@@ -1,0 +1,12 @@
+{
+ "Bridge/SolidityBridge/Yul/RecursiveScopes.lean:SolidityBridge.Yul.RecursiveScopes.Derivation.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/RecursiveScopes.lean:SolidityBridge.Yul.RecursiveScopes.Derivation.structured": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

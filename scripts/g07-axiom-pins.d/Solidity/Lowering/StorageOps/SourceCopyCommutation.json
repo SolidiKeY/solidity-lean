@@ -1,0 +1,22 @@
+{
+ "Solidity/Lowering/StorageOps/SourceCopyCommutation.lean:Solidity.Backend.StorageOps.SourceCopyCommutation.commute": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCopyCommutation.lean:Solidity.Backend.StorageOps.SourceCopyCommutation.frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCopyCommutation.lean:Solidity.Backend.StorageOps.SourceCopyCommutation.overwritten": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCopyCommutation.lean:Solidity.Backend.StorageOps.SourceCopyCommutation.word_congr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

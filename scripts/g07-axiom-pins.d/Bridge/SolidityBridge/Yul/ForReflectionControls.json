@@ -1,0 +1,27 @@
+{
+ "Bridge/SolidityBridge/Yul/ForReflectionControls.lean:SolidityBridge.Yul.ForReflection.Controls.infinite_success_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForReflectionControls.lean:SolidityBridge.Yul.ForReflection.Controls.oversized_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForReflectionControls.lean:SolidityBridge.Yul.ForReflection.Controls.pending_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForReflectionControls.lean:SolidityBridge.Yul.ForReflection.Controls.two_reflected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForReflectionControls.lean:SolidityBridge.Yul.ForReflection.Controls.zero_reflected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

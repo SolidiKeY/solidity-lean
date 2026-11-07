@@ -1,0 +1,985 @@
+{
+  "schema": 2,
+  "state": "frozen",
+  "scope": "full",
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "coverage_claim": "Whole declared selected suite: 19 case IDs; 15 scored cases (11 mutants and four negative-control semantic mutations), with 15 distinct scored mutant_sha256 values. Four unscored runner controls: independent known-kill, invalid compilation, label equivalence, and a weak-oracle survivor with a checked stronger regression. The survivor deliberately repeats guard.require-success-false via control_of; across all roles there are 18 distinct program hashes. All original 17 payloads remain unchanged, with direct rollback and return-frame mutations added. Exhaustive ledger and actual whole execution are required; no whole compiler correctness claim.",
+  "inventory": "tests/h28-sol/mutation-testing/inventory.selected-suite.json",
+  "inventory_sha256": "dbf8e5aedba0b1d61a619a721d5da4ddcf682bfe7db15680313a2dc0ff43c2a2",
+  "production_inputs": {
+    "Solidity/Calculus/Rules.lean": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+    "Solidity/Calculus/RuleShapes.lean": "f7a09bdeabe0ca9a2dbef9ddb33a4ae5a1ecea5b5c3c494ee2e05d0f44535949",
+    "Solidity/TestSuite/Refuted.lean": "61d90c3ecfd08ede2614b521afc1256891e6ff4ff3a4d83fbf9e35800cac3f2e",
+    "tests/upstream/README.md": "92bd8a345b09247b3c4c2be61b7a78ff4204c687b00acff5f181b239e5d33dc6",
+    "Solidity/Calculus/CallbackRules.lean": "4a9608669a6cc5e80cc1064e29dab97297f9362a389f1fe956d2f20961513a5e"
+  },
+  "cache_manifest": "tests/h28-sol/mutation-testing/evidence/callback-cache-bootstrap-v2/manifest.json",
+  "cache_manifest_sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c",
+  "cache_root": "/workspace/h28-runtime/prepared-callback-base-6f3eedf0-v2",
+  "runtime_lean_sha256": "8fadc3ed92cc9decb94c96ee9c0876e91e03a3a5e69138f32114f02789e2766c",
+  "measurement_binary_sha256": "34fec4c31dc6b7ae09b39d616f103657041366cbd5bcb12ab0f67e4329938c4c",
+  "cases": [
+    {
+      "id": "control.revert-diamond-true",
+      "kind": "known-kill",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | revertDiamond :\n      dl{ \u27e8 revert(); \u27e9 \u21dd false }",
+      "new": "  | revertDiamond :\n      dl{ \u27e8 revert(); \u27e9 \u21dd true }",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/RevertBaseline.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/RevertDiamondKill.lean",
+      "oracle_sha256": "2fab8e1f10a5bfaa206cabcbcd75de1db9fec8a12b0aeaf18e47c87a8403587c",
+      "witness_sha256": "120b7f53e487e5586f70bc036bd2f47433a5ecc1247e08c6de475afeaa68a2ea",
+      "oracle_declarations": [
+        "H28.RevertBaseline.source_link",
+        "H28.RevertBaseline.input_inhabited",
+        "H28.RevertBaseline.reverting_run"
+      ],
+      "witness_declarations": [
+        "H28.RevertDiamondKill.source_link",
+        "H28.RevertDiamondKill.input_inhabited",
+        "H28.RevertDiamondKill.checked_kill"
+      ],
+      "constructor_id": "Taclet.revertDiamond",
+      "family": "rollback-payment",
+      "oracle_signature_sha256": {
+        "H28.RevertBaseline.source_link": "144d37e5fd0ef3092d8d44e6e8989c316c5cb2eb13f0217ca37ce549353c3fab",
+        "H28.RevertBaseline.input_inhabited": "6e8fa3611c79027d65c31bedf2770835a56d730ce4214e8bc2e047a1e8fd55b4",
+        "H28.RevertBaseline.reverting_run": "5e157f888621d21c0f81f9f2124d1494be2b294b5a8e78fd9c4aa755a2a82244"
+      },
+      "witness_signature_sha256": {
+        "H28.RevertDiamondKill.source_link": "b24379fb17fd051830ee94e23a49d53f445ae82bb31ab7a3d73f356adfc04e3a",
+        "H28.RevertDiamondKill.input_inhabited": "96de47eef937d3308a6359c8a9fafad4d18d4099ae022bb8a0a47268d1f5ef2a",
+        "H28.RevertDiamondKill.checked_kill": "a5647be95056656b75d5b7f0b3e4b90b4066c450e66afcc5ca5c3a80dad31509"
+      },
+      "mutant_sha256": "ab16b8f064591a82628b07fc99e5fa42b506a2cb1a7a59e14274005cde0d7e93"
+    },
+    {
+      "id": "alias.receiver-getter-twice",
+      "kind": "mutant",
+      "family": "alias-capture-once",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | storagePush_unfold_leftCallReceiver :\n      dl{ \u27e8[ fc.push(); ]\u27e9 \u21dd \u27e8[ aliasType storage sp = fc; sp.push(); ]\u27e9 }",
+      "new": "  | storagePush_unfold_leftCallReceiver {m : Modality} {\u0393 : Ctx} {f : Name} {x : Ctx}\n      {args : Args C \u0393 x} {r : Var} {x_1 : Ty} {x_2 : Ctx}\n      {body : Prog C ([.alias (.array x_1)] ++ x) x_2}\n      {hd : ((none : Option (Src C \u0393 x_1)).isSome || x_1.defaultOkS) = true} :\n      Taclet C k m (.callReceiver f args r body (.push none hd))\n        (.unfold\n          (.cons (.call f args (.storage (.array x_1) r) body)\n            (.cons (.call f (args.wk (.drop .refl)) (.storage (.array x_1) r) body)\n              (.cons (.push (.alias .here) none hd) .nil)))\n          (.push (.push .refl)))",
+      "source_symbol": "Taclet.storagePush_unfold_leftCallReceiver",
+      "interface_note": "Disposable constructor uses explicit typed premise to express duplicated getter. All original input binders/types and LHS preserved; only semantic RHS changes. Both constructor signatures printed for audit.",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/AliasBaseline.lean",
+      "oracle_sha256": "138befa4d0e3a9c8452201fe8c8dcd599c297f249e2134ca40f5394525a8a751",
+      "oracle_declarations": [
+        "H28.AliasBaseline.source_link",
+        "H28.AliasBaseline.input_inhabited",
+        "H28.AliasBaseline.getter_once",
+        "H28.AliasBaseline.pure_once",
+        "H28.AliasBaseline.pure_twice_control",
+        "H28.AliasBaseline.actual_counter_one",
+        "H28.AliasBaseline.actual_rejects_post"
+      ],
+      "witness": "tests/h28-sol/mutation-testing/oracles/AliasTwiceKill.lean",
+      "witness_sha256": "53bd884bc0d62de6ac11bff9affa040f3ae42979ee5270b6caceab00abe1f624",
+      "witness_declarations": [
+        "H28.AliasTwiceKill.source_link",
+        "H28.AliasTwiceKill.input_inhabited",
+        "H28.AliasTwiceKill.checked_kill",
+        "H28.AliasTwiceKill.typed_landing",
+        "H28.AliasTwiceKill.pure_twice_control"
+      ],
+      "constructor_id": "Taclet.storagePush_unfold_leftCallReceiver",
+      "mutant_sha256": "e7b36c269b16493a8eeac8b2ee1e679a0504e6298b5f846f4b887e400f92d73e",
+      "oracle_signature_sha256": {
+        "H28.AliasBaseline.source_link": "414109d251f4c242f03dc12ef852256ef15df3b43af7444f37878c0e6f2a08ed",
+        "H28.AliasBaseline.input_inhabited": "7acf58f8f06785ae511a454b352ce5756d5cdafe132e19104a6b4ebe9a8a1f82",
+        "H28.AliasBaseline.getter_once": "ef81049bb1bc9677a518ba23b69b678b68a0d06bc9a0f4757e9e3c3c2c048f54",
+        "H28.AliasBaseline.pure_once": "c332caa7169b9c57ea7156e18eb0f73aada41f911f1fb935a06b7812ced619c2",
+        "H28.AliasBaseline.pure_twice_control": "918d5bdf975d22be24b3119cd26b79e54582c756bedbeec505d9cf232b070cea",
+        "H28.AliasBaseline.actual_counter_one": "e67bcc3946964f041bf8968cff3e713918c66bb39a30e15d70b7b2bd6d03b84d",
+        "H28.AliasBaseline.actual_rejects_post": "28840d07a89e0c4683f0eae9c13b032e9a6d6fdf0658b059267a8f7a5990626d"
+      },
+      "witness_signature_sha256": {
+        "H28.AliasTwiceKill.source_link": "c0fdd224e7af821649b56ad7535d00cd1315355eef61db7a8f7fe6da3e16bb27",
+        "H28.AliasTwiceKill.input_inhabited": "619c38954857e1f5a7b6266882005de847cdea901990b5fe5ba038c5d755b959",
+        "H28.AliasTwiceKill.checked_kill": "d8707677dc3567fb5b4b7ab218672d9636a18b53598ce35c1c6c6eacf36a5e2b",
+        "H28.AliasTwiceKill.typed_landing": "55038f5ada30b42ef1dc652b7899e01d41b2ded37ca033a90c5dbdceb17e055c",
+        "H28.AliasTwiceKill.pure_twice_control": "c62d5d0e6ff54839f97302f11c96dc70151561a2e79e783c5df019592750065c"
+      }
+    },
+    {
+      "id": "bounds.array-read-skipped",
+      "kind": "mutant",
+      "family": "index-bounds",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | storageIndexReadArrayFind :\n      dl{ \u27e8[ v = arr[ie]; ]\u27e9 \u21dd { v := find(storage, arr[ie]) } \u27e8[ ]\u27e9 }",
+      "new": "  | storageIndexReadArrayFind :\n      dl{ \u27e8[ v = arr[ie]; ]\u27e9 \u21dd { v := v } \u27e8[ ]\u27e9 }",
+      "source_symbol": "Taclet.storageIndexReadArrayFind",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/BoundsBaseline.lean",
+      "oracle_sha256": "059db341369f65869183ce8c422d2852b4fd9c2cf102678ee7641a1252e91cdc",
+      "oracle_declarations": [
+        "H28.BoundsBaseline.source_link",
+        "H28.BoundsBaseline.input_inhabited",
+        "H28.BoundsBaseline.dynamic_boundary_reverts",
+        "H28.BoundsBaseline.fixed_boundary_reverts",
+        "H28.BoundsBaseline.dynamic_positive_read",
+        "H28.BoundsBaseline.fixed_positive_read"
+      ],
+      "witness": "tests/h28-sol/mutation-testing/oracles/BoundsSkippedKill.lean",
+      "witness_sha256": "debc07e078ca0938447de5bdc97c655a8b3ed9f51e211dc400751feb2910965e",
+      "witness_declarations": [
+        "H28.BoundsSkippedKill.source_link",
+        "H28.BoundsSkippedKill.input_inhabited",
+        "H28.BoundsSkippedKill.checked_kill",
+        "H28.BoundsSkippedKill.checked_fixed_kill",
+        "H28.BoundsSkippedKill.typed_landing"
+      ],
+      "constructor_id": "Taclet.storageIndexReadArrayFind",
+      "mutant_sha256": "46e49b09e8ce2d676ff0c27f176bdcf8d463b3ccb092c7bd552729d71373c407",
+      "oracle_signature_sha256": {
+        "H28.BoundsBaseline.source_link": "831b459270784e4774f117d4023fe299023f17373838e0ae1f4b329f21d9b6a0",
+        "H28.BoundsBaseline.input_inhabited": "fd76689a83d0fa7c09306e081155df791622380fde2af2ffa762b2171019ff06",
+        "H28.BoundsBaseline.dynamic_boundary_reverts": "9b287bd9e84703e549bc0dbb737a1bdd8cb1e11114cef324145de8b0f0d727de",
+        "H28.BoundsBaseline.fixed_boundary_reverts": "476a159ce58d3ed3ecf856216276d61cb57eb97fde30f1591dcf79a5804b97e6",
+        "H28.BoundsBaseline.dynamic_positive_read": "a0ed22848f80b981d5b01dcaa84b841794bcca1e7d1144e50072f770fff19c81",
+        "H28.BoundsBaseline.fixed_positive_read": "7b03d657b63dffe11519f721bf33bb8f7a12ab15ab8de8e23b44016daf3c63a0"
+      },
+      "witness_signature_sha256": {
+        "H28.BoundsSkippedKill.source_link": "ad284bd97ca4d7872cdd6f415f76470de632328d594f791ef4eb6bb7398359a6",
+        "H28.BoundsSkippedKill.input_inhabited": "947f7d3571dd7b7c2c3e3a7f572beb44cba0a7c7d2b945e5b19ea5530b0cabed",
+        "H28.BoundsSkippedKill.checked_kill": "12b1e187cd93e40f9805a118b78e27f1df3fd1faccff1d6acbf3b11f7c752b9c",
+        "H28.BoundsSkippedKill.checked_fixed_kill": "2a8ed2b77ff6c34d922986c01f15be4668fc8c8c87de950b5e501945f79df1ff",
+        "H28.BoundsSkippedKill.typed_landing": "9e943f1381b3542745a748e954265959b18e103da85bfadc184f5d59a4b8e5a5"
+      }
+    },
+    {
+      "id": "callback.failed-send-flag-true",
+      "kind": "mutant",
+      "family": "callback-frames",
+      "source_symbol": "Taclet.sendNoCallbackBox",
+      "target": "Solidity/Calculus/Rules.lean",
+      "old": "  | sendNoCallbackBox :\n      dl{ [ pv = sadr.send(se); ] \u21dd\n          \"send succeeded\":\n            { pay(sadr, se) \u2016 pv := true }\n            \u27e8[ ]\u27e9\n        ; \"send failed\": { pv := false } \u27e8[ ]\u27e9 }\n",
+      "new": "  | sendNoCallbackBox :\n      dl{ [ pv = sadr.send(se); ] \u21dd\n          \"send succeeded\":\n            { pay(sadr, se) \u2016 pv := true }\n            \u27e8[ ]\u27e9\n        ; \"send failed\": { pv := true } \u27e8[ ]\u27e9 }\n",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/CallbackBaseline.lean",
+      "oracle_sha256": "de340249b80f01eeb91d0b53e0c2177004207c1f9ab9bef546754f3b79f86591",
+      "oracle_declarations": [
+        "H28.CallbackBaseline.source_link",
+        "H28.CallbackBaseline.input_inhabited",
+        "H28.CallbackBaseline.accepted_run",
+        "H28.CallbackBaseline.refused_run",
+        "H28.CallbackBaseline.callback_failed",
+        "H28.CallbackBaseline.callback_resumed",
+        "H28.CallbackBaseline.callback_local_global_controls",
+        "H28.CallbackBaseline.failed_frame",
+        "H28.CallbackBaseline.resumed_frame",
+        "H28.CallbackBaseline.frame_preserves_flag",
+        "H28.CallbackBaseline.drop_typed_landing",
+        "H28.CallbackBaseline.callback_frames_rejects"
+      ],
+      "witness": "tests/h28-sol/mutation-testing/oracles/CallbackFailureKill.lean",
+      "witness_sha256": "c0154e2afaffd7d8b78a5dd5e0e8042e6d256844a9e47239d8cb4a92dea5e756",
+      "witness_declarations": [
+        "H28.CallbackFailureKill.source_link",
+        "H28.CallbackFailureKill.input_inhabited",
+        "H28.CallbackFailureKill.accepted_run",
+        "H28.CallbackFailureKill.refused_run",
+        "H28.CallbackFailureKill.callback_failed",
+        "H28.CallbackFailureKill.callback_resumed",
+        "H28.CallbackFailureKill.callback_local_global_controls",
+        "H28.CallbackFailureKill.failed_frame",
+        "H28.CallbackFailureKill.resumed_frame",
+        "H28.CallbackFailureKill.frame_preserves_flag",
+        "H28.CallbackFailureKill.drop_typed_landing",
+        "H28.CallbackFailureKill.callback_frames_rejects",
+        "H28.CallbackFailureKill.first_typed_landing",
+        "H28.CallbackFailureKill.second_typed_landing",
+        "H28.CallbackFailureKill.first_start_landing",
+        "H28.CallbackFailureKill.second_start_landing",
+        "H28.CallbackFailureKill.first_post",
+        "H28.CallbackFailureKill.second_post",
+        "H28.CallbackFailureKill.premise_accepts_post",
+        "H28.CallbackFailureKill.real_frames",
+        "H28.CallbackFailureKill.execution_rejects_post",
+        "H28.CallbackFailureKill.checked_kill",
+        "H28.CallbackFailureKill.frame_post_of_true",
+        "H28.CallbackFailureKill.callback_premise_accepts_frames",
+        "H28.CallbackFailureKill.checked_callback_frames"
+      ],
+      "constructor_id": "Taclet.sendNoCallbackBox",
+      "mutant_sha256": "8e8b724069fa866577c1f0067bf60106857857f3e834ffb8618254b721bf4d2a",
+      "oracle_signature_sha256": {
+        "H28.CallbackBaseline.source_link": "2ac19c5a526b16f8fbfb5a968a4048f62dfcbcc8ed3edfa006a071e4a209e9ae",
+        "H28.CallbackBaseline.input_inhabited": "40a9705709da634b3b202597968e1155d1e444123842acf147640c7a7ccaabb6",
+        "H28.CallbackBaseline.accepted_run": "7636a2d034075d94f1c7f7711d23212fc10e7af009a8e0460ddcd4de8716bf1d",
+        "H28.CallbackBaseline.refused_run": "f42e8625c87083490daf41698df8af37b419a1becdbce87c825dcbfcc56c88bb",
+        "H28.CallbackBaseline.callback_failed": "00624f496abbe2d91a4c194c028c8ba59a5ba85495bcbdb1b6f67f85a3ca1c27",
+        "H28.CallbackBaseline.callback_resumed": "0a9cea0e060fb3b921847b4d633ed43517ea1ca6866e5574ffd1e6c1d103f734",
+        "H28.CallbackBaseline.callback_local_global_controls": "82d2f80fd81687e250ffedea40ccc660144b065aaf9aa5ae8b67c219fe6cdc60",
+        "H28.CallbackBaseline.failed_frame": "059c549e0f68c19f75b1eb877ba4efdc5a2425d5a660d54532d3f7b7a750b678",
+        "H28.CallbackBaseline.resumed_frame": "c798a51da3222a53379c3f4a5dd08df74b5385a1bd630b0a024b650114a6a6c5",
+        "H28.CallbackBaseline.frame_preserves_flag": "d74a04c0f8f6e616dcb2068d78b9145d4e7e353f4a648147d36952c456edc0af",
+        "H28.CallbackBaseline.drop_typed_landing": "2a20220caa44c2e85d4a6b18be209d6619bcf01f64956b98885af3a2864a6623",
+        "H28.CallbackBaseline.callback_frames_rejects": "86cc4bb09c9c82b79ce7448eed81076233eed88210164533cb39fe3579cc9425"
+      },
+      "witness_signature_sha256": {
+        "H28.CallbackFailureKill.source_link": "0aa4d59b80df39224e5fd435fc382fa9d6386e7b575ea2f78725503fb40d0ec8",
+        "H28.CallbackFailureKill.input_inhabited": "cfc8ddd5b75ab05a8776398f04220c31aa32a7a1d382bcc4dc2ab4938bb31972",
+        "H28.CallbackFailureKill.accepted_run": "1bc4e39d9fb22e9629f125463e4f74faf65b33a5d8a760f7abaa9ff0f00fded7",
+        "H28.CallbackFailureKill.refused_run": "f20dc44dec95aa6d3cfdc07a9bd4e394405c2f9c064db465b91b190cc90afa01",
+        "H28.CallbackFailureKill.callback_failed": "938a18ac92df0deeab77f0ee38260a1626bab11c4dfd95d8fcfb39f7d5ff7108",
+        "H28.CallbackFailureKill.callback_resumed": "237fc475ba8c284f36a2907c12ee14bc6f0f474af6a5d95e66237ef3a276c911",
+        "H28.CallbackFailureKill.callback_local_global_controls": "4e0fccff8f6b97bc184876d6ad54cb20b36f3bcd4b09d28366c117f322958daf",
+        "H28.CallbackFailureKill.failed_frame": "f28a93847e28512bac450bca8caaeedc90f6e20dfeb741ee25c169dee78790c7",
+        "H28.CallbackFailureKill.resumed_frame": "9b548c2df45cd22949698c8aba06eddc16b6f8be0334d587c684516427123da5",
+        "H28.CallbackFailureKill.frame_preserves_flag": "b52bd60478c20005bfd57540edd754b844253fed2c26f9ab4beea2dea0aeead6",
+        "H28.CallbackFailureKill.drop_typed_landing": "4cdaf81d91a05b1464e85704193fb1e466443670afd1d9666db73467dd72d236",
+        "H28.CallbackFailureKill.callback_frames_rejects": "5c8388a0ed269d20b6490c408f61a7223ddff0154f5a7f8200552f1be459721b",
+        "H28.CallbackFailureKill.first_typed_landing": "4070100ace69eaacc3c993deb83093d762b251c5bb209735eb68107dd7932d31",
+        "H28.CallbackFailureKill.second_typed_landing": "fa83dae3ab4f6055b4baceb942f7454e791a38eff54b7d4a0cc25014d63954eb",
+        "H28.CallbackFailureKill.first_start_landing": "a69b176fbde43d7f9e4148b3172a6847d0f6f5c6454f691a1f6312e77a1908ed",
+        "H28.CallbackFailureKill.second_start_landing": "72a0c137f8a688123cfbc811819820d95fd06bfc6bc0c571a263eda86194e4ea",
+        "H28.CallbackFailureKill.first_post": "0402f21dca8f25345436e25540c66debc7a2f6d0b428bcd1edce80aa299bb93e",
+        "H28.CallbackFailureKill.second_post": "87d6ec43552d4498c8f0730eb417e25dd8218680383cc7106bddbe30e3ec3de7",
+        "H28.CallbackFailureKill.premise_accepts_post": "e28772b3e4f60e1a574bb117cc9103369e63bb6e3d714883130b90f436831f41",
+        "H28.CallbackFailureKill.real_frames": "33f3f95ad6fc5eb13e0f5703c57aaeae4a8218b9676749f0ed2c158ee1a18ff3",
+        "H28.CallbackFailureKill.execution_rejects_post": "a01960e284d827cd0408f49910227306530684155819698349819831e6e09678",
+        "H28.CallbackFailureKill.checked_kill": "08f684d53655b921866ca62c08f75a44531cec824f23299c7874711a494fc5b6",
+        "H28.CallbackFailureKill.frame_post_of_true": "6890bb371702d8a81a7d4b61f74bbf6d6ece96690087d7388e85352b70548bb7",
+        "H28.CallbackFailureKill.callback_premise_accepts_frames": "71c272cf8c952fcc5ee68719978605b30804bc2d2fde988294fd5f1362f02251",
+        "H28.CallbackFailureKill.checked_callback_frames": "1847c6f47760db33ad9d1147f01071ef6b34223faff255f25511bee402d2ca56"
+      }
+    },
+    {
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "constructor_id": "Taclet.requireSimple",
+      "family": "guard-polarity",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/GuardBaseline.lean",
+      "oracle_sha256": "c68bc5209bc77526b2b7fa43aa85a41f572de18c45d63901e1b69b9cef5a3d01",
+      "oracle_declarations": [
+        "H28.GuardBaseline.source_link",
+        "H28.GuardBaseline.input_inhabited",
+        "H28.GuardBaseline.successful_run"
+      ],
+      "oracle_signature_sha256": {
+        "H28.GuardBaseline.source_link": "2a65b102ddc355819a7e3be5f255f5a0078d545bd0e8afa426b88041fff90d27",
+        "H28.GuardBaseline.input_inhabited": "ed90a0ef257bef0d9705f24e0468ac94f67ed49a36523d31f7844e9b3e727057",
+        "H28.GuardBaseline.successful_run": "1e43b746258ad01c1012136999ef5cfca6a4be7eed01a6c1d3f54beb54f32a0b"
+      },
+      "id": "control.guard-invalid-syntax",
+      "kind": "invalid-control",
+      "old": "  | requireSimple :\n      dl{ \u27e8[ require(se); ]\u27e9 \u21dd \"Holds\": se = true",
+      "new": "  | requireSimple :\n      dl{ \u27e8[ require(se); ]\u27e9 \u21dd \"Holds\": se = )",
+      "mutant_sha256": "5236f24540b4e561b32dbc34158ea92c8b8678c64ca69962f4da6d80539874c7"
+    },
+    {
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "constructor_id": "Taclet.requireSimple",
+      "family": "guard-polarity",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/GuardBaseline.lean",
+      "oracle_sha256": "c68bc5209bc77526b2b7fa43aa85a41f572de18c45d63901e1b69b9cef5a3d01",
+      "oracle_declarations": [
+        "H28.GuardBaseline.source_link",
+        "H28.GuardBaseline.input_inhabited",
+        "H28.GuardBaseline.successful_run"
+      ],
+      "oracle_signature_sha256": {
+        "H28.GuardBaseline.source_link": "2a65b102ddc355819a7e3be5f255f5a0078d545bd0e8afa426b88041fff90d27",
+        "H28.GuardBaseline.input_inhabited": "ed90a0ef257bef0d9705f24e0468ac94f67ed49a36523d31f7844e9b3e727057",
+        "H28.GuardBaseline.successful_run": "1e43b746258ad01c1012136999ef5cfca6a4be7eed01a6c1d3f54beb54f32a0b"
+      },
+      "id": "control.guard-label-equivalent",
+      "kind": "equivalent-control",
+      "old": "  | requireSimple :\n      dl{ \u27e8[ require(se); ]\u27e9 \u21dd \"Holds\"",
+      "new": "  | requireSimple :\n      dl{ \u27e8[ require(se); ]\u27e9 \u21dd \"holds\"",
+      "equivalence": "tests/h28-sol/mutation-testing/oracles/GuardEquivalent.lean",
+      "equivalence_sha256": "e438c64b429a282756b24e32894588214f8e2990622d97b1e675fbce072cd32f",
+      "equivalence_declarations": [
+        "H28.GuardEquivalent.source_link_all",
+        "H28.GuardEquivalent.equivalence_all",
+        "H28.GuardEquivalent.input_inhabited"
+      ],
+      "equivalence_signature_sha256": {
+        "H28.GuardEquivalent.source_link_all": "5922a460a1dde3cc04ab600a7c20f04475c4be0cb3b3e6f6b8eb27edad121ff3",
+        "H28.GuardEquivalent.equivalence_all": "5a990f688a2acfabf81ba92e6114e629c2cb03c8012d3802ab503a15d5344035",
+        "H28.GuardEquivalent.input_inhabited": "55cb241043381ee61eb9a27be8d14f00b40ce672f124946f888b1e9221915160"
+      },
+      "mutant_sha256": "3d8bc1d218b54b50e6e384c7e32572c616f6f9be455822bb32a4b75568cc3f07"
+    },
+    {
+      "id": "control.guard-weak-oracle-survivor",
+      "kind": "runner-survivor-control",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | requireSimple :\n      dl{ \u27e8[ require(se); ]\u27e9 \u21dd \"Holds\": se = true",
+      "new": "  | requireSimple :\n      dl{ \u27e8[ require(se); ]\u27e9 \u21dd \"Holds\": se = false",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/WeakGuardOracle.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/GuardTruePolarityKill.lean",
+      "oracle_sha256": "b02e252f2826ba8851155b473d64b0a4a5ee03f6d385a1e69f3dc53dc2f0f9b1",
+      "witness_sha256": "521891721ea8598866a1932044ec7e7ff41809197aa0585f30bd80cb9f840d40",
+      "oracle_declarations": [
+        "H28.WeakGuardOracle.source_link",
+        "H28.WeakGuardOracle.input_inhabited",
+        "H28.WeakGuardOracle.successful_run"
+      ],
+      "witness_declarations": [
+        "H28.GuardTruePolarityKill.source_link",
+        "H28.GuardTruePolarityKill.input_inhabited",
+        "H28.GuardTruePolarityKill.checked_kill"
+      ],
+      "constructor_id": "Taclet.requireSimple",
+      "family": "guard-polarity",
+      "oracle_signature_sha256": {
+        "H28.WeakGuardOracle.source_link": "925ef0c84d6862444ec24b95cfa4ce349bab146aa505be0ff1be2ff317b24608",
+        "H28.WeakGuardOracle.input_inhabited": "39b4e9b2cc9c4133689f648a2e0a7c77927dea6bb0cf54589bc279c25457f88f",
+        "H28.WeakGuardOracle.successful_run": "e69cef49f860cd5d412e9e765dea1daa75f8b7fb3212a9683ca6f75b46f33265"
+      },
+      "witness_signature_sha256": {
+        "H28.GuardTruePolarityKill.source_link": "922c0374bc06dcc1f4e74be3b533f5bffe77f9a017b15255e1a51871623c93d4",
+        "H28.GuardTruePolarityKill.input_inhabited": "5d5afaa7cc00d3d093427948e62657f83875b5cabff5acc7713ddb2166762a44",
+        "H28.GuardTruePolarityKill.checked_kill": "0aa5d8641933c78016afa557b57df43d836700211263f5cc5134ac4cbb17c311"
+      },
+      "mutant_sha256": "d0b0142e976c987ebf6a79ebfbe57543ce93167fc710c3ed6282b9879b97ba56",
+      "control_of": "guard.require-success-false",
+      "regression": "tests/h28-sol/mutation-testing/oracles/GuardBaseline.lean",
+      "regression_sha256": "c68bc5209bc77526b2b7fa43aa85a41f572de18c45d63901e1b69b9cef5a3d01",
+      "regression_declarations": [
+        "H28.GuardBaseline.source_link",
+        "H28.GuardBaseline.input_inhabited",
+        "H28.GuardBaseline.successful_run"
+      ],
+      "regression_signature_sha256": {
+        "H28.GuardBaseline.source_link": "2a65b102ddc355819a7e3be5f255f5a0078d545bd0e8afa426b88041fff90d27",
+        "H28.GuardBaseline.input_inhabited": "ed90a0ef257bef0d9705f24e0468ac94f67ed49a36523d31f7844e9b3e727057",
+        "H28.GuardBaseline.successful_run": "1e43b746258ad01c1012136999ef5cfca6a4be7eed01a6c1d3f54beb54f32a0b"
+      }
+    },
+    {
+      "id": "delete.array-index-skipped",
+      "kind": "negative-control",
+      "family": "pop-delete",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "source_symbol": "Taclet.storageIndexArrayDelete",
+      "old": "  | storageIndexArrayDelete :\n      dl{ \u27e8[ delete arr[ie]; ]\u27e9 \u21dd { storage := delAt(storage, arr[ie]) } \u27e8[ ]\u27e9 }",
+      "new": "  | storageIndexArrayDelete :\n      dl{ \u27e8[ delete arr[ie]; ]\u27e9 \u21dd { storage := storage } \u27e8[ ]\u27e9 }",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/DeleteBaseline.lean",
+      "oracle_sha256": "5bedd7f6795f26c1f6537ad7b1e61b42191bbd1e7e16531dfe20d08c45735b55",
+      "oracle_declarations": [
+        "H28.DeleteBaseline.source_link",
+        "H28.DeleteBaseline.input_inhabited",
+        "H28.DeleteBaseline.failing_run",
+        "H28.DeleteBaseline.positive_run"
+      ],
+      "witness": "tests/h28-sol/mutation-testing/oracles/DeleteSkippedKill.lean",
+      "witness_sha256": "ccca00f0e1b59bf171ef78beb5f481f912a2dc67b3314afde971256adac0ca7a",
+      "witness_declarations": [
+        "H28.DeleteSkippedKill.source_link",
+        "H28.DeleteSkippedKill.input_inhabited",
+        "H28.DeleteSkippedKill.checked_kill",
+        "H28.DeleteSkippedKill.typed_landing",
+        "H28.DeleteSkippedKill.positive_run"
+      ],
+      "constructor_id": "Taclet.storageIndexArrayDelete",
+      "mutant_sha256": "f143412200f27af7f5e685ca30e7af540637ef107fa1579147a1571392c138fa",
+      "oracle_signature_sha256": {
+        "H28.DeleteBaseline.source_link": "553049fdbfce57b101e464656b990fbcf28cbdacabb1fa756f7665e1af15ffe0",
+        "H28.DeleteBaseline.input_inhabited": "35d8eeff91b1468dc93f99c59ee1a72574a6d2ab3b42291dc21b0b434014edf3",
+        "H28.DeleteBaseline.failing_run": "136848aa1900021dab6b0724e076d302728bf26c384a17883e959b0433f5c915",
+        "H28.DeleteBaseline.positive_run": "1ead0d8ac894b448e2a94df4f2b18b2c4f9aad1e6a162bef8bd34063f0cb7282"
+      },
+      "witness_signature_sha256": {
+        "H28.DeleteSkippedKill.source_link": "c99ddaaf5b11677baca5a6e5bfb4f2448ecb008075e8ac9c8b3bb73f4b1bbc6c",
+        "H28.DeleteSkippedKill.input_inhabited": "5e933211355dc68af9005b8e0c828d4900654e92d185cb31ee029fe97b1089a1",
+        "H28.DeleteSkippedKill.checked_kill": "abbd6cfc28fb1d0a5a898f09855742a37992a3f4e42a78ba85eff3d14bf16f26",
+        "H28.DeleteSkippedKill.typed_landing": "74f276e66c2a15ce85b13a6a0d4dda0c4fc68799a27a6b36eca6e6fc93540373",
+        "H28.DeleteSkippedKill.positive_run": "e1957f8553b6653ac8ac1c9e1ab380a05fc6302dbd11610d17be27a80b82a5ca"
+      }
+    },
+    {
+      "id": "division.div-sub-helper-min-and-zero",
+      "kind": "mutant",
+      "family": "division-minimum",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  Tm.castV (BinOp.compound_ret hop p) (.app2 (.binop op (BinOp.compound_accepts hop hp)) a b)",
+      "new": "  if op = .div then\n    .app2 (.binop .sub (BinOp.compound_accepts (op := .sub) rfl hp)) a b\n  else\n    Tm.castV (BinOp.compound_ret hop p) (.app2 (.binop op (BinOp.compound_accepts hop hp)) a b)",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/DivisionBaseline.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/DivisionSubtractKill.lean",
+      "oracle_sha256": "fd1ec9bd8200c51823ea1ccb93dd92f5faef1ecd52cd993385cf4b4b77d369e6",
+      "witness_sha256": "1a70933ed6443f1c5554496d4b4b9f23656cca64485e3876d1dba5e04f8437d5",
+      "oracle_declarations": [
+        "H28.DivisionBaseline.source_link",
+        "H28.DivisionBaseline.input_inhabited",
+        "H28.DivisionBaseline.rejecting_run"
+      ],
+      "witness_declarations": [
+        "H28.DivisionSubtractKill.source_link",
+        "H28.DivisionSubtractKill.input_inhabited",
+        "H28.DivisionSubtractKill.checked_kill",
+        "H28.DivisionSubtractKill.checked_zero_kill",
+        "H28.DivisionSubtractKill.typed_landing"
+      ],
+      "source_symbol": "Tms.Term.binopC",
+      "constructor_id": "Tms.Term.binopC",
+      "mutant_sha256": "c7d7a379aafa101ac3b4ae60e9206f8b53490b0c9973771e414a5819b1a591bd",
+      "oracle_signature_sha256": {
+        "H28.DivisionBaseline.source_link": "ea1f0f82018966b5a14fa9181c8dc38313f1979ced962834da3c07588f806430",
+        "H28.DivisionBaseline.input_inhabited": "d44426e3fb45ba1807881add55b63d4a6636fe8db39533f92ba2e5a2598461f2",
+        "H28.DivisionBaseline.rejecting_run": "046d8569893f557f748a0bb6fc464400493deda781deda471806632b33466ad8"
+      },
+      "witness_signature_sha256": {
+        "H28.DivisionSubtractKill.source_link": "c9700934b46fce593d50f0d774185db0e55aca4914f4df3700ce01c7ffe1e55c",
+        "H28.DivisionSubtractKill.input_inhabited": "d8ee5c332e4b4b7d9019faea043384b08768565385d8f46a91cf815873cbde0d",
+        "H28.DivisionSubtractKill.checked_kill": "b50a69a5f67de958b13d482c764c7383dcfe76268b156b7d6187f6a500d805ba",
+        "H28.DivisionSubtractKill.checked_zero_kill": "11d53f1cce31f3d3cf05f1b037ede4d9ada3001e80f2b410863382f62f547453",
+        "H28.DivisionSubtractKill.typed_landing": "2ff2b79cf5284531f22cba7e831a7a4e5b86419897cb8363f6dcfc9b20f0bfd7"
+      }
+    },
+    {
+      "id": "guard.require-revert-true",
+      "kind": "negative-control",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | requireSimple :\n      dl{ \u27e8[ require(se); ]\u27e9 \u21dd \"Holds\": se = true \u27f9 \u27e8[ ]\u27e9 ; \"Reverts\": se = false",
+      "new": "  | requireSimple :\n      dl{ \u27e8[ require(se); ]\u27e9 \u21dd \"Holds\": se = true \u27f9 \u27e8[ ]\u27e9 ; \"Reverts\": se = true",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/GuardFalseBaseline.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/GuardFalsePolarityKill.lean",
+      "oracle_sha256": "7bb5e129a4f46e189a1f0dfc4daf984a356cdb5caff0adafd9b0cec4cd5c593e",
+      "witness_sha256": "b16424fb02d3fc64319689a214a535fed821729d1194b185d5e6c996f0760f69",
+      "oracle_declarations": [
+        "H28.GuardFalseBaseline.source_link",
+        "H28.GuardFalseBaseline.input_inhabited",
+        "H28.GuardFalseBaseline.reverting_run"
+      ],
+      "witness_declarations": [
+        "H28.GuardFalsePolarityKill.source_link",
+        "H28.GuardFalsePolarityKill.input_inhabited",
+        "H28.GuardFalsePolarityKill.checked_kill"
+      ],
+      "constructor_id": "Taclet.requireSimple",
+      "family": "guard-polarity",
+      "oracle_signature_sha256": {
+        "H28.GuardFalseBaseline.source_link": "e3f32934062236629a82a399eef9ac3eb7ea3c87f9d36d34d51874de9f0fe8ed",
+        "H28.GuardFalseBaseline.input_inhabited": "9786b7db5b47c46a32fc45878d62d155f8b8c4b8a4149344480fc02c41917d64",
+        "H28.GuardFalseBaseline.reverting_run": "3b03886ce25b681c3fe792aef991e653c069a4e5eb2f9309863520192e6407fe"
+      },
+      "witness_signature_sha256": {
+        "H28.GuardFalsePolarityKill.source_link": "4bb036641b1167628726d98d78aa87275703e748b32e583749dff14e00fb7813",
+        "H28.GuardFalsePolarityKill.input_inhabited": "d35d7e85d3978765627800ff1ee29f2daface70da07da813ae29675e481e34c4",
+        "H28.GuardFalsePolarityKill.checked_kill": "bd20867742fa477e99f066fc692d53363f128ae4dba7accfd3ed3537a207eaf0"
+      },
+      "mutant_sha256": "c4b2b6d70eb0208ee65a60bfa99a14949d2b8e6779a4a6fdf468c4f71ab3ff5b"
+    },
+    {
+      "id": "guard.require-success-false",
+      "kind": "mutant",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | requireSimple :\n      dl{ \u27e8[ require(se); ]\u27e9 \u21dd \"Holds\": se = true",
+      "new": "  | requireSimple :\n      dl{ \u27e8[ require(se); ]\u27e9 \u21dd \"Holds\": se = false",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/GuardBaseline.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/GuardTruePolarityKill.lean",
+      "oracle_sha256": "c68bc5209bc77526b2b7fa43aa85a41f572de18c45d63901e1b69b9cef5a3d01",
+      "witness_sha256": "521891721ea8598866a1932044ec7e7ff41809197aa0585f30bd80cb9f840d40",
+      "oracle_declarations": [
+        "H28.GuardBaseline.source_link",
+        "H28.GuardBaseline.input_inhabited",
+        "H28.GuardBaseline.successful_run"
+      ],
+      "witness_declarations": [
+        "H28.GuardTruePolarityKill.source_link",
+        "H28.GuardTruePolarityKill.input_inhabited",
+        "H28.GuardTruePolarityKill.checked_kill"
+      ],
+      "constructor_id": "Taclet.requireSimple",
+      "family": "guard-polarity",
+      "oracle_signature_sha256": {
+        "H28.GuardBaseline.source_link": "2a65b102ddc355819a7e3be5f255f5a0078d545bd0e8afa426b88041fff90d27",
+        "H28.GuardBaseline.input_inhabited": "ed90a0ef257bef0d9705f24e0468ac94f67ed49a36523d31f7844e9b3e727057",
+        "H28.GuardBaseline.successful_run": "1e43b746258ad01c1012136999ef5cfca6a4be7eed01a6c1d3f54beb54f32a0b"
+      },
+      "witness_signature_sha256": {
+        "H28.GuardTruePolarityKill.source_link": "922c0374bc06dcc1f4e74be3b533f5bffe77f9a017b15255e1a51871623c93d4",
+        "H28.GuardTruePolarityKill.input_inhabited": "5d5afaa7cc00d3d093427948e62657f83875b5cabff5acc7713ddb2166762a44",
+        "H28.GuardTruePolarityKill.checked_kill": "0aa5d8641933c78016afa557b57df43d836700211263f5cc5134ac4cbb17c311"
+      },
+      "mutant_sha256": "d0b0142e976c987ebf6a79ebfbe57543ce93167fc710c3ed6282b9879b97ba56"
+    },
+    {
+      "id": "overflow.compound-sub-helper-max",
+      "kind": "mutant",
+      "family": "overflow",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  Tm.castV (BinOp.compound_ret hop p) (.app2 (.binop op (BinOp.compound_accepts hop hp)) a b)",
+      "new": "  let _ := hop\n  .app2 (.binop .sub (BinOp.compound_accepts (op := .sub) rfl hp)) a b",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/OverflowBaseline.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/OverflowSubtractKill.lean",
+      "oracle_sha256": "c7af8a42a3a9a6c59c9c41ff31acc712e2e58c76626718e0b01b879e90850808",
+      "witness_sha256": "5ae5c5822db6a0199dc463055692ccaa440734f81113522de84b78a60a494fa3",
+      "oracle_declarations": [
+        "H28.OverflowBaseline.source_link",
+        "H28.OverflowBaseline.input_inhabited",
+        "H28.OverflowBaseline.overflowing_run"
+      ],
+      "witness_declarations": [
+        "H28.OverflowSubtractKill.source_link",
+        "H28.OverflowSubtractKill.input_inhabited",
+        "H28.OverflowSubtractKill.checked_kill",
+        "H28.OverflowSubtractKill.typed_landing"
+      ],
+      "source_symbol": "Tms.Term.binopC",
+      "constructor_id": "Tms.Term.binopC",
+      "mutant_sha256": "5b1f6dc573ab457fc981dea30031915a77715da0d8f3d6f7a7e72d96cc7cb045",
+      "oracle_signature_sha256": {
+        "H28.OverflowBaseline.source_link": "5bf1cd788a4a4642c720cacf517f85cdcfbc74d4e3ee476c3a99304b946e5d17",
+        "H28.OverflowBaseline.input_inhabited": "ce62109c01ad3f5afe5e0501cc059119da27bbf4491b7b7bd88ab3c13e81e90e",
+        "H28.OverflowBaseline.overflowing_run": "5e14ef5daea35f9439465c559743860b230f992b1b6f976dca28e3e0bef37657"
+      },
+      "witness_signature_sha256": {
+        "H28.OverflowSubtractKill.source_link": "c81243a70ab29aeb233eae1a0237732e8aa47be1ee26b16e1fda14a93086bf23",
+        "H28.OverflowSubtractKill.input_inhabited": "c4c80d3e1f8bcc7426c8812d66d5446d2ff097798149da19c6e0f031c34de82a",
+        "H28.OverflowSubtractKill.checked_kill": "e0ab7fe3b5ba8f34fbb6e438aaeb856d4a6c701fd14085ff228a0ec3f47a6dc3",
+        "H28.OverflowSubtractKill.typed_landing": "1135ee061581450a7738aad1ca39a75d0615c1fe63a53adfd11c9afa0a879db3"
+      }
+    },
+    {
+      "id": "overflow.increment-erased-max",
+      "kind": "negative-control",
+      "family": "overflow",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | localIncrement :\n      dl{ \u27e8[ v\u2295\u2295; ]\u27e9 \u21dd { v := v \u00b1 1 } \u27e8[ ]\u27e9 }",
+      "new": "  | localIncrement :\n      dl{ \u27e8[ v\u2295\u2295; ]\u27e9 \u21dd { v := v } \u27e8[ ]\u27e9 }",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/OverflowIncBaseline.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/OverflowIncSkipKill.lean",
+      "oracle_sha256": "4a309b8fd210e39138400b05d38da2d9f1723eb9682dbf5f8237fc47f05990aa",
+      "witness_sha256": "1c0e362275bdf2c2e48eed44fc9f2ad9f06c1b1657743b9e656937fec39fd730",
+      "oracle_declarations": [
+        "H28.OverflowIncBaseline.source_link",
+        "H28.OverflowIncBaseline.input_inhabited",
+        "H28.OverflowIncBaseline.overflowing_run"
+      ],
+      "witness_declarations": [
+        "H28.OverflowIncSkipKill.source_link",
+        "H28.OverflowIncSkipKill.input_inhabited",
+        "H28.OverflowIncSkipKill.checked_kill",
+        "H28.OverflowIncSkipKill.typed_landing"
+      ],
+      "source_symbol": "Taclet.localIncrement",
+      "constructor_id": "Taclet.localIncrement",
+      "mutant_sha256": "efe103b96b5e310d206a9777b5f255eb6cf4d6430c291215fa697f4d04b25066",
+      "oracle_signature_sha256": {
+        "H28.OverflowIncBaseline.source_link": "1b808de07eb7fc532e28f11e7a1d614fb01e91adbae9d3b8c7d87410bad3d1aa",
+        "H28.OverflowIncBaseline.input_inhabited": "81e88c73eaad2f560bbde6a0185e61be9b8a61162f7aa1a16fa6426723845a23",
+        "H28.OverflowIncBaseline.overflowing_run": "0a08092a06e46e6575e58a7b5b2c6eae60fd53a5347869dc43ac615cc6e35203"
+      },
+      "witness_signature_sha256": {
+        "H28.OverflowIncSkipKill.source_link": "a785ad15d2e77e6f1295afd653f5c93696d7fcfcc57673cd236e08a0bddabacf",
+        "H28.OverflowIncSkipKill.input_inhabited": "6257d2ebdd1b916ec8b23ba922984ef040fc54ee586ade0619967a3f7e7bda95",
+        "H28.OverflowIncSkipKill.checked_kill": "7029ae9e610dd59152a737760486401ee52bf59c0c3901f48af7039d75b102ae",
+        "H28.OverflowIncSkipKill.typed_landing": "8a9bdcabcb7073abb62d3fe583b3c5c1a34d43da0c4b20ba0f9133a1328fd4ab"
+      }
+    },
+    {
+      "id": "payment.success-flag-false",
+      "kind": "mutant",
+      "family": "rollback-payment",
+      "source_symbol": "Taclet.sendNoCallbackBox",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | sendNoCallbackBox :\n      dl{ [ pv = sadr.send(se); ] \u21dd\n          \"send succeeded\":\n            { pay(sadr, se) \u2016 pv := true }\n            \u27e8[ ]\u27e9\n        ; \"send failed\": { pv := false } \u27e8[ ]\u27e9 }\n",
+      "new": "  | sendNoCallbackBox :\n      dl{ [ pv = sadr.send(se); ] \u21dd\n          \"send succeeded\":\n            { pay(sadr, se) \u2016 pv := false }\n            \u27e8[ ]\u27e9\n        ; \"send failed\": { pv := false } \u27e8[ ]\u27e9 }\n",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/PaymentBaseline.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/PaymentFalseKill.lean",
+      "oracle_sha256": "171c3b08a4286826f67e1eefada3b0800d1e560efc5cd9c7701c0a96c235cbc4",
+      "witness_sha256": "fbb4ebd568b499a5fe08314307700c3229380915c0a661c0e64939276e9b797f",
+      "oracle_declarations": [
+        "H28.PaymentBaseline.source_link",
+        "H28.PaymentBaseline.input_inhabited",
+        "H28.PaymentBaseline.accepted_run",
+        "H28.PaymentBaseline.paid_ledger",
+        "H28.PaymentBaseline.refused_rollback"
+      ],
+      "witness_declarations": [
+        "H28.PaymentFalseKill.source_link",
+        "H28.PaymentFalseKill.input_inhabited",
+        "H28.PaymentFalseKill.accepted_run",
+        "H28.PaymentFalseKill.paid_ledger",
+        "H28.PaymentFalseKill.refused_rollback",
+        "H28.PaymentFalseKill.first_typed_landing",
+        "H28.PaymentFalseKill.second_typed_landing",
+        "H28.PaymentFalseKill.mutant_ledger_controls",
+        "H28.PaymentFalseKill.first_post",
+        "H28.PaymentFalseKill.second_post",
+        "H28.PaymentFalseKill.premise_accepts_post",
+        "H28.PaymentFalseKill.real_frames",
+        "H28.PaymentFalseKill.execution_rejects_post",
+        "H28.PaymentFalseKill.checked_kill"
+      ],
+      "constructor_id": "Taclet.sendNoCallbackBox",
+      "mutant_sha256": "ba4b6124ba0f7b17edceab290bf43f6077fc2e4e7e912ac1dbcb752dcf3b6e16",
+      "oracle_signature_sha256": {
+        "H28.PaymentBaseline.source_link": "6dd43a26f87a912c0ec69c48afbfe7b57db647ab3e737d1cea81599a0a7e912f",
+        "H28.PaymentBaseline.input_inhabited": "0f71899afe6282c540c5d765f9345a1176d2d1860c29e4f2d5e2acb738462b4e",
+        "H28.PaymentBaseline.accepted_run": "d258e1f43f22665facd2fc370748d50e73b2e5b0aacf20f73d89ea487ac8a3f3",
+        "H28.PaymentBaseline.paid_ledger": "9ffc80d00d43b44cfa722d72636007c406a5a82919e56aa629c860d71f19b870",
+        "H28.PaymentBaseline.refused_rollback": "cd633d025c1bf8169234d3470792cf7738de02e8fdc228282000bfdb7c5a7604"
+      },
+      "witness_signature_sha256": {
+        "H28.PaymentFalseKill.source_link": "5279c1f75653101257d968e898c77cae8cad8589fef7d83e753b17e57a9106c9",
+        "H28.PaymentFalseKill.input_inhabited": "6bb8acda61e4291103d4fbe3d504c37b8b025a8cca48b31e6eec513d734c8038",
+        "H28.PaymentFalseKill.accepted_run": "36e082e2534ce3f24ce302cd58f8b98d209da608d757dfdad28691163ba5b58b",
+        "H28.PaymentFalseKill.paid_ledger": "fa80cdc876d8bb215592aa3cdfaa45a9656f8c4a8c14cfaaa6850ab991a9213f",
+        "H28.PaymentFalseKill.refused_rollback": "87308770010deb012bff14f51ac58926fb99631ef68e0d134e6281f260154163",
+        "H28.PaymentFalseKill.first_typed_landing": "3cd87b10319a2329f22de1de0a49a77048855bd8ee484d15e3ad5ef819c446f7",
+        "H28.PaymentFalseKill.second_typed_landing": "ff39d287ce260e6ee59c840aca46a3ce32e5315d158d7aa2e0cdf996f112f62d",
+        "H28.PaymentFalseKill.mutant_ledger_controls": "8ec5a506559074d7be8207bd5c3d14193c6f3a85cb1054ac8bfabaf8efeb02fe",
+        "H28.PaymentFalseKill.first_post": "e97d6ef8ffbb9bce636c899c99affb6b30a8e10042b4e01f003a6a61f379d3a0",
+        "H28.PaymentFalseKill.second_post": "8016be2a920d531e4f3d3de4850de29cfdfc1dbcd8e07ab4441fddc4e233eb46",
+        "H28.PaymentFalseKill.premise_accepts_post": "e3da2ca11fb3ea848fb298e7861adef3e7d2cb1ae432b7b77d0fd222d6d09f14",
+        "H28.PaymentFalseKill.real_frames": "6ff6e7d048b5ccbfdbdbc47c8d98526340cd805b06f1ce8644abbe75b84358ab",
+        "H28.PaymentFalseKill.execution_rejects_post": "8cab364a706f16d828e218cf69f7de167ff8e0a9b5844a45af885893c73ecc75",
+        "H28.PaymentFalseKill.checked_kill": "a4658e58244d5d2a173d80bcea111c435ecd0c37ebb28c683955ca3bd7b9cb0d"
+      }
+    },
+    {
+      "id": "pop.empty-skipped",
+      "kind": "mutant",
+      "family": "pop-delete",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "source_symbol": "Taclet.storagePopSave",
+      "old": "  | storagePopSave :\n      dl{ \u27e8[ darr.pop(); ]\u27e9 \u21dd\n          { storage := save(delAt(storage, darr[darr.length - 1]), darr.length, darr.length - 1) }\n          \u27e8[ ]\u27e9 }",
+      "new": "  | storagePopSave :\n      dl{ \u27e8[ darr.pop(); ]\u27e9 \u21dd { storage := storage } \u27e8[ ]\u27e9 }",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/PopBaseline.lean",
+      "oracle_sha256": "555fe41ffee312fb3fdf507040c02ca72ac054a231065de8949664e02af17175",
+      "oracle_declarations": [
+        "H28.PopBaseline.source_link",
+        "H28.PopBaseline.input_inhabited",
+        "H28.PopBaseline.failing_run",
+        "H28.PopBaseline.positive_run"
+      ],
+      "witness": "tests/h28-sol/mutation-testing/oracles/PopSkippedKill.lean",
+      "witness_sha256": "cac41e9773a515b9d58a98948a9176f5da7c6fbc0381e0538824a3164806e31d",
+      "witness_declarations": [
+        "H28.PopSkippedKill.source_link",
+        "H28.PopSkippedKill.input_inhabited",
+        "H28.PopSkippedKill.checked_kill",
+        "H28.PopSkippedKill.typed_landing",
+        "H28.PopSkippedKill.positive_run"
+      ],
+      "constructor_id": "Taclet.storagePopSave",
+      "mutant_sha256": "4b265e8543a98764ed34381725fde91ad56348cf776ad008cfe72bd4fcfdfd07",
+      "oracle_signature_sha256": {
+        "H28.PopBaseline.source_link": "d44c78f7c79a57fba80f29c65f104f8f073384b8f99f09f6aeaa8725d6cd5e0c",
+        "H28.PopBaseline.input_inhabited": "682606f31c1070fb4dba650ca541a89c16115ba9e3cd50d2ca593be423b10da2",
+        "H28.PopBaseline.failing_run": "b2fb5050af64ba832d610ed0560f9f1ab6b7ce715b9fb0fb7359d1bfd87cbf72",
+        "H28.PopBaseline.positive_run": "5bd870ded066caaafaded8cbf953ea3832d9a792d7e0d65963fe64790ee37d41"
+      },
+      "witness_signature_sha256": {
+        "H28.PopSkippedKill.source_link": "b61c8d5572d4bcae1f35e02ea7385449eab626354b5109670224fc1d0d716a3f",
+        "H28.PopSkippedKill.input_inhabited": "ef9437b859490d647e83abea7bd75a2fd21785a7f089e9df703be620f0af4dbf",
+        "H28.PopSkippedKill.checked_kill": "4e16d62945f7a0be9bfffcc5892784bd724d2fb37bfb9c66f6960296475d74ec",
+        "H28.PopSkippedKill.typed_landing": "eba442373293ef3e8938995b0a14482c1fd7f1d9a70013f514b39feebee84831",
+        "H28.PopSkippedKill.positive_run": "8932c863d94aaa9fdc04aa82381b57b5879d276dab05e12b063e13dea355f764"
+      }
+    },
+    {
+      "id": "push.compound-updates-swapped",
+      "kind": "negative-control",
+      "family": "push-tail-length",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | storagePushAddAssign :\n      dl{ \u27e8[ sp.push() += se; ]\u27e9 \u21dd\n        { storage := save(storage, sp.length, sp.length + 1) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + se) } \u27e8[ ]\u27e9 }",
+      "new": "  | storagePushAddAssign :\n      dl{ \u27e8[ sp.push() += se; ]\u27e9 \u21dd\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + se) }\n        { storage := save(storage, sp.length, sp.length + 1) } \u27e8[ ]\u27e9 }",
+      "source_symbol": "Taclet.storagePushAddAssign",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/PushOrderBaseline.lean",
+      "oracle_sha256": "a80cda87cbfbe10b940740335d890c62c893e7f1725acc5cf63937e363016510",
+      "oracle_declarations": [
+        "H28.PushOrderBaseline.source_link",
+        "H28.PushOrderBaseline.input_inhabited",
+        "H28.PushOrderBaseline.empty_run",
+        "H28.PushOrderBaseline.populated_run"
+      ],
+      "witness": "tests/h28-sol/mutation-testing/oracles/PushOrderSwappedKill.lean",
+      "witness_sha256": "ad4b4bf25e014c1ecef419a5bd85800b183689586b59546db709798e6420dff5",
+      "witness_declarations": [
+        "H28.PushOrderSwappedKill.source_link",
+        "H28.PushOrderSwappedKill.input_inhabited",
+        "H28.PushOrderSwappedKill.checked_kill",
+        "H28.PushOrderSwappedKill.typed_landing",
+        "H28.PushOrderSwappedKill.first_not_exhausted"
+      ],
+      "constructor_id": "Taclet.storagePushAddAssign",
+      "mutant_sha256": "5fa195f22d4d54edf93db23140370cedceb48972afc32709493ed71f95ff61d2",
+      "oracle_signature_sha256": {
+        "H28.PushOrderBaseline.source_link": "5a725af91fd2f366d9c0516816e6f1b345d5d46ab0ade45b1924094275c05a40",
+        "H28.PushOrderBaseline.input_inhabited": "403760c3c70d6c0516fd765feffcc06f11eca65edadbb6b024dd367eff4561bd",
+        "H28.PushOrderBaseline.empty_run": "b64c79681c305ba94b865c6372a4a576976ac86ca505178a56c09ddbe2b1d48b",
+        "H28.PushOrderBaseline.populated_run": "13e64885444f5274c329e1a42b6e45171c20466dec47a53bcdf8412ad7a689de"
+      },
+      "witness_signature_sha256": {
+        "H28.PushOrderSwappedKill.source_link": "c2172d333cc2d241af877c217d8d151eb01a6bec549d2ac21bae7b0d8b0aa864",
+        "H28.PushOrderSwappedKill.input_inhabited": "ceec62bcebfa13242cd2f3f44b951335d197a5a38005c4195056d481411ee7a6",
+        "H28.PushOrderSwappedKill.checked_kill": "feb04e853236a6a8e188e5698ac83a50c2a8995d2d8efef631a1c38a3c020e39",
+        "H28.PushOrderSwappedKill.typed_landing": "4091a7e8ff18b4d97ff6886d2b4279c773a6d7d16283633ad91f8b5a5f8a5692",
+        "H28.PushOrderSwappedKill.first_not_exhausted": "3c8a4ce2ada71e59bb598f9e686ef6fde670f48870227d05e27218b898f953d2"
+      }
+    },
+    {
+      "id": "push.reference-tail-cleared",
+      "kind": "mutant",
+      "family": "push-tail-length",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": ".app2 .pushSlot s q",
+      "new": ".app2 .delAt (.app2 .pushSlot s q) (.app1 .next q)",
+      "source_symbol": "Tms.STerm.pushSlot",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/PushTailBaseline.lean",
+      "oracle_sha256": "f8884d84ac056c19f493d1cc5f90dc345aa12bd1c2fb1534c35a5bb47be5349c",
+      "oracle_declarations": [
+        "H28.PushTailBaseline.source_link",
+        "H28.PushTailBaseline.input_inhabited",
+        "H28.PushTailBaseline.clean_run",
+        "H28.PushTailBaseline.dirty_run",
+        "H28.PushTailBaseline.actual_inner_length",
+        "H28.PushTailBaseline.clean_post",
+        "H28.PushTailBaseline.actual_rejects_post"
+      ],
+      "witness": "tests/h28-sol/mutation-testing/oracles/PushTailClearKill.lean",
+      "witness_sha256": "b813788f044c3e7b7fb86b51d14884e44ca5ac12df8bd1ba7905fc3421f59395",
+      "witness_declarations": [
+        "H28.PushTailClearKill.source_link",
+        "H28.PushTailClearKill.input_inhabited",
+        "H28.PushTailClearKill.checked_kill",
+        "H28.PushTailClearKill.typed_landing",
+        "H28.PushTailClearKill.clean_update_returns"
+      ],
+      "constructor_id": "Tms.STerm.pushSlot",
+      "mutant_sha256": "7b8703a07ac93b202405b5d02e7aa9c04cf0be244353b66a578983cbf2560e84",
+      "oracle_signature_sha256": {
+        "H28.PushTailBaseline.source_link": "ce70f1d55705b24915dd3d44354e09bc2c6278c1112e78da7bdc4d1ec81fe497",
+        "H28.PushTailBaseline.input_inhabited": "26df5a4789a8a11299a659de688bb58d7ca9b6513b0e26632969d46b7cc3dc5e",
+        "H28.PushTailBaseline.clean_run": "634a6fd4376feb0035e007f657c925c97d31b24ebeb6f33bff88935ffe30cccb",
+        "H28.PushTailBaseline.dirty_run": "ccbad9590c5c05e35fa68a1aec544678e44dab90de0608476c603f74d6705551",
+        "H28.PushTailBaseline.actual_inner_length": "fb4df5dbabd3bc5b093dc2c6bf23ca4c17d41ae154b638d8161bbc1a3219bd6b",
+        "H28.PushTailBaseline.clean_post": "d73562a7059f49e1141439f8c77ff880b83791cedeaad8d986fa0ebb5f4e35b3",
+        "H28.PushTailBaseline.actual_rejects_post": "85dad0384770e46d87dec935b4adb3a859f65332a330e34939ec87e52b780baf"
+      },
+      "witness_signature_sha256": {
+        "H28.PushTailClearKill.source_link": "9f8185985a53f5eaffdea8b9872d61c1efd91e96e7b5c8bca406386876e42f06",
+        "H28.PushTailClearKill.input_inhabited": "7929fc19d8deb428b51f54e81250b55f0a1c0e1cf6e0c934143a27d0b706fa46",
+        "H28.PushTailClearKill.checked_kill": "2526e19339562cc38325230bfe49479808fa2583b8e57fbab73243d5cf5642ea",
+        "H28.PushTailClearKill.typed_landing": "2cf85691d68985f2da07a92e78030466ad6e130c5c52d4a2ad7452da41a9006b",
+        "H28.PushTailClearKill.clean_update_returns": "61199ff1109963b415550bb0ccb292500d0e2ba1406c4c306e3747fd8ca66c9e"
+      }
+    },
+    {
+      "kind": "mutant",
+      "family": "rollback-payment",
+      "source_symbol": "Taclet.sendNoCallbackBox",
+      "target": "Solidity/Calculus/Rules.lean",
+      "old": "  | sendNoCallbackBox :\n      dl{ [ pv = sadr.send(se); ] \u21dd\n          \"send succeeded\":\n            { pay(sadr, se) \u2016 pv := true }\n            \u27e8[ ]\u27e9\n        ; \"send failed\": { pv := false } \u27e8[ ]\u27e9 }\n",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "constructor_id": "Taclet.sendNoCallbackBox",
+      "id": "payment.failure-books-payment",
+      "new": "  | sendNoCallbackBox :\n      dl{ [ pv = sadr.send(se); ] \u21dd\n          \"send succeeded\":\n            { pay(sadr, se) \u2016 pv := true }\n            \u27e8[ ]\u27e9\n        ; \"send failed\": { pay(sadr, se) \u2016 pv := false } \u27e8[ ]\u27e9 }\n",
+      "mutant_sha256": "41139e82fe13279fb169c95f8bf42a5a24480db5c9f017ac4b4ff86ee161297a",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/RollbackBaseline.lean",
+      "oracle_sha256": "10355fa94803c8073c47d6c3730481b295995a5ba2a5ba0464dfc998c264e69a",
+      "oracle_declarations": [
+        "H28.RollbackBaseline.source_link",
+        "H28.RollbackBaseline.input_inhabited",
+        "H28.RollbackBaseline.accepted_run",
+        "H28.RollbackBaseline.refused_run",
+        "H28.RollbackBaseline.paid_controls",
+        "H28.RollbackBaseline.rollback_controls"
+      ],
+      "oracle_signature_sha256": {
+        "H28.RollbackBaseline.source_link": "135907193184f248eb026bdad5d5b30921bbcd5ba2cc859f884ba40c40997a40",
+        "H28.RollbackBaseline.input_inhabited": "279a44cf5946dca8c1cdd0dc811af620ba059b34d4e96d783f430055a5177366",
+        "H28.RollbackBaseline.accepted_run": "f7c07420a2f337dbbf7d66eacf7e38d992e3cf479b52b29371d3747ed417442c",
+        "H28.RollbackBaseline.refused_run": "04c539e52e0a590d7b4d3d731a87f93ff6c2700c444e4e71c7e907ccd9bebda1",
+        "H28.RollbackBaseline.paid_controls": "e648da1884066653bb1e1c488857130aee591c13053f61d8122ea2b41f340b90",
+        "H28.RollbackBaseline.rollback_controls": "7d6dc536999df6fef13b7f5388a3fa1b2c4c31c79f8cd840f7e422aa907f9295"
+      },
+      "witness": "tests/h28-sol/mutation-testing/oracles/RollbackBookedKill.lean",
+      "witness_sha256": "afb7641b8a5ce9b37baf172c8880d9a8fe94ae1076f0c00278a1d67b92fcdb5e",
+      "witness_declarations": [
+        "H28.RollbackBookedKill.source_link",
+        "H28.RollbackBookedKill.input_inhabited",
+        "H28.RollbackBookedKill.refused_run",
+        "H28.RollbackBookedKill.rollback_controls",
+        "H28.RollbackBookedKill.mutant_effect_controls",
+        "H28.RollbackBookedKill.first_landing",
+        "H28.RollbackBookedKill.second_landing",
+        "H28.RollbackBookedKill.first_post",
+        "H28.RollbackBookedKill.second_post",
+        "H28.RollbackBookedKill.premise_accepts_post",
+        "H28.RollbackBookedKill.real_frames",
+        "H28.RollbackBookedKill.execution_rejects_post",
+        "H28.RollbackBookedKill.checked_kill"
+      ],
+      "witness_signature_sha256": {
+        "H28.RollbackBookedKill.source_link": "e8124f5a77891abccbe87f2560eb4594999c4ff483e55fbb5d57506d44db3929",
+        "H28.RollbackBookedKill.input_inhabited": "ee8f3afec4d1b863369f1967dc1c0d5529786b298645bb0beeb05c2fe9811c0d",
+        "H28.RollbackBookedKill.refused_run": "71a4081fb25d47100d37073e483757d13fb502f28b72fd0927a57bb03c8d3942",
+        "H28.RollbackBookedKill.rollback_controls": "0c50cbca4cc8d25ce16ab1adb196c13d5fcf562e69cb80dc294804fd53bc4e54",
+        "H28.RollbackBookedKill.mutant_effect_controls": "6335ff33e4efacb2eca58d4509ab3a8c6f9afc1d224dae0ae2a129e7245103b9",
+        "H28.RollbackBookedKill.first_landing": "b6b2c1d117ce2fea25b15d11f897341e0c86731722727cf4102b17899e11213f",
+        "H28.RollbackBookedKill.second_landing": "b11227a4bc55765489252c589d2f26e70bc5655408079ead719744891bfec6b0",
+        "H28.RollbackBookedKill.first_post": "aa2df556778b01740b5a40b35e4c6104b68307125fd24ef263e0225c4deebe3f",
+        "H28.RollbackBookedKill.second_post": "72711a6c30b612268038ac3bf095a94823a78132d1fcd7da43a61f6224740358",
+        "H28.RollbackBookedKill.premise_accepts_post": "e2e1586014a4cc9bc3dec3ac3751314624a01bce50e77c7acf568005d2413ed7",
+        "H28.RollbackBookedKill.real_frames": "671548fbc28e61fb23e0a90df77bb6b6ec406876e0662aa19f52703bba5eaedc",
+        "H28.RollbackBookedKill.execution_rejects_post": "0c709f81e16dbd0d1ce6da5206666af2f469bcd2fffd404453c91b3ed2a20710",
+        "H28.RollbackBookedKill.checked_kill": "7459d4619604e95539b2c081e4249f52f17cc34765d431f04281ac402235fbf5"
+      }
+    },
+    {
+      "id": "frames.return-parameter-projection",
+      "kind": "mutant",
+      "family": "callback-frames",
+      "source_symbol": "Premise.expandCall",
+      "consumer_symbol": "Taclet.functionBodyExpand",
+      "constructor_id": "Premise.expandCall",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "    (fun {rs} bs body => .inline (args.declsThen (bs.declsThen\n      (.cons (.block (body.wk (Thin.keepAll rs (Thin.atop ps \u0393))).2.2) .nil)))\n      (Thin.keepAll rs (Thin.ofExt (Ext.append \u0393 ps))))",
+      "new": "    (fun {rs} bs body => .inline (args.declsThen (bs.declsThen\n      (.cons (.block (body.wk (Thin.keepAll rs (Thin.atop ps \u0393))).2.2) .nil)))\n      (if h : rs = ps then by\n        subst ps\n        exact Thin.ofExt (Ext.append (rs ++ \u0393) rs)\n       else Thin.keepAll rs (Thin.ofExt (Ext.append \u0393 ps))))",
+      "mutant_sha256": "6aa21ebc7287ffe97ff2edd01f90c6edc3ebff259801448dd5bcfc2e014ce77e",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/FrameReturnBaseline.lean",
+      "oracle_sha256": "34977c19b55b5b5552c6314790e7ae25d6ae393729d762ae653bd3436eba66a4",
+      "oracle_declarations": [
+        "H28.FrameReturnBaseline.source_link",
+        "H28.FrameReturnBaseline.input_inhabited",
+        "H28.FrameReturnBaseline.callee_returns",
+        "H28.FrameReturnBaseline.expanded_landing",
+        "H28.FrameReturnBaseline.correct_projection",
+        "H28.FrameReturnBaseline.wrong_projection",
+        "H28.FrameReturnBaseline.distinguishing_values",
+        "H28.FrameReturnBaseline.same_payload_control",
+        "H28.FrameReturnBaseline.good_frame_projects",
+        "H28.FrameReturnBaseline.bad_frame_projects"
+      ],
+      "oracle_signature_sha256": {
+        "H28.FrameReturnBaseline.source_link": "f9bf197fdbf5a835bbe84f5fa9d0f81eac629960cc26bda8fceed73f57b06a7d",
+        "H28.FrameReturnBaseline.input_inhabited": "efcb45626ec5903cae2e4ec4efd6dd8afa6c1dec2bd4ffb7a996d7533caf6ded",
+        "H28.FrameReturnBaseline.callee_returns": "6d8a95ede550fed22ab48d420edfbc12f94cd30e7f235849c60d69ca46f04eb5",
+        "H28.FrameReturnBaseline.expanded_landing": "361e9fba7ad7942166cd942176ac827fe35ee10a072a21a7ca8b246d9a6ef5c8",
+        "H28.FrameReturnBaseline.correct_projection": "0174c93a12eff7d4d1d8c66e72ca8abc9b24c7352b71a7a2e246d98e5b6b6a13",
+        "H28.FrameReturnBaseline.wrong_projection": "88c27d87744d82ee4377b48e91ab3c6e1c8bba287d6156f0708cfe9c12e9f9c6",
+        "H28.FrameReturnBaseline.distinguishing_values": "bbaa86ec58942a0cd0251c6b2e09ee75ffd909d0427442a7b2981b59dff2b2ca",
+        "H28.FrameReturnBaseline.same_payload_control": "ae1afbde4398b385f5448f6d2410116edc02dbc973345754ef1e4afd01c62b3c",
+        "H28.FrameReturnBaseline.good_frame_projects": "251fe1447f55f3c71ac31642360dd8e83ee754ff77927189cb03aa15c6dcbfd7",
+        "H28.FrameReturnBaseline.bad_frame_projects": "004203ab512c9f758eefd7b32a90095e75a4b7df57cf66e255794c56539412e9"
+      },
+      "witness": "tests/h28-sol/mutation-testing/oracles/FrameReturnKill.lean",
+      "witness_sha256": "73a1283e63547b66513dbea8fe2fe83cb25c43f51389dfcf2dad30f17c4053a0",
+      "witness_declarations": [
+        "H28.FrameReturnKill.source_link",
+        "H28.FrameReturnKill.input_inhabited",
+        "H28.FrameReturnKill.callee_returns",
+        "H28.FrameReturnKill.expanded_landing",
+        "H28.FrameReturnKill.correct_projection",
+        "H28.FrameReturnKill.wrong_projection",
+        "H28.FrameReturnKill.distinguishing_values",
+        "H28.FrameReturnKill.premise_frames",
+        "H28.FrameReturnKill.actual_frames",
+        "H28.FrameReturnKill.premise_accepts_post",
+        "H28.FrameReturnKill.execution_rejects_post",
+        "H28.FrameReturnKill.checked_kill",
+        "H28.FrameReturnKill.callback_preserves_number",
+        "H28.FrameReturnKill.callback_program_preserves",
+        "H28.FrameReturnKill.pending_preserves_number",
+        "H28.FrameReturnKill.after_cat",
+        "H28.FrameReturnKill.callback_premise_accepts",
+        "H28.FrameReturnKill.callback_resumes",
+        "H28.FrameReturnKill.callback_effect_controls",
+        "H28.FrameReturnKill.real_callback_frame",
+        "H28.FrameReturnKill.callback_execution_rejects",
+        "H28.FrameReturnKill.checked_callback_frames",
+        "H28.FrameReturnKill.same_payload_control",
+        "H28.FrameReturnKill.good_frame_projects",
+        "H28.FrameReturnKill.bad_frame_projects"
+      ],
+      "witness_signature_sha256": {
+        "H28.FrameReturnKill.source_link": "1087b96dd231807a09d13efb5e47d7cbbac808567300d07d2d571de2f4174e9b",
+        "H28.FrameReturnKill.input_inhabited": "eb49a3c51edef217a2fc3012647143f8de1401901d31db39fa6cf8a6f3c985e2",
+        "H28.FrameReturnKill.callee_returns": "268e99e018fe0dbb670d2d15126529dd1d80cc263a79d3564b99f342dbff8708",
+        "H28.FrameReturnKill.expanded_landing": "1ccc5f15b4d4f5ccfd2e0ae51ee7327df32619126826da5a7ce559bfcdf82cb6",
+        "H28.FrameReturnKill.correct_projection": "4df39603941cc813eb4601905042568df72663d45153a73f06254eb923313ef3",
+        "H28.FrameReturnKill.wrong_projection": "02d7a264ae8b339e668fe7b5eb1f63331abeca8865dd750be2fca46322434c82",
+        "H28.FrameReturnKill.distinguishing_values": "08700a457ccca2f731f17429f6866cafcb8d9819e86421a6e96bdd7b6e499fcc",
+        "H28.FrameReturnKill.premise_frames": "9a199cd77416ae1b7db6ca214127e0d6f25a5713b02070b69bb72594931044f8",
+        "H28.FrameReturnKill.actual_frames": "a014a503a9c08ac5f8cf55800a924c84c9553c2bea4daa738ae11704a38ea5fa",
+        "H28.FrameReturnKill.premise_accepts_post": "735370f5661833d70e551bca7366f82c1a057ff6c4feefada8f31b7f12815453",
+        "H28.FrameReturnKill.execution_rejects_post": "b48d7bb1cb7a51d18b1574f1d04466037f5ab8d4fed17106f977e163c779fa75",
+        "H28.FrameReturnKill.checked_kill": "b7c224cdbada747eda98559527e97b9daf26cd0f4bd363d36e75b40ae54fbe57",
+        "H28.FrameReturnKill.callback_preserves_number": "7c8573e5d24c8079e956816c1654ba54366734b0dae5b04b5e53f26da3800029",
+        "H28.FrameReturnKill.callback_program_preserves": "814063f18051a4b8e23cb3908f084d05ab867c06b1822fb87400f2e334d58817",
+        "H28.FrameReturnKill.pending_preserves_number": "1532ad3966855f74350099cd1dc8a0d518695077380f9a413acfdfcdde1ff518",
+        "H28.FrameReturnKill.after_cat": "b455495042748976a8ab2aa9a31fe9ece7193a654495f798b3834767cca0b409",
+        "H28.FrameReturnKill.callback_premise_accepts": "f8acba3f7ebe818311cdb135368ec384578b40d158fca2b4a522fb43eaa57b18",
+        "H28.FrameReturnKill.callback_resumes": "9c5ddcf5114f48c654c6987a7747633daa613e97a472ac730dbad3e2fb970e73",
+        "H28.FrameReturnKill.callback_effect_controls": "41668ed0daedb9b0aba7ecdc659bb228d128d60f6f3ffaa32b3e05462fc15556",
+        "H28.FrameReturnKill.real_callback_frame": "731fdd6f70eeaf9156074b15ddd15f504a21290b3e763e8c660be4df38e1c526",
+        "H28.FrameReturnKill.callback_execution_rejects": "b63d4a6657ab98fb99c4ab13db88be36f62690ce72bebee9c0b6070f5bba28e7",
+        "H28.FrameReturnKill.checked_callback_frames": "91b709aa075346487a8129bc37f9cf88a894f55e98f48f303275e7017b3a7038",
+        "H28.FrameReturnKill.same_payload_control": "fccf64221d2b382de7fdccf9f36939d25bd6c9203acee1c9dedf33f32ab5f221",
+        "H28.FrameReturnKill.good_frame_projects": "a4da07710e4ce97ebc52d154af93d02a5051ebb89747e44252816c355e2f6b15",
+        "H28.FrameReturnKill.bad_frame_projects": "89029d2601bdb97472de423bcde2f704ad71547eeb0f6223b0ddb0e743cd5856"
+      }
+    }
+  ],
+  "composition_sources": [
+    {
+      "file": "tests/h28-sol/mutation-testing/manifests/combined-pilot.json",
+      "sha256": "3d6a56fe57bf18bf7ff36f0daf182425dd71c589d0d07581772a9bd55852f3e6"
+    },
+    {
+      "file": "tests/h28-sol/mutation-testing/manifests/rollback-pilot.json",
+      "sha256": "7816f46144366ccb3d0b16a6b8e9c87b1b7040e528ee556d1537eb6cdf3edb5f"
+    },
+    {
+      "file": "tests/h28-sol/mutation-testing/manifests/frame-pilot.json",
+      "sha256": "6262c172b7146bed515368f35cedcfe0f56ed8eef93b104370a214d563d8dd75"
+    }
+  ],
+  "census_reference": {
+    "archive": "/workspace/h28-candidate-export-b85da7eb/inventory-proof-world.tar.gz",
+    "sha256": "1d1f4da80c217f78eae36154c4ac283d765712b4c2bac8e7a0bc8f028e38dcfb",
+    "input_head": "b85da7eb8f5cd1dc9cebeb19fd0a90f3613a2da9",
+    "catalog_sha256": "9977a50a4d659d02283ecc6587611413cd3ea298cc134bd01da5c36a052d2f73"
+  },
+  "input_storage": {
+    "authorization": "H44",
+    "inventory": "git-tracked selected attribution index",
+    "off_git_inputs": [
+      {
+        "role": "cache_manifest",
+        "path": "tests/h28-sol/mutation-testing/evidence/callback-cache-bootstrap-v2/manifest.json",
+        "sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c",
+        "bytes": 36528,
+        "availability": "VM-only"
+      }
+    ],
+    "bulk_manifest": "tests/h28-sol/mutation-testing/bulk-data.json"
+  },
+  "declared_case_counts": {
+    "case_ids": 19,
+    "scored_ids": 15,
+    "distinct_scored_programs": 15,
+    "unscored_runner_controls": 4,
+    "distinct_programs_all_roles": 18,
+    "roles": {
+      "known-kill": 1,
+      "mutant": 11,
+      "invalid-control": 1,
+      "equivalent-control": 1,
+      "runner-survivor-control": 1,
+      "negative-control": 4
+    }
+  }
+}

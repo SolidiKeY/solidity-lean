@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "original_assignment_file": "original-frozen-assignment.md",
+  "source": "Complete original first user assignment transcribed from original thread; not a coordinator-local file reference",
+  "launcher_rendered_prompt_sha256_reported_by_coordinator": "ac87fa49553cd6062248539597c894e4cbd49a6cbf037bc09ded81ca6457ae2d",
+  "launcher_rendered_object_retrievable": false,
+  "limitation": "get_goal is not exposed, so the launcher-rendered wrapper/object cannot be retrieved or independently matched. Actual saved thread-assignment bytes have their own SHA256 below; no equivalence of these two hashes is asserted.",
+  "saved_assignment_sha256": "25f9f6b22939c105021424f3f88bbffbb1241d2a5eeb2507e444f330182763e3"
+}

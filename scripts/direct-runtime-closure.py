@@ -8,6 +8,25 @@ import re
 import hashlib
 from bisect import bisect_right
 from pathlib import Path
+def file_sha256(path):
+    """Hash incrementally so runtime archives do not become resident copies."""
+    digest=hashlib.sha256()
+    with Path(path).open('rb') as stream:
+        for block in iter(lambda:stream.read(1024*1024), b''):
+            digest.update(block)
+    return digest.hexdigest()
+
+def snapshot_files(paths):
+    """Pin the exact selected file set as well as its contents."""
+    return {str(path):file_sha256(path) for path in sorted(set(map(Path,paths)))}
+
+def verify_snapshot(expected, paths):
+    actual=snapshot_files(paths)
+    if actual!=expected:
+        changed=sorted(key for key in expected.keys()|actual.keys()
+                       if expected.get(key)!=actual.get(key))
+        raise ValueError('Build inputs changed: '+', '.join(changed))
+
 IDENT=re.compile(r'\b[A-Za-z_]\w*\b')
 FUNC=re.compile(r'^(?:(?:LEAN_EXPORT|static)\s+)?[A-Za-z_][\w *]*?\s+(\w+)\([^;\n]*\) \{',re.M)
 GLOBAL=re.compile(r'^(?:(?:LEAN_EXPORT|static)\s+)?(?:lean_object\s*\*|uint\d+_t|int\d+_t|size_t|double|float)\s*(\w+)\s*;',re.M)
@@ -58,6 +77,7 @@ def collect(root,stage,module):
     return seen,order
 
 def extract(root,stage,module='Solidity.Tools.DirectRuntime',native_roots=()):
+    native_roots=set(native_roots)
     modules,order=collect(root,stage,module)
     definitions={};global_defs={}
     for name,m in modules.items():
@@ -70,6 +90,14 @@ def extract(root,stage,module='Solidity.Tools.DirectRuntime',native_roots=()):
             global_defs[g]=name
     functions=set();globals=set();pending=['solidity_direct_check','lean_io_eprintln','lean_list_to_array','lean_array_to_list_impl','lean_io_error_to_string','lean_mk_io_user_error','lean_stream_of_handle']
     initializer_names={m['init'] for m in modules.values()}
+    # Archive undefined references include platform/libc symbols, which the
+    # linker resolves. Generated Lean callbacks must instead exist in the
+    # collected graph: silently filtering one would hide an incomplete closure.
+    missing_native=sorted(s for s in native_roots
+                          if s.startswith(('l_','_init_l_'))
+                          and s not in definitions and s not in global_defs)
+    if missing_native:
+        raise ValueError('Unresolved generated native roots: '+', '.join(missing_native))
     retained_native=sorted(s for s in native_roots if s in definitions or s in global_defs)
     pending.extend(retained_native)
     while pending:

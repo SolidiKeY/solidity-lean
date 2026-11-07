@@ -1,0 +1,28 @@
+{
+ "Solidity/Lowering/V07/P12ContextExtension.lean:Solidity.Lowering.V07.P12ContextExtension.aligned_lift": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12ContextExtension.lean:Solidity.Lowering.V07.P12ContextExtension.aligned_thin": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12ContextExtension.lean:Solidity.Lowering.V07.P12ContextExtension.operand_thin": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12ContextExtension.lean:Solidity.Lowering.V07.P12ContextExtension.out_lift_frame": [
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12ContextExtension.lean:Solidity.Lowering.V07.P12ContextExtension.out_lift_glob": [
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12ContextExtension.lean:Solidity.Lowering.V07.P12ContextExtension.weaken": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

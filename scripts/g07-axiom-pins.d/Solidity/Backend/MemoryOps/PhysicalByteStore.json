@@ -1,0 +1,30 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalByteStore.lean:Solidity.Backend.MemoryOps.Physical.mstore8_revert_checked": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteStore.lean:Solidity.Backend.MemoryOps.Physical.mstore8_revert_live": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteStore.lean:Solidity.Backend.MemoryOps.Physical.mstore8_short_stack": [],
+ "Solidity/Backend/MemoryOps/PhysicalByteStore.lean:Solidity.Backend.MemoryOps.Physical.mstore8_slices": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteStore.lean:Solidity.Backend.MemoryOps.Physical.readMemory_writeByte_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteStore.lean:Solidity.Backend.MemoryOps.Physical.WordFrame.mstore8_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteStore.lean:Solidity.Backend.MemoryOps.Physical.WordFrame.writeByte_outside": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteStore.lean:Solidity.Backend.MemoryOps.Physical.writeByte_eq_putByte": []
+}

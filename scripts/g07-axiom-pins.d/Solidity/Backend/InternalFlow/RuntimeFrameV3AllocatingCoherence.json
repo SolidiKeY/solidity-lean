@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingCoherence.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingCoherence.source_coherence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

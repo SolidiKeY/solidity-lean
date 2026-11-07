@@ -1,0 +1,97 @@
+{
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.alias_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.child_address_ne": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.child_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.child_read_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.eval_nested_child_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.eval_nested_parent_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.eval_nested_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.eval_parent_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.eval_parent_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.index": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.indexLoc_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.indexLoc_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.length_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.parent_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.parent_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.same_heaps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.word_child_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.word_observe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMemory.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.word_parent_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

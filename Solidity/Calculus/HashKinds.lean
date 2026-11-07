@@ -1288,6 +1288,17 @@ theorem _root_.Solidity.Op2.nodeLevel?_spec {k : HashKind} {a b s : Srt} (o : Op
     · rw [if_neg hk] at h; cases h
   · cases h
 
+/-- Lift a hash-level witness along an implication of the hash predicate: the
+step the `hLevels_hashIn`/`topLevels_hashIn` cases take from a part (subterm,
+update element, subformula) to the whole. The
+predicates take the string's `R` and `id`, so both unify as patterns. -/
+private theorem lvlLift {σ : State C Γ} {l : Nat} {A B : RefTy → Nat → Prop}
+    (h : ∃ (R : RefTy) (i : Idx Γ (.mem R)), i.level = l ∧ ∀ id, σ.getV i = some id → A R id)
+    (f : ∀ {R id}, A R id → B R id) :
+    ∃ (R : RefTy) (i : Idx Γ (.mem R)), i.level = l ∧ ∀ id, σ.getV i = some id → B R id :=
+  let ⟨R, i, hl, hi⟩ := h
+  ⟨R, i, hl, fun id hv => f (hi id hv)⟩
+
 theorem _root_.Solidity.Tm.hLevels_hashIn (σ : State C Γ) (k : HashKind) {l : Nat} :
     {s : Srt} → (t : Tm C Γ s) → l ∈ t.hLevels k → ∃ (R : RefTy) (i : Idx Γ (.mem R)), i.level = l ∧
       ∀ id, σ.getV i = some id → t.HashIn σ k (σ.glob.memT.hashInput R id) (σ.glob.memT.hashId k R id)
@@ -1295,21 +1306,15 @@ theorem _root_.Solidity.Tm.hLevels_hashIn (σ : State C Γ) (k : HashKind) {l : 
   | _, .app2 o x y, h => by
     simp only [Tm.hLevels, List.mem_append] at h
     rcases h with (h | h) | h
-    · obtain ⟨R, i, hl, hi⟩ := o.nodeLevel?_spec x y (Option.mem_toList.1 h) σ
-      exact ⟨R, i, hl, hi⟩
-    · obtain ⟨R, i, hl, hi⟩ := Tm.hLevels_hashIn σ k x h
-      exact ⟨R, i, hl, fun id hv => .inr (.inl (hi id hv))⟩
-    · obtain ⟨R, i, hl, hi⟩ := Tm.hLevels_hashIn σ k y h
-      exact ⟨R, i, hl, fun id hv => .inr (.inr (hi id hv))⟩
+    · exact o.nodeLevel?_spec x y (Option.mem_toList.1 h) σ
+    · exact lvlLift (Tm.hLevels_hashIn σ k x h) (fun hi => .inr (.inl hi))
+    · exact lvlLift (Tm.hLevels_hashIn σ k y h) (fun hi => .inr (.inr hi))
   | _, .app3 _ x y z, h => by
     simp only [Tm.hLevels, List.mem_append] at h
     rcases h with (h | h) | h
-    · obtain ⟨R, i, hl, hi⟩ := Tm.hLevels_hashIn σ k x h
-      exact ⟨R, i, hl, fun id hv => .inl (hi id hv)⟩
-    · obtain ⟨R, i, hl, hi⟩ := Tm.hLevels_hashIn σ k y h
-      exact ⟨R, i, hl, fun id hv => .inr (.inl (hi id hv))⟩
-    · obtain ⟨R, i, hl, hi⟩ := Tm.hLevels_hashIn σ k z h
-      exact ⟨R, i, hl, fun id hv => .inr (.inr (hi id hv))⟩
+    · exact lvlLift (Tm.hLevels_hashIn σ k x h) (fun hi => .inl hi)
+    · exact lvlLift (Tm.hLevels_hashIn σ k y h) (fun hi => .inr (.inl hi))
+    · exact lvlLift (Tm.hLevels_hashIn σ k z h) (fun hi => .inr (.inr hi))
   | _, .pvV _, h | _, .pvP _, h | _, .pvS _, h | _, .pvI _, h | _, .app0 _, h | _, .pvZ _, h => nomatch h
 
 theorem _root_.Solidity.Rhs.hLevels_hashIn (σ : State C Γ) (k : HashKind) {l : Nat} {t : LTy}
@@ -1326,10 +1331,8 @@ theorem _root_.Solidity.UpdElem.hLevels_hashIn (σ : State C Γ) (k : HashKind) 
   | net r _ a | pay r a | netMt r a =>
     simp only [UpdElem.hLevels, List.mem_append] at h
     rcases h with h | h
-    · obtain ⟨R, i, hl, hi⟩ := Tm.hLevels_hashIn σ k r h
-      exact ⟨R, i, hl, fun id hv => .inl (hi id hv)⟩
-    · obtain ⟨R, i, hl, hi⟩ := Tm.hLevels_hashIn σ k a h
-      exact ⟨R, i, hl, fun id hv => .inr (hi id hv)⟩
+    · exact lvlLift (Tm.hLevels_hashIn σ k r h) (fun hi => .inl hi)
+    · exact lvlLift (Tm.hLevels_hashIn σ k a h) (fun hi => .inr hi)
 
 theorem _root_.Solidity.Upd.hLevels_hashIn (σ : State C Γ) (k : HashKind) {l : Nat} :
     {Δ : Ctx} → (U : Upd C Γ Δ) → l ∈ U.hLevels k → ∃ (R : RefTy) (i : Idx Γ (.mem R)), i.level = l ∧
@@ -1338,17 +1341,13 @@ theorem _root_.Solidity.Upd.hLevels_hashIn (σ : State C Γ) (k : HashKind) {l :
   | _, .snoc U e, h => by
     simp only [Upd.hLevels, List.mem_append] at h
     rcases h with h | h
-    · obtain ⟨R, i, hl, hi⟩ := Upd.hLevels_hashIn σ k U h
-      exact ⟨R, i, hl, fun id hv => .inl (hi id hv)⟩
-    · obtain ⟨R, i, hl, hi⟩ := UpdElem.hLevels_hashIn σ k e h
-      exact ⟨R, i, hl, fun id hv => .inr (hi id hv)⟩
+    · exact lvlLift (Upd.hLevels_hashIn σ k U h) (fun hi => .inl hi)
+    · exact lvlLift (UpdElem.hLevels_hashIn σ k e h) (fun hi => .inr hi)
   | _, .decl U _ r, h => by
     simp only [Upd.hLevels, List.mem_append] at h
     rcases h with h | h
-    · obtain ⟨R, i, hl, hi⟩ := Upd.hLevels_hashIn σ k U h
-      exact ⟨R, i, hl, fun id hv => .inl (hi id hv)⟩
-    · obtain ⟨R, i, hl, hi⟩ := Rhs.hLevels_hashIn σ k r h
-      exact ⟨R, i, hl, fun id hv => .inr (hi id hv)⟩
+    · exact lvlLift (Upd.hLevels_hashIn σ k U h) (fun hi => .inl hi)
+    · exact lvlLift (Rhs.hLevels_hashIn σ k r h) (fun hi => .inr hi)
   | _, .pop U _, h | _, .drop U _, h => Upd.hLevels_hashIn σ k U h
 
 /-- **A string hashed where the premise reads it is one of the premise's
@@ -1359,22 +1358,17 @@ theorem _root_.Solidity.Fml.topLevels_hashIn (σ : State C Γ) (k : HashKind) {l
   | .eq a b, h => by
     simp only [Fml.topLevels, List.mem_append] at h
     rcases h with h | h
-    · obtain ⟨R, i, hl, hi⟩ := Tm.hLevels_hashIn σ k a h
-      exact ⟨R, i, hl, fun id hv => .inl (hi id hv)⟩
-    · obtain ⟨R, i, hl, hi⟩ := Tm.hLevels_hashIn σ k b h
-      exact ⟨R, i, hl, fun id hv => .inr (hi id hv)⟩
+    · exact lvlLift (Tm.hLevels_hashIn σ k a h) (fun hi => .inl hi)
+    · exact lvlLift (Tm.hLevels_hashIn σ k b h) (fun hi => .inr hi)
   | .wellFormed s, h => Tm.hLevels_hashIn σ k s h
   | .not φ, h => Fml.topLevels_hashIn σ k φ h
   | .and φ ψ, h | .imp φ ψ, h => by
     simp only [Fml.topLevels, List.mem_append] at h
     rcases h with h | h
-    · obtain ⟨R, i, hl, hi⟩ := Fml.topLevels_hashIn σ k φ h
-      exact ⟨R, i, hl, fun id hv => .inl (hi id hv)⟩
-    · obtain ⟨R, i, hl, hi⟩ := Fml.topLevels_hashIn σ k ψ h
-      exact ⟨R, i, hl, fun id hv => .inr (hi id hv)⟩
+    · exact lvlLift (Fml.topLevels_hashIn σ k φ h) (fun hi => .inl hi)
+    · exact lvlLift (Fml.topLevels_hashIn σ k ψ h) (fun hi => .inr hi)
   | .upd _ U _, h => by
-    obtain ⟨R, i, hl, hi⟩ := Upd.hLevels_hashIn σ k U h
-    exact ⟨R, i, hl, fun id hv => .inl (hi id hv)⟩
+    exact lvlLift (Upd.hLevels_hashIn σ k U h) (fun hi => .inl hi)
   | .tt, h | .modal .., h | .havoc _, h | .all .., h | .bind .., h | .anon .., h | .allocAll .., h
   | .grow _, h => nomatch h
 

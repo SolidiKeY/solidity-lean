@@ -1,0 +1,47 @@
+{
+ "Bridge/SolidityBridge/AccessBridge/MemoryLoadControls.lean:SolidityBridge.AccessBridge.MemoryLoadControls.charged_initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryLoadControls.lean:SolidityBridge.AccessBridge.MemoryLoadControls.charged_nonzero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryLoadControls.lean:SolidityBridge.AccessBridge.MemoryLoadControls.charged_underfunded": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryLoadControls.lean:SolidityBridge.AccessBridge.MemoryLoadControls.clipped_image": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryLoadControls.lean:SolidityBridge.AccessBridge.MemoryLoadControls.clipped_values": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryLoadControls.lean:SolidityBridge.AccessBridge.MemoryLoadControls.endian_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryLoadControls.lean:SolidityBridge.AccessBridge.MemoryLoadControls.full_image": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryLoadControls.lean:SolidityBridge.AccessBridge.MemoryLoadControls.full_values": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryLoadControls.lean:SolidityBridge.AccessBridge.MemoryLoadControls.unchanged": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

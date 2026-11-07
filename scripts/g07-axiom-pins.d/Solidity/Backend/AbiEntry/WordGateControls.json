@@ -1,0 +1,46 @@
+{
+ "Solidity/Backend/AbiEntry/WordGateControls.lean:Solidity.Backend.AbiEntry.WordGateControls.bytes0_boundaries": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordGateControls.lean:Solidity.Backend.AbiEntry.WordGateControls.bytes1_boundaries": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordGateControls.lean:Solidity.Backend.AbiEntry.WordGateControls.bytes31_boundaries": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordGateControls.lean:Solidity.Backend.AbiEntry.WordGateControls.every_kind_accepts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordGateControls.lean:Solidity.Backend.AbiEntry.WordGateControls.every_kind_rejects": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordGateControls.lean:Solidity.Backend.AbiEntry.WordGateControls.full_and_oversized": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordGateControls.lean:Solidity.Backend.AbiEntry.WordGateControls.malformed_word_fault": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordGateControls.lean:Solidity.Backend.AbiEntry.WordGateControls.protected_and_saved": [],
+ "Solidity/Backend/AbiEntry/WordGateControls.lean:Solidity.Backend.AbiEntry.WordGateControls.raw_aligned_value": [
+  "Quot.sound"
+ ],
+ "Solidity/Backend/AbiEntry/WordGateControls.lean:Solidity.Backend.AbiEntry.WordGateControls.raw_padding_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

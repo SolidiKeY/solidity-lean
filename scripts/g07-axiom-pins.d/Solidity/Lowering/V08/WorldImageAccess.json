@@ -1,0 +1,65 @@
+{
+ "Solidity/Lowering/V08/WorldImageAccess.lean:Solidity.Lowering.V08.WorldImageAccess.account_balance": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccess.lean:Solidity.Lowering.V08.WorldImageAccess.account_lookup": [
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccess.lean:Solidity.Lowering.V08.WorldImageAccess.account_transfer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccess.lean:Solidity.Lowering.V08.WorldImageAccess.image_atTime": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccess.lean:Solidity.Lowering.V08.WorldImageAccess.installed_lookup": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccess.lean:Solidity.Lowering.V08.WorldImageAccess.installed_store": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccess.lean:Solidity.Lowering.V08.WorldImageAccess.library_inputs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccess.lean:Solidity.Lowering.V08.WorldImageAccess.lookup_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccess.lean:Solidity.Lowering.V08.WorldImageAccess.lookup_none_of_code_absent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccess.lean:Solidity.Lowering.V08.WorldImageAccess.lookup_none_of_kind_mismatch": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccess.lean:Solidity.Lowering.V08.WorldImageAccess.lookup_reflect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccess.lean:Solidity.Lowering.V08.WorldImageAccess.lookup_some_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccess.lean:Solidity.Lowering.V08.WorldImageAccess.timestamp_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

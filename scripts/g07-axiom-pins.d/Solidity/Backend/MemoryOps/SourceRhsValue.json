@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/MemoryOps/SourceRhsValue.lean:Solidity.Backend.MemoryOps.rhs_assign_value_bounds_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceRhsValue.lean:Solidity.Backend.MemoryOps.rhs_assign_value_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

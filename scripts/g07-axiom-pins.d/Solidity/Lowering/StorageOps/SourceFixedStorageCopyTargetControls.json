@@ -1,0 +1,42 @@
+{
+ "Solidity/Lowering/StorageOps/SourceFixedStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceFixedStorageCopyTarget.Controls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceFixedStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceFixedStorageCopyTarget.Controls.required_old_agreements": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceFixedStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceFixedStorageCopyTarget.Controls.root_presence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceFixedStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceFixedStorageCopyTarget.Controls.selected_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceFixedStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceFixedStorageCopyTarget.Controls.source_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceFixedStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceFixedStorageCopyTarget.Controls.target_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceFixedStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceFixedStorageCopyTarget.Controls.wrong_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceFixedStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceFixedStorageCopyTarget.Controls.wrong_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

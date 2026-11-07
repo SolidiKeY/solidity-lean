@@ -1,0 +1,42 @@
+{
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "cases": [
+    {
+      "id": "payment.success-flag-false",
+      "kind": "mutant",
+      "family": "rollback-payment",
+      "source_symbol": "Taclet.sendNoCallbackBox",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | sendNoCallbackBox :\n      dl{ [ pv = sadr.send(se); ] \u21dd\n          \"send succeeded\":\n            { pay(sadr, se) \u2016 pv := true }\n            \u27e8[ ]\u27e9\n        ; \"send failed\": { pv := false } \u27e8[ ]\u27e9 }\n",
+      "new": "  | sendNoCallbackBox :\n      dl{ [ pv = sadr.send(se); ] \u21dd\n          \"send succeeded\":\n            { pay(sadr, se) \u2016 pv := false }\n            \u27e8[ ]\u27e9\n        ; \"send failed\": { pv := false } \u27e8[ ]\u27e9 }\n",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/PaymentBaseline.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/PaymentFalseKill.lean",
+      "oracle_sha256": "171c3b08a4286826f67e1eefada3b0800d1e560efc5cd9c7701c0a96c235cbc4",
+      "witness_sha256": "fbb4ebd568b499a5fe08314307700c3229380915c0a661c0e64939276e9b797f",
+      "oracle_declarations": [
+        "H28.PaymentBaseline.source_link",
+        "H28.PaymentBaseline.input_inhabited",
+        "H28.PaymentBaseline.accepted_run",
+        "H28.PaymentBaseline.paid_ledger",
+        "H28.PaymentBaseline.refused_rollback"
+      ],
+      "witness_declarations": [
+        "H28.PaymentFalseKill.source_link",
+        "H28.PaymentFalseKill.input_inhabited",
+        "H28.PaymentFalseKill.accepted_run",
+        "H28.PaymentFalseKill.paid_ledger",
+        "H28.PaymentFalseKill.refused_rollback",
+        "H28.PaymentFalseKill.first_typed_landing",
+        "H28.PaymentFalseKill.second_typed_landing",
+        "H28.PaymentFalseKill.mutant_ledger_controls",
+        "H28.PaymentFalseKill.first_post",
+        "H28.PaymentFalseKill.second_post",
+        "H28.PaymentFalseKill.premise_accepts_post",
+        "H28.PaymentFalseKill.real_frames",
+        "H28.PaymentFalseKill.execution_rejects_post",
+        "H28.PaymentFalseKill.checked_kill"
+      ]
+    }
+  ]
+}

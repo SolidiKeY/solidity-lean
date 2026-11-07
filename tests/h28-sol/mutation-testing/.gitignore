@@ -1,0 +1,17 @@
+/evidence/
+/*.json
+!/bulk-data.json
+!/registration.json
+/.scratch/
+__pycache__/
+/runs/*/checks/
+# H44: bulk run data stays off Git, recorded in runs/BULK.json
+# (`tools/bulk.py restore` brings it back, verified)
+/manifests/h28-final.json
+/runs/*
+!/runs/BULK.json
+!/runs/final-8fad7b13/
+/runs/final-8fad7b13/*
+!/runs/final-8fad7b13/summary.json
+!/runs/final-8fad7b13/acceptance.json
+!/runs/final-8fad7b13/seal.json

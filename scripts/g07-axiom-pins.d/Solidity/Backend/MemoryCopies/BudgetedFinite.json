@@ -1,0 +1,27 @@
+{
+ "Solidity/Backend/MemoryCopies/BudgetedFinite.lean:Solidity.Backend.MemoryCopies.budgeted_finite_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedFinite.lean:Solidity.Backend.MemoryCopies.budgeted_finite_declaration": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedFinite.lean:Solidity.Backend.MemoryCopies.budgeted_finite_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedFinite.lean:Solidity.Backend.MemoryCopies.budgeted_finite_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedFinite.lean:Solidity.Backend.MemoryCopies.budgetedFinite": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

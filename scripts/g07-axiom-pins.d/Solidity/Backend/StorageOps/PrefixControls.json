@@ -1,0 +1,40 @@
+{
+ "Solidity/Backend/StorageOps/PrefixControls.lean:Solidity.Backend.StorageOps.common_prefix_fields_commute": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrefixControls.lean:Solidity.Backend.StorageOps.common_prefix_keys_commute": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrefixControls.lean:Solidity.Backend.StorageOps.common_prefix_lift": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrefixControls.lean:Solidity.Backend.StorageOps.modifyAt_append": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrefixControls.lean:Solidity.Backend.StorageOps.modifyAt_sequence": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrefixControls.lean:Solidity.Backend.StorageOps.prefix_save_append": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrefixControls.lean:Solidity.Backend.StorageOps.prefix_save_exists": [
+  "Quot.sound"
+ ],
+ "Solidity/Backend/StorageOps/PrefixControls.lean:Solidity.Backend.StorageOps.prefix_save_overwrite": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrefixControls.lean:Solidity.Backend.StorageOps.step_put_exists": [
+  "Quot.sound"
+ ],
+ "Solidity/Backend/StorageOps/PrefixControls.lean:Solidity.Backend.StorageOps.step_put_overwrite": [
+  "Quot.sound",
+  "propext"
+ ]
+}

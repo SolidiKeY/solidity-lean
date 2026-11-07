@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/MemoryCopies/FixedReferencePath.lean:Solidity.Backend.MemoryCopies.fixed_reference_path_select": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferencePath.lean:Solidity.Backend.MemoryCopies.fixedReferencePath": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

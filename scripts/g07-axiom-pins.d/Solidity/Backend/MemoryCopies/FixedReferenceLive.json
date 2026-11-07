@@ -1,0 +1,26 @@
+{
+ "Solidity/Backend/MemoryCopies/FixedReferenceLive.lean:Solidity.Backend.MemoryCopies.fixed_reference_live_contents": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceLive.lean:Solidity.Backend.MemoryCopies.fixed_reference_live_copy": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceLive.lean:Solidity.Backend.MemoryCopies.fixed_reference_live_count": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceLive.lean:Solidity.Backend.MemoryCopies.fixed_reference_live_representation": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceLive.lean:Solidity.Backend.MemoryCopies.fixed_reference_live_rows": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceLive.lean:Solidity.Backend.MemoryCopies.fixed_reference_live_vector_copy": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceLive.lean:Solidity.Backend.MemoryCopies.fixedReferenceLive": [
+  "Quot.sound",
+  "propext"
+ ]
+}

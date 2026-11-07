@@ -1,0 +1,290 @@
+{
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.memory_budgeted_memoryCalls_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallApplication.after_call": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallApplication.allocation_free": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallApplication.branch_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallApplication.budget": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallApplication.consumer_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallApplication.consumer_free": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallApplication.into_call": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallApplication.joined_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallApplication.old_reference": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallApplication.resources": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallApplication.shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallApplication.source_frame_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallControls.actual_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallControls.allocation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallControls.body": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallControls.checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallControls.consumer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallControls.costs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallControls.final_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallControls.first_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallControls.frame_difference": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallControls.initial_repr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallControls.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallControls.producer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallControls.public_recognizer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallControls.push_free": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallControls.second_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallFailures.argument": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallFailures.argument_free": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallFailures.argument_reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallFailures.argument_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallFailures.body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallFailures.body_free": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallFailures.body_reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallFailures.body_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallFailures.costs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallFailures.frames": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallFailures.later_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallFailures.reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallFailures.scheduled_costs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallFailures.source_unreachable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallFailures.wholeArgument": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallFailures.wholeBody": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallFailures.wrong_failure_stage": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallObservations.allocation_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallObservations.call_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallObservations.final_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallObservations.old_map_preserved": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallObservations.old_only_keeps_old": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallObservations.return_identity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallObservations.selected_return_base": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallObservations.skipped_consumer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallObservations.source_after_consume": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallObservations.source_before_consume": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.MemoryCallObservations.stale_map_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.memoryCalls_budgeted_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.memoryCalls_budgeted_memory_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.memoryCalls_memory_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallPins.lean:Solidity.Backend.Passes.memoryCalls_nonallocating_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

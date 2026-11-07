@@ -1,0 +1,27 @@
+{
+ "Solidity/Backend/Passes/CaptureMutation.lean:Solidity.Backend.Passes.CaptureMutation.execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CaptureMutation.lean:Solidity.Backend.Passes.CaptureMutation.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CaptureMutation.lean:Solidity.Backend.Passes.CaptureMutation.mapped_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CaptureMutation.lean:Solidity.Backend.Passes.CaptureMutation.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CaptureMutation.lean:Solidity.Backend.Passes.CaptureMutation.terminal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

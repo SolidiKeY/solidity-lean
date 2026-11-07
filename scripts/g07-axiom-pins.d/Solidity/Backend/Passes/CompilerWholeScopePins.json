@@ -1,0 +1,110 @@
+{
+ "Solidity/Backend/Passes/CompilerWholeScopePins.lean:Solidity.Backend.Passes.CompilerWholeScope.accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerWholeScopePins.lean:Solidity.Backend.Passes.CompilerWholeScope.accepted_some": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerWholeScopePins.lean:Solidity.Backend.Passes.CompilerWholeScope.actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerWholeScopePins.lean:Solidity.Backend.Passes.CompilerWholeScope.allocation_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerWholeScopePins.lean:Solidity.Backend.Passes.CompilerWholeScope.branch": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerWholeScopePins.lean:Solidity.Backend.Passes.CompilerWholeScope.compiler_join_codes_assoc": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerWholeScopePins.lean:Solidity.Backend.Passes.CompilerWholeScope.Controls.complete_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerWholeScopePins.lean:Solidity.Backend.Passes.CompilerWholeScope.Controls.corrupted_tail_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerWholeScopePins.lean:Solidity.Backend.Passes.CompilerWholeScope.Controls.omitted_scope_differs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerWholeScopePins.lean:Solidity.Backend.Passes.CompilerWholeScope.Controls.unscoped_some": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerWholeScopePins.lean:Solidity.Backend.Passes.CompilerWholeScope.Controls.unscoped_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerWholeScopePins.lean:Solidity.Backend.Passes.CompilerWholeScope.free": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerWholeScopePins.lean:Solidity.Backend.Passes.CompilerWholeScope.heap_objects": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerWholeScopePins.lean:Solidity.Backend.Passes.CompilerWholeScope.initial_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerWholeScopePins.lean:Solidity.Backend.Passes.CompilerWholeScope.resources": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerWholeScopePins.lean:Solidity.Backend.Passes.CompilerWholeScope.right_selected_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerWholeScopePins.lean:Solidity.Backend.Passes.CompilerWholeScope.room": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerWholeScopePins.lean:Solidity.Backend.Passes.CompilerWholeScope.selected_code_associative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerWholeScopePins.lean:Solidity.Backend.Passes.CompilerWholeScope.shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerWholeScopePins.lean:Solidity.Backend.Passes.CompilerWholeScope.source_frame_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerWholeScopePins.lean:Solidity.Backend.Passes.CompilerWholeScope.source_frame_strict": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerWholeScopePins.lean:Solidity.Backend.Passes.CompilerWholeScope.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

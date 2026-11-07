@@ -9,7 +9,7 @@ The tools: `node scripts/import-fanout.mjs` prints each module's rebuild
 fan-out (how many modules import it transitively) and the longest import
 chain, `--path A B` one import path from `A` to `B`;
 `node scripts/check-layers.mjs` fails when a core module reaches the
-elaborator.
+elaborator or introduces an unapproved core-to-non-core import boundary.
 
 ## P1. The core apart from the elaborator
 
@@ -43,11 +43,36 @@ elaborator.
 `Tools.SolCases` is an external-source printer and is explicitly included in
 the forbidden frontend set checked from the core.
 
-The list is closed under imports: no core module imports a module outside
-it.  The elaborator is `Syntax/{Elab,Quote,Splice}` and
-`Calculus/{Print*,Surface*,TacticSyntax,Quote,NamedTerm}`.  Source
-extraction for the core's composed models stays above it
-(`Frontend/WorldImport`, `Examples/Tactics/TransientStorage.lean`).
+The list is meant to be closed under imports. The architecture audit
+(`cloud/audit-20261106/architecture`, fa5acebd43214bbe642258d862f903bcf08d3f89)
+found 95 direct core-to-non-core boundary edges. Those exact edges are pinned in
+`scripts/core-import-baseline.json`, SHA256
+`d202b21ddde800b40237b9c4a95482c17b8d5ea8d2c78c1b42e4bad7344ac80b`
+(also recorded in `scripts/core-import-baseline.sha256`). Reproduce the audited
+bytes with `python3 -B scripts/h62/item5/statement-graph/audit_core_baseline.py`.
+They are existing debt, not proof that the core is already closed.
+
+`scripts/check-layers.mjs` now checks the Solidity-package import closure as well
+as the existing elaborator/parser restrictions. It follows paths through core
+modules and rejects each new boundary to a non-core module, printing a witness
+path. Paths through a pinned boundary are grandfathered; the downstream modules
+are not promoted into CORE. This is a boundary-edge policy, not a baseline of
+all transitive module pairs. Standard Lean library imports remain outside this
+package-layer graph. The scanner handles comments, indented imports, and multiple
+modules on one import line; unsupported quoted or multiline import syntax fails
+closed. Existing elaborator/parser bans still apply even to an allowed edge.
+
+The active subset is `scripts/core-import-allowlist.json`. Remove obsolete entries
+when fixing debt. It can only shrink: additions outside the audited set, duplicate
+edges, re-adding a previously removed edge, and delete/recreate histories are
+rejected. Validation checks committed change history and the working tree;
+shallow histories, grafts and custom history overrides are refused. The immutable
+95-edge snapshot and its checksum must not be enlarged to silence a new failure.
+
+The elaborator is `Syntax/{Elab,Quote,Splice}` and
+`Calculus/{Print*,Surface*,TacticSyntax,Quote,NamedTerm}`. Source extraction for
+the core's composed models stays above it (`Frontend/WorldImport`,
+`Examples/Tactics/TransientStorage.lean`).
 
 **A new module** that only states or proves (no `sol{}`, `dl!{}`, `#wp`,
 `#guard_msgs` of a printer) belongs in the core if what it imports is: add
@@ -141,7 +166,7 @@ file per new arm (`Calculus/Sound/README.md`; the template is in
    (`Calculus/RuleShapes.lean`) and `PrintedRules.printedOrigins`
    (`Calculus/PrintedRules.lean`); `#check_constructor_table` fails on a
    missing row.  A taclet that reads storage or memory also gets its row in
-   `SortCheck/Annotations.lean`, checked by `lake exe solkeycheck`.
+   `SortCheck/Annotations.lean` (`solidity-lean rules check` compares it with SolKey's rules on demand; no gate runs it since H89).
    `taclets_partitioned`/`printed_rules_partitioned` and the claimed and
    unclaimed counts move with the rows.
 
@@ -231,10 +256,44 @@ moving or deleting a module and commits the result; the integrator drops the
 lanes' root hunks and regenerates.
 
 `docs/module-map.md` is an index; the rows are in one file per area under
-`docs/module-map/` (its former `##` sections, contents unchanged).  A lane
-adds rows only to its area's file; `scripts/coord-tools/module-map.py BASE`
-lists the modules added since BASE without a row and proposes the area file
-and a row (the integrator's former `mmrows`/`mmplace`).
+`docs/module-map/` (its former `##` sections, contents unchanged).
+`scripts/coord-tools/module-map.py BASE` lists the modules added since BASE
+without a row and proposes the fragment and a row (the integrator's former
+`mmrows`/`mmplace`).
+
+The other shared bookkeeping files are generated too, from a fragment
+directory next to each: `docs/module-map.md` from `docs/module-map.d/`, each
+`docs/module-map/<area>.md` from `docs/module-map/<area>.d/`,
+`docs/README.md` from `docs/README.d/`, `TERRA-TODO.md` from `TERRA-TODO.d/`
+and `scripts/g07-axiom-pins.json` from `scripts/g07-axiom-pins.d/`.
+`scripts/coord-tools/fragments.sh` writes them; the combined files stay
+committed (scripts and `git show REV:path` read them).  A Markdown file is a
+marker line followed by its fragments concatenated in bytewise path order:
+`00-base.md` holds the migrated text, a lane adds `<lane>.md` (lower-case
+branch name), `~tail.md` sorts last, and a subdirectory such as
+`docs/README.d/10-language/` is a slot inside the file (the language table).
+The pin inventory has one fragment per Lean file,
+`scripts/g07-axiom-pins.d/<path without .lean>.json`;
+`check-axiom-pins.mjs --write` rewrites them with the combined file.  A lane
+edits only its own fragments and runs `fragments.sh`, so two lanes never touch
+the same lines.  `fragments.sh --check` (run by `gate.sh`, `run-lean.sh` and
+CI) fails on a stale combined file; the write refuses lines in a combined file
+that no fragment produces (a direct edit) unless `--force`.  The Markdown
+combined files merge with `merge=union` (the pin inventory does not: a union
+of JSON is not JSON); after any merge or rebase run `fragments.sh`.
+`fragments.sh --resolve [--lane NAME]`, during a conflicted two-parent merge
+or right after a merge commit, regenerates every combined file and the roots
+and stages the result; it exits 1 while a path stays conflicted.  A side that
+has fragments is taken from its fragments (its combined file may be stale);
+only lines none of the merged fragments has are adopted, into
+`<slot>/<lane>.md`.  A side that predates the fragments has its direct edits
+adopted: a replaced block found once is edited in place in the fragment that
+holds it, a deleted line found once is removed, inserted lines go to
+`<slot>/<lane>.md` (so they land at the end of their slot), and pins merge by
+key.  After a rebase or a fast-forward there is no merge to read; run
+`fragments.sh` and move the lines it refuses into a fragment.  The pre-gate
+service runs `--resolve` on merges whose only conflicts are in these files,
+their fragments or the roots, and records them as `auto_resolved`.
 
 Measured on the history since 2026-10-27 (non-merge commits): 214 touched
 `Solidity.lean`, whose hunks are now regenerated instead of merged.  269

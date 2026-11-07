@@ -147,19 +147,21 @@ function validate(inventory) {
 function main(args=process.argv.slice(2)) {
   const path=join(root,'docs/dafny-editor-features.json');
   if(args[0]==='--check') {
-    const inventory=JSON.parse(readFileSync(path,'utf8')),errors=validate(inventory);
+    const checked=require('./inventory.cjs').checkOffline(path);
+    if(checked.mode==='digest-only'){process.stdout.write('Digest-only: committed inventory/restore manifest agree; full feature/source/evidence validation NOT run (H44 bundle absent). Mandatory inventory-check/parity-gate still require the full bundle.\n');return;}
+    const inventory=checked.inventory,errors=validate(inventory);
     if(errors.length)throw new Error(errors.join('\n'));process.stdout.write(`Validated ${inventory.features.length} editor features; no untested completeness claims.\n`);return;
   }
   const extension=args[args.indexOf('--extension')+1],server=args[args.indexOf('--server')+1];
   if(!args.includes('--extension')||!args.includes('--server'))throw new Error('Use --check or --extension DIR --server DIR [--write]');
   const inventory=scan(resolve(extension),resolve(server));inventory.features=inventory.features.map(assess);
   if(args.includes('--check-source')) {
-    const expected=JSON.parse(readFileSync(path,'utf8'));
+    const expected=require('./inventory.cjs').loadInventory(path);
     if(JSON.stringify(expected.upstream)!==JSON.stringify(inventory.upstream)||JSON.stringify(expected.sources)!==JSON.stringify(inventory.sources)||
       JSON.stringify(expected.features.map(f=>f.id))!==JSON.stringify(inventory.features.map(f=>f.id)))throw new Error('Pinned source or discovered feature set drifted; inspect and reconcile the inventory');
     process.stdout.write('Pinned editor source and feature discovery match.\n');
   }
-  else if(args.includes('--write'))writeFileSync(path,JSON.stringify(inventory,null,2)+'\n');
+  else if(args.includes('--write'))require('./inventory.cjs').saveInventory(inventory,path);
   else process.stdout.write(JSON.stringify(inventory,null,2)+'\n');
 }
 module.exports={scan,assess,validate,files};

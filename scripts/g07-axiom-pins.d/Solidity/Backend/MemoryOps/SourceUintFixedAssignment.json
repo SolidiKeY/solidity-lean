@@ -1,0 +1,32 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintFixedAssignment.lean:Solidity.Backend.MemoryOps.resolved_uint_fixed_assign_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedAssignment.lean:Solidity.Backend.MemoryOps.resolved_uint_fixed_assign_word_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedAssignment.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.eval_assign_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedAssignment.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.eval_assign_of_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedAssignment.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.eval_index_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedAssignment.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.eval_index_loc": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

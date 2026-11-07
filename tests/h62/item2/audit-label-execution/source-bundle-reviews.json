@@ -1,0 +1,281 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "review_level": "source-inspection-only; no elaborated types, global inhabitance or simultaneous witnesses established",
+  "definitions": [
+    {
+      "path": "Solidity/Source/Machine.lean",
+      "source_sha256": "dd4c286689e2678adc18d2b65621f585acc255dd1a974e80d2d34ccadc36ad67",
+      "line": 181,
+      "excerpt": "structure Glob (E : Env) where\n  prog : Program E\n  pipeline : Pipeline\n  fixed : Fixed\n  balance0 : Address → Word\n  /-- Whether an account outside the system has code after a history. -/\n  hasCode : List Event → Address → Bool\n  callee : Strategy\n  timestamp : Word",
+      "excerpt_sha256": "3ff02fc02df029b00a774181c95b9242503a63450b0c90617263676f4b9fa348",
+      "inhabitance": "not-checked"
+    },
+    {
+      "path": "Solidity/Backend/Transient/TypedSource.lean",
+      "source_sha256": "4c03bcd8e6a68aac5ecba8421b589fb1ec84d661c779454ea91d95f90d64e196",
+      "line": 10,
+      "excerpt": "structure BoolSlot (E : Source.Env) where\n  path : Source.SPath\n  typed : E.cellTy path=.bool\n  transient : E.transientRoot path=true\n  key : Word",
+      "excerpt_sha256": "9a7743a69a548c88d1372a3aa3c0920b827bb4fdaa32c1db058e59365997925e",
+      "inhabitance": "not-checked"
+    },
+    {
+      "path": "Solidity/Frontend/Yul/ScopedParse.lean",
+      "source_sha256": "1719552d16e176916bf61495565786f68c3fafa6cd73f90489da7ae982ae67c8",
+      "line": 10,
+      "excerpt": "structure Parsed {X} (scope : Scope X) (tier : Tier) (outside localNames : List String)\n    (src : Bytes) where\n  parsed : AssemblyParse src\n  prepared : Prepared scope tier outside localNames parsed.body",
+      "excerpt_sha256": "32a0f5cd2dc21f47d59d7335be93858e590a737a2cd444db38e07e1157a9f0ac",
+      "inhabitance": "not-checked"
+    },
+    {
+      "path": "Solidity/Yul/ScopedSyntax.lean",
+      "source_sha256": "5532aecf9c3ca54a8d8e17b0db9a546becac6f6a48297ced6ceb19d8ea14404a",
+      "line": 21,
+      "excerpt": "structure Prepared {X} (scope : Scope X) (tier : Tier) (outside localNames : List String)\n    (body : Syn (.list .yulStmt)) where\n  shape : body.prec = true\n  finalNames : List String\n  declarations : DeclarationScope.BlockD outside [] body finalNames\n  placement : Placement.Derivation Placement.rootContext body\n  occurrences : OccurrenceCheck.D localNames false body\n  typing : ScopedBlockTyping.BlockD scope ClosedSyntax.rootEnv ClosedSyntax.rootControl body\n  policy : Policy.StmtP tier typing.code",
+      "excerpt_sha256": "9e2b3b9f7ea0bc1579f8bcc0f77dd1cc63bac3e422e5ad7b71cfa3c8d7a1eb27",
+      "inhabitance": "not-checked"
+    },
+    {
+      "path": "Solidity/Evm/MemorySource.lean",
+      "source_sha256": "0c843eaf5933df26cfc09d9d969c8975936b2e0ae51a37659874a5fc70a5dcfd",
+      "line": 26,
+      "excerpt": "structure StateRepr (L b frame : Nat) {Γ : Ctx} (F : Frag Γ)\n    (σ : State C Γ) (base : Nat → Fin W) (m : Machine) : Prop where\n  core : Sim C L b F σ m\n  heap : HeapRepr σ.heap base frame m\n  pointers : PointerRepr σ base b m\n  locals : b + Γ.length ≤ frame\n  structs : StructHeapRepr σ.heap base frame m\n  separated : StructArraySeparated σ.heap base\n  refs : RefFieldsRepr σ.heap base m",
+      "excerpt_sha256": "f35a574130716a04e69a1085a27b019b63830a9cbdcd3e0098560c8408bcf9e5",
+      "inhabitance": "not-checked"
+    },
+    {
+      "path": "Solidity/Backend/LabelExec/Fragment.lean",
+      "source_sha256": "313ff9222e86041080e8288b34e8543e8516e6a34c5ebea42642875ca536ad34",
+      "line": 42,
+      "excerpt": "inductive InstrShape (i : Instr) (input output : Nat) : Prop where\n  | mk (consumed produced suffix : Nat)\n      (row : arity i = some (consumed,produced))\n      (input_eq : input = consumed + suffix)\n      (output_eq : output = produced + suffix) : InstrShape i input output",
+      "excerpt_sha256": "66a3f50a17b921865ec154359484b7d455dcb4f99f7a55d2fbbaea771066debf",
+      "inhabitance": "not-checked"
+    },
+    {
+      "path": "Solidity/Backend/LabelExec/Fragment.lean",
+      "source_sha256": "313ff9222e86041080e8288b34e8543e8516e6a34c5ebea42642875ca536ad34",
+      "line": 61,
+      "excerpt": "inductive BlockShape : Block → Nat → Nat → Prop where\n  | code {n m : Nat} (p : Code n m) : BlockShape (.code p.instructions) n m\n  | seq {a b : Block} {n m k : Nat}\n      (left : BlockShape a n m) (right : BlockShape b m k) : BlockShape (.seq a b) n k\n  | ite {n m : Nat} {cond : Code n (n+1)} {thn els : Block}\n      (left : BlockShape thn n m) (right : BlockShape els n m)\n      (testCapacity : n+2 ≤ 1024) : BlockShape (.ite cond.instructions thn els) n m\n  | loop {n : Nat} {cond : Code n (n+1)} {body : Block}\n      (bodyShape : BlockShape body n n) (testCapacity : n+2 ≤ 1024) :\n      BlockShape (.loop cond.instructions body) n n",
+      "excerpt_sha256": "cdd3bf1a745c79822edd1678b737b0d45a155733df110f59ac5fdb38fdb0714e",
+      "inhabitance": "not-checked"
+    }
+  ],
+  "declarations": [
+    {
+      "name": "Solidity.Backend.Transient.write_actual",
+      "path": "Solidity/Backend/Transient/TypedSource.lean",
+      "signature_sha256": "e492ba39d1e893d48542a33675516e510e7d043f4a5b157e457bda987cca30ea",
+      "status": "source-inspection-only",
+      "simultaneous_witness": "pending",
+      "notes": {
+        "global_context": [],
+        "per_input": [
+          "slot : BoolSlot E",
+          "normal : F.static=false",
+          "s : Source.EMState E Γ"
+        ],
+        "hidden_bundle": [
+          "BoolSlot.path",
+          "BoolSlot.typed : E.cellTy path=.bool",
+          "BoolSlot.transient : E.transientRoot path=true",
+          "BoolSlot.key"
+        ],
+        "boundary": "The Type-valued slot carries selected-layout proof obligations. A globally inhabited Slot type, even if later proved, would not establish one matching E, F, and s."
+      }
+    },
+    {
+      "name": "Solidity.Yul.ScopedSyntax.Parsed.complete",
+      "path": "Solidity/Frontend/Yul/ScopedParse.lean",
+      "signature_sha256": "8ce5a44ebd90a5391e1ee4f379914b4210d95bb9166d8b2b330973e2451e34be",
+      "status": "source-inspection-only",
+      "simultaneous_witness": "pending",
+      "notes": {
+        "global_context": [],
+        "per_input": [
+          "p : @Parsed X scope tier outside localNames src"
+        ],
+        "hidden_bundle": [
+          "Parsed.parsed : AssemblyParse src",
+          "Parsed.prepared : Prepared scope tier outside localNames parsed.body",
+          "Prepared.shape",
+          "Prepared.declarations",
+          "Prepared.placement",
+          "Prepared.occurrences",
+          "Prepared.typing",
+          "Prepared.policy"
+        ],
+        "boundary": "One certificate bundles parser success and preparation for the same body. Source binder types for X/scope/tier/outside/localNames/src are inferred, not textually given."
+      }
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.UnsignedDiv.division_packet",
+      "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Composition.lean",
+      "signature_sha256": "a781bec26de9c1a184da4862b719d993982caed74a2ed9d32367c65534c4b16e",
+      "status": "source-inspection-only",
+      "simultaneous_witness": "pending",
+      "notes": {
+        "global_context": [
+          "G : Source.Glob E"
+        ],
+        "per_input": [
+          "input : Evm.Memory.StateRepr L b frame F σ base m",
+          "hd : σ.env.2.1.val ≠ 0"
+        ],
+        "hidden_bundle": [
+          "StateRepr.core",
+          "StateRepr.heap",
+          "StateRepr.pointers",
+          "StateRepr.locals",
+          "StateRepr.structs",
+          "StateRepr.separated",
+          "StateRepr.refs"
+        ],
+        "boundary": "Inherited variables define C/Γ/E/Δ/b/L/frame/F/σ/base/m. The nonzero divisor must belong to the SAME σ in StateRepr. Neither separate structure inhabitance nor an arbitrary nonzero integer supplies the joint witness."
+      }
+    },
+    {
+      "name": "Solidity.Backend.StructuredFlow.ConditionalSourceCompiler.correct",
+      "path": "Solidity/Backend/StructuredFlow/ConditionalSourceCompiler.lean",
+      "signature_sha256": "9ffe62ffba0803bcb305523dead0c10be4ab13e202781c52bf85ee57967025c6",
+      "status": "source-inspection-only",
+      "simultaneous_witness": "pending",
+      "notes": {
+        "global_context": [
+          "G : Source.Glob E",
+          "R : typed source-to-target relation parameter"
+        ],
+        "per_input": [
+          "aligned : m.Related R source.1 target.env",
+          "mapCI",
+          "mapCA",
+          "mapI",
+          "mapA",
+          "mapJ",
+          "mapB",
+          "entry : Evm.Sim C L base F₀ target machine",
+          "checked : Evm.inFragP ... = some F₁",
+          "capacity : L + Evm.Prog.pushes ... ≤ Evm.Lmax"
+        ],
+        "quantified_laws": [
+          "boolReflect : ∀ v b, R .bool (.val .bool) v b → v=.bool b"
+        ],
+        "boundary": "G is execution-context data, not a hash-law premise. Supplying R is not proving R; boolReflect is a separate law. All maps, alignment, compilation success and capacity must agree on one concrete source/target/machine tuple."
+      }
+    },
+    {
+      "name": "Solidity.Yul.RawIntegerInitialization.correct",
+      "path": "Solidity/Yul/RawIntegerInitialization.lean",
+      "signature_sha256": "ae210b507c69d608c4306ffb8918674133e966c592ddb79c1cd2a135aab6c84f",
+      "status": "source-inspection-only",
+      "simultaneous_witness": "pending",
+      "notes": {
+        "global_context": [
+          "glob : Solidity.Source.Glob env (inside conclusion-level ∀)"
+        ],
+        "per_input": [
+          "inRange : ty.lo ≤ value ∧ value ≤ ty.hi (inside conclusion-level ∀)",
+          "state : Snapshot env types (inside conclusion-level ∀)"
+        ],
+        "boundary": "There are zero written header binders; all quantified arguments are in the unchanged result_source. This is not a hypothesis-free statement. Do not discard inRange or infer it from separate IntTy/Int inhabitants."
+      }
+    },
+    {
+      "name": "Solidity.Yul.Adapters.AllocatedComputedFrame.allocated_supported",
+      "path": "Solidity/Yul/Adapters/AllocatedComputedFrame.lean",
+      "signature_sha256": "b08e6886f38d50ee9f6cb934d6d2fb9a0d6264b79a716d5a4fdd4d87703be285",
+      "status": "source-inspection-only",
+      "simultaneous_witness": "pending",
+      "notes": {
+        "global_context": [],
+        "per_input": [
+          "h : Source.Heap E.layout",
+          "data : Source.Data E.layout τ",
+          "new : InventoryTypeSupported E τ"
+        ],
+        "quantified_laws": [
+          "old : ∀ a σ d, h.get a=some ⟨σ,d⟩ → InventoryTypeSupported E σ"
+        ],
+        "boundary": "old is a quantified invariant of the selected INPUT heap. The separate ∀/→ after the result colon describes the allocated heap and is a conclusion, not an extra assumed input law."
+      }
+    },
+    {
+      "name": "Solidity.Yul.Adapters.P6CalldataHash.source_target_clipped_hash",
+      "path": "Solidity/Yul/Adapters/P6CalldataHash.lean",
+      "signature_sha256": "e34536a97fc1cd7729ee80ce34e3c1bc75142556d1a29f2ab70c94034fb602b4",
+      "status": "source-inspection-only",
+      "simultaneous_witness": "pending",
+      "notes": {
+        "global_context": [
+          "G : Source.Glob E"
+        ],
+        "per_input": [
+          "localValue",
+          "length",
+          "fixed : G.fixed.evm.keccak selectedBytes = Roadmap.Evm.keccakWord selectedBytes",
+          "μ : FrameMem C Γ",
+          "destination : ByteSpan μ.capacity"
+        ],
+        "boundary": "fixed is one per-input hash query, not equality of the global hash functions on all inputs. Keep all result-level lets. The nested ∀ H, MemOK E H s → MemOK E H after is a preservation conclusion, not an assumed precondition."
+      }
+    },
+    {
+      "name": "Solidity.Backend.LabelExec.InstrShape.fetched_step",
+      "path": "Solidity/Backend/LabelExec/FragmentSound.lean",
+      "signature_sha256": "3135df007a4fda8ad5a52a17eda4f93028934e8d823069626688763129d33e4c",
+      "status": "source-inspection-only",
+      "simultaneous_witness": "pending",
+      "notes": {
+        "global_context": [],
+        "per_input": [
+          "shape : InstrShape i n m",
+          "stack : Vector Scalar.Word n",
+          "pre",
+          "post"
+        ],
+        "hidden_bundle": [
+          "InstrShape.row",
+          "InstrShape.input_eq",
+          "InstrShape.output_eq"
+        ],
+        "boundary": "The same i/n/m and suffix shape constrain the dependent input Vector and the actual fetched successor; separate shape/vector inhabitants do not establish the combined input."
+      }
+    },
+    {
+      "name": "Solidity.Backend.LabelExec.BlockShape.control_capacity",
+      "path": "Solidity/Backend/LabelExec/FragmentSound.lean",
+      "signature_sha256": "ac83c2baf6c27a7314dcd3eecea8bcf187c125ae5e0d35dcb54412b202cd2d0a",
+      "status": "source-inspection-only",
+      "simultaneous_witness": "pending",
+      "notes": {
+        "global_context": [],
+        "per_input": [
+          "shape : BlockShape b n m"
+        ],
+        "hidden_bundle": [
+          "BlockShape.code",
+          "BlockShape.seq",
+          "BlockShape.ite.testCapacity",
+          "BlockShape.loop.testCapacity"
+        ],
+        "boundary": "The unchanged match conclusion requires n+2≤1024 only for ite/loop; the non-control arms conclude True. Preserve that case boundary; it neither proves universal capacity nor by itself proves the entire statement vacuous."
+      }
+    },
+    {
+      "name": "Solidity.Yul.ScopedSyntax.parse_iff",
+      "path": "Solidity/Frontend/Yul/ScopedParse.lean",
+      "signature_sha256": "26aed22029ec93cdd5c295af2548d28b463a7a529ef4d309e2e344125186a3ea",
+      "status": "source-inspection-only",
+      "simultaneous_witness": "pending",
+      "notes": {
+        "global_context": [],
+        "per_input": [
+          "scope",
+          "tier",
+          "outside",
+          "localNames",
+          "src"
+        ],
+        "boundary": "Nonempty (Parsed ...) occurs on the conclusion side of ↔. It does not supply an inhabited parsed certificate or a supported successful input, and the equivalence alone does not discharge totality."
+      }
+    }
+  ]
+}

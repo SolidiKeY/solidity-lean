@@ -25,7 +25,7 @@ function enumerate(directory,component){
 }
 function scan(extension,server,inventoryPath=join(repo,'docs/dafny-editor-features.json')){
   const testFiles=[...enumerate(extension,'extension'),...enumerate(server,'server')];
-  const inventory=JSON.parse(fs.readFileSync(inventoryPath,'utf8'));
+  const inventory=require('./inventory.cjs').loadInventory(inventoryPath);
   for(const file of testFiles){
     file.featureIds=inventory.features.filter(f=>f.upstream.some(s=>s.path===file.path&&s.repository===`dafny-lang/${file.component==='server'?'dafny':'ide-vscode'}`)).map(f=>f.id);
     for(const c of file.cases)c.reason=file.featureIds.length?'Related feature family discovered; this individual upstream test has not been ported and run against both targets.':'Unmapped reference test; inspect and add a targeted scenario before claiming coverage.';
@@ -36,7 +36,7 @@ function scan(extension,server,inventoryPath=join(repo,'docs/dafny-editor-featur
     counts:{testFiles:testFiles.length,registrationSites:testFiles.reduce((n,f)=>n+f.cases.length,0),unmappedFiles:testFiles.filter(f=>!f.featureIds.length).length},
     fileSetSha256:digest(JSON.stringify(testFiles.map(f=>[f.component,f.path,f.sha256]))),testFiles};
 }
-function validate(audit){
+function validateIndex(audit){
   const errors=[];
   if(audit.schemaVersion!==1||audit.fullParityEstablished!==false)errors.push('invalid audit schema/parity claim');
   if(!audit.testFiles?.length)return [...errors,'empty audit'];
@@ -50,13 +50,18 @@ function validate(audit){
       if(c.status!=='unexamined'||c.runtimeEvidence.length)errors.push('source registration cannot certify a runtime pass');
     }
   }
-  const inventory=JSON.parse(fs.readFileSync(join(repo,'docs/dafny-editor-features.json'),'utf8'));
+  for(const component of ['extension','server'])if(!/^[a-f0-9]{40}$/.test(audit.upstream?.[component]||''))errors.push('invalid audit source pin '+component);
+  return errors;
+}
+function validate(audit){
+  const errors=validateIndex(audit),inventory=require('./inventory.cjs').loadInventory();
   for(const component of ['extension','server'])if(audit.upstream?.[component]!==inventory.upstream[component].commit)errors.push('source pin drift');
   return errors;
 }
 function main(args=process.argv.slice(2)){
   if(args[0]==='--check'){
-    const audit=JSON.parse(fs.readFileSync(output,'utf8')),errors=validate(audit);if(errors.length)throw new Error(errors.join('\n'));
+    const audit=JSON.parse(fs.readFileSync(output,'utf8')),checked=require('./inventory.cjs').checkOffline(),errors=checked.mode==='full'?validate(audit):validateIndex(audit);if(errors.length)throw new Error(errors.join('\n'));
+    if(checked.mode==='digest-only'){process.stdout.write('Digest-only: committed audit index structure and inventory/restore digest checked; full inventory pin reconciliation NOT run (H44 bundle absent). No runtime/parity pass.\n');return;}
     process.stdout.write(`Audited ${audit.counts.testFiles} test files and ${audit.counts.registrationSites} registration sites; unported cases remain unexamined.\n`);return;
   }
   const value=k=>{const i=args.indexOf(k);if(i<0||!args[i+1])throw new Error('Required '+k);return resolve(args[i+1]);};
@@ -65,5 +70,5 @@ function main(args=process.argv.slice(2)){
   else if(args.includes('--write'))fs.writeFileSync(output,JSON.stringify(actual,null,2)+'\n');
   else process.stdout.write(JSON.stringify(actual,null,2)+'\n');
 }
-module.exports={enumerate,scan,validate};
+module.exports={enumerate,scan,validate,validateIndex};
 if(require.main===module)try{main();}catch(e){process.stderr.write(e.stack+'\n');process.exitCode=1;}

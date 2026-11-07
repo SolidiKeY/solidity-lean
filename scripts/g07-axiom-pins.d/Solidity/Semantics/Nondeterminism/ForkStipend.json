@@ -1,0 +1,13 @@
+{
+ "Solidity/Semantics/Nondeterminism/ForkStipend.lean:Solidity.Semantics.Nondeterminism.ForkSpec.noStipend_rejects_empty": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/ForkStipend.lean:Solidity.Semantics.Nondeterminism.ForkSpec.osaka_fits_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/ForkStipend.lean:Solidity.Semantics.Nondeterminism.ForkSpec.osaka_stipendRule": [
+  "propext"
+ ]
+}

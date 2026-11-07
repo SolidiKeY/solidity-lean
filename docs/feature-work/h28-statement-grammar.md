@@ -1,8 +1,10 @@
 # H28 statement grammar — work in progress
 
 Pinned base: `6f3eedf0788ee1f8a3bcf230558c712ecdca04d5`.
-Branch: `codex/solidity-h28-sol-20261104/statement-grammar`.
-Repository: `/workspace/solidity-lean`.
+Branch: `codex/solidity-h28-sol-20261104/statement-grammar` (Codex, to checkpoint X
+and the e6849d3b rebase); since 2026-11-05 the moved lane
+`cloud/moved4-20261105/statement-grammar`, started from master
+`aec9adf1ad8666a7e591e42a537069a93dc858cb` (see "Moved lane" at the end).
 Exclusive scope is the StatementGrammarH28 namespace, this document and
 `tests/h28-sol/statement-grammar/`. Upstream inputs are unchanged.
 Local registration is in the namespace's `registration.tsv`; shared roots and
@@ -2069,3 +2071,1201 @@ General compound/item framing, broader true coverage, repository final gates
 and whole-scope acceptance/reviews remain pending. SOL-EU stays excluded and
 SG-CEX-01/02 remain OPEN/REFUTED. Shared generated roots/maps/trust inventories
 remain coordinator-owned.
+
+
+## Moved lane (2026-11-05)
+
+The lane moved from the idle Codex VM to a Claude cloud VM with the same
+scope (handoff `.handoff/statement-grammar.md` on `cloud/moved4-prompts`,
+`997382550989229ccd97f1821365b9a8af1e62aa`). It starts from master
+`aec9adf1ad8666a7e591e42a537069a93dc858cb`, which already contains every
+lane path of Codex head 70845978. The Codex evidence under `/workspace/…`
+and its caches are not reachable from this VM; nothing below cites them.
+Validation is re-run fresh with the Lean MCP server (per-file diagnostics)
+and `./run-lean.sh`.
+
+The Codex lane kept publishing to master in parallel (its checkpoints Y–AE
+below, from `ControlFreePr` to `BlockHeaderBoundary`). Its letters collide
+with this lane's, so this lane's sections are headed "Moved-lane
+checkpoint …". The moved lane builds on the Codex modules where they apply
+(`CatchCoverage`, `CatchListCoverage`, `BlockHeaderBoundary`) and changes
+none of them.
+
+## Moved-lane checkpoint Y: Gate G0 node twin for the fixture observers
+
+The held review finding: the fixture observers evaluated by `decide +kernel`
+in `FixtureControls/Case00..44` still reached an indexed-family `match`.
+Checkpoint T had already moved FixtureData's own four observers to
+`Syn.casesOn` with category-generalising motives, but `optionalBodyCtorsAt`
+read the body through `Syn.nodes` (`Source/Ctor.lean`), a generated
+`match` on `Syn` (Gate G0 condition 1). Source is read-only for this lane.
+
+Repair: `G0Nodes.lean` defines `nodeCtorsAt`, a twin of
+`Syn.nodes ·|>.map Node.ctor` over all 112 `Syn` constructors, by
+`Syn.casesOn (motive := fun _ _ => List Ctor)` with structural recursion
+(the same form as `G0List`), generated mechanically from the `Syn.nodes`
+block so the preorder and constructor names match. The public
+`g0NodeCtors` is linked to the Source observer by
+`g0NodeCtors_eq_nodes : g0NodeCtors s = s.nodes.map Node.ctor` (induction,
+axioms `propext`). `optionalBodyCtorsAt` now reads `g0NodeCtors body`.
+No fixture, statement, required-constructor list or budget (fuel 64, name
+`f`) changed; the observation is equal by the link theorem.
+
+The profile half of the same observer (`statementFixtureCheck` compares
+`u.rejections.isEmpty` with the fixture's `profile`) also reached indexed
+matches: `Syn.rejections = s.nodes.filterMap Node.excl`, with `Syn.excl`,
+`Syn.placeholders` and `isLiteralBase` (finder Y-1, below). `G0Rejections.lean`
+adds their twins (`g0Nodes`, `g0Placeholders`, `g0IsLiteralBase`,
+`g0Rejections`, plus the typed views `g0OptValue`, `identAt`, `litAt`), all by
+`Syn.casesOn` with generalising motives, linked by `g0Nodes_eq`,
+`g0Placeholders_eq`, `g0IsLiteralBase_eq` and `g0Rejections_eq`
+(`g0Rejections s = s.rejections`; axioms `propext`). FixtureData reads
+`(g0Rejections u).isEmpty`; `statementFixtureCheck_profile` states that this
+is the old observation.
+
+Residual, not repaired: an `assembly` node's exclusion still calls Source's
+`isRethrow`, an indexed `match` with string-literal patterns. Lean 4.24
+cannot generate equation lemmas for its matcher ("failed to generate
+equality theorems for `match` expression `isRethrow.match_1`"), and a twin
+could not be linked to it here (a link by exhaustive case analysis on the
+string tests was attempted and abandoned); an unlinked twin was written, proved sound, and
+removed rather than kept without its link. It is evaluated only on
+`assembly` nodes, i.e. on the four accepted assembly fixtures
+(`statementFixture` sources at FixtureData lines ~179–199, one of them the
+canonical rethrow). The producer's `parse` (the system under test,
+read-only here) also matches on indexed syntax. Neither is a Gate G0
+exemption: the held finding is closed for the lane's observers except
+`isRethrow` on those four fixtures.
+
+Checks (Lean MCP, severity error, fresh on this VM): `G0Nodes`,
+`G0Rejections`, `FixtureData`, all 45 `FixtureControls/Case00..44` (each
+closes by `decide +kernel`, axioms `[propext]`; re-run after the rejections
+twin), `tests/…/G0ObserverControls` (`g0_node_ctors_twin_actual_body` and
+`g0_rejections_twin_actual` by `decide +kernel` on the twins only),
+`G0PublicAxioms`, `G0ElaborationAudit` (target list now 20 entries: 15
+private eliminators and 5 result families; the audit asserts only the
+inventory size and logs the terms, so the absence of matchers rests on
+inspection).
+
+Warned refactor: the twins replace `match`-compiled observers by the
+`casesOn` form Gate G0 prescribes. A matched before/after timing was not
+taken on this VM (no `lean` in Bash under the repository settings); it is
+listed as a limitation.
+
+## Moved-lane checkpoint Z: expression-atom conditional framing
+
+Queue item 2 asks for compound framing and nearest-else association outside
+the Boolean fragment, with expression subtrees as read-only atoms and any
+needed expression assumption exposed exactly.
+
+`AtomConditional.lean` exposes the atom premise
+
+    ExprAtomRparen e es a :=
+      ∀ n s, expr (n + a) (locatedInput (es ++ [)]) s) = .ok (e, punctBefore ) s)
+
+(the atom's tokens parse back to exactly `e` before `)`, leaving `)`
+unread, at every fuel of at least `a`). It is proved for Boolean literals and
+identifiers (`bool_atom_rparen`, `ident_atom_rparen`, budget 5) and is
+otherwise a premise: expression parser completeness and SOL-EU stay with the
+expression lanes. `AtomStatements` extends `BooleanStatements` (embedded by
+its first constructor) with `if`/`if-else`/`while`/`do` over atom
+conditions and the empty-header `for`. Proved: header equations
+(`if_atom_prefix`, `while_atom_prefix`, `do_atom_tail`), coverage at every
+excess fuel and framed suffix (`atom_statements_coverage`, budget additive
+in the atom budgets), the precedence contract (`atom_statements_node`),
+nearest else (`atom_statements_nearest_else`) and token uniqueness inside the
+fragment (`atom_statements_token_unique`, from the parser being a function).
+
+`AtomNested.lean` generalises to arbitrary nesting with mutual relations
+`AtomStmt`/`AtomItems` over the existing indexed syntax: blocks of any
+width and depth whose items are atom statements, empty return, break and
+continue in their intrinsic loop contexts, `return e;` (premise
+`ExprAtomSemi`, plus the token side condition `NoSemiHead`: nonempty and not
+starting with `;`), `unchecked { … }` items only in an unchecked-free context
+(the type index forbids nesting; the actual parser refusal is checked), the
+atom conditionals, and `for (; c; u)` with an empty initialiser and optional
+atom condition and update (`OptAtom`, `for_atom_step`; initialiser statements
+are not covered). Coverage is proved by mutual structural recursion
+(`atom_stmt_coverage`, `atom_items_at`), with budgets computed from the
+witness (`max (d + 7) b` per item, `+2` per unchecked wrapper) and loop
+fuel from the actual token length (`atom_items_count_le`); no successful
+parse is assumed. Also: block and unchecked coverage, the precedence
+contract and nearest else, token uniqueness and prefix/suffix uniqueness
+(`atom_stmt_prefix_unique`). Control-leaf lists embed
+(`atom_items_of_leaf_items`). All axioms are within `propext`/`Quot.sound`.
+
+Controls (`tests/…/AtomConditionalControls.lean`,
+`AtomNestedControls.lean`): every constructor of `AtomStatements`,
+`AtomStmt`, `AtomItems` and `OptAtom` inhabited (all four `for` header
+shapes, the last also by a kernel `rfl` at fuel 17); identifier
+conditions in every position; dangling else `if (x) if (y) {} else {}`
+parsed to the inner association (kernel `rfl` at fuel 18) and unique; the
+outer association excluded by the contract; closed loops preserving an
+`else` suffix; a block closing an open if before a following `else`;
+arbitrary width (n × `return x;`, constant budget) and arbitrary depth;
+a three-item block with `while`/`if-else`/`break`/`continue`/`return z;`/
+`unchecked`. Negative: the atom premise names the parsed expression
+(`ident "y"` refused for token `x`), refuses extra tokens and an
+insufficient budget; `NoSemiHead` refuses `[]` and `[;]`.
+
+"Arbitrary" conditions means arbitrary expressions satisfying the exposed
+premise; only single-token atoms (identifiers, Boolean literals) are shown to
+satisfy it here.
+
+Not claimed: yield/`Derives` uniqueness for the atom fragments (it needs
+the atoms' yields, i.e. a printer premise), `for` initialisers,
+simple/expression statements, emit/revert/try/
+assembly, and any expression-level fact beyond the stated premises.
+
+### Reviews of checkpoints Y and Z
+
+Separate read-only finder and skeptic reviews (no Lean server, no builds) of
+commits `cffc480d..5694e8e0`. Skeptic verdict PASS-with-fixes. Confirmed
+findings and their fixes:
+
+- Y-1 (finder): `statementFixtureCheck` kernel-evaluated `u.rejections`
+  (indexed matches in `Syn.nodes`/`Syn.excl`); the doc misnamed it as
+  producer code. Fixed by `G0Rejections.lean` (above); the `isRethrow`
+  residual is recorded.
+- Z-1 (both): "every constructor inhabited" was false for `AtomStmt.forLoop`
+  and `AtomStmt.doLoop`. Fixed: `for_do_relation`, plus the new `forAtom`
+  shapes.
+- Z-2 (both): `simp_all` in `atom_items_of_leaf_items`. Replaced by
+  `simp only`, with the statement restated as a budget bound `b ≤ 7`.
+- Y-2 (both): the G0 control kernel-evaluated `Syn.nodes` in a second
+  conjunct. Dropped; the link theorem covers it.
+- Y-3 (skeptic): eliminator count in the doc. Corrected above.
+- Z-3 (both): misleading docstring on `loopBody` and the name
+  `outer_block_actual_parse` (an instance, not a computed parse). Fixed
+  (`outer_block_at_fuel_32`); kernel-computed parses are
+  `ident_nearest_actual_parse` and `for_header_both_kernel`.
+- Suspected, addressed in wording: "arbitrary" conditions (only single-token
+  atoms are shown to satisfy the premise); "above `a`" → "at least `a`";
+  the parser's own matches are not a G0 exemption.
+
+### Round-2 reviews (for headers, rejections twin)
+
+Finder and skeptic, read-only, on `a850a62e..290f1d78`. Finder: no
+confirmed findings. It compared all 112 `nodesAt` and `placeholdersAt` cases
+with Source by script, hand-checked every exclusion and the `for` token
+list and budgets, and confirmed that no indexed `match` beyond the documented
+`isRethrow` and `parse` is reached. Skeptic: PASS-with-fixes, wording only.
+The closure claim must name the `isRethrow` exception and its four assembly
+fixtures, and "cannot be linked" becomes "could not be linked here". Both
+were fixed in `20dd3435`. A note left as is: `forAtom .none .none` and
+`forLoop` describe the same tree. That is harmless, because uniqueness is
+about trees.
+
+## Moved-lane handoff (2026-11-05)
+
+Queue accounting (handoff `.handoff/statement-grammar.md`):
+
+| Item | State |
+| --- | --- |
+| 1. Gate G0 repair of the fixture observers | Done for every lane observer except Source's `isRethrow` on the four accepted assembly fixtures, which could not be linked (checkpoint Y, `G0Nodes`, `G0Rejections`). All 45 cases still close by `decide +kernel`. |
+| 2. Compound/item framing and nearest else outside the proved fragment | Extended to arbitrary expression conditions under an exposed atom premise, arbitrarily nested blocks, `return e;`, `unchecked` items and `for (; c; u)` (checkpoint Z). Still open: `for` initialisers, simple/expression statements, emit/revert/try/assembly bodies. |
+| 3. Parser coverage with syntax-derived fuel | Covered for the `AtomStmt`/`AtomItems` fragment by mutual structural recursion. Budgets are computed from the witness, with loop fuel from the token length. Same open constructors as item 2. |
+| 4. Positive uniqueness independent of SOL-EU | Token and prefix uniqueness inside the atom fragments, from the parser being a function. Yield/`Derives` uniqueness for the atom fragments is not proved, because it needs a printer premise on the atoms. |
+| 5. SG-CEX-01/02 | Unchanged: OPEN/REFUTED. |
+| 6. Full repository gates | See the CLOUD-RESULT of this session: `./run-lean.sh`, `register.sh --check`, `check-orphans`, doc paths, trust, axiom pins. |
+| 7. Acceptance, reviews, handoff | Two rounds of finder and skeptic reviews, recorded above. This section is the handoff. |
+
+Gate notes. `check-doc-paths.sh` fails on one reference that predates this
+lane (`docs/feature-work/after-roadmap-va1.md` cites a Mathlib test path),
+and the lane adds no failure. `check-axiom-pins.mjs` reports drift only for
+other lanes' pins: the lane has no `#guard_msgs` pins, and none of the
+reported lines is in `StatementGrammarH28`. `check-trust.sh`: 0 findings.
+
+Full gate on `e08557db` (run after a container restart, Lake 4.24.0):
+`./run-lean.sh` printed "Build completed successfully (5828 jobs)", with no
+Lean errors (wall time 54 min, warm partial cache). It then exited 1 in its
+last step, `scripts/check-solkey.sh` (`solkeycheck: 167 mismatch(es)`,
+unknown tokens and sorts and unannotated reads in solkey storage taclets).
+The branch changes nothing that step reads: its diff from
+`aec9adf1` touches only `Solidity/Frontend/StatementGrammarH28/**`,
+`tests/h28-sol/statement-grammar/**`, this document, the module map and the
+generated root. The failure predates this lane and belongs to the solkey
+annotation owners.
+
+## Moved-lane checkpoint AA: simple statements and `for` initialisers
+
+This checkpoint follows the coordinator's follow-up order (2026-11-06), item 1.
+`AtomSimple.lean` exposes the premise on the existing `simple` parser:
+
+    SimpleAtom x ss a :=
+      ∀ n s, simple (n + a) (locatedInput (ss ++ [;]) s) = .ok (x, punctBefore ; s)
+
+It is proved for identifier expression statements (`ident_simple_atom`,
+budget 6, by `rfl`; the parser's `declHead` attempt fails and backtracks).
+Otherwise it is a premise, as with the expression atoms. The first token
+must satisfy `simpleHead`: it is not a statement keyword, `else`,
+`unchecked`, `{`, `}`, `;` or the identifier `revert`. This is a
+conservative set, not an exact one. `else` reaches `simpleStmt` but fails
+there, and `;` is excluded for the `for` header's `eat ;`. `revert` followed
+by a non-identifier also reaches `simpleStmt`.
+
+The following are proved:
+
+- `stmt_simple_dispatch`: a `simpleHead` token reaches `simpleStmt`. It is
+  proved by cases on the token. The string test on `revert` is discharged
+  by unfolding the matcher `stmt.match_7` and splitting its `dite`.
+- `simple_stmt_coverage`.
+- `simple_item_step`: the block-loop step.
+- `simple_no_else` and `simple_eat_semi`: the frame and header facts.
+- `for_header_prefix`, and in `AtomNested`, `for_init_step`.
+
+`AtomStmt` gains two constructors. `simpleS` has budget `a + 1`. `forInit`
+is `for (init; c; u) body` with optional atom condition and update, and has
+budget `d + a + ca + va + 1`. Coverage, the item step, the no-else lemma,
+nearest else, and token and prefix uniqueness extend to both.
+
+Controls (`AtomNestedControls`) cover:
+
+- a block `{ x; for (y; z; ) { w; } }` at derived budget 33, with coverage
+  and token uniqueness;
+- a kernel `rfl` parse of `x;` at fuel 13;
+- refusals of `simpleHead` on `if`, `else`, `unchecked`, `{`, `}`, `;`,
+  `revert` and the empty list;
+- the premise naming the parsed tree.
+
+A kernel `rfl` on the whole block exceeded the elaboration heartbeat budget.
+It was dropped, not given more heartbeats.
+
+Not claimed: any `simple` parse beyond the premise (declarations, tuple
+declarations and compound expressions are covered only through it), and
+the contextual `revert`-headed simple statements.
+
+## Moved-lane checkpoint AB: `emit` and `revert`; `try` not covered
+
+This is coordinator item 2. `AtomCall.lean` exposes two premises:
+
+- `PathAtom e ps`: `pathExpr` reads `ps` as `e` and stops at the
+  argument list's `(`.
+- `ArgsAtom args as b`: `callArgs` reads `as` as `args` before `;`.
+
+They are proved for identifiers (`ident_path_atom`) and for the empty
+positional list (`empty_args_atom`, budget 1). The steps are `emit_step`
+and `revert_step`. For `revert`, the dispatcher's string test on the
+literal reduces, and the path must start with an identifier, which is
+exactly the dispatcher's own condition.
+
+`AtomStmt` gains `emitS` and `revertS`, both at budget `b`. Each takes the
+precedence contract `e.isPathExpr = true` as a premise, because
+`Syn.precNode` of `emit` and `revert` is exactly that.
+
+Controls cover:
+
+- `{ emit E(); revert Err(); }` at budget 8, with coverage;
+- a kernel `rfl` parse of `revert Err();`;
+- contextual `revert;` and `revert();`, which reach `simpleStmt` and are
+  read as expression statements;
+- the precedence refusal of a non-path event.
+
+`try` is not covered. Its expression is followed by `{`, and the expression
+parser's call-options check looks past that brace. Probes show that `f {}`
+and `f() {}` both parse, leaving `{ }`. With a variable suffix, neither the identifier
+instance nor the call instance closes by `rfl`, because `postLoop` looks
+two tokens past `{` for `ident :`. A premise with that lookahead frame
+would probably work, since no statement starts with `ident :`. The real
+blocker is the catch-clause loop, which needs a "no following `catch`"
+frame that the statement-level frame does not carry. `try` was therefore
+not completed. The partial code was removed, and `try` stays in
+limitations.
+
+## Moved-lane checkpoint AC: yield and `Derives` uniqueness for the atom-condition fragment
+
+This is coordinator item 3. The printer premise can be stated without a scope
+decision:
+
+    AtomYield c cs := ∀ L, c.yield L = some ([cs], L)
+
+It says the existing printer yields exactly `cs` for `c`, for every layout
+state. It is proved for identifiers and Boolean literals.
+`AtomYields` (`AtomYield.lean`) mirrors `AtomStatements` with these
+premises; Boolean witnesses embed. The following are proved:
+
+- `atom_yields_yield`: the tree yields exactly its tokens.
+- `atom_yields_derives_iff`: `x.Derives w ↔ w = ts`.
+- `atom_statements_yield_unique`: two trees that have parse and print
+  witnesses and derive the same words are equal.
+
+Controls (`AtomConditionalControls`) cover:
+
+- the dangling-else tree `if (x) if (y) {} else {}`: its print witness, its
+  derivation, and that it is the only fragment tree deriving those words;
+- the wrong association printing the same tokens (`rfl`), which is excluded
+  by the precedence contract and not by the printer;
+- the printer premise naming the printed tokens.
+
+Not done: the same for the mutual `AtomStmt`/`AtomItems` fragment. It would
+need printer premises for `simple`, path and argument atoms, a yield
+relation parallel to the mutual pair, and a yield proof for blocks and
+lists. No scope decision is needed; this is left as further work.
+
+### Reviews of checkpoints AA–AB
+
+The skeptic gave PASS-with-fixes and confirmed:
+
+- the premises are confined to the sub-parsers `simple`, `pathExpr` and
+  `callArgs`, never `stmt`, `item` or `block`;
+- no earlier theorem statement changed;
+- imports are acyclic.
+
+Fixes:
+
+- The `simpleHead` set is described as conservative, not exact.
+- The `try` reason is softened, with the catch frame named as the blocker.
+- The module-map row for `AtomNested` was stale and has been updated.
+
+The finder found no soundness or coverage bugs. It confirmed the same
+`simpleHead` wording issue, fixed in the Lean docstring as well. It also
+found that `revert_needs_identifier` checked only token consumption; the
+control now checks the root constructors through the G0 twin
+(`simpleStmt`, `exprStmt`, `ident` or `call`). Two premises are noted as
+redundant but harmless, and are kept as stated: the `(` head of
+`emitS`/`revertS` follows from `ArgsAtom`, and `isPathExpr` follows from
+`PathAtom`.
+
+Final gate on `6bcbf5d7`. `./run-lean.sh`: "Build completed successfully
+(5831 jobs)". The new modules were replayed from artifacts whose Lake traces
+match the current sources. The script exits 1 only in the same solkey step,
+which predates this lane (`167 mismatch(es)`). `check-orphans`:
+5815 reachable, 0 orphaned. `check-trust`: 0 findings. Axiom pins: no lane
+entries. Doc paths: the same reference that predates this lane, and nothing
+new.
+## Checkpoint Y: global atom continuation-token absence
+
+H55-H58 file reservations are honored: all edits stay in the original exclusive
+statement-grammar paths; no reserved Yul file or producer was edited and no HOLD
+was entered. Existing frozen goal and original base are retained. Work starts
+from integrated master `70845978ab616a63b13d0dee8b31b28893ccf591`.
+
+ControlFreePr, ControlFreeAtoms and SyntaxControlFree prove that successful
+expression/type/argument/parameter/declaration/simple yields contain no actual
+else, catch or unchecked keyword tokens anywhere, strengthening the earlier
+head-only fact. The existing boundaryToken predicate and SemiFreeCat footprint
+are reused unchanged. The universal induction covers all 42 atom constructors
+and recursive nil/cons/none/some wrappers over existing Syn. Only successful
+actual yields and the existing category footprint are premises; no successful
+parse, expression uniqueness or new source/precedence restriction is assumed.
+The three keywords are excluded throughout every flattened token segment,
+including arbitrary expression subtrees and successful layout choices.
+
+ControlFree is a token-list Prop relation with inhabited empty/token/append
+constructors, not an untyped AST. Literal fragment guards and function-type
+attribute arrangements are the existing printer computations. The generic
+keyword lemma states its exact boundaryToken=false side condition, discharged
+for every scalar producer keyword. Punctuation is neutral, including semicolon;
+this distinguishes the new property from SemiFree. Existing semicolon proofs,
+producers, interfaces and budgets were not refactored or changed. New indexed
+syntax induction constructs proofs only; new computational controls match only
+on parameter-only yield options, never on Syn.
+
+ControlFreeControls enumerates actual successful nonempty yields for all 42
+constructors with exact Ctor inventories, all 5 literal classes, four generic
+list/option wrappers, both mapping-key forms, optional array/location/name/init
+fields, empty arguments/tuples and both function-attribute orders. Real else,
+catch and unchecked tokens are negative controls. Identifiers with those
+spellings and fragmented literal payload bytes remain data. An actual inhabited
+if/else yield contains a control keyword and is rejected by ControlFree; invalid
+fragment/layout choices remain refused. This proves token absence, not lexical
+validity, general statement segmentation, parser completeness or whole-language
+uniqueness. No new external solc fixture or compiler correctness claim is made.
+
+The committed audit inventory is self-contained:
+
+| Committed source | Explicit audit entries |
+|---|---:|
+| [ControlFreePr.lean](../../Solidity/Frontend/StatementGrammarH28/ControlFreePr.lean) | 21 source theorems |
+| [ControlFreeAtoms.lean](../../Solidity/Frontend/StatementGrammarH28/ControlFreeAtoms.lean) | 18 source theorems |
+| [SyntaxControlFree.lean](../../Solidity/Frontend/StatementGrammarH28/SyntaxControlFree.lean) | 4 source theorems |
+| `ControlFree.empty`, `.token`, `.append` | 3 relation constructors |
+| `ControlFreeParts` | 1 predicate definition |
+| [ControlFreeControls.lean](../../tests/h28-sol/statement-grammar/ControlFreeControls.lean) | 23 control theorems |
+| Total | 70 constants: 43 source theorems, 3 constructors, 1 definition, 23 control theorems |
+
+[ControlFreePublicAxioms.lean](../../tests/h28-sol/statement-grammar/ControlFreePublicAxioms.lean)
+lists every source signature and axiom query. The control file lists its own
+axiom queries and kernel-checked constructor inventories: 29 expression,
+5 type-name, 2 call-argument, 1 named-argument, 1 parameter, 1 variable-declaration
+and 3 simple-statement constructors, totaling 42. Nil, cons, none and some are
+four additional generic closure cases. These committed declarations and tests
+are the inventory; reviewing it does not require a VM-only JSON file.
+
+At checkpoint head `1b1391e3fa6ff56edd3ef8e5fad7ef64eca1c3c5`, all 96 VM checks
+passed (93 owned builds, controls, public audit and KeySort). The complete audit
+reported 56 constants without axioms, 5 using `propext`, and 9 using `propext`
+and `Quot.sound`. Lean was 4.24.0 and Lake 5.0.0-src+797c613. A line-oriented
+evidence collector initially rejected one wrapped axiom printout; the complete
+multiline output was then parsed against all 70 expected names without changing
+source, rerunning passed checks or relabeling a failed Lean gate.
+
+On the prepared task VM, reproduce the focused checks with:
+
+```sh
+python3 tests/h28-sol/statement-grammar/runtime.py build Solidity.Frontend.StatementGrammarH28.ControlFreePr
+python3 tests/h28-sol/statement-grammar/runtime.py build Solidity.Frontend.StatementGrammarH28.ControlFreeAtoms
+python3 tests/h28-sol/statement-grammar/runtime.py build Solidity.Frontend.StatementGrammarH28.SyntaxControlFree
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/ControlFreeControls.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/ControlFreePublicAxioms.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate Solidity/KeySort.lean
+```
+
+The following run IDs and `/workspace` paths locate historical execution
+receipts on that VM. They supplement the committed inventory above.
+Per-file source diagnostics pass: run-1793932818689100266,
+run-1793932857929873010 and run-1793932917015203868. Final controls diagnostics:
+run-1793933442590916776. Builds have no new warnings and maxHeartbeats is unchanged.
+Initial setup run-1793932748629497010 failed before any source edit/check because
+the documented temporary lock directory was absent after restart. The directory
+was recreated; all subsequent writes/checks acquired the same documented lock.
+That failed setup is retained and never counted as a proof pass.
+
+Separate read-only finder and skeptic source reviews pass with no findings;
+neither used Lean, servers, builds, solc or writes. Final acceptance additionally
+requires exact committed-head VM builds/controls/axiom/KeySort gates and evidence
+review. Results, exact commands/exits/timing/RSS, hashes, cache receipt and sealed
+handoff are linked from
+`/workspace/h28-statement-grammar-evidence/checkpoint-y-validation.json` and
+`/workspace/h28-statement-grammar-evidence/checkpoint-y-locations.json`.
+New modules have only local registration rows; no generated roots, shared maps
+or trust inventories are authored. H41 packs stay on the VM for coordinator
+pull with path/SHA; never run ship-cache.sh here.
+
+Original G11 remains partial: general compound/item framing and association,
+remaining true parser coverage, full repository gates and whole-scope acceptance
+remain open. SOL-EU remains excluded and SG-CEX-01/02 remain OPEN/REFUTED.
+Existing shared inventory/full-build holds remain separate. No goal was created,
+reset, replaced or marked complete by this checkpoint.
+
+
+## Checkpoint Z — inline-Yul continuation boundaries
+
+Adopted published master `38d38d87e74376d6b95daf9b792fa884333f20b3`
+by verified fast-forward, preserving the owned branch and its original base.
+This checkpoint is additive: no existing implementation or proof was refactored,
+no protected Yul helper file was edited, and no budget or premise changed.
+
+[The source](../../Solidity/Frontend/StatementGrammarH28/YulControlFree.lean)
+proves `yul_yield_controlFree` for every existing `Syn c` whose category is
+Yul statement, expression or case, with arbitrary nested list/option closure.
+`yul_yield_no_continuations` extracts absence of the exact three Solidity
+keyword tokens selected by `boundaryToken` from every actual successful yield.
+`assembly_yield_controlFree` covers arbitrary EVM flags, flag strings and Yul
+bodies under the immutable printer. The result does not require parser success,
+expression uniqueness, lexical validity, valid assembly flags or execution
+adequacy. Identifier/string payload spellings remain data. SG-CEX-01 is retained:
+this token-absence property does not establish flag injectivity or round-trip.
+
+The exhaustive constructor inventory is 11 Yul statements (`yulBlock`, `yulLet`,
+`yulAssign`, `yulExprStmt`, `yulIf`, `yulFor`, `yulSwitch`, `yulLeave`, `yulBreak`,
+`yulContinue`, `yulFun`), three expressions (`yulPath`, `yulCall`, `yulLit`),
+and one `yulCase`, plus `nil`, `cons`, `none`, `some` closure. The scalar literal
+proof covers all five `YulLit` alternatives: decimal, hexadecimal, string,
+hex string and Boolean. No constructor is represented by an empty relation.
+
+[Kernel controls](../../tests/h28-sol/statement-grammar/YulControlFreeControls.lean)
+have 10 theorems: exact constructor inventory; all 15 inhabited successful
+nonempty yields; all five literal alternatives; absent initializer/default and
+empty call/function alternatives; actual four list/option yields; atomic keyword
+payload spellings; all four EVM/nonempty-flag combinations; rejection of real
+Solidity continuation keywords; rejection of the Solidity-statement category;
+and the arbitrary-Yul-tree three-keyword corollary. The public source has four
+theorems and one category definition. [Public audit](../../tests/h28-sol/statement-grammar/YulControlFreePublicAxioms.lean)
+prints all five source signatures and axiom sets; controls print all 10 theorem
+axiom sets. Only standard `propext`/`Quot.sound` are permitted; no new trust.
+
+Reproduction in the prepared bounded VM, serially:
+
+```sh
+python3 tests/h28-sol/statement-grammar/runtime.py build Solidity.Frontend.StatementGrammarH28.YulControlFree
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/YulControlFreeControls.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/YulControlFreePublicAxioms.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate Solidity/KeySort.lean
+```
+
+Initial per-file diagnostics and build passed. Separate read-only finder and
+skeptic source reviews found no proof defects. Finder caught a premature receipt
+claim in this paragraph; it was corrected before commit. Acceptance still requires
+exact committed-head gates, cache, final review and seal receipts in the checkpoint
+handoff. External solc
+results are unchanged historical fixture evidence, not evidence for this universal
+kernel theorem. Original G11 remains partial: general compound framing, remaining
+parser coverage and final whole-repository acceptance are still outstanding.
+
+
+## Checkpoint AA — universal list measures and iteration budgets
+
+Rebased onto published `c61eac233747385d1b76aff6c9af72eb7923f43b`.
+The coordinator cherry-picked Z as `bc417f403bd7c26b52c0a9dc924e49269302bd24`;
+owned files were verified byte-identical before Git skipped duplicate `dcbe2ebf`.
+The recovery ref `refs/backup/statement-grammar/pre-c61eac233` preserves that head.
+Z's root registration is now integrated. This checkpoint adds a module and local
+registration only; no old proof or implementation was refactored.
+
+[ListMeasures](../../Solidity/Frontend/StatementGrammarH28/ListMeasures.lean)
+contains exactly nine public theorems:
+
+| Theorem | Exact scope |
+| --- | --- |
+| `list_length_values` | Every intrinsic list has the same G0 length and typed-values length. |
+| `list_yield_length` | Every successful list yield has exactly one output chunk per element, for every category. |
+| `list_yield_chunks_nonempty` | Under the explicit universal nonempty-element-yield premise, each actual output chunk is nonempty. |
+| `nonempty_chunks_token_bound` | The number of nonempty token chunks is bounded by flattened token length. |
+| `list_yield_token_bound` | The generic premise yields the intrinsic list-count bound. |
+| `statement_list_yield_token_bound` | The premise is discharged for arbitrary statement syntax in every context. |
+| `item_list_yield_token_bound` | The premise is discharged for arbitrary item syntax, including unchecked blocks. |
+| `item_list_many_iteration_budget` | Token-count bound: item count plus one is at most located-input token length plus one (the `many` counter in Parser.lean); the link to `many` is not stated in Lean. |
+| `statement_list_many_iteration_budget` | The corresponding universal statement-list iteration bound. |
+
+These are universal structural measures, not parser-success assumptions.
+The final inequalities establish the loop counter's capacity only; they do not
+establish the per-element parser's success, nesting fuel or general completeness.
+The exact generic premise is necessary: a present optional expression containing
+`none` yields one empty chunk. The statement/item specializations use existing
+unconditional nonempty-yield theorems, covering all 13 statement constructors and
+both item forms without expression uniqueness or a framed-root restriction.
+Existing G0 list observers supply all computational measures; indexed cases are
+proof-only. Budgets and immutable producers are unchanged.
+
+[Controls](../../tests/h28-sol/statement-grammar/ListMeasuresControls.lean)
+contain exactly 10 theorems. They enumerate and inhabit all 13 statement roots
+in an actual successful list and all 14 corresponding statement/unchecked items;
+exercise attribute and fragment layouts; reject missing layout; prove actual
+yields/count/budget for arbitrary natural-number width; check both empty lists
+and one stopping iteration; and retain the inhabited generic empty-chunk
+counterexample and its failed nonempty check. All four list/option constructors
+occur in controls. The generic arity theorem still applies to that negative
+example; only the nonempty-derived bound is unavailable.
+
+[Public audit](../../tests/h28-sol/statement-grammar/ListMeasuresPublicAxioms.lean)
+prints all nine signatures and axiom sets. Controls print all 10 theorem axiom
+sets. Per-file diagnostics and the initial owned build passed. Separate finder
+and skeptic source reviews found no defects. Exact committed-head gate, final
+review, cache and seal receipts remain acceptance requirements in the handoff;
+this text does not claim they already exist.
+
+```sh
+python3 tests/h28-sol/statement-grammar/runtime.py build Solidity.Frontend.StatementGrammarH28.ListMeasures
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/ListMeasuresControls.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/ListMeasuresPublicAxioms.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate Solidity/KeySort.lean
+```
+
+This is assigned block/list decomposition and fuel backfill. It does not close
+the remaining general compound framing, structural parser coverage or final
+whole-repository acceptance obligations. SG-CEX-01/02 stay explicit and SOL-EU
+remains excluded. External solc fixture results are separate historical evidence.
+
+Coordinator merge review (2026-11-06): finder and skeptic found no blocker.
+The `#print axioms` lines in ListMeasures* are unpinned (no `#guard_msgs`), and
+the `*_many_iteration_budget` theorems are token-count bounds that do not
+mention `many`.
+
+
+## Checkpoint AB — constructive catch-clause coverage
+
+Adopted published `b6b4d158ddc1ef9092c62c5b984033fde6f2d885`, preserving
+the coordinator's AA documentation qualification. AA Lean sources and controls
+were byte-identical to the reviewed checkpoint before duplicate rebase skipping.
+The recovery ref `refs/backup/statement-grammar/pre-b6b4d158d2` retains `cd21f8f3`.
+AA's root registration is integrated. This checkpoint is additive and makes no
+change to old statements, budgets, immutable producers or reserved Yul files.
+
+[CatchCoverage](../../Solidity/Frontend/StatementGrammarH28/CatchCoverage.lean)
+proves both actual `catchClause` branches. `catch_plain_prefix` exposes the exact
+remaining block-parser call at fuel `n+1`. `catch_signature_prefix` exposes the
+call at fuel `n+6` after a header with one Boolean parameter, arbitrary optional
+clause name and arbitrary optional parameter name. Parameter type is exactly
+`.elem .bool`, data location exactly `none`, and remaining parameters exactly
+`nil`; arbitrary type/argument coverage is not asserted.
+
+Bodies use the existing recursive `BooleanItemList`/`BooleanListBound` fragment,
+including arbitrary finite width and nesting, with the existing open-if contract.
+The sufficient catch fuels are `n+b+2` and `n+b+6`, derived from the syntax body
+bound, for every excess `n` and suffix state. `boolean_catch_clauses_complete`
+constructs the existential body bound from syntax; no successful parse is assumed.
+The result concerns the grammar parser, not Solidity catch-signature semantic
+validity: a Boolean parameter is intentionally a fixed grammar atom and is not
+claimed to be a semantically valid Error/Panic payload in solc.
+
+`BooleanCatch` is a two-constructor inhabited relation indexed by existing
+`Syn (.catchClause k)`, actual tokens and sufficient structural fuel. It is not
+an alternate syntax tree. `boolean_catch_coverage` proves actual parser success;
+`boolean_catch_yield` preserves arbitrary remaining layouts;
+`boolean_catch_token_unique` uses a common proved fuel to establish equality of
+fragment trees. `boolean_catch_derives` witnesses the actual grammar derivation,
+and `boolean_catch_actual_yield_unique` extracts uniqueness from successful
+actual yields inside this fragment. This is restricted catch uniqueness, not
+whole-statement or whole-language uniqueness. SOL-EU remains excluded.
+
+The exhaustive public inventory is 12 source theorems: two prefix equations,
+two coverage specializations, two actual-yield equations, fragment coverage,
+fragment yield, token uniqueness, existential completeness, derivability and
+actual-yield uniqueness. [Public audit](../../tests/h28-sol/statement-grammar/CatchCoveragePublicAxioms.lean)
+prints signatures and pins axiom messages with `#guard_msgs` for all 12 plus both
+relation constructors. [Controls](../../tests/h28-sol/statement-grammar/CatchCoverageControls.lean)
+have 12 theorems and pin every theorem's axiom message. These local pins address
+the coordinator's unguarded-message observation without changing older audits
+or shared trust inventories. Only standard `propext`/`Quot.sound` are permitted.
+
+Controls prove actual parsing at arbitrary natural-number body width/depth and
+excess fuel, both inhabited catch constructors, all four optional-name combinations,
+following catch/else/unchecked suffix preservation, actual derivations, rejection
+of empty parameter lists, wrong headers, missing braces, zero fuel and insufficient
+plain-clause fuel. These are token-level kernel controls, not new solc semantic
+acceptance fixtures. The previously checked solc fixture suites remain separate.
+
+Initial diagnostics passed after two source proof-elaboration repairs (StateT
+bind exposure and list flattening) and one control arithmetic repair (`max a a`).
+Raw failed iterations remain in immutable evidence; no premise/budget changed.
+Exact committed-head gates, final finder/skeptic reviews, cache and sealed handoff
+remain acceptance requirements, not claims already established by this prose.
+
+```sh
+python3 tests/h28-sol/statement-grammar/runtime.py build Solidity.Frontend.StatementGrammarH28.CatchCoverage
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/CatchCoverageControls.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/CatchCoveragePublicAxioms.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate Solidity/KeySort.lean
+```
+
+Original G11 remains partial: whole try-statement/catch-list coverage, arbitrary
+catch parameter types/lists, general compound boundary framing and remaining
+parser coverage/final whole-repository acceptance are open. SG-CEX-01/02 remain
+explicit; no exclusion or premise has been approved or weakened here.
+
+
+## Checkpoint AC — actual catch-list many coverage
+
+Continues the sealed AB checkpoint without changing its statements or source.
+[CatchListCoverage](../../Solidity/Frontend/StatementGrammarH28/CatchListCoverage.lean)
+connects intrinsic clause-list syntax to the actual `manyAux` and `many`
+combinators. `catchStep` names the step expression in the immutable try branch;
+the existing `catchClause` remains the sole clause parser implementation. This is a parser equation,
+beyond the AA token-count inequalities, whose coordinator qualification remains
+unchanged.
+
+`BooleanCatchList` is indexed by existing clause-list syntax, actual token
+segments and a structural maximum of the represented `BooleanCatch` budgets.
+Both nil and cons are inhabited. `boolean_catch_list_many_aux` proves success
+for one counter step per clause plus stopping, with arbitrary excess counter.
+`boolean_catch_list_many` supplies the actual parser counter from the proved
+nonempty-yield/token-count bound and arbitrary suffix length. Clause parser fuel
+is the maximum of syntax-derived bounds; no successful parse is assumed.
+Actual yields preserve layouts and common sufficient fuel proves list-tree
+uniqueness from flattened token equality inside the fragment.
+
+The terminal frame `NoFollowingCatch s` is the exact token-head observation that
+the catch loop stops. A following catch is greedily consumed: a checked control
+shows two plain clauses returned when one is supplied as the suffix. Omitting
+the frame would give a false stopping equation. This is not an approved source
+exclusion or a weakening of any prior theorem. `statement_no_following_catch`
+discharges the frame for **every actual following statement yield**, using the
+existing unconditional continuation-head theorem, without a root-fragment or
+expression-uniqueness restriction. Catch-list coverage remains restricted to
+AB's clause fragment; arbitrary parameter-type and whole-try coverage are open.
+
+The complete source inventory is 13 theorems: universal following-statement
+frame; catch-step stop, fragment head, step start and concrete step success;
+actual fragment list yield; universal arbitrary-catch yield head, nonemptiness
+and list token bound (reusing AA); fragment count bound; actual manyAux and many
+success; fragment list token/tree uniqueness. The three universal catch-yield
+results are unrestricted in header atoms/body syntax, while parser coverage is
+not. Existing G0 typed-list observations supply all computed syntax measures.
+
+[Controls](../../tests/h28-sol/statement-grammar/CatchListCoverageControls.lean)
+contain exactly 13 theorems: arbitrary mixed plain/signature pair-list bounds,
+counts, actual many and manyAux equations; empty-list parsing; preservation of
+non-catch keyword suffixes; consumed greedy catch suffix and its failed terminal
+frame; zero/insufficient counter refusal; malformed/underfuelled clause refusal;
+an actual non-Boolean string/memory/fragmented-literal catch yield head; both
+list relation constructors inhabited; and an actual following return-statement
+frame. These controls distinguish universal yield framing from restricted parser
+coverage and exercise both existing catch constructors plus list nil/cons.
+[Public audit](../../tests/h28-sol/statement-grammar/CatchListCoveragePublicAxioms.lean)
+pins all 13 source theorem axiom messages plus both relation constructors;
+controls pin all 13 of their theorem messages. Thus 28 declarations are audited.
+
+Initial source diagnostics exposed incorrectly named indexed-induction binders
+and a beta-reduction rewrite issue. The former caused cascading type errors and
+a 200000-heartbeat timeout; all raw failures remain evidence. Correcting binders
+and exposing the proposition fixed the proofs without raising any budget or
+changing any statement. Source and control diagnostics and the preliminary
+controls gate passed. Finder and skeptic both caught a duplicated nested axiom
+guard introduced while pinning a shared name prefix; the trailer was rebuilt
+with exactly one guard per query before commit. Exact committed-head checks,
+final reviews, cache and seal
+remain acceptance requirements in the checkpoint handoff.
+
+```sh
+python3 tests/h28-sol/statement-grammar/runtime.py build Solidity.Frontend.StatementGrammarH28.CatchListCoverage
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/CatchListCoverageControls.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/CatchListCoveragePublicAxioms.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate Solidity/KeySort.lean
+```
+
+Whole G11 remains partial. Whole try-statement header/composition coverage,
+arbitrary catch parameters, general compound framing and final whole-repository
+acceptance remain unfinished. SG-CEX-01/02 and the SOL-EU exclusion are unchanged.
+No solc semantic catch-validity claim follows from these kernel token-parser
+proofs; previous external fixture results remain separate evidence.
+
+
+## Checkpoint AD — concrete try-statement composition
+
+Rebased onto published `c460b20c15fd99d207a1297b49eb340608a129ee` after verifying
+original-base ancestry and byte-identical owned Lean/tests. The recovery ref
+`refs/backup/statement-grammar/pre-c460b20c` preserves `528be0a5`. AB/AC sources are now published, but their central imports remain pending;
+the new try module also awaits central registration. No old proof or implementation is refactored.
+
+[TryCoverage](../../Solidity/Frontend/StatementGrammarH28/TryCoverage.lean)
+proves the actual statement parser on a restricted, inhabited try fragment:
+exactly an identifier call with empty positional arguments; no return parameters;
+an empty success block; a required first `BooleanCatch` and arbitrary finite
+`BooleanCatchList` tail. Catch bodies retain the earlier recursive Boolean item
+fragment. Identifier names are arbitrary token payload strings. This does not
+cover arbitrary calls, nonempty success blocks or return-parameter variants.
+
+Two exact prefix equations expose the actual expression/header/block composition
+before catch parsing. The fixed `f() {}` header followed by a catch has definite
+lookahead, so the expression parser does not consume the success block as call
+options. The generalized prefix permits any locations on that following catch.
+`boolean_try_coverage` then composes the actual proved catch-list `many` result
+and existing typed-list inverse. Sufficient statement fuel is
+`n + max firstClauseBound tailBound + 10`, for every excess `n` and suffix state
+satisfying the exact `NoFollowingCatch` greedy terminal frame. No successful
+parse is assumed; clause bounds are constructed from syntax in AB/AC. Existing
+universal following-statement framing discharges the terminal frame when used
+before any actual statement yield.
+
+`BooleanTry.attempt` is an inhabited relation indexed by existing statement
+syntax, actual tokens and the arithmetic bound. It introduces no alternate AST.
+`boolean_try_fragment_coverage` and `boolean_try_fragment_yield` expose actual
+parser/yield equations; common sufficient fuel proves fragment token/tree
+uniqueness. `boolean_try_derives` and `boolean_try_actual_yield_unique` concern
+actual derivations/layouts within the fragment. Expressions are fixed call
+atoms here; SOL-EU is neither assumed nor proved. Grammar parsing of a call or
+Boolean catch signature does not establish Solidity semantic try validity.
+
+The exact source inventory is nine theorems: two prefix equations; direct
+coverage/yield; fragment coverage/yield; token uniqueness; Derives; actual-yield
+uniqueness. [Public audit](../../tests/h28-sol/statement-grammar/TryCoveragePublicAxioms.lean)
+checks all nine signatures plus the relation constructor and pins all 10 axiom
+messages with `#guard_msgs`. [Controls](../../tests/h28-sol/statement-grammar/TryCoverageControls.lean)
+have 14 theorems with 14 individual axiom pins, for 24 audited declarations total.
+
+Controls construct arbitrary natural-number catch-body depth and clause-list
+width, prove actual parsing and layout-preserving yields, exercise both plain
+and signature first clauses (including arbitrary optional names), plain-only
+and multi-clause tries, preserve a real following return statement, and establish
+an inhabited actual grammar derivation. Negative controls reject a missing catch,
+missing success block, empty catch parameters and insufficient fuel. A concrete
+try consumes two clauses when a second catch is supplied as suffix, retaining
+the necessity of the greedy terminal frame. These are kernel token-parser
+controls, not new solc semantic acceptance fixtures.
+
+Initial diagnostics required a syntax indentation fix, explicit flattening in
+the many rewrite and an explicit intrinsic context in a control helper. Raw failed
+iterations remain evidence; no theorem/premise/exclusion/budget changed. Source,
+controls and preliminary control gates passed. Exact committed-head gates,
+final finder/skeptic reviews, cache and seal remain handoff acceptance requirements.
+
+```sh
+python3 tests/h28-sol/statement-grammar/runtime.py build Solidity.Frontend.StatementGrammarH28.TryCoverage
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/TryCoverageControls.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/TryCoveragePublicAxioms.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate Solidity/KeySort.lean
+```
+
+Whole G11 remains partial. General try calls/success bodies/return parameters,
+arbitrary catch parameter types/lists, general compound boundary framing and
+remaining general parser coverage/final whole-repository acceptance remain open.
+SG-CEX-01/02 and all original exclusions/budgets are retained. Historical solc
+fixture evidence is separate from these universal restricted kernel proofs.
+
+
+## Checkpoint AE — universal block/call-options boundary
+
+Adopted remote-verified `812aeb301f27d70dad4acc3b3bd92d1c41d7c948`, preserving
+`65f7735f` under `refs/backup/statement-grammar/pre-812aeb301`. Owned Lean/tests
+were byte-identical before the rebase. Direct inspection of the published root
+confirmed imports for CatchCoverage, CatchListCoverage and TryCoverage; that
+statement is based on the root contents, not inferred merely from publication.
+This increment adds one owned module and local manifest row, without producer
+or earlier theorem changes.
+
+[BlockHeaderBoundary](../../Solidity/Frontend/StatementGrammarH28/BlockHeaderBoundary.lean)
+proves a universal token boundary for arbitrary existing syntax under the
+existing precedence contract. Named call options require an identifier followed
+by a colon immediately after their opening brace. A precedence-selected block's
+item list cannot have that prefix. An empty block retains its closing brace,
+so even an arbitrary continuation cannot manufacture the pair.
+
+`namedArgStart` is a token lookahead predicate, not an AST. `NoNamedFrame ts`
+quantifies over every token continuation. The proof reuses the existing universal
+expression/type atom-pair invariants, without expression uniqueness. All three
+simple alternatives are handled, including identifier-led type/name declarations
+and tuple declarations. Revert uses precisely the existing root path contract;
+the other fixed roots start in non-identifiers. `statement_no_named` takes only
+the existing `precNode` condition. The all-node projection and item/list lifting
+then derive `block_yield_no_named_header` from a successful arbitrary block yield
+and its existing full `Syn.prec` predicate, for arbitrary layouts and contents.
+No new source exclusion or expression/type/argument validity premise is added.
+
+The final two theorems concern the actual parser:
+`postLoop_no_named_lookahead` proves stopping at an opening brace whose next two
+located tokens are not an identifier/colon pair. `postLoop_yielded_block` derives
+those observations from **every** actual precedence-valid block yield and proves
+`postLoop (n+1)` preserves the supplied expression, entire block and arbitrary
+suffix state, at every positive fuel. This is lookahead discrimination; it does
+not establish expression uniqueness or general statement parser completeness.
+
+The exhaustive source inventory has 13 theorems: atom-pair exclusion;
+non-identifier framing; declaration-head framing; simple/revert/all-statement
+framing; statement all-node root projection; item and item-list framing; block
+item framing; block-yield lookahead; generic postfix stopping; yielded-block
+postfix stopping. There are five public token/predicate definitions.
+[Public audit](../../tests/h28-sol/statement-grammar/BlockHeaderBoundaryPublicAxioms.lean)
+checks/pins all 18 declarations. [Controls](../../tests/h28-sol/statement-grammar/BlockHeaderBoundaryControls.lean)
+have 17 theorem pins, for 35 inventoried declarations total.
+
+Controls enumerate all 13 statement constructors, all three simple alternatives,
+both item forms, the block constructor and nil/cons through arbitrary width.
+They check actual successful precedence/yield/postfix behavior for every root,
+attribute and fragmented-literal layouts (plus a missing-layout refusal), atomic
+colon payloads, arbitrary-width yields and parser stopping, and arbitrary-depth
+block precedence. Positive call-options input is actually consumed; its named
+pair fails the block frame. Empty-block closing braces prevent continuation
+capture. A colon supplied after an empty block exercises the non-identifier branch even
+when the second lookahead is a colon. Zero postfix fuel is rejected, and an invalid revert path is shown to
+fail the existing contract. That last control is not a counterexample to the
+boundary outside the contract; no such stronger conclusion is asserted.
+
+Checking-cost evidence: an initial attempt to try trivial roots before recursive
+simplification gave matched MCP wall times 151.296 and 151.721 seconds, so the
+original proof was restored. A second, targeted change unfolds `Syn.all` exactly
+once per nontrivial root, then projects Boolean conjunctions. Matched fresh CLI
+compilations of the same 13-theorem module took 147.43 seconds / 146.96 user
+seconds / 584272 KiB peak RSS before, and 1.74 seconds / 1.55 user seconds /
+463280 KiB after. Source outside that one proof was verified byte-identical;
+imports, statements, toolchain, single-thread configuration and proof budgets
+were unchanged. The one-step proof is retained; no >10% slowdown occurred.
+Raw plans, both source versions and exact command/resource logs are preserved.
+No earlier speed-motivated producer change was undone.
+
+Initial diagnostics exposed implicit printer-predicate inference, Boolean
+conjunction projection and list-map normalization issues; a control induction
+needed the correct Boolean normal form. All were fixed without theorem/premise
+or budget changes. The bounded CLI module build and per-file controls passed.
+Exact committed-head gates, final read-only reviews, cache and seal remain
+acceptance requirements in the handoff.
+
+```sh
+python3 tests/h28-sol/statement-grammar/runtime.py build Solidity.Frontend.StatementGrammarH28.BlockHeaderBoundary
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/BlockHeaderBoundaryControls.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/BlockHeaderBoundaryPublicAxioms.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate Solidity/KeySort.lean
+```
+
+Whole G11 remains partial. General try call/success-body/return-parameter parser
+composition, arbitrary catch headers, remaining general compound framing and
+parser coverage, and final whole-repository acceptance remain open. Existing
+SG-CEX-01/02, SOL-EU exclusion, premises and budgets are unchanged. Kernel
+lookahead proofs are separate from historical external solc fixture evidence.
+
+
+## Moved-lane checkpoint AD: `try` and catch clauses in the mutual fragment
+
+Follow-up item 1 (2026-11-06). Merged master `5af89dce` first. `AtomTry.lean`
+states four sub-parser premises, each stopping at the next block's `{` (or,
+for `ExprAtomReturns`, at `returns`):
+
+- `ExprAtomBrace e es a`: `expr` reads `es` as `e` before a success block
+  whose body is not headed by `ident :` (`NoNamedFrame`, the call-options
+  lookahead of `postLoop`; Codex `BlockHeaderBoundary`). Proved for
+  identifiers (`ident_expr_brace`, budget 5) with `postLoop_no_named_lookahead`.
+- `ExprAtomReturns e es a`: `expr` stops at `returns` (identifiers, by `rfl`).
+- `RetsAtom rets rs r` on `returnsOpt` (empty, `returns (bool)`).
+- `ParamsAtom ps pts a` on `paramsParen` (`(bool)` and `(bool x)`).
+
+`try_step` and `catch_sig_step` are the actual parser equations from those
+results; `catches_many` turns the catch loop's token-length counter into the
+recursive count. The catch loop is greedy, so a `try` must not be followed by
+`catch`. Requiring that of every statement would weaken the earlier coverage
+theorems, so the frame is conditional, like the else frame: `catchOpen`
+marks the statements whose last sub-statement is a `try` (`try`, and `if`,
+`while`, `for` through their last body), and `CatchFrame x s :=
+catchOpen x = false ∨ NoFollowingCatch s`.
+
+`AtomStmt` gains `tryS` (no return parameters; side condition
+`BlockBodyParts parts` on the success block) and `tryRets`. The mutual block
+gains `AtomCatch` (`plain`, `sig`) and `AtomCatches` (lists), with coverage
+by mutual structural recursion (`atom_catch_step`, `atom_catches_many_aux`).
+Budgets: `a + b + f + g + 2` (expression, success block, first clause, tail
+list), `+ r` with return parameters; a clause has `b + 2` or `a + b + 2`.
+
+Changed statements, all in this lane's own moved-lane modules:
+`atom_stmt_coverage` takes the extra `CatchFrame x s`, and
+`atom_stmt_prefix_unique` takes catch frames for both suffixes;
+`atom_stmt_token_unique` is unchanged. The general coverage theorem is
+slightly weaker: a tree without `try` must now discharge the new frame too,
+and no lemma did so in general (superseded by
+`catch_frame_of_no_try` in checkpoint AH). Every earlier control discharges it by
+computation (`Or.inl rfl`, or `Or.inl (by cases n <;> rfl)` for the
+arbitrary-depth family). `simpleHead` now also excludes `catch`, which is
+needed for the no-catch lemma. The dispatch lemma's statement is unchanged
+in form, but its `simpleHead` premise is stronger by `catch`; the parser
+never reads a `catch`-headed simple statement. `catchOpen` matches on the
+indexed family; it is a proof-level frame, reduced only by `rfl` in
+controls, and is not on the kernel-observer (fixture) path.
+
+Controls (`tests/…/AtomTryControls.lean`): a try with a plain and a signature
+catch at derived budget 37 (coverage at every catch-free suffix, token
+uniqueness), a try with `returns (bool)`, a try inside a block followed by a
+statement (any suffix), `if (c) try …` (catch-open through the then-branch),
+and kernel `rfl` parses of `try f {} catch {}`. Negative: with a second
+`catch` as suffix the actual parser reads both clauses (`try_greedy_catch_kernel`),
+a `catch` suffix fails the frame, and a success body starting with `x :` fails
+`BlockBodyParts` and is read by the actual expression parser as call options
+(`named_body_call_options`, kernel).
+
+## Moved-lane checkpoint AE: assembly, and the `isRethrow` link
+
+Follow-up item 2.
+
+**Gate G0 link.** `G0Rejections` now defines `g0IsRethrow`, a twin of
+Source's `isRethrow` reading the Yul body through five `Syn.casesOn` views
+(`listViewAt`, `yulExprStmtAt`, `yulCallAt`, `yulPathAt`, `yulLitAt`) and
+the `Cat`-indexed result family `listViewResult`. Lean 4.24 still generates no equation lemmas for
+`isRethrow.match_1`, but the link does not need them. The twin inspects the
+tree in the matcher's own preorder (head statement, call name, arguments,
+`add` arguments, path, literal, `mload`, the remaining tails, the outer
+tail), so `g0IsRethrow_eq : g0IsRethrow b = isRethrow b` is proved by case
+analysis in that order: each mismatched constructor reduces both sides
+(`rfl`), and each failed string or number test (`revert`, `add`, `32`,
+`mload`) is discharged by `delta isRethrow isRethrow.match_1` and
+`dif_neg`. Axioms: `propext`, `Quot.sound`. The proof names the
+auto-generated matcher `isRethrow.match_1`, so a toolchain re-pin must
+recheck it. The node twin's assembly
+exclusion calls `g0IsRethrow` (link `excl_assembly`), so the fixture
+observers no longer reach `isRethrow`. The four accepted assembly fixtures
+(Cases 22, 23, 24, 27) and `FixtureData` re-check by `decide +kernel`. The
+elaboration audit lists the six new views (26 targets).
+`G0ObserverControls.g0_rethrow_twin_actual` evaluates the twin by the kernel
+on the canonical body, on a different path, name and offset, on a trailing
+statement and on the empty body, and through `g0Rejections` on assembly.
+This closes the residual recorded in moved-lane checkpoint Y: no lane
+observer reaches an indexed-family `match`. The producer's own `parse` is
+the system under test and is out of scope, as before.
+
+**Assembly statements.** `AtomAsm.lean` states `YulBodyAtom` on `yulBody`
+and `FlagsAtom` on the flag list `sepBy1 (strArg "assembly flag")` before
+`)`; the `"evmasm"` dialect is data (`evmToks`). `AsmFlags` is the optional
+parenthesised list. `asm_step` is the actual `assembly` branch. Instances:
+the empty body, the single flag `"memory-safe"`. An elaborator `rfl` for the
+rethrow body exceeded the heartbeat budget (not raised), so that body is
+covered by a kernel parse of the whole statement in the controls
+(`rethrow_asm_kernel`, which also checks through the linked twin that it is
+not rejected). `AtomStmt.asm` has budget `a + 1`. The accepted assembly
+fixtures' statements were therefore not covered by the `AtomStmt` relation
+(superseded for the Case 24 rethrow statement in checkpoint AH; Cases 22,
+23 and 27 have other Yul bodies and remain outside the relation). A refusal control covers an
+unknown dialect string.
+
+## Moved-lane checkpoint AF: revert-headed statements
+
+Follow-up item 3. The dispatcher reads `revert` as a revert statement only
+when the next token is an identifier; otherwise it falls back to
+`simpleStmt`. `revertExprNext` names that side, and `revert_expr_dispatch`
+proves the fallback for every non-identifier next token. `AtomStmt.revertExpr`
+covers `revert …;` expression statements through `SimpleAtom` (budget
+`a + 1`), next to the existing `revertS`. Controls: the block
+`{ revert; revert Err(); revert(); }` (two `revertExpr` and one `revertS`),
+and `revertExprNext` refusing every identifier, so the two forms never share
+tokens.
+
+## Moved-lane checkpoint AG: `Derives` uniqueness for the mutual fragment
+
+Follow-up item 4: yield uniqueness among statements of the mutual fragment
+that carry both a parse and a print witness. `AtomDerives.lean`
+states the printer side of each atom as `Prints t parts` (the existing printer
+yields `parts` and consumes no layout choice) or `PrintsTo t ts` (its yield
+flattens to `ts`). The print relations `AtomStmtP`, `AtomItemsP`,
+`AtomCatchP` and `AtomCatchesP` mirror the four parse relations with the same
+token indices. Their printer premises sit on expressions, simple statements,
+arguments, parameters, return parameters, Yul bodies and flags (as a token
+equation), never on statements, items, blocks or clauses. Proved by mutual
+structural recursion: `atom_stmt_prints` (and for items, clauses, clause
+lists); then `atom_stmt_derives_iff : x.Derives w ↔ w = ts` and
+`atom_stmt_yield_unique`: two trees with parse and print witnesses that derive
+the same words are equal. Instances: identifiers, identifier expression
+statements, empty arguments, `bool` parameters, empty lists.
+
+Controls (`tests/…/AtomDerivesControls.lean`): a block holding a try with a
+signature catch, `revert;`, `assembly {}` and an `unchecked` block, with both
+witnesses, its `Derives` set, uniqueness against every tree with both
+witnesses, and the printer's tokens computed by the kernel (the printer is
+part of the system under test, like the parser); print witnesses for every
+remaining constructor (loops, conditionals, `return e;`, all `for` headers,
+a two-clause catch list, `try … returns`, flagged assembly, `revert Err();`,
+`emit E();`); negative controls for other words, a wrong print premise, and
+the outer dangling-else association, which has a print witness but no parse
+witness (`outer_else_not_parsed`).
+
+Not claimed: a derivation of `AtomStmtP` from `AtomStmt` plus atom printer
+premises, and item- or clause-level uniqueness corollaries.
+
+Not claimed: printer premises beyond the stated instances, and any
+expression-level printing or parsing fact.
+
+### Reviews of moved-lane checkpoints AD–AG
+
+Read-only finder and skeptic reviews (no Lean server, no builds) of
+`8c78af2a..a1003dd0`. Skeptic verdict: PASS-with-fixes. Neither review found a
+soundness bug. Both confirmed that every new premise sits on a sub-parser or
+sub-printer, that `catchOpen` covers every catch-open statement form, that
+`g0IsRethrow` checks the same shape as `isRethrow` and is Gate-G0-compliant,
+and that no lane observer still reaches `isRethrow`. They also confirmed that
+`AtomStmtP` mirrors all 19 `AtomStmt` constructors and that every new parse
+constructor is inhabited. Fixes:
+
+- Finder: the module-map row for `G0Rejections` still named `isRethrow` as
+  a residual; the `AtomAsm` docstring cited a nonexistent `asmFlags`. Both
+  are fixed. Nits are fixed: view count, the `returns` stop, the
+  `bool_rets_atom` instance, the arbitrary-depth frame.
+- Skeptic 1: most `AtomStmtP` constructors had no control. Added
+  `loops_print_relation` and the dangling-else pair
+  `outer_else_print_relation`/`outer_else_not_parsed`.
+- Skeptic 2: the item-4 claim was too strong. It is reworded to uniqueness
+  among trees with both witnesses, and the non-claims are listed.
+- Skeptic 3 and 4: the coverage theorem's weakening and the stronger
+  `simpleHead` premise are now stated, not denied.
+- Skeptic 5–7: the assembly fixtures are outside the relation; `catchOpen`
+  is not on the observer path; `g0IsRethrow_eq` depends on the generated
+  matcher name. All three are recorded.
+- Skeptic 8, a possible "no goals" after `prints_simp`, was refuted: the file
+  checks clean.
+
+### Gates for moved-lane checkpoints AD–AG
+
+Lean MCP per-file diagnostics, severity error, all clean:
+
+- `AtomTry`, `AtomAsm`, `AtomCall`, `AtomSimple`, `AtomNested`, `AtomDerives`,
+  `G0Rejections`;
+- `FixtureControls/Case22`, `Case23`, `Case24`, `Case27`;
+- `tests/…/AtomNestedControls`, `AtomTryControls`, `AtomDerivesControls`,
+  `G0ObserverControls`, `G0ElaborationAudit`.
+
+`#print axioms` for every new theorem is within `propext` and `Quot.sound`.
+
+`./run-lean.sh` ran twice; neither run completed.
+
+- First run (cold cache, 6003+ jobs, started at `a1003dd0`). Three modules
+  outside the lane were killed with exit 137 (out of memory):
+  `Checked/UnitExamples`, `Examples/Tactics/OpenLoops` and
+  `TestSuite/Derived7`. No module failed with a Lean error.
+- Second run (warm, at `1311182e`). Only `Checked/UnitExamples` was killed
+  (exit 137). Every lane module built: `AtomNested`, `AtomDerives` and the
+  four assembly fixture cases appear as built.
+
+`Checked/UnitExamples` is unchanged by this lane and by the merged master.
+While it built, the Lean language server held about 3 GB. Stopping the
+server was refused by the session's permission policy. `check-solkey.sh`,
+the script's last step, was therefore not reached in either run.
+
+| Check | Result |
+| --- | --- |
+| `register.sh --check` | pass |
+| `fragments.sh --check` | pass |
+| `check-layers` | pass |
+| `check-orphans` | 6384 reachable, 0 orphaned |
+| `check-trust` | 0 findings |
+| `check-doc-paths` | one missing reference, the same one that predates this lane (`after-roadmap-va1.md`) |
+
+## Moved-lane checkpoint AH: coordinator follow-up (catch frame, rethrow body)
+
+The coordinator asked for four more steps on 2026-11-06.
+
+1. **General catch frame.** `catchOpen_false_of_no_try`: a statement with no
+   `try` node (`Ctor.tryStmt ∉ x.nodes.map Node.ctor`) is not catch-open.
+   It is proved by structural recursion on the statement. `catch_frame_of_no_try`
+   states the same over the G0 node twin, so the hypothesis can be checked by
+   the kernel. `atom_stmt_coverage_no_try` is coverage of a `try`-free
+   statement under the else frame alone. Controls:
+   `revert_block_coverage_no_try` (node inventory by `decide +kernel`) and
+   `try_tree_has_try` (the lemma does not apply to a tree with a `try`). This
+   removes the weakening recorded in checkpoint AD for abstract families:
+   every `try`-free witness gets its catch frame from the lemma. For a
+   concrete tree, `Or.inl rfl` on `catchOpen` remains the cheapest check: it
+   looks only at the last-body spine, so it also succeeds for trees that hold
+   a `try` inside a block. The lemma's hypothesis over all nodes is stronger
+   than necessary; a spine-only version was not stated.
+2. **Rethrow Yul body.** `rethrow_yul_body : YulBodyAtom … 6` proves the
+   canonical body `{ revert(add(raw, 32), mload(raw)) }` at every fuel of at
+   least 6 and every suffix. Heartbeats are not raised. Small `rfl` steps are
+   composed by rewriting:
+   - the two inner calls (`yul_add_call`, `yul_mload_call`);
+   - the argument list (`rethrow_call_args`, through `sepByAux_comma` and
+     `sepByAux_rparen`);
+   - the outer call (`yul_call_prefix`, `rethrow_call_expr`);
+   - the statement (`yul_stmt_call_prefix`);
+   - the body loop (`yul_body_prefix`, `yulItemStep`, `many_aux_cons`).
+
+   `AtomStmt.asm` now covers the accepted rethrow fixture's statement
+   `assembly ("memory-safe") { … }` (`rethrow_asm_relation`, budget 7, with
+   coverage at every suffix). Its tokens are copied by hand from the fixture
+   source; they are not the lexer's output on `p24-canonical-rethrow.sol`. The note in checkpoint AE that this body is
+   only a fixed-fuel kernel parse is superseded.
+3. **`AtomStmtP` from `AtomStmt`: not derived, and why.** The parse premises
+   (`ExprAtomSemi`, `SimpleAtom`, `ArgsAtom`, …) say that a sub-parser reads
+   the tokens back to the tree. They say nothing about the printer. Deriving
+   the print premises from them needs a printer-after-parser round trip for
+   expressions, simple statements, arguments, parameters and Yul bodies. That
+   round trip belongs to the expression lanes (it implies SOL-EU-type facts),
+   so it is outside this lane. The two relations stay separate, and
+   uniqueness needs both witnesses.
+4. **Full gate:** below.
+
+### Gates for moved-lane checkpoint AH
+
+- Lean MCP per-file diagnostics, severity error, all clean: `AtomNested`,
+  `AtomAsm`, `tests/…/AtomTryControls`, `AtomDerivesControls`.
+- `#print axioms`: every new theorem is within `propext` and `Quot.sound`.
+- `LEAN_NUM_THREADS=2 ./run-lean.sh` at `65f452c8`: "Build completed
+  successfully (6400 jobs)". With two threads, no module was killed for lack
+  of memory. The script still exits 1, in its last step: `check-solkey.sh`
+  against the unpinned `../solkey` reports "167 mismatch(es)", as in earlier
+  runs. That step reads nothing this lane changes.
+- `SOLKEY_RULES=tests/migration/solkey/…/solidityProgramRules.key
+  scripts/check-solkey.sh`, the pinned rules: "OK — annotations match",
+  377 taclets.
+- `register.sh --check`, `fragments.sh --check` and `check-layers`: pass.
+- `check-orphans`: 6384 reachable, 0 orphaned.
+- `check-trust`: 0 findings.
+- `check-doc-paths`: one missing reference, the same one that predates this
+  lane.
+
+### Reviews of moved-lane checkpoint AH
+
+Read-only finder and skeptic reviews of `1311182e..ec45eb58`. Skeptic verdict:
+PASS-with-fixes. Neither review found a soundness issue. Both confirmed:
+
+- `yulItemStep` is the parser's own loop step;
+- `catchOpen_false_of_no_try` covers all 13 statement constructors;
+- `rethrow_yul_body` holds at every fuel of at least 6 and every suffix, with
+  no heartbeat raise;
+- the gate reporting is accurate.
+
+Fixes made:
+
+- Stale "not covered" and "no lemma" sentences in checkpoints AD and AE now
+  point forward to AH.
+- The module-map row for `AtomAsm` names `rethrow_yul_body`.
+- A no-op rewrite in `AtomAsm` was dropped; the file re-checks clean, and the
+  change is a proof step only.
+- The catch-frame claim was narrowed: `Or.inl rfl` stays the minimal check
+  for concrete trees.
+- The hand-copied fixture tokens are now stated.
+
+The finder also noted that budget 6 is not tight; 5 suffices. The doc does
+not claim tightness, so this is left as is.

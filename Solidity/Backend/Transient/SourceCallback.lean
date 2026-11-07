@@ -40,16 +40,16 @@ def source : Source.EMState env [.bool] :=
    ⟨⟨⟨fun _ => Source.Account.empty _⟩,Source.Transient.empty,[]⟩,
     (Source.Heap.empty.alloc ⟨.bytes .memory,.bytes [0xa1,0,0xfe]⟩).1,
     [.call Controls.other ⟨3,by decide⟩ [0x12] false],[(Controls.owner,[0x99,0x42])],
-    ⟨[.bool],.cons (.bool false) .nil⟩⟩⟩
+    ⟨[.bool],.cons (.bool false) .nil⟩,Source.FailureExecution.Cursor.empty⟩⟩
 def before : Source.EMState env [.bool] :=
   ⟨source.1,{source.2 with ex := source.2.ex.run [
     .account Controls.owner (fun a => { a with
-      balance := ⟨93,by decide⟩
+      balance := 93
       nonce := 4
       code := some 0
       storage := a.storage.write Controls.saved (.bool true) }),
     .transient Controls.other (fun cells => cells.write Controls.path (.bool true))]}⟩
-def credited := before.2.ex.apply (.account Controls.owner (fun a => a.withBalance ⟨93,by decide⟩))
+def credited := before.2.ex.apply (.account Controls.owner (fun a => a.withBalance 93))
 def changed := credited.apply (.transient Controls.owner (fun cells => cells.write Controls.path (.bool true)))
 def run (pipeline : Roadmap.Pipeline) (out : Roadmap.Outcome) (static : Bool) (horizon : Nat) :
     Source.EM env [.bool] Roadmap.Outcome := do

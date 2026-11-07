@@ -1,173 +1,413 @@
-# V10 storage operations
+# V10 storage operations — G27–G30
 
-Storage copy, clear, push and pop over the existing storage graph, numeric
-word store and structured `Evm.Instr` target (`Backend/StorageOps/`), from the
-v10-storage-operations lane. The core is Source-free. Above it, `Lowering/StorageOps/` checks actual
-independent Source storage operations; these are operation correspondences,
-not a general compiler or bytecode refinement.
+The lane remains partial. `Backend/StorageOps/` is Source-free;
+`Lowering/StorageOps/` contains clients of the independent Source semantics.
+Kernel operation laws, structured target execution, numeric transport and
+external compiler/EVM evidence are separate boundaries.
 
-## Layers
+## Graph and representation components
 
-- Runtime-shaped graph operations: `Traversal.copyArray`/`copyAt`,
-  `RecursiveCopy.recursiveCopy`, `RecursiveClear`, `RecursivePop`, each proved
-  equal to the master semantics (`copyArray_eq_overlay`, `copyAt_eq_semantics`,
-  `recursiveCopy_eq_overlay`).
-- Prefix transport and disjoint-path commutation (`CommonPrefix`,
-  `PrefixLaws`, `PathOperations`, `Commutation`, …); push/pop/delete
-  lifecycles (`Lifecycle*`, `MixedLifecycle`, `CopyLifecycle`).
-- Operations against the `Represented` relation (`PathRepresentation`,
-  `Copy*`, `Clear*`, `RepresentedOperations`); scalar save/copy to numeric
-  stores and `Evm.Slot` (`TargetOperations`, `KeysFit`).
-- Numeric transport with per-run regions (`FiniteRun`), footprints and G27
-  layout access (`NumericTraversal`, `CopyTransport`, `CopyWrites`,
-  `LayoutAccess`).
-- Structured target loops and correspondence (`TargetArray*`, `TargetCopy*`,
-  `TargetNested*`, `TargetFixed*`, `TargetSnapshot*`), snapshot frames,
-  nested-array root composition (`OutputRootComplete.complete`, whose
-  `reads`/`writes`/`clearWrites` premises cover intermediate copy states).
-- Runtime-header repetition and footprint shrinkage: `RuntimeCopyRepeat`
-  (`headers_and_footprint`, `copy_repeat`), `RuntimeCopyComposition.complete`,
-  `TargetArrayRepeat.complete`, quantified over machines, slots, lengths and
-  `FiniteRun`.
+`Value.overlay` is the independent copy specification. `Traversal.copyArray`
+provides outer runtime-prefix transport with semantic nested leaves;
+`RecursiveCopy` and `RecursiveClear` independently traverse demanded nested
+values. Their correspondence laws identify these views, without an admitted
+depth cap. Lazy function-valued fields do not prove eager emitted traversal.
 
-Premises catalogue: the `FiniteRun` per-run region, `KeysFit`, the
-`targetInitial` correspondence, self-copy or separation. Retained
-counterexamples: overlap refutes repetition, a region collision, header
-interference. `*Controls` modules instantiate the premises
-(`RuntimeCopyRepeatControls` builds a real `FiniteRun 128 16 2`).
+Path/common-prefix laws, disjoint updates, snapshot copies, mapping barriers,
+stale-tail clearing and aggregate lifecycle components reuse the existing
+intrinsic graph and published `Represented` relation. Numeric transport retains
+`FiniteRun` per-run hash/region coverage, `KeysFit`, initial store observations
+and separation premises; no global hash injectivity is inferred.
 
-## Open
+Structured target loops include runtime headers, repetition and nested/fixed
+copies. `OutputRootComplete.complete` requires read/write/clear coverage over
+intermediate stores. `LoopLaws` shares turn/exit adapters; it does not prove
+arbitrary-loop termination. Controls retain overlap, collision, header
+interference, malformed operands and complete context observations.
 
-General Source AST/compiler/address/liveness correspondence, emitted recursive
-traversal, packing and ABI, world rollback.
+## Source clients and address limits
 
-## Source operation clients (C145)
+Source delete/copy, repetition and disjoint-copy clients preserve exact runtime
+footprints, captured snapshots, older shadows and ordered outcomes. Registered
+modules replace historical script wrappers; those scripts are not dependencies
+of the new interfaces. Rollback laws invoke the existing rollback explicitly.
 
-Registered `Lowering/StorageOps/SourceCopyCommutation.lean` uses the
-independent Source semantics and the existing copy operation log. Its four laws
-prove exact runtime touched-path frames, overwritten-word independence,
-pointwise transport and all-path word commutation for disjoint destinations
-and fixed captured payloads. Ordinary storage is explicit. Older shadows and
-missing outside cells remain observable; journals and full states do not commute.
+`SourceWordRead.complete` and `SourceWordWrite.complete` pair independent Source
+and SLOAD/SSTORE runs sharing word observations. Source paths and target slots
+are independent parameters. `SourceArrayWrite.complete_numeric` similarly shares
+length, index and payload with graph/target operations, but has no relation
+identifying its Source path with its target base. These facts do not establish
+Source address/layout compilation or compiler preservation.
 
-`Lowering/StorageOps/SourceCopyCommutationControls.lean` executes both actual `Source.storeVal`
-orders with shrinking/growing arrays and complete ordered observations.
-Distinct journal snapshots refute state equality. Same-target and incremental
-source-capture orders discriminate the premises; rollback is explicitly invoked.
-These clients are registered above the Source-free Backend core. They do not
-supply general compiler, target, physical-address or world equivalence. Ten
-Source modules are migrated with unchanged proof bodies and declaration names;
-legacy script import wrappers preserve their clients.
+`StackWordWrite.code` consumes the value already on the stack;
+`TargetOperations.writeCode` adds the constant value push to that shared suffix.
+Their existing instruction behavior and proof premises are unchanged.
 
-## Operation views and Source clients
+Fresh indexing laws derive canonical-header checks and panic0x32 from raw Source
+cells. Bounds-first write failures precede payload/type/static/fuel checks.
+Retained raw reads remain distinct from fresh liveness. Unwritten uint cells
+are raw-absent while published reads default to zero. Finite numeric and
+nonempty live/retained owner-query clients discharge their stated premises;
+written-read inequality is not a separate failed representation judgment.
 
-`Value.overlay` is the independent graph specification. `Traversal.copyArray`
-provides outer runtime-prefix transport, using the semantic slot operation at
-nested leaves. `RecursiveCopy` and `RecursiveClear` independently recurse at
-nested demanded values. Their correspondence laws identify these views; lazy
-function-valued fields do not establish eager emitted traversal of a whole
-aggregate.
+`SourceWordCommutation` proves full Source-world equality for distinct captured
+typed cell writes, actual ordinary/writable execution and exact journal order.
+Mixed uint/bool controls retain nonempty locals, transient storage and a journal
+prefix: worlds agree while journals/states differ; overlap changes worlds.
+Explicit undo restores the seeded execution state. The routine combined adapter
+is pending in [TERRA-TODO](../../TERRA-TODO.md), without a compiled stub.
 
-`Lowering/StorageOps/SourceScalarDeleteLog.lean`,
-`Lowering/StorageOps/SourceArrayDeleteTarget.lean` and
-`Lowering/StorageOps/SourceStorageCopy.lean` supply actual Source delete/copy
-execution laws, frames and explicit rollback. Source repetition and commutation
-clients preserve complete ordered observations and distinguish journal/state
-identity. These modules import published Source semantics above the core;
-representation, target and whole-program premises remain explicit.
+`SourceWriteRollback` proves typed static refusal and actual `rollbackTo`
+restoration for a captured account-write-only poststate. Populated controls
+execute the original mark, retain a successful write through a later refusal,
+show that a failed bind skips its rollback continuation, and invoke rollback
+separately. A wrong mark loses older journal/log prefixes; a wrong payload type
+fails before static refusal. Heap/events/locals survive because these writes
+never changed them. This does not prove general frame or compiler rollback.
+The routine generic pair adapter remains uncompiled in TERRA-TODO.
 
-`Backend/StorageOps/TargetSelfCopy.lean` is the target-only self-copy interface.
-The old module and theorem namespace remain compatible; the canonical namespace
-exports the same laws. `OutputRootComplete.complete` requires read/write/clear
-location coverage over intermediate stores as well as OLD graph observations.
+`SourceStorageCopyPrefix.prepared` proves the actual distinct-path Source
+`storeVal(storRef)` result for primitive integer arrays at original fuel
+`count+padding+4`. Snapshot and payload phases finish; cleanup reuses its phase
+fuel. Success commits the header last; timeout retains exactly the corresponding
+prefix of the existing copy journal and the old header. Runtime counts and
+padding are arbitrary naturals, with the original OLD-read/type premises.
+Uniform and populated controls distinguish shorter payload failure, snapshot
+failure, partial cleanup, the sharper success threshold, empty/varying lengths,
+self-copy and refusal. Complete outcomes, contexts and journal snapshots retain
+both raw absent cells and defaulted zero reads. Generic smaller-fuel cases,
+Source AST/address compilation and target realization remain open; this is not
+G35 memory-to-storage work.
 
-The remaining actual Source clients are registered above the core: scalar,
-integer and boolean array deletion with represented target clearing; signed,
-boolean and fixed-array copying with captured snapshot target observations;
-mapping barriers, Source self-copy and two-destination deletes. All 42 legacy
-script imports remain compatible. Module registration preserves their proof
-bodies, exact fuels, typed path/read/layout premises and complete ordered
-positive and negative controls. These component correspondences do not close
-general Source compiler, recursive emitted traversal or world refinement.
+`SourceStorageCopyBarrier` proves the complementary primitive snapshot barrier:
+`loadElems` fuel≤count, array capture fuel≤count+1 and distinct-path
+`storeVal(storRef)` fuel≤count+2 return timeout with the entire initial state.
+Valid source-header/element reads are explicit; no destination-header/type or
+writable premise is needed before capture completes. Populated controls preserve
+complete ordered raw/default reads, contexts and journals, and distinguish the
+first payload write, malformed-source failure, malformed destination, same-path
+success and empty-array fuel boundary. Finder and skeptic reviewed the actual
+constructor thresholds and complete controls without running Lean. These laws
+are intrinsic Source execution, not an implicit rollback or compiler bridge.
 
-The Source and target self-copy modules retain a shared historical namespace
-with disjoint declaration names. Their module paths and import layers remain
-separate; the canonical target namespace exports only the five target laws.
+`SourceStorageCopyPayload.copy_prefix` closes the nonempty primitive payload
+boundary: at original fuel sourceLength+3, actual capture finishes and exactly
+sourceLength−1 elements are written before the final leaf times out. The exact
+poststate contains that journal prefix; cleanup and header commit are skipped.
+The source-header/read and destination-header/type premises remain explicit.
+Populated two/three-element and empty/short-destination clients retain complete
+ordered outcomes, raw/default views, contexts and journals. Actual fresh indexing
+can reject a newly written retained cell under the unchanged old header, while
+an existing location still reads it. Static/type/self-copy and next-fuel controls
+distinguish false extensions. The proof reuses published capture/leaf operations;
+it does not implement memory-to-storage lowering or infer automatic rollback.
 
-`Backend/StorageOps/LoopLaws.lean` shares the condition/body turn, zero-guard
-exit and single-loop adapters used by five runtime loop modules. Their ranking
-and prefix proofs still establish the required `loopRun` result. The clear
-condition reuses the published memory range condition with the same instruction
-list. Populated controls pin complete ordered context observations, false-guard
-body avoidance, pending-jump and malformed-flag faults, and one actual terminating
-loop. Shared adapters alone do not prove arbitrary-loop termination.
+Header readback retains the published proof unchanged. The task runtime now
+follows repository-default elaboration, preserving explicit single-thread and
+resource limits; both readback and the original EVM heartbeat checks pass in
+that mode. Diagnostics from the incompatible task-local override are retained.
 
-`Backend/StorageOps/StackWordWrite.lean` supplies a destination-only SSTORE
-program whose value arrives on the runtime stack. The above-core
-`Lowering/StorageOps/SourceWordWrite.lean` states actual Source `storeVal`
-execution with typed word readback beside that target operation; the Source
-path and target slot are independent parameters sharing only the word, so no
-address correspondence is claimed (likewise `SourceArrayWrite.complete_numeric`
-relates path and base only through length, index and payload). Positive
-budget, writable ordinary storage and input word agreement are explicit. The
-existing `Val.word` excludes function/reference values; no new admission or
-encoding is inferred. Concrete controls preserve ordered Source/target context
-observations and distinguish static, budget, type, region and operand behavior.
-The new Source namespaces match their paths; existing public namespaces remain
-compatible. Address compilation, liveness, physical layout and world closure
-remain separate obligations.
+`SourceStorageCopyEmpty.copy_empty` proves the remaining primitive fuel3
+boundary: an empty destination commits a zero header, while a nonempty old live
+tail times out before its first clear. Ten complete controls distinguish static,
+type, missing-source and same-path ordering, the next-fuel first clear, actual
+fresh/retained reads and raw-absent header materialization. Empty success grows
+the journal even when ordinary header reads stay zero; it is not a no-op.
+The generic all-fuel composition statement is well-typed but unproved in
+TERRA-TODO; with it, fifteen routine adapters remain pending.
 
-`Lowering/StorageOps/SourceWordRead.lean` derives the total typed ordinary-cell
-read equation, retaining missing-value failure, and connects successful actual
-Source reads to actual SLOAD under raw cell presence and input word agreement.
-No writable-frame or store-fuel premise is needed for reads. Populated controls
-retain complete ordered source/target contexts, static and transient reads,
-missing/type failures and a wrong-address countercontrol. This does not prove
-source address compilation, default encoding, liveness or world agreement.
+## Source byte capture and writes
 
-`Lowering/StorageOps/SourceArrayIndex.lean` derives actual fresh dynamic-array
-location checks from raw canonical Source header cells, retaining both the typed
-child location and panic0x32. Actual index/read composition reuses PUBLIC
-`Represented` and guarded target-read facts; raw Source header/leaf agreement,
-graph liveness and target initialization remain explicit. No source success is
-assumed. Out-of-bounds failure needs no selected-child or zero-default premise.
-Controls retain complete ordered source/target contexts and distinguish live
-reads from populated retained aliases and an incorrect unguarded read. Source
-panic payload, target revert and world rollback remain separate boundaries.
+`Lowering/StorageOps/SourceByteStorageCopy` proves OLD-state runtime byte
+capture and exact write progress at every original fuel using the existing
+Source fixed-byte cells and operation journal. Success requires fuel strictly
+greater than the payload length; equal fuel writes all bytes and then times
+out on the empty tail. This timeout preserves those writes and is not rollback.
+The typed-cell and OLD-read hypotheses remain explicit.
 
-`Lowering/StorageOps/SourceArrayWrite.lean` composes actual fresh Source
-indexing and by-value lvalue writes with the published guarded target write,
-represented update/frame and finite per-run numeric transport. Raw Source
-header, payload word and target address observations remain explicit premises.
-Primitive `writeLoc` works at every budget, including zero. Controls change
-the live payload while preserving header, retained tail and unrelated context,
-and distinguish fresh bounds failure from a raw retained-location write.
-Independent finder/skeptic reviews found no issues. `SourceArrayWriteNumericControls.lean` now discharges the numeric certificate
-inputs in a finite run covering the header and three children, with budget-zero
-Source execution and numeric readbacks `[2,53,59,61]` to `[2,53,83,61]`. The
-additional observer-query list is empty; that client does not exercise sibling
-query-owner frame premises. Existing full context/retained/outside controls stay
-unchanged. General Source address/default compilation, recursive physical
-emission and world rollback remain open.
+The companion controls instantiate both general producers and retain complete
+ordered outcomes, raw byte cells, journal snapshots and unchanged account/frame
+context. They distinguish partial writes, final-write timeout, successful writes,
+empty fuel boundaries, nonzero-start capture, static refusal and malformed paths.
+Independent read-only finder/skeptic reviews found no producer soundness issue;
+full storage-reference byte/string capture-to-cleanup/header composition and
+packed physical layout remain open at that helper boundary. These are Source operation helpers, not a
+memory-to-storage or whole compiler certificate.
 
-`Lowering/StorageOps/SourceArrayWriteFailure.lean` derives bounds-first
-Source panic and guarded target revert for arbitrary intrinsic payload types,
-without child presence/type, payload encoding, writable mode or positive fuel
-premises. Raw canonical Source header, target header agreement and target index
-fit remain explicit. Controls distinguish live type/static/fuel failures from
-bounds failure and pin complete ordered contexts. Unwritten raw uint cells are
-absent while their published read defaults to zero; both observations are
-retained. Malformed adapter inputs are negative controls, not admitted programs.
-Independent finder/skeptic reviews found no issues. World rollback and general
-address compilation remain separate obligations.
+## Source byte cleanup and prepared phases
 
-`Lowering/StorageOps/SourceArrayWriteFrameControls.lean` instantiates the
-Source/represented/numeric write with nonempty old-owner queries for a live
-sibling and a retained sibling. Logical path separation and symbolic nonaliasing
-are proved from existing constructors, and all original finite-run conditions
-are discharged. Ordered raw observations retain `53/61` while the written query
-changes `59` to `83`; retained fresh liveness stays absent. The negative control
-proves inequality of the written query's reads, not a separate failed
-representation judgment. Existing complete context/numeric fixtures are reused
-unchanged. Independent finder/skeptic reviews found no issues; general source,
-recursive physical emission and world composition remain open.
+`SourceByteStorageClear.range_eq_int` transports actual primitive byte-clear
+operations to the checked scalar runtime range, including zero-fuel failure;
+it does not equate byte and integer values. `SourceByteStoragePrepared` composes
+byte payload writes, exactly the demanded clear prefix and header-last commit.
+At phase fuel `length+padding+2`, cleanup gets budget `length+padding`; failure
+retains its generated writes and old header. No implicit rollback follows.
+
+The populated controls execute actual storage-reference byte copies and retain
+all ordered outcomes, raw observations, success/timeout journal order and
+nonempty local/account context. Shrink, growth, empty, self and static cases
+separate raw cleared absence from default-byte reads and fresh bounds checks;
+older shadows and unvisited tails remain observable. Independent read-only
+finder/skeptic reviews found no producer issue; their requested timeout-journal
+and default/live alias controls are included. String-copy coverage is not claimed.
+The generic capture-to-prepared adapter is type-validated but unproved in
+TERRA-TODO; sixteen routine adapters now remain pending. Packed representation,
+Source address compilation and emitted/world composition remain open.
+
+## Byte capture failure barrier
+
+`SourceByteStorageBarrier.load_timeout` proves exact full-state preservation at
+arbitrary insufficient capture fuel and nonzero starts, under valid OLD byte
+reads. No writable frame or destination hypothesis is needed. Malformed source
+reads can instead fail earlier; the read premise cannot be dropped.
+
+Populated controls pin all ten actual storage-reference failure/self cases and
+four byte-capture outcomes. Missing-destination and static checks follow valid
+capture; zero-fuel timeout precedes the self-copy shortcut. Complete ordered
+state/context/journal rows and shifted/static witnesses retain earlier shadows.
+The two routine memory/copy wrappers are type-checked statements only in
+TERRA-TODO; eighteen adapters remain pending. This is a capture barrier, not
+implicit rollback or a Source-to-target compiler theorem.
+
+## Nested allocating capture
+
+`SourceNestedByteCapture.empty_capture` executes the existing Source allocation
+of an empty reference object. `timeout_prefix` proves arbitrary runtime prefixes:
+capturing `count+1` empty byte-reference elements at original fuel `count+3`
+times out after exactly `count` existing heap allocations. OLD child-header reads
+are transported through heap-only changes using the published read-frame law.
+The footprint uses existing Source states/heaps and `Nat.repeatTR`, not another
+evaluator or an admitted-source depth cap.
+
+Populated actual storage-reference array copies distinguish storage/journal
+preservation from changed heap on timeout and static refusal. Ordered outcomes,
+heap contents, source shadows, old objects, success journals and self-copy are
+pinned. This is a concrete limit on generalizing primitive byte full-state
+preservation; no automatic heap/world rollback follows. The routine outer-copy
+wrapper is a type-checked proposition only in TERRA-TODO; nineteen adapters
+remain pending. General nested shapes, physical allocation/failure and compiler
+composition remain open.
+
+## Nonempty nested capture payloads
+
+`SourceNestedByteValues.capture` derives actual byte reads and typed allocation
+for nonempty payloads. `timeout_prefix` tracks distinct per-child payloads in
+runtime allocation order: at original fuel `count+length+3`, capture of
+`count+1` references times out after exactly `count` allocations. Both parameters
+are arbitrary naturals. Headers and byte reads are transported through heap-only
+updates using the published read-frame laws; the footprint folds existing
+Source heap operations over the runtime index range.
+
+This component uses a common runtime inner length, not arbitrary differing
+child lengths and not a source-profile cap. Populated copies distinguish partial
+capture, later destination/static failure and self-copy; old objects, retained
+source tails, complete headers/context/journals and distinct nonempty heap
+payloads are pinned. A reversed allocation order is a checked negative control.
+The routine outer wrapper is type-checked prose only in TERRA-TODO; twenty
+adapters remain unproved. General variable-shape capture, physical emission and
+compiler/world composition remain open.
+
+## Independently varying child lengths
+
+`SourceVaryingByteCapture.timeout_prefix` removes the common-inner-length
+premise from the preceding capture family. Every child has its own runtime
+length and payload. At original loop fuel `count+budget+3`, earlier children
+must satisfy `length(start+j) < count+budget-j`; the final child satisfies
+`budget ≤ length(start+count)`. These are actual matching-prefix fuel conditions,
+not an admitted-source cap. The proof derives each successful capture's padding
+and transports OLD header/byte reads across the resulting heap-only updates.
+
+Seven populated Source copy outcomes preserve complete headers, raw tails,
+heap contents, contexts and journals. Lengths 1/2/2 leave an older second byte
+outside the first captured object. A checked earlier-fuel counterexample shows
+why the success inequalities cannot be dropped. The routine outer wrapper is
+type-checked prose only; twenty-one Terra adapters remain unproved. General
+recursive shapes, eager target realization, physical allocation and compiler/
+world composition remain open.
+
+## Successful capture and returned identities
+
+`SourceByteCaptureSuccess.capture_all` proves successful runtime traversal of
+varying-length byte children under the original per-child fuel conditions and
+OLD reads. It returns the exact typed reference function `oldHeap.next+j`,
+independent of the storage start index, together with the ordered allocation
+footprint. The empty case and the `finCons` identity step are included.
+
+Full, shifted, static, empty, one-short and outer snapshot controls pin returned
+identities, complete states/headers/heaps/contexts/journals and actual heap-byte
+readbacks. An unallocated address is refused; an incorrect absolute-source-index
+offset is a negative control. Old objects and retained source tails survive.
+The routine outer snapshot wrapper is a type-checked proposition only in
+TERRA-TODO; twenty-two adapters remain unproved. These are logical Source heap
+identities, not physical pointer compilation, allocation-failure or world/
+compiler closure.
+
+## H26 downstream layout and execution interface
+
+`Backend/StorageOps/ProducerInterface` packages three explicit certificates:
+`PathEndpoint` ties the typed path location to the selected target operand;
+`StateEndpoint` retains graph representation, finite-run regions, numeric
+transport, query coverage and target observations; `ReachedEndpoint` certifies
+actual selected-code execution to that same observed machine. Pending producer
+laws are fields, with no unconditional producer instance.
+
+The execution equation matches the already published
+`Backend/MemoryCopies/Premises.LocationStepPremise` at public revision
+`6f3eedf0788ee1f8a3bcf230558c712ecdca04d5`. Consumers can construct that premise
+from `endpoint.execution`; the StorageOps interface avoids its Source imports.
+The inhabited bool-word client supplies every field and changes storage from
+zero to one while preserving stack, memory and context. Independent finder and
+skeptic reviews inspect this interface and witness without running Lean.
+
+This endpoint uses intrinsic `Evm.Machine`/`Evm.run`, not physical bytecode or
+packed byte-store execution. General concrete producers, Source authority and
+P17 physical adequacy remain open. The interface-first checkpoint was sealed before the separate readback
+modules described below were restored.
+
+## Capture allocation readbacks
+
+`SourceCaptureReadback.allocation_observations` proves exact fresh addresses
+and typed payloads for every arbitrary finite runtime capture prefix, with
+independently varying child lengths. It also preserves every older heap object.
+The proof uses the existing allocation operations and their typed readback laws;
+no replacement heap or representation relation is introduced.
+
+Full and shifted clients exercise actual Source capture and `heapAt`: existing
+objects survive, fresh objects contain changed captured bytes, dangling and
+wrong-type reads fail, and complete ordered states and journals are unchanged
+by reads. This strengthens logical Source heap observations only; physical
+allocation, target execution and world rollback remain open. The H26 endpoint
+stays sealed separately; P17's physical bridge choice is coordinator-escalated.
+
+## Captured nested-byte commit traversal
+
+`SourceCapturedByteCommit.commit_all` proves the actual `Source.storeElems`
+commit phase for arbitrary outer counts and independently varying byte-child
+lengths. Captured typed heap readbacks, existing path types, writable context,
+original fuel inequalities and destination headers at the reached prefix states
+are explicit premises. The ordered footprint contains only existing `Source.Op`
+values; it is not another evaluator. OLD header observations alone are not
+claimed sufficient for the intermediate reads.
+
+A populated whole storage-reference copy composes the checked capture and
+commit laws, then commits its outer header. Complete ordered outcomes and
+journals distinguish shifted references, empty traversal, dangling capture and
+partial writes on timeout. Fresh indexing refuses a retained child before the
+outer header commits, then accepts it afterward. A dirty child clears two
+stale bytes while retaining an older shadow byte; a wrong-reference control
+changes the selected payload. All prior fixtures remain unchanged.
+
+The initially combined concrete reduction exceeded the original heartbeat
+limit. Reusing capture/commit laws and keeping named outcome checks fixes that
+without changing budgets or observations. These are logical Source operations,
+not memory-to-storage compiler closure, general recursive physical emission or
+world rollback. The physical P17 bridge remains coordinator-escalated.
+
+## OLD-header transport through commit prefixes
+
+`SourceByteCommitFrames` proves persistent and transient read frames through
+byte writes, partial/full cleanup, header commit and arbitrary runtime prefixes.
+`prefix_header` derives the next sibling's actual read outcome from the OLD
+state using structural Source path separation. This supplies the intermediate
+header condition of the captured-byte commit theorem for the checked client;
+it does not assume the desired prefix execution or a physical address relation.
+
+The client exercises populated varying-length captures using only OLD header
+reads. Complete prefix state/journal observations retain unvisited defaults,
+source shadows and captured objects. An unrelated malformed query keeps its
+failure; an already visited header changes from zero to two, showing why the
+outside-path condition matters. Ordinary Source liveness checks, numeric hash
+transport, physical execution and world composition remain separate obligations.
+The routine generic OLD-header wrapper remains a type-checked statement for Terra.
+
+## Cleanup timeout after a runtime child prefix
+
+`SourceCapturedBytePhase.run_phase` derives captured-child execution from the
+existing heap and byte-copy semantics. `SourceCapturedByteTimeout.cleanup_timeout`
+proves an arbitrary successful child prefix followed by partial last-child
+cleanup. Captured-object, type and original per-child fuel conditions remain
+explicit. OLD destination headers suffice through the checked path frames.
+The exact failure state includes earlier commits and only the available stale
+tail prefix; neither the failing child header nor the outer header is committed.
+
+A populated whole storage-reference copy writes varying-length children before
+its last cleanup times out. Three of four stale bytes are cleared, an uncleared
+stale byte and an older shadow survive, and complete ordered journals are pinned.
+A successful phase control distinguishes the cleanup boundary. A separately
+invoked `rollbackTo` restores journaled state while captured heap objects remain;
+a rollback continuation after the failed bind is skipped. The original mark's
+heap component is not a heap-restoration guarantee. No Source semantics changed.
+The routine generic rollback wrapper is type-only for Terra; twenty-four
+adapters remain unproved. Physical target/caller rollback remains open.
+
+## Payload timeout after a runtime child prefix
+
+`SourceCapturedByteWriteTimeout.payload_timeout` proves the actual captured
+child writes exactly the available payload prefix before timeout, including
+zero write fuel. `write_timeout` lifts this through an arbitrary successful
+child prefix with OLD headers transported through the checked frames. Earlier
+payload/cleanup conditions and the final shortage condition remain explicit.
+The exact trace contains no cleanup or header for the failing child.
+
+A whole storage-reference copy captures varying-length children, commits the
+first two, writes both bytes of the third and then times out at its empty-tail
+fuel boundary. Its last child header stays zero despite populated raw cells;
+a successful phase control commits that header. Complete ordered states and
+journals distinguish failure, success, skipped rollback and separately invoked
+rollback retaining captured heap objects. The original heartbeat limit is
+preserved by reusing the checked commit theorem for the success contrast.
+These Source fuel observations do not establish EVM gas behavior, physical
+execution or whole-caller rollback. The prior twenty-four Terra adapters remain
+unproved; no generic pending adapter is used as a producer.
+
+## Remaining obligations
+
+General Source AST/address/default/value correspondence, complete packing/ABI
+and recursive physical emission, aggregate target lifecycle and compiler/world
+rollback composition remain open. G27.01–G27.05, G28, G29.01–G29.03, G30 and
+Backfill A/B therefore remain partial. Published owner results are reused with
+explicit premises; no missing representation or target bridge is assumed closed.
+
+## Snapshot fixture extraction boundary
+
+A shared initial-store fixture was evaluated without changing control statements
+or observations. Both implementation variants passed affected kernel checks, but
+the sequence fixture runtime increased by 22.7%, then by 10.5% after a
+reducibility optimization, exceeding the 10% limit in both trials. The original fixture definitions remain
+in production. Candidate patches and raw measurements are retained separately;
+this result is not migration or performance acceptance.
+
+## C224 adopted-head checkpoint (2026-11-07)
+
+The preserved branch had adopted master through 8319ae6ccb2df62ac6b4e8aad460f4d87853cd9f.
+Owned StorageOps sources, Source/Ctor, the toolchain and Lake configuration were
+unchanged from C223. Fresh KeySort passes by artifact fetch; the initially empty
+build directory does not establish cold compilation or a performance baseline.
+
+The checkpoint selected 350 touched targets. That build timed out with exit 124
+after 600.22 seconds (602 seconds wrapper wall time), peak sampled aggregate RSS
+1112567808 bytes and no resource stop. It completed 487 jobs without a recorded
+compiler error; those jobs are partial progress, not a completed build. Run-lean
+ran its preliminary checks but its heavy build was refused by the retained
+prerequisite guard. No identical retry, timeout increase or guard bypass was made.
+The V10-C224-TIMEOUT policy question was sent immediately through coord-ask;
+independent per-file proof work remains separate from full confirmation.
+
+Trust, orphans and layers pass. Strict docs remain FAIL: 4 missing references and
+131 ambiguous references. Running the same current checker on exact committed
+trees gives identical current/published findings at master 2a43bf4fcdaf24750265afc8f8be5b420d1d22b0
+(zero new/removed). The frozen original base under that same checker has 0 missing
+and 12 ambiguous references; its comparison remains FAIL with 132 new and 9 removed
+findings. Published equality is not a raw strict or frozen-baseline waiver and
+reproduces no build-timeout baseline. Strict axiom pins also remain FAIL: 16312
+pinned theorems, zero errors, 271 unrecorded changes. No inventory or gate policy
+was edited. All raw failures and completion-validated comparison logs are retained.
+
+Separate read-only finder and skeptic reviews found no receipt-boundary issue.
+Original closure still needs concrete Source-origin/layout/alignment and reached
+state construction for the published PathEndpoint/StateEndpoint/ReachedEndpoint
+interfaces; generated intermediate copy/clear coverage remains an explicit
+per-run premise. Generic recursive emitted selection, ordinary Source aggregate
+lifecycle and physical/P8/caller-world composition remain producer obligations.
+Existing intrinsic leaves and the 52-row audit reference ledger do not close
+G27-G30, the backfills or any consolidated proof/acceptance queue.

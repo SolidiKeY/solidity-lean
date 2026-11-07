@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const { createHash } = require('node:crypto');
 const { createExtension } = require('../src/extension.cjs');
 const model = require('../src/model.cjs');
-const { mock } = require('./mock.cjs');
+const { mock, leaves } = require('./mock.cjs');
 const token = { isCancellationRequested: false, onCancellationRequested: () => ({ dispose() {} }) };
 function row(env, overrides = {}) {
   return { source: env.doc.uri.fsPath, sourceHash: createHash('sha256').update(env.doc.text).digest('hex'), contract: 'C', function: 'f', signature: 'f(uint256)', status: 'proved', range: { start: { line: 1, character: 2 }, end: { line: 2, character: 3 } }, ...overrides };
@@ -56,9 +56,10 @@ test('impossible preconditions remain visible even when the postcondition is pro
   assert.equal(diagnostics[0].code, 'preconditions-impossible');
   assert.match(diagnostics[0].message, /vacuous/);
   const file = [...env.controller.items.values()][0];
-  assert.match([...file.children.values()][0].description, /vacuous/);
+  assert.match(leaves(file)[0].description, /vacuous/);
   await env.controller.run({include:[file]}, token);
-  assert.deepEqual(env.runs[0].calls.map(call => call[0]), ['started','errored','end']);
+  assert.deepEqual(env.runs[0].calls.map(call => call[0]), ['errored','end']);
+  assert.deepEqual(env.runs.at(-1).calls.map(call => call[0]), ['enqueued','started','errored','end']);
 });
 
 test('unknown audits require attention while possible entry states preserve a pass', () => {
@@ -76,7 +77,7 @@ test('verify command registers proof status, Test Explorer function and hover', 
   await env.commands.get('solidityLean.verify')();
   const file = env.controller.items.get(env.doc.uri.toString());
   assert.equal(file.children.size, 1);
-  const item = [...file.children.values()][0];
+  const item = leaves(file)[0];
   assert.equal(item.label, 'C.f(uint256)'); assert.equal(item.description, 'proved');
   assert.deepEqual(env.diagnosticMap.get(env.doc.uri.toString()), []);
   const hover = env.events.hover.provideHover(env.doc, { line: 1, character: 5 });
@@ -115,7 +116,7 @@ test('saves dirty files and passes configured executable, timeout and backend', 
   const env = setup(async (value, env) => { args = value; return { results: [row(env)], errors: [] }; });
   env.doc.isDirty = true; env.config.backendPath = '../other'; env.config.nodePath = '/custom/node'; env.config.timeoutMs = 123;
   await env.api.verify(env.doc);
-  assert.equal(env.doc.isDirty, false); assert.equal(args.backendPath, '/workspace/other');
+  assert.equal(env.doc.isDirty, false); assert.equal(args.backendPath, require('node:path').resolve(__dirname,'../../../other'));
   assert.equal(args.nodePath, '/custom/node'); assert.equal(args.timeoutMs, 123);
 });
 test('suppresses results from modified documents', async () => {
@@ -180,21 +181,21 @@ test('Test Explorer runs one exact overloaded signature and preserves sibling st
     return { results: args.function ? [row(env)] : [row(env), row(env, { function: 'g', signature: 'g()', status: 'ready' })], errors: [] };
   });
   await env.api.verify(env.doc, { listing: true });
-  const file = [...env.controller.items.values()][0], item = [...file.children.values()][0];
+  const file = [...env.controller.items.values()][0], item = leaves(file)[0];
   await env.controller.run({ include: [item] }, token);
   assert.equal(calls[1].function, 'f(uint256)'); assert.equal(calls[1].contract, 'C');
-  assert.deepEqual(env.runs[0].calls.map(call => call[0]), ['started', 'passed', 'end']);
-  assert.equal(file.children.size, 2);
+  assert.deepEqual(env.runs[0].calls.map(call => call[0]), ['enqueued','started','passed','end']);
+  assert.equal(leaves(file).length, 2);
 });
 test('Test Explorer respects exclusions and maps pending without counterexample claims', async () => {
   const env = setup(async (_, env) => ({ results: [row(env, { status: 'pending', reason: 'open proof goals' })], errors: [] }));
   await env.api.verify(env.doc, { listing: true });
-  const file = [...env.controller.items.values()][0], item = [...file.children.values()][0];
+  const file = [...env.controller.items.values()][0], item = leaves(file)[0];
   await env.controller.run({ include: [file], exclude: [item] }, token);
   assert.deepEqual(env.runs[0].calls.map(call => call[0]), ['end']);
   await env.controller.run({ include: [item] }, token);
-  assert.deepEqual(env.runs[1].calls.map(call => call[0]), ['started', 'failed', 'end']);
-  assert.doesNotMatch(env.runs[1].calls[1][2].message, /counterexample/i);
+  assert.deepEqual(env.runs[1].calls.map(call => call[0]), ['enqueued','started','failed','end']);
+  assert.doesNotMatch(env.runs[1].calls.find(call=>call[0]==='failed')[2].message, /counterexample/i);
 });
 
 test('Test Explorer runs each child once when result publication replaces children', async () => {
@@ -209,7 +210,7 @@ test('Test Explorer runs each child once when result publication replaces childr
   const file = [...env.controller.items.values()][0];
   await env.controller.run({include:[file]}, token);
   assert.deepEqual(calls, ['list','f(uint256)','g()']);
-  assert.deepEqual(env.runs[0].calls.map(call => call[0]), ['started','passed','started','passed','end']);
+  assert.deepEqual(env.runs[0].calls.map(call => call[0]), ['enqueued','enqueued','started','passed','started','passed','end']);
 });
 
 test('source hashes accept the BOM hidden by the editor without accepting other text', async () => {
@@ -292,11 +293,12 @@ test('certified model prestates are opt-in and appear in hover, output and faile
   const hover = env.events.hover.provideHover(env.doc, { line: 1, character: 5 });
   assert.match(hover.contents.value, /certified model prestate/);
   assert.match(hover.contents.value, /\\u001b/);
-  const item = [...[...env.controller.items.values()][0].children.values()][0];
+  const item = leaves([...env.controller.items.values()][0])[0];
   await env.controller.run({ include: [item] }, token);
-  assert.deepEqual(env.runs[0].calls.map(call => call[0]), ['started', 'failed', 'end']);
-  assert.match(env.runs[0].calls[1][2].message, /certified model prestate/);
-  assert.doesNotMatch(env.runs[0].calls[1][2].message, /exploit|constructor-reachable/);
+  assert.deepEqual(env.runs[0].calls.map(call => call[0]), ['failed','end']);
+  assert.deepEqual(env.runs.at(-1).calls.map(call => call[0]), ['enqueued','started','failed','end']);
+  assert.match(env.runs.at(-1).calls.find(call=>call[0]==='failed')[2].message, /certified model prestate/);
+  assert.doesNotMatch(env.runs.at(-1).calls.find(call=>call[0]==='failed')[2].message, /exploit|constructor-reachable/);
   env.doc.version++; env.events.change({ document: env.doc, contentChanges: [{}] });
   assert.equal(env.api.reports.size, 0);
   assert.equal(env.events.hover.provideHover(env.doc, { line: 1, character: 5 }), null);

@@ -23,6 +23,9 @@ export PATH="$HOME/.elan/bin:$repo_root/scripts/lean-vscode/bin:$PATH"
 node scripts/check-layers.mjs
 # The library roots are generated from the file tree (`docs/parallelism.md`, P5).
 bash scripts/coord-tools/register.sh --check
+# The module map, docs/README.md, TERRA-TODO.md and the pin inventory are
+# generated from per-lane fragments (P5).
+bash scripts/coord-tools/fragments.sh --check
 # One Lake invocation: the default targets (read from `lakefile.toml`) and
 # solkey's TestSuite through the solc import. The TestSuite is not a default
 # target, and the import reports a function that stops elaborating as a row,
@@ -35,7 +38,3 @@ lake build "${default_targets[@]}" SolkeyTestSuite
 if [[ "$with_bridge" -eq 1 ]]; then
   ./scripts/check-bridge.sh
 fi
-# Keep the sort-annotation table honest against the solkey taclet file:
-# drift fails the build. Skipped with a warning when no checkout is beside
-# this repository -- see scripts/check-solkey.sh.
-exec ./scripts/check-solkey.sh

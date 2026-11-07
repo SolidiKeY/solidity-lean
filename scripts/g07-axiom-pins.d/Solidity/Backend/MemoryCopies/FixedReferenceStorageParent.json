@@ -1,0 +1,50 @@
+{
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageParent.lean:Solidity.Backend.MemoryCopies.fixed_reference_storage_parent_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageParent.lean:Solidity.Backend.MemoryCopies.fixed_reference_storage_parent_demand": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageParent.lean:Solidity.Backend.MemoryCopies.fixed_reference_storage_parent_growth": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageParent.lean:Solidity.Backend.MemoryCopies.fixed_reference_storage_parent_guard": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageParent.lean:Solidity.Backend.MemoryCopies.fixed_reference_storage_parent_inputs": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageParent.lean:Solidity.Backend.MemoryCopies.fixed_reference_storage_parent_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageParent.lean:Solidity.Backend.MemoryCopies.fixed_reference_storage_parent_refusal_rows": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageParent.lean:Solidity.Backend.MemoryCopies.fixed_reference_storage_parent_repr": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageParent.lean:Solidity.Backend.MemoryCopies.fixed_reference_storage_parent_source": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageParent.lean:Solidity.Backend.MemoryCopies.fixed_reference_storage_parent_success_rows": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageParent.lean:Solidity.Backend.MemoryCopies.fixedReferenceStorageParent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

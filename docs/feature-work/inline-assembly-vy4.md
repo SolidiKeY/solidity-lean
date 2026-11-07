@@ -138,13 +138,13 @@ Source timeout. When static preparation succeeds, it returns the producer's unch
 Source/residual result carrying `.revert []`, paired with the local target's
 `.staticWrite` error and unchanged target. These distinct verdicts are kept.
 
-`load_agreement` observes the actual loaded target word before restoring the
+`load_assuming_view_agreement` observes the actual loaded target word before restoring the
 caller machine and requires pointwise agreement with `transientSlotLoad`.
 `store_exact` derives the actual paired target run from checked physical
 preparation and a nonstatic frame. `store_readback` uses VY2's real
 `transientSlot_load_store` law and finite separation to establish full-word
 agreement at the written slot. It does not claim preservation of every other
-physical slot or a whole-bank representation invariant. `reset_agreement`
+physical slot or a whole-bank representation invariant. `reset_readback_zero`
 uses actual typed default/codec zero facts to relate every slot after both
 transaction resets. No new world, layout or caller-reachability assumption is
 introduced; the matching-view premise is explicit and remains to be derived
@@ -446,6 +446,122 @@ pass. These are interface/port checks, not full Lake/TestSuite/strict/runtime
 KeySort or final source/joint gates; historical G07 failures are retained.
 No budget, expected observation or producer implementation changed.
 
-Scope note (review): in `Yul/World/TransientTargetPort.lean`, `load_agreement`
-takes the target load equation as a premise and `reset_agreement` holds for any
-target, so neither derives a source/target agreement by itself.
+Review correction: `load_assuming_view_agreement` transports an assumed
+pointwise physical-read/target-bank relation. `reset_readback_zero` reads zero
+after both resets for any prior target; neither constructs an initial view
+agreement. `stored_load_readback` instead derives the written-slot physical
+read and executed target read from the actual checked store, nonstatic frame
+and producer separation fact, with no initial agreement premise. Its control
+starts mismatched and invokes that law explicitly after the write. The three
+LOG port-rule controls now use direct `exact` law calls, with no `rfl` fallback.
+
+The intrinsic terminal leaf binds STOP/RETURN/REVERT to exact loaded bytes,
+with missing-memory refusal kept distinct from a genuine revert. It only
+produces an outcome; interpreter exit, frame completion and Source/G51
+integration remain open. Registered controls cover cross-word, empty and
+refused payloads.
+
+`selfDestruct` and `rollbackLifecycle` are compatibility abbreviations for the
+pre-existing `Lifecycle.destructKnown` and `Lifecycle.rollbackDestruction`.
+Their existing public proofs retain their premises; local lifecycle snapshot
+rollback was already implemented, not a newly closed adequacy obligation.
+
+Review-fix validation: explicit LOG law controls, actual mismatched-entry store
+readback and affected consumers pass. Combined 25-declaration signature/axiom
+audit is standard-only; independent finder/skeptic report no findings.
+No initial view or universal adequacy claim is added. Full lane gates remain
+open; earlier failed separation-decision attempt and historical gates are retained.
+
+## Intrinsic SELFDESTRUCT binding
+
+`SelfDestructBuiltin` binds the existing one-operand intrinsic builtin to
+`Lifecycle.destructAtFrame`, reusing the shared low160 address projection.
+It derives the actual lifecycle result, empty-success tag, local snapshot
+rollback and full non-endpoint account preservation from existing laws.
+The tag is not an interpreter-exit proof; `none` is not a callee revert.
+
+Controls cover dirty beneficiary bits, delegated storage owner versus a
+separate funded code target, old/fresh self/other beneficiary behavior,
+deferred deletion, complete code-target preservation, static refusal and
+actual-result rollback. They are typed context/metadata preparations, not
+code/creation reachability certificates. Environment credit, physical/G01/G51,
+compiler/resource and original Y07/Y09/Backfill A/B joint closure remain open.
+
+Both modules and twenty signature/axiom reports pass serial per-file checks;
+standard axioms only. Independent finder/skeptic report no findings. Failed
+scratch automation/layout attempts are retained. Layering, reachability,
+doc paths and trust pass; mandatory full lane gates remain pending.
+
+## H22/H21 reconciliation
+
+The lane is rebased onto H22's Core call-mode/invocation metadata and H21's
+build rules. Owned World/P7 code constructs no Core `ExtCall`; the inspected
+World leaf closure does not import `Syntax/Scoped`. No static/provenance
+interpretation of the new fields is claimed. Generated roots were regenerated
+and checked after rebasing; existing area-map coverage includes the carried
+modules. Original Source/world/G01/G51/resource and final obligations remain open.
+
+## Published dependency reconciliation
+
+The lane adopts published integration `059eb83d`; carried World/P7 source
+bodies are unchanged. The earlier library checkpoint stopped at the disk
+reserve and remains failed. Its axiom-pin failure is also retained. With the
+published nested-cache collection fix, the new inventory check passes with
+6,252 pins, zero errors and zero unrecorded changes; this is not full-library
+or lane completion. H24's declaration-graph companion is present but supplies
+no concrete admission inhabitant or creation/initcode executor. Original
+world/G01/G51/compiler/resource and joint obligations remain open.
+
+## Terminal builtin G0 repair
+
+`terminalBuiltin` uses `Builtin.casesOn` with a motive generalizing both arities
+and the operand function, replacing the indexed executable match rejected at
+review. Its public signature, existing laws and complete control module are
+unchanged. RETURN/REVERT retain full loaded bytes, STOP ignores memory, and
+missing memory or unhandled builtins still return `none`. This mechanical
+repair adds no interpreter, Source/G01/G51 or compiler adequacy claim.
+
+## H26 pending producer interfaces
+
+P7's nonempty payload obligation already exists as
+`Backend.FailurePaths.Premises.TransientPayloadAt`; its published controls refute
+the current nonempty adapter, so no instance is claimed.
+`World/PendingCoupling.WorldLogAt` adds a per-reached-invocation P19 contract
+using the existing G42 Step, actual full Source state, physical/transient
+carriers, complete observations and exact return buffers. Representation and
+Source observation relation still require their layout/H25/G01 owners' review;
+arbitrary parameter choices are not adequacy. No producer instance, Source
+change, target execution implementation or whole-lane closure is supplied.
+Review fixes before freezing: captured-entry carriers and successful target/P7
+endpoint machine equality are explicit. Raw Source halt bytes are not equated
+with caller-local returndata; only completed outcomes constrain that buffer.
+The Source observation boundary is relational, so it does not reconstruct log
+interleaving from separate legacy lists. Fault endpoints and concrete producers
+remain open. Independent read-only finder/skeptic follow-ups report no remaining
+confirmed interface findings; scoped module/signature checks pass.
+
+## Published P6/P14 conditional consumers
+
+`ReturndataByteLoad.copy_load` consumes the exact published P6
+`Physical.ByteWorld.Producer` field. The existing function-level copy derives
+its actual 32-byte image and outside-byte frame; the pending byte-load law
+then preserves memory and the saved stack. Source-window bounds, alignment,
+capacity and stack room remain explicit. Controls cover distinct bytes,
+wrong/truncated words, exact-end zero and out-of-source zero refusal. No
+concrete MLOAD producer or emitted RETURNDATACOPY implementation is claimed.
+
+`CreationReturnWindow.returned_window` consumes P14's exact return-address
+field and actual constructor Exec, deriving strict 20-byte bounds rather than
+assuming them. Its conditional witness retains nonempty runtime/arguments and
+immutable patches. Concrete controls reuse the published executed constructor
+and inspect both linked-address windows, wrong offsets, argument separation
+and zero-length boundaries. These bytes are returned runtime, not the deployed
+contract address or caller returndata after successful CREATE. Source creation,
+physical ownership/MemOK, world/compiler/resource and G51 closure remain open.
+
+Validation: four modules, importing controls and exact signatures pass scoped
+serial checks; all 25 consumer/control declarations are standard-axiom-only.
+Independent read-only finder and skeptic report no findings. Generated roots,
+area coverage, layers, trust and documentation paths pass. Initial automation
+and namespace diagnostics are retained. No concrete P6/P14 Producer instance,
+new opcode admission or final full-lane gate passage is inferred.

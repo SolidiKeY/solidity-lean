@@ -1,0 +1,32 @@
+{
+ "Solidity/Lowering/V08/WorldContextComposition.lean:Solidity.Lowering.V08.WorldContextComposition.finite_history": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldContextComposition.lean:Solidity.Lowering.V08.WorldContextComposition.later_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldContextComposition.lean:Solidity.Lowering.V08.WorldContextComposition.populated_history": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldContextComposition.lean:Solidity.Lowering.V08.WorldContextComposition.populated_transaction": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldContextComposition.lean:Solidity.Lowering.V08.WorldContextComposition.repeated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldContextComposition.lean:Solidity.Lowering.V08.WorldContextComposition.transaction": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

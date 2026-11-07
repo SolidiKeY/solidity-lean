@@ -131,7 +131,7 @@ def falseNode (F : AFml) (h : F.search = false) : Node F :=
 
 theorem falseNode_spec (F : AFml) (h : F.search = false) : (F.falseNode h).formula.atZero = false := by
   have hp := List.find?_some (Option.some_get (falseNode_isSome F h)).symm
-  simpa only [Bool.not_eq_true'] using hp
+  simpa only [falseNode, Bool.not_eq_true'] using hp
 
 /-- A false node reconstructs a concrete assignment to the starting formula. -/
 def searchCountermodel (F : AFml) (h : F.search = false) :

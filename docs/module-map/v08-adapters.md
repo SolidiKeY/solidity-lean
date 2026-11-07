@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/v08-adapters.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # V08 independent adapters
 
 | Module | Purpose |
@@ -608,7 +609,8 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean` | Populated ADD/MUL certificate consumers, complete ordered observations, modular boundaries and resource/frame separation controls. |
 
-| `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean` | Concrete ADD/MUL selection-certificate short-stack refusal against charged fetched execution, with gas/fuel priority controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean` | Concrete short-stack selection-certificate refusals (ADD/MUL, SUB, DIV/MOD, SDIV/SMOD, NOT/ISZERO, SHL/SHR, AND/OR/XOR, comparisons, POP, DUP1–DUP16) against charged fetched execution, with gas/fuel priority controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/IndexedRefusalInterfaceV1.lean` | Frozen V1 indexed DUP/SWAP refusal claims and explicit producer fields; no inhabitant or broader adequacy. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionSequence.lean` | Concrete ADD/MUL certificate sequence, two charged fetched steps, native continuation and populated order/wrap/resource controls. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionStop.lean` | Exact STOP decoding, actual arithmetic-sequence termination and populated buffer/PC/fuel controls against the pinned reference. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/ReturnSizeObservation.lean` | Charged frozen-API return-data-size observation, exact gate ordering and populated distinct-buffer/capacity controls. |
@@ -818,3 +820,143 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Source/Progress/BoundCatalogueControls.lean` | Inhabited complete-catalogue success and caller consumers, omitted-coverage and false-body metadata refusals. |
 | `Source/Progress/BoundCataloguePanicControls.lean` | Inhabited whole-catalogue post-initializer panic and caller preservation with coverage/metadata refusal controls. |
 | `Source/Progress/BoundCatalogueParentControls.lean` | Actual elaborated bound-local callee with allocating intrinsic parent argument, distinct argument/default/local references and restored caller state. |
+| `Backend/PrimitivePackets/SignedCheckedMul/Source.lean` | Checked int256 `*` Source evaluation on arbitrary locals: exact value or `Panic(0x11)`. |
+| `Backend/PrimitivePackets/SignedCheckedMul/Selected.lean` | The public compiler selects `binaryCode .int .mul`, with the literal `sTail .mul` guard. |
+| `Backend/PrimitivePackets/SignedCheckedMul/Target.lean` | Selected checked int256 `*` execution on any represented machine and saved stack: product or coarse revert. |
+| `Backend/PrimitivePackets/SignedCheckedMul/Agreement.lean` | Source and selected target of checked int256 `*` from one local family. |
+| `Backend/PrimitivePackets/SignedCheckedMul/Controls.lean` | Populated-frame, arbitrary-stack controls: both orders of `-2^255 * -1`, lower/upper overflow, regular products. |
+<!-- Retained V17 lane modules not yet present in the published map. -->
+| `Backend/StructuredFlow/ConditionalSourceCompiler.lean` | Compile the existing V07-related conditional statement, preserving its actual Source run and reached map as well as the intrinsic compiler contract. |
+| `Backend/StructuredFlow/ConditionalSourceCompilerControls.lean` | Inhabited witnesses and negative controls for the corresponding mapped lowering/compiler component. |
+| `Backend/StructuredFlow/MappedBranch.lean` | Branch code over the actual V07-mapped effectful condition. |
+| `Backend/StructuredFlow/MappedBranchControls.lean` | Inhabited witnesses and negative controls for the corresponding mapped lowering/compiler component. |
+| `Backend/StructuredFlow/ScopedMappedSequence.lean` | Drop the mapped branch's private capture in the existing intrinsic block, then compile a continuation in the reached caller context. |
+| `Backend/StructuredFlow/ScopedMappedSequenceControls.lean` | Inhabited witnesses and negative controls for the corresponding mapped lowering/compiler component. |
+| `Lowering/G19/AssignmentDoWhileBreak.lean` | A mapped assignment in a do-while body followed by unconditional break. |
+| `Lowering/G19/AssignmentDoWhileBreakControls.lean` | Mixed mapped clients: body writes once, arbitrary trailing condition is skipped. |
+| `Lowering/G19/AssignmentDoWhileContinue.lean` | A mapped assignment followed by continue skips every remaining body item. |
+| `Lowering/G19/AssignmentDoWhileContinueControls.lean` | Actual mixed mapped clients and effectful/declaration suffix rejection. |
+| `Lowering/G19/AssignmentForBreak.lean` | One mapped for-loop initializer followed by an immediate break. |
+| `Lowering/G19/AssignmentForBreakControls.lean` | Real mapped initializer writes and skipped optional for-loop post expressions. |
+| `Lowering/G19/AssignmentReturnFlagControls.lean` | Inhabited map-guided G19 clients over V07's actual mixed Bool/integer/ memory/storage fixture. |
+| `Lowering/G19/AssignmentWhileBreak.lean` | One mapped effectful while shape: a Boolean local-assignment condition and an immediate break body. |
+| `Lowering/G19/AssignmentWhileBreakControls.lean` | Actual mixed V07/P12 inputs. |
+| `Lowering/G19/ConditionalSequence.lean` | Actual conditional statement followed by an assignment in its caller context. |
+| `Lowering/G19/ConditionalSequenceControls.lean` | Inhabited witnesses and negative controls for the corresponding mapped lowering/compiler component. |
+| `Lowering/G19/ReturnTail.lean` | Consume the existing mapped return selector to suppress a real caller assignment. |
+| `Lowering/G19/ReturnTailControls.lean` | Inhabited witnesses and negative controls for the corresponding mapped lowering/compiler component. |
+| `Backend/StructuredFlow/ConditionalSequenceCompiler.lean` | Compiler connection for the existing V07-related conditional followed by an assignment in its reached caller context. |
+| `Backend/StructuredFlow/ConditionalSequenceCompilerControls.lean` | Inhabited Source/compiler continuation witnesses, frame observations and wrong-slot controls. |
+| `Lowering/G19/AssignmentWhileReset.lean` | Mapped Boolean assignment while with an actual resetting body and intrinsic loop. |
+| `Lowering/G19/AssignmentWhileResetControls.lean` | Inhabited Source/compiler loop, alias and prefix-only omission controls. |
+| `Lowering/G19/AssignmentWhileContinue.lean` | Mapped resetting while proves continue skips arbitrary suffixes and retests the condition. |
+| `Lowering/G19/AssignmentWhileContinueControls.lean` | Inhabited continue/retest and donor-observation controls with reused compiled loop witnesses. |
+| `Backend/StructuredFlow/WhileContinueCompiler.lean` | Actual emitter and compiler connection for the existing V07-related continue/retest loop. |
+| `Backend/StructuredFlow/WhileContinueCompilerControls.lean` | Inhabited Source/compiler join, semantic guard mutation and corrupted-entry simulation controls. |
+| `Lowering/G19/AssignmentForContinue.lean` | Actual mapped for/continue/post proof with complete scoped structural value extraction and replay. |
+| `Lowering/G19/AssignmentForContinueControls.lean` | Inhabited post-after-continue and fixed-resource omitted-post Source controls. |
+| `Solidity/Backend/StructuredFlow/DoWhileBreakCompiler.lean` | Mapped G19 immediate-break do-while Source certificate to existing scoped physical compiler. |
+| `Solidity/Backend/StructuredFlow/DoWhileBreakCompilerControls.lean` | Inhabited pipeline/value/fuel controls and skipped-condition/omitted-body negatives. |
+| `Solidity/Backend/StructuredFlow/DoWhileContinueCompiler.lean` | Mapped G19 do-while continue with skipped body suffix and literal-false exit to existing physical assignment compiler. |
+| `Solidity/Backend/StructuredFlow/DoWhileContinueCompilerControls.lean` | Inhabited pipeline/value/fuel controls and skipped-suffix/omitted-body negatives. |
+| `Solidity/Backend/StructuredFlow/WhileReturnCompiler.lean` | Mapped G19 while/bare-return classification to the existing captured-selector physical compiler prefix; no EVM RETURN. |
+| `Solidity/Backend/StructuredFlow/WhileReturnCompilerControls.lean` | Inhabited pipeline/value/fuel controls and wrong outcome/capture/base negatives. |
+| `Solidity/Backend/StructuredFlow/WhileBreakCompiler.lean` | Mapped assignment-condition/immediate-break Source certificate to the existing scoped physical compiler. |
+| `Solidity/Backend/StructuredFlow/WhileBreakCompilerControls.lean` | Inhabited pipeline/value/fuel controls and visible false-condition/omitted-code/wrong-base negatives. |
+| `Backend/StructuredFlow/ReturnTailCompiler.lean` | Actual compiler of mapped captured-return selection and a conditionally suppressed primitive caller assignment. |
+| `Backend/StructuredFlow/ReturnTailCompilerControls.lean` | Inhabited true/false write controls, eager/omitted suffix negatives and caller-condition/private-selector alias observation. |
+| `Lowering/G19/ReturnPair.lean` | V07-related captured return across two suffix assignments, rereading the second donor from reached state. |
+| `Lowering/G19/ReturnPairControls.lean` | Inhabited return/fallthrough, visible second write, stale donor and omitted-second controls. |
+| `Backend/StructuredFlow/ReturnPairCompiler.lean` | Actual compiler composition for mapped captured return and two reached-state suffix assignments; explicit fragment/capacity and entry premises. |
+| `Backend/StructuredFlow/ReturnPairCompilerControls.lean` | Inhabited both-pipeline runs, full native snapshot and typed/native suffix mutation negatives. |
+| `Lowering/G19/AssignmentDoWhileReturn.lean` | Mapped do-while body assignment then bare return; arbitrary trailing condition skipped, true fresh flag independent of assigned value. |
+| `Lowering/G19/AssignmentDoWhileReturnControls.lean` | Both-pipeline/checked-mode true and false body runs, same-slot, wrong flag, skipped-effect and return classification controls. |
+| `Backend/StructuredFlow/DoWhileReturnCompiler.lean` | Actual compiler composition for mapped do-while assignment/bare-return; explicit entry, fragment and capacity. |
+| `Backend/StructuredFlow/DoWhileReturnCompilerControls.lean` | Both-pipeline/checked-mode native snapshots, independent true capture, wrong flag and leaked trailing-write native mutations. |
+| `Lowering/G19/ConditionalReturn.lean` | V07-related conditional assignments then unconditional bare return, scoped branch temps and independent true return flag. |
+| `Lowering/G19/ConditionalReturnControls.lean` | Both-pipeline/checked-mode branch writes, reached-state donor, wrong donor/flag and Source return classification controls. |
+| `Backend/StructuredFlow/ConditionalReturnCompiler.lean` | Actual compiler composition for V07-related conditional assignments followed by captured bare return. |
+| `Backend/StructuredFlow/ConditionalReturnCompilerControls.lean` | Both-pipeline native full-cell/stack observations and compiled donor/flag mutation refusals. |
+| `Lowering/G19/ConditionalReturnContinuation.lean` | V07-related conditional return suppresses arbitrary unreachable Source and intrinsic target continuations. |
+| `Lowering/G19/ConditionalReturnContinuationControls.lean` | Both-pipeline/checked-mode return continuation controls and eager caller-write rejection for both guards. |
+| `Backend/StructuredFlow/ConditionalContinuationCompiler.lean` | Actual compiler of V07-related captured-return continuation guard with whole-tail fragment check. |
+| `Backend/StructuredFlow/ConditionalContinuationCompilerControls.lean` | Full native cell/stack guard observations and separately compiled eager caller-write rejection. |
+| `Lowering/G19/AssignmentBlocks.lean` | Arbitrary finite ordered Boolean-copy blocks with actual Source/typed runs and full V07 context-map transport. |
+| `Lowering/G19/AssignmentBlocksControls.lean` | Heterogeneous unsigned/Boolean frame, reached-read ordering, reversal, repetition and same-slot controls. |
+| `Backend/StructuredFlow/AssignmentBlocksCompiler.lean` | Actual ordered Boolean-block compiler with mapped entry, full fragment/capacity premises; extraction provenance remains NONPASS. |
+| `Backend/StructuredFlow/AssignmentBlocksCompilerControls.lean` | Full native cell/stack order, repetition and same-slot controls with factored exact execution. |
+| `Lowering/G19/AssignmentForReturn.lean`, `Lowering/G19/AssignmentForReturnControls.lean` | G19 map-guided for-loop immediate return with arbitrary skipped post, actual Source runs, captured target flag and mixed-state controls ([scope](../feature-work/roadmap-g19-for-return.md)). |
+| `Backend/StructuredFlow/ForContinueCompiler.lean`, `Backend/StructuredFlow/ForContinueCompilerControls.lean` | Actual mapped for/continue/post to existing loop-compiler join with physical observations and negative controls ([scope](../feature-work/roadmap-g36-for-continue-compiler.md)). |
+| `Backend/StructuredFlow/ForReturnCompiler.lean`, `Backend/StructuredFlow/ForReturnCompilerControls.lean` | Actual for-loop Source outcome/captured-flag compiler connection, full physical snapshots and capture/base/outcome negatives ([scope](../feature-work/roadmap-g36-for-return-compiler.md)). |
+| `Backend/StructuredFlow/ForBreakCompiler.lean`, `Backend/StructuredFlow/ForBreakCompilerControls.lean` | Actual mapped for-initializer/break to scoped-prefix compilation, exact exit fragment, full snapshots and initializer/base/post negatives ([scope](../feature-work/roadmap-g36-for-break-compiler.md)). |
+
+### P1 paired allocating scalar transport
+
+| Module | Purpose |
+|---|---|
+| `Backend/InternalFlow/RuntimeFrameV3ScalarDescentInterfaceV1.lean` | Frozen typed public-guard and allocating three-cell prefix obligations, parameterized by an existing compiler certificate. |
+| `Backend/InternalFlow/RuntimeFrameV3ScalarAllocatingDescent.lean` | Actual scalar allocating descent horizons with reached representation, exact ownership growth, three-cell parent history and complete exact new-object inventory. |
+| `Backend/InternalFlow/RuntimeFrameV3ScalarDescentControls.lean` | Populated zero/one/two descent horizons, old-array observations, capture-order negatives and the actual terminal guard. |
+| `Backend/InternalFlow/RuntimeFrameV3ScalarPairedExecution.lean` | Actual allocating descent history feeds the same-state scalar return loop. |
+| `Backend/InternalFlow/RuntimeFrameV3ScalarPairedTransport.lean` | All-count descent and return execution against the frozen producer, with derived history and allocator transport. |
+| `Backend/InternalFlow/RuntimeFrameV3ScalarPairedTransportControls.lean` | Populated actual producer, scalar result and restored pointer controls for paired transport. |
+| `Backend/InternalFlow/RuntimeFrameV3NativeScalarAgreement.lean` | All-count actual native recursive source and paired target scalar observation agreement, with heap identity separate. |
+| `Backend/InternalFlow/RuntimeFrameV3NativeScalarAgreementControls.lean` | Populated source/target scalar result and distinct native exhaustion versus target success controls. |
+| `Backend/InternalFlow/RuntimeFrameV3NativeAllocationCoherence.lean` | Complete native allocating-recursive output coherence across all sufficient quotation indices; target heap identity remains separate. |
+| `Backend/InternalFlow/RuntimeFrameV3NativeAllocationCoherenceControls.lean` | Exact populated two-allocation output at two sufficient indices and genuine insufficient-index exhaustion. |
+| `Backend/InternalFlow/RuntimeFrameV3FreshAllocationContents.lean` | Exact fresh private array source contents and physical words after arbitrary allocating descent tails. |
+| `Backend/InternalFlow/RuntimeFrameV3FreshAllocationContentsControls.lean` | Populated one/two-turn fresh object observations and header/payload ordering negatives. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocationInventory.lean` | Typed complete new-object inventory, every-reference coverage, distinct addresses and same-state physical observations. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocationInventoryControls.lean` | Populated zero/one/two actual descent inventories and new-object address distinctness. |
+| `Backend/InternalFlow/RuntimeFrameV3TypedHeapExtensionality.lean` | Intrinsic object/heap extensionality, derived output typings and uniqueness from exact old/new contents. |
+| `Backend/InternalFlow/RuntimeFrameV3NativeHeapProfile.lean` | Actual native recursive allocation supplies exact new-object contents and State-field preservation for every sufficient quotation index. |
+| `Backend/InternalFlow/RuntimeFrameV3NativeDescentHeap.lean` | Actual native output and reached target descent have identical complete dependent heaps; local return transport remains separate. |
+| `Backend/InternalFlow/RuntimeFrameV3TypedHeapExtensionalityControls.lean` | Two actual allocations preserve old objects yet differ in fresh contents; the altered heap fails the exact profile. |
+| `Backend/InternalFlow/RuntimeFrameV3NativeDescentHeapControls.lean` | Populated source/target heap identity with the native-result versus descent-slot mismatch retained. |
+| `Backend/InternalFlow/RuntimeFrameV3StateShell.lean` | Equality of existing non-memory State fields for allocation-only internal execution; no external/world-call adequacy. |
+| `Backend/InternalFlow/RuntimeFrameV3NativeReturnRepresentation.lean` | Actual native recursive output represented after actual target parent returns, with derived heaps, locals and remaining State fields. |
+| `Backend/InternalFlow/RuntimeFrameV3NativeReturnRepresentationControls.lean` | Populated actual-output representation, complete ordered 20-word observation vector and cursor/alias/halt negatives. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocationInventoryControls.lean` | Populated zero/one/two actual descent inventories and new-object alias negatives. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingCallCoherence.lean` | Frozen recursive-return source-coherence duty for the allocating family, all compatible callers/arguments/return binders and quotation indices. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingCallCoherenceControls.lean` | Actual outer calls at indices two/four with private allocation and preserved caller scalar; zero-index exhaustion distinguished from bare revert. |
+| `Backend/InternalFlow/RuntimeFrameV3OuterScalarRestore.lean` | Same-reference outer scalar restore preserving the live result and reached heap. |
+| `Backend/InternalFlow/RuntimeFrameV3OuterAllocatingCall.lean` | Executed allocating scalar call with actual exported caller representation and ordered result/control observations. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingOuterFamily.lean` | Fixed-image actual outer return over all capacity-admitted counts and sufficient source indices, with exported caller representation, total allocator transport, base extension and older-word preservation below an arbitrary runtime start. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingOuterFamilyControls.lean` | Inhabited zero/one-allocation families, complete ordered observations, changed-caller-result transport, starts9/11 and protected-word/scalar/halt negatives. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingOuterPlan.lean` | State-indexed argument demand and positive-allocation frozen Returned transport from existing Entry capacity; zero-cost transport is supplied by AllocatingOuterZero; universal claims are supplied by AllocatingOuterClaims. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingOuterPlanControls.lean` | Inhabited complete Entry and Returned across sufficient source indices, exact cursor/reference/counter/result/pointer vector and revert rejection. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingOuterZero.lean` | Owner-free zero-cost execution and frozen Returned; combined nonwrapped-count transport under original depth bounds. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingOuterZeroControls.lean` | Represented input with no allocator witness, actual zero-cost Entry/Returned and exact observations with cursor/halt negatives. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaims.lean` | Universal frozen ReturnClaim/BareRevertClaim for the existing allocating family and plan; checked zero-counter argument failure and insufficient-depth exhaustion remain distinct. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaimsControls.lean` | Inhabited universal success/revert consumers and complete failure entries at every index, rejecting panic/exhaustion/wrong-success outcomes. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingSourceCertificate.lean` | Closed syntax certificates for canonical/scoped allocating recursion; full source-run equality and frozen claim transport are derived, with no arbitrary-input parser or public-selector claim. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingSourceCertificateControls.lean` | Inhabited scoped recursion success/failure at all supplied indices and uncertifiability of malformed base/quotation inputs. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingSourceViews.lean` | Context-generalized intrinsic sequence/statement views and executable exact recBase certification; recursive-head recognition remains open. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingSourceViewsControls.lean` | Actual base acceptance and nil/revert/extra-statement refusal receipts, with extracted-certificate revert/exhaustion consumers. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingHeadViews.lean` | Generalized typed conditional/callRec/block/declaration/assignment views retaining actual children and constructor equations. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingDeclarationCheck.lean` | Executable exact scoped private bool-array allocation recognition from actual typed views; derives source syntax equality. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingHeadViewsControls.lean` | Actual head/allocation receipts, malformed-declaration refusals and the existing public allocation compiler-leaf link. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingTurnViews.lean` | Executable allocating conditional-root recognition retaining the actual guard, continuation and alternative with an exact syntax reconstruction; child/guard/whole-selector checks remain open. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingTurnViewsControls.lean` | Actual recursive-turn acceptance, preserved arbitrary continuation/alternative, and malformed root/allocation/extended-branch refusals. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingValueViews.lean` | Generalized typed simple/local/binary value views retaining actual primitive indices, operands and constructor equations. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingScalarLeaves.lean` | Exact allocating-family guard/zero/increment syntax recognition from actual value/assignment views; no indexed statement/argument match or semantic premise. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingGuardedTurn.lean` | Actual allocating root recognition checks original guard and zero arm, retains original continuation, and checks exact increment suffix independently. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingScalarLeavesControls.lean` | Populated guard/zero/increment/root/suffix receipts and actual wrong-operator/slot/literal/destination/alternative/extra-tail refusals. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingCallViews.lean` | Generalized intrinsic argument/memory-variable/value-return readers retain actual indices, payloads and constructor equations. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingCallLeaves.lean` | Exact original allocating argument labels/order/decrement/alias slot and result destination recognition through typed views. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingRecursiveCheck.lean` | Actual allocating recursive-head recognition retains child thunks, verifies original quotation indices, constructs existing source certificates and derives full source-run agreement from checker success. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingRecursiveCheckControls.lean` | Canonical acceptance at every index for fixed reference `A`, actual child retention, and wrong arguments/returns/function-name/index/child/base/signature refusals proved by `rfl`/`simp`. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingScopeView.lean` | Generalized exact unused-default-local decorator recognition, retaining the actual closed inner program and constructor equations. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingScopedCheck.lean` | Existing scoped allocating-family certification follows actual inner programs and children at original quotation indices; checker success derives full source-run agreement. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingScopedCheckControls.lean` | All-index scoped-family acceptance at fixed reference `A`, arbitrary decorator type/name, and actual initialization/order/context/root/index/child/profile refusals. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingScopedEndpoint.lean` | Populated checked scoped-source returns for original fixed C/A and positive/zero-cost callers, sharing all Returned invariants and existing ordered target observations; zero case proves no allocator witness. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingScopedEndpointControls.lean` | Concrete scoped-return instances, restored result/counter/older-frame observations, frame refusal and zero-cost return without allocator ownership. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingScopedTransport.lean` | Actual scoped-checker success yields frozen success/bare-revert claims for every original Entry, caller, frame and runtime cursor at fixed C/A; no approved-profile or selector claim. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingScopedTransportControls.lean` | Checked scoped-call argument-underflow transport preserves complete ordered bare-revert/non-success/panic/exhaustion distinctions without failed-State/world claims. |
+| `Backend/Executable/ConstructorArgumentControls.lean` | Inhabited argument-preparation controls, not constructor/runtime closure. |
+| `Backend/Executable/ConstructorArgumentFailure.lean` | Effectful local-argument failure at the native constructor boundary. |
+| `Backend/Executable/ConstructorBaseArgumentControls.lean` | Native inherited-argument clients with declaration-derived constructor contexts. |
+| `Backend/Executable/ConstructorBaseArguments.lean` | Actual inherited-constructor argument binding. |
+| `Backend/Executable/ConstructorStorageFailure.lean` | Storage-effect argument failure at the native constructor boundary. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/IndexedRefusalWitnessV1.lean` | Kernel-checked DUP/SWAP shortage proofs packaged into the unchanged frozen indexed refusal producer; instruction-local scope only. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/IndexedRefusalWitnessV1.lean` | Checked DUP/SWAP shortage proofs packaged into the frozen indexed refusal producer; instruction-local scope. |

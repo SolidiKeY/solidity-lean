@@ -1,0 +1,7 @@
+{
+ "Solidity/Lowering/StorageOps/SourceByteStorageBarrier.lean:Solidity.Lowering.StorageOps.SourceByteStorageBarrier.load_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

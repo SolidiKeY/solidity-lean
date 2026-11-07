@@ -1,0 +1,18 @@
+{
+ "Bridge/SolidityBridge/ExternalEvm/Assembly/LayoutChecks.lean:Solidity.Evm.External.Assembly.assembled_destination": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Assembly/LayoutChecks.lean:Solidity.Evm.External.Assembly.push32_length": [
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Assembly/LayoutChecks.lean:Solidity.Evm.External.Assembly.resolve_in_bounds": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Assembly/LayoutChecks.lean:Solidity.Evm.External.Assembly.resolve_out_of_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

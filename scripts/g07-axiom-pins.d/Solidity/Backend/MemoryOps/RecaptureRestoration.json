@@ -1,0 +1,41 @@
+{
+ "Solidity/Backend/MemoryOps/RecaptureRestoration.lean:Solidity.Backend.MemoryOps.captureTwice_restore_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/RecaptureRestoration.lean:Solidity.Backend.MemoryOps.checkedCaptureSequence_restore_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/RecaptureRestoration.lean:Solidity.Backend.MemoryOps.RecaptureControls.actual_restore": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/RecaptureRestoration.lean:Solidity.Backend.MemoryOps.RecaptureControls.criterion": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/RecaptureRestoration.lean:Solidity.Backend.MemoryOps.RecaptureControls.frozen_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/RecaptureRestoration.lean:Solidity.Backend.MemoryOps.RecaptureControls.payloads": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/RecaptureRestoration.lean:Solidity.Backend.MemoryOps.RecaptureControls.reached_reads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/RecaptureRestoration.lean:Solidity.Backend.MemoryOps.recapturedPayload_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

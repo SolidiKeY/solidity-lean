@@ -27,7 +27,7 @@ theorem arguments_run {E : Env} {Γ types} {tail : RArgs E (context Γ) types}
   (.bytes .calldata) rfl rfl off len start stop ordered bounded older state
  have tailRun := LiteralFailureMixedExpression.arguments_run G F extra
   (caller off len start stop older) state lookups
- simp only [Nat.one_mul] at head
+ simp only [STy.cdStride,Nat.one_mul] at head
  simp only [arguments]
  rw [evalArgs]
  dsimp only [ExceptT.run] at head tailRun

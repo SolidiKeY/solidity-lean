@@ -1,33 +1,37 @@
 'use strict';
 const { spawn, spawnSync } = require('node:child_process');
 const { resolve, join } = require('node:path');
-const { existsSync } = require('node:fs');
+const { existsSync,readdirSync } = require('node:fs');
 const { parseReport } = require('./report.cjs');
+const {processState}=require('./process-state.cjs');
 
-/** The backend uses detached Lean children; terminate the entire descendant tree. */
+/** Stop only a known-owned positive PID and its descendants or explicitly owned session. */
 function terminateTree(child) {
-  if (!child.pid) return;
+  if (!Number.isSafeInteger(child.pid) || child.pid <= 0) return;
   if (process.platform === 'win32') {
     spawnSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], { windowsHide: true, timeout: 5000 });
     return;
   }
-  // Freeze the CLI before discovering children so it cannot launch another batch.
-  try { process.kill(-child.pid, 'SIGSTOP'); } catch {}
-  const ps = spawnSync('ps', ['-eo', 'pid=,ppid='], { encoding: 'utf8', timeout: 5000 });
-  const children = new Map();
-  for (const line of (ps.stdout || '').trim().split('\n')) {
-    const [pid, parent] = line.trim().split(/\s+/).map(Number);
-    if (!children.has(parent)) children.set(parent, []);
-    children.get(parent).push(pid);
+  const identity=processState(child.pid);if(identity&&child.processBirth&&identity.birth!==child.processBirth)throw new Error('Owned process identity changed; refusing cleanup');
+  if(!child.ownedGroup&&(child.exitCode!==undefined&&child.exitCode!==null||child.signalCode!==undefined&&child.signalCode!==null))return;
+  if(child.ownedGroup)try{process.kill(-child.pid,'SIGSTOP');}catch{}
+  if(process.platform==='linux'){
+    const stop=record=>{if(!record)return;const now=processState(record.pid);if(!now||now.birth!==record.birth)return;
+      try{process.kill(record.pid,'SIGSTOP');}catch{}
+      // CONFIG_PROC_CHILDREN is optional; use PPID records rather than assuming task/*/children exists.
+      const children=readdirSync('/proc').filter(name=>/^\d+$/.test(name)).map(Number).map(processState).filter(candidate=>candidate?.ppid===record.pid);
+      for(const candidate of children)stop(candidate);
+      if(processState(record.pid)?.birth===record.birth)try{process.kill(record.pid,'SIGKILL');}catch{}
+    };stop(identity);
+    if(child.ownedGroup)try{process.kill(-child.pid,'SIGKILL');}catch{}
+    return;
   }
-  function kill(pid) {
-    try { process.kill(pid, 'SIGSTOP'); } catch {}
-    for (const descendant of children.get(pid) || []) kill(descendant);
-    // Detached children lead their own groups; ordinary children are killed by pid.
-    try { process.kill(-pid, 'SIGKILL'); } catch {}
-    try { process.kill(pid, 'SIGKILL'); } catch {}
-  }
-  kill(child.pid);
+  // Non-Linux fallback retains the existing bounded descendant snapshot; VM evidence is Linux-only.
+  try{process.kill(child.pid,'SIGSTOP');}catch{}
+  const ps=spawnSync('ps',['-eo','pid=,ppid='],{encoding:'utf8',timeout:5000}),children=new Map();
+  for(const line of(ps.stdout||'').trim().split('\n')){const[pid,parent]=line.trim().split(/\s+/).map(Number);if(!children.has(parent))children.set(parent,[]);children.get(parent).push(pid);}
+  function kill(pid){try{process.kill(pid,'SIGSTOP');}catch{}for(const descendant of children.get(pid)||[])kill(descendant);try{process.kill(pid,'SIGKILL');}catch{}}
+  kill(child.pid);if(child.ownedGroup)try{process.kill(-child.pid,'SIGKILL');}catch{}
 }
 
 function runBackend({ backendPath, nodePath = 'node', source, listing = false, auditPreconditions = false, counterexamples = false, contract, function: functionName, timeoutMs = 600000, signal }) {
@@ -45,6 +49,7 @@ function runBackend({ backendPath, nodePath = 'node', source, listing = false, a
   return new Promise((resolvePromise, reject) => {
     if (signal?.aborted) { reject(Object.assign(new Error('Verification cancelled'), { code: 'CANCELLED' })); return; }
     const child = spawn(nodePath, args, { cwd: root, detached: process.platform !== 'win32', windowsHide: true, shell: false });
+    child.ownedGroup=process.platform!=='win32';child.processBirth=processState(child.pid)?.birth;
     let stdout = '', stderr = '', finished = false;
     const finish = (error, report) => {
       if (finished) return;

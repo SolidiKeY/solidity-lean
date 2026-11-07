@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/MemoryCopies/FixedReferenceRebind.lean:Solidity.Backend.MemoryCopies.fixed_reference_rebind_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceRebind.lean:Solidity.Backend.MemoryCopies.fixed_reference_rebind_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceRebind.lean:Solidity.Backend.MemoryCopies.fixedReferenceRebind": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

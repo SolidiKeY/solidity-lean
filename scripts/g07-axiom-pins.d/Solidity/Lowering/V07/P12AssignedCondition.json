@@ -1,0 +1,32 @@
+{
+ "Solidity/Lowering/V07/P12AssignedCondition.lean:Solidity.Lowering.V07.P12AssignedCondition.aligned_assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AssignedCondition.lean:Solidity.Lowering.V07.P12AssignedCondition.assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AssignedCondition.lean:Solidity.Lowering.V07.P12AssignedCondition.source_not_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AssignedCondition.lean:Solidity.Lowering.V07.P12AssignedCondition.source_one": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AssignedCondition.lean:Solidity.Lowering.V07.P12AssignedCondition.source_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AssignedCondition.lean:Solidity.Lowering.V07.P12AssignedCondition.source_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

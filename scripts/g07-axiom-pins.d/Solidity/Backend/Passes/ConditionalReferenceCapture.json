@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/Passes/ConditionalReferenceCapture.lean:Solidity.Backend.Passes.ConditionalReferenceCapture.compiled": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ConditionalReferenceCapture.lean:Solidity.Backend.Passes.ConditionalReferenceCapture.compiledProgram": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ConditionalReferenceCapture.lean:Solidity.Backend.Passes.ConditionalReferenceCapture.execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ConditionalReferenceCapture.lean:Solidity.Backend.Passes.ConditionalReferenceCapture.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

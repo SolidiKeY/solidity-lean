@@ -1,0 +1,96 @@
+{
+  "ownerHead": "cc62220dcf1a47771536d75599b0ef588d143d62",
+  "runtimeBuildHead": "0140eb13b2f122d421deb07a19575a6801b21dfc",
+  "metadataSha256": {
+    "b-original-replay-manifest.json": "b589a6bcd8c3a58413f0f144b7c4879b1ba81d820291505e60691276d6bfa6f3",
+    "b-original-reconciliation-manifest.json": "149dd65a8935547044d41b2e59d52149fa893933a92f2924ec8949fd47b6c4ff"
+  },
+  "originalJournalSha256": "ae658ff7ea04b163a9d3939f58fc4b30acc15cf4cbe5487ca4abf5baddbb7f1d",
+  "journalBytes": 537822,
+  "journalCases": 84,
+  "sourceFingerprintsPerHead": 343,
+  "headsChecked": 2,
+  "bridgeAndClosureMatch": true,
+  "committedHarnessSha256": "63a01fa7513c310db9ca4040146cb8ee8e9cbb0a99007b5fe87555e6a40c46b5",
+  "executedHarnessSha256Reported": "37be7c069490f13759e6789fc00b4b4d29a3ca5c98aeb007f955f2aea73a6dbc",
+  "runtimePolicy": "Revalidated prior fresh H81 binaries; all343 Lean source hashes and build/binary/bridge/closure identities checked; no new runtime build.",
+  "rawArtifacts": [
+    {
+      "path": "/workspace/solidity-lean/.lake/native-browser-b-journal-handoff-cc62220dcf1a/handoff.json",
+      "expectedSha256": "ce3b211c7482f7c23761032aef098129c97152578eae9a6cb0484ab7ed594fe0",
+      "locallyPresentAndVerified": false
+    },
+    {
+      "path": "/workspace/solidity-lean/.lake/native-browser-b-original-replay/evidence.tar.gz",
+      "expectedSha256": "da15f10be44a77b18d488ab63312b40b8d0d9978ceb395cce3b446a73001a0ad",
+      "locallyPresentAndVerified": false
+    },
+    {
+      "path": "/workspace/solidity-lean/.lake/native-browser-b-original-reconciliation/evidence.tar.gz",
+      "expectedSha256": "40436ffb2fb002578dc00da33e3e0a3733a339b82c96f756b44e78a9c2b6859e",
+      "locallyPresentAndVerified": false
+    }
+  ],
+  "localRawEvidenceComplete": false,
+  "limitations": [
+    "Local verification covers Git metadata/source compatibility and retained journal, not an independent browser execution.",
+    "Executed harness bytes and actual wire/results archives are not locally verified until raw artifacts arrive.",
+    "Owner used revalidated prior fresh H81 binaries, not a new build for this replay; no unchanged STOP rerun requested.",
+    "Four diamonds pending; no source/compiler preservation, universal machine correctness or RUNTIME_GATE_PASS."
+  ],
+  "ownerReportedCounts": {
+    "proved": 64,
+    "refuted": 16,
+    "pending": 4
+  },
+  "ownerReportedIdentityDiamond": true,
+  "ownerReportedRuntimeGate": {
+    "command": [
+      "node",
+      "tests/directruntime-20261104/native-browser/h81-memory-controls.mjs"
+    ],
+    "exitCode": 0,
+    "wallSeconds": 141.64568312400297,
+    "scope": {
+      "memoryMaxBytes": 12884901888,
+      "memorySwapMaxBytes": 0
+    },
+    "requiredOuterHeadroomBytes": 4294967296,
+    "minimumOuterHeadroomBytes": 10586615808,
+    "resourceStop": false,
+    "sampledContainerProcessRssPeakBytes": 1375313920,
+    "rssSamplingSeconds": 0.1,
+    "childRusageMaxRssKiB": 275992,
+    "cgroupPeakBytes": 979558400,
+    "cgroupEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+    "runnerSha256": "8618123cc3a7149e411d586ad39ea315511b55c0fbc2fb284acb748e367d9041"
+  },
+  "localMetadataGate": {
+    "command": [
+      "python3",
+      "tests/directruntime-20261104/memory-references/browser-result-intake.py",
+      "/workspace/solidity-lean",
+      "cc62220dcf1a47771536d75599b0ef588d143d62",
+      "tests/directruntime-20261104/memory-references/runtime/master-5f145-validation/browser-cc622-intake"
+    ],
+    "exit": 0,
+    "wallSeconds": 1.8064765640010592,
+    "peakAggregateRssKiB": 15764,
+    "headroomGuardStopped": false,
+    "memoryMax": 12884901888,
+    "memorySwapMax": 0,
+    "leanThreads": 1
+  },
+  "checkerSha256": "487f86dabd2331eb43d986b32373ebaebd4b115c93dceed1c085d6e7ed51cf8d",
+  "archive": {
+    "path": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/master-5f145-validation/browser-result-metadata-evidence.tar.zst",
+    "sha256": "314c9b30a00015b96b1f8211749e2745b6852a1a91f4e3612d091681adb33b38",
+    "bytes": 26774,
+    "files": 7,
+    "payloadBytes": 159408,
+    "completeMemberReadbackVerified": true
+  },
+  "functionalWait": "Exact-journal execution reported delivered by authenticated native-browser owner; no further execution requested. Local raw-evidence verification remains pending.",
+  "review": "Independent read-only finder/skeptic:no findings;verified686source fingerprints,metadata/journal/harness hashes and reported-vs-local limits. No Lean/server or timing rerun.",
+  "setup": "Outer observer scope guard rejected an invocation before any child started; actual metadata gate ran in the verified12GiB/no-swap scope."
+}

@@ -1,8 +1,9 @@
 import Solidity.Lowering.G19.AssignmentReturnFlag
 
-/-! One mapped effectful while shape: a Boolean local-assignment condition
-and an immediate break body. Reuses V07's actual operand through the existing
-G19 map projection. No new lowering relation, evaluator or source carrier. -/
+/-! One effectful while shape: a Boolean local-assignment condition and an
+immediate break body. The hand-written target program reuses V07's operand
+through the existing G19 map projection; this is not a mapped lowering
+endpoint. No new lowering relation, evaluator or source carrier. -/
 namespace Solidity.Lowering.G19.AssignmentWhileBreak
 open Solidity.Lowering.V07
 open AssignmentReturnFlag (boolSlot)
@@ -32,7 +33,7 @@ theorem source_run {E : Source.Env} {srcΓ : Source.RCtx}
   have sub : (Source.EM.sub ls (Source.evalE G F (fuel+2)
       (.assign (.local i) (.local a)))).run (.nil,st) =
       (.ok (.val (.bool choice),ls.set i (.bool choice)),(.nil,st)) := by
-    have hr : Source.evalE G F (fuel+2) (.assign (.local i) (.local a)) (ls,st) =
+    have hr : Source.evalE (plan := none) G F (fuel+2) (.assign (.local i) (.local a)) (ls,st) =
         (.ok (.val (.bool choice)),(ls.set i (.bool choice),st)) :=
       source_assign_local_run G F fuel (ls,st) i a (.bool choice) read
     simp only [Source.EM.sub,ExceptT.run,ExceptT.mk,hr]

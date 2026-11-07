@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "source": "Incoming user messages H80 (2026-11-06), scoped instructions in this exact thread; supersedes earlier coordinator claims. This file records instructions, not proof/gate evidence.",
+  "decisions": [
+    {
+      "question": "Q-VIS-01",
+      "authorization": "Official VS Code1.108.0 archive provisioned; verify sha256 against saved official API; rendered rows remain open until actual evidence."
+    },
+    {
+      "question": "Q-RES-01",
+      "authorization": "Provision pinned validated CLI/Frontend dependencies on this lane VM; record checksums. Use12GiB no-swap serial-j1 scope, systemd user scope if available else ulimit-v fallback; report concrete failures. Original12GiB headroom and budgets remain.",
+      "decision": "H80"
+    },
+    {
+      "question": "Q-REL-01",
+      "authorization": "Add kernel-checked verifier metadata for actual failed obligation identity and exact source span; drive decorations from real metadata; no fabricated locations.",
+      "decision": "H80"
+    },
+    {
+      "question": "Q-STATUS-HELP-01",
+      "decision": "H80",
+      "status": "implementation-partial",
+      "scope": "Project proof documentation help",
+      "authorization": "The proof-help action links project docs/README.md and proof guide docs/calculus.md. Earlier H49 exclusion is superseded; no row waived."
+    },
+    {
+      "question": "Q-CLI-01",
+      "authorization": "Build produces compiler artifacts only; runtime/test equivalence remains incomplete. Existing concrete-model observations are not equivalence evidence.",
+      "decision": "H80"
+    }
+  ]
+}
