@@ -122,7 +122,7 @@ def scan(root):
                         break
             declarations.append(dict(path=path, line=text.count("\n", 0, m.start())+1,
                 kind=kind, name=name, in_controls_file="Controls" in p.stem,
-                disposition="original preserved read-only; owner migration pending",
+                disposition="current lexical declaration; frozen-source preservation not checked",
                 expected_message_comment=expected,
                 expected_message_sha256=sha(expected) if expected is not None else None,
                 statement=block[:cut], statement_sha256=sha(block[:cut]), command_sha256=sha(block)))

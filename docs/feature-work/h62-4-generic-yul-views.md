@@ -361,3 +361,13 @@ former Storage owner-relay request is superseded by this passing proof-only
 repair, with affected validation still pending. Generic fixture proofs, full
 negative/refusal coverage, semantic inventory and actual matched timings remain
 unfinished.
+
+### Frozen-source provenance for correspondence labels
+
+The lexical correspondence report now authenticates the existing frozen base from acceptance.py, compares complete current file Git blobs to that base and binds the result to census SHA256 hashes. Only matching files receive a preserved-original label. Modified and added files are explicitly unverified, baseline removals are listed separately, and source/content-universe changes after scanning fail closed. The scanner alone reports preservation as unchecked. Selected correspondence is tied to the exact ReadControls source path, so a same-basename file cannot inherit that evidence. No acceptance policy, frozen Lean declaration, proof budget or trust inventory is changed.
+
+The external refusal suite covers matching-but-changed pairs, proof-only file changes, new and removed files, missing/empty baselines, missing provenance, stale source contents and stale file universes. All 25 correspondence controls, seven census controls and the bounded-process control pass. Real-corpus reproduction retains both selected pairs and all 2,990 current control rows: 832 files match frozen blobs, 36 are modified and ten are additions; no frozen files are removed. This current inventory does not replace the historical 3,026-case inventory, whose semantic/migration reconciliation remains unfinished. Modified sources still require separate exact-statement and meaning checks. Even matching source bytes do not establish transitive dependency identity or elaborated type/meaning preservation; lexical PASS is not kernel correspondence.
+
+Independent read-only finder/skeptic found no confirmed defects. Evidence and matched external-CLI timings are retained at `/workspace/vy2-evidence/views-preservation/`. All four original checkpoints remain partial; generic Lean proof/refusal validation, complete case accounting, full-scope matched build timings and final/runtime acceptance remain open.
+
+The final matched correspondence-entrypoint samples, sharing the current census helper, give median 2.195→2.215 seconds (+1.0%, below the 10% stop). These are external CLI measurements, not historical full-toolchain or Lean build acceptance.
