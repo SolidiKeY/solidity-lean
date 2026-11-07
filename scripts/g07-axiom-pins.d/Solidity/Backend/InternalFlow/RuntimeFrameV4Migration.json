@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV4Migration.lean:Solidity.Backend.InternalFlow.RuntimeFrame.V4Migration.exhausting_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV4Migration.lean:Solidity.Backend.InternalFlow.RuntimeFrame.V4Migration.of_unrolled": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV4Migration.lean:Solidity.Backend.InternalFlow.RuntimeFrame.V4Migration.recursive_ofV3": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV4Migration.lean:Solidity.Backend.InternalFlow.RuntimeFrame.V4Migration.recursive_toV3": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
