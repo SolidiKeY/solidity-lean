@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "status": "blocked",
-  "integration": "8863c41276f9340d3d1960df9e4808294614189b",
+  "integration": "8a710f9d44df144d4c9855aeccca56585a422122",
   "original_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
   "full_lean_build": {
     "status": "pass",
@@ -13,16 +13,16 @@
       "SolkeyTestSuite",
       "SoliditySlowExamples"
     ],
-    "jobs": 6640,
+    "jobs": 6649,
     "exit_code": 0,
-    "elapsed_seconds": 106.03637676699145,
-    "peak_rss_bytes": 5963968512,
-    "minimum_available_bytes": 8508100608,
+    "elapsed_seconds": 26.96787910099374,
+    "peak_rss_bytes": 3398221824,
+    "minimum_available_bytes": 10289586176,
     "no_swap": true,
     "max_heavy_jobs": 1,
     "cleanup_complete": true,
-    "resource_receipt": "resume-8863-20261107/full-2-resource.json",
-    "stdout_sha256": "90cf96300dd0fb75cbe3079124385fb754e913f18fcdeb07293040e48845f1a0"
+    "resource_receipt": "resume-master-20261107-2/full-resource.json",
+    "stdout_sha256": "3d4261604c593902a3b4dc54681d36f67d718836820e6ff346ab89c2f737acaa"
   },
   "local_audit": {
     "modules": 9,
@@ -34,25 +34,25 @@
     "new_axioms": 0,
     "sorry": 0,
     "frozen_statements_changed": 0,
-    "upstream_lean_paths": 8028
+    "upstream_lean_paths": 8047
   },
   "static": {
-    "trust": "trust: 6646 sources, 289 inventoried implementation/recovery sites, 0 findings",
-    "orphans": "6629 reachable, 0 orphaned, 0 not allowed",
-    "doc_paths": "pass:140ambiguous references allresolve",
+    "trust": "trust: 6655 sources, 289 inventoried implementation/recovery sites, 0 findings",
+    "orphans": "6638 reachable, 0 orphaned, 0 not allowed",
+    "doc_paths": "pass",
     "roots": "pass",
     "fragments": "pass",
-    "axiom_pins": "fail:16774pins/0errors/184newstandard-only registrations"
+    "axiom_pins": "fail:16804theorems/0errors/214newstandard-only registrations"
   },
-  "timing_delta_percent": -1.8560215353330745,
+  "timing_delta_percent": 0.3053131635846862,
   "waits": [
     {
       "lane": "coordinator/G07 inventory owners",
-      "item": "PIN-8863c412: register exact184existing standard-only pins from off-Git ticket authenticated by small bulk-artifacts.sha256; no theorem/premise/exclusion/axiom changes."
+      "item": "PIN-8a710f9d: register the exact214 existing standard-only pins from authenticated off-Git ticket; no theorem, premise, exclusion or axiom changes."
     }
   ],
   "questions": [],
-  "boundary": "Current expanded full gate and nine-module+KeySort audit/acceptance177/439/7/10 pass. Global pin metadata acceptance remains blocked. External gas/fork observations are archived byte-identical fixture reuse, not fresh EVM execution or formal gas/world/generalcompiler bridges.",
+  "boundary": "Current full6649-job gate and fresh nine-module+KeySort audit/acceptance177/439/7/10 pass. Final metadata acceptance blocked. External observations reused only for identical current fixtures, not fresh EVM or formal gas/world/generalcompiler proofs.",
   "previous_full_lean_build": {
     "integration": "2a43bf4fcdaf24750265afc8f8be5b420d1d22b0",
     "status": "pass",
@@ -69,7 +69,7 @@
     "output": "resume-20261107/full.log",
     "stdout_sha256": "0f741f0097ab7ff34d21865cb6f7660169c1afdf5253e02a9021e2cca040edc2"
   },
-  "owner_ticket": "/workspace/audit-abi-world-evidence/resume-8863-20261107/axiom-pin-owner-ticket.json",
+  "owner_ticket": "/workspace/audit-abi-world-evidence/resume-master-20261107-2/axiom-pin-owner-ticket.json",
   "historical_806_validation": {
     "integration": "806a972a4f1eefc367f7fe21078e56469447ce13",
     "audit": "pass177/439/7/10",
@@ -89,5 +89,27 @@
     "reason": "4GiB reserve crossed at OpenLoops; no Lean errors",
     "bounded_prerequisite": "resume-8863-20261107/openloops-resource.json",
     "action": "Read-only generated/artifact clean-page advice between jobs, cold single-module prebuild, unchanged complete gate retry. No source/budget/limit changes."
+  },
+  "previous_8863_full_lean_build": {
+    "integration": "8863c41276f9340d3d1960df9e4808294614189b",
+    "status": "pass",
+    "command": "./run-lean.sh",
+    "mandatory_targets": [
+      "Solidity",
+      "SolidityExamples",
+      "solidity-lean",
+      "SolkeyTestSuite",
+      "SoliditySlowExamples"
+    ],
+    "jobs": 6640,
+    "exit_code": 0,
+    "elapsed_seconds": 106.03637676699145,
+    "peak_rss_bytes": 5963968512,
+    "minimum_available_bytes": 8508100608,
+    "no_swap": true,
+    "max_heavy_jobs": 1,
+    "cleanup_complete": true,
+    "resource_receipt": "resume-8863-20261107/full-2-resource.json",
+    "stdout_sha256": "90cf96300dd0fb75cbe3079124385fb754e913f18fcdeb07293040e48845f1a0"
   }
 }
