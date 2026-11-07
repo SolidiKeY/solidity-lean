@@ -1,0 +1,104 @@
+{
+  "guardedRegression": "Source-ID-bound requests must select and return exact compiler declarations;missing environment producer delivery cannot be replaced by retained-source success.",
+  "contextHead": "04c6ecb3cc47559d55244d8fde795f1c58fef0ef",
+  "newEnvironmentProducerHead": "44d89439afd8fe7aca251cd5693b5b7ea36cf603",
+  "environmentQualification": "blocked:exactcommit/Translate90479/packet/evidence unavailable;newenvironmentrequests0",
+  "sourceInventory": "7of8frontierhashesmatch;onlyTranslate90479missing.Exactfetch128notourref twice after successfulbranch fetch.",
+  "retainedBinaryContext": {
+    "sourceBuildHead": "0eb39db1dba7f81e4d8d0b4756ab50b87d4dcd6d",
+    "native": "b66aa042683596c84f23c861e43c11e23696575b0743cddb072d2f16b38f735d",
+    "wasm": "97e05db7b219ee38255ef69b626c386d8422435cadcfd35666f6027b16b6ec2c",
+    "currentRuntimeSourcePinsMatchingEach": 343,
+    "newRuntimeBuilds": 0,
+    "site": "Retainedpackaged generated-C/WASM site,actual boot checked;not newenvironment frontend/site qualification."
+  },
+  "actualControlsPerBackend": {
+    "retainedAddressFixtures": 16,
+    "proved": 10,
+    "refuted": 2,
+    "unsupported": 4,
+    "additionalPositiveGuards": 2,
+    "sourceIdRequestAndReplyChecks": 18,
+    "selectorRefusalRequests": 4,
+    "selectorGaps": [
+      "no selected functions",
+      "invalid sourceId selector"
+    ],
+    "freshExternalCompilerRuns": 4
+  },
+  "sourceIdentityBoundary": "IDs associate compiler AST declarations with actual request/reply selection;not source/compiler authentication,adequacy,overload completeness ornewenvironment support.No cachedverdict replay.",
+  "proofBoundary": "No Lean/productionruntime source files edited,no theorem/axiom/premise/budget/exclusion changes;no newLeanbuild/axiominventory/cachepack applicable.Lean/KeySort/RUNTIME/newfrontier gates remain pending newsource delivery.",
+  "STOPs": "All prior fitsM/nativecost/browserstartup/storage-diamond holds remain;no stopped benchmark rerun.",
+  "gates": [
+    {
+      "command": [
+        "node",
+        "tests/directruntime-20261104/native-browser/published-8495-controls.mjs"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/environment-preparation/identity-box-gate.json",
+      "sha256": "d12a3a26400cb922d868dccedc5ec2f959fea43c7420b22ad79d2acf1b649f1d",
+      "wallSeconds": 11.979470835001848,
+      "sampledRssPeakBytes": 1507950592,
+      "minimumOuterHeadroomBytes": 8422043648,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "node",
+        "tests/directruntime-20261104/native-browser/published-8495-controls.mjs"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/environment-preparation/identity-diamond-gate.json",
+      "sha256": "c37af0c59f992bd730f1844166ab7c632fe3bcdface4412f01ffdd24a99d01d5",
+      "wallSeconds": 13.995593441002711,
+      "sampledRssPeakBytes": 1473507328,
+      "minimumOuterHeadroomBytes": 8456134656,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "node",
+        ".lake/native-browser-environment-preparation/selector-negatives.mjs"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/environment-preparation/selector-negatives-gate.json",
+      "sha256": "d0a2dfecf7d4c709d284a1b86fd767703f33b67779fb138a63f06b44ee5e44e0",
+      "wallSeconds": 3.6588611850020243,
+      "sampledRssPeakBytes": 820981760,
+      "minimumOuterHeadroomBytes": 9106870272,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    }
+  ],
+  "syntax": "node --check passed",
+  "executedSelectorHarnessSha256": "8c054c3689b49386fa5d7b6163f87b74bca4ef4c221c54c19247342b9f65f6d2",
+  "committedSelectorHarnessSha256": "8c054c3689b49386fa5d7b6163f87b74bca4ef4c221c54c19247342b9f65f6d2",
+  "evidence": {
+    "path": "/workspace/solidity-lean/.lake/native-browser-environment-preparation/handoff-data/evidence.tar.gz",
+    "bytes": 65158,
+    "sha256": "647a61be0755bc9f6cbbc0cac9ce960f308fba1fc34f430a0fa2dd9f0c267495",
+    "payloads": 29,
+    "index": "/workspace/solidity-lean/.lake/native-browser-environment-preparation/handoff-data/files.json",
+    "indexSha256": "e1ef63879a4ce4d7fbbadea7b9bfda2f77946eaa1aa88594fb49fe5bad03fcbe"
+  },
+  "request": {
+    "path": "/workspace/solidity-lean/tests/directruntime-20261104/native-browser/environment-source-request.json",
+    "sha256": "823a49747b89548d596f457d3d382c117fed918ec3d9a16cb852f3afb1e86477"
+  },
+  "reviews": "Independent read-only finder and skeptic PASS final scoped code/provenance/results/boundary reviews.Both verified29archivepayloads plusindex;all3gatereceipts pass;selectorcommitted==executedprivate. Retainedbinary/no-newenv/no-sourceproof/STOP limits explicit.No Lean/server/build use by reviewers.",
+  "status": "Source-IDpreparation validated;requested16environmentqualification not complete.",
+  "genericHarnessLineage": {
+    "path": "/workspace/solidity-lean/tests/directruntime-20261104/native-browser/published-8495-controls.mjs",
+    "archivedCurrentSha256": "08b265016ceace25f43d08261e4a5b5fca65861b5794b9ee4fd4d1631b78dc75",
+    "postExecutionChange": "Only first documentation comment generalized after the runs; executable code/line count unchanged. Archive owns current snapshot; no claim that comment bytes were executed."
+  }
+}

@@ -91,3 +91,13 @@ its per-member manifest outside Git, preventing bulk regeneration into the tree.
 No Lean statement/source, verification gate, proof budget, resource bound or
 central axiom inventory changed. Historical paths above describe prior exports.
 The previous proof/test boundaries and owner waits remain unchanged.
+
+## Superseding 806 re-baseline
+
+Current integration806a972a4f1eefc367f7fe21078e56469447ce13 was fast-forwarded
+after exactremote/ancestry verification. Fresh9+KeySort receipts bind7966paths;
+acceptance177/439/7/10 and3controls pass; timing+1.405912057%within10. Current
+fullbuildpending281changedinputs. Prior6555pass/archiveindex remain historical.
+Currentwaits: PIN-806a972a85standard-only registrations, and2foreignsynthetic
+A/B docreferences. Ticket is offGit in resume-806-20261107 and authenticated by
+the small bulk manifest. No statement/budget/pin edits, newgoal or push.

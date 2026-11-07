@@ -48,4 +48,4 @@ async function servePhases(directory,runId,capture,seen){
     reply.finished=Date.now();json(p.reply,reply);
   }
 }
-module.exports={phases,paths,requestPhase,servePhases,phaseObserved};
+module.exports={atomicJson:json,phases,paths,requestPhase,servePhases,phaseObserved};

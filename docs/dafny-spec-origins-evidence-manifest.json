@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "sourceParent": "4f0a2d6abe3a920d8c5a20c8c06d373a1014824d",
+  "status": "partial",
+  "fileCount": 52,
+  "uncompressedBytes": 468267,
+  "archive": {
+    "path": "/workspace/dafny-parity-spec-origins-20261107/evidence/bulk.tar.gz",
+    "bytes": 63052,
+    "sha256": "71a48f07480a1710a0af2c3de2f537b35272cae4b28a3d6a699bddb23f07aeca"
+  },
+  "index": {
+    "path": "/workspace/dafny-parity-spec-origins-20261107/evidence/files.json",
+    "bytes": 10133,
+    "sha256": "200c630ae19c9494db19011995aad82f9ae80252ad7e379bf3eb0e9d6c775076"
+  },
+  "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-spec-origins-evidence-manifest.json --restore",
+  "boundaries": [
+    "Real native compiler fixture and existing exact-goal model refutation; no second search by the new consumer.",
+    "Raw source origins and kernel-typed parser-field equality only; canonical failed-postcondition correspondence and UI decoration absent.",
+    "All failed attempts retained; no legacy frontend declaration or output changed."
+  ]
+}

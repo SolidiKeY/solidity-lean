@@ -1,0 +1,12 @@
+{
+  "guardedRegression": "Primitive returns must execute rather than remain unknown; widths/reference returns stay refused.",
+  "producerHead": "957e5defaa3c2e32df1e692d8781e0d89fed5199",
+  "productionFile": "Solidity/Frontend/ExecutableAst/Shared/Intrinsic.lean",
+  "productionSha256": "74c01bacb59ba4783bc20a02d23b594dff458a34e30b2c3e40aa9f9fc0b64577",
+  "scope": "Exact reviewed single production file;not whole producer branch or unpublished H90 reader intake.",
+  "finiteControls": "Exact producer prefix before first external-fixture evaluation,namespaceclose,two signaturechecks and two axiomprints;18modal cases,sideeffectcheck,2refusals retained.",
+  "fullProducerControlSha256": "1deb08e8f5a0b53145828bcae3155d8ec6a38be8b0cf8f8eac85df7e8d5feacd",
+  "registration": "Test-only Lean driver,not a new library module;no shared generated roots/maps edited.",
+  "status": "Listedfilefunctional intake validated;see results-manifest.json. Fullassignment,fullH90reader and finalgates remainopen.",
+  "boundaries": "No theorem/premise/budget weakening or fresh H90 fullreader claim."
+}

@@ -2737,6 +2737,7 @@ import Solidity.Frontend.ConstantDepth.Correspondence
 import Solidity.Frontend.ConstantDepth.Determinism
 import Solidity.Frontend.ConstantDepth.Lookup
 import Solidity.Frontend.ConstantDepth.Rank
+import Solidity.Frontend.CounterexampleMetadataV1
 import Solidity.Frontend.CreationTryImport
 import Solidity.Frontend.ExecutableAst.ControlTuple.Adapter
 import Solidity.Frontend.ExecutableAst.ControlTuple.AdmissionControls
@@ -3019,6 +3020,7 @@ import Solidity.Frontend.SolcJson.YulWalkPath
 import Solidity.Frontend.SolcJson.YulWords
 import Solidity.Frontend.Source
 import Solidity.Frontend.SourceUnits
+import Solidity.Frontend.SpecOriginsV1
 import Solidity.Frontend.StatementGrammarH28.AtomAsm
 import Solidity.Frontend.StatementGrammarH28.AtomCall
 import Solidity.Frontend.StatementGrammarH28.AtomConditional

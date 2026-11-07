@@ -289,6 +289,158 @@ See retirement-handoff.md and preserved goal-pause-unavailable.json. No automati
 implementation continuation is authorized. Final stopped/head acknowledgement
 accompanies cumulative authenticated exports; successor owns integration.
 
+## Successor acceptance guard hardening (2026-11-06)
+
+The exact acknowledged final source `b2bd56aa33352d2a0ab3049259e6aeeae0ddbdca`
+was integrated after frozen assignment/queue/scope SHA256 verification and the
+coordinator's final-stop receipt. External historical gates were not revalidated.
+
+`accept_witnesses.py`, `accept_local_guard.py` and `h70_inventory.py` used Python
+assertions for acceptance predicates. Optimized Python removes assertions. All
+44 predicate expressions are now explicit `require` checks with identical AST
+conditions; rejection raises `ValueError`, and CLI rejection remains nonzero.
+Only literals and already-bound paths are message arguments, so eager message
+evaluation adds no I/O. Three tests pass in normal and optimized Python: exact
+44-predicate conservation, synthetic captured-run corruption rejection, and
+false-condition rejection. Version, exit, STOP, swap, cap, reserve and source-hash
+corruptions are rejected. These fixtures are fake metadata, never proof evidence.
+
+Independent finder and skeptic reviewed read-only without Lean/server/builds;
+no confirmed findings remain in this limited change. Their review stresses that
+other scripts, including `reconcile.py`, still use assertions. This is not a
+claim that the entire audit pipeline is optimization-safe. No real historical
+acceptance run, kernel type, witness, H69 classification, axiom footprint,
+resource enforcement or full-family timing is established by these tests.
+All ordinary joint witnesses, intentional-refutation distinctions, semantic
+census, supported compiler/failure/gas/fork coverage and final gates remain open.
+
+### Successor metadata refusal backfill
+
+After adopting published master `71c5963f3`, the unchanged acceptance predicates are exercised against an empty run, a matching version with the wrong toolchain commit, and mixed successful/failed or stopped records in both orders. Synthetic metadata tests remain separate from joint premise witnesses and kernel proof acceptance. No acceptance predicate, Lean statement, budget or trust requirement changes.
+
+### Focused resource reacceptance after master adoption
+
+Published master `706e36825` was adopted before validation. The approved activated per-file route checks the unchanged resource witnesses and exact kernel census serially. Source snapshots before and after both runs match. The unchanged acceptance script accepts five joint witnesses, one intentional H69 impossibility, five premise-free source statements and the generated equation for the byte-unchanged `Source.FailureResources` module. The intentional impossibility is not an ordinary joint witness, and the inhabited resource NoFail predicate is not a global SourceSpec producer.
+
+The unchanged whole-area census fails at `Solidity/Backend/CalldataPackets/RawAddress/Controls.lean` because that mapped source differs from its frozen baseline. This failure is retained; focused resource reconciliation does not waive it, narrow the full audit, or establish complete statement fidelity. Full kernel-family/gas/fork/SourceSpec coverage and final gates remain open. The runs enforce a hard 12 GiB child address-space limit with sampled aggregate RSS/reserve guards; no hard aggregate cgroup-cap claim is made.
+
+The small `resource-reacceptance-manifest.json` records paths, sizes and SHA256 values for off-Git evidence and the H1 cleanup receipt. Cleanup removed only three independently reviewed inactive generated SolkeyCheck binaries, reclaiming 517738496 bytes and leaving 2292506624 free immediately afterward. Source, sibling hashes/traces, logs, bundles, seals, protected caches and current build outputs were preserved.
+
+### RawAddress correspondence check and independent local-guard reacceptance
+
+The requested RawAddress comparison from the frozen baseline to `e8247d9277190b71488387dac594e82b2b191942` has exactly one hunk: it appends `Source.FailureExecution.Cursor.empty` to the anonymous initial Source.St value. It is not a mapFree argument or binder. The current file equals that integration version, but no baseline was changed: the exact hunk was reported as Q-WORLD-AUDIT-DRIFT-CURSOR, following the coordinator instruction to report any non-mapFree change. Census predicates and exclusions are unchanged.
+
+Independent focused checks now pass for the byte-unchanged `LocalGuardSelection` source. `LocalGuardSuccess` and its exact kernel census pass through the approved per-file route with stable source snapshots; the unchanged local acceptance predicate reconciles success and failure, rejects both reject-all and always-revert compilers, and checks the coherent carriers and thirteen primary declarations. Witness checking took 265.747 seconds including cold imports; kernel census took 12.807 seconds. These are observed focused checks, not matched performance acceptance. There is no charged gas or fork parameter here; no gas/fork, full pipeline, global SourceSpec or whole-area audit completion follows.
+
+After both gates stopped, a separately reviewed inactive generated SolkeyCheck binary was removed under H1. Its distinct hash and exact path remain in the off-Git receipt; source, sibling hash/trace and all other evidence were preserved. Free space then measured 2177425408 bytes. The small `local-guard-reacceptance-manifest.json` binds the focused results, unchanged full-audit disposition and cleanup receipt.
+
+### Authorized one-file VY5 correspondence baseline
+
+Coordinator answer Q-WORLD-AUDIT-DRIFT-CURSOR (GitHub #53) authorizes re-baselining only `Solidity/Backend/CalldataPackets/RawAddress/Controls.lean` at `e8247d9277190b71488387dac594e82b2b191942`. The empty execution-cursor field originates in `d83228dae5e6d141cd1ff454c75d544fc7f7cb60`; `e8247d927` is the reviewed VY5/mapFree integration snapshot. This correspondence is the stated integration review, not a new proof of Source adequacy. The census retains the same Git-blob equality predicate and exclusions, with one fixed per-file revision override and explicit override provenance in its summary. No arbitrary baseline option is exposed.
+
+Regression tests verify that the complete expected-blob table changes at exactly that entry, the authentic file passes, and later unreviewed bytes or an unknown path fail. Four tests pass normally and under Python optimization. The full census now reaches `RawInt/Execution.lean`, whose separate proof hunk adds `&& _` to a `change` expression. That hunk was sent as Q-WORLD-AUDIT-RAWINT; no additional override was applied.
+
+A separate diagnostic inventory visits all 881 paths in the authenticated retirement scope: 764 match their expected blobs and 117 remain unreconciled after the authorized override. This is not a semantic/all-kind audit, a changed exclusion set, or full census acceptance. Bulk path/hash detail remains off Git, bound by the small cursor-baseline manifest.
+
+### Standing four-kind VY5 correspondence review
+
+Q-WORLD-AUDIT-RAWINT (GitHub #54) authorizes only whole-file diffs consisting of mapFree arguments/binders, extra `&& _` in `change` steps, `lit_ok _ _` additions, or the empty execution cursor. Finder and skeptic independently reviewed all 117 remaining complete file diffs and agreed on 38 permitted files and 79 OTHER files. Together with the prior RawAddress exception, the census now has 39 explicit paths pinned to `e8247d9277190b71488387dac594e82b2b191942`. Per-file kind tags/citations are exposed by `correspondence_notes`; cursor entries additionally cite `d83228dae5e6d141cd1ff454c75d544fc7f7cb60`. The checker uses fixed exact Git blobs, not a runtime hunk classifier or a blanket VY5 exception. Its byte-equality predicate and exclusions remain unchanged.
+
+Tests pin the reviewed whitelist, verify that every other expected blob retains the original baseline, and reject both a known unapproved VY5 file and later unreviewed bytes. Four tests pass in normal and optimized Python modes. All 881 original mapped paths are accounted for diagnostically: 802 now match their expected revisions; 79 remain unreconciled. The full census correctly stops at G19 AssignmentBlocks, which adds `(plan := none)`, outside the four authorized forms. Other residual groups include monetary representation changes, `.run`/ExceptT rewrites and new calldata/stride handling. Their exact hunks were reported as Q-WORLD-VY5-OTHER-HUNKS; mixed files are not partially or wholly re-baselined. No full semantic/all-kind audit acceptance is claimed.
+
+### Master-history traceability reconciliation
+
+Q-WORLD-VY5-OTHER-HUNKS (GitHub #55) replaces the four-kind restriction for the remaining 79 files with per-hunk master-history traceability. `trace_baselines.py` records each requested per-file Git log, follows 122 real parent edges from the frozen base to `e8247d9277190b71488387dac594e82b2b191942`, and replays exact Git diffs while tracking original-line deletions and surviving-line introductions. All 158 net hunks trace; every cited commit is an ancestor of the pinned master observation. Integration-edge attribution and target-blame authoring attribution remain distinct. Independent finder and skeptic verified the provenance records, not semantic or kernel equivalence.
+
+The 79 explicit path/citation tuples join the previous 39 fixed entries. All 118 use the reviewed snapshot, with exact per-file correspondence notes listing the commits. No current-master wildcard or runtime hunk classifier is used by the census. Its byte-equality predicate and exclusions remain unchanged. Provenance fixtures exercise replacement, pure deletion, merge introduction versus original blame, foreign-master rejection and invalid replay refusal; all four pass normally and under Python optimization. The closed-policy and original acceptance regression tests also pass in both modes.
+
+The whole-area lexical census now passes its source-integrity checks across all 881 mapped files and retains 7951 theorem candidates. It still reports 26 unparsed headers, zero newly verified simultaneous witnesses and incomplete all-kind/interface classification. This resolves the source-byte reconciliation wait; it does not establish semantic statement equivalence, producer inhabitants, gas/fork adequacy, complete witness coverage or full gates. Bulk logs, line-attribution traces and census data stay off Git under the traceability manifest.
+
+An independent production-frame item has only completed its three pre-edit baseline checks so far: EnvironmentProjection 1.426s, ConstructorScalarTransport 38.283s including cold imports, LibraryFrameTransport 22.687s. No production frame code was edited or adopted. Disk admission stopped the baseline sequence before the third check; that check resumed only after independent reviews verified and removed the fully backed inactive H44 replica checkout. Exact commit/data archives and all original dirty work were retained. These are baseline observations, not matched performance acceptance or production unification completion.
+
+## Census acceptance under Python optimization
+
+The lexical regression driver now uses explicit refusals for all 16 original assertion predicates, preserving their AST expressions. Normal and optimized Python accept valid synthetic metadata and explicit unresolved headers, and reject ten malformed metadata cases each. The retained census snapshot also passes; this does not revalidate current source bytes or establish witnesses, kernel statement fidelity, or complete inventory. Commands and off-Git evidence hashes are in `tests/h62/item2/audit-v08-adapters/census-optimization-manifest.json`. No Lean source, premise, exclusion or budget changed.
+
+Independent read-only finder and skeptic reviews found no blocking issue; neither used Lean or the Lean server.
+
+## Runtime outcome sensitivity of the supported local guard
+
+The unchanged `LocalGuardSuccess.Contract` now entails a general runtime distinction: deterministic selection yields the same code image, and its `Out.isRevert` observations differ for true and false. `inputBlind_not_contract` rejects any compiler whose selected code has equal revert observations on these inputs; `actual_not_inputBlind` applies the real public selection contract. All original declarations are byte-preserved. This is one existing fixture, without charged-gas, fork or complete compiler adequacy.
+
+The finder identified that comparing complete outputs could distinguish only retained input machines. The revised proof compares the existing revert observation and passed the serial per-file gate. The initial timing STOP (1.862→2.165 seconds, +16.3%) is retained. After removing duplicate transitive axiom queries, the changed candidate measured 1.968→2.058 seconds (+4.6%); the remaining query covers all three proofs transitively and reports only the existing standard Lean axioms. Evidence and exact commands are indexed in `tests/h62/item2/audit-v08-adapters/input-blind-manifest.json`. No global gate pass is claimed.
+
+Final independent finder and skeptic reviews accepted the corrected status observation. Their review was read-only without Lean/server use; the transitive footprint report is not a complete declaration census.
+
+## Held shared-selection witness candidate
+
+A general axiom-free `option_selection_joint` candidate proves that deterministic Option selection yields one witness for every runtime case, provided an explicit index inhabits the case domain. Its checked `contract_joint_iff` and `actual_joint` instances retain the original local-guard contract and actual selected execution. Independent read-only finder and skeptic found no semantic issue, without Lean/server use. This is packaging of existing execution evidence, not additional compiler coverage.
+
+Runtime acceptance is NOT satisfied: the first matched check measured 2.066→2.278 seconds (+10.26%). Removing a redundant diagnostic command produced a changed candidate, measured once at 1.958→2.162 seconds (+10.42%), also STOP. Both failures are retained. The checked candidate and patch are preserved off Git, and the production test file was restored exactly to its committed source. No unchanged retry or integration is claimed. Exact evidence hashes are in `tests/h62/item2/audit-v08-adapters/selection-joint-manifest.json`. Further proof-cost reduction or another independent queue item is required.
+
+## Shared-selection proof cost reduction
+
+The held shared-selection candidate now has a direct elimination/transport proof of `option_selection_joint`. Its statement, `contract_joint_iff`, and `actual_joint` are unchanged from the checked held candidate. All previously committed declarations remain byte-identical. Deterministic selection identifies the same witness for every case; the explicit index preserves the nonempty-domain condition. The actual instance still packages existing execution evidence, without expanding compiler, Source, gas or fork coverage.
+
+The direct-term candidate passed the approved serial gate and matched warm timing, 2.164→2.266 seconds (+4.7%), with one Lean process and under 0.84 GB sampled aggregate RSS. The remaining `actual_joint` axiom query covers the general lemma and exact equivalence transitively and reports only existing standard Lean axioms; the earlier standalone report established the general lemma axiom-free. All earlier STOPs and candidate bytes remain retained, rather than overwritten. This resolves only the local timing hold, not full-family acceptance. Evidence hashes are in `tests/h62/item2/audit-v08-adapters/selection-joint-direct-manifest.json`.
+
+Independent read-only finder and skeptic accepted the direct-term proof and unchanged statements; neither used Lean or the Lean server.
+
+## Opt-in world-agreement kernel inventory
+
+`P8StatementCensus.lean` now supports `H62_WORLD_CENSUS=1` to inventory EnvironmentProjection, ConstructorScalarTransport, LibraryFrameTransport, CreationPremises and LibraryPremises by exact defining-module identity. It reuses the existing collector and adds a distinct `H62_WORLD_CENSUS_JSON` marker. All 157 original P8 rows match the original collector byte-for-byte under the same imports; default mode emits no world rows. Private/generated declarations are retained.
+
+The opt-in run checked 369 world declarations (module counts 46/111/57/71/84 respectively), retaining raw kernel types, structure fields, binders, provenance and per-declaration axiom footprints. Every entry remains PENDING and zero new joint witnesses are claimed. Only existing standard Lean axioms appeared. The full 881-file interface audit remains unfinished. Raw inventory stays off Git; hashes and exact invocation are in `tests/h62/item2/audit-v08-adapters/world-agreement-inventory-manifest.json`.
+
+The corrected opt-in run passed in 45.461 seconds with one Lean process and 1.181 GB sampled aggregate RSS. The initial reserved-identifier parse failure is retained. Original/default collector measurements under the same expanded import environment were 13.081/13.435 seconds; this is not a comparison against the original import graph or full-family performance acceptance. Imports are unconditional even in default mode. Independent read-only finder and skeptic accepted filtering, output compatibility and limited inventory claims; neither used Lean/server. No producer, Source, theorem, premise, axiom set or proof budget was changed.
+
+## Reconciliation refusals under optimized Python
+
+All five original predicates in `reconcile.py` now use explicit refusals rather than removable assertions. The regression suite compares 49 original predicate ASTs across the four acceptance scripts to the preserved baseline. Seven malformed reconciliation cases (complete-inventory claim, either invalid input status, duplicate census IDs, overlapping coverage, wrong coverage count, and an unknown covered ID) are rejected in both normal and optimized Python with no result artifact or success message. Valid synthetic metadata still reports 13 accounted targets, two remaining entries, and zero global SourceSpec witnesses.
+
+All six tests pass in both modes. The first development invocation ran only the four old tests because the new class followed unittest discovery; discovery order was fixed before acceptance. Original, normal, and optimized reconciliation outputs on the retained census/resource/local snapshots are byte-identical. These are metadata regression checks, not renewed source/fidelity validation or additional witness coverage. Exact commands, output hashes and logs stay off Git, indexed by `tests/h62/item2/audit-v08-adapters/reconciliation-optimization-manifest.json`. Independent read-only finder and skeptic found no issue; neither used Lean/server. No Lean source, original predicate, proof budget or exclusion changed.
+
+## Exact kernel types for seven unresolved calldata headers
+
+The four published RawAddress/RawBool/RawInt/RawUintN Execution modules now have a defining-module kernel inventory of 313 declarations. It captures all seven calldata theorem names whose lexical signatures remain None. The separate C3 header and eighteen Bridge headers are outside this increment. The lexical scanner and all its unresolved results remain unchanged; capturing these kernel types does not establish statement-fidelity acceptance, joint witnesses or full audit coverage. Every new row is PENDING and zero new witnesses are claimed. The inventory retains private/generated declarations and exact types, binders, provenance and axiom footprints; only existing standard Lean axioms appeared. Foreign execution sources match the pinned origin/master bytes.
+
+The small `scripts/h62/item2/audit-v08-adapters/generate_calldata_census.py` reuses the existing P8 collector body verbatim. Its fixed module set, validated output name/scope, symlink-redirection checks, exclusive creation and pinned-output-SHA option are exercised by five tests in normal and optimized Python. Use the writer lease for materialization. The generated diagnostic stays untracked; regenerate it with the recorded expected hash before the approved per-file gate. The actual diagnostic passed in 194.404 seconds, with one Lean process and 1.235 GB sampled aggregate RSS, including import rebuilding. This is new diagnostic coverage, not a checking-speed comparison or a production runtime acceptance claim.
+
+The full inventory is a verified gzip outside Git. Exact generation/gate commands, source/hash provenance, seven target names, counts and evidence hashes are in `tests/h62/item2/audit-v08-adapters/calldata-kernel-manifest.json`. Independent read-only finder and skeptic accepted the generator, inventory and bounded claims before sealing; neither used Lean/server. Separate cleanup finder and skeptic verified all four lossless archives and reviewed restoration without executing it.
+
+H1 losslessly archived four specifically reviewed historical cumulative-log copies after independent full decompression/hash/size checks and fresh inactivity/identity checks. The retained canonical log and all source/caches/current outputs are unchanged. Each compressed copy independently retains every original byte. Net free space increased by 284,717,056 bytes (1,865,076,736→2,149,793,792 immediately after archival). The old raw paths are intentionally absent: historical raw-path seals are NOT complete in place until exclusive verified restoration using the retained restore script, before running those old acceptance commands. Receipt, SHA manifest, restoration code and four compressed files stay together under the evidence directory. Cache shipment remains unadmitted; immutable hardlinked census logs were untouched.
+
+## Conservative name accounting between saved snapshots
+
+`scripts/h62/item2/audit-v08-adapters/reconcile_kernel_names.py` accounts for every lexical and kernel entry in the four-module calldata snapshot scope. The saved full lexical snapshot contains 59 scoped declarations (53 public-name and six private-name candidates); the kernel snapshot contains 313 entries, including 254 kernel-only pending entries. Original owner hints and captured roles are retained without owner confirmation. Source declarations outside this scope remain counted separately, not treated as accepted.
+
+The tool checks input name/ID uniqueness, exact module scope and kernel type hashes. It recognizes only exact public names or the standard module-qualified private prefix with an ASCII numeric counter. Ambiguous matches retain every candidate; missing or unsupported private spellings remain unmatched. All output fidelity/witness statuses remain PENDING, with zero new witnesses and zero fidelity acceptances. It does not infer a parsed-type equivalence, feasible premises or current-source validation from name alignment. The lexical scanner and original snapshot bytes are unchanged.
+
+Five regression tests pass under normal and optimized Python, including multiple-candidate retention, missing names, malformed private spellings, duplicate/scope/type-digest refusals, owner-hint nonpromotion and outside-scope accounting. Actual normal/optimized outputs are byte-identical. Reusing an existing output path fails without altering its bytes. Evidence, exact commands and source hashes are in `tests/h62/item2/audit-v08-adapters/kernel-name-reconciliation-manifest.json`; no Lean build was started for this metadata-only increment. Producer waits, full audit validation and earlier pin/layer failures remain open.
+
+Independent read-only finder and skeptic accepted this snapshot-accounting boundary without Lean/server use. Type digests establish input self-consistency, not trusted kernel provenance; the original kernel-capture receipt remains separate evidence. Outside-scope lexical rows are counted rather than copied, and multiple lexical IDs may reference one kernel candidate; no bijection is asserted.
+
+## Master pin and layer reconciliation refresh
+
+Published master 254c60df was adopted on the existing branch. One generic-v08 documentation conflict was resolved by retaining both historical reports and explicitly preserving coordinator H82 ownership; no retired goal was resumed. All six unrelated dirty helper files retained their exact bytes. The first checks ran during that documentation-only merge and are retained as pre-commit evidence; final-head static checks and warm fixture checks were captured separately after the merge commit.
+
+The actual layer gate now PASSES with zero new closure edges and 107 published pinned allowances, clearing the earlier layer wait. Trust, registration and whitespace pass. The actual pin gate still FAILS: zero errors, thirteen unrecorded changes, all from the two owned guarded audit fixtures. Fresh serial per-file checks validate their seven axiom-free resource reports and six reports using only the existing standard three Lean axioms. This is revalidation of existing statements, not new witness coverage or producer closure.
+
+`tests/h62/item2/audit-v08-adapters/g07-pin-registration-request.json` supplies exact contents for two proposed per-file generated fragments, including the current registry/source hashes and request WORLD-G07-13. It uses the unchanged production collector/comparator rather than a second parser. Applying only these entries in memory yields zero errors and zero changes; NO shared registry or fragment was edited, and the real pin gate remains failed until coordinator G07 registers and regenerates the aggregate, then reruns it. No statement, exclusion, budget, axiom set or error classification was relaxed.
+
+Independent read-only finder and skeptic accepted the exact guarded footprints and the proposal-only boundary without Lean/server use. Commands, merge preservation, final-head source bindings and raw evidence hashes are in `tests/h62/item2/audit-v08-adapters/master-pin-layer-refresh-manifest.json`. Global SourceSpec/body/world producers, full H68 certificates and all unfinished original audit/generic queues remain open.
+
+### Non-theorem frozen-source worklist
+
+`declaration_signals.py` supplements the theorem-only lexical snapshot without changing its predicates. It reads the exact frozen Git blobs selected by the existing census and checks each against the snapshot SHA256 before producing an off-Git worklist. All 881 module bindings passed. The worklist retains 4,850 non-theorem keyword occurrences (including 4,041 `def`, 534 `abbrev` and 136 `structure` signals), plus all 7,951 theorem tokens. Syntax quotations and other false positives remain pending rather than being silently filtered.
+
+This is neither an all-kind kernel census nor semantic declaration classification: generated declarations, proof projections, inherited binders and namespaces remain unresolved. It adds zero witnesses or statement-fidelity acceptances and does not validate current source bytes. Eight regression tests pass in normal and optimized Python, including duplicate-module, unknown-module and mismatched-snapshot refusal. Bulk output and test logs remain outside Git, indexed by `tests/h62/item2/audit-v08-adapters/declaration-signals-manifest.json`.
+
+### Bounded mapped kernel-collector preparation
+
+`generate_mapped_census.py` reuses the existing collector body for one to four explicitly selected files from the frozen audit snapshot. It checks the snapshot hash against the frozen Git blob and checks each selected current import against those same bytes before materializing a diagnostic. Duplicate, unmapped, stale and redirected inputs are refused. Generated files stay in the existing owned diagnostic directory, use exclusive creation, and can be pinned by output SHA256. No new collector implementation or lexical acceptance predicate was introduced. The old calldata renderer's default output remains byte-identical (`82c3ee64…`).
+
+Seven mapped-generator tests and five original calldata-generator tests passed in normal and optimized Python. The actual FailureResources diagnostic was materialized off Git and a repeated write was refused without changing its bytes. Finder and skeptic reported no findings. This is preparation only: no Lean check or new kernel inventory is claimed, and selected-file checks do not validate transitive imports. Disk remains below the retained reserve, so the approved per-file gate was not started. Exact bindings and evidence are indexed in `tests/h62/item2/audit-v08-adapters/mapped-census-generator-manifest.json`.
 ## H44 packaging correction (2026-11-07)
 
 The 178990-byte scope JSON is preserved byte-for-byte off-tree at
@@ -299,3 +451,9 @@ budget or scope-content changes. Prior exports remain preserved. Branch arrival
 head cf354e514bf0b0327f89fa2c60a799a5d04b776d already merged origin/master;
 that history is preserved. The review patch isolates this correction from it.
 Packaging only: retirement pause remains; no proof continuation or push.
+
+### Prepared mapped collector: actual bounded check
+
+The coordinator clarified that the retained 4 GiB reserve applies to RAM, not disk. With approximately 3.4 GB disk free and adequate available RAM, the prepared FailureResources diagnostic passed the approved serial per-file gate in 6.754 seconds, with one Lean process, 708,759,552 bytes peak sampled aggregate RSS, no swap and no STOP. The unchanged wrapper enforced the 12 GiB limits and 4 GiB RAM reserve. The initial checkout build remains untouched; `Q-WORLD-INITIAL-BUILD` no longer blocks these checks.
+
+The actual kernel output contains twenty defining-module records: twelve theorems, seven other declarations and one predicate definition. Only the existing standard Lean axioms appear. Every record remains PENDING, with zero new witnesses or fidelity acceptances. This validates the prepared collector on this existing resource family; it does not add global SourceSpec/body/world coverage, semantic adequacy or an all-module gate pass. Bulk types and logs remain outside Git, indexed by `tests/h62/item2/audit-v08-adapters/mapped-census-check-manifest.json`. Earlier disk-reserve STOP/hold reports remain historical evidence; the capacity interpretation is corrected here rather than changing proof or memory budgets.
