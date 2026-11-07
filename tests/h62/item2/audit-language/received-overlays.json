@@ -11,7 +11,7 @@
     "previous_reported_ticket_heads": [
       "78c110f83dc1a30700acd1b5bd34b19f61da6ccd"
     ],
-    "reported_host_receipt_path": "/home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-hash/3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff-collision-bound-overlay.patch",
+    "reported_host_receipt_path": "$XDG_STATE_HOME/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-hash/3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff-collision-bound-overlay.patch",
     "additional_pending": "full affected migration gates and Syntax.Raw, per coordinator/owner report; no passing-gate claim",
     "path_relative_to_evidence": "h70-received/3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff-collision-bound-received.patch"
   },

@@ -2125,7 +2125,7 @@
     "launchSession": 95153,
     "cwd": "/tmp/solidity-lean-net-assignable",
     "reportPath": "/tmp/migration-net-assignable-proof-current.json",
-    "command": "node scripts/solkey-migration.mjs baseline tests/migration/solkey /tmp/migration-net-assignable-proof-current.json /home/guilherme/projects/solkey/keyext.solidity.core/build/soljson proof",
+    "command": "node scripts/solkey-migration.mjs baseline tests/migration/solkey /tmp/migration-net-assignable-proof-current.json $SOLKEY_ROOT/keyext.solidity.core/build/soljson proof",
     "observedAt": "2026-10-16T06:31:14.624Z",
     "file": {
       "dev": 52,

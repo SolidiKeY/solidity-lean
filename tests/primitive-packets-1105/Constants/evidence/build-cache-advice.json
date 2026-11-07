@@ -1,8 +1,0 @@
-{
-  "action": "POSIX_FADV_DONTNEED on read-only owned .lake/build output descriptors; no file deletion/content mutation or resource-limit change",
-  "files": 6683,
-  "bytes": 2491031510,
-  "parent_current_before": 10430648320,
-  "parent_current_after": 8642220032,
-  "seconds": 0.3397325520054437
-}

@@ -1171,7 +1171,7 @@ pipelines it names (`QuantReduction`, `ArrayProperty`, `ArrayBlock`,
   `git stash`; never kill processes by a pattern that matches the
   invoking shell.
 * Another session works in the main checkout
-  (`/home/guilherme/projects/solidity-lean`): do not commit or merge
+  (`$REPO`): do not commit or merge
   there.  It has deleted `../solidity-lean-integ` twice and pushes to
   master itself (it took `kintneg`'s early commits into master on
   2026-10-26).  Recreate the integration worktree from origin/master

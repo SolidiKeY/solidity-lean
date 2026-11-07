@@ -1,5 +1,0 @@
-ERROR 68:17 Expected type must not contain metavariables
-  isHexDigit ?m.7 = true
-ERROR 72:18 Expected type must not contain metavariables
-  isHexDigit ?m.7 = true
-diag: 2 errors

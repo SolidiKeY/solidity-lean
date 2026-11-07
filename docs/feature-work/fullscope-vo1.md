@@ -162,7 +162,7 @@ The entire assignment is unfinished. No checkpoint readiness or publication.
 ## H41 cache receipt update — 2026-11-05
 
 Coordinator-reported receipt:
-`/home/guilherme/.local/state/cloudvm-coord/receipts/vo1-optimizer-cache-received-20261105T020426Z.json`.
+`$XDG_STATE_HOME/cloudvm-coord/receipts/vo1-optimizer-cache-received-20261105T020426Z.json`.
 The coordinator reports pulling and verifying the pack against SHA256
 `f84ba52f64e1d260ff0e6c7711acf9089330bc9bca8e604123332bfe48679b29`.
 Local SHA256 was rechecked and matches. Preserve the existing 89,252,357-byte
