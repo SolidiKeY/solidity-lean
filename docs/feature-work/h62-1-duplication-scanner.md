@@ -496,3 +496,32 @@ to source edits. The prior pin identifies bytes, not an authenticated scan.
 Independent finder and skeptic reviewed the evidence without Lean; these two
 runs establish byte repeatability only. Full outputs and timing records are in
 `/workspace/h62-duplication-scanner-evidence/postmerge-timing/`.
+
+## Nonrecursive wildcard traversal
+
+Wildcard directory components now receive an error-aware, non-following walk
+under their literal prefix, including nonrecursive patterns. Such walks stop
+at the pattern's directory depth; recursive `**` patterns still walk below
+their prefix. A traversal failure makes the report incomplete and suppresses
+incremental deltas. The walk may conservatively refuse unrelated siblings
+within that depth, and selection and reading remain non-atomic. The
+permission-error control is simulated; it does not prove behavior on every
+filesystem. These limits refine the earlier nonrecursive-wildcard caveat.
+
+The Python suite passed 36 tests. Independent finder and skeptic reviews
+without Lean identified the need to bound the nonrecursive walk; controls
+include an unrelated deeper link and a simulated inaccessible directory. A
+matched bounded full-tree pair on master
+`5da4771e63a4278ed53932ac39a032e3d7aea6ed` took 110.043 seconds before and
+104.998 seconds after (-4.58%). Both scans selected 7,143 files, recognized
+121,486 declarations, and reported no errors or unmatched patterns. Their
+complete reports agree after normalizing the scanner hash and the
+`scanner_changed` flag. This is an external lexical-tool check, not a proof
+of complete declaration accounting or intrinsic-signature equivalence.
+Evidence is outside Git under
+`/workspace/h62-duplication-scanner-evidence/wildcard-traversal/`.
+
+A separate review found that multiline section-variable continuations are not
+included in the lexical context hash. The scanner's intrinsic-signature
+rejection remains essential; this context hash does not establish elaborated
+signature equality. Resolving that limitation and live ownership remains open.

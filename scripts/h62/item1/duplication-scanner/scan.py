@@ -347,11 +347,11 @@ def main():
     matched, selection_errors, checked_components = {}, {}, {}
     for pat in args.paths:
         selected = []
-        # pathlib's recursive glob does not descend into directory symlinks.
-        # Refuse such directories beneath the literal prefix rather than
-        # silently describing a selection as complete.
+        # pathlib glob may silently skip inaccessible wildcard directories.
+        # Refuse uncertain traversal below the literal prefix, conservatively
+        # including links not necessarily selected by the final pattern.
         parts = Path(pat).parts
-        if "**" in parts:
+        if "**" in parts or any(any(c in part for c in "*?[") for part in parts[:-1]):
             prefix = []
             for part in parts:
                 if any(c in part for c in "*?["):
@@ -365,8 +365,19 @@ def main():
                     selection_errors[str(ancestor)] = "recursive selection traverses a symlink"
             def walk_error(exc):
                 selection_errors[str(exc.filename)] = str(exc)
-            if anchor.is_dir() and not anchor.is_symlink():
+            try:
+                anchor_mode = anchor.lstat().st_mode
+            except FileNotFoundError:
+                anchor_mode = None
+            except OSError as exc:
+                selection_errors[str(anchor)] = str(exc)
+                anchor_mode = None
+            if anchor_mode is not None and stat.S_ISDIR(anchor_mode):
+                max_depth = None if "**" in parts else len(parts[:-1]) - len(prefix)
                 for directory, dirs, names in os.walk(anchor, followlinks=False, onerror=walk_error):
+                    if max_depth is not None and len(Path(directory).relative_to(anchor).parts) >= max_depth:
+                        dirs.clear()
+                        continue
                     for dirname in list(dirs):
                         child = Path(directory) / dirname
                         if child.is_symlink():

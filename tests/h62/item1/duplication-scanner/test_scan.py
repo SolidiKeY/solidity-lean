@@ -382,6 +382,32 @@ class ScannerControls(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("patterns must stay within the root", result.stderr)
 
+    def test_nonrecursive_wildcard_walk_error_suppresses_deltas(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for folder in ("readable", "denied"):
+                (root / folder).mkdir()
+                (root / folder / "Target.lean").write_text("def x : Nat := 0\n")
+            cmd = [sys.executable, "-B", str(SCRIPT), str(root), "*/Target.lean"]
+            (root / "readable" / "deep").mkdir()
+            (root / "readable" / "deep" / "unrelated").symlink_to("missing")
+            first = subprocess.check_output(cmd)
+            baseline = root / "previous.json"
+            baseline.write_bytes(first)
+            actual_walk = scanner.os.walk
+            def failed_walk(top, *args, **kwargs):
+                kwargs["onerror"](PermissionError(13, "permission denied", str(root / "denied")))
+                yield from actual_walk(top, *args, **kwargs)
+            output = io.StringIO()
+            with mock.patch.object(sys, "argv", [str(SCRIPT), str(root), "*/Target.lean"] + pinned(baseline)), \
+                 mock.patch.object(scanner.os, "walk", failed_walk), contextlib.redirect_stdout(output):
+                self.assertTrue(scanner.main())
+            report = json.loads(output.getvalue())
+            self.assertTrue(any("permission denied" in e["reason"] for e in report["errors"]))
+            self.assertEqual(report["incremental"]["comparison_status"], "current-incomplete")
+            self.assertIsNone(report["incremental"]["removed"])
+            self.assertIsNone(report["incremental"]["candidate_groups"])
+
     def test_report_and_incremental(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
