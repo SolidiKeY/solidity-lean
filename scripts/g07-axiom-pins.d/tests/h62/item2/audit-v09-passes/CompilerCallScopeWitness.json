@@ -1,0 +1,27 @@
+{
+ "tests/h62/item2/audit-v09-passes/CompilerCallScopeWitness.lean:Solidity.Backend.Passes.AuditCompilerCallScope.corrupted_tail_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/CompilerCallScopeWitness.lean:Solidity.Backend.Passes.AuditCompilerCallScope.final_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/CompilerCallScopeWitness.lean:Solidity.Backend.Passes.AuditCompilerCallScope.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/CompilerCallScopeWitness.lean:Solidity.Backend.Passes.AuditCompilerCallScope.prefix_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/CompilerCallScopeWitness.lean:Solidity.Backend.Passes.AuditCompilerCallScope.skipped_consumer_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

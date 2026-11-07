@@ -20,5 +20,15 @@
  "Solidity/Backend/StorageOps/LayoutControls.lean:Solidity.Backend.StorageOps.LayoutAccess.resolveMany_length": [
   "Quot.sound",
   "propext"
+ ],
+ "Solidity/Backend/StorageOps/LayoutControls.lean:Solidity.Backend.StorageOps.LayoutControls.checked_alias_and_outside": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LayoutControls.lean:Solidity.Backend.StorageOps.LayoutControls.checked_alias_multiplicity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
  ]
 }
