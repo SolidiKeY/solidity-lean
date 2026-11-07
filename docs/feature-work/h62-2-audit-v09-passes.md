@@ -1278,3 +1278,17 @@ not successful admission or native execution. Existing noRefs refutation checks
 retain their exact empty-heap classification, axioms and cardinality checks.
 Evidence: `/workspace/vy3-evidence/loop-stale-pointer-refutation-20261107`.
 All original producer waits, proof budgets, STOPs and final obligations remain.
+
+
+Public compiler-call-scope checkpoint: four original `CompilerCallScopeControls`
+rows now have exact frozen signature accounting in `compiler-call-scope-witness-map.json`
+and checked aliases in `CompilerCallScopeWitness.lean`. The joint retains the
+actual public compiler selection and branch and derives its reached Input from
+an actual allocation run and selected MappedOutput via the existing generic
+boundary link. Full prefix/final stack-memory vectors, skipped-consumer refusal
+and corrupted saved-tail refusal retain their original statements. The private
+observer definition adds no selected row. Selected479/1259,780open; supplemental
+rows stay separate. Evidence is external at
+`/workspace/vy3-evidence/compiler-call-scope-20261107`. No native ByteWorld,
+ABI/gas or full Source/G24 adequacy is inferred; original producer waits, STOPs
+and full validation/timing obligations remain open.

@@ -1,0 +1,40 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface": "Solidity/Backend/Passes/CompilerCallScopeControls.lean",
+  "interface_sha256": "5bbd4e22aaef7e782fc236ddff824d0c1700f02aa02806e863668724a157a47b",
+  "joint_witness": "Solidity.Backend.Passes.AuditCompilerCallScope.joint",
+  "exercised_public_namespace": "Solidity.Backend.Passes.AuditCompilerCallScope",
+  "checked_private_names": [],
+  "rows": [
+    {
+      "name": "Solidity.Backend.Passes.CompilerCallScopeRecognition.Controls.prefix_vector",
+      "signature_sha256": "befa8e7127c03646e29b6fcc5a7bd18afc902f73eea330a832d98958dc63a170",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.CompilerCallScopeRecognition.Controls.final_vector",
+      "signature_sha256": "05721ccac4984b148f220e33fa1055d9a2f6f2bf7413769a7a7999778cfb77a7",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.CompilerCallScopeRecognition.Controls.skipped_consumer_refused",
+      "signature_sha256": "308ad23759e647033dc3c3bea74f353307530691ca11c51ec185d63eef0fb887",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.CompilerCallScopeRecognition.Controls.corrupted_tail_refused",
+      "signature_sha256": "80ccb906471730c548f6676dd876a76cf90d8bf62d8374b0473b60a5c9e4dc46",
+      "kind": "public-original-proof-reuse"
+    }
+  ],
+  "aggregate_selected": 479,
+  "aggregate_remaining": 780,
+  "auxiliary_definition_credit": 0,
+  "joint_contract": "actual-public-compiler-result-and-reached-selected-output-input",
+  "limits": "Four public original scope control rows. Complete prefix/final memory-stack observations and skipped-consumer/corrupted-tail refusals preserved. The private observer definition adds no row. No native ByteWorld/emission, gas/ABI or full Source/G24 adequacy.",
+  "checked_axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ]
+}
