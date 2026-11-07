@@ -22,6 +22,8 @@ def main():
     p.add_argument("--lean", type=Path, required=True)
     p.add_argument("--output", type=Path, required=True)
     p.add_argument("--proof-overlays", type=Path, help="Authenticated H70 proof-only receipts, permitted under H82")
+    p.add_argument("--gate-repair-manifest", type=Path, help="Exact user-requested proof revision manifest; original guards remain")
+    p.add_argument("--memory-cap-gib", type=int, default=12, choices=range(1,13), help="Lower address-space cap for like-for-like checks; never exceeds existing12GiB")
     p.add_argument("files", type=Path, nargs="+")
     args = p.parse_args()
     args.output = args.output.resolve()
@@ -49,9 +51,13 @@ def main():
             original = subprocess.check_output(["git", "show", f"{BASE}:{trusted['path']}"], cwd=ROOT)
             postimage, *_ = reconstruct(patch, original, trusted["path"])
             fidelity(trusted["path"], original, postimage)
-            if (ROOT / trusted["path"]).read_bytes() != postimage:
-                raise RuntimeError("source differs from authenticated proof postimage")
             overlays[trusted["path"]] = postimage
+    if args.gate_repair_manifest:
+        from gate_repair import approved_revisions
+        overlays.update(approved_revisions(args.gate_repair_manifest))
+    for path, expected in overlays.items():
+        if (ROOT / path).read_bytes() != expected:
+            raise RuntimeError("source differs from authenticated proof postimage")
     reserve = 4 * 1024**3
     def available_memory():
         host = int(next(x.split()[1] for x in open("/proc/meminfo") if x.startswith("MemAvailable:"))) * 1024
@@ -79,7 +85,7 @@ def main():
                         raise RuntimeError(f"external import requires owner toolchain/package: {name}")
         available = available_memory()
         swap = int(next(x.split()[1] for x in open("/proc/meminfo") if x.startswith("SwapTotal:")))
-        cap = min(12 * 1024**3, available - reserve - 256 * 1024**2)
+        cap = min(args.memory_cap_gib * 1024**3, available - reserve - 256 * 1024**2)
         if cap < 1024**3 or swap:
             raise RuntimeError(f"resource guard: available={available}, swap={swap}")
         artifact = lib / path.with_suffix(".olean")
@@ -102,7 +108,7 @@ def main():
                     break
                 time.sleep(0.1)
             code = process.wait()
-        record = {"file": str(path), "source_snapshot": BASE, "proof_overlay_paths": sorted(overlays), "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
+        record = {"file": str(path), "source_snapshot": BASE, "proof_overlay_paths": sorted(overlays), "gate_repair_manifest": str(args.gate_repair_manifest) if args.gate_repair_manifest else None, "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
                   "command": cmd, "exit": code, "outcome": outcome, "wall_seconds": time.monotonic()-start,
                   "log": str(log), "virtual_memory_cap": cap, "reserve": reserve,
                   "minimum_available": minimum_available,

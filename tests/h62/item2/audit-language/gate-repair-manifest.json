@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "original_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "parent_head": "683cab3cabe94700b2275f6f380c014e05c1e824",
+  "remote_master": "05d2c25872c4bb963a0ca7f605905e6e1e99eedc",
+  "authorization": "User coordinator pre-gate FAIL build-touched: fix against current origin/master without changing statements or budgets; H82 standing proof-only agreement.",
+  "revisions": [
+    {
+      "path": "Solidity/Hash/CollisionBound.lean",
+      "source_sha256": "5665c03bba33cabe75c39192ef6f6c98289e5296a259342c8e9edd8b0849306c",
+      "patch_path": "/workspace/h62-audit-language-evidence/gate-repair-20261107/CollisionBound-gate-repair.patch",
+      "patch_relative_to_evidence": "gate-repair-20261107/CollisionBound-gate-repair.patch",
+      "patch_sha256": "eb2b560b2c54ad954b7e7bce6d7c0e9bd8d156200b8246b9d6b7955430903188",
+      "patch_bytes": 4107
+    },
+    {
+      "path": "Solidity/Language/FixedPoint.lean",
+      "source_sha256": "bcfc09c015e3d03927ad142617d8741ede4b9621786a6021bdfe69d3010ce66d",
+      "patch_path": "/workspace/h62-audit-language-evidence/gate-repair-20261107/FixedPoint-gate-repair.patch",
+      "patch_relative_to_evidence": "gate-repair-20261107/FixedPoint-gate-repair.patch",
+      "patch_sha256": "8e083bfab2a84206de2e9d0acc7f5e0986b8cdebb15d8dd67f54d108e8ad5486",
+      "patch_bytes": 7476
+    }
+  ]
+}

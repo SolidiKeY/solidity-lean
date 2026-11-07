@@ -24,11 +24,15 @@ def digest(path):
             h.update(chunk)
     return h.hexdigest()
 
-def authenticate_resume_proofs(receipts):
+def authenticate_resume_proofs(receipts, repair_manifest=None):
     """Require both exact H70 identities before allowing either H82 source path."""
     from overlay_review import TRUSTED, reconstruct, fidelity
     assert len(receipts) == len(TRUSTED)
     assert {r.get("label") for r in receipts} == set(TRUSTED)
+    revisions = {}
+    if repair_manifest:
+        from gate_repair import approved_revisions
+        revisions = approved_revisions(repair_manifest)
     for receipt in receipts:
         trusted = TRUSTED[receipt["label"]]
         for supplied, key in (("owner", "owner"), ("expected_sha256", "sha256"),
@@ -39,7 +43,7 @@ def authenticate_resume_proofs(receipts):
         original = git("show", BASE + ":" + trusted["path"])
         approved, *_ = reconstruct(patch_data, original, trusted["path"])
         fidelity(trusted["path"], original, approved)
-        assert (ROOT / trusted["path"]).read_bytes() == approved
+        assert (ROOT / trusted["path"]).read_bytes() == revisions.get(trusted["path"], approved)
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
@@ -78,9 +82,10 @@ def main():
     state = json.loads(state_path.read_text())
     if a.continuation_state:
         assert state["execution_state"] == "RESUMED_BY_USER_20261107"
-        assert state["accepted_baseline"] == increment_base
+        assert state.get("increment_base", state["accepted_baseline"]) == increment_base
         receipts = json.loads((INPUTS.parent / "received-overlays.json").read_text())
-        authenticate_resume_proofs(receipts)
+        repair_manifest = ROOT / state["gate_repair_manifest"] if state.get("gate_repair_manifest") else None
+        authenticate_resume_proofs(receipts, repair_manifest)
     else:
         assert state["execution_state"] == "STOPPED_BY_HUMAN_RETIREMENT"
     a.output.mkdir(parents=True, exist_ok=True)

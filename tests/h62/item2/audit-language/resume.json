@@ -4,7 +4,7 @@
   "slug": "audit-language",
   "status": "partial",
   "execution_state": "RESUMED_BY_USER_20261107",
-  "accepted_baseline": "4f0a2d6abe3a920d8c5a20c8c06d373a1014824d",
+  "accepted_baseline": "05d2c25872c4bb963a0ca7f605905e6e1e99eedc",
   "original_frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
   "authorization": "Latest user scheduled-merge instruction explicitly re-baselines and continues original queue; H82 standing statement-preserving agreement applies. Retirement records retained as history, not current prohibition.",
   "original_environment": "ccarenv_b64_Y2NhcmVudl9hNTQ3YjYwNzYwNjA4MTkxOGJhYmM3MGZiMTJjYzk0Mw",
@@ -27,7 +27,8 @@
     "source_classification_resolved_rows": 3664,
     "source_classification_unresolved_rows": 482,
     "new_intrinsic_fixture_definitions": 4,
-    "frozen_theorem_headers_preserved_in_patches": 102
+    "frozen_theorem_headers_preserved_in_patches": 102,
+    "new_certificates_this_repair": 0
   },
   "fixedpoint_coverage": "All36named statements with leading arguments in FixedPoint core. Closed Fx.solc_lossy has no leading hypotheses; retained as uncovered conservative candidate, never silently excluded. Satellites remain pending.",
   "proof_files": [
@@ -46,11 +47,18 @@
     "resume-20261107/prerequisites/checks.json",
     "resume-20261107/witness-check/checks.json",
     "resume-20261107/acceptance-gates.json",
-    "resume-20261107/static-gates.json"
+    "resume-20261107/static-gates.json",
+    "gate-repair-20261107/after-gates.json",
+    "gate-repair-20261107/witnesses/checks.json",
+    "gate-repair-20261107/timing.json"
   ],
-  "review_evidence": "resume-20261107/reviews.json",
-  "timing_delta": null,
-  "timing_boundary": "No comparable passing pre-repair official4.35 baseline; prior originals failed migration. Additive39proofs are new work, not a timing refactor. No unchanged timing STOP rerun and no full-build performance claim.",
+  "review_evidence": "gate-repair-20261107/reviews.json",
+  "timing_delta": {
+    "Hash_percent": -10.654680289891639,
+    "FixedPoint_percent": 0.16253337738234563,
+    "method": "3freshserialchecks each before/after, medians,8GiBaddresscap,-j1,0swap,4GiBreserve; not a fullbuild benchmark"
+  },
+  "timing_boundary": "Gate-repair timings are focused same-resource per-file checks only. No full-build performance claim; no>10% slowdown observed.",
   "runtime_gate_pass": false,
   "open_queue": [
     "Complete actual elaborated interface membership, 482remaining source domains and global-vs-per-input classification; authoritative producer routing still262files from pinned old snapshot",
@@ -87,5 +95,10 @@
     }
   ],
   "questions": [],
-  "original_scope_inputs": "tests/h62/item2/audit-language/retirement/: complete original rendered prompt, originalqueue and small H44scopepointer; full245627byte inventory remains offGit and in portable archive"
+  "original_scope_inputs": "tests/h62/item2/audit-language/retirement/: complete original rendered prompt, originalqueue and small H44scopepointer; full245627byte inventory remains offGit and in portable archive",
+  "increment_base": "683cab3cabe94700b2275f6f380c014e05c1e824",
+  "gate_repair_manifest": "tests/h62/item2/audit-language/gate-repair-manifest.json",
+  "current_action": "Latest coordinator build-touched FAIL repair; no new theorem/scope/budget changes",
+  "gate_repair_evidence": "gate-repair-20261107/",
+  "coordinator_gate_rerun": "pending; local official4.35 success does not establish coordinator gate pass"
 }

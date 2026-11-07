@@ -10,6 +10,45 @@ inside this commit. This is an incomplete checkpoint, never completion of the
 four-checkpoint assignment. The existing goal must remain unfinished.
 
 
+## Coordinator build-touched repair on 2026-11-07
+
+The failed coordinator head is `683cab3cabe94700b2275f6f380c014e05c1e824`.
+After fetch, current origin/master is `05d2c25872c4bb963a0ca7f605905e6e1e99eedc`,
+already an ancestor of that lane head; no reset, rebase or new merge was needed.
+This is the cleanup increment base, not a claim that the failed head was accepted.
+
+Hash proofs now use their existing branch facts with `ite_true`/`ite_false`,
+removing all references to the renamed `ite_eq_left`/`ite_eq_right` lemmas.
+FixedPoint's remainder proof uses a local cast equality proved by `rfl` rather
+than either version-specific named cast lemma. Only five proof bodies change;
+all 102 theorem and 173 declaration headers remain unchanged. No statements,
+computational definitions, axioms, exclusions or proof budgets change.
+
+Both repaired files pass three fresh official v4.35 serial checks without
+warnings, with the same 8 GiB address-space cap, explicit `-j1`, zero swap and
+4 GiB reserve as three pre-edit checks. Median Hash time changes from 4.724 s
+to 4.221 s (-10.65%); FixedPoint from 1.9136 s to 1.9167 s (+0.16%). Neither
+crosses the greater-than-10% slowdown stop. Raw trials are retained; these focused
+measurements do not establish full-build performance or a v4.24 gate pass.
+The first attempted cast-lemma removal failed locally; that failed evidence is
+retained, and no failed artifact is reused in final fresh checks.
+
+A small committed gate-repair manifest pins the exact two source/patch hashes.
+Full patches stay off Git. The checker, verifier and exporter accept this revision
+only when explicitly selected, checking the exact path set, original frozen base,
+strict patch context, source headers, options and current bytes. Historical H70
+producer receipts remain unchanged. Set `H62_EVIDENCE` to relocate external patch
+artifacts; no workspace-root path is hardcoded in the new validation script.
+
+The repository pin remains v4.24 while the mandatory migration archive is v4.35.
+The requested newer-name errors have been removed without choosing a different
+build or reusing old-toolchain caches. The global documentation-path check finds two unchanged fixture-placeholder
+references in a different audit lane; they are recorded, not repaired here.
+The coordinator must rerun its actual gate;
+no coordinator/full/runtime pass is inferred from local v4.35 checks. Original
+51-certificate coverage, remaining queue, version/fidelity waits and goal remain
+unfinished; this repair adds no new witness theorem.
+
 ## Resumed at accepted master on 2026-11-07
 
 The latest user explicitly requested re-baselining and continuation. The original
