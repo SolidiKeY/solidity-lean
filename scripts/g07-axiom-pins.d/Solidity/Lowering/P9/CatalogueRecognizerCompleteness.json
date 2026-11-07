@@ -1,0 +1,32 @@
+{
+  "Solidity/Lowering/P9/CatalogueRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.entryB_mono": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/CatalogueRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.catalogueB_mono": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/CatalogueRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.entryB_complete": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/CatalogueRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.entries_common_fuel": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/CatalogueRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.catalogueB_complete": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/CatalogueRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.catalogueB_iff_from_elaborate": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ]
+}
