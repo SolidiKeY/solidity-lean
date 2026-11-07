@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "frozen_module_sha256": "ff5594d1dc41a90777a5fbef081dd62be4ca07723848c68a1372102fdf59e2ce",
+  "rows": [
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetOperations.lean:89:represented_read",
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.represented_read",
+      "signature": "theorem represented_read {n : Nat} {G : Schema n} {A : TypeGraph.Ty n}\n    (value : Value G A) (queries : List (Query G A)) (base : Solidity.Storage.Loc)\n    (fits : KeysFit base) (store : Store) (machine : Evm.Machine)\n    (before : Represented value queries base store)\n    (initial : \u2200 q \u2208 queries,\n      machine.store.cells (toSlot (q.location base) (query_keysFit q base fits)) = encodeWord (store (q.location base)))\n    (query : Query G A) (member : query \u2208 queries) (word : Semantics.Word) (read : query.read value = some word) :\n    Evm.run (readCode (toSlot (query.location base) (query_keysFit query base fits))) machine =\n      .ok { machine with stack := .val (encodeWord word) :: machine.stack } 0",
+      "signature_sha256": "6691ba53142472900787bb55e0941e2397267a8c88badbca82a0ab57fc92eb6a",
+      "witness": "H62.StorageAudit.RepresentedWitnesses.read_joint",
+      "status": "kernel-checked joint premise witness; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetOperations.lean:103:write_agreement",
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.write_agreement",
+      "signature": "theorem write_agreement (locations : List Solidity.Storage.Loc)\n    (fits : \u2200 l \u2208 locations, KeysFit l) (dst : Solidity.Storage.Loc) (dstFits : KeysFit dst)\n    (word : Semantics.Word) (store : Store) (machine : Evm.Machine)\n    (before : \u2200 l (member : l \u2208 locations),\n      machine.store.cells (toSlot l (fits l member)) = encodeWord (store l)) :\n    \u2200 l (member : l \u2208 locations),\n      (Evm.WordStore.write machine.store (toSlot dst dstFits) (encodeWord word).val).cells\n        (toSlot l (fits l member)) = encodeWord (Representation.write store dst word l)",
+      "signature_sha256": "5980ddd751120ccb6fa53ce77cb9b7ef5d373ebf76dc8be84cb0b4793c4503da",
+      "witness": "H62.StorageAudit.RepresentedWitnesses.write_joint",
+      "status": "kernel-checked joint premise witness; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetOperations.lean:142:represented_copy",
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.represented_copy",
+      "signature": "theorem represented_copy {n N L R : Nat} {G : Schema n} {A : TypeGraph.Ty n} {p : PrimTy}\n    {H : Solidity.Storage.Pre \u2192 Nat} {P : List Solidity.Storage.Pre} {locations : List Solidity.Storage.Loc}\n    (run : FiniteRun N L R H P locations) (store : Store) (numeric : WordStore)\n    (transport : Transport N H locations store numeric)\n    (root result : Value G A) (dst src : TypeGraph.Path G A (.prim p)) (value : p.Denote)\n    (source : root.find src = some (.prim value)) (performed : recursiveCopyAt root dst src = some result)\n    (queries : List (Query G A)) (base : Solidity.Storage.Loc) (baseFits : KeysFit base)\n    (represented : Represented root (.word src :: queries) base store) (supported : PathSupported dst)\n    (apart : \u2200 q \u2208 queries, q.apart dst)\n    (nonalias : \u2200 q \u2208 queries, q.location base \u2260 pathLoc dst base)\n    (sourceCovered : pathLoc src base \u2208 locations) (targetCovered : pathLoc dst base \u2208 locations)\n    (queryCovered : \u2200 q \u2208 queries, q.location base \u2208 locations)\n    (fitting : \u2200 l \u2208 locations, KeysFit l) (target : Evm.Machine)\n    (initial : \u2200 l (member : l \u2208 locations),\n      target.store.cells (toSlot l (fitting l member)) = encodeWord (store l)) :\n    let d := toSlot (pathLoc dst base) (path_keysFit dst base baseFits)\n    let s := toSlot (pathLoc src base) (path_keysFit src base baseFits)\n    let afterStore := Representation.write store (pathLoc dst base) (PrimTy.toWord value)\n    let afterNumeric := RepresentedOperations.numericCopy numeric ((pathLoc dst base).word N H) ((pathLoc src base).word N H)\n    let afterTarget := { target with store := Evm.WordStore.write target.store d (encodeWord (PrimTy.toWord value)).val }\n    Evm.run (copyCode d s) target = .ok afterTarget 0 \u2227\n      Represented result (.word dst :: queries) base afterStore \u2227\n      Transport N H locations afterStore afterNumeric \u2227\n      (\u2200 l (member : l \u2208 locations),\n        afterTarget.store.cells (toSlot l (fitting l member)) = encodeWord (afterStore l))",
+      "signature_sha256": "51a2281ef2da1945ac718e16a7b5ac81d23fb1d8eb556dd0bd65dfc81351032f",
+      "witness": "H62.StorageAudit.RepresentedWitnesses.copy_joint",
+      "status": "kernel-checked joint premise witness; independent fidelity reviews passed"
+    }
+  ],
+  "substitutions": "Existing ProducerInterfaceControls root/queries/base/symbolic/numeric/hash/locations and reached after machine. Read selects .word path and word=true. Write selects zero_word. Copy chooses dst=src=path, result=root, value=true, queries=[], N8/L1/R1/P[].",
+  "limitations": "Local scalar endpoint only. Copy query-frame premises hold on an explicitly empty frame. No general producer, Source admission, physical adequacy or compiler totality follows."
+}
