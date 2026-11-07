@@ -13,9 +13,9 @@ mapped modules. There are zero uncovered mapped statements. Of these, 54 have
 proposition premises, 53 have data/type/instance binders only, and 70 have no input
 binders. The 70 empty packages are explicit census accounting, not additional
 semantic feasibility coverage. The success/runtime phase and matched after timings pass.
-The prior full Lean build passed on 2a43bf4f; the current e0f4251f full build
-is pending. Final acceptance also awaits 149 standard-only G07 registrations
-(zero axiom errors). Current root, fragment and documentation checks pass. The later coordinator instruction explicitly
+The current expanded full Lean build passes on 8863c41276f9, including the
+mandatory slow examples. Final acceptance awaits 184 standard-only G07
+registrations (zero axiom errors). All other required checks pass. The later coordinator instruction explicitly
 reactivated this same worker and authorized merging origin/master and continuing.
 The retirement section below is historical; no goal was created or reset.
 
@@ -24,7 +24,7 @@ The retirement section below is historical; no goal was created or reset.
 | 1. Frozen signatures, ownership, premise classification | Complete source inventory; elaborated binders now also exported. |
 | 2. Simultaneous hypotheses | 177 exact-type packages pass complete Lean diagnostics and reviews. |
 | 3. Success/totality and behavioral controls | Seven formal theorems and ten provenance-bound external programs pass; proof/runtime boundary below. |
-| 4. Witness and statement-fidelity census | 177 independent type comparisons pass; 439 binders, 113 proposition binders. Fresh e0 per-file census passes; current full build and owner metadata closure remain pending. |
+| 4. Witness and statement-fidelity census | 177 independent type comparisons pass; 439 binders, 113 proposition binders. Fresh 8863 per-file census and full build pass; owner metadata closure remains blocked. |
 
 The accounting tool explicitly reports `witness_gate_complete=true` and
 `assignment_complete=false`. All original Solidity sources, generated roots,
@@ -715,3 +715,60 @@ Independent read-only finder and skeptic verified ancestry, cancellation/log
 binding/cleanup, preserved full/serial policy, fresh receipt/fidelity identity,
 149-entry ticket and matched timing; no findings, no Lean/server/build/edit.
 The expanded full gate remains pending and is required before final handoff.
+
+## Current final validation on 8863 (2026-11-07)
+
+After the e0 full run reached Derived21, the unchanged4GiBreserve guard stopped
+it after5841.628917seconds (peakRSS5366816768,minimumavailable4294782976,
+cleanuptrue,oneheavyjob,noSwap,noLeanerrors). Only after cleanup released the
+lock, fast-forwarded09073bac to requested8863c41276f9340d3d1960df9e4808294614189b.
+Observed remotea10b60f contains this exact published pin; no unrequested newer
+master was chased. The47changedvalidationinputs include PanicBytes; frozen
+24ABI files/map remain exactoriginalbytes. No source/statement edits by this
+continuation, no reset,newgoal,push or pre-gate.
+
+Fresh nine audit modules plus KeySort pass with8028canonicalupstream inputs
+bound before/after. Acceptance177/439/7/10,three tampering controls andfour
+scanner tests pass. Timing1.696835053 to1.665341429seconds (-1.856021535%,within
+10%) passes. Allstaticgates pass except axiom metadata:16774theorems,zeroerrors,
+184newstandard-only registrations. PIN-8863c412 has184unique previous=null keys
+and currentcentralSHA. No central pin/fragment edit was performed.
+
+The first8863full run also stopped at the same4GiBreserve: OpenLoops,426.697951s,
+peakRSS5970518016,minavailable4292747264,cleanuptrue,noSwap,noLeanerrors.
+Preserved both failures. After read-only clean-page advice, built only the
+expensive OpenLoops module under identical bounds:278jobs,342.390517s,
+peakRSS9124495360,minavailable5720244224,exit0/cleanuptrue/oneheavyjob/noSwap.
+This was a prerequisite, not a replacement gate. Repeated the unchanged full
+./run-lean.sh including SoliditySlowExamples and SolkeyTestSuite: PASS6640jobs,
+exit0,106.036377seconds. Resource receipt binds stdoutSHA
+90cf96300dd0fb75cbe3079124385fb754e913f18fcdeb07293040e48845f1a0.
+Fullretry peakRSS5963968512,minavailable8508100608,oneheavyjob,noSwap,cleanuptrue.
+No proof budget, source, observation, gate or resource limit was relaxed.
+
+Actual Lean4.24.0 Release797c613eb9b6d4ec95db23e3e00af9ac6657f24b and
+Lake5.0.0-src+797c613 are recorded. VMhard16GiB/taskRSS12GiB/reserve4GiB,
+explicit-j1/LEAN_NUM_THREADS1,stack131072 remain. Post-build source snapshot
+exactly matches the fresh before/after per-file snapshot. Runtime labels are
+not proofs; no solkeycheck CLI pass is claimed under current upstream policy.
+
+All original four audit implementation/proof checkpoints and assigned backfill
+are complete; zero original mapped statements are uncovered. Four map-drift
+modules remain outside the original frozen map, not silently counted. Final
+assignment acceptance remains blocked only on coordinator/G07 registration of
+the184alreadyexisting standard-only pins. No unclaimed audit candidate is
+assigned. Keep the original goal unfinished; no new/reset/complete goal.
+
+Gas/fork observations are archived external isolated-frame tests reused only
+for identical current encoded bytes, not fresh EVM execution, formal gas/world
+proofs or general Source/compiler adequacy. H44 bulk stays offGit; the small
+manifest authenticates current external ticket/archive/member-manifest files.
+Original prompt/workqueue/scope remain committed and included in exports.
+
+Final finder and skeptic verified the complete6640-job gate, recovery receipts
+and source/output/resource identity without Lean/server/builds/edits. They
+closed two metadata minors: the trust summary now matches6646sources/289sites/
+zero findings, and current external184ticket/archive/membermanifest pointers
+are authenticated. All1898archive members and four integrity controls pass;
+the committed bulk manifest remains17lines/1385bytes. No residual finding.
+Final acceptance remains blocked on the184owner registrations.
