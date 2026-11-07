@@ -892,8 +892,8 @@ existing fourteen-module non-default slow library is retained. The
 [pre-use contract](../../tests/directruntime-20261104/native-browser/h109/RUNNER-DESIGN.md)
 requires sealed source/Git/package/toolchain/cache inputs, actual kernel cgroup
 checks, serial execution, whole-container cleanup and precise timing/memory
-provenance. A candidate total 600-second deadline is conservative pending exact
-H116 scope from the requested latest handoff; it is not multiplied by fourteen.
+provenance. The exact H116 intake supersedes the provisional600 plan: only cumulative
+original Derived17 replay gets CI600/local300; H109 module measurements stay300.
 No proof heartbeat, statement, exclusion or other budget changes.
 
 The source-plan preparer validates all committed regular-file bytes against
@@ -905,6 +905,31 @@ checks run without Lean. Full source inventory stays outside Git with a hash.
 Independent read-only finder/skeptic reviews found and resolved regular-file,
 isolated-Git/package and cleanup-contract gaps. No production runner, real
 slow-module checks, matched measurements, CI qualification or pin relocation
-is claimed. The latest module-times result/drafts remain requested; the available
-H82 report is historical. A coordinator quiet window will be requested only
+is claimed. The latest module-times result and both rejected drafts are now delivered in
+the authenticated b3fb intake; the older H82 report is historical. A coordinator quiet window will be requested only
 when an exact reviewed axiom-pin migration is ready.
+
+
+### H127 exact draft intake and full-tree identity primitive
+
+The coordinator delivered the exact b3fb module-times result/waits and both
+rejected drafts. This lane read their source without importing or executing
+either; [draft-review.json](../../tests/directruntime-20261104/native-browser/h109/draft-review.json)
+records eight concrete input, serialism, timing/RSS, CPU, cleanup, evidence and
+A/B obligations. The supplemental archive contains a duplicate self-hardlink;
+strict production membership validation rejects that form. Only selected
+regular text/JSON payloads were inspected; both draft hashes also verify in
+the separate twelve-regular-member sealed delivery. No historical gates were
+rerun or reclassified as current proof/measurement results.
+
+The input-inventory primitive observes every source/cache/toolchain/package
+entry, including content, xattrs, modes, ownership and mtime; it separates inode
+identity from cross-copy content comparison. Special files and escaping or
+dangling links reject. Its verification CLI requires the exact inventory pin,
+and observations stay explicitly non-atomic. This is implementation progress
+on complete input binding, not a sealed snapshot or an authenticated runner.
+The exact H116 scope is cumulative original Derived17 CI600/local300 only;
+H109 module measurements retain300 in both contexts. No default checkpoint,
+static-classification owner, shared pin/root or theorem/budget was changed.
+The real serial controller, kernel resource/measurement/cleanup implementation,
+matched A/B, CI/lane-end gates and pin quiet window remain pending.
