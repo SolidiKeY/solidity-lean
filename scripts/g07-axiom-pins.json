@@ -45677,6 +45677,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Hash/Bridge.lean:Solidity.Hash.Bridge.premise_unit_rootFree": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/Bridge.lean:Solidity.Hash.Bridge.transfer_prefix": [],
  "Solidity/Hash/CollisionBound.lean:Solidity.Hash.adaptive_lazy_collision_prob_le": [
   "Classical.choice",
   "Quot.sound",
@@ -45712,6 +45717,27 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Hash/CollisionBridge.lean:Solidity.Hash.CollisionBridge.run_premise_le": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CollisionBridge.lean:Solidity.Hash.CollisionBridge.stopped_collision_le": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CollisionBridge.lean:Solidity.Hash.CollisionBridge.two_mul_combined_le": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CollisionBridgeCompiler.lean:Solidity.Hash.CollisionBridge.Compiler.failure_le": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CollisionBridgeCompiler.lean:Solidity.Hash.CollisionBridge.Compiler.refines": [],
  "Solidity/Language/FixedPoint/Abi.lean:Solidity.Language.FixedPoint.Fx.abiEncode_of_abiDecodeV2": [
   "Quot.sound",
   "propext"

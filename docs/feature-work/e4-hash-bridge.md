@@ -352,3 +352,21 @@ No scope question remains open. E4-Q1 is resolved as option A, and the
 combined bound/premises were kept unchanged. Handoff patch, bundle,
 evidence archive and SHA256SUMS will be sealed under `/tmp/e4-handoff`.
 The manifest records exact base, branch, final head and artifact hashes.
+
+## H82 continuation: local statement-preserving registration
+
+The coordinator's H82 continuation explicitly authorizes statement-preserving
+edits to any file without owner agreement. Under that newer authorization,
+this worker applied the already reviewed registration fragment locally:
+register.sh generated four root imports; the language-area fragment adds four
+module rows; CORE registers these four modules; the generated axiom inventory
+and three new per-file pin fragments record the seven measured pins.
+No existing theorem statement, premise, observation or proof budget changed.
+The pin writer also reordered seven unrelated P9 fragment objects; their JSON
+values were verified equal and those incidental formatting changes removed.
+
+The earlier REGISTRATION_OWNER wait is therefore cleared by H82. Library,
+corpus, full-runner and timing validation are being resumed rather than
+stopping at registration or discarding any saved proof work. The immutable
+previous handoff remains at /tmp/e4-handoff; continuation evidence and a new
+sealed handoff will use distinct directories.
