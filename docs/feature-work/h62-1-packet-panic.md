@@ -157,3 +157,7 @@ The base-pinned fourteen-row populated-fixture ledger accounts for the read-only
 ## SignedDiv Contract continuation
 
 The base-pinned checked-contract ledger records the quantified Source/target reads, StateRepr, saved finite words and all three numeric capacity premises alongside the separate Source, symbolic and numeric conclusions. Negative controls pass. Independent read-only finder and skeptic matched the declaration without Lean. All 474 currently observed lexical headers now have descriptions; broader semantic and proof obligations remain open.
+
+## Source-window evidence continuation
+
+`source_windows.py` generates base-pinned source windows and hashes next to all 474 manual observations, with source fidelity and negative controls. Independent read-only finder and skeptic verified all current windows and hashes without Lean. Windows have lexical boundaries, may omit preceding docstrings or attributes and include neighboring material, and do not prove observation prose or Lean statements. The bulk JSON stays off Git.

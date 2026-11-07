@@ -127,3 +127,7 @@ The original census matches only unmodified line-start headers and omitted priva
 ## SignedDiv Contract
 
 `signed_div_contract_ledger.py` records the full checked-contract literal declaration: original Source/target reads and StateRepr, saved finite words, and all three numeric zero-test, overflow-test and SDIV-body capacity premises remain explicit. Its Source mapped result, symbolic ValOutT and numeric outcome remain distinct. After registration, the reconciliation describes all 474 currently observed literal headers, including nine private headers; no original census row is unclassified. This is textual row accounting with manually reviewed prose, not complete Lean parsing, semantic case/dependency closure, proof validation, target payload correspondence or a runtime gate.
+
+## Source-window review evidence
+
+`source_windows.py` regenerates the reconciled ledgers and binds each manual observation to source text from its scanned literal header up to the next scanned header or end of file, with source and window SHA-256 hashes. Its 474-row generated JSON remains off Git. Windows omit preceding docstrings or attributes and may contain proof text, comments, namespace closures, axiom guards or unscanned declarations. They are navigational review evidence, not parsed theorem statements or mechanical confirmation that prose matches a proposition. Python text `splitlines` is broader than LF-only line splitting; independently checked current pinned sources contain no differing CR or Unicode separators.
