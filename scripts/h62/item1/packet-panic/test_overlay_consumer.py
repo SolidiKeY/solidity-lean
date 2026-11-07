@@ -22,7 +22,7 @@ class OverlayConsumerTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             result = subprocess.run([sys.executable, str(SCRIPT), "--project", tmp], capture_output=True, text=True)
             self.assertNotEqual(result.returncode, 0)
-            self.assertIn("outside the two authorized isolated diagnostic paths", result.stderr)
+            self.assertIn("outside the authorized isolated diagnostic paths", result.stderr)
             self.assertFalse((pathlib.Path(tmp) / ".lake").exists())
 
     def test_helper_target_refuses_symlink_and_other_file(self):

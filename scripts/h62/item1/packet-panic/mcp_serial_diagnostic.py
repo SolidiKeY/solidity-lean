@@ -25,9 +25,10 @@ project = args.project.resolve(strict=True)
 allowed_projects = {
     root / "tests/h62/item1/packet-panic/closure-project-retry",
     Path("/workspace/h62-packet-panic-overlay-2a18/tests/h62/item1/packet-panic/closure-project-overlay"),
+    Path("/workspace/h62-packet-panic-overlay-2a18-snapshot-v1/tests/h62/item1/packet-panic/closure-project-overlay"),
 }
 if project not in allowed_projects:
-    raise SystemExit("project is outside the two authorized isolated diagnostic paths")
+    raise SystemExit("project is outside the authorized isolated diagnostic paths")
 target = validated_target(project, args.diagnostic) if args.diagnostic else None
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import get_default_environment, stdio_client

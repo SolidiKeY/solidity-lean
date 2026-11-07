@@ -27,7 +27,8 @@ def verify_archive(archive, expected):
     seen = set()
     expected_dirs = {str(parent) for name in expected for parent in pathlib.PurePosixPath(name).parents if str(parent) != "."}
     seen_dirs = set()
-    with tarfile.open(archive, "r:") as stream:
+    opener = tarfile.open(fileobj=archive, mode="r:") if hasattr(archive, "read") else tarfile.open(archive, "r:")
+    with opener as stream:
         for member in stream:
             name = member.name
             path = pathlib.PurePosixPath(name)
