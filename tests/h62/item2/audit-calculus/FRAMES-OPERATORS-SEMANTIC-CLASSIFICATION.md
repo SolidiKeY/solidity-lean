@@ -1,0 +1,13 @@
+# Frame exit and compound-operator source roles
+
+Guarded regression: local frame-exit satisfaction must not become global arm soundness or execution success; compound return-type identity must not silently add numeric acceptance or operational safety.
+
+Fetched and adopted master dee876457e751e3598ba3e640bd76f8e63e10f02 with owned history preserved by rebase and backup ref. Complete frozen-selected PremiseSound and Lower files match frozen/current bytes and exact signatures. All two plus three named theorems are accounted; the many intrinsic lowering definitions remain unchanged.
+
+runFrames_seq preserves the exact typed result, including program/frame errors, when moving a sequence frame into the current program. It supplies no successful execution. holds_exit requires LOCAL satisfaction of the exact frame-exit formula, then concludes the same state's nil-program modality with the original frames/post. Nil current program does not mean empty frames or immediate normal return. Both modalities and typed scope pop/thinning remain. Premise.Sound and Stmt.Sound are universal interface definitions; these lemmas do not prove all their obligations.
+
+compound_accepts requires BOTH the operator's compound eligibility and the supplied type's numeric flag. compound_ret requires only compound eligibility and concludes return-type identity for arbitrary p; numeric acceptance is not assumed or concluded. IncDec.binOp_compound classifies every pre/post increment/decrement variant's binary operator, with no numeric proof or execution guarantee. None supplies arithmetic safety, general lowering/evaluation equivalence or compiler correctness.
+
+Prior 263 roles and all owners unchanged. All 5283 candidates retained: 268 reviewed/5015 pending; owners3746 confirmed/1537 unresolved. Zero fresh audit witnesses. Independent finder and skeptic inspect source/role fidelity without Lean/server. Bulk data, source snapshots and measured command/log evidence stay off Git under /workspace/h62-successor-evidence/frames-operators-classification-v22 and /workspace/h62-successor-bulk/frames-operators-classification-v22, located by small hash manifests.
+
+All original checkpoints remain incomplete. Static classification supplies no joint witnesses, generated-declaration clearance, source/compiler totality or gas/fork/world/physical adequacy. Existing H28 actualCallerFields/extractionActuallyChanges/replay pause remains on migrate-root-gate Raw compatibility and Context Classical.choice audit; no duplicate notice or unchanged STOP rerun. Historical missing bytes remain UNVERIFIABLE. No Lean source/statement/dependent-definition/budget/axiom/exclusion/toolchain changes, runtime/axiom/cache/performance acceptance or RUNTIME_GATE_PASS.
