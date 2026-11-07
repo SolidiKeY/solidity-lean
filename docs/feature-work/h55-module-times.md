@@ -1836,3 +1836,24 @@ checks supplied candidate consistency, not current-tree coverage, artifact
 authority, complete invocation, proof or runtime acceptance. Unreferenced
 rows are not excluded. Independent read-only finder and skeptic reviewed
 the counts without Lean, server or builds.
+
+## Extended-index drift after later merges
+
+`current_extended_drift.py` compares the 640-row extended static index to
+the tracked index/worktree scan at `d0ddfa9f4ebfdea2edaf268b0da826b146f5a6ca`.
+It observed 7,967 tracked Lean paths and 718 standalone candidates: 78 new
+to the candidate set, six changed, 471 unchanged with supplied static
+references and 163 unchanged without them. No candidate was removed. Five
+changed shared-translator files have prior references that are explicitly
+retained for historical review rather than treated as current-byte evidence.
+The sixth changed file had no prior reference.
+
+The scan is non-atomic even under the writer lock; index flags, ignored or
+generated files, candidate resolution and runtime provenance remain
+unverified. Candidate-set changes may reflect reclassification. The
+adapter preserves historical reference labels but does not authenticate
+artifact contents or establish an executable recipe. The older
+`reference_index_update.py` ignores this adapter's historical field and must
+not consume its output until extended; identical path labels across eras do
+not preserve multiple artifact versions. Independent read-only
+finder and skeptic reviewed the comparison without Lean, server or builds.
