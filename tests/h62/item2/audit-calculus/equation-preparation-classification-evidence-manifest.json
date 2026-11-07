@@ -1,0 +1,47 @@
+{
+  "scope": "Complete7 equation-preparation theorem role classifications; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 621,
+    "pending": 4662,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/equation-preparation-roles-v52/evidence.tar.gz",
+      "bytes": 1144682,
+      "sha256": "2297b0f0737397609976f4060a1148e8efa88bba78019275bb42770acc77a54c"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/equation-preparation-roles-v52/inputs.json",
+      "bytes": 969,
+      "sha256": "588ca2b85fb2fd97c49fb417dd1fac72cc543b74d08589f5d020c3e79aa06b59"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/equation-preparation-roles-v52/gates.json",
+      "bytes": 3030,
+      "sha256": "230a55e6415da1b3b8407293b573a50d13d10323ce31c094cf6f7079a1d9f5d9"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/equation-preparation-roles-v52/reviews.md",
+      "bytes": 645,
+      "sha256": "21a9a2b5163d4dbb99aa6a57d252306202585641624a9d35f70a2b2b6d0d2ffb"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/equation-preparation-roles-v52/case-rosters.json",
+      "bytes": 910,
+      "sha256": "bdde53512960c5e82c4068f085dd609792afd718bb2a26e928ac91fb2384466d"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/equation-preparation-roles-v52/doc-master-repair-binding.json",
+      "bytes": 486,
+      "sha256": "71ddbfcf6aeb926ad480e9c4223500e46689acc3135f489f05d1b0b6f3fbb0b1"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/equation-preparation-roles-v52/semantic-roles-reviewed.json",
+      "bytes": 1648352,
+      "sha256": "3cabc5640049f6039ed23e7774e8dc8fa08b25314c1f762266253f2f341135de"
+    }
+  ]
+}
