@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "batch": "solidity-h62-6-20261106",
+  "slug": "migrate-hash",
+  "handoff_to": "solidity-h62-6-20261106/migrate-root-gate",
+  "status": "retired-partial-not-complete",
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "branch": "codex/solidity-h62-6-20261106/migrate-hash",
+  "repository": "/workspace/migrate-hash",
+  "original_vm": "ccarenv_b64_Y2NhcmVudl9mMTNhMmY3MDU4MTA4MTkxYTZiODEzOGJmMGMxZDYzZQ",
+  "source_head": "2a18afcdba00a85645b0b3079704f78ffcd78860",
+  "pre_retirement_receipt_head": "a3f49ee0ec1829e63022c90194048d5a1ffe0d22",
+  "worker_stops_after_final_ack": true,
+  "original_goal": "Existing launcher-created frozen assignment; unfinished; no replacement/reset. Goal identifier/get_goal not exposed.",
+  "push": {
+    "performed": false,
+    "reason": "No supplied H71 permission permits this lane push; original no-push constraint retained. No master push."
+  },
+  "work_queue_accounting": [
+    {
+      "checkpoint": 1,
+      "status": "partial",
+      "saved": "Pinned source census125 declarations and clean old Hash native build pass",
+      "open": "Complete elaborated public/generated API inventory and H78 fidelity coverage; full old baseline is incomplete"
+    },
+    {
+      "checkpoint": 2,
+      "status": "partial",
+      "saved": "Official4.35 pin verified; both production Hash files ported; source declarations, definitions and budgets preserved;121 named APIs/97 theorem audits/four instances/19 controls pass",
+      "open": "All original public generated exports/visibility/signatures and required compatibility shims remain unknown/pending. Implemented shims=[]; do not infer none needed."
+    },
+    {
+      "checkpoint": 3,
+      "status": "blocked",
+      "saved": "Clean Hash native directory comparison and canonical production checks pass; module RSS growth reported, not a lane stop",
+      "open": "Full old attempt timed out; full new attempt fails outside Hash. No matched successful full-build delta, complete affected validation or runtime pass."
+    },
+    {
+      "checkpoint": 4,
+      "status": "partial",
+      "saved": "Reviewed scoped patches, exact2a18 source bundle/manifest, cumulative receipt bundle and hashes available; coordinator routed producer prerequisite",
+      "open": "Successor/root integration, actual complete H78 API/trust review and acceptance gates; routing is not owner agreement or passing validation."
+    }
+  ],
+  "backfill_accounting": [
+    {
+      "item": "Source scanner/census and exact declared-header/context/definition hashes",
+      "saved": "125 original source declarations accounted for; lexical audit explicitly not full generated/elaborated API",
+      "remaining": "H78 public generated inventory and exact exported types"
+    },
+    {
+      "item": "Negative controls",
+      "saved": "Six unsupported scanner cases and statement/definition mutation checks; four anonymous instance checks",
+      "remaining": "No independent new backfill claim; retirement prohibits implementation"
+    },
+    {
+      "item": "Isolated fixture proofs and semantic controls",
+      "saved": "Both Hash fixture modules and19 finite kernel controls checked; real production imports also pass",
+      "remaining": "Finite controls do not prove downstream compiler/gas/fork or consumer witness contracts"
+    },
+    {
+      "item": "Reproduction/timing/export tooling",
+      "saved": "Deterministic scripts, source-bound logs and static source provenance; old supervisor terminal with outputs preserved",
+      "remaining": "Successful full comparison and final affected/runtime acceptance; no known STOP rerun or new baseline"
+    },
+    {
+      "item": "Newly unclaimed audit cleanup",
+      "saved": "None claimed; no H55 work or scope transfer",
+      "remaining": "No unclaimed candidates accepted; no independent implementation authorized after H82 retirement"
+    }
+  ],
+  "waits": [
+    {
+      "lane": "solidity-h62-6-20261106/migrate-syntax",
+      "item": "Accepted statement/API/trust-preserving Solidity/Syntax/Raw.lean prerequisite; five original String API errors remain in saved full probe. Partial Raw source was not applied; reported30 axiom-growth entries need root review."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "Disposition of old full baseline native-command timeout at Calculus.RuleSyntax.Grammar after18/6389 modules; preserve terminal supervisor and existing300s cap, no restart authorized."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "H78-HASH-GENERATED-COVERAGE: complete original public generated declarations, exact old/new exports, universes/binder order/kinds/visibility, and any shim name/old_signature/new_signature/shim_signature.121 named APIs and97 theorem audits are not exhaustive; no such complete exports or shims were produced."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "Matched successful clean full-build wall/RSS comparison under current H81 policy, full affected importer and runtime/run-lean gates, trust/performance disposition, and final root receipt."
+    },
+    {
+      "lane": "COORD",
+      "item": "Tool capability cannot set existing goal PAUSED; retirement authorized and worker stops. Preserve pause externally; do not auto-resume this lane."
+    }
+  ],
+  "public_api": {
+    "named_checks": 121,
+    "theorem_axiom_audits": 97,
+    "original_source_declarations": 125,
+    "all_public_generated_inventory_complete": false,
+    "old_generated_exports": null,
+    "new_generated_exports": null,
+    "required_shims_known": false,
+    "implemented_shims": []
+  },
+  "proof_boundary": "Existing Hash modules/guards and finite controls pass on official4.35. No new source axiom/sorry/native_decide/maxHeartbeats raise. This does not prove all transitive axiom sets unchanged or all public generated interfaces compatible.",
+  "validation_evidence": {
+    "production": "/workspace/migrate-hash-evidence/new-production-acceptance-1/results.json",
+    "source_provenance": "/workspace/migrate-hash-evidence/source-provenance-2a18afcdb/manifest.json",
+    "old_full": "/workspace/migrate-hash-full/old-full-2/summary.json",
+    "new_full": "/workspace/migrate-hash-full/new-full-4/summary.json",
+    "reviews": "/workspace/migrate-hash-evidence/reviews.md"
+  },
+  "known_limits": "Historical checks used LEAN_NUM_THREADS=1,-j1,12GiB address-space cap,no configured swap,4GiB effective available reserve,300s command timeout; final aggregate1800s. Later H81/current resource policy and reported8GiB/module requirement must be supplied/observed by successor; no new validation or budget adjustment here.",
+  "supervisor": {
+    "pid": 36556,
+    "state": "zombie; terminal MODULE_TIMEOUT; no active heavy jobs",
+    "preserve": "/workspace/migrate-hash-evidence/baseline-controller.json",
+    "restart": false
+  },
+  "scope_takeover": "Only after final stopped/head acknowledgement; survivor integrates final head; no source ownership transfer claimed"
+}
