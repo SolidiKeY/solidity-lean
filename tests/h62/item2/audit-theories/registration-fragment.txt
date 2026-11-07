@@ -59,7 +59,7 @@ row Theory/Audit/H62/CloserWitnesses.lean | Joint inputs for all four unchanged 
 source tests/h62/item2/audit-theories/PayableWitnesses.lean
 candidate Solidity/Theory/Audit/H62/PayableWitnesses.lean
 import Solidity.Theory.Audit.H62.PayableWitnesses
-row Theory/Audit/H62/PayableWitnesses.lean | Six feasible Payable joint packets, one ordinary-input refutation pending Q-STATIC-VALUE, and three successful model API controls; no auto-H69 disposition.
+row Theory/Audit/H62/PayableWitnesses.lean | Six feasible Payable joint packets, one explicitly accepted intentional H69 static-value boundary, and three successful model API controls; no operational static-refusal coverage.
 
 source tests/h62/item2/audit-theories/AssignableWitnesses.lean
 candidate Solidity/Theory/Audit/H62/AssignableWitnesses.lean
