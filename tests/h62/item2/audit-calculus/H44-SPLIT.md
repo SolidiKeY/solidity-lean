@@ -1,6 +1,6 @@
 # H44 reviewable split
 
-The generated 361-path scope inventory and six-case semantic classification dataset are preserved outside Git. The committed bulk-inputs-manifest.json gives their absolute VM paths, sizes and SHA256 hashes. Source data is unchanged: scope75913 bytes SHA256 c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92; roles9206 bytes SHA256 bcb4f5c718e686dcce1a518a2583448b95ba05751902147d66f3b5463e491fc7.
+The generated 361-path scope inventory and six-case semantic classification dataset are preserved outside Git. The committed BULK-INPUTS.md gives their absolute VM paths, sizes and SHA256 hashes. Source data is unchanged: scope75913 bytes SHA256 c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92; roles9206 bytes SHA256 bcb4f5c718e686dcce1a518a2583448b95ba05751902147d66f3b5463e491fc7.
 
 Both tools consume exact verified external bytes and fail if inputs are missing or tampered. There is no fallback to an omitted payload. The frozen scope SHA pin, full census digest, classification fidelity rules and --require-complete behavior remain unchanged. Scripts, small controls, Lean modules, documentation and pointer manifests remain reviewable in the live branch delta. Historical metadata commits remain preserved; this is not history removal.
 
