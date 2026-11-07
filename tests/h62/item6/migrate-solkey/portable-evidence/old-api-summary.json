@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "source_base_claim": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "source_capture_report": "original-evidence.tar.gz!/old-interface-2/measurement.json",
+  "source_versions": {
+    "lean": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)",
+    "lake": "Lake version 5.0.0-src+797c613 (Lean version 4.24.0)"
+  },
+  "provenance_boundary": "Base is the caller-supplied authenticated-capture label, not inferred from expression text.",
+  "source_raw": "original-evidence.tar.gz!/old-interface-2/tests.h62.item6.migrate-solkey.FrozenInterfaces.log",
+  "source_raw_sha256": "233315fb789b1cb63bd24b7206707d4b4c963ee6dbf89782d3d4e6c442e0efd8",
+  "total_records": 759,
+  "excluded_records": 0,
+  "generated_family_name_candidate_counts": {
+    "noConfusion": 0,
+    "recOn": 0,
+    "casesOn": 0,
+    "match_": 0,
+    "toCtorIdx": 0,
+    "_proof_": 6
+  },
+  "public_inventory_complete": false,
+  "new_exports_available": false,
+  "implemented_shims": [],
+  "acceptance": "PENDING_H78_VISIBILITY_AND_NEW_EXPORTS; not compatibility evidence"
+}
