@@ -106,6 +106,8 @@ def declarations(text):
         rows.append({
             "name_candidate": (namespace + "." if namespace else "") + name,
             "kind": kind,
+            "name_line": text.count("\n", 0, event.start("name")) + 1,
+            "name_column": event.start("name") - (text.rfind("\n", 0, event.start("name")) + 1),
             "line": text.count("\n", 0, start) + 1,
             "byte_start": len(text[:start].encode()),
             "byte_end": len(text[:i].encode()),
