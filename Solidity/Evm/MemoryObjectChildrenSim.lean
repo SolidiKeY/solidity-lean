@@ -82,7 +82,7 @@ theorem children_sim {H : HTy} (hp : Heap H) (E : Ty)
     · have heq : cursor'.val + k = cursor.val + (k + 1) := by
         change cursor.val + 1 + k = cursor.val + (k + 1)
         omega
-      simpa only [heq] using ha'
+      simpa only [hp₁, o, Grown.alloc, heq] using ha'
     · exact BaseExtends.trans e (fun r => allocationBase_old base cursor r) hb'
     · intro j v hv
       cases j with

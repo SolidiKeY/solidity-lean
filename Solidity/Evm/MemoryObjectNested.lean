@@ -3,6 +3,9 @@ import Solidity.Evm.MemoryObjectChildrenSim
 /-! Allocation of a dynamic array whose elements default to distinct empty
 dynamic arrays. The source allocates children before the parent; the target
 reserves the parent first. Both use the same finite typed heap identities. -/
+-- Retain the existing typed nested-allocation proof reductions on Lean 4.35.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory.Objects
 
 def nestedCopy {H : HTy} (hp : Heap H) (E : Ty)

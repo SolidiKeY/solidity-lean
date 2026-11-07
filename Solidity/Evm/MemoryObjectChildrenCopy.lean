@@ -1,6 +1,9 @@
 import Solidity.Evm.MemoryObjectChildLoop
 
 /-! The actual source fold for a run of empty dynamic-array defaults. -/
+-- Retain the existing typed child-copy proof reductions on Lean 4.35.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory.Objects
 
 def childrenCopy {H : HTy} (hp : Heap H) (E : Ty)

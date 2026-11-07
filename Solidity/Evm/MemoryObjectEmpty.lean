@@ -3,6 +3,9 @@ import Solidity.Typing.Values
 
 /-! Empty reference arrays allocate their own positive object reservation.
 No child default is fabricated; their source copy has no child elements. -/
+-- Retain the existing typed empty-object proof reductions on Lean 4.35.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory.Objects
 open Semantics
 
@@ -125,7 +128,7 @@ theorem defaultEmpty_correct {L b frame : Nat} {Γ : Ctx} {F : Frag Γ}
       run_append_ok (allocateArray_run m cursor (wmod 0) ha.free.cell)]
     rfl
   · have hid : (σ.alloc (emptyArray E)).2.id = σ.H.length := rfl
-    simpa only [hid, upd_same] using
+    simpa only [State.allocPush, hid, upd_same] using
       (h.allocateEmpty ha hb E hs).consMem (σ.alloc (emptyArray E)).2 hcap
   · exact (ha.allocateEmpty E hs).localWrite (b + Γ.length) (by omega) (by omega) _
 
