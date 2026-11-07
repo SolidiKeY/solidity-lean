@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "purpose": "H44 off-Git proof/resource evidence for generic allocation certificates; no frozen census credit.",
+  "module": "tests/h62/item2/audit-v09-passes/FrameAllocationCertificates.lean",
+  "production_dependency_unchanged": "Solidity/Yul/Compilation/Allocation.lean",
+  "dependency_sha256": "71a07f9f1bfdfba21a9303b5c26a7d0c4d5ec8dd54d83451e8d155c988b489b6",
+  "toolchain": "Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b; Lake5.0.0-src+797c613",
+  "timing": {
+    "original_seconds": 0.803,
+    "inline_additions_seconds": 1.409,
+    "inline_observed_percent": 75.47,
+    "inline_result": "STOP: split additive proofs out; not accepted as a passing timing comparison.",
+    "restored_original_seconds": 1.208,
+    "restored_observed_percent": 50.44,
+    "disposition": "Timing hold retained. Identical original bytes still varied beyond10%; no unchanged retry, no speed/final acceptance claim.",
+    "companion_seconds": 1.409,
+    "companion_is_not_a_before_after_comparison": true
+  },
+  "selected": 538,
+  "open": 721,
+  "selected_credit_added": 0,
+  "files": [
+    {
+      "path": "/workspace/vy3-allocation-evidence-20261107/versions.log",
+      "size": 159,
+      "sha256": "159844bb03690a833f246d4a9473b59a18d9c3267ff2c3ce328f3c87c31071e4"
+    },
+    {
+      "path": "/workspace/vy3-allocation-evidence-20261107/keysort-result.json",
+      "size": 851,
+      "sha256": "8265da066635dc2b7412c7d549884eaaf4a5b491580007ea4d324ed4cea51636"
+    },
+    {
+      "path": "/workspace/vy3-allocation-evidence-20261107/keysort.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/vy3-allocation-evidence-20261107/allocation-baseline-result.json",
+      "size": 870,
+      "sha256": "1f60ac74fcc5aace177114662ad3d31ad0e01bb23c6893a6028036411b895fac"
+    },
+    {
+      "path": "/workspace/vy3-allocation-evidence-20261107/allocation-first-result.json",
+      "size": 870,
+      "sha256": "ab9b427209fb004173d0379e72553c33df48a3830fb3da4c52399c7bd6e8de11"
+    },
+    {
+      "path": "/workspace/vy3-allocation-evidence-20261107/allocation-first.log",
+      "size": 1009,
+      "sha256": "9068daf59b111da7ad7f6c04d2aaa4b3206b837cc579c134332f6d8f1ca78793"
+    },
+    {
+      "path": "/workspace/vy3-allocation-evidence-20261107/allocation-restored-result.json",
+      "size": 870,
+      "sha256": "65c0e2dca46569ded0002c6b0bcc6cf4e6c34d6708a98ae472bcaf44c232f8ec"
+    },
+    {
+      "path": "/workspace/vy3-allocation-evidence-20261107/frame-certificates-result.json",
+      "size": 945,
+      "sha256": "5f4eb0fbbf308fa6e7b2f640292c64d13c204368ff046e503a018a5d550ab9e1"
+    },
+    {
+      "path": "/workspace/vy3-allocation-evidence-20261107/frame-certificates.log",
+      "size": 803,
+      "sha256": "ad8aa35696ea565248981ee6e877353bf2621e466caf6cc1fa3956fb570d8c6d"
+    },
+    {
+      "path": "/workspace/vy3-allocation-evidence-20261107/frame-certificates-final-result.json",
+      "size": 946,
+      "sha256": "d80e0a67edd314c1be7ab197bdeb5f702eebd2b0e3d3f2993ab7017b5c9fd0c9"
+    },
+    {
+      "path": "/workspace/vy3-allocation-evidence-20261107/frame-certificates-final.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/vy3-allocation-evidence-20261107/toolchain-SHA256SUMS",
+      "size": 115,
+      "sha256": "471e50268649abe8a7cc629718b93212e8f889789ea78a9a2203747386258e76"
+    },
+    {
+      "path": "/workspace/vy3-allocation-evidence-20261107/bounded.py",
+      "size": 1656,
+      "sha256": "d22ab21b46575df106dbb9a6cfce6719cf2e072941037aef0a3d356615071e7d"
+    }
+  ]
+}

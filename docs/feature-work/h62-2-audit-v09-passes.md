@@ -1455,3 +1455,32 @@ The unrelated RelatedMemoryCapture/Source.SemanticsExamples STOP remains in forc
 Evidence: `/workspace/vy3-evidence/matched-master-cache-20261107`; comparison,
 ticket resolution, raw logs, resource records and native-C relocation hashes
 are retained there. The RAM artifacts are VM-local and are not portable Git data.
+
+
+Original VY3 backfill A: `tests/h62/item2/audit-v09-passes/FrameAllocationCertificates.lean`
+extends the existing generic Frame API with argument/result/local interval bounds,
+three injectivity laws reusing label injectivity, and constructive coverage of
+every position in the frame footprint. All arities, including empty regions,
+and every base are retained. A nonzero-base combined argument/result/local
+witness rejects the exclusive frame limit as a local. These are allocation
+certificates only; runtime contents, calling convention and G24 simulation are
+not inferred. No per-case interface or new production import was added.
+
+Fresh official Lean4.24.0/Lake5.0.0-src+797c613 runtime was restored separately
+from missing historical evidence. Serial Docker checks enforce12GiB/no swap
+and4GiB headroom. Direct KeySort and the final companion kernel check passed
+(1.409s for the latter), with guarded axiom reports: argument/result bounds
+are axiom-free, other certificates use propext and Quot.sound. No runtime/full
+acceptance marker is inferred from these focused checks.
+
+The first inline draft kernel-checked but exceeded the10% timing threshold
+(0.803s original,1.409s inline), so that workload remains a timing STOP. Proofs
+were split and simplified; the original Allocation module is byte-unchanged.
+Its restored check still measured1.208s, so the timing hold remains open; no
+unchanged retry or performance acceptance is claimed. A first companion check
+failed because its new axiom guards overstated the two optimized bounds' actual
+dependencies; raw failure is retained and final guards reflect the axiom-free
+proofs. Selected538/1259,721open remains unchanged. Evidence and timing/limits
+are inventoried in `frame-allocation-evidence.json`; raw records remain at
+`/workspace/vy3-allocation-evidence-20261107`. Historical `/workspace/vy3-evidence`
+is still missing and has not been reconstructed.
