@@ -449,3 +449,41 @@ Independent read-only finder and skeptic pass the source application and test
 updates, with no statement weakening found. Source checks and trust/orphans/
 roots/fragments/whitespace pass. These results do not discharge the pending
 kernel, axiom, meaning, timing, touched-build or full Bridge gates.
+
+
+## H133 VX1 G01 producer-review intake (2026-11-07)
+
+H133 routes the former V15 G01 EVM/resource review to this successor. The
+requester identifies head6cff82c7dcde5d21792a9467486f54408cf11f1a. That Git object
+and prior ee8eccaf5f9536a44912c7d2ec31329e7b46adaf are absent locally; the reported
+VX1 test directory/run-indexed interface is not available on fetched master.
+Exact consumer fields and proofs therefore have not been reviewed. Request an
+authenticated head-bound bundle/patch or frozen V1.RunIndexed interface with
+consequences/controls, paths and checksums through the coordinator relay; no
+peer VM branch was fetched and no interface was reconstructed from prose.
+
+A preliminary review of actual master G01 contracts and local P10 producers is
+saved under `/workspace/parallel-20261103/executable-bytecode/h133-vx1-g01-review`.
+P10 FrozenV1.api supplies constructed-site decode, charged local-step and
+continuation laws. It does not instantiate EvmSpec/Execution session deployment,
+all-history gas schedules, uniform environment maps, two-sided resource/prefix
+transport, source/compiler origin, physical memory, hash/world/chain coupling
+or arbitrary-instance nonvacuity. Local BYTE word-image laws are relevant inputs,
+not a physical-layout or full solc-convention certificate. CALL case alignment
+still assumes the exact entered Theta reply; it does not derive callee coupling.
+
+The reviewed public master references are EvmSpec/Execution in
+Solidity/Roadmap/Contracts.lean and GasRes/Certificate in Solidity/Roadmap/Evm.lean.
+These are context, not a substitute for VX1's unavailable exact run-indexed
+signature. The reported gasquery5 control does not supply a universal operational
+producer. No consumer theorem defect or frozen repair is inferred from missing
+bytes, no certificate/premise is invented, and no producer linkage is approved.
+All five capability-review gaps remain explicit. No Source/H16 or frozen
+interface edit, build, proof budget change, narrowing of eligibility, gate
+waiver or old Claude contact occurred. Original work and exact producer/cache
+waits remain unchanged.
+
+Independent read-only finder/skeptic reviews pass this preliminary capability
+review and authenticated-input request. Neither reviewed the missing consumer
+proof bytes or ran Lean/builds/server calls. No new producer certificate or
+operational linkage is delivered by this receipt.
