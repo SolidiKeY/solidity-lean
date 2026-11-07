@@ -17,7 +17,7 @@ theorem good_result : ((scopedCopy ByteSliceControls.G goodFrame 2 goodData 0).r
 
 theorem caller_locals_restored :
     ((scopedCopy ByteSliceControls.G goodFrame 2 goodData 0).run sourceBefore).2.1 = sourceLocals := by
-  rw [good_scoped_run,good_source_run,Source.cdToMem_array_run,validated]
+  rw [good_scoped_run,good_source_run,(Source.cdToMem_array_run (σ := .bool)),validated]
   rfl
 
 theorem heap_related : Related ((scopedCopy ByteSliceControls.G goodFrame 2 goodData 0).run sourceBefore).2.2.heap
@@ -32,7 +32,7 @@ theorem joint_second :
     BoolArrayControls.lowered.heap.readAddr (.index (aliasTarget.alloc (object aliasTarget.H values room)).2
       ArrTy.dyn (uintOfNat 1)) = some false := by
   refine ⟨?_,entry_joint_second.2⟩
-  rw [Source.Hoare.run_bind,good_scoped_run,good_source_run,Source.cdToMem_array_run,validated]
+  rw [Source.Hoare.run_bind,good_scoped_run,good_source_run,(Source.cdToMem_array_run (σ := .bool)),validated]
   rfl
 
 theorem zero_budget : (scopedCopy ByteSliceControls.G goodFrame 0 goodData 0).run sourceBefore =
@@ -87,7 +87,7 @@ theorem wrong_timeout_revert :
 theorem protected_old_objects :
     ((scopedCopy ByteSliceControls.G goodFrame 2 goodData 0).run sourceBefore).2.2.heap.get 0 = sourceHeap.get 0 ∧
     ((scopedCopy ByteSliceControls.G goodFrame 2 goodData 0).run sourceBefore).2.2.heap.get 1 = sourceHeap.get 1 := by
-  rw [good_scoped_run,good_source_run,Source.cdToMem_array_run,validated]
+  rw [good_scoped_run,good_source_run,(Source.cdToMem_array_run (σ := .bool)),validated]
   exact ⟨rfl,rfl⟩
 
 end Solidity.Backend.Aggregates.BoolArrayExpressionControls

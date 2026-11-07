@@ -118,7 +118,7 @@ theorem successful_import {E : Source.Env} {Λ : Source.RCtx} {C : Contract} {Γ
   · rw [lowerEntry_of_ok target frame selector data selector_length input entry]
     exact lowerCopy_success target frame selector data selector_length input entry validation
   · simp only [sourceCopy_run,entry]
-    rw [Source.cdToMem_array_run,validation]
+    rw [(Source.cdToMem_array_run (σ := .bool)),validation]
   · rw [sourceCopy_run,entry]
     exact copy_related frame selector data selector_length input entry source target validation
 

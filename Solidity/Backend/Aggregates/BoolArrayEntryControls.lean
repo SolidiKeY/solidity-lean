@@ -16,7 +16,7 @@ theorem good_source_run : (sourceCopy goodFrame goodData 0).run sourceBefore =
 
 theorem good_source_result : ((sourceCopy goodFrame goodData 0).run sourceBefore).1 =
     .ok (.val (.memRef rfl 2)) := by
-  rw [good_source_run,Source.cdToMem_array_run,validated]
+  rw [good_source_run,(Source.cdToMem_array_run (σ := .bool)),validated]
   rfl
 
 theorem good_heap_related : Related ((sourceCopy goodFrame goodData 0).run sourceBefore).2.2.heap

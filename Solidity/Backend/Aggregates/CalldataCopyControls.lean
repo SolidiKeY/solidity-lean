@@ -28,7 +28,7 @@ theorem copy_success : copied.run sourceBefore =
         ⟨.array .memory .bool none,Source.Data.array 2 (fun _ h => nomatch h)
           (fun k => .val ([Source.Val.bool true,.bool false].get k))⟩).1})) := by
   unfold copied
-  rw [Source.cdToMem_array_run,decoded_prefix]
+  rw [(Source.cdToMem_array_run (σ := .bool)),decoded_prefix]
   rfl
 
 theorem copied_order : (copied.run sourceBefore).2.2.heap.get 2 =
@@ -60,7 +60,7 @@ theorem dirty_copy_atomic :
 
 theorem empty_copy_allocates :
     ((Source.cdToMem copyFrame (.array .memory .bool none) 96 0).run sourceBefore).2.2.heap.next = 3 := by
-  rw [Source.cdToMem_array_run]
+  rw [(Source.cdToMem_array_run (σ := .bool))]
   rfl
 
 theorem wrong_failure_halt :

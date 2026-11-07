@@ -70,7 +70,7 @@ theorem copy_related {E : Source.Env} {Λ : Source.RCtx} {C : Contract} {Γ : Ct
       (target.alloc (object target.H t values room)).2 := by
 
   dsimp only
-  rw [Source.cdToMem_array_run, validation]
+  rw [(Source.cdToMem_array_run (σ := .int _)), validation]
   refine ⟨values, Source.Heap.alloc_get source.2.heap _, ?_⟩
   change MObj.elems ArrTy.dyn ((target.heap.alloc (object target.H t values (capacity t frame selector data selector_length input entry validation))).1.get
     (target.heap.alloc (object target.H t values (capacity t frame selector data selector_length input entry validation))).2) = values.map (value t)
@@ -104,7 +104,7 @@ theorem error_iff_copy_error {E : Source.Env} {Λ : Source.RCtx} {C : Contract} 
     lowerCopy (E := E) target t frame selector data selector_length input entry = .error halt ↔
       (Source.cdToMem frame (sourceTy t) offset length).run source = (.error halt,source) := by
 
-  rw [Source.cdToMem_array_run]
+  rw [(Source.cdToMem_array_run (σ := .int _))]
   unfold lowerCopy
   split
   · rename_i actual observed
@@ -198,8 +198,8 @@ abbrev argumentTy (t : Source.IntTy) : Source.STy := .array .calldata (.int t) n
 Explicit decidable equality avoids reducing the generated equality machinery. -/
 theorem conversion_allowed (E : Source.Env) (t : Source.IntTy) :
     (argumentTy t).implicit E.isBase E.mapFree (sourceTy t) = true := by
-  change (decide (t = t) && true && true) = true
-  simp only [Bool.and_true, decide_eq_true_eq]
+  change (decide (t = t) && true && true && (false || true)) = true
+  simp only [Bool.and_true, Bool.or_true, decide_eq_true_eq]
 
 def expr {E : Source.Env} {caller : Source.RCtx} (t : Source.IntTy) :
     Source.RExpr E (argumentTy t :: caller) (sourceTy t) :=
@@ -348,7 +348,7 @@ theorem copy_first_out {E : Source.Env} {Λ : Source.RCtx} {C : Contract} {Γ : 
     rw [List.getElem?_eq_none (Nat.le_of_eq
       (Source.cdToMem_array_length frame (.int t) offset length validation))]
     rfl
-  · rw [Source.cdToMem_array_run, validation]
+  · rw [(Source.cdToMem_array_run (σ := .int _)), validation]
     rfl
 
 
@@ -448,6 +448,6 @@ theorem selected_success_import_error {E : Source.Env} {caller : Source.RCtx} {C
     rfl
   · apply (entry_error_iff_source_error before target t frame selector data selector_length input entryIndex halt).2
     simp only [sourceCopy_run, entry]
-    rw [Source.cdToMem_array_run, validation_error]
+    rw [(Source.cdToMem_array_run (σ := .int _)), validation_error]
 end CalldataRead
 end Solidity.Backend.Aggregates.IntegerArrays

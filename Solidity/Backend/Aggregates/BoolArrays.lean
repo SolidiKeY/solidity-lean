@@ -104,7 +104,7 @@ theorem copy_related {E : Source.Env} {Λ : Source.RCtx} {C : Contract} {Γ : Ct
     Related ((Source.cdToMem frame sourceTy offset length).run source).2.2.heap source.2.heap.next
       (lower target values room).heap (target.alloc (object target.H values room)).2 := by
   dsimp only
-  rw [Source.cdToMem_array_run,validation]
+  rw [(Source.cdToMem_array_run (σ := .bool)),validation]
   exact ⟨values,Source.Heap.alloc_get source.2.heap _,target_contents target values _⟩
 
 /-- A total value/frame adapter OVER A SUCCESSFUL ABI ENTRY, using the actual Source word validator.
@@ -213,7 +213,7 @@ theorem phase_error_iff_copy_error {E : Source.Env} {Λ : Source.RCtx} {C : Cont
     · intro impossible
       cases impossible
     · intro impossible
-      rw [Source.cdToMem_array_run,validation] at impossible
+      rw [(Source.cdToMem_array_run (σ := .bool)),validation] at impossible
       cases congrArg Prod.fst impossible
 
 end Solidity.Backend.Aggregates.BoolArrays
