@@ -1,8 +1,8 @@
 {
-  "commit": "8a710f9d44df144d4c9855aeccca56585a422122",
+  "commit": "f5bfb9ba159d3ba2930d61dc07a2e0bbd5b07eb8",
   "originalBase": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
   "authority": "H82b authenticated translator scope and H90 reader extension; explicit published-master adoption",
-  "publication": "Immutable published master 8a710f9d44df144d4c9855aeccca56585a422122 was fetched and merged before this intake; unchanged allowlists and prior lane work preserved. No candidate decoder or rejected validation-contract update integrated.",
+  "publication": "Immutable published master f5bfb9ba159d3ba2930d61dc07a2e0bbd5b07eb8 fetched and already merged before exact original-archive staging; unchanged allowlists and prior lane commits preserved.",
   "updatePolicy": "Explicit recorded publication update and review; never derive from a moving ref.",
   "exclusiveFiles": [
     "Solidity/Frontend/ExecutableAst/ControlTuple/Adapter.lean",
@@ -42,7 +42,7 @@
     "tests/directruntime-20261104/shared-translator/**",
     "tests/h62/item1/binding-fixtures/**"
   ],
-  "publishedAncestor": "8a710f9d44df144d4c9855aeccca56585a422122",
+  "publishedAncestor": "f5bfb9ba159d3ba2930d61dc07a2e0bbd5b07eb8",
   "preservedInheritedWork": [
     {
       "commit": "636fc9880a8480a921abc7a328efc85222394981",

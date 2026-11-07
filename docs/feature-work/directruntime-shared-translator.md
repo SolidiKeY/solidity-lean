@@ -1306,3 +1306,31 @@ Independent read-only finder/skeptic confirmed mandatory guards, byte bindings,
 actual stack error and the limits; neither used Lean/server/builds/writes. Full
 source/importer migration, ReadBounds authority, runtime/performance repairs and
 original final acceptance remain open.
+
+
+### Exact original environment archive staged for courier
+
+H70's missing-host-original notice was answered by checking actual local bytes.
+The original environment-evidence.tar.zst still exists at65,713bytes, SHA256
+d8a141a7703e95cc81f7aa0741ed12a5073739b1cb7d4363354211ca3cb16060.
+Its committed environment-manifest.json is byte-identical to the manifest at
+44d89439afd8fe7aca251cd5693b5b7ea36cf603, manifestSHA8ee027cf3c84e2162d98a07cf38e07706076be85948483e8a9d5e35cbeb5f6b5.
+All56safe unique regular members and55internal checksums verify. Archived
+Translate bytes equal that historical Git blob; compilation sourceSHA matches
+the historical source; original ASTSHA4b57bac4 matches the separately delivered AST.
+Nothing is extracted or executed.
+
+A byte-identical copy is staged off Git under H44 at
+artifacts/environment-handoff/original-environment-evidence.tar.zst.
+Original-environment-staging.json records repository-relative paths and exact
+provenance for the existing accepted H71 request. It is the original44d archive,
+not native-browser c3c9ce43 evidence. Approved host pull, consumer delivery and
+inspection remain unconfirmed; local staging is not transport or qualification.
+No duplicate ticket, source push or cache shipment occurred.
+
+Finder and skeptic independently checked custody/provenance limits and found no
+blocker, without Lean/server/builds/writes. Publishedf5bfb9ba1 was already merged
+before this metadata work; the explicit publication pin advances without any
+allowlist change. No Lean/production source or frozen validation contract changes.
+All performance/stack holds, production-owner authority, four storage diamonds,
+Q-H90-DYNAMIC-VALIDATION and original full acceptance obligations remain open.
