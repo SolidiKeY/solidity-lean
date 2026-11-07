@@ -16,6 +16,7 @@ FAMILIES = ['declaration private/protected/class flags and active instance prior
 
 def make_plan(census, inventory, census_sha256, baseline):
     """Validate coverage and current inputs, without interpreting metadata absence."""
+    baseline = baseline.resolve()
     selected = census['yul_modules']
     rows = inventory['modules']
     if (len(set(selected)) != len(selected) or
@@ -38,16 +39,20 @@ def make_plan(census, inventory, census_sha256, baseline):
         count = row['declarations']
         if type(count) is not int or count < 0:
             raise ValueError('invalid kernel declaration count')
-        if interfaces.digest(row['summary']) != row['summary_sha256']:
+        # Relative inventory paths belong to the preserved source view, not cwd.
+        # Absolute evidence paths may legitimately be outside that worktree.
+        summary_path = (baseline / row['summary']).resolve()
+        summary_bytes = summary_path.read_bytes()
+        if hashlib.sha256(summary_bytes).hexdigest() != row['summary_sha256']:
             raise ValueError('old kernel summary drift: ' + row['module'])
-        snapshot = json.loads(pathlib.Path(row['summary']).read_text())
+        snapshot = json.loads(summary_bytes)
         if (snapshot['module'] != row['module'] or
                 len(snapshot['declarations']) != count or
                 type(snapshot['header']['expected_constants']) is not int or
                 snapshot['header']['expected_constants'] != count):
             raise ValueError('old kernel summary coverage mismatch')
         jobs.append(dict(index=index, module=row['module'],
-            kernel_declarations=count, kernel_summary=row['summary'],
+            kernel_declarations=count, kernel_summary=str(summary_path),
             kernel_summary_sha256=row['summary_sha256'],
             query_required=True, query_performed=False,
             scope='one original module per bounded old-toolchain probe'))

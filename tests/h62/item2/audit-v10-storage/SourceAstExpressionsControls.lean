@@ -46,8 +46,11 @@ def inspect (doc : Json) : Except String Nat := do
       (converted.filter failureBytes).length == 2 &&
       (converted.filter successTuple).length == 1 do
     throw "storage write, literal bytes or tuple order changed"
-  for node in nodes do
-    unless (expression 0 node).isOk == false do throw "depth exhaustion ignored"
+  let some member := nodes.find? (fun node =>
+    (node.getObjValAs? String "nodeType").toOption == some "MemberAccess")
+    | throw "missing nontrivial depth control"
+  unless !(expression 1 member).isOk && (expression 2 member).isOk do
+    throw "nonzero member-depth boundary changed"
   return converted.length
 
 /-- Malformed inputs and unsupported operators must not silently become a
