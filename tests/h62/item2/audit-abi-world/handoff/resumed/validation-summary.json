@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "status": "blocked",
+  "integration": "706e36825929d6d0084dc08b88de9349abcd25aa",
+  "original_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "full_lean_build": {
+    "status": "pass",
+    "command": "./run-lean.sh",
+    "jobs": 6546,
+    "exit_code": 0,
+    "elapsed_seconds": 274.93197262300237,
+    "peak_rss_bytes": 5904257024,
+    "minimum_available_bytes": 9599537152,
+    "no_swap": true,
+    "max_heavy_jobs": 1,
+    "cleanup_complete": true
+  },
+  "local_audit": {
+    "modules": 9,
+    "witnesses": 177,
+    "fidelity": 177,
+    "binders": 439,
+    "formal_success": 7,
+    "external_encoded_fixtures_identical": 10,
+    "new_axioms": 0,
+    "sorry": 0,
+    "frozen_statements_changed": 0
+  },
+  "static": {
+    "trust": "pass",
+    "orphans": "pass",
+    "doc_paths": "pass",
+    "axiom_pins": "fail:99 new standard-only registrations,0 errors"
+  },
+  "timing_delta_percent": -2.130716676924582,
+  "waits": [
+    {
+      "lane": "coordinator/G07 inventory owners",
+      "item": "PIN-706: record exact99 existing standard-only pins from committed owner ticket; no theorem/axiom/premise/exclusion edits."
+    }
+  ],
+  "questions": [],
+  "boundary": "Full Lean build and local ABI audit pass; final global metadata acceptance remains blocked. External gas/fork observations are reused for byte-identical fixtures, not formal gas/world proofs."
+}

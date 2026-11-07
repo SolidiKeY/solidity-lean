@@ -269,7 +269,8 @@ inferencer, the other candidates, import migration or full validation.
 
 `propose_migration.py` emits `migration-proposal.patch` deterministically from
 the current originals and the shared module. The proposal adds
-`Solidity/Source/InferHelpers.lean`, imports it from the two inferencers and
+the proposed file Solidity/Source/InferHelpers.lean (not present in this checkout),
+imports it from the two inferencers and
 keeps each existing helper name and type while changing its definition body
 to call the shared definition. It was not applied; `git apply --check` passes
 on this tree. It is a review artifact, not a checked migration: changed

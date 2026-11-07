@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "archive": "checkpoint-evidence.tar.gz",
-  "archive_sha256": "92ad15b2ef5cf7c118c4725e9f3f0b5229f992508f2813bf58e8f1e70fbf37d4",
+  "archive": "evidence.tar.gz",
+  "archive_sha256": "b5877ce4d66921a9e46f2dca17b9ffcc88e431c33f5ecbb7e8f573673ff25b85",
   "manifest": "tests/h62/item2/audit-abi-world/portable-evidence.sha256",
   "verify_command": "python3 -B scripts/h62/item2/audit-abi-world/portable_evidence.py verify --archive PATH_TO_ARCHIVE --manifest tests/h62/item2/audit-abi-world/portable-evidence.sha256",
   "integration": "706e36825929d6d0084dc08b88de9349abcd25aa",
@@ -14,5 +14,11 @@
     "identical_external_fixtures": 10
   },
   "full_gate_complete": false,
-  "boundary": "Byte integrity is portable; Lean diagnostics and external-test observations retain actual execution provenance. Full build remains pending."
+  "boundary": "Byte integrity is portable; Lean diagnostics and external-test observations retain actual execution provenance. Full build remains pending.",
+  "manifest_sha256": "4ecd020ccfea20bbcabbf743936037b7e56ea83cf84622f685a5ea096d026d24",
+  "archive_entries": 1260,
+  "full_lean_build_complete": true,
+  "final_acceptance": "blocked: PIN-706 central inventory99 new standard-only registrations,0 errors",
+  "owner_ticket": "tests/h62/item2/audit-abi-world/handoff/resumed/axiom-pin-owner-ticket.json",
+  "normal_build_record": "resume-20261106/checkpoints/final-blocked-acceptance/full-6-resource.json"
 }

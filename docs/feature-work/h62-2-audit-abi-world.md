@@ -12,8 +12,9 @@ statement-fidelity census now cover all 177 frozen declarations across all 24
 mapped modules. There are zero uncovered mapped statements. Of these, 54 have
 proposition premises, 53 have data/type/instance binders only, and 70 have no input
 binders. The 70 empty packages are explicit census accounting, not additional
-semantic feasibility coverage. The success/runtime phase and matched after timings now also pass. Full normal
-repository validation remains unfinished. The later coordinator instruction explicitly
+semantic feasibility coverage. The success/runtime phase and matched after timings pass.
+The full normal repository build now passes. Final acceptance is blocked only by
+99 unrecorded central G07 pin registrations (zero axiom errors). The later coordinator instruction explicitly
 reactivated this same worker and authorized merging origin/master and continuing.
 The retirement section below is historical; no goal was created or reset.
 
@@ -443,3 +444,48 @@ The d96 full run reached all library/examples and TestSuite.Derived20 before a
 reserve stop at2088.577s, peak taskRSS9174859776bytes, noLeanerrors, noSwap,
 oneheavyjob, cleanuptrue. OpenLoops passed unchanged. The new706 full gate remains
 to run with retained artifacts; no failed attempt is counted as a pass.
+
+## Final validated handoff: G07 metadata blocker
+
+All original ABI audit implementation/proofs are complete:24 frozen modules,
+177 exactly-once statements,177 simultaneous witnesses/fidelity comparisons,
+439 binders, seven success theorems and10 external fixtures with exact current
+encoded-byte identity. Four map-drift files remain explicitly outside the frozen
+map, not silently counted. No original statement, definition, premise, exclusion,
+proof budget, axiom set or Source module was changed by this lane's continuation.
+
+The actual current ./run-lean.sh command passed at706 input identity,6546jobs,
+exit0 in274.931973s. Resource receipt: peak taskRSS5904257024bytes, minimum
+available9599537152bytes, maxoneheavyLeanjob, noSwap, verifiedcleanup. Earlier
+full5 reached6517/6542 before a reserve stop at6563.727s; that failure is retained.
+Cold-cache recovery changed residency only, not proof/source/budgets. Current
+Lean4.24.0 Release797c613 and Lake5.0.0-src+797c613 plus fresh passing KeySort are
+recorded; no theorem truth is inferred from runtime labels. Current run-lean
+policy does not run solkeycheck; that CLI is not silently reported as passed.
+
+Trust passes:6553sources,289 inventoried implementation/recoverysites,0findings.
+Reachability passes:6537reachable,0orphaned,0notallowed. Documentation paths now
+pass (128 ambiguous but resolving references are nonfatal). The five initial
+missing references were synthetic/unapplied/external paths. H82-authorized
+documentation-only fixes retain the intended proposed filenames/purpose and
+failed-experiment exclusion; the duplicate-map fixture now cites an existing
+module and its four tests still pass. No other proving-lane Source was edited.
+
+One required global metadata gate remains failed: check-axiom-pins reports
+16118pinned theorems,0nonstandard/growth/removal errors,99unrecorded changes.
+Every change is a new registration using only existing standard axioms; none
+is a new axiom or pin growth. All pin sources and central inventory are unchanged
+from706. The original assignment explicitly prohibits this worker editing
+central pins. The deterministic propose_pin_sync.mjs supplies the exact99-key
+owner delta, recorded centralSHA and repair options in the committed resumed
+axiom-pin-owner-ticket.json. No --write, pin-fragment or central inventory edit
+was performed. Owner: coordinator/G07 per-file fragment owners.
+
+Thus full assignment acceptance remains BLOCKED, not done. The original four
+audit checkpoints have no uncovered statement/proof obligations; final gate
+closure awaits owner registration of the already existing standard-only pins.
+No extra unclaimed audit candidate is assigned. All independent authorized
+backfill, portability work and reviews are complete. After a metadata-only owner
+repair, check the pin/fragments gates; preserve current proof receipts if source
+inputs stay identical. Any new source/config input requires appropriately fresh
+validation. No unsupported premise/exclusion is offered as a repair.
