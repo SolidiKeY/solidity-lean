@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/memory-contract-roles-v41/semantic-roles-reviewed.json",
-    "bytes": 1478502,
-    "sha256": "3ba33129af9fd0dba0ae56e10d8ec65000a45a6cf9f930291f223d8e98db2205"
+    "path": "/workspace/h62-successor-bulk/merge-roles-v42/semantic-roles-reviewed.json",
+    "bytes": 1486163,
+    "sha256": "4db7bc7be128a62df08f2fb0dabe94a5c02f18ae5976fd0ea047953f02dcfd9c"
   }
 }
