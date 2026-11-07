@@ -120,5 +120,37 @@
       "intWrap_idempotent": "[propext, Classical.choice, Quot.sound]",
       "cleanWord_int_lowBits": "[propext, Classical.choice, Quot.sound]"
     }
+  },
+  "encoder_roundtrip": {
+    "scope": "Actual Source.Val.word.bind published cleanWord, complete Option Val equality",
+    "types": [
+      "every valid integer type with its actual lo/hi proof",
+      "Boolean"
+    ],
+    "pipelines": [
+      "legacy",
+      "viaIR"
+    ],
+    "proof_cases": [
+      "unsigned in range",
+      "signed nonnegative in range",
+      "signed negative in range",
+      "Boolean false and true in each pipeline"
+    ],
+    "encoder": "Existing 256-bit intWord; for every valid width, the modulus 2^bits divides 2^256",
+    "limits": [
+      "No roundtrip for unsupported dirty types",
+      "No arbitrary RawFrame materialization adequacy",
+      "No Source expression/statement or raw-copy integration"
+    ],
+    "numeric_helpers": [
+      "intWord_value",
+      "wrap_intWord",
+      "intWrap_of_range"
+    ],
+    "roundtrips": [
+      "cleanWord_int_roundtrip",
+      "cleanWord_bool_roundtrip"
+    ]
   }
 }

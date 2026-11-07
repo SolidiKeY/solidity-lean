@@ -499,4 +499,101 @@ Solidity.Yul.DirtyReadback.cleanWord (D := D) pipeline (.int ty) second := by
     (first.val : Int) (second.val : Int) residues
   simp only [Solidity.Source.intWrap, Solidity.Source.IntTy.wrap, wrapped]
 
+/-- The existing integer word encoder carries exactly the nonnegative 256-bit residue. -/
+theorem intWord_value :
+ ∀ (value : Int), ((Solidity.Source.intWord value).val : Int) =
+value % ((2 ^ 256 : Nat) : Int) := by
+  intro value
+  have positive : (0 : Int) < ((2 ^ 256 : Nat) : Int) := by decide
+  have nonnegative := Int.emod_nonneg value (by omega : ((2 ^ 256 : Nat) : Int) ≠ 0)
+  have bounded := Int.emod_lt_of_pos value positive
+  have narrow : (value % ((2 ^ 256 : Nat) : Int)).toNat < 2 ^ 256 := by omega
+  unfold Solidity.Source.intWord Solidity.Source.toWord
+  dsimp only
+  rw [Nat.mod_eq_of_lt narrow, Int.toNat_of_nonneg nonnegative]
+
+/-- The existing 256-bit encoder preserves every valid integer cleanup, including signed negative values. -/
+theorem wrap_intWord :
+ ∀ (ty : Solidity.Source.IntTy) (value : Int),
+ty.wrap ((Solidity.Source.intWord value).val : Int) = ty.wrap value := by
+  intro ty value
+  obtain ⟨factor, equation⟩ := Nat.pow_dvd_pow 2 ty.valid.2.2
+  have divides : ((2 ^ ty.bits : Nat) : Int) ∣ ((2 ^ 256 : Nat) : Int) := by
+    refine ⟨(factor : Int), ?_⟩
+    rw [equation, Int.natCast_mul]
+  apply Solidity.Yul.DirtyReadback.wrapBits_congr
+  rw [Solidity.Yul.DirtyReadback.intWord_value]
+  exact Int.emod_emod_of_dvd value divides
+
+/-- Encoding any integer and reading it back yields exactly the existing intrinsic wrapped value in either pipeline. This states no general Source execution agreement. -/
+theorem cleanWord_int_encode :
+ ∀ (D : Solidity.Source.Layout) (pipeline : Solidity.Yul.DirtyReadback.Pipeline)
+(ty : Solidity.Source.IntTy) (value : Int),
+Solidity.Yul.DirtyReadback.cleanWord (D := D) pipeline (.int ty) (Solidity.Source.intWord value) =
+some (Solidity.Source.intWrap ty value) := by
+  intro D pipeline ty value
+  rw [Solidity.Yul.DirtyReadback.cleanWord_int]
+  simp only [Solidity.Source.intWrap, Solidity.Yul.DirtyReadback.wrap_intWord]
+
+/-- Cleanup preserves every already bounded Source integer, unsigned or signed. -/
+theorem intWrap_of_range :
+ ∀ (ty : Solidity.Source.IntTy) (value : Int),
+ty.lo ≤ value ∧ value ≤ ty.hi → ty.wrap value = value := by
+  intro ty value bound
+  rcases ty with ⟨signed, bits, valid⟩
+  cases signed
+  · have positive := Solidity.Source.two_pow_pos bits
+    simp only [Solidity.Source.IntTy.lo, Solidity.Source.IntTy.hi,
+      Bool.false_eq_true, if_false] at bound
+    simp only [Solidity.Source.IntTy.wrap, Solidity.Source.wrapBits,
+      Bool.false_eq_true, false_and, if_false]
+    exact Int.emod_eq_of_lt bound.1 (by omega)
+  · let half : Int := ((2 ^ (bits - 1) : Nat) : Int)
+    let modulus : Int := ((2 ^ bits : Nat) : Int)
+    have positive : 0 < half := Int.ofNat_lt.mpr (Solidity.Source.two_pow_pos (bits - 1))
+    have relation : modulus = 2 * half := by
+      change ((2 ^ bits : Nat) : Int) = 2 * ((2 ^ (bits - 1) : Nat) : Int)
+      rw [Solidity.Source.two_pow_succ_pred (by omega), Int.natCast_mul]
+      rfl
+    have high : ((2 ^ (bits - 1) - 1 : Nat) : Int) = half - 1 := by
+      dsimp [half]
+      have pos := Solidity.Source.two_pow_pos (bits - 1)
+      omega
+    change -half ≤ value ∧ value ≤ ((2 ^ (bits - 1) - 1 : Nat) : Int) at bound
+    rw [high] at bound
+    simp only [Solidity.Source.IntTy.wrap, Solidity.Source.wrapBits, true_and]
+    change (if ((2 ^ (bits - 1) - 1 : Nat) : Int) < value % modulus
+      then value % modulus - modulus else value % modulus) = value
+    rw [high]
+    by_cases nonnegative : 0 ≤ value
+    · have residue : value % modulus = value := Int.emod_eq_of_lt nonnegative (by omega)
+      rw [residue]
+      split <;> omega
+    · have residue : value % modulus = value + modulus := by
+        rw [← Int.add_emod_right]
+        exact Int.emod_eq_of_lt (by omega) (by omega)
+      rw [residue]
+      split <;> omega
+
+/-- Every bounded intrinsic Source integer survives its actual ABI word encoder and published cleanup in either pipeline. This is a value roundtrip, not a general Source execution theorem. -/
+theorem cleanWord_int_roundtrip :
+ ∀ (D : Solidity.Source.Layout) (pipeline : Solidity.Yul.DirtyReadback.Pipeline)
+(ty : Solidity.Source.IntTy) (value : Int) (bound : ty.lo ≤ value ∧ value ≤ ty.hi),
+(Solidity.Source.Val.int (D := D) (t := ty) value bound).word.bind
+(Solidity.Yul.DirtyReadback.cleanWord (D := D) pipeline (.int ty)) =
+some (Solidity.Source.Val.int value bound) := by
+  intro D pipeline ty value bound
+  simp only [Solidity.Source.Val.word, Option.bind_some,
+    Solidity.Yul.DirtyReadback.cleanWord_int_encode, Solidity.Source.intWrap,
+    Solidity.Yul.DirtyReadback.intWrap_of_range ty value bound]
+
+/-- The intrinsic Boolean ABI encoder and published nonzero cleanup roundtrip exactly; no integer-width modulo rule is used. -/
+theorem cleanWord_bool_roundtrip :
+ ∀ (D : Solidity.Source.Layout) (pipeline : Solidity.Yul.DirtyReadback.Pipeline) (value : Bool),
+(Solidity.Source.Val.bool (D := D) value).word.bind
+(Solidity.Yul.DirtyReadback.cleanWord (D := D) pipeline .bool) =
+some (Solidity.Source.Val.bool value) := by
+  intro D pipeline value
+  cases pipeline <;> cases value <;> rfl
+
 end Solidity.Yul.DirtyReadback

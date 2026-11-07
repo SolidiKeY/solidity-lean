@@ -15,7 +15,8 @@ Source fixture below executes local reads only, not crypto or call agreement.
 Snapshot capture must preserve the complete Source observation while retaining
 the distinction between sparse and fully populated overlay metadata.
 Generic integer laws below guard cleanup idempotence and preservation under
-changes above the declared integer width; bool cleanup remains nonzero testing. -/
+changes above the declared integer width; bool cleanup remains nonzero testing.
+Integer and Boolean ABI-word cleanup must roundtrip complete intrinsic values. -/
 namespace Solidity.Yul.Checks.LocalBlock
 open Solidity.Source
 def env : Solidity.Source.Env := ⟨[]⟩
@@ -1173,5 +1174,24 @@ Solidity.Yul.Checks.LocalBlock.selectedReadState.raw Solidity.Yul.Checks.LocalBl
 /-- info: 'Solidity.Yul.DirtyReadback.cleanWord_int_lowBits' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.DirtyReadback.cleanWord_int_lowBits
+
+/-- info: 'Solidity.Yul.DirtyReadback.intWord_value' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.DirtyReadback.intWord_value
+/-- info: 'Solidity.Yul.DirtyReadback.wrap_intWord' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.DirtyReadback.wrap_intWord
+/-- info: 'Solidity.Yul.DirtyReadback.cleanWord_int_encode' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.DirtyReadback.cleanWord_int_encode
+/-- info: 'Solidity.Yul.DirtyReadback.intWrap_of_range' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.DirtyReadback.intWrap_of_range
+/-- info: 'Solidity.Yul.DirtyReadback.cleanWord_int_roundtrip' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.DirtyReadback.cleanWord_int_roundtrip
+/-- info: 'Solidity.Yul.DirtyReadback.cleanWord_bool_roundtrip' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.DirtyReadback.cleanWord_bool_roundtrip
 
 end Solidity.Yul.Checks.LocalBlock

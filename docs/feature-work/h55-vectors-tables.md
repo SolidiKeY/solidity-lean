@@ -484,3 +484,31 @@ Full Raw/source/table/generator acceptance and controlled timing remain open.
 Affected LocalBlock, original decoder controls and P16 built successfully (201
 jobs) with exact axiom pins. The bounded run took 80.35 seconds with no
 swap/OOM; this is not a controlled before/after speed comparison.
+
+## Intrinsic integer and Boolean encoder-cleanup roundtrips
+
+With master unchanged at 05d2c2587, the next slice connects cleanup to actual
+Source.Val.word. The existing intWord encoder carries the nonnegative 256-bit
+residue; for every valid width, 2^bits divides 2^256 and preserves the narrower residue,
+including for negative inputs. Cleanup after encoding any integer yields the
+complete intrinsic intWrap value. An unsigned/signed range proof then establishes
+that every already bounded intrinsic integer is returned unchanged by its actual
+word encoder and published cleanup, in both pipelines. Boolean false/true
+roundtrip separately through the existing nonzero test.
+
+These are universal kernel proofs, not a new finite oracle or decoder.
+The exact unsigned, signed-nonnegative, signed-negative and Boolean cases are
+recorded in the semantic ledger. An initial header elaboration failure is retained:
+Word erases the layout, so the new roundtrip statement supplies D explicitly.
+No existing statement or definition was changed to accommodate a proof.
+
+Focused diagnostics/builds and axiom audits passed. Numeric encoder/range helpers
+use propext and Quot.sound; the decoder laws use only the standard three axioms.
+No unsupported-type roundtrip, arbitrary materialized-frame adequacy, complete
+Source execution agreement or raw-copy integration is inferred. Those broader
+queues and acceptance/timing gates remain open; H58 remains on HOLD.
+
+Read-only finder and skeptic passed the six laws without Lean or writes.
+Affected LocalBlock, original decoder controls and P16 built successfully (201
+jobs), including all exact axiom pins. The bounded affected run took 78.32
+seconds with no swap/OOM; no controlled before/after timing is claimed.
