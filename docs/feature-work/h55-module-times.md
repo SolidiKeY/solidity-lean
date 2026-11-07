@@ -2389,3 +2389,24 @@ skeptic requested the historical toolchain asymmetry above; the regenerated
 artifact and index linkage were rechecked. Evidence hashes are in
 `tests/h55/module-times/automation-migration-evidence.sha256`. This non-atomic
 observation does not establish current runtime acceptance.
+
+## Historical delta binding in extended updates
+
+The coordinator identified that extended reference updates no longer accepted
+classifications bound to the earlier snapshot delta. The legacy CLI allowed that
+binding, but extended mode reserved its third argument for the version manifest.
+`reference_index_update.py` now accepts an optional `--delta PATH` immediately
+after that manifest in extended mode. The path and bytes must match recursively
+verified prior-index lineage, the artifact must have the snapshot delta list
+shape, and candidate hashes and mapping fields must still match the current drift.
+The output records the delta as a hashed input. Calls without the flag retain their
+previous interface; legacy mode rejects the extra flag.
+
+Synthetic CLI controls accept a lineage-bound delta and reject a stale candidate,
+a same-content unbound path and changed delta bytes. The full H55 Python suite
+passes 116 tests. Independent read-only finder and skeptic reviewed the change
+without Lean or a server. They identified two limits: a classification self-declares
+its input digest, so the updater does not prove each classified row belongs to
+the historical delta; and the new drift is not independently authenticated by
+this optional historical binding. This is static integrity checking, not runner,
+producer or runtime attestation. No historical result was reclassified as a pass.
