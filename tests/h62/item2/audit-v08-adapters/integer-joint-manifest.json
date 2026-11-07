@@ -1,0 +1,156 @@
+{
+  "status": "PROVED_COMPONENT_JOINT_MODEL",
+  "checked_head": "68bdaa8c85ef951c10670d67e17d9940c2f52931",
+  "source_bindings": {
+    "tests/h62/item2/audit-v08-adapters/IntegerCallableJoint.lean": "944e98b981c0addc63b6ad81627cc0279409599b42795d62518121272604676d",
+    "Solidity/Lowering/V08/IntegerCallable.lean": "95044564b701dc95a32d9443b3956df46d1ecf386c4f810edd2b300febe3f13a",
+    "Solidity/Lowering/V08/ScalarCallableTransport.lean": "947c8837b1d3348757f16cca210a976bc8f057c28108e26b16adf2dc599d6e89",
+    "Solidity/Lowering/V08/SourceCallable.lean": "4b76b7f19609592d7eb816df9d3e6df27a151624996d40e2d641c1e044580a6a"
+  },
+  "domain": "Every native Source.IntTy, arbitrary Pipeline, in-range integer, entire source state and target caller; one coherent syntax/environment/selected-body fixture per type.",
+  "new_joint_model_families": 1,
+  "full_statement_fidelity_acceptances": 0,
+  "original_laws": [
+    "Solidity.Lowering.V08.IntegerCallable.source_call",
+    "Solidity.Lowering.V08.IntegerCallable.transport",
+    "Solidity.Lowering.V08.SourceCallable.missing_body",
+    "Solidity.Lowering.V08.SourceCallable.zero_horizon"
+  ],
+  "controls": [
+    "missing_body_refused",
+    "missing_actual",
+    "timeout_actual",
+    "wrong_value_refused"
+  ],
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "failure_retained": "/workspace/v08-world-lowering-evidence/integer-joint-20261107-first/failed-source.lean",
+  "failure_reason": "Initial if-name fixture hit unchanged 200000 heartbeat limit at input elaboration. Existing constant-body fixture pattern avoids dispatch normalization; no budget change.",
+  "limitations": [
+    "Actual supplied component target specializes argument as typed literal; no general compiler adequacy or ABI ingress.",
+    "Source body is a constructed selected pure argument-return fixture, not a P8/global SourceSpec admission producer.",
+    "No full world/frame/body/session or H68 bridge acceptance.",
+    "Full-family timing and complete original audit acceptance remain open."
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/integer-joint-20261107/registration.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/integer-joint-20261107/trust.log",
+      "bytes": 79,
+      "sha256": "e19e9afa8adcd7cff854cb60c21ec14be93c9c1639a740dcfeb80e101d998e2f"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/integer-joint-20261107-first/console.log",
+      "bytes": 155,
+      "sha256": "51fa4a82d2c184f457c211678bd5143c53f7f414429dadc3c1ada5a6cd1a8976"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/integer-joint-20261107-first/failed-source.lean",
+      "bytes": 3907,
+      "sha256": "8cd1fd70f397bb02a519f88c383bd0ec18ca620cba5db1dcb9bf558b5b354bdd"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/integer-joint-20261107-first/gates/1.log",
+      "bytes": 19370,
+      "sha256": "0f4b35ce032f0597e296f1b238a13a580268c7bb988c166a4c612b8b0783fcf9"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/integer-joint-20261107-first/gates/HEAD",
+      "bytes": 41,
+      "sha256": "e35b5b53a894a3be829b8335918720b91996bfcc839dadde3cc0bf1b94f074a5"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/integer-joint-20261107-first/gates/gates.tsv",
+      "bytes": 245,
+      "sha256": "be1a51357a85303b882d76ffb8f9f5613c686d016c0434e9e718ee1e0ead26f9"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/integer-joint-20261107-first/results.json",
+      "bytes": 401,
+      "sha256": "568c54245f34980aa32e6eb0df3f503cfdec98741e4d7fd21b3d45a6b261b662"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/integer-joint-20261107-selected/console.log",
+      "bytes": 157,
+      "sha256": "b780360b3055bf6c18af8233a6ed98688f99b13ee9a1d5217f68a2e6185a5142"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/integer-joint-20261107-selected/gates/1.log",
+      "bytes": 18996,
+      "sha256": "9cf6377970dfb5ab496199bd00ef80759e6dcc74d91efc7fccda375c848c3954"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/integer-joint-20261107-selected/gates/HEAD",
+      "bytes": 41,
+      "sha256": "e35b5b53a894a3be829b8335918720b91996bfcc839dadde3cc0bf1b94f074a5"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/integer-joint-20261107-selected/gates/gates.tsv",
+      "bytes": 247,
+      "sha256": "8cf51e0823bcd7dc782c3f42f995801f82469727703bb5ac25dfac66cb6e2e57"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/integer-joint-20261107-selected/results.json",
+      "bytes": 400,
+      "sha256": "b722b1b7df086a66aa30cbbfc953d42709d75d0f140120e70c81c89bb94f8ba0"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/integer-joint-20261107-full/console.log",
+      "bytes": 153,
+      "sha256": "1939998fcace6deee9e0dd5923aa56193c5d41d37b728dcd56530a33ae7f8339"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/integer-joint-20261107-full/gates/1.log",
+      "bytes": 19476,
+      "sha256": "acde54fe2a7f296356d4748b31f54d27dc88f44d4c0dc9e70d00914b82e4fb6c"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/integer-joint-20261107-full/gates/HEAD",
+      "bytes": 41,
+      "sha256": "e35b5b53a894a3be829b8335918720b91996bfcc839dadde3cc0bf1b94f074a5"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/integer-joint-20261107-full/gates/gates.tsv",
+      "bytes": 243,
+      "sha256": "77dee41157a4ca4b7fb38cecbd992d1617e396ec25530702a08c107b45cf9c28"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/integer-joint-20261107-full/results.json",
+      "bytes": 400,
+      "sha256": "bc91ba7fda55a039c85aacc80db8c936fcc4259d3d81d57c109a9de6f92ceb60"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/integer-joint-20261107-final/console.log",
+      "bytes": 154,
+      "sha256": "4207b2f230d6b914a0e5c2e400d668257f3f28a052d8a7a64d9c03954c5027b4"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/integer-joint-20261107-final/gates/1.log",
+      "bytes": 19712,
+      "sha256": "7f70117176e3146554d160890b0781d1c8418f12716551a3fa44f4bbe4402f4f"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/integer-joint-20261107-final/gates/HEAD",
+      "bytes": 41,
+      "sha256": "e35b5b53a894a3be829b8335918720b91996bfcc839dadde3cc0bf1b94f074a5"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/integer-joint-20261107-final/gates/gates.tsv",
+      "bytes": 244,
+      "sha256": "309ef491ab3254467b970c033e51c7b63c6f5bbd0a0d77c32d40f47137941824"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/integer-joint-20261107-final/results.json",
+      "bytes": 400,
+      "sha256": "7ea877d38d791996f76b15a3353d804afb1199262156388a127716dac5783b8f"
+    }
+  ],
+  "reviews": "Independent read-only finder and skeptic accepted coherent all-native Inputs/range, exact original transport, actual refusal outcomes and limited literal-specialized component scope. No findings; no reviewer builds/tests."
+}
