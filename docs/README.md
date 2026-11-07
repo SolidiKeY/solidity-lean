@@ -179,6 +179,10 @@ Feature-work records write the cloud VM's workspace root as `${VM_WORKSPACE}` an
 
 G41 result/failure codec and terminal observations: [ABI packet consumers](feature-work/abi-world-packets.md).
 V17 validation and evidence preparation: [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md).
+- [Proof-coverage audit](audits/proof-coverage.md) (2026-11-06): claims vs theorems, statement quality, residue, and the ten best-paying proof efforts.
+- [Architecture audit](audits/architecture.md) (2026-11-06): areas and layering, per-case copies, Controls cost, dead weight.
+- [Build-speed audit](audits/build-speed.md) (2026-11-06): measured per-module time and memory, axiom-pin and slow-example costs.
+- [Coordination audit](audits/coordination-process.md) (2026-11-06): where lane time goes, gate saturation, merge latency, question load.
 - [Core EVM revert/return data (machine V2)](feature-work/evm-machine-v2.md): versioned `OutV2`/`MachineV2` with revert/return data, return buffer and CALL input bytes; migration to the frozen machine.
 - [Canonical P1 languages V2](feature-work/p1-lang-v2.md): `P1LangV2` with revert data, call events and frame classes over the V2 machine; `p1_frame_bridge` for a guarded revert-with-data family.
 | V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |

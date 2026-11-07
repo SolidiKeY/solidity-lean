@@ -12,8 +12,10 @@ python3 scripts/h62/item2/audit-evm-compiler/verify_evidence.py --archive /path/
 ```
 
 The verifier authenticates the archive and its embedded full manifest against
-the committed index, then performs the unchanged 181-source and 113-artifact
-checks. No tar extraction or original VM path is needed for this mode.
+the committed index, then performs all source and artifact
+checks enumerated in that manifest. No tar extraction or original VM path is needed for this mode.
+The archive root remains continuation-2 for transport compatibility; newer
+checkpoint data is identified by its receipt commands and integration base.
 For unpacked evidence use `--artifact-root /path/to/continuation-2`; that directory
 must contain the authenticated full evidence-manifest.json from the archive.
 
