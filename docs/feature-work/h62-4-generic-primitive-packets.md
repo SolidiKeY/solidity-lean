@@ -1218,3 +1218,18 @@ unchanged. These checks do not authenticate an external Approved profile or
 actual Source origin and do not finish production P1/G42.04. Independent
 read-only finder and skeptic found no domain weakening or provenance overclaim.
 Original full-validation and timing STOPs remain open.
+
+### CheckedMul owner cleanup intake, 2026-11-07
+
+MIC checkpoint a111ddfd is present on master a0a9ca15. All three panic
+control headers are byte-identical; reversing its single helper import and
+three proof replacements reproduces the entire previous Controls file exactly.
+The current source hash and shifted declaration lines are recorded in
+`tests/h62/item1/packet-panic/checkedmul-current-refresh.json`, separately from
+unchanged old-base evidence. The refreshed lexical counts are 16 named declarations,
+465 selected headers and 45 literal panicData occurrences. Ownership metadata
+is unavailable: this source-only refresh establishes no ownership eligibility.
+Helper publication and MIC application waits are closed. Producer kernel/runtime
+results remain producer evidence, not a local rerun; these actual Source-byte
+helpers make no selected-target payload claim. Full original gates and semantic
+case completeness remain open.
