@@ -729,3 +729,21 @@ roots pass. The current strict axiom-inventory check remains FAIL:16301 pinned
 theorems,zero errors,260 unrecorded changes. No inventory write or trust-policy
 change was made; H30 coordinator reconciliation remains separate. Local measured
 guards establish only their recorded axiom sets, not global inventory acceptance.
+
+## H19 supporting account-range control
+
+[H19ReachableBalanceControls.lean](../../tests/h62/item2/audit-v10-storage/H19ReachableBalanceControls.lean)
+is a standalone per-file audit control using the existing funding-success and
+nonpayable-revert Source fixtures. Its observation list retains four account
+balances from those two distinct runs. Existing published endpoint proofs
+establish the values; execution_ranges derives their word bounds without a
+caller-supplied Fits premise. lossless_observations then reuses the published
+monetary projection law in observation order. No Source program, state or
+interpreter is copied, and the existing monetary boundary controls remain.
+
+This supports two named CURRENT balance observations. Exact original/current
+H57 statement transport, global world/journal range, typed-program evidence and
+all nineteen requested consumer transports remain open. The control is not a
+library-containing Source/P8 producer or frozen-row registration. Existing
+interfaces, budgets and exclusions are unchanged. Validation and independent
+reviews are archived privately under H145; no new original-row credit follows.
