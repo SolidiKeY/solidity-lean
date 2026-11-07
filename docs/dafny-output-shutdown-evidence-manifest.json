@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "status": "partial",
+  "obligation": "callsite:src/extension.ts:21:24:createOutputChannel",
+  "sourceHead": "03298fb938f2052379a274af286b7534b7f30e21",
+  "fileCount": 102,
+  "uncompressedBytes": 3534019,
+  "archive": {
+    "path": "/workspace/dafny-parity-output-lifecycle-20261107/shutdown-evidence/bulk.tar.gz",
+    "bytes": 675541,
+    "sha256": "dbcb93f985e7a564bde5c5ff41b6423af76c02e6b031da25dbbdb99f4caa0b02"
+  },
+  "index": {
+    "path": "/workspace/dafny-parity-output-lifecycle-20261107/shutdown-evidence/files.json",
+    "bytes": 23891,
+    "sha256": "1968741cd3d154d7616b0e66e49f44c88fd08ae5fa5d5549d571dedecf55b2af"
+  },
+  "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-output-shutdown-evidence-manifest.json --restore",
+  "boundaries": [
+    "Actual native local root close/captured worker readback before single channel disposal; shared pending/rejected result.",
+    "Existing repository issue draft bound to actual runtime/server metadata; no source attached, URL opened or submission.",
+    "Paired upstream shutdown, native failure matrix, unobserved descendants and full glyph visibility unproved.",
+    "No full parity/performance/kernel/EVM or complete-row claim; all original judgments/gates remain."
+  ]
+}
