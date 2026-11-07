@@ -1350,3 +1350,28 @@ Earlier five-declaration receipts remain historical and unchanged.
 Independent read-only finder and skeptic accepted the actual statement-scope
 composition, horizon derivation, full-result negative and source/type/evidence
 bindings. Neither ran Lean or a server; final review receipts remain private.
+
+### Explicit reason target and independent runs
+
+`SourceReasonJoint.target_explicit` applies the existing target constructor law to
+`ProjectionControls.projected`. `independent_runs` pairs that execution with the
+existing actual Source reason run for the same payload. These are independent
+models: no state relation, compiler-selected body, admission or session
+correspondence is asserted. `empty_reason_not_plain` distinguishes encoded empty
+reason data from bare intrinsic revert; target error returns no state and gives
+no rollback conclusion. Existing theorem statements are preserved.
+
+The six original SourceFailures targets now have three Source component
+applications, one explicit target application, one independent-run conjunction
+and one existing-law reference. This adds no body fixture or fidelity acceptance.
+The post-merge serial per-file check passed in 2.270 seconds with one Lean and
+774,598,656 bytes peak sampled RSS under unchanged limits. All twelve printed
+declarations use only existing standard axioms. The local pin inventory reports
+17,492 pins, zero errors and zero unrecorded changes. Final master
+`77dbfca86aa107955b83529007fcaf3b57c32f29` changed no Lean source after that check.
+H145 private receipts: `1730586929e0d2fefda4f699a6b469d72b4fda16` under
+`evidence/solidity-v07-v11-20261030/v08-world-lowering/source-reason-explicit-target-20261107/`;
+the final export retains the subsequent merge/check records. Full original audit,
+production Source admission/origin/lifecycle, delegated body/frame transport and
+the assigned H68 bridge remain open. No full-root check, shared-checkout warming,
+matched timing acceptance or STOP release is claimed.

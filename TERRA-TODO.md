@@ -164,15 +164,16 @@ No earlier excluded Terra tasks or completed work are restored here.
 
 <!-- Preserved V10 routine obligations; none is marked discharged by this merge. -->
 
-# C157 routine adapter
+# C157 captured-write adapter — completed
 
 Module: `Solidity/Lowering/StorageOps/SourceWordCommutation.lean`.
 Lemma: `Solidity.Lowering.StorageOps.SourceWordCommutation.complete`.
 Why routine: combine checked `run` in both orders, `world_commute`, and
 `journal_order` in both orders; no new soundness argument or premise.
 
-The statement elaborated in the failed automation scratch. It is NOT a compiled
-Lean declaration or a closed proof. Keep every premise and exact journal snapshot.
+The exact statement below is now compiled as `SourceWordCommutation.complete`
+and used by the existing populated world-equality control. Every premise and
+exact journal snapshot is retained.
 Do not claim full Source states/journals commute, fresh lvalue compilation,
 whole compiler or implicit rollback. No admission is permitted.
 
@@ -198,7 +199,7 @@ theorem complete {E : Source.Env} {Γ : Source.RCtx} (frame : Source.Fr)
 end Solidity.Lowering.StorageOps.SourceWordCommutation
 ```
 
-The historical twelve adapters remain in the preserved original checkout and prior handoffs; they are not resubmitted here. This adds one pending routine adapter.
+The historical twelve adapters remain in the preserved original checkout and prior handoffs; they are not resubmitted here. C157 is closed; the other historical adapters remain open.
 
 ## C159 routine captured failure adapter
 
@@ -223,8 +224,9 @@ theorem run_refused {E : Source.Env} {Γ : Source.RCtx}
 end Solidity.Lowering.StorageOps.SourceWriteRollback
 ```
 
-Two routine adapters are specified here; the historical twelve remain preserved
-separately, for fourteen pending adapters total. Neither statement is compiled.
+These two routine adapters were originally recorded alongside twelve historical
+adapters. C157 is now compiled; C159 and the twelve historical adapters remain
+pending. Later subtotal statements below record their checkpoint history.
 
 ## C166: complete primitive-copy fuel classification
 

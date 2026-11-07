@@ -14,7 +14,8 @@ duplicate identities, checks unequal decoded words and preserves an older
 destination prefix during transfer; entry guards and
 compiler/native execution remain separate obligations. Lazy uint traversal
 below retains typed byte-derived contents and exact fuel failures, separately
-from entry span guards. -/
+from entry span guards. Array containers retain the extra constructor fuel
+step, including empty-container failure at zero fuel. -/
 namespace Solidity.Backend.AbiEntry.Consumers
 
 def rejection : Interface.RejectionConsumer EntryTransport.rejection where
@@ -297,6 +298,65 @@ theorem semantic_uint_sequence (input : Solidity.AbiEntry.Input)
             · have short : ¬(count+1=0 ∨ count+1+2≤fuel+3) := by omega
               rw [if_neg enough,if_neg short]
 
+
+/-- Both array containers reuse the byte-derived sequence and preserve their
+extra constructor fuel step. The fixed container ignores the supplied runtime
+length exactly as cval does; no entry guard or compiler result is assumed. -/
+theorem semantic_uint_containers (input : Solidity.AbiEntry.Input)
+    (base count : Nat) :
+    ∃ values : Solidity.AbiEntry.Seq (.word (.uint 256)) count,
+      sequenceElements values=semanticUintValues input base 0 count ∧
+      ∀ fuel length,
+        Solidity.AbiEntry.cval input fuel (.array (.word (.uint 256))) base count=
+          (if 0<fuel ∧ (count=0 ∨ count+3≤fuel) then
+            .ok (.array values) else .error .fuel) ∧
+        Solidity.AbiEntry.cval input fuel (.fixed (.word (.uint 256)) count) base length=
+          (if 0<fuel ∧ (count=0 ∨ count+3≤fuel) then
+            .ok (.fixed values) else .error .fuel) := by
+  obtain ⟨values,contents,execution⟩ := semantic_uint_sequence input base 0 count
+  refine ⟨values,contents,?_⟩
+  intro fuel length
+  cases fuel with
+  | zero => exact ⟨rfl,rfl⟩
+  | succ fuel =>
+    by_cases enough : count=0 ∨ count+2≤fuel
+    · have full : 0<fuel+1 ∧ (count=0 ∨ count+3≤fuel+1) := by omega
+      constructor <;> simp only [Solidity.AbiEntry.cval,execution,if_pos enough,if_pos full]
+    · have short : ¬(0<fuel+1 ∧ (count=0 ∨ count+3≤fuel+1)) := by omega
+      constructor <;> simp only [Solidity.AbiEntry.cval,execution,if_neg enough,if_neg short]
+
+/-- Regression: empty container fuel zero fails, whereas fuel one succeeds;
+the fixed container's arbitrary runtime length remains ignored. -/
+theorem semantic_uint_container_empty (input : Solidity.AbiEntry.Input)
+    (base length : Nat) :
+    Solidity.AbiEntry.cval input 0 (.array (.word (.uint 256))) base 0=.error .fuel ∧
+    Solidity.AbiEntry.cval input 1 (.array (.word (.uint 256))) base 0=.ok (.array .nil) ∧
+    Solidity.AbiEntry.cval input 1 (.fixed (.word (.uint 256)) 0) base length=
+      .ok (.fixed .nil) := ⟨rfl,rfl,rfl⟩
+
+/-- Regression: one actual raw-derived element is refused at fuel three and
+accepted at four, in both container forms, without a supplied decoded value. -/
+theorem semantic_uint_container_boundary (input : Solidity.AbiEntry.Input)
+    (base length : Nat) :
+    ∃ values : Solidity.AbiEntry.Seq (.word (.uint 256)) 1,
+      Solidity.AbiEntry.cval input 3 (.array (.word (.uint 256))) base 1=.error .fuel ∧
+      Solidity.AbiEntry.cval input 4 (.array (.word (.uint 256))) base 1=.ok (.array values) ∧
+      Solidity.AbiEntry.cval input 4 (.fixed (.word (.uint 256)) 1) base length=
+        .ok (.fixed values) := by
+  obtain ⟨values,_,execution⟩ := semantic_uint_containers input base 1
+  have short : ¬(0<3 ∧ (1=0 ∨ 1+3≤3)) := by decide
+  have enough : 0<4 ∧ (1=0 ∨ 1+3≤4) := by decide
+  refine ⟨values,?_,?_,?_⟩
+  · simpa only [if_neg short] using (execution 3 length).1
+  · simpa only [if_pos enough] using (execution 4 length).1
+  · simpa only [if_pos enough] using (execution 4 length).2
+
+/-- info: 'Solidity.Backend.AbiEntry.Consumers.UIntViews.semantic_uint_containers' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms semantic_uint_containers
+/-- info: 'Solidity.Backend.AbiEntry.Consumers.UIntViews.semantic_uint_container_empty' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms semantic_uint_container_empty
+/-- info: 'Solidity.Backend.AbiEntry.Consumers.UIntViews.semantic_uint_container_boundary' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms semantic_uint_container_boundary
 
 /-- Empty standalone sequences succeed even at zero fuel; no entry admission
 or empty-calldata head check is inferred from this observation. -/

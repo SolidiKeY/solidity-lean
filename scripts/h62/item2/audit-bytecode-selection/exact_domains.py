@@ -717,7 +717,7 @@ theorem empty_field_domain_refuted : ¬ (field_hypotheses_of% EmptyFieldToy.bad)
 #print axioms empty_field_domain_refuted
 '''
 
-def projection_domain_source(repo, rows, witnesses, *, support_modules=()):
+def projection_domain_source(repo, rows, witnesses, *, support_modules=(), support_source=""):
     """Reuse the pinned binder extractor for actual proof-field joint domains.
 
     Guards regression: a self certificate or capacity premise may not disappear
@@ -751,10 +751,16 @@ def projection_domain_source(repo, rows, witnesses, *, support_modules=()):
         raise ValueError('invalid field support imports')
     modules = sorted(set(modules + list(support_modules)))
     frozen_map, scope = _frozen_scope(repo, modules)
+    if not isinstance(support_source, str):
+        raise ValueError('invalid field support source')
+    if re.search(r'\b(?:sorry|admit|axiom|native_decide|unsafe|implemented_by)\b',mask(support_source)):
+        raise ValueError('forbidden field support mechanism')
     fragment = macro_fragment((repo / MACRO_PATH).read_text())
     source = 'import Lean\n' + ''.join('import '+name+'\n' for name in modules)
     source += '\n/-! Guard omission of certificate self, tail and capacity premises in field-domain witnesses. Original conclusions, source adequacy and global census remain unproved. -/\n'
     source += fragment + '\n' + PROJECTION_DOMAIN_CHECKER + '\n'
+    if support_source:
+        source += support_source + '\n'
     for helper,packet in selected.items():
         source += 'theorem '+helper+' : field_hypotheses_named% '+json.dumps(packet['target'])+' against% '+json.dumps(packet['observed_type']['type_expr'],ensure_ascii=False)+' := '+packet['proof']+'\n#print axioms '+helper+'\n'
     source += 'end '+NAMESPACE+'\n'
@@ -762,4 +768,6 @@ def projection_domain_source(repo, rows, witnesses, *, support_modules=()):
           'macro_fragment_sha256':MACRO_SHA256,'checker_sha256':sha(PROJECTION_DOMAIN_CHECKER.encode()),
           'generated_lean_sha256':sha(source.encode()),'original_conclusions_proved':False,
           'source_correspondence_established':False,'global_witness_ledger_linked':False}
+    if support_source:
+        pins['support_source_sha256'] = sha(support_source.encode())
     return source,pins

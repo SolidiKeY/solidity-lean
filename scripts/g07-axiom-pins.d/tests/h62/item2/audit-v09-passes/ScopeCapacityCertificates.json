@@ -1,0 +1,62 @@
+{
+ "tests/h62/item2/audit-v09-passes/ScopeCapacityCertificates.lean:Solidity.Yul.Compilation.empty_scope_full": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ScopeCapacityCertificates.lean:Solidity.Yul.Compilation.popPrefix_bound": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ScopeCapacityCertificates.lean:Solidity.Yul.Compilation.popPrefix_delta": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ScopeCapacityCertificates.lean:Solidity.Yul.Compilation.pushPrefix_bound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ScopeCapacityCertificates.lean:Solidity.Yul.Compilation.pushPrefix_delta": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ScopeCapacityCertificates.lean:Solidity.Yul.Compilation.scope_bound_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ScopeCapacityCertificates.lean:Solidity.Yul.Compilation.scope_capacity_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ScopeCapacityCertificates.lean:Solidity.Yul.Compilation.scope_updates_safe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ScopeCapacityCertificates.lean:Solidity.Yul.Compilation.scope_write_overflow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ScopeCapacityCertificates.lean:Solidity.Yul.Compilation.Slice.comp_bound_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ScopeCapacityCertificates.lean:Solidity.Yul.Compilation.stackBound_append_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ScopeCapacityCertificates.lean:Solidity.Yul.Compilation.stackBound_suffix": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ScopeCapacityCertificates.lean:Solidity.Yul.Compilation.writeSequence_delta": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

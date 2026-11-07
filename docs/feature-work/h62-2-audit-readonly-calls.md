@@ -1312,3 +1312,529 @@ Evidence: /workspace/h62-audit-readonly-calls/compiler-consumer/; committed pins
 `tests/h62/item2/audit-readonly-calls/compiler-consumer.sha256`. Next:remaining
 original joint inputs and full RO Source/callee/native-frame producer under all
 holds. No new scope question, owner ticket, push or goal reset/completion.
+
+
+### Nonempty primitive field/read joint inputs (2026-11-07)
+
+Fetched and inspected master a0a9ca15ba35fd6e8d9a9be10e4b6b45dbf45d3e; rebased the
+audit branch before this increment. The separate CheckedMul reuse change does
+not provide these clients. No production file, interface, dependent definition,
+axiom, exclusion or proof budget changed.
+
+`tests/h62/item2/audit-readonly-calls/PrimitiveReadWitnesses.lean` uses two actual
+declared Bool fields, nonempty Bool locals, one Source store and one intrinsic
+store. The head is written true; the tail reads its actual default false. The
+Fields constructor supplies declaration lookup, exact types, persistence and
+nonconstant metadata together. Rel is proved from the actual reads. The SAME
+inputs instantiate PrimitiveFields.read_value/total/unique/select and
+PrimitiveReads.read_of_read/read_head/target_read_head/target_expression. Tail
+selection and a negative head-only target control preserve distinct values.
+unique_joint checks the two simultaneous concrete relation premises; its
+reflexive equality conclusion is premise-satisfiability only. No Source program
+well-formedness/deployment, expression body or call/native-frame adequacy follows.
+
+The unchanged isolated checker supplies exact frozen/current type exports and
+axiom checks. A thin selection driver authenticates every admitted parent source
+and import, including modules outside the consumer overlap, before the existing
+cache verifier runs. Only the actual overlap is loaded; no arbitrary object
+fallback or held WorldCalls.Premises import. Frozen closure:52 modules,42 reused;
+current closure:57 modules,46 reused. Remaining nodes and the same fixture are
+compiled from captured bytes. This is authenticated executed-object reuse plus
+fresh extension checking, not a claim that all dependencies were freshly built.
+
+Final frozen PASS53.328s/800108544 bytes peak aggregate RSS; current
+PASS52.86s/801472512 bytes. Eight original raw kernel types match on each tree;
+all eleven audit axiom sets use standard propext/Classical.choice/Quot.sound
+or subsets. Repository per-file gate PASS95.17s,59 dependency jobs; actual
+Lean4.24.0 and Lake5.0.0-src+797c613, serial bounded -j1. KeySort passes separately.
+These are validation costs, not a before/after speed comparison or rebaseline.
+Historical Premises +80.254966536% STOP remains unchanged; no RUNTIME_GATE_PASS.
+
+Eight tooling controls pass: exact client inventory, cache-overlap authentication,
+source/pin substitution refusal, held import refusal, original identity retention,
+missing/duplicate/wrong type/client refusal and recredit/baseline refusal.
+Finder and skeptic caught a stale pre-initialization census, split admission
+hash/read and missing initial collector hash check; all three were fixed before
+acceptance. Both reviewed the final saved evidence without executing Lean,
+servers, tests or writes and found no remaining defect. Initial fixture
+elaboration and tooling-test failures remain in off-git evidence.
+
+The explicit committed admission pair and full verifier authorize exactly eight
+new coverage entries: joint witnesses57→65; ordinary pending429→421. All792
+identities and original fields remain;784 unrelated rows are unchanged. Other
+counts stay256 no-top-level-input,45 intentional impossibility,3 target-failure
+joint and2 frozen-v1 refutation/migration. The three private identity gaps remain
+pending. No definition-equivalence claim is made by raw type equality or separate
+frozen/current executions. Source/root_expression/caller-frame interfaces and
+our full H121 RO Source/callee/native-frame producer remain open, as do nineteen
+H19/H60 transports, G42.04 body binding, inherited queues and full acceptance.
+
+Evidence: /workspace/h62-audit-readonly-calls/primitive-reads/; proof pair under
+validated/, acceptance under accepted/. Committed pins:
+`tests/h62/item2/audit-readonly-calls/primitive-reads.sha256`. No new scope question
+or owner ticket. Next independent work: remaining original joint inputs and full
+RO execution/frame producer under the retained holds.
+
+
+### Nineteen Source version extracts received (2026-11-07)
+
+Fetched master and found the requested Source producer extraction already
+published, then rebased onto coordinator master
+6fbbf971caeb4c9946fbd20aaa0b25b3f1fb1f9f while preserving owned work.
+The integrated producer is scripts/h62/item2/audit-v10-storage/transport_pairs.py
+at32c853a6396aad1f4f79ad1e4cdddc4aef9c6488. It supplies19 exact lexical pairs
+(11 balance projections, one balance domain, seven typing parameters) plus
+three removed private identities. It explicitly supplies zero transport proofs.
+
+The consumer executes that producer and its direct lexical helper from retained
+buffers verified equal to their exact Git HEAD blobs. Captured C6/current Lean
+source buffers are independently Git-checked and reparsed from those same
+buffers. The saved producer packet, executed tools, sources and output buffers
+are sealed through completion. All22 cases bind to their exact original file,
+source name, signature, variable context and visibility in the retained792-row
+census. Historical kernel names/type hashes are reference-only; no current
+Lean elaboration, Source-definition equivalence or kernel transport is inferred.
+
+All792 original rows and root coverage remain unchanged:65 joint,3 target-failure
+joint,45 intentional impossibility,256 no-top-level-input,2 frozen-v1
+refutation/migration and421 ordinary pending. Three private gaps remain explicit
+and are never mapped to replacement public helpers. Exact source delivery is now
+received; the V10 wait is narrowed to H57/semantic/kernel transports and actual
+consumer proof references. Live ownership is not established by source intake.
+The old recorded observation commit exists on this VM; that fact alone does not
+recover historical proof/test artifacts or clear any provenance hold. Historical
+proof-cleanup fb0defdc remains UNVERIFIABLE.
+
+Seven controls pass, including missing/duplicate identities, signature/context
+drift, private alias/partition substitution and forbidden H57/kernel/proof credit.
+The retained-loader control uses different disk bytes and verifies that only the
+Git-verified captured buffers execute; Git mismatch refuses. Finder/skeptic
+found three provenance gaps (executed tool vs Git, saved-packet final seal, and
+second Source read); all were fixed, then both reviewed final source/evidence
+with no remaining findings and no execution or writes.
+
+Bounded final intake PASS1.01s/29773824 bytes peak aggregate RSS. This is a text
+and tooling gate, not a Lean proof or performance rebaseline. No Lean source,
+statement, definition, exclusion, axiom or budget changed; no held Lean workload
+was run. Historical Premises +80.254966536% STOP and runtime/whole-goal gates
+remain open. Our full H121 RO G42.02 Source/callee execution, selected
+compiler/world binding and physical frame remain OUR unfinished producer for
+memory-reference-structs; this intake is not that deliverable. G42.04 body
+binding, inherited queues and the421 ordinary inputs also remain open.
+
+Evidence: /workspace/h62-audit-readonly-calls/transport-intake/; committed pins
+`tests/h62/item2/audit-readonly-calls/transport-intake.sha256`. Owner-ticket
+historical requests are retained with explicit current routing/owned-producer
+fields. No new scope question, owner ping, push or goal change. Next independent
+work: remaining original joint inputs and the full owned RO execution/frame
+producer, while preserving all holds.
+
+
+The repository-wide documentation gate fails on an existing master citation at
+line348 of docs/feature-work/h62-4-generic-v08.md: it backticks the name of an
+explicitly untracked historical file. Exact bytes match master; the cited file
+is absent. Owner request RO-DOC-GENERIC-V08-UNTRACKED supplies an off-git
+formatting-only patch removing those backticks, retaining the filename and
+historical claim. No other lane file was edited and no passing docs gate is
+claimed. Source intake and all792-row preservation pass independently.
+
+
+### Read/discard continuation witnesses and Source type drift (2026-11-07)
+
+Fetched and checked coordinator master6fbbf971caeb4c9946fbd20aaa0b25b3f1fb1f9f;
+no newer equivalent client was present. The existing primitive fixture is
+extended additively with an explicit global record, a target Bool local and
+a following assignment. Prior eleven fixture definitions and eleven proof
+bodies remain byte-identical after the namespace opener, as checked against
+abcf292e41410f0ba4eb379dd554c4269f1ec735. The import grows to ReadStatement;
+this adds checking work, not an optimization or proof-speed rebaseline.
+
+The same source/target storage and typed local inputs exercise actual Source
+expressions, Source statements and the intrinsic read/discard block. Following
+code writes a=false while retaining the old true local; a following revert
+remains a revert. No global/callee adequacy follows from constructing the global
+record: it supplies only the auxiliary primitive expression inputs. The two
+credited target contracts use intrinsic state/root/evaluation/continuation only.
+
+Strict cache reuse refused because master changed Hash/CollisionBound proof
+source. No cache check was relaxed. Final frozen53-module and current58-module
+closures were freshly compiled from captured bytes, serially within inherited
+12GiB/no-swap/4GiB-reserve bounds. All nineteen helper proofs check separately
+on both trees and expose only standard propext/Classical.choice/Quot.sound
+axioms or subsets. Frozen PASS350.477s, current PASS341.091s; per-file repository
+gate PASS102.158s. Actual Lean4.24.0/Lake5.0.0-src+797c613 and bounded KeySort
+PASS are recorded. These durations are validation costs, not comparable
+before/after performance measurements. Historical Premises +80.254966536% STOP
+is unchanged; the held workload was not rerun and no RUNTIME_GATE_PASS follows.
+
+The first full-six current gate compiled its source/witness/probe, then FAILED
+the exact original kernel-type comparison. Four Source-facing statements have
+unchanged lexical signatures/context but different elaborated types after
+evalE/execS gained default RuntimePlan arguments: PrimitiveReads.source_expression,
+PrimitiveReads.root_expression, ReadStatement.source_run and
+ReadStatement.simulation. Their C6 joint applications compile; current
+applications concern changed types. This is a type-fidelity blocker, not
+a contradiction or a proof that the original hypotheses are impossible.
+The four remain ordinary pending with zero bridge/current-fidelity credit.
+Exactly one ESCALATE record per affected declaration is retained in off-git
+read-statements/type-drift/ESCALATIONS.txt. Owner ticket RO-READ-PLAN-TRANSPORT
+requests H57 legacy/planned pairs and exact consumer/semantic transports; no
+existing interface or Source definition was edited, no premise/exclusion/budget
+was changed, and no equivalence is inferred from successful concrete runs.
+
+Only target_run and target_then match their exact frozen types on both trees.
+Paired receipt acceptance credits exactly those two: joint65→67 and ordinary
+pending421→419. All792 identities and original fields remain;790 unrelated rows
+are unchanged, including the four drift cases and three private identity gaps.
+Other counts remain3target-failure joint,45intentional impossibility,
+256no-top-level-input and2frozen-v1 refutation/migration. Earlier eight-case
+receipts bind the earlier committed fixture bytes; they are historical records,
+not verification of the extended file. New paired runs recheck all old helpers.
+
+The shared collector now accepts a restricted explicit proof mapping and
+explanatory metadata configuration. Nine legacy controls pass, including exact
+output equality with the historical eight-case collector; three new controls
+check complete19-proof inventory, old-body preservation, exact two-case mapping,
+fresh verification and held-import refusal. Finder and skeptic independently
+reviewed the final source/evidence and confirmed the two credits/four retained
+blockers without using Lean, tests, builds, a server or writes.
+
+Artifacts: /workspace/h62-audit-readonly-calls/read-statements/; committed pins
+`tests/h62/item2/audit-readonly-calls/read-statements.sha256`. Existing global
+documentation failure RO-DOC-GENERIC-V08-UNTRACKED remains pending owner adoption;
+no passing repository docs/full gate is claimed. Full H121 G42.02 Source/callee
+execution, selected compiler/world binding and physical frame remain OUR
+unfinished producer for memory-reference-structs. G42.04 body binding, nineteen
+H19/H60 transports, inherited queues, historical proof-cleanup artifact recovery
+and full acceptance remain open. No new scope question or goal change.
+
+
+### Exact loaded-original type census (2026-11-07)
+
+Fetched/rebased masterdcf33632c2e88dd2161a0f1b212954ea84647f5f, including its
+private-path policy. No newer equivalent census was present. The query reuses
+only the admitted current read-statement proof closure:58 project object hashes,
+captured/current source hashes, tool/log/input pins and the leaf proof object
+are checked before/after. It imports only that unheld closure and Lean metadata;
+no Premises load, proof rerun, cache fallback or new dependency build occurs.
+Standard SDK/import-loader trust remains; object hashes are not independent
+loader-byte or source-to-object attestation.
+
+Exactly49 of the original792 declarations belong to loaded modules. The actual
+Lean query observes every original kernel name/module/kind, exports closed raw
+types, and obtains direct declaration selection ranges. Private names use
+Lean's constructor and are checked against original identities, with no public
+alias or basename fallback. All49 are present and directly source-bound,
+including seven private declarations;743 unloaded originals remain explicit.
+Kernel ranges must match the exact lexical declaration name span in captured
+source, not another occurrence of the same token. Current signature, variable
+context and visibility are retained separately. A raw type match does not prove
+unchanged dependency definitions, execution adequacy or live ownership.
+
+The final bounded metadata gate passes12.568s/805502976 bytes peak aggregate RSS:
+38 raw types match frozen exports and11 differ. Four Source drifts were already
+reported and StaticJournal.balance_storage is already an H19 case. Six newly
+reported drifts are SourceCallBoundary.call_zero/call_depth/call_static_value
+and SourceTypedCall.eval_external/external_captured/external_capture_failure.
+Their visible headers/context remain equal while elaborated types differ.
+RO-READ-PLAN-TRANSPORT now contains ten Source-related declarations; the known
+H19 overlap stays with its existing ticket. One new ESCALATE record per new
+declaration is retained off git, without repeating the prior four records.
+
+call_depth and call_static_value retain historical C6 joint-witness status.
+That original result is preserved, but it is not current-version fidelity.
+The new ledger records these axes separately and gives zero new credit. All792
+original rows, root coverage and historical classifications are unchanged:
+67joint,3target-failure joint,45intentional impossibility,256no-input,
+2frozen-v1 refutation/migration and419ordinary pending, including three private
+identity gaps. No unloaded/missing/private/range refusal is dropped or inferred
+to be feasible, impossible, owned or semantically equivalent.
+
+Six controls pass, including missing/duplicate identities, private missing-name
+retention, wrong identity/range, same-token-at-wrong-location and type drift
+without credit. Independent finder/skeptic found missing final log sealing and
+insufficient declaration-location binding; both were fixed. The initial query
+also needed explicit Lean.Name and proper private-name construction. Both
+reviewers confirmed final source/evidence without execution or writes and found
+no remaining issue. No new Lean declarations, premises, axioms or budgets.
+
+Actual wrapper versions remain Lean4.24.0/Lake5.0.0-src+797c613. Prior bounded
+KeySort PASS remains recorded in read-statements/evidence/keysort.json; this
+metadata gate is not a new runtime pass or proof-speed comparison. Historical
+Premises +80.254966536% STOP is unchanged. Full owned H121 Source/callee execution,
+compiler/world binding and physical frames, nineteen H19/H60 transports,
+G42.04 body binding, inherited queues and all final acceptance remain open.
+The existing generic-v08 documentation citation failure remains owner-pending.
+
+Evidence: /workspace/h62-audit-readonly-calls/loaded-original-types/; committed
+pins `tests/h62/item2/audit-readonly-calls/loaded-original-types.sha256`. No scope
+question, push or goal change. Next independent work: remaining original joint
+inputs, broader exact bindings and the owned full RO execution/frame producer.
+
+
+### H145 private evidence storage (2026-11-07)
+
+Rebased onto896fd3451f712fd940d28305eddfb8cf1c4ef034. H145 moves lane
+evidence to private coordination storage; historical evidence paths in earlier
+sections name archived records, not current public-tree files. Before resolving
+modify/delete conflicts, the complete26-file metadata snapshot at original
+headb099c40125795ce00cfa39c1df48fe5f76925a40 was copied and hash-verified
+outside the checkout. Owner tickets and their ten Source-related type blockers
+remain in that private snapshot. Rebase conflict versions were retained too.
+No Source/Lean proof, original statement, budget or goal was changed.
+
+The four reintroduced checksum manifests, two admission JSON files and three
+operational intake/dependency records are now outside the public tree. Real
+checker fixtures remain. The acceptance CLI takes an explicit private
+--admission path; its source-code digest pins remain exactly the original
+values. Hashing and parsing use the same retained buffer, and both admission
+and output paths are refused inside the checkout. Existing outputs cannot be
+overwritten. Changed historical Python tools are authenticated as exact
+hash-matching bytes from the original snapshot; they are not executed. All
+proof/source/object/log/type checks remain intact.
+
+Five private-storage controls, nine legacy accounting controls and three
+statement controls pass. Replayed paired acceptance is byte-identical for
+all792-row census, coverage and delta outputs;419ordinary pending and zero
+new credit. The exact loaded-type census also reproduces byte-identically:
+49loaded,38matching types,11drifts,743unloaded. This is evidence relocation
+and verification, not a Lean proof rerun, new current-fidelity result or
+performance rebaseline. All historical STOPs, ten Source transport blockers,
+nineteen H19/H60 transports, G42.04, private gaps and full owned H121 producer
+remain open.
+
+H145 explicitly authorizes the private coordination evidence upload. The
+metadata-only packet is prepared under
+/workspace/h62-audit-readonly-calls/evidence-policy/private-upload/. Large
+proof caches remain on the VM with absolute paths and hashes. Publication
+receipt and checksums are recorded in the saved CLOUDVM-RESULT, not in tests.
+Public code-branch/default-branch pushes remain prohibited. Full assignment
+and runtime acceptance remain unfinished.
+
+
+Private H145 archive uploaded successfully:
+SolidiKeY/solidity-lean-coord@2ea13a380409910c0b198737d07c60ee2b63b426,
+evidence/solidity-h62-2-20261106/audit-readonly-calls/private-upload/.
+Its LARGE-VM-ARTIFACTS.json records fifteen larger VM archives by path/hash.
+The upload changed only the private evidence repository; the code branch
+was not pushed.
+
+
+### Joint Source boundary inputs (2026-11-07)
+
+CallBoundaryWitnesses supplies the SAME explicit inputs to the original
+SourceCallBoundary.static_operation, return_short and return_revert interfaces.
+The static frame rejects an account-balance operation, one declared Bool return
+rejects a 31-byte buffer with the checked 31<32 premise, and a supplied callee
+revert preserves its nonempty [7,9] bytes. Actual runs preserve the input state.
+Negative controls reject successful static acceptance and erased revert data.
+These supplied outcomes do not establish actual callee execution, compiler/world
+binding, physical frames, gas/fork behavior or a compiler-success theorem.
+
+The SAME additive module elaborates at C6 and current source. Exact original
+raw kernel types match for all three interfaces, and all eight theorem axiom
+sets match the existing propext/Classical.choice/Quot.sound set. The checker
+reuses dependency objects from the exact already-admitted read-statement
+pair, authenticating every source/object/log and historical Python tool byte.
+The older primitive cache correctly refused current-source drift; that refusal
+remains recorded. H145's b099 historical tools are data, never executed.
+
+The shared collector verifies both sealed receipts and all source/log/object
+bindings before credit. All 792 original identities remain, with only these
+three pending rows changed. Counts are now 70 joint, 416 ordinary pending
+(including three private identity gaps), 3 target-failure joint, 45 intentional
+impossibility, 256 no-input and 2 frozen-v1 refutation/migration results.
+Frozen statements, definitions, premises, exclusions, budgets and axiom pins
+remain unchanged. No private identity, drift or unloaded row is discarded.
+
+Serial bounded frozen/current gates and axiom checks pass; exact commands,
+versions and resource measurements remain in private evidence. This is not a
+before/after performance comparison. The +80.254966536% Premises STOP remains
+unchanged and was not rerun. There is no runtime or full-assignment pass.
+
+Independent read-only finder and skeptic reviewed Source premise fidelity and
+negative controls without Lean servers or execution. The finder corrected the
+runner's missing-dependency description; final accounting review found no further issue and is recorded
+in the private handoff. Evidence, admission JSON, receipts and checksums stay
+outside this code branch under the H145 private coordination archive. The
+existing generic-v08 documentation citation failure remains owner-pending.
+
+Next independent work remains the other original joint inputs and full owned
+H121 Source/callee execution, selected compiler/world binding and physical-frame
+producer. External transport/G42.04 and historical artifact waits are unchanged.
+
+
+### Joint funded journal inputs (2026-11-07)
+
+JournalWitnesses applies the unchanged StaticJournal.transfer_history,
+History.storage and credit_history interfaces to one explicit nonempty Bool
+storage environment. A funded amount-three transfer between distinct accounts
+changes balances 9/1 to 6/4. The same successful transfer equation supplies the
+history premise; that same history and true mode supply storage preservation.
+The actual Source credit run succeeds with nonempty typed locals and changes
+the receiver balance to four. An actual stored true field survives. Controls
+reject whole-world equality and replacement of that cell by false.
+
+History is an algebraic journal certificate. It neither authorizes a nonzero
+static CALL nor supplies arbitrary Source-call execution, compiler/world binding
+or physical-frame correspondence. These joint inputs also do not establish
+cross-version semantics of the changed monetary representation. No original
+statement, dependent definition, premise, exclusion, budget or axiom is edited.
+
+The same additive module passes the isolated frozen/current gates. All three
+original raw kernel types match, and the eight theorem axiom sets match the
+existing propext/Classical.choice/Quot.sound set. Exact admitted read-parent
+objects are reused with source/import/object/log/tool validation; only missing
+dependencies and the new witness/probe may compile. Historical tools remain
+hash-matched data, not executable fallbacks. Commands, versions, measurements
+and provenance remain private evidence under H145. The Premises performance
+STOP is unchanged, and there is no runtime or whole-assignment pass.
+
+The existing exact-accounting collector admits only these three rows. All792
+original identities remain: 73 joint, 413 ordinary pending (including the three
+private identity gaps), 3 target-failure joint, 45 intentional impossibility,
+256 no-input and 2 frozen-v1 refutation/migration results. The other789 rows
+are unchanged. Existing type/transport/unloaded/private refusals remain open.
+Independent read-only finder and skeptic found no remaining issue in the
+joint premises, controls, exact receipt pair or complete ledger comparison;
+neither used Lean servers, execution or writes.
+
+The full owned H121 Source/callee/selected compiler-world/physical-frame
+producer, external transports/G42.04 and inherited cleanup queues remain
+unfinished. Next independent work is the remaining original joint inputs and
+that producer. No new scope question or goal change.
+
+
+### Joint captured invocation modes (2026-11-07)
+
+Rebased the clean lane onto a3a12bfa258e15db0cbb8f054042504b66e33352.
+The relevant Source and readonly files are unchanged. InvocationModeWitnesses
+supplies actual Invocation records for the original inherited, view_mode and
+pure_mode interfaces. Each record includes a checked declaration/signature,
+typed receiver/value/arguments and successful Source capture with nonempty
+address locals. Receiver two differs from caller zero. Inherited mode uses a
+payable declaration and static parent; view/pure use ordinary parents, so each
+cause of static mode is exercised independently. The pure-mode downgrade is
+explicitly refused.
+
+The explicit hasCode/callee records model capture inputs. They do not prove
+callee/body execution, selected compiler/world binding or physical frames.
+The first symbolic capture proof exhausted the unchanged heartbeat budget;
+case splitting on the existing mutability constructors gives checked concrete
+captures without raising the budget or weakening any invocation requirement.
+No existing statement, dependent definition, premise, exclusion or axiom changed.
+
+The same additive module passes frozen/current isolated proof gates. Three
+exact original raw kernel types match, and eight theorem axiom sets match the
+existing propext/Classical.choice/Quot.sound sets. All dependency sources, imports,
+objects, logs and historical tools remain authenticated by the existing checker.
+Detailed commands, actual versions, resource records and failed/intermediate
+attempts stay in private evidence under H145. No held Premises workload,
+performance rebaseline, STOP release or runtime acceptance is claimed.
+
+The exact-accounting collector changes only the three mode rows. All 792
+identities remain: 76 joint, 410 ordinary pending (including three private
+identity gaps), 3 target-failure joint, 45 intentional impossibility, 256 no-input
+and 2 frozen-v1 refutation/migration results. The other 789 rows are unchanged.
+Independent read-only finder and skeptic confirmed joint premise satisfaction,
+controls, exact receipts and complete ledger preservation with no findings;
+neither used Lean servers, execution, tests/builds or writes.
+
+Full owned H121 Source/callee/selected compiler-world/physical-frame production,
+external type/semantic transports and G42.04, inherited cleanup queues and final
+acceptance remain unfinished. Next independent work remains the original joint
+inputs and that owned producer; no goal or scope change.
+
+
+### Joint caller-owned storage transport inputs (2026-11-07)
+
+The clean branch adopted master 77dbfca86aa107955b83529007fcaf3b57c32f29
+without conflict. CallerStorageWitnesses supplies all inputs of the original
+PrimitiveFields.caller_storage, caller_exit and lowered_caller_exit interfaces
+at the SAME captured invocation and final Source state. A nonself call through
+an explicit external-model reply returns [7] and changes its event trace. The
+actual raw run and structural history use those exact endpoints. A named, typed,
+persistent C.flag field contains true in both Source and intrinsic storage; the
+CallLayout ownership proof is tied to the caller frame's C contract name.
+
+The reflexive storage equality is premise satisfiability only. It establishes
+neither compiled/resolved Source-body execution nor general runtime-history
+production, compiler/world binding, physical frames, gas/fork or H121 adequacy.
+The event-change control and rejection of a false/default intrinsic cell make
+the Source execution and nonempty representation observable. No original
+statement, dependent definition, premise, exclusion, budget or axiom changed.
+
+The same additive module passes frozen/current isolated gates; all three
+original kernel types match and all nine theorem axiom sets match the existing
+propext/Classical.choice/Quot.sound sets. Exact dependency/tool/log/object
+authentication remains intact. The erased-cell proof uses constructor
+discrimination instead of assuming a decidable equality instance for typed
+Source values. Detailed commands, versions, measurements and attempts remain
+in private evidence under H145. No performance rebaseline, STOP release or
+runtime pass is claimed.
+
+The collector explicitly maps storage_joint, exit_joint and owned_exit_joint,
+rather than the preceding helper proofs. All 792 originals remain: 79 joint,
+407 ordinary pending including three private identity gaps, 3 target-failure
+joint, 45 intentional impossibility, 256 no-input and 2 frozen-v1 refutation/
+migration results. The other 789 rows are unchanged. Independent read-only
+finder and skeptic found no remaining issue in the premises, mappings, exact
+paired receipts or census; neither used Lean servers, execution, tests/builds
+or writes.
+
+The H70 owner reply at 8add331c8ee2a8f7d6bbf3bf1ee2999344c804e8 explicitly
+supplies ZERO exact H57 transports. Its current endpoint range/wordView results
+are supporting evidence only; all nineteen transports and three private gaps
+stay open. No Source or owner module was edited/imported for this reply.
+Full owned H121 Source/callee/selected compiler-world/physical-frame production,
+external compiler-success/G42.04, inherited queues and final acceptance remain
+unfinished. Next work remains original joint inputs and the owned producer.
+
+
+### Joint exact private transport inputs (2026-11-07)
+
+PrivateTransportWitnesses supplies simultaneous equality/type/value inputs to
+the original private PrimitiveFields.cast_injective, cast_back, default_transport
+and PrimitiveReads.cancel constants. The actual Bool true value is carried
+through both roundtrip casts, the injective pair has its equality premise, and
+the actual Bool default is false. A negative control distinguishes transported
+true from that default. Reflexive conclusions are premise satisfiability only,
+not Source execution or compiler/world/frame adequacy.
+
+Test-only SDK macros construct the exact mkPrivateNameCore identities. The
+ordinary kernel checks each application. A separate probe inspects each witness
+proof term and requires its exact original private theorem constant, excluding
+public-surrogate substitution. Both frozen/current logs record all four links.
+The SDK elaborator import stays confined to this test module; it must never
+be imported or registered in the dependency-free core roots. No original source
+interface, dependent definition, premise, exclusion, budget or axiom changed.
+
+Both isolated gates pass: four original private kernel types match and all five
+witness/control axiom sets match the existing propext/Classical.choice/Quot.sound
+sets. One initial gate stopped on the mandatory memory reserve because clean
+file cache consumed headroom. Advisory release of this task's clean saved-object
+pages preserved file bytes and restored headroom; retry passed at unchanged
+limits. This cache-state change is not a before/after performance comparison or
+release of the historical Premises timing STOP. Exact commands, resources,
+attempts and manifests remain private under H145. No runtime pass is claimed.
+
+The collector admits only these four present private helpers. All 792 originals
+remain: 83 joint, 403 ordinary pending, 3 target-failure joint, 45 intentional
+impossibility, 256 no-input and 2 frozen-v1 refutation/migration results. The
+other 788 rows and all three removed-private identity gaps are unchanged. Those
+missing identities are separate obligations; no public alias or these four
+helpers restore them. Independent read-only finder and skeptic confirmed the
+private links, joint inputs and complete ledger preservation with no findings;
+neither used Lean servers, execution, tests/builds or writes.
+
+Full owned H121 Source/callee/selected compiler-world/physical-frame production,
+external compiler-success/G42.04 and all nineteen H57 transports, inherited
+queues and final acceptance remain open. Next work remains original joint
+inputs/exact bindings and that owned producer, with all existing STOPs retained.
+
+Coordinator review corrections: primitive-read and read-statement active coverage
+references identify the private coordination archive. Historical receipt hashes
+remain unchanged. The drift reporter rejects checkout-contained output paths,
+including paths reached through a symlink, before reading private inputs. Direct
+and symlink output regressions guard this boundary. These changes add no proof
+credit or new acceptance of historical receipts.
