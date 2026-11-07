@@ -35,7 +35,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
     if (!configured && !workspace) throw new Error('Set solidityLean.backendPath to the Solidity Lean repository directory');
     const automatic = cfg.get('verifyOnSave', false) ? 'onsave' : cfg.get('automaticVerification', 'onchange');
     return { backendPath: resolve(workspace || '.', configured || '.'), nodePath: cfg.get('nodePath', 'node'), timeoutMs: cfg.get('timeoutMs', 600000), auditPreconditions: cfg.get('auditPreconditions', false), counterexamples: cfg.get('counterexamples', false),
-      projectRoot:workspace||dirname(doc.uri.fsPath),includePaths:cfg.get('includePaths',[]),remappings:cfg.get('remappings',[]),
+      projectRoot:workspace||dirname(doc.uri.fsPath),includePaths:cfg.get('includePaths',[]),remappings:cfg.get('remappings',[]),compilerOutputDir:cfg.get('compilerOutputDir','bin'),
       workers: cfg.get('workers', 1), automaticVerification: {onchange:'change',onsave:'save',never:'never'}[automatic] || 'never' };
   }
   const sourceCommands=require('./source-commands.cjs').install(vscode,context,{settings,output,cancelVerification:uri=>cancel(uri,true)});

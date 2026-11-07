@@ -13,9 +13,9 @@ mapped modules. There are zero uncovered mapped statements. Of these, 54 have
 proposition premises, 53 have data/type/instance binders only, and 70 have no input
 binders. The 70 empty packages are explicit census accounting, not additional
 semantic feasibility coverage. The success/runtime phase and matched after timings pass.
-The current expanded full Lean build passes on 8863c41276f9, including the
-mandatory slow examples. Final acceptance awaits 184 standard-only G07
-registrations (zero axiom errors). All other required checks pass. The later coordinator instruction explicitly
+The current expanded full Lean build passes on 8a710f9d, including mandatory
+slow examples. Final acceptance awaits214 standard-only G07 registrations
+(zero axiom errors). All other required checks pass. The later coordinator instruction explicitly
 reactivated this same worker and authorized merging origin/master and continuing.
 The retirement section below is historical; no goal was created or reset.
 
@@ -24,7 +24,7 @@ The retirement section below is historical; no goal was created or reset.
 | 1. Frozen signatures, ownership, premise classification | Complete source inventory; elaborated binders now also exported. |
 | 2. Simultaneous hypotheses | 177 exact-type packages pass complete Lean diagnostics and reviews. |
 | 3. Success/totality and behavioral controls | Seven formal theorems and ten provenance-bound external programs pass; proof/runtime boundary below. |
-| 4. Witness and statement-fidelity census | 177 independent type comparisons pass; 439 binders, 113 proposition binders. Fresh 8863 per-file census and full build pass; owner metadata closure remains blocked. |
+| 4. Witness and statement-fidelity census | 177 independent type comparisons pass; 439 binders, 113 proposition binders. Fresh 8a710f9d per-file census and full build pass; owner metadata closure remains blocked. |
 
 The accounting tool explicitly reports `witness_gate_complete=true` and
 `assignment_complete=false`. All original Solidity sources, generated roots,
@@ -772,3 +772,45 @@ zero findings, and current external184ticket/archive/membermanifest pointers
 are authenticated. All1898archive members and four integrity controls pass;
 the committed bulk manifest remains17lines/1385bytes. No residual finding.
 Final acceptance remains blocked on the184owner registrations.
+
+## Current origin/master rebase and validation (2026-11-07)
+
+Verified reported merge db62b437fac3407b9b028a67d7f796d5ec372baf and prior
+765aacbff01591279404f72371868383060b54ef as ancestors of fetched origin/master
+8a710f9d44df144d4c9855aeccca56585a422122. Rebase fast-forwarded cleanly on
+the assigned branch; no history discarded, reset, push or new goal. The
+coordinator-local receipt path is provenance only, not presumed VM-accessible.
+There are25new validation inputs; frozen24ABI files/map remain exactoriginal.
+
+All nine audit modules plus KeySort pass fresh bounded diagnostics, binding
+8047upstream Lean paths/bytes before/after. Initial invocation used an absolute
+driver path, so strict receipt acceptance correctly rejected its command
+identity. Preserved that attempt under attempt-absolute-driver, then reran the
+exact required repository-relative command; no validator change. Acceptance
+177/439/7/10 and three tampering controls pass. Timing1.641550907 to1.646562778s
+(+0.305313164%,within10%) passes. Trust6655sources/289sites/0findings,
+reachability6638/0orphans, documentation/root/fragment checks pass.
+
+The cold OpenLoops prerequisite replayed successfully278jobs. Complete
+./run-lean.sh PASS6649jobs,exit0,26.967879seconds including SolkeyTestSuite and
+SoliditySlowExamples. Current resource receipt: peakRSS3398221824bytes,
+minavailable10289586176bytes,oneheavyLeanjob,noSwap,cleanuptrue. StdoutSHA256
+3d4261604c593902a3b4dc54681d36f67d718836820e6ff346ab89c2f737acaa.
+Post-build source snapshot exactly matches fresh diagnostic identity.
+Actual Lean4.24.0 Release797c613/Lake5.0.0-src+797c613 and unchanged16GiBhard/
+12GiBRSS/4GiBreserve/threads1/-j1/stack131072 are recorded. No gate, proof
+budget, source, statement, premise, observation, exclusion or axiom edit.
+
+Final acceptance remains blocked on214existing standard-only registrations:
+16804theorems,zeroerrors. Current off-Git PIN-8a710f9d ticket and bulk archive
+are authenticated by the tiny manifest/index. All original implementation and
+independent backfill are complete; no unclaimed candidate assigned. Prior
+receipts remain historical. External gas/fork observations are byte-identical
+archived fixture reuse, not fresh EVM/formal gas/world/generalcompiler proof.
+Keep existing goal unfinished pending owner metadata; no replacement goal.
+
+Final finder and skeptic verified the current6649-job full gate, strictreceipt
+identity and preserved rejected attempt without Lean/server/builds/edits.
+Packaging note closed after refreshing current214ticket/archive/index pointers:
+all2047members and hashes/sizes verify, four integrity controls pass; tiny
+manifest23lines/1890bytes, no bulkdata re-added toGit. No residual finding.
