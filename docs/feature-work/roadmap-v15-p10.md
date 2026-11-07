@@ -1989,3 +1989,124 @@ DUP1 through DUP16 short-stack consumers connect the actual indexed certificates
 `InstructionSelectionRefusal` proves insufficient-stack refusal for all sixteen SWAP depths against IR, selected Scalar code, the fetched driver and native reference execution. The clauses retain the input representation, three-gas admission and distinct driver/native fuel indices. Controls distinguish SWAP15 success from SWAP16 refusal on sixteen populated words, gas-before-stack ordering, permission flags and insufficient driver fuel. The populated observation retains account, memory, calldata and return-byte fields. These instruction-local results do not establish source frame origin, CALL/world composition or complete opcode-row adequacy.
 
 `IndexedRefusalWitnessV1.producer` packages the kernel-checked DUP and SWAP shortage theorems into the unchanged `IndexedRefusalInterfaceV1.Producer` fields. Focused checks of the witness and `InstructionSelectionRefusal` pass with guarded standard-only axiom reports. The contract is instruction-local: source frame origin, successful execution and full opcode-row adequacy remain open.
+
+
+## CALL/RETURNDATA correspondence validation (move6)
+
+This validates the fetched CALL/RETURNDATA relation that
+[G42](g42-world-call-consumers.md) names as the P10 input of
+`WorldCalls.FetchedPremises.Returndata`. The general law and the single-step
+controls go through the frozen `FrozenV1.api` CALL field and the pinned
+reference `EVM.call`; the frozen API is unchanged.
+
+`CallReturndataLaw` holds for every CALL site and fuel. `calleeRun` is the
+exact `Θ` invocation `EVM.call` makes, with every input pinned: callee code
+`toExecute .EVM σ t`, substate with `t` accessed, source, origin, recipient,
+`Ccallgas` gas, gas price, values, the input window read with padding,
+depth + 1, header and permission. `entered` is the entry condition (enough
+caller balance, depth below 1024).
+
+| Law | Statement |
+|---|---|
+| `call_returnData` | A non-erroring `EVM.call` result has the return buffer of `calleeRun` when `entered` holds, and an empty buffer when it fails. |
+| `fetched_call_returnData` | Lifted through `FrozenV1.api.charged.checked_call`: a non-erroring fetched CALL step exposes the actual gate, the seven popped operands and positive call fuel, and its buffer is given by `call_returnData` on the state `EVM.call` receives. |
+
+The conclusion is stated without reference to the caller's previous buffer;
+nothing rules out a callee output equal to it. `Θ` stays unevaluated.
+
+`CallReturndata` evaluates populated cases in the kernel. The caller has
+memory `[0xaa, 0xbb]` and a stale buffer `[0xcc, 0xdd]`; callee 31 is absent or
+has the one-byte body INVALID.
+
+| Control | Observation |
+|---|---|
+| `absent_call` | flag 1, stale buffer cleared, memory unchanged. |
+| `invalid_call` | flag 0, stale buffer still cleared. |
+| `absent_then_size` | the following RETURNDATASIZE pushes 0, not the stale size 2 (direct driver evaluation, not through the frozen API). |
+| `outcome_needs_callee` | two states that agree on environment, PC, stack, gas, memory, stale buffer and the caller's nonce and balance push different CALL flags. |
+
+Nonempty output is not exercised; `call_returnData` only constrains it. Kernel
+evaluation of callee instructions is the limit: a three-instruction callee
+peaked above 14 GB and was killed, beyond the 8 GiB module budget, and the
+identity precompile does not reduce in the kernel.
+
+Verdict for the G42 adapter: post-CALL return data is the output of the
+callee's `Θ` run, a function of callee code, world and the caller's input
+window. Flag dependence alone is expressible in the core through its free
+`Machine.accepts` oracle, but the core `Evm.Machine` has no return buffer and no
+code map, and its `CALL` is a two-operand payment
+(`Solidity.Evm.External.call_arity_mismatch`). A `FetchedPremises.Returndata`
+instance from `FrozenV1.API` therefore needs a callee/world execution producer
+(V13 WorldCalls steps) and a core-to-reference CALL representation. Neither is
+supplied or assumed here. Gas values, `Site` origin, resource, Osaka and
+transaction adequacy are not asserted.
+
+Read-only finder and skeptic reviews found that the first version of the law
+left most `Θ` inputs existential, its empty branch unguarded, and the docs
+overstated buffer replacement, nonempty output and the flag control. The law
+now pins every input and guards the empty branch, and the wording above is
+corrected.
+
+### G49 `p10_execution_bridge` status (move6)
+
+[`bridge-requests.json`](../../tests/h55/g49-final-theorem/bridge-requests.json)
+routes the P10 family to V15 as `p10_execution_bridge : (x : NativeContext_opcode)
+→ Approved_opcode x → BridgeGoal …` over `G49Final.PassCorrect`
+(`Solidity/Roadmap/G49Final/BridgeGoal.lean`). It is not delivered. Its two
+endpoints do not exist in the repository: there is no concrete pinned-Osaka
+`EvmSpec` (`Solidity/Roadmap/Evm.lean` defines no EVM; only the toy controls in
+`Solidity/Yul/Composition/CorrectnessControls.lean` instantiate `Execution`), and no
+canonical assembly-session `Lang` on the same loaded `Artifact`. The concrete
+assembly `SourceSpec` and session semantics are VY1 inputs, and the unified
+log/emit `Event` extension is a VY4 input
+([assembly correctness instances](assembly-correctness-instances.md)). An
+`EvmSpec` instance over the vendored EvmYul would further need the G06 session,
+failure-point and hash-preimage observations. The Codex lane's four missing
+obligations (endpoints, observation equations and approved coverage, fixed
+environment map and independent resource bound, two-sided failure/prefix
+transport) therefore all remain open. No placeholder `BridgeGoal`, assumed
+certificate or narrowed domain is introduced. `FrozenV1.API` and the
+CALL/RETURNDATA laws above are the existing local evidence that `Local_opcode`
+must retain.
+
+### Core `CALLIN` against the reference CALL (move6, H106)
+
+`CallInAgreement` relates the version-2 core law `Evm.callIn_returndata`
+(`Solidity/Evm/MachineV2.lean`) to `CallReturndataLaw.call_returnData`. Both
+leave the callee's output after an entered call and an empty buffer otherwise.
+
+| Theorem | Statement |
+|---|---|
+| `callIn_agrees` | Case alignment. If the reference `EVM.call` does not error, the two entry tests coincide (`hbal`), depth is below 1024, and, when the call is entered, the core oracle `reply a v input` equals the output of the exact `Θ` run (`hreply`), then the core `CALLIN` buffer equals the reference buffer byte for byte. In the entered branch the equality is `hreply` itself; the theorem contributes the alignment of the entered and not-entered branches and the empty case. |
+| `reference_depth_limit` | At depth 1024 a non-erroring reference CALL leaves an empty buffer. |
+| `core_ignores_depth` | A covered core `CALLIN` leaves `reply a v input`; the core has no depth to test. |
+| `depth_disagreement` | At reference depth 1024, with a covered core value (`v ≤ bal self`) and a nonempty reply, the core buffer differs from the buffer of every non-erroring reference CALL. |
+
+Differences, stated explicitly:
+
+- **Depth.** The core has none (`depth_disagreement`).
+- **Gas and world.** The reference output reads the forwarded `Ccallgas` gas, depth + 1, account map, substate and header; the core `reply` reads only callee, value and input. `hreply` is a premise about one `Θ` run, used only when the call is entered; no uniformity across states is proved or assumed.
+- **Operands.** `hbal` relates only the entry tests (core `bal self` against `v`, reference `codeOwner` balance against `value`). Core value, callee and input bytes (`readBytes` of whole cells) are not tied to the reference `value`, `t`/`recipient` or `readWithPadding` window; that correspondence is carried by `hreply` alone. The theorems hold for every `EVM.call` use (CALL, CALLCODE, DELEGATECALL, STATICCALL).
+- **Not compared.** The pushed success flag (core `accepts`, reference `x`), post-call balances (the core pays nothing on a self-call, the reference moves value inside `Θ`), the core ghost journal `calls`, and gas.
+- **Errors.** The reference call's own errors are excluded by its `.ok` hypothesis. `callInStep` never errors; `InstrV2.callIn` faults when `readBytes` fails, outside these theorems since `input` is given.
+
+Item 1 (EVM agreement over P1) beyond this instruction is not done. The P1
+language `RuntimeFrameP1LangV2` targets core `InstrV2` code, and no encoder
+covers `InstrV2`. The assembler for the frozen `Evm.Instr`
+(`Bridge/SolidityBridge/ExternalEvm/Assembly/CodeLayout.lean`, with execution
+proofs in `ExternalEvm/Assembly/`) covers push, pop, jump, jumpi and loop, the
+relative jumps as PUSH32/JUMP pairs; `ExternalEvm/StorageMacros.lean` lowers a
+storage subset. Fixed-cell MLOAD/MSTORE, CALL and the version-2 data
+instructions (`CALLIN`, `RETURNDATASIZE`, `RETURNDATACOPY`, data `REVERT`,
+`RETURN`) have no lowering; the arity obstructions in
+`ExternalEvm/Obstructions.lean` rule out single-opcode matches for them. A
+whole-frame P1 EVM agreement needs those lowerings and their execution
+correspondence; the world-call part also still waits on V13's WorldCalls step
+producers.
+
+Finder and skeptic reviews of this section found that `callIn_agrees` is mostly
+case alignment, that operands, flag, balances and journal were uncompared but
+unmentioned, that the depth claim lacked a theorem and its balance condition,
+and that the encoder paragraph ignored the frozen-`Instr` assembler. Fixed
+above: `depth_disagreement` added, `hreply` weakened to entered calls, the
+wording corrected.
