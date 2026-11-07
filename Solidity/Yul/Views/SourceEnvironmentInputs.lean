@@ -36,6 +36,24 @@ theorem transaction_hash_inputs (environment : Environment) (tx : Source.TxConfi
 theorem transaction_blockhash (environment : Environment) (tx : Source.TxConfig) (query : Roadmap.Word) :
     blockhash (environment.bindTransaction tx) query=blockhash environment query := rfl
 
+/-- Binding actual Source transaction metadata preserves the eligible-block
+hash result for every supplied environment and transaction. -/
+theorem transaction_blockhash_in_window (environment : Environment) (tx : Source.TxConfig)
+    (query : Roadmap.Word) (past : query.val < environment.number.val)
+    (recent : environment.number.val - query.val ≤ 256) :
+    blockhash (environment.bindTransaction tx) query = environment.historicalHash query :=
+  (transaction_blockhash environment tx query).trans
+    (blockhash_in_window environment query past recent)
+
+/-- Regression boundary: transaction binding cannot turn a current/future or
+too-old query into an eligible historical lookup. No Source admission is added. -/
+theorem transaction_blockhash_outside_window (environment : Environment) (tx : Source.TxConfig)
+    (query : Roadmap.Word)
+    (outside : ¬ (query.val < environment.number.val ∧ environment.number.val - query.val ≤ 256)) :
+    blockhash (environment.bindTransaction tx) query = 0 :=
+  (transaction_blockhash environment tx query).trans
+    (blockhash_outside_window environment query outside)
+
 theorem transaction_blobhash (environment : Environment) (tx : Source.TxConfig) (index : Roadmap.Word) :
     blobhash (environment.bindTransaction tx) index=blobhash environment index := rfl
 
