@@ -695,3 +695,27 @@ skeptic found no defect and used no Lean/server/build/edit. Original controls
 and census remain unchanged. This is primitive content correspondence, not
 arbitrary Source heap/world, session/gas or fetched-EVM adequacy. Full C4/H68,
 fidelity drift and prior timing STOPs remain open.
+
+### Signed-width cast correspondence
+
+`SignedCastCorrespondence.lean` adds five laws quantifying every legal source
+and destination signed width. Typed native inputs inhabit the populated signed
+local fixture; the existing input representation and word uniqueness yield
+actual selected-code execution with every saved stack. Independent Source
+explicit conversions retain arbitrary globals/frame/state/older local tail and
+wrap in either checked mode. The joint law derives public compiler selection.
+Positive sign-boundary 128 to -128, negative wrap -129 to 127 and reject-all
+controls use the general execution theorem. The emitted conditional is not
+claimed to be SIGNEXTEND code. Original controls/census remain unchanged.
+
+The first check rejected the reserved binder `from`; MCP diagnosed the parser
+failure and the binder was renamed. A selection tactic experiment failed on
+unresolved implicit context parameters and is retained without proof credit.
+The next check exposed the existing recursion-depth limit in two concrete
+implicit reductions. MCP confirmed those errors; the tactic helper checked both
+wrap equations. Explicit rewrites following the published controls fixed them
+without changing any statement, definition or budget. The final five-law kernel
+check passes in 2.942 seconds, sampled workload peak 834476 KiB, with existing
+standard axioms. Independent read-only finder/skeptic reviewed the final changes
+and found no defect; neither used Lean/server/build/edit. Full C4/H68, arbitrary
+heap/world/session/gas adequacy, fidelity drift and timing STOPs remain open.
