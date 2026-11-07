@@ -39,6 +39,10 @@ class Controls(unittest.TestCase):
         self.assertEqual(a.stdout, b.stdout)
         self.assertEqual(json.loads(a.stdout)["rowsWithCitations"], 1)
 
+    def test_standard_library_module_resolves(self):
+        d = fixture(); d["features"][0]["theorems"][0].update(name="Nat.add_comm", module="Init.Data.Nat.Basic")
+        r = self.run_check(d); self.assertEqual(r.returncode, 0, r.stderr)
+
     def test_missing_name(self):
         d = fixture(); del d["features"][0]["theorems"][0]["name"]
         r = self.run_check(d); self.assertNotEqual(r.returncode, 0); self.assertIn("invalid citation fields", r.stderr)
@@ -57,7 +61,7 @@ class Controls(unittest.TestCase):
 
     def test_missing_module(self):
         d = fixture(); d["features"][0]["theorems"][0]["module"] += "Bogus"
-        r = self.run_check(d); self.assertNotEqual(r.returncode, 0); self.assertIn("module source does not exist", r.stderr)
+        r = self.run_check(d); self.assertNotEqual(r.returncode, 0); self.assertIn("Lean resolution failed", r.stderr)
 
     def test_wrong_module_origin(self):
         d = fixture(); d["features"][0]["theorems"][0].update(name="Nat.add_comm")

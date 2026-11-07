@@ -16,7 +16,7 @@ import sys
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
-IDENT = re.compile(r"[A-Za-z_][A-Za-z_0-9']*(?:\.[A-Za-z_][A-Za-z_0-9']*)*\Z")
+IDENT = re.compile(r"[A-Za-z_][A-Za-z_0-9'?!]*(?:\.[A-Za-z_][A-Za-z_0-9'?!]*)*\Z")
 
 
 def validate(data):
@@ -49,8 +49,6 @@ def validate(data):
                 raise ValueError(f"{key}: fully qualified name required")
             if not isinstance(module, str) or not IDENT.fullmatch(module):
                 raise ValueError(f"{key}: invalid module")
-            if not (ROOT / (module.replace(".", "/") + ".lean")).is_file():
-                raise ValueError(f"{key}: module source does not exist: {module}")
             if cls not in ("a", "b", "c", "d") or direction not in ("model", "model-to-solc"):
                 raise ValueError(f"{key}: invalid class/direction")
             premises = c["premises"]

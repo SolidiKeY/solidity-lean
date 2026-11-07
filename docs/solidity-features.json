@@ -185,7 +185,7 @@
       "category": "lexical",
       "syntax": "true; false",
       "scope": "model",
-      "current": "present",
+      "current": "partial",
       "requirement": "Produce Boolean values, without numeric implicit coercion.",
       "upstream": [
         {
@@ -196,7 +196,16 @@
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Body.lean"
       ],
-      "theorems": []
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.expr",
+          "module": "Solidity.Frontend.SolcJson.Body",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Definition-only Boolean import branch; no general source/importer correspondence theorem. Downgraded present to partial under the non-d present gate (F8)."
     },
     {
       "id": "stringLiterals",
@@ -310,14 +319,30 @@
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Body.lean"
       ],
-      "theorems": []
+      "theorems": [
+        {
+          "name": "Solidity.Source.TypingExamples.w_litUnit",
+          "module": "Solidity.Source.TypingExamples",
+          "class": "c",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.unitFactor?",
+          "module": "Solidity.Syntax.Grammar",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Concrete typed one-ether derivation only; factor table is definitional. No theorem covers all denomination folding and range checks."
     },
     {
       "id": "timeUnits",
       "category": "lexical",
       "syntax": "seconds; minutes; hours; days; weeks",
       "scope": "model",
-      "current": "present",
+      "current": "partial",
       "requirement": "Fold literal unit factors; do not infer real-world clock guarantees or calendar arithmetic.",
       "upstream": [
         {
@@ -328,7 +353,16 @@
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Body.lean"
       ],
-      "theorems": []
+      "theorems": [
+        {
+          "name": "Solidity.unitFactor?",
+          "module": "Solidity.Syntax.Grammar",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Definition-only literal factor table; no unit-folding preservation theorem. Downgraded present to partial (F8)."
     },
     {
       "id": "pragmaVersion",
@@ -956,7 +990,7 @@
       "category": "types",
       "syntax": "bool",
       "scope": "model",
-      "current": "present",
+      "current": "partial",
       "requirement": "Keep Boolean typing distinct from integers and ABI words.",
       "upstream": [
         {
@@ -967,7 +1001,16 @@
       "localEvidence": [
         "Solidity/AST.lean"
       ],
-      "theorems": []
+      "theorems": [
+        {
+          "name": "Solidity.PrimTy.Denote",
+          "module": "Solidity.Semantics",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Boolean carrier is Bool by definition; no theorem of the full source typing requirement. Downgraded present to partial (F8)."
     },
     {
       "id": "integerTypes",
@@ -1325,7 +1368,7 @@
       "category": "expressions",
       "syntax": "(e)",
       "scope": "model",
-      "current": "present",
+      "current": "partial",
       "requirement": "Preserve grouping without introducing a tuple or changing evaluation.",
       "upstream": [
         {
@@ -1336,7 +1379,16 @@
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
       ],
-      "theorems": []
+      "theorems": [
+        {
+          "name": "Solidity.expandExpr",
+          "module": "Solidity.Syntax.Grammar",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Grouping macro branch only; no source evaluation-preservation theorem. Downgraded present to partial (F8)."
     },
     {
       "id": "tupleExpressions",
@@ -1872,7 +1924,27 @@
       "localEvidence": [
         "Solidity/Syntax/Scoped.lean"
       ],
-      "theorems": []
+      "theorems": [
+        {
+          "name": "Solidity.iteStep_sound",
+          "module": "Solidity.Calculus.SoundControl",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.compile_correct",
+          "module": "Solidity.Evm.Correct",
+          "class": "b",
+          "premises": [
+            "hP: inFragP F P = some F' (fragment admission)",
+            "hm: Sim C L b F sigma m (initial simulation)",
+            "hL: L + Prog.pushes P <= Lmax (local room)"
+          ],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Rule soundness is against intrinsic repository semantics. Compiler theorem additionally requires fragment admission, state simulation and local-room bound; neither proves source lowering or solc agreement."
     },
     {
       "id": "whileStatement",
@@ -1952,7 +2024,16 @@
       "localEvidence": [
         "Solidity/Syntax/Scoped.lean"
       ],
-      "theorems": []
+      "theorems": [
+        {
+          "name": "Solidity.lowerLoops",
+          "module": "Solidity.Syntax.Elab.Lower",
+          "class": "c",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Class c traces lowerLoops plus guard-message regressions in Solidity/Examples/Tactics/Loops.lean:60-106; transformed syntax tests do not prove general lowering correctness (F3)."
     },
     {
       "id": "continueStatement",
@@ -2348,7 +2429,30 @@
         "Solidity/ERC7201.lean",
         "Solidity/Syntax/Elab/Lower.lean"
       ],
-      "theorems": []
+      "theorems": [
+        {
+          "name": "Solidity.Examples.Tactics.AbiFeatures.erc20_namespace",
+          "module": "Solidity.Examples.Tactics.AbiFeatures",
+          "class": "c",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Examples.Tactics.AbiFeatures.empty_namespace",
+          "module": "Solidity.Examples.Tactics.AbiFeatures",
+          "class": "c",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Examples.Tactics.AbiFeatures.utf8_namespace",
+          "module": "Solidity.Examples.Tactics.AbiFeatures",
+          "class": "c",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Three concrete kernel namespace computations; no theorem relates runtime lowering to the ERC7201 root formula. General runtime formula agreement remains open."
     },
     {
       "id": "wrapUnwrap",
@@ -2415,7 +2519,7 @@
       "category": "environment",
       "syntax": "msg.sender",
       "scope": "abstract",
-      "current": "present",
+      "current": "partial",
       "requirement": "Supply a bounded caller identity per call frame; external self-calls change sender.",
       "upstream": [
         {
@@ -2433,7 +2537,16 @@
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "Universally quantified input approved."
       },
-      "theorems": []
+      "theorems": [
+        {
+          "name": "Solidity.TTx.msgSender",
+          "module": "Solidity.Semantics.State",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Definition-only uint256 context field, not address160 bound or external-self-call transition proof. Downgraded present to partial (F8)."
     },
     {
       "id": "msgValue",
@@ -2515,7 +2628,7 @@
       "category": "environment",
       "syntax": "block.timestamp",
       "scope": "abstract",
-      "current": "present",
+      "current": "partial",
       "requirement": "Read the environment timestamp; monotonicity, accuracy and miner constraints require explicit premises.",
       "upstream": [
         {
@@ -2533,7 +2646,16 @@
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "Universally quantified input approved."
       },
-      "theorems": []
+      "theorems": [
+        {
+          "name": "Solidity.TTx.timestamp",
+          "module": "Solidity.Semantics.State",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Definition-only environment field; no clock guarantees asserted. Downgraded present to partial (F8)."
     },
     {
       "id": "blockCoinbase",
@@ -3307,7 +3429,16 @@
         "tests/solc/DeclarationMetadata.sol",
         "docs/feature-work/declarations-metadata.md"
       ],
-      "theorems": []
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.declarationMetadata",
+          "module": "Solidity.Frontend.SolcJson.Body",
+          "class": "c",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Importer definition tested by tests/solc/DeclarationMetadata.sol:26-29; compiler-supplied metadata, not an all-input source correspondence theorem."
     },
     {
       "id": "interfaceId",
@@ -3328,7 +3459,16 @@
         "tests/solc/DeclarationMetadata.sol",
         "docs/feature-work/declarations-metadata.md"
       ],
-      "theorems": []
+      "theorems": [
+        {
+          "name": "Solidity.Examples.Tactics.DeclarationMetadata.ownInterface",
+          "module": "Solidity.Examples.Tactics.DeclarationMetadata",
+          "class": "c",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Concrete imported own-interface fixture only; selectors supplied by solc, not independently computed and proved equivalent."
     },
     {
       "id": "functionSelector",
@@ -3389,7 +3529,23 @@
         "tests/solc/DeclarationMetadata.sol",
         "docs/feature-work/declarations-metadata.md"
       ],
-      "theorems": []
+      "theorems": [
+        {
+          "name": "Solidity.Examples.Tactics.DeclarationMetadata.errorSelectors",
+          "module": "Solidity.Examples.Tactics.DeclarationMetadata",
+          "class": "c",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Examples.Tactics.DeclarationMetadata.eventSelector",
+          "module": "Solidity.Examples.Tactics.DeclarationMetadata",
+          "class": "c",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Concrete imported error/event selector fixtures only; no general signature-hash agreement theorem."
     },
     {
       "id": "arrayLength",
@@ -3598,7 +3754,140 @@
       "localEvidence": [
         "docs/solc-alignment.md"
       ],
-      "theorems": []
+      "theorems": [
+        {
+          "name": "Solidity.Evm.exp_tail",
+          "module": "Solidity.Evm.Exp",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.compile_correct",
+          "module": "Solidity.Evm.Correct",
+          "class": "b",
+          "premises": [
+            "hP: inFragP F P = some F' (fragment admission)",
+            "hm: Sim C L b F sigma m (initial simulation)",
+            "hL: L + Prog.pushes P <= Lmax (local room)"
+          ],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.add_tail",
+          "module": "Solidity.Evm.SimLemmas",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.sub_tail",
+          "module": "Solidity.Evm.SimLemmas",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.mul_tail",
+          "module": "Solidity.Evm.SimLemmas",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.div_tail",
+          "module": "Solidity.Evm.SimLemmas",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.mod_tail",
+          "module": "Solidity.Evm.SimLemmas",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.sadd_tail",
+          "module": "Solidity.Evm.Signed",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.ssub_tail",
+          "module": "Solidity.Evm.Signed",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.smul_tail",
+          "module": "Solidity.Evm.Signed",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.sdiv_tail",
+          "module": "Solidity.Evm.Signed",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.smod_tail",
+          "module": "Solidity.Evm.Signed",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.neg_run",
+          "module": "Solidity.Evm.Signed",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.tail_simT",
+          "module": "Solidity.Evm.SimLemmas",
+          "class": "b",
+          "premises": [
+            "hop: binInFrag op p = true",
+            "hand: op != and",
+            "hor: op != or",
+            "hacc: op.accepts p = true",
+            "ha: ReprV p a wa",
+            "hb: ReprV p b wb"
+          ],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.compound_simT",
+          "module": "Solidity.Evm.SimLemmas",
+          "class": "b",
+          "premises": [
+            "hop: op.hasCompoundAssign = true",
+            "hp: p.isNumeric = true",
+            "ha: ReprV p a wa",
+            "hb: ReprV p b wb"
+          ],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.bump_simT",
+          "module": "Solidity.Evm.SimLemmas",
+          "class": "b",
+          "premises": [
+            "hp: p.isNumeric = true",
+            "h: ReprV p a w"
+          ],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "uint256/int256 admitted symbolic-machine compiler fragment only. compile_correct has hP/hm/hL premises and permits coarse revert/fault outcomes; guards do not establish all source intermediate widths, pipeline orders or exact panic bytes. F8 under-citation corrected without upgrading partial. F1/F10 payment-disjunction and oracle limits, F2 source composition, F3 lowering, F4 symbolic storage, F5 coarse failures and F6 fragment boundaries remain open."
     },
     {
       "id": "uncheckedArithmetic",

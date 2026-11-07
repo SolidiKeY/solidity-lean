@@ -51,10 +51,12 @@ an uncited row, never proof of absence. The planned checker must reject a
 `present` row with no citation or only class d, and resolve names through an
 elaborated Lean environment rather than source-text matching.
 
-The schema-version reader accepts versions 1 and 2; both manifests pass its
-compatibility tests. Citation population remains pending the generated-metadata
-ownership dependency recorded in [the E3 lane](feature-work/e3-feature-citations.md).
-No citation coverage is claimed by this schema/checker checkpoint.
+Optional `citationNotes` records the narrow meaning of a citation and its gap.
+The reader accepts versions 1 and 2; the compatibility test covers both.
+The [E3 citation map](feature-work/e3-feature-citations.md) traces the original
+13 present rows and checkedArithmetic. Six definition-only present rows become
+partial; class c remains finite evidence. Remaining partial citations,
+model-to-solc gaps and the final aggregate metric are still open.
 
 ## Final proof obligations
 
