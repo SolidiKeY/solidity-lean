@@ -940,3 +940,196 @@ ScopeScan admission/diagnostic and compiler-artifact boundaries to ADAPTERS.md.
 Independent skeptic found no blocking scope/provenance defect and recommended
 explicit unchanged category/syntax assertions; added them to check.py. Neither
 review used Lean/server/builds; skeptic ran the lightweight Python checker.
+
+## VX1 G01 (cloud move5-20261106): OOM fix, frozen D1–D6, generator adapter
+
+Lane moved from the Codex VM lane `solidity-fullscope-20261104/vx1-contracts-environment`
+(H75); branch `cloud/move5-20261106/vx1-g01` from `cloud/move5-20261106/vx1-base`
+(`d2a9a040`), which already contained `origin/master` (`5f7bb144`).
+
+### OOM hold: the module over the bound
+
+Measured on a cold full build (`LEAN_NUM_THREADS=1 ./run-lean.sh`, 4 cores,
+15 GiB, no swap) with a `/proc/<pid>/status` VmHWM sampler (0.2 s) over every
+`lean` process. `Solidity/Backend/Scalar/PowerBounds.lean` (from master's
+v13-abi-world increment, `0bf90a41`) peaked at **7877 MiB, 203 s**: 32
+`decide +kernel` row checks in one module, at the 8 GiB pre-gate bound once
+Lake's own memory is counted. Every lane touching the library root rebuilds it.
+The second module near the bound is `Solidity/Source/Horizon.lean` (same
+increment): **7447 MiB, 201 s**. The full table of modules over 4 GiB is at
+the end of this section.
+
+Fix (`[oom-fix]` commit `cb07a2c3`): `scripts/backend-scalar-thresholds.py`
+now emits `PowerBounds/Part01`–`Part08` (four widths each: rows
+`naturalThresholdRow<w>` and `rowBounds<w>`, no longer `private`) and
+`PowerBounds.lean` assembling `naturalThresholds`, `threshold_bounds`,
+`thresholdWord(_nat)`, `exponentWord(_nat)` with unchanged statements and
+proofs. Constants, statements and row proofs are unchanged up to placement
+(multiset and order checked); the 64 row names lose `private`. Parts measured: Part04 2099 MiB / 26 s, Part08 2337 MiB / 26 s;
+`--check` of the generator and `check-backend-scalar.mjs` pass.
+
+Second fix (`[oom-fix]` commit `ce77a3f1`): `Source/Horizon.lean` is now the
+linear chain `Horizon/Below` → `Horizon/Grow` → `Horizon/Const` → `Horizon`
+(the Approx layer and its `#guard_msgs` axiom pins), cut at its own section
+boundaries; every original line is present in order and only module
+preambles and docstrings were added, so importers of `Solidity.Source.Horizon`
+see the same declarations. Measured: Below 2182 MiB / 51 s, Grow 3871 MiB /
+90 s, Const 1440 MiB / 26 s, Horizon 4091 MiB / 105 s (batch, one thread).
+This touches a VY5-owned file under the assignment's OOM authorization only.
+
+Third fix (`[oom-fix]` commit `75fea01c`): `Frontend/Checked/UnitExamples.lean`
+peaked at **7972 MiB, 129 s**. Its corpora move to `UnitExamples/Corpus`, the
+per-program `decide +kernel` certificates to `UnitExamples/Parsed`,
+`ProfileParsed` and `ProfileExprParsed` (made public, otherwise unchanged);
+`UnitExamples.lean` keeps the exactness lemmas, the pinned
+`allCtors_covered`/`profileCtors_covered` (pins unchanged, `#guard_msgs`
+passes) and the controls. Measured batch, one thread: Corpus 2008 MiB / 23 s,
+Parsed 2355 MiB / 38 s, ProfileParsed and ProfileExprParsed under 3726 MiB /
+34 s and 19 s, UnitExamples 2610 MiB / 20 s.
+
+Fourth (partial) fix: `Examples/Tactics/OpenLoops.lean` measured **9108 MiB,
+469 s** standalone (one thread). `binomialRowsNine` moves unchanged to
+`Examples/Tactics/OpenLoops/RowsNine.lean`; `OpenLoops.lean` now builds in
+10 s. `RowsNine` with its original `chunk := 128` peaked at 8992 MiB / 457 s;
+with `chunk := 64` it peaks at **5876 MiB but takes 594 s**. The chunk size is
+the only proof change (`sol_prove (chunk := n)` re-checks the same walk; each
+chunk is still kernel-checked). The 8 GiB bound now holds; the 300 s bound does
+not: the time is the walk itself, and meeting it needs the walk checkpointed
+across modules, which `sol_prove (chunk := n)` (`Calculus/ProveChunked.lean`,
+tactic owner) does not offer. Open, owner request below.
+
+Cold-build table (`run-lean.sh`, `LEAN_NUM_THREADS=1`, Lake running four jobs,
+VmHWM sampled every 0.2 s over 6415 modules; times are under parallel load and
+exceed standalone times). Rows over 5 GiB after the splits above (the split
+modules themselves are listed in their fixes):
+
+| Module | Peak MiB | Seconds |
+|---|---|---|
+| `Solidity/SortCheck/Faithfulness.lean` | 6427 | 61 |
+| `Solidity/Examples/Tactics/RevertData.lean` | 6163 | 118 |
+| `Solidity/TestSuite/Derived21.lean` | 5990 | 66 |
+| `Solidity/TestSuite/Derived7.lean` | 5428 | 86 |
+| `Solidity/Yul/Views/MemberDynamicSequence.lean` | 5357 | 13 |
+| `Solidity/Yul/Views/MemberDynamicBoundaryControls.lean` | 5326 | 9 |
+| `Solidity/Examples/Tactics/CallSharingDefault.lean` | 5297 | 73 |
+| `Solidity/Examples/DecisionHashThreeKinds.lean` | 5290 | 31 |
+
+Next by time: `Examples/Tactics/Recursion.lean` 296 s (2741 MiB) under load,
+at the time bound; not changed here.
+
+### Frozen G01 relation contracts D1–D6 (`FullScope.V1`)
+
+`Solidity/Language/EnvironmentFields/Frozen.lean`, namespace
+`Solidity.Roadmap.FullScope.V1`, over the unchanged definitions of
+`Solidity.Language.EnvironmentFields.Contracts`. A later change is a `V2`
+namespace with an adapter (H57); V1 is never edited in place.
+
+Consumer declaration names (vt1, vo1 and every X/O/T lane):
+
+| Name | Kind | Meaning |
+|---|---|---|
+| `V1.Alignment source target` | `abbrev` (Type) | the producer's operational resource alignment |
+| `V1.D1 source target domain machine compiler environment aligned` | `abbrev` (Type) | `RunIndexed.Certificate … .exact` |
+| `V1.targetRunOf` | `def` | the target run a certificate assigns to an eligible source run |
+| `V1.D1.forward_oracle`, `V1.D1.backward_oracle` | theorems | executed queries read the actual target reader |
+| `V1.D2 attempt` | structure (Prop) | `failures : CreationSizeFailures attempt` (EIP-170/3860), `live`: some fitting creation succeeds |
+| `V1.fieldRead`, `V1.fieldsDisjoint`, `V1.creationFitsDecidable` | defs, instance | low-order-first packed field content; byte disjointness; decidable limits |
+| `V1.Layout`, `V1.Layout.Agrees`, `V1.MemoryAgrees`, `V1.Physical`, `V1.Physical.Representable` | defs/structures | D3 data |
+| `V1.D3 physical` | structure (Prop) | `agrees` on related states, `total` on representable ones, `live`: some representable state |
+| `V1.Assembly`, `V1.D4 assembly` | structure, structure (Prop) | `writeback : UnsafeWriteback …`, `opaqueBlocks : Opaque …`, `live`: some execution and some unsafe block |
+| `V1.D5 source target environment`, `V1.d5_of_certificate` | def, theorem | environment correspondence; every certificate proves it |
+| `V1.D6 …` | `abbrev` (Type) | `RunIndexed.Certificate … .optimizer` |
+| `V1.Mode.observe_le`, `V1.Mode.observe_optimizer`, `V1.D1.toD6` | theorems/def | quotient monotone, idempotent; exact ⇒ optimizer |
+| `V1.Contract source target domain machine compiler environment aligned mode attempt physical assembly` | structure | `run`, `admitsSome`, `creation`, `layout`, `assemblyBoundary` |
+| `V1.Contract.compiles`, `V1.rejecting_refused`, `V1.forward_completes` | theorems | totality, rejecting compiler refused, adequacy on completion |
+
+`Solidity/Language/EnvironmentFields/FrozenControls.lean`
+(`V1.Controls`): `witness` and `optimizerWitness` inhabit the whole bundle
+(joint satisfiability, H62/H69) with an admitted input, an executed gas query,
+a successful completion matched by the target (`witness_live`,
+`oracle_live`), creation success at the limits (`creation_at_limits`) and a
+representable nonzero layout (`d3_live`). Negative controls:
+`rejecting_refused`, `reverting_refused` (both modes), `empty_relation_refused`,
+`shifted_relation_refused`, `overlap_refused`, `rewriting_optimizer_refused`,
+`extra_event_refused` (an extra non-gas observation with equal gas reads and
+outcome fails in both modes), `always_failing_refused` (D2),
+`nothing_admitted_refused` (an empty domain with a compiler compiling nothing).
+`tests/fullscope-20261104/vx1/FrozenAxioms.lean` inventories 24 declarations:
+only `propext`/`Quot.sound`. MCP diagnostics: no errors or warnings on all three.
+
+Binding for consumers: vt1's `fun_<name>_<id>` simulations state their
+correspondence as a `V1.Alignment` plus `RunIndexed.SourceRuns`/`TargetRuns`
+and conclude `V1.D1` (or `V1.Contract`); vo1 binds X01/D6 by `V1.D6` (from
+`V1.D1.toD6` for passes that are exact) and D4's `opaqueBlocks`.
+
+### Generator adapter
+
+See `tests/fullscope-20261104/vx1/manifest-rescope/ADAPTERS.md`, "Generator
+adapter": a patch for the generator owner, identity on the active catalog,
+staged and kernel-checked 30-row transition, seven mutation controls.
+Activation waits for VY5's `ScopeScan.certify` to test `unmodelled?` first; the
+active catalog (`docs/solidity-features.json`, `FeatureInfo.lean`,
+`Features.lean`) is unchanged.
+
+Use the qualified names (`V1.D1.toD6 c`, `V1.forward_completes c …`): `V1.D1`
+and `V1.D6` are abbreviations of `RunIndexed.Certificate`, so dot notation on
+a certificate value does not find the `V1` lemmas.
+
+Limits of the freeze, stated rather than hidden: D2–D4 are over the producer's
+own `attempt`, `Physical` and `Assembly`; `V1.Contract` does not tie them to
+the target's operational semantics (each producer's adapter does). The joint
+witness is a toy whose source and target share one execution function with
+trivial guards; its value is that every field is inhabited at once with live
+domains, not that the fields constrain each other. A "gas-only difference
+passes D6 but fails D1" control is not constructible in the run-indexed design:
+the coupled transcripts force the source oracle to read the target's gas
+values in both modes, so the quotient only matters for gas observations that
+are not oracle reads.
+
+### Reviews (finder, skeptic; read-only, no Lean server)
+
+Skeptic: C1 partially holds (D3/D4 could be vacuous through the producer's
+choice of state types, extent or an empty `executes`/`isUnsafe`); fixed by the
+`live` fields of `D3` and `D4`. C2 partially holds (degenerate toy, missing
+non-gas-change control); `extra_event_refused` added, degeneracy and the
+gas-only control recorded above. C3–C5 hold; fixed the doc's "byte-identical"
+wording, section numbering and the dot-notation caveat.
+
+Finder: A1 (an empty `Admitted` with a compiler compiling nothing satisfied
+the bundle) fixed by `Contract.admitsSome` and `nothing_admitted_refused`; A2
+(always-failing `attempt`, empty D3/D4 models) fixed by `D2.live`, `D3.live`,
+`D4.live` and `always_failing_refused`; A4 fixed by keeping the D3 helpers and
+the instance named inside `V1`. Remaining by design, recorded as limitations:
+`V1.D3` allows `Var := Empty` (a contract without state variables) and does
+not state that steps preserve `Related` (the producer's simulation proof does);
+`admitsSome` does not say *which* inputs are admitted (G07 ties `Admitted` to
+the catalog); the toy's guards are `True` and `legality` is `Iff.rfl`
+(exercised non-trivially by the earlier `specified_run_cannot_be_filtered` in
+`tests/fullscope-20261104/vx1/ContractsControls.lean`); the H38 Source (VY5)
+and EVM (V14/V15) reviews of `Legal`/`Aligned` are not recorded in this
+repository, so the freeze stands on the coordinator's VX1 assignment. Adapter
+E1 (generated `inProfile`/`outsideScope` still scope-only), E2 (anchor not
+checked), E3 (`python -O`) and E4 (`Admission/Profile.lean` census) fixed in
+the patch, `adapter.py` and ADAPTERS.md. PowerBounds and registration: no
+defect.
+
+### Gates (VX1 G01, final)
+
+- MCP diagnostics: `EnvironmentFields/{Frozen,FrozenControls}.lean`, `Source/Horizon.lean`,
+  `Frontend/Checked/UnitExamples.lean` and parts, `Backend/Scalar/PowerBounds.lean`:
+  no errors; `tests/fullscope-20261104/vx1/FrozenAxioms.lean`: 24 declarations,
+  only `propext`/`Quot.sound`.
+- `gate.sh touched` (origin/master): PASS, 472 s.
+- `gate.sh checkpoint`: build-touched, library, examples, trust, orphans, layers,
+  roots, fragments PASS; doc-paths FAIL (pre-existing:
+  `after-roadmap-va1.md` cites a missing Mathlib file, another lane's doc);
+  axiom-pins FAIL (pre-existing: 0 errors, 4379 unrecorded changes; pins are
+  coordinator-owned, H67).
+- `./run-lean.sh`: Lean build of all default targets and `SolkeyTestSuite`
+  without errors; `check-solkey.sh` against the unpinned `../solkey`
+  (`5c448df`) FAIL with 167 mismatches (upstream drift); pinned rerun against
+  the `473da8944c` snapshot (`SOLKEY_RULES=tests/migration/solkey/…/solidityProgramRules.key`)
+  PASS: "annotations match", 131 read-bearing.
+- `adapter.py --stage`: identity, 8 mutations rejected, staged hashes stable;
+  `check.py`, `solidity-feature-audit.py --check`,
+  `backend-scalar-thresholds.py --check`: PASS.

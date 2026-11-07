@@ -1554,6 +1554,14 @@ import Solidity.Backend.Scalar.Heights
 import Solidity.Backend.Scalar.Modular
 import Solidity.Backend.Scalar.Negation
 import Solidity.Backend.Scalar.PowerBounds
+import Solidity.Backend.Scalar.PowerBounds.Part01
+import Solidity.Backend.Scalar.PowerBounds.Part02
+import Solidity.Backend.Scalar.PowerBounds.Part03
+import Solidity.Backend.Scalar.PowerBounds.Part04
+import Solidity.Backend.Scalar.PowerBounds.Part05
+import Solidity.Backend.Scalar.PowerBounds.Part06
+import Solidity.Backend.Scalar.PowerBounds.Part07
+import Solidity.Backend.Scalar.PowerBounds.Part08
 import Solidity.Backend.Scalar.PowerGuard
 import Solidity.Backend.Scalar.Select
 import Solidity.Backend.Scalar.Shifts
@@ -2667,6 +2675,10 @@ import Solidity.Frontend.Checked.TypePrintExamples
 import Solidity.Frontend.Checked.TypePrintRoundtrip
 import Solidity.Frontend.Checked.TypePrintText
 import Solidity.Frontend.Checked.UnitExamples
+import Solidity.Frontend.Checked.UnitExamples.Corpus
+import Solidity.Frontend.Checked.UnitExamples.Parsed
+import Solidity.Frontend.Checked.UnitExamples.ProfileExprParsed
+import Solidity.Frontend.Checked.UnitExamples.ProfileParsed
 import Solidity.Frontend.Cli
 import Solidity.Frontend.ConstantDepth.Complete
 import Solidity.Frontend.ConstantDepth.Controls
@@ -3116,6 +3128,8 @@ import Solidity.Keccak
 import Solidity.KeySort
 import Solidity.Language.EnvironmentFields.ContractControls
 import Solidity.Language.EnvironmentFields.Contracts
+import Solidity.Language.EnvironmentFields.Frozen
+import Solidity.Language.EnvironmentFields.FrozenControls
 import Solidity.Language.FeatureInfo
 import Solidity.Language.Features
 import Solidity.Language.FixedPoint
@@ -4014,6 +4028,9 @@ import Solidity.Source.FailureCursor
 import Solidity.Source.FailureResources
 import Solidity.Source.Hoare
 import Solidity.Source.Horizon
+import Solidity.Source.Horizon.Below
+import Solidity.Source.Horizon.Const
+import Solidity.Source.Horizon.Grow
 import Solidity.Source.HorizonDeploy
 import Solidity.Source.Infer
 import Solidity.Source.Inheritance

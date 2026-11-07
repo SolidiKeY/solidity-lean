@@ -1,0 +1,135 @@
+--- a/scripts/solidity-feature-audit.py
++++ b/scripts/solidity-feature-audit.py
+@@ -60,6 +60,17 @@
+     return {k: sorted(set(v)) for k, v in result.items()}
+ 
+ 
++def diagnosed(r):
++    # A structured unsupported diagnostic is decoupled from scope: an excluded
++    # feature has one, and so has open full-language work whose former
++    # exclusion was withdrawn (H37/H70), until its implementation is admitted.
++    return r['scope'] == 'exclude' or r.get('diagnostic') == 'unsupported'
++
++
++def withdrawn(rows):
++    return [r for r in rows if r.get('diagnostic') == 'unsupported']
++
++
+ def q(value):
+     return json.dumps(value, ensure_ascii=False)
+ 
+@@ -75,7 +86,7 @@
+ 
+ def render_lean(data):
+     rows = data['features']
+-    excluded = [r for r in rows if r['scope'] == 'exclude']
++    excluded = [r for r in rows if diagnosed(r)]
+     block = [r for r in excluded if r['id'].startswith('block') and r['syntax'].startswith('block.')]
+     ordinary = [r for r in excluded if r not in block]
+     lines = ['import Lean.Data.Name', '', '/-!', '# Solidity feature scope', '',
+@@ -111,7 +122,8 @@
+               '/-- The catalog list enumerates the entire feature type. -/',
+               'theorem Feature.all_complete (f : Feature) : f ∈ Feature.all := by',
+               '  cases f <;> decide', '',
+-              '/-- Fields excluded by this profile; timestamp is intentionally absent. -/',
++              ('/-- Fields excluded by this profile; timestamp is intentionally absent. -/' if not withdrawn(rows) else
++               '/-- Fields with a structured unsupported diagnostic; timestamp is intentionally absent. -/'),
+               'inductive BlockField where']
+     lines += ['  | '+r['syntax'].split('.')[1] for r in block]
+     lines += ['  deriving Repr, DecidableEq, Inhabited', '', 'def BlockField.id : BlockField → String']
+@@ -157,7 +169,7 @@
+ 
+ def render_lean_info(data):
+     rows = data['features']
+-    excluded = [r for r in rows if r['scope'] == 'exclude']
++    excluded = [r for r in rows if diagnosed(r)]
+     block = [r for r in excluded if r['id'].startswith('block') and r['syntax'].startswith('block.')]
+     ordinary = [r for r in excluded if r not in block]
+     lines = ['import Solidity.Language.Features', '', '/-!', '# Solidity feature inspection records', '',
+@@ -186,10 +198,21 @@
+               '  targetFeatures.filter fun f => f.info.current == .missing', '',
+               'def partialFeatures : List Feature :=',
+               '  targetFeatures.filter fun f => f.info.current == .limited', '',
+-              '/-- The diagnostic metadata and exclusion decision cannot disagree. -/',
+-              'theorem Unmodelled.excluded (u : Unmodelled) : u.feature.info.scope = .exclude := by',
+-              '  cases u with', '  | blockField f => cases f <;> rfl']
+-    lines += ['  | '+r['id']+' => rfl' for r in ordinary]
++]
++    if not withdrawn(rows):
++        lines += ['/-- The diagnostic metadata and exclusion decision cannot disagree. -/',
++                  'theorem Unmodelled.excluded (u : Unmodelled) : u.feature.info.scope = .exclude := by',
++                  '  cases u with', '  | blockField f => cases f <;> rfl']
++        lines += ['  | '+r['id']+' => rfl' for r in ordinary]
++    else:
++        alt = lambda r: '.inl rfl' if r['scope'] == 'exclude' else '.inr ⟨rfl, rfl⟩'
++        lines += ['/-- A structured diagnostic belongs to an excluded feature or to open model work',
++                  'that is still missing; it never marks a feature as outside full-language scope. -/',
++                  'theorem Unmodelled.diagnosed (u : Unmodelled) : u.feature.info.scope = .exclude ∨',
++                  '    (u.feature.info.scope = .model ∧ u.feature.info.current = .missing) := by',
++                  '  cases u with',
++                  '  | blockField f => cases f <;> first | exact .inl rfl | exact .inr ⟨rfl, rfl⟩']
++        lines += ['  | '+r['id']+' => exact '+alt(r) for r in ordinary]
+     lines += ['', '/-- Every deliberately excluded feature has a structured diagnostic. -/',
+               'theorem Feature.exclusion_complete (f : Feature) (h : f.info.scope = .exclude) :',
+               '    ∃ u : Unmodelled, f.unmodelled? = some u ∧ u.feature = f := by',
+@@ -221,6 +244,9 @@
+                 continue
+             refs = ', '.join(f"[upstream]({base}{s['path']}#L{s['line']})" for s in r['upstream'])
+             refs += ''.join(f'; [local](../{p})' for p in r['localEvidence'])
++            if 'withdrawal' in r:
++                w = r['withdrawal']
++                refs += f"; [{w['question']}, {w['date']}](../{w['record']}): open, unsupported diagnostic until admitted (was {w['prior']['outcome']})"
+             if 'decision' in r:
+                 d = r['decision']
+                 refs += f"; [decision {d['question']}, {d['date']}](../{d['record']}): {d['outcome']}"
+@@ -259,7 +285,32 @@
+     return '\n'.join(section), f'**User decision ({date}):**'
+ 
+ 
++WITHDRAWAL_KEYS = {'question', 'date', 'record', 'prior'}
++
++
++def validate_withdrawal(r):
++    # H37/H70: a withdrawn exclusion is open model work with a diagnostic. Its
++    # former G00 Q1 decision is kept as provenance, never as an active decision.
++    if 'diagnostic' not in r and 'withdrawal' not in r:
++        return
++    assert r.get('diagnostic') == 'unsupported', ('diagnostic without withdrawal', r['id'])
++    w = r.get('withdrawal')
++    assert w and set(w) == WITHDRAWAL_KEYS, ('withdrawal provenance', r['id'], w)
++    assert r['scope'] == 'model' and r['current'] == 'missing', ('withdrawn row is open model work', r['id'])
++    assert 'decision' not in r, ('withdrawn row keeps an active decision', r['id'])
++    assert w['question'] == 'H37/H70' and re.fullmatch(r'\d{4}-\d{2}-\d{2}', w['date']), w
++    path, _, anchor = w['record'].partition('#')
++    assert anchor and (ROOT / path).is_file(), ('withdrawal record not found', w['record'])
++    slug = lambda h: re.sub(r'[^a-z0-9 -]', '', h.lower()).replace(' ', '-')
++    assert any(line.startswith('#') and slug(line.lstrip('#').strip()) == anchor
++               for line in (ROOT / path).read_text().splitlines()), ('withdrawal anchor not found', w['record'])
++    prior = w['prior']
++    assert prior['question'] == 'G00 Q1' and prior['outcome'] == 'approvedExclusion', prior
++    decision_marker(prior['record'], prior['date'])
++
++
+ def validate_decision(r):
++    validate_withdrawal(r)
+     d = r.get('decision')
+     if r['scope'] in DECIDED_SCOPES:
+         assert d and d['question'] == DECIDED_SCOPES[r['scope']], ('scope without its decision', r['id'])
+@@ -324,10 +375,15 @@
+     p = argparse.ArgumentParser(description=__doc__)
+     p.add_argument('--check', action='store_true', help='fail instead of rewriting generated files')
+     p.add_argument('--upstream', type=Path, help='also check exact source hashes and symbol coverage against a checkout')
++    p.add_argument('--manifest', type=Path, default=MANIFEST, help='render another (staged) manifest')
++    p.add_argument('--out-dir', type=Path, help='write or check the generated files in this directory instead')
+     args = p.parse_args()
+-    data, ledger = json.loads(MANIFEST.read_text()), json.loads(LEDGER.read_text())
++    data, ledger = json.loads(args.manifest.read_text()), json.loads(LEDGER.read_text())
+     validate(data, ledger, args.upstream)
+-    for path, content in [(LEAN, render_lean(data)), (LEAN_INFO, render_lean_info(data)), (REPORT, render_report(data))]:
++    outputs = [(LEAN, render_lean(data)), (LEAN_INFO, render_lean_info(data)), (REPORT, render_report(data))]
++    if args.out_dir:
++        outputs = [(args.out_dir / path.name, content) for path, content in outputs]
++    for path, content in outputs:
+         if args.check:
+             assert path.read_text() == content, f'stale generated file: {path}'
+         else:

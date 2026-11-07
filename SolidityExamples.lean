@@ -273,6 +273,7 @@ import Solidity.Examples.Tactics.Nonlinear
 import Solidity.Examples.Tactics.Nonvacuity
 import Solidity.Examples.Tactics.Notation
 import Solidity.Examples.Tactics.OpenLoops
+import Solidity.Examples.Tactics.OpenLoops.RowsNine
 import Solidity.Examples.Tactics.OperatorAliasesImport
 import Solidity.Examples.Tactics.Operators
 import Solidity.Examples.Tactics.OwnStructs
