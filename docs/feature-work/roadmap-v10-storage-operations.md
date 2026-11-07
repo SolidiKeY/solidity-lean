@@ -1114,15 +1114,18 @@ only. No handwritten resolved program, empty model or rewritten caller body
 is used. These results are syntax/resolution, not compiler rerun, source-byte
 binding, typed SrcProg, actual origin/admission/session/lifecycle adequacy.
 
-REQUIRED full elaboration acceptance FAILS for BOTH fixtures: L.integer and
+The manual full-unit elaboration probe FAILS for BOTH fixtures: L.integer and
 L.stru elabBody succeed, but C.f and C.g fail and elaborate.isSome is false.
 Source/Infer.lean:672-713 currently handles only contract-receiver try with a
 plain catch or unnamed bytes-memory catch. It has no preserved library-call /
 Error(string memory) case. Protected H16 Source remains unchanged. Question
 V10-C246-SOURCE-TRY was sent via coord-ask, ref20261107T082812Z, requesting
 H16-owned extension/approved producer or explicit hold, preserving all frozen
-interfaces and H57 obligations. The full acceptance probe remains checked in
-and failing; it is not replaced by the passing resolution-only check. Shared
+interfaces and H57 obligations. SourceAstUnitControls.lean is a manual diagnostic probe: no automated CI,
+default, affected-module or final gate invokes it. Its recorded failure is from
+explicit manual runs, not a failing automated gate or a passing expected-failure
+test. The required whole-unit acceptance obligation remains open. The probe is
+not replaced by the passing resolution-only check. Shared
 fixtureInputs/inspect prevent case copies. Original first probe and all failure
 logs remain retained. Missing cached objects for the shared test import were
 materialized using the repository restorer; this was not a Source repair.
@@ -1164,9 +1167,112 @@ Unused simp arguments found by the linter were removed without disabling it.
 
 Independent read-only finder and skeptic found no findings and confirmed the
 limited correspondence scope without using Lean/server/build. Required actual
-Source whole-unit elaboration remains failed as recorded at C246; this syntax
+Source whole-unit elaboration remains open; the manual C246 probe fails; this syntax
 correspondence is not its substitute. H16 V10-C246-SOURCE-TRY support, general
 mapping-bearing H24 disposition, Y04 physical and separate4.35 trust/timing
 waits remain distinct. Local child-reader correspondence, accepted-artifact /
 Source-byte binding, original and consolidated proof/backfill/coverage and all
 full final gates remain open. No prior STOP or producer hold is released.
+
+
+### C248 — published baseline and manual-probe coverage clarification
+
+Adopted origin/master f5bfb9ba159d3ba2930d61dc07a2e0bbd5b07eb8 in the existing
+branch. SourceAstUnitControls.lean is explicitly a MANUAL diagnostic probe,
+excluded from automated gates. The recorded C246 failure therefore supplies
+manual evidence of the actual caller elaboration gap, not automated gate
+coverage. It raises when either whole-unit elaboration fails; this has not been
+converted to a passing expected-failure test. Whole-unit acceptance remains
+required and open. This checkpoint changes documentation/docstring only;
+no Lean code, acceptance condition, Source implementation or producer hold
+changed, and no Lean/build/timing result is claimed from it.
+
+Read-only finder and skeptic reviewed this clarification and found no findings;
+neither used Lean/server/build. Import and executable-suffix byte checks pass.
+
+### C249 — receiver, operand and positional-call correspondence
+
+SourceAstExpressionCorrespondence proves exact identifier spelling, member
+receiver conversion, assignment left/right conversion and positional callee /
+ordered-argument conversion for the unchanged expression reader. The call law
+reuses C247 Each/build correspondence. Exact JSON field hypotheses identify
+supported syntax, not Source admission or execution filters. These laws remain
+relative to recursive child conversion; they do not establish compiler-ID/name
+resolution coherence, independent compiler fidelity, artifact binding, Source
+meaning/origin/H24 admission or lifecycle adequacy. Literal and tuple structural
+correspondence and those semantic obligations remain open.
+
+The successful-Except-bind helper is axiom-free. Identifier/member laws use
+propext+Quot.sound; assignment/call laws use the existing standard trio including
+Classical.choice. Exact measured guards pin all five; no new axiom declaration
+or trust-policy expansion. Initial normalization/elaboration attempts failed;
+outer-only unfolding, explicit successful-bind normalization, the equalities
+already substituted by case analysis and an explicitly typed intrinsic call
+builder resolve them. Failed/recovery diagnostics retained; no failing artifact
+or sorryAx pin accepted. No statement, converter definition, Source file,
+proof budget or exclusion was changed.
+
+Existing SourceAstExpressionsControls reuses the same 37 actual expression
+nodes per pipeline; only its import changes to cover the new proofs. All receiver,
+dirty-write, tuple/bytes and refusal/nonzero-depth checks pass. No cloned case
+fixtures were added. Finder and skeptic reviewed final code read-only without
+Lean/server/build and found no findings. Manual C246 full-unit elaboration
+probe remains a historical failed manual check outside automated gates, not
+replaced by these proofs; H16 library try/Error(string) support is still pending.
+General mapping-bearing H24, Y04 and separate4.35 waits and every STOP remain.
+Original/consolidated proof/backfill/coverage and full final gates remain open.
+
+### C250 — tuple components and decoded string bytes
+
+SourceAstTupleCorrespondence proves the existing tuple child adapter agrees
+with the shared optional-expression reader, null remains a hole, and successful
+tuples contain a nonempty ordered Each correspondence for every component.
+Empty-tuple rejection is proved as the existing explicit conversion gap, not a
+Source exclusion. Ordinary string conversion retains exactly the bytes returned
+by the existing decoder under exact field/digit/decoded-result hypotheses;
+this is not source provenance or independent compiler fidelity.
+
+Two adapter/hole guards use propext; three tuple/rejection/string laws use
+propext+Quot.sound. All five have exact measured guards. No reader definition,
+Source file, frozen statement/interface/premise/budget/exclusion or trust policy
+changed. Initial proofs failed while the optional reader and selected tuple
+branch were hidden; unfolding that existing reader and exposing the selected
+branch before the extensional adapter rewrite fixes the proof. Failed diagnostics
+and rejected recovery reports are retained, never accepted or pinned.
+
+Existing expression controls retain all37actual expressions per pipeline and
+add generic hole/empty/inline-array conversion boundaries with regression intent
+in the docstring. No per-case Source fixture copies or new phase folders.
+Finder and skeptic reviewed final code read-only without Lean/server/build and
+found no findings. This is structural syntax progress only; actual Source
+origin/H24/lifecycle and S03-PANIC41 producers remain undelivered local H121b
+obligations. C246 remains a historical failed MANUAL elaboration probe outside
+automated gates, not replaced by these proofs. H16 library try support, separate
+mapping-bearing H24, Y04 physical,4.35 trust/timing waits and all STOPs remain.
+Original/consolidated coverage, child/declaration/statement correspondence,
+accepted-artifact binding and full final gates remain open.
+
+### C251 — remaining supported literal values
+
+Adopted published7de6f66ad29488d70e3c31c6b2a4798b72a0a209, preserving in-flight
+work. SourceAstLiteralCorrespondence proves supported ordinary/Unicode/hex
+string constructor and byte preservation, canonical integer value under all
+three existing no-unit field encodings, both Boolean values and exact literal
+expression wrapping. All four measured guards use propext+Quot.sound. Input
+field/decoder premises describe existing reader behavior; they are not Source
+feasibility assumptions, independent compiler fidelity or provenance evidence.
+No reader, Source file, existing statement/interface/premise/budget/exclusion,
+axiom declaration, trust policy or resource limit was changed.
+
+Existing expression controls keep all37actual expressions per pipeline and
+all previous boundary checks. Generic controls add string-kind byte distinctions,
+both Booleans, each no-unit spelling, malformed Boolean and noncanonical-number
+refusals. No per-case Source fixture copies or new phase folders. Initial and
+guarded focused checks pass. Finder and skeptic reviewed code read-only without
+Lean/server/build and found no findings. The literal laws do not supply actual
+Source origin/H24/lifecycle/S03-PANIC41 or artifact binding; those H121b duties
+remain local and open. The C246 elaboration probe remains historical manual
+failure evidence outside automated gates. Protected inference/typing/elaboration/
+resolved files have no published changes releasing its hold. H16 exact try
+support, separate mapping-bearing H24, Y04 physical and4.35 trust/timing waits,
+all prior STOPs, inherited proofs/coverage and full final gates remain open.

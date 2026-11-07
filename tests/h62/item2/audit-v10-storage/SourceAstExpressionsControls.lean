@@ -1,8 +1,10 @@
-import Solidity.Lowering.P8.SourceAstExpressions
+import Solidity.Lowering.P8.SourceAstLiteralCorrespondence
 
 /-! Runtime checks of every expression node in both existing LibraryTry ASTs.
 Regression purpose: retain delegated storage receiver t, the dirty write of 9,
-return tuple order and failure string bytes. These checks are not Source
+return tuple order, holes, empty/inline tuple refusal and failure string bytes.
+Literal kind/byte, Boolean and unit-free integer boundaries are guarded too.
+These checks are not Source
 resolution/execution/admission or independent compiler validation. -/
 namespace H62.StorageAudit.SourceAstExpressionsControls
 open Lean Solidity.Source Solidity.Lowering.P8.SourceAstExpressions
@@ -57,12 +59,36 @@ def inspect (doc : Json) : Except String Nat := do
 successful expression. These runtime checks do not restrict Source semantics. -/
 def refusalChecks : Except String Unit := do
   for raw in [
+    "{\"nodeType\":\"Literal\",\"kind\":\"bool\",\"value\":\"yes\"}",
+    "{\"nodeType\":\"Literal\",\"kind\":\"number\",\"value\":\"01\"}",
+    "{\"nodeType\":\"TupleExpression\",\"isInlineArray\":false,\"components\":[]}",
+    "{\"nodeType\":\"TupleExpression\",\"isInlineArray\":true,\"components\":[]}",
     "{\"nodeType\":\"Literal\",\"kind\":\"string\",\"hexValue\":\"f\"}",
     "{\"nodeType\":\"Literal\",\"kind\":\"string\",\"hexValue\":\"66_66\"}",
     "{\"nodeType\":\"Assignment\",\"operator\":\"+=\"}",
     "{\"nodeType\":\"FunctionCall\",\"kind\":\"functionCall\",\"names\":[\"x\"]}",
     "{\"nodeType\":\"Literal\",\"kind\":\"number\",\"value\":\"9\",\"subdenomination\":\"ether\"}"] do
     unless !(expression 128 (← Json.parse raw)).isOk do throw "invalid expression accepted"
+
+  let hole ← Json.parse "{\"nodeType\":\"TupleExpression\",\"isInlineArray\":false,\"components\":[null,{\"nodeType\":\"Identifier\",\"name\":\"x\"}]}"
+  match ← expression 128 hole with
+  | .tuple .none (.cons (.some (.ident "x")) .nil) => pure ()
+  | _ => throw "tuple hole or trailing component changed"
+
+  -- Guard byte-kind distinctions; these are generic syntax fixtures, not Source cases.
+  for (kind, raw, expected) in [("string", "", Lit.str []),
+      ("unicodeString", "c3a9", .unicodeStr [195, 169]), ("hexString", "00ff", .hexStr [0, 255])] do
+    let node := Json.mkObj [("kind", .str kind), ("hexValue", .str raw)]
+    unless decide ((← literal node) = expected) do throw "literal kind or decoded bytes changed"
+  for value in [false, true] do
+    let node := Json.mkObj [("kind", .str "bool"),
+      ("value", .str (if value then "true" else "false"))]
+    unless decide ((← literal node) = Lit.bool value) do throw "Boolean value changed"
+  for units in [none, some Json.null, some (Json.str "")] do
+    let fields := [("kind", Json.str "number"), ("value", Json.str "17")]
+    let extra := match units with | none => [] | some v => [("subdenomination", v)]
+    unless decide ((← literal (Json.mkObj (fields ++ extra))) = Lit.num (.dec 17 0 0)) do
+      throw "unit-free integer value changed"
 
 #eval do
   match refusalChecks with
