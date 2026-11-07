@@ -51,7 +51,14 @@ python3 "$runner" "$out/functional83-gate.json" node tests/directruntime-2026110
 export NATIVE_BROWSER_OUTPUT="$out/negative-controls"
 mkdir "$NATIVE_BROWSER_OUTPUT"
 ln -s "$out/functional83/inputs" "$NATIVE_BROWSER_OUTPUT/inputs"
-python3 "$runner" "$out/browser-negatives-gate.json" node tests/directruntime-20261104/native-browser/browser-control-completion.cjs || true
+if python3 "$runner" "$out/browser-negatives-gate.json" node tests/directruntime-20261104/native-browser/browser-control-completion.cjs; then
+  :
+else
+  browser_status=$?
+  python3 tests/directruntime-20261104/native-browser/environment/known-stack-continuation.py \
+    "$out/browser-negatives-gate.json" "$NATIVE_BROWSER_OUTPUT/browser-control-completion.json" \
+    "$NATIVE_BROWSER_DIRECT/build.json" "$browser_status"
+fi
 python3 "$runner" "$out/native-negatives-gate.json" python3 .lake/native-browser-environment/native-negatives.py
 mkdir "$out/ui"
 if [[ -e web/artifacts/single-file-report.json ]]; then cp web/artifacts/single-file-report.json "$out/ui/previous-report.json"; rm web/artifacts/single-file-report.json; fi
