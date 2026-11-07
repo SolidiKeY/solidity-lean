@@ -49791,12 +49791,32 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.admissionOfEmpty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.chain_admitted": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
  "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.chain_produces": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.declarationGraphProducerOfEmpty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.empty_admitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.empty_produces": [
   "Classical.choice",
   "Quot.sound",
   "propext"
