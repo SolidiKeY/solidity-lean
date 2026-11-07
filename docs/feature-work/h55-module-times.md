@@ -2506,3 +2506,23 @@ finder and skeptic checked roles, hashes and history preservation without Lean
 or a server. Evidence hashes are in
 `tests/h55/module-times/v08-callable-evidence.sha256`. This non-atomic
 observation does not establish current runtime acceptance.
+
+## V10 Source AST audit observations
+
+`v10_source_ast_controls.py` records nine previously unreferenced storage audit
+sources with hashes and the audit document hash. They cover symbolic array and
+target-write witnesses, structural conversion, list correspondence, AST type,
+expression and statement checks, unit resolution and a full-unit elaboration
+probe. Several AST modules read LibraryTry fixture files or `fixtureInputs`.
+The full-unit probe is manual and currently fails; its source says that failure
+is not an accepted expected-failure gate and full acceptance remains open.
+Current invocation, inputs, effects and outcomes remain unresolved; this subset
+does not establish Source execution or physical/world adequacy.
+
+At `14b1740d853c4dad38d5f2d7c1918bdd7248db86`, the refreshed static index
+has 816 candidates, 624 with supplied current references and 192 without; seven
+retain historical references for review. No candidates were added, changed or
+removed since the preceding snapshot. Independent read-only finder and skeptic
+checked roles, file reads, hashes and history preservation without Lean or a
+server. Evidence hashes are in `tests/h55/module-times/v10-source-evidence.sha256`.
+This non-atomic observation does not establish current runtime acceptance.
