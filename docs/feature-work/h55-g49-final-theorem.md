@@ -1092,3 +1092,49 @@ owners and producer-fit gaps; run all frozen scope/observation/resource/progress
 deployment/adversarial transaction, controls, affected-module and acceptance
 gates; finish independent full-scope reviews and export the final validated cache.
 The existing goal remains unfinished, with the above dependencies recorded.
+
+
+## H121: adoption by G52 differential worker (2026-11-07)
+
+Human H121 freezes the former Claude G49 lane under H118 and transfers the full
+composed source/runtime producer to solidity-h62-3-20261106/g52-differential on
+its existing branch and persistent goal. Exact frozen source head
+8e9a052f115cb12c2549db8654422a1728046a01 was merged after origin/master254c60df6;
+latest authorized master7683091e7 was subsequently merged. No former-Claude
+follow-up, goal replacement, statement change, publication or acceptance follows.
+
+The existing bridge-requests.json:h121Adoption records a source-hashed textual
+candidate census, current collector route and the original provider provenance.
+All five full factory families remain pending: bare_prefix_bridge,
+compiler_agreement_bridge, p1_frame_bridge, v08_world_phase_bridge and
+p10_execution_bridge. Only two limited P1 examples have matching definitions;
+neither supplies full independent Approved_i agreement/coverage, actual general
+compiler-output endpoints, original full Local or uniform public-map transport.
+The generic cert_bridge already assumes a full certificate; it is not a producer.
+All original H68 requirements and factory signatures remain unchanged.
+
+The inherited fold still takes Lowering/Compilation/Execution and compiler/decode
+inputs plus all15PublicObligations fields: sourceApproved, sourceNonVacuous,
+targetApproved, keccak, coverage, bothPipelines, artifact, fixed, session, ifixed,
+isession, creates_table, hashes_source, decode_reach and decode_commutes.
+No field is discharged by adoption or by the native reference-fixture pipeline.
+The actual production selection and full premise closure remain unfinished.
+
+Fresh bounded existing check-pass-correct.py, private evidence/cache under
+/workspace/h44/g52-differential/evidence/g49-adoption-check, passes the unchanged
+FoldedPublic closure and controls (H64_SOURCE_AND_CONTROLS_CHECK_PASS, exit0).
+Actual Lean4.24.0 commit797c613 / Lake5.0.0-src+797c613; KeySort -j1 passes exit0,
+1.306s, empty diagnostic output. This is framework-only, not producer closure or
+the repository final gate. No Lean edits, new axioms/sorry, budget change,
+refactor or new timing-delta measurement occurred. H102's historical accepted
+paired protocol remains applicable to future proof changes.
+
+Independent read-only finder/skeptic adoption reviews confirm these boundaries;
+no Lean/server/heavy execution by reviewers. Their route-clarity finding was
+fixed by explicitly separating historical relayTo from current h121Collector.
+Evidence: /workspace/h44/g52-differential/evidence/g49-h121-reviews.json.
+Current handoff and runtime limitations are recorded in
+[h62-3-g52-differential.md](h62-3-g52-differential.md). Next: actual canonical
+source/session and emitted-program bindings, full owner bridges, concrete stages,
+artifact-table equality and the public residuals. Reuse existing generic interfaces;
+do not replace the pending producer with narrowed domains or conditional wrappers.
