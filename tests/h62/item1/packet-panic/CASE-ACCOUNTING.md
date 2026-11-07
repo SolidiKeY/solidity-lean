@@ -49,3 +49,37 @@ Descriptions preserve distinct Source byte controls and joint/target results. Ea
 The additive `signed_controls_ledger.py` maps a fresh `declarations.py` census to 71 reviewed literal Controls headers: SignedCheckedAdd 11, SignedCheckedSub 21, SignedCheckedMul 39. Each row carries the original path, line, raw-file SHA-256, declaration kind, a category and an observation; reviewed raw hashes and ordered source headers are checked before output. The generated `signed-controls-ledger.json` stays off Git. Its categories distinguish fixture setup, Source success and panic, joint Source/target success or coarse revert, target guard, negative controls and timeout. They are declaration observations, not 71 independent tests, kernel proofs, full semantic dependency closure or target payload claims.
 
 The ledger reads G25-reserved originals and does not edit them. Existing signed multiplication `#guard_msgs` and all other H55 proof guards are outside the edit scope and unchanged. The original premises, operand ordering, arbitrary saved tail and selected-code observations remain those of the cited files. The prior 102 unsigned rows and these 71 signed rows are separately accounted; other declarations and consumer/dependency proof obligations remain open.
+
+## Six checked pipeline declarations
+
+`checked_pipeline_ledger.py` maps 89 literal Source, Selected, Target and Agreement headers across the six unsigned/signed checked arithmetic families to manually reviewed observations: CheckedAdd 14, CheckedSub 17, CheckedMul 16, SignedCheckedAdd 13, SignedCheckedSub 14 and SignedCheckedMul 15. The generated `checked-pipeline-ledger.json` is off Git. It compares each complete source file byte-for-byte to the assigned base Git tree, checks its census hash and ordered literal headers, and records every mapped declaration with its source location. Changed source requires a fresh review; the script fails rather than silently transferring these descriptions to it.
+
+The 89 pipeline rows are disjoint from the prior 102 unsigned and 71 signed Controls rows. Together they account for 262 of the 465 literal headers in the ten-family census; the other 203 remain unclassified by these per-declaration ledgers. Counts describe textual declarations and do not imply semantic or dependency completeness. Source failure rows specify Source panic data and state; intrinsic target failures and selected-machine reverts are recorded separately, with no invented target payload or reverted machine state. Every range, read, fuel, correspondence, representation and saved-tail premise remains as written in the original declaration. G25 originals and H55 proof guards were read-only.
+
+## SignedMod Source
+
+`signed_mod_source_ledger.py` records all 12 literal headers in SignedMod/Source.lean, pinned to the assigned base bytes. They include the signed type/range and remainder bound; arbitrary checked-flag Source nonzero and zero-divisor outcomes; local reads with fuel+3 and the complete retained Source state; sign identities; and the pure minimum remainder -1 equality. The latter is not an execution theorem. The observations do not assert target payloads, unlisted cases or Lean validation. With this ledger, 274 of 465 enumerated literal headers have manual per-declaration observations; 191 remain unclassified. This is still not full semantic or dependency closure.
+
+## SignedMod Selection
+
+The base-byte-pinned `signed_mod_selection_ledger.py` adds ten literal declarations: public selection, operator-level nonzero/zero results, representation uniqueness, combined Source and selected execution, and separate symbolic success, zero-revert and origin success. The combined numeric theorem requires the stated finite-word saved stack and both capacity hypotheses; symbolic success and zero-revert quantify a separate arbitrary EVM-word tail. This is manual textual accounting, not Lean validation or a target panic-payload claim. Together the ledgers account for 284 of 465 literal headers; 181 remain.
+
+## SignedDiv Origin
+
+The base-byte-pinned `signed_div_origin_ledger.py` covers ten literal declarations for Source signed division origins. It distinguishes zero divisor in both modes, checked minimum/-1 arithmetic panic, unchecked minimum/-1 success, and ordinary division with a nonzero divisor and the overflow pair excluded. Local origin retains the original reads, frame, fuel+3 and full Source state. This is a textual Source account, not a target proof. The ledgers now account for 294 of 465 literal headers; 171 remain unclassified.
+
+## SignedDiv Selected
+
+The base-byte-pinned `signed_div_selected_ledger.py` adds twelve literal declarations covering public compiler selection, checked raw division and the unchecked minimum/-1 conditional, intrinsic evaluation under local-read premises, and symbolic `ValOutT` under the original physical StateRepr and arbitrary EVM-word tail. This is not a numeric capacity proof, target panic-payload claim, Lean proof or complete semantic account. The ledgers now account for 306 of 465 literal headers; 159 remain unclassified.
+
+## SignedDiv Execution
+
+`signed_div_execution_ledger.py` records six base-pinned intrinsic and joint Source/selected symbolic execution declarations. Ordinary and zero-divisor cases retain both checked modes; the minimum/-1 case separately records checked arithmetic panic/coarse revert and unchecked minimum success. Original Source/target local reads, physical StateRepr and arbitrary EVM-word tail remain binding. This is textual accounting, not Lean validation or a target panic-payload assertion. The ledgers now account for 312 of 465 literal headers; 153 remain unclassified.
+
+## UnsignedDiv Data and SourceOrigin
+
+`unsigned_div_origin_ledger.py` records eleven base-pinned literal declarations across Data and SourceOrigin. These include operand contexts, local-tail ordering, Source and intrinsic div/mod expressions, and Source local div/mod outcomes at n+3 across both pipelines with the complete local/state pair retained. A private helper `SourceOrigin.lift_result` lies outside the 465 literal-header census and is a dependency of both origins. The ledgers now account for 323 of those 465 headers; 142 remain unclassified, and the 465 count does not include private headers. This is textual accounting, not Lean validation or complete dependency coverage.
+
+## Additional private and protected headers
+
+The original census matches only unmodified line-start headers and omitted private or protected declarations. `private_header_ledger.py` scans the same independently enumerated 48 pinned files and finds nine additional literal `private theorem` headers. Their manual observations cover fixture heap references, representation uniqueness, unsigned success/refusal observations, numeric conversion, Source result lifting, and local-word representation. With these separately counted rows, 332 of 474 observed literal headers have manual observations; 142 of the original 465 remain unclassified. Neither scanner is a Lean parser: modifier combinations, alternate formatting, comments and declarations beyond the fixed files may be missed or misidentified. These counts are not full declaration, semantic or dependency coverage.

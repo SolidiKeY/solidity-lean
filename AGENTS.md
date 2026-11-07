@@ -70,6 +70,7 @@ milestone's documentation.
 | SolKey sort checks, pins and re-pinning | [solkey-migration.md](docs/solkey-migration.md) |
 | Paper derivations and definition links | [latex.md](docs/latex.md); use `Solidity.Tools.ProgramTrace` for separate captures |
 | Examples site | [site.md](docs/site.md); register examples in `site/examples.json` |
+| Audits and prior-art studies (read before freezing an interface) | [docs/audits/](docs/audits/): 2026-11-06 proof-coverage, architecture, build-speed, coordination audits; `prior-art-*.md` |
 
 Keep detailed guidance in `docs/` and link it here. Module docstrings explain
 conventions and rationale; avoid duplicating declarations or the rule map.

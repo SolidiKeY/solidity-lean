@@ -620,6 +620,20 @@ def lengthOf {Γ : RCtx} (F : Fr) {τ : STy} (v : Val E.layout τ) : EM E Γ Nat
   | .fixedBytes k _, _ => pure k
   | _, _ => halt (.stuck "length")
 
+/-- The location of element `i` of a non-value calldata array at `off`:
+an indirect dynamic element keeps its head coordinate; a represented static
+array is inline. A total function of the element type, so that `indexLoc`'s
+calldata branch is one `pure` (no dependent `match` for proofs to split). -/
+def cdIndexLoc {D : Layout} {Γ : RCtx} (off i : Nat) : (σ : STy) → Loc D Γ σ
+  | .bytes .calldata => .cdBytes off i
+  | .string .calldata => .cdString off i
+  | .array .calldata _ none => .cdArray off i
+  | .array .calldata σ (some length) =>
+    if 0 < (STy.array .calldata σ (some length)).cdStaticWords then
+      .cdFixedArray length (off+(STy.array .calldata σ (some length)).cdHeadBytes*i)
+    else .cd (off+32*i)
+  | _ => .cd (off + 32 * i)
+
 /-- The location of element `i` of an array value. -/
 def indexLoc {Γ : RCtx} (F : Fr) {l : DataLoc} {σ : STy} {k : Option Nat}
     (a : Val E.layout (.array l σ k)) (i : Nat) : EM E Γ (Loc E.layout Γ σ) := do
@@ -629,15 +643,7 @@ def indexLoc {Γ : RCtx} (F : Fr) {l : DataLoc} {σ : STy} {k : Option Nat}
     | .storRef _ p => pure (.stor (p.go (.index i)))
     | .memRef _ addr => pure (.mem addr i)
     | .cdRef _ off _ =>
-      if σ.isValueTy then pure (.cd (off + 32 * i)) else
-      match σ with
-      | .bytes .calldata => pure (.cdBytes off i)
-      | .string .calldata => pure (.cdString off i)
-      | .array .calldata _ none => pure (.cdArray off i)
-      | .array .calldata _ (some length) =>
-        if 0 < σ.cdStaticWords then pure (.cdFixedArray length (off+σ.cdHeadBytes*i))
-        else pure (.cd (off+32*i))
-      | _ => pure (.cd (off + 32 * i))
+      if σ.isValueTy then pure (.cd (off + 32 * i)) else pure (cdIndexLoc off i σ)
   else lift (panic .index)
 
 /-- The contents of a mapping key, as its path step. -/

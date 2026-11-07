@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "sourceParent": "c35c23f6405a0af6eb460d0277b9a7b7495dcbd5",
+  "status": "partial",
+  "archive": {
+    "path": "/workspace/dafny-parity-h80-20261106/provision-evidence.tar.gz",
+    "bytes": 222084,
+    "sha256": "7199321c9a17694445f943f72394b03d023edaa9f435a0ec3863c180d7aa1a0b"
+  },
+  "files": 55,
+  "installation": [
+    {
+      "path": "/workspace/dafny-parity-h80-20261106/installed/solidity-lean",
+      "bytes": 172009744,
+      "sha256": "9be3447eb3912a21244433a40fb1823ef7d7cbbc73248ccb154ed11662b1310d",
+      "installedFrom": "/workspace/solidity-lean/.lake/build/bin/solidity-lean"
+    },
+    {
+      "path": "/workspace/dafny-parity-h80-20261106/installed/Frontend.Cli.olean",
+      "bytes": 885864,
+      "sha256": "b352656fd72ef47015efd94f3597489daf77a98986ed0c580394ea32a511aaba",
+      "installedFrom": "/workspace/solidity-lean/.lake/build/lib/lean/Solidity/Frontend/Cli.olean"
+    },
+    {
+      "path": "/workspace/dafny-parity-h80-20261106/installed/Calculus.TermSize.olean",
+      "bytes": 21299560,
+      "sha256": "da0c61c8ca3a0849169ae1718c32c1006840b45f141e0855ffbddfbec777ba7d",
+      "installedFrom": "/workspace/solidity-lean/.lake/build/lib/lean/Solidity/Calculus/TermSize.olean"
+    }
+  ],
+  "reviewMember": "REVIEWS.md",
+  "boundary": "PinnedCLI/Frontend andKeySort pass; originalthreadfailures, invalidfixture andmonitoringgap preserved; fullgates/judges andverifiermetadata incomplete",
+  "fullGate": {
+    "sourceHead": "d1ec2a900024f5b0a74d4deb87a66464ce5698b5",
+    "status": "fail",
+    "commandExit": -9,
+    "shellExit": 247,
+    "resourceStop": {
+      "reason": "resource guard",
+      "rssBytes": 4875681792,
+      "availableBytes": 12880228352,
+      "swapTotalBytes": 0
+    },
+    "ownedSurvivors": [],
+    "archive": {
+      "path": "/workspace/dafny-parity-h80-20261106/full-gate-evidence.tar.gz",
+      "bytes": 206162,
+      "sha256": "948f787ef0845820c2b73f9750b863a66711e39b9575eb9c93fc62a8624e685e"
+    },
+    "boundary": "Source.Horizon crossed original12GiB OS reserve. No unchanged retry; full/TestSuite/timed strict/runtime remain unpassed."
+  }
+}

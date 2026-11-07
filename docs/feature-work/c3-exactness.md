@@ -427,3 +427,70 @@ tests/sol-c3-exactness/E684-HANDOFF.md and evidence/e684-inventory-gap.json.
 Historical full-driver H1 failures also remain unwaived; full acceptance fails
 explicitly. H41 delivery stays coordinator-pending, no shipping or freshness
 claim. No premise/budget/registry change, default merge, push, PR or goal reset.
+
+
+## H82 authenticated successor intake and current validation
+
+Final stopped C3 head21043c5220a7c0390810ec7088c83a6bd9c8ff8c was verified and
+merged by9192f209cd12c30a5183bc2c779a631102dc8061 before member work. Full frozen
+prompt/queue/scope hashes match the receipt; delivered H82b archive, manifest,
+SUMS and exact verified-final-stop member entry were checked. Metadata/frozen
+assignment/stopped acknowledgement wait is resolved. External runtime/seal and
+cache bytes are not included and remain unretrieved. No retired goal was woken.
+
+All nine Lean sources and six original producer pins remain unchanged. Updated
+scope baseline is the authenticated integration, not permission to edit another
+area. Portable bounded timing preserves failure/signal statuses. Fresh receipt
+selection is digest-bound outside Git; original tracked evidence is untouched.
+An additional current-file guard prevents cached build logs alone certifying
+kernel checks. It accepts exact direct elaboration or the preferred MCP Audit
+diagnostic, requiring current hashes/toolchain/bounds and explicit zero errors.
+Actual MCP diagnostic PASS; fresh compiler9 fixtures PASS; current fixture
+checkpoint236 declarations/12families with4scope+21general+9fixture negative
+controls PASS; five portable-evidence unit tests PASS; owned236pins already
+registered. Canonical KeySort377/131/table131 PASS. Lean4.24.0, Lake5.0.0.
+
+Retained CLI direct-import failures show missing physical C3 .olean files even
+though cached/fetched targets exit0. MCP's supported import setup succeeds;
+this does not establish CLI cache recovery or full runtime. No unchanged
+OpenLoops timing STOP was repeated. Full checkpoint still refuses unfinished
+full gates/reviews; global zero-error inventory has4405unrecorded changes
+(last actual check), and full cache-only readiness exits3. No RUNTIME_GATE_PASS.
+External solc observations, kernel proofs, constructor-name order and actual
+constructor execution remain distinct. Source, theorem, budget, axiom and
+exclusion bytes are unchanged. See tests/sol-c3-exactness/SUCCESSOR-HANDOFF.md
+for absolute paths, measured limits/times, exact resolved/unresolved waits.
+
+
+## Gate-owner hold and gate-preserving re-cut
+
+The successor e684-to-9192 pin change, mandatory direct audit and MCP acceptance
+alternative were not owner-approved and are withdrawn. Original e684 pin,
+TOOLING set and every original gate function/condition are restored. Optional
+successor receipts are used only as complete hash-bound pairs; absent files
+fall back to original tracked evidence. No MCP result substitutes for the
+required lake run. Earlier successor PASS reports under the withdrawn edits
+are historical, not approved acceptance.
+
+Six regression tests PASS, including full-module AST equality to member21043
+apart from the permitted evidence-location adapter. A detached clean-checkout
+check with all successor artifacts absent reaches tracked evidence without a
+missing-file exception. It still refuses original scope/snapshot drift; that
+is retained as failure, not waived. No pin, theorem or budget was changed to
+force parity. See tests/sol-c3-exactness/GATE-RECUT-HANDOFF.md. Gate-owner route,
+shared inventory, full runtime/cache/final acceptance and original external
+retirement evidence remain waits. No known timing STOP was rerun.
+
+
+## Evidence-authority review: substitution removed
+
+The optional successor adapter described above is withdrawn: its index declared
+both paths and hashes. The checker is now byte-identical to authenticated21043,
+including its e684 pin and all original checks, and reads original tracked
+audit/fixture evidence only. SUCCESSOR-EVIDENCE.json is ignored historical data.
+No MCP diagnostic substitutes for the required lake run. Four regression tests
+PASS, including exact-file equality and a poisoned index having no effect.
+A clean checkout without successor artifacts runs without missing-file errors;
+it retains original source/scope/snapshot refusals, now including upstream
+Source/WellFormed.lean pin drift. No pin or gate was changed to force success.
+Current acceptance remains open. See tests/sol-c3-exactness/EVIDENCE-AUTHORITY-HANDOFF.md.

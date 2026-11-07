@@ -64,3 +64,35 @@ test('missing runtime keeps constructor-only obligations visible',()=>{
  const result=unknownResult({id:1,nodes:[constructor]}, {},'missing runtime');
  assert.deepEqual(result.results.map(r=>[r.sourceId,r.function,r.status]),[[3,'constructor','unsupported']]);
 });
+
+// Guard cache ownership under old-result failure, superseded startup and terminal disposal.
+// Native protocol/Wasm boundaries here are injected and return pending, never proof evidence.
+function isolatedRuntime(onClose){
+ const file=require.resolve('../src/direct-runtime.cjs'),original=require.cache[file],lifetime=require('../src/child-lifetime.cjs'),wait=lifetime.waitForClose;
+ if(onClose)lifetime.waitForClose=(...args)=>onClose(wait,...args);delete require.cache[file];const api=require(file);lifetime.waitForClose=wait;
+ return {api,restore(){if(original)require.cache[file]=original;else delete require.cache[file];}};
+}
+function nativeFixture(f,body){
+ const program='#!'+process.execPath+'\n'+body,file=path.join(f.dir,'direct-check'),manifest=JSON.parse(fs.readFileSync(path.join(f.dir,'build.json'),'utf8'));
+ fs.writeFileSync(file,program,{mode:0o700});Object.assign(manifest,{platform:process.platform,arch:os.machine(),executable:sha(program)});fs.writeFileSync(path.join(f.dir,'build.json'),JSON.stringify(manifest));
+}
+const pendingRow={sourceId:1,function:'f',status:'pending',verification:'direct',reason:'Injected lifecycle boundary only'};
+const untilFixture=async predicate=>{const deadline=Date.now()+1000;while(!predicate()){assert.ok(Date.now()<deadline,'fixture boundary did not arrive');await new Promise(r=>setTimeout(r,2));}};
+test('native cache retains newer entry after old check failure (injected protocol)',{skip:process.platform!=='linux'},async()=>{
+ const f=fixture(),control=isolatedRuntime(),firstMarker=path.join(f.root,'first'),received=path.join(f.root,'received'),secondMarker=path.join(f.root,'second');let first;
+ try{nativeFixture(f,`const fs=require('node:fs');fs.writeFileSync(${JSON.stringify(firstMarker)},String(process.pid));console.log('{"ready":true}');require('node:readline').createInterface({input:process.stdin}).on('line',()=>fs.writeFileSync(${JSON.stringify(received)},'request'));setInterval(()=>{},1000);`);first=control.api.checkDirect(f.root,f.contract,{}).catch(error=>error);await untilFixture(()=>fs.existsSync(received));const oldPid=Number(fs.readFileSync(firstMarker));
+ nativeFixture(f,`const fs=require('node:fs');let count=0;let oldPresent;try{process.kill(${oldPid},0);oldPresent=true;}catch{oldPresent=false;}const write=()=>fs.writeFileSync(${JSON.stringify(secondMarker)},JSON.stringify({pid:process.pid,count,oldPresent}));write();console.log('{"ready":true}');require('node:readline').createInterface({input:process.stdin}).on('line',()=>{count++;write();console.log(${JSON.stringify(JSON.stringify({results:[pendingRow]}))});});setInterval(()=>{},1000);`);
+ const second=await control.api.checkDirect(f.root,f.contract,{}),afterSecond=JSON.parse(fs.readFileSync(secondMarker));const oldResult=await first;const third=await control.api.checkDirect(f.root,f.contract,{}),afterThird=JSON.parse(fs.readFileSync(secondMarker));if(process.env.DAFNY_DIRECT_CACHE_EVIDENCE)fs.writeFileSync(process.env.DAFNY_DIRECT_CACHE_EVIDENCE,JSON.stringify({scope:'Injected pending-only native protocol; no kernel/C equivalence.',afterSecond,oldResult:oldResult instanceof Error?{error:oldResult.message}:oldResult,afterThird},null,2)+'\n');
+ assert.equal(second.results[0].status,'pending');assert.equal(third.results[0].status,'pending');assert.equal(afterSecond.oldPresent,false,'replacement admitted before old physical close');assert.equal(afterThird.pid,afterSecond.pid,'old failure evicted newer runtime');assert.equal(afterThird.count,2);assert.ok(oldResult instanceof Error,'superseded check must reject');
+ }finally{await control.api.disposeDirect();await first;control.restore();fs.rmSync(f.root,{recursive:true,force:true});}
+});
+test('native cache refuses admission superseded during retirement (injected confirmation gate)',{skip:process.platform!=='linux'},async()=>{
+ let hold=false,release;const control=isolatedRuntime(async(wait,...args)=>{await wait(...args);if(hold){hold=false;await new Promise(resolve=>{release=resolve;});}}),f=fixture(),admissions=path.join(f.root,'admissions');let first,second;
+ const program=label=>`require('node:fs').appendFileSync(${JSON.stringify(admissions)},JSON.stringify({pid:process.pid,label:${JSON.stringify(label)}})+'\\n');console.log('{"ready":true}');require('node:readline').createInterface({input:process.stdin}).on('line',()=>console.log(${JSON.stringify(JSON.stringify({results:[pendingRow]}))}));setInterval(()=>{},1000);`;
+ try{nativeFixture(f,program('base'));await control.api.checkDirect(f.root,f.contract,{});hold=true;nativeFixture(f,program('superseded'));first=control.api.checkDirect(f.root,f.contract,{}).catch(error=>error);await untilFixture(()=>release);nativeFixture(f,program('current'));second=control.api.checkDirect(f.root,f.contract,{}).catch(error=>error);await new Promise(setImmediate);release();const a=await first,b=await second,rows=fs.readFileSync(admissions,'utf8').trim().split('\n').map(line=>JSON.parse(line));assert.ok(a instanceof Error,'superseded startup returned a result');assert.ok(!(b instanceof Error),b?.message);assert.deepEqual(rows.map(r=>r.label),['base','current'],'superseded startup admitted a child');}
+ finally{release?.();await control.api.disposeDirect();await Promise.allSettled([first,second]);control.restore();fs.rmSync(f.root,{recursive:true,force:true});}
+});
+test('direct result cannot publish after terminal disposal (injected Wasm boundary)',async()=>{
+ const f=fixture(),control=isolatedRuntime(),previous=globalThis.__directRetirementControl;try{const script="module.exports=async()=>({ccall:name=>name==='direct_init'?0:(globalThis.__directRetirementControl(),JSON.stringify({results:[{sourceId:1,function:'f',status:'pending',verification:'direct'}]}))});";fs.writeFileSync(path.join(f.dir,'direct.js'),script);const manifest=JSON.parse(fs.readFileSync(path.join(f.dir,'build.json'),'utf8'));manifest.javascript=sha(script);fs.writeFileSync(path.join(f.dir,'build.json'),JSON.stringify(manifest));globalThis.__directRetirementControl=()=>{control.api.disposeDirect();};await assert.rejects(control.api.checkDirect(f.root,f.contract,{}),/retiring|superseded/);}
+ finally{await control.api.disposeDirect();if(previous===undefined)delete globalThis.__directRetirementControl;else globalThis.__directRetirementControl=previous;control.restore();fs.rmSync(f.root,{recursive:true,force:true});}
+});
