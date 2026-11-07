@@ -289,3 +289,30 @@ canonical checksum/context/new blob and 65 unchanged source headers, without Lea
 application. The ledger now carries the same SC/LS plan definitions as its companion
 candidate artifact, so shared aliases remain available in either static output.
 The canonical/initial-transcription receipts remain distinct. No witness is promoted.
+
+## H82 retirement: final preservation only
+
+Human-approved stop-and-handoff and the explicit H70/H82 ordering correction override
+all concurrent continue receipts. Successor: solidity-v07-v11-20261030/v10-storage-operations.
+No new proof implementation or automatic continuation is authorized. This checkpoint
+adds only the full original assignment/goal/queue, exact original ownership and
+322-file scope manifests, retirement directives and complete open-queue state under
+[retirement/](../../tests/h62/item2/audit-v10-storage/retirement/OPEN-QUEUE.md).
+The predecessor work head was b99808cca35e0cee53df6aa3d11f79616cf35b58; the final
+preservation head is recorded in the exported result/bundle to avoid circular hashes.
+
+The complete assignment transcript was read from the original thread; both read-only
+reviewers found no omitted requirement, queue content or owner-map entry (123 entries).
+Its file hash differs from the reported original renderer fingerprint, explicitly
+recorded in prompt-provenance.json; renderer-byte identity is not claimed. The exact
+queue and all three original write scopes plus 322 frozen paths/hashes are preserved
+as files in the committed patch/bundle, not merely coordinator-local references.
+
+No pause operation is exposed. The only goal tool supports complete or blocked, so
+PAUSED cannot be requested through its schema. No completion/block transition is used
+as a substitute, and no goal is created/reset. Worker implementation stops; coordinator
+must persist the authorized PAUSED state. The prior trusted-context errors remain
+historical evidence. Original VM/branch/artifacts are preserved without deletion.
+No H71 push authorization was available in thread/files; no push, merge, PR, master
+change, source edit, Lean/MCP/build or timing rerun occurred. All four checkpoints and
+all open proof/backfill obligations remain as listed in retirement/OPEN-QUEUE.md.
