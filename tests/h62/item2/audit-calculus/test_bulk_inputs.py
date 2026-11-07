@@ -91,6 +91,18 @@ class PrivateArchiveControls(unittest.TestCase):
             with patch.dict("os.environ", {"GIT_DIR": str(root / "missing"), "GIT_OBJECT_DIRECTORY": str(root / "missing")}):
                 self.assertEqual(self.read(root, commit), b"frozen archived bytes")
 
+    def test_missing_promisor_blob_fails_without_lazy_fetch(self):
+        import subprocess
+        with tempfile.TemporaryDirectory() as name:
+            source = Path(name) / "source"
+            source.mkdir()
+            commit = self.packet(source)
+            subprocess.run(["git", "-C", str(source), "config", "uploadpack.allowFilter", "true"], check=True)
+            clone = Path(name) / "partial"
+            subprocess.run(["git", "clone", "-q", "--filter=blob:none", "--no-checkout", source.as_uri(), str(clone)], check=True)
+            with self.assertRaises(subprocess.CalledProcessError):
+                self.read(clone, commit)
+
     def test_bad_digest_refused(self):
         with tempfile.TemporaryDirectory() as name:
             root = Path(name)

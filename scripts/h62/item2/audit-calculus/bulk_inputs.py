@@ -25,7 +25,7 @@ def _git_bytes(repo, revision, relative):
         raise ValueError("unsafe archive path")
     args = ["git", "--no-replace-objects", "--no-optional-locks", "-C", str(repo)]
     env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
-    env.update(GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL=os.devnull)
+    env.update(GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL=os.devnull, GIT_NO_LAZY_FETCH="1")
     subprocess.check_output(args + ["cat-file", "-e", revision + "^{commit}"], stderr=subprocess.PIPE, env=env)
     tree = subprocess.check_output(args + ["ls-tree", revision, "--", str(p)], stderr=subprocess.PIPE, env=env)
     fields = tree.decode().rstrip("\n").split("\t")
