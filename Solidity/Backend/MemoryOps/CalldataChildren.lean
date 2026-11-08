@@ -70,6 +70,7 @@ theorem boolChild_parent_ne {H : HTy} {R : RefTy} (dst : HRef H R)
   have ht := (HRef.heq_of_id dst q he).1
   cases a <;> cases ht
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Arbitrary runtime reference slices have correspondence at the actual
 output heap. Intrinsic types derive destination/child separation; children
 may alias one another and no length/depth cutoff is imposed. -/
@@ -98,6 +99,7 @@ theorem decodedBoolChildren_overwrite {D : Source.Layout} {H : HTy} {R : RefTy}
   · exact (hr ⟨start + i, hb.index hi⟩).overwrite dst a offset _ hd
       (boolChild_parent_ne dst a _)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Empty and exact-end captures change no object; no child-separation premise
 is needed when there is no selected child. -/
 theorem referenceSlice_empty {H : HTy} {R Q : RefTy} (hp : Heap H)
