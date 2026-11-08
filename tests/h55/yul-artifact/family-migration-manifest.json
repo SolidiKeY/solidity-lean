@@ -3,7 +3,7 @@
   "scope": "Frozen 57-input H55 family queue; proof-entrypoint reuse is partial family migration, not definition or full-family completion.",
   "frozen_input_count": 57,
   "fully_migrated_families": 0,
-  "partially_migrated_input_files": 17,
+  "partially_migrated_input_files": 28,
   "entries": [
     {
       "path": "Solidity/Yul/Compilation/CaseCompletion.lean",
@@ -69,8 +69,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/LetControlCompilation.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.LetControlCompilation.Artifact.normal_to_model"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -95,8 +97,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/LetScopeCompilation.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.LetScopeCompilation.Artifact.normal_to_model"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -121,8 +125,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/LetSequenceCompilation.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.LetSequenceCompilation.Artifact.normal_to_model"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -175,8 +181,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/ScopedControlCompilation.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.ScopedControlCompilation.Artifact.normal_to_model"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -201,8 +209,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/ScopedForCompilation.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.ScopedForCompilation.Artifact.normal_to_model"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -247,8 +257,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/SourceLoopCompletion.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.SourceLoopCompletion.sourceLocals_injective"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -259,14 +271,18 @@
     },
     {
       "path": "Solidity/Yul/Compilation/SourceLoopModelCompletion.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.SourceLoopModelCompletion.completion_iff"
+      ],
       "existing_definitions_changed": false
     },
     {
       "path": "Solidity/Yul/Compilation/StructuredSequenceCompilation.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.StructuredSequenceCompilation.Artifact.normal_to_model"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -291,8 +307,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/SwitchCompilation.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.SwitchCompilation.Artifact.normal_to_model"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -317,8 +335,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/SwitchSequence.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.SwitchSequence.Artifact.normal_to_model"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -343,8 +363,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/ZeroControlCompilation.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.ZeroControlCompilation.Artifact.normal_to_model"
+      ],
       "existing_definitions_changed": false
     },
     {

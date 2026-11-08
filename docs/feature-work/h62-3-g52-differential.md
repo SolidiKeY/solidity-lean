@@ -1671,3 +1671,30 @@ therefore invalidates old observations. Early metadata refusals avoid expensive
 archive work for already-invalid receipts; all archive, ancestry and admission
 checks still run for qualifying records. These external checks add no Source
 agreement, full producer, public-obligation proof or runtime-gate claim.
+
+
+## Inventory remaining Engine-X protocol profiles
+
+Run the metadata inventory under the existing writer lock and serial resource
+guard; archive regeneration is heavy:
+
+```sh
+python3 scripts/h62/item3/g52-differential/engine_protocol_inventory.py \
+  --bulk "$BULK" --output "$BULK/evidence/engine-protocol-inventory.json"
+```
+
+The output must be a new file outside the repository. The existing archive
+verifier authenticates inputs before classification, and the input digest is
+checked again afterward. Extra request fields retain their exact JSON values,
+including null and structured expectations; these values are not interpreted as
+observed rejections. Ordered cases, mixed expected-error requests, version
+differences, empty sequences and parameter type gaps remain visible. An
+`outer-envelope-candidate` checks basic envelope/positional types only: payload
+contents are not validated. Every inventory has zero executed cases and zero
+Source matches; it supplies no Engine RPC, fixture or compiler acceptance.
+
+Fixture-independent controls:
+
+```sh
+python3 tests/h62/item3/g52-differential/test_engine_protocol_inventory.py
+```

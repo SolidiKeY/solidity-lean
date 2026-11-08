@@ -1,4 +1,5 @@
 import Solidity.Yul.Compilation.ScopedControlCompilation
+import Solidity.Yul.Compilation.CompletionControls
 /-! Actual one-case/default original switch lowering. The selector is computed
 once, retained during full-word comparison, and popped before either scoped
 arm. This is normal-source/model transport, not admission/native/G24 closure. -/
@@ -267,10 +268,8 @@ theorem Artifact.normal_to_model {c : Control} {n fuel : Nat} {stmt : Stmt [] []
    some ⟨sourceLocals out,.normal⟩) (m : Evm.Machine) (caller : List Evm.Word) :
  Evm.run artifact.code {m with stack := locals.toList.map coreWord++caller} =
  .ok {m with stack := out.toList.map coreWord++caller} 0 := by
- obtain ⟨actual,same,target⟩ := artifact.source_to_model horizon locals ⟨sourceLocals out,.normal⟩ ran m caller
- have equal : out = actual := SourceLoopCompletion.sourceLocals_injective (congrArg Outcome.vars same)
- cases equal
- exact target
+ exact CompletionControls.normal_output out _
+   (artifact.source_to_model horizon locals ⟨sourceLocals out,.normal⟩ ran m caller)
 
 
 

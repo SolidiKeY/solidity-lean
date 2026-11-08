@@ -13,6 +13,61 @@ import subprocess
 REFERENCE_REVISION = '645f10caf083550552616229654e29fddd1ad767'
 REFERENCE_DIRECTORY = 'docs/audits/direction-tools/references/'
 
+def upsert_gap(summary, gap):
+    """Replace only this subject; keep all unrelated evidence records."""
+    summary['evidence_gaps']=[g for g in summary.get('evidence_gaps',[]) if g.get('subject')!=gap['subject']]+[gap]
+
+
+def record_input_availability(summary):
+    """Carry known inventory waits into explicit evidence records.
+
+    Reference inputs have just been read and pinned. Missing differential/bench
+    inputs remain UNVERIFIABLE, rather than disappearing or spawning a task.
+    CI/closure and unknown waits remain pending for their own validators.
+    """
+    remaining=[]
+    for wait in summary.get('waits',[]):
+        if wait=={'item':'da-references','status':'absent on pinned base; own shallow CompCert measurement used when supplied'}:
+            upsert_gap(summary, {'subject':'reference artifact availability','status':'RESOLVED_BY_REUSE',
+                'source_wait':wait,'resolution':'Pinned committed reference inputs read; see reference_reuse.source_inputs. This does not establish matched process calibration.'})
+        elif wait=={'item':'va3/vu1','status':'scripts/differential/** and scripts/bench/** absent on pinned base; no output invented'}:
+            upsert_gap(summary, {'subject':'differential/benchmark reuse evidence','status':'UNVERIFIABLE',
+                'source_wait':wait,'scope':'Pinned-base inventory availability only; not a claim of global absence.',
+                'task_boundary':'Missing reuse evidence retained; no new producer request or measurement authorization.'})
+        else:
+            remaining.append(wait)
+    summary['waits']=remaining
+
+
+def apply_gap(summary):
+    """H151 disposition supplied by coordinator; not a new artifact search."""
+    gap={
+      'status':'UNVERIFIABLE',
+      'subject':'matched process-overhead calibration',
+      'authority':'H151 disposition of H241 existing-data lookup',
+      'coordinator_state_receipt':'coordinator-20261108T165207Z/receipt.json',
+      'receipt_boundary':'Coordinator supplied this pointer and disposition; receipt bytes/hash were not supplied in this VM.',
+      'lookup_boundary':'No matching artifact located in relevant process/reference handoffs, recorded reference reuse or bounded archive filename search. This does not prove no artifact exists elsewhere.',
+      'matched_ratio':None,'categorical_verdict':None,
+      'claim_status':'unproven/inconclusive',
+      'fresh_measurement_authorized':False,'full_audit_completion_authorized':False,
+      'new_task_or_producer_interface_authorized':False
+    }
+    upsert_gap(summary, gap)
+    summary['status']='partial'
+    summary['waits']=[w for w in summary.get('waits',[]) if w.get('item') not in ('matched process-overhead calibration','process-overhead-calibration')]
+    summary['matched_process_overhead_ratio']=None
+    summary['matched_process_overhead_verdict']=None
+    summary['reference_reuse']['process_overhead_calibration']='UNVERIFIABLE evidence gap under H151; no matched overhead numerator located in the bounded existing-data lookup'
+    summary['reference_reuse']['status']='UNVERIFIABLE calibration evidence; audit incomplete, not waiting for an unchanged artifact'
+    summary['reference_reuse']['evidence_gap']=gap
+    for trend in summary['trends']:
+        if trend['signal']=='CompCert infrastructure/source calibration':
+            trend['matched_ratio']=None
+            trend['verdict']=None
+            trend['assessment']='UNVERIFIABLE under H151; matched ratio and justified/redundant/wrong-direction claim remain unproven/inconclusive. Existing exploratory ratios are not matched calibration.'
+
+
 def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--out',type=pathlib.Path,required=True)
@@ -41,6 +96,8 @@ def main():
       'status':'blocked pending exact archived successful closure receipt and matched process calibration'
     }
     summary['reference_reuse']=result
+    record_input_availability(summary)
+    apply_gap(summary)
     summary['reproduce_continuation']='Run recorded history.py command, then python3 docs/audits/direction-tools/process/reuse.py --out RESULT_DIR'
     for name,data in [('reference-reuse.json',result),('summary.json',summary)]:
         raw=json.dumps(data,indent=2,sort_keys=True)+'\n'
