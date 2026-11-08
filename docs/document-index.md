@@ -331,6 +331,7 @@ and open obligations. Test proposals remain proposals until applied.
 - [tests/h62/item2/audit-calculus/BYTE-IMAGE-CLASSIFICATION.md](../tests/h62/item2/audit-calculus/BYTE-IMAGE-CLASSIFICATION.md)
 - [tests/h62/item2/audit-calculus/CALLBACK-FRAME-CLASSIFICATION.md](../tests/h62/item2/audit-calculus/CALLBACK-FRAME-CLASSIFICATION.md)
 - [tests/h62/item2/audit-calculus/EVM-TRY-OWNER-CONFIRMATION.md](../tests/h62/item2/audit-calculus/EVM-TRY-OWNER-CONFIRMATION.md)
+- [tests/h62/item2/audit-calculus/EXTERNAL-RETURN-CLASSIFICATION.md](../tests/h62/item2/audit-calculus/EXTERNAL-RETURN-CLASSIFICATION.md)
 - [tests/h62/item2/audit-calculus/PACKET-VERIFICATION.md](../tests/h62/item2/audit-calculus/PACKET-VERIFICATION.md)
 - [tests/h62/item2/audit-calculus/PANIC-CARRIER-CLASSIFICATION.md](../tests/h62/item2/audit-calculus/PANIC-CARRIER-CLASSIFICATION.md)
 - [tests/h62/item2/audit-calculus/PANIC-PRODUCER-CLASSIFICATION.md](../tests/h62/item2/audit-calculus/PANIC-PRODUCER-CLASSIFICATION.md)
