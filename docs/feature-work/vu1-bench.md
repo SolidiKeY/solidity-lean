@@ -50,8 +50,11 @@ list is available until the actual suite has run.
 
 - `VU1-R1` (resource-policy owner): required systemd hard scope cannot start on
   this container (PID 1 is `tail`; neither system nor user bus exists). Gates
-  and heavy benchmarks await a systemd/delegated-cgroup environment or an
-  explicitly authorized alternative hard limiter and reserve policy. The
+  and heavy benchmarks await provisioning under user decision H186, option A:
+  systemd or a delegated cgroup, then the unchanged bounded gates. No alternative
+  limiter was selected. A fresh capability check still finds no systemd bus
+  or writable delegated cgroup; no environment-provisioning tool is exposed.
+  This is a provisioning wait, not an unresolved policy choice. The
   16 GiB container limit alone is not the required 12 GiB job bound.
 - `VU1-D1` (documentation catalog owner): adding this requested document makes
   the generated catalog stale, but its output is outside this lane's lease.
@@ -66,8 +69,11 @@ list is available until the actual suite has run.
   Upstream result records mark the old MultiSigWallet compilation suite as
   lacking a harness adapter. No exclusion or replacement is authorized.
 - `VU1-I1` (measurement/frontend owner): locating admitted representative inputs
-  and supplying disjoint telemetry requires owner direction before the suite
-  interface can be frozen. The requested prior-art studies and Hard problems list were not located
+  and supplying complete disjoint telemetry is assigned to the existing owners
+  by user decision H185, option A. U01 waits for their exact published inputs;
+  it will not invent substitute fixtures or infer missing phase costs. This
+  resolves the scope question while leaving the dependency outstanding.
+  The requested prior-art studies and Hard problems list were not located
   under the named paths at this base. Do not freeze a replacement measurement
   interface until their location or an owner direction is established.
 
