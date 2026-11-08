@@ -46,3 +46,8 @@ are decoder reference contracts, not compiler or EVM gas contracts.
 Check `tests/h62/item2/audit-language/AbiBytesEntry.lean` after freshening the
 bytes-specification object when auditing its entry consumer. Preserve the outer
 head-size/offset checks and extra fuel layer when substituting a decoder.
+
+Freshen the entry witness object before checking
+`tests/h62/item2/audit-language/AbiBytesEntrySpec.lean`. Its zero/one-fuel clauses
+are necessary alongside sufficiently fueled outcomes; success preservation alone
+does not certify failure priority.
