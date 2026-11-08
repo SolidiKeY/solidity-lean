@@ -31,6 +31,7 @@ import SolidityBridge.AccessBridge.MemoryLoadInterface
 import SolidityBridge.AccessBridge.MemorySizeExecution
 import SolidityBridge.AccessBridge.MemorySizeExecutionControls
 import SolidityBridge.AccessBridge.MemorySizeExecutionInterface
+import SolidityBridge.AccessBridge.StorageInterface
 import SolidityBridge.Adversary
 import SolidityBridge.AdversaryPolicy
 import SolidityBridge.Arith

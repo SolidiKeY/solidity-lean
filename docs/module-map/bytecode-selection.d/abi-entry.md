@@ -1,0 +1,1 @@
+| `Bridge/SolidityBridge/AccessBridge/StorageInterface.lean` | Generic persistent/transient read and write charged-outcome obligations over actual P10 sites; low driver fuel and continuation remain explicit. |
