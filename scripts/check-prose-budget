@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Per-area prose ratchet. Missing areas have a zero budget; --update never raises it."""
 import argparse
+from bisect import bisect_left
 import json
 from pathlib import Path
 import re
@@ -8,7 +9,6 @@ import sys
 
 RAW = re.compile(r'r(#+)?"')
 CHAR = re.compile(r"'(?:[^'\\\n]|\\(?:u\{[0-9a-fA-F]+\}|.))'")
-PLAIN = re.compile(r"[^/\\\"'«rsmf{}-]+")
 METRICS = ("docs_lines", "comment_lines", "docstring_lines", "process_ids")
 
 # Lean 4.24 Init.Meta.Defs.isIdRest: interpolation keywords need token boundaries.
@@ -25,107 +25,312 @@ def _identifier_rest(char):
         and any(low <= n <= high for low, high in _ID_RANGES))
 
 
-def comment_lines(source):
-    """Return unique physical comment lines and their docstring subset.
+# Inventory: pinned Init/Lean interpolatedStr declarations, plus Lake.DSL v!.
+_INTERPOLATORS = {
+    "s!": "direct", "m!": "direct", "f!": "direct", "v!": "adjacent",
+    "dbg_trace": "direct", "println!": "direct", "throwError": "direct",
+    "reportIssue!": "direct", "throwErrorAt": "ref",
+    "throwNamedError": "name", "logNamedError": "name", "logNamedWarning": "name",
+    "throwNamedErrorAt": "ref_name", "logNamedErrorAt": "ref_name",
+    "logNamedWarningAt": "ref_name", "trace[": "trace",
+    "trace_goal[": "trace", "Macro.trace[": "trace",
+}
+_PREFIX = re.compile("|".join(re.escape(x) for x in sorted(_INTERPOLATORS, key=len, reverse=True)))
+_CODE = re.compile(r'--|/-|r#*"|["\'«`()\[\]{}⟨⟩‹›⟦⟧]|' + _PREFIX.pattern)
+_COMMENT = re.compile(r'/-|-/')
+_STRING = re.compile(r'"(?:[^"\\]|\\[\s\S])*"')
+_TEXT = re.compile(r'["\\{]')
+_GROUPS = {"(": ")", "[": "]", "{": "}", "⟨": "⟩", "‹": "›", "⟦": "⟧"}
 
-    Lean block comments nest. Strings (including raw strings), character
-    literals and escaped identifiers may contain comment delimiters.
-    """
-    comments, docs = set(), set()
-    stack = []
-    contexts = []  # interpolated string text or brace depth of an expression
-    pending_interpolation = False
-    i, line = 0, 1
-    while i < len(source):
-        if stack:
-            comments.add(line)
-            if any(stack):
-                docs.add(line)
-            if source.startswith("/-", i):
-                stack.append(source.startswith(("/--", "/-!"), i))
-                i += 2
-            elif source.startswith("-/", i):
-                stack.pop()
-                i += 2
+
+# Fixed-arity maximal terms in Lean.Parser.Term and Init.Tactics.
+_REF_WRAPPERS = {
+    "no_index": 1, "private_decl%": 1, "type_of%": 1,
+    "no_implicit_lambda%": 1, "value_of%": 1, "ensure_expected_type%": 2,
+    "unop%": 2, "binrel%": 3, "binrel_no_prop%": 3, "binop%": 3,
+    "binop_lazy%": 3, "leftact%": 3, "rightact%": 3,
+    "for_in%": 3, "for_in'%": 3, "decl_name%": 0,
+    "default_or_ofNonempty%": 0, "exact?%": 0,
+}
+_REF_HEAD = re.compile("|".join(re.escape(x) for x in sorted(_REF_WRAPPERS, key=len, reverse=True)))
+_NUMBER = re.compile(r'(?:0[xX][0-9a-fA-F_]+|0[oO][0-7_]+|0[bB][01_]+|[0-9][0-9_]*(?:\.[0-9_]+)?(?:[eE][+-]?[0-9_]+)?)')
+
+
+class _Scanner:
+    def __init__(self, source):
+        self.source = source
+        self.newlines = [m.start() for m in re.finditer("\n", source)]
+        self.comments, self.docs, self.interpolations = set(), set(), set()
+
+    def mark(self, start, end, target):
+        if end > start:
+            target.update(range(bisect_left(self.newlines, start) + 1,
+                                bisect_left(self.newlines, end - 1) + 2))
+
+    def block(self, start, collect):
+        source = self.source
+        stack = [(start, source.startswith(("/--", "/-!"), start))]
+        pos = start + 2
+        while stack:
+            token = _COMMENT.search(source, pos)
+            if token is None:
+                pos = len(source)
+                if collect:
+                    for opening, doc in stack:
+                        if doc:
+                            self.mark(opening, pos, self.docs)
+                break
+            pos = token.end()
+            if token[0] == "/-":
+                stack.append((token.start(), source.startswith(("/--", "/-!"), token.start())))
             else:
-                line += source[i] == "\n"
-                i += 1
-        elif contexts and contexts[-1] == "text":
-            if source[i] == "\\":
-                end = min(i + 2, len(source))
-            elif source[i] == '"':
-                contexts.pop()
-                end = i + 1
-            elif source[i] == "{":
-                contexts.append(1)
-                end = i + 1
+                opening, doc = stack.pop()
+                if doc and collect:
+                    self.mark(opening, pos, self.docs)
+        if collect:
+            self.mark(start, pos, self.comments)
+        return pos
+
+    def trivia(self, pos):
+        source = self.source
+        while pos < len(source):
+            if source[pos].isspace():
+                pos += 1
+            elif source.startswith("--", pos):
+                end = source.find("\n", pos)
+                pos = len(source) if end < 0 else end
+            elif source.startswith("/-", pos):
+                pos = self.block(pos, False)
             else:
-                end = i + 1
-            line += source[i:end].count("\n")
-            i = end
-        elif pending_interpolation and source[i].isspace():
-            line += source[i] == "\n"
-            i += 1
-        elif (source.startswith(("s!", "m!", "f!"), i)
-              and (i == 0 or not (_identifier_rest(source[i - 1]) or source[i - 1] == "."))
-              and (i + 2 == len(source) or not (_identifier_rest(source[i + 2]) or source[i + 2] == "."))):
-            # Trivia is scanned normally so separating comments still count.
-            pending_interpolation = True
-            i += 2
-        elif contexts and source[i] in "{}":
-            pending_interpolation = False
-            contexts[-1] += 1 if source[i] == "{" else -1
-            if contexts[-1] == 0:
-                contexts.pop()
-            i += 1
-        elif source.startswith("--", i):
-            comments.add(line)
-            end = source.find("\n", i)
-            i = len(source) if end < 0 else end
-        elif source.startswith("/-", i):
-            stack.append(source.startswith(("/--", "/-!"), i))
-            comments.add(line)
-            if stack[-1]:
-                docs.add(line)
-            i += 2
+                break
+        return pos
+
+    def identifier(self, pos, partial_dot=False):
+        source = self.source
+        start = pos
+        while pos < len(source):
+            if source[pos] == "«":
+                end = source.find("»", pos + 1)
+                pos = len(source) if end < 0 else end + 1
+            elif _identifier_rest(source[pos]):
+                while pos < len(source) and _identifier_rest(source[pos]):
+                    pos += 1
+            else:
+                return pos if pos > start else None
+            if pos >= len(source) or source[pos] != ".":
+                return pos
+            following = pos + 1
+            if following < len(source) and (source[following] == "«" or _identifier_rest(source[following])):
+                pos = following
+            else:
+                return following if partial_dot else pos
+        return pos if pos > start else None
+
+    def prefix(self, pos, boundary=True):
+        source = self.source
+        token = _PREFIX.match(source, pos)
+        if token is None or (boundary and pos and (_identifier_rest(source[pos - 1]) or source[pos - 1] == ".")):
+            return None
+        end = token.end()
+        if not token[0].endswith("[") and end < len(source) and (_identifier_rest(source[end]) or source[end] == "."):
+            return None
+        return token
+
+    def literal(self, pos):
+        source = self.source
+        raw = RAW.match(source, pos) if source[pos] == "r" else None
+        char = CHAR.match(source, pos) if source[pos] == "'" else None
+        if pos and (raw or char) and _identifier_rest(source[pos - 1]):
+            raw = char = None
+        if raw and pos and source[pos - 1] == ".":
+            raw = None
+        if raw:
+            closing = '"' + (raw[1] or "")
+            end = source.find(closing, raw.end())
+            return len(source) if end < 0 else end + len(closing)
+        if char:
+            return char.end()
+        if source[pos] == '"':
+            token = _STRING.match(source, pos)
+            return token.end() if token else len(source)
+        return None
+
+    def atom(self, pos):
+        """Skip a ref:max atom, including grouped expressions and postfixes."""
+        source = self.source
+        pos = self.trivia(pos)
+        if pos >= len(source):
+            return None
+        if source[pos] in "@$↑⇑↥":
+            return self.atom(pos + 1)
+        quoted = source[pos] == "`"
+        if quoted:
+            while pos < len(source) and source[pos] == "`":
+                pos += 1
+            pos = self.trivia(pos)
+        if pos >= len(source):
+            return None
+        token = None if quoted else self.prefix(pos, False)
+        head = None if quoted else _REF_HEAD.match(source, pos)
+        if head and _identifier_rest(head[0][-1]) and head.end() < len(source) and (_identifier_rest(source[head.end()]) or source[head.end()] == "."):
+            head = None
+        if quoted and source[pos] not in _GROUPS:
+            pos = self.identifier(pos)
+        elif head:
+            pos = head.end()
+            for _ in range(_REF_WRAPPERS[head[0]]):
+                pos = self.atom(pos)
+                if pos is None:
+                    return None
+            if head[0] == "default_or_ofNonempty%":
+                unsafe = self.trivia(pos)
+                end = unsafe + len("unsafe")
+                if source.startswith("unsafe", unsafe) and (end == len(source) or not (_identifier_rest(source[end]) or source[end] == ".")):
+                    pos = end
+        elif source.startswith(("#[", "#v[", "%["), pos):
+            opening = source.find("[", pos)
+            pos = self.code(opening + 1, "]", False)
+        elif source.startswith("*...*", pos):
+            pos += 5
+        elif source[pos] in "·⋯":
+            pos += 1
+        elif source[pos] == ".":
+            if pos + 1 < len(source) and source[pos + 1] in _GROUPS:
+                pos = self.code(pos + 2, _GROUPS[source[pos + 1]], False)
+            else:
+                pos = self.identifier(pos + 1) or pos + 1
+        elif source[pos].isascii() and source[pos].isdigit():
+            number = _NUMBER.match(source, pos)
+            pos = number.end()
+            if source.startswith("#", pos) and not source.startswith("#'", pos):
+                pos = self.atom(pos + 1)
+                if pos is None:
+                    return None
+        elif token:
+            quote = self.message(token)
+            if quote is not None:
+                self.interpolations.add(quote)
+                pos = self.interpolated(quote, False)
+            else:
+                pos = self.identifier(pos)
+        elif source[pos] in _GROUPS:
+            pos = self.code(pos + 1, _GROUPS[source[pos]], False)
         else:
-            if pending_interpolation and source[i] == '"':
-                pending_interpolation = False
-                contexts.append("text")
-                i += 1
-                continue
-            pending_interpolation = False
-            raw = RAW.match(source, i) if source[i] == "r" else None
-            char = CHAR.match(source, i) if source[i] == "'" else None
-            if i and (raw or char) and _identifier_rest(source[i - 1]):
-                raw = char = None
-            if raw and i and source[i - 1] == ".":
-                raw = None
-            if raw:
-                close = '"' + (raw[1] or "")
-                end = source.find(close, raw.end())
-                end = len(source) if end < 0 else end + len(close)
-            elif char:
-                end = char.end()
-            elif source[i] == "«":
-                end = source.find("»", i + 1)
-                end = len(source) if end < 0 else end + 1
-            elif source[i] == '"':
-                end = i + 1
-                while end < len(source):
-                    if source[end] == "\\":
-                        end += 2
-                    elif source[end] == '"':
-                        end += 1
-                        break
-                    else:
-                        end += 1
+            pos = self.literal(pos) or self.identifier(pos)
+        if pos is None:
+            return None
+        while pos < len(source):
+            if source.startswith("#'", pos):
+                pos = self.atom(pos + 2)
+                if pos is None:
+                    return None
+            elif source.startswith("<...*", pos):
+                pos += 5
+            elif source.startswith("...*", pos):
+                pos += 4
+            elif source.startswith(".{", pos):
+                pos = self.code(pos + 2, "}", False)
+            elif source[pos] == ".":
+                end = self.identifier(pos + 1)
+                if end is None:
+                    break
+                pos = end
+            elif source[pos] == "[":
+                pos = self.code(pos + 1, "]", False)
+                if pos < len(source) and source[pos] in "!?":
+                    pos += 1
+                elif pos < len(source) and source[pos] == "'":
+                    pos = self.atom(pos + 1)
+                    if pos is None:
+                        return None
             else:
-                plain = PLAIN.match(source, i)
-                end = plain.end() if plain else i + 1
-            line += source[i:end].count("\n")
-            i = end
-    return len(comments), len(docs)
+                break
+        return pos
+
+    def message(self, token):
+        source = self.source
+        mode = _INTERPOLATORS[token[0]]
+        pos = token.end()
+        if mode == "adjacent":
+            return pos if pos < len(source) and source[pos] == '"' else None
+        if mode.startswith("ref"):
+            pos = self.atom(pos)
+            if pos is None:
+                return None
+        if mode in ("name", "ref_name", "trace"):
+            pos = self.identifier(self.trivia(pos), mode != "trace")
+            if pos is None:
+                return None
+        pos = self.trivia(pos)
+        if mode == "trace":
+            if pos >= len(source) or source[pos] != "]":
+                return None
+            pos = self.trivia(pos + 1)
+        return pos if pos < len(source) and source[pos] == '"' else None
+
+    def interpolated(self, quote, collect):
+        pos = quote + 1
+        while token := _TEXT.search(self.source, pos):
+            pos = token.end()
+            if token[0] == '"':
+                return pos
+            if token[0] == "\\":
+                pos = min(pos + 1, len(self.source))
+            else:
+                pos = self.code(pos, "}", collect)
+        return len(self.source)
+
+    def code(self, pos=0, stop=None, collect=True):
+        source = self.source
+        closers = [stop] if stop else []
+        while token := _CODE.search(source, pos):
+            pos = token.start()
+            if source.startswith("--", pos):
+                end = source.find("\n", pos)
+                end = len(source) if end < 0 else end
+                if collect:
+                    self.mark(pos, end, self.comments)
+                pos = end
+            elif source.startswith("/-", pos):
+                pos = self.block(pos, collect)
+            elif source[pos] == "«":
+                end = source.find("»", pos + 1)
+                pos = len(source) if end < 0 else end + 1
+            elif source[pos] == "`":
+                while pos < len(source) and source[pos] == "`":
+                    pos += 1
+                # Name literals are tokens; syntax quotations remain code.
+                end = self.identifier(pos)
+                if end is not None:
+                    pos = end
+            elif source[pos] == '"' and pos in self.interpolations:
+                pos = self.interpolated(pos, collect)
+            elif end := self.literal(pos):
+                pos = end
+            elif prefix := self.prefix(pos):
+                quote = self.message(prefix)
+                if quote is not None:
+                    self.interpolations.add(quote)
+                pos = prefix.end() - int(prefix[0].endswith("["))
+            elif source[pos] in _GROUPS:
+                if closers:
+                    closers.append(_GROUPS[source[pos]])
+                pos += 1
+            elif closers and source[pos] == closers[-1]:
+                pos += 1
+                closers.pop()
+                if not closers:
+                    return pos
+            else:
+                pos += 1
+        return len(source)
+
+
+def comment_lines(source):
+    """Count physical comment lines and their docstring subset using Lean tokens."""
+    scanner = _Scanner(source)
+    scanner.code()
+    return len(scanner.comments), len(scanner.docs)
 
 
 def counts(root):

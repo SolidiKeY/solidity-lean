@@ -9,6 +9,42 @@ import unittest
 SCRIPT = Path(__file__).resolve().parents[1] / "check-prose-budget"
 MODULE = runpy.run_path(str(SCRIPT))
 
+# Independent inventory of pinned Init/Lean/Lake interpolatedStr declarations.
+BUILTIN_CASES = {
+    's!': 's! ', 'm!': 'm! ', 'f!': 'f! ', 'v!': 'v!',
+    'dbg_trace': 'dbg_trace ', 'println!': 'println! ',
+    'throwError': 'throwError ', 'reportIssue!': 'reportIssue! ',
+    'throwErrorAt': 'throwErrorAt stx ',
+    'throwNamedError': 'throwNamedError sample.error. ',
+    'logNamedError': 'logNamedError sample.error. ',
+    'logNamedWarning': 'logNamedWarning sample.error. ',
+    'throwNamedErrorAt': 'throwNamedErrorAt stx sample.error. ',
+    'logNamedErrorAt': 'logNamedErrorAt stx sample.error. ',
+    'logNamedWarningAt': 'logNamedWarningAt stx sample.error. ',
+    'trace[': 'trace[category] ', 'trace_goal[': 'trace_goal[category] ',
+    'Macro.trace[': 'Macro.trace[category] ',
+}
+
+
+REFERENCE_CASES = (
+    '.missing', '.(stx)', '‹Syntax›', '‹Lean.Syntax›', '⟨stx⟩',
+    '#[]', '#[stx]', '#v[stx]', '%[stx|xs]', '·', '⋯',
+    '↑stx', '⇑stx', '↥stx', 'no_index stx', 'no_index(stx)',
+    'private_decl% stx', 'type_of% stx', 'no_implicit_lambda% stx',
+    'no_implicit_lambda%stx', 'value_of% stx',
+    'ensure_expected_type% "ordinary /-- text -/" stx',
+    'unop% id stx', 'binop% f stx stx', 'binop_lazy% f stx stx',
+    'binrel% f stx stx', 'binrel_no_prop% f stx stx',
+    'leftact% f stx stx', 'rightact% f stx stx',
+    'for_in% x y z', "for_in'% x y z", 'decl_name%',
+    'default_or_ofNonempty%', 'default_or_ofNonempty% unsafe',
+    'default_or_ofNonempty%unsafe', 'exact?%', '_', '?m',
+    '1E10', '1E-3', '1.2E+3', '1.2E-3', '1#w', '1#(width)',
+    '1#↑w', '1#(8+1)', '1#no_index w', "1#'w", "x#'w",
+    "(f x)#'w", '1...*', '*...*', '1<...*',
+    '1.2e-3', '1.2e+3', '1e-3', '1#8', '0xF', '0b10', '0o7',
+)
+
 
 class ScannerTests(unittest.TestCase):
     def test_nested_comments_and_strings(self):
@@ -65,6 +101,75 @@ class ScannerTests(unittest.TestCase):
                 source = name + r'"escaped \" /- literal -/"'
                 self.assertEqual(MODULE['comment_lines'](source), (0, 0))
 
+    def test_all_builtin_interpolation_forms(self):
+        self.assertEqual(set(MODULE['_INTERPOLATORS']), set(BUILTIN_CASES))
+        for name, introducer in BUILTIN_CASES.items():
+            with self.subTest(name=name):
+                source = introducer + '"{ /-- first\nsecond\n-/ 1 }"'
+                self.assertEqual(MODULE['comment_lines'](source), (3, 3))
+
+    def test_debug_trace_trivia(self):
+        for trivia, expected in [(' ', (3, 3)), ('\n', (3, 3)),
+                                 ('/- gap -/ ', (3, 3)), ('-- gap\n', (4, 3))]:
+            with self.subTest(trivia=trivia):
+                self.assertEqual(MODULE['comment_lines']('dbg_trace' + trivia +
+                                 '"{ /-- first\nsecond\n-/ 1 }"'), expected)
+
+    def test_diagnostic_reference_arguments(self):
+        for name in ('throwErrorAt', 'throwNamedErrorAt', 'logNamedErrorAt', 'logNamedWarningAt'):
+            label = ' sample.error.' if name != 'throwErrorAt' else ''
+            source = name + ' (mkRef "{ /-- literal -/ 0 }")' + label + '\n"{ /-- real -/ 1 }"'
+            with self.subTest(name=name):
+                self.assertEqual(MODULE['comment_lines'](source), (1, 1))
+        for reference in ('(stx[0][1]).raw', '(stx[0]!)', "(stx[0]'h)", 'ref.{0}',
+                          '`throwErrorAt', '(stx).raw', '`(term| "{ /-- literal -/ }")'):
+            with self.subTest(reference=reference):
+                source = 'throwErrorAt ' + reference + '\n"{ /-- real -/ 1 }"'
+                self.assertEqual(MODULE['comment_lines'](source), (1, 1))
+        self.assertEqual(MODULE['comment_lines'](
+            'throwErrorAt (/- gap -/ stx).raw\n"{ /-- real -/ 1 }"'), (2, 1))
+
+    def test_comments_between_diagnostic_arguments(self):
+        source = ('throwNamedErrorAt -- prefix\n(stx) -- reference\n'
+                  'sample.error. -- name\n"{ /-- real -/ 1 }"')
+        self.assertEqual(MODULE['comment_lines'](source), (4, 1))
+        source = 'trace[-- category\nfoo.«a]b»-- end\n]\n"{ /-- real -/ 1 }"'
+        self.assertEqual(MODULE['comment_lines'](source), (3, 1))
+
+    def test_deep_reference_groups(self):
+        source = 'throwErrorAt ' + '(' * 2000 + 'stx' + ')' * 2000 + ' "{ /-- real -/ 1 }"'
+        self.assertEqual(MODULE['comment_lines'](source), (1, 1))
+
+    def test_maximal_reference_atoms(self):
+        for reference in REFERENCE_CASES:
+            for introducer in ('throwErrorAt ', 'throwNamedErrorAt '):
+                label = ' sample.error.' if 'Named' in introducer else ''
+                with self.subTest(reference=reference, introducer=introducer):
+                    source = introducer + reference + label + '\n"{ /-- first\nsecond\n-/ 1 }"'
+                    self.assertEqual(MODULE['comment_lines'](source), (3, 3))
+
+    def test_reference_precedence(self):
+        for reference in ('Type 0', 'Sort 0'):
+            self.assertEqual(MODULE['comment_lines']('throwErrorAt ' + reference +
+                             ' "{ /-- literal -/ 1 }"'), (0, 0))
+
+    def test_trace_categories_and_quoted_names(self):
+        for intro in ('trace[foo.«bar]baz»]', 'Macro.trace[«a]b»]', 'trace_goal[foo.bar]'):
+            with self.subTest(intro=intro):
+                self.assertEqual(MODULE['comment_lines'](intro + '\n"{ /-- real -/ 1 }"'), (1, 1))
+        for name in ('`dbg_trace', '``s!', '`throwErrorAt', '«dbg_trace»',
+                     'Ns.«s!»', 'Ns.dbg_trace', 'dbg_traceExtra', 'versions!'):
+            with self.subTest(name=name):
+                self.assertEqual(MODULE['comment_lines'](name + ' "{ /-- literal -/ 1 }"'), (0, 0))
+
+    def test_noninterpolated_message_terms(self):
+        for intro in ('dbg_trace', 'println!', 'throwError', 'throwErrorAt stx',
+                      'throwNamedError sample.error.', 'trace[category]'):
+            with self.subTest(intro=intro):
+                self.assertEqual(MODULE['comment_lines'](intro + ' ("{ /-- literal -/ 1 }")'), (0, 0))
+        # Lake's v! declaration alone uses noWs.
+        self.assertEqual(MODULE['comment_lines']('v! "{ /-- literal -/ 1 }"'), (0, 0))
+
     def test_docstrings(self):
         self.assertEqual(MODULE['comment_lines']('/-- docs\n/- nested -/\n-/\n/-! module -/'), (4, 4))
         self.assertEqual(MODULE['comment_lines']('/- plain /-- doc -/ end -/'), (1, 1))
@@ -118,6 +223,34 @@ class AcceptanceTests(unittest.TestCase):
         for args in ((), ('--update',)):
             self.assertEqual(self.run_script(*args).returncode, 1)
             self.assertEqual(self.baseline.read_bytes(), before)
+
+    def test_builtin_interpolated_comment_growth(self):
+        lean = self.root / 'Solidity/Area/A.lean'
+        for name, introducer in BUILTIN_CASES.items():
+            with self.subTest(name=name):
+                start = introducer + '"{1}"\n'
+                lean.write_text(start)
+                self.baseline.write_text(json.dumps(MODULE['counts'](self.root)))
+                before = self.baseline.read_bytes()
+                lean.write_text(start.replace('{1}', '{ /-- first\nsecond\n-/ 1 }'))
+                for args in ((), ('--update',)):
+                    self.assertEqual(self.run_script(*args).returncode, 1)
+                    self.assertEqual(self.baseline.read_bytes(), before)
+
+    def test_reference_atom_comment_growth(self):
+        lean = self.root / 'Solidity/Area/A.lean'
+        for reference in ('.missing', '‹Syntax›', '⟨stx⟩', 'no_index stx',
+                          'no_implicit_lambda% stx', 'default_or_ofNonempty%'):
+            for marker in ('/-', '/--'):
+                with self.subTest(reference=reference, marker=marker):
+                    start = 'throwErrorAt ' + reference + ' "{1}"\n'
+                    lean.write_text(start)
+                    self.baseline.write_text(json.dumps(MODULE['counts'](self.root)))
+                    before = self.baseline.read_bytes()
+                    lean.write_text(start.replace('{1}', '{ ' + marker + ' first\nsecond\n-/ 1 }'))
+                    for args in ((), ('--update',)):
+                        self.assertEqual(self.run_script(*args).returncode, 1)
+                        self.assertEqual(self.baseline.read_bytes(), before)
 
     def test_never_raise_and_no_partial_write(self):
         for update in ((), ('--update',)):
