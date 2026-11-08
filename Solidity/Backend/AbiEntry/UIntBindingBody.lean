@@ -57,13 +57,13 @@ theorem composed (C : Contract) (base bits : Nat) (label : Fin W) (bodyCode : Li
   have bindingRun := UIntBinding.run_program C base bits label machine word size initialWord initialSize
   simp only [uintBindingOutcome] at bindingRun
   by_cases short : size.val<36
-  · rw [if_pos short] at bindingRun ⊢
+  · rw [ite_eq_left short] at bindingRun ⊢
     exact run_append_revert bindingRun
-  · rw [if_neg short] at bindingRun ⊢
+  · rw [ite_eq_right short] at bindingRun ⊢
     by_cases valid : (Solidity.AbiEntry.Kind.uint bits).valid word.val=true
-    · rw [if_pos valid] at bindingRun ⊢
+    · rw [ite_eq_left valid] at bindingRun ⊢
       exact run_append_ok bindingRun
-    · rw [if_neg valid] at bindingRun ⊢
+    · rw [ite_eq_right valid] at bindingRun ⊢
       exact run_append_revert bindingRun
 
 theorem executed (base bits : Nat) (label : Fin W) (body : Prog C UIntBoundCtx Δ)
@@ -84,6 +84,7 @@ theorem executed (base bits : Nat) (label : Fin W) (body : Prog C UIntBoundCtx �
   rw [sameWhole,sameBody,code]
   exact composed C base bits label _ machine word size initialWord initialSize
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Raw semantic success identifies the actual local subsequently read by the body. -/
 theorem decoded_body (base bits : Nat) (label : Fin W) (body : Prog C UIntBoundCtx Δ)
     (outFrag : Frag Δ) (bodyCore : inFragP (Frag.init UIntBoundCtx) body=some outFrag)
@@ -107,7 +108,7 @@ theorem decoded_body (base bits : Nat) (label : Fin W) (body : Prog C UIntBoundC
     ⟨value,semantic,_,cell⟩
   refine ⟨value,semantic,cell,?_⟩
   rw [executed base bits label body outFrag bodyCore whole back wholeFound bodyFound machine _ size initialWord initialSize]
-  simp only [represented,if_neg full,rawArgumentWord,if_pos valid]
+  simp only [represented,ite_eq_right full,rawArgumentWord,ite_eq_left valid]
 
 /-- A short head prevents both the word read and all body execution. -/
 theorem short_before_body (base bits : Nat) (label : Fin W) (body : Prog C UIntBoundCtx Δ)
