@@ -76,3 +76,9 @@ For the source-value family, check
 `Solidity/Source/Value.lean` using the family checker before imported accounting.
 Keep the general supported-success and overflow refusal clients: feasibility
 tuples alone do not certify the operations' outcome behavior.
+
+For source observations, check
+`tests/h62/item2/audit-language/SourceObserveWitness.lean` against
+`Solidity/Source/Observe.lean`. The closed `readInt_reject` schema must receive
+no input-tuple credit; retain its actual rejection statement. Full-word encoding
+injectivity and panic-code separation do not imply selector injectivity.
