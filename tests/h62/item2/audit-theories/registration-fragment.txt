@@ -79,3 +79,6 @@ row Theory/Audit/H62/PureBoundaryWitnesses.lean | Eight selected Pure input pack
 
 # Proposal only: LeafProgressWitnesses imports unchanged Progress.Leaves + source examples.
 tests/h62/item2/audit-theories/LeafProgressWitnesses.lean
+
+# Proposal only: TupleProgressWitnesses imports unchanged tuple interface and owned progress fixture.
+tests/h62/item2/audit-theories/TupleProgressWitnesses.lean
