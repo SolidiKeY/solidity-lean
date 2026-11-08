@@ -41,9 +41,11 @@ code; this concerns the model's relative skip, not a native byte PC. -/
 theorem pending_skip_refused (locals : Vector Scalar.Word 1) (m final : Evm.Machine)
  (caller : List Evm.Word) (pending : Nat) :
  Evm.run innerArtifact.code {m with stack := locals.toList.map coreWord++caller} ≠ .ok final (pending+1) := by
- intro ran
- obtain ⟨_,_,_,done,_⟩ := artifact_reflected innerArtifact locals m final caller (pending+1) ran
- omega
+ exact CompletionControls.pending_refused (code := innerArtifact.code)
+   (initial := {m with stack := locals.toList.map coreWord++caller})
+   (fun actual pending ran => by
+     obtain ⟨_,_,_,done,_⟩ := artifact_reflected innerArtifact locals m actual caller pending ran
+     exact done) final pending
 
 /-- The true artifact cannot return the false artifact's observed result. -/
 theorem false_output_refused (m : Evm.Machine) (caller : List Evm.Word) :

@@ -17,6 +17,16 @@ theorem completed_horizon {α : Type} (run : Nat → Option α)
   rw [eq]
   exact refineAdd lo extra value done
 
+/-- Refuse a positive pending skip only after an existing actual-run law has
+proved that every successful result has pending zero. This does not assert
+completion, classify failures, or identify relative skips with native PCs. -/
+theorem pending_refused {code : List Evm.Instr} {initial : Evm.Machine}
+    (normal : ∀ final pending, Evm.run code initial = .ok final pending → pending = 0)
+    (final : Evm.Machine) (pending : Nat) :
+    Evm.run code initial ≠ .ok final (pending + 1) := by
+  intro ran
+  exact Nat.noConfusion (normal final (pending + 1) ran)
+
 theorem sourceLocals_injective {n : Nat} : Function.Injective (@sourceLocals n) := by
   intro a b same
   apply Vector.ext

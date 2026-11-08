@@ -3,7 +3,7 @@
   "scope": "Frozen 57-input H55 family queue; proof-entrypoint reuse is partial family migration, not definition or full-family completion.",
   "frozen_input_count": 57,
   "fully_migrated_families": 0,
-  "partially_migrated_input_files": 40,
+  "partially_migrated_input_files": 42,
   "entries": [
     {
       "path": "Solidity/Yul/Compilation/CaseCompletion.lean",
@@ -171,8 +171,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/LoopControlCompletionControls.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.LoopControlCompletion.Controls.pending_refused"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -283,8 +285,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/SourceLoopCompletionControls.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.SourceLoopModelCompletion.Controls.pending_refused"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -321,7 +325,8 @@
       "path": "Solidity/Yul/Compilation/StructuredSequenceCompletionControls.lean",
       "status": "proof_reuse_partial",
       "migrated_declarations": [
-        "Solidity.Yul.Compilation.StructuredSequenceCompletion.Controls.final_height"
+        "Solidity.Yul.Compilation.StructuredSequenceCompletion.Controls.final_height",
+        "Solidity.Yul.Compilation.StructuredSequenceCompletion.Controls.pending_skip_refused"
       ],
       "existing_definitions_changed": false
     },
