@@ -3225,6 +3225,7 @@ import Solidity.Language.FixedPoint.Conformance
 import Solidity.Language.FixedPoint.Laws
 import Solidity.Language.FixedPoint.Literals
 import Solidity.Language.FixedPoint.Storage
+import Solidity.Lowering.G17.IndexBounds
 import Solidity.Lowering.G17.IndexCapture
 import Solidity.Lowering.G17.IndexCaptureControls
 import Solidity.Lowering.G17.OperandStore
