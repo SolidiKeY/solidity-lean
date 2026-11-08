@@ -19,6 +19,7 @@ theorem overwriteSlice_target_eq_iff {H : HTy} {R : RefTy} {E : Ty}
   · intro ha
     rw [overwriteSlice_eq_self_of_agrees hp r a d payload hd ha]
 
+set_option backward.isDefEq.respectTransparency false in
 theorem boolTransfer_target_eq_iff {D : Source.Layout} {H : HTy} {R : RefTy}
     (c : Source.Calldata D) (off : Nat) (hp : Heap H) (r : HRef H R)
     (a : ArrTy R (.prim .bool)) (s t d : Nat) (out : Heap H)
@@ -113,6 +114,7 @@ private abbrev H : HTy := [B,N]
 private def child : HRef H B := ⟨0,rfl⟩
 private def q : HRef H N := ⟨1,rfl⟩
 private def values (n : Nat) := [false,true,false] ++ List.replicate n false
+set_option backward.isDefEq.respectTransparency false in
 private def hp (n : Nat) (hn : n+3 < 2^256) : Heap H :=
   (⟨values n,by simp only [values,List.length_append,List.length_cons,List.length_nil,List.length_replicate]; omega⟩,
    ⟨[zero,seven],by decide⟩,())
@@ -121,18 +123,21 @@ private theorem initial (n : Nat) (hn : n+3 < 2^256) :
     BoolChildRepr (bools (values n)) (fun _ => 7) (hp n hn) sv child := by
   refine ⟨rfl,?_⟩
   simp only [MObj.elems_dyn]; rfl
+set_option backward.isDefEq.respectTransparency false in
 private theorem hcap (n : Nat) (hn : n+3 < 2^256) :
     1+([true] : List Bool).length ≤ (hp n hn).len child .dyn := by
   simp only [Heap.len,MObj.elems_dyn,Heap.get,Objs.get,hp,child,values,
     List.length_append,List.length_cons,List.length_nil,List.length_replicate]
   omega
 private def mid (n : Nat) (hn : n+3 < 2^256) := overwriteSlice (hp n hn) child .dyn 1 [true] (hcap n hn)
+set_option backward.isDefEq.respectTransparency false in
 private theorem reached (n : Nat) (hn : n+3 < 2^256) :
     checkedCalldataBools (bools (values n)) 7 (hp n hn) child .dyn 1 2 1 = some (mid n hn) := by
   have h := checkedCalldataBools_some (bool_repr (values n)) (hp n hn) child .dyn 1 2 1
     ⟨by decide,by simp only [values,List.length_append,List.length_cons,List.length_nil,List.length_replicate]; omega⟩
     (by simpa only [bool_values,values,List.drop_succ_cons,List.drop_zero,List.take_succ_cons,List.take_zero,List.length_cons,List.length_nil] using hcap n hn)
-  simpa only [bool_values,values,List.drop_succ_cons,List.drop_zero,List.take_succ_cons,List.take_zero] using h
+  simpa only [mid,bool_values,values,List.cons_append,List.nil_append,Nat.reduceSub,
+    List.drop_succ_cons,List.drop_zero,List.take_succ_cons,List.take_zero] using h
 
 /-- Runtime-size inhabited same-content alias: the exact iff is applied to an
 actual successful operation and the initial relation comes from its real table. -/
@@ -143,6 +148,7 @@ theorem accepted (n : Nat) (hn : n+3 < 2^256) :
   exact ((initial n hn).alias_transfer_iff (bools (values n)) 7 1 2 1 (mid n hn) (reached n hn)).mpr
     ((initial n hn).self_agrees 1 2)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Actual successful wrong-value transfer fails the exact initial-agreement
 criterion and the immutable child correspondence, for every runtime tail. -/
 theorem rejected (n : Nat) (hn : n+3 < 2^256) :
@@ -153,8 +159,10 @@ theorem rejected (n : Nat) (hn : n+3 < 2^256) :
     have h := hcap n hn; omega
   let out := overwriteSlice (hp n hn) child .dyn 0 [true] hd
   have ho : checkedCalldataBools (bools [true]) 7 (hp n hn) child .dyn 0 1 0 = some out := by
-    have h := checkedCalldataBools_some (bool_repr [true]) (hp n hn) child .dyn 0 1 0 ⟨by decide,by decide⟩ (by simpa only [bool_values,List.drop_zero,List.take_succ_cons,List.take_zero] using hd)
-    simpa only [bool_values,List.drop_zero,List.take_succ_cons,List.take_zero] using h
+    have h := checkedCalldataBools_some (bool_repr [true]) (hp n hn) child .dyn 0 1 0 ⟨by decide,by decide⟩
+      (by simpa only [bool_values,List.drop_zero,List.take_succ_cons,List.take_zero,
+        List.length_cons,List.length_nil,Nat.sub_zero,Nat.zero_add] using hd)
+    simpa only [bool_values,List.drop_zero,List.take_succ_cons,List.take_zero,Nat.reduceSub] using h
   have ha : ¬ BoolTransferAgrees (bools [true]) 7 (hp n hn) child .dyn 0 1 0 := by
     intro h
     unfold BoolTransferAgrees at h
@@ -168,6 +176,7 @@ theorem rejected (n : Nat) (hn : n+3 < 2^256) :
   intro hf
   exact ha (((initial n hn).alias_transfer_iff (bools [true]) 7 0 1 0 out ho).mp hf)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Both Boolean values execute: false preserves the original child, true
 refutes its correspondence. The actual second uint step changes zero to max,
 with complete ordered uint and child outputs, for every intrinsic runtime tail. -/
@@ -183,8 +192,9 @@ theorem mixed_actual (n : Nat) (hn : n+3 < 2^256) (value : Bool) :
   let first := overwriteSlice (hp n hn) child .dyn 0 [value] hd
   have hfirst : checkedCalldataBools (bools [value]) 7 (hp n hn) child .dyn 0 1 0 = some first := by
     have h := checkedCalldataBools_some (bool_repr [value]) (hp n hn) child .dyn 0 1 0 ⟨by decide,by simp only [List.length_cons,List.length_nil]; omega⟩
-      (by simpa only [bool_values,List.drop_zero,List.take_succ_cons,List.take_zero] using hd)
-    simpa only [bool_values,List.drop_zero,List.take_succ_cons,List.take_zero] using h
+      (by simpa only [bool_values,List.drop_zero,List.take_succ_cons,List.take_zero,
+        List.length_cons,List.length_nil,Nat.sub_zero,Nat.zero_add] using hd)
+    simpa only [bool_values,List.drop_zero,List.take_succ_cons,List.take_zero,Nat.reduceSub] using h
   have hq : first.get q = (hp n hn).get q := overwriteSlice_frame _ child q .dyn 0 [value] hd (by decide)
   have hu : 0+([maximum] : List U).length ≤ first.len q .dyn := by
     rw [overwriteSlice_all_len]; simp only [Heap.len,MObj.elems_dyn,Heap.get,Objs.get,hp,q,List.length_cons,List.length_nil]; omega
@@ -194,8 +204,9 @@ theorem mixed_actual (n : Nat) (hn : n+3 < 2^256) (value : Bool) :
     unfold checkedBoolUintSequence
     rw [hfirst]
     have h := checkedCalldataUints_some (uint_repr [maximum]) first q .dyn 0 1 0 ⟨by decide,by decide⟩
-      (by simpa only [calldataUint_values,List.drop_zero,List.take_succ_cons,List.take_zero] using hu)
-    simpa only [Option.bind_some,calldataUint_values,List.drop_zero,List.take_succ_cons,List.take_zero] using h
+      (by simpa only [calldataUint_values,List.drop_zero,List.take_succ_cons,List.take_zero,
+        List.length_cons,List.length_nil,Nat.sub_zero,Nat.zero_add] using hu)
+    simpa only [Option.bind_some,calldataUint_values,List.drop_zero,List.take_succ_cons,List.take_zero,Nat.reduceSub] using h
   have ha : BoolTransferAgrees (bools [value]) 7 (hp n hn) child .dyn 0 1 0 ↔ value = false := by
     unfold BoolTransferAgrees
     rw [calldataBools_lookup (bool_repr [value])]
@@ -218,7 +229,6 @@ theorem mixed_actual (n : Nat) (hn : n+3 < 2^256) (value : Bool) :
     simp only [MObj.elems_dyn]; rfl
   · intro he
     have h := congrArg (fun obj : MObj H N => (MObj.elems .dyn obj).map (fun v : U => v.val)) he
-    dsimp only at h
     rw [hv] at h
     have old : (MObj.elems .dyn ((hp n hn).get q)).map (fun v : U => v.val) = [0,7] := by
       simp only [MObj.elems_dyn]; rfl
