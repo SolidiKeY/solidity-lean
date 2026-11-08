@@ -72,18 +72,19 @@ theorem getter_count (ordinary : Bool) (pipeline : Roadmap.Pipeline) :
 theorem ordinary_priority (pipeline : Roadmap.Pipeline) (value : Fin W) :
     run (compiled true true pipeline).code (machine fullBytes value)=.ok (written fullBytes value (wmod 33)) 0 := by
   have actual := reached true true pipeline fullBytes value (by decide)
-  simpa only [chosen,specialRowOutcome,Bool.true_or,if_true] using actual
+  simpa only [written,Bool.false_eq_true,ite_false,chosen,specialRowOutcome,Bool.true_or,ite_true] using actual
 
 theorem getter_zero (pipeline : Roadmap.Pipeline) :
     run (compiled false true pipeline).code (machine fullBytes (wmod 0))=.ok (written fullBytes (wmod 0) (wmod 11)) 0 := by
   have actual := reached false true pipeline fullBytes (wmod 0) (by decide)
-  simpa only [chosen,specialRowOutcome,Bool.false_or,decide_true,if_true] using actual
+  have observed : (machine fullBytes (wmod 0)).callvalue.val=0 := rfl
+  simpa only [written,Bool.false_eq_true,ite_false,chosen,specialRowOutcome,Bool.false_or,decide_eq_true observed,ite_true] using actual
 
 theorem getter_nonzero (pipeline : Roadmap.Pipeline) (value : Fin W) (nonzero : value.val≠0) :
     run (compiled false true pipeline).code (machine fullBytes value)=.revert := by
   have actual := reached false true pipeline fullBytes value (by decide)
   have observed : (machine fullBytes value).callvalue.val≠0 := nonzero
-  simpa only [chosen,specialRowOutcome,Bool.false_or,decide_eq_false observed,if_false] using actual
+  simpa only [written,Bool.false_eq_true,ite_false,chosen,specialRowOutcome,Bool.false_or,decide_eq_false observed,ite_true,ite_false] using actual
 
 private theorem fallback_selected (ordinary getters : Bool) (pipeline : Roadmap.Pipeline)
     (bytes : List UInt8) (notSelector : bytes=shortBytes ∨ bytes=missBytes) (value : Fin W) :
@@ -94,14 +95,14 @@ private theorem fallback_selected (ordinary getters : Bool) (pipeline : Roadmap.
 theorem padded_short_fallback (ordinary getters : Bool) (pipeline : Roadmap.Pipeline) (value : Fin W) :
     run (compiled ordinary getters pipeline).code (machine shortBytes value)=.ok (written shortBytes value (wmod 99)) 0 := by
   have actual := reached ordinary getters pipeline shortBytes value (by decide)
-  simpa only [fallback_selected ordinary getters pipeline shortBytes (Or.inl rfl),specialRowOutcome,
-    Bool.true_or,if_true] using actual
+  simpa only [written,Bool.false_eq_true,ite_false,fallback_selected ordinary getters pipeline shortBytes (Or.inl rfl),specialRowOutcome,
+    Bool.true_or,ite_true] using actual
 
 theorem full_miss_fallback (ordinary getters : Bool) (pipeline : Roadmap.Pipeline) (value : Fin W) :
     run (compiled ordinary getters pipeline).code (machine missBytes value)=.ok (written missBytes value (wmod 99)) 0 := by
   have actual := reached ordinary getters pipeline missBytes value (by decide)
-  simpa only [fallback_selected ordinary getters pipeline missBytes (Or.inr rfl),specialRowOutcome,
-    Bool.true_or,if_true] using actual
+  simpa only [written,Bool.false_eq_true,ite_false,fallback_selected ordinary getters pipeline missBytes (Or.inr rfl),specialRowOutcome,
+    Bool.true_or,ite_true] using actual
 
 theorem source_revert_bytes (pipeline : Roadmap.Pipeline) (fuel : Nat) (value : Fin W)
     (nonzero : value.val≠0) :
