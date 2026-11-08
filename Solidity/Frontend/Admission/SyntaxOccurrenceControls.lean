@@ -2,8 +2,7 @@ import Solidity.Frontend.Admission.SyntaxOccurrenceLaws
 import Solidity.Frontend.Admission.ExclusionFeatures
 import Solidity.Source.Examples
 
-/-! Inhabited exact-payload/order controls. These are syntax inventories,
-not execution-root, semantic reachability or profile witnesses. -/
+/-! Inhabited exact-payload/order controls. These are syntax inventories, not execution-root, semantic reachability or profile witnesses. -/
 namespace Solidity.Frontend.Admission.OccurrenceControls
 open Solidity.Source
 
@@ -43,8 +42,7 @@ theorem omitted_child_refused :
 #guard_msgs (whitespace := lax) in #print axioms repeated_payloads_retained
 /-- info: 'Solidity.Frontend.Admission.OccurrenceControls.omitted_child_refused' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms omitted_child_refused
-/-- Regression: reuse the existing inhabited rethrow/mixed-buffer syntax,
-without copying its parser or claiming bytes-memory typing/admission. -/
+/-- Regression: reuse the existing inhabited rethrow/mixed-buffer syntax, without copying its parser or claiming bytes-memory typing/admission. -/
 theorem canonical_rethrow_feature_retained :
     rootExclusionFeaturesAt Examples.rethrow = [.canonicalRethrow] ∧
       Examples.rethrow.rejections = [] :=
@@ -55,8 +53,7 @@ theorem different_buffers_remain_assembly :
       Examples.notRethrow.rejections = [.inlineAssembly] :=
   ⟨rfl,Examples.notRethrow_rejected⟩
 
-/-- The existing whole-unit fixtures report their five exclusion IDs, including
-flags nested in otherwise ordinary syntax. The sixth case is checked below. -/
+/-- The existing whole-unit fixtures report their five exclusion IDs, including flags nested in otherwise ordinary syntax. The sixth case is checked below. -/
 theorem inherited_exclusion_features_reported :
     .inlineAssembly ∈ sourceFeaturesWithExclusions Examples.withAssembly ∧
     .storageLayout ∈ sourceFeaturesWithExclusions Examples.withLayout ∧
@@ -65,8 +62,7 @@ theorem inherited_exclusion_features_reported :
     .removedGenericSolidity ∈ sourceFeaturesWithExclusions Examples.withGeneric := by
   decide
 
-/-- Malformed modifiers retain both their genuine catalog feature and raw
-intrinsic refusal. This is intentionally rejected syntax, not eligibility. -/
+/-- Malformed modifiers retain both their genuine catalog feature and raw intrinsic refusal. This is intentionally rejected syntax, not eligibility. -/
 theorem malformed_modifier_tag_retained :
     let bad := Syn.modifier "m" .none false none
       (.some (.block (.cons Examples.incStmt .nil)))

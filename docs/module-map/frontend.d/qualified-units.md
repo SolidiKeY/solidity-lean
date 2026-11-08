@@ -1,6 +1,5 @@
 
 ### SOL-QN final target, C3 and normalization adequacy
-
 | Module | Purpose |
 |---|---|
 | `Frontend/QualifiedUnits/Linearization.lean` | Independent C3 hierarchy judgment on original declaration identities; `order_iff` (the `idUniverse` bound never refuses a hierarchy), precedence and acyclicity. |

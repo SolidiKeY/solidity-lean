@@ -1,0 +1,782 @@
+[
+  {
+    "id": "M01",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 53,
+    "old": "some (x + y)",
+    "new": "some (x - y)",
+    "definition": "arithInt",
+    "targets": [
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "arithInt: some (x + y) -> some (x - y)"
+  },
+  {
+    "id": "M02",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 54,
+    "old": "some (x - y)",
+    "new": "some (x + y)",
+    "definition": "arithInt",
+    "targets": [
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "arithInt: some (x - y) -> some (x + y)"
+  },
+  {
+    "id": "M03",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 55,
+    "old": "some (x * y)",
+    "new": "some (x + y)",
+    "definition": "arithInt",
+    "targets": [
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "arithInt: some (x * y) -> some (x + y)"
+  },
+  {
+    "id": "M04",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 56,
+    "old": "if y < 0 then none else some (x ^ y.toNat)",
+    "new": "if y < 0 then none else some (x ^ (y.toNat + 1))",
+    "definition": "arithInt",
+    "targets": [
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "arithInt: if y < 0 then none else some (x ^ y.toNat) -> if y < 0 then none else some (x ^ (y.toNat + 1))"
+  },
+  {
+    "id": "M05",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 57,
+    "old": "if y = 0 then none else some (Int.tdiv x y)",
+    "new": "if y = 0 then some 0 else some (Int.tdiv x y)",
+    "definition": "arithInt",
+    "targets": [
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "arithInt: if y = 0 then none else some (Int.tdiv x y) -> if y = 0 then some 0 else some (Int.tdiv x y)"
+  },
+  {
+    "id": "M06",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 58,
+    "old": "if y = 0 then none else some (Int.tmod x y)",
+    "new": "if y = 0 then some 0 else some (Int.tmod x y)",
+    "definition": "arithInt",
+    "targets": [
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "arithInt: if y = 0 then none else some (Int.tmod x y) -> if y = 0 then some 0 else some (Int.tmod x y)"
+  },
+  {
+    "id": "M07",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 59,
+    "old": "(\u00b7 &&& \u00b7)",
+    "new": "(\u00b7 ||| \u00b7)",
+    "definition": "arithInt",
+    "targets": [
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "arithInt: (\u00b7 &&& \u00b7) -> (\u00b7 ||| \u00b7)"
+  },
+  {
+    "id": "M08",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 60,
+    "old": "(\u00b7 ||| \u00b7)",
+    "new": "(\u00b7 &&& \u00b7)",
+    "definition": "arithInt",
+    "targets": [
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "arithInt: (\u00b7 ||| \u00b7) -> (\u00b7 &&& \u00b7)"
+  },
+  {
+    "id": "M09",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 61,
+    "old": "(\u00b7 ^^^ \u00b7)",
+    "new": "(\u00b7 ||| \u00b7)",
+    "definition": "arithInt",
+    "targets": [
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "arithInt: (\u00b7 ^^^ \u00b7) -> (\u00b7 ||| \u00b7)"
+  },
+  {
+    "id": "M10",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 62,
+    "old": "n < 256 then a *",
+    "new": "n < 255 then a *",
+    "definition": "arithInt",
+    "targets": [
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "arithInt: n < 256 then a * -> n < 255 then a *"
+  },
+  {
+    "id": "M11",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 64,
+    "old": "n < 256 then a /",
+    "new": "n < 255 then a /",
+    "definition": "arithInt",
+    "targets": [
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "arithInt: n < 256 then a / -> n < 255 then a /"
+  },
+  {
+    "id": "M12",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 64,
+    "old": "if a < 0 then -1 else 0",
+    "new": "if a < 0 then 0 else 0",
+    "definition": "arithInt",
+    "targets": [
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "arithInt: if a < 0 then -1 else 0 -> if a < 0 then 0 else 0"
+  },
+  {
+    "id": "M13",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 65,
+    "old": "some ((x + y) % Semantics.uintBound)",
+    "new": "some ((x - y) % Semantics.uintBound)",
+    "definition": "arithInt",
+    "targets": [
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "arithInt: some ((x + y) % Semantics.uintBound) -> some ((x - y) % Semantics.uintBound)"
+  },
+  {
+    "id": "M14",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 66,
+    "old": "some ((x - y) % Semantics.uintBound)",
+    "new": "some ((x + y) % Semantics.uintBound)",
+    "definition": "arithInt",
+    "targets": [
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "arithInt: some ((x - y) % Semantics.uintBound) -> some ((x + y) % Semantics.uintBound)"
+  },
+  {
+    "id": "M15",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 67,
+    "old": "some (x * y % Semantics.uintBound)",
+    "new": "some ((x + y) % Semantics.uintBound)",
+    "definition": "arithInt",
+    "targets": [
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "arithInt: some (x * y % Semantics.uintBound) -> some ((x + y) % Semantics.uintBound)"
+  },
+  {
+    "id": "M16",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 68,
+    "old": "x ^ y.toNat % Semantics.uintBound",
+    "new": "x ^ (y.toNat + 1) % Semantics.uintBound",
+    "definition": "arithInt",
+    "targets": [
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "arithInt: x ^ y.toNat % Semantics.uintBound -> x ^ (y.toNat + 1) % Semantics.uintBound"
+  },
+  {
+    "id": "M17",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 91,
+    "old": "decide (x < y)",
+    "new": "decide (x \u2264 y)",
+    "definition": "evalNum",
+    "targets": [
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "evalNum: decide (x < y) -> decide (x \u2264 y)"
+  },
+  {
+    "id": "M18",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 92,
+    "old": "decide (y < x)",
+    "new": "decide (y \u2264 x)",
+    "definition": "evalNum",
+    "targets": [
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "evalNum: decide (y < x) -> decide (y \u2264 x)"
+  },
+  {
+    "id": "M19",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 93,
+    "old": "decide (x \u2264 y)",
+    "new": "decide (x < y)",
+    "definition": "evalNum",
+    "targets": [
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "evalNum: decide (x \u2264 y) -> decide (x < y)"
+  },
+  {
+    "id": "M20",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 94,
+    "old": "decide (y \u2264 x)",
+    "new": "decide (y < x)",
+    "definition": "evalNum",
+    "targets": [
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "evalNum: decide (y \u2264 x) -> decide (y < x)"
+  },
+  {
+    "id": "M21",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 105,
+    "old": "some (a && b)",
+    "new": "some (a || b)",
+    "definition": "evalBool",
+    "targets": [
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "evalBool: some (a && b) -> some (a || b)"
+  },
+  {
+    "id": "M22",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 106,
+    "old": "some (a || b)",
+    "new": "some (a && b)",
+    "definition": "evalBool",
+    "targets": [
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "evalBool: some (a || b) -> some (a && b)"
+  },
+  {
+    "id": "M23",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 125,
+    "old": "| .addmod, x, y => x + y",
+    "new": "| .addmod, x, y => x - y",
+    "definition": "wide",
+    "targets": [
+      "Solidity/Backend/Scalar/Modular.lean",
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "wide: | .addmod, x, y => x + y -> | .addmod, x, y => x - y"
+  },
+  {
+    "id": "M24",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 126,
+    "old": "| .mulmod, x, y => x * y",
+    "new": "| .mulmod, x, y => x + y",
+    "definition": "wide",
+    "targets": [
+      "Solidity/Backend/Scalar/Modular.lean",
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "wide: | .mulmod, x, y => x * y -> | .mulmod, x, y => x + y"
+  },
+  {
+    "id": "M25",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 131,
+    "old": "if k.val = 0 then none",
+    "new": "if k.val = 0 then some (PrimTy.dflt .uint)",
+    "definition": "evalT",
+    "targets": [
+      "Solidity/Backend/Scalar/Modular.lean",
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "evalT: if k.val = 0 then none -> if k.val = 0 then some (PrimTy.dflt .uint)"
+  },
+  {
+    "id": "M26",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 140,
+    "old": "PrimTy.int.ofInt? (-a.1)",
+    "new": "PrimTy.int.ofInt? (a.1)",
+    "definition": "evalT",
+    "targets": [
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "evalT: PrimTy.int.ofInt? (-a.1) -> PrimTy.int.ofInt? (a.1)"
+  },
+  {
+    "id": "M27",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 141,
+    "old": "some (!a)",
+    "new": "some a",
+    "definition": "evalT",
+    "targets": [
+      "Solidity/Backend/Scalar/Typed.lean",
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "evalT: some (!a) -> some a"
+  },
+  {
+    "id": "M28",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 142,
+    "old": "Semantics.uintBound - 1 - a.1",
+    "new": "Semantics.uintBound - 2 - a.1",
+    "definition": "evalT",
+    "targets": [
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "evalT: Semantics.uintBound - 1 - a.1 -> Semantics.uintBound - 2 - a.1"
+  },
+  {
+    "id": "M29",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 145,
+    "old": "a.1 < Semantics.intBound",
+    "new": "a.1 \u2264 Semantics.intBound",
+    "definition": "evalT",
+    "targets": [
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "evalT: a.1 < Semantics.intBound -> a.1 \u2264 Semantics.intBound"
+  },
+  {
+    "id": "M30",
+    "path": "Solidity/Semantics/Ops.lean",
+    "line": 147,
+    "old": "(a.1 % Semantics.uintBound)",
+    "new": "((a.1 + 1) % Semantics.uintBound)",
+    "definition": "evalT",
+    "targets": [
+      "Solidity/Evm/SimLemmas.lean",
+      "Solidity/Optimizer/Simplify.lean",
+      "Solidity/Examples/Tactics/Operators.lean",
+      "Solidity/Examples/Tactics/Values.lean",
+      "Solidity/Examples/Tactics/SignedCasts.lean",
+      "Solidity/Examples/Tactics/ModularArithmetic.lean"
+    ],
+    "source_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+    "area": "Semantics",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "evalT: (a.1 % Semantics.uintBound) -> ((a.1 + 1) % Semantics.uintBound)"
+  },
+  {
+    "id": "M31",
+    "path": "Solidity/Calculus/Closers.lean",
+    "line": 207,
+    "old": "| .error .panic => true",
+    "new": "| .error .panic => false",
+    "definition": "TRes.isPanic",
+    "targets": [
+      "Solidity/Calculus/Closers.lean",
+      "Solidity/Examples/Tactics/CheckedBlock.lean"
+    ],
+    "source_sha256": "92820e63eb62377e15269d9fae366a8003174e8c7b15ea0d3cf5b503891f9b89",
+    "area": "Calculus",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "TRes.isPanic: | .error .panic => true -> | .error .panic => false"
+  },
+  {
+    "id": "M32",
+    "path": "Solidity/Calculus/Closers.lean",
+    "line": 213,
+    "old": "| .error .exhausted => false",
+    "new": "| .error .exhausted => true",
+    "definition": "TRes.isFail",
+    "targets": [
+      "Solidity/Calculus/Closers.lean",
+      "Solidity/Examples/Tactics/CheckedBlock.lean"
+    ],
+    "source_sha256": "92820e63eb62377e15269d9fae366a8003174e8c7b15ea0d3cf5b503891f9b89",
+    "area": "Calculus",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "TRes.isFail: | .error .exhausted => false -> | .error .exhausted => true"
+  },
+  {
+    "id": "M33",
+    "path": "Solidity/Evm/Machine.lean",
+    "line": 76,
+    "old": "def H : Nat := 2 ^ 255",
+    "new": "def H : Nat := 2 ^ 254",
+    "definition": "signed word threshold",
+    "targets": [
+      "Solidity/Evm/Machine.lean"
+    ],
+    "source_sha256": "5b9ec1172302b00d76a01a8fa329615b63b6103bac9be6db45f7168ed4896686",
+    "area": "Evm",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "signed word threshold: def H : Nat := 2 ^ 255 -> def H : Nat := 2 ^ 254"
+  },
+  {
+    "id": "M34",
+    "path": "Solidity/Evm/Machine.lean",
+    "line": 107,
+    "old": "| .root o, i => .root (o + i)",
+    "new": "| .root o, i => .root (o + i + 1)",
+    "definition": "root slot offset",
+    "targets": [
+      "Solidity/Evm/Layout.lean"
+    ],
+    "source_sha256": "5b9ec1172302b00d76a01a8fa329615b63b6103bac9be6db45f7168ed4896686",
+    "area": "Evm",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "root slot offset: | .root o, i => .root (o + i) -> | .root o, i => .root (o + i + 1)"
+  },
+  {
+    "id": "M35",
+    "path": "Solidity/Backend/Scalar/Checked.lean",
+    "line": 48,
+    "old": ".op .ADD,\n   .op (.DUP \u27e81, by decide\u27e9), .op .GT]",
+    "new": ".op .SUB,\n   .op (.DUP \u27e81, by decide\u27e9), .op .GT]",
+    "definition": "overflow-test arithmetic",
+    "targets": [
+      "Solidity/Backend/Scalar/Checked.lean"
+    ],
+    "source_sha256": "0c1dcdbfce79a44bdcc7ab6d6d1da75073f2fb08698acfcfdafc19568ca193a2",
+    "area": "Backend",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "overflow-test arithmetic: .op .ADD,\n   .op (.DUP \u27e81, by decide\u27e9), .op .GT] -> .op .SUB,\n   .op (.DUP \u27e81, by decide\u27e9), .op .GT]"
+  },
+  {
+    "id": "M36",
+    "path": "Solidity/Backend/Scalar/Checked.lean",
+    "line": 53,
+    "old": ".op (.DUP \u27e81, by decide\u27e9), .op .LT]",
+    "new": ".op (.DUP \u27e81, by decide\u27e9), .op .GT]",
+    "definition": "underflow-test comparison",
+    "targets": [
+      "Solidity/Backend/Scalar/Checked.lean"
+    ],
+    "source_sha256": "0c1dcdbfce79a44bdcc7ab6d6d1da75073f2fb08698acfcfdafc19568ca193a2",
+    "area": "Backend",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "underflow-test comparison: .op (.DUP \u27e81, by decide\u27e9), .op .LT] -> .op (.DUP \u27e81, by decide\u27e9), .op .GT]"
+  },
+  {
+    "id": "M37",
+    "path": "Solidity/Yul/Words.lean",
+    "line": 94,
+    "old": "if (xs 1).val = 0 then word 0 else word ((xs 0).val % (xs 1).val)",
+    "new": "if (xs 1).val = 0 then word 1 else word ((xs 0).val % (xs 1).val)",
+    "definition": "modulo zero divisor",
+    "targets": [
+      "Solidity/Yul/WordLaws.lean"
+    ],
+    "source_sha256": "45d5ed2f4a66a670f1ea0b894c41c2ac61cad7a57cf296e5958c3da91c89d97c",
+    "area": "Yul",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "modulo zero divisor: if (xs 1).val = 0 then word 0 else word ((xs 0).val % (xs 1).val) -> if (xs 1).val = 0 then word 1 else word ((xs 0).val % (xs 1).val)"
+  },
+  {
+    "id": "M38",
+    "path": "Solidity/Yul/Words.lean",
+    "line": 107,
+    "old": "if (xs 0).val \u2265 256 then word 0 else word ((xs 1).val <<< (xs 0).val)",
+    "new": "if (xs 0).val \u2265 256 then word 1 else word ((xs 1).val <<< (xs 0).val)",
+    "definition": "large shift result",
+    "targets": [
+      "Solidity/Yul/WordLaws.lean"
+    ],
+    "source_sha256": "45d5ed2f4a66a670f1ea0b894c41c2ac61cad7a57cf296e5958c3da91c89d97c",
+    "area": "Yul",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "large shift result: if (xs 0).val \u2265 256 then word 0 else word ((xs 1).val <<< (xs 0).val) -> if (xs 0).val \u2265 256 then word 1 else word ((xs 1).val <<< (xs 0).val)"
+  },
+  {
+    "id": "M39",
+    "path": "Solidity/Lowering/V07/WordCasts.lean",
+    "line": 8,
+    "old": "def signed : Source.IntTy := \u27e8true,256,by decide\u27e9",
+    "new": "def signed : Source.IntTy := \u27e8true,128,by decide\u27e9",
+    "definition": "signed cast width",
+    "targets": [
+      "Solidity/Lowering/V07/WordCasts.lean"
+    ],
+    "source_sha256": "e78af9e401850b8aae5990425c9fa748fc15ead100ecf54337894a99b791b5e5",
+    "area": "Lowering",
+    "generated": false,
+    "provenance": "unmarked source; not a historical handwritten-authorship claim",
+    "description": "signed cast width: def signed : Source.IntTy := \u27e8true,256,by decide\u27e9 -> def signed : Source.IntTy := \u27e8true,128,by decide\u27e9"
+  }
+]
