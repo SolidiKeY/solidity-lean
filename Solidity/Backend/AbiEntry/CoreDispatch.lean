@@ -109,15 +109,15 @@ def certificate : Interface.CoreDispatchCertificate route where
   selected := fun base frag index rows fallback => ⟨compiled base frag index rows fallback,selected base frag index rows fallback⟩
   executed := executed
 
-/-- info: 'Solidity.Backend.AbiEntry.CoreDispatch.admitted' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiEntry.CoreDispatch.admitted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms admitted
 /-- info: 'Solidity.Backend.AbiEntry.CoreDispatch.selected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms selected
 /-- info: 'Solidity.Backend.AbiEntry.CoreDispatch.body_selected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms body_selected
-/-- info: 'Solidity.Backend.AbiEntry.CoreDispatch.target_hit' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiEntry.CoreDispatch.target_hit' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms target_hit
-/-- info: 'Solidity.Backend.AbiEntry.CoreDispatch.target_miss' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiEntry.CoreDispatch.target_miss' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms target_miss
 /-- info: 'Solidity.Backend.AbiEntry.CoreDispatch.run_route' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms run_route
