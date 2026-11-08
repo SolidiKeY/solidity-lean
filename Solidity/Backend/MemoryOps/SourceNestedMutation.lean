@@ -18,6 +18,7 @@ theorem SourceBoolRefsAt.parent_ne_child {E : Source.Env} {Γ : Source.RCtx} {H 
   have ht := congrArg Sigma.fst (Option.some.inj (hr.parent.symm.trans hc))
   cases ht
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The existing actual source/intrinsic write preserves the whole selected
 parent observer, including repeated aliases to the modified child. Other old
 children need only local separation from THIS written address; they need not be
@@ -94,7 +95,7 @@ theorem SourceBoolRefsAt.write_child_word {E : Source.Env} {Γ : Source.RCtx} {C
     have hw : σ.heap.writeAddr (.index q .dyn (Evm.Memory.indexValue i)) v=
         some (σ.heap.set q (MObj.setElem .dyn (σ.heap.get q) i.val v)) := by
       simp only [Heap.writeAddr,Heap.setIndex,Evm.Memory.indexValue,Int.toNat_natCast]
-      exact if_pos hi
+      exact ite_eq_left hi
     exact Option.some.inj (ho.symm.trans hw)
   obtain ⟨_,_,hc,_⟩ | ⟨hn,_⟩ := Evm.Memory.writeArray_correct (hm.state.heap.arrays q) i v (.val (Evm.bword v)) rfl
   · refine ⟨out,z,ho,?_,hc,hr',hm',?_,hl,hparent⟩
