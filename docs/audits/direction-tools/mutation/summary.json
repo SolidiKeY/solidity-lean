@@ -18,6 +18,7 @@
     "source_sha256": "4110f3923608d46d7955dd4fe0a555313ac59f6e168e3afa8f06c5753a607c18",
     "time_boundary": "Matched per-input repository and solc compile/run timings unavailable; no ratio invented"
   },
+  "execution_limitation": "no systemd scope on the cloud VM (H232)",
   "historical_capture": {
     "archive_sha256": "0389822b7ea06dbe7068896e38aa3abbdfe7c56376d631061efefea0bfd6a881",
     "audit_base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
@@ -66,7 +67,185 @@
     "scope": "Historical captured observation analysis only; no fresh execution, theorem validation, source runtime rebuild or full G52 qualification",
     "source_inputs": 160
   },
-  "lean_elaborations": 0,
+  "lean_elaborations": 5,
+  "lean_source_slice": {
+    "base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+    "boundary": "Unmodified theorem/definition source blocks copied from BASE into standalone Lean-import fixtures; only local source-slice proof coupling measured. Original module uses existing import cache and may be unavailable. No project build, whole-project survivor claim, fresh differential run, or full source/cache validation.",
+    "keysort": {
+      "command": [
+        "prlimit",
+        "--as=12884901888",
+        "--",
+        "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+        "-j1",
+        "-M11000",
+        "--tstack=131072",
+        "--root=/workspace/da-mutation-lean-evidence",
+        "-o",
+        "/workspace/da-mutation-lean-evidence/KeySort.olean",
+        "/workspace/da-mutation-lean-evidence/KeySort.lean"
+      ],
+      "log": "/workspace/da-mutation-lean-evidence/KeySort.log",
+      "name": "KeySort",
+      "output": "",
+      "returncode": 0,
+      "source_sha256": "d47ce39b0149d9701ac32ac36a72b535200ba1a25e59571203a1f4fa6be9f3b0"
+    },
+    "memory_address_space_cap_bytes": 12884901888,
+    "original_module_baseline": {
+      "command": [
+        "prlimit",
+        "--as=12884901888",
+        "--",
+        "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+        "-j1",
+        "-M11000",
+        "--tstack=131072",
+        "--root=/workspace/da-mutation-lean-evidence",
+        "-o",
+        "/workspace/da-mutation-lean-evidence/ClosersOriginal.olean",
+        "/workspace/da-mutation-lean-evidence/ClosersOriginal.lean"
+      ],
+      "log": "/workspace/da-mutation-lean-evidence/ClosersOriginal.log",
+      "name": "ClosersOriginal",
+      "output": "/workspace/da-mutation-lean-evidence/ClosersOriginal.lean:1:0: error: object file '/workspace/solidity-lean/.lake/build/lib/lean/Solidity/Calculus/CloseCallSharing.olean' of module Solidity.Calculus.CloseCallSharing does not exist\n",
+      "returncode": 1,
+      "source_sha256": "92820e63eb62377e15269d9fae366a8003174e8c7b15ea0d3cf5b503891f9b89"
+    },
+    "policy": {
+      "commit": "b6617a90ff530d4b6e588f0b5ca95859743970b5",
+      "id": "H232",
+      "limitation": "no systemd scope on the cloud VM (H232)",
+      "path": "docs/refactoring-progress.md",
+      "sha256": "8dd05565f948f3e52df87979937844086c05285fc6ad6b7e3d7a501c364e888d"
+    },
+    "runtime_gate_pass": false,
+    "source_slice_baseline": {
+      "command": [
+        "prlimit",
+        "--as=12884901888",
+        "--",
+        "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+        "-j1",
+        "-M11000",
+        "--tstack=131072",
+        "--root=/workspace/da-mutation-lean-evidence",
+        "-o",
+        "/workspace/da-mutation-lean-evidence/CloserSliceBaseline.olean",
+        "/workspace/da-mutation-lean-evidence/CloserSliceBaseline.lean"
+      ],
+      "log": "/workspace/da-mutation-lean-evidence/CloserSliceBaseline.log",
+      "name": "CloserSliceBaseline",
+      "output": "",
+      "returncode": 0,
+      "source_sha256": "257c2a3df01e53b2d006ebf93c0e30ab410baaaf92848c6a6ef6ca73578b9f59"
+    },
+    "source_slice_bindings": [
+      {
+        "end": "/-- What a modality",
+        "line": 30,
+        "path": "Solidity/Update.lean",
+        "sha256": "d623408f06c8bda7ad2900d8da90b4a19fb6bcb04a2d8e37771d9216afccae00",
+        "start": "inductive Modality where"
+      },
+      {
+        "end": "/-- A revert with the data",
+        "line": 58,
+        "path": "Solidity/Semantics/Run.lean",
+        "sha256": "922191c55a274609a1903869b4a1ba0f55e68537ea942ae280cfa1a2221c6161",
+        "start": "inductive THalt where"
+      },
+      {
+        "path": "Solidity/Semantics/Run.lean",
+        "sha256": "ac29a050e48e0e6e218eb65735c173e86c55ff652c6ebb541efbd1a01c28d6d7",
+        "text": "abbrev TRes (\u03b1 : Type) := Except THalt \u03b1"
+      },
+      {
+        "end": "theorem tbind_ok_inv",
+        "line": 34,
+        "path": "Solidity/Semantics/RunFrame.lean",
+        "sha256": "cd678799efd11753c70673f93ba7c8713deed257d3e0c160b8d447c5fd31eb40",
+        "start": "def _root_.Solidity.Modality.onTHalt"
+      },
+      {
+        "end": "/-- The state a modality",
+        "line": 63,
+        "path": "Solidity/Calculus/Logic.lean",
+        "sha256": "ab7ffc95afed255cdf5e9d8d6b73ac5f5575e16ad3125bafa99359855ad03ebf",
+        "start": "def _root_.Solidity.Modality.afterRunTR"
+      },
+      {
+        "end": "end Solidity",
+        "line": 205,
+        "path": "Solidity/Calculus/Closers.lean",
+        "sha256": "9cb7daa238e4b4960f800d0cce90f84b5f77a8ceb7df615492bdc747ff33b7df",
+        "start": "/-- The typed outcome is a panic."
+      }
+    ],
+    "source_slice_counts": {
+      "inconclusive": 0,
+      "proof_failed": 1,
+      "survived": 1
+    },
+    "source_slice_mutants": [
+      {
+        "id": "M31",
+        "interpretation": "vacuous-premise: isPanic becomes always false, so hp cannot hold; no global panic-coverage conclusion",
+        "probe": {
+          "command": [
+            "prlimit",
+            "--as=12884901888",
+            "--",
+            "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+            "-j1",
+            "-M11000",
+            "--tstack=131072",
+            "--root=/workspace/da-mutation-lean-evidence",
+            "-o",
+            "/workspace/da-mutation-lean-evidence/CloserSliceM31.olean",
+            "/workspace/da-mutation-lean-evidence/CloserSliceM31.lean"
+          ],
+          "log": "/workspace/da-mutation-lean-evidence/CloserSliceM31.log",
+          "name": "CloserSliceM31",
+          "output": "",
+          "returncode": 0,
+          "source_sha256": "5a10737549caf790d48d89127534c376ecaa1bddaf00d7bffb37c557ed6a40fd"
+        },
+        "status": "selected-source-slice-survived"
+      },
+      {
+        "id": "M32",
+        "interpretation": "local exhausted-case theorem constraint: changed isFail makes the copied theorem proof fail",
+        "probe": {
+          "command": [
+            "prlimit",
+            "--as=12884901888",
+            "--",
+            "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+            "-j1",
+            "-M11000",
+            "--tstack=131072",
+            "--root=/workspace/da-mutation-lean-evidence",
+            "-o",
+            "/workspace/da-mutation-lean-evidence/CloserSliceM32.olean",
+            "/workspace/da-mutation-lean-evidence/CloserSliceM32.lean"
+          ],
+          "log": "/workspace/da-mutation-lean-evidence/CloserSliceM32.log",
+          "name": "CloserSliceM32",
+          "output": "/workspace/da-mutation-lean-evidence/CloserSliceM32.lean:56:16: error: unsolved goals\ncase error.exhausted.refl\n\u03b1 : Type\np : \u03b1 \u2192 Prop\nh : Modality.diamond.afterRunTR p (Except.error THalt.exhausted)\n\u22a2 False\n",
+          "returncode": 1,
+          "source_sha256": "32114e25a53616c0ad0f980728b8e0eb65459efe39be46d304763856df554cef"
+        },
+        "status": "selected-source-slice-proof-failed"
+      }
+    ],
+    "swap_total_kib": 0,
+    "total_elaborations": 5,
+    "versions": {
+      "lake": "Lake version 5.0.0-src+797c613 (Lean version 4.24.0)",
+      "lean": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)"
+    }
+  },
   "mutants": 32,
   "mutation_selection": {
     "basis": "Both selected source files inspected; broad inventory classification remains heuristic",
@@ -112,12 +291,12 @@
       "reason": "Historical archive verified and analyzed; matched per-input timings absent. Coordinator awaits existing matched archive or separate bounded-run authorization; no rerun authorized"
     },
     {
-      "id": "W-LEAN",
-      "reason": "No Lean elaborations performed; systemd resource scope unavailable on this VM (no user bus); highest-value next checks are M32 afterRunTR_diamond_fail, M07 bitwise and M10 shifts. Structural survivors are not semantic survivors"
-    },
-    {
       "id": "W-REFERENCE-LOCK",
       "reason": "Exact historical reference lock bytes not delivered; reference-environment reproduction UNVERIFIABLE under H151"
+    },
+    {
+      "id": "QLEAN-CACHE",
+      "reason": "Whole Closers module baseline unavailable: missing CloseCallSharing.olean; artifact restore placed zero files. Need existing BASE-compatible import closure; not a semantic mutation failure"
     }
   ]
 }

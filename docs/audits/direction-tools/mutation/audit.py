@@ -126,5 +126,14 @@ def main():
         assert summary["historical_capture"]["audit_base"]==BASE,"regenerate captured results for pinned-base provenance"
         summary["waits"][0]={"id":"QDATA-TIMINGS","reason":"Historical archive verified and analyzed; matched per-input timings absent. Coordinator awaits existing matched archive or separate bounded-run authorization; no rerun authorized"}
         summary["waits"].append({"id":"W-REFERENCE-LOCK","reason":"Exact historical reference lock bytes not delivered; reference-environment reproduction UNVERIFIABLE under H151"})
+    probes=OUT/"lean-probes.json"
+    if probes.exists():
+        result=json.loads(probes.read_text());assert result["base"]==BASE
+        summary["lean_elaborations"]=result["total_elaborations"]
+        summary["lean_source_slice"]=result
+        summary["execution_limitation"]="no systemd scope on the cloud VM (H232)"
+        summary["waits"]=[w for w in summary["waits"] if w["id"]!="W-LEAN"]
+        if result["original_module_baseline"]["returncode"]!=0:
+            summary["waits"].append({"id":"QLEAN-CACHE","reason":"Whole Closers module baseline unavailable: missing CloseCallSharing.olean; artifact restore placed zero files. Need existing BASE-compatible import closure; not a semantic mutation failure"})
     write("summary.json",summary)
 if __name__=="__main__":main()
