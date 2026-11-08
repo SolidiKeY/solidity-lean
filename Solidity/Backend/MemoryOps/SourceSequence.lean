@@ -99,8 +99,8 @@ theorem resolved_assign_delete_word {E : Source.Env} {Γ : Source.RCtx} {C : Con
       hsroot hsi hsrhs htroot hti htrhs hk hm SH hmem
   have hlen : mid.len r .dyn=σ.heap.len r .dyn := by
     change (MObj.elems .dyn (mid.get r)).length=_
-    rw [indexedWrite_elems σ.heap mid r .dyn k value hw1,List.length_set]
-    rfl
+    rw [indexedWrite_elems σ.heap mid r .dyn k value hw1]
+    exact List.length_set (as := MObj.elems .dyn (σ.heap.get r)) (i := k.1.toNat) (a := value)
   have hl' : l.1.toNat<(σ.withHeap mid).heap.len r .dyn := by
     change l.1.toNat<mid.len r .dyn
     rw [hlen];exact hl
@@ -192,8 +192,8 @@ theorem resolved_delete_assign_word {E : Source.Env} {Γ : Source.RCtx} {C : Con
     resolved_delete_word G Fsrc (horizon+1) σ r hr sroot sj root j l hsroot hsj htroot htj hl hm SH hmem
   have hlen : mid.len r .dyn=σ.heap.len r .dyn := by
     change (MObj.elems .dyn (mid.get r)).length=_
-    rw [indexedWrite_elems σ.heap mid r .dyn l false hw1,List.length_set]
-    rfl
+    rw [indexedWrite_elems σ.heap mid r .dyn l false hw1]
+    exact List.length_set (as := MObj.elems .dyn (σ.heap.get r)) (i := l.1.toNat) (a := false)
   have hk' : k.1.toNat<(σ.withHeap mid).heap.len r .dyn := by
     change k.1.toNat<mid.len r .dyn
     rw [hlen];exact hk
@@ -257,8 +257,8 @@ theorem resolved_assign_delete_reject {E : Source.Env} {Γ : Source.RCtx} {C : C
       hsroot hsi hsrhs htroot hti htrhs hk hm SH hmem
   have hlen : mid.len r .dyn=σ.heap.len r .dyn := by
     change (MObj.elems .dyn (mid.get r)).length=_
-    rw [indexedWrite_elems σ.heap mid r .dyn k value hw1,List.length_set]
-    rfl
+    rw [indexedWrite_elems σ.heap mid r .dyn k value hw1]
+    exact List.length_set (as := MObj.elems .dyn (σ.heap.get r)) (i := k.1.toNat) (a := value)
   have hl' : (σ.withHeap mid).heap.len r .dyn≤l.1.toNat := by
     change mid.len r .dyn≤l.1.toNat
     rw [hlen];exact hl
