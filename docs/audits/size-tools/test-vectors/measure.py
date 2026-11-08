@@ -81,7 +81,7 @@ def inventory():
                 if not groups or groups[-1][:2] != (op, a) or groups[-1][2] == 16:
                     groups.append((op, a, 0))
                 x, y, count = groups[-1]; groups[-1] = (x, y, count + 1)
-            vectors[p] = dict(vectors=len(re.findall(r'^theorem v\d+', s, re.M)), binary=binary,
+            vectors[p] = dict(lines=len(s.splitlines()), vectors=len(re.findall(r'^theorem v\d+', s, re.M)), binary=binary,
                               rows=len(groups), predicted_line_saving=(binary-len(groups)-10 if binary else 0))
     return dict(areas=dict(sorted(areas.items())), vectors=vectors, controls=dict(sorted(controls.items())), corpus=corpus)
 
@@ -104,6 +104,7 @@ def run(cmd, cwd, log, env):
     if p.returncode: raise RuntimeError(f'{cmd} failed ({p.returncode}); see {log}')
 
 def audit_logs(result, out):
+    result['patch_bytes'] = (HERE/'pilot.patch').stat().st_size
     for i, p in enumerate(FILES):
         logs = {}
         for variant in ['before', 'after']:
@@ -128,12 +129,13 @@ def main():
     args = ap.parse_args()
     if args.audit_results:
         out = args.audit_results.resolve()
+        assert not out.is_relative_to(ROOT), 'evidence must stay outside the code tree'
         result = json.loads((out/'measurement.json').read_text())
         assert result['base'] == BASE and result['source'] == static()
         result = audit_logs(result, out)
         (out/'measurement.json').write_text(json.dumps(result, indent=2)+'\n')
         print(json.dumps(result, indent=2)); return
-    result = dict(base=BASE, source=static())
+    result = dict(base=BASE, patch_bytes=(HERE/'pilot.patch').stat().st_size, source=static())
     if args.inventory: result['inventory'] = inventory()
     if args.static:
         print(json.dumps(result, indent=2)); return
@@ -154,7 +156,7 @@ def main():
         run(['lake', 'build', 'Solidity.Yul.Words', 'Solidity.KeySort'], work, out/'imports.log', env)
         run(['python3', 'scripts/ci/restore-lake-artifacts.py'], work, out/'restore.log', env)
         result['versions'] = {cmd: subprocess.check_output([cmd, '--version'], env=env, text=True).strip() for cmd in ['lean', 'lake']}
-        result['resources'] = dict(lean_threads=1, swap=pathlib.Path('/proc/swaps').read_text(),
+        result['resources'] = dict(lean_threads=1, meminfo=pathlib.Path('/proc/meminfo').read_text(), swap=pathlib.Path('/proc/swaps').read_text(),
                                    check_memory_limit_mib=12288, note='no systemd scope on the cloud VM (H232)')
         result['timings'] = {}
         old, new = patched_sources()

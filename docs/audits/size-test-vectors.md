@@ -11,7 +11,8 @@ There is no new mathematical abstraction: the macro emits the original
 `decide +kernel` proof for each vector. Native constants and compiled size
 increase. This does not establish the parent study's estimated 30k → 1k saving.
 Only this document, the [reproducer](size-tools/test-vectors/measure.py), the
-[pilot patch](size-tools/test-vectors/pilot.patch), and the parent link are
+[pilot patch](size-tools/test-vectors/pilot.patch), the parent link, and the
+generated catalog row authorized by H266 are
 proposed for integration; the patch's `Solidity/` changes stay in scratch trees.
 
 ## Boundary and inventory
@@ -81,7 +82,7 @@ No duplicated arithmetic framework is justified merely to restate `Pure.eval`.
 
 The patch converts 960 binary vectors in
 [Arithmetic Part00](../../Solidity/Yul/Checks/Arithmetic/Part00.lean) and 691 in
-[Bytes](../../Solidity/Yul/Checks/Bytes.lean). All 296 remaining unary theorems
+[Bytes](../../Solidity/Yul/Checks/Bytes.lean). All 296 remaining unmatched theorems
 stay verbatim. Each table row shares the opcode and first input, with at most
 16 `(name, second input, literal expected output)` entries. This layout accounts
 for part of the line saving; the independent **53.0% byte reduction** establishes
