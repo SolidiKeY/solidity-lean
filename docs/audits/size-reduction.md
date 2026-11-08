@@ -2,9 +2,15 @@
 
 Coordinator findings of 2026-11-08 (H259), drawn from the
 [direction audit](direction.md) and its tools under
-[direction-tools](direction-tools/). Every line count below was measured at
-`origin/master` `ffa76e1c0`, except where a figure is marked as an estimate. The
-area studies at the end replace these estimates with savings measured on pilots.
+[direction-tools](direction-tools/). Counts keep the base of the measurement
+they cite: the direction audit's own bases
+([direction](direction.md#measurement-boundary-and-headline-facts)), `d6fd95f08`
+for the declaration graph, and `ffa76e1c0` for the Git history and file counts
+added here. Figures marked as estimates are not measured. The planned area
+studies at the end are to measure savings on pilots. The second audit round
+found that the proof core is nearly complete and that all 39 executed mutants
+were killed ([direction audit](direction.md#making-it-smaller)), so the size
+question concerns the compiler layers.
 
 ## Which size is justified
 
@@ -70,6 +76,9 @@ Translation validation keeps a full proof. The checker's soundness is a
 kernel-checked theorem, and the check of each program must run in the kernel,
 not through `native_decide`. Its open questions are the kernel check time on
 real contracts and whether completeness can be proved for the accepted fragment.
+The acceptance conditions in the [direction audit](direction.md) still apply:
+the checker plus its proofs must be at least 3× smaller than the proofs they
+replace, and kernel checking of real contracts must stay within the gate budget.
 
 The Yul and Lowering ideas above are estimates. The area studies measure them
 on real slices.
@@ -91,15 +100,19 @@ on real slices.
 
 ## Area studies
 
-Each study pilots its best ideas on a real slice and replaces its own line
-below with a link and its result.
+Two batches run the pilots. They are planned; until each study reports, no
+saving here is measured.
 
-- Yul views: pending, lane size-yul-views.
+- Translation validation for Yul, Backend and Lowering: lanes `tv-yul`,
+  `tv-backend` and `gen-lowering` of batch `shrink-pilots-1108` (H258), plus
+  `lowering-checker-p1`. Results go under `docs/audits/shrink/` and are
+  summarised in [direction audit: making it smaller](direction.md#making-it-smaller).
+
+- Yul views as one layout-indexed view: pending, lane size-yul-views.
 
 - Test vectors as theorems (repo-wide): pending, lane size-test-vectors.
 
-- Backend: pending, lane size-backend.
-
-- Lowering: pending, lane size-lowering.
-
 - Duplicates (repo-wide): pending, lane size-duplicates.
+
+Each lane of batch `size-reduction-1108` replaces its own line above with a
+link to its study and its measured result.
