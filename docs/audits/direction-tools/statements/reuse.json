@@ -1,5 +1,15 @@
 {
   "base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+  "completion_authorization": {
+    "H243": {
+      "question": "Q-STMT-REF-01",
+      "decision": "A: keep all rows, ratio=null with the exact non-comparability reason; size ratios only for genuine matches."
+    },
+    "H244": {
+      "question": "Q-STMT-PROV-01",
+      "decision": "A: accept the frozen inventory; report confirmed-generated, explicitly-handwritten and untraced separately; no claim about historical handwriting totals."
+    }
+  },
   "integrated_inputs_commit": "cf3baafd2202adf0107c5ae4d2879cd04ff0aec5",
   "input_sha256": {
     "docs/audits/direction-tools/census/census.json": "aabe0148297b2a00b9544c3c9234073a99fe50f50ca221e4a47637c20ac7b471",
@@ -171,5 +181,5 @@
       "resolution": "Retain the explicit handwritten exception documented by pinned scripts/check-corpus.sh; do not overwrite with a broader directory classification."
     }
   ],
-  "conclusion": "Integrated artifacts corroborate selected-module counts but supply no further direct selected-module pair or historical producer records. Q-STMT-REF-01 and Q-STMT-PROV-01 remain pending; no permission inferred from merging master."
+  "conclusion": "Integrated artifacts corroborate selected-module counts but supply no further direct selected-module pair or historical producer records. H243 authorizes explicit null ratios for unmatched units; H244 accepts separately reported generated, handwritten and untraced categories. Neither implies additional measurement or a historical origin certificate."
 }
