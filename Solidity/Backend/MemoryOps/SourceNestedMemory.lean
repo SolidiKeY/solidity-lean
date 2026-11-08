@@ -22,6 +22,7 @@ structure SourceBoolRefsAt {E : Source.Env} {Γ : Source.RCtx} {H : HTy}
   parent : y.2.heap.get parentAddress=some ⟨SourceBoolRefsTy,sourceBoolRefMemory address (MObj.elems .dyn (hp.get r))⟩
   children : ∀ q ∈ MObj.elems .dyn (hp.get r), SourceBoolMemoryAt y (address q.id) hp q .dyn
 
+set_option backward.isDefEq.respectTransparency false in
 theorem SourceBoolRefsAt.parent_read {E : Source.Env} {Γ : Source.RCtx} {H : HTy}
     {y : Source.EMState E Γ} {parentAddress : Nat} {hp : Heap H} {r : HRef H BoolRefsRef}
     {address : Nat → Nat} (hr : SourceBoolRefsAt y parentAddress hp r address)
@@ -35,8 +36,10 @@ theorem SourceBoolRefsAt.parent_read {E : Source.Env} {Γ : Source.RCtx} {H : HT
     rw [Source.memElem,Source.Hoare.run_bind,source_heapObj_run y parentAddress _ hr.parent]
     simp only [sourceBoolRefMemory,hi,↓reduceDIte,Source.Data.asVal]
     rfl
+  change (Source.memElem parentAddress i (.array .memory .bool none)).run y = _
   simpa only [he] using hs
 
+set_option backward.isDefEq.respectTransparency false in
 theorem SourceBoolRefsAt.parent_bounds {E : Source.Env} {Γ : Source.RCtx} {H : HTy}
     {y : Source.EMState E Γ} {parentAddress : Nat} {hp : Heap H} {r : HRef H BoolRefsRef}
     {address : Nat → Nat} (hr : SourceBoolRefsAt y parentAddress hp r address)
@@ -145,7 +148,7 @@ theorem SourceBoolRefsAt.indexLoc_run {E : Source.Env} {Γ : Source.RCtx} {H : H
     (i : Nat) (hi : i<hp.len r .dyn) :
     (Source.indexLoc (E := E) (Γ := Γ) F (.memRef rfl parentAddress : Source.Val E.layout SourceBoolRefsTy) i).run y=
       (.ok (.mem parentAddress i),y) := by
-  rw [Source.indexLoc,Source.Hoare.run_bind,hr.length_run F]
+  rw [Source.indexLoc.eq_def,Source.Hoare.run_bind,hr.length_run F]
   simp only [hi,↓reduceIte]
   rfl
 
@@ -161,7 +164,7 @@ theorem SourceBoolRefsAt.eval_parent_read {E : Source.Env} {Γ : Source.RCtx} {H
       (.ok (.val (.memRef rfl (address q.id))),y) := by
   have hqi : (MObj.elems .dyn (hp.get r))[k.1.toNat]?=some q := hq
   have hk : k.1.toNat<hp.len r .dyn := (List.getElem?_eq_some_iff.mp hqi).1
-  rw [Source.evalE,Source.Hoare.run_bind,source_local_value_run G F horizon y root _ hroot]
+  rw [Source.evalE.eq_def,Source.Hoare.run_bind,source_local_value_run G F horizon y root _ hroot]
   change ((Source.evalE G F (horizon+1) (.local index)) >>= fun v => Source.indexNat v >>= fun i =>
     Source.indexLoc F (.memRef rfl parentAddress : Source.Val E.layout SourceBoolRefsTy) i >>= fun loc =>
     Source.readLoc F loc >>= fun v => pure (Source.RVal.val v)).run y=_
@@ -186,7 +189,7 @@ theorem SourceBoolRefsAt.eval_nested_read {E : Source.Env} {Γ : Source.RCtx} {H
   have hqi : (MObj.elems .dyn (hp.get r))[k.1.toNat]?=some q := hq
   have hc := hr.child_at k.1.toNat q hqi
   have hjb : l.1.toNat<hp.len q .dyn := (List.getElem?_eq_some_iff.mp hv).1
-  rw [Source.evalE,Source.Hoare.run_bind,hr.eval_parent_read G F horizon root i k q hroot hi hq]
+  rw [Source.evalE.eq_def,Source.Hoare.run_bind,hr.eval_parent_read G F horizon root i k q hroot hi hq]
   change ((Source.evalE G F (horizon+2) (.local j)) >>= fun v => Source.indexNat v >>= fun n =>
     Source.indexLoc F (.memRef rfl (address q.id) : Source.Val E.layout (.array .memory .bool none)) n >>= fun loc =>
     Source.readLoc F loc >>= fun v => pure (Source.RVal.val v)).run y=_
@@ -234,7 +237,7 @@ theorem SourceBoolRefsAt.indexLoc_bounds {E : Source.Env} {Γ : Source.RCtx} {H 
     (i : Nat) (hi : hp.len r .dyn≤i) :
     (Source.indexLoc (E := E) (Γ := Γ) F (.memRef rfl parentAddress : Source.Val E.layout SourceBoolRefsTy) i).run y=
       (.error (.revert (Source.panicData .index)),y) := by
-  rw [Source.indexLoc,Source.Hoare.run_bind,hr.length_run F]
+  rw [Source.indexLoc.eq_def,Source.Hoare.run_bind,hr.length_run F]
   simp only [show ¬i<hp.len r .dyn from Nat.not_lt.mpr hi,↓reduceIte]
   rfl
 
@@ -247,7 +250,7 @@ theorem SourceBoolRefsAt.eval_parent_bounds {E : Source.Env} {Γ : Source.RCtx} 
     (hindex : y.1.get index=sourceUint k) (hk : hp.len r .dyn≤k.1.toNat) :
     (Source.evalE G F (horizon+2) (.indexArray (.local root) (.local index) rfl)).run y=
       (.error (.revert (Source.panicData .index)),y) := by
-  rw [Source.evalE,Source.Hoare.run_bind,source_local_value_run G F horizon y root _ hroot]
+  rw [Source.evalE.eq_def,Source.Hoare.run_bind,source_local_value_run G F horizon y root _ hroot]
   change ((Source.evalE G F (horizon+1) (.local index)) >>= fun v => Source.indexNat v >>= fun i =>
     Source.indexLoc F (.memRef rfl parentAddress : Source.Val E.layout SourceBoolRefsTy) i >>= fun loc =>
     Source.readLoc F loc >>= fun v => pure (Source.RVal.val v)).run y=_
@@ -265,7 +268,7 @@ theorem SourceBoolRefsAt.eval_nested_parent_bounds {E : Source.Env} {Γ : Source
     (hi : y.1.get i=sourceUint k) (hk : hp.len r .dyn≤k.1.toNat) :
     (Source.evalE G F (horizon+3) (.indexArray (.indexArray (.local root) (.local i) rfl) (.local j) rfl)).run y=
       (.error (.revert (Source.panicData .index)),y) := by
-  rw [Source.evalE,Source.Hoare.run_bind,hr.eval_parent_bounds G F horizon root i k hroot hi hk]
+  rw [Source.evalE.eq_def,Source.Hoare.run_bind,hr.eval_parent_bounds G F horizon root i k hroot hi hk]
 
 theorem SourceBoolRefsAt.eval_nested_child_bounds {E : Source.Env} {Γ : Source.RCtx} {H : HTy}
     {y : Source.EMState E Γ} {parentAddress : Nat} {hp : Heap H} {r : HRef H BoolRefsRef}
@@ -278,7 +281,7 @@ theorem SourceBoolRefsAt.eval_nested_child_bounds {E : Source.Env} {Γ : Source.
     (Source.evalE G F (horizon+3) (.indexArray (.indexArray (.local root) (.local i) rfl) (.local j) rfl)).run y=
       (.error (.revert (Source.panicData .index)),y) := by
   have hc := hr.child_at k.1.toNat q hq
-  rw [Source.evalE,Source.Hoare.run_bind,hr.eval_parent_read G F horizon root i k q hroot hi hq]
+  rw [Source.evalE.eq_def,Source.Hoare.run_bind,hr.eval_parent_read G F horizon root i k q hroot hi hq]
   change ((Source.evalE G F (horizon+2) (.local j)) >>= fun v => Source.indexNat v >>= fun n =>
     Source.indexLoc F (.memRef rfl (address q.id) : Source.Val E.layout (.array .memory .bool none)) n >>= fun loc =>
     Source.readLoc F loc >>= fun v => pure (Source.RVal.val v)).run y=_
