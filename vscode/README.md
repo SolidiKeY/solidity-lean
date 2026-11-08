@@ -62,3 +62,15 @@ Omitting the option retains strict full-rectangle admission. Tabs keep their str
 public-resource checks; trust-transition/recovery runs reject this option. DOM
 endpoints do not certify raster glyphs or mutation ABA, and this option does not
 waive the original failed run or either independent row judgment.
+
+Compiler quick fixes support `codeAction/resolve`. Wire clients retain eager
+edits for compatibility; the VS Code provider defers branded actions and resolves
+them against the latest listing and current source, diagnostics and dependencies.
+Expired or unknown handles refuse edits. This is compiler-action support, not
+Dafny proof/plugin action equivalence.
+
+The existing native runner's `--suite compiler-code-actions --targets local`
+observation requires one worker/obligation/trial, zero warmups and protocol on.
+It reuses the original `Fixes.sol` fixture and records actual VS Code provide,
+resolve and apply APIs plus owned LSP traffic, stale refusal and byte restoration.
+It does not certify a rendered lightbulb/menu, raster identity or proof outcome.

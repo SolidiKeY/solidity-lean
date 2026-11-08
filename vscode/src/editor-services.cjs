@@ -1,11 +1,18 @@
 'use strict';
 const {join,resolve,sep}=require('node:path');
 const {createHash}=require('node:crypto');
+const {isDeepStrictEqual}=require('node:util');
 const {summarize,issueURL}=require('./status-summary.cjs');
 const model=require('./model.cjs');
 
 function install(vscode,context,servers,reportError){
   const selector={scheme:'file',pattern:'**/*.sol'};
+  const codeActions=new WeakMap();
+  const actionSnapshot=doc=>({doc,uri:doc.uri.toString(),version:doc.version,sourceHash:createHash('sha256').update(doc.getText()).digest('hex'),epoch:pickerEpochs.get(doc.uri.toString())||0});
+  const actionFailure=(message,code=-32801)=>Object.assign(new Error(message),{code});
+  const assertActionCurrent=(owner,token)=>{if(token?.isCancellationRequested)throw actionFailure('Request cancelled',-32800);if(disposed||owner.doc.isClosed||!vscode.workspace.textDocuments.includes(owner.doc)||owner.doc.uri.toString()!==owner.uri||owner.doc.version!==owner.version||createHash('sha256').update(owner.doc.getText()).digest('hex')!==owner.sourceHash||(pickerEpochs.get(owner.uri)||0)!==owner.epoch)throw actionFailure('Code action document or service changed');};
+  const materializeAction=(row,owner,deferred)=>{const action=new vscode.CodeAction(row.title,vscode.CodeActionKind.QuickFix);if(!deferred&&row.edit)action.edit=workspaceEdit(row.edit);codeActions.set(action,{owner,wire:structuredClone(row)});return action;};
+
   const range=r=>new vscode.Range(r.start.line,r.start.character,r.end.line,r.end.character);
   const location=l=>new vscode.Location(vscode.Uri.parse(l.uri),range(l.range));
   const raw=async(method,doc,params,token)=>{
@@ -25,9 +32,15 @@ function install(vscode,context,servers,reportError){
   const providers=[
     vscode.languages.registerDocumentFormattingEditProvider(selector,{async provideDocumentFormattingEdits(doc,options,token){return (await query('textDocument/formatting',doc,{options},token)||[]).map(e=>new vscode.TextEdit(range(e.range),e.newText));}}),
     vscode.languages.registerCodeActionsProvider(selector,{async provideCodeActions(doc,selection,options,token){
-      const diagnostics=options.diagnostics.map(d=>({range:{start:d.range.start,end:d.range.end},message:d.message,source:d.source,code:typeof d.code==='object'?d.code.value:d.code,severity:d.severity+1}));
+      const owner=actionSnapshot(doc),diagnostics=options.diagnostics.map(d=>({range:{start:d.range.start,end:d.range.end},message:d.message,source:d.source,code:typeof d.code==='object'?d.code.value:d.code,severity:d.severity+1}));
       const actions=await query('textDocument/codeAction',doc,{range:{start:selection.start,end:selection.end},context:{diagnostics,only:options.only?[options.only.value]:undefined}},token)||[];
-      return actions.map(row=>{const action=new vscode.CodeAction(row.title,vscode.CodeActionKind.QuickFix);action.edit=workspaceEdit(row.edit);return action;});
+      if(!actions.length)return[];assertActionCurrent(owner,token);
+      return actions.map(row=>{const ref=row.data?.solidityLeanCodeActionV1;if(ref&&ref.uri!==owner.uri)throw actionFailure('Foreign compiler code action');return materializeAction(row,owner,!!ref);});
+    },async resolveCodeAction(action,token){
+      const record=codeActions.get(action);if(!record)throw actionFailure('Unknown editor code action',-32602);const {owner,wire}=record;assertActionCurrent(owner,token);
+      const ref=wire.data?.solidityLeanCodeActionV1,resolved=ref?await raw('codeAction/resolve',owner.doc,structuredClone(wire),token):wire;assertActionCurrent(owner,token);
+      if(ref){if(!isDeepStrictEqual(resolved?.data,wire.data)||resolved.edit?.documentChanges?.length!==1||resolved.edit.documentChanges.some(c=>c.textDocument.uri!==owner.uri||c.textDocument.version!==owner.version))throw actionFailure('Foreign or incomplete resolved compiler edit');}
+      return materializeAction(resolved,owner,false);
     }},{providedCodeActionKinds:[vscode.CodeActionKind.QuickFix]}),
     vscode.languages.registerWorkspaceSymbolProvider({async provideWorkspaceSymbols(queryText,token){
       if(!servers.clients.size){const files=await vscode.workspace.findFiles('**/*.sol','**/{node_modules,.lake,.git,.cache}/**',1);if(files.length)await servers.open(await vscode.workspace.openTextDocument(files[0]));}

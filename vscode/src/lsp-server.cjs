@@ -3,7 +3,7 @@
 const {mkdtempSync,mkdirSync,rmSync}=require('node:fs');
 const {join,resolve,dirname}=require('node:path');
 const {fileURLToPath,pathToFileURL}=require('node:url');
-const {createHash}=require('node:crypto');
+const {createHash,randomUUID}=require('node:crypto');
 const {fork}=require('node:child_process');
 const {RpcPeer,failure,cancellable}=require('./rpc.cjs');
 const {WorkerPool,fingerprint}=require('./worker-pool.cjs');
@@ -50,7 +50,7 @@ class SolidityService {
     this.notify('solidityLean/status',{uri:doc.uri,version:doc.version,sourceHash:hash(doc.text),synchronizationId:doc.synchronizationId,state,progressScope:'document',functions:state==='cancelled'?[]:functions,...extra});
   }
   diagnostics(doc,diagnostics){
-    const sourceHash=hash(doc.text);doc.publishedDiagnostics={uri:doc.uri,version:doc.version,sourceHash,synchronizationId:doc.synchronizationId,generation:this.generation,values:structuredClone(diagnostics)};
+    doc.codeActionSet=null;const sourceHash=hash(doc.text);doc.publishedDiagnostics={uri:doc.uri,version:doc.version,sourceHash,synchronizationId:doc.synchronizationId,generation:this.generation,values:structuredClone(diagnostics)};
     this.notify('textDocument/publishDiagnostics',{uri:doc.uri,version:doc.version,sourceHash,synchronizationId:doc.synchronizationId,diagnostics});
   }
   cancel(doc){
@@ -418,7 +418,7 @@ class SolidityService {
     return null;
   }
   codeActions(doc,params){
-    const actions=[],add=(title,diagnostic,range,newText)=>actions.push({title,kind:'quickfix',diagnostics:[diagnostic],edit:{documentChanges:[{textDocument:{uri:doc.uri,version:doc.version},edits:[{range,newText}]}]}});
+    doc.codeActionSet=null;const actions=[],add=(title,diagnostic,range,newText)=>actions.push({title,kind:'quickfix',diagnostics:[diagnostic],edit:{documentChanges:[{textDocument:{uri:doc.uri,version:doc.version},edits:[{range,newText}]}]}});
     if(params.context?.only&&!params.context.only.some(k=>'quickfix'.startsWith(k)))return [];
     // Client diagnostics select current compiler facts; they do not authorize edits.
     const batch=doc.publishedDiagnostics;
@@ -438,7 +438,22 @@ class SolidityService {
       if(String(diagnostic.code)==='5667'&&parent?.nodeType==='ParameterList')add('Remove unused parameter name '+variable.name,diagnostic,doc.index.nameRange(variable),'');
       if(String(diagnostic.code)==='2072'&&parent?.nodeType==='VariableDeclarationStatement'&&parent.declarations.length===1&&(!parent.initialValue||parent.initialValue.nodeType==='Literal')&&/^(?:u?int\d*|bool|address|bytes\d+)$/.test(variable.typeName?.name||''))add('Remove unused local '+variable.name,diagnostic,doc.index.nodeRange(parent),'');
     }
-    return actions;
+    if(!actions.length)return actions;
+    const listing=randomUUID(),entries=new Map(),unique=new Map();
+    const result=actions.map(action=>{const key=JSON.stringify(action);let id=unique.get(key);if(!id){id=randomUUID();unique.set(key,id);}const data={solidityLeanCodeActionV1:{uri:doc.uri,listing,id}};if(!entries.has(id))entries.set(id,structuredClone({...action,data}));return{...action,data};});
+    doc.codeActionSet={document:doc,batch,uri:doc.uri,version:doc.version,sourceHash:batch.sourceHash,generation:this.generation,synchronizationId:doc.synchronizationId,project:doc.compiled?.project??doc.projectSnapshot,listing,actions:entries};return result;
+  }
+  resolveCodeAction(action,signal){
+    if(signal?.aborted)throw failure('Request cancelled',-32800);
+    this.refresh();
+    const ref=action?.data?.solidityLeanCodeActionV1;
+    if(!ref||!['uri','listing','id'].every(k=>typeof ref[k]==='string'&&ref[k].length))throw failure('Unknown compiler code action data',-32602);
+    const doc=this.docs.get(ref.uri),set=doc?.codeActionSet;
+    if(!set||set.document!==doc||set.listing!==ref.listing||!this.current(doc,set.version)||doc.uri!==set.uri||hash(doc.text)!==set.sourceHash||this.generation!==set.generation||doc.synchronizationId!==set.synchronizationId||doc.publishedDiagnostics!==set.batch)throw failure('Code action is no longer current',-32801);
+    if(set.project&&!projects.current(set.project,this.projectDocuments(),true))throw failure('Code action dependency changed',-32801);
+    if(action.textDocument){if(action.textDocument.uri!==doc.uri)throw failure('Code action resource changed',-32801);checkVersion(doc,action.textDocument.version);}
+    const original=set.actions.get(ref.id);if(!original)throw failure('Unknown compiler code action',-32602);
+    return structuredClone(original);
   }
 
   async validateEdits(doc,edit,signal,expected=new Map()){
@@ -481,7 +496,7 @@ function startServer(input=process.stdin,output=process.stdout){
     service=new SolidityService(peer,params.initializationOptions?.backendPath||fileURLToPath(params.rootUri),params.initializationOptions?.settings);
     return {serverInfo:identity(),capabilities:{textDocumentSync:{openClose:true,change:2,save:{includeText:true}},hoverProvider:true,
       completionProvider:{triggerCharacters:['.']},definitionProvider:true,referencesProvider:true,documentSymbolProvider:true,documentHighlightProvider:true,
-      workspaceSymbolProvider:true,documentFormattingProvider:true,codeActionProvider:{codeActionKinds:['quickfix']},renameProvider:{prepareProvider:true},signatureHelpProvider:{triggerCharacters:['(',',']}}};
+      workspaceSymbolProvider:true,documentFormattingProvider:true,codeActionProvider:{codeActionKinds:['quickfix'],resolveProvider:true},renameProvider:{prepareProvider:true},signatureHelpProvider:{triggerCharacters:['(',',']}}};
   });
   const ready=()=>{if(!service||shuttingDown)throw failure('Server is not initialized',-32002);return service;};
   peer.onNotification('initialized',()=>{if(!versionSent){ready();peer.notify(versionNotification,identity());versionSent=true;}});
@@ -503,6 +518,7 @@ function startServer(input=process.stdin,output=process.stdout){
     workers:service.pool.workers.map(w=>w.child.pid),analysisWorkers:service.analysisPool.workers.map(w=>w.child.pid),retiringWorkers:[...service.pool.workers,...service.analysisPool.workers].filter(w=>w.retiring).map(w=>w.child.pid),directory:service.directory,queued:service.pool.queue.length,generation:service.generation}));
   for(const method of ['hover','completion','definition','references','documentSymbol','signatureHelp','documentHighlight','prepareRename','rename','formatting','codeAction'])
     peer.onRequest('textDocument/'+method,async(params,id)=>{const s=ready(),controller=new AbortController();s.requests.set(id,controller);try{return await s.language('textDocument/'+method,params,controller.signal);}finally{s.requests.delete(id);}});
+  peer.onRequest('codeAction/resolve',async(params,id)=>{const s=ready(),controller=new AbortController();s.requests.set(id,controller);try{return s.resolveCodeAction(params,controller.signal);}finally{s.requests.delete(id);}});
   peer.onRequest('workspace/symbol',async(params,id)=>{const s=ready(),controller=new AbortController();s.requests.set(id,controller);try{return await s.workspaceSymbols(params.query,controller.signal);}finally{s.requests.delete(id);}});
   peer.onNotification('workspace/didChangeWatchedFiles',params=>{for(const change of params.changes)ready().invalidatePath(fileURLToPath(change.uri));});
   peer.onRequest('shutdown',async()=>{shuttingDown=true;await service?.dispose();return null;});

@@ -120,6 +120,8 @@ async function run() {
     }
     if(config.suite==='contribution-menus'){
       await scenario(config.menuTrust==='recovery'?'native-contribution-menu-recovery':'native-contribution-menus',()=>require('./menu-lifecycle.cjs').run({vscode,config,events,sessionFor}));
+    }else if(config.suite==='compiler-code-actions'){
+      await scenario('native-compiler-code-actions',()=>require('./code-action-lifecycle.cjs').run({vscode,config,api,events,sessionFor}));
     }else if(config.suite==='verification-time-limit'){
       await scenario('native-verification-time-limit',()=>require('./verification-limit.cjs').run({vscode,config,api,events,until}));
     }else if(config.suite==='testing-symbols'){

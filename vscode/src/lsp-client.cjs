@@ -38,7 +38,7 @@ class LanguageClient extends EventEmitter {
     this.versionWait=waitForServerVersion(this.peer,this.startupAbort.signal);this.versionWait.promise.catch(error=>this.fail(error));
     const automaticVerification=configuration.automaticVerification||'never';
     const result=await this.peer.request('initialize',{processId:process.pid,rootUri:pathToFileURL(configuration.backendPath).href,
-      capabilities:{experimental:{solidityLeanOwnedProcess:true},textDocument:{publishDiagnostics:{versionSupport:true}}},initializationOptions:{backendPath:configuration.backendPath,
+      capabilities:{experimental:{solidityLeanOwnedProcess:true},textDocument:{publishDiagnostics:{versionSupport:true},codeAction:{dataSupport:true,resolveSupport:{properties:['edit']}}}},initializationOptions:{backendPath:configuration.backendPath,
         settings:{projectRoot:configuration.projectRoot,includePaths:configuration.includePaths||[],remappings:configuration.remappings||[],workers:configuration.workers||1,timeoutMs:configuration.timeoutMs||600000,automaticVerification,
           counterexamples:!!configuration.counterexamples,auditPreconditions:!!configuration.auditPreconditions}}},{timeoutMs:30000})
     ;
