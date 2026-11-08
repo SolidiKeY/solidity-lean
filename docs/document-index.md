@@ -216,6 +216,7 @@ and open obligations. Test proposals remain proposals until applied.
 - [docs/audits/prior-art-lowering.md](audits/prior-art-lowering.md)
 - [docs/audits/proof-coverage.md](audits/proof-coverage.md)
 - [docs/audits/size-reduction.md](audits/size-reduction.md)
+- [docs/audits/size-test-vectors.md](audits/size-test-vectors.md)
 - [docs/automation.md](automation.md)
 - [docs/bridge.md](bridge.md)
 - [docs/browser-simple-benchmarks.md](browser-simple-benchmarks.md)
