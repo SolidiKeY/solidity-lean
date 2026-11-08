@@ -200,28 +200,28 @@ theorem runCaptures_none_bounds {H : HTy} {R : RefTy} {E : Ty}
 
 /-- info: 'Solidity.Backend.MemoryOps.runCaptures_none_bounds' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms runCaptures_none_bounds
-/-- info: 'Solidity.Backend.MemoryOps.runCaptures_none_iff' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.runCaptures_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms runCaptures_none_iff
-/-- info: 'Solidity.Backend.MemoryOps.runCaptures_associative' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.runCaptures_associative' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms runCaptures_associative
-/-- info: 'Solidity.Backend.MemoryOps.runCaptures_singleton' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.runCaptures_singleton' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms runCaptures_singleton
-/-- info: 'Solidity.Backend.MemoryOps.runCaptures_cons_some' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.runCaptures_cons_some' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms runCaptures_cons_some
-/-- info: 'Solidity.Backend.MemoryOps.runCaptures_append' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.runCaptures_append' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms runCaptures_append
-/-- info: 'Solidity.Backend.MemoryOps.runCaptures_split_some' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.runCaptures_split_some' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms runCaptures_split_some
-/-- info: 'Solidity.Backend.MemoryOps.runCaptures_all_len' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.runCaptures_all_len' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms runCaptures_all_len
-/-- info: 'Solidity.Backend.MemoryOps.runCaptures_frame' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.runCaptures_frame' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms runCaptures_frame
-/-- info: 'Solidity.Backend.MemoryOps.runCaptures_success_iff' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.runCaptures_success_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms runCaptures_success_iff
-/-- info: 'Solidity.Backend.MemoryOps.runCaptures_none_first' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.runCaptures_none_first' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms runCaptures_none_first
-/-- info: 'Solidity.Backend.MemoryOps.runCaptures_reached' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.runCaptures_reached' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms runCaptures_reached
-/-- info: 'Solidity.Backend.MemoryOps.runCaptures_two' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.runCaptures_two' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms runCaptures_two
 end Solidity.Backend.MemoryOps
