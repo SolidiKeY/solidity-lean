@@ -114,7 +114,7 @@ theorem RefChildRepr.reverseMixedSequence_agrees {D : Source.Layout} {n n' : Opt
  Classical.choice,
  Quot.sound] -/
 #guard_msgs in #print axioms RefChildRepr.mixedSequence_agrees
-/-- info: 'Solidity.Backend.MemoryOps.checkedReverse_as_forward' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedReverse_as_forward' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedReverse_as_forward
 /-- info: 'Solidity.Backend.MemoryOps.RefChildRepr.reverseMixedSequence_agrees' depends on axioms: [propext,
  Classical.choice,
