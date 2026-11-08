@@ -11,14 +11,40 @@ BASE='d4ad633a9624263a59b14fd2c520b9bc602f88f3'
 EXT={'.lean','.v','.sml','.thy','.k','.md','.cpp','.h','.hs','.ml','.x','.y','.java','.g4','.key','.ML','.c','.cxx','.hpp'}
 DECL=re.compile(r'^\s*(?:(?:private|protected|noncomputable|unsafe|partial)\s+)*(def|abbrev|inductive|structure|class|instance|theorem|lemma|Definition|Fixpoint|Inductive|Record|Theorem|Lemma|Corollary|Datatype|Definition|Theorem|definition|fun|function|datatype|record|lemma|theorem|rule|syntax)\b',re.M)
 THM=re.compile(r'^\s*(?:(?:private|protected)\s+)*(?:theorem|lemma|Theorem|Lemma|Corollary)\b',re.M)
+BASE_FILES={}
+BASE_TEXT={}
+def base_snapshot():
+ global BASE_FILES,BASE_TEXT
+ if BASE_FILES: return
+ rows=subprocess.check_output(['git','-C',str(ROOT),'ls-tree','-r',BASE],text=True).splitlines()
+ for row in rows:
+  metadata,name=row.split('\t',1)
+  kind,typ,sha=metadata.split()
+  if typ=='blob': BASE_FILES[name]=sha
+ selected={name:sha for name,sha in BASE_FILES.items() if name.endswith('.lean')}
+ objects=list(dict.fromkeys(selected.values()))
+ raw=subprocess.run(['git','-C',str(ROOT),'cat-file','--batch'],input=('\n'.join(objects)+'\n').encode(),stdout=subprocess.PIPE,check=True).stdout
+ pos=0; texts={}
+ for sha in objects:
+  end=raw.index(b'\n',pos); header=raw[pos:end].split(); size=int(header[-1]); pos=end+1
+  texts[sha]=raw[pos:pos+size].decode(errors='replace'); pos+=size+1
+ BASE_TEXT={name:texts[sha] for name,sha in selected.items()}
+def source_text(root,name):
+ if root==ROOT:
+  base_snapshot()
+  if name in BASE_TEXT: return BASE_TEXT[name]
+  return subprocess.check_output(['git','-C',str(ROOT),'show',BASE+':'+name],text=True)
+ return (root/name).read_text(errors='replace')
 def tracked(root):
+ if root==ROOT:
+  base_snapshot(); return list(BASE_FILES)
  return subprocess.check_output(['git','-C',str(root),'ls-files'],text=True).splitlines()
 def count(root,paths):
  result=dict(unsupported_native_files=0,proof_region_lines_estimate=0,definition_region_lines_estimate=0,other_lines_estimate=0,handwritten_candidate_lines=0,files=0,lines=0,declarations=0,theorems=0,generated_lines=0,unclassified_lines=0,proof_marker_lines=0)
  for name in paths:
   f=root/name
-  if not f.is_file() or f.suffix not in EXT: continue
-  text=f.read_text(errors='replace')
+  if f.suffix not in EXT or (root!=ROOT and not f.is_file()): continue
+  text=source_text(root,name)
   if f.suffix=='.md':
    # K uses literate Markdown. Count fenced K only; exclude English and examples in other languages.
    text='\n'.join(re.findall(r'^```k[^\n]*\n(.*?)^```',text,re.M|re.S))
@@ -48,20 +74,19 @@ if __name__=='__main__':
  pins=json.loads((HERE/'pins.json').read_text())
  def git(root,*args): return subprocess.check_output(['git','-C',str(root),*args],text=True).strip()
  subprocess.run(['git','-C',str(ROOT),'merge-base','--is-ancestor',BASE,'HEAD'],check=True)
- # Audit scripts may be dirty during development; audited Lean source must be clean.
- assert not git(ROOT,'status','--porcelain','--','*.lean'), 'dirty audited source'
- assert not git(ROOT,'diff',BASE,'--','*.lean'), 'audited source differs from base'
+ # Read immutable base blobs, so subsequent coordinator merges cannot relabel source.
+ base_snapshot()
  for name,pin in pins.items():
   assert git(cache/name,'rev-parse','HEAD')==pin, name+' pin mismatch'
   assert not git(cache/name,'status','--porcelain'), name+' dirty reference'
  inputs={}
  for path in ['docs/audits/architecture-tools','docs/audits/proof-coverage-tools','docs/audits/build-speed-tools','docs/audits/build-speed.md','scripts/build-measure.py','scripts/build-measure-report.py','scripts/differential','scripts/bench']:
-  source=ROOT/path
-  inputs[path]=dict(present=source.exists(),files=sorted(str(x.relative_to(ROOT)) for x in source.rglob('*') if x.is_file()) if source.is_dir() else ([path] if source.is_file() else []))
+  matches=sorted(x for x in BASE_FILES if x==path or x.startswith(path+'/'))
+  inputs[path]=dict(present=bool(matches),files=matches)
  (HERE/'reused-inputs.json').write_text(json.dumps(dict(base=BASE,inputs=inputs,policy='reuse historical timing sample; no project build or Lean elaboration'),indent=2)+'\n')
  timings={} 
  timing_source=ROOT/'docs/audits/architecture-tools/timing-sample.tsv'
- for line in timing_source.read_text().splitlines():
+ for line in source_text(ROOT,str(timing_source.relative_to(ROOT))).splitlines():
   cols=line.replace('\\t','\t').split('\t')
   if len(cols)==5 and cols[-1]=='PASS': timings[cols[1]]=float(cols[2])
  (HERE/'timing-input.json').write_text(json.dumps(dict(source=str(timing_source.relative_to(ROOT)),source_base=BASE,meaning='historical single-file wall seconds; not matched reference hardware or clean builds',samples=timings),indent=2)+'\n')
@@ -84,7 +109,7 @@ if __name__=='__main__':
  (HERE/'inventory.json').write_text(json.dumps(inventory,indent=2)+'\n')
  rows=[]
  for pair in json.loads((HERE/'pair-specs.json').read_text()):
-  for path in pair['this_paths']: assert (ROOT/path).is_file(),path
+  for path in pair['this_paths']: assert path in BASE_FILES,path
   for path in pair['reference_paths']: assert (cache/pair['reference']/path).is_file(),path
   a=count(ROOT,pair['this_paths']); b=count(cache/pair['reference'],pair['reference_paths']); ratio=a['lines']/b['lines'] if b['lines'] else None
   rows.append(dict(**pair,this_lines=a['lines'],this_decls=a['native_declarations'],this_generated=a['generated_lines'],this_check_s=(timings.get(pair['this_paths'][0]) if len(pair['this_paths'])==1 else None),this_metrics=a,reference_metrics=b,reference_lines=b['lines'],reference_decls=b['native_declarations'],reference_generated=b['generated_lines'],reference_check_s=None,ratio=ratio))
