@@ -65,6 +65,7 @@ theorem executed (C : Contract) (base bits : Nat) (label : Fin W)
   rw [same]
   exact run_program C base bits label machine word size initialWord initialSize
 
+set_option backward.isDefEq.respectTransparency false in
 theorem entry_rejection (C : Contract) (base bits : Nat) (label : Fin W)
     (result : Compiler.Compilation base (Frag.init RouteCtx) (program C bits label))
     (found : Compiler.compile base (Frag.init RouteCtx) (program C bits label)=some result)
@@ -83,6 +84,7 @@ theorem entry_rejection (C : Contract) (base bits : Nat) (label : Fin W)
       constructor <;> intro impossible <;> cases impossible
     · simp only [if_neg valid,dif_neg valid]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The newly declared local is the typed semantic word decoded from bytes. -/
 theorem decoded_and_bound (C : Contract) (base bits : Nat) (label : Fin W)
     (result : Compiler.Compilation base (Frag.init RouteCtx) (program C bits label))
