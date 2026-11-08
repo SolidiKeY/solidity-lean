@@ -41,7 +41,8 @@ REFERENCE_CASES = (
     'default_or_ofNonempty%unsafe', 'exact?%', '_', '?m',
     '1E10', '1E-3', '1.2E+3', '1.2E-3', '1#w', '1#(width)',
     '1#↑w', '1#(8+1)', '1#no_index w', "1#'w", "x#'w",
-    "(f x)#'w", '1...*', '*...*', '1<...*',
+    "(f x)#'w", '1...*', '*...*', '1<...*', '1 ...*', '1 <...*',
+    '1 /- gap -/ <...*',
     '1.2e-3', '1.2e+3', '1e-3', '1#8', '0xF', '0b10', '0o7',
 )
 
@@ -146,7 +147,8 @@ class ScannerTests(unittest.TestCase):
                 label = ' sample.error.' if 'Named' in introducer else ''
                 with self.subTest(reference=reference, introducer=introducer):
                     source = introducer + reference + label + '\n"{ /-- first\nsecond\n-/ 1 }"'
-                    self.assertEqual(MODULE['comment_lines'](source), (3, 3))
+                    self.assertEqual(MODULE['comment_lines'](source),
+                                     (4 if '/- gap -/' in reference else 3, 3))
 
     def test_reference_precedence(self):
         for reference in ('Type 0', 'Sort 0'):

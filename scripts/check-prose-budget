@@ -220,14 +220,17 @@ class _Scanner:
         if pos is None:
             return None
         while pos < len(source):
+            suffix = self.trivia(pos)
+            if source.startswith("<...*", suffix):
+                pos = suffix + 5
+                continue
+            if source.startswith("...*", suffix):
+                pos = suffix + 4
+                continue
             if source.startswith("#'", pos):
                 pos = self.atom(pos + 2)
                 if pos is None:
                     return None
-            elif source.startswith("<...*", pos):
-                pos += 5
-            elif source.startswith("...*", pos):
-                pos += 4
             elif source.startswith(".{", pos):
                 pos = self.code(pos + 2, "}", False)
             elif source[pos] == ".":
