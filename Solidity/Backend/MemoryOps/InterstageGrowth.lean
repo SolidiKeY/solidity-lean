@@ -156,19 +156,19 @@ theorem captureAfterAlloc_none_iff {H : HTy} {R Q A : RefTy} {E : Ty}
  Classical.choice,
  Quot.sound] -/
 #guard_msgs in #print axioms checkedCaptureOverwrite_read_cases
-/-- info: 'Solidity.Backend.MemoryOps.checked_interstage_success' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checked_interstage_success' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checked_interstage_success
 /-- info: 'Solidity.Backend.MemoryOps.checked_interstage_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checked_interstage_none_iff
 /-- info: 'Solidity.Backend.MemoryOps.checked_interstage_read_cases' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checked_interstage_read_cases
-/-- info: 'Solidity.Backend.MemoryOps.captureAfterAlloc_checked' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.captureAfterAlloc_checked' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms captureAfterAlloc_checked
-/-- info: 'Solidity.Backend.MemoryOps.captureAfterAlloc_keeps' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.captureAfterAlloc_keeps' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms captureAfterAlloc_keeps
-/-- info: 'Solidity.Backend.MemoryOps.captureAfterAlloc_fresh' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.captureAfterAlloc_fresh' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms captureAfterAlloc_fresh
-/-- info: 'Solidity.Backend.MemoryOps.captureAfterAlloc_fresh_index' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.captureAfterAlloc_fresh_index' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms captureAfterAlloc_fresh_index
 /-- info: 'Solidity.Backend.MemoryOps.captureAfterAlloc_read_cases' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms captureAfterAlloc_read_cases
