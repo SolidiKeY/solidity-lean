@@ -185,25 +185,25 @@ theorem checkedCalldataBools_frame {D : Source.Layout} {n : Option Nat}
   obtain ⟨_, hd, rfl⟩ := checkedCalldataBools_result hc hp dst a start stop offset out h
   exact overwriteSlice_frame hp dst q a offset _ hd hne
 
-/-- info: 'Solidity.Backend.MemoryOps.calldataBools_lookup' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.MemoryOps.calldataBools_lookup' depends on axioms: [propext] -/
 #guard_msgs in #print axioms calldataBools_lookup
-/-- info: 'Solidity.Backend.MemoryOps.calldataBool_exact' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.MemoryOps.calldataBool_exact' depends on axioms: [propext] -/
 #guard_msgs in #print axioms calldataBool_exact
-/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataBools_some' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataBools_some' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedCalldataBools_some
 /-- info: 'Solidity.Backend.MemoryOps.calldataBools_slice_length' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms calldataBools_slice_length
 /-- info: 'Solidity.Backend.MemoryOps.checkedCalldataBools_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedCalldataBools_none_iff
-/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataBools_result' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataBools_result' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedCalldataBools_result
-/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataBools_read' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataBools_read' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedCalldataBools_read
-/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataBools_elems' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataBools_elems' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedCalldataBools_elems
-/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataBools_outside' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataBools_outside' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedCalldataBools_outside
-/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataBools_frame' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataBools_frame' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedCalldataBools_frame
 /-- Missing/unsupported decoded objects are adapter rejection, not profile exclusions. -/
 theorem checkedCalldataBools_no_payload {D : Source.Layout} {H : HTy} {R : RefTy}
@@ -239,8 +239,8 @@ theorem checkedCalldataBools_keeps {D : Source.Layout} {n : Option Nat}
   have ho := overwriteSlice_keeps e hk dst a offset payload hd q
   simpa only [hw] using ho
 
-/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataBools_no_payload' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataBools_no_payload' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedCalldataBools_no_payload
-/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataBools_keeps' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataBools_keeps' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedCalldataBools_keeps
 end Solidity.Backend.MemoryOps
