@@ -75,6 +75,8 @@ class LanguageClient extends EventEmitter {
     return parseReport(JSON.stringify(result));
   }
   async request(method,doc,params={},options={},isCurrent=()=>true){
+    if(options?.signal?.aborted)throw failure('Request cancelled',-32800);
+    if(doc.isClosed)throw failure('Document closed',-32801);
     const version=doc.version,text=doc.getText();await this.sync(doc,isCurrent,options.signal);
     const current=()=>isCurrent()&&!this.disposed&&!doc.isClosed&&doc.version===version&&doc.getText()===text;
     if(!current())throw failure('Document content changed',-32801);
@@ -136,6 +138,8 @@ class LanguageServers extends EventEmitter {
   async open(doc){await this.settled(undefined,doc);const client=this.client(doc),current=this.ownership(doc,client);await client.sync(doc,current);if(!current()||client.disposed)throw failure('Language client changed',-32801);this.emit('identity',{serverInfo:client.serverInfo,runtimeInfo:client.runtimeInfo,uris:[doc.uri.toString()]});return client;}
   async verify(args){await this.settled(args.signal,args.document);const client=this.client(args.document);return client.verify(args.document,args,this.ownership(args.document,client));}
   async request(method,doc,params,options){
+    if(options?.signal?.aborted)throw failure('Request cancelled',-32800);
+    if(doc.isClosed)throw failure('Document closed',-32801);
     const version=doc.version,text=doc.getText(),sourceCurrent=()=>!doc.isClosed&&doc.version===version&&doc.getText()===text;
     const validate=()=>{if(options?.signal?.aborted)throw failure('Request cancelled',-32800);if(!sourceCurrent())throw failure('Document content changed',-32801);};
     await this.settled(options?.signal,doc);validate();
