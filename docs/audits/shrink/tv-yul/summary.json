@@ -82,5 +82,16 @@
     "endpoint": "Existing Solidity/Yul/Compilation theorem family preserving Artifact forward/backward statements",
     "effect": "Replaces the original Views comparison endpoint. Concrete covered family selection and matched measurement remain outstanding."
   },
-  "prototype_branch": "codex/shrink-pilots-1108/tv-yul-prototype"
+  "prototype_branch": "codex/shrink-pilots-1108/tv-yul-prototype",
+  "compilation_candidate": {
+    "status": "under investigation; coverage not yet proved",
+    "inventory": "family.json",
+    "stem": "ScopedControl",
+    "physical_lines": 579,
+    "lexical_declarations": 15,
+    "modules": [
+      "Solidity/Yul/Compilation/ScopedControlCompilation.lean",
+      "Solidity/Yul/Compilation/ScopedControlCompletion.lean"
+    ]
+  }
 }

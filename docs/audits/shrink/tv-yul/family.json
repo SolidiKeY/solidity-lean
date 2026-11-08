@@ -1,0 +1,150 @@
+{
+  "base": "381328f608032dd19c405373c2b265e83a969850",
+  "authorization": "H264 A",
+  "status": "candidate; prototype and export preservation unproved",
+  "method": "Matching *Compilation.lean/*Completion.lean pairs only; excludes Controls fixtures and shared dependencies. Physical source lines and lexical declarations, not elaborated declaration counts or proof-only spans. Signatures retain original premises.",
+  "ranked_pairs": [
+    {
+      "stem": "ScopedControl",
+      "physical_lines": 579,
+      "lexical_declarations": 15
+    },
+    {
+      "stem": "StructuredSequence",
+      "physical_lines": 513,
+      "lexical_declarations": 12
+    },
+    {
+      "stem": "Switch",
+      "physical_lines": 425,
+      "lexical_declarations": 16
+    },
+    {
+      "stem": "LoopControl",
+      "physical_lines": 405,
+      "lexical_declarations": 15
+    },
+    {
+      "stem": "LetControl",
+      "physical_lines": 355,
+      "lexical_declarations": 14
+    },
+    {
+      "stem": "Case",
+      "physical_lines": 290,
+      "lexical_declarations": 8
+    },
+    {
+      "stem": "LetScope",
+      "physical_lines": 265,
+      "lexical_declarations": 12
+    },
+    {
+      "stem": "LetBranch",
+      "physical_lines": 242,
+      "lexical_declarations": 12
+    },
+    {
+      "stem": "Sequence",
+      "physical_lines": 237,
+      "lexical_declarations": 12
+    },
+    {
+      "stem": "MultiSwitch",
+      "physical_lines": 231,
+      "lexical_declarations": 11
+    },
+    {
+      "stem": "ScopedFor",
+      "physical_lines": 229,
+      "lexical_declarations": 11
+    },
+    {
+      "stem": "LetSequence",
+      "physical_lines": 227,
+      "lexical_declarations": 12
+    },
+    {
+      "stem": "ZeroControl",
+      "physical_lines": 219,
+      "lexical_declarations": 11
+    },
+    {
+      "stem": "ZeroScope",
+      "physical_lines": 174,
+      "lexical_declarations": 10
+    },
+    {
+      "stem": "GuardedFor",
+      "physical_lines": 170,
+      "lexical_declarations": 10
+    }
+  ],
+  "candidate": {
+    "stem": "ScopedControl",
+    "physical_lines": 579,
+    "lexical_declarations": 15,
+    "modules": [
+      {
+        "path": "Solidity/Yul/Compilation/ScopedControlCompilation.lean",
+        "physical_lines": 347,
+        "lexical_declarations": 10,
+        "theorem_statements": [
+          {
+            "name": "Solidity.Yul.Compilation.ScopedControlCompilation.scope_selected",
+            "line": 131,
+            "signature": "theorem scope_selected (entry exit : Backend.Program) (body : Backend.Block) (code : List Evm.Instr)\n (selected : WordControl.blockCode (.seq (.code entry) (.seq body (.code exit))) = some code) :\n \u2203 begin middle finish, WordMachine.selectCode entry = some begin \u2227\n WordControl.blockCode body = some middle \u2227 WordMachine.selectCode exit = some finish \u2227\n code = begin ++ (middle ++ finish)"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.ScopedControlCompilation.source_to_model",
+            "line": 149,
+            "signature": "theorem source_to_model {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}\n (compiled : Compiled c fuel stmt) (block : Backend.Block) (code : List Evm.Instr)\n (emitted : compiled.emit = some block) (selected : WordControl.blockCode block = some code)\n (horizon : Nat) (locals : Vector Scalar.Word n) (result : Outcome c n)\n (ran : evalStmt horizon .nil True.intro stmt compiled.profile (sourceLocals locals) = some result)\n (m : Evm.Machine) (caller : List Evm.Word) :\n \u2203 out : Vector Scalar.Word n, result = \u27e8sourceLocals out,.normal\u27e9 \u2227\n Evm.run code {m with stack"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.ScopedControlCompilation.Artifact.source_to_model",
+            "line": 304,
+            "signature": "theorem Artifact.source_to_model {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}\n (artifact : Artifact fuel stmt) (horizon : Nat) (locals : Vector Scalar.Word n) (result : Outcome c n)\n (ran : evalStmt horizon .nil True.intro stmt artifact.compiled.profile (sourceLocals locals) = some result)\n (m : Evm.Machine) (caller : List Evm.Word) :\n \u2203 out : Vector Scalar.Word n, result = \u27e8sourceLocals out,.normal\u27e9 \u2227\n Evm.run artifact.code {m with stack"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.ScopedControlCompilation.Artifact.normal_to_model",
+            "line": 314,
+            "signature": "theorem Artifact.normal_to_model {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}\n (artifact : Artifact fuel stmt) (horizon : Nat) (locals out : Vector Scalar.Word n)\n (ran : evalStmt horizon .nil True.intro stmt artifact.compiled.profile (sourceLocals locals) =\n   some \u27e8sourceLocals out,.normal\u27e9) (m : Evm.Machine) (caller : List Evm.Word) :\n Evm.run artifact.code {m with stack"
+          }
+        ]
+      },
+      {
+        "path": "Solidity/Yul/Compilation/ScopedControlCompletion.lean",
+        "physical_lines": 232,
+        "lexical_declarations": 5,
+        "theorem_statements": [
+          {
+            "name": "Solidity.Yul.Compilation.ScopedControlCompletion.source_zero",
+            "line": 11,
+            "signature": "theorem source_zero {c : Control} {n fresh : Nat} {body : Stmt [] [] c (fresh+n)}\n (profile : StmtWordP body) (horizon : Nat)\n (locals : Vector Scalar.Word n) (out : Vector Scalar.Word (fresh+n))\n (ran : evalStmt horizon .nil True.intro body profile\n   (sourceLocals (Vector.replicate fresh (0 : Scalar.Word) ++ locals)) = some \u27e8sourceLocals out,.normal\u27e9) :\n evalStmt (horizon+1) .nil True.intro (.zero fresh body) profile (sourceLocals locals) =\n some \u27e8sourceLocals (outerLocals out),.normal\u27e9"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.ScopedControlCompletion.source_let",
+            "line": 24,
+            "signature": "theorem source_let {c : Control} {n fuel : Nat} {rhs : Expr [] [] n 1} {body : Stmt [] [] c (1+n)}\n (initializer : ProducerExpressions.Compiled fuel rhs)\n (profile : StmtWordP body) (horizon : Nat)\n (locals : Vector Scalar.Word n) (out : Vector Scalar.Word (1+n))\n (ran : evalStmt horizon .nil True.intro body profile\n   (sourceLocals (#v[initializer.value locals] ++ locals)) = some \u27e8sourceLocals out,.normal\u27e9) :\n evalStmt (max fuel horizon+1) .nil True.intro (.let_ 1 rhs body)\n   (\u27e8initializer.profile,profile\u27e9 : StmtWordP (.let_ 1 rhs body)) (sourceLocals locals) =\n some \u27e8sourceLocals (outerLocals out),.normal\u27e9"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.ScopedControlCompletion.model_to_source",
+            "line": 52,
+            "signature": "theorem model_to_source {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}\n (compiled : Compiled c fuel stmt) (block : Backend.Block) (code : List Evm.Instr)\n (emitted : compiled.emit = some block) (selected : WordControl.blockCode block = some code)\n (locals : Vector Scalar.Word n) (m final : Evm.Machine) (caller : List Evm.Word) (skip : Nat)\n (ran : Evm.run code {m with stack"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.ScopedControlCompletion.artifact_reflected",
+            "line": 190,
+            "signature": "theorem artifact_reflected {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}\n (artifact : Artifact fuel stmt) (locals : Vector Scalar.Word n)\n (m final : Evm.Machine) (caller : List Evm.Word) (skip : Nat)\n (ran : Evm.run artifact.code {m with stack"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.ScopedControlCompletion.completion_iff",
+            "line": 199,
+            "signature": "theorem completion_iff {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}\n (artifact : Artifact fuel stmt) (locals out : Vector Scalar.Word n)\n (m : Evm.Machine) (caller : List Evm.Word) :\n (\u2203 horizon, evalStmt horizon .nil True.intro stmt artifact.compiled.profile (sourceLocals locals) =\n   some \u27e8sourceLocals out,.normal\u27e9) \u2194\n Evm.run artifact.code {m with stack"
+          }
+        ]
+      }
+    ]
+  },
+  "caution": "Largest matching pair is not a proved largest covered family until the checker coverage is established. Retained old proofs must count in the after workload; reference output equality is not general semantic completeness."
+}
