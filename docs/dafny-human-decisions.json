@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "source": "Incoming user messages H80 (2026-11-06), scoped instructions in this exact thread; supersedes earlier coordinator claims. This file records instructions, not proof/gate evidence. Incoming user H126 (2026-11-07) supplies the three scoped answers below; decision records are not validation evidence.",
+  "source": "Incoming user messages H80 (2026-11-06), scoped instructions in this exact thread; supersedes earlier coordinator claims. This file records instructions, not proof/gate evidence. Incoming user H126 (2026-11-07) supplies the three scoped answers below; decision records are not validation evidence. Incoming user answer Q-REL-CANONICAL-LEDGER-01 (2026-11-07) authorizes one shared local normalizer and ordinal companion with old outputs/signatures/budgets preserved; it is not validation evidence. Incoming user answer Q-REL-LEDGER-TRANSPORT-01 (2026-11-07) authorizes shared reader/private forwarding factoring and versioned ledger companions under exact preservation terms; this is scope authorization, not implementation/validation.",
   "decisions": [
     {
       "question": "Q-VIS-01",
@@ -69,6 +69,18 @@
       "decision": "H126",
       "status": "answered",
       "authorization": "H126 option1 routes the Derived17 proof-cost repair to module-times (OT-PERF-SLOW). Do not rerun the unchanged300s workload before that repair is merged; continue independent work."
+    },
+    {
+      "question": "Q-REL-CANONICAL-LEDGER-01",
+      "decision": "Incoming user answer,2026-11-07",
+      "status": "shared-normalizer-implemented; full metadata remains partial",
+      "authorization": "Factor existing local normalization into one shared helper and add ordinal-carrying companion; prove existing outputs/signatures/budgets unchanged (rfl/equality), no duplicate copy H112, legacy behaviour unchanged. Private Import transport factoring not assumed."
+    },
+    {
+      "question": "Q-REL-LEDGER-TRANSPORT-01",
+      "decision": "Incoming user answer,2026-11-07",
+      "status": "implemented as versioned ledger-returning companions; full parity acceptance remains open",
+      "authorization": "Factor reader/private forwarding bodies into shared internals and add versioned ledger-returning companions. Prove forget equalities preserving old signatures/defaults/results, no duplicate copies H112, no budget changes. Further refactors on these terms pre-approved; do not re-file this family."
     }
   ]
 }

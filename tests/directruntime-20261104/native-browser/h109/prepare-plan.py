@@ -19,7 +19,8 @@ SLOW = tuple("Solidity.Examples." + suffix for suffix in (
     "DecisionAPF", "DecisionBlocks", "DecisionGapCore", "DecisionGapHashes",
     "DecisionGapKInt", "DecisionGaps", "DecisionLedger", "DecisionOperators",
     "DecisionRefutations", "DecisionResidue", "DecisionStorageArrays",
-    "DecisionThreeKindCoverage", "Tactics.OpenLoops", "Tactics.RevertData"))
+    "DecisionThreeKindCoverage", "Tactics.OpenLoops", "Tactics.OpenLoops.RowsNine",
+    "Tactics.RevertData"))
 
 
 def git(root, *args):
@@ -60,7 +61,9 @@ def regular_bytes(root, name, size):
         os.close(directory)
 
 
-def prepare(root, head):
+def prepare(root, head, context="lane-end"):
+    if context not in ("ci", "lane-end"):
+        raise ValueError("Unsupported execution context")
     root = Path(root).resolve()
     if not re.fullmatch(r"[0-9a-f]{40}", head):
         raise ValueError("Expected full authenticated commit")
@@ -102,9 +105,12 @@ def prepare(root, head):
             imports.extend(line[7:].split())
         elif line.strip() and not line.startswith("--"):
             raise ValueError("Unexpected slow root syntax")
+    sources = {e["path"] for e in inventory}
+    rows_nine = "Solidity.Examples.Tactics.OpenLoops.RowsNine"
+    if rows_nine.replace(".", "/") + ".lean" in sources and rows_nine not in SLOW:
+        raise ValueError("RowsNine requires reviewed central slow-root and runner registration")
     if tuple(imports) != SLOW:
         raise ValueError("Slow root target inventory changed")
-    sources = {e["path"] for e in inventory}
     if any(module.replace(".", "/") + ".lean" not in sources for module in SLOW):
         raise ValueError("Missing committed slow source")
     if git(root, "diff", "HEAD", "--name-only") or git(root, "rev-parse", "HEAD").decode().strip() != head:
@@ -112,8 +118,18 @@ def prepare(root, head):
     return {"schemaVersion": 1, "status": "prepared-not-executed", "head": head,
             "tree": git(root, "rev-parse", "HEAD^{tree}").decode().strip(),
             "sourceInventory": inventory, "slowModules": list(SLOW),
-            "rootGate": "SoliditySlowExamples", "runnerDeadlineSeconds": 600,
-            "deadlinePolicy": "One total runner deadline; never multiply 600 by the target count.",
+            "rootGate": "SoliditySlowExamples", "executionContext": context,
+            "measurementDeadlineSeconds": 300,
+            "slowLibraryDeadlineSeconds": 600 if context == "ci" else 300,
+            "slowModuleDeadlineSeconds": {
+                module: 600 if context == "ci" else 300
+                for module in SLOW},
+            "derived17ReplayDeadlineSeconds": 600 if context == "ci" else 300,
+            "deadlinePolicy": "Default/VM module maximum remains300seconds. Coordinator explicitly "
+                              "extends600seconds to the H109 slow library in CI; default/VM STOPs remain. "
+                              "Original Derived17 CI600/local300 replay scope is retained. "
+                              "The library deadline is not multiplied by its15members. "
+                              "No non-slow module/VM increase. Context is a plan input, not CI attestation.",
             "workerPolicy": {"memoryMaxBytes": 12884901888, "swapMaxBytes": 0,
                              "leanThreads": 1, "lakeJobs": 1, "outerReserveBytes": 4294967296},
             "preparerSha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
@@ -127,8 +143,9 @@ if __name__ == "__main__":
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--head", required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--context", choices=("ci", "lane-end"), default="lane-end")
     args = parser.parse_args()
-    plan = prepare(args.root, args.head)
+    plan = prepare(args.root, args.head, args.context)
     # Exclusive creation: no stale plan can be overwritten or mistaken for a run.
     descriptor = os.open(args.output, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
     with os.fdopen(descriptor, "w") as stream:

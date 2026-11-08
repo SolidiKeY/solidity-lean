@@ -115,7 +115,7 @@ it).
 EthereumJS in legacy/viaIR, optimizer off/on. Exact outputs, panic/revert
 bytes and both declared roots after success/rollback are compared. Concrete
 parser/printer and literal-arithmetic regressions are kernel checked. See
-[implementation and evidence](feature-work/generated-differential.md) for
+[implementation and evidence](../Solidity/Tools/SolCases.lean) for
 commands, scope, refusals and remaining D/E work. This does not establish
 universal printer or solc correctness. The remaining full target follows.
 
@@ -231,4 +231,4 @@ external programs, or from a sibling repository.
    [full-scope.md](feature-work/full-scope.md), in the core (the Yul semantics
    is dependency-free); EVMYulLean agreement stays in `Bridge/`.
 
-The diamond-try [bounded modern attempt facility](feature-work/diamond-try-carrier-budget.md) supplies an explicitly derived/pinned CommonJS engine API and wiring for only check-source-admission/check-call-exception-vectors at their retained Cancun settings. Derive a separate artifact with scripts/evm-reference/derive-attempt-budget.py before invoking those scripts; the unpatched tree is refused. It is not a global fork/profile or historical runner change.
+The diamond-try [bounded modern attempt facility](../Solidity/Evm/TryPanicCarrier.lean) supplies an explicitly derived/pinned CommonJS engine API and wiring for only check-source-admission/check-call-exception-vectors at their retained Cancun settings. Derive a separate artifact with scripts/evm-reference/derive-attempt-budget.py before invoking those scripts; the unpatched tree is refused. It is not a global fork/profile or historical runner change.

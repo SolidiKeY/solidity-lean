@@ -2635,3 +2635,197 @@ skeptic reviewed this accounting boundary. Original 703-source closure,
 obligations remain open. Evidence and reproduction are off branch under
 /workspace/parallel-20261103/executable-bytecode/control-source-accounting/ and
 archived privately under H145.
+
+
+### Frozen premise source and binder accounting
+
+The same static join now accounts for all 41 records in the sealed Premises and
+PremisesV2 packet, including eleven kernel theorems. The lexical theorem scanner
+finds zero source theorem candidates in these two files. Consequently all 41
+records remain unmatched to that lexical theorem inventory: generated theorems
+and structure fields are not silently excluded or credited as source matches.
+Thirty-six records have ranges and five lack them. Source bytes are pinned to
+the frozen native inspection inputs; the parent checksum list and input
+manifest/record hashes are checked before the join.
+
+Across these records there are 395 ordered raw binders, with 64 proof-binder
+flags. Thirty binder heads name records supplied in this packet, 143 name
+constants absent from it, and 222 have no constant head. Those are metadata
+observations, not classified global/per-input premises, instantiated dependent
+types or simultaneous witnesses. No private flags or structure-parent roots
+occur in this packet; no absence of inherited obligations elsewhere follows.
+All source/kernel correspondence, generated-declaration ownership and field
+obligations remain explicit open work. This adds no new domain or census credit.
+
+The existing generic helpers produced byte-identical static reports on replay;
+independent read-only finder and skeptic reviewed the counts and boundaries.
+No Lean workload, prerequisite build, budget extension or PowerBounds retry was
+performed. The original closure, full validation, Source/runtime/G01 and physical
+obligations are unchanged. Reproduction and evidence remain off branch under
+/workspace/parallel-20261103/executable-bytecode/premise-source-accounting/ and
+are archived privately under H145.
+
+
+### False-runtime control: reviewed parameter roles
+
+Source/signature review of the frozen `V2.Controls.reject_false_runtime` now
+classifies the intent of all ten parameters. `Observation`, `source`,
+`bridgeStep`, `bridgeRun` and `reachable` describe the chosen observation and
+runtime model. `ir`, `b`, `input` and `output` identify the compiled instance.
+`composition` is a data-valued certificate for that same instance. These are
+review annotations, not kernel-proved role classifications or inhabited domains.
+
+All ten observed binders have `proof_binder = false`. This does not make the
+hypothesis domain automatically inhabited: `composition` must be an actual
+`CompositionCertificate ir b input output`, carrying lowering, whole-control,
+assembly and roundtrip obligations. The other parameters cannot be selected
+independently of this dependent certificate and counted as a simultaneous
+witness. No certificate inhabitant is supplied by this review. The published
+`scalarComposition` constructor remains the reuse target; its unavailable
+import products include the held PowerBounds dependency. No replacement
+certificate framework or stopped build is introduced.
+
+The constantly-false relation occurs in the *negated conclusion* about
+`Nonempty RuntimeConsumer`, not as an assumed input relation or an impossible
+input proof. This is an intentional negative control, not an unexpected
+vacuous theorem. The only open domain in the 13-theorem control packet remains
+open; prior eight positive and four refuted controls are unchanged. The static
+reproduction binds the preserved native-record seal, exact raw target type and
+frozen source bytes. It establishes no source correspondence, inherited
+instantiation, compiler acceptance, runtime/G01 linkage or additional witness.
+Independent read-only finder and skeptic reviewed these boundaries. Evidence is
+kept off branch under
+/workspace/parallel-20261103/executable-bytecode/runtime-control-roles/.
+
+
+### Simultaneous false-runtime control domain: empty instance
+
+The previously open `V2.Controls.reject_false_runtime` domain now has one checked
+simultaneous witness. The fixture constructs an actual empty-program instance
+of the existing `LoweringCertificate`, `ControlCertificate` and
+`CompositionCertificate`. It reuses the published `irStack_injective` lemma for
+both directions of empty IR lowering. Control execution handles arbitrary
+assembly placement with zero steps; the exact input height zero bounds its only
+execution boundary. Assembly and `decode_encode` concern that same empty code.
+This is an instance of the existing framework, not a replacement compiler or
+control evaluator. No component certificate is assumed as an input premise.
+
+All ten parameters are supplied together, including this composition value.
+The explicit negative control then instantiates the original false-runtime
+refusal with that same value. The always-none bridge functions and empty
+reachability predicate are merely parameters of the audited refusal theorem;
+they supply no `DecoderPremise`, `RuntimeConsumer` or external Bridge producer.
+This closes only the last domain in the 13-theorem control packet: nine positive
+joint domains and four intentionally refuted control domains. Generated
+auxiliaries remain visible; source authenticity and global census coverage do
+not follow from this local packet accounting.
+
+The first native check retained two proof errors (an unreduced stack-bound goal
+and an attempted definitional roundtrip). The corrections explicitly reduce the
+bound and use the existing roundtrip theorem. The corrected witness checked in
+3.084 seconds; the final source with its concrete refusal control checked in 3.102 seconds
+under the same serial resource policy (173330432-byte workload peak). Both final
+axiom outputs are standard-only.
+The 39 exact existing import products exclude PowerBounds; no prerequisite build
+or stopped workload was retried. A clean-tree admission initially rejected three
+newly generated Python bytecode files before starting a workload; only those
+owned regenerable files were removed. All failed evidence is retained.
+
+The regression suite passes 128 tests, including exact disjoint supplementation
+of the prior open roster. The nonmutating verifier binds the checked generated
+source to the checker-read fixture, raw target type, frozen source scope, native
+output/log/monitor records and all 39 product hashes. Separate independent
+read-only finder and skeptic found no semantic issue. Logs, products, failed
+attempts and receipts stay off branch under
+/workspace/parallel-20261103/executable-bytecode/runtime-empty-domain/. Exact review evidence is now archived at the immutable
+H145 citation below; fresh-master adoption still awaits Git access repair. Original Source/runtime/G01, physical, Bridge, global census, performance
+and full validation obligations remain open; no runtime gate is claimed.
+
+
+### Runtime-consumer proof projections: simultaneous reference instances
+
+Three further joint domains now check: V1 `RuntimeConsumer.consume`, V2
+`RuntimeConsumer.consume`, and V2 `RuntimeConsumer.inhabited`. The witnesses
+supply every parameter, an actual consumer self, the nonempty identity compiler
+relation, the existing reference decoder, and the same empty composition
+certificate together. V2's admission witness includes a real successful empty
+IR run. Its consume proof preserves the full machine relation, derives equality
+of the numeric stacks, and uses the decoder's zero equation to realize the exact
+zero-step result with its stack bound. The V1 instance reuses that proved V2
+result with the inhabited identity compiler; it does not repair V1's general
+empty-relation vulnerability or establish Source coverage.
+
+The new generic negative control rejects an always-none run function for every
+`DecoderPremise`: even its zero-step equation must return the input state. The
+positive domain uses `LabelExec.advance` and the existing `referenceDecoder`,
+not that rejected iterator. Shared certificate and decoder support are consumed
+once rather than copied. These are empty-program reference instances, not an
+external Bridge adapter, general compiler theorem or G01 operational producer.
+
+The exact checked file passed in 4.868 seconds on its first native attempt with
+182697984-byte workload peak; all printed axioms are standard-only. The same 39
+verified import products suffice, without new prerequisite builds or a
+PowerBounds retry. The suite passes 129 tests. Exact source/receipt replay also
+joins the preserved three compiler and five decoder field witnesses by their
+raw type expressions: all eleven proof projections observed in the two frozen
+Premises modules now have separate per-statement joint-domain witnesses. This
+is not one universal witness across all programs, acceptance of the other 30
+kernel records, lexical theorem correspondence or global census closure.
+
+Independent read-only finder and skeptic review covers the proof, negative
+control and receipt join. Full original source/runtime, G01, physical, Bridge,
+performance and affected-build obligations remain open. Evidence, native output,
+ledger and reproduction stay off branch under
+/workspace/parallel-20261103/executable-bytecode/runtime-consumer-domains/;
+exact private evidence is now archived at the immutable H145 citation below;
+fresh-master adoption still awaits Git access repair.
+
+
+### H145 immutable review evidence
+
+The exact sealed runtime-control, empty-composition and runtime-consumer packets
+are archived in the private coordination repository:
+
+```text
+evidence: 22f01d60f11a07b6b92b72fee357ffc5abc5a868 evidence/solidity-parallel-20261103/executable-bytecode/
+```
+
+Publication used the authenticated GitHub connector after the VM Git credential
+was rejected; it did not publish code or change the sealed snapshots. The API
+returned the archive blob hash and commit, and nineteen key archived text files
+were read back at that immutable commit and compared byte-for-byte. This is
+transport verification, not coordinator integration acceptance.
+
+The empty-composition review material includes its
+[exact generated source](https://github.com/SolidiKeY/solidity-lean-coord/blob/22f01d60f11a07b6b92b72fee357ffc5abc5a868/evidence/solidity-parallel-20261103/executable-bytecode/runtime-empty-domain/RuntimeEmptyDomain.lean),
+[import hashes](https://github.com/SolidiKeY/solidity-lean-coord/blob/22f01d60f11a07b6b92b72fee357ffc5abc5a868/evidence/solidity-parallel-20261103/executable-bytecode/runtime-empty-domain/evidence/import-bindings.json),
+[kernel result](https://github.com/SolidiKeY/solidity-lean-coord/blob/22f01d60f11a07b6b92b72fee357ffc5abc5a868/evidence/solidity-parallel-20261103/executable-bytecode/runtime-empty-domain/final/evidence/proof-result.json),
+[axiom output](https://github.com/SolidiKeY/solidity-lean-coord/blob/22f01d60f11a07b6b92b72fee357ffc5abc5a868/evidence/solidity-parallel-20261103/executable-bytecode/runtime-empty-domain/final/evidence/proof.log),
+and [independent reviews](https://github.com/SolidiKeY/solidity-lean-coord/blob/22f01d60f11a07b6b92b72fee357ffc5abc5a868/evidence/solidity-parallel-20261103/executable-bytecode/runtime-empty-domain/evidence/reviews.md).
+The sibling runtime-consumer packet likewise contains its generated source,
+source/type pins, native kernel and axiom records, eleven-field linkage ledger,
+and reviews. The archive index identifies the compact binary archive containing
+native kernel output artifacts as well as all nonregenerable evidence. Shared
+regenerable import products remain separately retained on the VM with complete
+archive size and SHA256 in that index; their manifests and hashes are archived
+directly. Original seal/checksum files are preserved unchanged.
+
+The Python fixture assertions are structural roster/reuse checks. They do not
+render or kernel-check a witness and cannot substitute for the separately
+archived native check. Kernel acceptance claims refer only to the exact checked
+sources and records above. Merge acceptance remains with the coordinator;
+original Source/runtime/G01, physical, Bridge and global-census gaps are not
+resolved by this publication.
+
+### H151 historical evidence gaps
+
+Unavailable historical raw/MCP exports are **UNVERIFIABLE**; their original
+claims remain unproven. Fresh native records above cover only their explicitly
+named new witnesses and do not reconstruct or validate those lost exports.
+The historically referenced off-Git ExactInstances fixture certification is
+also **UNVERIFIABLE in this audit** from the available material. Its old
+acceptance claim receives no credit, and retrieval of that historical payload
+is removed from this lane's waits. Any fresh owner regeneration is a separate
+result; neither its repaired documentation nor this archive supplies that proof.
+Current producer obligations and regenerable missing Bridge/Mathlib products
+remain distinct from these historical gaps.

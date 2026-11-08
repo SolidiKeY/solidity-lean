@@ -43,15 +43,72 @@ def specParams (C : Contract) (f : String) : Except String NCtx := do
     | throw s!"{f} is not a function of the contract"
   pure (ECtx.toNCtx (← d.paramCtx))
 
+/-- The named output context and typed post from the actual shared modal
+compiler. These fields are not reconstructed using default names. -/
+structure SpecModalContextV1 (C : Contract) (input : NCtx) (call : SProg C)
+    (posts : List (NRead C)) where
+  output : Ctx
+  program : Prog C input.ctx output
+  chainEquation : SProg.chain input.names input.ctx call = .ok ⟨output, program⟩
+  names : NCtx
+  namesEquation : names = (program.outNames input.names).zip output
+  contextEquation : names.ctx = output
+  post : Fml C names.ctx
+  postEquation : NRead.conj posts names = .ok post
+  formula : Fml C input.ctx
+  formulaEquation : formula = .modal .box program .nil (contextEquation ▸ post)
+
+def specModalWithContextV1 (Δ : NCtx) (P : SProg C) (posts : List (NRead C)) :
+    Except String (SpecModalContextV1 C Δ P posts) := do
+  match chain : SProg.chain Δ.names Δ.ctx P with
+  | .error reason => throw reason
+  | .ok ⟨Γ', P'⟩ =>
+    let Γn : NCtx := (P'.outNames Δ.names).zip Γ'
+    if h : Γn.ctx = Γ' then
+      let compiled ← rememberSpecResultV1 (NRead.conj posts Γn)
+      pure {
+        output := Γ', program := P', chainEquation := chain, names := Γn,
+        namesEquation := rfl, contextEquation := h, post := compiled.val,
+        postEquation := compiled.property, formula := .modal .box P' .nil (h ▸ compiled.val),
+        formulaEquation := rfl }
+    else throw "internal: the call leaves a context its names do not cover"
+
 /-- `[ P ] (φ₁ ∧ … ∧ φₙ)` read in `Δ`: the call `P` placed there
 (`SProg.chain`), the postconditions in the context it leaves. -/
-def specModal (Δ : NCtx) (P : SProg C) (posts : List (NRead C)) : Except String (Fml C Δ.ctx) := do
-  let ⟨Γ', P'⟩ ← SProg.chain Δ.names Δ.ctx P
-  let Γn : NCtx := (P'.outNames Δ.names).zip Γ'
-  if h : Γn.ctx = Γ' then
-    let post ← NRead.conj posts Γn
-    pure (.modal .box P' .nil (h ▸ post))
-  else throw "internal: the call leaves a context its names do not cover"
+def specModal (Δ : NCtx) (P : SProg C) (posts : List (NRead C)) : Except String (Fml C Δ.ctx) :=
+  (specModalWithContextV1 Δ P posts).map (·.formula)
+
+theorem specModalWithContextV1_forget (Δ : NCtx) (P : SProg C) (posts : List (NRead C)) :
+    (specModalWithContextV1 Δ P posts).map (·.formula) = specModal Δ P posts := rfl
+
+/-- The exact legacy obligation alongside contexts from its single shared
+pieces/modal computations. Existing signatures and formulas remain projections. -/
+structure SpecObligationContextV1 (C : Contract) (name : String) where
+  formula : Fml C []
+  pieces : SpecPiecesContextV1 C name
+  modalInput : NCtx
+  modal : SpecModalContextV1 C modalInput pieces.legacy.2.2.2.1 pieces.legacy.2.2.2.2
+
+def specObligationWithContextV1 (C : Contract) (f : String) :
+    Except String (SpecObligationContextV1 C f) := do
+  let pieces ← specPiecesWithContextV1 C f
+  let a := pieces.legacy.1
+  let b := pieces.legacy.2.1
+  let U := pieces.legacy.2.2.1
+  let P := pieces.legacy.2.2.2.1
+  let posts := pieces.legacy.2.2.2.2
+  let Γ ← specParams C f
+  let pre ← NRead.conj (a ++ b) Γ
+  let (body, modal) ← if U.isEmpty then do
+    let modal ← specModalWithContextV1 Γ P posts
+    pure (modal.formula, (⟨Γ, modal⟩ : (input : NCtx) × SpecModalContextV1 C input P posts))
+  else do
+    let ⟨Δ, U'⟩ ← Upd.resolveN (fun _ => none) Γ Γ .nil U
+    let modal ← specModalWithContextV1 Δ P posts
+    pure (.upd .box U' modal.formula, (⟨Δ, modal⟩ : (input : NCtx) × SpecModalContextV1 C input P posts))
+  pure {
+    formula := Fml.closeN false Γ (.imp pre body), pieces,
+    modalInput := modal.1, modal := modal.2 }
 
 /-- **The obligation of `f`, scoped**: `R ∧ L ∧ M ∧ I ∧ requires → {old :=
 storage ‖ oldNet := net ‖ B} [ T result = f(x₁, …, xₙ); ] (I ∧ ensures ∧
@@ -59,14 +116,11 @@ A)` (`specPieces`), read in its parameters' context and closed by hidden
 binders: the update declares `old` and `oldNet` at `LTy.old` and
 `LTy.oldNet` (`Upd.resolveN`), the call is placed past them
 (`specModal`), and the update is left out when it is empty. -/
-def specObligation (C : Contract) (f : String) : Except String (Fml C []) := do
-  let (a, b, U, P, posts) ← specPieces C f
-  let Γ ← specParams C f
-  let pre ← NRead.conj (a ++ b) Γ
-  let body ← if U.isEmpty then specModal Γ P posts else do
-    let ⟨Δ, U'⟩ ← Upd.resolveN (fun _ => none) Γ Γ .nil U
-    pure (.upd .box U' (← specModal Δ P posts))
-  pure (Fml.closeN false Γ (.imp pre body))
+def specObligation (C : Contract) (f : String) : Except String (Fml C []) :=
+  (specObligationWithContextV1 C f).map (·.formula)
+
+theorem specObligationWithContextV1_forget (C : Contract) (f : String) :
+    (specObligationWithContextV1 C f).map (·.formula) = specObligation C f := rfl
 
 /-- **The contract's invariant** (`invariant e;`, `Contract.inv`), a closed
 formula of the storage: solkey's `CInv(storage, net)`, as `specObligation`

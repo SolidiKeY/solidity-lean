@@ -149,37 +149,59 @@ class MCP(unittest.TestCase):
                 self.own(parent,'daemon',repo)
 
     def cleanup(self):
-        failure = None
-        self.release.touch()
+        failures = []
+        def attempt(action):
+            try: action()
+            except BaseException as exc: failures.append(exc)
+        # Capture fixture identities even when a client never finishes startup.
+        attempt(self.release.touch)
+        attempt(self.recover_owned)
         try:
             for proc in self.clients:
-                if proc.poll() is None: proc.communicate(timeout=5)
-            self.recover_owned()
+                if proc.poll() is None:
+                    attempt(lambda proc=proc: proc.communicate(timeout=5))
+            attempt(self.recover_owned)
             for repo in (self.repo,self.other):
-                if self.sock(repo).exists(): self.stop_and_wait(repo)
-            self.assert_stopped(self.owned)
-        except BaseException as exc: failure = exc
+                if self.sock(repo).exists():
+                    attempt(lambda repo=repo: self.stop_and_wait(repo))
+            attempt(lambda: self.assert_stopped(self.owned))
         finally:
+            # Settle each owned client independently before the final discovery;
+            # one timeout must not skip another client or its daemon/server.
+            for proc in self.clients:
+                if proc.poll() is None:
+                    attempt(proc.terminate)
+                    attempt(lambda proc=proc: proc.communicate(timeout=5))
+                if proc.poll() is None:
+                    attempt(proc.kill)
+                    attempt(lambda proc=proc: proc.communicate(timeout=5))
+            attempt(self.recover_owned)
             # Failure cleanup is identity-bound, never pkill or a host daemon stop.
             for sig in (signal.SIGTERM,signal.SIGKILL):
                 for pid,data in self.owned.items():
-                    identity = self.process_identity(pid)
-                    if self.alive(pid) and identity['argv']==data['argv']:
-                        os.kill(pid,sig)
+                    def stop(pid=pid,data=data,sig=sig):
+                        identity = self.process_identity(pid)
+                        if self.alive(pid) and identity['argv']==data['argv']:
+                            os.kill(pid,sig)
+                    attempt(stop)
                 deadline = time.monotonic()+2
                 while time.monotonic()<deadline and any(self.alive(pid) for pid in self.owned):
                     time.sleep(.01)
-            for proc in self.clients:
-                if proc.poll() is None: proc.terminate(); proc.communicate(timeout=5)
-            evidence = os.environ.get('TF_MCP_EVIDENCE')
-            if evidence:
-                out = Path(evidence); out.mkdir(parents=True,exist_ok=True)
-                (out/(self.id().rsplit('.',1)[-1]+'.json')).write_text(json.dumps(
-                    {'invocations':self.invocations,'rpc':self.records(),
-                     'owned_processes':self.owned,'cleanup_failure':str(failure) if failure else None,
-                     'alive_after_cleanup':[pid for pid in self.owned if self.alive(pid)]},indent=2)+'\n')
-            self.tmp.cleanup()
-        if failure is not None: raise failure
+            attempt(lambda: self.assert_stopped(self.owned))
+            try:
+                evidence = os.environ.get('TF_MCP_EVIDENCE')
+                if evidence:
+                    out = Path(evidence); out.mkdir(parents=True,exist_ok=True)
+                    (out/(self.id().rsplit('.',1)[-1]+'.json')).write_text(json.dumps(
+                        {'invocations':self.invocations,'rpc':self.records(),
+                         'owned_processes':self.owned,
+                         'cleanup_failure':str(failures[0]) if failures else None,
+                         'alive_after_cleanup':[pid for pid in self.owned if self.alive(pid)]},indent=2)+'\n')
+            except BaseException as exc: failures.append(exc)
+            finally: attempt(self.tmp.cleanup)
+        if failures:
+            for extra in failures[1:]: failures[0].add_note('additional cleanup failure: '+repr(extra))
+            raise failures[0]
 
     def sock(self, repo=None):
         root = str((repo or self.repo).resolve())

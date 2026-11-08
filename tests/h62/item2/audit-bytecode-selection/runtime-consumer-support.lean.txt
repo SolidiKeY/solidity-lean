@@ -1,0 +1,47 @@
+/-! Guard regression: RuntimeConsumer field domains must include an inhabited self, compiler and decoder together. This empty-program reference instance supplies no Source or external Bridge adequacy. -/
+def emptyReferenceRuntime : Solidity.Backend.Selection.V2.RuntimeConsumer
+    Unit (fun _ => ()) [] (fun _ initial final => final = initial)
+    (.code []) 0 0 emptyComposition
+    (Solidity.Backend.LabelExec.step [])
+    (fun count => Solidity.Backend.LabelExec.advance count []) (fun _ => True) where
+  inhabited := ⟨0,Solidity.Evm.Machine.init,[],[],rfl,rfl,rfl,rfl⟩
+  consume := by
+    intro compiler decoder budget m s t height stack same
+    have stacks : Solidity.Backend.Selection.irStack t = Solidity.Backend.Selection.irStack s :=
+      (congrArg Solidity.Evm.Machine.stack same).trans stack
+    have equal : t = s := Solidity.Backend.Selection.irStack_injective stacks
+    cases equal
+    refine ⟨0, decoder.zero ⟨0,s⟩, ?_⟩
+    intro k within
+    have zero : k = 0 := Nat.eq_zero_of_le_zero within
+    cases zero
+    exact ⟨⟨0,s⟩, decoder.zero ⟨0,s⟩, by
+      change s.length ≤ 1024
+      omega⟩
+
+def emptyReferenceCompilerV1 : Solidity.Backend.Selection.CompilerPremise
+    Unit (fun _ => ()) [] (fun _ initial final => final = initial) :=
+  ⟨Solidity.Backend.Selection.V2.Controls.identityCompiler.preserves⟩
+
+def emptyReferenceRuntimeV1 : Solidity.Backend.Selection.RuntimeConsumer
+    Unit (fun _ => ()) [] (fun _ initial final => final = initial)
+    (.code []) 0 0 emptyComposition
+    (Solidity.Backend.LabelExec.step [])
+    (fun count => Solidity.Backend.LabelExec.advance count []) (fun _ => True) where
+  consume := fun _ => emptyReferenceRuntime.consume
+    Solidity.Backend.Selection.V2.Controls.identityCompiler
+
+/-- An always-none iterator cannot meet even the reference zero-step equation. -/
+theorem decoder_always_none_run_refused (bytes : List UInt8) (height : Nat)
+    (step : Solidity.Backend.LabelExec.State → Option Solidity.Backend.LabelExec.State)
+    (reachable : Solidity.Backend.LabelExec.State → Prop) :
+    ¬ Nonempty (Solidity.Backend.Selection.DecoderPremise bytes height step
+      (fun _ _ => none) reachable) := by
+  rintro ⟨certificate⟩
+  have impossible : (none : Option Solidity.Backend.LabelExec.State) = some ⟨0,[]⟩ :=
+    certificate.zero ⟨0,[]⟩
+  cases impossible
+
+#print axioms emptyReferenceRuntime
+#print axioms emptyReferenceRuntimeV1
+#print axioms decoder_always_none_run_refused
