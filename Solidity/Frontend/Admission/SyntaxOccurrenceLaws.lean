@@ -1279,4 +1279,81 @@ theorem syntaxFieldUses_iff {α : Type u} {c : Cat} (root : Syn c)
 
 /-- info: 'Solidity.Frontend.Admission.syntaxFieldUses_iff' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms syntaxFieldUses_iff
+
+/-- Shared first-error law; silence checks every inventoried value, not only a prefix. -/
+theorem firstRejected_none_iff {α : Type u} (values : List α) (accepts : α → Bool) :
+    (values.filter (fun value => !accepts value)).head? = none ↔
+      ∀ value ∈ values, accepts value = true := by
+  rw [List.head?_eq_none_iff, List.filter_eq_nil_iff]
+  constructor
+  · intro silent value present
+    cases decision : accepts value with
+    | true => rfl
+    | false =>
+      exact False.elim ((silent value present) (by
+        change (!accepts value) = true
+        rw [decision]
+        rfl))
+  · intro allowed value present rejected
+    change (!accepts value) = true at rejected
+    rw [allowed value present] at rejected
+    cases rejected
+
+/-! Regression: header refusals must survive Env erasure. Diagnostics below use the original typed syntax and supplied classifier/predicate only; silence does not establish classifier completeness, lexical validity, typing or Source admission. -/
+def syntaxFieldRefusals {α : Type u} {c : Cat} (root : Syn c)
+    (fields : ∀ {k : Cat}, Syn k → List α) (accepts : α → Bool) :
+    List (SyntaxOccurrence × α) :=
+  (syntaxFieldUses root fields).filter fun use => !accepts use.2
+
+def syntaxFieldRefusal? {α : Type u} {c : Cat} (root : Syn c)
+    (fields : ∀ {k : Cat}, Syn k → List α) (accepts : α → Bool) :
+    Option (SyntaxOccurrence × α) := (syntaxFieldRefusals root fields accepts).head?
+
+theorem syntaxFieldRefusals_iff {α : Type u} {c : Cat} (root : Syn c)
+    (fields : ∀ {k : Cat}, Syn k → List α) (accepts : α → Bool)
+    (site : SyntaxOccurrence) (value : α) :
+    (site,value) ∈ syntaxFieldRefusals root fields accepts ↔
+      Syn.Sub site ⟨c,root⟩ ∧ value ∈ fields site.2 ∧ accepts value = false := by
+  simp only [syntaxFieldRefusals, List.mem_filter, syntaxFieldUses_iff,
+    Bool.not_eq, ← Bool.eq_false_iff, and_assoc]
+
+theorem syntaxFieldRefusal?_sound {α : Type u} {c : Cat} (root : Syn c)
+    (fields : ∀ {k : Cat}, Syn k → List α) (accepts : α → Bool)
+    (site : SyntaxOccurrence) (value : α)
+    (reported : syntaxFieldRefusal? root fields accepts = some (site,value)) :
+    Syn.Sub site ⟨c,root⟩ ∧ value ∈ fields site.2 ∧ accepts value = false :=
+  (syntaxFieldRefusals_iff root fields accepts site value).mp
+    (List.mem_of_head? reported)
+
+theorem syntaxFieldRefusal?_none_iff {α : Type u} {c : Cat} (root : Syn c)
+    (fields : ∀ {k : Cat}, Syn k → List α) (accepts : α → Bool) :
+    syntaxFieldRefusal? root fields accepts = none ↔
+      ∀ (site : SyntaxOccurrence) (value : α),
+        Syn.Sub site ⟨c,root⟩ → value ∈ fields site.2 → accepts value = true := by
+  change ((syntaxFieldUses root fields).filter (fun use => !accepts use.2)).head? = none ↔ _
+  rw [firstRejected_none_iff]
+  constructor
+  · intro allowed site value subterm field
+    exact allowed (site,value) ((syntaxFieldUses_iff root fields site value).mpr ⟨subterm,field⟩)
+  · intro allowed use member
+    obtain ⟨site,value⟩ := use
+    have found := (syntaxFieldUses_iff root fields site value).mp member
+    exact allowed site value found.1 found.2
+
+theorem emptySyntaxClassifier_none {α : Type u} {c : Cat} (root : Syn c)
+    (accepts : α → Bool) : syntaxFieldRefusal? root (fun _ => []) accepts = none :=
+  (syntaxFieldRefusal?_none_iff root (fun _ => []) accepts).mpr
+    (fun _ _ _ impossible => False.elim (List.not_mem_nil impossible))
+
+/-- info: 'Solidity.Frontend.Admission.firstRejected_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms firstRejected_none_iff
+/-- info: 'Solidity.Frontend.Admission.syntaxFieldRefusals_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxFieldRefusals_iff
+/-- info: 'Solidity.Frontend.Admission.syntaxFieldRefusal?_sound' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxFieldRefusal?_sound
+/-- info: 'Solidity.Frontend.Admission.syntaxFieldRefusal?_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxFieldRefusal?_none_iff
+/-- info: 'Solidity.Frontend.Admission.emptySyntaxClassifier_none' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms emptySyntaxClassifier_none
+
 end Solidity.Frontend.Admission
