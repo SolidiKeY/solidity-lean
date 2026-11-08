@@ -153,26 +153,26 @@ theorem RefChildRepr.captureAfterCopy {D : Source.Layout} {H : HTy} {R Q R' Q' A
     src' sa' dst' da' u' v' f' _ (captureAfterCopy_checked mid sv hm src' sa' dst' da' u' v' f' hs hd)
     hroot1 hroot2 hleaf1 hleaf2
 
-/-- info: 'Solidity.Backend.MemoryOps.captureAfterCopy_checked' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.captureAfterCopy_checked' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms captureAfterCopy_checked
-/-- info: 'Solidity.Backend.MemoryOps.captureAfterCopy_keeps' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.captureAfterCopy_keeps' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms captureAfterCopy_keeps
-/-- info: 'Solidity.Backend.MemoryOps.captureAfterCopy_fresh' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.captureAfterCopy_fresh' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms captureAfterCopy_fresh
-/-- info: 'Solidity.Backend.MemoryOps.captureAfterCopy_new_frame' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.captureAfterCopy_new_frame' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms captureAfterCopy_new_frame
 /-- info: 'Solidity.Backend.MemoryOps.copy_interstage_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms copy_interstage_none_iff
-/-- info: 'Solidity.Backend.MemoryOps.copy_interstage_success' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.copy_interstage_success' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms copy_interstage_success
 /-- info: 'Solidity.Backend.MemoryOps.copy_interstage_read_cases' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms copy_interstage_read_cases
 /-- info: 'Solidity.Backend.MemoryOps.default_interstage_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms default_interstage_none_iff
-/-- info: 'Solidity.Backend.MemoryOps.copy_interstage_alias' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.MemoryOps.copy_interstage_alias' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms copy_interstage_alias
-/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.captureAfterCopy' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.captureAfterCopy' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms BoolChildRepr.captureAfterCopy
-/-- info: 'Solidity.Backend.MemoryOps.RefChildRepr.captureAfterCopy' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.RefChildRepr.captureAfterCopy' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms RefChildRepr.captureAfterCopy
 end Solidity.Backend.MemoryOps

@@ -132,19 +132,21 @@ theorem checkedBoolUintSequence_none_keeps {D : Source.Layout} {H H' : HTy} {R Q
       checkedBoolUintSequence c off c' off' hp r a s t d q b u v f = none := by
   simp only [checkedBoolUintSequence_none_iff, boolTransfer_none_keeps c off e hk r a s t d,
     uintTransfer_none_keeps c' off' e hk q b u v f]
-/-- info: 'Solidity.Backend.MemoryOps.checkedBoolUintSequence_some_iff' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedBoolUintSequence_some_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedBoolUintSequence_some_iff
-/-- info: 'Solidity.Backend.MemoryOps.checkedBoolUintSequence_none_ordered' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedBoolUintSequence_none_ordered' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in #print axioms checkedBoolUintSequence_none_ordered
 /-- info: 'Solidity.Backend.MemoryOps.checkedBoolUintSequence_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedBoolUintSequence_none_iff
-/-- info: 'Solidity.Backend.MemoryOps.checkedBoolUintSequence_checked' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedBoolUintSequence_checked' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedBoolUintSequence_checked
-/-- info: 'Solidity.Backend.MemoryOps.checkedBoolUintSequence_elems' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedBoolUintSequence_elems' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedBoolUintSequence_elems
-/-- info: 'Solidity.Backend.MemoryOps.checkedBoolUintSequence_frame' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedBoolUintSequence_frame' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedBoolUintSequence_frame
-/-- info: 'Solidity.Backend.MemoryOps.checkedBoolUintSequence_keeps' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedBoolUintSequence_keeps' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedBoolUintSequence_keeps
 /-- info: 'Solidity.Backend.MemoryOps.checkedBoolUintSequence_none_keeps' depends on axioms: [propext,
  Classical.choice,
@@ -271,19 +273,21 @@ theorem checkedUintBoolSequence_none_keeps {D : Source.Layout} {H H' : HTy} {R Q
       checkedUintBoolSequence c off c' off' hp r a s t d q b u v f = none := by
   simp only [checkedUintBoolSequence_none_iff, uintTransfer_none_keeps c off e hk r a s t d,
     boolTransfer_none_keeps c' off' e hk q b u v f]
-/-- info: 'Solidity.Backend.MemoryOps.checkedUintBoolSequence_some_iff' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedUintBoolSequence_some_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedUintBoolSequence_some_iff
-/-- info: 'Solidity.Backend.MemoryOps.checkedUintBoolSequence_none_ordered' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedUintBoolSequence_none_ordered' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in #print axioms checkedUintBoolSequence_none_ordered
 /-- info: 'Solidity.Backend.MemoryOps.checkedUintBoolSequence_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedUintBoolSequence_none_iff
-/-- info: 'Solidity.Backend.MemoryOps.checkedUintBoolSequence_checked' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedUintBoolSequence_checked' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedUintBoolSequence_checked
-/-- info: 'Solidity.Backend.MemoryOps.checkedUintBoolSequence_elems' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedUintBoolSequence_elems' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedUintBoolSequence_elems
-/-- info: 'Solidity.Backend.MemoryOps.checkedUintBoolSequence_frame' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedUintBoolSequence_frame' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedUintBoolSequence_frame
-/-- info: 'Solidity.Backend.MemoryOps.checkedUintBoolSequence_keeps' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedUintBoolSequence_keeps' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedUintBoolSequence_keeps
 /-- info: 'Solidity.Backend.MemoryOps.checkedUintBoolSequence_none_keeps' depends on axioms: [propext,
  Classical.choice,
@@ -308,8 +312,8 @@ theorem checkedBoolUintSequence_comm {D : Source.Layout} {n n' : Option Nat}
   congr 1
   apply overwriteTwo_comm
 
-/-- info: 'Solidity.Backend.MemoryOps.bool_uint_transfer_ne' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.MemoryOps.bool_uint_transfer_ne' depends on axioms: [propext] -/
 #guard_msgs in #print axioms bool_uint_transfer_ne
-/-- info: 'Solidity.Backend.MemoryOps.checkedBoolUintSequence_comm' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedBoolUintSequence_comm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedBoolUintSequence_comm
 end Solidity.Backend.MemoryOps
