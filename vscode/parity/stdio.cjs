@@ -21,13 +21,15 @@ const repo=resolve(__dirname,'../..');
 
 function parse(args) {
   const o={targets:['dafny','local'],workers:[1,2,4],trials:5,warmups:1,scope:'services',timeoutMs:60000,obligations:8,memoryReserveMiB:12288,memoryMaxMiB:4096};
-  const keys={'--dafny':'dafny','--output':'output','--targets':'targets','--workers':'workers','--trials':'trials','--warmups':'warmups','--scope':'scope','--timeout-ms':'timeoutMs','--obligations':'obligations','--memory-reserve-mib':'memoryReserveMiB','--memory-max-mib':'memoryMaxMiB'};
+  const keys={'--dafny':'dafny','--output':'output','--targets':'targets','--workers':'workers','--trials':'trials','--warmups':'warmups','--scope':'scope','--timeout-ms':'timeoutMs','--obligations':'obligations','--memory-reserve-mib':'memoryReserveMiB','--memory-max-mib':'memoryMaxMiB','--configuration-mode':'configurationMode','--configuration-workspace':'configurationWorkspace'};
   for(let i=0;i<args.length;i++){
     if(args[i]==='--help')return {help:true};
     const k=keys[args[i]],v=args[++i];if(!k||!v||v.startsWith('--'))throw new Error('Invalid option '+args[i-1]);
     o[k]=['targets','workers'].includes(k)?v.split(',').map(x=>k==='workers'?Number(x):x):['trials','warmups','timeoutMs','obligations','memoryReserveMiB','memoryMaxMiB'].includes(k)?Number(v):v;
   }
-  if(!['services','full'].includes(o.scope))throw new Error('Invalid scope');
+  if(!['services','full','configuration'].includes(o.scope))throw new Error('Invalid scope');
+  if(o.scope==='configuration'&&(!require('./configuration-lifecycle.cjs').modes.includes(o.configurationMode)||o.workers.some(w=>w!==1)||o.trials!==1||o.warmups!==0||o.obligations!==1))throw Error('Configuration requires explicit mode and single bounded serial trial');
+  if(o.scope!=='configuration'&&(o.configurationMode!==undefined||o.configurationWorkspace!==undefined))throw Error('Configuration mode outside configuration scope');
   for(const k of ['trials','warmups','timeoutMs','obligations','memoryReserveMiB','memoryMaxMiB'])if(!Number.isSafeInteger(o[k])||o[k]<(k==='warmups'?0:1))throw new Error('Invalid '+k);
   if(o.trials>100||o.warmups>10||o.obligations>1000||o.timeoutMs>3600000)throw new Error('Excessive dimensions');
   for(const k of ['workers','targets'])if(new Set(o[k]).size!==o[k].length)throw new Error('Duplicate '+k);
@@ -36,17 +38,20 @@ function parse(args) {
   return o;
 }
 
-async function trial(target,workers,options,dir) {
+async function trial(target,workers,options,dir,dependencies={}) {
   fs.mkdirSync(dir,{recursive:true});
-  const workspace=join(dir,'workspace');fs.mkdirSync(workspace);
-  if(target==='dafny'){fs.mkdirSync(join(workspace,'services-project'));fs.writeFileSync(join(workspace,'services-project','dfyconfig.toml'),'includes = ["*.dfy"]\n');}
+  const workspace=options.configurationWorkspace?resolve(options.configurationWorkspace):join(dir,'workspace');if(options.configurationWorkspace){const marker=JSON.parse(fs.readFileSync(join(workspace,'configuration-owner.json'),'utf8'));assert.equal(marker.root,resolve(workspace,'..'));assert.ok(marker.cycle);}else fs.mkdirSync(workspace);
+  if(target==='dafny'&&options.scope!=='configuration'){fs.mkdirSync(join(workspace,'services-project'));fs.writeFileSync(join(workspace,'services-project','dfyconfig.toml'),'includes = ["*.dfy"]\n');}
   const trace=join(dir,'lsp.jsonl'),events=[],scenarios=[],metrics={},states=new Map(),diagnostics=new Map();
   const begin=performance.now(),runId=randomUUID();
   const command=target==='dafny'?resolve(options.dafny):process.execPath;
-  const args=target==='dafny'?['server','--verify-on','Never','--cores',String(workers),'--cache-verification','0','--verification-time-limit','20']:[join(repo,'vscode/src/lsp-server.cjs')];
+  const args=target==='dafny'?(options.scope==='configuration'?['server','--cores','1','--verification-time-limit','20','--notify-ghostness:true','--notify-line-verification-status:true',...require('./configuration-lifecycle.cjs').launchArgs(options.configurationMode)]:['server','--verify-on','Never','--cores',String(workers),'--cache-verification','0','--verification-time-limit','20']):[join(repo,'vscode/src/lsp-server.cjs')];
   fs.writeFileSync(join(dir,'config.json'),JSON.stringify({runId,target,workers,...options,command,args,workspace,
     runtimeEnvironment:Object.fromEntries(['LEAN_NUM_THREADS','SOLKEY_ROOT'].filter(k=>process.env[k]!==undefined).map(k=>[k,process.env[k]]))},null,2));
-  const child=spawn(command,args,{cwd:repo,detached:process.platform!=='win32',stdio:['pipe','pipe','pipe']});
+  const configuration=options.scope==='configuration'?new (require('./configuration-lifecycle.cjs').Exchange)({runId,target,serverSession:randomUUID()},{readSchema:dependencies.configurationSchema}):null;
+  if(configuration&&options.configurationMode!=='default'&&options.configurationMode!=='restored')configuration.set(options.configurationMode);
+  if(options.scope==='configuration'&&process.platform==='linux'&&!require('./resource-state.cjs').resourcesAllowed(require('./resource-state.cjs').resourceState(),options))throw Error('Configuration resource admission denied');
+  const child=(dependencies.spawnServer||spawn)(command,args,{cwd:repo,detached:process.platform!=='win32',stdio:['pipe','pipe','pipe']});
   child.ownedGroup=process.platform!=='win32';child.processBirth=processState(child.pid)?.birth;
   const ownedGroups=new Map(),sampler=new ProcessSampler(child.pid),peer=new RpcPeer(child.stdout,child.stdin);
   const log=fs.openSync(join(dir,'server.log'),'w');child.stderr.on('data',b=>fs.writeSync(log,b));
@@ -54,7 +59,7 @@ async function trial(target,workers,options,dir) {
   const closed=new Promise(resolve=>child.once('close',(code,signal)=>{exited=true;exitCode=code;exitSignal=signal;resolve();}));
   child.once('error',e=>peer.close(e));child.once('exit',(code,signal)=>peer.close(new Error(`Server exited ${code??signal}`)));
   const append=r=>fs.appendFileSync(trace,JSON.stringify({time:Date.now(),...r})+'\n');
-  const write=peer.write.bind(peer);peer.write=m=>{append({direction:'client',message:m});return write(m);};
+  const write=peer.write.bind(peer);peer.write=m=>{if(options.scope==='configuration'&&['solidityLean/verify','dafny/textDocument/verifySymbol'].includes(m.method))throw Error('Explicit verification forbidden in automatic configuration scenario');append({direction:'client',message:m});return write(m);};
   const receive=peer.receive.bind(peer);peer.receive=m=>{append({direction:'server',message:m});return receive(m);};
   peer.on('close',error=>{try{peer.frames.end();append({direction:'server',framingFinalized:true});}catch(e){append({direction:'server',error:e.message});}});
   const record=(kind,data)=>events.push({ms:performance.now()-begin,kind,data});
@@ -62,20 +67,21 @@ async function trial(target,workers,options,dir) {
     peer.onNotification(method,p=>{record(method,p);if(method.includes('symbolStatus'))states.set(p.uri,p);if(method==='textDocument/publishDiagnostics')diagnostics.set(p.uri,p);});
   if(target==='local')peer.onRequest('solidityLean/registerOwnedProcess',params=>{const owned=require('../src/process-state.cjs').ownedProcess(params,child);ownedGroups.set(owned.pid,owned);sampler.seen.set(owned.pid,owned.processBirth);record('owned-process-registration',{...params});return true;});
   if(target==='local')peer.onNotification('solidityLean/ownedProcess',params=>{const owned=ownedGroups.get(params.pid);if(params.event==='closed'&&owned?.processBirth===params.birth&&!groupMembers(owned).some(running))ownedGroups.delete(params.pid);});
-  peer.onRequest('workspace/configuration',p=>p.items.map(()=>null));
+  peer.onRequest('workspace/configuration',(p,id)=>configuration?configuration.reply(configuration.ticket(p,id)):p.items.map(()=>null));
   peer.onRequest('client/registerCapability',()=>null);peer.onRequest('window/workDoneProgress/create',()=>null);
-  const request=(method,params)=>peer.request(method,params,{timeoutMs:options.timeoutMs});
-  const until=async(predicate,label)=>{
+  const request=(method,params,budget=options.timeoutMs)=>{if(budget<=0)throw Object.assign(Error('Configuration operation timed out'),{code:'TIMEOUT'});if(!(budget<=options.timeoutMs))throw Error('Invalid remaining request budget');return peer.request(method,params,{timeoutMs:budget});};
+  const until=async(predicate,label,deadline)=>{
+    if(deadline!==undefined)return require('./configuration-lifecycle.cjs').waitUntil(predicate,label,{deadline,peer});
     const start=performance.now();while(!predicate()){
       if(peer.closed)throw new Error('Server closed during '+label);
-      if(performance.now()-start>options.timeoutMs)throw Object.assign(new Error('Timed out: '+label),{code:'TIMEOUT'});
+      if(performance.now()-start>options.timeoutMs||deadline!==undefined&&performance.now()>=deadline)throw Object.assign(new Error('Timed out: '+label),{code:'TIMEOUT'});
       await new Promise(r=>setTimeout(r,10));
     }
   };
   const scenario=async(id,fn)=>{
     record('scenario.start',{id});const start=performance.now();
     try{const observation=await fn();scenarios.push({id,status:observation?.status||'passed',elapsedMs:performance.now()-start,observation});}
-    catch(e){scenarios.push({id,status:e.code===-32601?'missing':e.code==='TIMEOUT'||/timed out/i.test(e.message)?'timeout':'broken',elapsedMs:performance.now()-start,error:e.stack});}
+    catch(e){scenarios.push({id,status:e.code===-32601?'missing':e.code==='TIMEOUT'||/timed out/i.test(e.message)?'timeout':'broken',elapsedMs:performance.now()-start,error:e.stack,...(options.scope==='configuration'&&fs.existsSync(join(dir,'configuration-observations.json'))?{failedPartialObservation:JSON.parse(fs.readFileSync(join(dir,'configuration-observations.json'),'utf8'))}:{})});}
     record('scenario.end',{id});
   };
   const open=(name,text)=>{
@@ -101,6 +107,7 @@ async function trial(target,workers,options,dir) {
   const stop=()=>{resourceStop=true;terminateTree(child);};
   const guard=setInterval(()=>{
     if(process.platform!=='linux')return;
+    if(options.scope==='configuration'&&!require('./resource-state.cjs').resourcesAllowed(require('./resource-state.cjs').resourceState(),options,sampler.samples.at(-1)?.rssBytes??0)){stop();return;}
     const available=Number(fs.readFileSync('/proc/meminfo','utf8').match(/MemAvailable:\s+(\d+)/)[1])*1024;
     if(sampler.samples.at(-1)?.rssBytes>options.memoryMaxMiB*1024**2||available<options.memoryReserveMiB*1024**2)stop();
   },250);
@@ -113,6 +120,7 @@ async function trial(target,workers,options,dir) {
         completion:{completionItem:{snippetSupport:true}},codeAction:{codeActionLiteralSupport:{codeActionKind:{valueSet:['quickfix']}}}}},
       initializationOptions:target==='local'?{backendPath:repo,settings:{projectRoot:workspace,workers,automaticVerification:'never',timeoutMs:options.timeoutMs}}:undefined});
     peer.notify('initialized',{});metrics.initializeRequestMs=performance.now()-start;metrics.coldStartupMs=performance.now()-begin;
+    if(options.scope==='configuration'){await scenario('automatic-configuration-lifecycle',()=>require('./configuration-lifecycle.cjs').observe({target,mode:options.configurationMode,peer,request,until,open,change,states,diagnostics,events,exchange:configuration,dir,timeoutMs:options.timeoutMs}));}else{
     const fixture=servicesWorkload(target),doc=open('services',fixture.text);
     await scenario('document-symbols',async()=>{
       const value=await request('textDocument/documentSymbol',{textDocument:{uri:doc.uri}});
@@ -340,6 +348,7 @@ async function trial(target,workers,options,dir) {
         });
       }
     }
+    }
   }catch(e){scenarios.push({id:'server-initialization',status:'broken',error:e.stack});}
   finally{
     try{await peer.request('shutdown',null,{timeoutMs:2000});shutdownAcknowledged=true;peer.notify('exit',null);append({direction:'client',framingFinalized:true});}catch(e){record('shutdown.error',{message:e.message});}
@@ -359,25 +368,26 @@ async function trial(target,workers,options,dir) {
     scenarios.push({id:'server-lifecycle',status:shutdownAcknowledged&&exited&&exitCode===0&&!forcedShutdown&&!groupErrors.length?'passed':'broken',observation:{shutdownAcknowledged,exited,exitCode,exitSignal,forcedShutdown}});
     fs.writeFileSync(join(dir,'resources.json'),JSON.stringify(resources));fs.closeSync(log);
     fs.writeFileSync(join(dir,'events.jsonl'),events.map(e=>JSON.stringify(e)).join('\n')+'\n');
+    if(options.scope==='configuration'){const errors=require('./configuration-lifecycle.cjs').auditWire(fs.readFileSync(trace,'utf8').trim().split('\n').filter(Boolean).map(JSON.parse),target,options.configurationMode);scenarios.push({id:'automatic-configuration-wire-audit',status:errors.length?'broken':'partial',observation:{errors,scope:'Whole captured wire through shutdown, not indefinite absence or rendered equivalence.'}});}
     const status=resourceStop?'resource-stop':resources.cleanup.remaining.length||groupErrors.length?'broken':scenarios.some(s=>s.status==='timeout')?'timeout':scenarios.some(s=>s.status==='broken')?'broken':scenarios.every(s=>s.status==='passed')?'passed':'passed-with-gaps';
     const result={schemaVersion:1,runId,target,status,metrics,scenarios,checks:scenarios.filter(s=>s.status==='passed').map(s=>s.id),serverCapabilities:initialization?.capabilities};
     fs.writeFileSync(join(dir,'result.json'),JSON.stringify(result,null,2));
-    return {target,workers,cache:'none',suite:'stdio-'+options.scope,status,result,artifacts:dir,protocol:protocol(trace),resources:{...resources,samples:undefined}};
+    return {target,workers,cache:options.scope==='configuration'?'original lifecycle default (not cache equivalence)':'none',suite:'stdio-'+options.scope,status,result,artifacts:dir,protocol:protocol(trace),resources:{...resources,samples:undefined}};
   }
 }
 
 async function main(args=process.argv.slice(2)){
-  const options=parse(args);if(options.help){process.stdout.write('node vscode/parity/stdio.cjs --dafny PATH --output DIR [--scope services|full] [--workers 1,2,4] [--trials 5] [--warmups 1]\n');return;}
+  const options=parse(args);if(options.help){process.stdout.write('node vscode/parity/stdio.cjs --dafny PATH --output DIR [--scope services|full|configuration --configuration-mode MODE] [--workers 1,2,4] [--trials 5] [--warmups 1]\n');return;}
   const output=resolve(options.output);if(fs.existsSync(output))throw new Error('Choose a new output directory');fs.mkdirSync(output,{recursive:true});
   const hash=p=>createHash('sha256').update(fs.readFileSync(p)).digest('hex');
   const report={schemaVersion:1,started:new Date().toISOString(),options,fullParityEstablished:false,runs:[],comparisons:[],environment:{node:process.version,cpu:cpus()[0]?.model,
-    localCommit:spawnSync('git',['rev-parse','HEAD'],{cwd:repo,encoding:'utf8'}).stdout.trim(),sourceHashes:Object.fromEntries(['stdio','core','workloads','analyze'].map(n=>[n+'.cjs',hash(join(__dirname,n+'.cjs'))])),
+    localCommit:spawnSync('git',['rev-parse','HEAD'],{cwd:repo,encoding:'utf8'}).stdout.trim(),sourceHashes:Object.fromEntries(['stdio','core','workloads','analyze',...(options.scope==='configuration'?['configuration-lifecycle','lifecycle-trace']:[])].map(n=>[n+'.cjs',hash(join(__dirname,n+'.cjs'))])),
     cpuQuota:process.platform==='linux'?fs.readFileSync('/sys/fs/cgroup/cpu.max','utf8').trim():null,
     memoryLimit:process.platform==='linux'?fs.readFileSync('/sys/fs/cgroup/memory.max','utf8').trim():null,
     backendSourceHashes:Object.fromEntries(fs.readdirSync(join(repo,'vscode/src')).filter(n=>n.endsWith('.cjs')).sort().map(n=>[n,hash(join(repo,'vscode/src',n))])),
     fixtureHashes:Object.fromEntries(['services.dfy','services.sol'].map(n=>[n,hash(join(repo,'tests/editor-parity',n))])),
     dafnyVersion:options.dafny?spawnSync(resolve(options.dafny),['--version'],{encoding:'utf8',timeout:10000,maxBuffer:1024*1024}).stdout?.trim():null},
-    limitations:['Stdio-only: no VS Code API, UI, DOM, accessibility or renderer measurements.','Services scope does not execute verification; full scope requires a freshly built local backend. Dafny automatic verification is disabled; native verifySymbol requests explicitly schedule only the proof fixtures.',
+    limitations:['Stdio-only: no VS Code API, UI, DOM, accessibility or renderer measurements.',options.scope==='configuration'?'Configuration scope uses document-driven Dafny verification; local remains compiler-only never; no explicit verify requests or rendered/client equivalence.':'Services scope does not execute verification; full scope requires a freshly built local backend. Dafny automatic verification is disabled; native verifySymbol requests explicitly schedule only the proof fixtures.',
       'Constant-return proof workload is a shared fragment, not general semantic equivalence.','Process-cold startup retains OS caches; cache policies and solver resource limits are not equivalent.',
       'Raw responses preserve native ranges, diagnostics and strings. Differences are evidence, not automatically regressions.','Frontend, VC, solver and UI phase timing are not isolated.']};
   const lock=join(tmpdir(),'solidity-lean-editor-parity.lock');fs.mkdirSync(lock);fs.writeFileSync(join(lock,'owner.json'),JSON.stringify({pid:process.pid,output}));
