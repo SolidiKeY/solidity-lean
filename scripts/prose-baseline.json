@@ -1,0 +1,212 @@
+{
+  "Solidity/Automation": {
+    "comment_lines": 28,
+    "docs_lines": 0,
+    "docstring_lines": 28,
+    "process_ids": 8
+  },
+  "Solidity/Backend": {
+    "comment_lines": 28351,
+    "docs_lines": 0,
+    "docstring_lines": 28293,
+    "process_ids": 1242
+  },
+  "Solidity/Calculus": {
+    "comment_lines": 22861,
+    "docs_lines": 0,
+    "docstring_lines": 22004,
+    "process_ids": 56
+  },
+  "Solidity/Corpus": {
+    "comment_lines": 1143,
+    "docs_lines": 0,
+    "docstring_lines": 1142,
+    "process_ids": 0
+  },
+  "Solidity/Counterexamples": {
+    "comment_lines": 194,
+    "docs_lines": 0,
+    "docstring_lines": 174,
+    "process_ids": 0
+  },
+  "Solidity/Evm": {
+    "comment_lines": 3788,
+    "docs_lines": 0,
+    "docstring_lines": 3734,
+    "process_ids": 9
+  },
+  "Solidity/Examples": {
+    "comment_lines": 15906,
+    "docs_lines": 0,
+    "docstring_lines": 15336,
+    "process_ids": 18
+  },
+  "Solidity/Frontend": {
+    "comment_lines": 9080,
+    "docs_lines": 0,
+    "docstring_lines": 8314,
+    "process_ids": 171
+  },
+  "Solidity/Hash": {
+    "comment_lines": 371,
+    "docs_lines": 0,
+    "docstring_lines": 371,
+    "process_ids": 5
+  },
+  "Solidity/Language": {
+    "comment_lines": 838,
+    "docs_lines": 0,
+    "docstring_lines": 829,
+    "process_ids": 8
+  },
+  "Solidity/Lowering": {
+    "comment_lines": 10137,
+    "docs_lines": 0,
+    "docstring_lines": 9975,
+    "process_ids": 403
+  },
+  "Solidity/Optimizer": {
+    "comment_lines": 709,
+    "docs_lines": 0,
+    "docstring_lines": 707,
+    "process_ids": 1
+  },
+  "Solidity/Precompiles": {
+    "comment_lines": 443,
+    "docs_lines": 0,
+    "docstring_lines": 439,
+    "process_ids": 47
+  },
+  "Solidity/Roadmap": {
+    "comment_lines": 1251,
+    "docs_lines": 0,
+    "docstring_lines": 1249,
+    "process_ids": 79
+  },
+  "Solidity/Semantics": {
+    "comment_lines": 3846,
+    "docs_lines": 0,
+    "docstring_lines": 3816,
+    "process_ids": 108
+  },
+  "Solidity/SolcValidation": {
+    "comment_lines": 1043,
+    "docs_lines": 0,
+    "docstring_lines": 985,
+    "process_ids": 8
+  },
+  "Solidity/Solkey": {
+    "comment_lines": 142,
+    "docs_lines": 0,
+    "docstring_lines": 140,
+    "process_ids": 0
+  },
+  "Solidity/SortCheck": {
+    "comment_lines": 359,
+    "docs_lines": 0,
+    "docstring_lines": 310,
+    "process_ids": 0
+  },
+  "Solidity/Source": {
+    "comment_lines": 6552,
+    "docs_lines": 0,
+    "docstring_lines": 6382,
+    "process_ids": 126
+  },
+  "Solidity/Stipend": {
+    "comment_lines": 90,
+    "docs_lines": 0,
+    "docstring_lines": 88,
+    "process_ids": 6
+  },
+  "Solidity/Storage": {
+    "comment_lines": 501,
+    "docs_lines": 0,
+    "docstring_lines": 487,
+    "process_ids": 10
+  },
+  "Solidity/Syntax": {
+    "comment_lines": 3096,
+    "docs_lines": 0,
+    "docstring_lines": 2532,
+    "process_ids": 3
+  },
+  "Solidity/TestSuite": {
+    "comment_lines": 386,
+    "docs_lines": 0,
+    "docstring_lines": 374,
+    "process_ids": 0
+  },
+  "Solidity/Theory": {
+    "comment_lines": 1481,
+    "docs_lines": 0,
+    "docstring_lines": 1481,
+    "process_ids": 14
+  },
+  "Solidity/Tools": {
+    "comment_lines": 1693,
+    "docs_lines": 0,
+    "docstring_lines": 1585,
+    "process_ids": 3
+  },
+  "Solidity/Typing": {
+    "comment_lines": 713,
+    "docs_lines": 0,
+    "docstring_lines": 713,
+    "process_ids": 0
+  },
+  "Solidity/Yul": {
+    "comment_lines": 12742,
+    "docs_lines": 0,
+    "docstring_lines": 12593,
+    "process_ids": 291
+  },
+  "Solidity/_root": {
+    "comment_lines": 1217,
+    "docs_lines": 0,
+    "docstring_lines": 1149,
+    "process_ids": 3
+  },
+  "docs/README.d": {
+    "comment_lines": 0,
+    "docs_lines": 19,
+    "docstring_lines": 0,
+    "process_ids": 0
+  },
+  "docs/_root": {
+    "comment_lines": 0,
+    "docs_lines": 30218,
+    "docstring_lines": 0,
+    "process_ids": 0
+  },
+  "docs/audits": {
+    "comment_lines": 0,
+    "docs_lines": 2509,
+    "docstring_lines": 0,
+    "process_ids": 0
+  },
+  "docs/benchmarks": {
+    "comment_lines": 0,
+    "docs_lines": 96119,
+    "docstring_lines": 0,
+    "process_ids": 0
+  },
+  "docs/feature-work": {
+    "comment_lines": 0,
+    "docs_lines": 114522,
+    "docstring_lines": 0,
+    "process_ids": 0
+  },
+  "docs/module-map": {
+    "comment_lines": 0,
+    "docs_lines": 9556,
+    "docstring_lines": 0,
+    "process_ids": 0
+  },
+  "docs/module-map.d": {
+    "comment_lines": 0,
+    "docs_lines": 103,
+    "docstring_lines": 0,
+    "process_ids": 0
+  }
+}

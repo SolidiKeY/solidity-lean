@@ -1,0 +1,168 @@
+#!/usr/bin/env python3
+"""Per-area prose ratchet. Missing areas have a zero budget; --update never raises it."""
+import argparse
+import json
+from pathlib import Path
+import re
+import sys
+
+RAW = re.compile(r'r(#+)?"')
+CHAR = re.compile(r"'(?:[^'\\\n]|\\(?:u\{[0-9a-fA-F]+\}|.))'")
+PLAIN = re.compile(r"[^/\\\"'«rs{}-]+")
+METRICS = ("docs_lines", "comment_lines", "docstring_lines", "process_ids")
+
+
+def comment_lines(source):
+    """Return unique physical comment lines and their docstring subset.
+
+    Lean block comments nest. Strings (including raw strings), character
+    literals and escaped identifiers may contain comment delimiters.
+    """
+    comments, docs = set(), set()
+    stack = []
+    contexts = []  # interpolated string text or brace depth of an expression
+    i, line = 0, 1
+    while i < len(source):
+        if stack:
+            comments.add(line)
+            if any(stack):
+                docs.add(line)
+            if source.startswith("/-", i):
+                stack.append(source.startswith(("/--", "/-!"), i))
+                i += 2
+            elif source.startswith("-/", i):
+                stack.pop()
+                i += 2
+            else:
+                line += source[i] == "\n"
+                i += 1
+        elif contexts and contexts[-1] == "text":
+            if source[i] == "\\":
+                end = min(i + 2, len(source))
+            elif source.startswith(("{{", "}}"), i):
+                end = i + 2
+            elif source[i] == '"':
+                contexts.pop()
+                end = i + 1
+            elif source[i] == "{":
+                contexts.append(1)
+                end = i + 1
+            else:
+                end = i + 1
+            line += source[i:end].count("\n")
+            i = end
+        elif source.startswith('s!"', i):
+            contexts.append("text")
+            i += 3
+        elif contexts and source[i] in "{}":
+            contexts[-1] += 1 if source[i] == "{" else -1
+            if contexts[-1] == 0:
+                contexts.pop()
+            i += 1
+        elif source.startswith("--", i):
+            comments.add(line)
+            end = source.find("\n", i)
+            i = len(source) if end < 0 else end
+        elif source.startswith("/-", i):
+            stack.append(source.startswith(("/--", "/-!"), i))
+            comments.add(line)
+            if stack[-1]:
+                docs.add(line)
+            i += 2
+        else:
+            raw = RAW.match(source, i) if source[i] == "r" else None
+            char = CHAR.match(source, i) if source[i] == "'" else None
+            if raw:
+                close = '"' + (raw[1] or "")
+                end = source.find(close, raw.end())
+                end = len(source) if end < 0 else end + len(close)
+            elif char:
+                end = char.end()
+            elif source[i] == "«":
+                end = source.find("»", i + 1)
+                end = len(source) if end < 0 else end + 1
+            elif source[i] == '"':
+                end = i + 1
+                while end < len(source):
+                    if source[end] == "\\":
+                        end += 2
+                    elif source[end] == '"':
+                        end += 1
+                        break
+                    else:
+                        end += 1
+            else:
+                plain = PLAIN.match(source, i)
+                end = plain.end() if plain else i + 1
+            line += source[i:end].count("\n")
+            i = end
+    return len(comments), len(docs)
+
+
+def counts(root):
+    for tree in ("docs", "Solidity"):
+        if not (root / tree).is_dir():
+            raise ValueError(f"missing source directory: {root / tree}")
+    result = {}
+    for tree in ("docs", "Solidity"):
+        for path in sorted((root / tree).rglob("*")):
+            if not path.is_file() or (tree == "Solidity" and path.suffix != ".lean"):
+                continue
+            relative = path.relative_to(root / tree)
+            area = tree + "/" + (relative.parts[0] if len(relative.parts) > 1 else "_root")
+            row = result.setdefault(area, dict.fromkeys(METRICS, 0))
+            source = path.read_text(encoding="utf-8")
+            if tree == "docs":
+                row["docs_lines"] += len(source.splitlines())
+            else:
+                comment, doc = comment_lines(source)
+                row["comment_lines"] += comment
+                row["docstring_lines"] += doc
+                row["process_ids"] += len(re.findall(r"\b[GH][0-9]+\b", source))
+    return result
+
+
+def read_baseline(path):
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError("baseline must be an area-to-counts object")
+    for area, row in data.items():
+        if not isinstance(row, dict) or set(row) != set(METRICS):
+            raise ValueError("invalid metrics for " + area)
+        if any(type(n) is not int or n < 0 for n in row.values()):
+            raise ValueError("counts must be nonnegative integers: " + area)
+    return data
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parent.parent)
+    parser.add_argument("--baseline", type=Path, help="defaults to ROOT/scripts/prose-baseline.json")
+    parser.add_argument("--update", action="store_true", help="lower existing budgets; refuse every increase")
+    args = parser.parse_args()
+    baseline_path = args.baseline or args.root / "scripts/prose-baseline.json"
+    try:
+        baseline = read_baseline(baseline_path)
+        actual = counts(args.root)
+        merged = {area: actual.get(area, dict.fromkeys(METRICS, 0))
+                  for area in sorted(baseline.keys() | actual.keys())}
+        failures = []
+        for area, row in merged.items():
+            for metric, value in row.items():
+                limit = baseline.get(area, {}).get(metric, 0)
+                if value > limit:
+                    failures.append(f"{area} {metric}: {value} > {limit}")
+        if failures:
+            print("Prose budget exceeded:\n" + "\n".join(failures), file=sys.stderr)
+            return 1
+        if args.update:
+            baseline_path.write_text(json.dumps(merged, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        print(f"Prose budget PASS ({len(merged)} areas)" + ("; baseline lowered" if args.update else ""))
+        return 0
+    except (OSError, ValueError) as error:
+        print(f"prose budget: {error}", file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main())
