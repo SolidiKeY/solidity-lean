@@ -322,6 +322,7 @@ and open obligations. Test proposals remain proposals until applied.
 - [tests/h28-sol/automation-benchmark/README.md](../tests/h28-sol/automation-benchmark/README.md)
 - [tests/h28-sol/mutation-testing/tools/README.md](../tests/h28-sol/mutation-testing/tools/README.md)
 - [tests/h28-sol/type-grammar/README.md](../tests/h28-sol/type-grammar/README.md)
+- [tests/h28-terra/drift-reports/README.md](../tests/h28-terra/drift-reports/README.md)
 - [tests/h62/item1/duplication-scanner/audit-source.md](../tests/h62/item1/duplication-scanner/audit-source.md)
 - [tests/h62/item2/audit-calculus/ARRAY-COPY-CLASSIFICATION.md](../tests/h62/item2/audit-calculus/ARRAY-COPY-CLASSIFICATION.md)
 - [tests/h62/item2/audit-calculus/BULK-INPUTS.md](../tests/h62/item2/audit-calculus/BULK-INPUTS.md)
