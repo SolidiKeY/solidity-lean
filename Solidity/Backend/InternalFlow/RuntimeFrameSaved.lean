@@ -69,7 +69,7 @@ theorem pushed_allocator (pointerCell : Nat) (address : Fin W) (value : Word)
     (payloadAbove : b + Γ.length ≤ address.val) (payloadBelow : address.val < frame) :
     GrowsAllocator b frame 0 σ base m σ base (Stack.pushed m pointerCell address value) := by
   intro cursor positive alloc space
-  simpa only [Nat.add_zero,Stack.pushed] using
+  simpa only [Nat.add_zero,Stack.pushed,writeMachine,Fin.eta] using
     (alloc.localWrite address.val (by omega) payloadBelow value).localWrite
       pointerCell (by omega) pointerBelow (.val (wmod (1 + address.val)))
 
