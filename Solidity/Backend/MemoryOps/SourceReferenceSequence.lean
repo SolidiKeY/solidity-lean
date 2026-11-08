@@ -14,6 +14,7 @@ def nestedDeleteStmt {C : Contract} {Γ : Ctx} (root : Idx Γ (.mem BoolRefsRef)
     (i j : Idx Γ (.val .uint)) : Stmt C Γ Γ :=
   .deleteMem (.loc (.index .dyn (.loc (.index .dyn (.var root rfl) (.simple (.local i)))) (.simple (.local j)))) rfl
 
+set_option backward.isDefEq.respectTransparency false in
 /-- INITIAL local/table alignment and bounds suffice. The nested delete selects
 what the first write installed, not what the original parent selected. -/
 theorem resolved_reference_delete_sequence {E : Source.Env} {Γ : Source.RCtx} {C : Contract} {Δ : Ctx}
@@ -73,7 +74,7 @@ theorem resolved_reference_delete_sequence {E : Source.Env} {Γ : Source.RCtx} {
   have hq₂ : mid.index r .dyn (Evm.Memory.indexValue k)=some v := by
     change (MObj.elems .dyn (mid.get r))[(Evm.Memory.indexValue k).1.toNat]?=some v
     rw [hparent₁]
-    simpa only [Evm.Memory.indexValue,Int.toNat_natCast] using List.getElem?_set_self hk (a := v)
+    simpa only [Evm.Memory.indexValue,Int.toNat_natCast] using List.getElem?_set_self (l := MObj.elems .dyn (σ.heap.get r)) hk (a := v)
   have hl₂ : l.val<mid.len v .dyn := by
     change l.val<(MObj.elems .dyn (mid.get v)).length
     rw [hchildren v];exact hl
@@ -101,13 +102,14 @@ theorem resolved_reference_delete_sequence {E : Source.Env} {Γ : Source.RCtx} {
       have hw : σ.heap.writeAddr (.index r .dyn (Evm.Memory.indexValue k)) v=
           some (σ.heap.set r (MObj.setElem .dyn (σ.heap.get r) k.val v)) := by
         simp only [Heap.writeAddr,Heap.setIndex,Evm.Memory.indexValue,Int.toNat_natCast]
-        exact if_pos hk
+        exact ite_eq_left hk
       exact Option.some.inj (ho₁.symm.trans hw)
     apply ha₂ cursor hb
     change Evm.Memory.StructAllocatorRepr mid base frame cursor mm
     rw [hmid]
     exact reference_slot_allocator hm r k.val hk v cursor ha hbound
 
+set_option backward.isDefEq.respectTransparency false in
 theorem resolved_reference_delete_late_error {E : Source.Env} {Γ : Source.RCtx} {C : Contract} {Δ : Ctx}
     {y : Source.EMState E Γ} {a : Nat} (G : Source.Glob E) (Fsrc : Source.Fr) (n : Nat)
     (sroot : Source.Idx Γ SourceBoolRefsTy) (si sj : Source.Idx Γ (.int .u256))
@@ -152,7 +154,7 @@ theorem resolved_reference_delete_late_error {E : Source.Env} {Γ : Source.RCtx}
   have hq₂ : mid.index r .dyn (Evm.Memory.indexValue k)=some v := by
     change (MObj.elems .dyn (mid.get r))[(Evm.Memory.indexValue k).1.toNat]?=some v
     rw [hparent₁]
-    simpa only [Evm.Memory.indexValue,Int.toNat_natCast] using List.getElem?_set_self hk (a := v)
+    simpa only [Evm.Memory.indexValue,Int.toNat_natCast] using List.getElem?_set_self (l := MObj.elems .dyn (σ.heap.get r)) hk (a := v)
   have hl₂ : mid.len v .dyn≤l.val := by
     change (MObj.elems .dyn (mid.get v)).length≤l.val
     rw [hchildren v];exact hl
