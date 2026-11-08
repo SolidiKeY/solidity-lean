@@ -72,3 +72,5 @@ import Solidity.Theory.Audit.H62.PureBoundaryWitnesses
 row Theory/Audit/H62/PureBoundaryWitnesses.lean | Eight selected Pure input packets, nonidentity universally commuting terminating loops and visible outside replacement; PARTIAL8/26, optional standalone placement pending review.
 
 | `tests/h62/item2/audit-theories/ObservationDomains.lean` | Supplemental Obs.ext joint packet with inhabited word/length domains and observed fields; abstract Obs only. |
+
+| `tests/h62/item2/audit-theories/CleanTailWitnesses.lean` | All six original CleanTail joint telescopes, private input, admitted flag-write system and actual transient reset; source-model only. |
