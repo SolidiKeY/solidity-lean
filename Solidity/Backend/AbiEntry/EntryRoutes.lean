@@ -23,7 +23,7 @@ private theorem chain_core (C : Contract) (table : PayableRouteTable) (receive f
     rcases row with ⟨tag,label,payable⟩
     have guarded := ValueGateBody.admitted (Frag.init RouteCtx) (SelectorRoutes.writeLabel C label) payable
       (Frag.init RouteCtx) (SelectorRoutes.write_core C label _)
-    simp only [chain,inFragP,inFrag,SelectorRoutes.condition_in,if_true]
+    simp only [chain,inFragP,inFrag,SelectorRoutes.condition_in,ite_true]
     rw [guarded,ih]
     rfl
 
@@ -64,9 +64,9 @@ private theorem chain_run (C : Contract) (base : Nat) (table : PayableRouteTable
     rcases row with ⟨tag,label,payable⟩
     rw [chain_code,PayableRoutes.test_run base tag selector _ _ machine initial]
     by_cases same : tag.val=selector.val
-    · rw [if_pos same,PayableRoutes.branchBody_run]
+    · rw [ite_eq_left same,PayableRoutes.branchBody_run]
       simp only [ordinaryResult,List.find?_cons,decide_eq_true same,Option.map_some,specialRowOutcome]
-    · rw [if_neg same,ih]
+    · rw [ite_eq_right same,ih]
       simp only [ordinaryResult,List.find?_cons,decide_eq_false same]
 
 private theorem code (C : Contract) (base : Nat) (table : PayableRouteTable) (receive fallback : Option SpecialRow) :
@@ -84,11 +84,11 @@ private theorem length_front (base : Nat) (size : Fin W) (yes no : List Evm.Inst
       if size.val<4 then run (yes++[.jump no.length]++no) machine else run no machine := by
   by_cases small : size.val<4
   · simp only [run,List.cons_append,List.nil_append,List.append_assoc,exec_cons_zero,Instr.step,Machine.next,
-      Out.bind,initial,wmod,Nat.mod_eq_of_lt (by decide : (4 : Nat)<W),small,decide_true,bword,if_true,
-      if_false,Nat.one_ne_zero,decide_false,Bool.false_eq_true]
+      Out.bind,initial,wmod,Nat.mod_eq_of_lt (by decide : (4 : Nat)<W),small,decide_true,bword,ite_true,
+      ite_false,Nat.one_ne_zero,decide_false,Bool.false_eq_true]
   · simp only [run,List.cons_append,List.nil_append,List.append_assoc,exec_cons_zero,Instr.step,Machine.next,
       Out.bind,initial,wmod,Nat.mod_eq_of_lt (by decide : (4 : Nat)<W),small,decide_false,decide_true,bword,
-      if_true,if_false,Nat.one_ne_zero,Bool.false_eq_true,exec_skip_append,exec_cons_succ]
+      ite_true,ite_false,Nat.one_ne_zero,Bool.false_eq_true,exec_skip_append,exec_cons_succ]
 
 private theorem special_join (C : Contract) (base : Nat) (receive fallback : Option SpecialRow)
     (rest : List Evm.Instr) (machine : Machine) (size : Fin W) (length : machine.mem (base+1)=.val size) :
@@ -103,7 +103,7 @@ private theorem special_join (C : Contract) (base : Nat) (receive fallback : Opt
   | none => rfl
   | some pair =>
     cases allowed : pair.2 || decide (machine.callvalue.val=0) <;>
-      simp only [allowed,Bool.false_eq_true,if_true,if_false,Out.bind,exec_cons_zero,Instr.step,nilrun,exec_length]
+      simp only [allowed,Bool.false_eq_true,ite_true,ite_false,Out.bind,exec_cons_zero,Instr.step,nilrun,exec_length]
 
 theorem run_route (C : Contract) (base : Nat) (table : PayableRouteTable) (receive fallback : Option SpecialRow)
     (machine : Machine) (selector size : Fin W) (initial : machine.mem base=.val selector)
@@ -112,10 +112,10 @@ theorem run_route (C : Contract) (base : Nat) (table : PayableRouteTable) (recei
       entryRouteOutcome base table receive fallback selector size machine := by
   rw [code,length_front base size _ _ machine length]
   by_cases small : size.val<4
-  · rw [if_pos small,special_join C base receive fallback _ machine size length]
-    simp only [entryRouteOutcome,if_pos small]
-  · rw [if_neg small,chain_run C base table receive fallback machine selector size initial length]
-    simp only [entryRouteOutcome,if_neg small]
+  · rw [ite_eq_left small,special_join C base receive fallback _ machine size length]
+    simp only [entryRouteOutcome,ite_eq_left small]
+  · rw [ite_eq_right small,chain_run C base table receive fallback machine selector size initial length]
+    simp only [entryRouteOutcome,ite_eq_right small]
     rfl
 
 theorem executed (C : Contract) (base : Nat) (table : PayableRouteTable) (receive fallback : Option SpecialRow)
