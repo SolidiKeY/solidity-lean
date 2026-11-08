@@ -1,5 +1,12 @@
 {
+ "Solidity/Frontend/Admission/DeclarationOccurrences.lean:Solidity.Frontend.Admission.collected_declaration_subterm": [
+  "propext"
+ ],
  "Solidity/Frontend/Admission/DeclarationOccurrences.lean:Solidity.Frontend.Admission.declarationOccurrences_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/DeclarationOccurrences.lean:Solidity.Frontend.Admission.declaration_occurrence_in_source_unit": [
   "Quot.sound",
   "propext"
  ],
@@ -24,5 +31,6 @@
   "Quot.sound",
   "propext"
  ],
- "Solidity/Frontend/Admission/DeclarationOccurrences.lean:Solidity.Frontend.Admission.source_unit_not_recoverable_from_env": []
+ "Solidity/Frontend/Admission/DeclarationOccurrences.lean:Solidity.Frontend.Admission.source_unit_not_recoverable_from_env": [],
+ "Solidity/Frontend/Admission/DeclarationOccurrences.lean:Solidity.Frontend.Admission.syntaxSub_trans": []
 }

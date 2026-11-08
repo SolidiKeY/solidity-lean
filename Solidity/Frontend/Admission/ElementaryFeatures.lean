@@ -218,4 +218,20 @@ theorem declarationElementaryFeatures_iff (E : Env) (f : Feature) :
 /-- info: 'Solidity.Frontend.Admission.declarationElementaryFeatures_iff' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms declarationElementaryFeatures_iff
 
+/-- Every extracted elementary feature is witnessed by an actual syntax site
+and direct elementary field in the original unit. This is one-way provenance,
+not completeness of the whole feature catalog or a source admission proof. -/
+theorem declarationElementaryFeatures_source_witness (u : Syn .unit) (f : Feature)
+    (present : f ∈ declarationElementaryFeatures u.env) :
+    ∃ (site : SyntaxOccurrence) (e : Elem), site ∈ syntaxOccurrences u ∧
+      e ∈ elementaryFieldsAt site.2 ∧ elementaryFeature e = f := by
+  obtain ⟨site,e,occurs,field,classified⟩ :=
+    (declarationElementaryFeatures_iff u.env f).mp present
+  refine ⟨site.2,e,?_,field,classified⟩
+  exact declaration_occurrence_in_source_unit u site
+    ((declarationOccurrences_iff u.env site).mpr occurs)
+
+/-- info: 'Solidity.Frontend.Admission.declarationElementaryFeatures_source_witness' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms declarationElementaryFeatures_source_witness
+
 end Solidity.Frontend.Admission

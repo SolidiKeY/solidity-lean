@@ -122,4 +122,57 @@ theorem source_unit_not_recoverable_from_env :
 /-- info: 'Solidity.Frontend.Admission.source_unit_not_recoverable_from_env' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms source_unit_not_recoverable_from_env
 
+/-- Compose the existing intrinsic subterm relation without replacing its
+representation or its immediate-child relation. -/
+theorem syntaxSub_trans {a b c : SyntaxOccurrence}
+    (ab : Syn.Sub a b) (bc : Syn.Sub b c) : Syn.Sub a c := by
+  induction bc with
+  | refl => exact ab
+  | child member sub ih => exact .child member ih
+
+/-- Every declaration returned by the actual collector retains its original
+syntax position. No separate declaration roster or coverage premise is used. -/
+theorem collected_declaration_subterm (scope : Option String) {c : Cat} (s : Syn c) :
+    ∀ d ∈ s.collect scope,
+      Syn.Sub ⟨d.kind.cat d.top,d.node⟩ ⟨c,s⟩ := by
+  fun_induction Syn.collect scope s <;> intro d member
+  all_goals first
+    | exact False.elim (List.not_mem_nil member)
+    | (have same := List.mem_singleton.mp member
+       cases same
+       exact .refl _)
+    | (rename_i ih
+       exact .child (List.mem_singleton_self _) (ih d member))
+    | (rename_i ihLeft ihRight
+       rcases List.mem_append.mp member with left | right
+       · exact .child (List.mem_cons_self ..) (ihLeft d left)
+       · exact .child (List.mem_cons_of_mem _ (List.mem_singleton_self _)) (ihRight d right))
+    | (rcases List.mem_cons.mp member with same | nested
+       · cases same
+         exact .refl _
+       · rename_i ih
+         first
+           | exact .child (List.mem_singleton_self _) (ih d nested)
+           | exact .child (List.mem_cons_of_mem _ (List.mem_singleton_self _)) (ih d nested)
+           | exact .child (List.mem_cons_of_mem _
+               (List.mem_cons_of_mem _ (List.mem_singleton_self _))) (ih d nested))
+
+/-- Declaration inventory sites are genuine sites of their original source
+unit. The converse is deliberately absent: headers also occur in the unit. -/
+theorem declaration_occurrence_in_source_unit (u : Syn .unit)
+    (site : DeclarationOccurrence) (present : site ∈ declarationOccurrences u.env) :
+    site.2 ∈ syntaxOccurrences u := by
+  have occurs := (declarationOccurrences_iff u.env site).mp present
+  have root := collected_declaration_subterm Option.none u site.1 occurs.1
+  exact (syntaxOccurrences_iff u site.2).mpr (syntaxSub_trans occurs.2 root)
+
+/-- info: 'Solidity.Frontend.Admission.syntaxSub_trans' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxSub_trans
+
+/-- info: 'Solidity.Frontend.Admission.collected_declaration_subterm' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms collected_declaration_subterm
+
+/-- info: 'Solidity.Frontend.Admission.declaration_occurrence_in_source_unit' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms declaration_occurrence_in_source_unit
+
 end Solidity.Frontend.Admission
