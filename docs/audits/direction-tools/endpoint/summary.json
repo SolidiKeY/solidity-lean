@@ -1,0 +1,685 @@
+{
+  "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+  "command": "python3 docs/audits/direction-tools/endpoint/measure.py --check",
+  "counting_boundary": "Pinned committed statements and reports, not fresh kernel validation. Units remain separate: obligations, taclets, semantic fixture files, EEST function templates. Never add their denominators into a percentage.",
+  "endpoints": {
+    "a": {
+      "denominators": {
+        "TestSuite_obligations": 566,
+        "additional_corpus_rows": 208,
+        "program_taclets": 377
+      },
+      "numerators": {
+        "TestSuite_derived": 552,
+        "TestSuite_refuted_negative_controls": 11,
+        "additional_proved_model_examples": 72,
+        "claimed_taclets": 342
+      },
+      "other_statuses": {
+        "TestSuite": {
+          "derived": 552,
+          "excluded": 1,
+          "refuted": 11,
+          "skip": 2
+        },
+        "additional_corpus": {
+          "proved": 72,
+          "unported": 101,
+          "unsupported": 35
+        }
+      },
+      "percent_TestSuite_derived": 97.5265,
+      "percent_taclets_claimed": 90.7162,
+      "product": "SolKey-compatible proof core",
+      "reason": "Substantial checked intrinsic proof endpoint already exists. Claimed taclets and model proofs measure the core, not Java parser equivalence or production semantics. Unclaimed architectural rules remain denominator members; refutations do not count as positive coverage.",
+      "theorems": [
+        "Solkey.TestSuite.<function>.proved (exact row names in solkey.json)",
+        "Solidity.Proves.fmlValid",
+        "Solidity.Stmt.sound",
+        "Solidity.taclets_partitioned"
+      ],
+      "verdict": "justified"
+    },
+    "b": {
+      "chain": [
+        {
+          "citation": {
+            "anchor": "theorem Proves.fmlValid",
+            "line": 29,
+            "path": "Solidity/Calculus/Sound.lean"
+          },
+          "stage": "SolKey obligation to intrinsic validity",
+          "status": "proved in pinned source",
+          "theorem": "Solidity.Proves.fmlValid"
+        },
+        {
+          "citation": {
+            "anchor": "structure CheckedFrontend",
+            "line": 798,
+            "path": "Solidity/Roadmap/Contracts.lean"
+          },
+          "stage": "source admission",
+          "status": "interface; a full accepted-source producer still required"
+        },
+        {
+          "citation": {
+            "anchor": "def lowerLoops",
+            "line": 543,
+            "path": "Solidity/Syntax/Elab/Lower.lean"
+          },
+          "other": {
+            "anchor": "partial def uncheckStmts",
+            "line": 707,
+            "path": "Solidity/Syntax/Elab/Lower.lean"
+          },
+          "stage": "actual loop/unchecked lowering to intrinsic",
+          "status": "missing general semantic preservation for emitted programs"
+        },
+        {
+          "citation": {
+            "anchor": "structure Lowering",
+            "line": 835,
+            "path": "Solidity/Roadmap/Contracts.lean"
+          },
+          "stage": "source-world lowering certificate",
+          "status": "interface, not a concrete compiler instance"
+        },
+        {
+          "citation": {
+            "anchor": "theorem compiler_checked",
+            "line": 297,
+            "path": "Solidity/Theorems.lean"
+          },
+          "stage": "checked intrinsic compilation",
+          "status": "proved conditional on Compilation.Input; includes core and memory branches",
+          "theorem": "Solidity.Main.compiler_checked"
+        },
+        {
+          "citation": {
+            "anchor": "structure Execution",
+            "line": 910,
+            "path": "Solidity/Roadmap/Contracts.lean"
+          },
+          "stage": "instruction assembly to deployed bytes",
+          "status": "Execution certificate is a supplied stage; not provided by compiler_checked"
+        },
+        {
+          "citation": {
+            "anchor": "theorem Stages.publicCorrectness",
+            "line": 68,
+            "path": "Solidity/Yul/Composition/CorrectnessPublic.lean"
+          },
+          "stage": "composition of supplied stages",
+          "status": "proved conditionally; concrete stages/tables still inputs",
+          "theorem": "Solidity.Yul.Composition.CorrectnessInstances.Stages.publicCorrectness"
+        },
+        {
+          "citation": {
+            "anchor": "structure PublicBoundary",
+            "line": 24,
+            "path": "Solidity/Yul/Composition/CorrectnessPublic.lean"
+          },
+          "stage": "environment, deployment table, hashes, state export",
+          "status": "nine residual producer obligations"
+        },
+        {
+          "citation": {
+            "anchor": "def EvmSpec.Approved",
+            "line": 888,
+            "path": "Solidity/Roadmap/Contracts.lean"
+          },
+          "stage": "approved source/EVM and real Keccak",
+          "status": "separate final conjuncts, not inferred from toy PublicCorrectness"
+        }
+      ],
+      "denominator": {
+        "certified_source_fragment_SolKey_rows": 0,
+        "certified_source_fragment_solc_files": 0,
+        "unrestricted_SolKey_rows": 774,
+        "unrestricted_solc_files": 1701
+      },
+      "denominator_definition": "Tagged solc semantic fixture files and SolKey corpus obligations restricted by a concrete source-to-deployed-byte theorem's acceptance predicate. No non-toy source predicate is established at this base.",
+      "features": [
+        {
+          "category": "statements",
+          "citation": {
+            "anchor": "def inFrag {",
+            "line": 274,
+            "path": "Solidity/Evm/Compile.lean"
+          },
+          "description": "Core: assignments, locals/storage aliases, push/pop/delete, conditionals/block, require/assert/revert, bounded-normal loop and scalar internal call subject to guards. Not a Solidity-source acceptance theorem.",
+          "predicate": "def inFrag {\u0393 \u0393' : Ctx} (F : Frag \u0393) : Solidity.Stmt C \u0393 \u0393' \u2192 Option (Frag \u0393')\n  | .assign l r => F.guard (assignIn F r l)\n  | .rebind i r => match r with\n    | .path q => (bindFl F q).map (F.set i)\n    | .push .. => none\n  | .assignLocal _ r => F.guard (valIn F r)\n  | .declLocal p _ init => (F.push (.val p) .ok).guard (init.all (valIn F))\n  | .declStorage R _ init => declStorageIn F R init\n  | .opAssign _ _ _ l r => F.guard (opLocIn F l && valIn F r)\n  | .incDec _ _ l => F.guard (opLocIn F l)\n  | .assignIncDec _ _ _ l _ => F.guard (opLocIn F l)\n  | .push b v _ => F.guard (pushIn F v b)\n  | .pop b => F.dropFragile.guard (spathIn F false b)\n  | .transfer r a => F.guard (valIn F r && valIn F a)\n  | @Solidity.Stmt.delete _ _ T l => F.dropFragile.guard (leavesFit T && locIn F false l)\n  | .ite c t e =>\n    if valIn F c then\n      match inFragP F t, inFragP F e with\n      | some F\u2081, some F\u2082 => some ((F\u2081.restrict \u0393).meet (F\u2082.restrict \u0393))\n      | _, _ => none\n    else none\n  | .block body => (inFragP F body).map (Frag.restrict \u0393)\n  | .require c | .assert c => F.guard (valIn F c)\n  | .revert => some F\n  | .assumeFalse => none\n  | @Solidity.Stmt.call _ _ _ ps rs _ _ args ret body =>\n    if argsIn F args then\n      match inFragP (Frag.init (rs ++ ps)) body with\n      | some _ => CallRetIn (F.after (Prog.shrinks body)) ret\n      | none => none\n    else none\n  -- a loop whose body pushes, pays, shrinks nothing and leaves what is known\n  -- of the locals as it found it: every turn starts from the same fragment\n  | .loop _ c body =>\n    if valIn F c && Prog.pushes body == 0 && !Prog.pays body && !Prog.shrinks body then\n      match inFragP F body with\n      | some G => if (G.restrict \u0393).fl = F.fl then some F else none\n      | none => none\n    else none\n  | .assignLocalPush .. | .send .. | .declMem .. | .rebindMem .. | .assignFromMem ..\n  | .assignMem .. | .deleteMem ..\n  | .assignNew .. | .tryCall .. | .revertData _ | .catchData .. | .pushOpAssign .. | .pushIncDec ..\n  | .callReceiver .. => none\n  | .callReceiverPush .. => none\n  -- recursion is outside the compiled fragment\n  | .callRec .. => none"
+        },
+        {
+          "category": "expressions/storage",
+          "citation": {
+            "anchor": "def spathIn {",
+            "line": 110,
+            "path": "Solidity/Evm/Compile.lean"
+          },
+          "description": "Primitive expressions with recursive guards; map keys uint; offsets/fixed array sizes fit W; fragile aliases tracked. Core excludes memory reads/length, modular/hash expressions.",
+          "predicate": "def spathIn {\u0393 : Ctx} (F : Frag \u0393) (free : Bool) : {T : Ty} \u2192 Solidity.SPath C \u0393 T \u2192 Bool\n  | _, .alias i => F.get i == .ok || (!free && F.get i == .fragile)\n  | _, .loc l => locIn F free l\ndef locIn {\u0393 : Ctx} (F : Frag \u0393) (free : Bool) : {T : Ty} \u2192 Solidity.Loc C \u0393 T \u2192 Bool\n  | _, .root .. => true\n  | _, @Solidity.Loc.field _ _ s _ b f _ => decide (offset s f < W) && spathIn F free b\n  | _, @Solidity.Loc.index _ _ _ k _ .map b i => k == .uint && spathIn F free b && valIn F i\n  | _, .index (.arr .dyn) b i => !free && spathIn F free b && valIn F i\n  | _, .index (.arr (.fixed (n := n))) b i =>\n    !free && decide (n < W) && spathIn F free b && valIn F i\ndef valIn {\u0393 : Ctx} (F : Frag \u0393) : {p : PrimTy} \u2192 Solidity.Val C \u0393 p \u2192 Bool\n  | _, .simple s => simpleIn s\n  | _, .read l => locIn F false l\n  | _, @Solidity.Val.binop _ _ p _ op _ _ a b => binInFrag op p && valIn F a && valIn F b\n  | _, @Solidity.Val.unop _ _ p _ op _ _ a => unInFrag op p && valIn F a\n  | _, .ternary c a b => valIn F c && valIn F a && valIn F b\n  | _, .len b _ => spathIn F false b\n  | _, .readMem _ | _, .mlen .. | _, .modular .. | _, .hash .. => false\nend"
+        },
+        {
+          "category": "calls",
+          "citation": {
+            "anchor": "def argsIn {",
+            "line": 146,
+            "path": "Solidity/Evm/Compile.lean"
+          },
+          "description": "Core: scalar args and zero/single scalar return. Reject reference args and multi/reference returns. Payment refusal remains observable in the legacy compiler theorem.",
+          "predicate": "def argsIn {\u0393 : Ctx} (F : Frag \u0393) : {ps : Ctx} \u2192 Solidity.Args C \u0393 ps \u2192 Bool\n  | _, .nil => true\n  | _, .snoc as _ _ e => argsIn F as && valIn F e\n  | _, .snocStorage .. | _, .snocMemory .. => false\n\n/-- What a call leaves the caller knowing: nothing new for no return or one\nreturn value; calls exporting several returns, memory or storage aliases are out. -/\ndef CallRetIn {\u0393 : Ctx} (F : Frag \u0393) : {rs \u0393' : Ctx} \u2192 Solidity.CallRet \u0393 rs \u0393' \u2192\n    Option (Frag \u0393')\n  | _, _, .none => some F\n  | _, _, .val .. => some F\n  | _, _, .rets _ => none\n  | _, _, .mem .. => none\n  | _, _, .storage .. => none"
+        },
+        {
+          "category": "types",
+          "citation": {
+            "anchor": "def simpleIn",
+            "line": 104,
+            "path": "Solidity/Evm/Compile.lean"
+          },
+          "description": "Simple values and operation-specific primitive type restrictions; retain exact predicate below rather than claiming all Solidity scalar types.",
+          "predicate": "def simpleIn {\u0393 : Ctx} : {p : PrimTy} \u2192 Solidity.Simple C \u0393 p \u2192 Bool\n  | _, .env k _ => k != .selfBalance\n  | _, _ => true"
+        }
+      ],
+      "fraction_explanation": "0/0 restricted fraction is undefined, not 100%. Zero percent is certified source acceptance among all pinned semanticTests; it is NOT an estimate of intrinsic compiler syntactic acceptance. That latter percentage requires a source-to-intrinsic producer and successful fragment witnesses per file.",
+      "intrinsic_compilation_branches": [
+        "core",
+        "memory",
+        "referenceArrays",
+        "objects",
+        "construction",
+        "memoryLoops",
+        "memoryLoopScopes",
+        "memoryCalls",
+        "memoryCopy",
+        "fixedMemory",
+        "copyConstruction"
+      ],
+      "intrinsic_theorem": "Solidity.Main.compiler_checked",
+      "numerator": {
+        "kernel_source_to_deployed_bytes_SolKey_rows": 0,
+        "kernel_source_to_deployed_bytes_solc_files": 0
+      },
+      "percent_all_semanticTests_with_certified_acceptance": 0,
+      "product": "verified accepted-fragment compiler",
+      "reason": "Further transport expansion without producing source acceptance, deployed bytes and boundary evidence does not increase the product's certified fixture numerator. Existing intrinsic and conditional composition proofs remain useful; zero certified fixtures is not zero theorem value.",
+      "residual_PublicBoundary_fields": [
+        "bothPipelines",
+        "fixed",
+        "session",
+        "ifixed",
+        "isession",
+        "creates_table",
+        "hashes_source",
+        "decode_reach",
+        "decode_commutes"
+      ],
+      "restricted_fraction": null,
+      "verdict": "wrong-direction"
+    },
+    "c": {
+      "denominators": {
+        "Ethereum_execution_spec_function_templates": 914,
+        "solc_semantic_fixture_files": 1701
+      },
+      "external_test_boundary": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+      "nothing_category": "Blocked solc files have no successful adapted runtime check in this report; broken files have attempted checks. No EEST adapter or linked proof identified. This is not a claim that no isolated hand-written examples share their features.",
+      "numerators": {
+        "EEST_templates_with_identified_adapter": 0,
+        "kernel_EEST_templates": 0,
+        "kernel_source_to_deployed_bytes_solc_files": 0,
+        "reported_blocked_solc_files": 1164,
+        "reported_broken_scalar_interpreter_solc_files": 308,
+        "reported_working_scalar_interpreter_solc_files": 229
+      },
+      "pins": {
+        "Ethereum_execution_spec_tests": "10eaa63d5da2f50b63d4359968f36542212f9f50",
+        "solc": "1835d247de183f23e7b0e2bc4a50732af525b77c"
+      },
+      "product": "production Solidity/EVM conformance",
+      "reason": "Interpreter vectors do not measure deployed bytecode, fork/gas/log/precompile or transaction conformance. This product needs executable test adapters plus a concrete approved EVM instance; more model-only examples cannot supply that coverage.",
+      "solc_stage_counts": {
+        "lean-import:blocked": 39,
+        "lean-runtime:blocked": 1125,
+        "lean-runtime:broken": 308,
+        "lean-runtime:working": 229
+      },
+      "verdict": "wrong-direction",
+      "working_scalar_interpreter_percent": 13.4627
+    }
+  },
+  "generated_method": "Reused census marker classifier, correcting Corpus/Imported.lean to handwritten per check-corpus.sh. Unmarked is not proven handwritten. Chain/agreement names grouped as candidates without treating names as generator evidence.",
+  "generated_split": {
+    "ALL": {
+      "detected_generated_lines": 31657,
+      "files": 8291,
+      "physical_lines": 1311130,
+      "unknown_import_only_lines": 1502,
+      "unmarked_lines": 1277971
+    },
+    "AST.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 1247,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 1247
+    },
+    "Automation": {
+      "detected_generated_lines": 0,
+      "files": 3,
+      "physical_lines": 84,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 84
+    },
+    "Backend": {
+      "detected_generated_lines": 2451,
+      "files": 2015,
+      "physical_lines": 279224,
+      "unknown_import_only_lines": 13,
+      "unmarked_lines": 276760
+    },
+    "Calculus": {
+      "detected_generated_lines": 1550,
+      "files": 388,
+      "physical_lines": 169330,
+      "unknown_import_only_lines": 427,
+      "unmarked_lines": 167353
+    },
+    "Corpus": {
+      "detected_generated_lines": 3939,
+      "files": 9,
+      "physical_lines": 4204,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 265
+    },
+    "Counterexamples": {
+      "detected_generated_lines": 0,
+      "files": 4,
+      "physical_lines": 413,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 413
+    },
+    "ERC7201.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 38,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 38
+    },
+    "Eqns.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 46,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 46
+    },
+    "Evm": {
+      "detected_generated_lines": 0,
+      "files": 279,
+      "physical_lines": 45857,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 45857
+    },
+    "Examples": {
+      "detected_generated_lines": 0,
+      "files": 356,
+      "physical_lines": 61471,
+      "unknown_import_only_lines": 104,
+      "unmarked_lines": 61367
+    },
+    "FreshNames.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 93,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 93
+    },
+    "Frontend": {
+      "detected_generated_lines": 4360,
+      "files": 512,
+      "physical_lines": 102235,
+      "unknown_import_only_lines": 114,
+      "unmarked_lines": 97761
+    },
+    "Hash": {
+      "detected_generated_lines": 0,
+      "files": 6,
+      "physical_lines": 2265,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 2265
+    },
+    "Hashes.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 199,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 199
+    },
+    "Keccak.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 123,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 123
+    },
+    "KeySort.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 271,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 271
+    },
+    "Language": {
+      "detected_generated_lines": 2399,
+      "files": 8,
+      "physical_lines": 5964,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 3565
+    },
+    "Lowering": {
+      "detected_generated_lines": 58,
+      "files": 716,
+      "physical_lines": 104250,
+      "unknown_import_only_lines": 6,
+      "unmarked_lines": 104186
+    },
+    "Optimizer": {
+      "detected_generated_lines": 0,
+      "files": 16,
+      "physical_lines": 6658,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 6658
+    },
+    "Precompiles": {
+      "detected_generated_lines": 0,
+      "files": 11,
+      "physical_lines": 2072,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 2072
+    },
+    "RevertBytes.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 75,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 75
+    },
+    "Roadmap": {
+      "detected_generated_lines": 38,
+      "files": 20,
+      "physical_lines": 4728,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 4690
+    },
+    "Scope.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 286,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 286
+    },
+    "Secp256k1.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 130,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 130
+    },
+    "Semantics": {
+      "detected_generated_lines": 0,
+      "files": 82,
+      "physical_lines": 25790,
+      "unknown_import_only_lines": 55,
+      "unmarked_lines": 25735
+    },
+    "Semantics.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 113,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 113
+    },
+    "Signature.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 612,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 612
+    },
+    "SolcValidation": {
+      "detected_generated_lines": 972,
+      "files": 30,
+      "physical_lines": 7626,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 6654
+    },
+    "Solkey": {
+      "detected_generated_lines": 0,
+      "files": 5,
+      "physical_lines": 266,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 266
+    },
+    "SortCheck": {
+      "detected_generated_lines": 0,
+      "files": 3,
+      "physical_lines": 1281,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 1281
+    },
+    "Source": {
+      "detected_generated_lines": 620,
+      "files": 262,
+      "physical_lines": 50041,
+      "unknown_import_only_lines": 8,
+      "unmarked_lines": 49413
+    },
+    "SpecSyntax.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 220,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 220
+    },
+    "Stipend": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 274,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 274
+    },
+    "Storage": {
+      "detected_generated_lines": 0,
+      "files": 21,
+      "physical_lines": 4049,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 4049
+    },
+    "Syntax": {
+      "detected_generated_lines": 0,
+      "files": 21,
+      "physical_lines": 14545,
+      "unknown_import_only_lines": 44,
+      "unmarked_lines": 14501
+    },
+    "Syntax.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 72,
+      "unknown_import_only_lines": 72,
+      "unmarked_lines": 0
+    },
+    "TestSuite": {
+      "detected_generated_lines": 0,
+      "files": 49,
+      "physical_lines": 4710,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 4710
+    },
+    "Theorems.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 360,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 360
+    },
+    "Theory": {
+      "detected_generated_lines": 0,
+      "files": 25,
+      "physical_lines": 8890,
+      "unknown_import_only_lines": 41,
+      "unmarked_lines": 8849
+    },
+    "Tools": {
+      "detected_generated_lines": 0,
+      "files": 31,
+      "physical_lines": 8575,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 8575
+    },
+    "TypeGraph.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 147,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 147
+    },
+    "Typing": {
+      "detected_generated_lines": 0,
+      "files": 12,
+      "physical_lines": 6832,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 6832
+    },
+    "Update.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 58,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 58
+    },
+    "Yul": {
+      "detected_generated_lines": 6975,
+      "files": 1827,
+      "physical_lines": 197439,
+      "unknown_import_only_lines": 374,
+      "unmarked_lines": 190090
+    },
+    "Yul.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 194,
+      "unknown_import_only_lines": 194,
+      "unmarked_lines": 0
+    },
+    "chain-agreement-name-candidates": {
+      "detected_generated_lines": 0,
+      "files": 148,
+      "physical_lines": 24885,
+      "unmarked_lines": 24885
+    },
+    "outside-Solidity": {
+      "detected_generated_lines": 8295,
+      "files": 1561,
+      "physical_lines": 187773,
+      "unknown_import_only_lines": 50,
+      "unmarked_lines": 179428
+    }
+  },
+  "inventory_reuse": {
+    "docs/audits/architecture-tools/timing-sample.tsv": {
+      "exists": true,
+      "sha256": "3f8463128ba2f8d99d837ae55b8b73e3ae027be88edea390c0fa68622b96d796"
+    },
+    "docs/audits/build-speed.md": {
+      "exists": true,
+      "sha256": "1916a8903369d0f05c28897641dd3eacaad2d38c86ef5b4ccf04182091a3b39e"
+    },
+    "docs/audits/direction.md": {
+      "exists": true,
+      "sha256": "df6b110530bbb332d4689f3be9ebc6bf3d09616a0a9085a5da8e4d3791d36a9f"
+    },
+    "docs/audits/proof-coverage-tools/theorem_census.py": {
+      "exists": true,
+      "sha256": "d753ca35fa7cc5550fe26340dbdea04bcbf3deab47a51e931b7beca46bab2f95"
+    },
+    "scripts/bench/README.md": {
+      "exists": false,
+      "sha256": null
+    },
+    "scripts/build-measure.py": {
+      "exists": true,
+      "sha256": "ed72626920b8e4aa9cbd965c5e7daf9e47cc48cf1712f7653a69959b2b693350"
+    },
+    "scripts/check-corpus.sh": {
+      "exists": true,
+      "sha256": "bb73ac9098d24369822b3d151d1cac3511c34644f093ae7b03b4616e33c7391f"
+    },
+    "scripts/differential/README.md": {
+      "exists": false,
+      "sha256": null
+    },
+    "tests/upstream/results/summary.json": {
+      "exists": true,
+      "sha256": "9a47a4776353ab6da2f0b5ef361877c347fb8d2c0a4071be01994f40422d5ea6"
+    }
+  },
+  "limitations": [
+    "No Lean build, elaboration or Lean server used; kernel-checked labels describe pinned proof artifacts and trust gates, not fresh checking.",
+    "EEST denominator is test function templates at an independently pinned checkout, not expanded pytest/fixture case count; cannot compare its size to solc fixture-file count.",
+    "No executable syntactic acceptance percentage for the union of intrinsic memory/compiler predicates is asserted; it is not a source accepted fragment.",
+    "The general source-to-bytes gap is established by theorem/interface inspection and the public-boundary candidate index, not an undecidable proof of theorem nonexistence.",
+    "Frozen solc/SolKey snapshots differ from first-round reference portfolio pins; coverage uses corpus pins, calibration uses its cited reference pin."
+  ],
+  "remaining_work_estimates": {
+    "a": {
+      "additional_lines_range": [
+        5305,
+        15915
+      ],
+      "basis": "1-3 CompCert pass-pair units for correspondence closure, exact outstanding obligation ports and frontend/strategy parity. Not 35 independent soundness proofs: many unclaimed taclets are architectural normalization differences.",
+      "deliverable": "Close or explicitly distinguish every remaining corpus obligation and taclet; retain negative controls and current soundness."
+    },
+    "b": {
+      "additional_lines_range": [
+        15915,
+        42440
+      ],
+      "basis": "3-8 pass-pair units for certified admission/lowering, executable assembly linkage, and deployment/hash/state-export producers on a deliberately small fragment.",
+      "deliverable": "Non-toy source acceptance predicate, emitted bytes, complete boundary evidence and per-fixture acceptance witnesses."
+    },
+    "c": {
+      "additional_lines_range": [
+        122137,
+        366411
+      ],
+      "basis": "1-3 complete multi-target CompCert backend portfolios as a broad integration/proof planning scale; production Solidity includes frontend, ABI, storage, calls, forks and harness work absent from a single pass. This is a scenario, not a comparable subsystem efficiency ratio.",
+      "deliverable": "All pinned semantic fixtures plus all EEST templates adapted with fork/gas/log/precompile checks and approved byte semantics; refresh to maintained pins before claiming current production support."
+    },
+    "method": "Planning scenarios in additional handwritten-equivalent lines, NOT measured missing LOC, deletion budgets, person-time or statistical forecasts. Calibrated to existing reference scopes; generated fixtures excluded. Reuse could reduce them; full production proof effort can exceed them.",
+    "reference_pass_pair": {
+      "commit": "2685140bf72c959446981fb99b5e44a8975021bc",
+      "generated_lines": 0,
+      "lines": 5305,
+      "paths": [
+        "cfrontend/Cshmgen.v",
+        "cfrontend/Cshmgenproof.v",
+        "cfrontend/Cminorgen.v",
+        "cfrontend/Cminorgenproof.v"
+      ],
+      "source": "docs/audits/direction-tools/README-results.json#subsystems.lowering"
+    }
+  },
+  "schema": 1,
+  "scope": "docs/audits/direction-tools/endpoint/**; code read only",
+  "waits": [
+    {
+      "item": "va3 differential/vu1 bench",
+      "state": "absent on pinned base; used committed upstream report instead"
+    },
+    {
+      "item": "matched source-to-bytes timing",
+      "state": "no such endpoint measured; historical module timing is not a substitute"
+    }
+  ]
+}
