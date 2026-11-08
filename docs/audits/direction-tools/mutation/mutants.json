@@ -3,9 +3,9 @@
     "definition": "arithInt",
     "expected_constraint": "Operator boundary/example theorem mentioning enclosing definition; independent solc vectors alone do not execute this Lean definition",
     "expected_failing_candidate": {
-      "line": 75,
-      "name": "compound",
-      "path": "Solidity/Examples/Tactics/Operators.lean",
+      "line": 60,
+      "name": "additionSimple",
+      "path": "Solidity/Examples/Tactics/Values.lean",
       "status": "unvalidated candidate; may not kill this boundary"
     },
     "generated": false,
@@ -173,9 +173,9 @@
     "definition": "arithInt",
     "expected_constraint": "Operator boundary/example theorem mentioning enclosing definition; independent solc vectors alone do not execute this Lean definition",
     "expected_failing_candidate": {
-      "line": 75,
-      "name": "compound",
-      "path": "Solidity/Examples/Tactics/Operators.lean",
+      "line": 63,
+      "name": "subtractionSimple",
+      "path": "Solidity/Examples/Tactics/Values.lean",
       "status": "unvalidated candidate; may not kill this boundary"
     },
     "generated": false,
@@ -343,9 +343,9 @@
     "definition": "arithInt",
     "expected_constraint": "Operator boundary/example theorem mentioning enclosing definition; independent solc vectors alone do not execute this Lean definition",
     "expected_failing_candidate": {
-      "line": 75,
-      "name": "compound",
-      "path": "Solidity/Examples/Tactics/Operators.lean",
+      "line": 66,
+      "name": "multiplicationSimple",
+      "path": "Solidity/Examples/Tactics/Values.lean",
       "status": "unvalidated candidate; may not kill this boundary"
     },
     "generated": false,
@@ -513,9 +513,9 @@
     "definition": "arithInt",
     "expected_constraint": "Operator boundary/example theorem mentioning enclosing definition; independent solc vectors alone do not execute this Lean definition",
     "expected_failing_candidate": {
-      "line": 103,
-      "name": "uncheckedWrap: checked power also appears in syntax examples; candidate only",
-      "path": "Solidity/Examples/Tactics/Operators.lean",
+      "line": 288,
+      "name": "powerSimple",
+      "path": "Solidity/Examples/Tactics/Values.lean",
       "status": "unvalidated candidate; may not kill this boundary"
     },
     "generated": false,
@@ -4393,9 +4393,9 @@
     "definition": "evalT",
     "expected_constraint": "Operator boundary/example theorem mentioning enclosing definition; independent solc vectors alone do not execute this Lean definition",
     "expected_failing_candidate": {
-      "line": 61,
-      "name": "short: boolean negation candidate",
-      "path": "Solidity/Examples/Tactics/ModularArithmetic.lean",
+      "line": 135,
+      "name": "ifNegated",
+      "path": "Solidity/Examples/Tactics/Branch.lean",
       "status": "unvalidated candidate; may not kill this boundary"
     },
     "generated": false,
@@ -4730,14 +4730,10 @@
     ]
   },
   {
+    "constraint_search_result": "No exact uint256-to-int threshold 2^255 constraint found in inspected cast examples; downcast is not a valid killer",
     "definition": "evalT",
     "expected_constraint": "Operator boundary/example theorem mentioning enclosing definition; independent solc vectors alone do not execute this Lean definition",
-    "expected_failing_candidate": {
-      "line": 46,
-      "name": "numberLiteral: signed threshold exact boundary may be absent",
-      "path": "Solidity/Examples/Tactics/SignedCasts.lean",
-      "status": "unvalidated candidate; may not kill this boundary"
-    },
+    "expected_failing_candidate": null,
     "generated": false,
     "id": "M29",
     "line": 145,

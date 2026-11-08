@@ -43,8 +43,8 @@ def main():
     add(closer,"| .error .panic => true","| .error .panic => false","Modality.afterRunTR_not_panic may become vacuous; require boundary example, not merely successful elaboration")
     add(closer,"| .error .exhausted => false","| .error .exhausted => true","Modality.afterRunTR_diamond_fail expected to fail (exhaustion accepted)")
     # Candidate constraints selected by inspecting concrete example bodies; not measured kills.
-    candidates=[("Operators",75,"compound"),("Operators",75,"compound"),("Operators",75,"compound"),
-      ("Operators",103,"uncheckedWrap: checked power also appears in syntax examples; candidate only"),
+    candidates=[("Values",60,"additionSimple"),("Values",63,"subtractionSimple"),("Values",66,"multiplicationSimple"),
+      ("Values",288,"powerSimple"),
       ("Operators",113,"zero-divisor anonymous example"),("Operators",146,"signedRemainder: nonzero divisors, zero boundary not covered"),
       ("Operators",40,"bitwise"),("Operators",40,"bitwise"),("Operators",40,"bitwise"),
       ("Operators",56,"shifts"),("Operators",130,"signedBitwise: no unsigned shift-255 boundary"),("Operators",130,"signedBitwise"),
@@ -53,12 +53,14 @@ def main():
       ("Operators",146,"signedRemainder: uses comparisons, equality boundary candidate"),("Operators",146,"signedRemainder: uses comparisons, equality boundary candidate"),
       ("Operators",40,"bitwise: boolean conjunction in postcondition"),("ModularArithmetic",61,"short: short circuit boolean disjunction candidate"),
       ("ModularArithmetic",32,"basic modular result anonymous example"),("ModularArithmetic",32,"basic modular result anonymous example"),
-      ("ModularArithmetic",50,"zeroAdd anonymous example"),("SignedCasts",113,"checkedNegReverts"),("ModularArithmetic",61,"short: boolean negation candidate"),
-      ("Operators",47,"complement"),("SignedCasts",46,"numberLiteral: signed threshold exact boundary may be absent"),("SignedCasts",46,"numberLiteral")]
+      ("ModularArithmetic",50,"zeroAdd anonymous example"),("SignedCasts",113,"checkedNegReverts"),("Branch",135,"ifNegated"),
+      ("Operators",47,"complement"),("SignedCasts",29,"downcast: uint-to-int conversion, but not the 256-bit threshold boundary"),("SignedCasts",46,"numberLiteral")]
     for m,(file,line,name) in zip(specs,candidates):
         path="Solidity/Examples/Tactics/"+file+".lean"
         assert 0<line<=len(lean[path].splitlines())
         m["expected_failing_candidate"]={"path":path,"line":line,"name":name,"status":"unvalidated candidate; may not kill this boundary"}
+    specs[28]["expected_failing_candidate"]=None
+    specs[28]["constraint_search_result"]="No exact uint256-to-int threshold 2^255 constraint found in inspected cast examples; downcast is not a valid killer"
     for m in specs[len(candidates):]:
         name="afterRunTR_not_panic" if m["id"]=="M31" else "afterRunTR_diamond_fail"
         text=lean[closer];pos=text.index("theorem _root_.Solidity.Modality."+name)
