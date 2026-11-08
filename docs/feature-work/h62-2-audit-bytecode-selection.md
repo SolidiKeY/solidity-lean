@@ -2990,3 +2990,44 @@ realization or full Bridge/package/performance validation. All original STOPs
 and remaining success/control obligations are retained. Legacy RuntimeConsumer
 semantic ownership is master/coordinator per the latest ownership lookup; that
 lookup authorizes no change to the legacy contract or its dependent definitions.
+
+
+### Supported value-checked nil-body execution
+
+`value-checked-body-success.lean.txt` adds general success lemmas for the actual
+selected uint and Boolean programs with nil continuations. Both require the
+same machine's represented word and size 36, the existing payability guard and
+a valid word. The proof uses the real whole/body selection equations and the
+existing execution theorem; successful execution is the conclusion, not an
+admission premise. The nil continuation finishes with the exact existing bound
+machine and zero pending skip.
+
+A closed Boolean joint witness supplies the existing certificate, explicit
+polymorphic equality to `ValueCheckedBodies.Bool.program`, actual selected
+compilation, represented word 1/size 36 and successful execution together.
+Reject-all contradicts the actual compiler selection, and always-revert
+disagrees on represented valid payable Boolean inputs. Dirty Boolean word 2 and
+short size 35 still revert in that same selected implementation. This separates
+supported success from the preceding size-zero field-domain instances.
+
+The final seven printed theorem checks passed the serial native checker in
+5.791 seconds, with a 162000896-byte workload peak and standard-only axioms.
+Two earlier failed sources and their receipts are retained: one used an
+unavailable redundant simp name, and the next needed explicit polymorphic
+binders in the program equality. No proof/resource limits changed. All attempts
+use the same unextended checkpoint epoch and the same 246 verified frozen
+imports; no PowerBounds, Bridge or prerequisite workload was run.
+Independent read-only finder and skeptic reviews pass for source and receipt
+verification. Exact source, compiled artifact, argv, import identities, axiom and
+monitor records, reviews and both failures are privately archived; the package
+was read back byte-for-byte before this validation claim:
+
+```text
+evidence: 99d5eebe986795202aad6b98147a6e2f7e12c6f1 evidence/solidity-parallel-20261103/executable-bytecode/value-checked-body-success-0039ee35.json
+```
+
+This establishes gasless intrinsic IR behavior for nil continuations. It does
+not establish arbitrary-body success, Source authenticity/correspondence,
+physical byte loading, charged execution/fork acceptance, full census closure,
+Bridge/package validation or performance acceptance. The original aggregate
+source receipt remains RED and all original STOPs remain binding.
