@@ -1,0 +1,27 @@
+{
+ "Solidity/Lowering/Readonly/SourceKnownTryEffects.lean:Solidity.Lowering.Readonly.SourceHistory.TryKnown.equation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownTryEffects.lean:Solidity.Lowering.Readonly.SourceHistory.TryKnown.finish": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownTryEffects.lean:Solidity.Lowering.Readonly.SourceHistory.TryKnown.finish_effect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownTryEffects.lean:Solidity.Lowering.Readonly.SourceHistory.TryKnown.payload": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownTryEffects.lean:Solidity.Lowering.Readonly.SourceHistory.TryKnown.payload_effect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

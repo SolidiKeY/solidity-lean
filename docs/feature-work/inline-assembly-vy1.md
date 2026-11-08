@@ -1483,6 +1483,33 @@ P20 pending producer fields remain explicit obligations; importing them proves
 no concrete Source/compiler adequacy. General P16/full VY1 and final lane gates
 remain open.
 
+### P16 generated-file maintenance
+
+Run `python3 -B scripts/h62/item1/p16-generator/check.py` to verify the generated
+marker, complete P16 bytes, ordered import/documentation census and pinned Git
+baseline. Edit registered fragments rather than the generated interface. The
+baseline commit must exist locally. This integrity check does not certify live
+producer completeness, semantic coverage or Lean elaboration. Extension ordering
+and producer membership require separate reconciliation. Checkpoint and full
+gates run this checker as `p16-generated`; the pinned baseline object must be
+present locally, including in CI checkouts. A missing object fails closed.
+
+### P20 represented-success consumer (V2)
+
+Use `Backend/Selection/P20ConsumerInterface.lean`'s
+`P20RepresentedConsumerV2` and `Backend/Selection/P20Consumer.lean`'s
+`p20RepresentedConsumerV2` when an actual V2 `PendingG24` link is supplied.
+`p20_joint_success_v2` retains its joint domain/Input witness, payment freedom,
+source/Yul success, target execution, unchanged caller stack and full G24 `Rep`.
+The memory-store control reuses the reviewed producer in
+`tests/h62/item2/audit-v09-passes/P20InterfaceV2Controls.lean`.
+
+The V1 assembly consumer and both interface versions remain available unchanged.
+V2 does not provide V1's unrestricted stack-only lowering certificate; the
+existing V1 overlap conversion still requires that certificate independently.
+This migration does not establish general P20 adequacy, admission/origin,
+failures, divergence, physical/dirty views or native/resource/observation closure.
+
 ### Recursive while completed horizons
 
 `LocalWhileHorizon.successor` and `extension` preserve the exact final caller

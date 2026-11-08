@@ -9,7 +9,8 @@ and both converted/unconverted argument lists. Declaration identities are
 retained at call sites; this module does not follow function bodies yet. This
 is a structural extraction interface, not an operational adequacy theorem or
 complete feature extraction for types, specification terms or the
-solc-JSON importer. No syntax representation is replaced.
+solc-JSON importer. No syntax representation is replaced. Library-call sites record typed delegated syntax
+under the existing abstract external-library feature, not ABI or linkage adequacy.
 -/
 namespace Solidity.Frontend.Admission
 open Solidity.Source
@@ -21,6 +22,7 @@ inductive ObservationSite where
   | magic (name : Builtin) (member : String)
   | internalCall (declaration : Decl)
   | externalCall (declaration : Decl)
+  | libraryCall (declaration : Decl)
   | balance
   | payment
   | abiEncode (kind : AbiKind)
@@ -36,6 +38,7 @@ def ObservationSite.status : ObservationSite → Option Status
   | .magic b m => b.memberStatus m
   | .internalCall _ => some (.admitted "internalCalls")
   | .externalCall _ => some (.admitted Feature.externalTypedCalls.id)
+  | .libraryCall _ => some (.admitted Feature.externalLibraryCalls.id)
   | .balance => some (.admitted "addressBalance")
   | .payment => some (.admitted "sendTransfer")
   | .abiEncode .encode => some (.admitted "abiEncode")
@@ -184,6 +187,8 @@ def stmtObservations {E : Env} {R : List STy} {M : Bool} {k : SCtx} {Γ Γ' : RC
     (fun _ e _ => observations e) -- tuple declaration
     (fun target d _ args ok _ cat => .externalCall d ::
       (observations target ++ convObservations args ++ itemsObservations ok ++ itemsObservations cat))
+    (fun d _ _ args ok cat => .libraryCall d ::
+      (convObservations args ++ itemsObservations ok ++ itemsObservations cat))
 termination_by structural s
 
 def itemsObservations {E : Env} {R : List STy} {M : Bool} {k : SCtx} {Γ Γ' : RCtx}

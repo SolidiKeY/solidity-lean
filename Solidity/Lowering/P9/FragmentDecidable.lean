@@ -98,7 +98,7 @@ def stmtDec (A : Decl → Prop) [DecidablePred A] {R : List STy} {M : Bool} :
   | _, _, _, .skip | _, _, _, .brk | _, _, _, .cont | _, _, _, .ret _ => isTrue trivial
   | _, _, _, .retVal (σ := σ) (τ := τ) _ e _ => by letI := exprDec A e; exact inferInstanceAs (Decidable (RExpr.ValFragC A e ∧ τ.isValue = true ∧ σ.FragSrc))
   | _, _, _, .retTuple es => by letI := argsDec A es; exact inferInstanceAs (Decidable (RConvArgs.ValFragC A es))
-  | _, _, _, .placeholder .. | _, _, _, .emit .. | _, _, _, .revertError .. | _, _, _, .rethrow .. | _, _, _, .declTuple .. | _, _, _, .tryCall .. => isFalse (by intro h; exact h)
+  | _, _, _, .placeholder .. | _, _, _, .emit .. | _, _, _, .revertError .. | _, _, _, .rethrow .. | _, _, _, .declTuple .. | _, _, _, .tryCall .. | _, _, _, .tryLibrary .. => isFalse (by intro h; exact h)
 
 def itemsDec (A : Decl → Prop) [DecidablePred A] {R : List STy} {M : Bool} :
     {k : SCtx} → {Γ Γ' : RCtx} → (b : RItems E R M k Γ Γ') → Decidable (b.ValFragC A)

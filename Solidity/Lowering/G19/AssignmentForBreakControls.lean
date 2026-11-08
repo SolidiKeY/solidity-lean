@@ -62,7 +62,7 @@ theorem same_slot (pipeline : Roadmap.Pipeline) (fuel : Nat) (post : Source.ROpt
 /-- This exact post expression would overwrite the initializer's true value. -/
 theorem post_is_effectful :
     Source.evalE (MixedAssignmentControls.globals .legacy) F0 2
-      (.assign (.local .here) (.bool false)) (plan := none) P12Controls.sourcePost =
+      (.assign (.local .here) (.bool false)) (plan := none) (calldataKnown := true) P12Controls.sourcePost =
       (.ok (.val (.bool false)),P.source) := by rfl
 
 /-- Immediate break must not run the effectful post expression. -/
