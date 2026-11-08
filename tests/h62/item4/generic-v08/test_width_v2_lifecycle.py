@@ -124,7 +124,7 @@ class Ownership(unittest.TestCase):
         try:
             require_scope()
         except ScopeError as error:
-            self.skipTest('hard resource scope unavailable; lifecycle NOT VALIDATED: '+str(error))
+            self.skipTest('required memory observations unavailable; lifecycle NOT VALIDATED: '+str(error))
 
     def exercise(self, case):
         with tempfile.TemporaryDirectory() as folder:

@@ -168,7 +168,7 @@ if a.aggregate:
                   requested_seconds=a.seconds, polling_seconds=.25, termination_grace_seconds=5,
                   monitor_error=monitor_error, original_parent_pid=original_parent,
                   worker_parent_death_signal='SIGKILL', worker_lease_fd=a.lease_fd,
-                  hard_scope=scope_snapshot, memory_enforcement='kernel cgroup hard limit; sampled RSS is additional diagnostic/stop',
+                  hard_scope=scope_snapshot, memory_enforcement='H232 cloud VM isolation; RLIMIT_AS and sampled aggregate RSS; host pre-gate separately enforces 16GiB/no-swap',
                   aggregate_scope='Lean tree + monitor' + (' + serial v2 driver' if a.aggregate_parent else ''))
 a.record.write_text(json.dumps(record,indent=2)+'\n')
 print(json.dumps(record),flush=True)

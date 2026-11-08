@@ -160,11 +160,12 @@ class Refusal(unittest.TestCase):
             self.assertIsNone(result)
             self.assertFalse(spawned)
 
-    def test_unisolated_v2_scope_refuses_before_spawn(self):
+    def test_h232_does_not_require_delegated_scope(self):
         for maximum in (16*1024**3, 'max'):
-            result, spawned, _ = self.exercise(scope_max=maximum)
-            self.assertIsNone(result)
-            self.assertFalse(spawned)
+            result, spawned, _ = self.exercise(scope_max=maximum, finished=True)
+            self.assertTrue(spawned)
+            self.assertIsNone(result['stop'])
+            self.assertFalse(result['hard_scope']['hard_scope'])
 
     def test_aggregate_stop_is_observable(self):
         row = f'Name: lean\nPPid: 1\nVmRSS: {12*1024**2+1} kB\n'

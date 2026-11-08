@@ -1,4 +1,4 @@
-"""Verify existing kernel-enforced scope limits; never infer a waiver."""
+"""Observe H232 cloud-VM admission; retain the strict scope verifier separately."""
 from pathlib import Path, PurePosixPath
 
 CAP = 12*1024**3
@@ -9,7 +9,7 @@ class ScopeError(RuntimeError):
     pass
 
 
-def require_scope(proc_root=Path('/proc'), cgroup_root=Path('/sys/fs/cgroup'), check_reserve=True):
+def require_hard_scope(proc_root=Path('/proc'), cgroup_root=Path('/sys/fs/cgroup'), check_reserve=True):
     try:
         memberships = [line[3:] for line in (proc_root/'self/cgroup').read_text().splitlines()
                        if line.startswith('0::')]
@@ -40,3 +40,27 @@ def require_scope(proc_root=Path('/proc'), cgroup_root=Path('/sys/fs/cgroup'), c
         raise
     except (OSError, KeyError, ValueError) as error:
         raise ScopeError('hard scope observation unavailable: '+str(error)) from error
+
+
+def require_scope(proc_root=Path('/proc'), cgroup_root=Path('/sys/fs/cgroup'), check_reserve=True):
+    """H232: the cloud VM is isolation; no delegated systemd scope is required.
+
+    Keep the existing host reserve and no-swap observations. The host pre-gate
+    supplies the enforced 16GiB/no-swap merge gate; this is not that gate.
+    """
+    try:
+        memory = dict(line.split(':', 1) for line in (proc_root/'meminfo').read_text().splitlines())
+        available = int(memory['MemAvailable'].split()[0])*1024
+        swap = int(memory['SwapTotal'].split()[0])*1024
+        if available < 0 or swap != 0:
+            raise ScopeError('invalid memory observation or swap enabled')
+        if check_reserve and available < HOST_RESERVE:
+            raise ScopeError('12GiB host reserve unavailable')
+        return dict(membership='cloud-vm-H232', hard_scope=False,
+                    limitation='no systemd scope on the cloud VM (H232)',
+                    host_available_bytes=available, host_reserve_bytes=HOST_RESERVE,
+                    swap_total_bytes=swap)
+    except ScopeError:
+        raise
+    except (OSError, KeyError, ValueError) as error:
+        raise ScopeError('cloud VM memory observation unavailable: '+str(error)) from error

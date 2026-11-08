@@ -9,7 +9,7 @@ sys.dont_write_bytecode = True
 ROOT = Path(__file__).resolve().parents[4]
 SCRIPTS = ROOT/'scripts/h62/item4/generic-v08'
 sys.path.insert(0, str(SCRIPTS))
-from width_scope import require_scope, ScopeError, CAP, HOST_RESERVE
+from width_scope import require_hard_scope as require_scope, require_scope as cloud_scope, ScopeError, CAP, HOST_RESERVE
 spec = importlib.util.spec_from_file_location('v2_scope_driver', SCRIPTS/'reproduce-width-v2.py')
 driver = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(driver)
@@ -89,6 +89,23 @@ class Scope(unittest.TestCase):
                     driver.main(['--toolchain', '/unvalidated', '--output', str(output)])
             lean.assert_not_called()
             self.assertFalse(output.exists())
+
+
+class CloudAdmission(unittest.TestCase):
+    def test_h232_no_systemd_or_cgroup_required(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            (root/'meminfo').write_text('MemAvailable: 18874368 kB\nSwapTotal: 0 kB\n')
+            observation = cloud_scope(root, root/'absent')
+            self.assertFalse(observation['hard_scope'])
+            self.assertEqual(observation['limitation'], 'no systemd scope on the cloud VM (H232)')
+
+    def test_h232_measurement_and_swap_fail_closed(self):
+        for content in ('MemAvailable: 18874368 kB\nSwapTotal: 1 kB\n', 'bad'):
+            with tempfile.TemporaryDirectory() as folder:
+                root = Path(folder)
+                (root/'meminfo').write_text(content)
+                with self.assertRaises(ScopeError): cloud_scope(root)
 
 
 if __name__ == '__main__':
