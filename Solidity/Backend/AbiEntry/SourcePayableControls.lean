@@ -61,18 +61,19 @@ private theorem matched (payable : Bool) (pipeline : Roadmap.Pipeline) (value : 
 theorem zero_nonpayable (pipeline : Roadmap.Pipeline) :
     run (compiled false pipeline).code (machine fullBytes 0)=.ok (written fullBytes 0 (wmod 11)) 0 := by
   have actual := reached false pipeline fullBytes 0 (by decide)
-  simpa only [sourcePayableOutcome,matched,Bool.false_or,decide_true,if_true] using actual
+  have observed : (frame fullBytes 0).value.val=0 := rfl
+  simpa only [written,Bool.false_eq_true,sourcePayableOutcome,matched,Bool.false_or,decide_eq_true observed,ite_true] using actual
 
 theorem payable_all_values (pipeline : Roadmap.Pipeline) (value : Roadmap.Word) :
     run (compiled true pipeline).code (machine fullBytes value)=.ok (written fullBytes value (wmod 11)) 0 := by
   have actual := reached true pipeline fullBytes value (by decide)
-  simpa only [sourcePayableOutcome,matched,Bool.true_or,if_true] using actual
+  simpa only [written,Bool.false_eq_true,sourcePayableOutcome,matched,Bool.true_or,ite_true] using actual
 
 theorem rejected_collision (pipeline : Roadmap.Pipeline) (value : Roadmap.Word) (nonzero : value.val≠0) :
     run (compiled false pipeline).code (machine fullBytes value)=.revert := by
   have actual := reached false pipeline fullBytes value (by decide)
   have observed : (frame fullBytes value).value.val≠0 := nonzero
-  simpa only [sourcePayableOutcome,matched,Bool.false_or,decide_eq_false observed,if_false] using actual
+  simpa only [written,Bool.false_eq_true,sourcePayableOutcome,matched,Bool.false_or,decide_eq_false observed,ite_false] using actual
 
 theorem no_collision_fallthrough (pipeline : Roadmap.Pipeline) (value : Roadmap.Word) (nonzero : value.val≠0) :
     run (compiled false pipeline).code (machine fullBytes value)≠.ok (written fullBytes value (wmod 22)) 0 := by
@@ -88,7 +89,7 @@ private theorem missed (payable : Bool) (pipeline : Roadmap.Pipeline) (value : R
 theorem no_match (payable : Bool) (pipeline : Roadmap.Pipeline) (value : Roadmap.Word) :
     run (compiled payable pipeline).code (machine missBytes value)=.ok (written missBytes value fallback) 0 := by
   have actual := reached payable pipeline missBytes value (by decide)
-  simpa only [sourcePayableOutcome,missed,Bool.true_or,if_true] using actual
+  simpa only [written,Bool.false_eq_true,sourcePayableOutcome,missed,Bool.true_or,ite_true] using actual
 
 theorem source_revert_bytes (pipeline : Roadmap.Pipeline) (fuel : Nat) (value : Roadmap.Word)
     (nonzero : value.val≠0) :
