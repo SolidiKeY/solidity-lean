@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """coord-ask — the lane's only channel to the coordinator (runs on a lane VM; needs git and push access to the
-coordination repository, nothing else; it does not touch the lane's own repository).
+coordination repository, nothing else; in the lane's own repository it only fetches master, for --done).
 
   coord-ask [-t TITLE] [-q QID] TEXT     ask a question (TEXT may also come on stdin); the QID leads the title
   coord-ask --ack QID [NOTE]             the coordinator's answer to QID was applied: closes the question
@@ -10,6 +10,9 @@ coordination repository, nothing else; it does not touch the lane's own reposito
 Each call commits one small file on top of the coordination repo's main in a tree-less shallow clone and pushes it
 to coord-q/<lane>/<ts>, coord-ack/<lane>/<ts> or coord-done/<lane>/<ts>. The coordinator's inbox receives the push
 through a GitHub webhook and opens, follows up (same lane + QID) or closes the issue, then deletes the ref.
+--done also checks the head against the fetched master: when it lacks master commits older than COORD_STALE_HOURS
+(6), it warns (the merge pre-gate builds the head merged onto current master) and records `behind:` in the push; it
+never refuses.
 Environment: COORD_Q_REPO (repository URL; default: this project's coordination repository), CLOUDVM_BATCH / CLOUDVM_SLUG
 (override the batch/slug parsed from a codex/<batch>/<slug> branch name).
 """
@@ -20,6 +23,17 @@ def git(*a, inp=None, env=None):
     r = subprocess.run(['git', *a], input=inp, capture_output=True, text=True, env=env)
     if r.returncode: sys.exit(f'coord_ask: git {a[0]} failed: {r.stderr.strip()[-300:]}')
     return r.stdout.strip()
+
+
+def behind_master(hours):
+    """(commits, age of the oldest in hours) of the fetched origin master that HEAD lacks, if the oldest is at least
+    `hours` old. Compares against FETCH_HEAD, so a lane clone whose fetch refspec omits master is still checked."""
+    if subprocess.run(['git', 'fetch', '-q', 'origin', 'master'], capture_output=True).returncode: return None
+    r = subprocess.run(['git', 'log', '--format=%ct', 'HEAD..FETCH_HEAD'], capture_output=True, text=True)
+    ts = [int(x) for x in r.stdout.split()] if r.returncode == 0 else []
+    if not ts: return None
+    age = (time.time() - min(ts)) / 3600
+    return (len(ts), age) if age >= hours else None
 
 
 def main():
@@ -50,7 +64,19 @@ def main():
     parts = lane.split('/')
     batch = os.environ.get('CLOUDVM_BATCH') or (parts[1] if len(parts) > 2 else '')
     slug = os.environ.get('CLOUDVM_SLUG') or (parts[2] if len(parts) > 2 else '')
-    blob = f'{first}\nlane: {lane}\nhead: {head}\nbatch: {batch}\nslug: {slug}\n---\n{body}\n'
+    extra = ''
+    if a.done:
+        try: hours = float(os.environ.get('COORD_STALE_HOURS') or 6)
+        except ValueError: hours = 6.0
+        if not 0 <= hours < float('inf'): hours = 6.0   # nan, inf and negatives fall back too
+        b = behind_master(hours)
+        if b:
+            extra = f'behind: {b[0]} commits, oldest {b[1]:.0f}h\n'
+            print(f'coord-ask: WARNING: your head lacks {b[0]} commits of origin/master (the oldest is {b[1]:.0f} h old). '
+                  'The merge pre-gate builds your head merged onto current master: merge origin/master and run '
+                  '`bash scripts/coord-tools/gate.sh touched` before your next push (docs/contributing.md#before-pushing).',
+                  file=sys.stderr)
+    blob = f'{first}\nlane: {lane}\nhead: {head}\nbatch: {batch}\nslug: {slug}\n{extra}---\n{body}\n'
     ts = time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())
     with tempfile.TemporaryDirectory() as tmp:
         env = dict(os.environ, GIT_TERMINAL_PROMPT='0', GIT_DIR=os.path.join(tmp, 'q'))
