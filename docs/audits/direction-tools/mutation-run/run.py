@@ -75,7 +75,7 @@ def main():
             (args.work/(name+'.log')).write_text(out)
             return dict(returncode=rc,seconds=round(time.monotonic()-t,3),log=str(args.work/(name+'.log'))),out
         targets=sorted({module(p) for m in ms for p in [m['path']]+m['targets']})
-        b,out=run(['lake','build','-j1']+targets,'baseline')
+        b,out=run(['lake','--no-build','build']+[t+':olean' for t in targets],'baseline')
         dump(args.work/'baseline.json',b)
         if b['returncode']: print('BASELINE_BLOCKED',b,flush=True); return
         # Parse pinned import graph; rebuild precisely the mutant-to-selected-target paths.
