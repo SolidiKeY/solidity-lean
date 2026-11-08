@@ -73,6 +73,20 @@ def main():
             else: raise AssertionError('rename failure fixture did not run')
         assert json.loads(target.read_text())=={'keep':True}, 'failed checkpoint replaced existing data'
 
+        # Profile provenance must match before rankings can be attached.
+        inv=root/'fixture-inventory.json'; inv.write_text(json.dumps({'base':base,'largest_areas':[],'areas':{},'build_workloads':{},'incremental':[],'sample_plan':[]}))
+        empty=root/'empty-sample.json'; empty.write_text(json.dumps({'base':base,'versions':{},'samples':[]}))
+        wrong=root/'wrong-profile.json'; wrong.write_text(json.dumps({'base':'wrong-base'}))
+        bad=subprocess.run([sys.executable,str(HERE/'analyze.py'),'--inventory',str(inv),'--sample',str(empty),'--profiles',str(wrong),'--repo',str(root),'--out',str(root/'bad-analysis')],capture_output=True,text=True)
+        assert bad.returncode!=0 and 'profile dataset base mismatch' in bad.stderr
+        assert not (root/'bad-analysis/analysis.json').exists()
+        baseline=root/'baseline.json'; baseline.write_text(json.dumps({'base':base,'samples':[{'path':'Solidity.lean','status':'dependency-cache-unavailable'}]}))
+        effective=root/'effective.json'; effective.write_text(json.dumps({'base':base,'per_area':[],'slowest_sampled_modules':[],'declaration_profiles':None,'full_check_only_estimates':{},'passing_current_modules':1,'attempted_observations':2,'current_gaps':[],'limitations':[]}))
+        changed=subprocess.run([sys.executable,str(HERE/'summarize.py'),'--sample',str(baseline),'--analysis',str(effective),'--out',str(root/'effective-summary')],check=True,capture_output=True,text=True)
+        effective_summary=json.loads((root/'effective-summary/summary.json').read_text())
+        assert effective_summary['fresh_passing_samples']==1 and effective_summary['waits']==[]
+        assert len(effective_summary['baseline_only_counts']['waits'])==1
+        assert json.loads(changed.stdout)['passing']==1
         subprocess.run([sys.executable,str(HERE/'summarize.py'),'--out',str(root/'summary')],check=True,capture_output=True)
         summary=json.loads((root/'summary/summary.json').read_text())
         assert summary['measurement_environment'] is None

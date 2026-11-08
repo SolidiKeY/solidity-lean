@@ -27,8 +27,10 @@ def main():
         summary['fresh_passing_samples']=analysis['passing_current_modules']
         summary['fresh_attempted_samples']=analysis['attempted_observations']
         summary['areas']=analysis['per_area']
+        summary['baseline_only_counts']['waits']=summary['waits']
+        summary['waits']=[{'lane':'da-timing','item':r['path']+': '+r['status']} for r in analysis['current_gaps']]
         summary['checkpoints'].update({'declaration_ranking':'partial','full_build_estimate':'partial','ten_prioritized_changes':'partial'})
         summary['limitations']=[s for s in summary['limitations'] if not s.startswith('No matched ratios or full-build estimates')]+analysis['limitations']
     args.out.mkdir(parents=True,exist_ok=True); (args.out/'summary.json').write_text(json.dumps(summary,indent=2)+'\n')
-    print(json.dumps({'status':summary['status'],'modules':summary['tracked_lean_modules'],'lines':summary['tracked_lean_lines'],'passing':len(passed)}))
+    print(json.dumps({'status':summary['status'],'modules':summary['tracked_lean_modules'],'lines':summary['tracked_lean_lines'],'passing':summary['fresh_passing_samples']}))
 if __name__=='__main__': main()
