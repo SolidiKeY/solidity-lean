@@ -584,7 +584,7 @@ end Solidity.Source.TypingExamples
 #guard_msgs in #print axioms Solidity.Source.TypingExamples.tooBig_illTyped
 /-- info: 'Solidity.Source.TypingExamples.clashing_illFormed' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.TypingExamples.clashing_illFormed
-/-- info: 'Solidity.Source.TypingExamples.diamond_linearize' does not depend on any axioms -/
+/-- info: 'Solidity.Source.TypingExamples.diamond_linearize' depends on axioms: [propext] -/
 #guard_msgs in #print axioms Solidity.Source.TypingExamples.diamond_linearize
 /-- info: 'Solidity.Source.implicit_int_range' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.implicit_int_range
@@ -606,7 +606,7 @@ end Solidity.Source.TypingExamples
 #guard_msgs in #print axioms Solidity.Source.TypingExamples.sameSig_illFormed
 /-- info: 'Solidity.Source.TypingExamples.ifaceBody_illFormed' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.TypingExamples.ifaceBody_illFormed
-/-- info: 'Solidity.Source.TypingExamples.exprCoverage_total' does not depend on any axioms -/
+/-- info: 'Solidity.Source.TypingExamples.exprCoverage_total' depends on axioms: [propext] -/
 #guard_msgs in #print axioms Solidity.Source.TypingExamples.exprCoverage_total
 /-- info: 'Solidity.Source.ItemsOK.resolved' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.ItemsOK.resolved
