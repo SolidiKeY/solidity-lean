@@ -98,9 +98,9 @@ theorem BoolChildRepr.mixed_alias_iff {D : Source.Layout} {H : HTy} {Q : RefTy}
 #guard_msgs in #print axioms overwriteSlice_target_eq_iff
 /-- info: 'Solidity.Backend.MemoryOps.boolTransfer_target_eq_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms boolTransfer_target_eq_iff
-/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.object_eq' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.object_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms BoolChildRepr.object_eq
-/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.at_heap_iff' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.at_heap_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms BoolChildRepr.at_heap_iff
 /-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.alias_transfer_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms BoolChildRepr.alias_transfer_iff
