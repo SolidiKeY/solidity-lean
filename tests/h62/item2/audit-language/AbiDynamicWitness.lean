@@ -94,4 +94,70 @@ theorem fixed_result_refused (result : Except Fail (Entries memoryParams)) :
 #print axioms calldata_observation
 #print axioms actual_memory_behavior
 #print axioms fixed_result_refused
+
+/-! Guarded regression: the allocation cap is inclusive, and exceeding it must
+panic rather than revert. The following statements quantify over arbitrary
+input data, starting allocation, requested size and returned offset. -/
+theorem allocation_success_iff (I : Input) (a size next : Nat) :
+    alloc I a size = .ok next ↔ next = a + roundUp size ∧ I.free + next ≤ lim := by
+  by_cases h : I.free + (a + roundUp size) ≤ lim
+  · rw [alloc, if_pos h]
+    constructor
+    · intro equal
+      cases equal
+      exact ⟨rfl, h⟩
+    · rintro ⟨rfl, _⟩
+      rfl
+  · rw [alloc, if_neg h]
+    constructor
+    · intro impossible
+      cases impossible
+    · rintro ⟨rfl, bounded⟩
+      exact False.elim (h bounded)
+
+theorem allocation_panic_iff (I : Input) (a size : Nat) :
+    alloc I a size = .error .panic ↔ lim < I.free + (a + roundUp size) := by
+  by_cases h : I.free + (a + roundUp size) ≤ lim
+  · rw [alloc, if_pos h]
+    constructor
+    · intro impossible
+      cases impossible
+    · intro tooLarge
+      exact False.elim ((Nat.not_lt_of_ge h) tooLarge)
+  · rw [alloc, if_neg h]
+    constructor
+    · intro _
+      exact Nat.lt_of_not_ge h
+    · intro _
+      rfl
+
+theorem allocation_lower_free {I J : Input} {a size next : Nat}
+    (lower : J.free ≤ I.free) (success : alloc I a size = .ok next) :
+    alloc J a size = .ok next := by
+  have bounds := (allocation_success_iff I a size next).mp success
+  exact (allocation_success_iff J a size next).mpr
+    ⟨bounds.1, Nat.le_trans (Nat.add_le_add_right lower next) bounds.2⟩
+
+theorem allocation_never_reverts (I : Input) (a size : Nat) :
+    alloc I a size ≠ .error .revert := by
+  unfold alloc
+  split <;> intro impossible <;> cases impossible
+
+-- roundUp 33 = 64: equality is admitted, while one greater must panic.
+theorem allocation_exact_limit :
+    alloc (input (lim - 64)) 0 33 = .ok 64 := by
+  apply (allocation_success_iff _ _ _ _).mpr
+  exact ⟨by decide, by decide⟩
+
+theorem allocation_one_over_limit :
+    alloc (input (lim - 63)) 0 33 = .error .panic := by
+  apply (allocation_panic_iff _ _ _).mpr
+  decide
+
+#print axioms allocation_success_iff
+#print axioms allocation_panic_iff
+#print axioms allocation_lower_free
+#print axioms allocation_never_reverts
+#print axioms allocation_exact_limit
+#print axioms allocation_one_over_limit
 end Solidity.H62.AuditLanguage.AbiDynamicWitness
