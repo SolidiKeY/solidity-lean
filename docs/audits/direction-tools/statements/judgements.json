@@ -139,7 +139,7 @@
     "witness": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Families.lean#every_rule_inhabited",
     "witness_needed": "Existing source instantiation; not elaborated in this audit. Does not cover every possible premise or compiler path.",
     "reference": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cexec.v#L2163",
-    "comparison": "Similar external theorem: Executable one-step computation agrees with the relational semantics. Differences: Local deterministic statement rewriting versus nondeterministic C transitions, external-world crash alternative, and expression side effects; local theorem delegates to rule library.",
+    "comparison": "Similar external theorem: Executable one-step computation agrees with the relational semantics. Differences: Local deterministic statement rewriting versus nondeterministic C transitions, external-world crash alternative, and expression side effects; local theorem delegates to rule library. CompCert additionally assumes abstract external-function and inline-assembly implementations satisfy the enclosing soundness/completeness contracts; local intrinsic rewriting has no such external implementations.",
     "priority": "none",
     "non_comparability_reason": ""
   },
@@ -163,7 +163,7 @@
     "witness": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Families.lean#rule_step_family",
     "witness_needed": "Existing source instantiation; not elaborated in this audit. Does not cover every possible premise or compiler path.",
     "reference": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cexec.v#L2229",
-    "comparison": "Similar external theorem: Relational one-step result is covered by the executable step mechanism. Differences: CompCert returns a list of transitions and requires a possible external-world trace; local rule conclusion is equality to one deterministic step.",
+    "comparison": "Similar external theorem: Relational one-step result is covered by the executable step mechanism. Differences: CompCert returns a list of transitions and requires a possible external-world trace; local rule conclusion is equality to one deterministic step. CompCert additionally assumes abstract external-function and inline-assembly implementations satisfy the enclosing soundness/completeness contracts; local intrinsic rewriting has no such external implementations.",
     "priority": "none",
     "non_comparability_reason": ""
   },
@@ -175,7 +175,7 @@
     "witness": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Families.lean#every_rule_inhabited",
     "witness_needed": "Existing source instantiation; not elaborated in this audit. Does not cover every possible premise or compiler path.",
     "reference": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cstrategy.v#L1397",
-    "comparison": "Similar external theorem: A suitable starting state admits a next semantic step (or has finished). Differences: CompCert assumes safe execution and permits final states; local rewriting always produces a residual proposition, with additional SolKey rule-availability premises.",
+    "comparison": "Similar external theorem: A suitable starting state admits a next semantic step (or has finished). Differences: CompCert assumes safe operational execution and permits final states; local intrinsic statement rewriting unconditionally produces a residual proposition at each rule index and modality, not a runtime transition.",
     "priority": "none",
     "non_comparability_reason": ""
   },
@@ -187,7 +187,7 @@
     "witness": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Families.lean#rule_from_step_family",
     "witness_needed": "Existing source instantiation; not elaborated in this audit. Does not cover every possible premise or compiler path.",
     "reference": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cexec.v#L2163",
-    "comparison": "Similar external theorem: Executable one-step computation agrees with the relational semantics. Differences: Local deterministic statement rewriting versus nondeterministic C transitions, external-world crash alternative, and expression side effects; local theorem delegates to rule library.",
+    "comparison": "Similar external theorem: Executable one-step computation agrees with the relational semantics. Differences: Local deterministic statement rewriting versus nondeterministic C transitions, external-world crash alternative, and expression side effects; local theorem delegates to rule library. CompCert additionally assumes abstract external-function and inline-assembly implementations satisfy the enclosing soundness/completeness contracts; local intrinsic rewriting has no such external implementations.",
     "priority": "none",
     "non_comparability_reason": ""
   },
@@ -199,7 +199,7 @@
     "witness": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Calculus.lean#solkey_rule_application",
     "witness_needed": "Existing source instantiation; not elaborated in this audit. Does not cover every possible premise or compiler path.",
     "reference": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cstrategy.v#L1397",
-    "comparison": "Similar external theorem: A suitable starting state admits a next semantic step (or has finished). Differences: CompCert assumes safe execution and permits final states; local rewriting always produces a residual proposition, with additional SolKey rule-availability premises.",
+    "comparison": "Similar external theorem: A suitable starting state admits a next semantic step (or has finished). Differences: CompCert assumes safe operational execution and permits final states; local restricted rewriting requires inSolkey and a step-equality witness and yields a residual proposition, not a runtime transition.",
     "priority": "none",
     "non_comparability_reason": ""
   },

@@ -58,6 +58,9 @@ def equation_case : Nat → Nat
         search=json.loads(r["external_theorem_search"])
         assert search["unit"]==r["path"]+"#"+r["name"]
         assert search["queries"] and search["reviewed_candidates"]
+        if search["selected"]:
+            candidate=next(x for x in search["reviewed_candidates"] if x["reference"]==search["selected"])
+            assert not candidate["implicit_context"].startswith("Consult pinned file"),candidate["reference"]
         if all(x.get("ratio") is None for x in json.loads(r["reference_calibration"])):
             assert not search["selected"] and not search["existing_measurement"]
             assert search["non_comparability_reason"]==r["non_comparability_reason"]

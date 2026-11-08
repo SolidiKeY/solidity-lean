@@ -45,13 +45,13 @@
           "reference": "cc-exec#do_step_sound",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cexec.v#L2163",
           "statement": "Theorem do_step_sound:\n  forall w S rule t S',\n  In (TR rule t S') (do_step w S) ->\n  Csem.step ge S t S' \\/ (t = E0 /\\ S' = Stuckstate /\\ can_crash_world w S).",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Cexec Section EXEC fixes ge: genv and abstract do_external_function/do_inline_assembly implementations. Soundness uses do_external_function_sound and do_inline_assembly_sound: a successful executable call satisfies its external/assembly relational semantics and possible_trace. Completeness contracts are also declared in that section; this audit does not reconstruct Coq's minimized generalized argument list. Source lines 98-100, 436-462."
         },
         {
           "reference": "cc-strategy#progress",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cstrategy.v#L1397",
           "statement": "Theorem progress:\n  forall S,\n  safe S -> (exists r, final_state S r) \\/ (exists t, exists S', step S t S').",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Section STRATEGY fixes ge: genv (lines 24-26). safe S and final_state/step use that global environment; safety is an explicit premise."
         }
       ],
       "selected": null,
@@ -95,13 +95,13 @@
           "reference": "cc-exec#do_step_sound",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cexec.v#L2163",
           "statement": "Theorem do_step_sound:\n  forall w S rule t S',\n  In (TR rule t S') (do_step w S) ->\n  Csem.step ge S t S' \\/ (t = E0 /\\ S' = Stuckstate /\\ can_crash_world w S).",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Cexec Section EXEC fixes ge: genv and abstract do_external_function/do_inline_assembly implementations. Soundness uses do_external_function_sound and do_inline_assembly_sound: a successful executable call satisfies its external/assembly relational semantics and possible_trace. Completeness contracts are also declared in that section; this audit does not reconstruct Coq's minimized generalized argument list. Source lines 98-100, 436-462."
         },
         {
           "reference": "cc-strategy#progress",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cstrategy.v#L1397",
           "statement": "Theorem progress:\n  forall S,\n  safe S -> (exists r, final_state S r) \\/ (exists t, exists S', step S t S').",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Section STRATEGY fixes ge: genv (lines 24-26). safe S and final_state/step use that global environment; safety is an explicit premise."
         }
       ],
       "selected": null,
@@ -203,13 +203,13 @@
           "reference": "cc-ints#add_unsigned",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/lib/Integers.v#L701",
           "statement": "Theorem add_unsigned: forall x y, add x y = repr (unsigned x + unsigned y).",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Integers.Make(WS: WORDSIZE), with WS.wordsize: nat and wordsize_not_zero. Arithmetic is modulo 2^wordsize; 32/64-bit instantiations are not a Solidity uint8 evaluator."
         },
         {
           "reference": "afp-wp#kdplus_safe_dest",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L75",
           "statement": "lemma kdplus_safe_dest[wpdrules]:\n  assumes \"kdplus_safe (rvalue.Value (Uint l)) (rvalue.Value (Uint r)) = Some ya\"\n  shows \"unat l + unat r < 2^256 \\<and> ya = rvalue.Value (Uint (l + r))\"",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Global theorem over Uint values containing 256-bit words; successful Some result is a premise. No Contract locale or panic-payload semantics."
         }
       ],
       "selected": "afp-wp#kdplus_safe_dest",
@@ -240,7 +240,7 @@
           "reference": "cc-ints#add_unsigned",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/lib/Integers.v#L701",
           "statement": "Theorem add_unsigned: forall x y, add x y = repr (unsigned x + unsigned y).",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Integers.Make(WS: WORDSIZE), with WS.wordsize: nat and wordsize_not_zero. Arithmetic is modulo 2^wordsize; 32/64-bit instantiations are not a Solidity uint8 evaluator."
         },
         {
           "reference": "afp-wp#kdplus",
@@ -384,7 +384,7 @@
           "reference": "cc-strategy#step_simulation",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cstrategy.v#L1388",
           "statement": "Theorem step_simulation:\n  forall S1 t S2,\n  step S1 t S2 -> plus Csem.step ge S1 t S2.",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Section STRATEGY fixes ge: genv (lines 24-26); both operational relations use it."
         },
         {
           "reference": "cc-strategy#strategy_simulation",
@@ -475,7 +475,7 @@
           "reference": "cc-strategy#step_simulation",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cstrategy.v#L1388",
           "statement": "Theorem step_simulation:\n  forall S1 t S2,\n  step S1 t S2 -> plus Csem.step ge S1 t S2.",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Section STRATEGY fixes ge: genv (lines 24-26); both operational relations use it."
         },
         {
           "reference": "cc-strategy#strategy_simulation",
@@ -566,7 +566,7 @@
           "reference": "cc-strategy#step_simulation",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cstrategy.v#L1388",
           "statement": "Theorem step_simulation:\n  forall S1 t S2,\n  step S1 t S2 -> plus Csem.step ge S1 t S2.",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Section STRATEGY fixes ge: genv (lines 24-26); both operational relations use it."
         },
         {
           "reference": "cc-strategy#strategy_simulation",
@@ -629,7 +629,7 @@
           "reference": "afp-solidity#execute_cond_monad_simp2",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/Solidity.thy#L468",
           "statement": "lemma execute_cond_monad_simp2[execute_simps]:\n  assumes \"execute (equals_monad bm true_monad) s = Normal (kdbool False, s')\"\n  shows \"execute (cond_monad bm mt mf) s = execute mf s'\"",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Global lemma with typed expression monads; no Contract/Method/External locale encloses this statement. The condition's successful false result is a premise."
         }
       ],
       "selected": "afp-solidity#execute_cond_monad_simp2",
@@ -742,7 +742,7 @@
           "reference": "cc-strategy#step_simulation",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cstrategy.v#L1388",
           "statement": "Theorem step_simulation:\n  forall S1 t S2,\n  step S1 t S2 -> plus Csem.step ge S1 t S2.",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Section STRATEGY fixes ge: genv (lines 24-26); both operational relations use it."
         },
         {
           "reference": "afp-monad#execute_bind",
@@ -781,7 +781,7 @@
           "reference": "cc-strategy#step_simulation",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cstrategy.v#L1388",
           "statement": "Theorem step_simulation:\n  forall S1 t S2,\n  step S1 t S2 -> plus Csem.step ge S1 t S2.",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Section STRATEGY fixes ge: genv (lines 24-26); both operational relations use it."
         },
         {
           "reference": "afp-monad#execute_bind",
@@ -820,7 +820,7 @@
           "reference": "cc-strategy#step_simulation",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cstrategy.v#L1388",
           "statement": "Theorem step_simulation:\n  forall S1 t S2,\n  step S1 t S2 -> plus Csem.step ge S1 t S2.",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Section STRATEGY fixes ge: genv (lines 24-26); both operational relations use it."
         },
         {
           "reference": "afp-monad#execute_bind",
@@ -852,7 +852,7 @@
           "reference": "cc-typing#evar_sound",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Ctyping.v#L1095",
           "statement": "Lemma evar_sound:\n  forall x a, evar e x = OK a -> wt_expr ce e a.",
-          "implicit_context": "Typing section has environments ce and e; successful evar e x produces a well-typed expression in those environments."
+          "implicit_context": "Section SOUNDNESS_CONSTRUCTORS fixes ce: composite_env, e: typenv, rt: type (1074-1078). wt_expr uses ce/e; successful evar lookup is explicit."
         }
       ],
       "selected": "cc-typing#evar_sound",
@@ -878,7 +878,7 @@
           "reference": "cc-typing#evar_sound",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Ctyping.v#L1095",
           "statement": "Lemma evar_sound:\n  forall x a, evar e x = OK a -> wt_expr ce e a.",
-          "implicit_context": "Typing section has environments ce and e; successful evar e x produces a well-typed expression in those environments."
+          "implicit_context": "Section SOUNDNESS_CONSTRUCTORS fixes ce: composite_env, e: typenv, rt: type (1074-1078). wt_expr uses ce/e; successful evar lookup is explicit."
         }
       ],
       "selected": "cc-typing#evar_sound",
@@ -904,7 +904,7 @@
           "reference": "cc-typing#ecall_sound",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Ctyping.v#L1243",
           "statement": "Lemma ecall_sound:\n  forall fn args a, ecall fn args = OK a -> wt_expr ce e fn -> wt_exprlist ce e args -> wt_expr ce e a.",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Section SOUNDNESS_CONSTRUCTORS fixes ce: composite_env, e: typenv, rt: type (1074-1078). wt_expr uses ce/e; rt is declared in the section, not necessarily generalized into this theorem."
         }
       ],
       "selected": "cc-typing#ecall_sound",
@@ -936,7 +936,7 @@
           "reference": "cc-typing#econst_int_sound",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Ctyping.v#L1115",
           "statement": "Lemma econst_int_sound:\n  forall n sg, wt_expr ce e (econst_int n sg).",
-          "implicit_context": "Ctyping typing section has composite environment ce and local environment e; these are implicit in wt_expr ce e."
+          "implicit_context": "Section SOUNDNESS_CONSTRUCTORS fixes ce: composite_env, e: typenv, rt: type (1074-1078). wt_expr uses ce/e and econst_int takes a bounded integer n and signedness sg."
         },
         {
           "reference": "cc-ints#unsigned_repr",
@@ -993,13 +993,13 @@
           "reference": "cc-exec#do_step_sound",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cexec.v#L2163",
           "statement": "Theorem do_step_sound:\n  forall w S rule t S',\n  In (TR rule t S') (do_step w S) ->\n  Csem.step ge S t S' \\/ (t = E0 /\\ S' = Stuckstate /\\ can_crash_world w S).",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Cexec Section EXEC fixes ge: genv and abstract do_external_function/do_inline_assembly implementations. Soundness uses do_external_function_sound and do_inline_assembly_sound: a successful executable call satisfies its external/assembly relational semantics and possible_trace. Completeness contracts are also declared in that section; this audit does not reconstruct Coq's minimized generalized argument list. Source lines 98-100, 436-462."
         },
         {
           "reference": "afp-solidity#post_true",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/Solidity.thy#L796",
           "statement": "lemma post_true:\n  assumes \"effect (exc x) s r\"\n      and \"I' s\"\n      and \"post s r I (K True)\"\n    shows \"post s r I I'\"",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Inside context Contract (Solidity.thy 749-806), fixing this::'a::address. effect(exc x) uses the exception wrapper which restores pre-state; post's normal-result invariant I and initial-state predicate I' are explicit premises."
         }
       ],
       "selected": "afp-solidity#post_true",
@@ -1050,13 +1050,13 @@
           "reference": "cc-exec#do_step_sound",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cexec.v#L2163",
           "statement": "Theorem do_step_sound:\n  forall w S rule t S',\n  In (TR rule t S') (do_step w S) ->\n  Csem.step ge S t S' \\/ (t = E0 /\\ S' = Stuckstate /\\ can_crash_world w S).",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Cexec Section EXEC fixes ge: genv and abstract do_external_function/do_inline_assembly implementations. Soundness uses do_external_function_sound and do_inline_assembly_sound: a successful executable call satisfies its external/assembly relational semantics and possible_trace. Completeness contracts are also declared in that section; this audit does not reconstruct Coq's minimized generalized argument list. Source lines 98-100, 436-462."
         },
         {
           "reference": "afp-solidity#post_true",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/Solidity.thy#L796",
           "statement": "lemma post_true:\n  assumes \"effect (exc x) s r\"\n      and \"I' s\"\n      and \"post s r I (K True)\"\n    shows \"post s r I I'\"",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Inside context Contract (Solidity.thy 749-806), fixing this::'a::address. effect(exc x) uses the exception wrapper which restores pre-state; post's normal-result invariant I and initial-state predicate I' are explicit premises."
         }
       ],
       "selected": "afp-solidity#post_true",
@@ -1095,7 +1095,7 @@
           "reference": "afp-wp#storage_update_eq",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L163",
           "statement": "lemma (in Contract) storage_update_eq[wpsimps]:\n  \"state.Storage (storage_update i x s) this i = x\"",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). Updates the currently executing contract's storage location i."
         }
       ],
       "selected": "afp-wp#storage_update_eq",
@@ -1131,7 +1131,7 @@
           "reference": "afp-solidity#post_true",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/Solidity.thy#L796",
           "statement": "lemma post_true:\n  assumes \"effect (exc x) s r\"\n      and \"I' s\"\n      and \"post s r I (K True)\"\n    shows \"post s r I I'\"",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Inside context Contract (Solidity.thy 749-806), fixing this::'a::address. effect(exc x) uses the exception wrapper which restores pre-state; post's normal-result invariant I and initial-state predicate I' are explicit premises."
         }
       ],
       "selected": null,
@@ -1168,7 +1168,7 @@
           "reference": "cc-exec#do_step_sound",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cexec.v#L2163",
           "statement": "Theorem do_step_sound:\n  forall w S rule t S',\n  In (TR rule t S') (do_step w S) ->\n  Csem.step ge S t S' \\/ (t = E0 /\\ S' = Stuckstate /\\ can_crash_world w S).",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Cexec Section EXEC fixes ge: genv and abstract do_external_function/do_inline_assembly implementations. Soundness uses do_external_function_sound and do_inline_assembly_sound: a successful executable call satisfies its external/assembly relational semantics and possible_trace. Completeness contracts are also declared in that section; this audit does not reconstruct Coq's minimized generalized argument list. Source lines 98-100, 436-462."
         },
         {
           "reference": "afp-wp#wp_transfer_monad",
@@ -1180,7 +1180,7 @@
           "reference": "afp-wp#inv_wp",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L824",
           "statement": "lemma (in Contract) inv_wp:\n  assumes \"effect m s r\"\n      and \"wp m (K x) (K y) s\"\n    shows \"inv r x y\"",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/inv are semantic predicates; WP allows NT. No local callback/no-callback policy is encoded."
         }
       ],
       "selected": null,
@@ -1217,7 +1217,7 @@
           "reference": "cc-exec#do_step_sound",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cexec.v#L2163",
           "statement": "Theorem do_step_sound:\n  forall w S rule t S',\n  In (TR rule t S') (do_step w S) ->\n  Csem.step ge S t S' \\/ (t = E0 /\\ S' = Stuckstate /\\ can_crash_world w S).",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Cexec Section EXEC fixes ge: genv and abstract do_external_function/do_inline_assembly implementations. Soundness uses do_external_function_sound and do_inline_assembly_sound: a successful executable call satisfies its external/assembly relational semantics and possible_trace. Completeness contracts are also declared in that section; this audit does not reconstruct Coq's minimized generalized argument list. Source lines 98-100, 436-462."
         },
         {
           "reference": "afp-wp#wp_transfer_monad",
@@ -1229,7 +1229,7 @@
           "reference": "afp-wp#inv_wp",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L824",
           "statement": "lemma (in Contract) inv_wp:\n  assumes \"effect m s r\"\n      and \"wp m (K x) (K y) s\"\n    shows \"inv r x y\"",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/inv are semantic predicates; WP allows NT. No local callback/no-callback policy is encoded."
         }
       ],
       "selected": null,
@@ -1280,13 +1280,13 @@
           "reference": "cc-exec#do_step_sound",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cexec.v#L2163",
           "statement": "Theorem do_step_sound:\n  forall w S rule t S',\n  In (TR rule t S') (do_step w S) ->\n  Csem.step ge S t S' \\/ (t = E0 /\\ S' = Stuckstate /\\ can_crash_world w S).",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Cexec Section EXEC fixes ge: genv and abstract do_external_function/do_inline_assembly implementations. Soundness uses do_external_function_sound and do_inline_assembly_sound: a successful executable call satisfies its external/assembly relational semantics and possible_trace. Completeness contracts are also declared in that section; this audit does not reconstruct Coq's minimized generalized argument list. Source lines 98-100, 436-462."
         },
         {
           "reference": "afp-solidity#post_true",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/Solidity.thy#L796",
           "statement": "lemma post_true:\n  assumes \"effect (exc x) s r\"\n      and \"I' s\"\n      and \"post s r I (K True)\"\n    shows \"post s r I I'\"",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Inside context Contract (Solidity.thy 749-806), fixing this::'a::address. effect(exc x) uses the exception wrapper which restores pre-state; post's normal-result invariant I and initial-state predicate I' are explicit premises."
         }
       ],
       "selected": "afp-solidity#post_true",
@@ -1323,7 +1323,7 @@
           "reference": "cc-exec#do_step_sound",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cexec.v#L2163",
           "statement": "Theorem do_step_sound:\n  forall w S rule t S',\n  In (TR rule t S') (do_step w S) ->\n  Csem.step ge S t S' \\/ (t = E0 /\\ S' = Stuckstate /\\ can_crash_world w S).",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Cexec Section EXEC fixes ge: genv and abstract do_external_function/do_inline_assembly implementations. Soundness uses do_external_function_sound and do_inline_assembly_sound: a successful executable call satisfies its external/assembly relational semantics and possible_trace. Completeness contracts are also declared in that section; this audit does not reconstruct Coq's minimized generalized argument list. Source lines 98-100, 436-462."
         },
         {
           "reference": "afp-wp#wp_transfer_monad",
@@ -1335,7 +1335,7 @@
           "reference": "afp-wp#inv_wp",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L824",
           "statement": "lemma (in Contract) inv_wp:\n  assumes \"effect m s r\"\n      and \"wp m (K x) (K y) s\"\n    shows \"inv r x y\"",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/inv are semantic predicates; WP allows NT. No local callback/no-callback policy is encoded."
         }
       ],
       "selected": null,
@@ -1372,7 +1372,7 @@
           "reference": "cc-exec#do_step_sound",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cexec.v#L2163",
           "statement": "Theorem do_step_sound:\n  forall w S rule t S',\n  In (TR rule t S') (do_step w S) ->\n  Csem.step ge S t S' \\/ (t = E0 /\\ S' = Stuckstate /\\ can_crash_world w S).",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Cexec Section EXEC fixes ge: genv and abstract do_external_function/do_inline_assembly implementations. Soundness uses do_external_function_sound and do_inline_assembly_sound: a successful executable call satisfies its external/assembly relational semantics and possible_trace. Completeness contracts are also declared in that section; this audit does not reconstruct Coq's minimized generalized argument list. Source lines 98-100, 436-462."
         },
         {
           "reference": "afp-wp#wp_transfer_monad",
@@ -1384,7 +1384,7 @@
           "reference": "afp-wp#inv_wp",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L824",
           "statement": "lemma (in Contract) inv_wp:\n  assumes \"effect m s r\"\n      and \"wp m (K x) (K y) s\"\n    shows \"inv r x y\"",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/inv are semantic predicates; WP allows NT. No local callback/no-callback policy is encoded."
         }
       ],
       "selected": null,
@@ -1410,7 +1410,7 @@
           "reference": "cc-typing#evar_sound",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Ctyping.v#L1095",
           "statement": "Lemma evar_sound:\n  forall x a, evar e x = OK a -> wt_expr ce e a.",
-          "implicit_context": "Typing section has environments ce and e; successful evar e x produces a well-typed expression in those environments."
+          "implicit_context": "Section SOUNDNESS_CONSTRUCTORS fixes ce: composite_env, e: typenv, rt: type (1074-1078). wt_expr uses ce/e; successful evar lookup is explicit."
         }
       ],
       "selected": "cc-typing#evar_sound",
@@ -1436,7 +1436,7 @@
           "reference": "cc-typing#evar_sound",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Ctyping.v#L1095",
           "statement": "Lemma evar_sound:\n  forall x a, evar e x = OK a -> wt_expr ce e a.",
-          "implicit_context": "Typing section has environments ce and e; successful evar e x produces a well-typed expression in those environments."
+          "implicit_context": "Section SOUNDNESS_CONSTRUCTORS fixes ce: composite_env, e: typenv, rt: type (1074-1078). wt_expr uses ce/e; successful evar lookup is explicit."
         }
       ],
       "selected": "cc-typing#evar_sound",
@@ -1515,7 +1515,7 @@
           "reference": "cc-strategy#step_simulation",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cstrategy.v#L1388",
           "statement": "Theorem step_simulation:\n  forall S1 t S2,\n  step S1 t S2 -> plus Csem.step ge S1 t S2.",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Section STRATEGY fixes ge: genv (lines 24-26); both operational relations use it."
         },
         {
           "reference": "cc-strategy#strategy_simulation",
@@ -1606,7 +1606,7 @@
           "reference": "cc-strategy#step_simulation",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cstrategy.v#L1388",
           "statement": "Theorem step_simulation:\n  forall S1 t S2,\n  step S1 t S2 -> plus Csem.step ge S1 t S2.",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Section STRATEGY fixes ge: genv (lines 24-26); both operational relations use it."
         },
         {
           "reference": "cc-strategy#strategy_simulation",
@@ -1705,7 +1705,7 @@
           "reference": "afp-wp#post_wp",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L830",
           "statement": "lemma (in Contract) post_wp:\n  assumes \"effect m s r\"\n      and \"wp m (\\<lambda>r s'. Is s r s') (K Ie) s\"\n    shows \"post s r Is Ie\"",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
         }
       ],
       "selected": null,
@@ -1792,7 +1792,7 @@
           "reference": "afp-wp#post_wp",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L830",
           "statement": "lemma (in Contract) post_wp:\n  assumes \"effect m s r\"\n      and \"wp m (\\<lambda>r s'. Is s r s') (K Ie) s\"\n    shows \"post s r Is Ie\"",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
         }
       ],
       "selected": null,
@@ -1879,7 +1879,7 @@
           "reference": "afp-wp#post_wp",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L830",
           "statement": "lemma (in Contract) post_wp:\n  assumes \"effect m s r\"\n      and \"wp m (\\<lambda>r s'. Is s r s') (K Ie) s\"\n    shows \"post s r Is Ie\"",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
         }
       ],
       "selected": null,
@@ -1966,7 +1966,7 @@
           "reference": "afp-wp#post_wp",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L830",
           "statement": "lemma (in Contract) post_wp:\n  assumes \"effect m s r\"\n      and \"wp m (\\<lambda>r s'. Is s r s') (K Ie) s\"\n    shows \"post s r Is Ie\"",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
         }
       ],
       "selected": null,
@@ -2053,7 +2053,7 @@
           "reference": "afp-wp#post_wp",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L830",
           "statement": "lemma (in Contract) post_wp:\n  assumes \"effect m s r\"\n      and \"wp m (\\<lambda>r s'. Is s r s') (K Ie) s\"\n    shows \"post s r Is Ie\"",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
         }
       ],
       "selected": null,
@@ -2140,7 +2140,7 @@
           "reference": "afp-wp#post_wp",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L830",
           "statement": "lemma (in Contract) post_wp:\n  assumes \"effect m s r\"\n      and \"wp m (\\<lambda>r s'. Is s r s') (K Ie) s\"\n    shows \"post s r Is Ie\"",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
         }
       ],
       "selected": null,
@@ -2227,7 +2227,7 @@
           "reference": "afp-wp#post_wp",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L830",
           "statement": "lemma (in Contract) post_wp:\n  assumes \"effect m s r\"\n      and \"wp m (\\<lambda>r s'. Is s r s') (K Ie) s\"\n    shows \"post s r Is Ie\"",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
         }
       ],
       "selected": null,
@@ -2314,7 +2314,7 @@
           "reference": "afp-wp#post_wp",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L830",
           "statement": "lemma (in Contract) post_wp:\n  assumes \"effect m s r\"\n      and \"wp m (\\<lambda>r s'. Is s r s') (K Ie) s\"\n    shows \"post s r Is Ie\"",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
         }
       ],
       "selected": null,
@@ -2401,7 +2401,7 @@
           "reference": "afp-wp#post_wp",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L830",
           "statement": "lemma (in Contract) post_wp:\n  assumes \"effect m s r\"\n      and \"wp m (\\<lambda>r s'. Is s r s') (K Ie) s\"\n    shows \"post s r Is Ie\"",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
         }
       ],
       "selected": null,
@@ -2488,7 +2488,7 @@
           "reference": "afp-wp#post_wp",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L830",
           "statement": "lemma (in Contract) post_wp:\n  assumes \"effect m s r\"\n      and \"wp m (\\<lambda>r s'. Is s r s') (K Ie) s\"\n    shows \"post s r Is Ie\"",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
         }
       ],
       "selected": null,
@@ -2575,7 +2575,7 @@
           "reference": "afp-wp#post_wp",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L830",
           "statement": "lemma (in Contract) post_wp:\n  assumes \"effect m s r\"\n      and \"wp m (\\<lambda>r s'. Is s r s') (K Ie) s\"\n    shows \"post s r Is Ie\"",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
         }
       ],
       "selected": null,
@@ -2662,7 +2662,7 @@
           "reference": "afp-wp#post_wp",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L830",
           "statement": "lemma (in Contract) post_wp:\n  assumes \"effect m s r\"\n      and \"wp m (\\<lambda>r s'. Is s r s') (K Ie) s\"\n    shows \"post s r Is Ie\"",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
         }
       ],
       "selected": null,
@@ -2735,12 +2735,12 @@
           "reference": "cc-exec#do_step_sound",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cexec.v#L2163",
           "statement": "Theorem do_step_sound:\n  forall w S rule t S',\n  In (TR rule t S') (do_step w S) ->\n  Csem.step ge S t S' \\/ (t = E0 /\\ S' = Stuckstate /\\ can_crash_world w S).",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Cexec Section EXEC fixes ge: genv and abstract do_external_function/do_inline_assembly implementations. Soundness uses do_external_function_sound and do_inline_assembly_sound: a successful executable call satisfies its external/assembly relational semantics and possible_trace. Completeness contracts are also declared in that section; this audit does not reconstruct Coq's minimized generalized argument list. Source lines 98-100, 436-462."
         }
       ],
       "selected": "cc-exec#do_step_sound",
       "shared_property": "Executable one-step computation agrees with the relational semantics.",
-      "differences": "Local deterministic statement rewriting versus nondeterministic C transitions, external-world crash alternative, and expression side effects; local theorem delegates to rule library.",
+      "differences": "Local deterministic statement rewriting versus nondeterministic C transitions, external-world crash alternative, and expression side effects; local theorem delegates to rule library. CompCert additionally assumes abstract external-function and inline-assembly implementations satisfy the enclosing soundness/completeness contracts; local intrinsic rewriting has no such external implementations.",
       "non_comparability_reason": null,
       "existing_measurement": null
     },
@@ -2795,12 +2795,12 @@
           "reference": "cc-exec#do_step_complete",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cexec.v#L2229",
           "statement": "Theorem do_step_complete:\n  forall w S t S' w',\n  possible_trace w t w' -> Csem.step ge S t S' -> exists rule, In (TR rule t S') (do_step w S).",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Cexec Section EXEC fixes ge: genv and abstract do_external_function/do_inline_assembly implementations. Completeness uses do_external_function_complete and do_inline_assembly_complete, requiring relational-call semantics and possible_trace to yield executable success. Soundness contracts are also declared in the section; minimized generalized dependencies are not reconstructed. Source lines 98-100, 436-462."
         }
       ],
       "selected": "cc-exec#do_step_complete",
       "shared_property": "Relational one-step result is covered by the executable step mechanism.",
-      "differences": "CompCert returns a list of transitions and requires a possible external-world trace; local rule conclusion is equality to one deterministic step.",
+      "differences": "CompCert returns a list of transitions and requires a possible external-world trace; local rule conclusion is equality to one deterministic step. CompCert additionally assumes abstract external-function and inline-assembly implementations satisfy the enclosing soundness/completeness contracts; local intrinsic rewriting has no such external implementations.",
       "non_comparability_reason": null,
       "existing_measurement": null
     },
@@ -2823,7 +2823,7 @@
           "reference": "cc-strategy#progress",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cstrategy.v#L1397",
           "statement": "Theorem progress:\n  forall S,\n  safe S -> (exists r, final_state S r) \\/ (exists t, exists S', step S t S').",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Section STRATEGY fixes ge: genv (lines 24-26). safe S and final_state/step use that global environment; safety is an explicit premise."
         },
         {
           "reference": "cc-strategy#can_estep",
@@ -2834,7 +2834,7 @@
       ],
       "selected": "cc-strategy#progress",
       "shared_property": "A suitable starting state admits a next semantic step (or has finished).",
-      "differences": "CompCert assumes safe execution and permits final states; local rewriting always produces a residual proposition, with additional SolKey rule-availability premises.",
+      "differences": "CompCert assumes safe operational execution and permits final states; local intrinsic statement rewriting unconditionally produces a residual proposition at each rule index and modality, not a runtime transition.",
       "non_comparability_reason": null,
       "existing_measurement": null
     },
@@ -2902,12 +2902,12 @@
           "reference": "cc-exec#do_step_sound",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cexec.v#L2163",
           "statement": "Theorem do_step_sound:\n  forall w S rule t S',\n  In (TR rule t S') (do_step w S) ->\n  Csem.step ge S t S' \\/ (t = E0 /\\ S' = Stuckstate /\\ can_crash_world w S).",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Cexec Section EXEC fixes ge: genv and abstract do_external_function/do_inline_assembly implementations. Soundness uses do_external_function_sound and do_inline_assembly_sound: a successful executable call satisfies its external/assembly relational semantics and possible_trace. Completeness contracts are also declared in that section; this audit does not reconstruct Coq's minimized generalized argument list. Source lines 98-100, 436-462."
         }
       ],
       "selected": "cc-exec#do_step_sound",
       "shared_property": "Executable one-step computation agrees with the relational semantics.",
-      "differences": "Local deterministic statement rewriting versus nondeterministic C transitions, external-world crash alternative, and expression side effects; local theorem delegates to rule library.",
+      "differences": "Local deterministic statement rewriting versus nondeterministic C transitions, external-world crash alternative, and expression side effects; local theorem delegates to rule library. CompCert additionally assumes abstract external-function and inline-assembly implementations satisfy the enclosing soundness/completeness contracts; local intrinsic rewriting has no such external implementations.",
       "non_comparability_reason": null,
       "existing_measurement": null
     },
@@ -2930,7 +2930,7 @@
           "reference": "cc-strategy#progress",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cstrategy.v#L1397",
           "statement": "Theorem progress:\n  forall S,\n  safe S -> (exists r, final_state S r) \\/ (exists t, exists S', step S t S').",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Section STRATEGY fixes ge: genv (lines 24-26). safe S and final_state/step use that global environment; safety is an explicit premise."
         },
         {
           "reference": "cc-strategy#can_estep",
@@ -2941,7 +2941,7 @@
       ],
       "selected": "cc-strategy#progress",
       "shared_property": "A suitable starting state admits a next semantic step (or has finished).",
-      "differences": "CompCert assumes safe execution and permits final states; local rewriting always produces a residual proposition, with additional SolKey rule-availability premises.",
+      "differences": "CompCert assumes safe operational execution and permits final states; local restricted rewriting requires inSolkey and a step-equality witness and yields a residual proposition, not a runtime transition.",
       "non_comparability_reason": null,
       "existing_measurement": null
     },
@@ -3018,7 +3018,7 @@
           "reference": "cc-strategy#step_simulation",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cstrategy.v#L1388",
           "statement": "Theorem step_simulation:\n  forall S1 t S2,\n  step S1 t S2 -> plus Csem.step ge S1 t S2.",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Section STRATEGY fixes ge: genv (lines 24-26); both operational relations use it."
         }
       ],
       "selected": null,
@@ -3045,7 +3045,7 @@
           "reference": "cc-strategy#step_simulation",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cstrategy.v#L1388",
           "statement": "Theorem step_simulation:\n  forall S1 t S2,\n  step S1 t S2 -> plus Csem.step ge S1 t S2.",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Section STRATEGY fixes ge: genv (lines 24-26); both operational relations use it."
         }
       ],
       "selected": "cc-strategy#step_simulation",
@@ -3133,7 +3133,7 @@
           "reference": "afp-wp#post_wp",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L830",
           "statement": "lemma (in Contract) post_wp:\n  assumes \"effect m s r\"\n      and \"wp m (\\<lambda>r s'. Is s r s') (K Ie) s\"\n    shows \"post s r Is Ie\"",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
         }
       ],
       "selected": null,
@@ -3215,7 +3215,7 @@
           "reference": "cc-strategy#step_simulation",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cstrategy.v#L1388",
           "statement": "Theorem step_simulation:\n  forall S1 t S2,\n  step S1 t S2 -> plus Csem.step ge S1 t S2.",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Section STRATEGY fixes ge: genv (lines 24-26); both operational relations use it."
         }
       ],
       "selected": null,
@@ -3257,7 +3257,7 @@
           "reference": "afp-wp#post_wp",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L830",
           "statement": "lemma (in Contract) post_wp:\n  assumes \"effect m s r\"\n      and \"wp m (\\<lambda>r s'. Is s r s') (K Ie) s\"\n    shows \"post s r Is Ie\"",
-          "implicit_context": "Contract locale, including this address and contract-state operations; WP admits NT nontermination."
+          "implicit_context": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
         }
       ],
       "selected": "afp-wp#post_wp",
@@ -3299,7 +3299,7 @@
           "reference": "afp-wp#post_wp",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L830",
           "statement": "lemma (in Contract) post_wp:\n  assumes \"effect m s r\"\n      and \"wp m (\\<lambda>r s'. Is s r s') (K Ie) s\"\n    shows \"post s r Is Ie\"",
-          "implicit_context": "Contract locale, including this address and contract-state operations; WP admits NT nontermination."
+          "implicit_context": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
         }
       ],
       "selected": "afp-wp#post_wp",
@@ -3341,7 +3341,7 @@
           "reference": "afp-wp#post_wp",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L830",
           "statement": "lemma (in Contract) post_wp:\n  assumes \"effect m s r\"\n      and \"wp m (\\<lambda>r s'. Is s r s') (K Ie) s\"\n    shows \"post s r Is Ie\"",
-          "implicit_context": "Contract locale, including this address and contract-state operations; WP admits NT nontermination."
+          "implicit_context": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
         }
       ],
       "selected": "afp-wp#post_wp",
@@ -3383,7 +3383,7 @@
           "reference": "afp-wp#inv_wp",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L824",
           "statement": "lemma (in Contract) inv_wp:\n  assumes \"effect m s r\"\n      and \"wp m (K x) (K y) s\"\n    shows \"inv r x y\"",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/inv are semantic predicates; WP allows NT. No local callback/no-callback policy is encoded."
         },
         {
           "reference": "afp-wp#wp_transfer_monad",
@@ -3431,7 +3431,7 @@
           "reference": "afp-wp#inv_wp",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L824",
           "statement": "lemma (in Contract) inv_wp:\n  assumes \"effect m s r\"\n      and \"wp m (K x) (K y) s\"\n    shows \"inv r x y\"",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/inv are semantic predicates; WP allows NT. No local callback/no-callback policy is encoded."
         },
         {
           "reference": "afp-wp#wp_transfer_monad",
@@ -3525,7 +3525,7 @@
           "reference": "afp-wp#inv_wp",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L824",
           "statement": "lemma (in Contract) inv_wp:\n  assumes \"effect m s r\"\n      and \"wp m (K x) (K y) s\"\n    shows \"inv r x y\"",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/inv are semantic predicates; WP allows NT. No local callback/no-callback policy is encoded."
         }
       ],
       "selected": null,
@@ -3682,7 +3682,7 @@
           "reference": "afp-wp#wpbind",
           "url": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L251",
           "statement": "lemma wpbind[wprules]:\n  assumes \"wp f (\\<lambda>a. (wp (g a) P E)) E s\"\n  shows \"wp (f \\<bind> g) P E s\"",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Global WP rule over polymorphic state monads, with no Contract locale or termination premise. WP permits NT; separate normal and exception postconditions are explicit."
         }
       ],
       "selected": "afp-wp#wpbind",
@@ -3743,7 +3743,7 @@
           "reference": "cc-complements#transf_c_program_preservation",
           "url": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/driver/Complements.v#L31",
           "statement": "Theorem transf_c_program_preservation:\n  forall p tp beh,\n  transf_c_program p = OK tp ->\n  program_behaves (Asm.semantics tp) beh ->\n  exists beh', program_behaves (Csem.semantics p) beh' /\\ behavior_improves beh' beh.",
-          "implicit_context": "Consult pinned file for enclosing sections/locales; header is not an elaborated signature."
+          "implicit_context": "Global theorem over complete C and assembly programs; successful compilation and target program_behaves are explicit. behavior_improves permits a source Going_wrong behaviour to improve into a target behaviour."
         }
       ],
       "selected": "cc-complements#transf_c_program_preservation",
@@ -3932,7 +3932,7 @@
       "ratio": 0.058824,
       "outlier": true,
       "verdict": "justified",
-      "reason": "Executable one-step computation agrees with the relational semantics. Differences: Local deterministic statement rewriting versus nondeterministic C transitions, external-world crash alternative, and expression side effects; local theorem delegates to rule library. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      "reason": "Executable one-step computation agrees with the relational semantics. Differences: Local deterministic statement rewriting versus nondeterministic C transitions, external-world crash alternative, and expression side effects; local theorem delegates to rule library. CompCert additionally assumes abstract external-function and inline-assembly implementations satisfy the enclosing soundness/completeness contracts; local intrinsic rewriting has no such external implementations. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
     },
     {
       "unit": "Solidity/Theorems.lean#rule_unique",
@@ -3954,7 +3954,7 @@
       "ratio": 0.032787,
       "outlier": true,
       "verdict": "justified",
-      "reason": "Relational one-step result is covered by the executable step mechanism. Differences: CompCert returns a list of transitions and requires a possible external-world trace; local rule conclusion is equality to one deterministic step. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      "reason": "Relational one-step result is covered by the executable step mechanism. Differences: CompCert returns a list of transitions and requires a possible external-world trace; local rule conclusion is equality to one deterministic step. CompCert additionally assumes abstract external-function and inline-assembly implementations satisfy the enclosing soundness/completeness contracts; local intrinsic rewriting has no such external implementations. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
     },
     {
       "unit": "Solidity/Theorems.lean#rule_exists",
@@ -3965,7 +3965,7 @@
       "ratio": 0.111111,
       "outlier": true,
       "verdict": "justified",
-      "reason": "A suitable starting state admits a next semantic step (or has finished). Differences: CompCert assumes safe execution and permits final states; local rewriting always produces a residual proposition, with additional SolKey rule-availability premises. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      "reason": "A suitable starting state admits a next semantic step (or has finished). Differences: CompCert assumes safe operational execution and permits final states; local intrinsic statement rewriting unconditionally produces a residual proposition at each rule index and modality, not a runtime transition. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
     },
     {
       "unit": "Solidity/Theorems.lean#rule_of_step",
@@ -3976,7 +3976,7 @@
       "ratio": 0.058824,
       "outlier": true,
       "verdict": "justified",
-      "reason": "Executable one-step computation agrees with the relational semantics. Differences: Local deterministic statement rewriting versus nondeterministic C transitions, external-world crash alternative, and expression side effects; local theorem delegates to rule library. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      "reason": "Executable one-step computation agrees with the relational semantics. Differences: Local deterministic statement rewriting versus nondeterministic C transitions, external-world crash alternative, and expression side effects; local theorem delegates to rule library. CompCert additionally assumes abstract external-function and inline-assembly implementations satisfy the enclosing soundness/completeness contracts; local intrinsic rewriting has no such external implementations. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
     },
     {
       "unit": "Solidity/Theorems.lean#solkey_rule_exists",
@@ -3987,7 +3987,7 @@
       "ratio": 0.111111,
       "outlier": true,
       "verdict": "justified",
-      "reason": "A suitable starting state admits a next semantic step (or has finished). Differences: CompCert assumes safe execution and permits final states; local rewriting always produces a residual proposition, with additional SolKey rule-availability premises. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      "reason": "A suitable starting state admits a next semantic step (or has finished). Differences: CompCert assumes safe operational execution and permits final states; local restricted rewriting requires inSolkey and a step-equality witness and yields a residual proposition, not a runtime transition. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
     },
     {
       "unit": "Solidity/Theorems.lean#solkey_step_taclet",

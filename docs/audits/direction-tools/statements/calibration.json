@@ -235,7 +235,7 @@
       "ratio": 0.058824,
       "outlier": true,
       "verdict": "justified",
-      "reason": "Executable one-step computation agrees with the relational semantics. Differences: Local deterministic statement rewriting versus nondeterministic C transitions, external-world crash alternative, and expression side effects; local theorem delegates to rule library. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      "reason": "Executable one-step computation agrees with the relational semantics. Differences: Local deterministic statement rewriting versus nondeterministic C transitions, external-world crash alternative, and expression side effects; local theorem delegates to rule library. CompCert additionally assumes abstract external-function and inline-assembly implementations satisfy the enclosing soundness/completeness contracts; local intrinsic rewriting has no such external implementations. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
     },
     {
       "unit": "Solidity/Theorems.lean#rule_unique",
@@ -257,7 +257,7 @@
       "ratio": 0.032787,
       "outlier": true,
       "verdict": "justified",
-      "reason": "Relational one-step result is covered by the executable step mechanism. Differences: CompCert returns a list of transitions and requires a possible external-world trace; local rule conclusion is equality to one deterministic step. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      "reason": "Relational one-step result is covered by the executable step mechanism. Differences: CompCert returns a list of transitions and requires a possible external-world trace; local rule conclusion is equality to one deterministic step. CompCert additionally assumes abstract external-function and inline-assembly implementations satisfy the enclosing soundness/completeness contracts; local intrinsic rewriting has no such external implementations. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
     },
     {
       "unit": "Solidity/Theorems.lean#rule_exists",
@@ -268,7 +268,7 @@
       "ratio": 0.111111,
       "outlier": true,
       "verdict": "justified",
-      "reason": "A suitable starting state admits a next semantic step (or has finished). Differences: CompCert assumes safe execution and permits final states; local rewriting always produces a residual proposition, with additional SolKey rule-availability premises. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      "reason": "A suitable starting state admits a next semantic step (or has finished). Differences: CompCert assumes safe operational execution and permits final states; local intrinsic statement rewriting unconditionally produces a residual proposition at each rule index and modality, not a runtime transition. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
     },
     {
       "unit": "Solidity/Theorems.lean#rule_of_step",
@@ -279,7 +279,7 @@
       "ratio": 0.058824,
       "outlier": true,
       "verdict": "justified",
-      "reason": "Executable one-step computation agrees with the relational semantics. Differences: Local deterministic statement rewriting versus nondeterministic C transitions, external-world crash alternative, and expression side effects; local theorem delegates to rule library. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      "reason": "Executable one-step computation agrees with the relational semantics. Differences: Local deterministic statement rewriting versus nondeterministic C transitions, external-world crash alternative, and expression side effects; local theorem delegates to rule library. CompCert additionally assumes abstract external-function and inline-assembly implementations satisfy the enclosing soundness/completeness contracts; local intrinsic rewriting has no such external implementations. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
     },
     {
       "unit": "Solidity/Theorems.lean#solkey_rule_exists",
@@ -290,7 +290,7 @@
       "ratio": 0.111111,
       "outlier": true,
       "verdict": "justified",
-      "reason": "A suitable starting state admits a next semantic step (or has finished). Differences: CompCert assumes safe execution and permits final states; local rewriting always produces a residual proposition, with additional SolKey rule-availability premises. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+      "reason": "A suitable starting state admits a next semantic step (or has finished). Differences: CompCert assumes safe operational execution and permits final states; local restricted rewriting requires inSolkey and a step-equality witness and yields a residual proposition, not a runtime transition. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
     },
     {
       "unit": "Solidity/Theorems.lean#solkey_step_taclet",
@@ -427,5 +427,5 @@
     "matched_units": 30,
     "outliers": 13
   },
-  "conclusion": "The small checked compiler facade is an outlier against the CakeML facade because compact Input/Agrees contracts hide detail that the reference facade exposes; both sides delegate. Other measured facade and finite-case ratios are within 3x. Additional similar-theorem ratios include small fixed local computations and delegating calculus facades versus general external theorems. Their recorded outliers reflect different generality or proof packaging, not measured transitive proof effort. Semantic compiler weaknesses are assessed from permitted behaviours, not inferred from these sizes."
+  "conclusion": "The small checked compiler facade is an outlier against the CakeML facade because compact Input/Agrees contracts hide detail that the reference facade exposes; both sides delegate. The other original compiler-facade and solc finite-case ratios are within 3x. Additional similar-theorem ratios include small fixed local computations and delegating calculus facades versus general external theorems. Their recorded outliers reflect different generality or proof packaging, not measured transitive proof effort. Semantic compiler weaknesses are assessed from permitted behaviours, not inferred from these sizes."
 }

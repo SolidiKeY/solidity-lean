@@ -9,9 +9,11 @@
     ],
     "selected": "cc-exec#do_step_sound",
     "shared": "Executable one-step computation agrees with the relational semantics.",
-    "differences": "Local deterministic statement rewriting versus nondeterministic C transitions, external-world crash alternative, and expression side effects; local theorem delegates to rule library.",
+    "differences": "Local deterministic statement rewriting versus nondeterministic C transitions, external-world crash alternative, and expression side effects; local theorem delegates to rule library. CompCert additionally assumes abstract external-function and inline-assembly implementations satisfy the enclosing soundness/completeness contracts; local intrinsic rewriting has no such external implementations.",
     "reason": null,
-    "context": {},
+    "context": {
+      "cc-exec#do_step_sound": "Cexec Section EXEC fixes ge: genv and abstract do_external_function/do_inline_assembly implementations. Soundness uses do_external_function_sound and do_inline_assembly_sound: a successful executable call satisfies its external/assembly relational semantics and possible_trace. Completeness contracts are also declared in that section; this audit does not reconstruct Coq's minimized generalized argument list. Source lines 98-100, 436-462."
+    },
     "existing_measurement": null
   },
   "Solidity/Theorems.lean#rule_of_step": {
@@ -24,9 +26,11 @@
     ],
     "selected": "cc-exec#do_step_sound",
     "shared": "Executable one-step computation agrees with the relational semantics.",
-    "differences": "Local deterministic statement rewriting versus nondeterministic C transitions, external-world crash alternative, and expression side effects; local theorem delegates to rule library.",
+    "differences": "Local deterministic statement rewriting versus nondeterministic C transitions, external-world crash alternative, and expression side effects; local theorem delegates to rule library. CompCert additionally assumes abstract external-function and inline-assembly implementations satisfy the enclosing soundness/completeness contracts; local intrinsic rewriting has no such external implementations.",
     "reason": null,
-    "context": {},
+    "context": {
+      "cc-exec#do_step_sound": "Cexec Section EXEC fixes ge: genv and abstract do_external_function/do_inline_assembly implementations. Soundness uses do_external_function_sound and do_inline_assembly_sound: a successful executable call satisfies its external/assembly relational semantics and possible_trace. Completeness contracts are also declared in that section; this audit does not reconstruct Coq's minimized generalized argument list. Source lines 98-100, 436-462."
+    },
     "existing_measurement": null
   },
   "Solidity/Theorems.lean#rule_is_step": {
@@ -38,9 +42,11 @@
     ],
     "selected": "cc-exec#do_step_complete",
     "shared": "Relational one-step result is covered by the executable step mechanism.",
-    "differences": "CompCert returns a list of transitions and requires a possible external-world trace; local rule conclusion is equality to one deterministic step.",
+    "differences": "CompCert returns a list of transitions and requires a possible external-world trace; local rule conclusion is equality to one deterministic step. CompCert additionally assumes abstract external-function and inline-assembly implementations satisfy the enclosing soundness/completeness contracts; local intrinsic rewriting has no such external implementations.",
     "reason": null,
-    "context": {},
+    "context": {
+      "cc-exec#do_step_complete": "Cexec Section EXEC fixes ge: genv and abstract do_external_function/do_inline_assembly implementations. Completeness uses do_external_function_complete and do_inline_assembly_complete, requiring relational-call semantics and possible_trace to yield executable success. Soundness contracts are also declared in the section; minimized generalized dependencies are not reconstructed. Source lines 98-100, 436-462."
+    },
     "existing_measurement": null
   },
   "Solidity/Theorems.lean#rule_unique": {
@@ -69,9 +75,11 @@
     ],
     "selected": "cc-strategy#progress",
     "shared": "A suitable starting state admits a next semantic step (or has finished).",
-    "differences": "CompCert assumes safe execution and permits final states; local rewriting always produces a residual proposition, with additional SolKey rule-availability premises.",
+    "differences": "CompCert assumes safe operational execution and permits final states; local intrinsic statement rewriting unconditionally produces a residual proposition at each rule index and modality, not a runtime transition.",
     "reason": null,
-    "context": {},
+    "context": {
+      "cc-strategy#progress": "Section STRATEGY fixes ge: genv (lines 24-26). safe S and final_state/step use that global environment; safety is an explicit premise."
+    },
     "existing_measurement": null
   },
   "Solidity/Theorems.lean#solkey_rule_exists": {
@@ -84,9 +92,11 @@
     ],
     "selected": "cc-strategy#progress",
     "shared": "A suitable starting state admits a next semantic step (or has finished).",
-    "differences": "CompCert assumes safe execution and permits final states; local rewriting always produces a residual proposition, with additional SolKey rule-availability premises.",
+    "differences": "CompCert assumes safe operational execution and permits final states; local restricted rewriting requires inSolkey and a step-equality witness and yields a residual proposition, not a runtime transition.",
     "reason": null,
-    "context": {},
+    "context": {
+      "cc-strategy#progress": "Section STRATEGY fixes ge: genv (lines 24-26). safe S and final_state/step use that global environment; safety is an explicit premise."
+    },
     "existing_measurement": null
   },
   "Solidity/Theorems.lean#solkey_step_taclet": {
@@ -100,7 +110,9 @@
     "shared": "A restricted stepping discipline embeds into the general semantic relation.",
     "differences": "CompCert relates strategy transitions to positive sequences of C steps; local theorem relates SolKey taclet rewriting to the calculus under its shape premise.",
     "reason": null,
-    "context": {},
+    "context": {
+      "cc-strategy#step_simulation": "Section STRATEGY fixes ge: genv (lines 24-26); both operational relations use it."
+    },
     "existing_measurement": null
   },
   "Solidity/Theorems.lean#soundness": {
@@ -117,7 +129,7 @@
     "differences": "The closest compiler candidate preserves specifications across compilation; the closer Solidity candidate assumes WP and an effect, whereas local theorems assume calculus derivability and quantify validity. Isabelle WP is partial correctness (NT allowed).",
     "reason": null,
     "context": {
-      "afp-wp#post_wp": "Contract locale, including this address and contract-state operations; WP admits NT nontermination."
+      "afp-wp#post_wp": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
     },
     "existing_measurement": null
   },
@@ -135,7 +147,7 @@
     "differences": "The closest compiler candidate preserves specifications across compilation; the closer Solidity candidate assumes WP and an effect, whereas local theorems assume calculus derivability and quantify validity. Isabelle WP is partial correctness (NT allowed).",
     "reason": null,
     "context": {
-      "afp-wp#post_wp": "Contract locale, including this address and contract-state operations; WP admits NT nontermination."
+      "afp-wp#post_wp": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
     },
     "existing_measurement": null
   },
@@ -153,7 +165,7 @@
     "differences": "The closest compiler candidate preserves specifications across compilation; the closer Solidity candidate assumes WP and an effect, whereas local theorems assume calculus derivability and quantify validity. Isabelle WP is partial correctness (NT allowed).",
     "reason": null,
     "context": {
-      "afp-wp#post_wp": "Contract locale, including this address and contract-state operations; WP admits NT nontermination."
+      "afp-wp#post_wp": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
     },
     "existing_measurement": null
   },
@@ -171,7 +183,9 @@
     "shared": "Verification obligations imply invariant properties of semantic outcomes.",
     "differences": "Local derivability includes callback/no-callback invariant regimes; Isabelle assumes a WP over an effect and does not encode those same callback policies. This compares the invariant-soundness layer, not callback feature coverage.",
     "reason": null,
-    "context": {},
+    "context": {
+      "afp-wp#inv_wp": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/inv are semantic predicates; WP allows NT. No local callback/no-callback policy is encoded."
+    },
     "existing_measurement": null
   },
   "Solidity/Theorems.lean#noCallback_soundness": {
@@ -188,7 +202,9 @@
     "shared": "Verification obligations imply invariant properties of semantic outcomes.",
     "differences": "Local derivability includes callback/no-callback invariant regimes; Isabelle assumes a WP over an effect and does not encode those same callback policies. This compares the invariant-soundness layer, not callback feature coverage.",
     "reason": null,
-    "context": {},
+    "context": {
+      "afp-wp#inv_wp": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/inv are semantic predicates; WP allows NT. No local callback/no-callback policy is encoded."
+    },
     "existing_measurement": null
   },
   "Solidity/Theorems.lean#symex_sound": {
@@ -204,7 +220,9 @@
     "shared": "A backwards verification condition is sufficient for the composed program's postcondition.",
     "differences": "Local theorem is fuel-indexed symbolic formula transformation; Isabelle's rule handles one monadic bind and separate exception postconditions.",
     "reason": null,
-    "context": {},
+    "context": {
+      "afp-wp#wpbind": "Global WP rule over polymorphic state monads, with no Contract locale or termination premise. WP permits NT; separate normal and exception postconditions are explicit."
+    },
     "existing_measurement": null
   },
   "Solidity/Theorems.lean#compiler_correct": {
@@ -246,7 +264,9 @@
     "shared": "A target execution has a corresponding source execution and a preserved observable.",
     "differences": "Local result is success-conditional and compares net account balances only; CompCert covers whole program behaviours with behavior_improves, including source undefined behaviour.",
     "reason": null,
-    "context": {},
+    "context": {
+      "cc-complements#transf_c_program_preservation": "Global theorem over complete C and assembly programs; successful compilation and target program_behaves are explicit. behavior_improves permits a source Going_wrong behaviour to improve into a target behaviour."
+    },
     "existing_measurement": null
   },
   "Solidity/Theorems.lean#solkey_rule_lt_calculus": {
@@ -262,7 +282,9 @@
     "shared": null,
     "differences": null,
     "reason": "The closest inspected compiler results embed one execution strategy into general C semantics. Neither exhibits a formula or rule derivable in one proof system and underivable in another; thus neither is a similar strict-separation witness. No such theorem was found in the bounded compiler/Solidity theorem catalog.",
-    "context": {},
+    "context": {
+      "cc-strategy#step_simulation": "Section STRATEGY fixes ge: genv (lines 24-26); both operational relations use it."
+    },
     "existing_measurement": null
   },
   "Solidity/Theorems.lean#solkey_lt_calculus": {
@@ -278,7 +300,9 @@
     "shared": null,
     "differences": null,
     "reason": "The closest inspected compiler results embed one execution strategy into general C semantics. Neither exhibits a formula or rule derivable in one proof system and underivable in another; thus neither is a similar strict-separation witness. No such theorem was found in the bounded compiler/Solidity theorem catalog.",
-    "context": {},
+    "context": {
+      "cc-strategy#step_simulation": "Section STRATEGY fixes ge: genv (lines 24-26); both operational relations use it."
+    },
     "existing_measurement": null
   },
   "Solidity/Theorems.lean#solkey_eq_calculus": {
@@ -295,7 +319,9 @@
     "shared": null,
     "differences": null,
     "reason": "The inspected strategy simulation relates program behaviours in one direction; the WP/postcondition pair relates semantic predicates to verification conditions. None establishes equivalence of derivability in two proof calculi under a formula-fragment premise, so these are not a similar proof-system equivalence theorem in this bounded search.",
-    "context": {},
+    "context": {
+      "afp-wp#post_wp": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
+    },
     "existing_measurement": null
   },
   "Solidity/Theorems.lean#noCallback_iff": {
@@ -312,7 +338,9 @@
     "shared": null,
     "differences": null,
     "reason": "The nearest inspected strategy and external-call verification theorems do not state that restricting callbacks leaves validity of a callback-free formula unchanged. Transfer WP handles an external operation, and inv_wp proves an outcome invariant; neither is the required validity equivalence. No similar proposition was found in the searched files.",
-    "context": {},
+    "context": {
+      "afp-wp#inv_wp": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/inv are semantic predicates; WP allows NT. No local callback/no-callback policy is encoded."
+    },
     "existing_measurement": null
   },
   "Solidity/Theorems.lean#cleanTail_holds": {
@@ -344,7 +372,10 @@
     "shared": null,
     "differences": null,
     "reason": "The closest compiler step-soundness/progress results admit stuck/crash alternatives or assume safety. They do not eliminate a contradictory symbolic modality premise by deriving False as these closers do. No similar contradiction-elimination theorem was found in the searched catalog; a general progress theorem is not this proof unit.",
-    "context": {},
+    "context": {
+      "cc-exec#do_step_sound": "Cexec Section EXEC fixes ge: genv and abstract do_external_function/do_inline_assembly implementations. Soundness uses do_external_function_sound and do_inline_assembly_sound: a successful executable call satisfies its external/assembly relational semantics and possible_trace. Completeness contracts are also declared in that section; this audit does not reconstruct Coq's minimized generalized argument list. Source lines 98-100, 436-462.",
+      "cc-strategy#progress": "Section STRATEGY fixes ge: genv (lines 24-26). safe S and final_state/step use that global environment; safety is an explicit premise."
+    },
     "existing_measurement": null
   },
   "Solidity/Calculus/Closers.lean#_root_.Solidity.Modality.afterRunTR_diamond_fail": {
@@ -360,7 +391,10 @@
     "shared": null,
     "differences": null,
     "reason": "The closest compiler step-soundness/progress results admit stuck/crash alternatives or assume safety. They do not eliminate a contradictory symbolic modality premise by deriving False as these closers do. No similar contradiction-elimination theorem was found in the searched catalog; a general progress theorem is not this proof unit.",
-    "context": {},
+    "context": {
+      "cc-exec#do_step_sound": "Cexec Section EXEC fixes ge: genv and abstract do_external_function/do_inline_assembly implementations. Soundness uses do_external_function_sound and do_inline_assembly_sound: a successful executable call satisfies its external/assembly relational semantics and possible_trace. Completeness contracts are also declared in that section; this audit does not reconstruct Coq's minimized generalized argument list. Source lines 98-100, 436-462.",
+      "cc-strategy#progress": "Section STRATEGY fixes ge: genv (lines 24-26). safe S and final_state/step use that global environment; safety is an explicit premise."
+    },
     "existing_measurement": null
   },
   "Solidity/Source/SemanticsExamples.lean#add_overflow_checked": {
@@ -376,7 +410,10 @@
     "shared": "Checked unsigned addition can succeed only within its representable range.",
     "differences": "Local closed uint8 evaluation proves a particular overflow panic payload; Isabelle's generic uint256 success inversion implies rejection out of range but does not prove that payload or exact evaluator outcome.",
     "reason": null,
-    "context": {},
+    "context": {
+      "cc-ints#add_unsigned": "Integers.Make(WS: WORDSIZE), with WS.wordsize: nat and wordsize_not_zero. Arithmetic is modulo 2^wordsize; 32/64-bit instantiations are not a Solidity uint8 evaluator.",
+      "afp-wp#kdplus_safe_dest": "Global theorem over Uint values containing 256-bit words; successful Some result is a premise. No Contract locale or panic-payload semantics."
+    },
     "existing_measurement": null
   },
   "Solidity/Source/SemanticsExamples.lean#add_overflow_unchecked": {
@@ -391,7 +428,9 @@
     "shared": "Unsigned unchecked addition wraps modulo the word width.",
     "differences": "Local uint8 fixed input result versus a generic word arithmetic identity; CompCert is not a Solidity expression evaluator.",
     "reason": null,
-    "context": {},
+    "context": {
+      "cc-ints#add_unsigned": "Integers.Make(WS: WORDSIZE), with WS.wordsize: nat and wordsize_not_zero. Arithmetic is modulo 2^wordsize; 32/64-bit instantiations are not a Solidity uint8 evaluator."
+    },
     "existing_measurement": null
   },
   "Solidity/Source/SemanticsExamples.lean#div_by_zero": {
@@ -423,7 +462,9 @@
     "shared": "A false condition selects one branch without executing the other branch's effects.",
     "differences": "Local conjunction with a state-changing right operand versus a generic false conditional in Isabelle's monadic evaluator; not a theorem equating complete evaluators.",
     "reason": null,
-    "context": {},
+    "context": {
+      "afp-solidity#execute_cond_monad_simp2": "Global lemma with typed expression monads; no Contract/Method/External locale encloses this statement. The condition's successful false result is a premise."
+    },
     "existing_measurement": null
   },
   "Solidity/Source/SemanticsExamples.lean#lit_ok": {
@@ -439,7 +480,7 @@
     "differences": "Local rational-to-uint implicit conversion requires FitsInt and fixed uint metadata; CompCert starts from a bounded integer representation and proves expression well-typedness.",
     "reason": null,
     "context": {
-      "cc-typing#econst_int_sound": "Ctyping typing section has composite environment ce and local environment e; these are implicit in wt_expr ce e."
+      "cc-typing#econst_int_sound": "Section SOUNDNESS_CONSTRUCTORS fixes ce: composite_env, e: typenv, rt: type (1074-1078). wt_expr uses ce/e and econst_int takes a bounded integer n and signedness sg."
     },
     "existing_measurement": null
   },
@@ -455,7 +496,7 @@
     "differences": "Local fixed declaration lookup returns a uint type; CompCert generically converts successful variable lookup into wt_expr. These are analogous lookup/typing interfaces, not equal algorithms.",
     "reason": null,
     "context": {
-      "cc-typing#evar_sound": "Typing section has environments ce and e; successful evar e x produces a well-typed expression in those environments."
+      "cc-typing#evar_sound": "Section SOUNDNESS_CONSTRUCTORS fixes ce: composite_env, e: typenv, rt: type (1074-1078). wt_expr uses ce/e; successful evar lookup is explicit."
     },
     "existing_measurement": null
   },
@@ -471,7 +512,7 @@
     "differences": "Local fixed declaration lookup returns a uint type; CompCert generically converts successful variable lookup into wt_expr. These are analogous lookup/typing interfaces, not equal algorithms.",
     "reason": null,
     "context": {
-      "cc-typing#evar_sound": "Typing section has environments ce and e; successful evar e x produces a well-typed expression in those environments."
+      "cc-typing#evar_sound": "Section SOUNDNESS_CONSTRUCTORS fixes ce: composite_env, e: typenv, rt: type (1074-1078). wt_expr uses ce/e; successful evar lookup is explicit."
     },
     "existing_measurement": null
   },
@@ -487,7 +528,7 @@
     "differences": "Local fixed declaration lookup returns a uint type; CompCert generically converts successful variable lookup into wt_expr. These are analogous lookup/typing interfaces, not equal algorithms.",
     "reason": null,
     "context": {
-      "cc-typing#evar_sound": "Typing section has environments ce and e; successful evar e x produces a well-typed expression in those environments."
+      "cc-typing#evar_sound": "Section SOUNDNESS_CONSTRUCTORS fixes ce: composite_env, e: typenv, rt: type (1074-1078). wt_expr uses ce/e; successful evar lookup is explicit."
     },
     "existing_measurement": null
   },
@@ -503,7 +544,7 @@
     "differences": "Local fixed declaration lookup returns a uint type; CompCert generically converts successful variable lookup into wt_expr. These are analogous lookup/typing interfaces, not equal algorithms.",
     "reason": null,
     "context": {
-      "cc-typing#evar_sound": "Typing section has environments ce and e; successful evar e x produces a well-typed expression in those environments."
+      "cc-typing#evar_sound": "Section SOUNDNESS_CONSTRUCTORS fixes ce: composite_env, e: typenv, rt: type (1074-1078). wt_expr uses ce/e; successful evar lookup is explicit."
     },
     "existing_measurement": null
   },
@@ -518,7 +559,9 @@
     "shared": "Call-signature typing evidence supports an accepted function application.",
     "differences": "Local fixed zero-argument/zero-result signature lookup versus CompCert generic call well-typedness, with additional well-typed function/argument premises.",
     "reason": null,
-    "context": {},
+    "context": {
+      "cc-typing#ecall_sound": "Section SOUNDNESS_CONSTRUCTORS fixes ce: composite_env, e: typenv, rt: type (1074-1078). wt_expr uses ce/e; rt is declared in the section, not necessarily generalized into this theorem."
+    },
     "existing_measurement": null
   },
   "Solidity/Source/SemanticsExamples.lean#revert_rolls_back": {
@@ -534,7 +577,10 @@
     "shared": "An exceptional execution preserves predicates of the pre-call state by restoring it.",
     "differences": "Local closed transactions include storage, logs or transient-storage observations; Isabelle's exc wrapper restores its entire modeled state but has no EVM transient-storage feature or matching event/panic payload claim. Only the rollback principle is shared.",
     "reason": null,
-    "context": {},
+    "context": {
+      "cc-exec#do_step_sound": "Cexec Section EXEC fixes ge: genv and abstract do_external_function/do_inline_assembly implementations. Soundness uses do_external_function_sound and do_inline_assembly_sound: a successful executable call satisfies its external/assembly relational semantics and possible_trace. Completeness contracts are also declared in that section; this audit does not reconstruct Coq's minimized generalized argument list. Source lines 98-100, 436-462.",
+      "afp-solidity#post_true": "Inside context Contract (Solidity.thy 749-806), fixing this::'a::address. effect(exc x) uses the exception wrapper which restores pre-state; post's normal-result invariant I and initial-state predicate I' are explicit premises."
+    },
     "existing_measurement": null
   },
   "Solidity/Source/SemanticsExamples.lean#outside_revert_rolls_back": {
@@ -550,7 +596,10 @@
     "shared": "An exceptional execution preserves predicates of the pre-call state by restoring it.",
     "differences": "Local closed transactions include storage, logs or transient-storage observations; Isabelle's exc wrapper restores its entire modeled state but has no EVM transient-storage feature or matching event/panic payload claim. Only the rollback principle is shared.",
     "reason": null,
-    "context": {},
+    "context": {
+      "cc-exec#do_step_sound": "Cexec Section EXEC fixes ge: genv and abstract do_external_function/do_inline_assembly implementations. Soundness uses do_external_function_sound and do_inline_assembly_sound: a successful executable call satisfies its external/assembly relational semantics and possible_trace. Completeness contracts are also declared in that section; this audit does not reconstruct Coq's minimized generalized argument list. Source lines 98-100, 436-462.",
+      "afp-solidity#post_true": "Inside context Contract (Solidity.thy 749-806), fixing this::'a::address. effect(exc x) uses the exception wrapper which restores pre-state; post's normal-result invariant I and initial-state predicate I' are explicit premises."
+    },
     "existing_measurement": null
   },
   "Solidity/Source/SemanticsExamples.lean#revert_rolls_back_transient": {
@@ -566,7 +615,10 @@
     "shared": "An exceptional execution preserves predicates of the pre-call state by restoring it.",
     "differences": "Local closed transactions include storage, logs or transient-storage observations; Isabelle's exc wrapper restores its entire modeled state but has no EVM transient-storage feature or matching event/panic payload claim. Only the rollback principle is shared.",
     "reason": null,
-    "context": {},
+    "context": {
+      "cc-exec#do_step_sound": "Cexec Section EXEC fixes ge: genv and abstract do_external_function/do_inline_assembly implementations. Soundness uses do_external_function_sound and do_inline_assembly_sound: a successful executable call satisfies its external/assembly relational semantics and possible_trace. Completeness contracts are also declared in that section; this audit does not reconstruct Coq's minimized generalized argument list. Source lines 98-100, 436-462.",
+      "afp-solidity#post_true": "Inside context Contract (Solidity.thy 749-806), fixing this::'a::address. effect(exc x) uses the exception wrapper which restores pre-state; post's normal-result invariant I and initial-state predicate I' are explicit premises."
+    },
     "existing_measurement": null
   },
   "Solidity/Source/SemanticsExamples.lean#commit_keeps_storage": {
@@ -581,7 +633,9 @@
     "shared": "A successful storage write is observed when that location is read.",
     "differences": "Local full transaction also checks a return value and committed storage; Isabelle proves one generic storage update/read identity in the Contract locale.",
     "reason": null,
-    "context": {},
+    "context": {
+      "afp-wp#storage_update_eq": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). Updates the currently executing contract's storage location i."
+    },
     "existing_measurement": null
   },
   "Solidity/Source/SemanticsExamples.lean#hex_literal_bytes": {
@@ -613,7 +667,9 @@
     "shared": null,
     "differences": null,
     "reason": "The closest compiler strategy simulations and monadic sequencing theorem specify or relate one evaluation discipline. They do not compare two Solidity compiler profiles on the same side-effecting expression or constructor-order fixture, and do not derive this differing numeric result. No similar profile-difference proposition was found in the searched catalog.",
-    "context": {},
+    "context": {
+      "cc-strategy#step_simulation": "Section STRATEGY fixes ge: genv (lines 24-26); both operational relations use it."
+    },
     "existing_measurement": null
   },
   "Solidity/Source/SemanticsExamples.lean#order_viaIR": {
@@ -630,7 +686,9 @@
     "shared": null,
     "differences": null,
     "reason": "The closest compiler strategy simulations and monadic sequencing theorem specify or relate one evaluation discipline. They do not compare two Solidity compiler profiles on the same side-effecting expression or constructor-order fixture, and do not derive this differing numeric result. No similar profile-difference proposition was found in the searched catalog.",
-    "context": {},
+    "context": {
+      "cc-strategy#step_simulation": "Section STRATEGY fixes ge: genv (lines 24-26); both operational relations use it."
+    },
     "existing_measurement": null
   },
   "Solidity/Source/SemanticsExamples.lean#order_differs": {
@@ -647,7 +705,9 @@
     "shared": null,
     "differences": null,
     "reason": "The closest compiler strategy simulations and monadic sequencing theorem specify or relate one evaluation discipline. They do not compare two Solidity compiler profiles on the same side-effecting expression or constructor-order fixture, and do not derive this differing numeric result. No similar profile-difference proposition was found in the searched catalog.",
-    "context": {},
+    "context": {
+      "cc-strategy#step_simulation": "Section STRATEGY fixes ge: genv (lines 24-26); both operational relations use it."
+    },
     "existing_measurement": null
   },
   "Solidity/Source/SemanticsExamples.lean#ctor_order_legacy": {
@@ -664,7 +724,9 @@
     "shared": null,
     "differences": null,
     "reason": "The closest compiler strategy simulations and monadic sequencing theorem specify or relate one evaluation discipline. They do not compare two Solidity compiler profiles on the same side-effecting expression or constructor-order fixture, and do not derive this differing numeric result. No similar profile-difference proposition was found in the searched catalog.",
-    "context": {},
+    "context": {
+      "cc-strategy#step_simulation": "Section STRATEGY fixes ge: genv (lines 24-26); both operational relations use it."
+    },
     "existing_measurement": null
   },
   "Solidity/Source/SemanticsExamples.lean#ctor_order_viaIR": {
@@ -681,7 +743,9 @@
     "shared": null,
     "differences": null,
     "reason": "The closest compiler strategy simulations and monadic sequencing theorem specify or relate one evaluation discipline. They do not compare two Solidity compiler profiles on the same side-effecting expression or constructor-order fixture, and do not derive this differing numeric result. No similar profile-difference proposition was found in the searched catalog.",
-    "context": {},
+    "context": {
+      "cc-strategy#step_simulation": "Section STRATEGY fixes ge: genv (lines 24-26); both operational relations use it."
+    },
     "existing_measurement": null
   },
   "Solidity/Source/SemanticsExamples.lean#modifier_twice_legacy": {
@@ -697,7 +761,9 @@
     "shared": null,
     "differences": null,
     "reason": "The closest inspected sequencing/strategy theorems do not describe a Solidity modifier placeholder used once or twice, nor legacy/viaIR continuation handling. Generic bind execution alone cannot state whether that placeholder reruns the body. No similar modifier-semantics theorem was found in the bounded compiler/Solidity catalog.",
-    "context": {},
+    "context": {
+      "cc-strategy#step_simulation": "Section STRATEGY fixes ge: genv (lines 24-26); both operational relations use it."
+    },
     "existing_measurement": null
   },
   "Solidity/Source/SemanticsExamples.lean#modifier_twice_viaIR": {
@@ -713,7 +779,9 @@
     "shared": null,
     "differences": null,
     "reason": "The closest inspected sequencing/strategy theorems do not describe a Solidity modifier placeholder used once or twice, nor legacy/viaIR continuation handling. Generic bind execution alone cannot state whether that placeholder reruns the body. No similar modifier-semantics theorem was found in the bounded compiler/Solidity catalog.",
-    "context": {},
+    "context": {
+      "cc-strategy#step_simulation": "Section STRATEGY fixes ge: genv (lines 24-26); both operational relations use it."
+    },
     "existing_measurement": null
   },
   "Solidity/Source/SemanticsExamples.lean#modifier_once": {
@@ -729,7 +797,9 @@
     "shared": null,
     "differences": null,
     "reason": "The closest inspected sequencing/strategy theorems do not describe a Solidity modifier placeholder used once or twice, nor legacy/viaIR continuation handling. Generic bind execution alone cannot state whether that placeholder reruns the body. No similar modifier-semantics theorem was found in the bounded compiler/Solidity catalog.",
-    "context": {},
+    "context": {
+      "cc-strategy#step_simulation": "Section STRATEGY fixes ge: genv (lines 24-26); both operational relations use it."
+    },
     "existing_measurement": null
   },
   "Solidity/Source/SemanticsExamples.lean#transient_cleared": {
@@ -745,7 +815,9 @@
     "shared": null,
     "differences": null,
     "reason": "The closest memory and rollback theorems describe encoding or restoration after an exception. Neither states that EVM transient storage is cleared at successful transaction end; the searched Isabelle Solidity state does not model that transient-storage domain. No similar lifecycle theorem was found in this bounded search.",
-    "context": {},
+    "context": {
+      "afp-solidity#post_true": "Inside context Contract (Solidity.thy 749-806), fixing this::'a::address. effect(exc x) uses the exception wrapper which restores pre-state; post's normal-result invariant I and initial-state predicate I' are explicit premises."
+    },
     "existing_measurement": null
   },
   "Solidity/Source/SemanticsExamples.lean#reentrant_callback": {
@@ -762,7 +834,10 @@
     "shared": null,
     "differences": null,
     "reason": "The closest inspected compiler external-step and Solidity transfer/invariant WP theorems permit generic external effects. They do not specify this callback trace or static-call refusal of a state write/value transfer, nor its exact result. No similar EVM callback/static-policy proposition was found in the searched theorem catalog.",
-    "context": {},
+    "context": {
+      "cc-exec#do_step_sound": "Cexec Section EXEC fixes ge: genv and abstract do_external_function/do_inline_assembly implementations. Soundness uses do_external_function_sound and do_inline_assembly_sound: a successful executable call satisfies its external/assembly relational semantics and possible_trace. Completeness contracts are also declared in that section; this audit does not reconstruct Coq's minimized generalized argument list. Source lines 98-100, 436-462.",
+      "afp-wp#inv_wp": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/inv are semantic predicates; WP allows NT. No local callback/no-callback policy is encoded."
+    },
     "existing_measurement": null
   },
   "Solidity/Source/SemanticsExamples.lean#no_callback": {
@@ -779,7 +854,10 @@
     "shared": null,
     "differences": null,
     "reason": "The closest inspected compiler external-step and Solidity transfer/invariant WP theorems permit generic external effects. They do not specify this callback trace or static-call refusal of a state write/value transfer, nor its exact result. No similar EVM callback/static-policy proposition was found in the searched theorem catalog.",
-    "context": {},
+    "context": {
+      "cc-exec#do_step_sound": "Cexec Section EXEC fixes ge: genv and abstract do_external_function/do_inline_assembly implementations. Soundness uses do_external_function_sound and do_inline_assembly_sound: a successful executable call satisfies its external/assembly relational semantics and possible_trace. Completeness contracts are also declared in that section; this audit does not reconstruct Coq's minimized generalized argument list. Source lines 98-100, 436-462.",
+      "afp-wp#inv_wp": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/inv are semantic predicates; WP allows NT. No local callback/no-callback policy is encoded."
+    },
     "existing_measurement": null
   },
   "Solidity/Source/SemanticsExamples.lean#static_callback_refused": {
@@ -796,7 +874,10 @@
     "shared": null,
     "differences": null,
     "reason": "The closest inspected compiler external-step and Solidity transfer/invariant WP theorems permit generic external effects. They do not specify this callback trace or static-call refusal of a state write/value transfer, nor its exact result. No similar EVM callback/static-policy proposition was found in the searched theorem catalog.",
-    "context": {},
+    "context": {
+      "cc-exec#do_step_sound": "Cexec Section EXEC fixes ge: genv and abstract do_external_function/do_inline_assembly implementations. Soundness uses do_external_function_sound and do_inline_assembly_sound: a successful executable call satisfies its external/assembly relational semantics and possible_trace. Completeness contracts are also declared in that section; this audit does not reconstruct Coq's minimized generalized argument list. Source lines 98-100, 436-462.",
+      "afp-wp#inv_wp": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/inv are semantic predicates; WP allows NT. No local callback/no-callback policy is encoded."
+    },
     "existing_measurement": null
   },
   "Solidity/Source/SemanticsExamples.lean#static_value_call_halts": {
@@ -813,7 +894,10 @@
     "shared": null,
     "differences": null,
     "reason": "The closest inspected compiler external-step and Solidity transfer/invariant WP theorems permit generic external effects. They do not specify this callback trace or static-call refusal of a state write/value transfer, nor its exact result. No similar EVM callback/static-policy proposition was found in the searched theorem catalog.",
-    "context": {},
+    "context": {
+      "cc-exec#do_step_sound": "Cexec Section EXEC fixes ge: genv and abstract do_external_function/do_inline_assembly implementations. Soundness uses do_external_function_sound and do_inline_assembly_sound: a successful executable call satisfies its external/assembly relational semantics and possible_trace. Completeness contracts are also declared in that section; this audit does not reconstruct Coq's minimized generalized argument list. Source lines 98-100, 436-462.",
+      "afp-wp#inv_wp": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/inv are semantic predicates; WP allows NT. No local callback/no-callback policy is encoded."
+    },
     "existing_measurement": null
   },
   "Solidity/Theorems.lean#ValidUnder": {
@@ -830,7 +914,9 @@
     "shared": null,
     "differences": null,
     "reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row.",
-    "context": {},
+    "context": {
+      "afp-wp#post_wp": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
+    },
     "existing_measurement": null
   },
   "Solidity/Theorems.lean#Derives": {
@@ -847,7 +933,9 @@
     "shared": null,
     "differences": null,
     "reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row.",
-    "context": {},
+    "context": {
+      "afp-wp#post_wp": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
+    },
     "existing_measurement": null
   },
   "Solidity/Theorems.lean#DerivesK": {
@@ -864,7 +952,9 @@
     "shared": null,
     "differences": null,
     "reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row.",
-    "context": {},
+    "context": {
+      "afp-wp#post_wp": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
+    },
     "existing_measurement": null
   },
   "Solidity/Theorems.lean#Rewrites": {
@@ -881,7 +971,9 @@
     "shared": null,
     "differences": null,
     "reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row.",
-    "context": {},
+    "context": {
+      "afp-wp#post_wp": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
+    },
     "existing_measurement": null
   },
   "Solidity/Theorems.lean#RewritesK": {
@@ -898,7 +990,9 @@
     "shared": null,
     "differences": null,
     "reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row.",
-    "context": {},
+    "context": {
+      "afp-wp#post_wp": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
+    },
     "existing_measurement": null
   },
   "Solidity/Theorems.lean#DoesAs": {
@@ -915,7 +1009,9 @@
     "shared": null,
     "differences": null,
     "reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row.",
-    "context": {},
+    "context": {
+      "afp-wp#post_wp": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
+    },
     "existing_measurement": null
   },
   "Solidity/Theorems.lean#Runs": {
@@ -932,7 +1028,9 @@
     "shared": null,
     "differences": null,
     "reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row.",
-    "context": {},
+    "context": {
+      "afp-wp#post_wp": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
+    },
     "existing_measurement": null
   },
   "Solidity/Theorems.lean#MRuns": {
@@ -949,7 +1047,9 @@
     "shared": null,
     "differences": null,
     "reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row.",
-    "context": {},
+    "context": {
+      "afp-wp#post_wp": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
+    },
     "existing_measurement": null
   },
   "Solidity/Theorems.lean#MReverts": {
@@ -966,7 +1066,9 @@
     "shared": null,
     "differences": null,
     "reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row.",
-    "context": {},
+    "context": {
+      "afp-wp#post_wp": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
+    },
     "existing_measurement": null
   },
   "Solidity/Theorems.lean#Compiles": {
@@ -983,7 +1085,9 @@
     "shared": null,
     "differences": null,
     "reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row.",
-    "context": {},
+    "context": {
+      "afp-wp#post_wp": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
+    },
     "existing_measurement": null
   },
   "Solidity/Theorems.lean#Represents": {
@@ -1000,7 +1104,9 @@
     "shared": null,
     "differences": null,
     "reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row.",
-    "context": {},
+    "context": {
+      "afp-wp#post_wp": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
+    },
     "existing_measurement": null
   },
   "Solidity/Theorems.lean#unexpandValid": {
@@ -1017,7 +1123,9 @@
     "shared": null,
     "differences": null,
     "reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row.",
-    "context": {},
+    "context": {
+      "afp-wp#post_wp": "Lemma is in Contract locale fixing this::'a::address (Solidity.thy 137-139). effect/WP/post are semantic predicates; WP allows NT, so partial correctness."
+    },
     "existing_measurement": null
   }
 }
