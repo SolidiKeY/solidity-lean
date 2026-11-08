@@ -92,6 +92,7 @@ theorem decodedBoolRead_overrun {D : Source.Layout} {c : Source.Calldata D}
   have hl := decodedBoolRead_bound hc hr
   omega
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The existing heap overwrite receives the captured decoded Boolean slice.
 Every interior result agrees with a finite read of the original calldata
 object. No arbitrary payload cap or source preservation assumption occurs. -/
