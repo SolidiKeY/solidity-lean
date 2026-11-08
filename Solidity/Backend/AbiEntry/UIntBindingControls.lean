@@ -31,13 +31,13 @@ private theorem accept (bits : Nat) (input : Solidity.AbiEntry.Input)
     (full : ¬(wmod input.size).val<36)
     (valid : (Solidity.AbiEntry.Kind.uint bits).valid (rawArgumentWord input).val=true) :
     run (compiled bits).code (machine input)=.ok (bound input) 0 := by
-  simpa only [uintBindingOutcome,if_neg full,if_pos valid] using actual bits input
+  simpa only [uintBindingOutcome,ite_eq_right full,ite_eq_left valid, bound] using actual bits input
 
 private theorem reject (bits : Nat) (input : Solidity.AbiEntry.Input)
     (full : ¬(wmod input.size).val<36)
     (invalid : ¬(Solidity.AbiEntry.Kind.uint bits).valid (rawArgumentWord input).val=true) :
     run (compiled bits).code (machine input)=.revert := by
-  simpa only [uintBindingOutcome,if_neg full,if_neg invalid] using actual bits input
+  simpa only [uintBindingOutcome,ite_eq_right full,ite_eq_right invalid] using actual bits input
 
 theorem raw_value_and_frame (fuel : Nat) :
     Solidity.AbiEntry.load good.data 4=255 ∧ good.size=38 ∧
@@ -68,14 +68,14 @@ theorem wide_accepts (bits : Nat) (wide : 256≤bits) (word size : Fin W) (full 
     run (compiled bits).code initial=.ok (uintBoundMachine 7 label word initial) 0 := by
   have valid : (Solidity.AbiEntry.Kind.uint bits).valid word.val=true := by
     exact decide_eq_true (Nat.lt_of_lt_of_le word.isLt (Nat.pow_le_pow_right (by decide : 0<2) wide))
-  simpa only [uintBindingOutcome,if_neg full,if_pos valid] using
+  simpa only [uintBindingOutcome,ite_eq_right full,ite_eq_left valid] using
     UIntBinding.executed C 7 bits label (compiled bits) (UIntBinding.selected C 7 bits label)
       initial word size wordCell sizeCell
 
 private def short : Solidity.AbiEntry.Input := {data := List.replicate 35 0,free := 71}
 theorem short_head : run (compiled 8).code (machine short)=.revert := by
   have small : (wmod short.size).val<36 := by decide
-  simpa only [uintBindingOutcome,if_pos small] using actual 8 short
+  simpa only [uintBindingOutcome,ite_eq_left small] using actual 8 short
 
 theorem insufficient_fuel :
     run (compiled 8).code (machine good)=.ok (bound good) 0 ∧
