@@ -14,6 +14,19 @@ theorem sourceLocals_injective {n : Nat} : Function.Injective (@sourceLocals n) 
   apply BitVec.eq_of_toNat_eq
   exact congrArg Fin.val words
 
+/-- A reflected normal outcome determines its full-word output. This transports
+an arbitrary target postcondition, so callers keep their complete machine frame
+rather than repeating output extraction or assuming a chosen target result. -/
+theorem normal_output {c : Control} {n : Nat} (out : Vector Scalar.Word n)
+    (target : Vector Scalar.Word n → Prop)
+    (transport : ∃ actual : Vector Scalar.Word n,
+      (⟨sourceLocals out, .normal⟩ : Outcome c n) = ⟨sourceLocals actual, .normal⟩ ∧
+        target actual) : target out := by
+  obtain ⟨actual, same, done⟩ := transport
+  have equal : out = actual := sourceLocals_injective (congrArg Outcome.vars same)
+  cases equal
+  exact done
+
 theorem frame_locals_injective {n depth : Nat} (newer : Vector Scalar.Word depth)
     (out actual : Vector Scalar.Word n) (caller : List Evm.Word)
     (same : (newer.toList ++ out.toList).map coreWord ++ caller =
