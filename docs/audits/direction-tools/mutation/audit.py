@@ -73,7 +73,7 @@ def main():
     for m in specs[len(candidates):]:
         name="afterRunTR_not_panic" if m["id"]=="M31" else "afterRunTR_diamond_fail"
         text=lean[closer];pos=text.index("theorem _root_.Solidity.Modality."+name)
-        m["expected_failing_candidate"]={"path":closer,"line":text[:pos].count("\n")+1,"name":"Modality."+name,"status":"unvalidated; M31 may make premise vacuous rather than fail"}
+        m["expected_failing_candidate"]={"path":closer,"line":text[:pos].count("\n")+1,"name":"Modality."+name,"status":"static candidate; consult bounded results for executed module/caller outcomes"}
     # Lexical references are candidates only: no claim of proof dependency or coverage.
     cache={}
     for m in specs:
@@ -108,14 +108,14 @@ def main():
         try:
             path.write_text(original.replace(m["old"],m["new"],1));r=check()
         finally:path.write_text(original)
-        results.append(dict(id=m["id"],checker=r,status="cheap-check-survived; Lean-unassessed" if baseline["returncode"]==0 and r["returncode"]==0 else "checker-failed-unattributed",semantic_kill_established=False))
+        results.append(dict(id=m["id"],checker=r,status="cheap-structural-check-survived" if baseline["returncode"]==0 and r["returncode"]==0 else "checker-failed-unattributed",assessment="structural checker only; no Lean inference"))
     write("checker-results.json",dict(baseline=baseline,mutants=results,boundary="Structural layer/source/trust/generation checker; no execution of changed Lean bodies. No semantic mutation score inferred."))
     source=report_path;text=blobs[source].decode("utf-8")
     assert hashlib.sha256(text.encode()).hexdigest()=="4110f3923608d46d7955dd4fe0a555313ac59f6e168e3afa8f06c5753a607c18","cited snapshot changed; re-audit its denominators"
     assert "320 real comparisons produced zero mismatches" in text
     matched=int(re.search(r"(\d+) real primitive-fragment observations match",text)[1]);unsupported=int(re.search(r"(\d+) observations have reference execution only",text)[1])
-    summary=dict(base=BASE,mutants=len(specs),cheap_checker_survivors=sum(r["status"].startswith("cheap-check-survived") for r in results),semantic_survivors=None,semantic_kills=None,lean_elaborations=0,axioms_added=0,sorry_added=0,mutation_selection=dict(handwritten=len(specs),generated=0,files=sorted({m["path"] for m in specs}),basis="Both selected source files inspected; broad inventory classification remains heuristic"),
-      conclusion="Cheap structural checks do not constrain these operator/closer mutations. Whether existing proofs kill them remains unassessed; static references cannot establish coverage gaps.",
+    summary=dict(base=BASE,mutants=len(specs),cheap_checker_survivors=sum(r["status"].startswith("cheap-structural-check-survived") for r in results),semantic_survivors=None,semantic_kills=None,lean_elaborations=0,axioms_added=0,sorry_added=0,mutation_selection=dict(handwritten=len(specs),generated=0,files=sorted({m["path"] for m in specs}),basis="Both selected source files inspected; broad inventory classification remains heuristic"),
+      conclusion="Cheap structural checks alone do not assess proof coupling. Bounded module outcomes are reported separately; remaining mutants and project-wide survivor claims are unassessed.",
       differential=dict(source=source,source_sha256=hashlib.sha256(text.encode()).hexdigest(),pending_eest=int(re.search(r"All ([\d,]+) EEST rows are pending",text)[1].replace(",","")),provenance="cited committed report, not replayed",matched=matched,disagreed=0,matched_subset_agreement=matched/matched,reference_only_unsupported=unsupported,agreement_including_unsupported=None,disagreement_classes=[],disagreement_boundary="No mismatches reported for admitted primitive fragment; unsupported rows are not agreements",per_input_time_ratios=None,time_boundary="Matched per-input repository and solc compile/run timings unavailable; no ratio invented"),
       waits=[dict(id="W-TIMING",reason="Named va3/vu1 paths and matched raw timing outputs absent at pinned base; G52 private bulk results not present on VM"),dict(id="W-LEAN",reason="No Lean elaborations performed; systemd resource scope unavailable on this VM (no user bus); highest-value next checks are M32 afterRunTR_diamond_fail, M07 bitwise and M10 shifts. Structural survivors are not semantic survivors")],reproduce="python3 docs/audits/direction-tools/mutation/audit.py --scratch ABSOLUTE_BASE_WORKTREE")
     summary["source_revision"]=source_revision
@@ -125,6 +125,49 @@ def main():
         summary["historical_capture"]=json.loads(captured.read_text())
         assert summary["historical_capture"]["audit_base"]==BASE,"regenerate captured results for pinned-base provenance"
         summary["waits"][0]={"id":"QDATA-TIMINGS","reason":"Historical archive verified and analyzed; matched per-input timings absent. Coordinator awaits existing matched archive or separate bounded-run authorization; no rerun authorized"}
-        summary["waits"].append({"id":"W-REFERENCE-LOCK","reason":"Exact historical reference lock bytes not delivered; reference-environment reproduction UNVERIFIABLE under H151"})
+        if summary["historical_capture"]["reference_environment_reproduction"]=="UNVERIFIABLE":
+            summary["waits"].append({"id":"W-REFERENCE-LOCK","reason":"Exact historical reference lock bytes not delivered; reference-environment reproduction UNVERIFIABLE under H151"})
+    probes=OUT/"lean-probes.json"
+    if probes.exists():
+        result=json.loads(probes.read_text());assert result["base"]==BASE
+        summary["lean_elaborations"]=result["total_elaborations"]
+        summary["lean_source_slice"]=result
+        summary["execution_limitation"]="no systemd scope on the cloud VM (H232)"
+        summary["waits"]=[w for w in summary["waits"] if w["id"]!="W-LEAN"]
+        if result["original_module_baseline"]["returncode"]!=0:
+            summary["waits"].append({"id":"QLEAN-CACHE","reason":"Whole Closers module baseline unavailable: missing CloseCallSharing.olean; artifact restore placed zero files. Need existing BASE-compatible import closure; not a semantic mutation failure"})
+    whole_path=OUT/"lean-whole.json"
+    if whole_path.exists():
+        whole=json.loads(whole_path.read_text());assert whole["base"]==BASE
+        summary["lean_whole_module"]=whole
+        summary["lean_elaborations"]=max(summary["lean_elaborations"],whole["total_elaborations"])
+        if whole["original_module_baseline"]["returncode"]==0:
+            summary["waits"]=[w for w in summary["waits"] if w["id"]!="QLEAN-CACHE"]
+        checked={m["id"] for m in whole["whole_module_mutants"]}
+        summary["bounded_lean_assessment"]={"checked_ids":sorted(checked),"whole_module_counts":whole["whole_module_counts"],"not_assessed_by_Lean":sorted({m["id"] for m in specs}-checked),"full_project_survivors":None,"boundary":"Whole Closers module only, with verified BASE-compatible imports; other consumers and other mutants not elaborated"}
+        states={m["id"]:m["status"] for m in whole["whole_module_mutants"]}
+        if states.get("M31")=="selected-whole-module-survived" and states.get("M32")=="selected-whole-module-proof-failed":
+            summary["bounded_conclusion"]="M32 is rejected by the existing exhausted-case theorem in the full module. M31 passes the full module because the panic-helper premise becomes vacuous; no project-wide panic-coverage conclusion follows."
+    cache_path=OUT/"cache-verification.json"
+    if cache_path.exists():
+        cache=json.loads(cache_path.read_text());assert cache["base"]==BASE and cache["status"]=="pass"
+        summary["import_cache_provenance"]={k:v for k,v in cache.items() if k not in ("artifacts","source_bindings")}
+    consumer_path=OUT/"consumer-probe.json"
+    if consumer_path.exists():
+        consumer=json.loads(consumer_path.read_text());assert consumer["base"]==BASE
+        summary["lean_existing_consumer"]=consumer
+        summary["bounded_lean_assessment"]["boundary"]="Whole-module stage counts are retained here; the existing underflowChecked consumer is also checked separately. Other unselected consumers remain untested."
+        summary["lean_elaborations"]=max(summary["lean_elaborations"],consumer["total_elaborations"])
+        failures={m["id"] for m in summary["lean_whole_module"]["whole_module_mutants"] if m["status"].endswith("proof-failed")}
+        selected={m["id"] for m in summary["lean_whole_module"]["whole_module_mutants"]}|{"M31"}
+        if consumer["outcome"]=="existing-consumer-proof-failed":failures.add("M31")
+        summary["selected_existing_check_outcomes"]={"proof_rejected_ids":sorted(failures),"surviving_ids_in_selected_checks":sorted(selected-failures),"checked_ids":sorted(selected),"unassessed_by_Lean":sorted({m["id"] for m in specs}-selected),"boundary":"Selected original module and copied existing consumer proof checks, not an exhaustive project mutation score"}
+        if failures=={"M31","M32"}:
+            summary["bounded_conclusion"]="M32 is rejected by the existing exhausted-case theorem. M31 passes the helper module alone via a vacuous premise, but the existing underflowChecked consumer proof rejects it. Both selected mutants are detected; the other mutants and project-wide score remain unassessed."
+        summary["remaining_elaboration_allowance"]=10-summary["lean_elaborations"]
+    projection=OUT/"vector-projection.json"
+    if projection.exists():
+        summary["literal_vector_projection"]=json.loads(projection.read_text())
+        assert summary["literal_vector_projection"]["base"]==BASE
     write("summary.json",summary)
 if __name__=="__main__":main()
