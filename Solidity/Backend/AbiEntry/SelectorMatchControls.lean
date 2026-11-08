@@ -52,9 +52,9 @@ theorem inhabited_frame :
 #guard_msgs (whitespace := lax) in #print axioms raw_mismatch
 /-- info: 'Solidity.Backend.AbiEntry.SelectorMatchControls.low_payload_ignored' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms low_payload_ignored
-/-- info: 'Solidity.Backend.AbiEntry.SelectorMatchControls.padded_partial_collision' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.AbiEntry.SelectorMatchControls.padded_partial_collision' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms padded_partial_collision
-/-- info: 'Solidity.Backend.AbiEntry.SelectorMatchControls.empty_not_source_match' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.AbiEntry.SelectorMatchControls.empty_not_source_match' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms empty_not_source_match
 /-- info: 'Solidity.Backend.AbiEntry.SelectorMatchControls.capacity_refused' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms capacity_refused
