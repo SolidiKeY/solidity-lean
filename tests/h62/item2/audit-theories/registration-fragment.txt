@@ -76,3 +76,9 @@ row Theory/Audit/H62/PureBoundaryWitnesses.lean | Eight selected Pure input pack
 | `tests/h62/item2/audit-theories/CleanTailWitnesses.lean` | All six original CleanTail joint telescopes, private input, admitted flag-write system and actual transient reset; source-model only. |
 
 | `tests/h62/item2/audit-theories/ReachableModeWitnesses.lean` | All11 original Reachable/Mode input packets includingprivate, universal setter success and persistent box obligations; source-model only. |
+
+# Proposal only: LeafProgressWitnesses imports unchanged Progress.Leaves + source examples.
+tests/h62/item2/audit-theories/LeafProgressWitnesses.lean
+
+# Proposal only: TupleProgressWitnesses imports unchanged tuple interface and owned progress fixture.
+tests/h62/item2/audit-theories/TupleProgressWitnesses.lean

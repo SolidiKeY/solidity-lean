@@ -143,6 +143,21 @@ WITNESSES.update({
  'Solidity.Reachable.PersistentFml.invariant':("ReachableModeWitnesses",'mode_persistent_invariant_inputs_joint'),
  'Solidity.Reachable.ValidStart.of_persistent':("ReachableModeWitnesses",'mode_persistent_transfer_inputs_joint'),
 })
+WITNESSES.update({
+ 'Solidity.Theory.Progress.emitExt_sound': ("LeafProgressWitnesses", 'leaf_emit_inputs_joint'),
+ 'Solidity.Theory.Progress.revertErrorExt_sound': ("LeafProgressWitnesses", 'leaf_revert_error_inputs_joint'),
+ 'Solidity.Theory.Progress.builtinExt_sound': ("LeafProgressWitnesses", 'leaf_builtin_inputs_joint'),
+ 'Solidity.Theory.Progress.leafExt_sound': ("LeafProgressWitnesses", 'leaf_all_inputs_joint'),
+ 'Solidity.Theory.Progress.effectExt_sound': ("LeafProgressWitnesses", 'leaf_effect_inputs_joint'),
+ 'Solidity.Theory.Progress.leafExt_sound_callFree': ("LeafProgressWitnesses", 'leaf_call_free_inputs_joint'),
+})
+WITNESSES.update({
+ 'Solidity.Theory.Progress.RVal.untuple_ok': ("TupleProgressWitnesses", 'tuple_untuple_inputs_joint'),
+ 'Solidity.Theory.Progress.pushVals_ns': ("TupleProgressWitnesses", 'tuple_push_inputs_joint'),
+ 'Solidity.Theory.Progress.argsFragment_le': ("TupleProgressWitnesses", 'tuple_args_inputs_joint'),
+ 'Solidity.Theory.Progress.tupleInit_ns': ("TupleProgressWitnesses", 'tuple_initializer_inputs_joint'),
+ 'Solidity.Theory.Progress.declTuple_ns': ("TupleProgressWitnesses", 'tuple_declaration_inputs_joint'),
+})
 IMPOSSIBLE={
  "Solidity.Theory.Progress.Val.not_tuple":("ProgressWitnesses","no_plain_tuple_input"),
  "Solidity.Theory.Progress.Controls.no_tuple_local":("ProgressWitnesses","no_tuple_locals_input"),
