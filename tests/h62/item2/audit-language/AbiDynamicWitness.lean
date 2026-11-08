@@ -160,4 +160,42 @@ theorem allocation_one_over_limit :
 #print axioms allocation_never_reverts
 #print axioms allocation_exact_limit
 #print axioms allocation_one_over_limit
+
+/-! Guarded regression: creating a calldata reference does not read the payload
+and must not inherit an eager decoder's fuel requirement. The head-size and
+reference-layout checks remain mandatory; later cvalRef reads still use fuel. -/
+theorem calldata_entry_equation (I : Input) (fuel : Nat) :
+    entry I fuel calldataParams =
+      if I.size < 4 + headsOf calldataParams then .error .revert
+      else match cref I .bytes 4 0 with
+        | .ok (addr, len) => .ok (.cons (.ref addr len) .nil)
+        | .error failure => .error failure := by
+  simp only [entry, calldataParams, enter]
+  cases reference : cref I .bytes 4 0 <;> rfl
+
+theorem calldata_entry_fuel_independent (I : Input) (first second : Nat) :
+    entry I first calldataParams = entry I second calldataParams := by
+  rw [calldata_entry_equation, calldata_entry_equation]
+
+theorem calldata_reference_failure (I : Input) (fuel : Nat) (failure : Fail)
+    (enough : ¬ I.size < 4 + headsOf calldataParams)
+    (refused : cref I .bytes 4 0 = .error failure) :
+    entry I fuel calldataParams = .error failure := by
+  rw [calldata_entry_equation, if_neg enough, refused]
+
+theorem calldata_short_head (I : Input) (fuel : Nat)
+    (short : I.size < 4 + headsOf calldataParams) :
+    entry I fuel calldataParams = .error .revert := by
+  rw [calldata_entry_equation, if_pos short]
+
+-- The concrete reference enters at zero fuel, but observing it cannot.
+theorem calldata_zero_fuel_observation (free : Nat) :
+    cvalRef (input free) 0 .bytes 68 2 = .error .fuel := by
+  rfl
+
+#print axioms calldata_entry_equation
+#print axioms calldata_entry_fuel_independent
+#print axioms calldata_reference_failure
+#print axioms calldata_short_head
+#print axioms calldata_zero_fuel_observation
 end Solidity.H62.AuditLanguage.AbiDynamicWitness
