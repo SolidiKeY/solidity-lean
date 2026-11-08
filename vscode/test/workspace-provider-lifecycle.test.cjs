@@ -1,0 +1,25 @@
+// Regression: cancelled workspace-symbol bootstrap must not advance owned work.
+// Injected public editor/service boundary; not native UI or proof evidence.
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),{fixture}=require('./controller-fixture.cjs');
+function setup(stage){let provider,release;const calls={find:0,document:0,open:0,query:0},e=fixture(undefined,env=>{
+ env.vscode.SymbolInformation=class{constructor(name,kind,containerName,location){Object.assign(this,{name,kind,containerName,location});}};env.vscode.Location=class{constructor(uri,range){Object.assign(this,{uri,range});}};
+ env.vscode.languages.registerWorkspaceSymbolProvider=p=>{provider=p;return{dispose(){}};};
+ env.service.clients=new Map();
+ env.vscode.workspace.findFiles=async(...args)=>{calls.find++;calls.findArgs=args;return stage==='find'?new Promise(r=>release=r):[env.doc.uri];};
+ env.vscode.workspace.openTextDocument=async()=>{calls.document++;return stage==='document'?new Promise(r=>release=r):env.doc;};
+ env.service.open=async()=>{calls.open++;if(stage==='open')await new Promise(r=>release=r);};
+ env.service.workspaceSymbols=async(_query,options)=>{calls.query++;calls.signal=options.signal;return stage==='query'?new Promise(r=>release=r):[row(env.doc)];};
+ });calls.open=0;
+ return{e,provider,calls,finish:()=>release(stage==='find'?[e.doc.uri]:stage==='document'?e.doc:stage==='query'?[row(e.doc)]:undefined)};
+}
+function row(doc){return{name:'C',kind:5,location:{uri:doc.uri.toString(),range:{start:{line:0,character:0},end:{line:0,character:1}}}};}
+async function settle(){for(let n=0;n<8;n++)await Promise.resolve();}
+test('already cancelled workspace query does not discover documents or start a service',async()=>{const f=setup(),token=new f.e.vscode.CancellationTokenSource();try{token.cancel();assert.deepEqual(await f.provider.provideWorkspaceSymbols('C',token.token),[]);assert.deepEqual([f.calls.find,f.calls.document,f.calls.open,f.calls.query],[0,0,0,0]);assert.equal(token.listeners.size,0);}finally{token.dispose();await f.e.api.dispose();}});
+for(const stage of ['find','document','open','query'])test('workspace cancellation after '+stage+' refuses later stages and results',async()=>{const f=setup(stage),token=new f.e.vscode.CancellationTokenSource();try{const pending=f.provider.provideWorkspaceSymbols('C',token.token);await settle();token.cancel();f.finish();assert.deepEqual(await pending,[]);const index=['find','document','open','query'].indexOf(stage),counts=[f.calls.find,f.calls.document,f.calls.open,f.calls.query];for(let n=index+1;n<counts.length;n++)assert.equal(counts[n],0,stage);assert.equal(token.listeners.size,0);if(stage==='query')assert.equal(f.calls.signal.aborted,true);}finally{token.dispose();await f.e.api.dispose();}});
+test('disposal during workspace discovery cannot open a late document',async()=>{const f=setup('find');try{const pending=f.provider.provideWorkspaceSymbols('C');await settle();await f.e.api.dispose();f.finish();assert.deepEqual(await pending,[]);assert.equal(f.calls.document,0);assert.equal(f.calls.query,0);}finally{await f.e.api.dispose();}});
+test('current workspace bootstrap preserves search budget resource and symbol result',async()=>{const f=setup(),token=new f.e.vscode.CancellationTokenSource();try{const rows=await f.provider.provideWorkspaceSymbols('C',token.token);assert.equal(rows.length,1);assert.equal(rows[0].name,'C');assert.equal(rows[0].kind,4);assert.deepEqual([f.calls.find,f.calls.document,f.calls.open,f.calls.query],[1,1,1,1]);assert.equal(f.calls.findArgs[2],1);assert.equal(f.calls.findArgs[3],token.token);assert.equal(token.listeners.size,0);}finally{token.dispose();await f.e.api.dispose();}});
+
+test('existing client skips bootstrap and retains the owned workspace response',async()=>{const f=setup();f.e.service.clients.set('already-running',{});try{const rows=await f.provider.provideWorkspaceSymbols('C');assert.equal(rows[0].name,'C');assert.deepEqual([f.calls.find,f.calls.document,f.calls.open,f.calls.query],[0,0,0,1]);}finally{await f.e.api.dispose();}});
+test('discovery failure reports its real cause and retires cancellation subscription',async()=>{const f=setup(),token=new f.e.vscode.CancellationTokenSource();f.e.vscode.workspace.findFiles=async()=>{throw Error('owned discovery failed');};try{assert.deepEqual(await f.provider.provideWorkspaceSymbols('C',token.token),[]);assert.ok(f.e.notices.some(text=>text.includes('owned discovery failed')));assert.equal(token.listeners.size,0);assert.equal(f.calls.document,0);assert.equal(f.calls.query,0);}finally{token.dispose();await f.e.api.dispose();}});
+test('disposal during ignored workspace response refuses symbols without cancelling shared startup',async()=>{const f=setup('query');try{const pending=f.provider.provideWorkspaceSymbols('C');await settle();await f.e.api.dispose();const cancels=f.e.calls.cancels;f.finish();assert.deepEqual(await pending,[]);assert.equal(f.e.calls.cancels,cancels);}finally{await f.e.api.dispose();}});

@@ -43,10 +43,18 @@ function install(vscode,context,servers,reportError){
       return materializeAction(resolved,owner,false);
     }},{providedCodeActionKinds:[vscode.CodeActionKind.QuickFix]}),
     vscode.languages.registerWorkspaceSymbolProvider({async provideWorkspaceSymbols(queryText,token){
-      if(!servers.clients.size){const files=await vscode.workspace.findFiles('**/*.sol','**/{node_modules,.lake,.git,.cache}/**',1);if(files.length)await servers.open(await vscode.workspace.openTextDocument(files[0]));}
       const abort=new AbortController(),registration=token?.onCancellationRequested(()=>abort.abort());if(token?.isCancellationRequested)abort.abort();
-      try{return (await servers.workspaceSymbols(queryText,{signal:abort.signal})).map(s=>new vscode.SymbolInformation(s.name,s.kind-1,'',location(s.location)));}
-      catch(error){if(![-32800,-32801].includes(error.code))reportError(error);return [];}
+      const current=()=>{if(abort.signal.aborted)throw actionFailure('Request cancelled',-32800);if(disposed)throw actionFailure('Editor services disposed');};
+      try{
+        current();
+        if(!servers.clients.size){
+          const files=await vscode.workspace.findFiles('**/*.sol','**/{node_modules,.lake,.git,.cache}/**',1,token);current();
+          if(files.length){const doc=await vscode.workspace.openTextDocument(files[0]);current();await servers.open(doc);current();}
+        }
+        const result=await servers.workspaceSymbols(queryText,{signal:abort.signal});current();
+        return result.map(s=>new vscode.SymbolInformation(s.name,s.kind-1,'',location(s.location)));
+      }
+      catch(error){if(![-32800,-32801].includes(error.code)&&error.code!=='CANCELLED')reportError(error);return [];}
       finally{registration?.dispose();}
     }}),
     vscode.languages.registerCompletionItemProvider(selector,{async provideCompletionItems(doc,position,token){
