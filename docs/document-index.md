@@ -370,6 +370,8 @@ and open obligations. Test proposals remain proposals until applied.
 - [scripts/h62/item2/audit-calculus/h28-inherited-handoff/RETIREMENT.md](../scripts/h62/item2/audit-calculus/h28-inherited-handoff/RETIREMENT.md)
 - [scripts/h62/item2/audit-calculus/h28-inherited-handoff/STEERING.md](../scripts/h62/item2/audit-calculus/h28-inherited-handoff/STEERING.md)
 - [scripts/h62/item2/audit-calculus/h28-inherited-handoff/WORK-AND-BACKFILL-QUEUE.md](../scripts/h62/item2/audit-calculus/h28-inherited-handoff/WORK-AND-BACKFILL-QUEUE.md)
+- [scripts/h62/item2/audit-theories/handoff/CERTIFICATE-BINDING-FIX-20261107.md](../scripts/h62/item2/audit-theories/handoff/CERTIFICATE-BINDING-FIX-20261107.md)
+- [scripts/h62/item2/audit-theories/handoff/CONFLICT-RESOLUTION-20261108.md](../scripts/h62/item2/audit-theories/handoff/CONFLICT-RESOLUTION-20261108.md)
 - [scripts/h62/item2/audit-theories/handoff/OPEN-QUEUE.md](../scripts/h62/item2/audit-theories/handoff/OPEN-QUEUE.md)
 - [scripts/h62/item2/audit-theories/handoff/original-work-and-backfill-queue.md](../scripts/h62/item2/audit-theories/handoff/original-work-and-backfill-queue.md)
 - [vscode/README.md](../vscode/README.md)
