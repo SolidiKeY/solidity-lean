@@ -98,6 +98,7 @@ def packed {D : Source.Layout} (F : Source.Fr) (demands : List Demand) :
     Premises.V11G34_PackedViews F.cd (views (D := D) F demands) :=
   packCalldataViews F.cd (views F demands) (coherent F demands)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The same existing table reader obtains byte-derived uints for every fixed
 or dynamic capture. This is not a Source-reference/logical-key transport law. -/
 theorem uints {D : Source.Layout} (F : Source.Fr) (demands : List Demand)
@@ -116,6 +117,7 @@ theorem uints {D : Source.Layout} (F : Source.Fr) (demands : List Demand)
       (rawPayload F demands[i.val].offset demands[i.val].count)[j]))))=_
   rw [calldataUint_values]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Existing checked intrinsic transfer consumes either typed shape with only
 its original source-slice and destination bounds. No desired execution is given. -/
 theorem transfer {D : Source.Layout} {H : HTy} {R : RefTy}
@@ -134,7 +136,7 @@ theorem transfer {D : Source.Layout} {H : HTy} {R : RefTy}
   unfold checkedCalldataUints
   rw [uints]
   simp only [Bind.bind,Option.bind,rawPayload,payload_length,
-    dif_pos (show start≤stop ∧ stop≤demands[i.val].count from ⟨bounds.ordered,bounds.bounded⟩),dif_pos fits]
+    dite_eq_left (show start≤stop ∧ stop≤demands[i.val].count from ⟨bounds.ordered,bounds.bounded⟩),dite_eq_left fits]
 
 private def sampleEnv : Source.Env := ⟨[]⟩
 private def sampleFrame : Source.Fr :=
@@ -171,10 +173,12 @@ private abbrev TargetTy : RefTy := .array (.prim .uint)
 private def targetRoot : HRef [TargetTy] TargetTy := ⟨0,rfl⟩
 private def targetHeap : Heap [TargetTy] :=
   (⟨[wordValue 99,wordValue 98,wordValue 97],by decide⟩,())
+set_option backward.isDefEq.respectTransparency false in
 private theorem target_length : targetHeap.len targetRoot .dyn=3 := by
   simp only [Heap.len,Heap.get,Objs.get,targetRoot,targetHeap,MObj.elems_dyn]
   rfl
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The fixed view copies actual bytes while the older prefix word stays 99. -/
 theorem mixed_transfer :
     let p := packed (D := sampleEnv.layout) sampleFrame sampleDemands
@@ -264,7 +268,7 @@ theorem semantic_uint_sequence (input : Solidity.AbiEntry.Input)
     refine ⟨.nil,?_,?_⟩
     · rfl
     · intro fuel
-      rw [if_pos (Or.inl rfl)]
+      rw [ite_eq_left (Or.inl rfl)]
       cases fuel <;> rfl
   | succ count ih =>
     obtain ⟨tail,contents,execution⟩ := ih (index+1)
@@ -276,27 +280,27 @@ theorem semantic_uint_sequence (input : Solidity.AbiEntry.Input)
       cases fuel with
       | zero =>
         have short : ¬(count+1=0 ∨ count+1+2≤0) := by omega
-        rw [if_neg short]
+        rw [ite_eq_right short]
         rfl
       | succ fuel =>
         cases fuel with
         | zero =>
           have short : ¬(count+1=0 ∨ count+1+2≤1) := by omega
-          rw [if_neg short]
+          rw [ite_eq_right short]
           rfl
         | succ fuel =>
           cases fuel with
           | zero =>
             have short : ¬(count+1=0 ∨ count+1+2≤2) := by omega
-            rw [if_neg short]
+            rw [ite_eq_right short]
             rfl
           | succ fuel =>
             rw [Solidity.AbiEntry.cseq,semantic_uint_element,execution]
             by_cases enough : count=0 ∨ count+2≤fuel+2
             · have enough' : count+1=0 ∨ count+1+2≤fuel+3 := by omega
-              simp only [if_pos enough,if_pos enough',Solidity.AbiEntry.Shape.headSize]
+              simp only [ite_eq_left enough,ite_eq_left enough',Solidity.AbiEntry.Shape.headSize]
             · have short : ¬(count+1=0 ∨ count+1+2≤fuel+3) := by omega
-              rw [if_neg enough,if_neg short]
+              rw [ite_eq_right enough,ite_eq_right short]
 
 
 /-- Both array containers reuse the byte-derived sequence and preserve their
@@ -321,9 +325,9 @@ theorem semantic_uint_containers (input : Solidity.AbiEntry.Input)
   | succ fuel =>
     by_cases enough : count=0 ∨ count+2≤fuel
     · have full : 0<fuel+1 ∧ (count=0 ∨ count+3≤fuel+1) := by omega
-      constructor <;> simp only [Solidity.AbiEntry.cval,execution,if_pos enough,if_pos full]
+      constructor <;> simp only [Solidity.AbiEntry.cval,execution,ite_eq_left enough,ite_eq_left full]
     · have short : ¬(0<fuel+1 ∧ (count=0 ∨ count+3≤fuel+1)) := by omega
-      constructor <;> simp only [Solidity.AbiEntry.cval,execution,if_neg enough,if_neg short]
+      constructor <;> simp only [Solidity.AbiEntry.cval,execution,ite_eq_right enough,ite_eq_right short]
 
 /-- Regression: empty container fuel zero fails, whereas fuel one succeeds;
 the fixed container's arbitrary runtime length remains ignored. -/
@@ -347,9 +351,9 @@ theorem semantic_uint_container_boundary (input : Solidity.AbiEntry.Input)
   have short : ¬(0<3 ∧ (1=0 ∨ 1+3≤3)) := by decide
   have enough : 0<4 ∧ (1=0 ∨ 1+3≤4) := by decide
   refine ⟨values,?_,?_,?_⟩
-  · simpa only [if_neg short] using (execution 3 length).1
-  · simpa only [if_pos enough] using (execution 4 length).1
-  · simpa only [if_pos enough] using (execution 4 length).2
+  · simpa only [ite_eq_right short] using (execution 3 length).1
+  · simpa only [ite_eq_left enough] using (execution 4 length).1
+  · simpa only [ite_eq_left enough] using (execution 4 length).2
 
 /-- info: 'Solidity.Backend.AbiEntry.Consumers.UIntViews.semantic_uint_containers' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms semantic_uint_containers
@@ -365,7 +369,7 @@ theorem semantic_uint_empty (input : Solidity.AbiEntry.Input)
     (Solidity.AbiEntry.cseq input fuel (.word (.uint 256)) base index 0).map
       sequenceElements=.ok [] := by
   obtain ⟨values,contents,execution⟩ := semantic_uint_sequence input base index 0
-  rw [execution,if_pos (Or.inl rfl)]
+  rw [execution,ite_eq_left (Or.inl rfl)]
   change Except.ok (sequenceElements values)=_
   rw [contents]
   rfl
@@ -378,7 +382,7 @@ theorem semantic_uint_fuel (input : Solidity.AbiEntry.Input)
       .error .fuel := by
   obtain ⟨values,contents,execution⟩ := semantic_uint_sequence input base index count
   have insufficient : ¬(count=0 ∨ count+2≤fuel) := by omega
-  rw [execution,if_neg insufficient]
+  rw [execution,ite_eq_right insufficient]
 
 /-- Regression: an unaligned read after a nonempty prefix observes unequal
 words 7 and 42. This is standalone traversal, not ABI entry admission. -/
@@ -386,7 +390,7 @@ theorem semantic_uint_unequal :
     (Solidity.AbiEntry.cseq ⟨sampleFrame.cd,0⟩ 4 (.word (.uint 256)) 1 0 2).map
       sequenceElements=.ok [.word ⟨7,by decide,by decide⟩,.word ⟨42,by decide,by decide⟩] := by
   obtain ⟨values,contents,execution⟩ := semantic_uint_sequence ⟨sampleFrame.cd,0⟩ 1 0 2
-  rw [execution,if_pos (Or.inr (by decide))]
+  rw [execution,ite_eq_left (Or.inr (by decide))]
   change Except.ok (sequenceElements values)=_
   rw [contents]
   rfl
@@ -397,7 +401,7 @@ theorem semantic_uint_zero_padding (free base index : Nat) :
     (Solidity.AbiEntry.cseq ⟨[],free⟩ 4 (.word (.uint 256)) base index 2).map
       sequenceElements=.ok [.word ⟨0,by decide,by decide⟩,.word ⟨0,by decide,by decide⟩] := by
   obtain ⟨values,contents,execution⟩ := semantic_uint_sequence ⟨[],free⟩ base index 2
-  rw [execution,if_pos (Or.inr (by decide))]
+  rw [execution,ite_eq_left (Or.inr (by decide))]
   change Except.ok (sequenceElements values)=_
   rw [contents]
   simp only [semanticUintValues,List.range'_succ,List.range'_zero,List.map_cons,List.map_nil,
