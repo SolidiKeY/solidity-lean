@@ -2219,3 +2219,19 @@ is not treated as resolution or no-verification evidence. The observer now
 waits for the positive status event using only the remainder of the same
 per-phase operation budget; proof status, diagnostic and symbol checks share
 that deadline. No missing-status predicate or original budget is relaxed.
+
+
+The changed headless sequence completes all four reference epochs and the local
+compiler-only sample with exit0 and no owned survivors. Actual launch-default
+verification continues after a live client `never` notification; fresh Never
+and Save launches exhibit their selected behavior, and a fresh restored-default
+launch verifies again. Save mode retains real error/fix diagnostics, and every
+unsaved version is checked separately through the final wire. These are direct
+server observations, not pinned VS Code client setting-change/restart UI.
+
+All five native server processes requested `workspace/configuration` zero times.
+The native configuration-request/reply aspect therefore remains missing; the
+framed request/reply and stale/foreign/late controls are explicitly injected.
+Local Change/Save/cancellation outcomes are also injected service controls,
+while native local execution stays Never/compiler-only. No row completion,
+resource/semantic waiver or kernel/compiler/EVM correspondence follows.
