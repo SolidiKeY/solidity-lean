@@ -44,18 +44,18 @@ theorem payable_signed_body (value : Fin W) :
   constructor
   · have full : ¬(wmod negative.size).val<36 := by decide
     have valid : (Solidity.AbiEntry.Kind.int 8).valid (rawArgumentWord negative).val=true := by decide
-    rw [actual,Bool.true_or,if_pos (rfl : true=true),if_neg full,if_pos valid]
+    rw [actual,Bool.true_or,ite_eq_left (rfl : true=true),ite_eq_right full,ite_eq_left valid]
     rfl
   · have full : ¬(wmod positive.size).val<36 := by decide
     have valid : (Solidity.AbiEntry.Kind.int 8).valid (rawArgumentWord positive).val=true := by decide
-    rw [actual,Bool.true_or,if_pos (rfl : true=true),if_neg full,if_pos valid]
+    rw [actual,Bool.true_or,ite_eq_left (rfl : true=true),ite_eq_right full,ite_eq_left valid]
     rfl
 
 theorem zero_nonpayable :
     run (whole false).code (machine negative (wmod 0))=.ok (finished negative (wmod 0) true) 0 := by
   have full : ¬(wmod negative.size).val<36 := by decide
   have valid : (Solidity.AbiEntry.Kind.int 8).valid (rawArgumentWord negative).val=true := by decide
-  rw [actual,if_neg full,if_pos valid]
+  rw [actual,ite_eq_right full,ite_eq_left valid]
   rfl
 
 theorem nonpayable_before_any_local (value : Fin W) (nonzero : value.val≠0) :
@@ -71,12 +71,12 @@ theorem dirty_still_rejected (fuel : Nat) :
   have full : ¬(wmod dirty.size).val<36 := by decide
   have invalid : ¬(Solidity.AbiEntry.Kind.int 8).valid (rawArgumentWord dirty).val=true := by decide
   constructor
-  · rw [actual,if_neg full,if_neg invalid]
+  · rw [actual,ite_eq_right full,ite_eq_right invalid]
     rfl
   · rw [SingleWordGate.entry_form]
     have size : ¬dirty.size<36 := by decide
-    rw [if_neg size]
-    exact dif_neg invalid
+    rw [ite_eq_right size]
+    exact dite_eq_right invalid
 
 theorem raw_signed_body (fuel : Nat) :
     ∃ value : Solidity.AbiEntry.Word (.int 8),
@@ -110,7 +110,7 @@ theorem body_failure_not_decoder_failure (fuel : Nat) :
   · have allowed : (false || decide ((wmod 0).val=0))=true := by decide
     have full : ¬(wmod negative.size).val<36 := by decide
     have valid : (Solidity.AbiEntry.Kind.int 8).valid (rawArgumentWord negative).val=true := by decide
-    rw [ordered,if_pos allowed,if_neg full,if_pos valid]
+    rw [ordered,ite_eq_left allowed,ite_eq_right full,ite_eq_left valid]
     rfl
   · exact ⟨_,SingleWordGate.entry_success negative fuel (.int 8) (by decide) (by decide)⟩
 
@@ -123,7 +123,7 @@ theorem short_before_word_and_body :
     run (SignedEntryBody.Binding.selectedWhole 7 8 label body _ bodyCore).code
       {machine negative (wmod 0) with mem := fun address => if address=8 then .val (wmod 35) else .slot (.root 0)}
     else .revert)=.revert
-  rw [if_pos (by decide : (false || decide ((wmod 0).val=0))=true)]
+  rw [ite_eq_left (by decide : (false || decide ((wmod 0).val=0))=true)]
   exact SignedEntryBody.Binding.short_before_body 7 8 label body _ bodyCore _ (wmod 35) rfl (by decide)
 
 theorem fuel_boundary :
@@ -158,6 +158,6 @@ theorem protected_and_saved (value : Fin W) :
 #guard_msgs (whitespace := lax) in #print axioms short_before_word_and_body
 /-- info: 'Solidity.Backend.AbiEntry.SignedEntryBodyControls.fuel_boundary' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms fuel_boundary
-/-- info: 'Solidity.Backend.AbiEntry.SignedEntryBodyControls.protected_and_saved' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.AbiEntry.SignedEntryBodyControls.protected_and_saved' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms protected_and_saved
 end Solidity.Backend.AbiEntry.SignedEntryBodyControls
