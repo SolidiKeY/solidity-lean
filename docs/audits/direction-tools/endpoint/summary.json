@@ -1,0 +1,1158 @@
+{
+  "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+  "command": "python3 docs/audits/direction-tools/endpoint/measure.py --check",
+  "counting_boundary": "Pinned committed statements and reports, not fresh kernel validation. Units remain separate: obligations, taclets, semantic fixture files, EEST function templates. Never add their denominators into a percentage.",
+  "endpoints": {
+    "a": {
+      "denominators": {
+        "TestSuite_obligations": 566,
+        "additional_corpus_rows": 208,
+        "program_taclets": 377
+      },
+      "numerators": {
+        "TestSuite_derived": 552,
+        "TestSuite_refuted_negative_controls": 11,
+        "additional_proved_model_examples": 72,
+        "claimed_taclets": 342
+      },
+      "other_statuses": {
+        "TestSuite": {
+          "derived": 552,
+          "excluded": 1,
+          "refuted": 11,
+          "skip": 2
+        },
+        "additional_corpus": {
+          "proved": 72,
+          "unported": 101,
+          "unsupported": 35
+        }
+      },
+      "percent_TestSuite_derived": 97.5265,
+      "percent_taclets_claimed": 90.7162,
+      "product": "SolKey-compatible proof core",
+      "reason": "Substantial checked intrinsic proof endpoint already exists. Claimed taclets and model proofs measure the core, not Java parser equivalence or production semantics. Unclaimed architectural rules remain denominator members; refutations do not count as positive coverage.",
+      "theorems": [
+        "Solkey.TestSuite.<function>.proved (exact row names in solkey.json)",
+        "Solidity.Proves.fmlValid",
+        "Solidity.Stmt.sound",
+        "Solidity.RuleShapes.taclets_partitioned"
+      ],
+      "verdict": "justified"
+    },
+    "b": {
+      "branch_composition_rule": "Compiler.compile selects a whole-program branch in order. Arbitrary statement-wise unions of separately accepted branches are NOT accepted unless one branch compiles that whole program. Every branch still requires Compilation.Input (state representation, capacity and allocation premises) to apply compiler_checked.",
+      "chain": [
+        {
+          "citation": {
+            "anchor": "theorem Proves.fmlValid",
+            "line": 29,
+            "path": "Solidity/Calculus/Sound.lean"
+          },
+          "stage": "SolKey obligation to intrinsic validity",
+          "status": "proved in pinned source",
+          "theorem": "Solidity.Proves.fmlValid"
+        },
+        {
+          "citation": {
+            "anchor": "structure CheckedFrontend",
+            "line": 798,
+            "path": "Solidity/Roadmap/Contracts.lean"
+          },
+          "stage": "source admission",
+          "status": "interface; a full accepted-source producer still required"
+        },
+        {
+          "citation": {
+            "anchor": "def lowerLoops",
+            "line": 543,
+            "path": "Solidity/Syntax/Elab/Lower.lean"
+          },
+          "other": {
+            "anchor": "partial def uncheckStmts",
+            "line": 707,
+            "path": "Solidity/Syntax/Elab/Lower.lean"
+          },
+          "stage": "actual loop/unchecked lowering to intrinsic",
+          "status": "missing general semantic preservation for emitted programs"
+        },
+        {
+          "citation": {
+            "anchor": "structure Lowering",
+            "line": 835,
+            "path": "Solidity/Roadmap/Contracts.lean"
+          },
+          "stage": "source-world lowering certificate",
+          "status": "interface, not a concrete compiler instance"
+        },
+        {
+          "citation": {
+            "anchor": "theorem compiler_checked",
+            "line": 297,
+            "path": "Solidity/Theorems.lean"
+          },
+          "stage": "checked intrinsic compilation",
+          "status": "proved conditional on Compilation.Input; includes core and memory branches",
+          "theorem": "Solidity.Main.compiler_checked"
+        },
+        {
+          "citation": {
+            "anchor": "structure Execution",
+            "line": 910,
+            "path": "Solidity/Roadmap/Contracts.lean"
+          },
+          "stage": "instruction assembly to deployed bytes",
+          "status": "Execution certificate is a supplied stage; not provided by compiler_checked"
+        },
+        {
+          "citation": {
+            "anchor": "theorem Stages.publicCorrectness",
+            "line": 68,
+            "path": "Solidity/Yul/Composition/CorrectnessPublic.lean"
+          },
+          "stage": "composition of supplied stages",
+          "status": "proved conditionally; concrete stages/tables still inputs",
+          "theorem": "Solidity.Yul.Composition.CorrectnessInstances.Stages.publicCorrectness"
+        },
+        {
+          "citation": {
+            "anchor": "structure PublicBoundary",
+            "line": 24,
+            "path": "Solidity/Yul/Composition/CorrectnessPublic.lean"
+          },
+          "stage": "environment, deployment table, hashes, state export",
+          "status": "nine residual producer obligations"
+        },
+        {
+          "citation": {
+            "anchor": "def EvmSpec.Approved",
+            "line": 888,
+            "path": "Solidity/Roadmap/Contracts.lean"
+          },
+          "stage": "approved source/EVM and real Keccak",
+          "status": "separate final conjuncts, not inferred from toy PublicCorrectness"
+        }
+      ],
+      "denominator": {
+        "certified_source_fragment_SolKey_rows": null,
+        "certified_source_fragment_solc_files": null,
+        "unrestricted_SolKey_rows": 774,
+        "unrestricted_solc_files": 1701
+      },
+      "denominator_definition": "Tagged solc semantic fixture files and SolKey corpus obligations restricted by a concrete source-to-deployed-byte theorem's acceptance predicate. No non-toy source predicate is established at this base.",
+      "features": [
+        {
+          "category": "statements",
+          "citation": {
+            "anchor": "def inFrag {",
+            "line": 274,
+            "path": "Solidity/Evm/Compile.lean"
+          },
+          "description": "Core: assignments, locals/storage aliases, push/pop/delete, conditionals/block, require/assert/revert, bounded-normal loop and scalar internal call subject to guards. Not a Solidity-source acceptance theorem.",
+          "predicate": "def inFrag {\u0393 \u0393' : Ctx} (F : Frag \u0393) : Solidity.Stmt C \u0393 \u0393' \u2192 Option (Frag \u0393')\n  | .assign l r => F.guard (assignIn F r l)\n  | .rebind i r => match r with\n    | .path q => (bindFl F q).map (F.set i)\n    | .push .. => none\n  | .assignLocal _ r => F.guard (valIn F r)\n  | .declLocal p _ init => (F.push (.val p) .ok).guard (init.all (valIn F))\n  | .declStorage R _ init => declStorageIn F R init\n  | .opAssign _ _ _ l r => F.guard (opLocIn F l && valIn F r)\n  | .incDec _ _ l => F.guard (opLocIn F l)\n  | .assignIncDec _ _ _ l _ => F.guard (opLocIn F l)\n  | .push b v _ => F.guard (pushIn F v b)\n  | .pop b => F.dropFragile.guard (spathIn F false b)\n  | .transfer r a => F.guard (valIn F r && valIn F a)\n  | @Solidity.Stmt.delete _ _ T l => F.dropFragile.guard (leavesFit T && locIn F false l)\n  | .ite c t e =>\n    if valIn F c then\n      match inFragP F t, inFragP F e with\n      | some F\u2081, some F\u2082 => some ((F\u2081.restrict \u0393).meet (F\u2082.restrict \u0393))\n      | _, _ => none\n    else none\n  | .block body => (inFragP F body).map (Frag.restrict \u0393)\n  | .require c | .assert c => F.guard (valIn F c)\n  | .revert => some F\n  | .assumeFalse => none\n  | @Solidity.Stmt.call _ _ _ ps rs _ _ args ret body =>\n    if argsIn F args then\n      match inFragP (Frag.init (rs ++ ps)) body with\n      | some _ => CallRetIn (F.after (Prog.shrinks body)) ret\n      | none => none\n    else none\n  -- a loop whose body pushes, pays, shrinks nothing and leaves what is known\n  -- of the locals as it found it: every turn starts from the same fragment\n  | .loop _ c body =>\n    if valIn F c && Prog.pushes body == 0 && !Prog.pays body && !Prog.shrinks body then\n      match inFragP F body with\n      | some G => if (G.restrict \u0393).fl = F.fl then some F else none\n      | none => none\n    else none\n  | .assignLocalPush .. | .send .. | .declMem .. | .rebindMem .. | .assignFromMem ..\n  | .assignMem .. | .deleteMem ..\n  | .assignNew .. | .tryCall .. | .revertData _ | .catchData .. | .pushOpAssign .. | .pushIncDec ..\n  | .callReceiver .. => none\n  | .callReceiverPush .. => none\n  -- recursion is outside the compiled fragment\n  | .callRec .. => none"
+        },
+        {
+          "category": "expressions/storage",
+          "citation": {
+            "anchor": "def spathIn {",
+            "line": 110,
+            "path": "Solidity/Evm/Compile.lean"
+          },
+          "description": "Primitive expressions with recursive guards; map keys uint; offsets/fixed array sizes fit W; fragile aliases tracked. Core excludes memory reads/length, modular/hash expressions.",
+          "predicate": "def spathIn {\u0393 : Ctx} (F : Frag \u0393) (free : Bool) : {T : Ty} \u2192 Solidity.SPath C \u0393 T \u2192 Bool\n  | _, .alias i => F.get i == .ok || (!free && F.get i == .fragile)\n  | _, .loc l => locIn F free l\ndef locIn {\u0393 : Ctx} (F : Frag \u0393) (free : Bool) : {T : Ty} \u2192 Solidity.Loc C \u0393 T \u2192 Bool\n  | _, .root .. => true\n  | _, @Solidity.Loc.field _ _ s _ b f _ => decide (offset s f < W) && spathIn F free b\n  | _, @Solidity.Loc.index _ _ _ k _ .map b i => k == .uint && spathIn F free b && valIn F i\n  | _, .index (.arr .dyn) b i => !free && spathIn F free b && valIn F i\n  | _, .index (.arr (.fixed (n := n))) b i =>\n    !free && decide (n < W) && spathIn F free b && valIn F i\ndef valIn {\u0393 : Ctx} (F : Frag \u0393) : {p : PrimTy} \u2192 Solidity.Val C \u0393 p \u2192 Bool\n  | _, .simple s => simpleIn s\n  | _, .read l => locIn F false l\n  | _, @Solidity.Val.binop _ _ p _ op _ _ a b => binInFrag op p && valIn F a && valIn F b\n  | _, @Solidity.Val.unop _ _ p _ op _ _ a => unInFrag op p && valIn F a\n  | _, .ternary c a b => valIn F c && valIn F a && valIn F b\n  | _, .len b _ => spathIn F false b\n  | _, .readMem _ | _, .mlen .. | _, .modular .. | _, .hash .. => false\nend"
+        },
+        {
+          "category": "calls",
+          "citation": {
+            "anchor": "def argsIn {",
+            "line": 146,
+            "path": "Solidity/Evm/Compile.lean"
+          },
+          "description": "Core: scalar args and zero/single scalar return. Reject reference args and multi/reference returns. Payment refusal remains observable in the legacy compiler theorem.",
+          "predicate": "def argsIn {\u0393 : Ctx} (F : Frag \u0393) : {ps : Ctx} \u2192 Solidity.Args C \u0393 ps \u2192 Bool\n  | _, .nil => true\n  | _, .snoc as _ _ e => argsIn F as && valIn F e\n  | _, .snocStorage .. | _, .snocMemory .. => false\n\n/-- What a call leaves the caller knowing: nothing new for no return or one\nreturn value; calls exporting several returns, memory or storage aliases are out. -/\ndef CallRetIn {\u0393 : Ctx} (F : Frag \u0393) : {rs \u0393' : Ctx} \u2192 Solidity.CallRet \u0393 rs \u0393' \u2192\n    Option (Frag \u0393')\n  | _, _, .none => some F\n  | _, _, .val .. => some F\n  | _, _, .rets _ => none\n  | _, _, .mem .. => none\n  | _, _, .storage .. => none"
+        },
+        {
+          "category": "types",
+          "citation": {
+            "anchor": "def simpleIn",
+            "line": 104,
+            "path": "Solidity/Evm/Compile.lean"
+          },
+          "description": "Simple values and operation-specific primitive type restrictions; retain exact predicate below rather than claiming all Solidity scalar types.",
+          "predicate": "def simpleIn {\u0393 : Ctx} : {p : PrimTy} \u2192 Solidity.Simple C \u0393 p \u2192 Bool\n  | _, .env k _ => k != .selfBalance\n  | _, _ => true"
+        }
+      ],
+      "fraction_explanation": "Restricted fraction and denominator are unavailable because no concrete accepted-source predicate is identified, not proven empty. Zero percent counts identified certified source-acceptance witnesses among all pinned semanticTests; it is NOT intrinsic compiler syntactic acceptance. The settling measurement is a per-fixture kernel witness of the concrete source producer followed by successful Compiler.compile and deployed-byte composition.",
+      "intrinsic_compilation_branches": [
+        "core",
+        "memory",
+        "referenceArrays",
+        "objects",
+        "construction",
+        "memoryLoops",
+        "memoryLoopScopes",
+        "memoryCalls",
+        "memoryCopy",
+        "fixedMemory",
+        "copyConstruction"
+      ],
+      "intrinsic_memory_branch_features": [
+        {
+          "acceptors": [
+            {
+              "citation": {
+                "anchor": "def compileVal",
+                "line": 106,
+                "path": "Solidity/Evm/MemoryCompile.lean"
+              },
+              "definition": "def compileVal (b : Nat) {\u0393 : Ctx} (F : Frag \u0393) :\n    {p : PrimTy} \u2192 (e : Val C \u0393 p) \u2192 Option (CompiledVal b F e)\n  | _, .readMem (.index .dyn (.var src hm) i) =>\n    do\n      let index \u2190 compileVal b F i\n      pure \u27e8_, .read src hm i index.code index.cert\u27e9\n  | _, @Solidity.Val.mlen _ _ _ (.prim _) (.var src hm) rfl => some \u27e8_, .length src hm\u27e9\n  | _, .readMem (.field (.var src hm) _ hf) => some \u27e8_, .field src hm hf\u27e9\n  | _, .readMem (.index .dyn src i) => do\n    let pointer \u2190 compilePtr b src\n    let index \u2190 compileVal b F i\n    pure \u27e8_, .pathRead src pointer.code pointer.cert i index.code index.cert\u27e9\n  | _, @Solidity.Val.mlen _ _ _ (.prim _) src rfl => do\n    let pointer \u2190 compilePtr b src\n    pure \u27e8_, .pathLength src pointer.code pointer.cert\u27e9\n  | _, .readMem (.field src _ hf) => do\n    let pointer \u2190 compilePtr b src\n    pure \u27e8_, .pathField src hf pointer.code pointer.cert\u27e9\n  | _, @Solidity.Val.binop _ _ p _ op hacc rfl x y =>\n    if hop : binInFrag op p = true then do\n      let left \u2190 compileVal b F x\n      let right \u2190 compileVal b F y\n      pure \u27e8_, .binary op hop hacc x y left.code right.code left.cert right.cert\u27e9\n    else none\n  | _, @Solidity.Val.unop _ _ p _ op hacc rfl x =>\n    if hop : unInFrag op p = true then do\n      let operand \u2190 compileVal b F x\n      pure \u27e8_, .unary op hop hacc x operand.code operand.cert\u27e9\n    else none\n  | _, .ternary c x y => do\n    let cond \u2190 compileVal b F c\n    let left \u2190 compileVal b F x\n    let right \u2190 compileVal b F y\n    pure \u27e8_, .conditional c x y cond.code left.code right.code cond.cert left.cert right.cert\u27e9\n  | _, e => if he : valIn F e = true then some \u27e8_, .core e he\u27e9 else none\n\n/-- No value compiler result is trusted: its clause proves the typed result. -/",
+              "name": "compileVal"
+            },
+            {
+              "citation": {
+                "anchor": "def compileBump",
+                "line": 401,
+                "path": "Solidity/Evm/MemoryCompile.lean"
+              },
+              "definition": "def compileBump (b : Nat) {\u0393 : Ctx} (F : Frag \u0393) {p : PrimTy}\n    (op : IncDec) (hp : p.isNumeric = true) (l : OpLoc C \u0393 p) :\n    Option {code : List Instr // StmtFrag b F F (.incDec op hp l) code} :=\n  match l with\n  | .mindex .dyn (.var dst hm) i => do\n    let one := incrementOne hp\n    let valueExpr := compoundValue op.binOp (increment_compound op) hp\n      (.readMem (.index .dyn (.var dst hm) (.simple i))) one\n    let index \u2190 compileVal b F (.simple i)\n    let value \u2190 compileVal b F valueExpr\n    pure \u27e8_, .incrementMemory F op hp .dyn (.var dst hm) i _\n      (.compoundMemory F op.binOp (increment_compound op) hp .dyn (.var dst hm) i one _\n        (.write F dst hm (.simple i) valueExpr index.code value.code index.cert value.cert))\u27e9\n  | .mfield (.var dst hm) f hf => do\n    let one := incrementOne hp\n    let valueExpr := compoundValue op.binOp (increment_compound op) hp\n      (.readMem (.field (.var dst hm) f hf)) one\n    let value \u2190 compileVal b F valueExpr\n    pure \u27e8_, .incrementField F op hp (.var dst hm) f hf _\n      (.compoundField F op.binOp (increment_compound op) hp (.var dst hm) f hf one _\n        (.writeField F dst hm hf valueExpr value.code value.cert))\u27e9\n  | .mindex .dyn src i => do\n    let pointer \u2190 compilePtr b src\n    let one := incrementOne hp\n    let valueExpr := compoundValue op.binOp (increment_compound op) hp\n      (.readMem (.index .dyn src (.simple i))) one\n    let index \u2190 compileVal b F (.simple i)\n    let value \u2190 compileVal b F valueExpr\n    pure \u27e8_, .incrementMemory F op hp .dyn src i _\n      (.compoundMemory F op.binOp (increment_compound op) hp .dyn src i one _\n        (.writePathArray F src pointer.code pointer.cert (.simple i) valueExpr\n          index.code value.code index.cert value.cert))\u27e9\n  | .mfield src f hf => do\n    let pointer \u2190 compilePtr b src\n    let one := incrementOne hp\n    let valueExpr := compoundValue op.binOp (increment_compound op) hp (.readMem (.field src f hf)) one\n    let value \u2190 compileVal b F valueExpr\n    pure \u27e8_, .incrementField F op hp src f hf _\n      (.compoundField F op.binOp (increment_compound op) hp src f hf one _\n        (.writePathField F src pointer.code pointer.cert hf valueExpr value.code value.cert))\u27e9\n  | .local dst => do\n    let one := incrementOne hp\n    let valueExpr := compoundValue op.binOp (increment_compound op) hp (.simple (.local dst)) one\n    let value \u2190 compileVal b F valueExpr\n    pure \u27e8_, .incrementLocal F op hp dst _\n      (.compoundLocal F op.binOp (increment_compound op) hp dst one _\n        (.assign F dst valueExpr value.code value.cert))\u27e9\n  | _ => none",
+              "name": "compileBump"
+            },
+            {
+              "citation": {
+                "anchor": "def compileStmt",
+                "line": 452,
+                "path": "Solidity/Evm/MemoryCompile.lean"
+              },
+              "definition": "def compileStmt (b : Nat) {\u0393 \u0394 : Ctx} (F : Frag \u0393) :\n    (s : Stmt C \u0393 \u0394) \u2192 Option (CompiledStmt b F s)\n  | .assignLocal dst e => do\n    let value \u2190 compileVal b F e\n    pure \u27e8F, _, .assign F dst e value.code value.cert\u27e9\n  | .declLocal p x (some e) => do\n    let value \u2190 compileVal b F e\n    pure \u27e8F.push (.val p) .ok, _, .declare F x e value.code value.cert\u27e9\n  | .declLocal p x none => some \u27e8F.push (.val p) .ok, _, .declareDefault F p x\u27e9\n  | .rebindMem dst (.alias (.var src hm)) =>\n    some \u27e8F, _, .rebind F dst src hm\u27e9\n  | @Solidity.Stmt.rebindMem _ _ (.array (.prim p)) dst (.newArr n _) =>\n    if hb : 0 < b then\n      if hn : simpleIn n = true then some \u27e8F, _, .reallocate F p dst n hb hn\u27e9\n      else none\n    else none\n  | .declMem R x (some (.alias (.var src hm))) _ _ =>\n    some \u27e8F.push (.mem R) .ok, _, .declareAlias F x src hm\u27e9\n  | .rebindMem dst (.alias src) => do\n    let pointer \u2190 compilePtr b src\n    pure \u27e8F, _, .rebindPath F dst src pointer.code pointer.cert\u27e9\n  | .declMem R x (some (.alias src)) _ hm => do\n    let pointer \u2190 compilePtr b src\n    pure \u27e8F.push (.mem R) .ok, _, .declarePathAlias F x src hm pointer.code pointer.cert\u27e9\n  | .declMem (.struct s) x none hd hm =>\n    if hb : 0 < b then\n      match hc : defaultCode? (.struct s) with\n      | none => none\n      | some data => some \u27e8F.push (.mem (.struct s)) .ok, _,\n          .allocateStruct F s x hd hm hb data (defaultCode_sound hc)\u27e9\n    else none\n  | @Solidity.Stmt.assignNew _ _ (.array (.prim _)) (.mem (.field src _ hf)) n _ =>\n    if hb : 0 < b then\n      if hn : simpleIn n = true then do\n        let pointer \u2190 compilePtr b src\n        pure \u27e8F, _, .allocateArrayField F src hf n pointer.code pointer.cert hb hn\u27e9\n      else none\n    else none\n  | .declMem (.struct s) x (some (.copy (.loc (.root root hr)) _)) _ hm =>\n    if hb : 0 < b then\n      if hp : primitiveMembers (Semantics.structDef s) = true then do\n        let loads \u2190 compileCopyLoads b F root hr (Semantics.structDef s)\n        pure \u27e8F.push (.mem (.struct s)) .ok, _, .copyStruct F s x root hr hm hb hp loads.code loads.cert\u27e9\n      else none\n    else none\n  | @Solidity.Stmt.rebindMem _ _ (.struct s) dst (.copy (.loc (.root root hr)) hm) =>\n    if hb : 0 < b then\n      if hp : primitiveMembers (Semantics.structDef s) = true then do\n        let loads \u2190 compileCopyLoads b F root hr (Semantics.structDef s)\n        pure \u27e8F, _, .rebindCopyStruct F s dst root hr hm hb hp loads.code loads.cert\u27e9\n      else none\n    else none\n  | .declMem (.array (.prim p)) x (some (.newArr n _)) _ _ =>\n    if hb : 0 < b then\n      if hn : simpleIn n = true then\n        some \u27e8F.push (.mem (.array (.prim p))) .ok, _, .allocate F p x n hb hn\u27e9\n      else none\n    else none\n  | .declMem (.array (.prim p)) x none _ _ =>\n    if hb : 0 < b then\n      some \u27e8F.push (.mem (.array (.prim p))) .ok, _,\n        .defaultArray F p x _ (.allocate F p x (.lit 0 rfl) hb rfl)\u27e9\n    else none\n  | .assignMem (.index .dyn (.var dst hm) i) (.val v) => do\n    let index \u2190 compileVal b F i\n    let value \u2190 compileVal b F v\n    pure \u27e8F, _, .write F dst hm i v index.code value.code index.cert value.cert\u27e9\n  | .assignMem (.field (.var dst hm) _ hf) (.val v) => do\n    let value \u2190 compileVal b F v\n    pure \u27e8F, _, .writeField F dst hm hf v value.code value.cert\u27e9\n  | .assignMem (.index .dyn src i) (.val v) => do\n    let pointer \u2190 compilePtr b src\n    let index \u2190 compileVal b F i\n    let value \u2190 compileVal b F v\n    pure \u27e8F, _, .writePathArray F src pointer.code pointer.cert i v index.code value.code index.cert value.cert\u27e9\n  | .assignMem (.field src _ hf) (.val v) => do\n    let pointer \u2190 compilePtr b src\n    let value \u2190 compileVal b F v\n    pure \u27e8F, _, .writePathField F src pointer.code pointer.cert hf v value.code value.cert\u27e9\n  | .assignMem (.field dst _ hf) (.ref src) => do\n    let pointer \u2190 compilePtr b dst\n    let value \u2190 compilePtr b src\n    pure \u27e8F, _, .writeReference F dst src hf pointer.code value.code pointer.cert value.cert\u27e9\n  | @Solidity.Stmt.deleteMem _ _ (.prim _) (.loc (.index .dyn (.var dst hm) i)) _ => do\n    let index \u2190 compileVal b F i\n    pure \u27e8F, _, .deleteElement F dst hm i index.code index.cert\u27e9\n  | @Solidity.Stmt.deleteMem _ _ (.ref (.array (.prim p))) (.var dst _) _ =>\n    if hb : 0 < b then\n      some \u27e8F, _, .deleteArray F dst _ (.reallocate F p dst (.lit 0 rfl) hb rfl)\u27e9\n    else none\n  | @Solidity.Stmt.deleteMem _ _ (.ref (.struct s)) (.var dst hm) hd =>\n    if hb : 0 < b then\n      match hc : defaultCode? (.struct s) with\n      | none => none\n      | some data => some \u27e8F, _, .deleteStruct F dst hd hm hb data (defaultCode_sound hc)\u27e9\n    else none\n  | @Solidity.Stmt.deleteMem _ _ (.ref (.array (.prim _))) (.loc (.field src _ hf)) _ =>\n    if hb : 0 < b then do\n      let pointer \u2190 compilePtr b src\n      pure \u27e8F, _, .deleteArrayField F src hf pointer.code pointer.cert hb\u27e9\n    else none\n  | @Solidity.Stmt.deleteMem _ _ (.ref (.struct t)) (.loc (.field src f hf)) hd =>\n    if hb : 0 < b then\n      match hc : defaultCode? (.struct t) with\n      | none => none\n      | some data => do\n        let pointer \u2190 compilePtr b src\n        pure \u27e8F, _, .deleteStructField F src hf hd (MLoc.field src f hf).mapFree\n          pointer.code pointer.cert hb data (defaultCode_sound hc)\u27e9\n    else none\n  | @Solidity.Stmt.deleteMem _ _ (.prim p) (.loc (.field (.var dst hm) _ hf)) _ => do\n    let value \u2190 compileVal b F (deleteDefaultValue p)\n    pure \u27e8F, _, .deleteField F (.var dst hm) hf _\n      (.writeField F dst hm hf (deleteDefaultValue p) value.code value.cert)\u27e9\n  | @Solidity.Stmt.deleteMem _ _ (.prim p) (.loc (.index .dyn src i)) _ => do\n    let pointer \u2190 compilePtr b src\n    let index \u2190 compileVal b F i\n    let value \u2190 compileVal b F (deleteDefaultValue p)\n    pure \u27e8F, _, .deletePathElement F src i _\n      (.writePathArray F src pointer.code pointer.cert i (deleteDefaultValue p)\n        index.code value.code index.cert value.cert)\u27e9\n  | @Solidity.Stmt.deleteMem _ _ (.prim p) (.loc (.field src _ hf)) _ => do\n    let pointer \u2190 compilePtr b src\n    let value \u2190 compileVal b F (deleteDefaultValue p)\n    pure \u27e8F, _, .deleteField F src hf _\n      (.writePathField F src pointer.code pointer.cert hf (deleteDefaultValue p) value.code value.cert)\u27e9\n  | .opAssign op hop hp (.mindex .dyn (.var dst hm) i) r => do\n    let valueExpr := compoundValue op hop hp (.readMem (.index .dyn (.var dst hm) (.simple i))) r\n    let index \u2190 compileVal b F (.simple i)\n    let value \u2190 compileVal b F valueExpr\n    pure \u27e8F, _, .compoundMemory F op hop hp .dyn (.var dst hm) i r _\n      (.write F dst hm (.simple i) valueExpr index.code value.code index.cert value.cert)\u27e9\n  | .opAssign op hop hp (.local dst) r => do\n    let valueExpr := compoundValue op hop hp (.simple (.local dst)) r\n    let value \u2190 compileVal b F valueExpr\n    pure \u27e8F, _, .compoundLocal F op hop hp dst r _ (.assign F dst valueExpr value.code value.cert)\u27e9\n  | .opAssign op hop hp (.mfield (.var dst hm) f hf) r => do\n    let valueExpr := compoundValue op hop hp (.readMem (.field (.var dst hm) f hf)) r\n    let value \u2190 compileVal b F valueExpr\n    pure \u27e8F, _, .compoundField F op hop hp (.var dst hm) f hf r _\n      (.writeField F dst hm hf valueExpr value.code value.cert)\u27e9\n  | .opAssign op hop hp (.mindex .dyn src i) r => do\n    let pointer \u2190 compilePtr b src\n    let valueExpr := compoundValue op hop hp (.readMem (.index .dyn src (.simple i))) r\n    let index \u2190 compileVal b F (.simple i)\n    let value \u2190 compileVal b F valueExpr\n    pure \u27e8F, _, .compoundMemory F op hop hp .dyn src i r _\n      (.writePathArray F src pointer.code pointer.cert (.simple i) valueExpr\n        index.code value.code index.cert value.cert)\u27e9\n  | .opAssign op hop hp (.mfield src f hf) r => do\n    let pointer \u2190 compilePtr b src\n    let valueExpr := compoundValue op hop hp (.readMem (.field src f hf)) r\n    let value \u2190 compileVal b F valueExpr\n    pure \u27e8F, _, .compoundField F op hop hp src f hf r _\n      (.writePathField F src pointer.code pointer.cert hf valueExpr value.code value.cert)\u27e9\n  | .incDec op hp l => do\n    let bump \u2190 compileBump b F op hp l\n    pure \u27e8F, bump.val, bump.property\u27e9\n  | .assignIncDec dst op hp (.mindex .dyn (.var src hm) i) hrecv => do\n    let value \u2190 compileVal b F (bumpResultValue op hp\n      (.readMem (.index .dyn (.var src hm) (.simple i))))\n    let bump \u2190 compileBump b F op hp (.mindex .dyn (.var src hm) i)\n    pure \u27e8F, _, .captureMemory F dst op hp .dyn (.var src hm) i hrecv\n      value.code bump.val value.cert bump.property\u27e9\n  | .assignIncDec dst op hp (.local src) hrecv => do\n    let value \u2190 compileVal b F (bumpResultValue op hp (.simple (.local src)))\n    let bump \u2190 compileBump b F op hp (.local src)\n    pure \u27e8F, _, .captureLocal F dst op hp src hrecv value.code bump.val value.cert bump.property\u27e9\n  | .assignIncDec dst op hp (.mfield (.var src hm) f hf) hrecv => do\n    let value \u2190 compileVal b F (bumpResultValue op hp (.readMem (.field (.var src hm) f hf)))\n    let bump \u2190 compileBump b F op hp (.mfield (.var src hm) f hf)\n    pure \u27e8F, _, .captureField F dst op hp (.var src hm) f hf hrecv\n      value.code bump.val value.cert bump.property\u27e9\n  | .assign l (.val v) =>\n    if hl : locIn F false l = true then do\n      let value \u2190 compileVal b F v\n      pure \u27e8F, _, .storageWrite F l v value.code hl value.cert\u27e9\n    else none\n  | .require c => do\n    let cond \u2190 compileVal b F c\n    pure \u27e8F, _, .require F c cond.code cond.cert\u27e9\n  | .revert => some \u27e8F, _, .revert F\u27e9\n  | .block body => do\n    let result \u2190 compileProg b F body\n    pure \u27e8result.frag.restrict \u0393, result.code, .block body result.code result.cert\u27e9\n  | .ite c thn els => do\n    let cond \u2190 compileVal b F c\n    let left \u2190 compileProg b F thn\n    let right \u2190 compileProg b F els\n    pure \u27e8(left.frag.restrict \u0393).meet (right.frag.restrict \u0393), _,\n      .ite c thn els cond.code left.code right.code cond.cert left.cert right.cert\u27e9\n  | _ => none",
+              "name": "compileStmt"
+            },
+            {
+              "citation": {
+                "anchor": "def compileProg",
+                "line": 645,
+                "path": "Solidity/Evm/MemoryCompile.lean"
+              },
+              "definition": "def compileProg (b : Nat) {\u0393 \u0394 : Ctx} (F : Frag \u0393) :\n    (P : Prog C \u0393 \u0394) \u2192 Option (CompiledProg b F P)\n  | .nil => some \u27e8F, [], .nil F\u27e9\n  | .cons s P => do\n    let head \u2190 compileStmt b F s\n    let tail \u2190 compileProg b head.frag P\n    pure \u27e8tail.frag, head.code ++ tail.code, .cons head.cert tail.cert\u27e9",
+              "name": "compileProg"
+            }
+          ],
+          "branch": "memory",
+          "feature_list": "Primitive arrays/primitive-member structs; memory declarations/allocation, pointer aliases, path reads/writes, numeric updates, require/assert/revert, blocks/branches. Source/destination/layout guards and capacity remain required; arbitrary reference arrays and calls need another branch."
+        },
+        {
+          "acceptors": [
+            {
+              "citation": {
+                "anchor": "def compileStmt",
+                "line": 44,
+                "path": "Solidity/Evm/MemoryRefArrayCompile.lean"
+              },
+              "definition": "def compileStmt (b : Nat) {\u0393 \u0394 : Ctx} (F : Frag \u0393) :\n    (s : Stmt C \u0393 \u0394) \u2192 Option (CompiledStmt b F s)\n  | .rebindMem dst (.alias src) => do\n    let result \u2190 compileRefPtr b F src\n    pure \u27e8F, _, .rebind F dst src result.code result.cert\u27e9\n  | .assignMem (.index .dyn dst i) (.ref src) => do\n    let parent \u2190 compileRefPtr b F dst\n    let value \u2190 compileRefPtr b F src\n    if hi : valIn F i = true then\n      pure \u27e8F, _, .reference F dst src parent.code value.code parent.cert value.cert i hi\u27e9\n    else none\n  | .assignMem (.index .dyn dst i) (.val v) => do\n    let parent \u2190 compileRefPtr b F dst\n    if hv : valIn F v = true then\n      if hi : valIn F i = true then\n        pure \u27e8F, _, .primitive F dst parent.code parent.cert v hv i hi\u27e9\n      else none\n    else none\n  | _ => none\n\n/-- This boundary follows the existing checked compiler; certificates are proof data. -/",
+              "name": "compileStmt"
+            },
+            {
+              "citation": {
+                "anchor": "def compileProg",
+                "line": 65,
+                "path": "Solidity/Evm/MemoryRefArrayCompile.lean"
+              },
+              "definition": "def compileProg (b : Nat) {\u0393 \u0394 : Ctx} (F : Frag \u0393) :\n    (P : Prog C \u0393 \u0394) \u2192 Option (CompiledProg b F P)\n  | .nil => some \u27e8F, [], .nil F\u27e9\n  | .cons s P => do\n    let head \u2190 compileStmt b F s\n    let tail \u2190 compileProg b head.frag P\n    pure \u27e8tail.frag, head.code ++ tail.code, .cons head.cert tail.cert\u27e9",
+              "name": "compileProg"
+            }
+          ],
+          "branch": "referenceArrays",
+          "feature_list": "Memory pointer rebinding and dynamic-array indexed primitive/reference assignment only; checked reference pointers, core valIn index/value guards. No general declarations or calls in this branch."
+        },
+        {
+          "acceptors": [
+            {
+              "citation": {
+                "anchor": "def compileStmt",
+                "line": 54,
+                "path": "Solidity/Evm/MemoryObjectCompile.lean"
+              },
+              "definition": "def compileStmt (b : Nat) {\u0393 \u0394 : Ctx} (F : Frag \u0393) :\n    (s : Stmt C \u0393 \u0394) \u2192 Option (CompiledStmt b F s)\n  | .rebindMem dst (.alias src) => do\n    let r \u2190 compilePtr b F src\n    pure \u27e8F, _, .rebind F dst src r.code r.cert\u27e9\n  | .declMem R x (some (.alias src)) rfl hm => do\n    let r \u2190 compilePtr b F src\n    pure \u27e8_, _, .alias F x src r.code r.cert hm\u27e9\n  | .assignMem (.index a dst i) v => do\n    let p \u2190 compilePtr b F dst\n    let r \u2190 compileSrc b F v\n    if hi : valIn F i = true then pure \u27e8F, _, .write F a dst v p.code r.code p.cert r.cert i hi\u27e9\n    else none\n  | .assignMem (.field dst _ hf) (.val v) => do\n    let p \u2190 compilePtr b F dst\n    let r \u2190 compileVal b F v\n    pure \u27e8F, _, .fieldWrite F dst v p.code r.code p.cert r.cert hf\u27e9\n  | .assignLocal dst v => do\n    let r \u2190 compileVal b F v\n    pure \u27e8F, _, .assign F dst v r.code r.cert\u27e9\n  | .declLocal _ x (some v) => do\n    let r \u2190 compileVal b F v\n    pure \u27e8_, _, .declare F x v r.code r.cert\u27e9\n  | _ => none",
+              "name": "compileStmt"
+            },
+            {
+              "citation": {
+                "anchor": "def compileProg",
+                "line": 79,
+                "path": "Solidity/Evm/MemoryObjectCompile.lean"
+              },
+              "definition": "def compileProg (b : Nat) {\u0393 \u0394 : Ctx} (F : Frag \u0393) :\n    (P : Prog C \u0393 \u0394) \u2192 Option (CompiledProg b F P)\n  | .nil => some \u27e8F, [], .nil F\u27e9\n  | .cons s P => do\n    let h \u2190 compileStmt b F s\n    let t \u2190 compileProg b h.frag P\n    pure \u27e8t.frag, _, .cons h.cert t.cert\u27e9",
+              "name": "compileProg"
+            }
+          ],
+          "branch": "objects",
+          "feature_list": "Typed memory alias declaration/rebind, array/struct field writes, local scalar assignment/initialized declaration, checked object pointer/source/value compilers; other statements refused."
+        },
+        {
+          "acceptors": [
+            {
+              "citation": {
+                "anchor": "def compileStmt",
+                "line": 77,
+                "path": "Solidity/Evm/MemoryObjectConstructionCompile.lean"
+              },
+              "definition": "def compileStmt (b : Nat) {\u0393 \u0394 : Ctx} (F : Frag \u0393) (s : Stmt C \u0393 \u0394) :\n    Option (CompiledStmt b F s) :=\n  match Objects.compileStmt b F s with\n  | some r => some \u27e8r.frag, r.code, .old r.cert\u27e9\n  | none => if hb : 0 < b then\n    match s with\n    | .declMem (.array E) x none hd hm => some \u27e8_, _, .empty F E x hd hm hb\u27e9\n    | .declMem (.array (.prim p)) x (some (.newArr n _)) _ _ =>\n      if hn : simpleIn n = true then some \u27e8_, _, .primitive F p x n hb hn\u27e9 else none\n    | .rebindMem (R := .array (.prim p)) dst (.newArr n _) =>\n      if hn : simpleIn n = true then some \u27e8_, _, .reprimitive F p dst n hb hn\u27e9 else none\n    | .declMem (.array (.ref (.array E))) x (some (.newArr n hn)) _ hm =>\n      if hns : simpleIn n = true then\n        some \u27e8_, _, .nested F E x n hb hns hn (by simpa only [Ty.mapFree] using hm)\u27e9 else none\n    | .rebindMem (R := .array (.ref (.array E))) dst (.newArr n hn) =>\n      if hns : simpleIn n = true then\n        some \u27e8_, _, .renested F E dst n hb hns hn (by\n          simpa only [Ty.mapFree] using RefTy.mapFree_of_newArrOk hn)\u27e9 else none\n    | .declMem (.array E) x (some (.newArr (.lit 0 _) hn)) _ hm =>\n      some \u27e8_, _, .newEmpty F E x hn hm hb\u27e9\n    | .rebindMem (R := .array E) dst (.newArr (.lit 0 _) hn) =>\n      some \u27e8_, _, .reEmpty F E dst hn hb\u27e9\n    | .declMem R x none hd hm => do\n      let builder \u2190 ReferenceDefaults.compileDefault R hm\n      pure \u27e8_, _, .defaultRef F R x hd hm hb builder\u27e9\n    | .declMem (.array (.ref R)) x (some (.newArr n hn)) _ hm =>\n      if hns : simpleIn n = true then do\n        let builder \u2190 ReferenceDefaults.compileDefault R (by simpa only [Ty.mapFree] using hm)\n        pure \u27e8_, _, .reference F R x n hb hns hn _ builder\u27e9\n      else none\n    | .rebindMem (R := .array (.ref R)) dst (.newArr n hn) =>\n      if hns : simpleIn n = true then do\n        let builder \u2190 ReferenceDefaults.compileDefault R (by\n          simpa only [Ty.mapFree] using RefTy.mapFree_of_newArrOk hn)\n        pure \u27e8_, _, .rereference F R dst n hb hns hn _ builder\u27e9\n      else none\n    | _ => none\n    else none",
+              "name": "compileStmt"
+            },
+            {
+              "citation": {
+                "anchor": "def compileProg",
+                "line": 116,
+                "path": "Solidity/Evm/MemoryObjectConstructionCompile.lean"
+              },
+              "definition": "def compileProg (b : Nat) {\u0393 \u0394 : Ctx} (F : Frag \u0393) :\n    (P : Prog C \u0393 \u0394) \u2192 Option (CompiledProg b F P)\n  | .nil => some \u27e8F, [], .nil F\u27e9\n  | .cons s P => do\n    let head \u2190 compileStmt b F s\n    let tail \u2190 compileProg b head.frag P\n    pure \u27e8tail.frag, _, .cons head.cert tail.cert\u27e9",
+              "name": "compileProg"
+            }
+          ],
+          "branch": "construction",
+          "feature_list": "Objects branch plus default map-free references and dynamic primitive/nested/reference array construction/rebind, simple length expressions, positive base, and compiled reference-default builders. New-array shape and mapFree evidence restrict types."
+        },
+        {
+          "acceptors": [
+            {
+              "citation": {
+                "anchor": "private def compileFiniteStmt",
+                "line": 185,
+                "path": "Solidity/Evm/MemoryLoopCompile.lean"
+              },
+              "definition": "private def compileFiniteStmt (b : Nat) {\u0393 \u0394 : Ctx} (F : Frag \u0393) (s : Stmt C \u0393 \u0394) :\n    Option (CompiledStmt b F s) := do\n  let compiled \u2190 Memory.compileStmt b F s\n  pure \u27e8compiled.frag, compiled.code, .finite compiled.cert\u27e9\n\n/-- The only new statement registration is a checked memory loop.\nThe tactic term generates the dependent eliminator, with no indexed matcher. -/",
+              "name": "compileFiniteStmt"
+            },
+            {
+              "citation": {
+                "anchor": "def compileStmt",
+                "line": 192,
+                "path": "Solidity/Evm/MemoryLoopCompile.lean"
+              },
+              "definition": "def compileStmt (b : Nat) {\u0393 \u0394 : Ctx} (F : Frag \u0393) (s : Stmt C \u0393 \u0394) :\n    Option (CompiledStmt b F s) := by\n  cases s\n  case loop =>\n    rename_i a c body\n    exact do\n      let condition \u2190 Memory.compileVal b F c\n      let compiled \u2190 Memory.compileProg b F body\n      if stable : compiled.frag.restrict \u0393 = F then\n        pure \u27e8F, [.loop condition.code compiled.code],\n          .loop a c body condition.code compiled.code compiled.frag condition.cert compiled.cert stable\u27e9\n      else none\n  all_goals exact compileFiniteStmt b F _",
+              "name": "compileStmt"
+            },
+            {
+              "citation": {
+                "anchor": "def compileProg",
+                "line": 206,
+                "path": "Solidity/Evm/MemoryLoopCompile.lean"
+              },
+              "definition": "def compileProg (b : Nat) {\u0393 \u0394 : Ctx} (F : Frag \u0393) (P : Prog C \u0393 \u0394) :\n    Option (CompiledProg b F P) :=\n  Prog.casesOn (motive_2 := fun \u0393 \u0394 P => (F : Frag \u0393) \u2192 Option (CompiledProg b F P)) P\n    (fun F => some \u27e8F, [], .nil F\u27e9)\n    (fun s P F => do\n      let head \u2190 compileStmt b F s\n      let tail \u2190 compileProg b head.frag P\n      pure \u27e8tail.frag, head.code ++ tail.code, .cons head.cert tail.cert\u27e9) F",
+              "name": "compileProg"
+            }
+          ],
+          "branch": "memoryLoops",
+          "feature_list": "Finite Memory statements plus loop with Memory-compiled condition/body and stable output fragment restricted to the entry context; finite body certificate and room bounds retained."
+        },
+        {
+          "acceptors": [
+            {
+              "citation": {
+                "anchor": "private def compileBase",
+                "line": 14,
+                "path": "Solidity/Evm/MemoryLoopScopeCompile.lean"
+              },
+              "definition": "private def compileBase (b : Nat) {\u0393 \u0394 : Ctx} (F : Frag \u0393) (s : Stmt C \u0393 \u0394) :\n    Option (CompiledStmt b F s) := do\n  let result \u2190 Loops.compileStmt b F s\n  pure \u27e8result.frag, result.code, .base result.cert\u27e9",
+              "name": "compileBase"
+            },
+            {
+              "citation": {
+                "anchor": "private def compileStmtM",
+                "line": 20,
+                "path": "Solidity/Evm/MemoryLoopScopeCompile.lean"
+              },
+              "definition": "private def compileStmtM (b : Nat) {\u0393 \u0394 : Ctx} (s : Stmt C \u0393 \u0394) (F : Frag \u0393) :\n    Option (CompiledStmt b F s) :=\n  match s with\n  | .block body => do\n    let result \u2190 compileProgM b body F\n    pure \u27e8result.frag.restrict \u0393, result.code, .block result.cert\u27e9\n  | .ite c thn els => do\n    let condition \u2190 Memory.compileVal b F c\n    let left \u2190 compileProgM b thn F\n    let right \u2190 compileProgM b els F\n    pure \u27e8(left.frag.restrict \u0393).meet (right.frag.restrict \u0393), _,\n      .ite condition.cert left.cert right.cert\u27e9\n  | s => compileBase b F s\ntermination_by structural s",
+              "name": "compileStmtM"
+            },
+            {
+              "citation": {
+                "anchor": "private def compileProgM",
+                "line": 34,
+                "path": "Solidity/Evm/MemoryLoopScopeCompile.lean"
+              },
+              "definition": "private def compileProgM (b : Nat) {\u0393 \u0394 : Ctx} (P : Prog C \u0393 \u0394) (F : Frag \u0393) :\n    Option (CompiledProg b F P) :=\n  match P with\n  | .nil => some \u27e8F, [], .nil F\u27e9\n  | .cons s P => do\n    let head \u2190 compileStmtM b s F\n    let tail \u2190 compileProgM b P head.frag\n    pure \u27e8tail.frag, head.code ++ tail.code, .cons head.cert tail.cert\u27e9\ntermination_by structural P",
+              "name": "compileProgM"
+            },
+            {
+              "citation": {
+                "anchor": "def compileStmt",
+                "line": 20,
+                "path": "Solidity/Evm/MemoryLoopScopeCompile.lean"
+              },
+              "definition": "def compileStmt (b : Nat) {\u0393 \u0394 : Ctx} (s : Stmt C \u0393 \u0394) :\n    (F : Frag \u0393) \u2192 Option (CompiledStmt b F s) := by\n  induction s using Solidity.Stmt.rec\n    (motive_2 := fun \u0393 \u0394 P => (F : Frag \u0393) \u2192 Option (CompiledProg b F P))\n  case block body ih =>\n    first | intro F | rename_i F\n    exact do\n      let result \u2190 ih F\n      pure \u27e8result.frag.restrict _, result.code, .block result.cert\u27e9\n  case ite c thn els iht ihe =>\n    first | intro F | rename_i F\n    exact do\n      let condition \u2190 Memory.compileVal b F c\n      let left \u2190 iht F\n      let right \u2190 ihe F\n      pure \u27e8(left.frag.restrict _).meet (right.frag.restrict _), _,\n        .ite condition.cert left.cert right.cert\u27e9\n  case nil F =>\n    exact some \u27e8F, [], .nil F\u27e9\n  case cons s P ihs ihp F =>\n    exact do\n      let head \u2190 ihs F\n      let tail \u2190 ihp head.frag\n      pure \u27e8tail.frag, head.code ++ tail.code, .cons head.cert tail.cert\u27e9\n  all_goals\n    first | intro F | rename_i F\n    exact compileBase b F _\n\n@[implemented_by compileProgM]",
+              "name": "compileStmt"
+            },
+            {
+              "citation": {
+                "anchor": "def compileProg",
+                "line": 34,
+                "path": "Solidity/Evm/MemoryLoopScopeCompile.lean"
+              },
+              "definition": "def compileProg (b : Nat) {\u0393 \u0394 : Ctx} (P : Prog C \u0393 \u0394) :\n    (F : Frag \u0393) \u2192 Option (CompiledProg b F P) := by\n  induction P using Solidity.Prog.rec\n    (motive_1 := fun \u0393 \u0394 P => (F : Frag \u0393) \u2192 Option (CompiledStmt b F P))\n  case block body ih F =>\n    exact do\n      let result \u2190 ih F\n      pure \u27e8result.frag.restrict _, result.code, .block result.cert\u27e9\n  case ite c thn els iht ihe F =>\n    exact do\n      let condition \u2190 Memory.compileVal b F c\n      let left \u2190 iht F\n      let right \u2190 ihe F\n      pure \u27e8(left.frag.restrict _).meet (right.frag.restrict _), _,\n        .ite condition.cert left.cert right.cert\u27e9\n  case nil =>\n    first | intro F | rename_i F\n    exact some \u27e8F, [], .nil F\u27e9\n  case cons s P ihs ihp =>\n    first | intro F | rename_i F\n    exact do\n      let head \u2190 ihs F\n      let tail \u2190 ihp head.frag\n      pure \u27e8tail.frag, head.code ++ tail.code, .cons head.cert tail.cert\u27e9\n  all_goals\n    first | intro F | rename_i F\n    exact compileBase b F _",
+              "name": "compileProg"
+            }
+          ],
+          "branch": "memoryLoopScopes",
+          "feature_list": "MemoryLoops inside recursively compiled blocks/conditionals; loop bodies retain finite Memory compiler, so this is not arbitrary nested-loop acceptance."
+        },
+        {
+          "acceptors": [
+            {
+              "citation": {
+                "anchor": "private def expandCall",
+                "line": 374,
+                "path": "Solidity/Evm/MemoryCalls.lean"
+              },
+              "definition": "private def expandCall (b : Nat)\n    (previous : {\u0393 \u0394 : Ctx} \u2192 (F : Frag \u0393) \u2192 (P : Prog C \u0393 \u0394) \u2192 Option (Program b F P))\n    {\u0393 \u0394 : Ctx} (F : Frag \u0393) (s : Stmt C \u0393 \u0394) : Option (Statement b F s) :=\n  match s with\n  | @Solidity.Stmt.call _ _ _ ps _ \u0393f f args ret body =>\n    CallRet.casesOn (motive := fun rs _ ret => (body : Prog C (rs ++ ps) \u0393f) \u2192\n      Option (Statement b F (.call f args ret body))) ret\n      (fun body => do\n        let out \u2190 previous F (expandNone args body)\n        pure (equivalent out (expandNone_run f args body)))\n      (fun p r res body => do\n        let out \u2190 previous F (expandVal args p r res body)\n        pure (equivalent out (expandVal_run f args p r res body)))\n      (fun _ _ => none)\n      (fun R r hd hm body => do\n        let out \u2190 previous F (expandMem args R r hd hm body)\n        pure (memoryReturn f args R r hd hm body out))\n      (fun _ _ _ => none) body\n  | _ => none\n\n/-- Each call expansion removes one level of calls. No public search limit. -/",
+              "name": "expandCall"
+            },
+            {
+              "citation": {
+                "anchor": "private def atHeight",
+                "line": 395,
+                "path": "Solidity/Evm/MemoryCalls.lean"
+              },
+              "definition": "private def atHeight (b : Nat) : Nat \u2192 {\u0393 \u0394 : Ctx} \u2192\n    (F : Frag \u0393) \u2192 (P : Prog C \u0393 \u0394) \u2192 Option (Program b F P)\n  | 0, _, _, F, P => (Memory.compileProg b F P).map plain\n  | n + 1, _, _, F, P => programUsing b (expandCall b (atHeight b n)) F P",
+              "name": "atHeight"
+            },
+            {
+              "citation": {
+                "anchor": "def compile",
+                "line": 413,
+                "path": "Solidity/Evm/MemoryCalls.lean"
+              },
+              "definition": "def compile (b : Nat) {\u0393 \u0394 : Ctx} (F : Frag \u0393) (P : Prog C \u0393 \u0394) : Option (Program b F P) :=\n  atHeight b (height P) F P",
+              "name": "compile"
+            }
+          ],
+          "branch": "memoryCalls",
+          "feature_list": "Direct internal signatures expanded by call-height recursion over finite Memory programs; supported scalar/memory argument/return shapes checked by expandCall; storage/multiple-return shapes refused by explicit cases; public dispatch additionally requires zero storage pushes. No external call or source-world guarantee."
+        },
+        {
+          "acceptors": [
+            {
+              "citation": {
+                "anchor": "def compileBump",
+                "line": 257,
+                "path": "Solidity/Evm/MemoryStorageCopyCompile.lean"
+              },
+              "definition": "def compileBump (b : Nat) {\u0393 : Ctx} (F : Frag \u0393) {p : PrimTy}\n    (op : IncDec) (hp : p.isNumeric = true) (l : OpLoc C \u0393 p) :\n    Option {code : List Instr // StmtFrag b F F (.incDec op hp l) code} :=\n  match l with\n  | .mindex .dyn (.var dst hm) i => do\n    let one := incrementOne hp\n    let valueExpr := compoundValue op.binOp (increment_compound op) hp\n      (.readMem (.index .dyn (.var dst hm) (.simple i))) one\n    let index \u2190 compileVal b F (.simple i)\n    let value \u2190 compileVal b F valueExpr\n    pure \u27e8_, .incrementMemory F op hp .dyn (.var dst hm) i _\n      (.compoundMemory F op.binOp (increment_compound op) hp .dyn (.var dst hm) i one _\n        (.write F dst hm (.simple i) valueExpr index.code value.code index.cert value.cert))\u27e9\n  | .mfield (.var dst hm) f hf => do\n    let one := incrementOne hp\n    let valueExpr := compoundValue op.binOp (increment_compound op) hp\n      (.readMem (.field (.var dst hm) f hf)) one\n    let value \u2190 compileVal b F valueExpr\n    pure \u27e8_, .incrementField F op hp (.var dst hm) f hf _\n      (.compoundField F op.binOp (increment_compound op) hp (.var dst hm) f hf one _\n        (.writeField F dst hm hf valueExpr value.code value.cert))\u27e9\n  | .mindex .dyn src i => do\n    let pointer \u2190 compilePtr b src\n    let one := incrementOne hp\n    let valueExpr := compoundValue op.binOp (increment_compound op) hp\n      (.readMem (.index .dyn src (.simple i))) one\n    let index \u2190 compileVal b F (.simple i)\n    let value \u2190 compileVal b F valueExpr\n    pure \u27e8_, .incrementMemory F op hp .dyn src i _\n      (.compoundMemory F op.binOp (increment_compound op) hp .dyn src i one _\n        (.writePathArray F src pointer.code pointer.cert (.simple i) valueExpr\n          index.code value.code index.cert value.cert))\u27e9\n  | .mfield src f hf => do\n    let pointer \u2190 compilePtr b src\n    let one := incrementOne hp\n    let valueExpr := compoundValue op.binOp (increment_compound op) hp (.readMem (.field src f hf)) one\n    let value \u2190 compileVal b F valueExpr\n    pure \u27e8_, .incrementField F op hp src f hf _\n      (.compoundField F op.binOp (increment_compound op) hp src f hf one _\n        (.writePathField F src pointer.code pointer.cert hf valueExpr value.code value.cert))\u27e9\n  | .local dst => do\n    let one := incrementOne hp\n    let valueExpr := compoundValue op.binOp (increment_compound op) hp (.simple (.local dst)) one\n    let value \u2190 compileVal b F valueExpr\n    pure \u27e8_, .incrementLocal F op hp dst _\n      (.compoundLocal F op.binOp (increment_compound op) hp dst one _\n        (.assign F dst valueExpr value.code value.cert))\u27e9\n  | _ => none",
+              "name": "compileBump"
+            },
+            {
+              "citation": {
+                "anchor": "def compileStmt",
+                "line": 308,
+                "path": "Solidity/Evm/MemoryStorageCopyCompile.lean"
+              },
+              "definition": "def compileStmt (b : Nat) {\u0393 \u0394 : Ctx} (F : Frag \u0393) :\n    (s : Stmt C \u0393 \u0394) \u2192 Option (CompiledStmt b F s)\n  | .assignLocal dst e => do\n    let value \u2190 compileVal b F e\n    pure \u27e8F, _, .assign F dst e value.code value.cert\u27e9\n  | .declLocal p x (some e) => do\n    let value \u2190 compileVal b F e\n    pure \u27e8F.push (.val p) .ok, _, .declare F x e value.code value.cert\u27e9\n  | .declLocal p x none => some \u27e8F.push (.val p) .ok, _, .declareDefault F p x\u27e9\n  | .rebindMem dst (.alias (.var src hm)) =>\n    some \u27e8F, _, .rebind F dst src hm\u27e9\n  | @Solidity.Stmt.rebindMem _ _ (.array (.prim p)) dst (.newArr n _) =>\n    if hb : 0 < b then\n      if hn : simpleIn n = true then some \u27e8F, _, .reallocate F p dst n hb hn\u27e9\n      else none\n    else none\n  | .declMem R x (some (.alias (.var src hm))) _ _ =>\n    some \u27e8F.push (.mem R) .ok, _, .declareAlias F x src hm\u27e9\n  | .rebindMem dst (.alias src) => do\n    let pointer \u2190 compilePtr b src\n    pure \u27e8F, _, .rebindPath F dst src pointer.code pointer.cert\u27e9\n  | .declMem R x (some (.alias src)) _ hm => do\n    let pointer \u2190 compilePtr b src\n    pure \u27e8F.push (.mem R) .ok, _, .declarePathAlias F x src hm pointer.code pointer.cert\u27e9\n  | .declMem (.struct s) x none hd hm =>\n    if hb : 0 < b then\n      if hp : primitiveMembers (Semantics.structDef s) = true then\n        some \u27e8F.push (.mem (.struct s)) .ok, _, .allocateStruct F s x hd hm hb hp\u27e9\n      else none\n    else none\n  | .declMem (.struct s) x (some (.copy (.loc (.root root hr)) _)) _ hm =>\n    if hb : 0 < b then\n      if hp : primitiveMembers (Semantics.structDef s) = true then do\n        let loads \u2190 compileCopyLoads b F root hr (Semantics.structDef s)\n        pure \u27e8F.push (.mem (.struct s)) .ok, _, .copyStruct F s x root hr hm hb hp loads.code loads.cert\u27e9\n      else none\n    else none\n  | @Solidity.Stmt.rebindMem _ _ (.struct s) dst (.copy (.loc (.root root hr)) hm) =>\n    if hb : 0 < b then\n      if hp : primitiveMembers (Semantics.structDef s) = true then do\n        let loads \u2190 compileCopyLoads b F root hr (Semantics.structDef s)\n        pure \u27e8F, _, .rebindCopyStruct F s dst root hr hm hb hp loads.code loads.cert\u27e9\n      else none\n    else none\n  | .declMem (.array (.prim p)) x (some (.newArr n _)) _ _ =>\n    if hb : 0 < b then\n      if hn : simpleIn n = true then\n        some \u27e8F.push (.mem (.array (.prim p))) .ok, _, .allocate F p x n hb hn\u27e9\n      else none\n    else none\n  | .declMem (.array (.prim p)) x none _ _ =>\n    if hb : 0 < b then\n      some \u27e8F.push (.mem (.array (.prim p))) .ok, _,\n        .defaultArray F p x _ (.allocate F p x (.lit 0 rfl) hb rfl)\u27e9\n    else none\n  | .assignMem (.index .dyn (.var dst hm) i) (.val v) => do\n    let index \u2190 compileVal b F i\n    let value \u2190 compileVal b F v\n    pure \u27e8F, _, .write F dst hm i v index.code value.code index.cert value.cert\u27e9\n  | .assignMem (.field (.var dst hm) _ hf) (.val v) => do\n    let value \u2190 compileVal b F v\n    pure \u27e8F, _, .writeField F dst hm hf v value.code value.cert\u27e9\n  | .assignMem (.index .dyn src i) (.val v) => do\n    let pointer \u2190 compilePtr b src\n    let index \u2190 compileVal b F i\n    let value \u2190 compileVal b F v\n    pure \u27e8F, _, .writePathArray F src pointer.code pointer.cert i v index.code value.code index.cert value.cert\u27e9\n  | .assignMem (.field src _ hf) (.val v) => do\n    let pointer \u2190 compilePtr b src\n    let value \u2190 compileVal b F v\n    pure \u27e8F, _, .writePathField F src pointer.code pointer.cert hf v value.code value.cert\u27e9\n  | .assignMem (.field dst _ hf) (.ref src) => do\n    let pointer \u2190 compilePtr b dst\n    let value \u2190 compilePtr b src\n    pure \u27e8F, _, .writeReference F dst src hf pointer.code value.code pointer.cert value.cert\u27e9\n  | @Solidity.Stmt.deleteMem _ _ (.prim _) (.loc (.index .dyn (.var dst hm) i)) _ => do\n    let index \u2190 compileVal b F i\n    pure \u27e8F, _, .deleteElement F dst hm i index.code index.cert\u27e9\n  | @Solidity.Stmt.deleteMem _ _ (.ref (.array (.prim p))) (.var dst _) _ =>\n    if hb : 0 < b then\n      some \u27e8F, _, .deleteArray F dst _ (.reallocate F p dst (.lit 0 rfl) hb rfl)\u27e9\n    else none\n  | @Solidity.Stmt.deleteMem _ _ (.ref (.struct s)) (.var dst hm) hd =>\n    if hb : 0 < b then\n      if hp : primitiveMembers (Semantics.structDef s) = true then\n        some \u27e8F, _, .deleteStruct F dst hd hm hb hp\u27e9\n      else none\n    else none\n  | @Solidity.Stmt.deleteMem _ _ (.ref (.array (.prim _))) (.loc (.field src _ hf)) _ =>\n    if hb : 0 < b then do\n      let pointer \u2190 compilePtr b src\n      pure \u27e8F, _, .deleteArrayField F src hf pointer.code pointer.cert hb\u27e9\n    else none\n  | @Solidity.Stmt.deleteMem _ _ (.ref (.struct t)) (.loc (.field src f hf)) hd =>\n    if hb : 0 < b then\n      if hp : primitiveMembers (Semantics.structDef t) = true then do\n        let pointer \u2190 compilePtr b src\n        pure \u27e8F, _, .deleteStructField F src hf hd (MLoc.field src f hf).mapFree\n          pointer.code pointer.cert hb hp\u27e9\n      else none\n    else none\n  | @Solidity.Stmt.deleteMem _ _ (.prim p) (.loc (.field (.var dst hm) _ hf)) _ => do\n    let value \u2190 compileVal b F (deleteDefaultValue p)\n    pure \u27e8F, _, .deleteField F (.var dst hm) hf _\n      (.writeField F dst hm hf (deleteDefaultValue p) value.code value.cert)\u27e9\n  | @Solidity.Stmt.deleteMem _ _ (.prim p) (.loc (.index .dyn src i)) _ => do\n    let pointer \u2190 compilePtr b src\n    let index \u2190 compileVal b F i\n    let value \u2190 compileVal b F (deleteDefaultValue p)\n    pure \u27e8F, _, .deletePathElement F src i _\n      (.writePathArray F src pointer.code pointer.cert i (deleteDefaultValue p)\n        index.code value.code index.cert value.cert)\u27e9\n  | @Solidity.Stmt.deleteMem _ _ (.prim p) (.loc (.field src _ hf)) _ => do\n    let pointer \u2190 compilePtr b src\n    let value \u2190 compileVal b F (deleteDefaultValue p)\n    pure \u27e8F, _, .deleteField F src hf _\n      (.writePathField F src pointer.code pointer.cert hf (deleteDefaultValue p) value.code value.cert)\u27e9\n  | .opAssign op hop hp (.mindex .dyn (.var dst hm) i) r => do\n    let valueExpr := compoundValue op hop hp (.readMem (.index .dyn (.var dst hm) (.simple i))) r\n    let index \u2190 compileVal b F (.simple i)\n    let value \u2190 compileVal b F valueExpr\n    pure \u27e8F, _, .compoundMemory F op hop hp .dyn (.var dst hm) i r _\n      (.write F dst hm (.simple i) valueExpr index.code value.code index.cert value.cert)\u27e9\n  | .opAssign op hop hp (.local dst) r => do\n    let valueExpr := compoundValue op hop hp (.simple (.local dst)) r\n    let value \u2190 compileVal b F valueExpr\n    pure \u27e8F, _, .compoundLocal F op hop hp dst r _ (.assign F dst valueExpr value.code value.cert)\u27e9\n  | .opAssign op hop hp (.mfield (.var dst hm) f hf) r => do\n    let valueExpr := compoundValue op hop hp (.readMem (.field (.var dst hm) f hf)) r\n    let value \u2190 compileVal b F valueExpr\n    pure \u27e8F, _, .compoundField F op hop hp (.var dst hm) f hf r _\n      (.writeField F dst hm hf valueExpr value.code value.cert)\u27e9\n  | .opAssign op hop hp (.mindex .dyn src i) r => do\n    let pointer \u2190 compilePtr b src\n    let valueExpr := compoundValue op hop hp (.readMem (.index .dyn src (.simple i))) r\n    let index \u2190 compileVal b F (.simple i)\n    let value \u2190 compileVal b F valueExpr\n    pure \u27e8F, _, .compoundMemory F op hop hp .dyn src i r _\n      (.writePathArray F src pointer.code pointer.cert (.simple i) valueExpr\n        index.code value.code index.cert value.cert)\u27e9\n  | .opAssign op hop hp (.mfield src f hf) r => do\n    let pointer \u2190 compilePtr b src\n    let valueExpr := compoundValue op hop hp (.readMem (.field src f hf)) r\n    let value \u2190 compileVal b F valueExpr\n    pure \u27e8F, _, .compoundField F op hop hp src f hf r _\n      (.writePathField F src pointer.code pointer.cert hf valueExpr value.code value.cert)\u27e9\n  | .incDec op hp l => do\n    let bump \u2190 compileBump b F op hp l\n    pure \u27e8F, bump.val, bump.property\u27e9\n  | .assignIncDec dst op hp (.mindex .dyn (.var src hm) i) hrecv => do\n    let value \u2190 compileVal b F (bumpResultValue op hp\n      (.readMem (.index .dyn (.var src hm) (.simple i))))\n    let bump \u2190 compileBump b F op hp (.mindex .dyn (.var src hm) i)\n    pure \u27e8F, _, .captureMemory F dst op hp .dyn (.var src hm) i hrecv\n      value.code bump.val value.cert bump.property\u27e9\n  | .assignIncDec dst op hp (.local src) hrecv => do\n    let value \u2190 compileVal b F (bumpResultValue op hp (.simple (.local src)))\n    let bump \u2190 compileBump b F op hp (.local src)\n    pure \u27e8F, _, .captureLocal F dst op hp src hrecv value.code bump.val value.cert bump.property\u27e9\n  | .assignIncDec dst op hp (.mfield (.var src hm) f hf) hrecv => do\n    let value \u2190 compileVal b F (bumpResultValue op hp (.readMem (.field (.var src hm) f hf)))\n    let bump \u2190 compileBump b F op hp (.mfield (.var src hm) f hf)\n    pure \u27e8F, _, .captureField F dst op hp (.var src hm) f hf hrecv\n      value.code bump.val value.cert bump.property\u27e9\n  | .assign l (.val v) =>\n    if hl : locIn F false l = true then do\n      let value \u2190 compileVal b F v\n      pure \u27e8F, _, .storageWrite F l v value.code hl value.cert\u27e9\n    else none\n  | @Solidity.Stmt.assignFromMem _ _ (.array (.prim _p)) dst src => do\n    if hl : locIn F false dst = true then\n      let pointer \u2190 compilePtr b src\n      pure \u27e8F.dropFragile, _, .copyArrayToStorage F dst src pointer.code pointer.cert hl\u27e9\n    else none\n  | @Solidity.Stmt.assignFromMem _ _ (.struct s) dst src => do\n    if hl : locIn F false dst = true then\n      if hprim : primitiveMembers (Semantics.structDef s) = true then\n        if hst : static (.ref (.struct s)) = true then\n          if hfit : (Semantics.structDef s).length < W then\n            let pointer \u2190 compilePtr b src\n            pure \u27e8F, _, .copyStructToStorage F dst src pointer.code pointer.cert hl hprim hst hfit\u27e9\n          else none\n        else none\n      else none\n    else none\n  | .require c => do\n    let cond \u2190 compileVal b F c\n    pure \u27e8F, _, .require F c cond.code cond.cert\u27e9\n  | .revert => some \u27e8F, _, .revert F\u27e9\n  | .block body => do\n    let result \u2190 compileProg b F body\n    pure \u27e8result.frag.restrict \u0393, result.code, .block body result.code result.cert\u27e9\n  | .ite c thn els => do\n    let cond \u2190 compileVal b F c\n    let left \u2190 compileProg b F thn\n    let right \u2190 compileProg b F els\n    pure \u27e8(left.frag.restrict \u0393).meet (right.frag.restrict \u0393), _,\n      .ite c thn els cond.code left.code right.code cond.cert left.cert right.cert\u27e9\n  | _ => none",
+              "name": "compileStmt"
+            },
+            {
+              "citation": {
+                "anchor": "def compileProg",
+                "line": 508,
+                "path": "Solidity/Evm/MemoryStorageCopyCompile.lean"
+              },
+              "definition": "def compileProg (b : Nat) {\u0393 \u0394 : Ctx} (F : Frag \u0393) :\n    (P : Prog C \u0393 \u0394) \u2192 Option (CompiledProg b F P)\n  | .nil => some \u27e8F, [], .nil F\u27e9\n  | .cons s P => do\n    let head \u2190 compileStmt b F s\n    let tail \u2190 compileProg b head.frag P\n    pure \u27e8tail.frag, head.code ++ tail.code, .cons head.cert tail.cert\u27e9",
+              "name": "compileProg"
+            }
+          ],
+          "branch": "memoryCopy",
+          "feature_list": "Checked memory-to-storage copying plus restricted scalar operations, blocks/branches and selected memory allocation/path operations; compileCopy/compileStmt retain primitive/array/struct shape and core-location guards."
+        },
+        {
+          "acceptors": [
+            {
+              "citation": {
+                "anchor": "private def compileCopy",
+                "line": 298,
+                "path": "Solidity/Evm/MemoryFixedCompile.lean"
+              },
+              "definition": "private def compileCopy (b : Nat) {\u0393 : Ctx} (F : Frag \u0393) :\n    {R : RefTy} \u2192 (dst : Loc C \u0393 (.ref R)) \u2192 (src : MPath C \u0393 (.ref R)) \u2192\n      Option (CompiledStmt b F (.assignFromMem dst src))\n  | .array (.prim _), dst, src => do\n    let pointer \u2190 compilePtr b src\n    if hl : locIn F false dst = true then\n      pure \u27e8F.dropFragile, _, .arrayCopy F dst src pointer.code pointer.cert hl\u27e9\n    else none\n  | .struct s, dst, src => do\n    if hl : locIn F false dst = true then\n      if hprim : primitiveMembers (Semantics.structDef s) = true then\n        if hst : static (.ref (.struct s)) = true then\n          if hfit : (Semantics.structDef s).length < W then\n            let pointer \u2190 compilePtr b src\n            pure \u27e8F, _, .structCopy F dst src pointer.code pointer.cert hl hprim hst hfit\u27e9\n          else none\n        else none\n      else none\n    else none\n  | .fixed (.prim _) n, dst, src =>\n    if hn : n < W then do\n      let pointer \u2190 compilePtr b src\n      if hl : locIn F false dst = true then\n        pure \u27e8F, _, .copy F dst src pointer.code pointer.cert hl hn\u27e9\n      else none\n    else none\n  | _, _, _ => none",
+              "name": "compileCopy"
+            },
+            {
+              "citation": {
+                "anchor": "private def compileCopyMem",
+                "line": 326,
+                "path": "Solidity/Evm/MemoryFixedCompile.lean"
+              },
+              "definition": "private def compileCopyMem (b : Nat) {\u0393 : Ctx} (F : Frag \u0393) :\n    {R : RefTy} \u2192 (dst : Loc C \u0393 (.ref R)) \u2192 (src : MPath C \u0393 (.ref R)) \u2192\n      Option (CompiledStmt b F (.assign dst (.copyMem src)))\n  | .fixed (.prim _) n, dst, src =>\n    if hn : n < W then do\n      let pointer \u2190 compilePtr b src\n      if hl : locIn F false dst = true then\n        pure \u27e8F, _, .copyMem F dst src pointer.code pointer.cert hl hn\u27e9\n      else none\n    else none\n  | _, _, _ => none",
+              "name": "compileCopyMem"
+            },
+            {
+              "citation": {
+                "anchor": "private def compileShape",
+                "line": 338,
+                "path": "Solidity/Evm/MemoryFixedCompile.lean"
+              },
+              "definition": "private def compileShape (b : Nat) {\u0393 : Ctx} (F : Frag \u0393) :\n    {E : Ty} \u2192 {n : Nat} \u2192 {R : RefTy} \u2192 (dst : Loc C \u0393 (.ref R)) \u2192\n    (src : MPath C \u0393 (.ref (.fixed E n))) \u2192 (shape : FixedCopy E n R) \u2192\n    Option (CompiledStmt b F (.assign dst (.fixedCopyMem src shape)))\n  | .prim _, _, _, dst, src, shape =>\n    FixedCopy.casesOn (motive := fun R shape => (dst : Loc C \u0393 (.ref R)) \u2192\n      Option (CompiledStmt b F (.assign dst (.fixedCopyMem src shape)))) shape\n      (dynamic := fun hn dst => do\n        let pointer \u2190 compilePtr b src\n        if hl : locIn F false dst = true then\n          pure \u27e8F.dropFragile, _, .dynamic F dst src pointer.code pointer.cert hl hn\u27e9\n        else none)\n      (fixed := fun k hfit dst =>\n        if hk : k < W then do\n          let pointer \u2190 compilePtr b src\n          if hl : locIn F false dst = true then\n            pure \u27e8F, _, .pad F dst src pointer.code pointer.cert hl hfit hk\u27e9\n          else none\n        else none) dst\n  | .ref _, _, _, _, _, _ => none",
+              "name": "compileShape"
+            },
+            {
+              "citation": {
+                "anchor": "private def compileAssign",
+                "line": 359,
+                "path": "Solidity/Evm/MemoryFixedCompile.lean"
+              },
+              "definition": "private def compileAssign (b : Nat) {\u0393 : Ctx} (F : Frag \u0393) {T : Ty}\n    (dst : Loc C \u0393 T) (rhs : Src C \u0393 T) : Option (CompiledStmt b F (.assign dst rhs)) :=\n  Src.casesOn (motive := fun T rhs =>\n    (dst : Loc C \u0393 T) \u2192 Option (CompiledStmt b F (.assign dst rhs))) rhs\n    (val := fun _ _ => none)\n    (copy := fun _ _ _ => none)\n    (fixedCopy := fun _ _ _ _ => none)\n    (copyMem := fun src dst => compileCopyMem b F dst src)\n    (fixedCopyMem := fun src shape dst => compileShape b F dst src shape) dst\n\nvariable (b : Nat)",
+              "name": "compileAssign"
+            },
+            {
+              "citation": {
+                "anchor": "def compileStmt",
+                "line": 372,
+                "path": "Solidity/Evm/MemoryFixedCompile.lean"
+              },
+              "definition": "def compileStmt : {\u0393 \u0394 : Ctx} \u2192 (F : Frag \u0393) \u2192 (s : Stmt C \u0393 \u0394) \u2192 Option (CompiledStmt b F s)\n  | _, _, F, s => Stmt.casesOn (motive_1 := fun \u0393 _ s =>\n      (F : Frag \u0393) \u2192 Option (CompiledStmt b F s)) s\n    (assign := fun dst rhs F => compileAssign b F dst rhs)\n    (rebind := fun _ _ _ => none)\n    (assignLocal := fun _ _ _ => none)\n    (declLocal := fun _ _ _ _ => none)\n    (declStorage := fun _ _ _ _ => none)\n    (opAssign := fun _ _ _ _ _ _ => none)\n    (incDec := fun _ _ _ _ => none)\n    (assignIncDec := fun _ _ _ _ _ _ => none)\n    (assignLocalPush := fun _ _ _ => none)\n    (pushOpAssign := fun _ _ _ _ _ _ => none)\n    (pushIncDec := fun _ _ _ _ => none)\n    (push := fun _ _ _ _ => none)\n    (pop := fun _ _ => none)\n    (transfer := fun _ _ _ => none)\n    (send := fun _ _ _ _ _ => none)\n    (declMem := fun _ _ _ _ _ _ => none)\n    (rebindMem := fun _ _ _ => none)\n    (assignFromMem := fun dst src F => compileCopy b F dst src)\n    (assignMem := fun _ _ _ => none)\n    (delete := fun _ _ => none)\n    (deleteMem := fun _ _ _ => none)\n    (assignNew := fun _ _ _ _ => none)\n    (ite := fun c thn els F => do\n      let cond \u2190 Solidity.Evm.Memory.compileVal b F c\n      let left \u2190 compileProg F thn\n      let right \u2190 compileProg F els\n      pure \u27e8(left.frag.restrict _).meet (right.frag.restrict _), _,\n        .ite c thn els cond.code left.code right.code cond.cert left.cert right.cert\u27e9)\n    (require := fun c F => do\n      let value \u2190 Solidity.Evm.Memory.compileVal b F c\n      pure \u27e8F, _, .require F c value.code value.cert\u27e9)\n    (assert := fun _ _ => none)\n    (revert := fun F => some \u27e8F, _, .revert F\u27e9)\n    (assumeFalse := fun  _ => none)\n    (call := fun _ _ _ _ _ => none)\n    (callReceiver := fun _ _ _ _ _ _ => none)\n    (callReceiverPush := fun _ _ _ _ _ _ _ => none)\n    (tryCall := fun _ _ _ _ _ _ _ _ _ _ _ => none)\n    (loop := fun _ _ _ _ => none)\n    (block := fun body F => do\n      let result \u2190 compileProg F body\n      pure \u27e8result.frag.restrict _, result.code, .block body result.code result.cert\u27e9)\n    (callRec := fun _ _ _ _ _ _ => none)\n    (revertData := fun _ _ => none)\n    (catchData := fun _ _ _ _ _ _ _ _ _ => none) F\n\n  termination_by structural _ _ _F s => s",
+              "name": "compileStmt"
+            },
+            {
+              "citation": {
+                "anchor": "def compileProg",
+                "line": 423,
+                "path": "Solidity/Evm/MemoryFixedCompile.lean"
+              },
+              "definition": "def compileProg : {\u0393 \u0394 : Ctx} \u2192 (F : Frag \u0393) \u2192 (P : Prog C \u0393 \u0394) \u2192 Option (CompiledProg b F P)\n  | _, _, F, P => Prog.casesOn (motive_2 := fun \u0393 _ P =>\n      (F : Frag \u0393) \u2192 Option (CompiledProg b F P)) P\n      (fun F => some \u27e8F, [], .nil F\u27e9)\n      (fun s tail F => do\n        let head \u2190 compileStmt F s\n        let rest \u2190 compileProg head.frag tail\n        pure \u27e8rest.frag, head.code ++ rest.code, .cons head.cert rest.cert\u27e9) F\n  termination_by structural _ _ _F P => P",
+              "name": "compileProg"
+            }
+          ],
+          "branch": "fixedMemory",
+          "feature_list": "Fixed-shape memory/storage copy and assignment through compileCopy/compileCopyMem/compileShape/compileAssign, require/revert, block/conditional recursion; most intrinsic constructors explicitly return none, including calls/loops."
+        },
+        {
+          "acceptors": [
+            {
+              "citation": {
+                "anchor": "def compileStmt",
+                "line": 32,
+                "path": "Solidity/Evm/MemoryStorageConstructionCompile.lean"
+              },
+              "definition": "def compileStmt (b : Nat) {\u0393 \u0394 : Ctx} (F : Frag \u0393) (s : Stmt C \u0393 \u0394) : Option (CompiledStmt b F s) :=\n  match Construction.compileStmt b F s with\n  | some r => some \u27e8r.frag, r.code, .construction r.cert\u27e9\n  | none => (Fixed.compileStmt b F s).map fun r => \u27e8r.frag, r.code, .copying r.cert\u27e9\n\n/-- Generalized intrinsic recursion preserves both contexts at admission. -/",
+              "name": "compileStmt"
+            },
+            {
+              "citation": {
+                "anchor": "def compileProg",
+                "line": 38,
+                "path": "Solidity/Evm/MemoryStorageConstructionCompile.lean"
+              },
+              "definition": "def compileProg (b : Nat) : {\u0393 \u0394 : Ctx} \u2192 (F : Frag \u0393) \u2192 (P : Prog C \u0393 \u0394) \u2192 Option (CompiledProg b F P)\n  | _, _, F, P => Prog.casesOn (motive_2 := fun \u0393 _ P => (F : Frag \u0393) \u2192 Option (CompiledProg b F P)) P\n      (fun F => some \u27e8F, [], .nil F\u27e9)\n      (fun s P F => do\n        let head \u2190 compileStmt b F s\n        let tail \u2190 compileProg b head.frag P\n        pure \u27e8tail.frag, head.code ++ tail.code, .cons head.cert tail.cert\u27e9) F\n  termination_by structural _ _ _F P => P",
+              "name": "compileProg"
+            }
+          ],
+          "branch": "copyConstruction",
+          "feature_list": "Statement-wise Construction or Fixed compiler with recursive program sequencing; this combination is explicitly implemented, unlike an arbitrary union of every branch."
+        }
+      ],
+      "intrinsic_theorem": "Solidity.Main.compiler_checked",
+      "numerator": {
+        "kernel_source_to_deployed_bytes_SolKey_rows": 0,
+        "kernel_source_to_deployed_bytes_solc_files": 0
+      },
+      "percent_all_semanticTests_with_identified_certified_acceptance_witness": 0,
+      "product": "verified accepted-fragment compiler",
+      "reason": "Further transport expansion without producing source acceptance, deployed bytes and boundary evidence does not increase the product's certified fixture numerator. Existing intrinsic and conditional composition proofs remain useful; zero certified fixtures is not zero theorem value.",
+      "residual_PublicBoundary_fields": [
+        "bothPipelines",
+        "fixed",
+        "session",
+        "ifixed",
+        "isession",
+        "creates_table",
+        "hashes_source",
+        "decode_reach",
+        "decode_commutes"
+      ],
+      "restricted_fraction": null,
+      "verdict": "wrong-direction"
+    },
+    "c": {
+      "base_runner_sha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
+      "current_base_runtime_validation": "Not rerun; historical statuses are retained evidence with older model/runner hashes, not proof they pass current source. Current executable numerator is unknown until the corpus runner is rerun.",
+      "denominators": {
+        "Ethereum_execution_spec_function_templates": 914,
+        "solc_semantic_fixture_files": 1701
+      },
+      "external_test_boundary": "Pinned-solc reference diagnostics; typed Lean observations for supported scalar/canonical-prefix ABI vectors, v2 primitive entry checks and retained failure bytes in required legacy/viaIR source modes. Generated EVM/SSA, gas, logs and the native C++ harness are not tested.",
+      "filtered_report_comparison": [
+        {
+          "path": "test/libsolidity/semanticTests/revertStrings/empty_v2.sol",
+          "report": "tests/upstream/revert-power/upstream-debug/summary.json",
+          "reported_status": "blocked",
+          "selected_full_report_status": "blocked"
+        },
+        {
+          "path": "test/libsolidity/semanticTests/tryCatch/panic.sol",
+          "report": "tests/upstream/revert-power/upstream-panic/summary.json",
+          "reported_status": "blocked",
+          "selected_full_report_status": "blocked"
+        },
+        {
+          "path": "test/libsolidity/semanticTests/viaYul/loops/break.sol",
+          "report": "tests/upstream/step12-quantified-diamond/upstream-after/summary.json",
+          "reported_status": "working",
+          "selected_full_report_status": "working"
+        },
+        {
+          "path": "test/libsolidity/semanticTests/viaYul/loops/continue.sol",
+          "report": "tests/upstream/step12-quantified-diamond/upstream-after/summary.json",
+          "reported_status": "working",
+          "selected_full_report_status": "working"
+        },
+        {
+          "path": "test/libsolidity/semanticTests/viaYul/loops/return.sol",
+          "report": "tests/upstream/step12-quantified-diamond/upstream-after/summary.json",
+          "reported_status": "working",
+          "selected_full_report_status": "working"
+        },
+        {
+          "path": "test/libsolidity/semanticTests/viaYul/loops/simple.sol",
+          "report": "tests/upstream/step12-quantified-diamond/upstream-after/summary.json",
+          "reported_status": "working",
+          "selected_full_report_status": "working"
+        }
+      ],
+      "historical_working_interpreter_percent": 38.6243,
+      "nothing_category": "Blocked solc files have no successful adapted runtime check in this report; broken files have attempted checks. No EEST adapter or linked proof identified. This is not a claim that no isolated hand-written examples share their features.",
+      "numerators": {
+        "EEST_templates_with_identified_adapter": 0,
+        "kernel_EEST_templates": 0,
+        "kernel_source_to_deployed_bytes_solc_files": 0,
+        "reported_blocked_solc_files": 848,
+        "reported_broken_interpreter_solc_files": 196,
+        "reported_working_interpreter_solc_files": 657
+      },
+      "pins": {
+        "Ethereum_execution_spec_tests": "10eaa63d5da2f50b63d4359968f36542212f9f50",
+        "solc": "1835d247de183f23e7b0e2bc4a50732af525b77c"
+      },
+      "product": "production Solidity/EVM conformance",
+      "reason": "Interpreter vectors do not measure deployed bytecode, fork/gas/log/precompile or transaction conformance. This product needs executable test adapters plus a concrete approved EVM instance; more model-only examples cannot supply that coverage.",
+      "report_inventory": [
+        {
+          "complete": true,
+          "counts": {
+            "blocked": 5329,
+            "broken": 196,
+            "working": 4135
+          },
+          "filter": null,
+          "modelSha256": "0f89a4c1d6e3c72717fc00d74df270a8cb8bc627af12ef76da9bd855c5f25902",
+          "path": "tests/upstream/baseline-20261028/summary.json",
+          "runnerSha256": "de90dacc69e0054dadeccc958b4a948611f44cd3213942bde72c1a3bdd3e8082",
+          "sha256": "7957775c1ab16bc217849d8b96d061079034fbdd622e9105e6c3bda39b45d914",
+          "solc_commit": "1835d247de183f23e7b0e2bc4a50732af525b77c"
+        },
+        {
+          "complete": true,
+          "counts": {
+            "blocked": 5645,
+            "broken": 308,
+            "working": 3707
+          },
+          "filter": null,
+          "modelSha256": "c042a72f4d864a780a366ad4f27d148df0d7e213d33c37d4b6a51f0ad33710df",
+          "path": "tests/upstream/results/summary.json",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "sha256": "9a47a4776353ab6da2f0b5ef361877c347fb8d2c0a4071be01994f40422d5ea6",
+          "solc_commit": "1835d247de183f23e7b0e2bc4a50732af525b77c"
+        },
+        {
+          "complete": true,
+          "counts": {
+            "blocked": 1,
+            "broken": 0,
+            "working": 0
+          },
+          "filter": "revertStrings/empty_v2.sol",
+          "modelSha256": "35b6f1a1a88cf542bd5df48867ee74465db23d78f3dd3a35b57419a6658de54c",
+          "path": "tests/upstream/revert-power/upstream-debug/summary.json",
+          "runnerSha256": "de90dacc69e0054dadeccc958b4a948611f44cd3213942bde72c1a3bdd3e8082",
+          "sha256": "973c900f2288e5f71bee4ab888519350bceff4919ee006fdc7d90e7306a7960f",
+          "solc_commit": "1835d247de183f23e7b0e2bc4a50732af525b77c"
+        },
+        {
+          "complete": true,
+          "counts": {
+            "blocked": 1,
+            "broken": 0,
+            "working": 0
+          },
+          "filter": "tryCatch/panic.sol",
+          "modelSha256": "35b6f1a1a88cf542bd5df48867ee74465db23d78f3dd3a35b57419a6658de54c",
+          "path": "tests/upstream/revert-power/upstream-panic/summary.json",
+          "runnerSha256": "de90dacc69e0054dadeccc958b4a948611f44cd3213942bde72c1a3bdd3e8082",
+          "sha256": "aa471028dd81e8749e38a72ce3bda0f1025aeedaf350dbfdd73ab7e50752c9b6",
+          "solc_commit": "1835d247de183f23e7b0e2bc4a50732af525b77c"
+        },
+        {
+          "complete": true,
+          "counts": {
+            "blocked": 0,
+            "broken": 0,
+            "working": 4
+          },
+          "filter": "semanticTests/viaYul/loops/",
+          "modelSha256": "1cd157d05bf813d33d493fb2c0384e86a3f1c5054cb13bc5ca16e221d5e960d7",
+          "path": "tests/upstream/step12-quantified-diamond/upstream-after/summary.json",
+          "runnerSha256": "de90dacc69e0054dadeccc958b4a948611f44cd3213942bde72c1a3bdd3e8082",
+          "sha256": "27d5756956466618f283fd3b705cc7fe163b6cc17a2e02777f8119d013cecf6c",
+          "solc_commit": "1835d247de183f23e7b0e2bc4a50732af525b77c"
+        }
+      ],
+      "selected_historical_report": "tests/upstream/baseline-20261028/summary.json",
+      "selected_report_metadata": {
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "modelSha256": "0f89a4c1d6e3c72717fc00d74df270a8cb8bc627af12ef76da9bd855c5f25902",
+        "runnerSha256": "de90dacc69e0054dadeccc958b4a948611f44cd3213942bde72c1a3bdd3e8082",
+        "scope": "Pinned-solc reference diagnostics; typed Lean observations for supported scalar/canonical-prefix ABI vectors, v2 primitive entry checks and retained failure bytes in required legacy/viaIR source modes. Generated EVM/SSA, gas, logs and the native C++ harness are not tested."
+      },
+      "solc_stage_counts": {
+        "lean-import:blocked": 39,
+        "lean-runtime:blocked": 809,
+        "lean-runtime:broken": 196,
+        "lean-runtime:working": 657
+      },
+      "verdict": "wrong-direction"
+    }
+  },
+  "generated_method": "Reused census marker classifier, correcting Corpus/Imported.lean to handwritten per check-corpus.sh. Unmarked is not proven handwritten. Chain/agreement names grouped as candidates without treating names as generator evidence.",
+  "generated_split": {
+    "ALL": {
+      "detected_generated_lines": 31657,
+      "files": 8291,
+      "physical_lines": 1311130,
+      "unknown_import_only_lines": 1502,
+      "unmarked_lines": 1277971
+    },
+    "AST.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 1247,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 1247
+    },
+    "Automation": {
+      "detected_generated_lines": 0,
+      "files": 3,
+      "physical_lines": 84,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 84
+    },
+    "Backend": {
+      "detected_generated_lines": 2451,
+      "files": 2015,
+      "physical_lines": 279224,
+      "unknown_import_only_lines": 13,
+      "unmarked_lines": 276760
+    },
+    "Calculus": {
+      "detected_generated_lines": 1550,
+      "files": 388,
+      "physical_lines": 169330,
+      "unknown_import_only_lines": 427,
+      "unmarked_lines": 167353
+    },
+    "Corpus": {
+      "detected_generated_lines": 3939,
+      "files": 9,
+      "physical_lines": 4204,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 265
+    },
+    "Counterexamples": {
+      "detected_generated_lines": 0,
+      "files": 4,
+      "physical_lines": 413,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 413
+    },
+    "ERC7201.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 38,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 38
+    },
+    "Eqns.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 46,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 46
+    },
+    "Evm": {
+      "detected_generated_lines": 0,
+      "files": 279,
+      "physical_lines": 45857,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 45857
+    },
+    "Examples": {
+      "detected_generated_lines": 0,
+      "files": 356,
+      "physical_lines": 61471,
+      "unknown_import_only_lines": 104,
+      "unmarked_lines": 61367
+    },
+    "FreshNames.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 93,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 93
+    },
+    "Frontend": {
+      "detected_generated_lines": 4360,
+      "files": 512,
+      "physical_lines": 102235,
+      "unknown_import_only_lines": 114,
+      "unmarked_lines": 97761
+    },
+    "Hash": {
+      "detected_generated_lines": 0,
+      "files": 6,
+      "physical_lines": 2265,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 2265
+    },
+    "Hashes.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 199,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 199
+    },
+    "Keccak.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 123,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 123
+    },
+    "KeySort.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 271,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 271
+    },
+    "Language": {
+      "detected_generated_lines": 2399,
+      "files": 8,
+      "physical_lines": 5964,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 3565
+    },
+    "Lowering": {
+      "detected_generated_lines": 58,
+      "files": 716,
+      "physical_lines": 104250,
+      "unknown_import_only_lines": 6,
+      "unmarked_lines": 104186
+    },
+    "Optimizer": {
+      "detected_generated_lines": 0,
+      "files": 16,
+      "physical_lines": 6658,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 6658
+    },
+    "Precompiles": {
+      "detected_generated_lines": 0,
+      "files": 11,
+      "physical_lines": 2072,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 2072
+    },
+    "RevertBytes.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 75,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 75
+    },
+    "Roadmap": {
+      "detected_generated_lines": 38,
+      "files": 20,
+      "physical_lines": 4728,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 4690
+    },
+    "Scope.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 286,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 286
+    },
+    "Secp256k1.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 130,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 130
+    },
+    "Semantics": {
+      "detected_generated_lines": 0,
+      "files": 82,
+      "physical_lines": 25790,
+      "unknown_import_only_lines": 55,
+      "unmarked_lines": 25735
+    },
+    "Semantics.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 113,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 113
+    },
+    "Signature.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 612,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 612
+    },
+    "SolcValidation": {
+      "detected_generated_lines": 972,
+      "files": 30,
+      "physical_lines": 7626,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 6654
+    },
+    "Solkey": {
+      "detected_generated_lines": 0,
+      "files": 5,
+      "physical_lines": 266,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 266
+    },
+    "SortCheck": {
+      "detected_generated_lines": 0,
+      "files": 3,
+      "physical_lines": 1281,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 1281
+    },
+    "Source": {
+      "detected_generated_lines": 620,
+      "files": 262,
+      "physical_lines": 50041,
+      "unknown_import_only_lines": 8,
+      "unmarked_lines": 49413
+    },
+    "SpecSyntax.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 220,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 220
+    },
+    "Stipend": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 274,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 274
+    },
+    "Storage": {
+      "detected_generated_lines": 0,
+      "files": 21,
+      "physical_lines": 4049,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 4049
+    },
+    "Syntax": {
+      "detected_generated_lines": 0,
+      "files": 21,
+      "physical_lines": 14545,
+      "unknown_import_only_lines": 44,
+      "unmarked_lines": 14501
+    },
+    "Syntax.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 72,
+      "unknown_import_only_lines": 72,
+      "unmarked_lines": 0
+    },
+    "TestSuite": {
+      "detected_generated_lines": 0,
+      "files": 49,
+      "physical_lines": 4710,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 4710
+    },
+    "Theorems.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 360,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 360
+    },
+    "Theory": {
+      "detected_generated_lines": 0,
+      "files": 25,
+      "physical_lines": 8890,
+      "unknown_import_only_lines": 41,
+      "unmarked_lines": 8849
+    },
+    "Tools": {
+      "detected_generated_lines": 0,
+      "files": 31,
+      "physical_lines": 8575,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 8575
+    },
+    "TypeGraph.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 147,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 147
+    },
+    "Typing": {
+      "detected_generated_lines": 0,
+      "files": 12,
+      "physical_lines": 6832,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 6832
+    },
+    "Update.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 58,
+      "unknown_import_only_lines": 0,
+      "unmarked_lines": 58
+    },
+    "Yul": {
+      "detected_generated_lines": 6975,
+      "files": 1827,
+      "physical_lines": 197439,
+      "unknown_import_only_lines": 374,
+      "unmarked_lines": 190090
+    },
+    "Yul.lean": {
+      "detected_generated_lines": 0,
+      "files": 1,
+      "physical_lines": 194,
+      "unknown_import_only_lines": 194,
+      "unmarked_lines": 0
+    },
+    "chain-agreement-name-candidates": {
+      "detected_generated_lines": 0,
+      "files": 148,
+      "physical_lines": 24885,
+      "unmarked_lines": 24885
+    },
+    "outside-Solidity": {
+      "detected_generated_lines": 8295,
+      "files": 1561,
+      "physical_lines": 187773,
+      "unknown_import_only_lines": 50,
+      "unmarked_lines": 179428
+    }
+  },
+  "inventory_reuse": {
+    "docs/audits/architecture-tools/timing-sample.tsv": {
+      "exists": true,
+      "sha256": "3f8463128ba2f8d99d837ae55b8b73e3ae027be88edea390c0fa68622b96d796"
+    },
+    "docs/audits/build-speed.md": {
+      "exists": true,
+      "sha256": "1916a8903369d0f05c28897641dd3eacaad2d38c86ef5b4ccf04182091a3b39e"
+    },
+    "docs/audits/direction.md": {
+      "exists": true,
+      "sha256": "df6b110530bbb332d4689f3be9ebc6bf3d09616a0a9085a5da8e4d3791d36a9f"
+    },
+    "docs/audits/proof-coverage-tools/theorem_census.py": {
+      "exists": true,
+      "sha256": "d753ca35fa7cc5550fe26340dbdea04bcbf3deab47a51e931b7beca46bab2f95"
+    },
+    "scripts/bench/README.md": {
+      "exists": false,
+      "sha256": null
+    },
+    "scripts/build-measure.py": {
+      "exists": true,
+      "sha256": "ed72626920b8e4aa9cbd965c5e7daf9e47cc48cf1712f7653a69959b2b693350"
+    },
+    "scripts/check-corpus.sh": {
+      "exists": true,
+      "sha256": "bb73ac9098d24369822b3d151d1cac3511c34644f093ae7b03b4616e33c7391f"
+    },
+    "scripts/differential/README.md": {
+      "exists": false,
+      "sha256": null
+    },
+    "tests/upstream/results/summary.json": {
+      "exists": true,
+      "sha256": "9a47a4776353ab6da2f0b5ef361877c347fb8d2c0a4071be01994f40422d5ea6"
+    }
+  },
+  "limitations": [
+    "No Lean build, elaboration or Lean server used; kernel-checked labels describe pinned proof artifacts and trust gates, not fresh checking.",
+    "EEST denominator is test function templates at an independently pinned checkout, not expanded pytest/fixture case count; cannot compare its size to solc fixture-file count.",
+    "No executable syntactic acceptance percentage for the union of intrinsic memory/compiler predicates is asserted; it is not a source accepted fragment.",
+    "The general source-to-bytes gap is established by theorem/interface inspection and the public-boundary candidate index, not an undecidable proof of theorem nonexistence.",
+    "Frozen solc/SolKey snapshots differ from first-round reference portfolio pins; coverage uses corpus pins, calibration uses its cited reference pin."
+  ],
+  "remaining_work_estimates": {
+    "a": {
+      "additional_lines_range": [
+        5305,
+        15915
+      ],
+      "basis": "1-3 CompCert pass-pair units for correspondence closure, exact outstanding obligation ports and frontend/strategy parity. Not 35 independent soundness proofs: many unclaimed taclets are architectural normalization differences.",
+      "deliverable": "Close or explicitly distinguish every remaining corpus obligation and taclet; retain negative controls and current soundness."
+    },
+    "b": {
+      "additional_lines_range": [
+        15915,
+        42440
+      ],
+      "basis": "3-8 pass-pair units for certified admission/lowering, executable assembly linkage, and deployment/hash/state-export producers on a deliberately small fragment.",
+      "deliverable": "Non-toy source acceptance predicate, emitted bytes, complete boundary evidence and per-fixture acceptance witnesses."
+    },
+    "c": {
+      "additional_lines_range": [
+        120330,
+        360990
+      ],
+      "basis": "1-3 complete multi-target CompCert backend portfolios as a broad integration/proof planning scale; production Solidity includes frontend, ABI, storage, calls, forks and harness work absent from a single pass. This is a scenario, not a comparable subsystem efficiency ratio.",
+      "deliverable": "All pinned semantic fixtures plus all EEST templates adapted with fork/gas/log/precompile checks and approved byte semantics; refresh to maintained pins before claiming current production support.",
+      "reference_generated_lines": 1807,
+      "reference_pin": "2685140bf72c959446981fb99b5e44a8975021bc",
+      "reference_total_lines": 122137
+    },
+    "method": "Planning scenarios in additional handwritten-equivalent lines, NOT measured missing LOC, deletion budgets, person-time or statistical forecasts. Calibrated to existing reference scopes; generated fixtures excluded. Reuse could reduce them; full production proof effort can exceed them.",
+    "reference_pass_pair": {
+      "commit": "2685140bf72c959446981fb99b5e44a8975021bc",
+      "generated_lines": 0,
+      "lines": 5305,
+      "paths": [
+        "cfrontend/Cshmgen.v",
+        "cfrontend/Cshmgenproof.v",
+        "cfrontend/Cminorgen.v",
+        "cfrontend/Cminorgenproof.v"
+      ],
+      "source": "docs/audits/direction-tools/README-results.json#subsystems.lowering"
+    }
+  },
+  "schema": 1,
+  "scope": "docs/audits/direction-tools/endpoint/**; code read only",
+  "waits": [
+    {
+      "item": "va3 differential/vu1 bench",
+      "state": "absent on pinned base; used committed upstream report instead"
+    },
+    {
+      "item": "matched source-to-bytes timing",
+      "state": "no such endpoint measured; historical module timing is not a substitute"
+    }
+  ]
+}

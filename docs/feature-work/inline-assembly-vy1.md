@@ -1521,6 +1521,16 @@ arbitrary assembly refusal. The import control shows why `Env` alone is
 insufficient; retain the original unit or equivalent header information.
 Membership bridges do not promise equality of old/new ordering or counts.
 
+`ExclusionFeatures.lean` supplements the subset using the existing `Syn.excl`.
+All six exclusion IDs match the catalog exactly; canonical-rethrow syntax keeps
+its existing exception. Retain and check the intrinsic rejection channel
+independently of catalog feature extraction. `syntaxExclusionUses` supplies
+actual typed sites, and reported flags also occur in `Syn.rejections`; no
+converse list/order equality is claimed. `syntaxFieldUses` shares whole-unit
+metadata traversal with the structural collector. The inherited Source syntax
+examples cover general assembly, mixed buffers, removed constructs and malformed
+modifiers; none is presented as operational admission evidence.
+
 ### P16 generated-file maintenance
 
 Run `python3 -B scripts/h62/item1/p16-generator/check.py` to verify the generated
@@ -2008,25 +2018,10 @@ statements, outcomes and proof limits are unchanged.
 stability for the real do/while driver with the concrete body adapter factory.
 `adapterSuccessor` and `adapterExtension` transport this to the genuine
 intrinsic P16 do/while adapter, preserving the entire raw frame.
-Body terminality comes from the actual parent result. Normal/continue evaluate
-the condition on the actual postbody frame and recurse on the actual
-postcondition frame; break bypasses the condition. The original intrinsic
-body certificate and non-timeout premise remain explicit. No coherence,
-projection, assumed child law or arbitrary-adapter raw stability is introduced.
+Body terminality comes from the actual parent result. Normal/continue evaluate the condition on the actual postbody frame and recurse on the actual postcondition frame; break bypasses the condition. The original intrinsic body certificate and non-timeout premise remain explicit. No coherence, projection, assumed child law or arbitrary-adapter raw stability is introduced.
 
-Nine controls use actual typed adapters. Break3 preserves raw2/u8257 and
-skips a guard that independently times out at fuel2. Continue5 writes false;
-normal10 executes its mutating body even with a false guard. Both preserve
-the sibling raw257. All three completed entire frames stabilize at every
-larger horizon; normal9 remains timeout. Source correctness is checked
-separately from a clean initial frame for every horizon.
-No Source/ExtCall/evaluator/layout/observation/admission/dirty-readback/compiler
-changes or adequacy claims are made. Full VY1/general P16 and final lane
-gates remain open.
+Nine controls use actual typed adapters. Break3 preserves raw2/u8257 and skips a guard that independently times out at fuel2. Continue5 writes false; normal10 executes its mutating body even with a false guard. Both preserve the sibling raw257. All three completed entire frames stabilize at every larger horizon; normal9 remains timeout. Source correctness is checked separately from a clean initial frame for every horizon. No Source/ExtCall/evaluator/layout/observation/admission/dirty-readback/compiler changes or adequacy claims are made. Full VY1/general P16 and final lane gates remain open.
 
-Independent read-only finder and skeptic core/final reviews report no
-findings. Per-file diagnostics, focused checks, affected core build and
-layer/root checks pass. Thirteen scoped axiom reports use only Lean standard
-axioms. Standard tactic failures and the redundant solved-goal tactic failure
-remain raw evidence; removing that redundant tactic changes no statement,
-expected behavior or proof limit.
+Independent read-only finder and skeptic core/final reviews report no findings. Per-file diagnostics, focused checks, affected core build and layer/root checks pass. Thirteen scoped axiom reports use only Lean standard axioms. Standard tactic failures and the redundant solved-goal tactic failure remain raw evidence; removing that redundant tactic changes no statement, expected behavior or proof limit.
+
+Literal tags in `Frontend/Admission/StructuralFeatures.lean` use the existing generic syntax collector alongside the frozen structural subset. Equal decoded bytes retain string/hex-string/Unicode distinctions; numeric spelling, contextual address literals and lexical validity need their own evidence. These tags do not establish admission.

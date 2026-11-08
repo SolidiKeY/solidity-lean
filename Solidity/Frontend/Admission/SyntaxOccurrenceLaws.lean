@@ -1,7 +1,6 @@
 import Solidity.Frontend.Admission.SyntaxOccurrences
 
-/-! Structural laws against the independent Source.Syn.Sub relation.
-No execution-root, feature classification or frontend adequacy is asserted. -/
+/-! Structural laws against the independent Source.Syn.Sub relation. No execution-root, feature classification or frontend adequacy is asserted. -/
 namespace Solidity.Frontend.Admission
 open Solidity.Source
 
@@ -1251,4 +1250,33 @@ theorem syntaxOccurrences_iff {c : Cat} (s : Syn c) (x : SyntaxOccurrence) :
 #guard_msgs (whitespace := lax) in #print axioms syntaxOccurrences_complete
 /-- info: 'Solidity.Frontend.Admission.syntaxOccurrences_iff' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms syntaxOccurrences_iff
+
+/-! Generic whole-syntax metadata collection. Regression: headers are not part of a declaration-only roster. Classifiers share the canonical visitor rather than introducing per-feature traversal copies. -/
+universe u
+
+
+def syntaxFieldUses {α : Type u} {c : Cat} (root : Syn c)
+    (fields : ∀ {k : Cat}, Syn k → List α) : List (SyntaxOccurrence × α) :=
+  (syntaxOccurrences root).flatMap fun site =>
+    (fields site.2).map fun value => (site,value)
+
+/-- Exact field accounting against the independent intrinsic subterm relation; classifier validity/completeness and lexical positions remain separate. -/
+theorem syntaxFieldUses_iff {α : Type u} {c : Cat} (root : Syn c)
+    (fields : ∀ {k : Cat}, Syn k → List α) (site : SyntaxOccurrence) (value : α) :
+    (site,value) ∈ syntaxFieldUses root fields ↔
+      Syn.Sub site ⟨c,root⟩ ∧ value ∈ fields site.2 := by
+  simp only [syntaxFieldUses, List.mem_flatMap, List.mem_map]
+  constructor
+  · rintro ⟨other,member,field,present,equality⟩
+    have sites := congrArg Prod.fst equality
+    have values := congrArg Prod.snd equality
+    dsimp only at sites values
+    cases sites
+    cases values
+    exact ⟨(syntaxOccurrences_iff root site).mp member,present⟩
+  · rintro ⟨subterm,present⟩
+    exact ⟨site,(syntaxOccurrences_iff root site).mpr subterm,value,present,rfl⟩
+
+/-- info: 'Solidity.Frontend.Admission.syntaxFieldUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxFieldUses_iff
 end Solidity.Frontend.Admission

@@ -1,5 +1,4 @@
 # The solc front end
-
 `SolkeyTestSuite` (`lake build SolkeyTestSuite`): solkey's `TestSuite.sol` from
 the AST the pinned soljson writes (`scripts/solc-ast.mjs` makes
 `tests/solc/TestSuite.ast.json`; `./scripts/check-solc-ast.sh` re-derives and
