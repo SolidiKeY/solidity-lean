@@ -120,7 +120,7 @@ async function run() {
     }
     if(config.suite==='contribution-menus'){
       await scenario(config.menuTrust==='recovery'?'native-contribution-menu-recovery':'native-contribution-menus',()=>require('./menu-lifecycle.cjs').run({vscode,config,events,sessionFor}));
-    }else if(config.suite==='workspace-symbols'){
+    }else if(['workspace-symbols','workspace-symbols-resolved'].includes(config.suite)){
       await scenario('native-workspace-symbols',()=>require('./workspace-symbol-lifecycle.cjs').run({vscode,config,events,sessionFor,bounded}));
     }else if(config.suite==='editor-language-scope'){
       await scenario('native-editor-language-scope',()=>require('./editor-language-lifecycle.cjs').run({vscode,config,events,sessionFor}));

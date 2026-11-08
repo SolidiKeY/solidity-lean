@@ -97,3 +97,9 @@ fixtures for ordered function/absent/function workspace-symbol API queries.
 Use one worker/obligation/trial, zero warmups and protocol on. Raw API diagnostics
 and owned process/source/session protocol records remain separate from rendered
 search, cancellation UI, verification and the original row judgments.
+
+`workspace-symbols-resolved` is a separate readiness-bound case: it waits within
+the original operation deadline for the current source's actual compiler-ready
+notification (local) or `ResolutionSucceeded` notification (Dafny) before querying.
+It keeps the immediate-query case and its failures separate. Resolution readiness
+establishes neither a verification verdict nor whole-row parity.
