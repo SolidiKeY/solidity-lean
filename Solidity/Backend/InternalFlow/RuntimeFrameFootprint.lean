@@ -105,7 +105,7 @@ theorem array_write (repr : StateRepr L b frame F σ base m)
   · have impossible : σ.heap.writeAddr (.index ref .dyn (indexValue index)) value ≠ none := by
       simp only [Heap.writeAddr,Heap.setIndex,indexValue,Int.toNat_natCast]
       exact fun absent =>
-        Option.noConfusion ((ite_eq_left
+        Option.some_ne_none _ ((ite_eq_left
           (show index.val < (MObj.elems .dyn (σ.heap.get ref)).length from live)).symm.trans absent)
     exact (impossible hsource).elim
 
