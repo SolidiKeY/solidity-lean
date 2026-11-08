@@ -42,9 +42,26 @@ def catalogue():
         m['description']=m['definition']+': '+m['old']+' -> '+m['new']
     return ms
 
+def failure_names(mod,out):
+    lines=source(mod.replace('.','/')+'.lean').splitlines()
+    declarations=[]
+    for i,line in enumerate(lines,1):
+        match=re.match(r'^(?:@\[[^]]+\]\s*)?(?:(?:private|protected|noncomputable|unsafe)\s+)*(theorem|lemma|def|example)\b(?:\s+([^\s:(]+))?',line)
+        if match: declarations.append((i,match[2] or 'anonymous '+match[1]))
+    names=[]
+    for match in re.finditer(r'\.lean:(\d+):\d+: error(?:\([^)]*\))?:',out):
+        n=int(match[1]); previous=[d for d in declarations if d[0]<=n]
+        names.append(mod+':'+str(n)+':'+(previous[-1][1] if previous else 'unattributed'))
+    return sorted(set(names))
+
 def main():
-    a=argparse.ArgumentParser(); a.add_argument('--work',type=pathlib.Path); a.add_argument('--check',action='store_true'); a.add_argument('--seconds',type=int,default=3600); a.add_argument('--timeout',type=int,default=240); args=a.parse_args()
+    a=argparse.ArgumentParser(); a.add_argument('--work',type=pathlib.Path); a.add_argument('--check',action='store_true'); a.add_argument('--refresh',action='store_true'); a.add_argument('--seconds',type=int,default=3600); a.add_argument('--timeout',type=int,default=240); args=a.parse_args()
     ms=catalogue()
+    if args.refresh:
+        rs=json.loads((HERE/'results.json').read_text())
+        for r in rs:
+            if r['verdict']=='KILLED': r['killed_by']=failure_names(r['checks'][-1]['module'],r['checks'][-1]['decisive_output'])
+        dump(HERE/'results.json',rs); dump(HERE/'summary.json',summarize(ms,rs)); return
     if args.check:
         assert json.loads((HERE/'mutants.json').read_text())==ms
         rs=json.loads((HERE/'results.json').read_text()); assert len({r['id'] for r in rs})==len(rs)
@@ -167,7 +184,7 @@ def main():
                                 killed.append(mod+':'+str(n)+':'+(names[-1] if names else 'anonymous'))
                         break
             finally:p.write_text(original)
-            rs.append(dict(id=m['id'],area=m['area'],file=m['path'],line=m['line'],description=m['description'],verdict=verdict,killed_by=sorted(set(killed)) if verdict=='KILLED' else [],seconds=round(sum(c['seconds'] for c in checks),3),baseline_pass=True,checks=checks))
+            rs.append(dict(id=m['id'],area=m['area'],file=m['path'],line=m['line'],description=m['description'],verdict=verdict,killed_by=failure_names(checks[-1]['module'],checks[-1]['decisive_output']) if verdict=='KILLED' else [],seconds=round(sum(c['seconds'] for c in checks),3),baseline_pass=True,checks=checks))
             dump(HERE/'results.json',rs); dump(HERE/'summary.json',summarize(ms,rs)); print(m['id'],verdict,rs[-1]['seconds'],killed[:2],flush=True)
 
 def summarize(ms,rs):
