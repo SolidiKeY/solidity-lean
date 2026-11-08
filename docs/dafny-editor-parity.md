@@ -2109,3 +2109,49 @@ check and fail closed at the typed-formula reader when that correspondence is
 unavailable. A passing numeric retained-formula slot control remains separate
 from source attribution, span publication and full editor parity. Existing
 compiler-expansion ownership holds, proof budgets and final gates are unchanged.
+
+
+### Native Workspace Trust menu collection
+
+The existing contribution-menu runner now has an explicit
+`--menu-trust transitions` mode. It enables real Workspace Trust in its isolated
+user profile, starts with the native startup prompt disabled, and reads back the
+public effective settings. It does not inject `isWorkspaceTrusted` or context
+keys. The built-in Workspace Trust editor's actual Trust/Don't Trust buttons are
+operated through native mouse dispatch. Unsupported target activation is not
+forced in restricted mode; static contribution observations remain separate
+from runtime readiness.
+
+The collection preserves the original five trusted phases and adds restricted
+source, trust loss and restored-trust endpoints. Source bytes, URI, version,
+session and public trust readbacks bind the observations. Both trust-button
+screenshots have matching before/after UI readbacks; capture-time changes fail.
+Local restored trust must restore the declared submenu/actions, and untrusted
+local source must hide them. Pinned Dafny restricted-mode visibility is recorded
+without inventing a trust predicate. The original three-second preparation
+limit, product predicates and proof settings are unchanged. Tests use injected
+CDP/envelopes and are not native evidence. Real reload/capture failures remain
+failures; no raster/ABA, macOS, full lifecycle or row-judgment claim follows.
+
+
+The supervisor's explicit `native-editor` profile preserves the original
+native runner's RSS guards and headroom checks without applying Lean's virtual
+address-space cap to Electron. Observed Lean/Lake children fail that profile; process sampling cannot prove
+absence of short-lived invocations, so this is restricted to reviewed
+editor-only collection and never admits proof work. Finite inherited address
+limits refuse native admission without being lifted.
+The default Lean profile retains its existing address-space and aggregate
+limits. This distinguishes Electron address reservation from resident memory;
+it grants no proof-budget or resource-stop waiver.
+
+
+The fresh paired Linux trust attempt retains failures. Both targets captured
+initial restricted menus and real trust gain with public API confirmation.
+Local retained all five trusted phases and native trust-loss UI data, then
+post-loss DOM capture timed out and no fresh host report arrived. Dafny failed
+the unchanged three-second untitled menu preparation. These are incomplete
+transitions, not successful restoration or full pairing. Owned cleanup has no
+survivors. A failed partial menu snapshot is now transported into aggregate
+reports even when the host report is absent; it cannot become a validated
+result. Original SIGTRAP/address-profile and output-reuse refusals are retained.
+No menu row is completed or judged equivalent from this evidence.
