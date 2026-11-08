@@ -176,8 +176,8 @@ function hoverContent(index,target){
   let documentation=typeof target.documentation==='string'?target.documentation:target.documentation?.text;
   const docRange=origin&&target.documentation?.src?index.nodeRange(target,target.documentation.src):null;
   if(docRange){const raw=origin.text.slice(offset(origin.text,docRange.start),offset(origin.text,docRange.end));
-    if(raw.startsWith('///'))documentation=raw.split(/\r?\n/).map(line=>line.replace(/^\s*\/\/\/ ?/,'')).join('\n');
-    else if(raw.startsWith('/**'))documentation=raw.slice(3,-2).split(/\r?\n/).map(line=>line.replace(/^\s*\* ?/,'')).join('\n');
+    if(raw.startsWith('///'))documentation=raw.split(/\r\n|\r|\n/).map(line=>line.replace(/^\s*\/\/\/ ?/,'')).join('\n');
+    else if(raw.startsWith('/**'))documentation=raw.slice(3,-2).split(/\r\n|\r|\n/).map(line=>line.replace(/^\s*\* ?/,'')).join('\n');
   }
   return (documentation?.trim()?documentation.trim()+'\n':'')+'```solidity\n'+description+'\n```';
 }
