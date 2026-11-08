@@ -18,7 +18,7 @@ function install(vscode,context,servers,reportError){
   const raw=async(method,doc,params,token)=>{
     const controller=new AbortController(),registration=token?.onCancellationRequested(()=>controller.abort());
     if(token?.isCancellationRequested)controller.abort();
-    try{if(!isSolidityFile(doc))throw actionFailure('Unsupported editor document');return await servers.request(method,doc,params,{signal:controller.signal});}finally{registration?.dispose();}
+    try{if(!isSolidityFile(doc))throw actionFailure('Unsupported editor document');const owner=actionSnapshot(doc);assertActionCurrent(owner,token);const result=await servers.request(method,doc,params,{signal:controller.signal});assertActionCurrent(owner,token);return result;}finally{registration?.dispose();}
   };
   const query=async(method,doc,params,token)=>{
     try{return await raw(method,doc,params,token);}
