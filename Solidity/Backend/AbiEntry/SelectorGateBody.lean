@@ -115,13 +115,13 @@ def certificate : Interface.SelectorGateBodyCertificate program where
       whole_selected base frag index tag body outFrag bodyCore,body_selected base frag body outFrag bodyCore⟩
   executed := executed
 
-/-- info: 'Solidity.Backend.AbiEntry.SelectorGateBody.admitted' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiEntry.SelectorGateBody.admitted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms admitted
 /-- info: 'Solidity.Backend.AbiEntry.SelectorGateBody.whole_selected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms whole_selected
 /-- info: 'Solidity.Backend.AbiEntry.SelectorGateBody.body_selected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms body_selected
-/-- info: 'Solidity.Backend.AbiEntry.SelectorGateBody.condition_code' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.AbiEntry.SelectorGateBody.condition_code' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms condition_code
 /-- info: 'Solidity.Backend.AbiEntry.SelectorGateBody.code' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms code
