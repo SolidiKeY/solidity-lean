@@ -98,6 +98,8 @@ def main():
             p.write_text(''.join(lines[:i])+tail.replace(m['old'],m['new'],1))
             overlay=args.work/'overlay'; overlay.mkdir(exist_ok=True)
             for x in overlay.rglob('*.olean'):x.unlink()
+            for x in (ROOT/'.lake/build/lib/lean').rglob('*.olean'):
+                link=overlay/x.relative_to(ROOT/'.lake/build/lib/lean'); link.parent.mkdir(parents=True,exist_ok=True); link.symlink_to(x)
             menv=dict(env,LEAN_PATH=str(overlay)+':'+str(ROOT/'.lake/build/lib/lean'))
             changed=module(m['path']); wanted=set()
             for target in map(module,m['targets']): wanted |= {d for d in deps(target) if changed in deps(d)}
@@ -112,6 +114,7 @@ def main():
             try:
                 for mod in order:
                     dest=overlay/(mod.replace('.','/')+'.olean'); dest.parent.mkdir(parents=True,exist_ok=True)
+                    if dest.exists() or dest.is_symlink(): dest.unlink()
                     c,out=run(['lean','-j1','--tstack=131072','-o',str(dest),mod.replace('.','/')+'.lean'],m['id']+'-'+mod,menv)
                     c['module']=mod; checks.append(c)
                     if c['returncode']:
