@@ -28,14 +28,14 @@ theorem empty_receive (selector value : Fin W) :
   have reached := actual selector (wmod 0) value
   have small : (wmod 0).val<4 := by decide
   have empty : (wmod 0).val=0 := rfl
-  simpa only [entryRouteOutcome,if_pos small,specialOutcome,specialResult,if_pos empty,recv,
-    Option.orElse_some,specialRowOutcome,Bool.true_or,if_true] using reached
+  simpa only [written,Bool.false_eq_true,entryRouteOutcome,ite_eq_left small,specialOutcome,specialResult,ite_eq_left empty,recv,
+    Option.orElse_some,specialRowOutcome,Bool.true_or,ite_true] using reached
 
 theorem short_fallback (selector value : Fin W) (size : Fin W) (nonempty : size.val≠0) (small : size.val<4) :
     run compiled.code (machine selector size value)=.ok (written selector size value (wmod 22)) 0 := by
   have reached := actual selector size value
-  simpa only [entryRouteOutcome,if_pos small,specialOutcome,specialResult,if_neg nonempty,fb,
-    specialRowOutcome,Bool.true_or,if_true] using reached
+  simpa only [written,Bool.false_eq_true,entryRouteOutcome,ite_eq_left small,specialOutcome,specialResult,ite_eq_right nonempty,fb,
+    specialRowOutcome,Bool.true_or,ite_true] using reached
 
 theorem ordinary_zero :
     run compiled.code (machine (wmod 0xdeadbe00) (wmod 4) (wmod 0))=
@@ -43,7 +43,8 @@ theorem ordinary_zero :
   have reached := actual (wmod 0xdeadbe00) (wmod 4) (wmod 0)
   have full : ¬(wmod 4).val<4 := by decide
   have chosen : ordinaryResult table (wmod 0xdeadbe00)=some (wmod 33,false) := by decide
-  simpa only [entryRouteOutcome,if_neg full,chosen,specialRowOutcome,Bool.false_or,decide_true,if_true] using reached
+  have observed : (machine (wmod 0xdeadbe00) (wmod 4) (wmod 0)).callvalue.val=0 := rfl
+  simpa only [written,Bool.false_eq_true,entryRouteOutcome,ite_eq_right full,chosen,specialRowOutcome,Bool.false_or,decide_eq_true observed,ite_true] using reached
 
 theorem ordinary_reject_no_fallback (value : Fin W) (nonzero : value.val≠0) :
     run compiled.code (machine (wmod 0xdeadbe00) (wmod 4) value)=.revert := by
@@ -51,8 +52,8 @@ theorem ordinary_reject_no_fallback (value : Fin W) (nonzero : value.val≠0) :
   have full : ¬(wmod 4).val<4 := by decide
   have chosen : ordinaryResult table (wmod 0xdeadbe00)=some (wmod 33,false) := by decide
   have observed : (machine (wmod 0xdeadbe00) (wmod 4) value).callvalue.val≠0 := nonzero
-  simpa only [entryRouteOutcome,if_neg full,chosen,specialRowOutcome,Bool.false_or,
-    decide_eq_false observed,if_false] using reached
+  simpa only [written,Bool.false_eq_true,entryRouteOutcome,ite_eq_right full,chosen,specialRowOutcome,Bool.false_or,
+    decide_eq_false observed,ite_false] using reached
 
 theorem full_miss_fallback (value : Fin W) :
     run compiled.code (machine (wmod 0) (wmod 4) value)=.ok (written (wmod 0) (wmod 4) value (wmod 22)) 0 := by
@@ -60,8 +61,8 @@ theorem full_miss_fallback (value : Fin W) :
   have full : ¬(wmod 4).val<4 := by decide
   have nonempty : (wmod 4).val≠0 := by decide
   have missed : ordinaryResult table (wmod 0)=none := by decide
-  simpa only [entryRouteOutcome,if_neg full,missed,specialOutcome,specialResult,if_neg nonempty,
-    fb,specialRowOutcome,Bool.true_or,if_true] using reached
+  simpa only [written,Bool.false_eq_true,entryRouteOutcome,ite_eq_right full,missed,specialOutcome,specialResult,ite_eq_right nonempty,
+    fb,specialRowOutcome,Bool.true_or,ite_true] using reached
 
 theorem absent_all (selector size value : Fin W) :
     run (EntryRoutes.compiled C 7 [] none none).code (machine selector size value)=.revert := by
@@ -70,11 +71,11 @@ theorem absent_all (selector size value : Fin W) :
   have missed : ordinaryResult [] selector=none := rfl
   have absent : specialResult none none size=none := by
     by_cases empty : size.val=0
-    · simp only [specialResult,if_pos empty,Option.orElse_none]
-    · simp only [specialResult,if_neg empty]
+    · simp only [specialResult,ite_eq_left empty,Option.orElse_none]
+    · simp only [specialResult,ite_eq_right empty]
   by_cases small : size.val<4
-  · simpa only [entryRouteOutcome,if_pos small,specialOutcome,absent,specialRowOutcome] using reached
-  · simpa only [entryRouteOutcome,if_neg small,missed,specialOutcome,absent,specialRowOutcome] using reached
+  · simpa only [written,Bool.false_eq_true,entryRouteOutcome,ite_eq_left small,specialOutcome,absent,specialRowOutcome] using reached
+  · simpa only [written,Bool.false_eq_true,entryRouteOutcome,ite_eq_right small,missed,specialOutcome,absent,specialRowOutcome] using reached
 
 theorem padded_collision_fixed (value : Fin W) :
     run compiled.code (machine (wmod 0xdeadbe00) (wmod 3) value)=
@@ -91,8 +92,8 @@ theorem equal_label_no_bypass (value : Fin W) (nonzero : value.val≠0) :
   have full : ¬(wmod 4).val<4 := by decide
   have chosen : ordinaryResult table (wmod 0xdeadbe00)=some (wmod 33,false) := by decide
   have observed : (machine (wmod 0xdeadbe00) (wmod 4) value).callvalue.val≠0 := nonzero
-  simpa only [entryRouteOutcome,if_neg full,chosen,specialRowOutcome,Bool.false_or,
-    decide_eq_false observed,if_false] using reached
+  simpa only [written,Bool.false_eq_true,entryRouteOutcome,ite_eq_right full,chosen,specialRowOutcome,Bool.false_or,
+    decide_eq_false observed,ite_false] using reached
 
 theorem malformed_length_fault :
     run compiled.code {machine (wmod 0) (wmod 0) (wmod 0) with mem := fun _ => .slot (.root 0)}=.fault := by rfl
