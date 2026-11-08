@@ -121,7 +121,9 @@ theorem protected_and_saved :
 #guard_msgs (whitespace := lax) in #print axioms empty_table_executes_default
 /-- info: 'Solidity.Backend.AbiEntry.CoreDispatchControls.default_can_revert' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms default_can_revert
-/-- info: 'Solidity.Backend.AbiEntry.CoreDispatchControls.heterogeneous_outputs' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiEntry.CoreDispatchControls.heterogeneous_outputs' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms heterogeneous_outputs
 /-- info: 'Solidity.Backend.AbiEntry.CoreDispatchControls.protected_and_saved' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms protected_and_saved
