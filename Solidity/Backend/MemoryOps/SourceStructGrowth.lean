@@ -8,6 +8,7 @@ word corollary consumes an existing target allocation certificate. -/
 namespace Solidity.Backend.MemoryOps
 open Semantics
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Honest preservation of the actual occupied Source cell plus intrinsic Keeps. -/
 theorem SourceBoolMemoryAt.transport {E : Source.Env} {Γ : Source.RCtx} {H H' : HTy}
     {y z : Source.EMState E Γ} {addr : Nat} {hp : Heap H} {hp' : Heap H'}
@@ -53,8 +54,9 @@ def allocatedSourceAddress (old : Nat → Nat) (freshId freshAddress : Nat) : Na
 theorem allocatedSourceAddress_old (old : Nat → Nat) {H : HTy} (fresh : Nat)
     (i : Nat) (hi : i<H.length) : allocatedSourceAddress old H.length fresh i=old i := by
   unfold allocatedSourceAddress
-  rw [if_neg (Nat.ne_of_lt hi)]
+  rw [ite_eq_right (Nat.ne_of_lt hi)]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The actual existing allocators produce the extension, old observations,
 fresh relation and MemOK. Freshness follows occupied cells and real alloc_get.
 The supplied intrinsic object has its existing intrinsic length validity. -/
@@ -109,9 +111,9 @@ theorem SourceBoolStructAt.alloc_bool {E : Source.Env} {Γ : Source.RCtx} {H : H
   rw [source_bool_alloc y xs] at hmk
   refine ⟨source_bool_alloc y xs,hk,hr.transport hk hs ha,?_,hmk.1,rfl,?_,ha,?_,hn _ _ hr.parent,hn _ _ hr.leaf,?_,rfl,rfl,rfl,rfl,rfl⟩
   · change SourceBoolMemoryAt z (allocatedSourceAddress address H.length y.2.heap.next H.length) (hp.alloc o).1 (hp.alloc o).2 .dyn
-    rw [allocatedSourceAddress,if_pos rfl]
+    rw [allocatedSourceAddress,ite_eq_left rfl]
     exact hnew
-  · exact if_pos rfl
+  · exact ite_eq_left rfl
   · intro R q
     exact Nat.ne_of_lt q.id_lt
   · intro q hq
@@ -189,6 +191,7 @@ theorem SourceBoolStructAt.alloc_select_delete {E : Source.Env} {Γ : Source.RCt
   exact hqw
 
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Supported EMPTY-default word application. The named old observer is
 transported through actual Source default/State.allocPush/word allocation. All
 initial allocator/space premises remain explicit; no nonempty/all-profile compiler. -/
