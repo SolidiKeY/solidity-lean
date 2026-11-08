@@ -419,7 +419,9 @@ class SolidityService {
   }
   codeActions(doc,params){
     doc.codeActionSet=null;const actions=[],add=(title,diagnostic,range,newText)=>actions.push({title,kind:'quickfix',diagnostics:[diagnostic],edit:{documentChanges:[{textDocument:{uri:doc.uri,version:doc.version},edits:[{range,newText}]}]}});
-    if(params.context?.only&&!params.context.only.some(k=>'quickfix'.startsWith(k)))return [];
+    // CodeActionKind identifiers are dot-separated hierarchies, not lexical prefixes.
+    // This producer emits only the base quickfix kind; descendants do not select it.
+    const only=params.context?.only;if(only!==undefined){if(!Array.isArray(only)||only.some(k=>typeof k!=='string'))throw failure('Invalid code action kind filter',-32602);if(!only.some(k=>k===''||k==='quickfix'))return [];}
     // Client diagnostics select current compiler facts; they do not authorize edits.
     const batch=doc.publishedDiagnostics;
     if(!this.current(doc,doc.version)||!batch||batch.uri!==doc.uri||batch.version!==doc.version||batch.sourceHash!==hash(doc.text)||batch.generation!==this.generation||batch.synchronizationId!==doc.synchronizationId)return actions;
