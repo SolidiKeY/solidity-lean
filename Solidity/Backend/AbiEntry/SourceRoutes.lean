@@ -26,6 +26,7 @@ private theorem eq_reverse (left right : Nat) : decide (left=right)=decide (righ
   simp only [decide_eq_true_eq]
   exact eq_comm
 
+set_option backward.isDefEq.respectTransparency false in
 theorem predicate {E : Source.Env} (global : Source.Glob E) (signature : List Char)
     (frame : Source.Fr) (full : 4≤frame.cd.length) :
     decide ((selectorWord global signature).val=(rawSelectorWord frame).val)=
@@ -37,7 +38,8 @@ theorem predicate {E : Source.Env} (global : Source.Glob E) (signature : List Ch
   have normalized : Scalar.run (SelectorMatch.code (SelectorMatch.sourceSelector global signature))
       [BitVec.ofNat 256 (Solidity.AbiEntry.load frame.cd 0)]=
       some [Scalar.flag (decide ((rawSelectorWord frame).val=(selectorWord global signature).val))] := by
-    simpa only [BitVec.toNat_ofNat,Nat.mod_eq_of_lt bounded,SelectorMatch.source_value] using numeric
+    simpa only [BitVec.toNat_ofNat,Nat.mod_eq_of_lt bounded,SelectorMatch.source_value,
+      rawSelectorWord,selectorWord] using numeric
   have same := (List.cons.inj (Option.some.inj (normalized.symm.trans source))).1
   have checked := flags (decide ((rawSelectorWord frame).val=(selectorWord global signature).val))
     (global.selector signature==frame.cd.take 4) same
