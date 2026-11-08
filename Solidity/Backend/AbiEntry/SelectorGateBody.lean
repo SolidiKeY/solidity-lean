@@ -59,9 +59,9 @@ theorem run_code (address : Nat) (tag selector : Fin W) (machine : Machine)
       if tag.val=selector.val then .ok machine 0 else .revert := by
   by_cases same : tag.val=selector.val
   · simp only [run,exec,Instr.step,Machine.next,Out.bind,initial,same,decide_true,bword,
-      if_true,if_false,Nat.one_ne_zero]
+      ite_true,ite_false,Nat.one_ne_zero]
   · simp only [run,exec,Instr.step,Machine.next,Out.bind,initial,same,decide_false,bword,
-      Bool.false_eq_true,if_false,if_true]
+      Bool.false_eq_true,ite_false,ite_true]
 
 theorem executed (base : Nat) (frag : Frag Γ) (index : Idx Γ (.val .uint)) (tag : Fin W)
     (body : Prog C Γ Δ) (outFrag : Frag Δ) (bodyCore : inFragP frag body=some outFrag)
@@ -79,9 +79,9 @@ theorem executed (base : Nat) (frag : Frag Γ) (index : Idx Γ (.val .uint)) (ta
   have guardRun : run [.mload (cellOf base index),.push (.val tag),.eq,.jumpi 1,.revert] machine=
       if tag.val=selector.val then .ok machine 0 else .revert := run_code _ tag selector machine initial
   by_cases same : tag.val=selector.val
-  · rw [if_pos same] at guardRun ⊢
+  · rw [ite_eq_left same] at guardRun ⊢
     exact run_append_ok guardRun
-  · rw [if_neg same] at guardRun ⊢
+  · rw [ite_eq_right same] at guardRun ⊢
     exact run_append_revert guardRun
 
 theorem miss_before_body (base : Nat) (frag : Frag Γ) (index : Idx Γ (.val .uint)) (tag : Fin W)
@@ -91,7 +91,7 @@ theorem miss_before_body (base : Nat) (frag : Frag Γ) (index : Idx Γ (.val .ui
     run (selectedWhole base frag index tag body outFrag bodyCore).code machine=.revert := by
   rw [executed base frag index tag body outFrag bodyCore _ _
     (whole_selected base frag index tag body outFrag bodyCore) (body_selected base frag body outFrag bodyCore)
-    machine selector initial,if_neg miss]
+    machine selector initial,ite_eq_right miss]
 
 /-- Reuse the published Source selector predicate; body/signature association remains separate. -/
 theorem source_executed {E : Source.Env} (global : Source.Glob E) (signature : List Char)
