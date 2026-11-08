@@ -129,7 +129,7 @@ def certificate : Interface.BoolBindingBodyCertificate program where
       code base label body outFrag bodyCore⟩
   executed := executed
 
-/-- info: 'Solidity.Backend.AbiEntry.BoolBindingBody.admitted' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiEntry.BoolBindingBody.admitted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms admitted
 /-- info: 'Solidity.Backend.AbiEntry.BoolBindingBody.whole_selected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms whole_selected
