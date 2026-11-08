@@ -53,6 +53,7 @@ theorem source_refs_write {E : Source.Env} {Γ : Source.RCtx} {H : HTy}
   simp only [ht,↓reduceDIte]
   rfl
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Redirecting a parent slot changes no Boolean object, including retained old
 aliases and the newly selected child. Type separation supplies the necessary
 parent/child address inequality; no global injection is required. -/
@@ -92,7 +93,7 @@ theorem SourceBoolRefsAt.write_reference {E : Source.Env} {Γ : Source.RCtx} {H 
     rfl
   refine ⟨out,z,?_,hs,⟨?_,?_⟩,hmk,rfl,elems,child_frame,?_,⟨rfl,rfl,rfl,rfl⟩⟩
   · simp only [Heap.writeAddr,Heap.setIndex,Evm.Memory.indexValue,Int.toNat_natCast]
-    exact if_pos hi
+    exact ite_eq_left hi
   · change (y.2.heap.write _ _ ht).get a=some _
     rw [Source.Heap.write_get,elems]
   · intro q hq
@@ -149,7 +150,7 @@ theorem SourceBoolRefsAt.write_reference_word {E : Source.Env} {Γ : Source.RCtx
     have hw : σ.heap.writeAddr (.index r .dyn (Evm.Memory.indexValue i)) v=
         some (σ.heap.set r (MObj.setElem .dyn (σ.heap.get r) i.val v)) := by
       simp only [Heap.writeAddr,Heap.setIndex,Evm.Memory.indexValue,Int.toNat_natCast]
-      exact if_pos hi
+      exact ite_eq_left hi
     exact Option.some.inj (ho.symm.trans hw)
   obtain ⟨_,_,hc,_⟩ | ⟨hn,_⟩ := (hm.arrays.arrays r).write i v
   · exact ⟨out,z,ho,hs,hc,hr',hm',hout ▸ hm.setReference r i.val hi v,hl,he,hchildren,hsource,heffects⟩
