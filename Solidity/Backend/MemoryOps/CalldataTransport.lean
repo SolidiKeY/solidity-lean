@@ -53,8 +53,8 @@ theorem decodedArray_overwrite_transport {D : Source.Layout} {τ : Source.STy} {
   obtain ⟨s, v, hs, hm, hr⟩ := decodedArray_overwrite_read hc hp dst a values hl rel hr offset start stop i hb hd hi
   exact ⟨s, v, hs, hm, hr, overwriteSlice_frame hp dst q a offset _ hd hne⟩
 
-/-- info: 'Solidity.Backend.MemoryOps.decodedArray_overwrite_read' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.decodedArray_overwrite_read' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms decodedArray_overwrite_read
-/-- info: 'Solidity.Backend.MemoryOps.decodedArray_overwrite_transport' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.decodedArray_overwrite_transport' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms decodedArray_overwrite_transport
 end Solidity.Backend.MemoryOps
