@@ -1,5 +1,6 @@
 import Solidity.Yul.Compilation.ScopedLoopExecution
 import Solidity.Yul.Compilation.ScopedControlCompletion
+import Solidity.Yul.Compilation.CompletionControls
 /-! Reverse finite-success correspondence for existing scoped body/post loop
 artifacts. Actual successful model traces supply genuine source completions;
 model noncompletion faults are not source/native divergence equivalence. -/
@@ -39,10 +40,12 @@ theorem source_more (condition : ProducerExpressions.Compiled fc test)
    (sourceLocals mid) stepped
  have remaining' : evalLoop H .nil True.intro test condition.profile step post.compiled.profile
    work body.compiled.profile (sourceLocals next) = some (⟨sourceLocals out,.normal⟩ : Outcome c n) := by
-   obtain ⟨extra,eq⟩ := Nat.exists_eq_add_of_le (show hr ≤ H by dsimp only [H]; omega)
-   rw [eq]
-   exact evalLoop_refines_add hr extra .nil True.intro test condition.profile step post.compiled.profile
-     work body.compiled.profile (sourceLocals next) _ remaining
+   exact CompletionControls.completed_horizon
+     (fun fuel => evalLoop fuel .nil True.intro test condition.profile step post.compiled.profile
+       work body.compiled.profile (sourceLocals next))
+     (fun fuel extra => evalLoop_refines_add fuel extra .nil True.intro test condition.profile
+       step post.compiled.profile work body.compiled.profile (sourceLocals next))
+     (show hr ≤ H by dsimp only [H]; omega) remaining
  change Option.bind (evalExpr H .nil True.intro test condition.profile (sourceLocals locals)) _ = _
  rw [tested]
  change (if (condition.value locals).toNat = 0 then _ else _) = _
