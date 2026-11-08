@@ -2109,3 +2109,26 @@ check and fail closed at the typed-formula reader when that correspondence is
 unavailable. A passing numeric retained-formula slot control remains separate
 from source attribution, span publication and full editor parity. Existing
 compiler-expansion ownership holds, proof budgets and final gates are unchanged.
+
+
+### Native Workspace Trust menu collection
+
+The existing contribution-menu runner now has an explicit
+`--menu-trust transitions` mode. It enables real Workspace Trust in its isolated
+user profile, starts with the native startup prompt disabled, and reads back the
+public effective settings. It does not inject `isWorkspaceTrusted` or context
+keys. The built-in Workspace Trust editor's actual Trust/Don't Trust buttons are
+operated through native mouse dispatch. Unsupported target activation is not
+forced in restricted mode; static contribution observations remain separate
+from runtime readiness.
+
+The collection preserves the original five trusted phases and adds restricted
+source, trust loss and restored-trust endpoints. Source bytes, URI, version,
+session and public trust readbacks bind the observations. Both trust-button
+screenshots have matching before/after UI readbacks; capture-time changes fail.
+Local restored trust must restore the declared submenu/actions, and untrusted
+local source must hide them. Pinned Dafny restricted-mode visibility is recorded
+without inventing a trust predicate. The original three-second preparation
+limit, product predicates and proof settings are unchanged. Tests use injected
+CDP/envelopes and are not native evidence. Real reload/capture failures remain
+failures; no raster/ABA, macOS, full lifecycle or row-judgment claim follows.

@@ -62,3 +62,18 @@ The serial Lake configuration and cached shim must match tracked sources.
 These local guards rely on the existing trusted checkout and external bounded
 cgroup mapping. They are not H127 sealed-input, complete resource/measurement
 provenance or whole-container cleanup acceptance. All STOPs remain unchanged.
+
+The `retained-transfers.py` API inspects the sealed historical ReadBounds6513
+native binary against the current tracked transfer classifier. Fixed binary,
+build and selected-inventory pins identify its inputs; the independently pinned
+baseline supplies exact reviewed origin bodies. All six reviewed functions are
+disassembled anew, including conditional branches and unknown/indirect targets.
+Canonical absolute binary paths and end-of-options separators prevent filenames
+from becoming tool options. Tool versions/hashes and input stability are recorded.
+The caller must hold the writer lease and bound the invocation.
+
+This inspection executes GNU data-inspection tools only. It does not execute
+the verifier, rebuild current source, authenticate a current native/WASM closure,
+prove semantic purity or release a runtime/performance STOP. Historical static
+results and current-source acceptance remain separate. Raw results belong in the
+private coordination repository, never beside these scripts.
