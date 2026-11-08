@@ -146,4 +146,30 @@ theorem visibility_carriers (v : Visibility) (cv : CtorVis) (sv : StateVis) :
 /-- info: 'Solidity.Frontend.Admission.OccurrenceControls.visibility_carriers' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms visibility_carriers
 
+
+/-! Regression: written mutability survives unused declaration traversal, while getter inference must not create raw written qualifiers. These are syntax inventories, not effect/admission witnesses. -/
+def explicitMutabilityUnit (state : Option Mutability) : Syn .unit :=
+  .unit (.cons (.topPart (.function (.ident "unused") .nil none state .nil false none .nil .none)) .nil)
+
+theorem explicit_mutability_unused (state : Option Mutability) :
+    (declarationMutabilityUses (explicitMutabilityUnit state).env).map Prod.snd = state.toList ∧
+    (syntaxMutabilityUses (explicitMutabilityUnit state)).map Prod.snd = state.toList := by
+  cases state <;> exact ⟨rfl,rfl⟩
+
+theorem mutability_carriers (state : Mutability) (payable : Bool) :
+    [mutabilityFieldsAt (Syn.constructor .nil .nil payable none (.block .nil)),
+     mutabilityFieldsAt (Syn.function (t := true) (.ident "f") .nil none (some state) .nil false none .nil .none),
+     mutabilityFieldsAt (Syn.fallback .fbNoParams true (some state) .nil false none .none),
+     mutabilityFieldsAt (Syn.receive true payable .nil false none .none),
+     mutabilityFieldsAt (Syn.fnType .nil none (some state) .nil),
+     mutabilityFieldsAt (Syn.stateVar (.elem .bool) (some .pub) (some .constant) none false "x" .none)] =
+      [if payable then [.payable] else [],[state],[state],
+       if payable then [.payable] else [],[state],[]] := by
+  cases payable <;> rfl
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.explicit_mutability_unused' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms explicit_mutability_unused
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.mutability_carriers' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms mutability_carriers
+
 end Solidity.Frontend.Admission.OccurrenceControls

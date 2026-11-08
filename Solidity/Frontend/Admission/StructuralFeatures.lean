@@ -746,4 +746,217 @@ theorem visibilityFeaturesAt_iff {c : Cat} (s : Syn c) (f : Feature) :
 /-- info: 'Solidity.Frontend.Admission.visibilityFeaturesAt_iff' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms visibilityFeaturesAt_iff
 
+
+/-! Regression: written mutability on unused declarations and function types is metadata, not a child. The five carriers use the shared syntax visitor. Absent/false stays empty; state-variable getters must not invent written pure/view qualifiers. This raw inventory proves neither mutability legality, effects, nonpayable entry checks nor admission. -/
+inductive DirectMutability : {c : Cat} → Syn c → Mutability → Prop where
+  | constructor (params mods vis body) :
+      DirectMutability (.constructor params mods true vis body) .payable
+  | function {t : Bool} (name params vis mods virtual override returns body) (state : Mutability) :
+      DirectMutability (.function (t := t) name params vis (some state) mods virtual override returns body) state
+  | fallback (sig external mods virtual override body) (state : Mutability) :
+      DirectMutability (.fallback sig external (some state) mods virtual override body) state
+  | receive (external mods virtual override body) :
+      DirectMutability (.receive external true mods virtual override body) .payable
+  | fnType (params vis returns) (state : Mutability) :
+      DirectMutability (.fnType params vis (some state) returns) state
+
+def mutabilityFieldsAt {c : Cat} (s : Syn c) : List Mutability :=
+  Syn.casesOn (motive := fun _ _ => List Mutability) s
+    ([])
+    (fun _ _ => [])
+    ([])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ payable _ _ => if payable then [.payable] else [])
+    (fun _ _ _ state _ _ _ _ _ => state.toList)
+    (fun _ _ _ _ _ => [])
+    (fun _ _ state _ _ _ _ => state.toList)
+    ([])
+    (fun _ _ _ => [])
+    (fun _ payable _ _ _ _ => if payable then [.payable] else [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ state _ => state.toList)
+    (fun _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    ([])
+    ([])
+    (fun _ _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    ([])
+    ([])
+    ([])
+    (fun _ _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+
+theorem DirectMutability.mem_fields {c : Cat} {s : Syn c} {state : Mutability}
+    (field : DirectMutability s state) : state ∈ mutabilityFieldsAt s := by
+  cases field <;> exact List.mem_singleton_self _
+
+theorem mutabilityFieldsAt_sound {c : Cat} (s : Syn c) (state : Mutability)
+    (present : state ∈ mutabilityFieldsAt s) : DirectMutability s state := by
+  cases s with
+  | constructor params mods payable vis body =>
+    cases payable with
+    | false => exact False.elim (List.not_mem_nil present)
+    | true =>
+      have same := List.mem_singleton.mp present
+      cases same
+      exact .constructor params mods vis body
+  | function name params vis stateOpt mods virtual override returns body =>
+    cases stateOpt with
+    | none => exact False.elim (List.not_mem_nil present)
+    | some value =>
+      have same := List.mem_singleton.mp present
+      cases same
+      exact .function name params vis mods virtual override returns body _
+  | fallback sig external stateOpt mods virtual override body =>
+    cases stateOpt with
+    | none => exact False.elim (List.not_mem_nil present)
+    | some value =>
+      have same := List.mem_singleton.mp present
+      cases same
+      exact .fallback sig external mods virtual override body _
+  | receive external payable mods virtual override body =>
+    cases payable with
+    | false => exact False.elim (List.not_mem_nil present)
+    | true =>
+      have same := List.mem_singleton.mp present
+      cases same
+      exact .receive external mods virtual override body
+  | fnType params vis stateOpt returns =>
+    cases stateOpt with
+    | none => exact False.elim (List.not_mem_nil present)
+    | some value =>
+      have same := List.mem_singleton.mp present
+      cases same
+      exact .fnType params vis returns _
+  | _ => exact False.elim (List.not_mem_nil present)
+
+theorem mutabilityFieldsAt_iff {c : Cat} (s : Syn c) (state : Mutability) :
+    state ∈ mutabilityFieldsAt s ↔ DirectMutability s state :=
+  ⟨mutabilityFieldsAt_sound s state,DirectMutability.mem_fields⟩
+
+def syntaxMutabilityUses {c : Cat} (root : Syn c) : List (SyntaxOccurrence × Mutability) :=
+  syntaxFieldUses root mutabilityFieldsAt
+
+theorem syntaxMutabilityUses_iff {c : Cat} (root : Syn c) (site : SyntaxOccurrence) (state : Mutability) :
+    (site,state) ∈ syntaxMutabilityUses root ↔ Syn.Sub site ⟨c,root⟩ ∧ DirectMutability site.2 state := by
+  rw [syntaxMutabilityUses, syntaxFieldUses_iff, mutabilityFieldsAt_iff]
+
+def declarationMutabilityUses (E : Env) : List (DeclarationOccurrence × Mutability) :=
+  declarationFieldUses E mutabilityFieldsAt
+
+theorem declarationMutabilityUses_iff (E : Env) (site : DeclarationOccurrence) (state : Mutability) :
+    (site,state) ∈ declarationMutabilityUses E ↔ site.Occurs E ∧ DirectMutability site.2.2 state := by
+  rw [declarationMutabilityUses, declarationFieldUses_iff, mutabilityFieldsAt_iff]
+
+def mutabilityFeaturesAt {c : Cat} (s : Syn c) : List Feature :=
+  (mutabilityFieldsAt s).map fun _ => .stateMutability
+
+theorem mutabilityFeaturesAt_iff {c : Cat} (s : Syn c) (f : Feature) :
+    f ∈ mutabilityFeaturesAt s ↔ f = .stateMutability ∧ ∃ state, DirectMutability s state := by
+  change (f ∈ (mutabilityFieldsAt s).map (fun _ => Feature.stateMutability)) ↔ _
+  rw [List.mem_map]
+  constructor
+  · rintro ⟨state,field,equal⟩
+    exact ⟨equal.symm, state, (mutabilityFieldsAt_iff s state).mp field⟩
+  · rintro ⟨rfl,state,field⟩
+    exact ⟨state,(mutabilityFieldsAt_iff s state).mpr field,rfl⟩
+
+/-- info: 'Solidity.Frontend.Admission.mutabilityFieldsAt_iff' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms mutabilityFieldsAt_iff
+/-- info: 'Solidity.Frontend.Admission.syntaxMutabilityUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxMutabilityUses_iff
+/-- info: 'Solidity.Frontend.Admission.declarationMutabilityUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms declarationMutabilityUses_iff
+/-- info: 'Solidity.Frontend.Admission.mutabilityFeaturesAt_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms mutabilityFeaturesAt_iff
+
 end Solidity.Frontend.Admission
