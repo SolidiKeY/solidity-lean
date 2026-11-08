@@ -230,7 +230,7 @@ theorem wide_bytes_body (value : Fin W) :
 #guard_msgs (whitespace := lax) in #print axioms short_before_word_and_body
 /-- info: 'Solidity.Backend.AbiEntry.WordCarrierEntryBodyControls.fuel_boundary' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms fuel_boundary
-/-- info: 'Solidity.Backend.AbiEntry.WordCarrierEntryBodyControls.protected_and_saved' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.AbiEntry.WordCarrierEntryBodyControls.protected_and_saved' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms protected_and_saved
 /-- info: 'Solidity.Backend.AbiEntry.WordCarrierEntryBodyControls.payable_bytes_body' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms payable_bytes_body
