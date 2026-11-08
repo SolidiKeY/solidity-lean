@@ -135,9 +135,9 @@ theorem checkedBoolSequence_none_keeps {D : Source.Layout} {H H' : HTy} {R Q : R
       checkedBoolSequence c off c' off' hp r a s t d q b u v f = none := by
   simp only [checkedBoolSequence_none_iff, boolTransfer_none_keeps c off e hk r a s t d,
     boolTransfer_none_keeps c' off' e hk q b u v f]
-/-- info: 'Solidity.Backend.MemoryOps.boolTransfer_result_lookup' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.boolTransfer_result_lookup' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms boolTransfer_result_lookup
-/-- info: 'Solidity.Backend.MemoryOps.boolTransfer_all_len' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.boolTransfer_all_len' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms boolTransfer_all_len
 /-- info: 'Solidity.Backend.MemoryOps.boolTransfer_none_lookup' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms boolTransfer_none_lookup
@@ -145,9 +145,9 @@ theorem checkedBoolSequence_none_keeps {D : Source.Layout} {H H' : HTy} {R Q : R
 #guard_msgs in #print axioms boolTransfer_none_length
 /-- info: 'Solidity.Backend.MemoryOps.boolTransfer_none_keeps' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms boolTransfer_none_keeps
-/-- info: 'Solidity.Backend.MemoryOps.checkedBoolSequence_some_iff' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedBoolSequence_some_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedBoolSequence_some_iff
-/-- info: 'Solidity.Backend.MemoryOps.checkedBoolSequence_none_ordered' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedBoolSequence_none_ordered' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedBoolSequence_none_ordered
 /-- info: 'Solidity.Backend.MemoryOps.checkedBoolSequence_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedBoolSequence_none_iff
@@ -282,9 +282,9 @@ theorem checkedUintSequence_none_keeps {D : Source.Layout} {H H' : HTy} {R Q : R
       checkedUintSequence c off c' off' hp r a s t d q b u v f = none := by
   simp only [checkedUintSequence_none_iff, uintTransfer_none_keeps c off e hk r a s t d,
     uintTransfer_none_keeps c' off' e hk q b u v f]
-/-- info: 'Solidity.Backend.MemoryOps.uintTransfer_result_lookup' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.uintTransfer_result_lookup' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms uintTransfer_result_lookup
-/-- info: 'Solidity.Backend.MemoryOps.uintTransfer_all_len' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.uintTransfer_all_len' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms uintTransfer_all_len
 /-- info: 'Solidity.Backend.MemoryOps.uintTransfer_none_lookup' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms uintTransfer_none_lookup
@@ -292,9 +292,9 @@ theorem checkedUintSequence_none_keeps {D : Source.Layout} {H H' : HTy} {R Q : R
 #guard_msgs in #print axioms uintTransfer_none_length
 /-- info: 'Solidity.Backend.MemoryOps.uintTransfer_none_keeps' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms uintTransfer_none_keeps
-/-- info: 'Solidity.Backend.MemoryOps.checkedUintSequence_some_iff' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedUintSequence_some_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedUintSequence_some_iff
-/-- info: 'Solidity.Backend.MemoryOps.checkedUintSequence_none_ordered' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedUintSequence_none_ordered' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedUintSequence_none_ordered
 /-- info: 'Solidity.Backend.MemoryOps.checkedUintSequence_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedUintSequence_none_iff
