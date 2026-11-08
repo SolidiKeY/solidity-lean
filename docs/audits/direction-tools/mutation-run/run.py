@@ -18,6 +18,8 @@ def catalogue():
         m={k:m[k] for k in ('id','path','line','old','new','definition')}
         m['targets']=['Solidity/Evm/SimLemmas.lean','Solidity/Optimizer/Simplify.lean','Solidity/Examples/Tactics/Operators.lean','Solidity/Examples/Tactics/Values.lean','Solidity/Examples/Tactics/SignedCasts.lean','Solidity/Examples/Tactics/ModularArithmetic.lean'] if m['path'].endswith('Ops.lean') else [m['path'],'Solidity/Examples/Tactics/CheckedBlock.lean']
         # Expensive dependent slices are explicit, never inferred from lexical mentions.
+        if m['id'] in ['M23','M24','M25']: m['targets'].insert(0,'Solidity/Backend/Scalar/Modular.lean')
+        if m['id']=='M27': m['targets'].insert(0,'Solidity/Backend/Scalar/Typed.lean')
         ms.append(m)
     def add(p,old,new,targets,desc):
         s=source(p); assert s.count(old)==1,(p,old,s.count(old))
