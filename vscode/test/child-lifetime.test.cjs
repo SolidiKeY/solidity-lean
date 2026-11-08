@@ -33,3 +33,24 @@ test('confirmed empty owned group needs one final process-table readback (actual
  fs.readdirSync=function(directory,...args){if(directory==='/proc')scans++;return read.call(this,directory,...args);};
  try{await require('../src/child-lifetime.cjs').waitForGroup(child);assert.equal(scans,1,'one fresh empty-group readback is sufficient; avoid consuming retirement budget twice');assert.equal(child.exitCode,0);}finally{fs.readdirSync=read;terminateTree(child);await closed;}
 });
+
+// Regression: ignored/closed parent stdio needs no preliminary global scan;
+// actual close and fresh final owned-group retirement remain mandatory.
+test('closed transport defers group scan until physical close and still retires live descendants',{skip:process.platform!=='linux'},async()=>{
+ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),dir=fs.mkdtempSync(path.join(os.tmpdir(),'closed-transport-')),marker=path.join(dir,'descendant.json'),stateModule=require.resolve('../src/process-state.cjs');
+ const sibling=spawn(process.execPath,['-e','setInterval(()=>{},1000)'],{detached:true,stdio:'ignore'});sibling.ownedGroup=true;const siblingClosed=trackChild(sibling),siblingBirth=sibling.processBirth;
+ const body=`const {spawn}=require('node:child_process'),fs=require('node:fs'),{processState}=require(${JSON.stringify(stateModule)});const descendant=spawn(process.execPath,['-e','setInterval(()=>{},1000)'],{stdio:'ignore'});descendant.once('spawn',()=>{const identity=processState(descendant.pid);fs.writeFileSync(${JSON.stringify(marker)},JSON.stringify(identity));process.exit(0);});`;
+ const child=spawn(process.execPath,['-e',body],{detached:true,stdio:'ignore'});child.ownedGroup=true;require('../src/child-lifetime.cjs').enableChildLifetimeObservation(child);const closed=trackChild(child);
+ try{await waitForClose(child,{closed});const trace=require('../src/child-lifetime.cjs').childLifetimeObservation(child),events=trace.events.map(e=>e.event),descendant=JSON.parse(fs.readFileSync(marker,'utf8'));
+  assert.ok(!events.includes('exit.group.read.start'),'Closed transport must not block close delivery on a redundant process-table scan');assert.ok(events.indexOf('child.close')<events.indexOf('group.read.start'),'Fresh final group readback still follows physical close');assert.ok(events.includes('group.kill.start'),'Live owned descendant must still be retired');assert.equal(groupMembers(child).some(running),false);const remaining=processState(descendant.pid);assert.ok(!remaining||remaining.birth!==descendant.birth||!running(remaining));assert.equal(processState(sibling.pid)?.birth,siblingBirth);assert.equal(running(processState(sibling.pid)),true,'Unrelated private session survives');assert.equal(child.listenerCount('exit'),0);
+ }finally{terminateTree(child);terminateTree(sibling);await Promise.all([closed,siblingClosed]);fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+// Regression: an empty owned-group result sampled after the original deadline
+// is diagnostic data, not timely retirement confirmation.
+test('empty final group readback completing at deadline is refused (actual group, injected clock)',{skip:process.platform!=='linux'},async()=>{
+ const fs=require('node:fs'),child=spawn(process.execPath,['-e','process.exit(0)'],{detached:true,stdio:'ignore'});child.ownedGroup=true;const closed=trackChild(child);await closed;const read=fs.readdirSync,now=Date.now;let clock=0,scans=0;Date.now=()=>clock;
+ fs.readdirSync=function(directory,...args){const result=read.call(this,directory,...args);if(directory==='/proc'){scans++;clock=1000;}return result;};
+ try{await assert.rejects(require('../src/child-lifetime.cjs').waitForGroup(child,{deadline:1000}),/deadline/);assert.equal(scans,1);}
+ finally{fs.readdirSync=read;Date.now=now;terminateTree(child);await closed;}
+});
