@@ -13,8 +13,8 @@ import re
 import subprocess
 
 REPO = Path(__file__).resolve().parents[4]
-ARCHIVE_COMMIT = "9d1f018b304ec0b8ed79c1265f0da06110297f05"
-ARCHIVE_DIR = "evidence/solidity-h28-sol-20261104/automation-benchmark/external-return-inputs-v140"
+ARCHIVE_COMMIT = "a6ebf45f5931f241db9fd3d381914bf0a932943d"
+ARCHIVE_DIR = "evidence/solidity-h28-sol-20261104/automation-benchmark/semantics-owner-inputs-v141"
 
 
 def _git_bytes(repo, revision, relative):
