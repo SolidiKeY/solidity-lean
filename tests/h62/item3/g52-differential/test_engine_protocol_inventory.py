@@ -28,6 +28,25 @@ class Profiles(unittest.TestCase):
         self.assertEqual(result['rows'][0]['requests'][1]['extra_keys'], ['validationError'])
         self.assertEqual((result['executed_cases'], result['source_matches'], result['differential_complete']), (0, 0, False))
 
+    def test_distinct_expected_errors_remain_distinct_metadata(self):
+        request = record()['fixture']['engineNewPayloads'][0]
+        request['validationError'] = 'BlockException.INVALID_REQUESTS'
+        before = m.request_profile(request)
+        request['validationError'] = 'BlockException.INCORRECT_BLOB_GAS_USED'
+        after = m.request_profile(request)
+        self.assertEqual(before['extra_fields']['validationError'], 'BlockException.INVALID_REQUESTS')
+        self.assertNotEqual(before['extra_fields'], after['extra_fields'])
+        self.assertEqual(before['issues'], after['issues'])
+
+    def test_null_and_structured_extra_values_are_not_erased(self):
+        request = record()['fixture']['engineNewPayloads'][0]
+        request.update(validationError=['A', 'B'], errorCode=None, futureExpectation={'code': -38003})
+        result = m.inventory([record(requests=[request])], 1)
+        request['validationError'].append('C')
+        request['futureExpectation']['code'] = 0
+        self.assertEqual(result['rows'][0]['requests'][0]['extra_fields'], {'validationError': ['A', 'B'], 'errorCode': None, 'futureExpectation': {'code': -38003}})
+        self.assertEqual((result['executed_cases'], result['source_matches']), (0, 0))
+
     def test_shape_candidates_are_not_execution(self):
         result = m.inventory([record()], 1)
         self.assertEqual(result['case_profile_counts'], {'outer-envelope-candidate': 1})
