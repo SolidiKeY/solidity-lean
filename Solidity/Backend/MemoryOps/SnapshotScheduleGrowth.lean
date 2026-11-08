@@ -64,8 +64,10 @@ private abbrev H : HTy := [B,B]
 private def r : HRef H B := ⟨0,rfl⟩
 private def neighbor : HRef H B := ⟨1,rfl⟩
 private def old (n : Nat) := [true,false,false] ++ List.replicate n false
+set_option backward.isDefEq.respectTransparency false in
 private def hp (n : Nat) (hn : n+3 < 2^256) : Heap H :=
   (⟨old n,by simp only [old,List.length_append,List.length_cons,List.length_nil,List.length_replicate]; omega⟩,⟨[false,true],by decide⟩,())
+set_option backward.isDefEq.respectTransparency false in
 private theorem len (n : Nat) (hn : n+3 < 2^256) : (hp n hn).len r .dyn = n+3 := by
   simp only [Heap.len,MObj.elems_dyn,Heap.get,Objs.get,hp,r,old,List.length_append,List.length_cons,List.length_nil,List.length_replicate]; omega
 private theorem hu (n : Nat) (hn : n+3 < 2^256) : SliceBounds ((hp n hn).len r .dyn) 1 3 := by rw [len]; exact ⟨by decide,by omega⟩
@@ -74,6 +76,7 @@ private def bad (n : Nat) (hn : n+3 < 2^256) := captureOverwrite (hp n hn) r .dy
 private def obj : MObj H C := ⟨[r,r],by decide⟩
 private def e := List.prefix_append H [C]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Actual allocation is between a meaningful first write and a runtime
 finite tail of actual recaptures. New parent fields retain old aliases while child changes. -/
 theorem interstage (n copies : Nat) (hn : n+3 < 2^256) :
@@ -87,7 +90,9 @@ theorem interstage (n copies : Nat) (hn : n+3 < 2^256) :
       MObj.elems .dyn (out.get (neighbor.wk e)) = [false,true] ∧
       (bools (old n)).objects (7+(mid.alloc obj).2.id) = none := by
   have hc : runCaptures (hp n hn) r .dyn cycle = some (hp n hn) := by
-    simpa only [restoreCycles,List.append_nil] using ScheduleControls.primitive_cycles n 1 hn
+    have h := ScheduleControls.primitive_cycles n 1 hn
+    change runCaptures (hp n hn) r .dyn (restoreCycles 1) = some (hp n hn) at h
+    simpa only [restoreCycles,List.append_nil] using h
   have hcycles : runCaptures (hp n hn) r .dyn (restoreCycles copies) = some (hp n hn) := ScheduleControls.primitive_cycles n copies hn
   have ho : runCaptures (hp n hn) r .dyn ([first]++([repair]++restoreCycles copies++[repair])) = some (bad n hn) := by
     change runCaptures (hp n hn) r .dyn (cycle++(restoreCycles copies++[repair])) = _
@@ -145,19 +150,23 @@ private abbrev H : HTy := [B,B,C]
 private def left : HRef H B := ⟨0,rfl⟩
 private def right : HRef H B := ⟨1,rfl⟩
 private def root : HRef H C := ⟨2,rfl⟩
+set_option backward.isDefEq.respectTransparency false in
 private def hp (n : Nat) (hn : n+3 < 2^256) : Heap H :=
   (⟨[true,false],by decide⟩,⟨[false,true],by decide⟩,
    ⟨[left,right,right]++List.replicate n left,by simp only [List.length_append,List.length_cons,List.length_nil,List.length_replicate]; omega⟩,())
 private def obj : MObj H Q := ⟨[root,root],by decide⟩
 private def e := List.prefix_append H [Q]
+set_option backward.isDefEq.respectTransparency false in
 private theorem hs (n : Nat) (hn : n+3 < 2^256) : SliceBounds ((hp n hn).len root .dyn) 0 1 := by
   constructor
   · decide
   · simp only [Heap.len,MObj.elems_dyn,Heap.get,Objs.get,hp,root,List.length_append,List.length_cons,List.length_nil,List.length_replicate]; omega
+set_option backward.isDefEq.respectTransparency false in
 private theorem hd (n : Nat) (hn : n+3 < 2^256) : 1+(1-0) ≤ (hp n hn).len root .dyn := by
   simp only [Heap.len,MObj.elems_dyn,Heap.get,Objs.get,hp,root,List.length_append,List.length_cons,List.length_nil,List.length_replicate]; omega
 private def mid (n : Nat) (hn : n+3 < 2^256) := captureOverwrite (hp n hn) root .dyn root .dyn 0 1 1 (hs n hn) (hd n hn)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Nonprimitive weakening is exercised by actual allocated schedules: the
 old reference array changes aliases in its real first output then recaptures. -/
 theorem reference_allocated (n copies : Nat) (hn : n+3 < 2^256) :
