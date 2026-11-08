@@ -1,0 +1,122 @@
+[
+  {
+    "rank": 1,
+    "id": "payment-correct",
+    "category": "problem",
+    "finding": "compiler_correct permits target revert for a paying program whose typed run succeeds. This disjunction is weaker than behavioural refinement; it does not prove the actual compiler misbehaves.",
+    "source": "Solidity/Theorems.lean#theorem compiler_correct",
+    "action": "Report boundary; no premise, exclusion or theorem change authorized."
+  },
+  {
+    "rank": 2,
+    "id": "payment-checked",
+    "category": "problem",
+    "finding": "compiler_checked inherits the same refusal allowance through Agrees; certificate acceptance alone does not strengthen that relation.",
+    "source": "Solidity/Evm/Compiler.lean#def Agrees",
+    "action": "Report boundary; no premise, exclusion or theorem change authorized."
+  },
+  {
+    "rank": 3,
+    "id": "target-boundary",
+    "category": "boundary",
+    "finding": "Headline compiler target is the symbolic Evm machine; deployed-bytecode, physical hashes, forks and gas require separate relations.",
+    "source": "docs/compiler-verification.md",
+    "action": "Report boundary; no premise, exclusion or theorem change authorized."
+  },
+  {
+    "rank": 4,
+    "id": "divergence-fault",
+    "category": "boundary",
+    "finding": "compiler_correct allows abstract-machine fault for typed divergence; compare with observable-behaviour semantics before calling it divergence preservation.",
+    "source": "Solidity/Theorems.lean#theorem compiler_correct",
+    "action": "Report boundary; no premise, exclusion or theorem change authorized."
+  },
+  {
+    "rank": 5,
+    "id": "compiler-coverage",
+    "category": "boundary",
+    "finding": "Fragment and representation premises restrict the supported inputs; satisfiable witnesses do not demonstrate whole Solidity coverage. CompCert also conditions on successful translation.",
+    "source": "Solidity/Theorems.lean#theorem compiler_correct",
+    "action": "Report boundary; no premise, exclusion or theorem change authorized."
+  },
+  {
+    "rank": 6,
+    "id": "checked-paths",
+    "category": "boundary",
+    "finding": "Input is branch-specific and includes memory room/allocation premises. A core require witness does not establish each memory path inhabited.",
+    "source": "Solidity/Evm/Compiler.lean#def Input",
+    "action": "Report boundary; no premise, exclusion or theorem change authorized."
+  },
+  {
+    "rank": 7,
+    "id": "success-only-net",
+    "category": "boundary",
+    "finding": "compiler_net accounts for successful target runs only; it cannot rule out extra target failure. Its narrower name and docstring are accurate.",
+    "source": "Solidity/Theorems.lean#theorem compiler_net",
+    "action": "Report boundary; no premise, exclusion or theorem change authorized."
+  },
+  {
+    "rank": 8,
+    "id": "model-soundness",
+    "category": "boundary",
+    "finding": "Calculus soundness is strong for its intrinsic typed model, but no source elaborator or solc equivalence follows from that statement alone.",
+    "source": "Solidity/Theorems.lean#theorem soundness",
+    "action": "Report boundary; no premise, exclusion or theorem change authorized."
+  },
+  {
+    "rank": 9,
+    "id": "callback-policy",
+    "category": "boundary",
+    "finding": "Callback validity quantifies over the stated invariant-respecting callback semantics; it is not unqualified safety under arbitrary external Solidity code.",
+    "source": "Solidity/Theorems.lean#theorem callback_soundness",
+    "action": "Report boundary; no premise, exclusion or theorem change authorized."
+  },
+  {
+    "rank": 10,
+    "id": "noCallback-policy",
+    "category": "boundary",
+    "finding": "The noCallback theorem disables transfer/send callbacks in its model; the theorem does not certify the gas rationale for every fork.",
+    "source": "Solidity/Theorems.lean#theorem noCallback_soundness",
+    "action": "Report boundary; no premise, exclusion or theorem change authorized."
+  },
+  {
+    "rank": 11,
+    "id": "clean-tail",
+    "category": "boundary",
+    "finding": "cleanTail_holds assumes CleanTail; initial-state witness exists, but arbitrary dirty external states are outside that claim.",
+    "source": "Solidity/Theorems.lean#theorem cleanTail_holds",
+    "action": "Report boundary; no premise, exclusion or theorem change authorized."
+  },
+  {
+    "rank": 12,
+    "id": "symex-fuel",
+    "category": "boundary",
+    "finding": "symex_sound proves residual implication at arbitrary fuel; it does not assert solver completeness or symbolic execution termination without a supplied bound.",
+    "source": "Solidity/Theorems.lean#theorem symex_sound",
+    "action": "Report boundary; no premise, exclusion or theorem change authorized."
+  },
+  {
+    "rank": 13,
+    "id": "solkey-model",
+    "category": "boundary",
+    "finding": "Taclet-fragment equivalence is a relation between Lean rule sets, not an execution of the upstream Java SolKey prover.",
+    "source": "Solidity/Theorems.lean#theorem solkey_eq_calculus",
+    "action": "Report boundary; no premise, exclusion or theorem change authorized."
+  },
+  {
+    "rank": 14,
+    "id": "popular-examples",
+    "category": "measurement caveat",
+    "finding": "Most-imported-module ranking selects Source regression theorems. Fixed examples are useful checks but do not become general theorems because their module is popular.",
+    "source": "Solidity/Source/SemanticsExamples.lean",
+    "action": "Report boundary; no premise, exclusion or theorem change authorized."
+  },
+  {
+    "rank": 15,
+    "id": "contradiction-lemmas",
+    "category": "looks fine",
+    "finding": "The popular failure eliminators intentionally have incompatible joint hypotheses and conclude False. Counting them as vacuous headline proofs would be a method error.",
+    "source": "Solidity/Calculus/Closers.lean",
+    "action": "Report boundary; no premise, exclusion or theorem change authorized."
+  }
+]

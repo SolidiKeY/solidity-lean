@@ -1,0 +1,231 @@
+{
+  "base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+  "method": {
+    "command": "python3 -I docs/audits/direction-tools/statements/scan.py --check",
+    "selection": "All @[goal] in tracked Lean; all theorem/lemma/abbrev/def in Solidity/Theorems.lean; top 30 public theorems by distinct direct importers of their defining module, ties path then line. This is module exposure, not declaration usage. Includes examples explicitly.",
+    "generated": "Roots, Corpus, AxiomPins, and first-1600-character generation markers separated; unmarked is not a handwriting guarantee. Chain/agreement generators may lack markers; no scale verdict uses this approximation.",
+    "parsing": "Source-level, not elaborated. Premises column is explicit binders; arrows remain in conclusion. Context preserves open/variable commands, including commands from earlier ended sections; consult source for exact scope. No proof rechecked.",
+    "ratios": "Reference theorem statement logical-obligation ratios only; no unjustified LOC/check-time comparison of compiler vs calculus. Source citations are cited, not measured. Compiler header nonblank physical line ratios are descriptive typography only; outliers justified by abbreviation/scope, never treated as effort or strength. Other rows have no like-for-like compiler-pass counterpart."
+  },
+  "counts": {
+    "unmarked_files": 8214,
+    "unmarked_lines": 1278222,
+    "generated_files": 63,
+    "generated_lines": 30549,
+    "tracked_lean_files": 8277,
+    "goal_attributes": 0,
+    "public_theorems": 61507,
+    "top_imported": 30,
+    "selected": 62,
+    "headline_theorems": 21,
+    "classifications": {
+      "strong": 49,
+      "trivial": 11,
+      "weaker than named": 2
+    },
+    "witnesses": {
+      "intentional incompatible hypotheses": 2,
+      "existing concrete source instance": 27,
+      "existing source witness": 22,
+      "not applicable (definition)": 11
+    }
+  },
+  "goals": [],
+  "inventory_reuse": [
+    {
+      "path": "docs/audits/architecture-tools",
+      "present": true
+    },
+    {
+      "path": "docs/audits/proof-coverage-tools",
+      "present": true
+    },
+    {
+      "path": "docs/audits/build-speed-tools",
+      "present": true
+    },
+    {
+      "path": "docs/audits/build-speed.md",
+      "present": true
+    },
+    {
+      "path": "scripts/build-measure.py",
+      "present": true
+    },
+    {
+      "path": "scripts/build-measure-report.py",
+      "present": true
+    },
+    {
+      "path": "scripts/differential",
+      "present": false
+    },
+    {
+      "path": "scripts/bench",
+      "present": false
+    }
+  ],
+  "timings": {
+    "path": "docs/audits/architecture-tools/timing-sample.tsv",
+    "rows": 61,
+    "sha256": "3f8463128ba2f8d99d837ae55b8b73e3ae027be88edea390c0fa68622b96d796",
+    "use": "Existing sample only; no per-selected-theorem timing inferred"
+  },
+  "references": [
+    {
+      "id": "compcert",
+      "url": "https://raw.githubusercontent.com/AbsInt/CompCert/2685140bf72c959446981fb99b5e44a8975021bc/driver/Compiler.v",
+      "theorem": "transf_c_program_correct",
+      "line": 446,
+      "source_sha256": "1782a975c8df642a54d28c891405714145997c1cfe4d227f07a4c4d71ff525fb",
+      "statement": "Theorem transf_c_program_correct:\n  forall p tp,\n  transf_c_program p = OK tp ->\n  backward_simulation (Csem.semantics p) (Asm.semantics tp).",
+      "status": "measured pinned source excerpt; source not compiled",
+      "comparison": "Successful actual translation implies backward simulation of C to assembly; source undefined behaviour constrains guarantees. Intrinsic-model soundness is a different boundary."
+    },
+    {
+      "id": "cakeml",
+      "url": "https://raw.githubusercontent.com/CakeML/cakeml/58720ae1c69f86a79fec68749b0089ca6a3bb473/compiler/backend/proofs/source_to_flatProofScript.sml",
+      "theorem": "compile_semantics",
+      "line": 6393,
+      "source_sha256": "d313e00205920b4942a9c033b0ecf0dcda327c51f7973e5cc19d9fa5b33418f4",
+      "statement": "Theorem compile_semantics:\n   precondition interp s env cfg ec prog\n ⇒\n   ¬semantics_determ s env prog Fail ⇒\n   semantics_determ s env prog\n      (semantics ec s.ffi s.ptr_eq_oracle (SND (compile cfg prog)))",
+      "status": "measured pinned source excerpt; source not compiled",
+      "comparison": "A verified pass: non-Fail source semantics and explicit precondition imply equality of source and compiled flat semantics; not a Solidity or full-backend theorem."
+    }
+  ],
+  "top_problems": [
+    {
+      "rank": 1,
+      "id": "payment-correct",
+      "category": "problem",
+      "finding": "compiler_correct permits target revert for a paying program whose typed run succeeds. This disjunction is weaker than behavioural refinement; it does not prove the actual compiler misbehaves.",
+      "source": "Solidity/Theorems.lean#theorem compiler_correct",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    },
+    {
+      "rank": 2,
+      "id": "payment-checked",
+      "category": "problem",
+      "finding": "compiler_checked inherits the same refusal allowance through Agrees; certificate acceptance alone does not strengthen that relation.",
+      "source": "Solidity/Evm/Compiler.lean#def Agrees",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    },
+    {
+      "rank": 3,
+      "id": "target-boundary",
+      "category": "boundary",
+      "finding": "Headline compiler target is the symbolic Evm machine; deployed-bytecode, physical hashes, forks and gas require separate relations.",
+      "source": "docs/compiler-verification.md",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    },
+    {
+      "rank": 4,
+      "id": "divergence-fault",
+      "category": "boundary",
+      "finding": "compiler_correct allows abstract-machine fault for typed divergence; compare with observable-behaviour semantics before calling it divergence preservation.",
+      "source": "Solidity/Theorems.lean#theorem compiler_correct",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    },
+    {
+      "rank": 5,
+      "id": "compiler-coverage",
+      "category": "boundary",
+      "finding": "Fragment and representation premises restrict the supported inputs; satisfiable witnesses do not demonstrate whole Solidity coverage. CompCert also conditions on successful translation.",
+      "source": "Solidity/Theorems.lean#theorem compiler_correct",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    },
+    {
+      "rank": 6,
+      "id": "checked-paths",
+      "category": "boundary",
+      "finding": "Input is branch-specific and includes memory room/allocation premises. A core require witness does not establish each memory path inhabited.",
+      "source": "Solidity/Evm/Compiler.lean#def Input",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    },
+    {
+      "rank": 7,
+      "id": "success-only-net",
+      "category": "boundary",
+      "finding": "compiler_net accounts for successful target runs only; it cannot rule out extra target failure. Its narrower name and docstring are accurate.",
+      "source": "Solidity/Theorems.lean#theorem compiler_net",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    },
+    {
+      "rank": 8,
+      "id": "model-soundness",
+      "category": "boundary",
+      "finding": "Calculus soundness is strong for its intrinsic typed model, but no source elaborator or solc equivalence follows from that statement alone.",
+      "source": "Solidity/Theorems.lean#theorem soundness",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    },
+    {
+      "rank": 9,
+      "id": "callback-policy",
+      "category": "boundary",
+      "finding": "Callback validity quantifies over the stated invariant-respecting callback semantics; it is not unqualified safety under arbitrary external Solidity code.",
+      "source": "Solidity/Theorems.lean#theorem callback_soundness",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    },
+    {
+      "rank": 10,
+      "id": "noCallback-policy",
+      "category": "boundary",
+      "finding": "The noCallback theorem disables transfer/send callbacks in its model; the theorem does not certify the gas rationale for every fork.",
+      "source": "Solidity/Theorems.lean#theorem noCallback_soundness",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    },
+    {
+      "rank": 11,
+      "id": "clean-tail",
+      "category": "boundary",
+      "finding": "cleanTail_holds assumes CleanTail; initial-state witness exists, but arbitrary dirty external states are outside that claim.",
+      "source": "Solidity/Theorems.lean#theorem cleanTail_holds",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    },
+    {
+      "rank": 12,
+      "id": "symex-fuel",
+      "category": "boundary",
+      "finding": "symex_sound proves residual implication at arbitrary fuel; it does not assert solver completeness or symbolic execution termination without a supplied bound.",
+      "source": "Solidity/Theorems.lean#theorem symex_sound",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    },
+    {
+      "rank": 13,
+      "id": "solkey-model",
+      "category": "boundary",
+      "finding": "Taclet-fragment equivalence is a relation between Lean rule sets, not an execution of the upstream Java SolKey prover.",
+      "source": "Solidity/Theorems.lean#theorem solkey_eq_calculus",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    },
+    {
+      "rank": 14,
+      "id": "popular-examples",
+      "category": "measurement caveat",
+      "finding": "Most-imported-module ranking selects Source regression theorems. Fixed examples are useful checks but do not become general theorems because their module is popular.",
+      "source": "Solidity/Source/SemanticsExamples.lean",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    },
+    {
+      "rank": 15,
+      "id": "contradiction-lemmas",
+      "category": "looks fine",
+      "finding": "The popular failure eliminators intentionally have incompatible joint hypotheses and conclude False. Counting them as vacuous headline proofs would be a method error.",
+      "source": "Solidity/Calculus/Closers.lean",
+      "action": "Report boundary; no premise, exclusion or theorem change authorized."
+    }
+  ],
+  "waits": [
+    {
+      "id": "W-runtime",
+      "reason": "Lean and Lake absent from PATH; no elaboration requested or performed. Witnesses are source evidence, not fresh validation."
+    },
+    {
+      "id": "W-differential",
+      "reason": "scripts/differential and scripts/bench absent at pinned base; no results inferred."
+    }
+  ],
+  "axioms_added": 0,
+  "sorry_added": 0,
+  "conclusion": "Headline calculus theorems match their stated intrinsic-model scope. Compiler statements retain payment/refusal and abstraction gaps against behavioural refinement. Source examples are useful fixed-case checks, not general semantic preservation. No evidence here justifies judging overall project size redundant."
+}

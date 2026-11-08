@@ -1,0 +1,22 @@
+[
+  {
+    "id": "compcert",
+    "url": "https://raw.githubusercontent.com/AbsInt/CompCert/2685140bf72c959446981fb99b5e44a8975021bc/driver/Compiler.v",
+    "theorem": "transf_c_program_correct",
+    "line": 446,
+    "source_sha256": "1782a975c8df642a54d28c891405714145997c1cfe4d227f07a4c4d71ff525fb",
+    "statement": "Theorem transf_c_program_correct:\n  forall p tp,\n  transf_c_program p = OK tp ->\n  backward_simulation (Csem.semantics p) (Asm.semantics tp).",
+    "status": "measured pinned source excerpt; source not compiled",
+    "comparison": "Successful actual translation implies backward simulation of C to assembly; source undefined behaviour constrains guarantees. Intrinsic-model soundness is a different boundary."
+  },
+  {
+    "id": "cakeml",
+    "url": "https://raw.githubusercontent.com/CakeML/cakeml/58720ae1c69f86a79fec68749b0089ca6a3bb473/compiler/backend/proofs/source_to_flatProofScript.sml",
+    "theorem": "compile_semantics",
+    "line": 6393,
+    "source_sha256": "d313e00205920b4942a9c033b0ecf0dcda327c51f7973e5cc19d9fa5b33418f4",
+    "statement": "Theorem compile_semantics:\n   precondition interp s env cfg ec prog\n \u21d2\n   \u00acsemantics_determ s env prog Fail \u21d2\n   semantics_determ s env prog\n      (semantics ec s.ffi s.ptr_eq_oracle (SND (compile cfg prog)))",
+    "status": "measured pinned source excerpt; source not compiled",
+    "comparison": "A verified pass: non-Fail source semantics and explicit precondition imply equality of source and compiled flat semantics; not a Solidity or full-backend theorem."
+  }
+]
