@@ -11,6 +11,9 @@ def main():
     assert m["declarations"]=={"def":1,"theorem":1,"axiom":1},m
     assert m["sorry"]==0 and m["native_decide"]==0
     assert m["maxHeartbeats"]==["900"]
+    quoted=module("Solidity/Test.lean", "def quote := '\"'\ndef real := 1\ndef nextQuote := '\"'\ntheorem stillReal : True := by trivial\n")
+    assert quoted["declarations"]=={"def":3,"theorem":1},quoted
+    assert clean("def foo'a' := 1").strip()=="def foo'a' := 1"
     assert clean('a /- nested /- x -/ y -/ b').strip()=='a                        b'.strip() or clean('a /- nested /- x -/ y -/ b').split()==['a','b']
     assert category("Solidity/Corpus/Basic.lean","def a := 1")=="unmarked"
     assert category("Solidity/Corpus/TestSuite.lean","")=="corpus"

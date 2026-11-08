@@ -43,6 +43,10 @@ def clean(text):
             j=text.find("\n",i); j=len(text) if j<0 else j
             out[i:j]=" "*(j-i); i=j; continue
         if text.startswith("/-",i): out[i:i+2]=[" "," "]; depth=1; i+=2; continue
+        if text[i]=="'" and (i==0 or not (text[i-1].isalnum() or text[i-1] in "_'")):
+            char=re.match(r"'(?:\\(?:u\{[0-9a-fA-F]+\}|x[0-9a-fA-F]{2}|.)|[^\\'\n])'",text[i:])
+            if char:
+                j=i+len(char.group()); out[i:j]=" "*(j-i); i=j; continue
         if text[i]=='"': out[i]=" "; string=True
         i+=1
     return "".join(out)

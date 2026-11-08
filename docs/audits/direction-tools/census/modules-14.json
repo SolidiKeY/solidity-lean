@@ -6248,15 +6248,15 @@
   {
     "area": "SolcValidation",
     "category": "unmarked",
-    "code_lines": 456,
+    "code_lines": 467,
     "declarations": {
       "abbrev": 1,
-      "def": 56,
+      "def": 57,
       "structure": 2,
       "theorem": 3
     },
-    "definition_lines": 433,
-    "definition_to_proof_line_ratio": 33.30769230769231,
+    "definition_lines": 444,
+    "definition_to_proof_line_ratio": 34.15384615384615,
     "description": "Certifying parser for solc's object-dialect Yul text",
     "implemented_by": 0,
     "imports": [
@@ -6351,14 +6351,14 @@
   {
     "area": "SolcValidation",
     "category": "unmarked",
-    "code_lines": 187,
+    "code_lines": 215,
     "declarations": {
       "abbrev": 3,
-      "def": 25,
+      "def": 27,
       "inductive": 11,
       "structure": 3
     },
-    "definition_lines": 177,
+    "definition_lines": 205,
     "definition_to_proof_line_ratio": null,
     "description": "Intrinsic syntax of solc's object-dialect Yul text",
     "implemented_by": 0,

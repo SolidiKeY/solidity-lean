@@ -598,11 +598,11 @@
         "lines": 1096034
       }
     },
-    "code_lines": 878617,
+    "code_lines": 878656,
     "declarations": {
       "abbrev": 2259,
       "axiom": 0,
-      "def": 42900,
+      "def": 42903,
       "inductive": 1035,
       "instance": 177,
       "lemma": 1,
@@ -610,8 +610,8 @@
       "structure": 1398,
       "theorem": 65929
     },
-    "definition_lines": 218875,
-    "definition_to_proof_line_ratio": 0.3799365716398505,
+    "definition_lines": 218914,
+    "definition_to_proof_line_ratio": 0.38000427021800676,
     "files": 6717,
     "generated_lines": 23620,
     "generated_share": 0.021068480589703384,
