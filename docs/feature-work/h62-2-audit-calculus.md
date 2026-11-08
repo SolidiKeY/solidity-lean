@@ -2174,3 +2174,6 @@ No source/statements/definitions/interfaces/budgets/axioms/exclusions/toolchain 
 
 
 The remaining callback-frame premise interpretation is recorded in [CALLBACK-FRAME-CLASSIFICATION.md](../../tests/h62/item2/audit-calculus/CALLBACK-FRAME-CLASSIFICATION.md). At checkpoint V138 its three exact ledger bindings are published through the authenticated private-input route:1695 reviewed/3588 pending; semantic ownership stays unresolved and no joint witness credit is taken.
+
+
+The complete frozen primitive-return projection interpretation is recorded in [PRIMITIVE-PROJECTION-CLASSIFICATION.md](../../tests/h62/item2/audit-calculus/PRIMITIVE-PROJECTION-CLASSIFICATION.md). At checkpoint V139 six exact private ledger bindings give1701 reviewed/3582 pending; semantic ownership remains unresolved and no joint-witness credit follows.
