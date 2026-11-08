@@ -79,7 +79,7 @@ theorem raw_aligned_value (fuel len : Nat) :
   constructor
   · decide
   · have valid : (Solidity.AbiEntry.Kind.fixedBytes 1).valid (Solidity.AbiEntry.load rawGood.data 1)=true := by decide
-    simp only [Solidity.AbiEntry.cval,dif_pos valid]
+    simp only [Solidity.AbiEntry.cval,dite_eq_left valid]
     exact ⟨_,rfl⟩
 
 theorem malformed_word_fault :
@@ -102,7 +102,7 @@ theorem protected_and_saved (word : Fin W) :
 #guard_msgs (whitespace := lax) in #print axioms every_kind_rejects
 /-- info: 'Solidity.Backend.AbiEntry.WordGateControls.raw_padding_failure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms raw_padding_failure
-/-- info: 'Solidity.Backend.AbiEntry.WordGateControls.raw_aligned_value' depends on axioms: [Quot.sound] -/
+/-- info: 'Solidity.Backend.AbiEntry.WordGateControls.raw_aligned_value' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms raw_aligned_value
 /-- info: 'Solidity.Backend.AbiEntry.WordGateControls.malformed_word_fault' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms malformed_word_fault
