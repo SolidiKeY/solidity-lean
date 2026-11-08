@@ -55,7 +55,9 @@ and compiler setup. Follow the guarded build workflow in
 For the existing bounded `contribution-menus` runner, `--menu-anchor visible-scrollport-v1`
 selects H199's separate editor-scrollport admission. It retains the original mouse
 point and three-second readiness deadline, requires observed clipping and owned
-`elementFromPoint` hits before mouse press/release, and records raw probe failures.
+`elementFromPoint` hits in two observations before mouse press, and records raw
+probe failures. The original press/release sequence then opens the menu; a menu
+overlay is never admitted as an editor hit.
 Omitting the option retains strict full-rectangle admission. Tabs keep their strict
 public-resource checks; trust-transition/recovery runs reject this option. DOM
 endpoints do not certify raster glyphs or mutation ABA, and this option does not

@@ -23,6 +23,6 @@ function admit(probe,anchor,uri){
  for(const style of [probe.anchorStyle,probe.scrollportStyle])assert.ok(style&&style.display!=='none'&&!['hidden','collapse'].includes(style.visibility),'Hidden menu anchor/scrollport');
  const clip={left:0,top:0,right:anchor.viewport.width,bottom:anchor.viewport.height};assert.ok(Array.isArray(probe.clips)&&probe.clips.some(c=>c.scrollport),'Missing observed clipping scrollport');
  for(const c of probe.clips){assert.ok(typeof c.x==='boolean'&&typeof c.y==='boolean'&&(c.x||c.y)&&c.element&&['left','top','right','bottom'].every(k=>Number.isFinite(c.rect?.[k]))&&c.rect.right>c.rect.left&&c.rect.bottom>c.rect.top,'Invalid observed clip');assert.ok(c.transform==='none'||/^matrix\(1,\s*0,\s*0,\s*1,\s*0,\s*0\)$/.test(c.transform),'Transformed clipping ancestor not supported');if(c.x){clip.left=Math.max(clip.left,c.rect.left);clip.right=Math.min(clip.right,c.rect.right);}if(c.y){clip.top=Math.max(clip.top,c.rect.top);clip.bottom=Math.min(clip.bottom,c.rect.bottom);}}
- assert.ok(p.x>clip.left&&p.x<clip.right&&p.y>clip.top&&p.y<clip.bottom,'Original mouse point outside observed clip');return{version,point:p,clip,probe};
+ assert.ok(p.x>clip.left&&p.x<clip.right&&p.y>clip.top&&p.y<clip.bottom,'Original mouse point outside observed clip');return{version,checkpoint:'before-native-press',point:p,clip,probe};
 }
 module.exports={version,observe,point,admit};
