@@ -715,25 +715,25 @@
     "priority": "none"
   },
   "Solidity/Source/SemanticsExamples.lean#sessionAt_eq": {
-    "english_claim": "sessionAt eq: the displayed Source evaluator computation has the specified result on these concrete inputs.",
-    "strength": "strong",
-    "reason": "A bounded concrete regression theorem, not named as a universal semantic-preservation theorem. decide is kernel computation; it is not evidence of semantic triviality.",
-    "witness_status": "existing concrete source instance",
-    "witness": "Solidity/Source/SemanticsExamples.lean#sessionAt_eq",
-    "witness_needed": "Literal conversion is used by lit and litAB with a FitsInt proof; k=0 is a satisfiable example.",
+    "english_claim": "For arbitrary session environment and horizon, sessionAt of PS unfolds to sessionFrom at the creation address.",
+    "strength": "trivial",
+    "reason": "Definitional equality proved by rfl, universally quantified over env and n; not a finite evaluator regression.",
+    "witness_status": "existing source witness",
+    "witness": "Solidity/Source/SemanticsExamples.lean#envS",
+    "witness_needed": "envS is a constructed SessionEnv; session_runs exercises the same PS/envS at concrete horizons. No propositional premise is assumed.",
     "reference": "cakeml;compcert",
-    "comparison": "A concrete evaluator regression is narrower than CakeML pass semantic equality or CompCert backward simulation, but matches its own test claim. No compiler-correctness verdict follows.",
+    "comparison": "A definitional wrapper identity, not semantic preservation. Both CompCert and CakeML also distinguish executable definitions from compiler-correctness claims.",
     "priority": "none"
   },
   "Solidity/Source/SemanticsExamples.lean#session_consistent": {
-    "english_claim": "session consistent: the displayed Source evaluator computation has the specified result on these concrete inputs.",
+    "english_claim": "For arbitrary typed source program and session environment, its sessionAt family is prefix-consistent.",
     "strength": "strong",
-    "reason": "A bounded concrete regression theorem, not named as a universal semantic-preservation theorem. decide is kernel computation; it is not evidence of semantic triviality.",
-    "witness_status": "existing concrete source instance",
-    "witness": "Solidity/Source/SemanticsExamples.lean#session_consistent",
-    "witness_needed": "Literal conversion is used by lit and litAB with a FitsInt proof; k=0 is a satisfiable example.",
+    "reason": "Generic session-family consistency delegated to sessionAt_consistent; not a bounded concrete computation.",
+    "witness_status": "existing source witness",
+    "witness": "Solidity/Source/SemanticsExamples.lean#session_runs",
+    "witness_needed": "PS and envS are constructed immediately above session_runs and instantiate the generic typed program/environment domains; no FitsInt premise occurs.",
     "reference": "cakeml;compcert",
-    "comparison": "A concrete evaluator regression is narrower than CakeML pass semantic equality or CompCert backward simulation, but matches its own test claim. No compiler-correctness verdict follows.",
+    "comparison": "Generic consistency of the source observation family, not source-to-target compiler preservation. Compare CompCert/CakeML behaviour semantics only after a separate simulation/translation theorem.",
     "priority": "none"
   },
   "Solidity/Theorems.lean#unexpandValid": {

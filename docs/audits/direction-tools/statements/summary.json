@@ -2,6 +2,7 @@
   "base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
   "method": {
     "command": "python3 -I docs/audits/direction-tools/statements/scan.py --check",
+    "source": "All source blobs, paths, inventory availability and timing sample read from Git objects at BASE, independent of current checkout or merged HEAD.",
     "selection": "All @[goal] in tracked Lean; all theorem/lemma/abbrev/def in Solidity/Theorems.lean; top 30 public theorems by distinct direct importers of their defining module, ties path then line. This is module exposure, not declaration usage. Includes examples explicitly.",
     "generated": "Roots, Corpus, AxiomPins, marked chain/agreement and other marked generation separated. Chain/agreement without markers is an explicit unresolved bucket, never called handwritten. Selected declaration files have no generation marker; no theorem strength verdict depends on generated counts. True handwriting cannot be certified from source markers; no scale/effort verdict uses these buckets.",
     "parsing": "Source-level, not elaborated. Premises column is explicit binders; arrows remain in conclusion. Context preserves open/variable commands, including commands from earlier ended sections; consult source for exact scope. No proof rechecked.",

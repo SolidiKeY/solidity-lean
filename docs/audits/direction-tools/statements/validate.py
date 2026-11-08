@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 """Offline checker for audit artifacts; --remote additionally verifies pinned excerpts.
-Run: python3 -I docs/audits/direction-tools/statements/validate.py [--remote]
+Run: python3 -I docs/audits/direction-tools/statements/validate.py [--remote] [--lane-scope]
+Default checks frozen data after merges; --lane-scope additionally checks this lane before merge.
 """
-import csv,hashlib,json,pathlib,subprocess,sys,urllib.request,re,runpy
+import csv,hashlib,json,pathlib,subprocess,sys,urllib.request,re,runpy,functools
 HERE=pathlib.Path(__file__).resolve().parent
 ROOT=HERE.parents[3]
 BASE="d4ad633a9624263a59b14fd2c520b9bc602f88f3"
 def git(*a):return subprocess.check_output(["git",*a],cwd=ROOT,text=True).strip()
+@functools.lru_cache(maxsize=None)
+def frozen_text(path):
+    return subprocess.check_output(["git","show",BASE+":"+path],cwd=ROOT,text=True)
 def cite(c):
     path,_,needle=c.partition("#")
-    assert (ROOT/path).is_file(),c
-    if needle:assert needle in (ROOT/path).read_text(),c
+    text=frozen_text(path)
+    if needle:assert needle in text,c
 
 def main():
     api=runpy.run_path(str(HERE/"scan.py"),run_name="audit_parser")
@@ -36,11 +40,19 @@ def equation_case : Nat → Nat
         if r["witness"]:cite(r["witness"])
         assert r["strength"] in ("strong","weaker than named","trivial","unclear")
         assert r["english_claim"] and r["comparison"] and r["witness_needed"]
+    judgements=json.loads((HERE/"judgements.json").read_text())
+    session_eq=judgements["Solidity/Source/SemanticsExamples.lean#sessionAt_eq"]
+    session_consistent=judgements["Solidity/Source/SemanticsExamples.lean#session_consistent"]
+    assert session_eq["strength"]=="trivial"
+    assert "arbitrary" in session_consistent["english_claim"]
+    assert "FitsInt" not in session_eq["witness_needed"]
+    assert "FitsInt" not in session_consistent["witness_needed"]
     for p in summary["top_problems"]:cite(p["source"])
-    # Every measured Lean source is pinned; ignore the audit output itself.
-    assert not git("diff","--name-only",BASE,"--","*.lean"), "Lean sources differ from frozen base"
-    changed=git("diff","--name-only",BASE).splitlines()
-    assert all(p.startswith("docs/audits/direction-tools/statements/") for p in changed),changed
+    # Frozen inputs are Git blobs, so unrelated later master changes are valid.
+    git("cat-file","-e",BASE+"^{commit}")
+    if "--lane-scope" in sys.argv:
+        changed=git("diff","--name-only",BASE).splitlines()
+        assert all(p.startswith("docs/audits/direction-tools/statements/") for p in changed),changed
     for p in HERE.iterdir():
         if p.is_file():assert p.stat().st_size<1000000,p
     if "--remote" in sys.argv:

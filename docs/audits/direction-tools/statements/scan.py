@@ -6,11 +6,25 @@ searched for goal attributes; public ranking is Solidity/ theorem/lemma only.
 The parser masks nested comments and strings, retains offsets, and records raw
 binders plus active variable/open/namespace commands (not elaborated types).
 """
-import argparse,collections,csv,hashlib,json,pathlib,re,subprocess
+import argparse,collections,csv,hashlib,json,pathlib,re,subprocess,tarfile,functools
 BASE='d4ad633a9624263a59b14fd2c520b9bc602f88f3'
 HERE=pathlib.Path(__file__).resolve().parent
 ROOT=HERE.parents[3]
 def git(*args): return subprocess.check_output(['git',*args],cwd=ROOT,text=True).strip()
+@functools.lru_cache(maxsize=None)
+def frozen_text(path):
+    return subprocess.check_output(['git','show',BASE+':'+path],cwd=ROOT).decode('utf-8')
+
+def frozen_lean():
+    # Git pathspec *.lean recursively selects tracked Lean blobs at BASE.
+    proc=subprocess.Popen(['git','archive',BASE,'--','*.lean'],cwd=ROOT,stdout=subprocess.PIPE)
+    texts={}
+    with tarfile.open(fileobj=proc.stdout,mode='r|') as archive:
+        for entry in archive:
+            if entry.isfile():texts[entry.name]=archive.extractfile(entry).read().decode('utf-8')
+    if proc.wait():raise RuntimeError('Cannot read frozen Lean archive')
+    return texts
+
 def mask(s):
     out=list(s); i=0; depth=0; string=False
     while i<len(s):
@@ -78,9 +92,9 @@ def generation(path,raw):
     return 'unresolved_chain_agreement' if candidate else 'unmarked_other'
 
 def generate():
-    paths=git('ls-files','*.lean').splitlines(); texts={};clean={};decls=[];fan=collections.defaultdict(set);goals=[];inventory=collections.Counter()
+    texts=frozen_lean();paths=sorted(texts);clean={};decls=[];fan=collections.defaultdict(set);goals=[];inventory=collections.Counter()
     for path in paths:
-        raw=(ROOT/path).read_text();c=mask(raw);texts[path]=raw;clean[path]=c
+        raw=texts[path];c=mask(raw);clean[path]=c
         cat=generation(path,raw)
         inventory[cat+'_files']+=1;inventory[cat+'_lines']+=len(raw.splitlines())
         for imp in set(re.findall(r'^\s*(?:public\s+|meta\s+)*import\s+(\S+)',c,re.M)):fan[imp].add(path)
@@ -110,10 +124,11 @@ def generate():
         d['importer_generation_breakdown']=json.dumps(dict(sorted(collections.Counter(generation(p,texts[p]) for p in fan[d['path'][:-5].replace('/','.')]).items())))
         d['known_generated_importers']=d['direct_importers']-d['unmarked_importers'] if isinstance(d['unmarked_importers'],int) else '';rows.append(d)
     sources=['docs/audits/architecture-tools','docs/audits/proof-coverage-tools','docs/audits/build-speed-tools','docs/audits/build-speed.md','scripts/build-measure.py','scripts/build-measure-report.py','scripts/differential','scripts/bench']
-    inv=[dict(path=p,present=(ROOT/p).exists()) for p in sources]
+    base_paths=git('ls-tree','-r','--name-only',BASE).splitlines()
+    inv=[dict(path=p,present=any(q==p or q.startswith(p+'/') for q in base_paths)) for p in sources]
     problems=json.loads((HERE/'problems.json').read_text())
-    timing=(ROOT/'docs/audits/architecture-tools/timing-sample.tsv').read_text().splitlines()
-    summary=dict(base=BASE,method=dict(command='python3 -I docs/audits/direction-tools/statements/scan.py --check',selection='All @[goal] in tracked Lean; all theorem/lemma/abbrev/def in Solidity/Theorems.lean; top 30 public theorems by distinct direct importers of their defining module, ties path then line. This is module exposure, not declaration usage. Includes examples explicitly.',generated='Roots, Corpus, AxiomPins, marked chain/agreement and other marked generation separated. Chain/agreement without markers is an explicit unresolved bucket, never called handwritten. Selected declaration files have no generation marker; no theorem strength verdict depends on generated counts. True handwriting cannot be certified from source markers; no scale/effort verdict uses these buckets.',parsing='Source-level, not elaborated. Premises column is explicit binders; arrows remain in conclusion. Context preserves open/variable commands, including commands from earlier ended sections; consult source for exact scope. No proof rechecked.',ratios='Reference theorem statement header physical-line ratios only; no unjustified LOC/check-time comparison of compiler vs calculus. Source citations are cited, not measured. Compiler header nonblank physical line ratios are descriptive typography only; outliers justified by abbreviation/scope, never treated as effort or strength. Other rows have no like-for-like compiler-pass counterpart.'),counts=dict(inventory,tracked_lean_files=len(paths),goal_attributes=len(goals),public_theorems=len(public),top_imported= len(top),selected=len(rows),headline_theorems=sum(d['path']=='Solidity/Theorems.lean' and d['kind']=='theorem' for d in rows),classifications=dict(collections.Counter(d['strength'] for d in rows)),witnesses=dict(collections.Counter(d['witness_status'] for d in rows))),goals=goals,inventory_reuse=inv,timings=dict(path='docs/audits/architecture-tools/timing-sample.tsv',rows=len(timing),sha256=hashlib.sha256(('\n'.join(timing)+'\n').encode()).hexdigest(),use='Existing sample only; no per-selected-theorem timing inferred'),references=json.loads((HERE/'references.json').read_text()),top_problems=problems,waits=[dict(id='W-runtime',reason='Lean and Lake absent from PATH; no elaboration requested or performed. Witnesses are source evidence, not fresh validation.'),dict(id='W-differential',reason='scripts/differential and scripts/bench absent at pinned base; no results inferred.')],axioms_added=0,sorry_added=0,conclusion='Headline calculus theorems match their stated intrinsic-model scope. Compiler statements retain payment/refusal and abstraction gaps against behavioural refinement. Source examples are useful fixed-case checks, not general semantic preservation. No evidence here justifies judging overall project size redundant.')
+    timing=frozen_text('docs/audits/architecture-tools/timing-sample.tsv').splitlines()
+    summary=dict(base=BASE,method=dict(command='python3 -I docs/audits/direction-tools/statements/scan.py --check',source='All source blobs, paths, inventory availability and timing sample read from Git objects at BASE, independent of current checkout or merged HEAD.',selection='All @[goal] in tracked Lean; all theorem/lemma/abbrev/def in Solidity/Theorems.lean; top 30 public theorems by distinct direct importers of their defining module, ties path then line. This is module exposure, not declaration usage. Includes examples explicitly.',generated='Roots, Corpus, AxiomPins, marked chain/agreement and other marked generation separated. Chain/agreement without markers is an explicit unresolved bucket, never called handwritten. Selected declaration files have no generation marker; no theorem strength verdict depends on generated counts. True handwriting cannot be certified from source markers; no scale/effort verdict uses these buckets.',parsing='Source-level, not elaborated. Premises column is explicit binders; arrows remain in conclusion. Context preserves open/variable commands, including commands from earlier ended sections; consult source for exact scope. No proof rechecked.',ratios='Reference theorem statement header physical-line ratios only; no unjustified LOC/check-time comparison of compiler vs calculus. Source citations are cited, not measured. Compiler header nonblank physical line ratios are descriptive typography only; outliers justified by abbreviation/scope, never treated as effort or strength. Other rows have no like-for-like compiler-pass counterpart.'),counts=dict(inventory,tracked_lean_files=len(paths),goal_attributes=len(goals),public_theorems=len(public),top_imported= len(top),selected=len(rows),headline_theorems=sum(d['path']=='Solidity/Theorems.lean' and d['kind']=='theorem' for d in rows),classifications=dict(collections.Counter(d['strength'] for d in rows)),witnesses=dict(collections.Counter(d['witness_status'] for d in rows))),goals=goals,inventory_reuse=inv,timings=dict(path='docs/audits/architecture-tools/timing-sample.tsv',rows=len(timing),sha256=hashlib.sha256(('\n'.join(timing)+'\n').encode()).hexdigest(),use='Existing sample only; no per-selected-theorem timing inferred'),references=json.loads((HERE/'references.json').read_text()),top_problems=problems,waits=[dict(id='W-runtime',reason='Lean and Lake absent from PATH; no elaboration requested or performed. Witnesses are source evidence, not fresh validation.'),dict(id='W-differential',reason='scripts/differential and scripts/bench absent at pinned base; no results inferred.')],axioms_added=0,sorry_added=0,conclusion='Headline calculus theorems match their stated intrinsic-model scope. Compiler statements retain payment/refusal and abstraction gaps against behavioural refinement. Source examples are useful fixed-case checks, not general semantic preservation. No evidence here justifies judging overall project size redundant.')
     return rows,summary
 
 def main():
