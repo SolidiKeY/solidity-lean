@@ -1,0 +1,3856 @@
+{
+  "schema": 1,
+  "base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+  "reachability": {
+    "modules": 8277,
+    "provenance": {
+      "library": {
+        "modules": 7269,
+        "physical_lines": 1197760
+      },
+      "vendored": {
+        "modules": 101,
+        "physical_lines": 18480
+      },
+      "external_lean_consumer": {
+        "modules": 907,
+        "physical_lines": 92531
+      }
+    },
+    "physical_lines": 1308771,
+    "generated_modules": 69,
+    "filename_only_generation_candidates": 157,
+    "generated_physical_lines": 31718,
+    "node_totals": {
+      "all": {
+        "declarations": 130475,
+        "source_span_lines": 1165902,
+        "commands": 63033
+      },
+      "area:Automation": {
+        "commands": 2,
+        "source_span_lines": 33,
+        "declarations": 3
+      },
+      "area:Backend": {
+        "declarations": 28662,
+        "source_span_lines": 256671,
+        "commands": 12732
+      },
+      "area:Bridge": {
+        "declarations": 7657,
+        "source_span_lines": 75089,
+        "commands": 5047
+      },
+      "area:Calculus": {
+        "declarations": 11746,
+        "source_span_lines": 151128,
+        "commands": 616
+      },
+      "area:Corpus": {
+        "declarations": 599,
+        "source_span_lines": 3877,
+        "commands": 13
+      },
+      "area:Counterexamples": {
+        "declarations": 18,
+        "source_span_lines": 238,
+        "commands": 12
+      },
+      "area:Evm": {
+        "declarations": 4396,
+        "source_span_lines": 41297,
+        "commands": 392
+      },
+      "area:Examples": {
+        "declarations": 6150,
+        "source_span_lines": 50823,
+        "commands": 3739
+      },
+      "area:Frontend": {
+        "declarations": 7924,
+        "source_span_lines": 93995,
+        "commands": 3767
+      },
+      "area:Hash": {
+        "declarations": 173,
+        "source_span_lines": 1957,
+        "commands": 21
+      },
+      "area:Language": {
+        "declarations": 345,
+        "source_span_lines": 5577,
+        "commands": 114
+      },
+      "area:Lowering": {
+        "declarations": 11696,
+        "source_span_lines": 94510,
+        "commands": 7239
+      },
+      "area:Optimizer": {
+        "declarations": 445,
+        "source_span_lines": 5873,
+        "commands": 7
+      },
+      "area:Precompiles": {
+        "declarations": 239,
+        "source_span_lines": 1678,
+        "commands": 155
+      },
+      "area:Roadmap": {
+        "declarations": 446,
+        "source_span_lines": 4255,
+        "commands": 123
+      },
+      "area:Semantics": {
+        "declarations": 2250,
+        "source_span_lines": 22085,
+        "commands": 215
+      },
+      "area:SolcValidation": {
+        "declarations": 931,
+        "source_span_lines": 6694
+      },
+      "area:Solidity": {
+        "declarations": 394,
+        "source_span_lines": 3236,
+        "commands": 104
+      },
+      "area:Solkey": {
+        "declarations": 5,
+        "source_span_lines": 171,
+        "commands": 35
+      },
+      "area:SortCheck": {
+        "declarations": 86,
+        "source_span_lines": 1058,
+        "commands": 11
+      },
+      "area:Source": {
+        "declarations": 5484,
+        "source_span_lines": 44815,
+        "commands": 1590
+      },
+      "area:Stipend": {
+        "declarations": 31,
+        "source_span_lines": 211,
+        "commands": 2
+      },
+      "area:Storage": {
+        "declarations": 362,
+        "source_span_lines": 3697,
+        "commands": 90
+      },
+      "area:Syntax": {
+        "declarations": 874,
+        "source_span_lines": 13461,
+        "commands": 267
+      },
+      "area:TestSuite": {
+        "declarations": 569,
+        "source_span_lines": 2300,
+        "commands": 24
+      },
+      "area:Theory": {
+        "declarations": 661,
+        "source_span_lines": 7479,
+        "commands": 1
+      },
+      "area:Tools": {
+        "declarations": 570,
+        "source_span_lines": 7501,
+        "commands": 42
+      },
+      "area:Typing": {
+        "declarations": 563,
+        "source_span_lines": 6020
+      },
+      "area:Yul": {
+        "declarations": 28086,
+        "source_span_lines": 178151,
+        "commands": 7659
+      },
+      "area:docs": {
+        "declarations": 19,
+        "source_span_lines": 89,
+        "commands": 22
+      },
+      "area:scripts": {
+        "declarations": 72,
+        "source_span_lines": 614,
+        "commands": 16
+      },
+      "area:tests": {
+        "commands": 18935,
+        "source_span_lines": 78106,
+        "declarations": 8883
+      },
+      "area:top": {
+        "declarations": 8,
+        "source_span_lines": 1177,
+        "commands": 21
+      },
+      "area:vendor": {
+        "declarations": 76,
+        "source_span_lines": 1050,
+        "commands": 9
+      },
+      "area:vscode": {
+        "declarations": 49,
+        "source_span_lines": 912,
+        "commands": 7
+      },
+      "area:web": {
+        "declarations": 3,
+        "source_span_lines": 74,
+        "commands": 4
+      },
+      "generated": {
+        "declarations": 8326,
+        "source_span_lines": 23035,
+        "commands": 2356
+      },
+      "handwritten_or_unmarked": {
+        "declarations": 122149,
+        "source_span_lines": 1142867,
+        "commands": 60677
+      },
+      "provenance:external_lean_consumer": {
+        "declarations": 9026,
+        "source_span_lines": 79795,
+        "commands": 18984
+      },
+      "provenance:library": {
+        "declarations": 119791,
+        "source_span_lines": 1070116,
+        "commands": 43947
+      },
+      "provenance:vendored": {
+        "declarations": 1658,
+        "source_span_lines": 15991,
+        "commands": 102
+      }
+    }
+  },
+  "lexical": {
+    "goals": {
+      "all": {
+        "declarations": 5291,
+        "source_span_lines": 65475,
+        "declarations_share": 0.04055182985246216,
+        "source_span_lines_share": 0.05615823628401015
+      },
+      "area:Calculus": {
+        "declarations": 1762,
+        "source_span_lines": 23058,
+        "declarations_share": 0.15000851353652306,
+        "source_span_lines_share": 0.15257265364459266
+      },
+      "area:Evm": {
+        "declarations": 1457,
+        "source_span_lines": 21683,
+        "declarations_share": 0.33143767060964513,
+        "source_span_lines_share": 0.5250502457805651
+      },
+      "area:Semantics": {
+        "declarations": 1094,
+        "source_span_lines": 11417,
+        "declarations_share": 0.4862222222222222,
+        "source_span_lines_share": 0.5169572107765452
+      },
+      "area:Solidity": {
+        "declarations": 282,
+        "source_span_lines": 2230,
+        "declarations_share": 0.7157360406091371,
+        "source_span_lines_share": 0.6891223733003708
+      },
+      "area:Syntax": {
+        "declarations": 205,
+        "source_span_lines": 1841,
+        "declarations_share": 0.2345537757437071,
+        "source_span_lines_share": 0.13676547061882474
+      },
+      "area:Theory": {
+        "declarations": 206,
+        "source_span_lines": 2388,
+        "declarations_share": 0.31164901664145234,
+        "source_span_lines_share": 0.3192940232651424
+      },
+      "area:Typing": {
+        "declarations": 285,
+        "source_span_lines": 2858,
+        "declarations_share": 0.5062166962699822,
+        "source_span_lines_share": 0.47475083056478407
+      },
+      "generated": {
+        "declarations": 2,
+        "source_span_lines": 758,
+        "declarations_share": 0.00024021138601969732,
+        "source_span_lines_share": 0.03290644671152594
+      },
+      "handwritten_or_unmarked": {
+        "declarations": 5289,
+        "source_span_lines": 64717,
+        "declarations_share": 0.04329957674643264,
+        "source_span_lines_share": 0.05662688659310314
+      },
+      "provenance:library": {
+        "declarations": 5291,
+        "source_span_lines": 65475,
+        "declarations_share": 0.0441685936339124,
+        "source_span_lines_share": 0.06118495564966789
+      }
+    },
+    "tests_only": {
+      "all": {
+        "declarations": 110481,
+        "source_span_lines": 924296,
+        "commands": 45168,
+        "declarations_share": 0.8467599156926614,
+        "source_span_lines_share": 0.7927733205706826
+      },
+      "area:Automation": {
+        "declarations": 3,
+        "source_span_lines": 16,
+        "declarations_share": 1.0,
+        "source_span_lines_share": 0.48484848484848486
+      },
+      "area:Backend": {
+        "declarations": 25499,
+        "source_span_lines": 211848,
+        "commands": 5407,
+        "declarations_share": 0.889644825901891,
+        "source_span_lines_share": 0.8253678833993712
+      },
+      "area:Bridge": {
+        "declarations": 5172,
+        "source_span_lines": 49773,
+        "commands": 3501,
+        "declarations_share": 0.6754603630664752,
+        "source_span_lines_share": 0.6628534139487808
+      },
+      "area:Calculus": {
+        "declarations": 8478,
+        "source_span_lines": 106760,
+        "commands": 24,
+        "declarations_share": 0.7217776264260174,
+        "source_span_lines_share": 0.7064210470594463
+      },
+      "area:Corpus": {
+        "declarations": 529,
+        "source_span_lines": 2689,
+        "commands": 2,
+        "declarations_share": 0.8831385642737897,
+        "source_span_lines_share": 0.6935775083827702
+      },
+      "area:Counterexamples": {
+        "declarations": 18,
+        "source_span_lines": 188,
+        "declarations_share": 1.0,
+        "source_span_lines_share": 0.7899159663865546
+      },
+      "area:Evm": {
+        "declarations": 2550,
+        "source_span_lines": 16421,
+        "commands": 375,
+        "declarations_share": 0.5800727934485896,
+        "source_span_lines_share": 0.3976317892340848
+      },
+      "area:Examples": {
+        "declarations": 6150,
+        "source_span_lines": 50823,
+        "commands": 3739,
+        "declarations_share": 1.0,
+        "source_span_lines_share": 1.0
+      },
+      "area:Frontend": {
+        "declarations": 6814,
+        "source_span_lines": 73229,
+        "commands": 440,
+        "declarations_share": 0.8599192327107521,
+        "source_span_lines_share": 0.7790733549656896
+      },
+      "area:Hash": {
+        "declarations": 26,
+        "source_span_lines": 149,
+        "declarations_share": 0.15028901734104047,
+        "source_span_lines_share": 0.07613694430250383
+      },
+      "area:Language": {
+        "declarations": 149,
+        "source_span_lines": 3215,
+        "declarations_share": 0.4318840579710145,
+        "source_span_lines_share": 0.576474807244038
+      },
+      "area:Lowering": {
+        "declarations": 10536,
+        "source_span_lines": 79320,
+        "commands": 4568,
+        "declarations_share": 0.9008207934336525,
+        "source_span_lines_share": 0.8392762670616866
+      },
+      "area:Optimizer": {
+        "declarations": 434,
+        "source_span_lines": 5805,
+        "commands": 7,
+        "declarations_share": 0.9752808988764045,
+        "source_span_lines_share": 0.9884215903286225
+      },
+      "area:Precompiles": {
+        "declarations": 213,
+        "source_span_lines": 1298,
+        "declarations_share": 0.891213389121339,
+        "source_span_lines_share": 0.7735399284862932
+      },
+      "area:Roadmap": {
+        "declarations": 341,
+        "source_span_lines": 3178,
+        "commands": 44,
+        "declarations_share": 0.7645739910313901,
+        "source_span_lines_share": 0.7468860164512339
+      },
+      "area:Semantics": {
+        "declarations": 808,
+        "source_span_lines": 7861,
+        "commands": 110,
+        "declarations_share": 0.3591111111111111,
+        "source_span_lines_share": 0.3559429477020602
+      },
+      "area:SolcValidation": {
+        "declarations": 227,
+        "source_span_lines": 1485,
+        "declarations_share": 0.24382384532760473,
+        "source_span_lines_share": 0.22184045413803405
+      },
+      "area:Solidity": {
+        "declarations": 60,
+        "source_span_lines": 509,
+        "declarations_share": 0.15228426395939088,
+        "source_span_lines_share": 0.1572929542645241
+      },
+      "area:Solkey": {
+        "declarations": 5,
+        "source_span_lines": 36,
+        "commands": 3,
+        "declarations_share": 1.0,
+        "source_span_lines_share": 0.21052631578947367
+      },
+      "area:SortCheck": {
+        "declarations": 65,
+        "source_span_lines": 787,
+        "declarations_share": 0.7558139534883721,
+        "source_span_lines_share": 0.7438563327032136
+      },
+      "area:Source": {
+        "declarations": 5076,
+        "source_span_lines": 41316,
+        "commands": 1206,
+        "declarations_share": 0.925601750547046,
+        "source_span_lines_share": 0.9219234631261854
+      },
+      "area:Stipend": {
+        "declarations": 30,
+        "source_span_lines": 197,
+        "declarations_share": 0.967741935483871,
+        "source_span_lines_share": 0.933649289099526
+      },
+      "area:Storage": {
+        "declarations": 330,
+        "source_span_lines": 3258,
+        "commands": 55,
+        "declarations_share": 0.9116022099447514,
+        "source_span_lines_share": 0.8812550716797404
+      },
+      "area:Syntax": {
+        "declarations": 615,
+        "source_span_lines": 10369,
+        "declarations_share": 0.7036613272311213,
+        "source_span_lines_share": 0.7702993834039076
+      },
+      "area:TestSuite": {
+        "declarations": 569,
+        "source_span_lines": 2300,
+        "commands": 24,
+        "declarations_share": 1.0,
+        "source_span_lines_share": 1.0
+      },
+      "area:Theory": {
+        "declarations": 400,
+        "source_span_lines": 4523,
+        "declarations_share": 0.6051437216338881,
+        "source_span_lines_share": 0.6047599946516914
+      },
+      "area:Tools": {
+        "declarations": 405,
+        "source_span_lines": 5375,
+        "commands": 3,
+        "declarations_share": 0.7105263157894737,
+        "source_span_lines_share": 0.7165711238501533
+      },
+      "area:Typing": {
+        "declarations": 236,
+        "source_span_lines": 2849,
+        "declarations_share": 0.4191829484902309,
+        "source_span_lines_share": 0.47325581395348837
+      },
+      "area:Yul": {
+        "declarations": 25685,
+        "source_span_lines": 157491,
+        "commands": 6659,
+        "declarations_share": 0.9145125685394858,
+        "source_span_lines_share": 0.8840309624981055
+      },
+      "area:docs": {
+        "declarations": 19,
+        "source_span_lines": 89,
+        "commands": 22,
+        "declarations_share": 1.0,
+        "source_span_lines_share": 1.0
+      },
+      "area:scripts": {
+        "declarations": 72,
+        "source_span_lines": 614,
+        "commands": 16,
+        "declarations_share": 1.0,
+        "source_span_lines_share": 1.0
+      },
+      "area:tests": {
+        "commands": 18935,
+        "source_span_lines": 78106,
+        "declarations": 8883,
+        "declarations_share": 1.0,
+        "source_span_lines_share": 1.0
+      },
+      "area:top": {
+        "declarations": 8,
+        "source_span_lines": 1171,
+        "commands": 17,
+        "declarations_share": 1.0,
+        "source_span_lines_share": 0.9949022939677146
+      },
+      "area:vendor": {
+        "declarations": 24,
+        "source_span_lines": 262,
+        "declarations_share": 0.3157894736842105,
+        "source_span_lines_share": 0.24952380952380954
+      },
+      "area:vscode": {
+        "declarations": 49,
+        "source_span_lines": 912,
+        "commands": 7,
+        "declarations_share": 1.0,
+        "source_span_lines_share": 1.0
+      },
+      "area:web": {
+        "declarations": 3,
+        "source_span_lines": 74,
+        "commands": 4,
+        "declarations_share": 1.0,
+        "source_span_lines_share": 1.0
+      },
+      "generated": {
+        "declarations": 8032,
+        "source_span_lines": 13829,
+        "commands": 175,
+        "declarations_share": 0.9646889262551045,
+        "source_span_lines_share": 0.600347297590623
+      },
+      "handwritten_or_unmarked": {
+        "declarations": 102449,
+        "source_span_lines": 910467,
+        "commands": 44993,
+        "declarations_share": 0.8387215613717672,
+        "source_span_lines_share": 0.7966517538786227
+      },
+      "provenance:external_lean_consumer": {
+        "declarations": 9026,
+        "source_span_lines": 79795,
+        "commands": 18984,
+        "declarations_share": 1.0,
+        "source_span_lines_share": 1.0
+      },
+      "provenance:library": {
+        "declarations": 100626,
+        "source_span_lines": 837224,
+        "commands": 26184,
+        "declarations_share": 0.8400130226811697,
+        "source_span_lines_share": 0.7823675190353195
+      },
+      "provenance:vendored": {
+        "declarations": 829,
+        "source_span_lines": 7277,
+        "declarations_share": 0.5,
+        "source_span_lines_share": 0.45506847601776
+      }
+    },
+    "neither": {
+      "all": {
+        "declarations": 14703,
+        "source_span_lines": 176131,
+        "commands": 17865,
+        "declarations_share": 0.11268825445487642,
+        "source_span_lines_share": 0.15106844314530724
+      },
+      "area:Automation": {
+        "commands": 2,
+        "source_span_lines": 17,
+        "declarations_share": 0.0,
+        "source_span_lines_share": 0.5151515151515151
+      },
+      "area:Backend": {
+        "commands": 7325,
+        "source_span_lines": 44823,
+        "declarations": 3163,
+        "declarations_share": 0.110355174098109,
+        "source_span_lines_share": 0.17463211660062883
+      },
+      "area:Bridge": {
+        "declarations": 2485,
+        "source_span_lines": 25316,
+        "commands": 1546,
+        "declarations_share": 0.3245396369335249,
+        "source_span_lines_share": 0.3371465860512192
+      },
+      "area:Calculus": {
+        "declarations": 1506,
+        "source_span_lines": 21310,
+        "commands": 592,
+        "declarations_share": 0.12821386003745955,
+        "source_span_lines_share": 0.14100629929596104
+      },
+      "area:Corpus": {
+        "declarations": 70,
+        "source_span_lines": 1188,
+        "commands": 11,
+        "declarations_share": 0.11686143572621036,
+        "source_span_lines_share": 0.30642249161722984
+      },
+      "area:Counterexamples": {
+        "commands": 12,
+        "source_span_lines": 50,
+        "declarations_share": 0.0,
+        "source_span_lines_share": 0.21008403361344538
+      },
+      "area:Evm": {
+        "declarations": 389,
+        "source_span_lines": 3193,
+        "commands": 17,
+        "declarations_share": 0.08848953594176524,
+        "source_span_lines_share": 0.07731796498535003
+      },
+      "area:Frontend": {
+        "declarations": 1110,
+        "source_span_lines": 20766,
+        "commands": 3327,
+        "declarations_share": 0.14008076728924784,
+        "source_span_lines_share": 0.22092664503431034
+      },
+      "area:Hash": {
+        "declarations": 147,
+        "source_span_lines": 1808,
+        "commands": 21,
+        "declarations_share": 0.8497109826589595,
+        "source_span_lines_share": 0.9238630556974962
+      },
+      "area:Language": {
+        "declarations": 196,
+        "source_span_lines": 2362,
+        "commands": 114,
+        "declarations_share": 0.5681159420289855,
+        "source_span_lines_share": 0.423525192755962
+      },
+      "area:Lowering": {
+        "declarations": 1160,
+        "source_span_lines": 15190,
+        "commands": 2671,
+        "declarations_share": 0.09917920656634747,
+        "source_span_lines_share": 0.1607237329383134
+      },
+      "area:Optimizer": {
+        "declarations": 11,
+        "source_span_lines": 68,
+        "declarations_share": 0.024719101123595506,
+        "source_span_lines_share": 0.01157840967137749
+      },
+      "area:Precompiles": {
+        "commands": 155,
+        "source_span_lines": 380,
+        "declarations": 26,
+        "declarations_share": 0.1087866108786611,
+        "source_span_lines_share": 0.22646007151370678
+      },
+      "area:Roadmap": {
+        "declarations": 105,
+        "source_span_lines": 1077,
+        "commands": 79,
+        "declarations_share": 0.23542600896860988,
+        "source_span_lines_share": 0.25311398354876613
+      },
+      "area:Semantics": {
+        "declarations": 348,
+        "source_span_lines": 2807,
+        "commands": 105,
+        "declarations_share": 0.15466666666666667,
+        "source_span_lines_share": 0.1270998415213946
+      },
+      "area:SolcValidation": {
+        "declarations": 704,
+        "source_span_lines": 5209,
+        "declarations_share": 0.7561761546723953,
+        "source_span_lines_share": 0.7781595458619659
+      },
+      "area:Solidity": {
+        "declarations": 52,
+        "source_span_lines": 497,
+        "commands": 104,
+        "declarations_share": 0.1319796954314721,
+        "source_span_lines_share": 0.15358467243510507
+      },
+      "area:Solkey": {
+        "commands": 32,
+        "source_span_lines": 135,
+        "declarations_share": 0.0,
+        "source_span_lines_share": 0.7894736842105263
+      },
+      "area:SortCheck": {
+        "declarations": 21,
+        "source_span_lines": 271,
+        "commands": 11,
+        "declarations_share": 0.2441860465116279,
+        "source_span_lines_share": 0.2561436672967864
+      },
+      "area:Source": {
+        "declarations": 408,
+        "source_span_lines": 3499,
+        "commands": 384,
+        "declarations_share": 0.07439824945295405,
+        "source_span_lines_share": 0.07807653687381456
+      },
+      "area:Stipend": {
+        "declarations": 1,
+        "source_span_lines": 14,
+        "commands": 2,
+        "declarations_share": 0.03225806451612903,
+        "source_span_lines_share": 0.06635071090047394
+      },
+      "area:Storage": {
+        "declarations": 32,
+        "source_span_lines": 439,
+        "commands": 35,
+        "declarations_share": 0.08839779005524862,
+        "source_span_lines_share": 0.11874492832025967
+      },
+      "area:Syntax": {
+        "declarations": 54,
+        "source_span_lines": 1251,
+        "commands": 267,
+        "declarations_share": 0.06178489702517163,
+        "source_span_lines_share": 0.09293514597726767
+      },
+      "area:Theory": {
+        "declarations": 55,
+        "source_span_lines": 568,
+        "commands": 1,
+        "declarations_share": 0.0832072617246596,
+        "source_span_lines_share": 0.0759459820831662
+      },
+      "area:Tools": {
+        "declarations": 165,
+        "source_span_lines": 2126,
+        "commands": 39,
+        "declarations_share": 0.2894736842105263,
+        "source_span_lines_share": 0.2834288761498467
+      },
+      "area:Typing": {
+        "declarations": 42,
+        "source_span_lines": 313,
+        "declarations_share": 0.07460035523978685,
+        "source_span_lines_share": 0.05199335548172757
+      },
+      "area:Yul": {
+        "declarations": 2401,
+        "source_span_lines": 20660,
+        "commands": 1000,
+        "declarations_share": 0.08548743146051413,
+        "source_span_lines_share": 0.11596903750189445
+      },
+      "area:top": {
+        "commands": 4,
+        "source_span_lines": 6,
+        "declarations_share": 0.0,
+        "source_span_lines_share": 0.005097706032285472
+      },
+      "area:vendor": {
+        "declarations": 52,
+        "source_span_lines": 788,
+        "commands": 9,
+        "declarations_share": 0.6842105263157895,
+        "source_span_lines_share": 0.7504761904761905
+      },
+      "generated": {
+        "declarations": 292,
+        "source_span_lines": 8448,
+        "commands": 2181,
+        "declarations_share": 0.03507086235887581,
+        "source_span_lines_share": 0.3667462556978511
+      },
+      "handwritten_or_unmarked": {
+        "declarations": 14411,
+        "source_span_lines": 167683,
+        "commands": 15684,
+        "declarations_share": 0.1179788618818001,
+        "source_span_lines_share": 0.14672135952827406
+      },
+      "provenance:library": {
+        "declarations": 13874,
+        "source_span_lines": 167417,
+        "commands": 17763,
+        "declarations_share": 0.1158183836849179,
+        "source_span_lines_share": 0.15644752531501258
+      },
+      "provenance:vendored": {
+        "declarations": 829,
+        "source_span_lines": 8714,
+        "commands": 102,
+        "declarations_share": 0.5,
+        "source_span_lines_share": 0.54493152398224
+      }
+    }
+  },
+  "implicit_sensitivity": {
+    "goals": {
+      "all": {
+        "declarations": 5866,
+        "source_span_lines": 74428,
+        "commands": 541,
+        "declarations_share": 0.044958804368653,
+        "source_span_lines_share": 0.06383726934167709
+      },
+      "area:Calculus": {
+        "declarations": 2161,
+        "source_span_lines": 29981,
+        "commands": 205,
+        "declarations_share": 0.18397752426357908,
+        "source_span_lines_share": 0.19838150442009422
+      },
+      "area:Evm": {
+        "declarations": 1481,
+        "source_span_lines": 21825,
+        "commands": 2,
+        "declarations_share": 0.33689717925386714,
+        "source_span_lines_share": 0.5284887522096036
+      },
+      "area:Semantics": {
+        "declarations": 1116,
+        "source_span_lines": 11617,
+        "commands": 9,
+        "declarations_share": 0.496,
+        "source_span_lines_share": 0.5260131310844465
+      },
+      "area:Solidity": {
+        "commands": 104,
+        "source_span_lines": 2668,
+        "declarations": 321,
+        "declarations_share": 0.8147208121827412,
+        "source_span_lines_share": 0.8244746600741656
+      },
+      "area:Syntax": {
+        "commands": 221,
+        "source_span_lines": 3073,
+        "declarations": 294,
+        "declarations_share": 0.33638443935926776,
+        "source_span_lines_share": 0.22828913156526262
+      },
+      "area:Theory": {
+        "declarations": 208,
+        "source_span_lines": 2406,
+        "declarations_share": 0.3146747352496218,
+        "source_span_lines_share": 0.32170076213397514
+      },
+      "area:Typing": {
+        "declarations": 285,
+        "source_span_lines": 2858,
+        "declarations_share": 0.5062166962699822,
+        "source_span_lines_share": 0.47475083056478407
+      },
+      "generated": {
+        "declarations": 3,
+        "source_span_lines": 1137,
+        "declarations_share": 0.000360317079029546,
+        "source_span_lines_share": 0.049359670067288905
+      },
+      "handwritten_or_unmarked": {
+        "declarations": 5863,
+        "source_span_lines": 73291,
+        "commands": 541,
+        "declarations_share": 0.0479987556181385,
+        "source_span_lines_share": 0.06412907188675497
+      },
+      "provenance:library": {
+        "declarations": 5866,
+        "source_span_lines": 74428,
+        "commands": 541,
+        "declarations_share": 0.04896862034710454,
+        "source_span_lines_share": 0.0695513383595797
+      }
+    },
+    "tests_only": {
+      "all": {
+        "declarations": 116363,
+        "source_span_lines": 1017776,
+        "commands": 62193,
+        "declarations_share": 0.8918413489174172,
+        "source_span_lines_share": 0.8729515859823553
+      },
+      "area:Automation": {
+        "commands": 2,
+        "source_span_lines": 33,
+        "declarations": 3,
+        "declarations_share": 1.0,
+        "source_span_lines_share": 1.0
+      },
+      "area:Backend": {
+        "declarations": 27593,
+        "source_span_lines": 247703,
+        "commands": 12732,
+        "declarations_share": 0.9627032307584956,
+        "source_span_lines_share": 0.9650603301502702
+      },
+      "area:Bridge": {
+        "declarations": 6394,
+        "source_span_lines": 63715,
+        "commands": 4752,
+        "declarations_share": 0.8350528927778503,
+        "source_span_lines_share": 0.8485264153204863
+      },
+      "area:Calculus": {
+        "declarations": 8742,
+        "source_span_lines": 110772,
+        "commands": 411,
+        "declarations_share": 0.7442533628469266,
+        "source_span_lines_share": 0.7329680800381134
+      },
+      "area:Corpus": {
+        "declarations": 531,
+        "source_span_lines": 2750,
+        "commands": 13,
+        "declarations_share": 0.8864774624373957,
+        "source_span_lines_share": 0.709311323188032
+      },
+      "area:Counterexamples": {
+        "declarations": 18,
+        "source_span_lines": 238,
+        "commands": 12,
+        "declarations_share": 1.0,
+        "source_span_lines_share": 1.0
+      },
+      "area:Evm": {
+        "declarations": 2619,
+        "source_span_lines": 16653,
+        "commands": 390,
+        "declarations_share": 0.595768880800728,
+        "source_span_lines_share": 0.4032496307237814
+      },
+      "area:Examples": {
+        "declarations": 6150,
+        "source_span_lines": 50823,
+        "commands": 3739,
+        "declarations_share": 1.0,
+        "source_span_lines_share": 1.0
+      },
+      "area:Frontend": {
+        "declarations": 7186,
+        "source_span_lines": 85606,
+        "commands": 3767,
+        "declarations_share": 0.9068652195860677,
+        "source_span_lines_share": 0.9107505718389276
+      },
+      "area:Hash": {
+        "declarations": 155,
+        "source_span_lines": 1821,
+        "commands": 21,
+        "declarations_share": 0.8959537572254336,
+        "source_span_lines_share": 0.9305058763413387
+      },
+      "area:Language": {
+        "declarations": 274,
+        "source_span_lines": 5114,
+        "commands": 114,
+        "declarations_share": 0.7942028985507247,
+        "source_span_lines_share": 0.9169804554419939
+      },
+      "area:Lowering": {
+        "declarations": 11456,
+        "source_span_lines": 93058,
+        "commands": 7239,
+        "declarations_share": 0.9794801641586868,
+        "source_span_lines_share": 0.9846365463972067
+      },
+      "area:Optimizer": {
+        "declarations": 434,
+        "source_span_lines": 5805,
+        "commands": 7,
+        "declarations_share": 0.9752808988764045,
+        "source_span_lines_share": 0.9884215903286225
+      },
+      "area:Precompiles": {
+        "declarations": 221,
+        "source_span_lines": 1530,
+        "commands": 155,
+        "declarations_share": 0.9246861924686193,
+        "source_span_lines_share": 0.9117997616209773
+      },
+      "area:Roadmap": {
+        "declarations": 420,
+        "source_span_lines": 4068,
+        "commands": 123,
+        "declarations_share": 0.9417040358744395,
+        "source_span_lines_share": 0.9560517038777908
+      },
+      "area:Semantics": {
+        "declarations": 920,
+        "source_span_lines": 8889,
+        "commands": 206,
+        "declarations_share": 0.4088888888888889,
+        "source_span_lines_share": 0.40249037808467286
+      },
+      "area:SolcValidation": {
+        "declarations": 304,
+        "source_span_lines": 1816,
+        "declarations_share": 0.32653061224489793,
+        "source_span_lines_share": 0.27128772034657905
+      },
+      "area:Solidity": {
+        "declarations": 43,
+        "source_span_lines": 352,
+        "declarations_share": 0.10913705583756345,
+        "source_span_lines_share": 0.10877626699629171
+      },
+      "area:Solkey": {
+        "declarations": 5,
+        "source_span_lines": 171,
+        "commands": 35,
+        "declarations_share": 1.0,
+        "source_span_lines_share": 1.0
+      },
+      "area:SortCheck": {
+        "declarations": 74,
+        "source_span_lines": 925,
+        "commands": 11,
+        "declarations_share": 0.8604651162790697,
+        "source_span_lines_share": 0.8742911153119093
+      },
+      "area:Source": {
+        "declarations": 5185,
+        "source_span_lines": 42893,
+        "commands": 1590,
+        "declarations_share": 0.9454777534646244,
+        "source_span_lines_share": 0.9571125739149838
+      },
+      "area:Stipend": {
+        "declarations": 31,
+        "source_span_lines": 211,
+        "commands": 2,
+        "declarations_share": 1.0,
+        "source_span_lines_share": 1.0
+      },
+      "area:Storage": {
+        "declarations": 348,
+        "source_span_lines": 3612,
+        "commands": 90,
+        "declarations_share": 0.9613259668508287,
+        "source_span_lines_share": 0.9770083851771707
+      },
+      "area:Syntax": {
+        "declarations": 554,
+        "source_span_lines": 10013,
+        "commands": 46,
+        "declarations_share": 0.6338672768878718,
+        "source_span_lines_share": 0.7438526112473071
+      },
+      "area:TestSuite": {
+        "declarations": 569,
+        "source_span_lines": 2300,
+        "commands": 24,
+        "declarations_share": 1.0,
+        "source_span_lines_share": 1.0
+      },
+      "area:Theory": {
+        "declarations": 401,
+        "source_span_lines": 4532,
+        "commands": 1,
+        "declarations_share": 0.6066565809379728,
+        "source_span_lines_share": 0.6059633640861077
+      },
+      "area:Tools": {
+        "declarations": 519,
+        "source_span_lines": 7010,
+        "commands": 42,
+        "declarations_share": 0.9105263157894737,
+        "source_span_lines_share": 0.9345420610585256
+      },
+      "area:Typing": {
+        "declarations": 236,
+        "source_span_lines": 2849,
+        "declarations_share": 0.4191829484902309,
+        "source_span_lines_share": 0.47325581395348837
+      },
+      "area:Yul": {
+        "declarations": 25888,
+        "source_span_lines": 160825,
+        "commands": 7659,
+        "declarations_share": 0.9217403688670512,
+        "source_span_lines_share": 0.9027454238258555
+      },
+      "area:docs": {
+        "declarations": 19,
+        "source_span_lines": 89,
+        "commands": 22,
+        "declarations_share": 1.0,
+        "source_span_lines_share": 1.0
+      },
+      "area:scripts": {
+        "declarations": 72,
+        "source_span_lines": 614,
+        "commands": 16,
+        "declarations_share": 1.0,
+        "source_span_lines_share": 1.0
+      },
+      "area:tests": {
+        "commands": 18935,
+        "source_span_lines": 78106,
+        "declarations": 8883,
+        "declarations_share": 1.0,
+        "source_span_lines_share": 1.0
+      },
+      "area:top": {
+        "declarations": 8,
+        "source_span_lines": 1171,
+        "commands": 17,
+        "declarations_share": 1.0,
+        "source_span_lines_share": 0.9949022939677146
+      },
+      "area:vendor": {
+        "declarations": 56,
+        "source_span_lines": 723,
+        "commands": 9,
+        "declarations_share": 0.7368421052631579,
+        "source_span_lines_share": 0.6885714285714286
+      },
+      "area:vscode": {
+        "declarations": 49,
+        "source_span_lines": 912,
+        "commands": 7,
+        "declarations_share": 1.0,
+        "source_span_lines_share": 1.0
+      },
+      "area:web": {
+        "declarations": 3,
+        "source_span_lines": 74,
+        "commands": 4,
+        "declarations_share": 1.0,
+        "source_span_lines_share": 1.0
+      },
+      "generated": {
+        "declarations": 8042,
+        "source_span_lines": 18916,
+        "commands": 2352,
+        "declarations_share": 0.965889983185203,
+        "source_span_lines_share": 0.8211851530280009
+      },
+      "handwritten_or_unmarked": {
+        "declarations": 108321,
+        "source_span_lines": 998860,
+        "commands": 59841,
+        "declarations_share": 0.8867939974948629,
+        "source_span_lines_share": 0.8739949617934545
+      },
+      "provenance:external_lean_consumer": {
+        "declarations": 9026,
+        "source_span_lines": 79795,
+        "commands": 18984,
+        "declarations_share": 1.0,
+        "source_span_lines_share": 1.0
+      },
+      "provenance:library": {
+        "declarations": 105983,
+        "source_span_lines": 925333,
+        "commands": 43107,
+        "declarations_share": 0.8847325759030311,
+        "source_span_lines_share": 0.8647034527097996
+      },
+      "provenance:vendored": {
+        "commands": 102,
+        "source_span_lines": 12648,
+        "declarations": 1354,
+        "declarations_share": 0.8166465621230398,
+        "source_span_lines_share": 0.7909449065099118
+      }
+    },
+    "neither": {
+      "all": {
+        "declarations": 8246,
+        "source_span_lines": 73698,
+        "commands": 299,
+        "declarations_share": 0.06319984671392988,
+        "source_span_lines_share": 0.06321114467596763
+      },
+      "area:Backend": {
+        "declarations": 1069,
+        "source_span_lines": 8968,
+        "declarations_share": 0.03729676924150443,
+        "source_span_lines_share": 0.03493966984972981
+      },
+      "area:Bridge": {
+        "declarations": 1263,
+        "source_span_lines": 11374,
+        "commands": 295,
+        "declarations_share": 0.16494710722214967,
+        "source_span_lines_share": 0.15147358467951363
+      },
+      "area:Calculus": {
+        "declarations": 843,
+        "source_span_lines": 10375,
+        "declarations_share": 0.0717691128894943,
+        "source_span_lines_share": 0.06865041554179238
+      },
+      "area:Corpus": {
+        "declarations": 68,
+        "source_span_lines": 1127,
+        "declarations_share": 0.11352253756260434,
+        "source_span_lines_share": 0.290688676811968
+      },
+      "area:Evm": {
+        "declarations": 296,
+        "source_span_lines": 2819,
+        "declarations_share": 0.06733393994540492,
+        "source_span_lines_share": 0.068261617066615
+      },
+      "area:Frontend": {
+        "declarations": 738,
+        "source_span_lines": 8389,
+        "declarations_share": 0.09313478041393236,
+        "source_span_lines_share": 0.0892494281610724
+      },
+      "area:Hash": {
+        "declarations": 18,
+        "source_span_lines": 136,
+        "declarations_share": 0.10404624277456648,
+        "source_span_lines_share": 0.06949412365866121
+      },
+      "area:Language": {
+        "declarations": 71,
+        "source_span_lines": 463,
+        "declarations_share": 0.20579710144927535,
+        "source_span_lines_share": 0.0830195445580061
+      },
+      "area:Lowering": {
+        "declarations": 240,
+        "source_span_lines": 1452,
+        "declarations_share": 0.02051983584131327,
+        "source_span_lines_share": 0.015363453602793356
+      },
+      "area:Optimizer": {
+        "declarations": 11,
+        "source_span_lines": 68,
+        "declarations_share": 0.024719101123595506,
+        "source_span_lines_share": 0.01157840967137749
+      },
+      "area:Precompiles": {
+        "declarations": 18,
+        "source_span_lines": 148,
+        "declarations_share": 0.07531380753138076,
+        "source_span_lines_share": 0.08820023837902265
+      },
+      "area:Roadmap": {
+        "declarations": 26,
+        "source_span_lines": 187,
+        "declarations_share": 0.05829596412556054,
+        "source_span_lines_share": 0.043948296122209164
+      },
+      "area:Semantics": {
+        "declarations": 214,
+        "source_span_lines": 1579,
+        "declarations_share": 0.0951111111111111,
+        "source_span_lines_share": 0.0714964908308807
+      },
+      "area:SolcValidation": {
+        "declarations": 627,
+        "source_span_lines": 4878,
+        "declarations_share": 0.673469387755102,
+        "source_span_lines_share": 0.728712279653421
+      },
+      "area:Solidity": {
+        "declarations": 30,
+        "source_span_lines": 216,
+        "declarations_share": 0.07614213197969544,
+        "source_span_lines_share": 0.06674907292954264
+      },
+      "area:SortCheck": {
+        "declarations": 12,
+        "source_span_lines": 133,
+        "declarations_share": 0.13953488372093023,
+        "source_span_lines_share": 0.12570888468809074
+      },
+      "area:Source": {
+        "declarations": 299,
+        "source_span_lines": 1922,
+        "declarations_share": 0.054522246535375636,
+        "source_span_lines_share": 0.04288742608501618
+      },
+      "area:Storage": {
+        "declarations": 14,
+        "source_span_lines": 85,
+        "declarations_share": 0.03867403314917127,
+        "source_span_lines_share": 0.022991614822829323
+      },
+      "area:Syntax": {
+        "declarations": 26,
+        "source_span_lines": 375,
+        "declarations_share": 0.029748283752860413,
+        "source_span_lines_share": 0.027858257187430353
+      },
+      "area:Theory": {
+        "declarations": 52,
+        "source_span_lines": 541,
+        "declarations_share": 0.07866868381240545,
+        "source_span_lines_share": 0.0723358737799171
+      },
+      "area:Tools": {
+        "declarations": 51,
+        "source_span_lines": 491,
+        "declarations_share": 0.08947368421052632,
+        "source_span_lines_share": 0.06545793894147448
+      },
+      "area:Typing": {
+        "declarations": 42,
+        "source_span_lines": 313,
+        "declarations_share": 0.07460035523978685,
+        "source_span_lines_share": 0.05199335548172757
+      },
+      "area:Yul": {
+        "declarations": 2198,
+        "source_span_lines": 17326,
+        "declarations_share": 0.0782596311329488,
+        "source_span_lines_share": 0.0972545761741444
+      },
+      "area:top": {
+        "commands": 4,
+        "source_span_lines": 6,
+        "declarations_share": 0.0,
+        "source_span_lines_share": 0.005097706032285472
+      },
+      "area:vendor": {
+        "declarations": 20,
+        "source_span_lines": 327,
+        "declarations_share": 0.2631578947368421,
+        "source_span_lines_share": 0.31142857142857144
+      },
+      "generated": {
+        "declarations": 281,
+        "source_span_lines": 2982,
+        "commands": 4,
+        "declarations_share": 0.033749699735767476,
+        "source_span_lines_share": 0.12945517690471023
+      },
+      "handwritten_or_unmarked": {
+        "declarations": 7965,
+        "source_span_lines": 70716,
+        "commands": 295,
+        "declarations_share": 0.06520724688699867,
+        "source_span_lines_share": 0.06187596631979049
+      },
+      "provenance:library": {
+        "declarations": 7942,
+        "source_span_lines": 70355,
+        "commands": 299,
+        "declarations_share": 0.06629880374986434,
+        "source_span_lines_share": 0.06574520893062061
+      },
+      "provenance:vendored": {
+        "declarations": 304,
+        "source_span_lines": 3343,
+        "declarations_share": 0.18335343787696018,
+        "source_span_lines_share": 0.20905509349008816
+      }
+    }
+  },
+  "duplication": {
+    "method": "architecture dup_decls.statement/norm and near_files.canon; stable bottom-12 10-token shingle candidates, exact Jaccard >=0.8; >=300 tokens",
+    "caveat": "candidate sketch may miss near pairs; transitive clusters need not be pairwise similar; alpha-renamed numeric constants do not establish semantic equivalence",
+    "same_statement_clusters": 2743,
+    "exact_canonical_file_groups": 57,
+    "file_candidate_pairs": 11360,
+    "verified_near_pairs": 292,
+    "near_file_clusters": 88,
+    "near_cluster_physical_lines": 26599
+  },
+  "duplicate_cluster_files": [
+    "duplicates-000.json",
+    "duplicates-001.json",
+    "duplicates-002.json",
+    "duplicates-003.json",
+    "duplicates-004.json",
+    "duplicates-005.json",
+    "duplicates-006.json",
+    "duplicates-007.json",
+    "duplicates-008.json",
+    "duplicates-009.json",
+    "duplicates-010.json",
+    "duplicates-011.json",
+    "duplicates-012.json",
+    "duplicates-013.json",
+    "duplicates-014.json"
+  ],
+  "unassigned_physical_lines": 142869,
+  "generation_candidates": [
+    {
+      "module": "SolidityBridge.PrecompileAgreement.Bytes",
+      "path": "Bridge/SolidityBridge/PrecompileAgreement/Bytes.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "SolidityBridge.PrecompileAgreement.Controls",
+      "path": "Bridge/SolidityBridge/PrecompileAgreement/Controls.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "SolidityBridge.PrecompileAgreement.Gas",
+      "path": "Bridge/SolidityBridge/PrecompileAgreement/Gas.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "SolidityBridge.PrecompileAgreement.Header",
+      "path": "Bridge/SolidityBridge/PrecompileAgreement/Header.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "SolidityBridge.PrecompileAgreement.Identity",
+      "path": "Bridge/SolidityBridge/PrecompileAgreement/Identity.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "SolidityBridge.RoadmapV15.P10.CallInAgreement",
+      "path": "Bridge/SolidityBridge/RoadmapV15/P10/CallInAgreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "SolidityBridge.RoadmapV15.P10.DecoderAgreement",
+      "path": "Bridge/SolidityBridge/RoadmapV15/P10/DecoderAgreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "SolidityBridge.RoadmapV15.P10.DecoderAgreementControls",
+      "path": "Bridge/SolidityBridge/RoadmapV15/P10/DecoderAgreementControls.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement",
+      "path": "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "SolidityBridge.RoadmapV15.P10.PushDecoderAgreement",
+      "path": "Bridge/SolidityBridge/RoadmapV15/P10/PushDecoderAgreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "SolidityBridge.RoadmapV15.P10.StackSelectionAgreement",
+      "path": "Bridge/SolidityBridge/RoadmapV15/P10/StackSelectionAgreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "tests.precompile-agreement.Acceptance",
+      "path": "Bridge/tests/precompile-agreement/Acceptance.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "tests.precompile-agreement.ActualAxioms",
+      "path": "Bridge/tests/precompile-agreement/ActualAxioms.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "tests.precompile-agreement.AllDeclarations",
+      "path": "Bridge/tests/precompile-agreement/AllDeclarations.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "tests.precompile-agreement.Axioms",
+      "path": "Bridge/tests/precompile-agreement/Axioms.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "tests.precompile-agreement.BoundaryVectors",
+      "path": "Bridge/tests/precompile-agreement/BoundaryVectors.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "tests.precompile-agreement.CacheRequest",
+      "path": "Bridge/tests/precompile-agreement/CacheRequest.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "tests.precompile-agreement.H70BridgeProbe",
+      "path": "Bridge/tests/precompile-agreement/H70BridgeProbe.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "tests.precompile-agreement.NativeModexpProbe",
+      "path": "Bridge/tests/precompile-agreement/NativeModexpProbe.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "tests.precompile-agreement.TrustProbe",
+      "path": "Bridge/tests/precompile-agreement/TrustProbe.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Automation.H28.Chain",
+      "path": "Solidity/Automation/H28/Chain.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Backend.InternalDispatch.Agreement",
+      "path": "Solidity/Backend/InternalDispatch/Agreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Backend.InternalDispatch.Chain",
+      "path": "Solidity/Backend/InternalDispatch/Chain.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Backend.InternalFlow.RuntimeFrameArgumentAgreement",
+      "path": "Solidity/Backend/InternalFlow/RuntimeFrameArgumentAgreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Backend.InternalFlow.RuntimeFrameCallAgreement",
+      "path": "Solidity/Backend/InternalFlow/RuntimeFrameCallAgreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Backend.InternalFlow.RuntimeFrameP1V2CallAgreement",
+      "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1V2CallAgreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Backend.InternalFlow.RuntimeFrameP1V2CallAgreementControls",
+      "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1V2CallAgreementControls.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReferenceAgreement",
+      "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1V2ReferenceAgreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReferenceRebindAgreement",
+      "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1V2ReferenceRebindAgreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Backend.InternalFlow.RuntimeFrameP1V2ValueAgreement",
+      "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1V2ValueAgreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Backend.InternalFlow.RuntimeFrameP1V2ValueAgreementControls",
+      "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1V2ValueAgreementControls.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Backend.InternalFlow.RuntimeFrameResultAgreement",
+      "path": "Solidity/Backend/InternalFlow/RuntimeFrameResultAgreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Backend.InternalFlow.RuntimeFrameV3NativeScalarAgreement",
+      "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3NativeScalarAgreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Backend.InternalFlow.RuntimeFrameV3NativeScalarAgreementControls",
+      "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3NativeScalarAgreementControls.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveAgreement",
+      "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveAgreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Backend.MemoryOps.CalldataAgreementChildren",
+      "path": "Solidity/Backend/MemoryOps/CalldataAgreementChildren.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Backend.MemoryOps.OverwriteAgreement",
+      "path": "Solidity/Backend/MemoryOps/OverwriteAgreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Backend.MemoryOps.OverwriteAgreementExact",
+      "path": "Solidity/Backend/MemoryOps/OverwriteAgreementExact.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Backend.PrimitivePackets.BitNot.Agreement",
+      "path": "Solidity/Backend/PrimitivePackets/BitNot/Agreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Backend.PrimitivePackets.CheckedAdd.Agreement",
+      "path": "Solidity/Backend/PrimitivePackets/CheckedAdd/Agreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Backend.PrimitivePackets.CheckedMul.Agreement",
+      "path": "Solidity/Backend/PrimitivePackets/CheckedMul/Agreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Backend.PrimitivePackets.CheckedSub.Agreement",
+      "path": "Solidity/Backend/PrimitivePackets/CheckedSub/Agreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Backend.PrimitivePackets.Comparisons.Agreement",
+      "path": "Solidity/Backend/PrimitivePackets/Comparisons/Agreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Agreement",
+      "path": "Solidity/Backend/PrimitivePackets/Constants/Agreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Backend.PrimitivePackets.SignedCast.Agreement",
+      "path": "Solidity/Backend/PrimitivePackets/SignedCast/Agreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Backend.PrimitivePackets.SignedCheckedAdd.Agreement",
+      "path": "Solidity/Backend/PrimitivePackets/SignedCheckedAdd/Agreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Backend.PrimitivePackets.SignedCheckedMul.Agreement",
+      "path": "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Agreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Backend.PrimitivePackets.SignedCheckedSub.Agreement",
+      "path": "Solidity/Backend/PrimitivePackets/SignedCheckedSub/Agreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Backend.Scalar.CastChains",
+      "path": "Solidity/Backend/Scalar/CastChains.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Calculus.ChainGen",
+      "path": "Solidity/Calculus/ChainGen.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Calculus.ChainKit",
+      "path": "Solidity/Calculus/ChainKit.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Calculus.ChainRules",
+      "path": "Solidity/Calculus/ChainRules.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Calculus.Chains",
+      "path": "Solidity/Calculus/Chains.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Calculus.Chains.Elab",
+      "path": "Solidity/Calculus/Chains/Elab.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Calculus.Chains.Proofs",
+      "path": "Solidity/Calculus/Chains/Proofs.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Calculus.Chains.Strategy",
+      "path": "Solidity/Calculus/Chains/Strategy.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Calculus.DecisionSourceChain",
+      "path": "Solidity/Calculus/DecisionSourceChain.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Calculus.RewriteChainGen",
+      "path": "Solidity/Calculus/RewriteChainGen.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Calculus.RewriteChains",
+      "path": "Solidity/Calculus/RewriteChains.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Calculus.SolkeyAgreementH28.Freshness",
+      "path": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Examples.ChainExpand",
+      "path": "Solidity/Examples/ChainExpand.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Examples.ChainNotation",
+      "path": "Solidity/Examples/ChainNotation.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Examples.ChainRewrites",
+      "path": "Solidity/Examples/ChainRewrites.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Examples.ChainRewritesOpen",
+      "path": "Solidity/Examples/ChainRewritesOpen.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Examples.Chains.Arithmetic",
+      "path": "Solidity/Examples/Chains/Arithmetic.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Examples.Chains.CheckedArithmetic",
+      "path": "Solidity/Examples/Chains/CheckedArithmetic.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Examples.Chains.EvaluationOrder",
+      "path": "Solidity/Examples/Chains/EvaluationOrder.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Examples.Chains.FixedLength",
+      "path": "Solidity/Examples/Chains/FixedLength.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Examples.Chains.Memory",
+      "path": "Solidity/Examples/Chains/Memory.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Examples.Chains.MemoryArrays",
+      "path": "Solidity/Examples/Chains/MemoryArrays.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Examples.Chains.MemoryCoverage",
+      "path": "Solidity/Examples/Chains/MemoryCoverage.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Examples.Chains.MemoryDelete",
+      "path": "Solidity/Examples/Chains/MemoryDelete.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Examples.Chains.MemoryToStorage",
+      "path": "Solidity/Examples/Chains/MemoryToStorage.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Examples.Chains.Payment",
+      "path": "Solidity/Examples/Chains/Payment.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Examples.Chains.Storage",
+      "path": "Solidity/Examples/Chains/Storage.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Examples.Chains.StorageArrays",
+      "path": "Solidity/Examples/Chains/StorageArrays.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Examples.Chains.StorageCoverage",
+      "path": "Solidity/Examples/Chains/StorageCoverage.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Examples.Chains.StorageDelete",
+      "path": "Solidity/Examples/Chains/StorageDelete.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Examples.Chains.StorageToMemory",
+      "path": "Solidity/Examples/Chains/StorageToMemory.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Examples.DecisionHashFiveChain",
+      "path": "Solidity/Examples/DecisionHashFiveChain.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Examples.DecisionSourceChain",
+      "path": "Solidity/Examples/DecisionSourceChain.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Examples.Tactics.Chains",
+      "path": "Solidity/Examples/Tactics/Chains.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Lowering.V08.LiteralFailureSliceChain",
+      "path": "Solidity/Lowering/V08/LiteralFailureSliceChain.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Lowering.V08.LiteralFailureSliceChainControls",
+      "path": "Solidity/Lowering/V08/LiteralFailureSliceChainControls.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Roadmap.G49Final.PassChain",
+      "path": "Solidity/Roadmap/G49Final/PassChain.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Semantics.Nondeterminism.ForkAgreement",
+      "path": "Solidity/Semantics/Nondeterminism/ForkAgreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.BoolSlot",
+      "path": "Solidity/Source/Agreement/BoolSlot.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.BoolSlotAnd",
+      "path": "Solidity/Source/Agreement/BoolSlotAnd.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.BoolSlotAndControls",
+      "path": "Solidity/Source/Agreement/BoolSlotAndControls.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.BoolSlotAssign",
+      "path": "Solidity/Source/Agreement/BoolSlotAssign.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.BoolSlotConditional",
+      "path": "Solidity/Source/Agreement/BoolSlotConditional.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.BoolSlotConditionalControls",
+      "path": "Solidity/Source/Agreement/BoolSlotConditionalControls.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.BoolSlotControls",
+      "path": "Solidity/Source/Agreement/BoolSlotControls.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.BoolSlotNot",
+      "path": "Solidity/Source/Agreement/BoolSlotNot.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.BoolSlotNotControls",
+      "path": "Solidity/Source/Agreement/BoolSlotNotControls.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.BoolSlotOr",
+      "path": "Solidity/Source/Agreement/BoolSlotOr.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.BoolSlotOrControls",
+      "path": "Solidity/Source/Agreement/BoolSlotOrControls.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.BoolSlotRead",
+      "path": "Solidity/Source/Agreement/BoolSlotRead.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.BoolSlotReadControls",
+      "path": "Solidity/Source/Agreement/BoolSlotReadControls.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.BoolSlotReadWrite",
+      "path": "Solidity/Source/Agreement/BoolSlotReadWrite.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.BoolSlotRepeated",
+      "path": "Solidity/Source/Agreement/BoolSlotRepeated.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.BoolSlotRepeatedControls",
+      "path": "Solidity/Source/Agreement/BoolSlotRepeatedControls.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.BoolSlotSaved",
+      "path": "Solidity/Source/Agreement/BoolSlotSaved.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.BoolSlotSavedControls",
+      "path": "Solidity/Source/Agreement/BoolSlotSavedControls.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.BoolSlotToggle",
+      "path": "Solidity/Source/Agreement/BoolSlotToggle.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.BoolSlotToggleControls",
+      "path": "Solidity/Source/Agreement/BoolSlotToggleControls.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.Locals",
+      "path": "Solidity/Source/Agreement/Locals.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.NormalBoolAssign",
+      "path": "Solidity/Source/Agreement/NormalBoolAssign.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.NormalBoolAssignControls",
+      "path": "Solidity/Source/Agreement/NormalBoolAssignControls.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.NormalBoolBindings",
+      "path": "Solidity/Source/Agreement/NormalBoolBindings.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.NormalBoolControls",
+      "path": "Solidity/Source/Agreement/NormalBoolControls.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.NormalComposition",
+      "path": "Solidity/Source/Agreement/NormalComposition.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.NormalControls",
+      "path": "Solidity/Source/Agreement/NormalControls.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.NormalCuts",
+      "path": "Solidity/Source/Agreement/NormalCuts.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.NormalDefaultControls",
+      "path": "Solidity/Source/Agreement/NormalDefaultControls.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.NormalDefaults",
+      "path": "Solidity/Source/Agreement/NormalDefaults.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.NormalStatement",
+      "path": "Solidity/Source/Agreement/NormalStatement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.NormalStep",
+      "path": "Solidity/Source/Agreement/NormalStep.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.Primitive",
+      "path": "Solidity/Source/Agreement/Primitive.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.PrimitiveCopySequence",
+      "path": "Solidity/Source/Agreement/PrimitiveCopySequence.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.PrimitiveCopySequenceControls",
+      "path": "Solidity/Source/Agreement/PrimitiveCopySequenceControls.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.PrimitiveSavedAssign",
+      "path": "Solidity/Source/Agreement/PrimitiveSavedAssign.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.PrimitiveSavedAssignControls",
+      "path": "Solidity/Source/Agreement/PrimitiveSavedAssignControls.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.PrimitiveSlot",
+      "path": "Solidity/Source/Agreement/PrimitiveSlot.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.PrimitiveSlotAssign",
+      "path": "Solidity/Source/Agreement/PrimitiveSlotAssign.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.PrimitiveSlotAssignControls",
+      "path": "Solidity/Source/Agreement/PrimitiveSlotAssignControls.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.PrimitiveSlotControls",
+      "path": "Solidity/Source/Agreement/PrimitiveSlotControls.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.PrimitiveSlotReverse",
+      "path": "Solidity/Source/Agreement/PrimitiveSlotReverse.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.PrimitiveSlotReverseControls",
+      "path": "Solidity/Source/Agreement/PrimitiveSlotReverseControls.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Agreement.PrimitiveTypes",
+      "path": "Solidity/Source/Agreement/PrimitiveTypes.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Progress.ForwardingChain",
+      "path": "Solidity/Source/Progress/ForwardingChain.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Progress.ForwardingChainControls",
+      "path": "Solidity/Source/Progress/ForwardingChainControls.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Progress.InitializedChain",
+      "path": "Solidity/Source/Progress/InitializedChain.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Source.Progress.InitializedChainControls",
+      "path": "Solidity/Source/Progress/InitializedChainControls.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Syntax.DispatchChain",
+      "path": "Solidity/Syntax/DispatchChain.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Yul.Adapters.MemoryAgreement",
+      "path": "Solidity/Yul/Adapters/MemoryAgreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Yul.Adapters.MemoryAgreementControls",
+      "path": "Solidity/Yul/Adapters/MemoryAgreementControls.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Yul.Adapters.P6ChainedByteAssignment",
+      "path": "Solidity/Yul/Adapters/P6ChainedByteAssignment.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Yul.Adapters.P6ChainedByteAssignmentControls",
+      "path": "Solidity/Yul/Adapters/P6ChainedByteAssignmentControls.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Yul.LocalBoolAgreement",
+      "path": "Solidity/Yul/LocalBoolAgreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Yul.LocalBoolControlAgreement",
+      "path": "Solidity/Yul/LocalBoolControlAgreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Yul.LocalU8Agreement",
+      "path": "Solidity/Yul/LocalU8Agreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Yul.OpenAgreement",
+      "path": "Solidity/Yul/OpenAgreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Yul.OpenCasesAgreement",
+      "path": "Solidity/Yul/OpenCasesAgreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Yul.OpenExpressionAgreement",
+      "path": "Solidity/Yul/OpenExpressionAgreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Yul.OpenLoopAgreement",
+      "path": "Solidity/Yul/OpenLoopAgreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Yul.OpenStatementAgreement",
+      "path": "Solidity/Yul/OpenStatementAgreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Yul.Views.AbiCalldataAgreement",
+      "path": "Solidity/Yul/Views/AbiCalldataAgreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Yul.Views.Agreements",
+      "path": "Solidity/Yul/Views/Agreements.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Yul.Views.RetainedArrayAgreement",
+      "path": "Solidity/Yul/Views/RetainedArrayAgreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "Solidity.Yul.WordAgreement",
+      "path": "Solidity/Yul/WordAgreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "tests.h28-sol.automation-benchmark.ChainControls",
+      "path": "tests/h28-sol/automation-benchmark/ChainControls.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "tests.h28-sol.automation-benchmark.ChainRefusalBaseline",
+      "path": "tests/h28-sol/automation-benchmark/ChainRefusalBaseline.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "tests.h28-sol.automation-benchmark.ChainRefusalCandidate",
+      "path": "tests/h28-sol/automation-benchmark/ChainRefusalCandidate.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "tests.h55.v08-agreements.Agreements",
+      "path": "tests/h55/v08-agreements/Agreements.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "tests.h62.item1.infer-helpers.SharedAgreement",
+      "path": "tests/h62/item1/infer-helpers/SharedAgreement.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    },
+    {
+      "module": "tests.h62.item2.audit-g25-scalar-lowering.ScalarCastChainsWitnesses",
+      "path": "tests/h62/item2/audit-g25-scalar-lowering/ScalarCastChainsWitnesses.lean",
+      "reason": "chain/agreement filename only; not counted generated"
+    }
+  ],
+  "largest_30_clusters": [
+    {
+      "kind": "unreachable_source_directory",
+      "directory": "Solidity/Yul/Views",
+      "modules": [
+        "Solidity.Yul.Views.AbiCalldataAgreement",
+        "Solidity.Yul.Views.AbiDecodeSequence",
+        "Solidity.Yul.Views.AbiUintArrayRun",
+        "Solidity.Yul.Views.ActualBankedScalar",
+        "Solidity.Yul.Views.ActualScalarReset",
+        "Solidity.Yul.Views.ActualScalarSafety",
+        "Solidity.Yul.Views.ActualScalarTransient",
+        "Solidity.Yul.Views.ActualScalarWrite",
+        "Solidity.Yul.Views.AggregateData",
+        "Solidity.Yul.Views.AggregateStorageDeclaration",
+        "Solidity.Yul.Views.AggregateStorageExtent",
+        "Solidity.Yul.Views.AggregateStorageSnapshot",
+        "Solidity.Yul.Views.AggregateWriteback",
+        "Solidity.Yul.Views.ArrayStruct",
+        "Solidity.Yul.Views.ByteHeapRealization",
+        "Solidity.Yul.Views.CanonicalCompatibility",
+        "Solidity.Yul.Views.CanonicalMemory",
+        "Solidity.Yul.Views.CanonicalRetained",
+        "Solidity.Yul.Views.CellHashFinalization",
+        "Solidity.Yul.Views.CellHashMemory",
+        "Solidity.Yul.Views.CellWritesCalldataHash",
+        "Solidity.Yul.Views.ComponentComposition",
+        "Solidity.Yul.Views.ComputedDynamicSnapshot",
+        "Solidity.Yul.Views.ComputedLayout",
+        "Solidity.Yul.Views.ComputedPlacement",
+        "Solidity.Yul.Views.ComputedSnapshotSource",
+        "Solidity.Yul.Views.ComputedStorage",
+        "Solidity.Yul.Views.DeclarationBoundary",
+        "Solidity.Yul.Views.DeclarationPacking",
+        "Solidity.Yul.Views.DeclarationPathExtent",
+        "Solidity.Yul.Views.DeclarationScalars",
+        "Solidity.Yul.Views.DeclarationSeparation",
+        "Solidity.Yul.Views.DynamicAccess",
+        "Solidity.Yul.Views.DynamicAdministration",
+        "Solidity.Yul.Views.DynamicElements",
+        "Solidity.Yul.Views.DynamicHeader",
+        "Solidity.Yul.Views.DynamicHeaderSelection",
+        "Solidity.Yul.Views.DynamicInventory",
+        "Solidity.Yul.Views.DynamicInventoryWriteback",
+        "Solidity.Yul.Views.DynamicJournalCaller",
+        "Solidity.Yul.Views.DynamicJournalChild",
+        "Solidity.Yul.Views.DynamicJournalPrepare",
+        "Solidity.Yul.Views.DynamicLengthWorld",
+        "Solidity.Yul.Views.DynamicSeparation",
+        "Solidity.Yul.Views.DynamicUintMemory",
+        "Solidity.Yul.Views.EnumeratedMemory",
+        "Solidity.Yul.Views.FinitePaths",
+        "Solidity.Yul.Views.FiniteResidual",
+        "Solidity.Yul.Views.FiniteWorld",
+        "Solidity.Yul.Views.FixedDeclarationChecked",
+        "Solidity.Yul.Views.FixedDeclarationComposition",
+        "Solidity.Yul.Views.FixedDeclarationDefaults",
+        "Solidity.Yul.Views.FixedDeclarationFinal",
+        "Solidity.Yul.Views.FixedDeclarationJournal",
+        "Solidity.Yul.Views.FixedDeclarationPack",
+        "Solidity.Yul.Views.FixedDeclarationReads",
+        "Solidity.Yul.Views.FixedDeclarationSource",
+        "Solidity.Yul.Views.FixedDeclarationState",
+        "Solidity.Yul.Views.FixedDeclarationStore",
+        "Solidity.Yul.Views.FixedInventoryHistory",
+        "Solidity.Yul.Views.FixedInventoryLaws",
+        "Solidity.Yul.Views.FixedInventoryTransport",
+        "Solidity.Yul.Views.FixedInventoryView",
+        "Solidity.Yul.Views.FixedNominalInventoryHistory",
+        "Solidity.Yul.Views.FixedNominalInventoryLaws",
+        "Solidity.Yul.Views.FixedNominalInventoryTransport",
+        "Solidity.Yul.Views.FixedNominalInventoryView",
+        "Solidity.Yul.Views.FixedNominalMemory",
+        "Solidity.Yul.Views.FixedNominalStruct",
+        "Solidity.Yul.Views.FrameCalldata",
+        "Solidity.Yul.Views.HeapAllocationPlacement",
+        "Solidity.Yul.Views.HeapAllocationReads",
+        "Solidity.Yul.Views.HeapByteAllocation",
+        "Solidity.Yul.Views.HeapByteBoundaries",
+        "Solidity.Yul.Views.HeapByteComposition",
+        "Solidity.Yul.Views.HeapByteMemOK",
+        "Solidity.Yul.Views.HeapBytePlacement",
+        "Solidity.Yul.Views.HeapByteResize",
+        "Solidity.Yul.Views.HeapByteResizeBoundaries",
+        "Solidity.Yul.Views.HeapByteResizePlacement",
+        "Solidity.Yul.Views.HeapByteWriteback",
+        "Solidity.Yul.Views.HeapEnumeration",
+        "Solidity.Yul.Views.HeapEnumerationLaws",
+        "Solidity.Yul.Views.HeapPreparationComplete",
+        "Solidity.Yul.Views.InheritedDeclarationComposition",
+        "Solidity.Yul.Views.InheritedDeclarationFinal",
+        "Solidity.Yul.Views.InheritedDeclarationJournal",
+        "Solidity.Yul.Views.InheritedDeclarationLaws",
+        "Solidity.Yul.Views.InheritedDeclarationReads",
+        "Solidity.Yul.Views.InheritedDeclarationState",
+        "Solidity.Yul.Views.InheritedDeclarationStore",
+        "Solidity.Yul.Views.Inputs",
+        "Solidity.Yul.Views.IntDynamicCompatibility",
+        "Solidity.Yul.Views.IntDynamicRegions",
+        "Solidity.Yul.Views.IntDynamicSeparation",
+        "Solidity.Yul.Views.IntDynamicSnapshot",
+        "Solidity.Yul.Views.IntDynamicSource",
+        "Solidity.Yul.Views.IntOwnershipBanks",
+        "Solidity.Yul.Views.IntOwnershipBatch",
+        "Solidity.Yul.Views.IntOwnershipFrame",
+        "Solidity.Yul.Views.IntOwnershipReads",
+        "Solidity.Yul.Views.IntPayloadInverse",
+        "Solidity.Yul.Views.InventoryObject",
+        "Solidity.Yul.Views.InventoryObjectLaws",
+        "Solidity.Yul.Views.InventorySnapshotHistory",
+        "Solidity.Yul.Views.InventoryView",
+        "Solidity.Yul.Views.JointMemory",
+        "Solidity.Yul.Views.JointPlacement",
+        "Solidity.Yul.Views.JointRaw",
+        "Solidity.Yul.Views.JointRetained",
+        "Solidity.Yul.Views.JointSequential",
+        "Solidity.Yul.Views.LayoutOrigin",
+        "Solidity.Yul.Views.LayoutOriginComposition",
+        "Solidity.Yul.Views.LayoutOriginFinal",
+        "Solidity.Yul.Views.LayoutOriginJournal",
+        "Solidity.Yul.Views.LayoutOriginReads",
+        "Solidity.Yul.Views.LayoutOriginState",
+        "Solidity.Yul.Views.LayoutOriginStore",
+        "Solidity.Yul.Views.LinkedCellHash",
+        "Solidity.Yul.Views.LocatedHash",
+        "Solidity.Yul.Views.LocatedInventory",
+        "Solidity.Yul.Views.LocatedProvenance",
+        "Solidity.Yul.Views.LocatedRegistration",
+        "Solidity.Yul.Views.LocatedSeparation",
+        "Solidity.Yul.Views.LocatedSource",
+        "Solidity.Yul.Views.MappingSlots",
+        "Solidity.Yul.Views.MemberArray",
+        "Solidity.Yul.Views.MemberComputedStorage",
+        "Solidity.Yul.Views.MemberDynamicGrowth",
+        "Solidity.Yul.Views.MemberDynamicInitial",
+        "Solidity.Yul.Views.MemberDynamicLayout",
+        "Solidity.Yul.Views.MemberDynamicSequence",
+        "Solidity.Yul.Views.MemberDynamicSequenceClear",
+        "Solidity.Yul.Views.MemberDynamicSequencePrefix",
+        "Solidity.Yul.Views.MemberDynamicSequenceRegrow",
+        "Solidity.Yul.Views.MemberDynamicSnapshot",
+        "Solidity.Yul.Views.MemberOwnershipBanks",
+        "Solidity.Yul.Views.MemberOwnershipBatch",
+        "Solidity.Yul.Views.MemberOwnershipFrame",
+        "Solidity.Yul.Views.MemberOwnershipPlan",
+        "Solidity.Yul.Views.MemberOwnershipPreservation",
+        "Solidity.Yul.Views.MemberOwnershipReads",
+        "Solidity.Yul.Views.MemberOwnershipStable",
+        "Solidity.Yul.Views.MemberSourceInventory",
+        "Solidity.Yul.Views.MemberStorageCompatibility",
+        "Solidity.Yul.Views.MemberStoragePaths",
+        "Solidity.Yul.Views.MemoryContract",
+        "Solidity.Yul.Views.MemoryLayout",
+        "Solidity.Yul.Views.MemoryTransport",
+        "Solidity.Yul.Views.MixedCellSequence",
+        "Solidity.Yul.Views.MixedHeapOrder",
+        "Solidity.Yul.Views.MixedNominalInventoryHistory",
+        "Solidity.Yul.Views.MixedNominalInventoryLaws",
+        "Solidity.Yul.Views.MixedNominalInventoryTransport",
+        "Solidity.Yul.Views.MixedNominalInventoryView",
+        "Solidity.Yul.Views.MultiRootByteFrames",
+        "Solidity.Yul.Views.NestedDeclaration",
+        "Solidity.Yul.Views.NestedDeclarationComposition",
+        "Solidity.Yul.Views.NestedDeclarationFinal",
+        "Solidity.Yul.Views.NestedDeclarationJournal",
+        "Solidity.Yul.Views.NestedDeclarationReads",
+        "Solidity.Yul.Views.NestedDeclarationReset",
+        "Solidity.Yul.Views.NestedDeclarationSource",
+        "Solidity.Yul.Views.NestedDeclarationStore",
+        "Solidity.Yul.Views.NestedMappingLayout",
+        "Solidity.Yul.Views.NestedMappingSlots",
+        "Solidity.Yul.Views.NominalInventoryLaws",
+        "Solidity.Yul.Views.NominalInventoryView",
+        "Solidity.Yul.Views.NominalMemory",
+        "Solidity.Yul.Views.NominalRetained",
+        "Solidity.Yul.Views.ObjectMemoryAllocation",
+        "Solidity.Yul.Views.OwnedBoolEncoding",
+        "Solidity.Yul.Views.OwnedBoolFollowing",
+        "Solidity.Yul.Views.OwnedBoolFrame",
+        "Solidity.Yul.Views.OwnedBoolJournal",
+        "Solidity.Yul.Views.OwnedBoolOwnership",
+        "Solidity.Yul.Views.OwnedBoolOwnershipBatch",
+        "Solidity.Yul.Views.OwnedBoolOwnershipFrame",
+        "Solidity.Yul.Views.OwnedBoolOwnershipLaws",
+        "Solidity.Yul.Views.OwnedBoolOwnershipReads",
+        "Solidity.Yul.Views.OwnedBoolSource",
+        "Solidity.Yul.Views.OwnedInventory",
+        "Solidity.Yul.Views.OwnershipBanks",
+        "Solidity.Yul.Views.OwnershipBatch",
+        "Solidity.Yul.Views.PackedAggregates",
+        "Solidity.Yul.Views.PackedCellUpdate",
+        "Solidity.Yul.Views.PackedDynamicCompatibility",
+        "Solidity.Yul.Views.PackedDynamicRegions",
+        "Solidity.Yul.Views.PackedDynamicSeparation",
+        "Solidity.Yul.Views.PackedDynamicSequence",
+        "Solidity.Yul.Views.PackedDynamicSnapshot",
+        "Solidity.Yul.Views.PackedDynamicSource",
+        "Solidity.Yul.Views.PackedOwnershipBanks",
+        "Solidity.Yul.Views.PackedOwnershipBatch",
+        "Solidity.Yul.Views.PackedOwnershipReads",
+        "Solidity.Yul.Views.PackedResidualCodec",
+        "Solidity.Yul.Views.PackedResidualFrame",
+        "Solidity.Yul.Views.PackedResidualInvariant",
+        "Solidity.Yul.Views.PackedResidualSource",
+        "Solidity.Yul.Views.PackedResidualWriteback",
+        "Solidity.Yul.Views.PackedResidualWritebackSound",
+        "Solidity.Yul.Views.PackedSlots",
+        "Solidity.Yul.Views.Packing",
+        "Solidity.Yul.Views.PathIntElements",
+        "Solidity.Yul.Views.PathIntSeparation",
+        "Solidity.Yul.Views.PathIntSource",
+        "Solidity.Yul.Views.PathScalarElements",
+        "Solidity.Yul.Views.PathScalarSeparation",
+        "Solidity.Yul.Views.PathScalarSource",
+        "Solidity.Yul.Views.PathScalarValues",
+        "Solidity.Yul.Views.PointerMemory",
+        "Solidity.Yul.Views.PrimitiveDynamicCoverage",
+        "Solidity.Yul.Views.PrimitiveDynamicSequence",
+        "Solidity.Yul.Views.PrimitiveDynamicSnapshot",
+        "Solidity.Yul.Views.PrimitiveOwnershipBanks",
+        "Solidity.Yul.Views.PrimitiveOwnershipBatch",
+        "Solidity.Yul.Views.PrimitiveOwnershipPreservation",
+        "Solidity.Yul.Views.PrimitiveOwnershipReads",
+        "Solidity.Yul.Views.PrimitiveOwnershipStable",
+        "Solidity.Yul.Views.RecursiveComputedStorage",
+        "Solidity.Yul.Views.RecursiveDynamicLayout",
+        "Solidity.Yul.Views.RecursiveDynamicMetadata",
+        "Solidity.Yul.Views.RecursiveDynamicPack",
+        "Solidity.Yul.Views.RecursiveDynamicSequence",
+        "Solidity.Yul.Views.RecursiveOwnershipBanks",
+        "Solidity.Yul.Views.RecursiveOwnershipBatch",
+        "Solidity.Yul.Views.RecursiveOwnershipFrame",
+        "Solidity.Yul.Views.RecursiveOwnershipReads",
+        "Solidity.Yul.Views.RecursiveOwnershipStable",
+        "Solidity.Yul.Views.RecursiveRootCompatibility",
+        "Solidity.Yul.Views.RecursiveRootLegacy",
+        "Solidity.Yul.Views.RecursiveRootPaths",
+        "Solidity.Yul.Views.RecursiveSnapshot",
+        "Solidity.Yul.Views.RecursiveStorageCompatibility",
+        "Solidity.Yul.Views.RecursiveStorageEquations",
+        "Solidity.Yul.Views.ResidualJournal",
+        "Solidity.Yul.Views.ResidualMcopy",
+        "Solidity.Yul.Views.ResidualMemoryWriteback",
+        "Solidity.Yul.Views.RetainedAliasFrames",
+        "Solidity.Yul.Views.RetainedAliasSequence",
+        "Solidity.Yul.Views.RetainedAliasSub",
+        "Solidity.Yul.Views.RetainedAliasTransaction",
+        "Solidity.Yul.Views.RetainedAllocation",
+        "Solidity.Yul.Views.RetainedAllocationRegions",
+        "Solidity.Yul.Views.RetainedArrayAgreement",
+        "Solidity.Yul.Views.RetainedArrayImage",
+        "Solidity.Yul.Views.RetainedArrayLayout",
+        "Solidity.Yul.Views.RetainedBinaryDispatch",
+        "Solidity.Yul.Views.RetainedBlockObserver",
+        "Solidity.Yul.Views.RetainedBranchObserver",
+        "Solidity.Yul.Views.RetainedCallerBoundaries",
+        "Solidity.Yul.Views.RetainedClosedCaller",
+        "Solidity.Yul.Views.RetainedCompoundProducers",
+        "Solidity.Yul.Views.RetainedConditionalProducers",
+        "Solidity.Yul.Views.RetainedConversionProducers",
+        "Solidity.Yul.Views.RetainedDynamicUint",
+        "Solidity.Yul.Views.RetainedEntryFrame",
+        "Solidity.Yul.Views.RetainedEntryImage",
+        "Solidity.Yul.Views.RetainedEntryOwnership",
+        "Solidity.Yul.Views.RetainedEntryPaths",
+        "Solidity.Yul.Views.RetainedEntryRun",
+        "Solidity.Yul.Views.RetainedExpressionCapture",
+        "Solidity.Yul.Views.RetainedForIteration",
+        "Solidity.Yul.Views.RetainedForLoopScopes",
+        "Solidity.Yul.Views.RetainedForPost",
+        "Solidity.Yul.Views.RetainedGuardObserver",
+        "Solidity.Yul.Views.RetainedIfThenObserver",
+        "Solidity.Yul.Views.RetainedIndices",
+        "Solidity.Yul.Views.RetainedLocalAlias",
+        "Solidity.Yul.Views.RetainedLocationProducers",
+        "Solidity.Yul.Views.RetainedLocationRun",
+        "Solidity.Yul.Views.RetainedLogicalProducers",
+        "Solidity.Yul.Views.RetainedMemberArray",
+        "Solidity.Yul.Views.RetainedOwnershipFrame",
+        "Solidity.Yul.Views.RetainedOwnershipPlan",
+        "Solidity.Yul.Views.RetainedOwnershipRefresh",
+        "Solidity.Yul.Views.RetainedOwnershipSub",
+        "Solidity.Yul.Views.RetainedPairProducers",
+        "Solidity.Yul.Views.RetainedRuntimePaths",
+        "Solidity.Yul.Views.RetainedRuntimeRun",
+        "Solidity.Yul.Views.RetainedShiftProducers",
+        "Solidity.Yul.Views.RetainedSourcePrefix",
+        "Solidity.Yul.Views.RetainedTupleProducers",
+        "Solidity.Yul.Views.RetainedTupleSequence",
+        "Solidity.Yul.Views.RetainedTupleStatement",
+        "Solidity.Yul.Views.RetainedUnaryProducers",
+        "Solidity.Yul.Views.RootDeclarationChecked",
+        "Solidity.Yul.Views.RootDeclarationComposition",
+        "Solidity.Yul.Views.RootDeclarationFinal",
+        "Solidity.Yul.Views.RootDeclarationInitial",
+        "Solidity.Yul.Views.RootDeclarationJournal",
+        "Solidity.Yul.Views.RootDeclarationReadback",
+        "Solidity.Yul.Views.RootDeclarationReads",
+        "Solidity.Yul.Views.RootDeclarationSource",
+        "Solidity.Yul.Views.RootDeclarationState",
+        "Solidity.Yul.Views.RootDeclarationStore",
+        "Solidity.Yul.Views.RootDeclarationTyping",
+        "Solidity.Yul.Views.ScalarDynamicRegions",
+        "Solidity.Yul.Views.ScalarDynamicSeparation",
+        "Solidity.Yul.Views.ScalarDynamicSnapshot",
+        "Solidity.Yul.Views.ScalarDynamicSource",
+        "Solidity.Yul.Views.ScalarDynamicValues",
+        "Solidity.Yul.Views.ScalarFamilySequence",
+        "Solidity.Yul.Views.ScalarOwnershipBanks",
+        "Solidity.Yul.Views.ScalarOwnershipBatch",
+        "Solidity.Yul.Views.ScalarOwnershipReads",
+        "Solidity.Yul.Views.ScalarWorld",
+        "Solidity.Yul.Views.ScalarWriteback",
+        "Solidity.Yul.Views.ScratchHeapTransport",
+        "Solidity.Yul.Views.SignedDynamicSequence",
+        "Solidity.Yul.Views.SlotTranslation",
+        "Solidity.Yul.Views.SourceBalanceInputs",
+        "Solidity.Yul.Views.SourceBalanceOperands",
+        "Solidity.Yul.Views.SourceBalanceReads",
+        "Solidity.Yul.Views.SourceEnvironmentInputs",
+        "Solidity.Yul.Views.SourceGraphEndpoints",
+        "Solidity.Yul.Views.SourceHashBuiltin",
+        "Solidity.Yul.Views.SourceMagicReads",
+        "Solidity.Yul.Views.SourceTargetInputs",
+        "Solidity.Yul.Views.StaticUintMemory",
+        "Solidity.Yul.Views.StorageBalanceInputs",
+        "Solidity.Yul.Views.StorageContract",
+        "Solidity.Yul.Views.StorageDeclarationHead",
+        "Solidity.Yul.Views.StorageDeclarationTyping",
+        "Solidity.Yul.Views.StructArray",
+        "Solidity.Yul.Views.StructConstructorRun",
+        "Solidity.Yul.Views.TransientSlots"
+      ],
+      "lines": 10146,
+      "decls": 1341,
+      "generated_modules": 0,
+      "generators": {},
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "No lexical path is not a deletion proof; retain until elaborated dependencies and test/goal intent are checked.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    },
+    {
+      "kind": "unreachable_source_directory",
+      "directory": "Solidity/Calculus",
+      "modules": [
+        "Solidity.Calculus.ActiveReadConstraints",
+        "Solidity.Calculus.AllLeft",
+        "Solidity.Calculus.AnonLocalCapture",
+        "Solidity.Calculus.Arms",
+        "Solidity.Calculus.ArrayBlock",
+        "Solidity.Calculus.ArrayCut",
+        "Solidity.Calculus.ArrayProperty",
+        "Solidity.Calculus.ArrayReduction",
+        "Solidity.Calculus.Assumptions",
+        "Solidity.Calculus.AutoComplete",
+        "Solidity.Calculus.Blocks",
+        "Solidity.Calculus.CallFunctionAffine",
+        "Solidity.Calculus.CallFunctionEmit",
+        "Solidity.Calculus.CallFunctionLeafMetrics",
+        "Solidity.Calculus.CallFunctionOperationalBase",
+        "Solidity.Calculus.CallFunctionPlan",
+        "Solidity.Calculus.CallFunctionSearch",
+        "Solidity.Calculus.CallFunctionTable",
+        "Solidity.Calculus.CallFunctionTermPower",
+        "Solidity.Calculus.CallFunctionTransform",
+        "Solidity.Calculus.CallResultRestore",
+        "Solidity.Calculus.CallSummary",
+        "Solidity.Calculus.CallbackDerive",
+        "Solidity.Calculus.CallbackRules",
+        "Solidity.Calculus.CallerModelValid",
+        "Solidity.Calculus.CapturePayments",
+        "Solidity.Calculus.ChainGen",
+        "Solidity.Calculus.ChainKit",
+        "Solidity.Calculus.ChainRules",
+        "Solidity.Calculus.CleanTailBoundary",
+        "Solidity.Calculus.Close",
+        "Solidity.Calculus.CloseLemmas",
+        "Solidity.Calculus.Completeness",
+        "Solidity.Calculus.ContractWorld",
+        "Solidity.Calculus.CorrectCallback",
+        "Solidity.Calculus.DataIn",
+        "Solidity.Calculus.Decide",
+        "Solidity.Calculus.DecideCleanTail",
+        "Solidity.Calculus.DecideComplete",
+        "Solidity.Calculus.DecideLang",
+        "Solidity.Calculus.DecideScoped",
+        "Solidity.Calculus.Decision",
+        "Solidity.Calculus.DecisionArrayReasons",
+        "Solidity.Calculus.DecisionBoundedInstance",
+        "Solidity.Calculus.DecisionBoundedUInt",
+        "Solidity.Calculus.DecisionCoefficientBoundary",
+        "Solidity.Calculus.DecisionCompoundCoverage",
+        "Solidity.Calculus.DecisionCompoundFieldReason",
+        "Solidity.Calculus.DecisionFixedArrayPair",
+        "Solidity.Calculus.DecisionFixedArrayPath",
+        "Solidity.Calculus.DecisionFixedArrayStorage",
+        "Solidity.Calculus.DecisionGivenHeapComputedBoundary",
+        "Solidity.Calculus.DecisionGivenHeapComputedReason",
+        "Solidity.Calculus.DecisionGivenHeapFixedBoundary",
+        "Solidity.Calculus.DecisionGivenHeapFixedReason",
+        "Solidity.Calculus.DecisionGivenHeapReason",
+        "Solidity.Calculus.DecisionHaltingOrBoundary",
+        "Solidity.Calculus.DecisionHaltingOrReason",
+        "Solidity.Calculus.DecisionMappingFieldReason",
+        "Solidity.Calculus.DecisionMemoryCoverage",
+        "Solidity.Calculus.DecisionMemoryExtension",
+        "Solidity.Calculus.DecisionNumericBounds",
+        "Solidity.Calculus.DecisionNumericCompiler",
+        "Solidity.Calculus.DecisionNumericFlatten",
+        "Solidity.Calculus.DecisionNumericGroundSource",
+        "Solidity.Calculus.DecisionNumericLogic",
+        "Solidity.Calculus.DecisionNumericNormalization",
+        "Solidity.Calculus.DecisionResidue",
+        "Solidity.Calculus.DecisionResidueReasons",
+        "Solidity.Calculus.DecisionSourceChain",
+        "Solidity.Calculus.DecisionSourceDiscovery",
+        "Solidity.Calculus.DecisionSourceInstance",
+        "Solidity.Calculus.DelabErase",
+        "Solidity.Calculus.DependentReduction",
+        "Solidity.Calculus.Deploy",
+        "Solidity.Calculus.Elementary",
+        "Solidity.Calculus.ElimFacts",
+        "Solidity.Calculus.ElimWriteFree",
+        "Solidity.Calculus.ExpandLaws",
+        "Solidity.Calculus.FilteredMembership",
+        "Solidity.Calculus.FirstOrder",
+        "Solidity.Calculus.FixedArrayRoot",
+        "Solidity.Calculus.FlattenTotality",
+        "Solidity.Calculus.FloorRegion",
+        "Solidity.Calculus.Fml",
+        "Solidity.Calculus.FunContract",
+        "Solidity.Calculus.HashKinds",
+        "Solidity.Calculus.HashKinds3",
+        "Solidity.Calculus.HashMove",
+        "Solidity.Calculus.HashWrittenInput",
+        "Solidity.Calculus.Hyp",
+        "Solidity.Calculus.JoinSequence",
+        "Solidity.Calculus.JoinSequenceSize",
+        "Solidity.Calculus.KIntEncode",
+        "Solidity.Calculus.KeyTaclets",
+        "Solidity.Calculus.Lands",
+        "Solidity.Calculus.LastLine",
+        "Solidity.Calculus.LeafDerive",
+        "Solidity.Calculus.LeafTotality",
+        "Solidity.Calculus.LedgerCut",
+        "Solidity.Calculus.LedgerReduction",
+        "Solidity.Calculus.LexVariantSound",
+        "Solidity.Calculus.Lifetime",
+        "Solidity.Calculus.Lower",
+        "Solidity.Calculus.MemContract",
+        "Solidity.Calculus.MemFloor",
+        "Solidity.Calculus.MemInst",
+        "Solidity.Calculus.MemNegPrep",
+        "Solidity.Calculus.MemObserve",
+        "Solidity.Calculus.MemStructWitness",
+        "Solidity.Calculus.MemSwap",
+        "Solidity.Calculus.MemoryLoopReplay",
+        "Solidity.Calculus.MemoryWitness",
+        "Solidity.Calculus.NamedTerm",
+        "Solidity.Calculus.Notation",
+        "Solidity.Calculus.PresburgerDecision",
+        "Solidity.Calculus.Print",
+        "Solidity.Calculus.PrintStmt",
+        "Solidity.Calculus.PrintTerm",
+        "Solidity.Calculus.PrintedRules",
+        "Solidity.Calculus.Proves",
+        "Solidity.Calculus.ProvesDerive",
+        "Solidity.Calculus.QuantArithmetic",
+        "Solidity.Calculus.QuantExpand",
+        "Solidity.Calculus.QuantHoist",
+        "Solidity.Calculus.QuotientCut",
+        "Solidity.Calculus.ReadBounds",
+        "Solidity.Calculus.ReadQuery",
+        "Solidity.Calculus.ReadTrace",
+        "Solidity.Calculus.Recursion",
+        "Solidity.Calculus.RewriteChainGen",
+        "Solidity.Calculus.RewriteChains",
+        "Solidity.Calculus.Rigid",
+        "Solidity.Calculus.RuleExists",
+        "Solidity.Calculus.RuleShapes",
+        "Solidity.Calculus.RunFrameMem",
+        "Solidity.Calculus.RunFrameOwn",
+        "Solidity.Calculus.ScalarCode",
+        "Solidity.Calculus.SeqRewrite",
+        "Solidity.Calculus.SequentNotation",
+        "Solidity.Calculus.Sequents",
+        "Solidity.Calculus.SolkeyFragment",
+        "Solidity.Calculus.Spec",
+        "Solidity.Calculus.StaticLinear",
+        "Solidity.Calculus.Step",
+        "Solidity.Calculus.StepFragment",
+        "Solidity.Calculus.StorageOnlyHavoc",
+        "Solidity.Calculus.SurfaceNotation",
+        "Solidity.Calculus.SurfaceRevert",
+        "Solidity.Calculus.SurfaceSpec",
+        "Solidity.Calculus.Symex",
+        "Solidity.Calculus.SymexFragment",
+        "Solidity.Calculus.Taclet",
+        "Solidity.Calculus.TailMode",
+        "Solidity.Calculus.TargetProfile",
+        "Solidity.Calculus.TermEq",
+        "Solidity.Calculus.TermEval",
+        "Solidity.Calculus.TermSize",
+        "Solidity.Calculus.TheoryRead",
+        "Solidity.Calculus.Transient",
+        "Solidity.Calculus.TreeData",
+        "Solidity.Calculus.UpdRuleScoped",
+        "Solidity.Calculus.UpdateRules"
+      ],
+      "lines": 8356,
+      "decls": 733,
+      "generated_modules": 1,
+      "generators": {
+        "Solidity.Calculus.KeyTaclets": {
+          "paths": [
+            "scripts/solkey-migration.mjs"
+          ],
+          "ci_script_reachable": false,
+          "status": "textual candidate linkage; not invocation proof"
+        }
+      },
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "Generated/candidate-generated families require generator and coverage review; source similarity is not interchangeable behavior.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    },
+    {
+      "kind": "unreachable_source_directory",
+      "directory": "Solidity/Backend/InternalFlow",
+      "modules": [
+        "Solidity.Backend.InternalFlow.RuntimeFrameBytes",
+        "Solidity.Backend.InternalFlow.RuntimeFrameCapturedReference",
+        "Solidity.Backend.InternalFlow.RuntimeFrameCodeAuthentication",
+        "Solidity.Backend.InternalFlow.RuntimeFrameComposition",
+        "Solidity.Backend.InternalFlow.RuntimeFrameFootprint",
+        "Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV4",
+        "Solidity.Backend.InternalFlow.RuntimeFrameMutation",
+        "Solidity.Backend.InternalFlow.RuntimeFrameNested",
+        "Solidity.Backend.InternalFlow.RuntimeFrameNoneProducer",
+        "Solidity.Backend.InternalFlow.RuntimeFrameP1Bridge",
+        "Solidity.Backend.InternalFlow.RuntimeFrameP1LangV2",
+        "Solidity.Backend.InternalFlow.RuntimeFrameP1LangV2Migration",
+        "Solidity.Backend.InternalFlow.RuntimeFrameP1V2Lift",
+        "Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReadAtBridge",
+        "Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReferenceBridge",
+        "Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReferenceRebindAgreement",
+        "Solidity.Backend.InternalFlow.RuntimeFrameP1V2ValueBridge",
+        "Solidity.Backend.InternalFlow.RuntimeFrameReference",
+        "Solidity.Backend.InternalFlow.RuntimeFrameReferenceProgram",
+        "Solidity.Backend.InternalFlow.RuntimeFrameRestore",
+        "Solidity.Backend.InternalFlow.RuntimeFrameRestoredRepresentation",
+        "Solidity.Backend.InternalFlow.RuntimeFrameReturnContinuation",
+        "Solidity.Backend.InternalFlow.RuntimeFrameReturnReentry",
+        "Solidity.Backend.InternalFlow.RuntimeFrameSaved",
+        "Solidity.Backend.InternalFlow.RuntimeFrameStack",
+        "Solidity.Backend.InternalFlow.RuntimeFrameTarget",
+        "Solidity.Backend.InternalFlow.RuntimeFrameTransport",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingActivation",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingArguments",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingCoherence",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingEmission",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingFailure",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOutcome",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingPrefixes",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingQuotations",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingReturn",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingSource",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingZero",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatorReturn",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3ApprovedProfile",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3ArgumentCall",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3ArgumentCalleeFailure",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3ArgumentEntry",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3ArrayProbe",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3BarePrefix",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3BareRevertProducer",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducer",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerRef",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerRefTuple",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3CallerPrefixes",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3CallerReframe",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3CountdownWitness",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3DistinctScalarExport",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3DomainTransport",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulScalarCall",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulScalarFailure",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulSourceSelection",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3EmissionPrefixes",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3EmissionUnwind",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3FixedThunkProducer",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3FrozenScopeClient",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3FrozenScopeCompiler",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3FrozenScopeCoverage",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3FrozenScopeFamily",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3FrozenScopeHorizons",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3FrozenScopeRuntime",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3GeneralBoundary",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3GuardedCaller",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3GuardedPrefixes",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3GuardedRecursion",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3HeapDomain",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3MemoryArgument",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3MutatingActivation",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3MutatingCaller",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3MutatingCallerClient",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3MutatingCompletion",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3MutatingContinuation",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3MutatingContinuationClient",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3MutatingFailure",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3MutatingHistory",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3MutatingPrefixes",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3MutatingResume",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3MutatingReturn",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3MutatingSource",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3NativeParents",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3NativeUnwind",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3OrderedArgumentFailure",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3OrderedCalleeFailure",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3OrderedEffectfulClient",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3OrderedEffectfulScalar",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3ParentRestore",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3ParentStop",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveActivation",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveHistory",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveIngress",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveProducer",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveResult",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveScopeClient",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveUnwind",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3SameCallDual",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3SameCallInputs",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarArgument",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarCallReturn",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarContinuation",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarContinuationRevert",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDemandDual",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDual",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarEmitter",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveAgreement",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarReentry",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarReentryEndpoint",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarSourceCompilerClient",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarUnwindFacts",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3ScopedScalarClient",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3ScopedScalarCompiler",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV4Migration",
+        "Solidity.Backend.InternalFlow.RuntimeFrameV4TrivialFamily"
+      ],
+      "lines": 6100,
+      "decls": 759,
+      "generated_modules": 1,
+      "generators": {
+        "Solidity.Backend.InternalFlow.RuntimeFrameV3ApprovedProfile": {
+          "paths": [
+            "scripts/generate-runtime-frame-approved-profile.py"
+          ],
+          "ci_script_reachable": false,
+          "status": "textual candidate linkage; not invocation proof"
+        }
+      },
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "Generated/candidate-generated families require generator and coverage review; source similarity is not interchangeable behavior.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    },
+    {
+      "kind": "unreachable_source_directory",
+      "directory": "Solidity/SolcValidation",
+      "modules": [
+        "Solidity.SolcValidation.IrAbiHelpers",
+        "Solidity.SolcValidation.IrAbiSim",
+        "Solidity.SolcValidation.IrCensusCreation",
+        "Solidity.SolcValidation.IrCensusDeployed",
+        "Solidity.SolcValidation.IrCensusMaps",
+        "Solidity.SolcValidation.IrCensusParse",
+        "Solidity.SolcValidation.IrCensusTransfer",
+        "Solidity.SolcValidation.IrCensusTree",
+        "Solidity.SolcValidation.IrCensusUnique",
+        "Solidity.SolcValidation.IrErase",
+        "Solidity.SolcValidation.IrEval",
+        "Solidity.SolcValidation.IrEvalFuel",
+        "Solidity.SolcValidation.IrExpEvm",
+        "Solidity.SolcValidation.IrExpHelpers",
+        "Solidity.SolcValidation.IrExpModel",
+        "Solidity.SolcValidation.IrExpSim",
+        "Solidity.SolcValidation.IrHelperSim",
+        "Solidity.SolcValidation.IrHelperSource",
+        "Solidity.SolcValidation.IrHelperSteps",
+        "Solidity.SolcValidation.IrHelpers",
+        "Solidity.SolcValidation.IrLinkedCode",
+        "Solidity.SolcValidation.IrParse",
+        "Solidity.SolcValidation.IrPushHelpers",
+        "Solidity.SolcValidation.IrPushSim",
+        "Solidity.SolcValidation.IrRename",
+        "Solidity.SolcValidation.IrSyntax"
+      ],
+      "lines": 4878,
+      "decls": 627,
+      "generated_modules": 6,
+      "generators": {
+        "Solidity.SolcValidation.IrCensusCreation": {
+          "paths": [],
+          "ci_script_reachable": null,
+          "status": "unknown; filename classification alone is not provenance"
+        },
+        "Solidity.SolcValidation.IrCensusDeployed": {
+          "paths": [],
+          "ci_script_reachable": null,
+          "status": "unknown; filename classification alone is not provenance"
+        },
+        "Solidity.SolcValidation.IrCensusMaps": {
+          "paths": [],
+          "ci_script_reachable": null,
+          "status": "unknown; filename classification alone is not provenance"
+        },
+        "Solidity.SolcValidation.IrCensusTree": {
+          "paths": [],
+          "ci_script_reachable": null,
+          "status": "unknown; filename classification alone is not provenance"
+        },
+        "Solidity.SolcValidation.IrHelpers": {
+          "paths": [],
+          "ci_script_reachable": null,
+          "status": "unknown; filename classification alone is not provenance"
+        },
+        "Solidity.SolcValidation.IrLinkedCode": {
+          "paths": [],
+          "ci_script_reachable": null,
+          "status": "unknown; filename classification alone is not provenance"
+        }
+      },
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "Generated/candidate-generated families require generator and coverage review; source similarity is not interchangeable behavior.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    },
+    {
+      "kind": "unreachable_source_directory",
+      "directory": "Solidity/Frontend/SolcJson",
+      "modules": [
+        "Solidity.Frontend.SolcJson.Body",
+        "Solidity.Frontend.SolcJson.Contract",
+        "Solidity.Frontend.SolcJson.Getters",
+        "Solidity.Frontend.SolcJson.TryPanicCallMetadata",
+        "Solidity.Frontend.SolcJson.TryPanicSourceCaller",
+        "Solidity.Frontend.SolcJson.TryPanicSourceData",
+        "Solidity.Frontend.SolcJson.TryPanicSourcePlan",
+        "Solidity.Frontend.SolcJson.Yul",
+        "Solidity.Frontend.SolcJson.YulAssignmentPath",
+        "Solidity.Frontend.SolcJson.YulAttachedUse",
+        "Solidity.Frontend.SolcJson.YulBlockPath",
+        "Solidity.Frontend.SolcJson.YulBuiltinUse",
+        "Solidity.Frontend.SolcJson.YulContextTrace",
+        "Solidity.Frontend.SolcJson.YulControlFields",
+        "Solidity.Frontend.SolcJson.YulControlPrefix",
+        "Solidity.Frontend.SolcJson.YulDeclarationChildren",
+        "Solidity.Frontend.SolcJson.YulDeclarationFields",
+        "Solidity.Frontend.SolcJson.YulExpressionPath",
+        "Solidity.Frontend.SolcJson.YulExpressionPositions",
+        "Solidity.Frontend.SolcJson.YulForChildren",
+        "Solidity.Frontend.SolcJson.YulForwardJson",
+        "Solidity.Frontend.SolcJson.YulFunctionRoot",
+        "Solidity.Frontend.SolcJson.YulIfBodyLeaves",
+        "Solidity.Frontend.SolcJson.YulIfRoot",
+        "Solidity.Frontend.SolcJson.YulLeafTrace",
+        "Solidity.Frontend.SolcJson.YulLocalParse",
+        "Solidity.Frontend.SolcJson.YulMetadata",
+        "Solidity.Frontend.SolcJson.YulMetadataWords",
+        "Solidity.Frontend.SolcJson.YulNames",
+        "Solidity.Frontend.SolcJson.YulNamespaceBinding",
+        "Solidity.Frontend.SolcJson.YulObjectLookup",
+        "Solidity.Frontend.SolcJson.YulPrefix",
+        "Solidity.Frontend.SolcJson.YulRawParse",
+        "Solidity.Frontend.SolcJson.YulReferenceAttachment",
+        "Solidity.Frontend.SolcJson.YulReferenceCover",
+        "Solidity.Frontend.SolcJson.YulSafety",
+        "Solidity.Frontend.SolcJson.YulScopedJson",
+        "Solidity.Frontend.SolcJson.YulScopedParse",
+        "Solidity.Frontend.SolcJson.YulStatementTags",
+        "Solidity.Frontend.SolcJson.YulStatementTrace",
+        "Solidity.Frontend.SolcJson.YulTargetPath",
+        "Solidity.Frontend.SolcJson.YulTypedChildren",
+        "Solidity.Frontend.SolcJson.YulWalkPath",
+        "Solidity.Frontend.SolcJson.YulWords"
+      ],
+      "lines": 4440,
+      "decls": 307,
+      "generated_modules": 0,
+      "generators": {},
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "No lexical path is not a deletion proof; retain until elaborated dependencies and test/goal intent are checked.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    },
+    {
+      "kind": "unreachable_source_directory",
+      "directory": "Solidity/Frontend/QualifiedUnits",
+      "modules": [
+        "Solidity.Frontend.QualifiedUnits.Checked",
+        "Solidity.Frontend.QualifiedUnits.ConstructorFixtures",
+        "Solidity.Frontend.QualifiedUnits.Inheritance",
+        "Solidity.Frontend.QualifiedUnits.Layout",
+        "Solidity.Frontend.QualifiedUnits.Linearization",
+        "Solidity.Frontend.QualifiedUnits.Lookup",
+        "Solidity.Frontend.QualifiedUnits.MergeSpecification",
+        "Solidity.Frontend.QualifiedUnits.ReferenceCoverage",
+        "Solidity.Frontend.QualifiedUnits.References",
+        "Solidity.Frontend.QualifiedUnits.Relation",
+        "Solidity.Frontend.QualifiedUnits.SignatureGap",
+        "Solidity.Frontend.QualifiedUnits.SignatureHiding",
+        "Solidity.Frontend.QualifiedUnits.SignatureMembers",
+        "Solidity.Frontend.QualifiedUnits.SignatureNormalization",
+        "Solidity.Frontend.QualifiedUnits.SignatureResolution",
+        "Solidity.Frontend.QualifiedUnits.Specification",
+        "Solidity.Frontend.QualifiedUnits.Target",
+        "Solidity.Frontend.QualifiedUnits.TypePaths",
+        "Solidity.Frontend.QualifiedUnits.UnitPaths"
+      ],
+      "lines": 3294,
+      "decls": 363,
+      "generated_modules": 0,
+      "generators": {},
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "No lexical path is not a deletion proof; retain until elaborated dependencies and test/goal intent are checked.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    },
+    {
+      "kind": "unreachable_source_directory",
+      "directory": "Solidity/Yul",
+      "modules": [
+        "Solidity.Yul.AssignmentCheck",
+        "Solidity.Yul.BlockExtract",
+        "Solidity.Yul.BlockExtractLogic",
+        "Solidity.Yul.BlockHeaders",
+        "Solidity.Yul.BlockScope",
+        "Solidity.Yul.BlockTyping",
+        "Solidity.Yul.BuiltinUse",
+        "Solidity.Yul.Builtins",
+        "Solidity.Yul.CleanFunctions",
+        "Solidity.Yul.CleanLocals",
+        "Solidity.Yul.ClosedFunctions",
+        "Solidity.Yul.ClosedPure",
+        "Solidity.Yul.ClosedRun",
+        "Solidity.Yul.DeclarationCheck",
+        "Solidity.Yul.DeclarationScope",
+        "Solidity.Yul.DirectBindings",
+        "Solidity.Yul.DirtyReadback",
+        "Solidity.Yul.ExpressionCheck",
+        "Solidity.Yul.ExternalCheck",
+        "Solidity.Yul.ExternalKeys",
+        "Solidity.Yul.ExternalScope",
+        "Solidity.Yul.FunctionScope",
+        "Solidity.Yul.GlobalExternal",
+        "Solidity.Yul.HorizonAdapter",
+        "Solidity.Yul.LocalBlock",
+        "Solidity.Yul.LocalBoolAgreement",
+        "Solidity.Yul.LocalBoolControl",
+        "Solidity.Yul.LocalBoolExpr",
+        "Solidity.Yul.LocalCoordinates",
+        "Solidity.Yul.LocalOperations",
+        "Solidity.Yul.LocalScope",
+        "Solidity.Yul.LocalState",
+        "Solidity.Yul.LocalValues",
+        "Solidity.Yul.LocalWordView",
+        "Solidity.Yul.OccurrenceCheck",
+        "Solidity.Yul.OccurrenceSyntax",
+        "Solidity.Yul.OpenCalculus",
+        "Solidity.Yul.OpenComposition",
+        "Solidity.Yul.OpenFunctions",
+        "Solidity.Yul.OpenLocal",
+        "Solidity.Yul.PlacementCheck",
+        "Solidity.Yul.RawFrame",
+        "Solidity.Yul.RawFrameLogic",
+        "Solidity.Yul.RawIfElse",
+        "Solidity.Yul.RawIfThen",
+        "Solidity.Yul.RawSource",
+        "Solidity.Yul.RawSourceAdapter",
+        "Solidity.Yul.RawSourceAdapterDoWhile",
+        "Solidity.Yul.RawSourceAdapterIfElse",
+        "Solidity.Yul.RawSourceAdapterLoop",
+        "Solidity.Yul.RawSourceAdapterUnchecked",
+        "Solidity.Yul.RawTypedScope",
+        "Solidity.Yul.ScalarLocals",
+        "Solidity.Yul.ScopedBlockTyping",
+        "Solidity.Yul.ScopedNames",
+        "Solidity.Yul.ScopedSyntax",
+        "Solidity.Yul.ScopedWordSyntax",
+        "Solidity.Yul.SourceBindings",
+        "Solidity.Yul.SourceContext",
+        "Solidity.Yul.SourceTypes",
+        "Solidity.Yul.StatementTags",
+        "Solidity.Yul.Syntax",
+        "Solidity.Yul.TierPolicy",
+        "Solidity.Yul.TypingLeafPaths",
+        "Solidity.Yul.TypingLeafScope",
+        "Solidity.Yul.TypingLeaves",
+        "Solidity.Yul.TypingSites",
+        "Solidity.Yul.TypingStatements",
+        "Solidity.Yul.TypingTargetPaths",
+        "Solidity.Yul.WordAdapter",
+        "Solidity.Yul.WordAgreement",
+        "Solidity.Yul.WordCells",
+        "Solidity.Yul.WordCoverage",
+        "Solidity.Yul.WordInputs",
+        "Solidity.Yul.WordLaws",
+        "Solidity.Yul.WordLoops",
+        "Solidity.Yul.WordPolicy",
+        "Solidity.Yul.WordRules",
+        "Solidity.Yul.WordSwitch",
+        "Solidity.Yul.WordSyntax",
+        "Solidity.Yul.WordUpdates",
+        "Solidity.Yul.Words"
+      ],
+      "lines": 3267,
+      "decls": 337,
+      "generated_modules": 0,
+      "generators": {},
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "No lexical path is not a deletion proof; retain until elaborated dependencies and test/goal intent are checked.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    },
+    {
+      "kind": "unreachable_source_directory",
+      "directory": "Bridge/SolidityBridge/RoadmapV15/P10",
+      "modules": [
+        "SolidityBridge.RoadmapV15.P10.CallInAgreement",
+        "SolidityBridge.RoadmapV15.P10.CallReturndata",
+        "SolidityBridge.RoadmapV15.P10.CallReturndataLaw",
+        "SolidityBridge.RoadmapV15.P10.EnvironmentObservationProducer",
+        "SolidityBridge.RoadmapV15.P10.EnvironmentObservationWitness",
+        "SolidityBridge.RoadmapV15.P10.EnvironmentTasksV1",
+        "SolidityBridge.RoadmapV15.P10.IndexedRefusalInterfaceV1",
+        "SolidityBridge.RoadmapV15.P10.IndexedRefusalWitnessV1",
+        "SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal",
+        "SolidityBridge.RoadmapV15.P10.InstructionSelectionSequence",
+        "SolidityBridge.RoadmapV15.P10.InstructionSelectionStop",
+        "SolidityBridge.RoadmapV15.P10.ReturnSizeObservation",
+        "SolidityBridge.RoadmapV15.P10.SignExtensionAllWitness",
+        "SolidityBridge.RoadmapV15.P10.SignExtensionPositiveWitness",
+        "SolidityBridge.RoadmapV15.P10.SignExtensionResidueWitness",
+        "SolidityBridge.RoadmapV15.P10.StorageOwnerFixtures"
+      ],
+      "lines": 2917,
+      "decls": 236,
+      "generated_modules": 0,
+      "generators": {},
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "No lexical path is not a deletion proof; retain until elaborated dependencies and test/goal intent are checked.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    },
+    {
+      "kind": "unreachable_source_directory",
+      "directory": "Solidity/Evm",
+      "modules": [
+        "Solidity.Evm.Compiler",
+        "Solidity.Evm.Correct",
+        "Solidity.Evm.Interpreter",
+        "Solidity.Evm.MachineV2",
+        "Solidity.Evm.MemoryCompile",
+        "Solidity.Evm.MemoryCopyBound",
+        "Solidity.Evm.MemoryDefaultCompile",
+        "Solidity.Evm.MemoryDelete",
+        "Solidity.Evm.MemoryLoop",
+        "Solidity.Evm.MemoryLoopCompile",
+        "Solidity.Evm.MemoryLoopFiniteHorizon",
+        "Solidity.Evm.MemoryLoopHorizon",
+        "Solidity.Evm.MemoryLoopHorizonCapacity",
+        "Solidity.Evm.MemoryLoopHorizonObjectAllocatingPrefixes",
+        "Solidity.Evm.MemoryLoopHorizonObjectBodyScope",
+        "Solidity.Evm.MemoryLoopHorizonObjectCapacity",
+        "Solidity.Evm.MemoryLoopHorizonObjectCheckedNested",
+        "Solidity.Evm.MemoryLoopHorizonObjectCheckedReads",
+        "Solidity.Evm.MemoryLoopHorizonObjectCompile",
+        "Solidity.Evm.MemoryLoopHorizonObjectCompletedAllocator",
+        "Solidity.Evm.MemoryLoopHorizonObjectCost",
+        "Solidity.Evm.MemoryLoopHorizonObjectCoverage",
+        "Solidity.Evm.MemoryLoopHorizonObjectFinite",
+        "Solidity.Evm.MemoryLoopHorizonObjectLiveCells",
+        "Solidity.Evm.MemoryLoopHorizonObjectLocalLoads",
+        "Solidity.Evm.MemoryLoopHorizonObjectLocalReads",
+        "Solidity.Evm.MemoryLoopHorizonObjectNewArrays",
+        "Solidity.Evm.MemoryLoopHorizonObjectNewInventory",
+        "Solidity.Evm.MemoryLoopHorizonObjectObservedRoom",
+        "Solidity.Evm.MemoryLoopHorizonObjectOldElements",
+        "Solidity.Evm.MemoryLoopHorizonObjectOldHeaders",
+        "Solidity.Evm.MemoryLoopHorizonObjectOldStructs",
+        "Solidity.Evm.MemoryLoopHorizonObjectOutcomes",
+        "Solidity.Evm.MemoryLoopHorizonObjectPendingAllocator",
+        "Solidity.Evm.MemoryLoopHorizonObjectPrefix",
+        "Solidity.Evm.MemoryLoopHorizonObjectResume",
+        "Solidity.Evm.MemoryLoopHorizonObjectRetainedNew",
+        "Solidity.Evm.MemoryLoopHorizonObjectRetainedRefs",
+        "Solidity.Evm.MemoryLoopHorizonObjectStability",
+        "Solidity.Evm.MemoryLoopHorizonObjectStatement",
+        "Solidity.Evm.MemoryLoopHorizonObjectStep",
+        "Solidity.Evm.MemoryLoopHorizonObjectTurnBound",
+        "Solidity.Evm.MemoryLoopHorizonObservedRoom",
+        "Solidity.Evm.MemoryLoopHorizonOutcomes",
+        "Solidity.Evm.MemoryLoopHorizonPrefixCapacity",
+        "Solidity.Evm.MemoryLoopScopeCompile",
+        "Solidity.Evm.MemoryLoopScopeMeta",
+        "Solidity.Evm.MemoryMixedLoopAllocation",
+        "Solidity.Evm.MemoryMixedLoopCompile",
+        "Solidity.Evm.MemoryMixedLoopDivergence",
+        "Solidity.Evm.MemoryMixedLoopFinite",
+        "Solidity.Evm.MemoryObjectChildrenCopy",
+        "Solidity.Evm.MemoryRecursiveAllocation",
+        "Solidity.Evm.MemoryRecursiveBranchRoom",
+        "Solidity.Evm.MemoryRecursiveCert",
+        "Solidity.Evm.MemoryRecursiveCompile",
+        "Solidity.Evm.MemoryRecursiveComposition",
+        "Solidity.Evm.MemoryRecursiveDemandBounds",
+        "Solidity.Evm.MemoryRecursiveDemandViews",
+        "Solidity.Evm.MemoryRecursiveDivergence",
+        "Solidity.Evm.MemoryRecursiveFinite",
+        "Solidity.Evm.MemoryRecursiveHorizon",
+        "Solidity.Evm.MemoryRecursiveLiftFull",
+        "Solidity.Evm.MemoryRecursiveOneTurn",
+        "Solidity.Evm.MemoryRecursiveRoom",
+        "Solidity.Evm.MemoryRefArray",
+        "Solidity.Evm.MemorySource",
+        "Solidity.Evm.MemoryStorageCopyCompile",
+        "Solidity.Evm.MemoryStructCopy",
+        "Solidity.Evm.MemoryStructDefaultCode",
+        "Solidity.Evm.MemoryStructDefaultLayout",
+        "Solidity.Evm.MemoryStructReferenceDefaultBoundaries",
+        "Solidity.Evm.MemoryStructReferenceDefaultLiterals",
+        "Solidity.Evm.MemoryStructReferenceDefaultModes",
+        "Solidity.Evm.Sim",
+        "Solidity.Evm.TryByteCapture",
+        "Solidity.Evm.TryPanicCallMetadata",
+        "Solidity.Evm.TryPanicCarrier",
+        "Solidity.Evm.TryPanicProducer",
+        "Solidity.Evm.TryPanicSourceBodyImage",
+        "Solidity.Evm.TryPanicSourceBytes",
+        "Solidity.Evm.TryPanicSourceControl",
+        "Solidity.Evm.TryPanicSourceDeterminism",
+        "Solidity.Evm.TryPanicSourceExecution",
+        "Solidity.Evm.TryPanicSourceFrame",
+        "Solidity.Evm.TryPanicSourcePlan"
+      ],
+      "lines": 2819,
+      "decls": 296,
+      "generated_modules": 0,
+      "generators": {},
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "No lexical path is not a deletion proof; retain until elaborated dependencies and test/goal intent are checked.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    },
+    {
+      "kind": "unreachable_source_directory",
+      "directory": "Solidity/Yul/Composition",
+      "modules": [
+        "Solidity.Yul.Composition.AttemptPhysical",
+        "Solidity.Yul.Composition.CatchFunctionPhysical",
+        "Solidity.Yul.Composition.CorrectnessInstances",
+        "Solidity.Yul.Composition.DoWhilePhysical",
+        "Solidity.Yul.Composition.ForPhysical",
+        "Solidity.Yul.Composition.FunctionPhysical",
+        "Solidity.Yul.Composition.HeapCatchPhysical",
+        "Solidity.Yul.Composition.LoopPhysical",
+        "Solidity.Yul.Composition.ModifierPhysical",
+        "Solidity.Yul.Composition.ModifierPostPhysical",
+        "Solidity.Yul.Composition.NestedModifierPhysical",
+        "Solidity.Yul.Composition.P6FrameCorrectness",
+        "Solidity.Yul.Composition.RawCatchPhysical",
+        "Solidity.Yul.Composition.RecursivePhysical",
+        "Solidity.Yul.Composition.RethrowPhysical",
+        "Solidity.Yul.Composition.RuntimeBlockPhysical",
+        "Solidity.Yul.Composition.ScopeCatchPhysical",
+        "Solidity.Yul.Composition.UncheckedLoopPhysical"
+      ],
+      "lines": 2611,
+      "decls": 316,
+      "generated_modules": 0,
+      "generators": {},
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "No lexical path is not a deletion proof; retain until elaborated dependencies and test/goal intent are checked.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    },
+    {
+      "kind": "near_file",
+      "modules": [
+        "Solidity.Backend.Passes.FreshBooleanPins",
+        "Solidity.Backend.Passes.HeapBoundaryPins",
+        "Solidity.Backend.Passes.LoopPins",
+        "Solidity.Backend.Passes.MemoryCallPins",
+        "Solidity.Backend.Passes.MemoryCallReusePins",
+        "Solidity.Backend.Passes.StatefulValuePins",
+        "Solidity.Backend.StructuredFlow.SourceDispatchAxioms",
+        "tests.calldata-packets-1105.RawInt.Axioms",
+        "tests.precompile-agreement.Axioms",
+        "tests.sol-constant-depth.Axioms"
+      ],
+      "lines": 2038,
+      "generated_modules": 0,
+      "generators": {},
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "Shared statement/template shape is a consolidation lead; namespaces, contracts and numeric cases can differ.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    },
+    {
+      "kind": "unreachable_source_directory",
+      "directory": "Bridge/SolidityBridge/ExternalEvm",
+      "modules": [
+        "SolidityBridge.ExternalEvm.BoundedScannerInterface",
+        "SolidityBridge.ExternalEvm.BoundedScannerPrefix",
+        "SolidityBridge.ExternalEvm.FiniteStorage",
+        "SolidityBridge.ExternalEvm.Memory",
+        "SolidityBridge.ExternalEvm.MemoryRefinement",
+        "SolidityBridge.ExternalEvm.Obstructions",
+        "SolidityBridge.ExternalEvm.OutcomeDriver",
+        "SolidityBridge.ExternalEvm.RequireLocalState",
+        "SolidityBridge.ExternalEvm.StaticcallDriver",
+        "SolidityBridge.ExternalEvm.StorageAddresses",
+        "SolidityBridge.ExternalEvm.StorageMacros",
+        "SolidityBridge.ExternalEvm.StorageOpcode",
+        "SolidityBridge.ExternalEvm.StorageSlots",
+        "SolidityBridge.ExternalEvm.TryMemory",
+        "SolidityBridge.ExternalEvm.TryMemoryCode",
+        "SolidityBridge.ExternalEvm.TryMemoryDriver",
+        "SolidityBridge.ExternalEvm.TryPanicOperational",
+        "SolidityBridge.ExternalEvm.TryPanicRelative",
+        "SolidityBridge.ExternalEvm.TryPanicSourcePadding",
+        "SolidityBridge.ExternalEvm.TryPanicSourceScanner"
+      ],
+      "lines": 1970,
+      "decls": 411,
+      "generated_modules": 0,
+      "generators": {},
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "No lexical path is not a deletion proof; retain until elaborated dependencies and test/goal intent are checked.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    },
+    {
+      "kind": "near_file",
+      "modules": [
+        "Solidity.Yul.Checks.Shifts.Part00",
+        "Solidity.Yul.Checks.Shifts.Part03"
+      ],
+      "lines": 1901,
+      "generated_modules": 2,
+      "generators": {
+        "Solidity.Yul.Checks.Shifts.Part00": {
+          "paths": [],
+          "ci_script_reachable": null,
+          "status": "unknown; filename classification alone is not provenance"
+        },
+        "Solidity.Yul.Checks.Shifts.Part03": {
+          "paths": [],
+          "ci_script_reachable": null,
+          "status": "unknown; filename classification alone is not provenance"
+        }
+      },
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "Generated/candidate-generated families require generator and coverage review; source similarity is not interchangeable behavior.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    },
+    {
+      "kind": "unreachable_source_directory",
+      "directory": "Solidity/Source",
+      "modules": [
+        "Solidity.Source.Calldata",
+        "Solidity.Source.Const",
+        "Solidity.Source.Ctor",
+        "Solidity.Source.Decode",
+        "Solidity.Source.Elaborated",
+        "Solidity.Source.ExprProgress",
+        "Solidity.Source.FailureEvaluatorApprox",
+        "Solidity.Source.FailureEvaluatorGrow",
+        "Solidity.Source.FailureEvaluatorStability",
+        "Solidity.Source.FailureResources",
+        "Solidity.Source.Hoare",
+        "Solidity.Source.Horizon",
+        "Solidity.Source.HorizonFuel",
+        "Solidity.Source.HorizonGrow",
+        "Solidity.Source.Ledger",
+        "Solidity.Source.Machine",
+        "Solidity.Source.Monetary",
+        "Solidity.Source.Resolve",
+        "Solidity.Source.Semantics",
+        "Solidity.Source.StmtProgress",
+        "Solidity.Source.Types",
+        "Solidity.Source.Typing",
+        "Solidity.Source.Unique",
+        "Solidity.Source.Upstream",
+        "Solidity.Source.UserOps",
+        "Solidity.Source.Value",
+        "Solidity.Source.WellFormed"
+      ],
+      "lines": 1474,
+      "decls": 266,
+      "generated_modules": 1,
+      "generators": {
+        "Solidity.Source.Ctor": {
+          "paths": [
+            "scripts/source-ctors.py"
+          ],
+          "ci_script_reachable": false,
+          "status": "textual candidate linkage; not invocation proof"
+        }
+      },
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "Generated/candidate-generated families require generator and coverage review; source similarity is not interchangeable behavior.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    },
+    {
+      "kind": "unreachable_source_directory",
+      "directory": "Bridge/SolidityBridge",
+      "modules": [
+        "SolidityBridge.Adversary",
+        "SolidityBridge.AdversaryPolicy",
+        "SolidityBridge.CallbackModalTrace",
+        "SolidityBridge.CallbackTrace",
+        "SolidityBridge.CompilerSimulation",
+        "SolidityBridge.Evm",
+        "SolidityBridge.ExternalEvm",
+        "SolidityBridge.Fresh",
+        "SolidityBridge.Loop",
+        "SolidityBridge.LoopFixpoint",
+        "SolidityBridge.ModelTheory",
+        "SolidityBridge.ProofTheory",
+        "SolidityBridge.Rewriting",
+        "SolidityBridge.WeakestPre",
+        "SolidityBridge.WeakestPreLaws"
+      ],
+      "lines": 1386,
+      "decls": 148,
+      "generated_modules": 0,
+      "generators": {},
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "No lexical path is not a deletion proof; retain until elaborated dependencies and test/goal intent are checked.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    },
+    {
+      "kind": "unreachable_source_directory",
+      "directory": "Solidity/Calculus/RuleSyntax",
+      "modules": [
+        "Solidity.Calculus.RuleSyntax.Grammar",
+        "Solidity.Calculus.RuleSyntax.Schemas"
+      ],
+      "lines": 1360,
+      "decls": 57,
+      "generated_modules": 0,
+      "generators": {},
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "No lexical path is not a deletion proof; retain until elaborated dependencies and test/goal intent are checked.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    },
+    {
+      "kind": "near_file",
+      "modules": [
+        "Solidity.TestSuite.Derived1",
+        "Solidity.TestSuite.Derived10",
+        "Solidity.TestSuite.Derived2",
+        "Solidity.TestSuite.Derived3",
+        "Solidity.TestSuite.Derived4",
+        "Solidity.TestSuite.Derived5",
+        "Solidity.TestSuite.Derived6",
+        "Solidity.TestSuite.Derived7",
+        "Solidity.TestSuite.Derived9"
+      ],
+      "lines": 1188,
+      "generated_modules": 0,
+      "generators": {},
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "Shared statement/template shape is a consolidation lead; namespaces, contracts and numeric cases can differ.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    },
+    {
+      "kind": "unreachable_source_directory",
+      "directory": "Solidity/Corpus",
+      "modules": [
+        "Solidity.Corpus.Imported",
+        "Solidity.Corpus.SolcArrays",
+        "Solidity.Corpus.SolcControlFlow",
+        "Solidity.Corpus.SolcExpressions",
+        "Solidity.Corpus.SolcMappings",
+        "Solidity.Corpus.SolcMemory",
+        "Solidity.Corpus.SolcStructs"
+      ],
+      "lines": 1127,
+      "decls": 68,
+      "generated_modules": 7,
+      "generators": {
+        "Solidity.Corpus.Imported": {
+          "paths": [
+            "scripts/solkey-port.mjs"
+          ],
+          "ci_script_reachable": false,
+          "status": "textual candidate linkage; not invocation proof"
+        },
+        "Solidity.Corpus.SolcArrays": {
+          "paths": [
+            "scripts/solkey-port.mjs"
+          ],
+          "ci_script_reachable": false,
+          "status": "textual candidate linkage; not invocation proof"
+        },
+        "Solidity.Corpus.SolcControlFlow": {
+          "paths": [
+            "scripts/solkey-port.mjs"
+          ],
+          "ci_script_reachable": false,
+          "status": "textual candidate linkage; not invocation proof"
+        },
+        "Solidity.Corpus.SolcExpressions": {
+          "paths": [
+            "scripts/solkey-port.mjs"
+          ],
+          "ci_script_reachable": false,
+          "status": "textual candidate linkage; not invocation proof"
+        },
+        "Solidity.Corpus.SolcMappings": {
+          "paths": [
+            "scripts/solkey-port.mjs"
+          ],
+          "ci_script_reachable": false,
+          "status": "textual candidate linkage; not invocation proof"
+        },
+        "Solidity.Corpus.SolcMemory": {
+          "paths": [
+            "scripts/solkey-port.mjs"
+          ],
+          "ci_script_reachable": false,
+          "status": "textual candidate linkage; not invocation proof"
+        },
+        "Solidity.Corpus.SolcStructs": {
+          "paths": [
+            "scripts/solkey-port.mjs"
+          ],
+          "ci_script_reachable": false,
+          "status": "textual candidate linkage; not invocation proof"
+        }
+      },
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "Generated/candidate-generated families require generator and coverage review; source similarity is not interchangeable behavior.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    },
+    {
+      "kind": "unreachable_source_directory",
+      "directory": "Solidity/Semantics",
+      "modules": [
+        "Solidity.Semantics.AbiAccess",
+        "Solidity.Semantics.AbiEntry",
+        "Solidity.Semantics.AbiEntryProofs",
+        "Solidity.Semantics.AllocBytes",
+        "Solidity.Semantics.CallResume",
+        "Solidity.Semantics.Callback",
+        "Solidity.Semantics.CallbackCapture",
+        "Solidity.Semantics.CallbackWk",
+        "Solidity.Semantics.ContractWorld",
+        "Solidity.Semantics.ContractWorldCertificates",
+        "Solidity.Semantics.CreationTryFrame",
+        "Solidity.Semantics.DeferredCallback",
+        "Solidity.Semantics.DeferredCorrespondence",
+        "Solidity.Semantics.Ends",
+        "Solidity.Semantics.EntryReturn",
+        "Solidity.Semantics.ExternalReturnBytes",
+        "Solidity.Semantics.ExternalTryWitness",
+        "Solidity.Semantics.LibraryTryFrame",
+        "Solidity.Semantics.Lifetime",
+        "Solidity.Semantics.NoPanic",
+        "Solidity.Semantics.NumericLowering",
+        "Solidity.Semantics.PaymentWorld",
+        "Solidity.Semantics.RevertMemory",
+        "Solidity.Semantics.Run",
+        "Solidity.Semantics.RunAccel",
+        "Solidity.Semantics.RunWk",
+        "Solidity.Semantics.StaticInvocation",
+        "Solidity.Semantics.Termination",
+        "Solidity.Semantics.Transient",
+        "Solidity.Semantics.TransientWorld",
+        "Solidity.Semantics.TryConditions"
+      ],
+      "lines": 1118,
+      "decls": 128,
+      "generated_modules": 0,
+      "generators": {},
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "No lexical path is not a deletion proof; retain until elaborated dependencies and test/goal intent are checked.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    },
+    {
+      "kind": "unreachable_source_directory",
+      "directory": "Solidity/Lowering/V07",
+      "modules": [
+        "Solidity.Lowering.V07.AcceptedGraphProducer",
+        "Solidity.Lowering.V07.AssignmentBoundaries",
+        "Solidity.Lowering.V07.AssignmentOrder",
+        "Solidity.Lowering.V07.AssignmentSubtraction",
+        "Solidity.Lowering.V07.ConditionLoopControl",
+        "Solidity.Lowering.V07.Conversions",
+        "Solidity.Lowering.V07.DeclarationGraph",
+        "Solidity.Lowering.V07.EffectfulCondition",
+        "Solidity.Lowering.V07.FieldCompleteness",
+        "Solidity.Lowering.V07.GraphAdmissionBoundary",
+        "Solidity.Lowering.V07.GraphRanks",
+        "Solidity.Lowering.V07.LocalFieldSupport",
+        "Solidity.Lowering.V07.LocationGraphInterface",
+        "Solidity.Lowering.V07.LocationGraphLaws",
+        "Solidity.Lowering.V07.LocationGraphProducer",
+        "Solidity.Lowering.V07.Operands",
+        "Solidity.Lowering.V07.P8Bindings",
+        "Solidity.Lowering.V07.PrimitiveGraph",
+        "Solidity.Lowering.V07.RecursiveGraph",
+        "Solidity.Lowering.V07.RegisteredScalarClients",
+        "Solidity.Lowering.V07.SourceRefusal",
+        "Solidity.Lowering.V07.WrappedAdditionPair"
+      ],
+      "lines": 962,
+      "decls": 132,
+      "generated_modules": 0,
+      "generators": {},
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "No lexical path is not a deletion proof; retain until elaborated dependencies and test/goal intent are checked.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    },
+    {
+      "kind": "near_file",
+      "modules": [
+        "Solidity.Backend.MemoryCopies.FixedReferenceStorageLoopControls",
+        "Solidity.Backend.MemoryCopies.NestedStorageLoopControls"
+      ],
+      "lines": 862,
+      "generated_modules": 0,
+      "generators": {},
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "Shared statement/template shape is a consolidation lead; namespaces, contracts and numeric cases can differ.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    },
+    {
+      "kind": "near_file",
+      "modules": [
+        "Solidity.Frontend.StatementGrammarH28.BoundaryHead",
+        "Solidity.Frontend.StatementGrammarH28.SyntaxHead"
+      ],
+      "lines": 748,
+      "generated_modules": 0,
+      "generators": {},
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "Shared statement/template shape is a consolidation lead; namespaces, contracts and numeric cases can differ.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    },
+    {
+      "kind": "near_file",
+      "modules": [
+        "Solidity.Yul.Views.IntOwnershipPlan",
+        "Solidity.Yul.Views.MemberOwnershipPlan",
+        "Solidity.Yul.Views.OwnershipPlan",
+        "Solidity.Yul.Views.PackedOwnershipPlan",
+        "Solidity.Yul.Views.PrimitiveOwnershipPlan",
+        "Solidity.Yul.Views.RecursiveOwnershipPlan",
+        "Solidity.Yul.Views.ScalarOwnershipPlan"
+      ],
+      "lines": 707,
+      "generated_modules": 0,
+      "generators": {},
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "Shared statement/template shape is a consolidation lead; namespaces, contracts and numeric cases can differ.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    },
+    {
+      "kind": "near_file",
+      "modules": [
+        "Solidity.Backend.MemoryCopies.CheckedFixedStoragePathControls",
+        "Solidity.Backend.MemoryCopies.FixedStoragePathControls"
+      ],
+      "lines": 668,
+      "generated_modules": 0,
+      "generators": {},
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "Shared statement/template shape is a consolidation lead; namespaces, contracts and numeric cases can differ.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    },
+    {
+      "kind": "near_file",
+      "modules": [
+        "Solidity.Backend.MemoryCopies.CheckedStoragePathControls",
+        "Solidity.Backend.MemoryCopies.RuntimePathArrayControls"
+      ],
+      "lines": 656,
+      "generated_modules": 0,
+      "generators": {},
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "Shared statement/template shape is a consolidation lead; namespaces, contracts and numeric cases can differ.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    },
+    {
+      "kind": "near_file",
+      "modules": [
+        "Solidity.Lowering.V07.SignedNarrowAddition",
+        "Solidity.Lowering.V07.SignedNarrowMultiplication",
+        "Solidity.Lowering.V07.SignedNarrowSubtraction"
+      ],
+      "lines": 618,
+      "generated_modules": 0,
+      "generators": {},
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "Shared statement/template shape is a consolidation lead; namespaces, contracts and numeric cases can differ.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    },
+    {
+      "kind": "unreachable_source_directory",
+      "directory": "Bridge/vendor/Loom/MonadAlgebras/WP",
+      "modules": [
+        "Loom.MonadAlgebras.WP.Attr",
+        "Loom.MonadAlgebras.WP.Basic",
+        "Loom.MonadAlgebras.WP.DoNames'",
+        "Loom.MonadAlgebras.WP.Gen",
+        "Loom.MonadAlgebras.WP.Liberal",
+        "Loom.MonadAlgebras.WP.Matcher",
+        "Loom.MonadAlgebras.WP.Options"
+      ],
+      "lines": 594,
+      "decls": 52,
+      "generated_modules": 0,
+      "generators": {},
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "No lexical path is not a deletion proof; retain until elaborated dependencies and test/goal intent are checked.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    },
+    {
+      "kind": "unreachable_source_directory",
+      "directory": "Bridge/SolidityBridge/HashBridge",
+      "modules": [
+        "SolidityBridge.HashBridge.CallQueries",
+        "SolidityBridge.HashBridge.Charged",
+        "SolidityBridge.HashBridge.CutSound",
+        "SolidityBridge.HashBridge.FrameHash",
+        "SolidityBridge.HashBridge.HashCuts",
+        "SolidityBridge.HashBridge.Layout",
+        "SolidityBridge.HashBridge.Prefix",
+        "SolidityBridge.HashBridge.Queries",
+        "SolidityBridge.HashBridge.QueryUnique",
+        "SolidityBridge.HashBridge.StaticQueries",
+        "SolidityBridge.HashBridge.ThetaQueries",
+        "SolidityBridge.HashBridge.XiContextMessage",
+        "SolidityBridge.HashBridge.XiQueries"
+      ],
+      "lines": 583,
+      "decls": 39,
+      "generated_modules": 0,
+      "generators": {},
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "No lexical path is not a deletion proof; retain until elaborated dependencies and test/goal intent are checked.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    },
+    {
+      "kind": "unreachable_source_directory",
+      "directory": "Solidity/Yul/World",
+      "modules": [
+        "Solidity.Yul.World.AdapterRules",
+        "Solidity.Yul.World.Adapters",
+        "Solidity.Yul.World.ByteMemory",
+        "Solidity.Yul.World.CallBuiltin",
+        "Solidity.Yul.World.CreationAddressing",
+        "Solidity.Yul.World.CreationFrames",
+        "Solidity.Yul.World.Frames",
+        "Solidity.Yul.World.Lifecycle",
+        "Solidity.Yul.World.LifecycleAdapter",
+        "Solidity.Yul.World.LifecycleFrames",
+        "Solidity.Yul.World.Observations",
+        "Solidity.Yul.World.PendingCoupling",
+        "Solidity.Yul.World.Raw",
+        "Solidity.Yul.World.ReturnSize",
+        "Solidity.Yul.World.ReturndataBuiltin",
+        "Solidity.Yul.World.SelfDestruct",
+        "Solidity.Yul.World.SelfDestructBuiltin",
+        "Solidity.Yul.World.TerminalBuiltin",
+        "Solidity.Yul.World.TransientTargetPort",
+        "Solidity.Yul.World.TransientTargetRollback"
+      ],
+      "lines": 570,
+      "decls": 88,
+      "generated_modules": 0,
+      "generators": {},
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "No lexical path is not a deletion proof; retain until elaborated dependencies and test/goal intent are checked.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    },
+    {
+      "kind": "same_normalized_statement",
+      "modules": [
+        "Solidity.Evm.MemoryCompile",
+        "Solidity.Evm.MemoryFixedCompile",
+        "Solidity.Evm.MemoryStorageCopyCompile"
+      ],
+      "lines": 564,
+      "generated_modules": 0,
+      "generators": {},
+      "declarations": [
+        {
+          "module": "Solidity.Evm.MemoryCompile",
+          "name": "stmt_sound",
+          "line": 983
+        },
+        {
+          "module": "Solidity.Evm.MemoryFixedCompile",
+          "name": "stmt_sound",
+          "line": 224
+        },
+        {
+          "module": "Solidity.Evm.MemoryStorageCopyCompile",
+          "name": "stmt_sound",
+          "line": 857
+        }
+      ],
+      "suggestion": "keep pending semantic dependency validation",
+      "why": "Shared statement/template shape is a consolidation lead; namespaces, contracts and numeric cases can differ.",
+      "verdict": "unclassified: no matched reference-class denominator"
+    }
+  ],
+  "root_drift": [
+    "scripts/differential/ absent at pinned base",
+    "scripts/bench/ absent at pinned base",
+    "Solidity/Goals.lean absent at pinned base"
+  ],
+  "waits": [
+    {
+      "item": "scripts/differential/ absent at pinned base",
+      "reason": "absent at pinned base; continue available source census"
+    },
+    {
+      "item": "scripts/bench/ absent at pinned base",
+      "reason": "absent at pinned base; continue available source census"
+    },
+    {
+      "item": "Solidity/Goals.lean absent at pinned base",
+      "reason": "absent at pinned base; continue available source census"
+    }
+  ],
+  "review_fixes": [
+    "Finder/skeptic: same-line attributed and opaque declarations now parsed; all tracked Lean consumers included.",
+    "Finder: imported vendor source roots mapped from Lake source roots; declaration names removed from reference tokens; inherited module context included conservatively.",
+    "Finder: full duplicate cluster membership/line totals saved in indexed small shards.",
+    "Finder/skeptic: filename-only generation candidates separated; unknown generator reachability null; script links labeled textual.",
+    "Finder: physical span lines include interior comments/blanks; outside-span remainder reported."
+  ],
+  "findings": [
+    "CI import coverage measures build inclusion; it does not show how much supports a headline theorem.",
+    "All keep suggestions are provisional; no deletion or redundant/wrong-direction verdict follows from a lexical census."
+  ],
+  "reference_class": {
+    "counterpart": "same-repository source dependency graph versus CI import closure",
+    "ratio_policy": "Pending coordinator question DAREACH-REF: no cross-system ratio or >3x judgment until counterpart goal roots and dependency universes are matched.",
+    "external_figures_used": false
+  },
+  "limitations": [
+    "Lexical matches overconnect local/overloaded names and do not resolve namespaces or elaborated generated declarations.",
+    "Implicit closure is sensitivity analysis, not a proven upper bound; notation, tactics, syntax quotation, mutual blocks and macros can hide dependencies.",
+    "Source generation markers are heuristic; filename-only chain/agreement candidates are separate; unmarked generated files may be missed.",
+    "No reachability fraction proves code removable; external clients and goals outside the pinned roots are outside the model.",
+    "Non-Lean test execution is not modeled; tracked Lean consumers and literal CI Lake targets (with executable aliases) define the available roots; dynamic CI target construction may be missed.",
+    "Missing external imports (Lean/Mathlib/dependency packages absent from tracked source) are outside the graph; vendored files are tracked separately.",
+    "Near-duplicate statements need not prove the same theorem; near files alpha-normalize numerals, so equivalence is not asserted."
+  ],
+  "citations": [
+    "Solidity/Theorems.lean",
+    "lakefile.toml",
+    ".github/workflows/lean.yml",
+    "docs/audits/architecture-tools/dup_decls.py",
+    "docs/audits/architecture-tools/near_files.py",
+    "scripts/core-import-closure.mjs",
+    "docs/audits/build-speed.md",
+    "docs/audits/proof-coverage-tools/theorem_census.py"
+  ]
+}
