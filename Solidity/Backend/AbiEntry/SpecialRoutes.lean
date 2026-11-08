@@ -50,10 +50,10 @@ private theorem front (base : Nat) (size : Fin W) (yes no : List Evm.Instr) (mac
       if size.val=0 then run (yes++[.jump no.length]++no) machine else run no machine := by
   by_cases empty : size.val=0
   · simp only [run,List.cons_append,List.nil_append,List.append_assoc,exec_cons_zero,Instr.step,
-      Machine.next,Out.bind,initial,wmod,Nat.zero_mod,empty,decide_true,bword,if_true,if_false,
+      Machine.next,Out.bind,initial,wmod,Nat.zero_mod,empty,decide_true,bword,ite_true,ite_false,
       Nat.one_ne_zero,decide_false,Bool.false_eq_true]
   · simp only [run,List.cons_append,List.nil_append,List.append_assoc,exec_cons_zero,Instr.step,
-      Machine.next,Out.bind,initial,wmod,Nat.zero_mod,empty,decide_false,decide_true,bword,if_true,if_false,
+      Machine.next,Out.bind,initial,wmod,Nat.zero_mod,empty,decide_false,decide_true,bword,ite_true,ite_false,
       Nat.one_ne_zero,Bool.false_eq_true,exec_skip_append,exec_cons_succ]
 
 private theorem endpoint_run (C : Contract) (base : Nat) (row : Option SpecialRow) (rest : List Evm.Instr)
@@ -94,17 +94,23 @@ private theorem endpoint_alone (C : Contract) (base : Nat) (row : Option Special
       change run ([.callvalue,.push (.val (wmod 0)),.eq,.jumpi 1,.revert]++
         compileProg base (SelectorRoutes.writeLabel C label)) machine=_
       have gate := ValueGateBody.composed false (compileProg base (SelectorRoutes.writeLabel C label)) machine
-      simpa only [Bool.false_eq_true,if_false,SelectorRoutes.write_code] using gate
+      have write : run [.push (.val label),.mstore (base+1)] machine=
+          .ok {machine with mem := upd machine.mem (base+1) (.val label)} 0 := by
+        simp only [run,exec_cons_zero,Instr.step,Machine.next,Out.bind]
+        exact exec_length [] _
+      simp only [Bool.false_eq_true,ite_false,SelectorRoutes.write_code] at gate
+      rw [write] at gate
+      simpa only [specialRowOutcome,SelectorRoutes.write_code] using gate
 
 theorem run_route (C : Contract) (base : Nat) (receive fallback : Option SpecialRow)
     (machine : Machine) (size : Fin W) (initial : machine.mem (base+1)=.val size) :
     run (compileProg base (route C receive fallback)) machine=specialOutcome base receive fallback size machine := by
   rw [code,front base size _ _ machine initial]
   by_cases empty : size.val=0
-  · rw [if_pos empty,endpoint_run]
-    simp only [specialOutcome,specialResult,if_pos empty]
-  · rw [if_neg empty,endpoint_alone]
-    simp only [specialOutcome,specialResult,if_neg empty]
+  · rw [ite_eq_left empty,endpoint_run]
+    simp only [specialOutcome,specialResult,ite_eq_left empty]
+  · rw [ite_eq_right empty,endpoint_alone]
+    simp only [specialOutcome,specialResult,ite_eq_right empty]
 
 theorem executed (C : Contract) (base : Nat) (receive fallback : Option SpecialRow)
     (result : Compiler.Compilation base (Frag.init RouteCtx) (route C receive fallback))
@@ -128,11 +134,11 @@ theorem source_lookup (E : Source.Env) (frame : Source.Fr) (labels : Source.Decl
       (sourceSpecial E frame).map (row labels) := by
   cases bytes : frame.cd with
   | nil =>
-    simp only [specialResult,length,bytes,List.length_nil,sourceSpecial,List.isEmpty_nil,if_true,
+    simp only [specialResult,length,bytes,List.length_nil,sourceSpecial,List.isEmpty_nil,ite_true,
       receiveRow,fallbackRow]
     cases E.special frame.contract .receive <;> rfl
   | cons b bs =>
-    simp only [specialResult,length,bytes,List.length_cons,Nat.add_one_ne_zero,if_false,sourceSpecial,
+    simp only [specialResult,length,bytes,List.length_cons,Nat.add_one_ne_zero,ite_false,sourceSpecial,
       List.isEmpty_cons,Bool.false_eq_true,fallbackRow]
 
 theorem source_executed (E : Source.Env) (frame : Source.Fr) (labels : Source.Decl → Fin W)
@@ -163,7 +169,7 @@ theorem source_rejection {E : Source.Env} (global : Source.Glob E) (frame : Sour
     Source.dispatch global frame (fuel+1) frame.cd=Source.EM.halt (.revert []) := by
   unfold sourceSpecial at chosen
   simp only [Source.dispatch,ordinary,getter,chosen,decide_eq_true nonzero,nonpayable,
-    Bool.not_false,Bool.true_and,if_true]
+    Bool.not_false,Bool.true_and,ite_true]
   rfl
 
 def certificate : Interface.SpecialRoutesCertificate route where
