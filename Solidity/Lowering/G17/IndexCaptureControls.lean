@@ -1,8 +1,6 @@
 import Solidity.Lowering.G17.IndexBounds
 
-/-! Discriminating captured-index controls: the old object has length two
-and its replacement length three. Index two must still fail on the captured
-object; consulting the rebound caller slot would incorrectly succeed. -/
+/-! Discriminating captured-index controls: the old object has length two and its replacement length three. Index two must still fail on the captured object; consulting the rebound caller slot would incorrectly succeed. -/
 namespace Solidity.Lowering.G17.IndexCapture.Controls
 private abbrev C := (default : Contract)
 private abbrev TgtCtx : Ctx := [.mem bytesR,.mem bytesR]
@@ -24,9 +22,7 @@ private def lateRead : Val C TgtCtx .uint :=
 private def lateWrite : Stmt C TgtCtx TgtCtx :=
   .assignMem (.index .dyn (.var (.there .here) rfl) indexTwo) (.val seven)
 
-/-- Rejects using the rebound slot instead of the captured object for either
-an indexed read or write. Both arrays are live, so danglingness cannot explain
-away the difference. Bounds failure, not result-value coincidence, detects it. -/
+/-- Rejects using the rebound slot instead of the captured object for either an indexed read or write. Both arrays are live, so danglingness cannot explain away the difference. Bounds failure, not result-value coincidence, detects it. -/
 theorem captured_base_controls :
     (readOperand (.there .here) .here rfl .dyn indexTwo).run target = .error .revert ∧
     (writeCode (.there .here) .here rfl .dyn indexTwo seven).run target = .error .revert ∧
@@ -73,8 +69,7 @@ private def observeSuccessfulWrite : Option (Int × Int) :=
     | some x,some y => some (x.1,y.1)
     | _,_ => none
 
-/-- When both objects have the index, the captured object receives the write
-and the replacement retains its old contents. This rejects a late-base write. -/
+/-- When both objects have the index, the captured object receives the write and the replacement retains its old contents. This rejects a late-base write. -/
 theorem successful_write_targets_old : observeSuccessfulWrite = some (7,0) := by
   unfold observeSuccessfulWrite
   rw [write_run target (.there .here) .here rfl old assigned rfl rfl]
@@ -85,9 +80,7 @@ theorem successful_write_targets_old : observeSuccessfulWrite = some (7,0) := by
         Objs.set, pure, Except.pure, State.push, State.withHeap, Heap.index, HRef.wk, getElem?_pos,
         List.getElem_cons_zero]
 
-/-- A Source bounds panic carries 0x32. The native unguarded option lookup's
-empty revert cannot discharge Source revert transport; a lowering guard must
-preserve the payload instead of relabelling this failure. -/
+/-- A Source bounds panic carries 0x32. The native unguarded option lookup's empty revert cannot discharge Source revert transport; a lowering guard must preserve the payload instead of relabelling this failure. -/
 theorem source_index_panic_is_not_empty : THalt.ofData (Source.panicData .index) ≠ .revert := by
   decide
 
@@ -97,15 +90,13 @@ private def capturedIds : Option (Option Nat × Option Nat) :=
   | .ok out => some ((TEnv.get .here out.st.env).map HRef.id,
       (TEnv.get (.there (.there .here)) out.st.env).map HRef.id)
 
-/-- Rejects capturing the replacement after the rebind, or overwriting the
-fresh capture together with the caller slot. -/
+/-- Rejects capturing the replacement after the rebind, or overwriting the fresh capture together with the caller slot. -/
 theorem captured_prefix_identity : capturedIds = some (some 0,some 1) := by
   unfold capturedIds
   rw [capture_run target (.there .here) .here rfl old assigned rfl rfl]
   rfl
 
-/-- Both guarded accesses check the captured object's length and emit its
-exact bounds-panic bytes; using the replacement would wrongly succeed. -/
+/-- Both guarded accesses check the captured object's length and emit its exact bounds-panic bytes; using the replacement would wrongly succeed. -/
 theorem guarded_bounds_payload :
     (IndexBounds.readOperand (.there .here) .here rfl .dyn (.lit 2 (by decide))).run target =
       .error (THalt.ofData (Source.panicData .index)) ∧
@@ -121,9 +112,7 @@ theorem guarded_bounds_payload :
         Heap.get, Objs.get, MObj.elems_dyn, List.length_cons, List.length_nil, Nat.zero_add,
         Nat.reduceAdd, Nat.lt_irrefl, ↓reduceIte]
 
-/-- A valid guarded read succeeds, and a valid guarded write is the actual
-old-object-only store observed above. This rejects an always-panicking guard
-and losing or redirecting an in-bounds store. -/
+/-- A valid guarded read succeeds, and a valid guarded write is the actual old-object-only store observed above. This rejects an always-panicking guard and losing or redirecting an in-bounds store. -/
 theorem guarded_in_bounds :
     (IndexBounds.readOperand (.there .here) .here rfl .dyn (.lit 0 (by decide))).run target =
       .ok ((⟨after,List.prefix_refl _⟩ : Out C target.H TgtCtx),SVal.prim zero) ∧

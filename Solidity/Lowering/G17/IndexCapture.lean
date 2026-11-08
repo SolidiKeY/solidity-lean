@@ -1,9 +1,6 @@
 import Solidity.Lowering.V07.ReferenceEffects
 
-/-! Indexed native access after reference capture and local rebinding. The
-captured object identity is retained for every array shape and primitive type.
-This is an operational ingredient for indexAccess, not yet Source transport,
-a heap/world relation, or coverage of storage/mapping/calldata indexing. -/
+/-! Indexed native access after reference capture and local rebinding. The captured object identity is retained for every array shape and primitive type. This is an operational ingredient for indexAccess, not yet Source transport, a heap/world relation, or coverage of storage/mapping/calldata indexing. -/
 namespace Solidity.Lowering.G17.IndexCapture
 open V07
 variable {C : Contract} {Γ : Ctx} {R : RefTy} {p : PrimTy}
@@ -32,9 +29,7 @@ def readOperand (i a : Idx Γ (.mem R)) (hm : (Ty.ref R).mapFree = true)
     DeferredSource.Operand C Γ (.prim p) :=
   ⟨_,captureCode i a hm,.val (.readMem (.index array (.var .here hm) (index.wk (.drop .refl))))⟩
 
-/-- The index is evaluated after rebinding, but the indexed object is the
-captured reference. Bounds failures use the existing heap lookup/revert law.
-No result of the desired read is an input premise. -/
+/-- The index is evaluated after rebinding, but the indexed object is the captured reference. Bounds failures use the existing heap lookup/revert law. No result of the desired read is an input premise. -/
 theorem read_run (target : State C Γ) (i a : Idx Γ (.mem R))
     (hm : (Ty.ref R).mapFree = true) (old assigned : HRef target.H R)
     (readI : TEnv.get i target.env = some old) (readA : TEnv.get a target.env = some assigned)
@@ -62,8 +57,7 @@ theorem read_run (target : State C Γ) (i a : Idx Γ (.mem R))
     dsimp only [State.setLocal]
     cases TRes.ofOpt (target.heap.index old array k) <;> rfl
 
-/-- A write through the captured base; the RHS and index retain their existing
-native evaluation order at the reached caller. -/
+/-- A write through the captured base; the RHS and index retain their existing native evaluation order at the reached caller. -/
 def writeCode (i a : Idx Γ (.mem R)) (hm : (Ty.ref R).mapFree = true)
     (array : ArrTy R (.prim p)) (index : Val C Γ .uint) (value : Val C Γ p) :
     Prog C Γ (.mem R :: Γ) :=
@@ -71,8 +65,7 @@ def writeCode (i a : Idx Γ (.mem R)) (hm : (Ty.ref R).mapFree = true)
     (.index array (.var .here hm) (index.wk (.drop .refl)))
     (.val (value.wk (.drop .refl)))) .nil)
 
-/-- Capturing the reference retains the referent for indexed writes, even
-when the original caller slot has been rebound to another object. -/
+/-- Capturing the reference retains the referent for indexed writes, even when the original caller slot has been rebound to another object. -/
 theorem write_run (target : State C Γ) (i a : Idx Γ (.mem R))
     (hm : (Ty.ref R).mapFree = true) (old assigned : HRef target.H R)
     (readI : TEnv.get i target.env = some old) (readA : TEnv.get a target.env = some assigned)
