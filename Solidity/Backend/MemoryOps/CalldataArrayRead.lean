@@ -90,7 +90,7 @@ theorem decodedArraySlice_compose {D : Source.Layout} {τ : Source.STy}
   congr 1
   omega
 
-/-- info: 'Solidity.Backend.MemoryOps.decodedArrayRead_iff' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.MemoryOps.decodedArrayRead_iff' depends on axioms: [propext] -/
 #guard_msgs in #print axioms decodedArrayRead_iff
 /-- info: 'Solidity.Backend.MemoryOps.decodedArrayRead_overrun' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms decodedArrayRead_overrun
@@ -98,6 +98,6 @@ theorem decodedArraySlice_compose {D : Source.Layout} {τ : Source.STy}
 #guard_msgs in #print axioms decodedArraySlice_length
 /-- info: 'Solidity.Backend.MemoryOps.decodedArraySlice_read' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms decodedArraySlice_read
-/-- info: 'Solidity.Backend.MemoryOps.decodedArraySlice_compose' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.decodedArraySlice_compose' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms decodedArraySlice_compose
 end Solidity.Backend.MemoryOps
