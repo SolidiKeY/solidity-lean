@@ -22,7 +22,7 @@ theorem admitted (frag : Frag Γ) (index : Idx Γ (.val .uint))
     (yesCore : inFragP frag yes=some yesFrag) (noCore : inFragP frag no=some noFrag) :
     inFragP frag (program index yes no)=some ((yesFrag.restrict Γ).meet (noFrag.restrict Γ)) := by
   have different : (PrimTy.uint != PrimTy.bool)=true := by decide
-  simp only [program,inFragP,inFrag,condition,valIn,simpleIn,binInFrag,different,Bool.true_and,if_true,yesCore,noCore]
+  simp only [program,inFragP,inFrag,condition,valIn,simpleIn,binInFrag,different,Bool.true_and,ite_true,yesCore,noCore]
 
 def selectedWhole (base : Nat) (frag : Frag Γ) (index : Idx Γ (.val .uint))
     (yes : Prog C Γ ΔT) (no : Prog C Γ ΔF) (yesFrag : Frag ΔT) (noFrag : Frag ΔF)
@@ -65,10 +65,10 @@ theorem test_run (base : Nat) (size : Fin W) (yes no : List Evm.Instr) (machine 
       if size.val<4 then run (yes++[.jump no.length]++no) machine else run no machine := by
   by_cases small : size.val<4
   · simp only [run,List.cons_append,List.nil_append,List.append_assoc,exec_cons_zero,Instr.step,
-      Machine.next,Out.bind,initial,wmod,Nat.mod_eq_of_lt (by decide : (4 : Nat)<W),small,decide_true,bword,if_true,if_false,
+      Machine.next,Out.bind,initial,wmod,Nat.mod_eq_of_lt (by decide : (4 : Nat)<W),small,decide_true,bword,ite_true,ite_false,
       Nat.one_ne_zero,decide_false,Bool.false_eq_true]
   · simp only [run,List.cons_append,List.nil_append,List.append_assoc,exec_cons_zero,Instr.step,
-      Machine.next,Out.bind,initial,wmod,Nat.mod_eq_of_lt (by decide : (4 : Nat)<W),small,decide_false,decide_true,bword,if_true,if_false,
+      Machine.next,Out.bind,initial,wmod,Nat.mod_eq_of_lt (by decide : (4 : Nat)<W),small,decide_false,decide_true,bword,ite_true,ite_false,
       Nat.one_ne_zero,Bool.false_eq_true,exec_skip_append,exec_cons_succ]
 
 
