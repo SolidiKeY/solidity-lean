@@ -55,8 +55,10 @@ private abbrev H : HTy := [B,B]
 private def r : HRef H B := ⟨0,rfl⟩
 private def neighbor : HRef H B := ⟨1,rfl⟩
 private def old (n : Nat) := [true,false,false] ++ List.replicate n false
+set_option backward.isDefEq.respectTransparency false in
 private def hp (n : Nat) (hn : n+3 < 2^256) : Heap H :=
   (⟨old n,by simp only [old,List.length_append,List.length_cons,List.length_nil,List.length_replicate]; omega⟩,⟨[false,true],by decide⟩,())
+set_option backward.isDefEq.respectTransparency false in
 private theorem len (n : Nat) (hn : n+3 < 2^256) : (hp n hn).len r .dyn = n+3 := by
   simp only [Heap.len,MObj.elems_dyn,Heap.get,Objs.get,hp,r,old,List.length_append,List.length_cons,List.length_nil,List.length_replicate]; omega
 private theorem hs (n : Nat) (hn : n+3 < 2^256) : SliceBounds ((hp n hn).len r .dyn) 0 1 := by
@@ -71,6 +73,7 @@ private def sv : Source.Data D BoolChildTy := .val (.cdRef rfl 7 0)
 private theorem initial (n : Nat) (hn : n+3 < 2^256) : BoolChildRepr (bools (old n)) (fun _ => 7) (hp n hn) sv r := by
   refine ⟨rfl,?_⟩; simp only [MObj.elems_dyn]; rfl
 
+set_option backward.isDefEq.respectTransparency false in
 /-- All payload/source and intermediate vectors are derived from actual heap
 operations. The recaptured payload differs from its initial-heap counterpart. -/
 theorem payloads (n : Nat) (hn : n+3 < 2^256) :
@@ -111,7 +114,6 @@ theorem actual_restore (n : Nat) (hn : n+3 < 2^256) :
   refine ⟨checkedCaptureOverwrite_some _ _ _ _ _ _ _ _ (hs n hn) (hd n hn),?_,hc,ho,?_,?_⟩
   · intro hi
     have hx := congrArg (fun obj : MObj H B => (MObj.elems .dyn obj)[1]?) ((initial n hn).object_eq hi)
-    dsimp only at hx
     rw [(payloads n hn).2.1] at hx
     simp only [MObj.elems_dyn] at hx
     exact (by decide : (some true : Option Bool) ≠ some false) hx
@@ -161,11 +163,11 @@ theorem reached_reads (n : Nat) (hn : n+3 < 2^256) :
     rw [overwriteSlice_frame _ r neighbor .dyn 1 _ _ (by decide)]
     simp only [MObj.elems_dyn]; rfl
   · have hr := recapturedPayload_read (hp n hn) r .dyn 0 1 1 (hs n hn) (hd n hn) 1 3 (hu n hn) 0 (by decide)
-    rw [if_pos (by decide)] at hr
-    simpa only [Nat.reduceAdd,Nat.reduceSub,Nat.add_zero] using hr
+    rw [ite_eq_left (by decide)] at hr
+    simpa only [mid,Nat.reduceAdd,Nat.reduceSub,Nat.add_zero] using hr
   · have hr := recapturedPayload_read (hp n hn) r .dyn 0 1 1 (hs n hn) (hd n hn) 1 3 (hu n hn) 1 (by decide)
-    rw [if_neg (by decide)] at hr
-    simpa only [Nat.reduceAdd,Nat.reduceSub,Nat.add_zero] using hr
+    rw [ite_eq_right (by decide)] at hr
+    simpa only [mid,Nat.reduceAdd,Nat.reduceSub,Nat.add_zero] using hr
 
 /-- info: 'Solidity.Backend.MemoryOps.RecaptureControls.reached_reads' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms reached_reads
