@@ -11,8 +11,8 @@ private theorem cycles_agree {α : Type} (xs : List α) (he : xs[2]? = xs[1]?) (
     intro k
     rw [cycle_origin]
     by_cases hk : k = 1
-    · subst k; rw [if_pos rfl]; exact he
-    · rw [if_neg hk]
+    · subst k; rw [ite_eq_left rfl]; exact he
+    · rw [ite_eq_right hk]
   induction copies with
   | zero => intro k; rfl
   | succ copies ih =>
@@ -27,9 +27,11 @@ private def left : HRef H B := ⟨0,rfl⟩
 private def right : HRef H B := ⟨1,rfl⟩
 private def root : HRef H C := ⟨2,rfl⟩
 private def values (n : Nat) := [left,right,right] ++ List.replicate n left
+set_option backward.isDefEq.respectTransparency false in
 private def hp (n : Nat) (hn : n+3 < 2^256) : Heap H :=
   (⟨[true,false],by decide⟩,⟨[false,true],by decide⟩,
    ⟨values n,by simp only [values,List.length_append,List.length_cons,List.length_nil,List.length_replicate]; omega⟩,())
+set_option backward.isDefEq.respectTransparency false in
 private theorem len (n : Nat) (hn : n+3 < 2^256) : (hp n hn).len root .dyn = n+3 := by
   simp only [Heap.len,MObj.elems_dyn,Heap.get,Objs.get,hp,root,values,List.length_append,List.length_cons,List.length_nil,List.length_replicate]; omega
 private theorem hs (n : Nat) (hn : n+3 < 2^256) : SliceBounds ((hp n hn).len root .dyn) 0 1 := by rw [len]; exact ⟨by decide,by omega⟩
@@ -80,7 +82,6 @@ theorem reference_intermediate (n : Nat) (hn : n+3 < 2^256) :
     simp only [MObj.elems_dyn]; rfl
   · intro he
     have hx := congrArg (fun o : MObj H C => ((MObj.elems .dyn o)[1]?).map HRef.id) he
-    dsimp only at hx
     rw [hv] at hx
     simp only [MObj.elems_dyn] at hx
     have bad : (some 0 : Option Nat) ≠ some 1 := by decide
