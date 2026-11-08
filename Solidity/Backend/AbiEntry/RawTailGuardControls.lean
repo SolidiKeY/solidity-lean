@@ -39,7 +39,7 @@ theorem negative_guard :
   rfl
 
 theorem negative_reference : tailRef negativeInput array 4 4=.ok (4,0) := by
-  rw [RawTailGuard.reference negativeInput array 4 4 (by decide),negative_condition,if_pos rfl,
+  rw [RawTailGuard.reference negativeInput array 4 4 (by decide),negative_condition,ite_eq_left rfl,
     relative,wrapped,length]
   have address : wrap ((2^256-28)+32)=4 := by decide
   rw [address]
@@ -59,7 +59,7 @@ theorem huge_metadata :
 #guard_msgs (whitespace := lax) in #print axioms empty_guard
 /-- info: 'Solidity.Backend.AbiEntry.RawTailGuardControls.malformed_guard' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms malformed_guard
-/-- info: 'Solidity.Backend.AbiEntry.RawTailGuardControls.negative_condition' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.AbiEntry.RawTailGuardControls.negative_condition' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms negative_condition
 /-- info: 'Solidity.Backend.AbiEntry.RawTailGuardControls.negative_guard' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms negative_guard
