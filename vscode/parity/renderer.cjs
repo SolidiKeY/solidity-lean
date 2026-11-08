@@ -1,47 +1,62 @@
 'use strict';
-const {writeFileSync,mkdirSync} = require('node:fs');
+const {writeFileSync,mkdirSync,appendFileSync} = require('node:fs');
 const {join} = require('node:path');
 const {createServer} = require('node:net');
 const {performance} = require('node:perf_hooks');
+const {randomUUID,createHash}=require('node:crypto');
 
 async function availablePort() {
   const server=createServer();
   await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(0,'127.0.0.1',resolve);});
   const port=server.address().port;await new Promise(resolve=>server.close(resolve));return port;
 }
-class DevTools {
-  constructor(url) {
-    this.next=0;this.pending=new Map();this.socket=new WebSocket(url);
-    this.ready=new Promise((resolve,reject)=>{
-      const timer=setTimeout(()=>reject(new Error('CDP connection timeout')),5000);
-      this.socket.addEventListener('open',()=>{clearTimeout(timer);resolve();},{once:true});
-      this.socket.addEventListener('error',()=>{clearTimeout(timer);reject(new Error('CDP connection failed'));},{once:true});
-    });
-    this.socket.addEventListener('message',event=>{
-      const message=JSON.parse(event.data),task=this.pending.get(message.id);
-      if(!task)return;this.pending.delete(message.id);clearTimeout(task.timer);
-      if(message.error)task.reject(new Error(JSON.stringify(message.error)));else task.resolve(message.result);
-    });
-  }
-  async request(method,params={}) {
-    await this.ready;const id=++this.next;
-    return new Promise((resolve,reject)=>{
-      const timer=setTimeout(()=>{this.pending.delete(id);reject(new Error('CDP timeout '+method));},5000);
-      this.pending.set(id,{resolve,reject,timer});this.socket.send(JSON.stringify({id,method,params}));
-    });
-  }
-  close() {
-    this.socket.close();
-    for(const task of this.pending.values()){clearTimeout(task.timer);task.reject(new Error('CDP closed'));}
-    this.pending.clear();
-  }
+// Bounded phase diagnostics are failure evidence, never a successful capture.
+function phaseDiagnostic(file,identity){
+ identity=JSON.parse(JSON.stringify(identity));let count=0,bytes=0;
+ return event=>{const row=JSON.stringify({...event,...identity})+'\n';if(++count>256||(bytes+=Buffer.byteLength(row))>1024*1024)throw Error('CDP phase diagnostic bound exceeded');appendFileSync(file,row);};
 }
-async function connect(port) {
-  const response=await fetch(`http://127.0.0.1:${port}/json/list`,{signal:AbortSignal.timeout(1500)});
-  const pages=await response.json();
-  const page=pages.find(p=>p.type==='page'&&p.url.startsWith('vscode-file:'));
-  if(!page)throw new Error('VS Code renderer not ready');
-  return new DevTools(page.webSocketDebuggerUrl);
+class DevTools {
+ constructor(url,{socketFactory=url=>new WebSocket(url),now=()=>performance.now(),setTimer=setTimeout,clearTimer=clearTimeout,diagnostic=()=>{},identity={}}={}){
+  this.next=0;this.pending=new Map();this.now=now;this.setTimer=setTimer;this.clearTimer=clearTimer;this.diagnostic=diagnostic;this.identity={...identity,connectionId:randomUUID()};this.socket=socketFactory(url);this.connectionStarted=now();
+  this.ready=new Promise((resolve,reject)=>{this.readyResolve=resolve;this.readyReject=reject;this.connectTimer=setTimer(()=>this.abort(Error('CDP connection timeout'),'connection.timeout'),5000);});
+  this.note('connection.start');
+  this.socket.addEventListener('open',()=>{clearTimer(this.connectTimer);if(this.failure)return;if(now()-this.connectionStarted>=5000){this.abort(Error('CDP connection timeout'),'connection.late-open',{elapsedMs:now()-this.connectionStarted});return;}this.note('connection.open');this.readyResolve();},{once:true});
+  this.socket.addEventListener('error',()=>this.abort(Error('CDP connection failed'),'socket.error'),{once:true});
+  this.socket.addEventListener('close',event=>this.abort(Error('CDP disconnected'),'socket.close',{code:event.code,reason:event.reason}),{once:true});
+  this.socket.addEventListener('message',event=>{
+   let message;try{message=JSON.parse(event.data);}catch{this.abort(Error('Malformed CDP response'),'response.malformed');return;}
+   const object=message!==null&&typeof message==='object'&&!Array.isArray(message),response=object&&Object.hasOwn(message,'id');
+   if(!object||(response?(!Number.isSafeInteger(message.id)||message.id<1||(Object.hasOwn(message,'result')===Object.hasOwn(message,'error'))):typeof message.method!=='string')){this.abort(Error('Malformed CDP response'),'response.malformed',{payloadHash:createHash('sha256').update(event.data).digest('hex')});return;}
+   const record=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);if(response?(Object.hasOwn(message,'result')?!record(message.result):!record(message.error)||!Number.isSafeInteger(message.error.code)||typeof message.error.message!=='string'):(Object.hasOwn(message,'params')&&!record(message.params))){this.abort(Error('Malformed CDP response'),'response.malformed',{payloadHash:createHash('sha256').update(event.data).digest('hex')});return;}
+   if(!response){this.note('notification',{method:message.method,paramsHash:createHash('sha256').update(JSON.stringify(message.params??null)).digest('hex')});return;}
+   const task=this.pending.get(message.id);if(!task){this.note('response.unmatched',{id:message.id});return;}
+   this.pending.delete(message.id);clearTimer(task.timer);const elapsedMs=now()-task.started;
+   if(elapsedMs>=5000){this.note('response.late',{id:message.id,method:task.method,elapsedMs});task.reject(Error('CDP timeout '+task.method));return;}
+   const ok=this.note('response',{id:message.id,method:task.method,elapsedMs,error:message.error??null,exception:message.result?.exceptionDetails?.text??null,bytes:Buffer.byteLength(event.data)});
+   if(!ok){task.reject(this.failure);return;}if(message.error)task.reject(Error(JSON.stringify(message.error)));else task.resolve(message.result);
+  });
+ }
+ note(event,data={}){if(this.diagnosticFailure)return false;try{this.diagnostic({...this.identity,event,monotonicMs:this.now(),wallTime:Date.now(),...data});return true;}catch(error){this.diagnosticFailure=error;this.abort(error,'diagnostic.failure');return false;}}
+ abort(error,event,data={}){if(this.failure)return;this.failure=error;this.clearTimer(this.connectTimer);this.note(event,data);this.readyReject(error);for(const [id,t]of this.pending){this.clearTimer(t.timer);this.note('request.aborted',{id,method:t.method});t.reject(error);}this.pending.clear();try{this.socket.close();}catch(closeError){this.note('socket.close-failed',{error:closeError.message});}}
+ async request(method,params={}){
+  await this.ready;if(this.failure)throw this.failure;const id=++this.next,started=this.now();
+  return new Promise((resolve,reject)=>{
+   const timer=this.setTimer(()=>{this.pending.delete(id);this.note('request.timeout',{id,method,elapsedMs:this.now()-started});reject(Error('CDP timeout '+method));},5000);
+   this.pending.set(id,{resolve,reject,timer,started,method});
+   if(!this.note('request',{id,method,deadlineMs:5000,paramsHash:createHash('sha256').update(JSON.stringify(params)).digest('hex'),...(method.startsWith('Input.')?{input:params}:{})}))return;
+   try{this.socket.send(JSON.stringify({id,method,params}));}catch(error){this.pending.delete(id);this.clearTimer(timer);this.note('request.send-failed',{id,method,error:error.message});reject(error);}
+  });
+ }
+ finish(){const failure=this.failure;this.close();if(failure)throw failure;}
+ close(){this.abort(Error('CDP closed'),'connection.owned-close');if(this.diagnosticFailure)throw this.diagnosticFailure;}
+}
+async function connect(port,options={}){
+ const start=performance.now();options.diagnostic?.({event:'target.lookup.start',wallTime:Date.now(),monotonicMs:start});
+ try{const response=await fetch(`http://127.0.0.1:${port}/json/list`,{signal:AbortSignal.timeout(1500)}),pages=await response.json();
+  const page=pages.find(p=>p.type==='page'&&p.url.startsWith('vscode-file:'));if(!page)throw Error('VS Code renderer not ready');
+  options.diagnostic?.({event:'target.lookup.finish',wallTime:Date.now(),monotonicMs:performance.now(),elapsedMs:performance.now()-start,targetId:page.id,targetUrl:page.url,targetTitle:page.title});
+  return new DevTools(page.webSocketDebuggerUrl,{...options,identity:{...options.identity,targetId:page.id,targetUrl:page.url,targetTitle:page.title}});
+ }catch(error){options.diagnostic?.({event:'target.lookup.failed',wallTime:Date.now(),monotonicMs:performance.now(),elapsedMs:performance.now()-start,error:error.message});throw error;}
 }
 async function capture(client,directory,screenshot=false,surface='editor') {
   const start=performance.now();
@@ -69,11 +84,12 @@ const contextMenuNodes='(()=>{const roots=[document],nodes=[];for(let i=0;i<root
 async function captureContributionMenu(client,directory,metadata){
  const label=metadata.target==='local'?'Solidity Lean':'Dafny',expected=metadata.target==='local'?'Build Compiler Artifact with Import Options':'Build with Custom Arguments';
  const nodes=contextMenuNodes+'.filter(e=>e.getClientRects().length)';
- const read=async()=> (await client.request('Runtime.evaluate',{expression:'(()=>{const nodes='+nodes+';return{activeUri:document.querySelector(".editor-group-container.active .monaco-editor[data-uri]")?.getAttribute("data-uri")??null,items:nodes.map(e=>{const i=e.closest("[role=menuitem]"),r=e.getBoundingClientRect();return{label:e.textContent,ariaDisabled:i?.getAttribute("aria-disabled")??null,className:i?.className??null,bounds:{left:r.left,top:r.top,right:r.right,bottom:r.bottom},withinViewport:r.left>=0&&r.top>=0&&r.right<=innerWidth&&r.bottom<=innerHeight};})};})()',returnByValue:true})).result.value;
+ const read=async()=> (await client.request('Runtime.evaluate',{expression:'(()=>{const nodes='+nodes+';return{rendererLifetime:{timeOrigin:performance.timeOrigin,url:location.href},activeUri:document.querySelector(".editor-group-container.active .monaco-editor[data-uri]")?.getAttribute("data-uri")??null,items:nodes.map(e=>{const i=e.closest("[role=menuitem]"),r=e.getBoundingClientRect();return{label:e.textContent,ariaDisabled:i?.getAttribute("aria-disabled")??null,className:i?.className??null,bounds:{left:r.left,top:r.top,right:r.right,bottom:r.bottom},withinViewport:r.left>=0&&r.top>=0&&r.right<=innerWidth&&r.bottom<=innerHeight};})};})()',returnByValue:true})).result.value;
  const point=(await client.request('Runtime.evaluate',{expression:'(()=>{const e=document.querySelector('+JSON.stringify(metadata.kind==='tab'?'.editor-group-container.active .tabs-container .tab.active':'.editor-group-container.active .monaco-editor .view-lines')+');if(!e)return null;const r=e.getBoundingClientRect();return{x:r.left+Math.min(60,r.width/2),y:r.top+Math.min(12,r.height/2)};})()',returnByValue:true})).result.value;
  if(!point)throw Error('Owned menu source/tab is not rendered');
  const attempts=[],deadline=Date.now()+3000,prep=task=>require('./menu-lifecycle.cjs').preparation(task,deadline);let before,primary;
- try{for(const type of ['mousePressed','mouseReleased'])await prep(()=>client.request('Input.dispatchMouseEvent',{type,...point,button:'right',clickCount:1}));
+ client.note?.('menu.readiness.start',{deadlineWall:deadline,budgetMs:3000});
+ try{for(const type of ['mousePressed','mouseReleased']){attempts.push({stage:'native-input',type,wallTime:Date.now(),deadlineWall:deadline});await prep(()=>client.request('Input.dispatchMouseEvent',{type,...point,button:'right',clickCount:1}));}
   while(Date.now()<deadline){before=await prep(read);attempts.push(before);if(before?.items?.length)break;await new Promise(r=>setTimeout(r,20));}
   if(!before?.items?.length)throw Error('No native context menu opened');
   const submenu=before.items.find(i=>i.label===label);
@@ -84,15 +100,15 @@ async function captureContributionMenu(client,directory,metadata){
   if(before.activeUri!==metadata.binding.uri)throw Error('Foreign active source in menu renderer');
   writeFileSync(join(directory,'menu-before.json'),JSON.stringify(before,null,2));const rendered=await capture(client,directory,true),after=await read();writeFileSync(join(directory,'menu-after.json'),JSON.stringify(after,null,2));require('node:assert/strict').deepEqual(after,before,'Menu changed during AX/PNG capture');
   return{...rendered,contributionMenu:{binding:metadata.binding,before,after,submenuVisible:!!submenu,kind:metadata.kind,scope:'Native mouse-opened menu endpoints; raw labels/attributes/bounds retained. No raster glyph or mutation-ABA claim.'}};
- }catch(error){primary=error;try{await capture(client,directory,true);}catch{}throw error;}
+ }catch(error){client.note?.('menu.failed',{error:error.message});primary=error;try{await capture(client,directory,true);}catch{}throw error;}
  finally{writeFileSync(join(directory,'menu-attempts.json'),JSON.stringify(attempts,null,2));const cleanupDeadline=Date.now()+3000;try{for(let i=0;i<2;i++)for(const type of ['keyDown','keyUp'])await require('./menu-lifecycle.cjs').preparation(()=>client.request('Input.dispatchKeyEvent',{type,key:'Escape',code:'Escape',windowsVirtualKeyCode:27}),cleanupDeadline);}catch(error){writeFileSync(join(directory,'menu-cleanup-error.json'),JSON.stringify({error:error.message,primary:primary?.message??null}));if(!primary)throw error;}}
 }
 // Only built-in Workspace Trust UI is operated; no context-key or service injection.
 async function captureTrustControl(client,directory,metadata,captureSurface=capture){
  const desired=metadata.desired,label=desired?'Trust':"Don't Trust",opposite=desired?"Don't Trust":'Trust';
  if(typeof desired!=='boolean'||metadata.binding?.trusted===desired)throw Error('Invalid native trust transition');
- const read=async()=> (await client.request('Runtime.evaluate',{expression:`(()=>{const root=document.querySelector('.workspace-trust-editor');return{visible:!!root?.getClientRects().length,buttons:[...(root?.querySelectorAll('.monaco-button')||[])].filter(e=>e.getClientRects().length).map(e=>{const r=e.getBoundingClientRect();return{label:e.textContent,disabled:e.getAttribute('aria-disabled'),bounds:{left:r.left,top:r.top,right:r.right,bottom:r.bottom}};})};})()`,returnByValue:true})).result.value;
- const deadline=Date.now()+3000,prep=task=>require('./menu-lifecycle.cjs').preparation(task,deadline);let before,after,beforeCaptured,afterCaptured;
+ const read=async()=> (await client.request('Runtime.evaluate',{expression:`(()=>{const root=document.querySelector('.workspace-trust-editor');return{rendererLifetime:{timeOrigin:performance.timeOrigin,url:location.href},visible:!!root?.getClientRects().length,buttons:[...(root?.querySelectorAll('.monaco-button')||[])].filter(e=>e.getClientRects().length).map(e=>{const r=e.getBoundingClientRect();return{label:e.textContent,disabled:e.getAttribute('aria-disabled'),bounds:{left:r.left,top:r.top,right:r.right,bottom:r.bottom}};})};})()`,returnByValue:true})).result.value;
+ const deadline=Date.now()+3000,prep=task=>require('./menu-lifecycle.cjs').preparation(task,deadline);let before,after,beforeCaptured,afterCaptured;client.note?.('trust.readiness.start',{deadlineWall:deadline,budgetMs:3000});
  try{
   while(Date.now()<deadline){before=await prep(read);if(before?.visible&&before.buttons.some(b=>b.label===label))break;await new Promise(r=>setTimeout(r,20));}
   const button=before?.buttons.filter(b=>b.label===label);if(button?.length!==1||button[0].disabled==='true')throw Error('Native trust button unavailable');
@@ -244,4 +260,4 @@ async function captureCompilerConfiguration(client,directory,metadata){
  const deadline=Date.now()+15000;let before;do{before=await read();if(valid(before))break;await new Promise(resolve=>setTimeout(resolve,50));}while(Date.now()<deadline);writeFileSync(join(directory,'configuration-before.json'),JSON.stringify(before,null,2));const rendered=await capture(client,directory,true),after=await read();writeFileSync(join(directory,'configuration-after.json'),JSON.stringify(after,null,2));
  if(!valid(before)||!valid(after)||JSON.stringify(before)!==JSON.stringify(after))throw Error('Rendered output directory configuration/source changed or missing');return{...rendered,configuration:{before,after,metadata,scope:'Actual Settings UI default or resource JSON DOM/AX/PNG; not full glyph/raster equivalence.'}};
 }
-module.exports={captureTrustControl,captureContributionMenu,testingLabel,captureTesting,availablePort,DevTools,connect,capture,inputProbe,buildKeybinding,contextSubmenu,captureTrace,captureProofHelp,captureProofHover,captureOutput,captureCompilerConfiguration};
+module.exports={phaseDiagnostic,captureTrustControl,captureContributionMenu,testingLabel,captureTesting,availablePort,DevTools,connect,capture,inputProbe,buildKeybinding,contextSubmenu,captureTrace,captureProofHelp,captureProofHover,captureOutput,captureCompilerConfiguration};

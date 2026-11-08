@@ -7,9 +7,20 @@ const {createHash}=require('node:crypto');
 const {observe} = require('./observe.cjs');
 const {workload,symbolPosition,verificationOutcomes,servicesWorkload,assertServiceResponse} = require('./workloads.cjs');
 
+// A restarted host may be recorded, but must not overwrite the original source session.
+function beginHostLifecycle(config,trusted){
+ const file=join(config.dir,'host-lifecycle.jsonl'),previous=existsSync(file),stat=process.platform==='linux'?readFileSync('/proc/self/stat','utf8'):null;
+ const identity={runId:config.runId,target:config.target,hostSession:require('node:crypto').randomUUID(),pid:process.pid,birth:stat?.slice(stat.lastIndexOf(')')+2).split(/\s+/)[19]??null};
+ const lifecycle=(event,data={})=>appendFileSync(file,JSON.stringify({...identity,event,wallTime:Date.now(),monotonicMs:performance.now(),...data})+'\n');
+ lifecycle('host.start',{previousHostRecorded:previous,trusted});
+ if(previous)throw Error('Native trust host restarted; refuse replacing original source session/evidence');
+ return lifecycle;
+}
+
 async function run() {
   const vscode = require('vscode');
   const config = JSON.parse(readFileSync(process.env.PARITY_HOST_CONFIG,'utf8'));
+  if(config.menuTrust){const lifecycle=beginHostLifecycle(config,vscode.workspace.isTrusted);process.once('exit',code=>lifecycle('host.exit',{code}));process.on('uncaughtExceptionMonitor',error=>lifecycle('host.uncaught',{message:error.message}));}
   config.hostFilesystemCapability=require('./filesystem.cjs').recursiveCapability(config.dir);writeFileSync(join(config.dir,'host-filesystem-capability.json'),JSON.stringify(config.hostFilesystemCapability));
   // Desktop VS Code may resolve a login-shell PATH. Preserve the explicitly
   // selected backend toolchain rather than silently switching installations.
@@ -563,4 +574,4 @@ async function run() {
   }
   // The launcher validates fresh structured evidence and retains failed scenarios.
 }
-module.exports = {run};
+module.exports = {run,beginHostLifecycle};

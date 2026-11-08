@@ -2132,3 +2132,40 @@ without inventing a trust predicate. The original three-second preparation
 limit, product predicates and proof settings are unchanged. Tests use injected
 CDP/envelopes and are not native evidence. Real reload/capture failures remain
 failures; no raster/ABA, macOS, full lifecycle or row-judgment claim follows.
+
+
+The fresh paired Linux trust attempt retains failures. Both targets captured
+initial restricted menus and real trust gain with public API confirmation.
+Local retained all five trusted phases and native trust-loss UI data, then
+post-loss DOM capture timed out and no fresh host report arrived. Dafny failed
+the unchanged three-second untitled menu preparation. These are incomplete
+transitions, not successful restoration or full pairing. Owned cleanup has no
+survivors. A failed partial menu snapshot is now transported into aggregate
+reports even when the host report is absent; it cannot become a validated
+result. Original SIGTRAP/address-profile and output-reuse refusals are retained.
+No menu row is completed or judged equivalent from this evidence.
+
+
+### Bounded menu transport and host-lifetime diagnostics
+
+Menu phases now retain structured request/response/timeout/disconnect timings,
+native input dispatch, target identity and source-bound phase identity in a
+bounded journal. Journal loss/overflow fails collection. Existing target lookup,
+connection/RPC and menu-readiness deadlines remain 1.5s, 5s and 3s respectively;
+no readiness wait, retry or lifecycle-domain enabling RPC was added. Overdue
+responses and opens are refused even if event-loop delivery beats a late timer.
+Remote disconnect aborts pending work; malformed envelopes fail closed. The
+existing menu/trust reads additionally retain renderer time origin and URL;
+new renderer lifetimes cannot substitute for the original. Host start/exit
+records retain PID/birth/session, and a second host start refuses overwriting
+original evidence. Failed-partial transport includes diagnostic file hashes,
+without converting diagnostics into a passing capture.
+
+The retained local log reports renderer MessagePort closure and extension-host
+termination. The pinned editor's trust-loss participant explicitly stops and
+restarts extension hosts. This supports a lifecycle investigation; it does not
+prove the cause of the DOMSnapshot timeout. New collection must retain all five
+legacy phases and the same source-session/public-trust predicates. A restarted
+host or target remains a failure, not an assumed continuation. Injected late,
+disconnect, malformed, overflow and restart controls are not native, rendered,
+kernel or compiler/EVM evidence. All original row judgments and gates remain.

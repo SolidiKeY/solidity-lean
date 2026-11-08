@@ -47,6 +47,10 @@ function trustErrors(value,runId,target){
    if(c?.nativeMouse!==true||c.desired!==desired||JSON.stringify(c.binding)!==JSON.stringify(b)||!c.before?.visible||!c.after?.visible||JSON.stringify(c.beforeCaptured)!==JSON.stringify(c.before)||JSON.stringify(c.afterCaptured)!==JSON.stringify(c.after)||c.before.buttons.filter(x=>x.label===label&&x.disabled!=='true').length!==1||!c.after.buttons.some(x=>x.label===opposite))errors.push('missing real trust button transition');
   }
  }
+ const lifetimes=[];
+ for(const row of value.phases||[]){const m=row.capture?.capture?.contributionMenu;lifetimes.push(m?.before?.rendererLifetime,m?.after?.rendererLifetime);}
+ for(const row of steps){const c=row.capture?.capture;if(['initial','lost','restored'].includes(row.phase)){lifetimes.push(c?.contributionMenu?.before?.rendererLifetime,c?.contributionMenu?.after?.rendererLifetime);}else{for(const k of ['before','after','beforeCaptured','afterCaptured'])lifetimes.push(c?.trustControl?.[k]?.rendererLifetime);}}
+ const first=lifetimes[0];if(!first||!Number.isFinite(first.timeOrigin)||first.timeOrigin<=0||!String(first.url).startsWith('vscode-file:')||lifetimes.some(x=>JSON.stringify(x)!==JSON.stringify(first)))errors.push('renderer restarted or missing lifetime evidence');
  const main=value.phases?.[0]?.binding,{trusted:mainTrust,...mainSource}=main||{};if(main&&JSON.stringify(mainSource)!==JSON.stringify(identity))errors.push('legacy/trust source mismatch');
  return errors;
 }
@@ -89,7 +93,10 @@ async function run({vscode,config,events,sessionFor,requestPhase=require('./phas
 // Failure transport only: never substitute this partial snapshot for a host result.
 function partialEvidence(directory,runId,target){
  const file=path.join(directory,'menu-observations.json');let bytes;
- try{bytes=fs.readFileSync(file);const observation=JSON.parse(bytes);if(observation.runId!==runId||observation.target!==target)throw Error('Foreign partial menu identity');return{status:'failed-partial',file,sha256:createHash('sha256').update(bytes).digest('hex'),observation};}
- catch(error){return{status:'unavailable',file,...(bytes?{sha256:createHash('sha256').update(bytes).digest('hex')}:{}),error:error.message};}
+ const diagnostics=[];let diagnosticError;
+ try{const root=fs.realpathSync(directory),candidates=[path.join(directory,'host-lifecycle.jsonl')],phaseRoot=path.join(directory,'phases');if(fs.existsSync(phaseRoot))for(const name of fs.readdirSync(phaseRoot))if(name.startsWith('menus-'))candidates.push(path.join(phaseRoot,name,'cdp-timing.jsonl'));for(const candidate of candidates){if(!fs.existsSync(candidate))continue;const real=fs.realpathSync(candidate);if(!real.startsWith(root+path.sep))throw Error('Escaping partial diagnostic');const content=fs.readFileSync(real);diagnostics.push({file:candidate,bytes:content.length,sha256:createHash('sha256').update(content).digest('hex')});}}catch(error){diagnosticError=error.message;}
+
+ try{bytes=fs.readFileSync(file);const observation=JSON.parse(bytes);if(observation.runId!==runId||observation.target!==target)throw Error('Foreign partial menu identity');return{status:'failed-partial',file,diagnostics,diagnosticError,sha256:createHash('sha256').update(bytes).digest('hex'),observation};}
+ catch(error){return{status:'unavailable',file,diagnostics,diagnosticError,...(bytes?{sha256:createHash('sha256').update(bytes).digest('hex')}:{}),error:error.message};}
 }
 module.exports={phases,validate,run,preparation,trustErrors,partialEvidence};
