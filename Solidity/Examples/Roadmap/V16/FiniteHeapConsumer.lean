@@ -116,9 +116,9 @@ theorem finite_memory_cost {C : Contract} {b : Nat} {Γ Δ : Ctx}
     (path : compiled.isMemory = true) (σ : State C Γ) :
     compiled.allocationCost σ = Memory.allocationCostProg P σ := by
   cases compiled with
-  | memoryCopy _ => rcases path with h | h | h <;> cases h
-  | fixedMemory _ => rcases path with h | h | h <;> cases h
-  | copyConstruction _ => rcases path with h | h | h <;> cases h
+  | memoryCopy _ => cases path
+  | fixedMemory _ => cases path
+  | copyConstruction _ => cases path
   | core _ _ => cases path
   | memory _ => rfl
   | referenceArrays _ => cases path
@@ -137,9 +137,9 @@ theorem finite_memory_rep_iff {C : Contract} {b : Nat} {Γ Δ : Ctx}
       Memory.StateRepr L b frame compiled.frag τ base' m' ∧ Memory.BaseExtends σ.H base base' ∧
       Memory.GrowsAllocator b frame (compiled.allocationCost σ) σ base m τ base' m' := by
   cases compiled with
-  | memoryCopy _ => rcases path with h | h | h <;> cases h
-  | fixedMemory _ => rcases path with h | h | h <;> cases h
-  | copyConstruction _ => rcases path with h | h | h <;> cases h
+  | memoryCopy _ => cases path
+  | fixedMemory _ => cases path
+  | copyConstruction _ => cases path
   | core _ _ => cases path
   | memory _ => rfl
   | referenceArrays _ => cases path
