@@ -21,11 +21,11 @@ private theorem actual (bits : Nat) (word size : Fin W) :
 private theorem accept (bits : Nat) (word : Fin W) (valid : (Solidity.AbiEntry.Kind.int bits).valid word.val=true) :
     run (compiled bits).code (machine word (wmod 36))=.ok (bound word (wmod 36)) 0 := by
   have full : ¬(wmod 36).val<36 := by decide
-  simpa only [signedBindingOutcome,if_neg full,if_pos valid] using actual bits word (wmod 36)
+  simpa only [bound,signedBindingOutcome,ite_eq_right full,ite_eq_left valid] using actual bits word (wmod 36)
 private theorem reject (bits : Nat) (word : Fin W) (invalid : ¬(Solidity.AbiEntry.Kind.int bits).valid word.val=true) :
     run (compiled bits).code (machine word (wmod 36))=.revert := by
   have full : ¬(wmod 36).val<36 := by decide
-  simpa only [signedBindingOutcome,if_neg full,if_neg invalid] using actual bits word (wmod 36)
+  simpa only [bound,signedBindingOutcome,ite_eq_right full,ite_eq_right invalid] using actual bits word (wmod 36)
 
 theorem signed8_edges :
     run (compiled 8).code (machine (wmod 127) (wmod 36))=.ok (bound (wmod 127) (wmod 36)) 0 ∧
@@ -76,7 +76,7 @@ theorem raw_dirty_rejection (fuel : Nat) :
   have rejected : run (compiled 8).code (rawMachine dirty)=.revert := by
     have full : ¬(wmod dirty.size).val<36 := by decide
     have invalid : ¬(Solidity.AbiEntry.Kind.int 8).valid (rawArgumentWord dirty).val=true := by decide
-    simpa only [signedBindingOutcome,if_neg full,if_neg invalid] using actual 8 (rawArgumentWord dirty) (wmod dirty.size)
+    simpa only [rawMachine,rawBound,bound,signedBindingOutcome,ite_eq_right full,ite_eq_right invalid] using actual 8 (rawArgumentWord dirty) (wmod dirty.size)
   exact ⟨rejected,(SignedBinding.entry_rejection C 7 8 label (compiled 8) (SignedBinding.selected C 7 8 label)
     dirty fuel (rawMachine dirty) (wmod dirty.size) rfl rfl (by decide)).mp rejected⟩
 
@@ -105,7 +105,7 @@ theorem fuel_boundary :
   have actualRun : run (compiled 8).code (rawMachine negative)=.ok (rawBound negative) 0 := by
     have full : ¬(wmod negative.size).val<36 := by decide
     have valid : (Solidity.AbiEntry.Kind.int 8).valid (rawArgumentWord negative).val=true := by decide
-    simpa only [signedBindingOutcome,if_neg full,if_pos valid] using actual 8 (rawArgumentWord negative) (wmod negative.size)
+    simpa only [rawMachine,rawBound,bound,signedBindingOutcome,ite_eq_right full,ite_eq_left valid] using actual 8 (rawArgumentWord negative) (wmod negative.size)
   exact ⟨actualRun,SingleWordGate.insufficient_fuel negative (.int 8) (by decide)⟩
 
 theorem protected_and_saved :
