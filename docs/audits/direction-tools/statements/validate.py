@@ -31,6 +31,7 @@ def equation_case : Nat → Nat
     assert parsed[1]["conclusion"]=="Nat → Nat"
     subprocess.run([sys.executable,"-I",str(HERE/"calibrate.py"),"--check"],cwd=ROOT,check=True)
     subprocess.run([sys.executable,"-I",str(HERE/"provenance.py"),"--check"],cwd=ROOT,check=True)
+    subprocess.run([sys.executable,"-I",str(HERE/"reuse.py"),"--check"],cwd=ROOT,check=True)
     subprocess.run([sys.executable,"-I",str(HERE/"scan.py"),"--check"],cwd=ROOT,check=True)
     rows=list(csv.DictReader((HERE/"statements.csv").open()))
     summary=json.loads((HERE/"summary.json").read_text())
