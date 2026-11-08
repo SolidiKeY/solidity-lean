@@ -8,12 +8,137 @@
       "path": "Solidity/Examples/Tactics/Values.lean",
       "status": "unvalidated candidate; may not kill this boundary"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 119,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 199,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 206,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 122,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 131,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 152,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 161,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 200,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 244,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 250,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 262,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 273,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 285,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 293,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 301,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 317,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 14,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaims.lean"
+      },
+      {
+        "line": 44,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveSource.lean"
+      },
+      {
+        "line": 50,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveStep.lean"
+      },
+      {
+        "line": 23,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 22,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 93,
+        "path": "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean"
+      },
+      {
+        "line": 15,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 26,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 71,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 83,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 25,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 39,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 124,
+        "path": "Solidity/Backend/Scalar/Checked.lean"
+      }
+    ],
     "generated": false,
     "id": "M01",
     "line": 53,
     "new": "some (x - y)",
     "old": "some (x + y)",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.BinOp.arithInt",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 120,
     "static_mentions_first_30": [
@@ -178,12 +303,137 @@
       "path": "Solidity/Examples/Tactics/Values.lean",
       "status": "unvalidated candidate; may not kill this boundary"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 119,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 199,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 206,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 122,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 131,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 152,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 161,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 200,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 244,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 250,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 262,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 273,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 285,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 293,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 301,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 317,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 14,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaims.lean"
+      },
+      {
+        "line": 44,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveSource.lean"
+      },
+      {
+        "line": 50,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveStep.lean"
+      },
+      {
+        "line": 23,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 22,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 93,
+        "path": "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean"
+      },
+      {
+        "line": 15,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 26,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 71,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 83,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 25,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 39,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 124,
+        "path": "Solidity/Backend/Scalar/Checked.lean"
+      }
+    ],
     "generated": false,
     "id": "M02",
     "line": 54,
     "new": "some (x + y)",
     "old": "some (x - y)",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.BinOp.arithInt",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 120,
     "static_mentions_first_30": [
@@ -348,12 +598,137 @@
       "path": "Solidity/Examples/Tactics/Values.lean",
       "status": "unvalidated candidate; may not kill this boundary"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 119,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 199,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 206,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 122,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 131,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 152,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 161,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 200,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 244,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 250,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 262,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 273,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 285,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 293,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 301,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 317,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 14,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaims.lean"
+      },
+      {
+        "line": 44,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveSource.lean"
+      },
+      {
+        "line": 50,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveStep.lean"
+      },
+      {
+        "line": 23,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 22,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 93,
+        "path": "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean"
+      },
+      {
+        "line": 15,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 26,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 71,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 83,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 25,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 39,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 124,
+        "path": "Solidity/Backend/Scalar/Checked.lean"
+      }
+    ],
     "generated": false,
     "id": "M03",
     "line": 55,
     "new": "some (x + y)",
     "old": "some (x * y)",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.BinOp.arithInt",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 120,
     "static_mentions_first_30": [
@@ -518,12 +893,137 @@
       "path": "Solidity/Examples/Tactics/Values.lean",
       "status": "unvalidated candidate; may not kill this boundary"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 119,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 199,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 206,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 122,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 131,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 152,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 161,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 200,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 244,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 250,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 262,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 273,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 285,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 293,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 301,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 317,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 14,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaims.lean"
+      },
+      {
+        "line": 44,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveSource.lean"
+      },
+      {
+        "line": 50,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveStep.lean"
+      },
+      {
+        "line": 23,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 22,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 93,
+        "path": "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean"
+      },
+      {
+        "line": 15,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 26,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 71,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 83,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 25,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 39,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 124,
+        "path": "Solidity/Backend/Scalar/Checked.lean"
+      }
+    ],
     "generated": false,
     "id": "M04",
     "line": 56,
     "new": "if y < 0 then none else some (x ^ (y.toNat + 1))",
     "old": "if y < 0 then none else some (x ^ y.toNat)",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.BinOp.arithInt",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 120,
     "static_mentions_first_30": [
@@ -688,12 +1188,137 @@
       "path": "Solidity/Examples/Tactics/Operators.lean",
       "status": "unvalidated candidate; may not kill this boundary"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 119,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 199,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 206,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 122,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 131,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 152,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 161,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 200,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 244,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 250,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 262,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 273,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 285,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 293,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 301,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 317,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 14,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaims.lean"
+      },
+      {
+        "line": 44,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveSource.lean"
+      },
+      {
+        "line": 50,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveStep.lean"
+      },
+      {
+        "line": 23,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 22,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 93,
+        "path": "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean"
+      },
+      {
+        "line": 15,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 26,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 71,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 83,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 25,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 39,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 124,
+        "path": "Solidity/Backend/Scalar/Checked.lean"
+      }
+    ],
     "generated": false,
     "id": "M05",
     "line": 57,
     "new": "if y = 0 then some 0 else some (Int.tdiv x y)",
     "old": "if y = 0 then none else some (Int.tdiv x y)",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.BinOp.arithInt",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 120,
     "static_mentions_first_30": [
@@ -858,12 +1483,137 @@
       "path": "Solidity/Examples/Tactics/Operators.lean",
       "status": "unvalidated candidate; may not kill this boundary"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 119,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 199,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 206,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 122,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 131,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 152,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 161,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 200,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 244,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 250,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 262,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 273,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 285,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 293,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 301,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 317,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 14,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaims.lean"
+      },
+      {
+        "line": 44,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveSource.lean"
+      },
+      {
+        "line": 50,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveStep.lean"
+      },
+      {
+        "line": 23,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 22,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 93,
+        "path": "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean"
+      },
+      {
+        "line": 15,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 26,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 71,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 83,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 25,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 39,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 124,
+        "path": "Solidity/Backend/Scalar/Checked.lean"
+      }
+    ],
     "generated": false,
     "id": "M06",
     "line": 58,
     "new": "if y = 0 then some 0 else some (Int.tmod x y)",
     "old": "if y = 0 then none else some (Int.tmod x y)",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.BinOp.arithInt",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 120,
     "static_mentions_first_30": [
@@ -1028,12 +1778,137 @@
       "path": "Solidity/Examples/Tactics/Operators.lean",
       "status": "unvalidated candidate; may not kill this boundary"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 119,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 199,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 206,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 122,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 131,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 152,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 161,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 200,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 244,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 250,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 262,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 273,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 285,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 293,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 301,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 317,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 14,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaims.lean"
+      },
+      {
+        "line": 44,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveSource.lean"
+      },
+      {
+        "line": 50,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveStep.lean"
+      },
+      {
+        "line": 23,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 22,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 93,
+        "path": "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean"
+      },
+      {
+        "line": 15,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 26,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 71,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 83,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 25,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 39,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 124,
+        "path": "Solidity/Backend/Scalar/Checked.lean"
+      }
+    ],
     "generated": false,
     "id": "M07",
     "line": 59,
     "new": "(\u00b7 ||| \u00b7)",
     "old": "(\u00b7 &&& \u00b7)",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.BinOp.arithInt",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 120,
     "static_mentions_first_30": [
@@ -1198,12 +2073,137 @@
       "path": "Solidity/Examples/Tactics/Operators.lean",
       "status": "unvalidated candidate; may not kill this boundary"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 119,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 199,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 206,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 122,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 131,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 152,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 161,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 200,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 244,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 250,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 262,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 273,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 285,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 293,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 301,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 317,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 14,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaims.lean"
+      },
+      {
+        "line": 44,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveSource.lean"
+      },
+      {
+        "line": 50,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveStep.lean"
+      },
+      {
+        "line": 23,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 22,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 93,
+        "path": "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean"
+      },
+      {
+        "line": 15,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 26,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 71,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 83,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 25,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 39,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 124,
+        "path": "Solidity/Backend/Scalar/Checked.lean"
+      }
+    ],
     "generated": false,
     "id": "M08",
     "line": 60,
     "new": "(\u00b7 &&& \u00b7)",
     "old": "(\u00b7 ||| \u00b7)",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.BinOp.arithInt",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 120,
     "static_mentions_first_30": [
@@ -1368,12 +2368,137 @@
       "path": "Solidity/Examples/Tactics/Operators.lean",
       "status": "unvalidated candidate; may not kill this boundary"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 119,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 199,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 206,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 122,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 131,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 152,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 161,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 200,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 244,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 250,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 262,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 273,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 285,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 293,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 301,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 317,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 14,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaims.lean"
+      },
+      {
+        "line": 44,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveSource.lean"
+      },
+      {
+        "line": 50,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveStep.lean"
+      },
+      {
+        "line": 23,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 22,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 93,
+        "path": "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean"
+      },
+      {
+        "line": 15,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 26,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 71,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 83,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 25,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 39,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 124,
+        "path": "Solidity/Backend/Scalar/Checked.lean"
+      }
+    ],
     "generated": false,
     "id": "M09",
     "line": 61,
     "new": "(\u00b7 ||| \u00b7)",
     "old": "(\u00b7 ^^^ \u00b7)",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.BinOp.arithInt",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 120,
     "static_mentions_first_30": [
@@ -1538,12 +2663,137 @@
       "path": "Solidity/Examples/Tactics/Operators.lean",
       "status": "unvalidated candidate; may not kill this boundary"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 119,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 199,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 206,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 122,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 131,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 152,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 161,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 200,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 244,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 250,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 262,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 273,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 285,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 293,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 301,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 317,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 14,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaims.lean"
+      },
+      {
+        "line": 44,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveSource.lean"
+      },
+      {
+        "line": 50,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveStep.lean"
+      },
+      {
+        "line": 23,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 22,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 93,
+        "path": "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean"
+      },
+      {
+        "line": 15,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 26,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 71,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 83,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 25,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 39,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 124,
+        "path": "Solidity/Backend/Scalar/Checked.lean"
+      }
+    ],
     "generated": false,
     "id": "M10",
     "line": 62,
     "new": "n < 255 then a *",
     "old": "n < 256 then a *",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.BinOp.arithInt",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 120,
     "static_mentions_first_30": [
@@ -1708,12 +2958,137 @@
       "path": "Solidity/Examples/Tactics/Operators.lean",
       "status": "unvalidated candidate; may not kill this boundary"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 119,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 199,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 206,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 122,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 131,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 152,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 161,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 200,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 244,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 250,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 262,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 273,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 285,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 293,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 301,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 317,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 14,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaims.lean"
+      },
+      {
+        "line": 44,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveSource.lean"
+      },
+      {
+        "line": 50,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveStep.lean"
+      },
+      {
+        "line": 23,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 22,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 93,
+        "path": "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean"
+      },
+      {
+        "line": 15,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 26,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 71,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 83,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 25,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 39,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 124,
+        "path": "Solidity/Backend/Scalar/Checked.lean"
+      }
+    ],
     "generated": false,
     "id": "M11",
     "line": 64,
     "new": "n < 255 then a /",
     "old": "n < 256 then a /",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.BinOp.arithInt",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 120,
     "static_mentions_first_30": [
@@ -1878,12 +3253,137 @@
       "path": "Solidity/Examples/Tactics/Operators.lean",
       "status": "unvalidated candidate; may not kill this boundary"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 119,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 199,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 206,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 122,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 131,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 152,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 161,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 200,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 244,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 250,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 262,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 273,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 285,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 293,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 301,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 317,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 14,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaims.lean"
+      },
+      {
+        "line": 44,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveSource.lean"
+      },
+      {
+        "line": 50,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveStep.lean"
+      },
+      {
+        "line": 23,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 22,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 93,
+        "path": "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean"
+      },
+      {
+        "line": 15,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 26,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 71,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 83,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 25,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 39,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 124,
+        "path": "Solidity/Backend/Scalar/Checked.lean"
+      }
+    ],
     "generated": false,
     "id": "M12",
     "line": 64,
     "new": "if a < 0 then 0 else 0",
     "old": "if a < 0 then -1 else 0",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.BinOp.arithInt",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 120,
     "static_mentions_first_30": [
@@ -2048,12 +3548,137 @@
       "path": "Solidity/Examples/Tactics/Operators.lean",
       "status": "unvalidated candidate; may not kill this boundary"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 119,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 199,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 206,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 122,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 131,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 152,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 161,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 200,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 244,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 250,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 262,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 273,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 285,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 293,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 301,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 317,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 14,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaims.lean"
+      },
+      {
+        "line": 44,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveSource.lean"
+      },
+      {
+        "line": 50,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveStep.lean"
+      },
+      {
+        "line": 23,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 22,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 93,
+        "path": "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean"
+      },
+      {
+        "line": 15,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 26,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 71,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 83,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 25,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 39,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 124,
+        "path": "Solidity/Backend/Scalar/Checked.lean"
+      }
+    ],
     "generated": false,
     "id": "M13",
     "line": 65,
     "new": "some ((x - y) % Semantics.uintBound)",
     "old": "some ((x + y) % Semantics.uintBound)",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.BinOp.arithInt",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 120,
     "static_mentions_first_30": [
@@ -2218,12 +3843,137 @@
       "path": "Solidity/Examples/Tactics/Operators.lean",
       "status": "unvalidated candidate; may not kill this boundary"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 119,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 199,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 206,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 122,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 131,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 152,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 161,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 200,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 244,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 250,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 262,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 273,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 285,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 293,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 301,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 317,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 14,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaims.lean"
+      },
+      {
+        "line": 44,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveSource.lean"
+      },
+      {
+        "line": 50,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveStep.lean"
+      },
+      {
+        "line": 23,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 22,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 93,
+        "path": "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean"
+      },
+      {
+        "line": 15,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 26,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 71,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 83,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 25,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 39,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 124,
+        "path": "Solidity/Backend/Scalar/Checked.lean"
+      }
+    ],
     "generated": false,
     "id": "M14",
     "line": 66,
     "new": "some ((x + y) % Semantics.uintBound)",
     "old": "some ((x - y) % Semantics.uintBound)",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.BinOp.arithInt",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 120,
     "static_mentions_first_30": [
@@ -2388,12 +4138,137 @@
       "path": "Solidity/Examples/Tactics/SignedCasts.lean",
       "status": "unvalidated candidate; may not kill this boundary"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 119,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 199,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 206,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 122,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 131,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 152,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 161,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 200,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 244,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 250,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 262,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 273,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 285,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 293,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 301,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 317,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 14,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaims.lean"
+      },
+      {
+        "line": 44,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveSource.lean"
+      },
+      {
+        "line": 50,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveStep.lean"
+      },
+      {
+        "line": 23,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 22,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 93,
+        "path": "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean"
+      },
+      {
+        "line": 15,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 26,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 71,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 83,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 25,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 39,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 124,
+        "path": "Solidity/Backend/Scalar/Checked.lean"
+      }
+    ],
     "generated": false,
     "id": "M15",
     "line": 67,
     "new": "some ((x + y) % Semantics.uintBound)",
     "old": "some (x * y % Semantics.uintBound)",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.BinOp.arithInt",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 120,
     "static_mentions_first_30": [
@@ -2558,12 +4433,137 @@
       "path": "Solidity/Examples/Tactics/SignedCasts.lean",
       "status": "unvalidated candidate; may not kill this boundary"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 119,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 199,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 206,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 122,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 131,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 152,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 161,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 200,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 244,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 250,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 262,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 273,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 285,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 293,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 301,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 317,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 14,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaims.lean"
+      },
+      {
+        "line": 44,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveSource.lean"
+      },
+      {
+        "line": 50,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveStep.lean"
+      },
+      {
+        "line": 23,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintCompound.lean"
+      },
+      {
+        "line": 22,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 40,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDecrement.lean"
+      },
+      {
+        "line": 93,
+        "path": "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean"
+      },
+      {
+        "line": 15,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 26,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Execution.lean"
+      },
+      {
+        "line": 71,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 83,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Execution.lean"
+      },
+      {
+        "line": 25,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 39,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/Numeric.lean"
+      },
+      {
+        "line": 124,
+        "path": "Solidity/Backend/Scalar/Checked.lean"
+      }
+    ],
     "generated": false,
     "id": "M16",
     "line": 68,
     "new": "x ^ (y.toNat + 1) % Semantics.uintBound",
     "old": "x ^ y.toNat % Semantics.uintBound",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.BinOp.arithInt",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 120,
     "static_mentions_first_30": [
@@ -2723,17 +4723,143 @@
     "definition": "evalNum",
     "expected_constraint": "Operator boundary/example theorem mentioning enclosing definition; independent solc vectors alone do not execute this Lean definition",
     "expected_failing_candidate": {
-      "line": 146,
-      "name": "signedRemainder: uses comparisons, equality boundary candidate",
-      "path": "Solidity/Examples/Tactics/Operators.lean",
-      "status": "unvalidated candidate; may not kill this boundary"
+      "line": 408,
+      "name": "lt_self: equal operands must produce false",
+      "path": "Solidity/Optimizer/Simplify.lean",
+      "source_sha256": "00f394102c032397fbf00b53603dfddb846019c197b09fc689035a7e85e2bbce",
+      "status": "strong source-level candidate; elaboration not run"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 151,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 199,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 206,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 7,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 11,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 15,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 19,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 23,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 27,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 31,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 35,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 39,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 43,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 47,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 51,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 55,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 59,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 63,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 67,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 71,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 75,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 79,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 83,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 87,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 91,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 95,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 99,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 55,
+        "path": "Bridge/SolidityBridge/Arith/NarrowChecked.lean"
+      },
+      {
+        "line": 115,
+        "path": "Bridge/SolidityBridge/Arith/NarrowChecked.lean"
+      },
+      {
+        "line": 29,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 52,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      }
+    ],
     "generated": false,
     "id": "M17",
     "line": 91,
     "new": "decide (x \u2264 y)",
     "old": "decide (x < y)",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.BinOp.evalNum",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 153,
     "static_mentions_first_30": [
@@ -2893,17 +5019,143 @@
     "definition": "evalNum",
     "expected_constraint": "Operator boundary/example theorem mentioning enclosing definition; independent solc vectors alone do not execute this Lean definition",
     "expected_failing_candidate": {
-      "line": 146,
-      "name": "signedRemainder: uses comparisons, equality boundary candidate",
-      "path": "Solidity/Examples/Tactics/Operators.lean",
-      "status": "unvalidated candidate; may not kill this boundary"
+      "line": 426,
+      "name": "gt_self: equal operands must produce false",
+      "path": "Solidity/Optimizer/Simplify.lean",
+      "source_sha256": "00f394102c032397fbf00b53603dfddb846019c197b09fc689035a7e85e2bbce",
+      "status": "strong source-level candidate; elaboration not run"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 151,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 199,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 206,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 7,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 11,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 15,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 19,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 23,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 27,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 31,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 35,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 39,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 43,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 47,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 51,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 55,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 59,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 63,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 67,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 71,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 75,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 79,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 83,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 87,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 91,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 95,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 99,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 55,
+        "path": "Bridge/SolidityBridge/Arith/NarrowChecked.lean"
+      },
+      {
+        "line": 115,
+        "path": "Bridge/SolidityBridge/Arith/NarrowChecked.lean"
+      },
+      {
+        "line": 29,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 52,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      }
+    ],
     "generated": false,
     "id": "M18",
     "line": 92,
     "new": "decide (y \u2264 x)",
     "old": "decide (y < x)",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.BinOp.evalNum",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 153,
     "static_mentions_first_30": [
@@ -3063,17 +5315,143 @@
     "definition": "evalNum",
     "expected_constraint": "Operator boundary/example theorem mentioning enclosing definition; independent solc vectors alone do not execute this Lean definition",
     "expected_failing_candidate": {
-      "line": 146,
-      "name": "signedRemainder: uses comparisons, equality boundary candidate",
-      "path": "Solidity/Examples/Tactics/Operators.lean",
-      "status": "unvalidated candidate; may not kill this boundary"
+      "line": 417,
+      "name": "le_self: equal operands must produce true",
+      "path": "Solidity/Optimizer/Simplify.lean",
+      "source_sha256": "00f394102c032397fbf00b53603dfddb846019c197b09fc689035a7e85e2bbce",
+      "status": "strong source-level candidate; elaboration not run"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 151,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 199,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 206,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 7,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 11,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 15,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 19,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 23,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 27,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 31,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 35,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 39,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 43,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 47,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 51,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 55,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 59,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 63,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 67,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 71,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 75,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 79,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 83,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 87,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 91,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 95,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 99,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 55,
+        "path": "Bridge/SolidityBridge/Arith/NarrowChecked.lean"
+      },
+      {
+        "line": 115,
+        "path": "Bridge/SolidityBridge/Arith/NarrowChecked.lean"
+      },
+      {
+        "line": 29,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 52,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      }
+    ],
     "generated": false,
     "id": "M19",
     "line": 93,
     "new": "decide (x < y)",
     "old": "decide (x \u2264 y)",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.BinOp.evalNum",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 153,
     "static_mentions_first_30": [
@@ -3233,17 +5611,143 @@
     "definition": "evalNum",
     "expected_constraint": "Operator boundary/example theorem mentioning enclosing definition; independent solc vectors alone do not execute this Lean definition",
     "expected_failing_candidate": {
-      "line": 146,
-      "name": "signedRemainder: uses comparisons, equality boundary candidate",
-      "path": "Solidity/Examples/Tactics/Operators.lean",
-      "status": "unvalidated candidate; may not kill this boundary"
+      "line": 435,
+      "name": "ge_self: equal operands must produce true",
+      "path": "Solidity/Optimizer/Simplify.lean",
+      "source_sha256": "00f394102c032397fbf00b53603dfddb846019c197b09fc689035a7e85e2bbce",
+      "status": "strong source-level candidate; elaboration not run"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 151,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 199,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 206,
+        "path": "Bridge/SolidityBridge/Arith/CheckedExecution.lean"
+      },
+      {
+        "line": 7,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 11,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 15,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 19,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 23,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 27,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 31,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 35,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 39,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 43,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 47,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 51,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 55,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 59,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 63,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 67,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 71,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 75,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 79,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 83,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 87,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 91,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 95,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 99,
+        "path": "Bridge/SolidityBridge/Arith/Comparison.lean"
+      },
+      {
+        "line": 55,
+        "path": "Bridge/SolidityBridge/Arith/NarrowChecked.lean"
+      },
+      {
+        "line": 115,
+        "path": "Bridge/SolidityBridge/Arith/NarrowChecked.lean"
+      },
+      {
+        "line": 29,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 52,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      }
+    ],
     "generated": false,
     "id": "M20",
     "line": 94,
     "new": "decide (y < x)",
     "old": "decide (y \u2264 x)",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.BinOp.evalNum",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 153,
     "static_mentions_first_30": [
@@ -3403,17 +5907,131 @@
     "definition": "evalBool",
     "expected_constraint": "Operator boundary/example theorem mentioning enclosing definition; independent solc vectors alone do not execute this Lean definition",
     "expected_failing_candidate": {
-      "line": 40,
-      "name": "bitwise: boolean conjunction in postcondition",
-      "path": "Solidity/Examples/Tactics/Operators.lean",
-      "status": "unvalidated candidate; may not kill this boundary"
+      "line": 294,
+      "name": "and_true_l: choose a false right operand",
+      "path": "Solidity/Optimizer/Simplify.lean",
+      "source_sha256": "00f394102c032397fbf00b53603dfddb846019c197b09fc689035a7e85e2bbce",
+      "status": "strong source-level candidate; elaboration not run"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 27,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 122,
+        "path": "Bridge/SolidityBridge/Arith/NarrowChecked.lean"
+      },
+      {
+        "line": 83,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 203,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 244,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 250,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 262,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 273,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 285,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 293,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 301,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 317,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 46,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Selected.lean"
+      },
+      {
+        "line": 736,
+        "path": "Solidity/Calculus/CloseScoped/Leaf.lean"
+      },
+      {
+        "line": 743,
+        "path": "Solidity/Calculus/CloseScoped/Leaf.lean"
+      },
+      {
+        "line": 1200,
+        "path": "Solidity/Calculus/CloseScoped/Leaf.lean"
+      },
+      {
+        "line": 910,
+        "path": "Solidity/Calculus/Closer/Bytes.lean"
+      },
+      {
+        "line": 919,
+        "path": "Solidity/Calculus/Closer/Bytes.lean"
+      },
+      {
+        "line": 574,
+        "path": "Solidity/Calculus/Closer/Normal.lean"
+      },
+      {
+        "line": 1721,
+        "path": "Solidity/Calculus/MemSwap.lean"
+      },
+      {
+        "line": 494,
+        "path": "Solidity/Evm/SimLemmas.lean"
+      },
+      {
+        "line": 292,
+        "path": "Solidity/Optimizer/Simplify.lean"
+      },
+      {
+        "line": 302,
+        "path": "Solidity/Optimizer/Simplify.lean"
+      },
+      {
+        "line": 312,
+        "path": "Solidity/Optimizer/Simplify.lean"
+      },
+      {
+        "line": 322,
+        "path": "Solidity/Optimizer/Simplify.lean"
+      },
+      {
+        "line": 348,
+        "path": "Solidity/Optimizer/Simplify.lean"
+      },
+      {
+        "line": 355,
+        "path": "Solidity/Optimizer/Simplify.lean"
+      },
+      {
+        "line": 264,
+        "path": "Solidity/Semantics/NumericLowering.lean"
+      }
+    ],
     "generated": false,
     "id": "M21",
     "line": 105,
     "new": "some (a || b)",
     "old": "some (a && b)",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.BinOp.evalBool",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 27,
     "static_mentions_first_30": [
@@ -3558,17 +6176,131 @@
     "definition": "evalBool",
     "expected_constraint": "Operator boundary/example theorem mentioning enclosing definition; independent solc vectors alone do not execute this Lean definition",
     "expected_failing_candidate": {
-      "line": 61,
-      "name": "short: short circuit boolean disjunction candidate",
-      "path": "Solidity/Examples/Tactics/ModularArithmetic.lean",
-      "status": "unvalidated candidate; may not kill this boundary"
+      "line": 314,
+      "name": "or_false_l: choose a true right operand",
+      "path": "Solidity/Optimizer/Simplify.lean",
+      "source_sha256": "00f394102c032397fbf00b53603dfddb846019c197b09fc689035a7e85e2bbce",
+      "status": "strong source-level candidate; elaboration not run"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 27,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 122,
+        "path": "Bridge/SolidityBridge/Arith/NarrowChecked.lean"
+      },
+      {
+        "line": 83,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 203,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 244,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 250,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 262,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 273,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 285,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 293,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 301,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 317,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 46,
+        "path": "Solidity/Backend/PrimitivePackets/SignedDiv/Selected.lean"
+      },
+      {
+        "line": 736,
+        "path": "Solidity/Calculus/CloseScoped/Leaf.lean"
+      },
+      {
+        "line": 743,
+        "path": "Solidity/Calculus/CloseScoped/Leaf.lean"
+      },
+      {
+        "line": 1200,
+        "path": "Solidity/Calculus/CloseScoped/Leaf.lean"
+      },
+      {
+        "line": 910,
+        "path": "Solidity/Calculus/Closer/Bytes.lean"
+      },
+      {
+        "line": 919,
+        "path": "Solidity/Calculus/Closer/Bytes.lean"
+      },
+      {
+        "line": 574,
+        "path": "Solidity/Calculus/Closer/Normal.lean"
+      },
+      {
+        "line": 1721,
+        "path": "Solidity/Calculus/MemSwap.lean"
+      },
+      {
+        "line": 494,
+        "path": "Solidity/Evm/SimLemmas.lean"
+      },
+      {
+        "line": 292,
+        "path": "Solidity/Optimizer/Simplify.lean"
+      },
+      {
+        "line": 302,
+        "path": "Solidity/Optimizer/Simplify.lean"
+      },
+      {
+        "line": 312,
+        "path": "Solidity/Optimizer/Simplify.lean"
+      },
+      {
+        "line": 322,
+        "path": "Solidity/Optimizer/Simplify.lean"
+      },
+      {
+        "line": 348,
+        "path": "Solidity/Optimizer/Simplify.lean"
+      },
+      {
+        "line": 355,
+        "path": "Solidity/Optimizer/Simplify.lean"
+      },
+      {
+        "line": 264,
+        "path": "Solidity/Semantics/NumericLowering.lean"
+      }
+    ],
     "generated": false,
     "id": "M22",
     "line": 106,
     "new": "some (a && b)",
     "old": "some (a || b)",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.BinOp.evalBool",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 27,
     "static_mentions_first_30": [
@@ -3718,12 +6450,57 @@
       "path": "Solidity/Examples/Tactics/ModularArithmetic.lean",
       "status": "unvalidated candidate; may not kill this boundary"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 10,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 29,
+        "path": "Bridge/SolidityBridge/Arith/Modular.lean"
+      },
+      {
+        "line": 40,
+        "path": "Bridge/SolidityBridge/Arith/Modular.lean"
+      },
+      {
+        "line": 45,
+        "path": "Solidity/Backend/Scalar/Modular.lean"
+      },
+      {
+        "line": 52,
+        "path": "Solidity/Backend/Scalar/Modular.lean"
+      },
+      {
+        "line": 54,
+        "path": "Solidity/Backend/Scalar/Modular.lean"
+      },
+      {
+        "line": 76,
+        "path": "Solidity/Backend/Scalar/Modular.lean"
+      },
+      {
+        "line": 83,
+        "path": "Solidity/Backend/Scalar/Modular.lean"
+      },
+      {
+        "line": 85,
+        "path": "Solidity/Backend/Scalar/Modular.lean"
+      },
+      {
+        "line": 1886,
+        "path": "Solidity/Calculus/QuotientCut.lean"
+      },
+      {
+        "line": 1891,
+        "path": "Solidity/Calculus/QuotientCut.lean"
+      }
+    ],
     "generated": false,
     "id": "M23",
     "line": 125,
     "new": "| .addmod, x, y => x - y",
     "old": "| .addmod, x, y => x + y",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.ModOp.wide",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 327,
     "static_mentions_first_30": [
@@ -3888,12 +6665,57 @@
       "path": "Solidity/Examples/Tactics/ModularArithmetic.lean",
       "status": "unvalidated candidate; may not kill this boundary"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 10,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 29,
+        "path": "Bridge/SolidityBridge/Arith/Modular.lean"
+      },
+      {
+        "line": 40,
+        "path": "Bridge/SolidityBridge/Arith/Modular.lean"
+      },
+      {
+        "line": 45,
+        "path": "Solidity/Backend/Scalar/Modular.lean"
+      },
+      {
+        "line": 52,
+        "path": "Solidity/Backend/Scalar/Modular.lean"
+      },
+      {
+        "line": 54,
+        "path": "Solidity/Backend/Scalar/Modular.lean"
+      },
+      {
+        "line": 76,
+        "path": "Solidity/Backend/Scalar/Modular.lean"
+      },
+      {
+        "line": 83,
+        "path": "Solidity/Backend/Scalar/Modular.lean"
+      },
+      {
+        "line": 85,
+        "path": "Solidity/Backend/Scalar/Modular.lean"
+      },
+      {
+        "line": 1886,
+        "path": "Solidity/Calculus/QuotientCut.lean"
+      },
+      {
+        "line": 1891,
+        "path": "Solidity/Calculus/QuotientCut.lean"
+      }
+    ],
     "generated": false,
     "id": "M24",
     "line": 126,
     "new": "| .mulmod, x, y => x + y",
     "old": "| .mulmod, x, y => x * y",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.ModOp.wide",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 327,
     "static_mentions_first_30": [
@@ -4058,12 +6880,89 @@
       "path": "Solidity/Examples/Tactics/ModularArithmetic.lean",
       "status": "unvalidated candidate; may not kill this boundary"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 18,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 9,
+        "path": "Bridge/SolidityBridge/Arith/Modular.lean"
+      },
+      {
+        "line": 41,
+        "path": "Solidity/Backend/Scalar/Modular.lean"
+      },
+      {
+        "line": 61,
+        "path": "Solidity/Backend/Scalar/Modular.lean"
+      },
+      {
+        "line": 72,
+        "path": "Solidity/Backend/Scalar/Modular.lean"
+      },
+      {
+        "line": 92,
+        "path": "Solidity/Backend/Scalar/Modular.lean"
+      },
+      {
+        "line": 1885,
+        "path": "Solidity/Calculus/QuotientCut.lean"
+      },
+      {
+        "line": 1886,
+        "path": "Solidity/Calculus/QuotientCut.lean"
+      },
+      {
+        "line": 1890,
+        "path": "Solidity/Calculus/QuotientCut.lean"
+      },
+      {
+        "line": 1891,
+        "path": "Solidity/Calculus/QuotientCut.lean"
+      },
+      {
+        "line": 1901,
+        "path": "Solidity/Calculus/QuotientCut.lean"
+      },
+      {
+        "line": 2021,
+        "path": "Solidity/Calculus/QuotientCut.lean"
+      },
+      {
+        "line": 2823,
+        "path": "Solidity/Calculus/QuotientCut.lean"
+      },
+      {
+        "line": 2864,
+        "path": "Solidity/Calculus/QuotientCut.lean"
+      },
+      {
+        "line": 2865,
+        "path": "Solidity/Calculus/QuotientCut.lean"
+      },
+      {
+        "line": 2890,
+        "path": "Solidity/Calculus/QuotientCut.lean"
+      },
+      {
+        "line": 2891,
+        "path": "Solidity/Calculus/QuotientCut.lean"
+      },
+      {
+        "line": 2912,
+        "path": "Solidity/Calculus/QuotientCut.lean"
+      },
+      {
+        "line": 2913,
+        "path": "Solidity/Calculus/QuotientCut.lean"
+      }
+    ],
     "generated": false,
     "id": "M25",
     "line": 131,
     "new": "if k.val = 0 then some (PrimTy.dflt .uint)",
     "old": "if k.val = 0 then none",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.ModOp.evalT",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 3776,
     "static_mentions_first_30": [
@@ -4228,12 +7127,137 @@
       "path": "Solidity/Examples/Tactics/SignedCasts.lean",
       "status": "unvalidated candidate; may not kill this boundary"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 55,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 83,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 74,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationBodyControls.lean"
+      },
+      {
+        "line": 22,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean"
+      },
+      {
+        "line": 23,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean"
+      },
+      {
+        "line": 32,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean"
+      },
+      {
+        "line": 44,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean"
+      },
+      {
+        "line": 18,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceControls.lean"
+      },
+      {
+        "line": 36,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceControls.lean"
+      },
+      {
+        "line": 60,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 61,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 63,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 66,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 67,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 72,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 75,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 76,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 85,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 86,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 88,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 91,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 92,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 97,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 100,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 101,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 109,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 56,
+        "path": "Solidity/Backend/Scalar/Negation.lean"
+      },
+      {
+        "line": 61,
+        "path": "Solidity/Backend/Scalar/Negation.lean"
+      },
+      {
+        "line": 62,
+        "path": "Solidity/Backend/Scalar/Negation.lean"
+      },
+      {
+        "line": 65,
+        "path": "Solidity/Backend/Scalar/Negation.lean"
+      },
+      {
+        "line": 66,
+        "path": "Solidity/Backend/Scalar/Negation.lean"
+      }
+    ],
     "generated": false,
     "id": "M26",
     "line": 140,
     "new": "PrimTy.int.ofInt? (a.1)",
     "old": "PrimTy.int.ofInt? (-a.1)",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.UnOp.evalT",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 3776,
     "static_mentions_first_30": [
@@ -4393,17 +7417,143 @@
     "definition": "evalT",
     "expected_constraint": "Operator boundary/example theorem mentioning enclosing definition; independent solc vectors alone do not execute this Lean definition",
     "expected_failing_candidate": {
-      "line": 135,
-      "name": "ifNegated",
-      "path": "Solidity/Examples/Tactics/Branch.lean",
-      "status": "non-discriminating: postcondition holds for either branch; no expected kill established"
+      "line": 66,
+      "name": "bool_not_init_model: pushed value is explicitly inverse of old operand",
+      "path": "Solidity/Source/Agreement/BoolSlotNot.lean",
+      "source_sha256": "695a82a3aa93d206c9186b495088289ba0bca9c625f0e6dcf08150d24a361d7e",
+      "status": "strong source-level candidate; elaboration not run"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 55,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 83,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 74,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationBodyControls.lean"
+      },
+      {
+        "line": 22,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean"
+      },
+      {
+        "line": 23,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean"
+      },
+      {
+        "line": 32,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean"
+      },
+      {
+        "line": 44,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean"
+      },
+      {
+        "line": 18,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceControls.lean"
+      },
+      {
+        "line": 36,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceControls.lean"
+      },
+      {
+        "line": 60,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 61,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 63,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 66,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 67,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 72,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 75,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 76,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 85,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 86,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 88,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 91,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 92,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 97,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 100,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 101,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 109,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 56,
+        "path": "Solidity/Backend/Scalar/Negation.lean"
+      },
+      {
+        "line": 61,
+        "path": "Solidity/Backend/Scalar/Negation.lean"
+      },
+      {
+        "line": 62,
+        "path": "Solidity/Backend/Scalar/Negation.lean"
+      },
+      {
+        "line": 65,
+        "path": "Solidity/Backend/Scalar/Negation.lean"
+      },
+      {
+        "line": 66,
+        "path": "Solidity/Backend/Scalar/Negation.lean"
+      }
+    ],
     "generated": false,
     "id": "M27",
     "line": 141,
     "new": "some a",
     "old": "some (!a)",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.UnOp.evalT",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 3776,
     "static_mentions_first_30": [
@@ -4568,12 +7718,137 @@
       "path": "Solidity/Examples/Tactics/Operators.lean",
       "status": "unvalidated candidate; may not kill this boundary"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 55,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 83,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 74,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationBodyControls.lean"
+      },
+      {
+        "line": 22,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean"
+      },
+      {
+        "line": 23,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean"
+      },
+      {
+        "line": 32,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean"
+      },
+      {
+        "line": 44,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean"
+      },
+      {
+        "line": 18,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceControls.lean"
+      },
+      {
+        "line": 36,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceControls.lean"
+      },
+      {
+        "line": 60,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 61,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 63,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 66,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 67,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 72,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 75,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 76,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 85,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 86,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 88,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 91,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 92,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 97,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 100,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 101,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 109,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 56,
+        "path": "Solidity/Backend/Scalar/Negation.lean"
+      },
+      {
+        "line": 61,
+        "path": "Solidity/Backend/Scalar/Negation.lean"
+      },
+      {
+        "line": 62,
+        "path": "Solidity/Backend/Scalar/Negation.lean"
+      },
+      {
+        "line": 65,
+        "path": "Solidity/Backend/Scalar/Negation.lean"
+      },
+      {
+        "line": 66,
+        "path": "Solidity/Backend/Scalar/Negation.lean"
+      }
+    ],
     "generated": false,
     "id": "M28",
     "line": 142,
     "new": "Semantics.uintBound - 2 - a.1",
     "old": "Semantics.uintBound - 1 - a.1",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.UnOp.evalT",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 3776,
     "static_mentions_first_30": [
@@ -4730,16 +8005,153 @@
     ]
   },
   {
-    "constraint_search_result": "No exact uint256-to-int threshold 2^255 constraint found in inspected cast examples; downcast is not a valid killer",
+    "boundary_control": {
+      "expression": "checkU p Semantics.intBound (-Semantics.intBound)",
+      "line": 156,
+      "path": "Solidity/Lowering/V07/WordCastControls.lean",
+      "status": "exact threshold guard exists in pinned base; not executed"
+    },
+    "constraint_search_result": "Exact threshold control and all-input cast theorem found outside the initial example-only search; missing-constraint claim withdrawn",
     "definition": "evalT",
     "expected_constraint": "Operator boundary/example theorem mentioning enclosing definition; independent solc vectors alone do not execute this Lean definition",
-    "expected_failing_candidate": null,
+    "expected_failing_candidate": {
+      "line": 18,
+      "name": "to_int_eval: all admitted uint256 values, including 2^255",
+      "path": "Solidity/Lowering/V07/WordCasts.lean",
+      "source_sha256": "e78af9e401850b8aae5990425c9fa748fc15ead100ecf54337894a99b791b5e5",
+      "status": "strong source-level candidate; elaboration not run"
+    },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 55,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 83,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 74,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationBodyControls.lean"
+      },
+      {
+        "line": 22,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean"
+      },
+      {
+        "line": 23,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean"
+      },
+      {
+        "line": 32,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean"
+      },
+      {
+        "line": 44,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean"
+      },
+      {
+        "line": 18,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceControls.lean"
+      },
+      {
+        "line": 36,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceControls.lean"
+      },
+      {
+        "line": 60,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 61,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 63,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 66,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 67,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 72,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 75,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 76,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 85,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 86,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 88,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 91,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 92,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 97,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 100,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 101,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 109,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 56,
+        "path": "Solidity/Backend/Scalar/Negation.lean"
+      },
+      {
+        "line": 61,
+        "path": "Solidity/Backend/Scalar/Negation.lean"
+      },
+      {
+        "line": 62,
+        "path": "Solidity/Backend/Scalar/Negation.lean"
+      },
+      {
+        "line": 65,
+        "path": "Solidity/Backend/Scalar/Negation.lean"
+      },
+      {
+        "line": 66,
+        "path": "Solidity/Backend/Scalar/Negation.lean"
+      }
+    ],
     "generated": false,
     "id": "M29",
     "line": 145,
     "new": "a.1 \u2264 Semantics.intBound",
     "old": "a.1 < Semantics.intBound",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.UnOp.evalT",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 3776,
     "static_mentions_first_30": [
@@ -4899,17 +8311,143 @@
     "definition": "evalT",
     "expected_constraint": "Operator boundary/example theorem mentioning enclosing definition; independent solc vectors alone do not execute this Lean definition",
     "expected_failing_candidate": {
-      "line": 46,
-      "name": "numberLiteral",
-      "path": "Solidity/Examples/Tactics/SignedCasts.lean",
-      "status": "unvalidated candidate; may not kill this boundary"
+      "line": 30,
+      "name": "to_uint_eval: source wrapping cast fixes the returned word",
+      "path": "Solidity/Lowering/V07/WordCasts.lean",
+      "source_sha256": "e78af9e401850b8aae5990425c9fa748fc15ead100ecf54337894a99b791b5e5",
+      "status": "strong source-level candidate; elaboration not run"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 55,
+    "explicit_code_mentions_first_30": [
+      {
+        "line": 83,
+        "path": "Bridge/SolidityBridge/Arith/OverflowGuards.lean"
+      },
+      {
+        "line": 74,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationBodyControls.lean"
+      },
+      {
+        "line": 22,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean"
+      },
+      {
+        "line": 23,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean"
+      },
+      {
+        "line": 32,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean"
+      },
+      {
+        "line": 44,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean"
+      },
+      {
+        "line": 18,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceControls.lean"
+      },
+      {
+        "line": 36,
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceControls.lean"
+      },
+      {
+        "line": 60,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 61,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 63,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 66,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 67,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 72,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 75,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 76,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 85,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 86,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 88,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 91,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 92,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 97,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 100,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 101,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 109,
+        "path": "Solidity/Backend/Scalar/Casts.lean"
+      },
+      {
+        "line": 56,
+        "path": "Solidity/Backend/Scalar/Negation.lean"
+      },
+      {
+        "line": 61,
+        "path": "Solidity/Backend/Scalar/Negation.lean"
+      },
+      {
+        "line": 62,
+        "path": "Solidity/Backend/Scalar/Negation.lean"
+      },
+      {
+        "line": 65,
+        "path": "Solidity/Backend/Scalar/Negation.lean"
+      },
+      {
+        "line": 66,
+        "path": "Solidity/Backend/Scalar/Negation.lean"
+      }
+    ],
     "generated": false,
     "id": "M30",
     "line": 147,
     "new": "((a.1 + 1) % Semantics.uintBound)",
     "old": "(a.1 % Semantics.uintBound)",
     "path": "Solidity/Semantics/Ops.lean",
+    "qualified_definition": "Solidity.UnOp.evalT",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 3776,
     "static_mentions_first_30": [
@@ -5074,12 +8612,16 @@
       "path": "Solidity/Calculus/Closers.lean",
       "status": "unvalidated; M31 may make premise vacuous rather than fail"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 0,
+    "explicit_code_mentions_first_30": [],
     "generated": false,
     "id": "M31",
     "line": 207,
     "new": "| .error .panic => false",
     "old": "| .error .panic => true",
     "path": "Solidity/Calculus/Closers.lean",
+    "qualified_definition": "Solidity.TRes.isPanic",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 0,
     "static_mentions_first_30": []
@@ -5093,12 +8635,16 @@
       "path": "Solidity/Calculus/Closers.lean",
       "status": "unvalidated; M31 may make premise vacuous rather than fail"
     },
+    "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
+    "explicit_code_mention_count": 0,
+    "explicit_code_mentions_first_30": [],
     "generated": false,
     "id": "M32",
     "line": 213,
     "new": "| .error .exhausted => true",
     "old": "| .error .exhausted => false",
     "path": "Solidity/Calculus/Closers.lean",
+    "qualified_definition": "Solidity.TRes.isFail",
     "static_boundary": "Lexical names may collide across namespaces, occur in comments, or miss indirect dependencies; not theorem kills",
     "static_mention_count": 0,
     "static_mentions_first_30": []
