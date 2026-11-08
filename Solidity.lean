@@ -2410,6 +2410,12 @@ import Solidity.Calculus.UpdateRules
 import Solidity.Calculus.VisitedSet
 import Solidity.Calculus.WalkSyntax
 import Solidity.Calculus.WkOver
+import Solidity.Correctness.Lowering.Checker.Contract
+import Solidity.Correctness.Lowering.Checker.IntrinsicProbe
+import Solidity.Correctness.Lowering.Checker.MeasuredPilot
+import Solidity.Correctness.Lowering.Checker.RawProbe
+import Solidity.Correctness.Lowering.Checker.SourceAssociation
+import Solidity.Correctness.Lowering.Checker.WhileBreak
 import Solidity.Counterexamples.DeleteFamilyGenericOverlap
 import Solidity.Counterexamples.DiamondTry
 import Solidity.Counterexamples.PreFixSortAnnotations
