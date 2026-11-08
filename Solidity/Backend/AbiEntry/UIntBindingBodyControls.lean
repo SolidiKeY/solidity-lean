@@ -42,7 +42,7 @@ private theorem body_run : run back.code (bound good)=.ok finished 0 := by
     simp only [run,exec_cons_zero,Instr.step,Machine.next,Out.bind,argument]
     rfl
   have added := add_tail (bound good) (bound good).stack (a := 255) (b := 1) (by decide) (by decide)
-  rw [dif_pos (by decide : 255+1<W)] at added
+  rw [dite_eq_left (by decide : 255+1<W)] at added
   rw [bodyCode,List.append_assoc,run_append_ok loaded,run_append_ok added]
   rfl
 
@@ -54,7 +54,7 @@ theorem selected_and_changes :
     UIntBindingBody.body_selected 7 body _ bodyCore,?_⟩
   have full : ¬(wmod good.size).val<36 := by decide
   have valid : (Solidity.AbiEntry.Kind.uint 8).valid (rawArgumentWord good).val=true := by decide
-  rw [actual,if_neg full,if_pos valid,body_run]
+  rw [actual,ite_eq_right full,ite_eq_left valid,body_run]
 
 theorem decoded_argument (fuel : Nat) :
     ∃ value : Solidity.AbiEntry.Word (.uint 8),
@@ -73,11 +73,11 @@ theorem invalid_prevents_body (fuel : Nat) :
   have full : ¬(wmod dirty.size).val<36 := by decide
   have invalid : ¬(Solidity.AbiEntry.Kind.uint 8).valid (rawArgumentWord dirty).val=true := by decide
   constructor
-  · rw [actual,if_neg full,if_neg invalid]
+  · rw [actual,ite_eq_right full,ite_eq_right invalid]
   · rw [SingleWordGate.entry_form]
     have size : ¬dirty.size<36 := by decide
-    rw [if_neg size]
-    exact dif_neg invalid
+    rw [ite_eq_right size]
+    exact dite_eq_right invalid
 
 theorem short_prevents_word_and_body :
     run whole.code {machine good with
@@ -99,7 +99,7 @@ theorem body_failure_not_decoder_failure (fuel : Nat) :
       (UIntBindingBody.body_selected 7 rejecting _ rejectingCore) (machine good) (rawArgumentWord good) (wmod good.size) rfl rfl
     have full : ¬(wmod good.size).val<36 := by decide
     have valid : (Solidity.AbiEntry.Kind.uint 8).valid (rawArgumentWord good).val=true := by decide
-    rw [actualReject,if_neg full,if_pos valid]
+    rw [actualReject,ite_eq_right full,ite_eq_left valid]
     rfl
   · exact ⟨_,SingleWordGate.entry_success good fuel (.uint 8) (by decide) (by decide)⟩
 
@@ -128,6 +128,6 @@ theorem protected_and_saved :
 #guard_msgs (whitespace := lax) in #print axioms body_failure_not_decoder_failure
 /-- info: 'Solidity.Backend.AbiEntry.UIntBindingBodyControls.fuel_boundary' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms fuel_boundary
-/-- info: 'Solidity.Backend.AbiEntry.UIntBindingBodyControls.protected_and_saved' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.AbiEntry.UIntBindingBodyControls.protected_and_saved' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms protected_and_saved
 end Solidity.Backend.AbiEntry.UIntBindingBodyControls
