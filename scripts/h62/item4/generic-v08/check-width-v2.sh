@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Independently check current-signature consumers; frozen v1 remains unresolved.
+# V2 uses explicit master4.24; the frozen v1 reproduce-width.py keeps its4.35 pin.
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
-export LEAN_NUM_THREADS=1
-exec bash scripts/coord-tools/gate.sh per-file tests/h62/item4/generic-v08/IntrinsicWidthsV2.lean
+exec python3 -B scripts/h62/item4/generic-v08/reproduce-width-v2.py "$@"
