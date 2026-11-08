@@ -18,6 +18,50 @@
     "source_sha256": "4110f3923608d46d7955dd4fe0a555313ac59f6e168e3afa8f06c5753a607c18",
     "time_boundary": "Matched per-input repository and solc compile/run timings unavailable; no ratio invented"
   },
+  "historical_capture": {
+    "archive_sha256": "0389822b7ea06dbe7068896e38aa3abbdfe7c56376d631061efefea0bfd6a881",
+    "captured_agreement": 1.0,
+    "captured_comparisons": 320,
+    "captured_halts": {
+      "return": 192,
+      "revert": 128
+    },
+    "counts": {
+      "match": 320
+    },
+    "disagreement_classes": {},
+    "excluded_current_reference_lock_sha256": "39b1ce55d3978f318323dfbcf1c094b734507d1483e92c586d5e58c8d0e304f4",
+    "families": {
+      "0": 32,
+      "1": 32,
+      "2": 32,
+      "3": 32,
+      "4": 32,
+      "5": 32,
+      "6": 32,
+      "7": 32,
+      "8": 32,
+      "9": 32
+    },
+    "historical_reference_lock_sha256": "e42c4cf3acece9d74a08ecbd41171b3c7b7c5494c39a87debcefecda9beff397",
+    "limitations": [
+      "Historical captured comparisons only; not fresh execution or full G52 qualification.",
+      "No matched per-input compile/run timings.",
+      "Historical reference lock not recovered from inspected owner/reproduction/handoff copies; current lock differs and is excluded. Reference-environment reproducibility is UNVERIFIABLE pending exact archived bytes."
+    ],
+    "manifest_files_verified": 644,
+    "modes": {
+      "legacy": 160,
+      "via-ir": 160
+    },
+    "per_input_time_ratios": null,
+    "producer_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+    "producer_sources_changed_vs_audit_checkout": [],
+    "reference_environment_reproduction": "UNVERIFIABLE",
+    "report_bindings_verified": 3,
+    "scope": "Historical captured observation analysis only; no fresh execution, theorem validation, source runtime rebuild or full G52 qualification",
+    "source_inputs": 160
+  },
   "lean_elaborations": 0,
   "mutants": 32,
   "mutation_selection": {
@@ -35,12 +79,16 @@
   "sorry_added": 0,
   "waits": [
     {
-      "id": "W-TIMING",
-      "reason": "Named va3/vu1 paths and matched raw timing outputs absent at pinned base; G52 private bulk results not present on VM"
+      "id": "QDATA-TIMINGS",
+      "reason": "Historical archive verified and analyzed; matched per-input timings absent. Coordinator awaits existing matched archive or separate bounded-run authorization; no rerun authorized"
     },
     {
       "id": "W-LEAN",
       "reason": "No Lean elaborations performed; systemd resource scope unavailable on this VM (no user bus); highest-value next checks are M32 afterRunTR_diamond_fail, M07 bitwise and M10 shifts. Structural survivors are not semantic survivors"
+    },
+    {
+      "id": "W-REFERENCE-LOCK",
+      "reason": "Exact historical reference lock bytes not delivered; reference-environment reproduction UNVERIFIABLE under H151"
     }
   ]
 }

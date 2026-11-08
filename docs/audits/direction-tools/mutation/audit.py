@@ -108,5 +108,10 @@ def main():
       conclusion="Cheap structural checks do not constrain these operator/closer mutations. Whether existing proofs kill them remains unassessed; static references cannot establish coverage gaps.",
       differential=dict(source=source,source_sha256=hashlib.sha256(text.encode()).hexdigest(),pending_eest=int(re.search(r"All ([\d,]+) EEST rows are pending",text)[1].replace(",","")),provenance="cited committed report, not replayed",matched=matched,disagreed=0,matched_subset_agreement=matched/matched,reference_only_unsupported=unsupported,agreement_including_unsupported=None,disagreement_classes=[],disagreement_boundary="No mismatches reported for admitted primitive fragment; unsupported rows are not agreements",per_input_time_ratios=None,time_boundary="Matched per-input repository and solc compile/run timings unavailable; no ratio invented"),
       waits=[dict(id="W-TIMING",reason="Named va3/vu1 paths and matched raw timing outputs absent at pinned base; G52 private bulk results not present on VM"),dict(id="W-LEAN",reason="No Lean elaborations performed; systemd resource scope unavailable on this VM (no user bus); highest-value next checks are M32 afterRunTR_diamond_fail, M07 bitwise and M10 shifts. Structural survivors are not semantic survivors")],reproduce="python3 docs/audits/direction-tools/mutation/audit.py --scratch ABSOLUTE_BASE_WORKTREE")
+    captured=OUT/"captured-results.json"
+    if captured.exists():
+        summary["historical_capture"]=json.loads(captured.read_text())
+        summary["waits"][0]={"id":"QDATA-TIMINGS","reason":"Historical archive verified and analyzed; matched per-input timings absent. Coordinator awaits existing matched archive or separate bounded-run authorization; no rerun authorized"}
+        summary["waits"].append({"id":"W-REFERENCE-LOCK","reason":"Exact historical reference lock bytes not delivered; reference-environment reproduction UNVERIFIABLE under H151"})
     write("summary.json",summary)
 if __name__=="__main__":main()
