@@ -30,6 +30,7 @@ def calldataBools {D : Source.Layout} (c : Source.Calldata D) (off : Nat) : Opti
   | some ⟨.array .calldata .bool _, d⟩ => calldataBoolPayload d
   | _ => none
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Checked operation-side transfer into an existing typed array. -/
 def checkedCalldataBools {D : Source.Layout} {H : HTy} {R : RefTy}
     (c : Source.Calldata D) (off : Nat) (hp : Heap H) (dst : HRef H R)
@@ -60,6 +61,7 @@ theorem calldataBool_exact {D : Source.Layout} (d : Source.Data D .bool) :
     | storRef h _ => cases h
     | cdRef h _ _ => cases h
 
+set_option backward.isDefEq.respectTransparency false in
 theorem checkedCalldataBools_some {D : Source.Layout} {n : Option Nat}
     {c : Source.Calldata D} {off len : Nat} {hn : ∀ m, n = some m → m = len}
     {xs : Fin len → Source.Data D .bool} (hc : DecodedArrayAt c off len hn xs)
@@ -126,6 +128,7 @@ theorem checkedCalldataBools_result {D : Source.Layout} {n : Option Nat}
     next hd => cases h
   next hs => cases h
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Every written element agrees with an immutable source-table read. -/
 theorem checkedCalldataBools_read {D : Source.Layout} {n : Option Nat}
     {c : Source.Calldata D} {off len : Nat} {hn : ∀ m, n = some m → m = len}
@@ -157,6 +160,7 @@ theorem checkedCalldataBools_elems {D : Source.Layout} {n : Option Nat}
   obtain ⟨_, hd, rfl⟩ := checkedCalldataBools_result hc hp dst a start stop offset out h
   exact overwriteSlice_elems hp dst a offset _ hd
 
+set_option backward.isDefEq.respectTransparency false in
 theorem checkedCalldataBools_outside {D : Source.Layout} {n : Option Nat}
     {c : Source.Calldata D} {off len : Nat} {hn : ∀ m, n = some m → m = len}
     {xs : Fin len → Source.Data D .bool} (hc : DecodedArrayAt c off len hn xs)
@@ -211,6 +215,7 @@ theorem checkedCalldataBools_no_payload {D : Source.Layout} {H : HTy} {R : RefTy
   rw [h]
   rfl
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The computed primitive payload is independent of heap growth. Success and
 all old typed observations transport through actual preserving extension. -/
 theorem checkedCalldataBools_keeps {D : Source.Layout} {n : Option Nat}
