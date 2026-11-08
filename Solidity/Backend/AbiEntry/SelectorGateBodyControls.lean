@@ -77,12 +77,12 @@ theorem selected_and_executes :
   have matched : tag.val=(rawSelectorWord (frame good)).val := by decide
   have full : ¬(wmod good.size).val<36 := by decide
   have valid : (Solidity.AbiEntry.Kind.enumBelow 3).valid (rawArgumentWord good).val=true := by decide
-  rw [guarded,if_pos matched,decoded,if_neg full,if_pos valid]
+  rw [guarded,ite_eq_left matched,decoded,ite_eq_right full,ite_eq_left valid]
   rfl
 
 theorem wrong_selector_rejected : run whole.code (machine miss (wmod 0))=.revert := by
   have different : tag.val≠(rawSelectorWord (frame miss)).val := by decide
-  rw [guarded,if_neg different]
+  rw [guarded,ite_eq_right different]
 
 theorem dirty_enum_after_match (fuel : Nat) :
     run whole.code (machine dirty (wmod 0))=.revert ∧
@@ -91,20 +91,20 @@ theorem dirty_enum_after_match (fuel : Nat) :
   have full : ¬(wmod dirty.size).val<36 := by decide
   have invalid : ¬(Solidity.AbiEntry.Kind.enumBelow 3).valid (rawArgumentWord dirty).val=true := by decide
   constructor
-  · rw [guarded,if_pos matched,decoded,if_neg full,if_neg invalid]
+  · rw [guarded,ite_eq_left matched,decoded,ite_eq_right full,ite_eq_right invalid]
     rfl
   · rw [SingleWordGate.entry_form]
     have size : ¬dirty.size<36 := by decide
-    rw [if_neg size]
-    exact dif_neg invalid
+    rw [ite_eq_right size]
+    exact dite_eq_right invalid
 
 theorem matched_nonpayable (value : Fin W) (nonzero : value.val≠0) :
     run whole.code (machine good value)=.revert := by
   have matched : tag.val=(rawSelectorWord (frame good)).val := by decide
   have blocked : (false || decide (value.val=0))=false := by
     simp only [Bool.false_or,decide_eq_false nonzero]
-  rw [guarded,if_pos matched,decoded]
-  simp only [blocked,Bool.false_eq_true,if_false]
+  rw [guarded,ite_eq_left matched,decoded]
+  simp only [blocked,Bool.false_eq_true,ite_false]
 
 /-- A miss needs only the selector cell, even if every other local is malformed. -/
 theorem miss_before_any_entry_local (initial : Machine)
@@ -124,7 +124,7 @@ theorem raw_value_and_body (fuel : Nat) :
     ⟨value,semantic,cell,bodyRun⟩
   refine ⟨value,semantic,cell,?_⟩
   have matched : tag.val=(rawSelectorWord (frame good)).val := by decide
-  rw [guarded,if_pos matched,bodyRun]
+  rw [guarded,ite_eq_left matched,bodyRun]
   rfl
 
 theorem protected_and_saved :
@@ -147,7 +147,7 @@ theorem matched_short_before_word_and_body :
   rw [SelectorGateBody.executed 7 (Frag.init InputCtx) selectorIndex tag entry _ entryCore whole back
     (SelectorGateBody.whole_selected 7 (Frag.init InputCtx) selectorIndex tag entry _ entryCore)
     (SelectorGateBody.body_selected 7 (Frag.init InputCtx) entry _ entryCore) _ tag rfl,
-    if_pos (rfl : tag.val=tag.val),existing_entry_code]
+    ite_eq_left (rfl : tag.val=tag.val),existing_entry_code]
   rw [WordCarrierEntryBody.gated 8 (.enumBelow 3) false label payload _ payloadCore oldCompiled
     (WordCarrierEntryBody.selected 8 (.enumBelow 3) false label payload _ payloadCore)]
   change (if false || decide ((wmod 0).val=0) then
@@ -155,7 +155,7 @@ theorem matched_short_before_word_and_body :
       {machine good (wmod 0) with
         mem := fun address => if address=7 then .val tag else if address=9 then .val (wmod 35) else .slot (.root 0)}
     else .revert)=.revert
-  rw [if_pos (by decide : (false || decide ((wmod 0).val=0))=true)]
+  rw [ite_eq_left (by decide : (false || decide ((wmod 0).val=0))=true)]
   exact WordCarrierEntryBody.Binding.short_before_body 8 (.enumBelow 3) label payload _ payloadCore _
     (wmod 35) rfl (by decide)
 
@@ -169,7 +169,7 @@ theorem matching_reverting_body :
     (SelectorGateBody.whole_selected 7 (Frag.init InputCtx) selectorIndex tag rejecting _ rejectingCore)
     (SelectorGateBody.body_selected 7 (Frag.init InputCtx) rejecting _ rejectingCore)
     (machine good (wmod 0)) (rawSelectorWord (frame good)) rfl,
-    if_pos (by decide : tag.val=(rawSelectorWord (frame good)).val)]
+    ite_eq_left (by decide : tag.val=(rawSelectorWord (frame good)).val)]
   rfl
 
 private def global := Source.SemanticsExamples.G0 .legacy
@@ -180,11 +180,12 @@ private def sourceInput : Solidity.AbiEntry.Input :=
 private theorem source_actual (input : Solidity.AbiEntry.Input) (full : 4≤input.data.length) :
     run sourceWhole.code (machine input (wmod 0))=
       if global.selector []==(frame input).cd.take 4 then run oldCompiled.code (machine input (wmod 0)) else .revert := by
-  rw [SelectorGateBody.source_executed global [] (frame input) full
+  have executed := SelectorGateBody.source_executed global [] (frame input) full
     7 (Frag.init InputCtx) selectorIndex entry _ entryCore sourceWhole back
     (SelectorGateBody.whole_selected 7 (Frag.init InputCtx) selectorIndex sourceTag entry _ entryCore)
-    (SelectorGateBody.body_selected 7 (Frag.init InputCtx) entry _ entryCore) (machine input (wmod 0)) rfl,
-    existing_entry_code]
+    (SelectorGateBody.body_selected 7 (Frag.init InputCtx) entry _ entryCore) (machine input (wmod 0)) rfl
+  rw [existing_entry_code] at executed
+  exact executed
 
 /-- The published model hash supplies inhabited match/miss predicate controls, not a Keccak claim. -/
 theorem source_predicate_match_and_miss :
@@ -196,10 +197,10 @@ theorem source_predicate_match_and_miss :
   · have matched : (global.selector []==(frame sourceInput).cd.take 4)=true := by decide
     have full : ¬(wmod sourceInput.size).val<36 := by decide
     have valid : (Solidity.AbiEntry.Kind.enumBelow 3).valid (rawArgumentWord sourceInput).val=true := by decide
-    rw [source_actual sourceInput (by decide),if_pos matched,decoded,if_neg full,if_pos valid]
+    rw [source_actual sourceInput (by decide),ite_eq_left matched,decoded,ite_eq_right full,ite_eq_left valid]
     rfl
   · have different : ¬(global.selector []==(frame miss).cd.take 4)=true := by decide
-    rw [source_actual miss (by decide),if_neg different]
+    rw [source_actual miss (by decide),ite_eq_right different]
 
 /-- info: 'Solidity.Backend.AbiEntry.SelectorGateBodyControls.source_predicate_match_and_miss' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms source_predicate_match_and_miss
