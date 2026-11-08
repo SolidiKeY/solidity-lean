@@ -138,6 +138,41 @@ theorem guarded_in_bounds :
 #print axioms guarded_bounds_payload
 #print axioms guarded_in_bounds
 
+private def privateIndex : DeferredSource.Operand C TgtCtx (.prim .uint) :=
+  ⟨.val .uint :: TgtCtx,
+    .cons (.declLocal .uint (.user "private_index") (some (.simple (.lit 2 (by decide)))))
+      (.cons (.rebindMem (.there (.there .here)) (.alias (.var (.there .here) rfl))) .nil),
+    .val (.simple (.local .here))⟩
+private def growingIndex : DeferredSource.Operand C TgtCtx (.prim .uint) :=
+  ⟨.mem bytesR :: TgtCtx,
+    .cons (.declMem bytesR (.user "new_index_array") none rfl rfl)
+      (.cons (.rebindMem (.there (.there .here)) (.alias (.var .here rfl))) .nil),
+    .val (.simple (.lit 0 (by decide)))⟩
+private def haltingIndex : DeferredSource.Operand C TgtCtx (.prim .uint) :=
+  ⟨_,.cons .revert .nil,.val (.simple (.lit 0 (by decide)))⟩
+
+/-- Private index temporaries, caller rebinding, new heap objects and halts cannot redirect or overwrite the old reference capture; rejects late capture, scope-exit reads and ignored index halts. -/
+theorem effectful_prefix_controls :
+    (effectfulIndexCode (.there .here) rfl privateIndex).run target =
+      .ok (⟨(after.push (t := .mem bytesR) (some old)).push (t := .val .uint) ⟨2,by decide⟩,
+        List.prefix_refl _⟩) ∧
+    (let g := target.allocDefaultG bytesR rfl
+     (effectfulIndexCode (.there .here) rfl growingIndex).run target =
+       .ok (⟨((g.st.setLocal (.there .here) (some g.val)).push (t := .mem bytesR)
+         (some (HRef.wk g.ext old))).push (t := .val .uint) zero,g.ext⟩)) ∧
+    (effectfulIndexCode (.there .here) rfl haltingIndex).run target = .error .revert := by
+  constructor
+  · rw [effectfulIndexCode_run target (.there .here) rfl old rfl]
+    rfl
+  · constructor
+    · dsimp only
+      rw [effectfulIndexCode_run target (.there .here) rfl old rfl]
+      rfl
+    · rw [effectfulIndexCode_run target (.there .here) rfl old rfl]
+      rfl
+
+#print axioms effectful_prefix_controls
+
 namespace SourceCapture
 open Source
 private abbrev sourceEnv := Preservation.MemoryBodyControls.E
