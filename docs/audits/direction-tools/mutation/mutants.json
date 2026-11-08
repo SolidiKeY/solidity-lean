@@ -1478,10 +1478,11 @@
     "definition": "arithInt",
     "expected_constraint": "Operator boundary/example theorem mentioning enclosing definition; independent solc vectors alone do not execute this Lean definition",
     "expected_failing_candidate": {
-      "line": 146,
-      "name": "signedRemainder: nonzero divisors, zero boundary not covered",
-      "path": "Solidity/Examples/Tactics/Operators.lean",
-      "status": "unvalidated candidate; may not kill this boundary"
+      "line": 2300,
+      "name": "mod_zero: every admitted numeric zero divisor must fail",
+      "path": "Solidity/Calculus/QuotientCut.lean",
+      "source_sha256": "dbac549834df63f3c68e5d8df2c73a51039a70d94766ff9648aba07211ea235e",
+      "status": "source-level candidate; consult bounded results for execution scope and status"
     },
     "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
     "explicit_code_mention_count": 119,
@@ -6657,6 +6658,7 @@
     ]
   },
   {
+    "candidate_limitation": "Basic mulmod literal outputs coincide for product and sum; arithmetic projection is non-discriminating. No Lean test outcome inferred.",
     "definition": "wide",
     "expected_constraint": "Operator boundary/example theorem mentioning enclosing definition; independent solc vectors alone do not execute this Lean definition",
     "expected_failing_candidate": {
@@ -7122,10 +7124,11 @@
     "definition": "evalT",
     "expected_constraint": "Operator boundary/example theorem mentioning enclosing definition; independent solc vectors alone do not execute this Lean definition",
     "expected_failing_candidate": {
-      "line": 113,
-      "name": "checkedNegReverts",
-      "path": "Solidity/Examples/Tactics/SignedCasts.lean",
-      "status": "unvalidated candidate; may not kill this boundary"
+      "line": 2401,
+      "name": "int_div_neg_one: unchanged division by -1 must equal unary negation",
+      "path": "Solidity/Calculus/QuotientCut.lean",
+      "source_sha256": "dbac549834df63f3c68e5d8df2c73a51039a70d94766ff9648aba07211ea235e",
+      "status": "source-level candidate; consult bounded results for execution scope and status"
     },
     "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
     "explicit_code_mention_count": 55,

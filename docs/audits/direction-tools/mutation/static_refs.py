@@ -69,6 +69,8 @@ def augment(lean,specs):
         refs[symbol]=found
     # Stronger candidates found outside the initially searched example directory.
     overrides={
+      "M06":("Solidity/Calculus/QuotientCut.lean","theorem mod_zero","mod_zero: every admitted numeric zero divisor must fail"),
+      "M26":("Solidity/Calculus/QuotientCut.lean","theorem int_div_neg_one","int_div_neg_one: unchanged division by -1 must equal unary negation"),
       "M31":("Solidity/Examples/Tactics/CheckedBlock.lean","theorem underflowChecked","underflowChecked: positive panic-recognition premise in existing consumer proof"),
       "M17":("Solidity/Optimizer/Simplify.lean","theorem lt_self","lt_self: equal operands must produce false"),
       "M18":("Solidity/Optimizer/Simplify.lean","theorem gt_self","gt_self: equal operands must produce false"),
@@ -93,4 +95,6 @@ def augment(lean,specs):
         m["explicit_code_mentions_first_30"]=found[:30]
         m["explicit_code_mention_count"]=len(found)
         m["explicit_code_boundary"]="Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence."
+    for m in specs:
+        if m["id"]=="M24":m["candidate_limitation"]="Basic mulmod literal outputs coincide for product and sum; arithmetic projection is non-discriminating. No Lean test outcome inferred."
     return {"method":"heuristic offset-preserving nested-comment/string/character stripping and explicit qualified token search","lexical_limitations":"Interpolated strings with nested quoted expressions may leak apparent code references; neither tokenizer nor qualified-name search is Lean name resolution","mutants":len(specs),"with_explicit_code_mentions":sum(m["explicit_code_mention_count"]>0 for m in specs),"strong_candidates_updated":sorted(overrides),"semantic_kills":None,"semantic_survivors":None,"boundary":"Candidate existence and source spelling only; no Lean name resolution or elaboration"}

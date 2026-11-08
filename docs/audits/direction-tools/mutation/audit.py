@@ -165,5 +165,9 @@ def main():
         if failures=={"M31","M32"}:
             summary["bounded_conclusion"]="M32 is rejected by the existing exhausted-case theorem. M31 passes the helper module alone via a vacuous premise, but the existing underflowChecked consumer proof rejects it. Both selected mutants are detected; the other mutants and project-wide score remain unassessed."
         summary["remaining_elaboration_allowance"]=10-summary["lean_elaborations"]
+    projection=OUT/"vector-projection.json"
+    if projection.exists():
+        summary["literal_vector_projection"]=json.loads(projection.read_text())
+        assert summary["literal_vector_projection"]["base"]==BASE
     write("summary.json",summary)
 if __name__=="__main__":main()
