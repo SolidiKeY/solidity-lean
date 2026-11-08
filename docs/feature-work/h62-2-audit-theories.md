@@ -21,3 +21,5 @@ Missing historical receipts can be reconstructed with [rebuild_frozen_evidence.p
 [Frozen leaf premise roles](../../scripts/h62/item2/audit-theories/leaf_progress_input_roles.py) run against original history and pin both all-horizon laws. [Rehashed corruption controls](../../scripts/h62/item2/audit-theories/check_leaf_role_controls.py) reject selected-horizon substitutions and altered type, configuration or owner metadata.
 
 [Tuple-progress packets](../../tests/h62/item2/audit-theories/TupleProgressWitnesses.lean) retain exact constructor-required fit proofs alongside slot/fragment and all-lower-horizon laws. [Certificate controls](../../scripts/h62/item2/audit-theories/check_tuple_progress_controls.py) require the complete declaration packet.
+
+[Tuple premise roles](../../scripts/h62/item2/audit-theories/tuple_progress_input_roles.py) distinguish ordinary joint inputs from intentional H69 type separation. [Rehashed controls](../../scripts/h62/item2/audit-theories/check_tuple_role_controls.py) preserve duplicate anonymous hypotheses and late data, and keep classification independent of supplied coverage labels.
