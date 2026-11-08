@@ -1,4 +1,4 @@
-import Solidity.Lowering.G17.IndexCapture
+import Solidity.Lowering.G17.IndexBounds
 
 /-! Discriminating captured-index controls: the old object has length two
 and its replacement length three. Index two must still fail on the captured
@@ -90,6 +90,63 @@ empty revert cannot discharge Source revert transport; a lowering guard must
 preserve the payload instead of relabelling this failure. -/
 theorem source_index_panic_is_not_empty : THalt.ofData (Source.panicData .index) ≠ .revert := by
   decide
+
+private def capturedIds : Option (Option Nat × Option Nat) :=
+  match (captureCode (.there .here) .here rfl).run target with
+  | .error _ => none
+  | .ok out => some ((TEnv.get .here out.st.env).map HRef.id,
+      (TEnv.get (.there (.there .here)) out.st.env).map HRef.id)
+
+/-- Rejects capturing the replacement after the rebind, or overwriting the
+fresh capture together with the caller slot. -/
+theorem captured_prefix_identity : capturedIds = some (some 0,some 1) := by
+  unfold capturedIds
+  rw [capture_run target (.there .here) .here rfl old assigned rfl rfl]
+  rfl
+
+/-- Both guarded accesses check the captured object's length and emit its
+exact bounds-panic bytes; using the replacement would wrongly succeed. -/
+theorem guarded_bounds_payload :
+    (IndexBounds.readOperand (.there .here) .here rfl .dyn (.lit 2 (by decide))).run target =
+      .error (THalt.ofData (Source.panicData .index)) ∧
+    (IndexBounds.writeCode (.there .here) .here rfl .dyn (.lit 2 (by decide)) (.lit 7 (by decide))).run target =
+      .error (THalt.ofData (Source.panicData .index)) := by
+  constructor
+  · rw [IndexBounds.read_run target (.there .here) .here rfl old assigned rfl rfl]
+    simp only [target, Nat.reducePow, old, Simple.evalT, PrimTy.ofLit, Int.reduceToNat, Heap.len,
+        Heap.get, Objs.get, MObj.elems_dyn, List.length_cons, List.length_nil, Nat.zero_add,
+        Nat.reduceAdd, Nat.lt_irrefl, ↓reduceIte]
+  · rw [IndexBounds.write_run target (.there .here) .here rfl old assigned rfl rfl]
+    simp only [target, Nat.reducePow, old, Simple.evalT, PrimTy.ofLit, Int.reduceToNat, Heap.len,
+        Heap.get, Objs.get, MObj.elems_dyn, List.length_cons, List.length_nil, Nat.zero_add,
+        Nat.reduceAdd, Nat.lt_irrefl, ↓reduceIte]
+
+/-- A valid guarded read succeeds, and a valid guarded write is the actual
+old-object-only store observed above. This rejects an always-panicking guard
+and losing or redirecting an in-bounds store. -/
+theorem guarded_in_bounds :
+    (IndexBounds.readOperand (.there .here) .here rfl .dyn (.lit 0 (by decide))).run target =
+      .ok ((⟨after,List.prefix_refl _⟩ : Out C target.H TgtCtx),SVal.prim zero) ∧
+    (IndexBounds.writeCode (.there .here) .here rfl .dyn (.lit 0 (by decide)) (.lit 7 (by decide))).run target =
+      (writeCode (.there .here) .here rfl .dyn indexZero seven).run target ∧
+    observeSuccessfulWrite = some (7,0) := by
+  constructor
+  · rw [IndexBounds.read_run target (.there .here) .here rfl old assigned rfl rfl,
+      IndexCapture.read_run target (.there .here) .here rfl old assigned rfl rfl]
+    simp only [target, Nat.reducePow, old, Simple.evalT, PrimTy.ofLit, Int.toNat_zero, Heap.len,
+        Heap.get, Objs.get, MObj.elems_dyn, List.length_cons, List.length_nil, Nat.zero_add,
+        Nat.reduceAdd, Nat.zero_lt_succ, ↓reduceIte, bind, Except.bind, Val.evalT, TRes.ofOpt,
+        Heap.index, getElem?_pos, List.getElem_cons_zero, pure, Except.pure, after]
+  · constructor
+    · rw [IndexBounds.write_run target (.there .here) .here rfl old assigned rfl rfl]
+      simp only [target, Nat.reducePow, old, Simple.evalT, PrimTy.ofLit, Int.toNat_zero, Heap.len,
+          Heap.get, Objs.get, MObj.elems_dyn, List.length_cons, List.length_nil, Nat.zero_add,
+          Nat.reduceAdd, Nat.zero_lt_succ, ↓reduceIte, indexZero, seven]
+    · exact successful_write_targets_old
+
+#print axioms captured_prefix_identity
+#print axioms guarded_bounds_payload
+#print axioms guarded_in_bounds
 
 #print axioms captured_base_controls
 #print axioms successful_write_targets_old

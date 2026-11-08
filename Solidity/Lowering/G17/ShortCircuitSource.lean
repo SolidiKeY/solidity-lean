@@ -10,7 +10,8 @@ namespace Solidity.Lowering.G17
 open V07 V07.P12NextInterface
 variable {E : Source.Env} {C : Contract} {srcΓ : Source.RCtx} {Γ : Ctx}
 
-private theorem source_step (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
+/-- Exact Source lazy step after the left operand reaches its value. -/
+theorem source_short_step (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
     (source middle : Source.EMState E srcΓ) (conj b : Bool)
     (left right : Source.RExpr E srcΓ .bool)
     (leftRun : (Source.evalE G F fuel left).run source = (.ok (.val (.bool b)),middle)) :
@@ -74,7 +75,7 @@ def shortCondition (G : Source.Glob E) (F : Source.Fr) (m : ContextMap srcΓ Γ)
           | val value =>
             obtain ⟨b,rfl⟩ := Source.Val.eq_bool value
             obtain ⟨a,native,post⟩ := l.success fuel source middle target b aligned inner
-            rw [source_step G F fuel source middle conj b left right inner] at run
+            rw [source_short_step G F fuel source middle conj b left right inner] at run
             by_cases take : needsRight conj b = true
             · simp only [if_pos take] at run
               obtain ⟨z,nativeRight,reached⟩ := r.success fuel middle after a.st choice post run
@@ -112,7 +113,7 @@ def shortCondition (G : Source.Glob E) (F : Source.Fr) (m : ContextMap srcΓ Γ)
           | val value =>
             obtain ⟨b,rfl⟩ := Source.Val.eq_bool value
             obtain ⟨a,native,post⟩ := l.success fuel source middle target b aligned inner
-            rw [source_step G F fuel source middle conj b left right inner] at run
+            rw [source_short_step G F fuel source middle conj b left right inner] at run
             by_cases take : needsRight conj b = true
             · simp only [if_pos take] at run
               have nativeRight := r.revert fuel middle after a.st data post run
@@ -121,7 +122,7 @@ def shortCondition (G : Source.Glob E) (F : Source.Fr) (m : ContextMap srcΓ Γ)
             · simp only [if_neg take] at run
               cases run
 
-#print axioms source_step
+#print axioms source_short_step
 #print axioms source_error
 #print axioms shortCondition
 
