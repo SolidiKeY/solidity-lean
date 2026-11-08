@@ -1,5 +1,28 @@
 {
   "base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+  "completion_authorization": {
+    "question": "Q-STMT-PROV-01",
+    "decision": "A: accept the frozen inventory; report confirmed-generated, explicitly-handwritten and untraced separately; no claim about historical handwriting totals."
+  },
+  "category_summary": {
+    "confirmed_generated_by_inventory": {
+      "files": 59,
+      "lines": 26230
+    },
+    "explicitly_handwritten": {
+      "files": 2,
+      "lines": 265
+    },
+    "untraced": {
+      "files": 8214,
+      "lines": 1278222
+    },
+    "axiom_pins_separate": {
+      "files": 2,
+      "lines": 4054
+    }
+  },
+  "category_boundary": "Confirmed-generated means identified by the frozen producer/marker inventory. Axiom-pin files are reported separately, not treated as mathematical handwriting. Untraced includes both unmarked source and unresolved Chain/Agreement filenames; no historical handwriting total is inferred.",
   "method": "Complete frozen Lean source inventory. Known file producers and documented handwritten exceptions override markers. Unknown provenance remains explicit; no historical authorship certificate inferred.",
   "counts": {
     "generated_axiom_pins_files": 2,
