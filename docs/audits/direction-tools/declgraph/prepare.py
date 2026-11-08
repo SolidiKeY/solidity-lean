@@ -6,6 +6,19 @@ Requires matching cache products. --no-build prohibits cold elaboration.
 """
 import argparse,collections,json,os,pathlib,re,runpy,subprocess
 
+def recorded_artifacts(cache, arts):
+ """Lake 4.24 ModuleOutputHashes: o[0]=main, o[1]=server, o[2]=private.
+ Absent optional entries are allowed; a recorded artifact must exist.
+ """
+ hashes=arts['o']
+ if not 1<=len(hashes)<=3:raise ValueError('Invalid Lake olean hash array')
+ files={suffix:cache/'artifacts'/(str(h)+'.'+suffix)
+        for suffix,h in zip(('olean','olean.server','olean.private'),hashes)}
+ files['ilean']=cache/'artifacts'/(str(arts['i'])+'.ilean')
+ for suffix,src in files.items():
+  if not src.is_file():raise FileNotFoundError('Missing recorded '+suffix+' artifact: '+str(src))
+ return files
+
 def main():
  p=argparse.ArgumentParser();p.add_argument('--cache',type=pathlib.Path,required=True);p.add_argument('--view',type=pathlib.Path,required=True);p.add_argument('--modules',type=pathlib.Path,required=True);a=p.parse_args()
  api=runpy.run_path(str(pathlib.Path(__file__).with_name('audit.py')))
@@ -30,9 +43,11 @@ def main():
   for line in f.open():
    _,arts=json.loads(line)
    if isinstance(arts,dict):
-    for h in arts.get('o',[]):
-     if str(h) in table:assert table[str(h)]['i']==arts['i'], 'Ambiguous reference pair'
-     table[str(h)]=arts
+    hs=arts.get('o',[])
+    if not hs:continue
+    h=str(hs[0])
+    if h in table:assert (table[h]['i'],table[h]['o'])==(arts['i'],arts['o']), 'Ambiguous module artifact pair'
+    table[h]=arts
  # Hash local artifacts using the pinned Lean/Lake implementation.
  local=[str(f) for f in paths if not f.is_relative_to(a.cache/'artifacts')]
  hashes={}
@@ -46,10 +61,10 @@ def main():
   arts=table.get(h)
   if arts is None:raise RuntimeError('No matching reference artifact for '+m+' '+h)
   stem=a.view/pathlib.Path(m.replace('.','/'));stem.parent.mkdir(parents=True,exist_ok=True)
-  os.link(f,stem.with_suffix('.olean'))
-  src=a.cache/'artifacts'/(str(arts['i'])+'.ilean');os.link(src,stem.with_suffix('.ilean'))
-  for suffix in ('olean.server','olean.private'):
-   src=a.cache/'artifacts'/(h+'.'+suffix)
-   if src.exists():os.link(src,stem.with_suffix('.'+suffix))
+  files=recorded_artifacts(a.cache,arts)
+  # Lake's query is authoritative for the main object; optional sidecars and
+  # references use their own recorded content hashes.
+  files['olean']=f
+  for suffix,src in files.items():os.link(src,stem.with_suffix('.'+suffix))
  a.modules.write_text('\n'.join(mods)+'\n');print('CURRENT_ARTIFACT_VIEW_PASS',len(mods))
 if __name__=='__main__':main()
