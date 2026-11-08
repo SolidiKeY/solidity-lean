@@ -129,18 +129,18 @@ theorem decodedRefChildren_overwrite {D : Source.Layout} {H : HTy} {R : RefTy}
       (refChild_parent_ne dst a _)
       (fun q _ => refChild_leaf_ne dst a q)
 
-/-- info: 'Solidity.Backend.MemoryOps.refChild_parent_ne' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.MemoryOps.refChild_parent_ne' depends on axioms: [propext] -/
 #guard_msgs in #print axioms refChild_parent_ne
-/-- info: 'Solidity.Backend.MemoryOps.refChild_leaf_ne' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.MemoryOps.refChild_leaf_ne' depends on axioms: [propext] -/
 #guard_msgs in #print axioms refChild_leaf_ne
-/-- info: 'Solidity.Backend.MemoryOps.RefChildRepr.overwrite' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.RefChildRepr.overwrite' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms RefChildRepr.overwrite
-/-- info: 'Solidity.Backend.MemoryOps.RefChildRepr.index' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.MemoryOps.RefChildRepr.index' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms RefChildRepr.index
-/-- info: 'Solidity.Backend.MemoryOps.RefChildRepr.index_bounds' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.RefChildRepr.index_bounds' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms RefChildRepr.index_bounds
-/-- info: 'Solidity.Backend.MemoryOps.RefChildRepr.index_bool' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.MemoryOps.RefChildRepr.index_bool' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms RefChildRepr.index_bool
-/-- info: 'Solidity.Backend.MemoryOps.decodedRefChildren_overwrite' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.decodedRefChildren_overwrite' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms decodedRefChildren_overwrite
 end Solidity.Backend.MemoryOps
