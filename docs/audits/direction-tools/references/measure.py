@@ -49,8 +49,8 @@ if __name__=='__main__':
  def git(root,*args): return subprocess.check_output(['git','-C',str(root),*args],text=True).strip()
  subprocess.run(['git','-C',str(ROOT),'merge-base','--is-ancestor',BASE,'HEAD'],check=True)
  # Audit scripts may be dirty during development; audited Lean source must be clean.
- assert not git(ROOT,'status','--porcelain','--','Solidity','Bridge','Solidity.lean','SolidityExamples.lean'), 'dirty audited source'
- assert not git(ROOT,'diff',BASE,'--','Solidity','Bridge','Solidity.lean','SolidityExamples.lean'), 'audited source differs from base'
+ assert not git(ROOT,'status','--porcelain','--','*.lean'), 'dirty audited source'
+ assert not git(ROOT,'diff',BASE,'--','*.lean'), 'audited source differs from base'
  for name,pin in pins.items():
   assert git(cache/name,'rev-parse','HEAD')==pin, name+' pin mismatch'
   assert not git(cache/name,'status','--porcelain'), name+' dirty reference'

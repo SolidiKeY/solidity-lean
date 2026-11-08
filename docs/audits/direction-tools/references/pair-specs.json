@@ -9,7 +9,7 @@
       "cfrontend/Csyntax.v"
     ],
     "comparability": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations.",
-    "outlier_reason": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "expression syntax: Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "typed C-like syntax",
@@ -21,7 +21,7 @@
       "cfrontend/Clight.v"
     ],
     "comparability": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations.",
-    "outlier_reason": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "typed C-like syntax: Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "expression operations",
@@ -33,7 +33,7 @@
       "cfrontend/Cop.v"
     ],
     "comparability": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations.",
-    "outlier_reason": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "expression operations: Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "value model",
@@ -45,7 +45,7 @@
       "common/Values.v"
     ],
     "comparability": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations.",
-    "outlier_reason": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "value model: Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "state model",
@@ -57,7 +57,7 @@
       "common/Memory.v"
     ],
     "comparability": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations.",
-    "outlier_reason": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "state model: Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "storage model",
@@ -71,7 +71,7 @@
       "common/Memory.v"
     ],
     "comparability": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations.",
-    "outlier_reason": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "storage model: Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "statement execution",
@@ -83,7 +83,7 @@
       "cfrontend/Csem.v"
     ],
     "comparability": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations.",
-    "outlier_reason": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "statement execution: Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "big step execution",
@@ -95,19 +95,19 @@
       "cfrontend/ClightBigstep.v"
     ],
     "comparability": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations.",
-    "outlier_reason": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "big step execution: Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "type definitions",
     "this_paths": [
-      "Solidity/Source/Typing.lean"
+      "Solidity/Source/Types.lean"
     ],
     "reference": "CompCert",
     "reference_paths": [
       "cfrontend/Ctypes.v"
     ],
-    "comparability": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations.",
-    "outlier_reason": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "comparability": "Source type representations versus C type representations; Solidity reference types and C composite/pointer layouts differ.",
+    "outlier_reason": "type definitions: Source type representations versus C type representations; Solidity reference types and C composite/pointer layouts differ. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "loop lowering",
@@ -119,7 +119,7 @@
       "cfrontend/Cminorgen.v"
     ],
     "comparability": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations.",
-    "outlier_reason": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "loop lowering: Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "loop lowering correctness",
@@ -130,8 +130,8 @@
     "reference_paths": [
       "cfrontend/Cminorgenproof.v"
     ],
-    "comparability": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations.",
-    "outlier_reason": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "comparability": "One fixed assignment/while/break family proof versus CompCert general Cminor generation correctness; ratio measures radically different theorem coverage.",
+    "outlier_reason": "loop lowering correctness: One fixed assignment/while/break family proof versus CompCert general Cminor generation correctness; ratio measures radically different theorem coverage. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "integer operations",
@@ -142,8 +142,8 @@
     "reference_paths": [
       "lib/Integers.v"
     ],
-    "comparability": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations.",
-    "outlier_reason": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "comparability": "Narrow EVM arithmetic lemmas versus full generic integer library; local word foundations are imported and excluded, so the small ratio is a component-boundary artifact.",
+    "outlier_reason": "integer operations: Narrow EVM arithmetic lemmas versus full generic integer library; local word foundations are imported and excluded, so the small ratio is a component-boundary artifact. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "Yul syntax",
@@ -155,7 +155,7 @@
       "Clear/Ast.lean"
     ],
     "comparability": "Yul versus intrinsic Solidity/EVM file; scope validation pending.",
-    "outlier_reason": "Yul versus intrinsic Solidity/EVM file; scope validation pending. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "Yul syntax: Yul versus intrinsic Solidity/EVM file; scope validation pending. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "Yul interpreter",
@@ -167,7 +167,7 @@
       "Clear/Interpreter.lean"
     ],
     "comparability": "Yul versus intrinsic Solidity/EVM file; scope validation pending.",
-    "outlier_reason": "Yul versus intrinsic Solidity/EVM file; scope validation pending. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "Yul interpreter: Yul versus intrinsic Solidity/EVM file; scope validation pending. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "EVM state",
@@ -179,7 +179,7 @@
       "Clear/EVMState.lean"
     ],
     "comparability": "Yul versus intrinsic Solidity/EVM file; scope validation pending.",
-    "outlier_reason": "Yul versus intrinsic Solidity/EVM file; scope validation pending. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "EVM state: Yul versus intrinsic Solidity/EVM file; scope validation pending. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "primitive operations",
@@ -191,7 +191,7 @@
       "Clear/PrimOps.lean"
     ],
     "comparability": "Yul versus intrinsic Solidity/EVM file; scope validation pending.",
-    "outlier_reason": "Yul versus intrinsic Solidity/EVM file; scope validation pending. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "primitive operations: Yul versus intrinsic Solidity/EVM file; scope validation pending. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "word arithmetic",
@@ -203,7 +203,7 @@
       "Clear/UInt256.lean"
     ],
     "comparability": "Yul versus intrinsic Solidity/EVM file; scope validation pending.",
-    "outlier_reason": "Yul versus intrinsic Solidity/EVM file; scope validation pending. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "word arithmetic: Yul versus intrinsic Solidity/EVM file; scope validation pending. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "fuel lemmas",
@@ -215,7 +215,7 @@
       "Clear/OutOfFuelLemmas.lean"
     ],
     "comparability": "Yul versus intrinsic Solidity/EVM file; scope validation pending.",
-    "outlier_reason": "Yul versus intrinsic Solidity/EVM file; scope validation pending. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "fuel lemmas: Yul versus intrinsic Solidity/EVM file; scope validation pending. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "ML syntax analogue",
@@ -227,7 +227,7 @@
       "semantics/astScript.sml"
     ],
     "comparability": "Different source languages; file-level size calibration only.",
-    "outlier_reason": "Different source languages; file-level size calibration only. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "ML syntax analogue: Different source languages; file-level size calibration only. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "ML evaluation analogue",
@@ -239,7 +239,7 @@
       "semantics/evaluateScript.sml"
     ],
     "comparability": "Different source languages; file-level size calibration only.",
-    "outlier_reason": "Different source languages; file-level size calibration only. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "ML evaluation analogue: Different source languages; file-level size calibration only. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "ML type system analogue",
@@ -251,7 +251,7 @@
       "semantics/typeSystemScript.sml"
     ],
     "comparability": "Different source languages; file-level size calibration only.",
-    "outlier_reason": "Different source languages; file-level size calibration only. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "ML type system analogue: Different source languages; file-level size calibration only. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "ML primitives analogue",
@@ -263,7 +263,7 @@
       "semantics/semanticPrimitivesScript.sml"
     ],
     "comparability": "Different source languages; file-level size calibration only.",
-    "outlier_reason": "Different source languages; file-level size calibration only. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "ML primitives analogue: Different source languages; file-level size calibration only. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "ML parser analogue",
@@ -275,7 +275,7 @@
       "semantics/gramScript.sml"
     ],
     "comparability": "Different source languages; file-level size calibration only.",
-    "outlier_reason": "Different source languages; file-level size calibration only. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "ML parser analogue: Different source languages; file-level size calibration only. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "Yul AST",
@@ -287,7 +287,7 @@
       "EvmYul/Yul/Ast.lean"
     ],
     "comparability": "Different semantic profiles; local closed fragment versus upstream general semantics; size only.",
-    "outlier_reason": "Different semantic profiles; local closed fragment versus upstream general semantics; size only. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "Yul AST: Different semantic profiles; local closed fragment versus upstream general semantics; size only. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "Yul evaluation",
@@ -299,7 +299,7 @@
       "EvmYul/Yul/Interpreter.lean"
     ],
     "comparability": "Different semantic profiles; local closed fragment versus upstream general semantics; size only.",
-    "outlier_reason": "Different semantic profiles; local closed fragment versus upstream general semantics; size only. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "Yul evaluation: Different semantic profiles; local closed fragment versus upstream general semantics; size only. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "Yul primitive operations",
@@ -311,7 +311,7 @@
       "EvmYul/Yul/PrimOps.lean"
     ],
     "comparability": "Different semantic profiles; local closed fragment versus upstream general semantics; size only.",
-    "outlier_reason": "Different semantic profiles; local closed fragment versus upstream general semantics; size only. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "Yul primitive operations: Different semantic profiles; local closed fragment versus upstream general semantics; size only. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "EVM machine state",
@@ -324,8 +324,8 @@
       "EvmYul/State.lean",
       "EvmYul/SharedState.lean"
     ],
-    "comparability": "Different semantic profiles; local closed fragment versus upstream general semantics; size only.",
-    "outlier_reason": "Different semantic profiles; local closed fragment versus upstream general semantics; size only. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "comparability": "Local mini-solkey stack machine includes instructions and execution; upstream state records import Account and MachineState dependencies not included. This is a component-boundary size comparison only.",
+    "outlier_reason": "EVM machine state: Local mini-solkey stack machine includes instructions and execution; upstream state records import Account and MachineState dependencies not included. This is a component-boundary size comparison only. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "Solidity memory",
@@ -337,7 +337,7 @@
       "thys/Isabelle-Solidity/Memory.thy"
     ],
     "comparability": "Isabelle entry models Solidity; local file is only one component, not an entry-wide proof comparison.",
-    "outlier_reason": "Isabelle entry models Solidity; local file is only one component, not an entry-wide proof comparison. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "Solidity memory: Isabelle entry models Solidity; local file is only one component, not an entry-wide proof comparison. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "Solidity state",
@@ -349,7 +349,7 @@
       "thys/Isabelle-Solidity/State.thy"
     ],
     "comparability": "Isabelle entry models Solidity; local file is only one component, not an entry-wide proof comparison.",
-    "outlier_reason": "Isabelle entry models Solidity; local file is only one component, not an entry-wide proof comparison. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "Solidity state: Isabelle entry models Solidity; local file is only one component, not an entry-wide proof comparison. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "Solidity store",
@@ -363,7 +363,7 @@
       "thys/Isabelle-Solidity/Stores.thy"
     ],
     "comparability": "Isabelle entry models Solidity; local file is only one component, not an entry-wide proof comparison.",
-    "outlier_reason": "Isabelle entry models Solidity; local file is only one component, not an entry-wide proof comparison. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "Solidity store: Isabelle entry models Solidity; local file is only one component, not an entry-wide proof comparison. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "Solidity language",
@@ -375,7 +375,7 @@
       "thys/Isabelle-Solidity/Solidity.thy"
     ],
     "comparability": "Isabelle entry models Solidity; local file is only one component, not an entry-wide proof comparison.",
-    "outlier_reason": "Isabelle entry models Solidity; local file is only one component, not an entry-wide proof comparison. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "Solidity language: Isabelle entry models Solidity; local file is only one component, not an entry-wide proof comparison. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "ABI access",
@@ -387,7 +387,7 @@
       "kevm-pyk/src/kevm_pyk/kproj/evm-semantics/abi.md"
     ],
     "comparability": "K literate module versus Lean component; language/coverage mismatch; K code fences only counted.",
-    "outlier_reason": "K literate module versus Lean component; language/coverage mismatch; K code fences only counted. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "ABI access: K literate module versus Lean component; language/coverage mismatch; K code fences only counted. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "EVM memory",
@@ -399,7 +399,7 @@
       "kevm-pyk/src/kevm_pyk/kproj/evm-semantics/buf.md"
     ],
     "comparability": "K literate module versus Lean component; language/coverage mismatch; K code fences only counted.",
-    "outlier_reason": "K literate module versus Lean component; language/coverage mismatch; K code fences only counted. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "EVM memory: K literate module versus Lean component; language/coverage mismatch; K code fences only counted. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "EVM execution",
@@ -411,7 +411,7 @@
       "kevm-pyk/src/kevm_pyk/kproj/evm-semantics/evm.md"
     ],
     "comparability": "K literate module versus Lean component; language/coverage mismatch; K code fences only counted.",
-    "outlier_reason": "K literate module versus Lean component; language/coverage mismatch; K code fences only counted. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "EVM execution: K literate module versus Lean component; language/coverage mismatch; K code fences only counted. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "EVM instruction syntax",
@@ -423,7 +423,7 @@
       "kevm-pyk/src/kevm_pyk/kproj/evm-semantics/evm-types.md"
     ],
     "comparability": "K literate module versus Lean component; language/coverage mismatch; K code fences only counted.",
-    "outlier_reason": "K literate module versus Lean component; language/coverage mismatch; K code fences only counted. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "EVM instruction syntax: K literate module versus Lean component; language/coverage mismatch; K code fences only counted. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "Solidity parser",
@@ -435,7 +435,7 @@
       "libsolidity/parsing/Parser.cpp"
     ],
     "comparability": "Production C++ compiler implementation versus Lean syntax/semantics; no solc proof counterpart.",
-    "outlier_reason": "Production C++ compiler implementation versus Lean syntax/semantics; no solc proof counterpart. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "Solidity parser: Production C++ compiler implementation versus Lean syntax/semantics; no solc proof counterpart. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "Solidity AST",
@@ -447,7 +447,7 @@
       "libsolidity/ast/AST.h"
     ],
     "comparability": "Production C++ compiler implementation versus Lean syntax/semantics; no solc proof counterpart.",
-    "outlier_reason": "Production C++ compiler implementation versus Lean syntax/semantics; no solc proof counterpart. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "Solidity AST: Production C++ compiler implementation versus Lean syntax/semantics; no solc proof counterpart. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "Solidity type representation",
@@ -459,7 +459,7 @@
       "libsolidity/ast/Types.h"
     ],
     "comparability": "Production C++ compiler implementation versus Lean syntax/semantics; no solc proof counterpart.",
-    "outlier_reason": "Production C++ compiler implementation versus Lean syntax/semantics; no solc proof counterpart. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "Solidity type representation: Production C++ compiler implementation versus Lean syntax/semantics; no solc proof counterpart. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "ABI coder",
@@ -471,7 +471,7 @@
       "libsolidity/codegen/ABIFunctions.cpp"
     ],
     "comparability": "Production C++ compiler implementation versus Lean syntax/semantics; no solc proof counterpart.",
-    "outlier_reason": "Production C++ compiler implementation versus Lean syntax/semantics; no solc proof counterpart. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "ABI coder: Production C++ compiler implementation versus Lean syntax/semantics; no solc proof counterpart. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "SolKey Solidity grammar",
@@ -483,7 +483,7 @@
       "keyext.solidity.core/src/main/antlr/SolidityRules.g4"
     ],
     "comparability": "ANTLR versus Lean parser grammar; proof machinery excluded.",
-    "outlier_reason": "ANTLR versus Lean parser grammar; proof machinery excluded. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "SolKey Solidity grammar: ANTLR versus Lean parser grammar; proof machinery excluded. No redundancy or direction conclusion follows without matching the semantic obligations."
   },
   {
     "unit": "SolKey specification grammar",
@@ -495,6 +495,6 @@
       "keyext.solidity.core/src/main/antlr/SolSpec.g4"
     ],
     "comparability": "Nearest parser component; different surface languages.",
-    "outlier_reason": "Nearest parser component; different surface languages. Paths enumerate components, excluding transitive foundation libraries; unequal obligations prevent a redundancy conclusion."
+    "outlier_reason": "SolKey specification grammar: Nearest parser component; different surface languages. No redundancy or direction conclusion follows without matching the semantic obligations."
   }
 ]
