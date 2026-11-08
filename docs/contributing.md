@@ -58,7 +58,8 @@ Register with `scripts/coord-tools/register.sh`, add the area fragment under
 
 - Read the relevant [audits and prior-art studies](document-index.md#guides-audits-and-performance)
   before freezing an interface, and the [direction audit](audits/direction.md)
-  before adding a large new area.
+  and [size reduction](audits/size-reduction.md) (it links each area study once
+  written) before adding a large new area.
 - Before a refactor that may slow checking, say so and check Git history for a
   speed-motivated change it would undo.
 - Symbolic execution needs `--tstack=131072`; use the project wrappers.
