@@ -20,7 +20,7 @@ function beginHostLifecycle(config,trusted){
 async function run() {
   const vscode = require('vscode');
   const config = JSON.parse(readFileSync(process.env.PARITY_HOST_CONFIG,'utf8'));
-  if(config.menuTrust){const lifecycle=beginHostLifecycle(config,vscode.workspace.isTrusted);if(config.menuTrust==='recovery')config.menuRecoveryHost=lifecycle.identity;process.once('exit',code=>lifecycle('host.exit',{code}));process.on('uncaughtExceptionMonitor',error=>lifecycle('host.uncaught',{message:error.message}));}
+  if(config.menuTrust||config.suite==='contribution-menus'){const lifecycle=beginHostLifecycle(config,vscode.workspace.isTrusted);config.menuHost=lifecycle.identity;if(config.menuTrust==='recovery')config.menuRecoveryHost=lifecycle.identity;process.once('exit',code=>lifecycle('host.exit',{code}));process.on('uncaughtExceptionMonitor',error=>lifecycle('host.uncaught',{message:error.message}));}
   config.hostFilesystemCapability=require('./filesystem.cjs').recursiveCapability(config.dir);writeFileSync(join(config.dir,'host-filesystem-capability.json'),JSON.stringify(config.hostFilesystemCapability));
   // Desktop VS Code may resolve a login-shell PATH. Preserve the explicitly
   // selected backend toolchain rather than silently switching installations.
