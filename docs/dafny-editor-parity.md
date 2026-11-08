@@ -2262,7 +2262,9 @@ only, not native recovery, screenshots, raster correspondence or parity.
 
 For source-only launch-argument observations, run
 `node vscode/parity/lifecycle-trace.cjs --launch-arguments NEW_OUTPUT.json`.
-This requires the pinned extension checkout and its TypeScript dependency; it
+This requires the pinned extension checkout, its TypeScript dependency and the
+restored checksum-bound inventory. Wrong revisions, dirty tracked sources and
+files differing from immutable Git blobs are refused before execution. It
 executes the original client builder with injected configuration and installer
 boundaries. It never starts a server or loads a plugin. Explicit bounded fixture
 settings are not observations of native defaults, and malformed plugin inputs
@@ -2270,3 +2272,15 @@ exercise the builder only. The compiler must be absent from the module cache;
 its exact recorded file and the schema bytes are verified before use. Native
 configuration/restart, plugin loading, ghost decorations, local correspondence
 and both independent row judgments remain separate unfinished obligations.
+
+
+For native resolver-only ghost notifications, run
+`node vscode/parity/lifecycle-trace.cjs DAFNY_EXECUTABLE NEW_OUTPUT --ghost`.
+The observer reads the exact pinned on/off C# test sources and expected range.
+Each fresh server uses Never verification, one core, the existing20-second
+verifier limit,4GiB process-tree RSS cap, no swap and12GiB host reserve. It
+requires owned ResolutionSucceeded and query checkpoints; a symbol response
+alone is insufficient. On-mode checks the latest range, UTF16 comment movement
+and restoration; off-mode requires zero ghost notifications through shutdown.
+The distinct pinned on/off source fixtures are not a same-source A/B comparison.
+No VS Code decoration, local ghost semantics or kernel proof follows.
