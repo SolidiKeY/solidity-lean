@@ -132,6 +132,15 @@ completion claim. Both coordination questions were acknowledged after recording
 the selected option A decisions. H232 subsequently removes the memory-scope
 provisioning dependency; the H185 owner-input dependency remains pending.
 
+Independent read-only finder and skeptic reviews of the H232 update found no
+scope, citation, trust or decision-fidelity issue. Neither used the Lean server.
+The provisioning wait is removed; no gate or performance pass is inferred.
+
+On an elan-free installation, set `LAKE_CACHE_DIR` explicitly to the directory
+printed by the cache installer: its toolchain cache can differ from Lake's
+XDG default. Verify the active path with `lake env printenv LAKE_CACHE_DIR`
+before interpreting a cold rebuild as a cache miss for the pinned revision.
+
 ## Checkpoint handoff
 
 Inventory is partial until its reviews and required gates pass. Suite, fresh
