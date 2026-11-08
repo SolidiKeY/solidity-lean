@@ -46,6 +46,7 @@ def calldataUints {D : Source.Layout} (c : Source.Calldata D) (off : Nat) : Opti
   | some ⟨.array .calldata (.int ⟨false, 256, _⟩) _, d⟩ => calldataUintPayload d
   | _ => none
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Checked operation-side transfer into an existing typed array. -/
 def checkedCalldataUints {D : Source.Layout} {H : HTy} {R : RefTy}
     (c : Source.Calldata D) (off : Nat) (hp : Heap H) (dst : HRef H R)
@@ -91,6 +92,7 @@ theorem calldataUint_values {D : Source.Layout} (bs : List PrimTy.uint.Denote) :
   · intro i hi hj
     simp only [List.getElem_ofFn, calldataUint_sourceUint, Fin.getElem_fin]
 
+set_option backward.isDefEq.respectTransparency false in
 theorem checkedCalldataUints_some {D : Source.Layout} {n : Option Nat}
     {c : Source.Calldata D} {off len : Nat} {hn : ∀ m, n = some m → m = len}
     {xs : Fin len → Source.Data D (.int .u256)} (hc : DecodedArrayAt c off len hn xs)
@@ -157,6 +159,7 @@ theorem checkedCalldataUints_result {D : Source.Layout} {n : Option Nat}
     next hd => cases h
   next hs => cases h
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Every written element agrees with an immutable source-table read. -/
 theorem checkedCalldataUints_read {D : Source.Layout} {n : Option Nat}
     {c : Source.Calldata D} {off len : Nat} {hn : ∀ m, n = some m → m = len}
@@ -188,6 +191,7 @@ theorem checkedCalldataUints_elems {D : Source.Layout} {n : Option Nat}
   obtain ⟨_, hd, rfl⟩ := checkedCalldataUints_result hc hp dst a start stop offset out h
   exact overwriteSlice_elems hp dst a offset _ hd
 
+set_option backward.isDefEq.respectTransparency false in
 theorem checkedCalldataUints_outside {D : Source.Layout} {n : Option Nat}
     {c : Source.Calldata D} {off len : Nat} {hn : ∀ m, n = some m → m = len}
     {xs : Fin len → Source.Data D (.int .u256)} (hc : DecodedArrayAt c off len hn xs)
@@ -242,6 +246,7 @@ theorem checkedCalldataUints_no_payload {D : Source.Layout} {H : HTy} {R : RefTy
   rw [h]
   rfl
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The computed primitive payload is independent of heap growth. Success and
 all old typed observations transport through actual preserving extension. -/
 theorem checkedCalldataUints_keeps {D : Source.Layout} {n : Option Nat}
@@ -273,6 +278,7 @@ theorem checkedCalldataUints_keeps {D : Source.Layout} {n : Option Nat}
 #guard_msgs in #print axioms calldataUint_sourceUint
 /-- info: 'Solidity.Backend.MemoryOps.calldataUint_values' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms calldataUint_values
+set_option backward.isDefEq.respectTransparency false in
 /-- Every valid empty source interval is actual heap identity at any fitting
 runtime destination endpoint. No Source/target rollback semantics is inferred. -/
 theorem checkedCalldataUints_empty {D : Source.Layout} {n : Option Nat}
