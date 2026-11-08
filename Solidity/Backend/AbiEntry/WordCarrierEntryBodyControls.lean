@@ -44,18 +44,18 @@ theorem payable_enum_body (value : Fin W) :
   constructor
   · have full : ¬(wmod enumGood.size).val<36 := by decide
     have valid : (Solidity.AbiEntry.Kind.enumBelow 3).valid (rawArgumentWord enumGood).val=true := by decide
-    rw [actual,Bool.true_or,if_pos (rfl : true=true),if_neg full,if_pos valid]
+    rw [actual,Bool.true_or,ite_eq_left (rfl : true=true),ite_eq_right full,ite_eq_left valid]
     rfl
   · have full : ¬(wmod positive.size).val<36 := by decide
     have valid : (Solidity.AbiEntry.Kind.enumBelow 3).valid (rawArgumentWord positive).val=true := by decide
-    rw [actual,Bool.true_or,if_pos (rfl : true=true),if_neg full,if_pos valid]
+    rw [actual,Bool.true_or,ite_eq_left (rfl : true=true),ite_eq_right full,ite_eq_left valid]
     rfl
 
 theorem zero_nonpayable :
     run (whole false).code (machine enumGood (wmod 0))=.ok (finished enumGood (wmod 0) true) 0 := by
   have full : ¬(wmod enumGood.size).val<36 := by decide
   have valid : (Solidity.AbiEntry.Kind.enumBelow 3).valid (rawArgumentWord enumGood).val=true := by decide
-  rw [actual,if_neg full,if_pos valid]
+  rw [actual,ite_eq_right full,ite_eq_left valid]
   rfl
 
 theorem nonpayable_before_any_local (value : Fin W) (nonzero : value.val≠0) :
@@ -71,12 +71,12 @@ theorem dirty_still_rejected (fuel : Nat) :
   have full : ¬(wmod dirty.size).val<36 := by decide
   have invalid : ¬(Solidity.AbiEntry.Kind.enumBelow 3).valid (rawArgumentWord dirty).val=true := by decide
   constructor
-  · rw [actual,if_neg full,if_neg invalid]
+  · rw [actual,ite_eq_right full,ite_eq_right invalid]
     rfl
   · rw [SingleWordGate.entry_form]
     have size : ¬dirty.size<36 := by decide
-    rw [if_neg size]
-    exact dif_neg invalid
+    rw [ite_eq_right size]
+    exact dite_eq_right invalid
 
 theorem raw_enum_body (fuel : Nat) :
     ∃ value : Solidity.AbiEntry.Word (.enumBelow 3),
@@ -109,7 +109,7 @@ theorem body_failure_not_decoder_failure (fuel : Nat) :
   · have allowed : (false || decide ((wmod 0).val=0))=true := by decide
     have full : ¬(wmod enumGood.size).val<36 := by decide
     have valid : (Solidity.AbiEntry.Kind.enumBelow 3).valid (rawArgumentWord enumGood).val=true := by decide
-    rw [ordered,if_pos allowed,if_neg full,if_pos valid]
+    rw [ordered,ite_eq_left allowed,ite_eq_right full,ite_eq_left valid]
     rfl
   · exact ⟨_,SingleWordGate.entry_success enumGood fuel (.enumBelow 3) (by decide) (by decide)⟩
 
@@ -122,7 +122,7 @@ theorem short_before_word_and_body :
     run (WordCarrierEntryBody.Binding.selectedWhole 7 (.enumBelow 3) label body _ bodyCore).code
       {machine enumGood (wmod 0) with mem := fun address => if address=8 then .val (wmod 35) else .slot (.root 0)}
     else .revert)=.revert
-  rw [if_pos (by decide : (false || decide ((wmod 0).val=0))=true)]
+  rw [ite_eq_left (by decide : (false || decide ((wmod 0).val=0))=true)]
   exact WordCarrierEntryBody.Binding.short_before_body 7 (.enumBelow 3) label body _ bodyCore _ (wmod 35) rfl (by decide)
 
 theorem fuel_boundary :
@@ -160,7 +160,7 @@ theorem payable_bytes_body (value : Fin W) :
     run (bytesWhole true).code (machine bytesGood value)=.ok (finished bytesGood value false) 0 := by
   have full : ¬(wmod bytesGood.size).val<36 := by decide
   have valid : (Solidity.AbiEntry.Kind.fixedBytes 1).valid (rawArgumentWord bytesGood).val=true := by decide
-  rw [bytes_actual,Bool.true_or,if_pos (rfl : true=true),if_neg full,if_pos valid]
+  rw [bytes_actual,Bool.true_or,ite_eq_left (rfl : true=true),ite_eq_right full,ite_eq_left valid]
   rfl
 
 theorem dirty_padding_prevents_body (fuel : Nat) :
@@ -169,12 +169,12 @@ theorem dirty_padding_prevents_body (fuel : Nat) :
   have full : ¬(wmod bytesDirty.size).val<36 := by decide
   have invalid : ¬(Solidity.AbiEntry.Kind.fixedBytes 1).valid (rawArgumentWord bytesDirty).val=true := by decide
   constructor
-  · rw [bytes_actual,if_neg full,if_neg invalid]
+  · rw [bytes_actual,ite_eq_right full,ite_eq_right invalid]
     rfl
   · rw [SingleWordGate.entry_form]
     have size : ¬bytesDirty.size<36 := by decide
-    rw [if_neg size]
-    exact dif_neg invalid
+    rw [ite_eq_right size]
+    exact dite_eq_right invalid
 
 theorem raw_bytes_body (fuel : Nat) :
     ∃ value : Solidity.AbiEntry.Word (.fixedBytes 1),
@@ -209,7 +209,7 @@ theorem wide_bytes_body (value : Fin W) :
       (WordCarrierEntryBody.Binding.body_selected 7 body _ bodyCore) (machine bytesDirty value) _ _ rfl rfl
   have full : ¬(wmod bytesDirty.size).val<36 := by decide
   have valid : (Solidity.AbiEntry.Kind.fixedBytes 33).valid (rawArgumentWord bytesDirty).val=true := by decide
-  rw [ordered,Bool.true_or,if_pos (rfl : true=true),if_neg full,if_pos valid]
+  rw [ordered,Bool.true_or,ite_eq_left (rfl : true=true),ite_eq_right full,ite_eq_left valid]
   rfl
 
 /-- info: 'Solidity.Backend.AbiEntry.WordCarrierEntryBodyControls.wide_bytes_body' depends on axioms: [propext, Classical.choice, Quot.sound] -/
