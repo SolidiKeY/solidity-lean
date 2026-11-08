@@ -11,6 +11,9 @@ theorem construction_compile_inversion {C : Contract} {b : Nat} {Γ Δ : Ctx}
     (accepted : Compiler.compile b F P = some compiled) :
     Memory.Construction.compileProg b F P = some (constructionCertificate compiled path) := by
   cases compiled with
+  | memoryCopy _ => cases path
+  | fixedMemory _ => cases path
+  | copyConstruction _ => cases path
   | core _ _ => cases path
   | memory _ => cases path
   | referenceArrays _ => cases path
@@ -22,7 +25,16 @@ theorem construction_compile_inversion {C : Contract} {b : Nat} {Γ Δ : Ctx}
     change Memory.Construction.compileProg b F P = some out
     simp only [Compiler.compile,Option.map] at accepted
     repeat' (first | split at accepted | cases accepted)
-    all_goals assumption
+    all_goals first
+      | assumption
+      | (change (match Memory.StorageCopy.compileProg b F P with
+          | some copied => some (Compiler.Compilation.memoryCopy copied)
+          | none => match Memory.Fixed.compileProg b F P with
+            | some fixed => some (Compiler.Compilation.fixedMemory fixed)
+            | none => (Memory.CopyConstruction.compileProg b F P).map
+                Compiler.Compilation.copyConstruction) = some (.construction out) at accepted
+         simp only [Option.map] at accepted
+         repeat' (first | split at accepted | cases accepted))
 
 theorem construction_compile_append {C : Contract} {b : Nat} {Γ Ξ Δ : Ctx}
     {F : Frag Γ} {P : Prog C Γ Ξ} {Q : Prog C Ξ Δ}
