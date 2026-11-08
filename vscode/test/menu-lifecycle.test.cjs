@@ -70,3 +70,25 @@ test('recovery option requires explicit predecessor and original bounded menu di
 test('recovery predecessor immutable receipt and source guard rejects changed bytes (injected files)',()=>{const fs=require('fs'),os=require('os'),path=require('path'),{pathToFileURL}=require('url'),{verifyRecoveryReceipts}=require('../parity/menu-lifecycle.cjs'),dir=fs.mkdtempSync(path.join(os.tmpdir(),'recovery-receipts-'));try{const source=path.join(dir,'source'),receipt=path.join(dir,'receipt');fs.writeFileSync(source,'unchanged source');fs.writeFileSync(receipt,'original failure');const hash=p=>createHash('sha256').update(fs.readFileSync(p)).digest('hex'),prior={receipts:[{file:receipt,sha256:hash(receipt)}],binding:{uri:pathToFileURL(source).href,sourceHash:hash(source)}};verifyRecoveryReceipts(prior);fs.writeFileSync(receipt,'changed failure');assert.throws(()=>verifyRecoveryReceipts(prior),/receipt mutated/);fs.writeFileSync(receipt,'original failure');fs.writeFileSync(source,'different source');assert.throws(()=>verifyRecoveryReceipts(prior),/source mutated/);}finally{fs.rmSync(dir,{recursive:true,force:true});}});
 
 test('recovery admission validates original five endpoints and native grant, retaining only unfinished deny (injected)',()=>{const {recoveryPrefixErrors}=require('../parity/menu-lifecycle.cjs'),make=()=>{const v=trustedFixture();v.trust.steps=v.trust.steps.slice(0,3);const deny=v.trust.steps[2];delete deny.capture;delete deny.after;return v;},events=[{kind:'scenario.start',data:{id:'native-contribution-menus'}}];assert.deepEqual(recoveryPrefixErrors(make(),events,'run','local','/'),[]);for(const mutate of [v=>v.phases[0].capture.metadataHash='foreign',v=>delete v.phases[0].capture.capture.screenshot,v=>v.phases[0].error='actual error',v=>v.phases[1].capture.capture.contributionMenu.after.items=[],v=>v.trust.steps[1].capture.capture.trustControl.nativeMouse=false,v=>v.trust.steps[1].after.trusted=false,v=>v.trust.steps[1].capture.runId='foreign',v=>v.trust.steps[2].after=v.trust.steps[2].binding]){const v=make();mutate(v);assert.ok(recoveryPrefixErrors(v,events,'run','local','/').length);}assert.ok(recoveryPrefixErrors(make(),[...events,{kind:'clipboard.write'}],'run','local','/').length);});
+
+// Exercise the real file request/server transport; bytes are synthetic, not native evidence.
+test('recovery phases complete through request and capture server transport (synthetic PNG)', async()=>{
+ const fs=require('node:fs'),os=require('node:os'),path=require('node:path');
+ const {requestPhase,servePhases}=require('../parity/phase-capture.cjs');
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'recovery-phase-transport-')),seen=new Set();
+ try{
+  for(const phase of ['menus-trust-recovery-initial','menus-trust-control-recovery','menus-trust-recovery-restored']){
+   const pending=requestPhase(dir,'recovery-run',phase,{source:'unchanged'},1000);
+   const observed=[];
+   await servePhases(dir,'recovery-run',async(destination,request)=>{
+    observed.push(request.phase);
+    fs.writeFileSync(path.join(destination,'screenshot.png'),Buffer.from([137,80,78,71,13,10,26,10,0]));
+    return {captured:true,screenshot:true};
+   },seen);
+   const reply=await pending;
+   assert.equal(reply.status,'captured');
+   assert.equal(reply.phase,phase);
+   assert.deepEqual(observed,[phase]);
+  }
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
