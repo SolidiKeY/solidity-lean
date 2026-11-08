@@ -112,7 +112,7 @@ saving here is measured.
 
 - Test vectors as theorems (repo-wide): pending, lane size-test-vectors.
 
-- Duplicates (repo-wide): pending, lane size-duplicates.
+- [Duplicates (repo-wide)](size-duplicates.md): pilot saves 687 lines while retaining 358 theorem names; 789-line projection for Derived1–12, no repo-wide deletion budget.
 
 Each lane of batch `size-reduction-1108` replaces its own line above with a
 link to its study and its measured result.
