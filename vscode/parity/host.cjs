@@ -34,7 +34,7 @@ async function run() {
   const extension=vscode.extensions.getExtension(target==='dafny'?'dafny-lang.ide-vscode':'SolidiKeY.solidity-lean');
   if(!config.menuTrust)assert.ok(extension,'target extension is installed');
   const observedExtensionPath=extension?.extensionPath||config.observedExtensionPath;assert.ok(observedExtensionPath,'missing target extension source path');
-  const observation = observe(vscode,record,observedExtensionPath,config.recordProtocol?config.trace:null,config.workspace,{captureServerArtifacts:config.suite==='verification-time-limit',artifactReferenceDirectory:target==='dafny'?require('node:path').dirname(config.dafnyExecutable):undefined});
+  const observation = observe(vscode,record,observedExtensionPath,config.recordProtocol?config.trace:null,config.workspace,{observeSymbolProviders:config.suite==='editor-language-scope',documentSessionFor:doc=>sessionFor(doc),captureServerArtifacts:config.suite==='verification-time-limit',artifactReferenceDirectory:target==='dafny'?require('node:path').dirname(config.dafnyExecutable):undefined});
   const heartbeat = [];
   let last = performance.now();
   const timer = setInterval(()=>{const now=performance.now();heartbeat.push(Math.max(0,now-last-25));last=now;},25);
@@ -569,7 +569,7 @@ async function run() {
   } catch(error) {result.status=error.code==='TIMEOUT'?'timeout':'broken';result.error=error.stack;}
   finally {
     if(localStatus)api.service.removeListener('status',localStatus);
-    clearInterval(timer);observation.restore();result.elapsedMs=performance.now()-started;
+    clearInterval(timer);observation.restore();if(observation.symbolProviderFailures)result.observations.symbolProviderRecordingFailures=[...observation.symbolProviderFailures];result.elapsedMs=performance.now()-started;
     writeFileSync(config.result,JSON.stringify(result,null,2));
     if(target==='local'&&!localRetirementStarted) api?.cancel();
     const captureStart=performance.now();

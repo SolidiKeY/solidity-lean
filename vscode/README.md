@@ -85,3 +85,9 @@ changes, symbol APIs and owned LSP traffic for source/plaintext/restored phases.
 Use one worker/obligation/trial, zero warmups and protocol on. Each target keeps
 its original fixture and settings; this API observation does not certify rendered
 UI, verification outcomes, runtime equivalence or whole parity.
+
+That suite also observes calls to registered document-symbol providers, retaining
+source sessions and public close-event counts without replacing their returned
+promises. These diagnostics do not prove which result the aggregate symbol API
+consumed. Unknown return objects and recording failures remain explicit; the
+strict request-correlation check is unchanged.
