@@ -22,7 +22,7 @@ def main():
             cmd=[str(x) for x in ["python3",Path(__file__).resolve().with_name(name+".py"),*args]];log=out/(name+".log")
             with log.open("w") as stream:r=subprocess.run(cmd,cwd=ROOT,env=dict(os.environ,PYTHONDONTWRITEBYTECODE="1"),stdout=stream,stderr=subprocess.STDOUT)
             rows.append(dict(command=cmd,cwd=str(ROOT),exit=r.returncode,log=str(log)));(out/"refresh-gates.json").write_text(json.dumps(rows,indent=2)+"\n");r.check_returncode()
-        run("verify_census",["--evidence",out,"--require-complete-explicit-module","Solidity/Theory/Reachable/CleanTail.lean","--require-complete-explicit-module","Solidity/Theory/Reachable/Mode.lean"])
+        run("verify_census",["--evidence",out,"--require-complete-explicit-module","Solidity/Theory/Reachable/CleanTail.lean","--require-complete-explicit-module","Solidity/Theory/Reachable/Mode.lean","--require-complete-explicit-module","Solidity/Theory/Progress/Leaves.lean"])
         run("verify_helpers",["--evidence",out])
         common=["--out",out,"--proof-evidence",out,"--historical-evidence",old]
         run("coverage_ledger",common)
@@ -30,15 +30,15 @@ def main():
         run("verify_acceptance_snapshot",["--evidence",out,"--roles",out/"all-reviewed-pure-input-roles.json","--historical-evidence",old,"--out",out])
         run("verify_payable",["--evidence",out,"--require-ordinary-complete"])
         run("verify_totality",["--evidence",out])
-        for name in ("path_input_roles","mirror_input_roles","clean_tail_input_roles","reachable_mode_input_roles"):run(name,common)
+        for name in ("path_input_roles","mirror_input_roles","clean_tail_input_roles","reachable_mode_input_roles","leaf_progress_input_roles"):run(name,common)
         ledger=json.loads((out/"original-coverage-ledger.json").read_text());snapshot=json.loads((out/"acceptance-snapshot.json").read_text());helpers=json.loads((out/"verified-helpers.json").read_text())
-        assert snapshot["joint_certificates"]==120 and snapshot["accepted_H69"]==4 and snapshot["remaining_original_records"]==1344
-        assert helpers["proved_theorems"]==snapshot["checked_helper_theorems"]==177
+        assert snapshot["joint_certificates"]==126 and snapshot["accepted_H69"]==4 and snapshot["remaining_original_records"]==1338
+        assert helpers["proved_theorems"]==snapshot["checked_helper_theorems"]==188
         assert snapshot["reviewed_roles"]==44 and snapshot["remaining_roles"]==456
-        assert ledger["remaining_original_records"]==len(json.loads((out/"remaining-original-records.json").read_text()))==1344
-        groups=[json.loads((out/name).read_text())["declarations"] for name in ("all-reviewed-pure-input-roles.json","path-input-roles.json","mirror-input-roles.json","clean-tail-input-roles.json","reachable-mode-input-roles.json")]
-        names=[r["theorem"] for group in groups for r in group];assert len(names)==len(set(names))==115
-        summary=dict(frozen_base=BASE,helpers=177,joint=120,H69=4,remaining_original_records=1344,legacy_acceptance_roles=44,separate_disjoint_role_records=115,remaining_role_specifications=385,lean_jobs=0,full_assignment_acceptance=False,boundary="All115 role records validated in separate reports on original history; legacy acceptance snapshot remains44, no merged115 acceptance or physical compiler claim.")
+        assert ledger["remaining_original_records"]==len(json.loads((out/"remaining-original-records.json").read_text()))==1338
+        groups=[json.loads((out/name).read_text())["declarations"] for name in ("all-reviewed-pure-input-roles.json","path-input-roles.json","mirror-input-roles.json","clean-tail-input-roles.json","reachable-mode-input-roles.json","leaf-progress-input-roles.json")]
+        names=[r["theorem"] for group in groups for r in group];assert len(names)==len(set(names))==121
+        summary=dict(frozen_base=BASE,helpers=188,joint=126,H69=4,remaining_original_records=1338,legacy_acceptance_roles=44,separate_disjoint_role_records=121,remaining_role_specifications=379,lean_jobs=0,full_assignment_acceptance=False,boundary="All121 role records validated in separate reports on original history; legacy acceptance snapshot remains44, no merged121 acceptance or physical compiler claim.")
         (out/"refresh-summary.json").write_text(json.dumps(summary,indent=2)+"\n")
-    print("HISTORY_ACCEPTANCE_REFRESH_PASS:177helpers;120joint;1344pending;legacy44;separate115;no_Lean_jobs")
+    print("HISTORY_ACCEPTANCE_REFRESH_PASS:188helpers;126joint;1338pending;legacy44;separate121;no_Lean_jobs")
 if __name__=="__main__":main()

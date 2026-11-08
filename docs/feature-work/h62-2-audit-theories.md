@@ -15,3 +15,7 @@ Missing historical receipts can be reconstructed with [rebuild_frozen_evidence.p
 [Historical acceptance refresh](../../scripts/h62/item2/audit-theories/refresh_history_acceptance.py) regenerates derived ledgers and snapshots from checked proof inputs in a fresh directory. It links no prior summary reports and performs no new Lean proof.
 
 [Reachable-mode witnesses](../../tests/h62/item2/audit-theories/ReachableModeWitnesses.lean) supply whole invariant and persistent-call laws alongside real admitted entries. [Premise accounting](../../scripts/h62/item2/audit-theories/reachable_mode_input_roles.py) and [corruption controls](../../scripts/h62/item2/audit-theories/check_reachable_mode_role_controls.py) preserve all11 original telescopes, including private reset identity.
+
+[Leaf-extension packets](../../tests/h62/item2/audit-theories/LeafProgressWitnesses.lean) preserve full all-horizon premises and distinguish builtin source success from configuration-only emit/error/effect inputs. [Certificate refusal controls](../../scripts/h62/item2/audit-theories/check_leaf_progress_controls.py) require the designated whole-law packet.
+
+[Frozen leaf premise roles](../../scripts/h62/item2/audit-theories/leaf_progress_input_roles.py) run against original history and pin both all-horizon laws. [Rehashed corruption controls](../../scripts/h62/item2/audit-theories/check_leaf_role_controls.py) reject selected-horizon substitutions and altered type, configuration or owner metadata.
