@@ -37,7 +37,7 @@ def main():
             try: mod.command(['fixture-only'],root,root/'scan-failure.log')
             except PermissionError: pass
             else: raise AssertionError('post-launch scan failure swallowed')
-            kill.assert_called_once_with(fake.pid,mod.signal.SIGTERM)
+            assert kill.call_args_list==[mock.call(fake.pid,mod.signal.SIGTERM),mock.call(fake.pid,mod.signal.SIGKILL)], 'surviving descendants were not stopped'
         # Interrupt the real resume loop immediately after its first checkpoint.
         # No Lean or Git runs: these interfaces are replaced by deterministic fixtures.
         fixture=root/'resume-fixture'; fixture.mkdir(); source=fixture/'source'; source.mkdir(); output=fixture/'results'; output.mkdir()

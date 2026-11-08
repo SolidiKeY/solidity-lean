@@ -49,6 +49,20 @@ def active_compilers(exclude_group=None):
         except ProcessLookupError: continue
     return found
 
+def terminate_owned_session(proc):
+    """Only for the fresh session created by command(), never discovered PIDs.
+
+    Kill the group even if its leader exits promptly: descendants may survive
+    TERM. A group with no remaining members simply yields ProcessLookupError.
+    """
+    try: os.killpg(proc.pid,signal.SIGTERM)
+    except ProcessLookupError: pass
+    try: proc.wait(timeout=5)
+    except subprocess.TimeoutExpired: pass
+    try: os.killpg(proc.pid,signal.SIGKILL)
+    except ProcessLookupError: pass
+    proc.wait()
+
 def command(args,cwd,log,timeout=600):
     if not CLOUD_VM_OPT_IN: raise RuntimeError('cloud-only runner requires explicit --cloud-vm; host resource policy is not implemented')
     if int(re.search(r'^SwapTotal:\s+(\d+)',pathlib.Path('/proc/meminfo').read_text(),re.M)[1])!=0: raise RuntimeError('cloud runner requires swap disabled')
@@ -78,23 +92,14 @@ def command(args,cwd,log,timeout=600):
                 elif workers>1 or active_compilers(exclude_group=proc.pid): reason='concurrent_lean_guard'
                 elif shutil.disk_usage(cwd).free<2*1024**3: reason='disk_guard'
                 if reason:
-                    try: os.killpg(proc.pid,signal.SIGTERM)
-                    except ProcessLookupError: pass
-                    try: proc.wait(timeout=5)
-                    except subprocess.TimeoutExpired: os.killpg(proc.pid,signal.SIGKILL); proc.wait()
+                    terminate_owned_session(proc)
                     break
                 try: proc.wait(timeout=0.1)
                 except subprocess.TimeoutExpired: pass
         except BaseException:
             # This session was created by this Popen invocation. Never terminate
             # PIDs returned by the VM-wide scan: those may belong to other work.
-            try: os.killpg(proc.pid,signal.SIGTERM)
-            except ProcessLookupError: pass
-            try: proc.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                try: os.killpg(proc.pid,signal.SIGKILL)
-                except ProcessLookupError: pass
-                proc.wait()
+            terminate_owned_session(proc)
             raise
         code=proc.wait() if reason is None else (124 if reason=='timeout' else 125)
     return {'command':args,'cwd':str(cwd),'exit_code':code,'wall_seconds':time.monotonic()-start,'peak_sampled_group_rss_kib':peak,'peak_sampled_lean_workers':peak_workers,'stop_reason':reason,'log':str(log)}
