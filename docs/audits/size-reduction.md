@@ -110,7 +110,7 @@ saving here is measured.
 
 - [Yul views as one layout-indexed view](size-yul-views.md): 15-file pilot saves 7/1,797 lines; go for exact proof reuse, no-go for blanket layout rollout.
 
-- Test vectors as theorems (repo-wide): pending, lane size-test-vectors.
+- [Test vectors as theorems (repo-wide)](size-test-vectors.md): pilot saves 73.4% of source lines and 53.0% of bytes while preserving 1,947 theorems; compiled size and memory increase.
 
 - Duplicates (repo-wide): pending, lane size-duplicates.
 

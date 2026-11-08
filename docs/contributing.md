@@ -1,124 +1,105 @@
 # Development and verification
 
-Read [AGENTS.md](../AGENTS.md) and the relevant area conventions before edits.
-Use `rg` and local imports to find code. Source and tests define APIs;
-documentation retains commands, constraints and semantic assumptions.
+Source and tests define APIs; this page keeps commands and constraints.
 
 ## Checks
 
-Prefer the Lean MCP server for diagnostics, goals, hover and outlines.
-After a Lean edit, check that file with `lean_diagnostic_messages`
-(`interactive=false`); follow the
-[lean-verify skill](../.agents/skills/lean-verify/SKILL.md).
-Use a full build for import changes and final confirmation, rather than for
-each proof iteration. Documentation-only edits need path and link checks.
+After a Lean edit, check that file through the Lean MCP server
+([lean-verify skill](../.agents/skills/lean-verify/SKILL.md)). Full builds are
+for import changes and final confirmation. Documentation-only edits need the
+path, navigation and generator checks.
 
 | Command | Coverage |
 |---|---|
-| `./run-lean.sh` | Layer, root and fragment checks, then the default targets, `SolkeyTestSuite` and `SoliditySlowExamples` in one Lake invocation (`--bridge` adds the Bridge gate) |
-| `bash scripts/coord-tools/register.sh --check` | The generated library roots match the file tree (`register.sh` rewrites them); no Lean |
-| `bash scripts/coord-tools/fragments.sh --check` | The module map, `docs/README.md`, `TERRA-TODO.md` and `scripts/g07-axiom-pins.json` match their fragment directories (`fragments.sh` rewrites them); no Lean |
-| `lake build Solidity` | The library without the examples: a lane checkpoint (`scripts/coord-tools/gate.sh checkpoint`) |
-| `lake build SolidityExamples SolkeyTestSuite` | The regular examples and the TestSuite: a checkpoint touching `Syntax`, `Semantics` or `Calculus` adds them |
+| `./run-lean.sh` | Layer, root and fragment checks, default targets, `SolkeyTestSuite`, `SoliditySlowExamples` (`--bridge` adds Bridge) |
+| `bash scripts/coord-tools/register.sh --check` | Generated library roots match the tree (without `--check` it rewrites them) |
+| `bash scripts/coord-tools/fragments.sh --check` | Module map, `docs/README.md`, `TERRA-TODO.md`, `scripts/g07-axiom-pins.json` match their fragments |
+| `lake build Solidity` | Library without examples (`gate.sh checkpoint`) |
+| `lake build SolidityExamples SolkeyTestSuite` | Examples and TestSuite; a checkpoint touching `Syntax`, `Semantics` or `Calculus` adds them |
+| `bash scripts/coord-tools/gate.sh touched` | Merge pre-gate: layers on the merged tree, then touched modules and their library importers |
 | `node scripts/check-orphans.mjs` | Every module reachable from a library root |
-| `node scripts/check-layers.mjs` | No new core import boundary beyond the pinned107 snapshot; elaborator/parser bans remain unconditional; no Lean |
-| `bash scripts/coord-tools/gate.sh touched` | Merge pre-gate: check layers first on the prospective merged tree, then build touched modules; fail before build on new boundary edges |
-| `python3 scripts/check-doc-navigation.py` | Every retained Markdown document reachable through local links from both agent entry points; generated catalog current |
-| `./scripts/check-doc-paths.sh` | Backticked Lean file references in tracked prose; five exact historical/fixture pairs carry explicit reasons, with no basename-wide exemption |
-| `./scripts/check-private-paths.sh` | No personal home directories (`/home/<user>/`, `/Users/<user>/`) in tracked files, since the repository is public; write `~`, `$XDG_STATE_HOME`, `$REPO` or a relative path. Run by CI and by every merge gate |
-| `./scripts/check-evidence-files.sh` | No lane evidence (receipts, handoffs, provenance, checksum manifests, resource and validation records) under `tests/` or `Bridge/tests/`; lanes archive it in the private coordination repository with `scripts/coord-tools/coord-evidence` and cite the printed path. Run by CI and by every merge gate |
-| `node scripts/check-axiom-pins.mjs` | Original axiom-policy errors plus new unrecorded pin changes; exact existing H112 drift uses a SHA256-pinned, shrink-only baseline |
-| `solidity-lean rules check --key FILE` | Sort annotations against a SolKey rules file; manual, not part of any gate (H89) |
+| `node scripts/check-layers.mjs` | No new core import boundary beyond the pinned snapshot |
+| `node scripts/check-axiom-pins.mjs` | Axiom policy and unrecorded pin changes (H112 baseline shrinks only) |
+| `python3 scripts/check-doc-navigation.py` | Every Markdown document reachable from `AGENTS.md` and `CLAUDE.md`; catalog current |
+| `./scripts/check-doc-paths.sh` | Backticked Lean paths in prose exist |
+| `./scripts/check-private-paths.sh` | No home directories in tracked files (public repo): write `~`, `$REPO` or a relative path |
+| `./scripts/check-evidence-files.sh` | No lane evidence under `tests/`; archive it with `scripts/coord-tools/coord-evidence` |
 | `./scripts/check-corpus.sh` | `SolidityCorpus` against `tests/solkey/expected.tsv` |
-| `./scripts/check-testsuite.sh` | TestSuite rows against `TestSuite/Report.lean`'s pin and SolKey functions; no Lean |
-| `node scripts/check-automatic.mjs --strict` | Every TestSuite obligation has an automatic proof/replay or refutation, none pending; no Lean |
-| `node scripts/solidity-upstream.mjs` | Pinned solc tests on the typed interpreter, per pipeline; [runner documentation](solidity-upstream-tests.md) |
-
+| `./scripts/check-testsuite.sh` | TestSuite rows against `TestSuite/Report.lean` |
+| `node scripts/check-automatic.mjs --strict` | Every TestSuite obligation proved, replayed or refuted |
+| `node scripts/solidity-upstream.mjs` | Pinned solc tests on the interpreter ([runner](solidity-upstream-tests.md)) |
+| `solidity-lean rules check --key FILE` | Sort annotations against a SolKey rules file; manual (H89) |
 
 ## Before pushing
 
 The merge pre-gate runs `gate.sh touched` on your head merged onto current
-`origin/master`: it builds the modules you changed and the library modules that
-import them, with the coverage described in
-[`scripts/coord-tools/README.md`](../scripts/coord-tools/README.md). It is not a
-full build. Run the same check first:
+`origin/master` (coverage in [`scripts/coord-tools/README.md`](../scripts/coord-tools/README.md));
+it is not a full build.
 
-1. `git fetch origin master && git merge origin/master` (or a temporary worktree
-   with the merge), then `bash scripts/coord-tools/gate.sh touched` in that tree.
-   Fix failures there: the pre-gate rejects a head that builds only on an older
-   base, or only in the files it changed. On a lane, `coord-ask --done` runs this
-   check itself and reports only a head that passes it (or is already on master);
-   anything else (a failure, a conflict, a check that cannot run) needs
-   `--no-check REASON`. The push records the checked head and any command override.
-2. A change to a module with many importers (for example `Solidity/Source/**`)
-   keeps existing statements: add the new form beside the old one as a versioned
-   pair (H57) and move the importers in the same head, or keep the old form until
-   they move.
-3. A gate, baseline or audit you add must pass on the merged head, not only on
-   your base: compute ratchet baselines from the merge base or regenerate them at
-   merge, and make audits re-runnable from committed scripts.
+1. Merge `origin/master` (or use a temporary merge worktree) and run
+   `bash scripts/coord-tools/gate.sh touched` there and fix failures: a head
+   that builds only on an older base is rejected. On a lane, `coord-ask --done`
+   runs this check; pass `--no-check REASON` only for a failure your change did
+   not cause (master broken, tool missing).
+2. Changing a module with many importers (e.g. `Solidity/Source/**`): add the
+   new form beside the old as a versioned pair (H57) and move the importers in
+   the same head, or keep the old form until they move.
+3. A new gate, baseline or audit must pass on the merged head: compute ratchet
+   baselines from the merge base and keep audits re-runnable from committed scripts.
 
 Progress and status go into your result, never into shared documents.
 
-## Toolchain and proofs
+## New modules
 
-Run from the repository root with the pinned `lean-toolchain`. Prefer per-file
-Lean MCP diagnostics after a Lean edit, following the
-[lean-verify skill](../.agents/skills/lean-verify/SKILL.md). Use full builds for
-import changes and final confirmation. Documentation-only edits require path,
-link and generator checks, not Lean compilation.
+Register with `scripts/coord-tools/register.sh`, add the area fragment under
+`docs/module-map/<area>.d/`, and run `scripts/coord-tools/fragments.sh`.
 
-Symbolic execution needs `--tstack=131072`; use the configured project wrappers.
-Try `grind`, `bv_decide` or `omega` before long manual proofs. Finished proofs
-use `simp only [...]`, explicit signatures and typed local facts. Do not raise
-`maxHeartbeats` to repair a proof.
+## Design and speed
+
+- Read the relevant [audits and prior-art studies](document-index.md#guides-audits-and-performance)
+  before freezing an interface.
+- Before a refactor that may slow checking, say so and check Git history for a
+  speed-motivated change it would undo.
+- Symbolic execution needs `--tstack=131072`; use the project wrappers.
+- Try `grind`, `bv_decide` or `omega` before long manual proofs. Finished proofs
+  use `simp only [...]`, explicit signatures and typed `have`s.
 
 ## Tactics
 
-Searching tactics need bounded search and a cheap replay suggestion twin.
-Catch Lean runtime timeouts with `tryCatchRuntimeEx`; ordinary `try` does not
-catch them. Pin regression examples and check generated proof terms with the kernel.
-Profile before optimizing; avoid repeating search during replay.
+Searching tactics need bounded search and a cheap replay twin. Catch runtime
+timeouts with `tryCatchRuntimeEx` (`try` does not). Pin regression examples,
+kernel-check generated terms, and profile before optimizing.
 
 ## Worktrees and memory
 
-Acquire the shared writer lock and follow
-[resource bounds](refactoring-progress.md#resource-bounds-and-resuming-work)
-before writes or Lean checks. Use a separate worktree for a parallel writing
-lane; preserve unrelated work. Do not terminate other sessions' workers.
-After a lane is integrated, remove only its own worktree and workers.
+Take the writer lock and follow the
+[resource bounds](refactoring-progress.md#resource-bounds-and-resuming-work).
+Preserve unrelated work and other sessions' workers; after integration, remove
+only your own worktree and workers.
 
 ## Build cache and CI
 
 After fetching master, `bash scripts/ci/fetch-lake-cache.sh` installs matching
-artifacts. Missing cache bytes mean a cold build, not a passing check. Tools
-reading `.lake/build` may need `python3 scripts/ci/restore-lake-artifacts.py`.
-CI workflow files are authoritative for the actual job set and limits.
+artifacts; a missing cache means a cold build, not a pass. Tools reading
+`.lake/build` may need `python3 scripts/ci/restore-lake-artifacts.py`. The CI
+workflow files define the job set.
 
 ## Measurements
 
-Use matched source, toolchain, workload and cache conditions, complete result
-denominators and the same resource limits. Failures and timeouts remain
-failures; component timings are not end-to-end proof times. Representative
-runners (their code defines options and required inputs):
+Compare only under matched source, toolchain, workload, cache and limits, with
+full denominators; timeouts count as failures. Runners: `scripts/measure-simple.mjs`,
+`scripts/measure-native.mjs`, `vscode/test/measure-proof-speed.cjs`,
+`scripts/testsuite-performance.mjs --native`, `web/test/performance.cjs --single --benchmark`.
 
-```sh
-node scripts/measure-simple.mjs .lake/simple-measurement
-node scripts/measure-native.mjs .lake/simple-measurement
-node vscode/test/measure-proof-speed.cjs .lake/proof-speed.json
-node scripts/testsuite-performance.mjs --native
-node web/test/performance.cjs --single --benchmark
-```
+## Reviews
 
-## Documentation reviews
+End each milestone with independent read-only finder and skeptic reviews per
+area; neither uses the Lean server. Fix confirmed findings and record their
+resolution concisely.
 
-End each milestone with read-only finder and skeptic reviews; neither uses the
-Lean server. Fix confirmed findings and record their resolution concisely.
-This cleanup preserved live parsed/pinned inputs and model boundaries; the
-independent reviews and reference/generator checks cover the removed prose. Keep source,
-tests and generated inventories authoritative; do not maintain parallel prose
-implementation catalogs or chronological gate receipts.
+## Documentation
 
-New guidance must add information not reasonably recoverable from code/tests
-and be linked from its topic guide. After adding it to Git, run
-`python3 scripts/check-doc-navigation.py --write`; CI checks discoverability.
+Keep prose only for what code and tests cannot say: commands, non-obvious
+constraints, external assumptions and open decisions. Implementation tours and
+completed-work histories belong in code and Git. Link new guidance from its
+topic guide, add it to Git, then run `python3 scripts/check-doc-navigation.py --write`.

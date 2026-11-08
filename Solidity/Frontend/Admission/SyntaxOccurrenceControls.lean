@@ -122,4 +122,54 @@ theorem nested_prefix_payloads :
 /-- info: 'Solidity.Frontend.Admission.OccurrenceControls.nested_prefix_payloads' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms nested_prefix_payloads
 
+
+/-! Regression: metadata visibility must survive unused-declaration traversal; absent fields must not acquire defaults, and function-type payloads must not be treated as legality evidence. -/
+def explicitVisibilityUnit (vis : Option Visibility) : Syn .unit :=
+  .unit (.cons (.topPart (.function (.ident "unused") .nil vis none .nil false none .nil .none)) .nil)
+
+theorem explicit_visibility_unused (vis : Option Visibility) :
+    (declarationVisibilityUses (explicitVisibilityUnit vis).env).map Prod.snd = vis.toList ∧
+    (syntaxVisibilityUses (explicitVisibilityUnit vis)).map Prod.snd = vis.toList := by
+  cases vis <;> exact ⟨rfl,rfl⟩
+
+theorem visibility_carriers (v : Visibility) (cv : CtorVis) (sv : StateVis) :
+    [visibilityFieldsAt (Syn.constructor .nil .nil false (some cv) (.block .nil)),
+     visibilityFieldsAt (Syn.function (t := true) (.ident "f") .nil (some v) none .nil false none .nil .none),
+     visibilityFieldsAt (Syn.fallback .fbNoParams true none .nil false none .none),
+     visibilityFieldsAt (Syn.receive true false .nil false none .none),
+     visibilityFieldsAt (Syn.stateVar (.elem .bool) (some sv) none none false "x" .none),
+     visibilityFieldsAt (Syn.fnType .nil (some v) none .nil)] =
+      [[ctorVisibility cv],[v],[.external],[.external],[stateVisibility sv],[v]] := rfl
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.explicit_visibility_unused' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms explicit_visibility_unused
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.visibility_carriers' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms visibility_carriers
+
+
+/-! Regression: written mutability survives unused declaration traversal, while getter inference must not create raw written qualifiers. These are syntax inventories, not effect/admission witnesses. -/
+def explicitMutabilityUnit (state : Option Mutability) : Syn .unit :=
+  .unit (.cons (.topPart (.function (.ident "unused") .nil none state .nil false none .nil .none)) .nil)
+
+theorem explicit_mutability_unused (state : Option Mutability) :
+    (declarationMutabilityUses (explicitMutabilityUnit state).env).map Prod.snd = state.toList ∧
+    (syntaxMutabilityUses (explicitMutabilityUnit state)).map Prod.snd = state.toList := by
+  cases state <;> exact ⟨rfl,rfl⟩
+
+theorem mutability_carriers (state : Mutability) (payable : Bool) :
+    [mutabilityFieldsAt (Syn.constructor .nil .nil payable none (.block .nil)),
+     mutabilityFieldsAt (Syn.function (t := true) (.ident "f") .nil none (some state) .nil false none .nil .none),
+     mutabilityFieldsAt (Syn.fallback .fbNoParams true (some state) .nil false none .none),
+     mutabilityFieldsAt (Syn.receive true payable .nil false none .none),
+     mutabilityFieldsAt (Syn.fnType .nil none (some state) .nil),
+     mutabilityFieldsAt (Syn.stateVar (.elem .bool) (some .pub) (some .constant) none false "x" .none)] =
+      [if payable then [.payable] else [],[state],[state],
+       if payable then [.payable] else [],[state],[]] := by
+  cases payable <;> rfl
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.explicit_mutability_unused' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms explicit_mutability_unused
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.mutability_carriers' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms mutability_carriers
+
 end Solidity.Frontend.Admission.OccurrenceControls

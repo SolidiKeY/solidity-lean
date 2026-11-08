@@ -227,6 +227,11 @@
   ],
   "source_reference_occurrences": 2551051,
   "status": "partial",
+  "supplemental_measurements": {
+    "compiler_overrides": "compiler-edges.json",
+    "effect_on_liveness": "not integrated; syntax occurrences do not certify semantic roots",
+    "syntax_census": "syntax-census.json"
+  },
   "unowned_source_reference_nodes": 96831,
   "unused_but_planned_verified_lines": 0
 }
