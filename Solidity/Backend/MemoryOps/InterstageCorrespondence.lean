@@ -86,14 +86,14 @@ theorem BoolChildRepr.captureAfterFirstAlloc {D : Source.Layout} {H : HTy} {R Q 
     _ _ (Heap.keeps_alloc _ o) src' sa' dst' da' u' v' f' _
     (captureAfterAlloc_checked _ o src' sa' dst' da' u' v' f' hs' hd') hfirst hsecond
 
-/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.checkedCapture' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.checkedCapture' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms BoolChildRepr.checkedCapture
-/-- info: 'Solidity.Backend.MemoryOps.RefChildRepr.checkedCapture' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.RefChildRepr.checkedCapture' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms RefChildRepr.checkedCapture
-/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.interstage' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.interstage' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms BoolChildRepr.interstage
-/-- info: 'Solidity.Backend.MemoryOps.RefChildRepr.interstage' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.RefChildRepr.interstage' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms RefChildRepr.interstage
-/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.captureAfterFirstAlloc' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.captureAfterFirstAlloc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms BoolChildRepr.captureAfterFirstAlloc
 end Solidity.Backend.MemoryOps
