@@ -75,14 +75,14 @@ theorem captureAfterDefault_mirrors {H : HTy} {R Q A : RefTy} {E : Ty}
       H.length (mid.allocDefault A hm).val :=
   captureAfterCopy_mirrors mid (SVal.dflt (.ref A)) hm src sa dst da u v f hs hd
 
-/-- info: 'Solidity.Backend.MemoryOps.mirrors_frame' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.MemoryOps.mirrors_frame' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms mirrors_frame
-/-- info: 'Solidity.Backend.MemoryOps.fields_mirrors_frame' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.MemoryOps.fields_mirrors_frame' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms fields_mirrors_frame
-/-- info: 'Solidity.Backend.MemoryOps.vec_mirrors_frame' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.MemoryOps.vec_mirrors_frame' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms vec_mirrors_frame
-/-- info: 'Solidity.Backend.MemoryOps.captureAfterCopy_mirrors' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.captureAfterCopy_mirrors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms captureAfterCopy_mirrors
-/-- info: 'Solidity.Backend.MemoryOps.captureAfterDefault_mirrors' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.captureAfterDefault_mirrors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms captureAfterDefault_mirrors
 end Solidity.Backend.MemoryOps
