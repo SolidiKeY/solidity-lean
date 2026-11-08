@@ -94,6 +94,8 @@ theorem BoolChildRepr.captureAfterFirstAlloc {D : Source.Layout} {H : HTy} {R Q 
 #guard_msgs in #print axioms BoolChildRepr.interstage
 /-- info: 'Solidity.Backend.MemoryOps.RefChildRepr.interstage' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms RefChildRepr.interstage
-/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.captureAfterFirstAlloc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.captureAfterFirstAlloc' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in #print axioms BoolChildRepr.captureAfterFirstAlloc
 end Solidity.Backend.MemoryOps
