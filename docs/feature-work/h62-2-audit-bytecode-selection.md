@@ -2879,3 +2879,41 @@ merged cleanly at 6a974407, retaining all local work and regenerating roots.
 This recovered Git transport, not Lean build artifacts or historical evidence.
 The later b89c3af4 publication arrived after the native check and remains the
 next adoption input; no acceptance on that later tree is inferred.
+
+
+### Value-checked body certificate premise roles
+
+`Backend/AbiEntry/ValueCheckedBodiesInterface.lean` belongs to the frozen
+bytecode-selection module map. Its six proof fields are the `selected`,
+`executed` and `early_rejection` projections of
+`Solidity.Backend.AbiEntry.Interface.ValueCheckedUIntBodyCertificate` and
+`Solidity.Backend.AbiEntry.Interface.ValueCheckedBoolBodyCertificate`.
+The source is unchanged from frozen base `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
+This is manual binder-role classification, not a simultaneous witness or a
+proof that either certificate is inhabited.
+
+Both certificates quantify over a chosen `program` implementation. A projection
+also requires the certificate itself: six separate field statements cannot be
+credited by treating that global obligation as an arbitrary data parameter.
+The following roles apply to both the uint and Boolean versions:
+
+| Field | Per-input premises | What remains to establish |
+|---|---|---|
+| `selected` | A body and output fragment with successful `inFragP` equality. | The global certificate and a jointly feasible body/fragment instance; the conclusion supplies successful whole and body compilations. |
+| `executed` | The same fragment equality, actual whole/body compilation objects and both compiler equalities, a machine and word/size values with both memory equalities. | All those premises together with one certificate; independent inhabitants of the object types do not suffice. |
+| `early_rejection` | The fragment equality, an actual whole compilation and its compiler equality, and a machine whose payable/callvalue guard is false. | A jointly feasible instance and the certificate; the false guard is a proposition to prove, not a freely selectable Boolean. |
+
+Base, label, payable flag, contract/context indices, body and output fragment
+are instance parameters; the uint version additionally takes `bits`. The
+`executed` memory equalities bind the supplied values to the same machine at
+`base` and `base+1`. They must not be replaced with facts about another machine.
+Its size and value-validity tests occur in the conditional conclusion, rather
+than as admission premises. Its accepted branch promises execution of the
+compiled continuation, which may itself revert; it does not promise a successful
+observable result for every body. Likewise, `selected` is conditional on fragment
+feasibility and is not unconditional compiler totality.
+
+No premise is classified as impossible here. No inherited-field, source-owner,
+Source/runtime/G01, physical, gas/fork, global-census or domain-closure credit
+follows from this classification. Exact simultaneous instances and meaningful
+supported-body success controls remain open.
