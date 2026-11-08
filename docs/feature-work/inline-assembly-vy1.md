@@ -1492,6 +1492,12 @@ instantiates this API. A classifier can return an empty or incomplete list, so
 these traversal laws do not establish classifier validity, whole-catalog
 coverage, lexical scope, or admission. Keep the original source unit available:
 its headers cannot be recovered from the declaration environment alone.
+`LocationFeatures.lean` instantiates the collector for every explicit `DataLoc`
+field in `Syn`: parameter and variable-declaration metadata. Its independent
+relation proves exact direct-field accounting, and a generic unused-function
+control retains all three locations while omission yields no location feature.
+These are syntax features; legality and default/inferred locations remain
+separate from this subset and from operational admission.
 
 ### P16 generated-file maintenance
 
