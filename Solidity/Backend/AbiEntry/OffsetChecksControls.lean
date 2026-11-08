@@ -70,7 +70,7 @@ theorem inhabited_frames :
 #guard_msgs (whitespace := lax) in #print axioms wrapped_product
 /-- info: 'Solidity.Backend.AbiEntry.OffsetChecksControls.signed_not_unsigned' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms signed_not_unsigned
-/-- info: 'Solidity.Backend.AbiEntry.OffsetChecksControls.lazy_negative_reference' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.AbiEntry.OffsetChecksControls.lazy_negative_reference' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms lazy_negative_reference
 /-- info: 'Solidity.Backend.AbiEntry.OffsetChecksControls.height_boundaries' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms height_boundaries
