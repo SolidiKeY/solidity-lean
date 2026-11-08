@@ -171,7 +171,7 @@ theorem reached_reads (n : Nat) (hn : n+3 < 2^256) :
 
 /-- info: 'Solidity.Backend.MemoryOps.RecaptureControls.reached_reads' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms reached_reads
-/-- info: 'Solidity.Backend.MemoryOps.RecaptureControls.payloads' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.RecaptureControls.payloads' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms payloads
 /-- info: 'Solidity.Backend.MemoryOps.RecaptureControls.criterion' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms criterion
