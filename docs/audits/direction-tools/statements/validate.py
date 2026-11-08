@@ -29,6 +29,8 @@ def equation_case : Nat → Nat
     assert [d["name"] for d in parsed]==["record_case","equation_case","ordinary"]
     assert parsed[0]["conclusion"].endswith("= some 0")
     assert parsed[1]["conclusion"]=="Nat → Nat"
+    subprocess.run([sys.executable,"-I",str(HERE/"calibrate.py"),"--check"],cwd=ROOT,check=True)
+    subprocess.run([sys.executable,"-I",str(HERE/"provenance.py"),"--check"],cwd=ROOT,check=True)
     subprocess.run([sys.executable,"-I",str(HERE/"scan.py"),"--check"],cwd=ROOT,check=True)
     rows=list(csv.DictReader((HERE/"statements.csv").open()))
     summary=json.loads((HERE/"summary.json").read_text())
@@ -47,6 +49,7 @@ def equation_case : Nat → Nat
     assert "arbitrary" in session_consistent["english_claim"]
     assert "FitsInt" not in session_eq["witness_needed"]
     assert "FitsInt" not in session_consistent["witness_needed"]
+    assert "Generic conversion-acceptance" in judgements["Solidity/Source/SemanticsExamples.lean#lit_ok"]["reason"]
     for p in summary["top_problems"]:cite(p["source"])
     # Frozen inputs are Git blobs, so unrelated later master changes are valid.
     git("cat-file","-e",BASE+"^{commit}")
@@ -60,6 +63,7 @@ def equation_case : Nat → Nat
             raw=urllib.request.urlopen(r["url"],timeout=30).read();text=raw.decode()
             assert hashlib.sha256(raw).hexdigest()==r["source_sha256"]
             assert r["statement"] in text
+            assert r["theorem_source"] in text
             assert text[:text.index(r["statement"])].count("\n")+1==r["line"]
             print("PINNED_REFERENCE_PASS",r["id"],r["theorem"])
     print("AUDIT_VALIDATION_PASS",len(rows),"statements; source witnesses checked as text, not elaborated")

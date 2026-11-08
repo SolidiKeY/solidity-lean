@@ -528,14 +528,14 @@
     "priority": "none"
   },
   "Solidity/Source/SemanticsExamples.lean#lit_ok": {
-    "english_claim": "lit ok: the displayed Source evaluator computation has the specified result on these concrete inputs.",
+    "english_claim": "For arbitrary name relations B/M and natural k fitting uint256, implicit conversion of the rational literal k to uint256 is accepted.",
     "strength": "strong",
-    "reason": "A bounded concrete regression theorem, not named as a universal semantic-preservation theorem. decide is kernel computation; it is not evidence of semantic triviality.",
+    "reason": "Generic conversion-acceptance lemma conditional on the stated integer range proof, not a bounded evaluator regression.",
     "witness_status": "existing source witness",
     "witness": "Solidity/Source/SemanticsExamples.lean#litAB",
     "witness_needed": "Literal conversion is used by lit and litAB with a FitsInt proof; k=0 is a satisfiable example.",
     "reference": "cakeml;compcert",
-    "comparison": "A concrete evaluator regression is narrower than CakeML pass semantic equality or CompCert backward simulation, but matches its own test claim. No compiler-correctness verdict follows.",
+    "comparison": "Local type-conversion acceptance under a range premise. CompCert/CakeML compiler semantic preservation is a different claim; this lemma alone gives no evaluation or source-to-target agreement.",
     "priority": "none"
   },
   "Solidity/Source/SemanticsExamples.lean#revert_rolls_back": {
@@ -731,7 +731,7 @@
     "reason": "Generic session-family consistency delegated to sessionAt_consistent; not a bounded concrete computation.",
     "witness_status": "existing source witness",
     "witness": "Solidity/Source/SemanticsExamples.lean#session_runs",
-    "witness_needed": "PS and envS are constructed immediately above session_runs and instantiate the generic typed program/environment domains; no FitsInt premise occurs.",
+    "witness_needed": "PS and envS are constructed immediately above session_runs and instantiate the generic typed program/environment domains; no propositional premise is assumed.",
     "reference": "cakeml;compcert",
     "comparison": "Generic consistency of the source observation family, not source-to-target compiler preservation. Compare CompCert/CakeML behaviour semantics only after a separate simulation/translation theorem.",
     "priority": "none"
