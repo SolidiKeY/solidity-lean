@@ -5,6 +5,7 @@ Keeps fact is supplied by published allocation in controls. Only old represented
 objects are transported; fresh-object representation is not assumed. -/
 namespace Solidity.Backend.MemoryOps
 
+set_option backward.isDefEq.respectTransparency false in
 theorem BoolChildRepr.grow {D : Source.Layout} {H H' : HTy}
     {c : Source.Calldata D} {address : Nat → Nat} {hp : Heap H} {hp' : Heap H'}
     {s : Source.Data D BoolChildTy} {r : HRef H BoolChildRef}
@@ -39,6 +40,7 @@ theorem decodedChildRefs_wk {D : Source.Layout} {H H' : HTy} (e : H <+: H')
   rw [List.getElem_map]
   rfl
 
+set_option backward.isDefEq.respectTransparency false in
 theorem RefChildRepr.grow {D : Source.Layout} {H H' : HTy}
     {c : Source.Calldata D} {address : Nat → Nat} {hp : Heap H} {hp' : Heap H'}
     {s : Source.Data D RefChildTy} {r : HRef H RefChildRef}
