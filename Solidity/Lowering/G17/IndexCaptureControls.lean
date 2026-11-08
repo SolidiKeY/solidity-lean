@@ -1,4 +1,5 @@
 import Solidity.Lowering.G17.IndexBounds
+import Solidity.Source.Preservation.MemoryBodyControls
 
 /-! Discriminating captured-index controls: the old object has length two and its replacement length three. Index two must still fail on the captured object; consulting the rebound caller slot would incorrectly succeed. -/
 namespace Solidity.Lowering.G17.IndexCapture.Controls
@@ -136,6 +137,73 @@ theorem guarded_in_bounds :
 #print axioms captured_prefix_identity
 #print axioms guarded_bounds_payload
 #print axioms guarded_in_bounds
+
+namespace SourceCapture
+open Source
+private abbrev sourceEnv := Preservation.MemoryBodyControls.E
+private abbrev Aty := Preservation.MemoryBodyControls.Aty
+private abbrev Ctx : RCtx := [Aty,Aty,Aty,.int .u256]
+private def locals : Locals sourceEnv.layout Ctx :=
+  .cons (.memRef rfl 0) (.cons (.memRef rfl 1) (.cons (.memRef rfl 0)
+    (.cons (.int 42 (by decide)) .nil)))
+private def world : St sourceEnv :=
+  {Preservation.MemoryBodyControls.initial with heap := Preservation.MemoryBodyControls.defaulted}
+private def source : EMState sourceEnv Ctx := (locals,world)
+private def rebound : EMState sourceEnv Ctx := (locals.set .here (.memRef rfl 1),world)
+private def index : RExpr sourceEnv Ctx (.int .u256) :=
+  .length (.assign (.local .here) (.local (.there .here))) rfl
+private def access : RExpr sourceEnv Ctx (.int .u256) := .indexArray (.local .here) index rfl
+private def store : RExpr sourceEnv Ctx (.int .u256) :=
+  .assign (.indexArray (.local .here) (by decide) index rfl) (.local (.there (.there (.there .here))))
+private def updated : EMState sourceEnv Ctx :=
+  (rebound.1,{world with heap := world.heap.write 0 Preservation.MemoryBodyControls.modified rfl})
+
+/-- The index really rebinds its base to a live empty array; the read still returns the captured old object's seven. Rejects late-base lookup and stale caller locals. -/
+theorem read_captured (p : Roadmap.Pipeline) :
+    (evalE (Preservation.MemoryBodyControls.glob p) Preservation.MemoryBodyControls.frame 10 access).run source =
+      (.ok (.val (.int 7 (by decide))),rebound) := by
+  have baseRun : (evalE (Preservation.MemoryBodyControls.glob p) Preservation.MemoryBodyControls.frame 9
+      (.local .here : RExpr sourceEnv Ctx Aty)).run source =
+      (.ok (.val (.memRef rfl 0)),source) := rfl
+  have indexRun : (evalE (Preservation.MemoryBodyControls.glob p) Preservation.MemoryBodyControls.frame 9
+      index).run source = (.ok (.val (.int 0 (by decide))),rebound) := by
+    cases p <;> rfl
+  have actual := source_capture_order (Preservation.MemoryBodyControls.glob p)
+    Preservation.MemoryBodyControls.frame 9 (.local .here : RExpr sourceEnv Ctx Aty) index rfl
+    source source rebound (.memRef rfl 0) (.val (.int 0 (by decide))) baseRun indexRun
+  exact actual.1.trans rfl
+
+/-- The same effectful index must select the old location for a write; the independent old alias survives and the replacement object remains empty. Rejects redirected writes. -/
+theorem write_captured (p : Roadmap.Pipeline) :
+    (evalLoc (Preservation.MemoryBodyControls.glob p) Preservation.MemoryBodyControls.frame 9
+      (.indexArray (.local .here : RExpr sourceEnv Ctx Aty) (by decide) index rfl)).run source =
+        (.ok (.mem 0 0),rebound) ∧
+    (evalE (Preservation.MemoryBodyControls.glob p) Preservation.MemoryBodyControls.frame 10 store).run source =
+      (.ok (.val (.int 42 (by decide))),updated) := by
+  have baseRun : (evalE (Preservation.MemoryBodyControls.glob p) Preservation.MemoryBodyControls.frame 8
+      (.local .here : RExpr sourceEnv Ctx Aty)).run source =
+      (.ok (.val (.memRef rfl 0)),source) := rfl
+  have indexRun : (evalE (Preservation.MemoryBodyControls.glob p) Preservation.MemoryBodyControls.frame 8
+      index).run source = (.ok (.val (.int 0 (by decide))),rebound) := by
+    cases p <;> rfl
+  have actual := source_capture_order (Preservation.MemoryBodyControls.glob p)
+    Preservation.MemoryBodyControls.frame 8 (.local .here : RExpr sourceEnv Ctx Aty) index rfl
+    source source rebound (.memRef rfl 0) (.val (.int 0 (by decide))) baseRun indexRun
+  constructor
+  · exact (actual.2 (by decide)).trans rfl
+  · cases p <;> rfl
+
+/-- Looking up the rebound empty object instead would panic with index data, making the successful old-object access discriminating. -/
+theorem late_base_panics (p : Roadmap.Pipeline) :
+    (evalE (Preservation.MemoryBodyControls.glob p) Preservation.MemoryBodyControls.frame 3
+      (.indexArray (.local (.there .here) : RExpr sourceEnv Ctx Aty) (.const (Q.ofInt 0)) (by decide))).run rebound =
+      (.error (.revert (panicData .index)),rebound) := by
+  cases p <;> rfl
+
+#print axioms read_captured
+#print axioms write_captured
+#print axioms late_base_panics
+end SourceCapture
 
 #print axioms captured_base_controls
 #print axioms successful_write_targets_old
