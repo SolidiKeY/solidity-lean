@@ -44,15 +44,15 @@ theorem cycle_origin (k : Nat) : captureOrigin cycle k = if k = 1 then 2 else k 
   · subst k; rfl
   by_cases h1 : k = 1
   · subst k; rfl
-  rw [if_neg h1]
+  rw [ite_eq_right h1]
   have hk : 2 ≤ k := by omega
   change snapshotOrigin first (snapshotOrigin repair k) = k
   have hr : snapshotOrigin repair k = k := by
     change (if 0 ≤ k ∧ k < 2 then 1+(k-0) else k) = k
-    rw [if_neg (by omega)]
+    rw [ite_eq_right (by omega)]
   have hf : snapshotOrigin first k = k := by
     change (if 1 ≤ k ∧ k < 2 then 0+(k-1) else k) = k
-    rw [if_neg (by omega)]
+    rw [ite_eq_right (by omega)]
   rw [hr,hf]
 
 private abbrev B := BoolChildRef
@@ -60,8 +60,10 @@ private abbrev H : HTy := [B,B]
 private def r : HRef H B := ⟨0,rfl⟩
 private def neighbor : HRef H B := ⟨1,rfl⟩
 private def old (n : Nat) := [true,false,false] ++ List.replicate n false
+set_option backward.isDefEq.respectTransparency false in
 private def hp (n : Nat) (hn : n+3 < 2^256) : Heap H :=
   (⟨old n,by simp only [old,List.length_append,List.length_cons,List.length_nil,List.length_replicate]; omega⟩,⟨[false,true],by decide⟩,())
+set_option backward.isDefEq.respectTransparency false in
 private theorem len (n : Nat) (hn : n+3 < 2^256) : (hp n hn).len r .dyn = n+3 := by
   simp only [Heap.len,MObj.elems_dyn,Heap.get,Objs.get,hp,r,old,List.length_append,List.length_cons,List.length_nil,List.length_replicate]; omega
 private theorem hs (n : Nat) (hn : n+3 < 2^256) : SliceBounds ((hp n hn).len r .dyn) 0 1 := by
@@ -82,8 +84,8 @@ theorem primitive_provenance (n copies : Nat) (hn : n+3 < 2^256) :
     intro k
     rw [cycle_origin]
     by_cases hk : k = 1
-    · subst k; rw [if_pos rfl]; simp only [MObj.elems_dyn]; rfl
-    · rw [if_neg hk]
+    · subst k; rw [ite_eq_left rfl]; simp only [MObj.elems_dyn]; rfl
+    · rw [ite_eq_right hk]
   induction copies with
   | zero => intro k; rfl
   | succ copies ih =>
@@ -155,7 +157,6 @@ theorem three_meaningful (n : Nat) (hn : n+3 < 2^256) :
     simp only [MObj.elems_dyn]; rfl
   · intro h
     have hx := congrArg (fun o : MObj H B => (MObj.elems .dyn o)[0]?) (congrArg (fun h : Heap H => h.get r) h)
-    dsimp only at hx
     rw [hv] at hx
     simp only [MObj.elems_dyn] at hx
     exact (by decide : (some false : Option Bool) ≠ some true) hx
@@ -178,7 +179,6 @@ theorem reversed_negative (n : Nat) (hn : n+3 < 2^256) :
     simp only [MObj.elems_dyn]; rfl
   · intro h
     have hx := congrArg (fun h : Heap H => (MObj.elems .dyn (h.get r))[0]?) h
-    dsimp only at hx
     rw [hv] at hx
     simp only [MObj.elems_dyn] at hx
     exact (by decide : (some false : Option Bool) ≠ some true) hx
