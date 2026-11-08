@@ -180,6 +180,6 @@ theorem protected_and_saved (value : Fin W) :
 #guard_msgs (whitespace := lax) in #print axioms bool_raw_body
 /-- info: 'Solidity.Backend.AbiEntry.ValueCheckedBodiesControls.body_rejection_preserved' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms body_rejection_preserved
-/-- info: 'Solidity.Backend.AbiEntry.ValueCheckedBodiesControls.protected_and_saved' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.AbiEntry.ValueCheckedBodiesControls.protected_and_saved' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms protected_and_saved
 end Solidity.Backend.AbiEntry.ValueCheckedBodiesControls
