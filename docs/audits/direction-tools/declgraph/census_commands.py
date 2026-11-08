@@ -12,7 +12,7 @@ def generate(source_root,view,commands,compiler):
  assert receipt['producer_sha256']==hashlib.sha256((HERE/'Commands.lean').read_bytes()).hexdigest(),'Stale parser revision'
  assert receipt['index_sha256']==hashlib.sha256(commands.read_bytes()).hexdigest(),'Index receipt mismatch'
  assert receipt['compiler_sha256']==hashlib.sha256(compiler.read_bytes()).hexdigest(),'Compiler receipt mismatch'
- assert pathlib.Path(receipt['reference_view']).resolve()==view.resolve(),'Reference-view mismatch' 
+ assert pathlib.Path(receipt['reference_view']).resolve()==view.resolve(),'Reference-view mismatch'
  api=runpy.run_path(str(HERE/'audit.py'));src=api['assert_sources'](source_root)
  expected={str(source_root.resolve()/p):p for p in src};seen=set();areas=collections.defaultdict(collections.Counter);failures=[];roots=[];provenance=collections.defaultdict(collections.Counter)
  for line in commands.open():
