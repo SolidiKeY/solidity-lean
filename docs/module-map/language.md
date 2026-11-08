@@ -261,3 +261,11 @@ Its explicit `mapFree` consumers neither import nor certify the frozen original
 module. Predicate independence compares two current-signature calls only.
 The five original headers remain unresolved. Missing dirty work and unrecovered
 historical validation remain UNVERIFIABLE under H151.
+
+The driver forwards handled termination and waits for monitor cleanup while
+holding the writer lock. The monitor also inherits the lock descriptor and
+retains the original driver PID; parent loss stops the worker before ownership
+is released. It never substitutes a new parent in resource measurements.
+Kernel parent-ID discovery and live-owned status reads fail closed; missing
+data is ignored only when process exit is confirmed. The guard regressions
+use lightweight process fixtures and do not establish any Lean theorem.

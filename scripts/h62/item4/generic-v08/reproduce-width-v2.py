@@ -10,6 +10,7 @@ import json
 import os
 from pathlib import Path
 import re
+import signal
 import subprocess
 import sys
 import time
@@ -60,7 +61,7 @@ def bounded_command(lean, record, seconds, args):
     if not 1 <= seconds <= SECONDS:
         raise ValueError('remaining budget must be between1 and300 seconds')
     return [sys.executable, '-B', str(ROOT/'scripts/h62/item4/generic-v08/bounded.py'),
-            '--record', str(record), '--seconds', str(seconds), '--aggregate', '--aggregate-parent', '--',
+            '--record', str(record), '--seconds', str(seconds), '--aggregate', '--aggregate-parent', '--parent-pid', str(os.getpid()), '--',
             str(lean), '-j1', '--tstack=131072', *args]
 
 
@@ -72,6 +73,30 @@ def input_bindings(repo, paths):
             raise ValueError('missing or redirected input: ' + name)
         result[name] = hashlib.sha256(path.read_bytes()).hexdigest()
     return result
+
+
+def run_monitor(command, **kwargs):
+    """Retain caller's writer lock until monitor cleanup is complete."""
+    child = None
+    previous = {}
+    def interrupted(signum, _frame):
+        raise InterruptedError('driver signal ' + str(signum))
+    for signum in (signal.SIGTERM, signal.SIGINT):
+        previous[signum] = signal.signal(signum, interrupted)
+    try:
+        child = subprocess.Popen(command, **kwargs)
+        return subprocess.CompletedProcess(command, child.wait())
+    except BaseException:
+        for signum in previous:
+            signal.signal(signum, signal.SIG_IGN)
+        if child is not None:
+            if child.poll() is None:
+                child.terminate()
+            child.wait()
+        raise
+    finally:
+        for signum, handler in previous.items():
+            signal.signal(signum, handler)
 
 
 def main(argv=None):
@@ -102,6 +127,7 @@ def main(argv=None):
         bound_paths = [m.replace('.', '/')+'.lean' for m in modules] + [TARGET,
             'lean-toolchain', 'scripts/h62/item4/generic-v08/census.py',
             'scripts/h62/item4/generic-v08/bounded.py',
+            'scripts/h62/item4/generic-v08/width_resources.py',
             'scripts/h62/item4/generic-v08/reproduce-width-v2.py',
             'scripts/h62/item4/generic-v08/check-width-v2.sh']
         before = input_bindings(ROOT, bound_paths)
@@ -118,8 +144,13 @@ def main(argv=None):
                 (output/'STOP.txt').write_text('overall300second deadline exhausted\n')
                 return 1
             run = bounded_command(lean, output/(name+'.json'), remaining, command)
-            with (output/(name+'.log')).open('w') as log:
-                result = subprocess.run(run, cwd=ROOT, env=env, stdout=log, stderr=subprocess.STDOUT)
+            try:
+                with (output/(name+'.log')).open('w') as log:
+                    result = run_monitor(run, cwd=ROOT, env=env, stdout=log, stderr=subprocess.STDOUT,
+                                         pass_fds=(lock.fileno(),))
+            except BaseException as error:
+                (output/'STOP.txt').write_text('driver interrupted after monitor cleanup: '+type(error).__name__+'\n')
+                return 1
             print(name, result.returncode, flush=True)
             after = input_bindings(ROOT, bound_paths)
             (output/'inputs-after.json').write_text(json.dumps(after, indent=2)+'\n')

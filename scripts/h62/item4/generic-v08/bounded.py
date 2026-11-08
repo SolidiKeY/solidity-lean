@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 """One bounded process group; report actual resource/time data, never a fake pass."""
 import argparse,json,os,pathlib,resource,signal,subprocess,time
+from width_resources import process_usage
 p=argparse.ArgumentParser(__doc__)
 p.add_argument('--record',type=pathlib.Path,required=True)
 p.add_argument('--seconds',type=int,default=300)
 p.add_argument('--aggregate',action='store_true',help='Also enforce aggregate12GiB RSS and one Lean process')
 p.add_argument('--aggregate-parent',action='store_true',help='Include the serial v2 driver RSS')
+p.add_argument('--parent-pid',type=int,help='Original v2 driver; never follow reparenting')
 p.add_argument('command',nargs=argparse.REMAINDER)
 a=p.parse_args()
 cmd=a.command[1:] if a.command[:1]==['--'] else a.command
 if not cmd: p.error('command required')
 if a.aggregate_parent and not a.aggregate: p.error('--aggregate-parent requires --aggregate')
+if a.aggregate_parent and (a.parent_pid is None or a.parent_pid <= 1):
+    p.error('--aggregate-parent requires the original --parent-pid')
 if pathlib.Path(cmd[0]).name != 'lean' or '-j1' not in cmd:
     p.error('only a direct Lean command with explicit -j1 is supported')
 
@@ -25,27 +29,12 @@ def available():
     current=int(pathlib.Path('/sys/fs/cgroup/memory.current').read_text())
     return min(host,int(cap)-current) if cap!='max' else host
 
-def process_usage(pid):
-    rows = {}
-    for status in pathlib.Path('/proc').glob('[0-9]*/status'):
-        try:
-            fields = dict(line.split(':', 1) for line in status.read_text().splitlines() if ':' in line)
-            rows[int(status.parent.name)] = (int(fields['PPid']),
-                int(fields.get('VmRSS', '0 kB').split()[0])*1024, fields['Name'].strip())
-        except (OSError, KeyError, ValueError):
-            continue
-    selected = {pid}
-    while True:
-        children = {i for i, row in rows.items() if row[0] in selected} - selected
-        if not children:
-            break
-        selected.update(children)
-    return (sum(rows[i][1] for i in selected if i in rows),
-            sum(rows[i][2] == 'lean' for i in selected if i in rows))
-
 if available()<4*1024**3: raise SystemExit('BLOCKED: less than 4 GiB headroom')
 if int(pathlib.Path('/proc/meminfo').read_text().split('SwapTotal:')[1].split()[0])!=0:
     raise SystemExit('BLOCKED: active swap configuration requires no-swap isolation')
+original_parent=a.parent_pid if a.aggregate_parent else None
+if original_parent is not None and os.getppid()!=original_parent:
+    raise SystemExit('BLOCKED: original driver was lost before spawn')
 start=time.monotonic()
 env=dict(os.environ,LEAN_NUM_THREADS='1')
 proc=None
@@ -62,11 +51,14 @@ if a.aggregate:
 try:
     proc=subprocess.Popen(cmd,env=env,preexec_fn=preexec)
     while proc.poll() is None:
+        if original_parent is not None and os.getppid()!=original_parent:
+            stop='parent-lost'
+            break
         if time.monotonic()-start>a.seconds: stop='timeout'
         elif available()<4*1024**3: stop='headroom'
         if a.aggregate:
             rss, lean_processes = process_usage(proc.pid)
-            for pid in [os.getpid()] + ([os.getppid()] if a.aggregate_parent else []):
+            for pid in [os.getpid()] + ([original_parent] if a.aggregate_parent else []):
                 status = pathlib.Path(f'/proc/{pid}/status').read_text()
                 rss += int(status.split('VmRSS:')[1].split()[0])*1024
             if int(pathlib.Path('/proc/meminfo').read_text().split('SwapTotal:')[1].split()[0]):
@@ -84,12 +76,14 @@ try:
             break
         time.sleep(.25)
     # A completed child is not evidence of meeting an already expired deadline.
+    if original_parent is not None and os.getppid()!=original_parent:
+        stop=stop or 'parent-lost'
     if a.aggregate and time.monotonic()-start>a.seconds:
         stop=stop or 'timeout'
 except BaseException as error:
     if not a.aggregate:
         raise
-    stop=stop or 'monitor-error'
+    stop=stop or ('parent-lost' if original_parent is not None and os.getppid()!=original_parent else 'monitor-error')
     monitor_error=type(error).__name__ + ': ' + str(error)
 finally:
     if a.aggregate:
@@ -132,7 +126,7 @@ if a.aggregate:
     record.update(peak_sampled_aggregate_rss=peak_aggregate, max_lean_processes=max_lean_processes,
                   aggregate_rss_limit_bytes=12*1024**3, no_swap_required=True,
                   requested_seconds=a.seconds, polling_seconds=.25, termination_grace_seconds=5,
-                  monitor_error=monitor_error,
+                  monitor_error=monitor_error, original_parent_pid=original_parent,
                   aggregate_scope='Lean tree + monitor' + (' + serial v2 driver' if a.aggregate_parent else ''))
 a.record.write_text(json.dumps(record,indent=2)+'\n')
 print(json.dumps(record),flush=True)

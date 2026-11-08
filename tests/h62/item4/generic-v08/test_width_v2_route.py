@@ -64,6 +64,7 @@ class Route(unittest.TestCase):
             paths = ['lean-toolchain', v2.TARGET, 'Solidity/Source/Types.lean',
                      'scripts/h62/item4/generic-v08/census.py',
                      'scripts/h62/item4/generic-v08/bounded.py',
+                     'scripts/h62/item4/generic-v08/width_resources.py',
                      'scripts/h62/item4/generic-v08/reproduce-width-v2.py',
                      'scripts/h62/item4/generic-v08/check-width-v2.sh']
             for name in paths:
@@ -75,10 +76,11 @@ class Route(unittest.TestCase):
             (tool/'bin/lean').write_text('')
             output = root/'fresh'
             version = 'Lean (version 4.24.0, commit ' + v2.COMMIT + ', Release)'
-            with patch.object(v2, 'ROOT', repo), patch.object(v2.subprocess, 'check_output', return_value=version), patch.object(v2.subprocess, 'run', return_value=Mock(returncode=0)) as run, patch.object(v2.fcntl, 'flock'), patch.object(v2.time, 'monotonic', side_effect=[0, 1, 301]):
+            with patch.object(v2, 'ROOT', repo), patch.object(v2.subprocess, 'check_output', return_value=version), patch.object(v2, 'run_monitor', return_value=Mock(returncode=0)) as run, patch.object(v2.fcntl, 'flock'), patch.object(v2.time, 'monotonic', side_effect=[0, 1, 301]):
                 result = v2.main(['--toolchain', str(tool), '--output', str(output)])
             self.assertEqual(result, 1)
             self.assertEqual(run.call_count, 1)
+            self.assertEqual(len(run.call_args.kwargs['pass_fds']), 1)
             self.assertFalse((output/'summary.json').exists())
             self.assertIn('deadline', (output/'STOP.txt').read_text())
             self.assertEqual(json.loads((output/'inputs-before.json').read_text()),
@@ -88,10 +90,11 @@ class Route(unittest.TestCase):
 
 class Refusal(unittest.TestCase):
     def exercise(self, swap=0, reserve=16*1024**3, rows=None, seconds=300,
-                 measurement_error=None, aggregate=True, finished=False, interrupt_signal=False):
+                 measurement_error=None, aggregate=True, finished=False, interrupt_signal=False, owned_status_error=None):
         rows = rows or {}
         original_read = Path.read_text
         original_glob = Path.glob
+        original_iterdir = Path.iterdir
         def read(path, *args, **kwargs):
             value = str(path)
             if value == '/proc/meminfo':
@@ -106,16 +109,41 @@ class Refusal(unittest.TestCase):
                 if interrupt_signal:
                     signal.getsignal(signal.SIGTERM)(signal.SIGTERM, None)
             if value in rows:
+                if owned_status_error is not None and value == f'/proc/{owned_status_error}/status':
+                    raise PermissionError('live owned status unreadable')
                 return rows[value]
+            if value.startswith('/proc/') and value.endswith('/stat'):
+                key = '/'.join(value.split('/')[:-1])+'/status'
+                if key not in rows:
+                    raise FileNotFoundError(value)
+                fields = dict(x.split(':', 1) for x in rows[key].splitlines() if ':' in x)
+                return value.split('/')[2]+' (lean) S '+fields['PPid'].strip()
+            if value.startswith('/proc/321/') and value.endswith('/status'):
+                raise FileNotFoundError(value)
+            if '/task/' in value and value.endswith('/children'):
+                parent = int(value.split('/')[2])
+                return ' '.join(p.split('/')[2] for p, data in rows.items()
+                    if int(dict(x.split(':', 1) for x in data.splitlines() if ':' in x)['PPid']) == parent)
             return original_read(path, *args, **kwargs)
         def glob(path, pattern):
             return iter(Path(p) for p in rows) if str(path) == '/proc' else original_glob(path, pattern)
+        def iterdir(path):
+            value = str(path)
+            if value == '/proc':
+                return iter(Path('/proc')/p.split('/')[2] for p in rows)
+            if value.startswith('/proc/') and value.endswith('/task'):
+                pid = value.split('/')[2]
+                return iter([path/pid])
+            return original_iterdir(path)
+        def liveness(pid, _signal):
+            if f'/proc/{pid}/status' not in rows:
+                raise ProcessLookupError(pid)
         with tempfile.TemporaryDirectory() as folder:
             record = Path(folder)/'record.json'
             proc = Mock(pid=321, returncode=0 if finished else -15)
             proc.poll.return_value = 0 if finished else None
             proc.wait.return_value = proc.returncode
-            with patch.object(sys, 'argv', ['bounded', '--record', str(record), '--seconds', str(seconds), *(['--aggregate'] if aggregate else []), '--', 'lean', '-j1', 'x.lean']), patch.object(Path, 'read_text', read), patch.object(Path, 'glob', glob), patch('subprocess.Popen', return_value=proc) as spawn, patch('os.killpg', side_effect=ProcessLookupError if finished else None) as kill:
+            with patch.object(sys, 'argv', ['bounded', '--record', str(record), '--seconds', str(seconds), *(['--aggregate'] if aggregate else []), '--', 'lean', '-j1', 'x.lean']), patch.object(Path, 'read_text', read), patch.object(Path, 'glob', glob), patch.object(Path, 'iterdir', iterdir), patch('os.kill', side_effect=liveness), patch('subprocess.Popen', return_value=proc) as spawn, patch('os.killpg', side_effect=ProcessLookupError if finished else None) as kill:
                 with self.assertRaises(SystemExit):
                     runpy.run_path(str(SCRIPTS/'bounded.py'), run_name='__main__')
                 result = json.loads(record.read_text()) if record.exists() else None
@@ -147,6 +175,16 @@ class Refusal(unittest.TestCase):
             self.assertTrue(spawned)
             self.assertEqual(result['stop'], 'monitor-error')
             self.assertIn(error.__name__, result['monitor_error'])
+            self.assertTrue(any(c.args == (321, signal.SIGTERM) for c in kills))
+
+    def test_live_owned_status_failure_cleans_worker(self):
+        rows = {'/proc/321/status': 'Name: lean\nPPid: 1\nVmRSS: 1 kB\n',
+                '/proc/322/status': 'Name: lean\nPPid: 321\nVmRSS: 1 kB\n'}
+        for pid in (321, 322):
+            result, _, kills = self.exercise(rows=rows, owned_status_error=pid)
+            self.assertEqual(result['stop'], 'monitor-error')
+            self.assertIn('MeasurementError', result['monitor_error'])
+            self.assertNotEqual(result['exit'], 0)
             self.assertTrue(any(c.args == (321, signal.SIGTERM) for c in kills))
 
     def test_monitor_signal_cleans_process_group(self):
