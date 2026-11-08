@@ -302,4 +302,48 @@ theorem memory_bytes_lower_free {I J : Input} (fuel pos a next : Nat)
 
 #print axioms memory_bytes_success_iff
 #print axioms memory_bytes_lower_free
+
+/-! Guarded regression: eager bytes panic must not be credited to a missing
+length word or truncated payload. This exact characterization retains the
+ordered head/length checks and the actual allocator's panic condition. -/
+theorem memory_bytes_panic_iff (I : Input) (fuel pos a : Nat) :
+    mdec I (fuel + 1) .bytes pos a = .error .panic ↔
+    pos + 31 < I.size ∧
+      (lim < load I.data pos ∨
+        (load I.data pos ≤ lim ∧
+          alloc I a (roundUp (load I.data pos) + 32) = .error .panic)) := by
+  constructor
+  · intro panic
+    by_cases head : pos + 31 < I.size
+    · by_cases length : load I.data pos ≤ lim
+      · cases allocation : alloc I a (roundUp (load I.data pos) + 32) with
+        | error failure =>
+          have propagated := memory_bytes_allocation_failure I fuel pos a failure head length allocation
+          have same : failure = .panic := Except.error.inj (propagated.symm.trans panic)
+          exact ⟨head, Or.inr ⟨length,
+            congrArg (fun f => (Except.error f : Except Fail Nat)) same⟩⟩
+        | ok next =>
+          by_cases payload : pos + 32 + load I.data pos ≤ I.size
+          · rw [memory_bytes_success_of_bounds I fuel pos a next head length allocation payload] at panic
+            cases panic
+          · rw [memory_bytes_truncated_payload I fuel pos a next head length allocation
+              (Nat.lt_of_not_ge payload)] at panic
+            cases panic
+      · exact ⟨head, Or.inl (Nat.lt_of_not_ge length)⟩
+    · rw [memory_bytes_missing_length I fuel pos a head] at panic
+      cases panic
+  · rintro ⟨head, oversized | ⟨length, allocation⟩⟩
+    · exact memory_bytes_oversized_length I fuel pos a head oversized
+    · exact memory_bytes_allocation_failure I fuel pos a .panic head length allocation
+
+theorem memory_bytes_panic_bound_iff (I : Input) (fuel pos a : Nat) :
+    mdec I (fuel + 1) .bytes pos a = .error .panic ↔
+    pos + 31 < I.size ∧
+      (lim < load I.data pos ∨
+        (load I.data pos ≤ lim ∧
+          lim < I.free + (a + roundUp (roundUp (load I.data pos) + 32)))) := by
+  rw [memory_bytes_panic_iff, allocation_panic_iff]
+
+#print axioms memory_bytes_panic_iff
+#print axioms memory_bytes_panic_bound_iff
 end Solidity.H62.AuditLanguage.AbiDynamicWitness
