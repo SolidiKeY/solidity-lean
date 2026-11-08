@@ -155,6 +155,6 @@
     "python3 docs/audits/shrink/tv-backend/replay.py .lake/build/lib/lean \"$OUT/inputs/imports-after.txt\" \"$OUT/inputs/modules.txt\" 0 \"$OUT/after\"",
     "python3 docs/audits/shrink/tv-backend/assert_absent.py \"$OUT/exports\"",
     "lake build SolidityExamples SoliditySlowExamples; python3 scripts/ci/restore-lake-artifacts.py; lake env lean -j1 -M12288 -t0 --tstack=131072 Solidity/Theorems.lean; lake env lean -j1 -M12288 --tstack=131072 scripts/AxiomAudit.lean",
-    "The delivered head restores the deletion prototype. On that audit-only head run test_inventory.py, check.py and scripts/coord-tools/gate.sh full; validate documentation paths/navigation. Preserve prototype commit 43dac7b74f45f0d985044d76f3beb2340be19a8b; no rollout or branch push is authorized."
+    "The delivered head restores the deletion prototype. On that audit-only head set SOLKEY_EXAMPLES to $PWD/tests/migration/solkey/keyext.solidity.examples (the committed pinned snapshot), then run test_inventory.py, check.py and scripts/coord-tools/gate.sh full; validate documentation paths/navigation. Preserve prototype commit 43dac7b74f45f0d985044d76f3beb2340be19a8b; no rollout or branch push is authorized."
   ]
 }
