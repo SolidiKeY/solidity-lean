@@ -35,6 +35,28 @@ each proof iteration. Documentation-only edits need path and link checks.
 | `node scripts/solidity-upstream.mjs` | Pinned solc tests on the typed interpreter, per pipeline; [runner documentation](solidity-upstream-tests.md) |
 
 
+## Before pushing
+
+The merge pre-gate runs `gate.sh touched` on your head merged onto current
+`origin/master`: it builds the modules you changed and the library modules that
+import them, with the coverage described in
+[`scripts/coord-tools/README.md`](../scripts/coord-tools/README.md). It is not a
+full build. Run the same check first:
+
+1. `git fetch origin master && git merge origin/master` (or a temporary worktree
+   with the merge), then `bash scripts/coord-tools/gate.sh touched` in that tree.
+   Fix failures there: the pre-gate rejects a head that builds only on an older
+   base, or only in the files it changed.
+2. A change to a module with many importers (for example `Solidity/Source/**`)
+   keeps existing statements: add the new form beside the old one as a versioned
+   pair (H57) and move the importers in the same head, or keep the old form until
+   they move.
+3. A gate, baseline or audit you add must pass on the merged head, not only on
+   your base: compute ratchet baselines from the merge base or regenerate them at
+   merge, and make audits re-runnable from committed scripts.
+
+Progress and status go into your result, never into shared documents.
+
 ## Toolchain and proofs
 
 Run from the repository root with the pinned `lean-toolchain`. Prefer per-file
