@@ -87,7 +87,7 @@ def certificate : Interface.SelectorBranchesCertificate program where
       branch_selected base frag yes yesFrag yesCore,branch_selected base frag no noFrag noCore⟩
   executed := executed
 
-/-- info: 'Solidity.Backend.AbiEntry.SelectorBranches.admitted' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiEntry.SelectorBranches.admitted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms admitted
 /-- info: 'Solidity.Backend.AbiEntry.SelectorBranches.whole_selected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms whole_selected
