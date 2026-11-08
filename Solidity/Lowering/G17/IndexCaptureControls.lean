@@ -200,6 +200,60 @@ theorem late_base_panics (p : Roadmap.Pipeline) :
       (.error (.revert (panicData .index)),rebound) := by
   cases p <;> rfl
 
+private def valueIndex : Source.Idx Ctx (.int .u256) := .there (.there (.there .here))
+private def beforeFailure : EMState sourceEnv Ctx := (locals,updated.2)
+private def writeBeforeFailure : RExpr sourceEnv Ctx (.int .u256) :=
+  .assign (.indexArray (.local .here) (by decide) (.const (Q.ofInt 0)) (by decide)) (.local valueIndex)
+private def failingBase : RExpr sourceEnv Ctx Aty :=
+  .cond (.compare .eq (.binary .div writeBeforeFailure
+      (.binary .sub (.local valueIndex) (.local valueIndex))) (.local valueIndex))
+    (.local .here) (.local (.there .here))
+private def failingIndex : RExpr sourceEnv Ctx (.int .u256) :=
+  .indexArray (.assign (.local .here) (.local (.there .here))) (.const (Q.ofInt 0)) (by decide)
+
+/-- A failed base retains its prior Source EM heap write and skips the index's caller rebind; rejects eager index effects or rollback of the evaluator's reached state. -/
+theorem base_failure_skips_index (p : Roadmap.Pipeline) :
+    (evalE (Preservation.MemoryBodyControls.glob p) Preservation.MemoryBodyControls.frame 16 failingBase).run source =
+      (.error (.revert (panicData .divZero)),beforeFailure) ∧
+    (evalE (Preservation.MemoryBodyControls.glob p) Preservation.MemoryBodyControls.frame 17
+      (.indexArray failingBase index rfl)).run source = (.error (.revert (panicData .divZero)),beforeFailure) ∧
+    (evalLoc (Preservation.MemoryBodyControls.glob p) Preservation.MemoryBodyControls.frame 17
+      (.indexArray failingBase (by decide) index rfl)).run source =
+      (.error (.revert (panicData .divZero)),beforeFailure) := by
+  have baseRun : (evalE (Preservation.MemoryBodyControls.glob p) Preservation.MemoryBodyControls.frame 16
+      failingBase).run source = (.error (.revert (panicData .divZero)),beforeFailure) := by
+    cases p <;> rfl
+  have indexRun : (evalE (Preservation.MemoryBodyControls.glob p) Preservation.MemoryBodyControls.frame 16
+      index).run beforeFailure =
+      (.ok (.val (.int 0 (by decide))),(beforeFailure.1.set .here (.memRef rfl 1),beforeFailure.2)) := by
+    cases p <;> rfl
+  have actual := source_capture_all (Preservation.MemoryBodyControls.glob p)
+    Preservation.MemoryBodyControls.frame 16 failingBase index rfl source beforeFailure _
+    (.error (.revert (panicData .divZero))) (.ok (.val (.int 0 (by decide)))) baseRun indexRun
+  exact ⟨baseRun,actual.1,actual.2 (by decide)⟩
+
+/-- An index panic after rebinding propagates with its reached Source EM state for reads and locations; rejects swallowed failures and discarded index effects. -/
+theorem index_failure_keeps_effects (p : Roadmap.Pipeline) :
+    (evalE (Preservation.MemoryBodyControls.glob p) Preservation.MemoryBodyControls.frame 9 failingIndex).run source =
+      (.error (.revert (panicData .index)),rebound) ∧
+    (evalE (Preservation.MemoryBodyControls.glob p) Preservation.MemoryBodyControls.frame 10
+      (.indexArray (.local .here : RExpr sourceEnv Ctx Aty) failingIndex rfl)).run source =
+      (.error (.revert (panicData .index)),rebound) ∧
+    (evalLoc (Preservation.MemoryBodyControls.glob p) Preservation.MemoryBodyControls.frame 10
+      (.indexArray (.local .here : RExpr sourceEnv Ctx Aty) (by decide) failingIndex rfl)).run source =
+      (.error (.revert (panicData .index)),rebound) := by
+  have baseRun : (evalE (Preservation.MemoryBodyControls.glob p) Preservation.MemoryBodyControls.frame 9
+      (.local .here : RExpr sourceEnv Ctx Aty)).run source = (.ok (.val (.memRef rfl 0)),source) := rfl
+  have indexRun : (evalE (Preservation.MemoryBodyControls.glob p) Preservation.MemoryBodyControls.frame 9
+      failingIndex).run source = (.error (.revert (panicData .index)),rebound) := by
+    cases p <;> rfl
+  have actual := source_capture_all (Preservation.MemoryBodyControls.glob p)
+    Preservation.MemoryBodyControls.frame 9 (.local .here : RExpr sourceEnv Ctx Aty) failingIndex rfl
+    source source rebound (.ok (.val (.memRef rfl 0))) (.error (.revert (panicData .index))) baseRun indexRun
+  exact ⟨indexRun,actual.1.trans rfl,(actual.2 (by decide)).trans rfl⟩
+
+#print axioms base_failure_skips_index
+#print axioms index_failure_keeps_effects
 #print axioms read_captured
 #print axioms write_captured
 #print axioms late_base_panics
