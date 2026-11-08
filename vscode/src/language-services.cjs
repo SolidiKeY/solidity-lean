@@ -80,12 +80,16 @@ function index(text,ast,project){
 }
 const plainType=s=>(s||'').replace(/ (?:storage|memory|calldata)(?: ref| pointer)?/g,'');
 function fallbackMembers(text,point){
-  const before=text.slice(0,offset(text,point)),match=/([A-Za-z_$][\w$]*)\s*\.\s*[\w$]*$/.exec(before);if(!match)return [];
-  const ts=require('./solidity-text.cjs').tokens(text).filter(t=>t.kind!=='comment'&&t.kind!=='string');
+  // Mask non-code tokens without moving UTF-16 offsets or line boundaries.
+  const all=require('./solidity-text.cjs').tokens(text);let code='',end=0;
+  for(const token of all)if(token.kind==='comment'||token.kind==='string'){code+=text.slice(end,token.start)+token.text.replace(/[^\r\n]/g,' ');end=token.end;}
+  code+=text.slice(end);
+  const before=code.slice(0,offset(text,point)),match=/([A-Za-z_$][\w$]*)\s*\.\s*[\w$]*$/.exec(before);if(!match)return [];
+  const ts=all.filter(t=>t.kind!=='comment'&&t.kind!=='string');
   const scopes=[];for(let i=0;i<ts.length;i++)if(['contract','library','interface','struct','enum'].includes(ts[i].text)&&ts[i+1]?.kind==='word'){
     const kind=ts[i].text,name=ts[i+1].text;let open=i+2;while(open<ts.length&&ts[open].text!=='{')open++;let depth=1,end=open+1;
     for(;end<ts.length&&depth;end++){if(ts[end].text==='{')depth++;if(ts[end].text==='}')depth--;}
-    scopes.push({kind,name,start:ts[open]?.start??text.length,end:ts[end-1]?.end??text.length,body:text.slice(ts[open]?.end,ts[end-1]?.start)});
+    scopes.push({kind,name,start:ts[open]?.start??text.length,end:ts[end-1]?.end??text.length,body:code.slice(ts[open]?.end,ts[end-1]?.start)});
   }
   let type=match[1],storage=false;
   if(type==='this'||type==='super'){const scope=scopes.find(s=>['contract','library','interface'].includes(s.kind)&&s.start<match.index&&s.end>match.index);type=scope?.name;}
