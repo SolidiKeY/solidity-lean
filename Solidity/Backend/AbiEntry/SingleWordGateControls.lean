@@ -37,7 +37,7 @@ theorem raw_success (fuel : Nat) :
   have full : ¬(wmod good.size).val<36 := by decide
   have valid : Solidity.AbiEntry.Kind.bool.valid (rawArgumentWord good).val=true := by decide
   refine ⟨by decide,by decide,?_,?_⟩
-  · simpa only [singleWordOutcome,if_neg full,wordGateOutcome,if_pos valid] using actual .bool good
+  · simpa only [written,singleWordOutcome,ite_eq_right full,wordGateOutcome,ite_eq_left valid] using actual .bool good
   · exact ⟨_,SingleWordGate.entry_success good fuel .bool (by decide) valid⟩
 
 theorem raw_dirty_rejection (fuel : Nat) :
@@ -46,7 +46,7 @@ theorem raw_dirty_rejection (fuel : Nat) :
   have full : ¬(wmod dirty.size).val<36 := by decide
   have invalid : ¬Solidity.AbiEntry.Kind.bool.valid (rawArgumentWord dirty).val=true := by decide
   have rejected : run (compiled .bool).code (machine dirty)=.revert := by
-    simpa only [singleWordOutcome,if_neg full,wordGateOutcome,if_neg invalid] using actual .bool dirty
+    simpa only [singleWordOutcome,ite_eq_right full,wordGateOutcome,ite_eq_right invalid] using actual .bool dirty
   exact ⟨rejected,(SingleWordGate.entry_rejection C 7 .bool label (compiled .bool)
     (SingleWordGate.selected C 7 .bool label) dirty fuel (machine dirty) (wmod dirty.size)
     rfl rfl (by decide)).mp rejected⟩
@@ -68,11 +68,11 @@ theorem full_word_fault :
   have full : ¬(wmod 39).val<36 := by decide
   change run (compileProg 7 (HeadGate.program C (singleWordParams .bool) label)) broken=
     (if (wmod 39).val<36 then .revert else .ok {broken with mem := upd broken.mem 8 (.val label)} 0) at head
-  rw [if_neg full] at head
+  rw [ite_eq_right full] at head
   change run (compileProg 7 (HeadGate.program C (singleWordParams .bool) label) ++
     compileProg 7 (WordGate.program C .bool label)) broken=.fault
   rw [run_append_ok head]
-  simp only [WordGate.program,UnsignedGate.program,dif_pos (by decide : 2<W),compileProg,compileStmt,
+  simp only [WordGate.program,UnsignedGate.program,dite_eq_left (by decide : 2<W),compileProg,compileStmt,
     UnsignedGate.condition_code]
   rfl
 
