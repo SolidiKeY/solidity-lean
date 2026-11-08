@@ -113,4 +113,84 @@ theorem exhaust_all_boolean_behavior_refused :
 #print axioms accept_all_boolean_refused
 #print axioms reject_all_boolean_behavior_refused
 #print axioms exhaust_all_boolean_behavior_refused
+
+/-! Guarded regression: sequential ABI heads must advance by one word and
+preserve parameter order; validating only the first boolean must not accept a
+malformed second head. These controls cover a two-value family, not general ABI
+progress or compiler correctness. -/
+def boolPairParams : List Param := [⟨.word .bool, .value, false⟩, ⟨.word .bool, .value, false⟩]
+def boolPairInput (a b : UInt8) : Input :=
+  ⟨List.replicate 35 0 ++ [a] ++ List.replicate 31 0 ++ [b], 128⟩
+def boolWord (b : Bool) : Word .bool := if b then trueWord else falseWord
+def boolByte (b : Bool) : UInt8 := if b then 1 else 0
+def boolPairResult (a b : Bool) : Entries boolPairParams :=
+  .cons (.val (.word (boolWord a))) (.cons (.val (.word (boolWord b))) .nil)
+
+theorem bool_pair_success (a b : Bool) (fuel : Nat) :
+    entry (boolPairInput (boolByte a) (boolByte b)) (fuel + 2) boolPairParams =
+      .ok (boolPairResult a b) := by
+  cases a <;> cases b <;> rfl
+
+theorem bool_pair_malformed_first (fuel : Nat) :
+    entry (boolPairInput 2 1) (fuel + 2) boolPairParams = .error .revert := by
+  rfl
+
+theorem bool_pair_malformed_second (fuel : Nat) :
+    entry (boolPairInput 1 2) (fuel + 2) boolPairParams = .error .revert := by
+  rfl
+
+theorem bool_pair_truncated (fuel : Nat) :
+    entry ⟨(boolPairInput 1 0).data.take 67, 128⟩ (fuel + 2) boolPairParams =
+      .error .revert := by
+  rfl
+
+theorem bool_pair_insufficient_fuel (a b : Bool) :
+    entry (boolPairInput (boolByte a) (boolByte b)) 1 boolPairParams = .error .fuel := by
+  cases a <;> cases b <;> rfl
+
+/-- Exact observations on one shared decoder, including both head validators. -/
+def BooleanPairBehavior (decode : Input → Nat → Except Fail (Entries boolPairParams)) : Prop :=
+  (∀ a b fuel, decode (boolPairInput (boolByte a) (boolByte b)) (fuel + 2) =
+    .ok (boolPairResult a b)) ∧
+  (∀ fuel, decode (boolPairInput 2 1) (fuel + 2) = .error .revert) ∧
+  (∀ fuel, decode (boolPairInput 1 2) (fuel + 2) = .error .revert) ∧
+  (∀ fuel, decode ⟨(boolPairInput 1 0).data.take 67, 128⟩ (fuel + 2) = .error .revert) ∧
+  (∀ a b, decode (boolPairInput (boolByte a) (boolByte b)) 1 = .error .fuel)
+
+theorem actual_pair_behavior : BooleanPairBehavior (fun I fuel => entry I fuel boolPairParams) := by
+  exact ⟨bool_pair_success, bool_pair_malformed_first, bool_pair_malformed_second,
+    bool_pair_truncated, bool_pair_insufficient_fuel⟩
+
+/-- A fixed result cannot implement the ordered pair's success and refusal observations. -/
+theorem constant_pair_behavior_refused (result : Except Fail (Entries boolPairParams)) :
+    ¬ BooleanPairBehavior (fun _ _ => result) := by
+  intro h
+  have impossible := (h.1 true false 0).symm.trans (h.2.2.1 0)
+  cases impossible
+
+/-- Deliberately wrong decoder: retain entry's refusals but reverse its outputs. -/
+def swapPairResult : Entries boolPairParams → Entries boolPairParams
+  | .cons first (.cons second .nil) => .cons second (.cons first .nil)
+
+def swappedPairDecoder (I : Input) (fuel : Nat) : Except Fail (Entries boolPairParams) :=
+  (entry I fuel boolPairParams).map swapPairResult
+
+def firstPairWord : Entries boolPairParams → Nat
+  | .cons (.val (.word word)) _ => word.val
+  | _ => 2
+
+theorem swapped_pair_behavior_refused : ¬ BooleanPairBehavior swappedPairDecoder := by
+  intro h
+  let observe : Except Fail (Entries boolPairParams) → Nat := fun result =>
+    match result with
+    | .ok values => firstPairWord values
+    | .error _ => 2
+  have impossible := congrArg observe (h.1 true false 0)
+  change (0 : Nat) = 1 at impossible
+  cases impossible
+
+#print axioms swapped_pair_behavior_refused
+#print axioms bool_pair_success
+#print axioms actual_pair_behavior
+#print axioms constant_pair_behavior_refused
 end Solidity.H62.AuditLanguage
