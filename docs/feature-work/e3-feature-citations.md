@@ -115,10 +115,15 @@ settings, expected outputs or pins:
 ```sh
 python3 -I tests/sol-numeric-literals/generate-fixtures.py --check
 node scripts/check-feature-citations-solc.mjs "$SOLJSON_0838"
+python3 -I scripts/check-feature-citations-observations.py   --output tests/sol-numeric-literals/evidence/lean-fixtures.actual.json
 python3 -I tests/sol-numeric-literals/differential.py
 ```
 
-The original checker verifies the exact compiler SHA256 and version. These
+The observation-export command evaluates the imported observation definitions
+fresh in a temporary Lean query, even when all imported artifacts are cached.
+It supplies the ignored input required by differential.py; no expected fixture
+is copied into that input. The original checker verifies the exact compiler
+SHA256 and version. These
 commands validate finite AST/numeric observations, not EVM execution or universal
 compiler parity.
 
@@ -137,12 +142,19 @@ model-to-solc citation does not close the general-agreement gap.
 ### Coordinator CI registration fragment
 
 Place after library/example builds; do not change another lane's workflow here.
+The explicit fetch supplies the old manifest required by the compatibility test
+on a default shallow checkout. Regenerate the current integration tree's
+document catalog with `python3 scripts/check-doc-navigation.py --write` after
+staging this document, then run the navigation check before committing it.
+The catalog and checker postdate this pinned base; do not backport a catalog
+containing archived legacy evidence from the frozen tree.
 
 ```yaml
 - name: Check feature theorem citations
   env:
     LEAN_NUM_THREADS: '1'
   run: |
+    git fetch --no-tags --depth=1 origin a0a9ca15ba35fd6e8d9a9be10e4b6b45dbf45d3e
     python3 -I scripts/ci/restore-lake-artifacts.py
     python3 -I scripts/check-feature-citations-compat.test.py
     python3 -I scripts/check-feature-citations.test.py
@@ -159,8 +171,9 @@ F4's symbolic storage, F5's coarse failures and F6's fragment restriction.
 Citations do not discharge F7's witness-build problem or F9's decision residue.
 No theorem statement, proof budget, axiom, premise or exclusion is changed.
 
-G00/G03 generated blocks remain coordinator-owned and must be regenerated from
-the eventual integrated inputs. Routing/staging is not gate acceptance.
+G00/G03 blocks are regenerated with their unchanged existing generators under
+the E3-Q2/H82 doc-fix authorization. Regenerate them again from the eventual
+integrated inputs. Routing/staging is not gate acceptance.
 Library/full gates and independent final reviews are separate from name lookup.
 
 Execution receipts, logs, timings, reviews and handoffs belong in the
