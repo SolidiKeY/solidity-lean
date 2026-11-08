@@ -38,7 +38,7 @@ function parse(args) {
   const options={trials:5,warmups:1,workers:[1,2,4],obligations:8,timeoutMs:300000,operationTimeoutMs:60000,targets:['dafny','local'],cache:['none','basic'],trace:'on',suite:'full'};
   const keys={'--code':'code','--dafny':'dafny','--dafny-extension':'dafnyExtension','--dotnet':'dotnet','--output':'output',
     '--trials':'trials','--warmups':'warmups','--workers':'workers','--obligations':'obligations','--timeout-ms':'timeoutMs','--operation-timeout-ms':'operationTimeoutMs','--targets':'targets','--cache':'cache','--trace':'trace',
-    '--memory-reserve-mib':'memoryReserveMiB','--memory-max-mib':'memoryMaxMiB','--suite':'suite','--menu-trust':'menuTrust'};
+    '--memory-reserve-mib':'memoryReserveMiB','--memory-max-mib':'memoryMaxMiB','--suite':'suite','--menu-trust':'menuTrust','--menu-recovery-from':'menuRecoveryFrom'};
   for(let i=0;i<args.length;i++) {
     if(args[i]==='--help') return {help:true};
     const key=keys[args[i]];if(!key||!args[i+1]||args[i+1].startsWith('--')) throw new Error('Invalid option '+args[i]);
@@ -56,7 +56,8 @@ function parse(args) {
   if(options.obligations>1000||options.trials>100||options.warmups>10)throw new Error('Excessive benchmark dimensions');
   if(!['on','off'].includes(options.trace))throw new Error('Invalid trace');
   if(!['contribution-menus','verification-time-limit','full','benchmark','visual','commands','custom-commands','custom-default-commands','custom-import-actions','compiler-output','dafny-compiler-output','dafny-command-output','output-lifecycle','testing-symbols','trace-unavailable','trace-visibility','trace-light-show','proof-help','proof-hover'].includes(options.suite))throw new Error('Invalid suite');
-  if(options.menuTrust!==undefined&&(options.menuTrust!=='transitions'||options.suite!=='contribution-menus'))throw Error('Native trust transitions require contribution-menus');
+  if(options.menuTrust!==undefined&&(!['transitions','recovery'].includes(options.menuTrust)||options.suite!=='contribution-menus'))throw Error('Native trust transitions require contribution-menus');
+  if((options.menuTrust==='recovery')!==!!options.menuRecoveryFrom)throw Error('Recovery requires explicit predecessor directory and recovery mode');
   if(options.suite==='contribution-menus'&&(options.workers.some(w=>w!==1)||options.obligations!==1||options.trials!==1||options.warmups!==0||options.trace!=='on'))throw Error('Menu capture requires single serial trial, one worker/obligation and protocol');
   if(options.suite==='verification-time-limit'&&(options.trace!=='on'||options.workers.some(w=>w!==1)||options.obligations!==1))throw Error('Time-limit probe requires protocol, one worker and one obligation');
   if(options.suite==='testing-symbols'&&options.trace==='off')throw Error('Compiler Testing absence assertions require protocol');
@@ -107,9 +108,10 @@ async function launch(config,options) {
   if(['proof-help','proof-hover'].includes(options.suite))settings['solidityLean.counterexamples']=true;
   if(config.target==='local'){settings['solidityLean.workers']=config.workers;settings['solidityLean.automaticVerification']=options.suite==='visual'?'onchange':'never';}
   mkdirSync(join(config.workspace,'.vscode'),{recursive:true});
-  writeFileSync(join(config.workspace,'.vscode/settings.json'),JSON.stringify(settings));
+  if(!config.menuRecovery)writeFileSync(join(config.workspace,'.vscode/settings.json'),JSON.stringify(settings));
   const runtimeEnvironment=Object.fromEntries(['PATH','SOLKEY_ROOT','LEAN_NUM_THREADS','XDG_CACHE_HOME'].filter(k=>process.env[k]!==undefined).map(k=>[k,process.env[k]]));
   if(['compiler-output','dafny-compiler-output','dafny-command-output'].includes(options.suite)){config.foreignWorkspace=join(config.dir,'unrelated-resource');mkdirSync(join(config.foreignWorkspace,'.vscode'),{recursive:true});writeFileSync(join(config.foreignWorkspace,'.vscode/settings.json'),'{}');config.workspaceFile=join(config.dir,'output.code-workspace');writeFileSync(config.workspaceFile,JSON.stringify({folders:[{name:'Primary',path:config.workspace},{name:'Unrelated',path:config.foreignWorkspace}],...(['dafny-compiler-output','dafny-command-output'].includes(options.suite)?{settings}: {})}));}
+  if(config.menuRecovery){config.workspaceFile=join(config.dir,'recovery.code-workspace');writeFileSync(config.workspaceFile,JSON.stringify({folders:[{path:config.workspace}],settings}));}
   const hostConfig={...config,observedExtensionPath:config.target==='local'?resolve(repo,'vscode'):resolve(options.dafnyExtension),backendPath:config.target==='local'?repo:undefined,dafnyExecutable:config.target==='dafny'?resolve(options.dafny):undefined,dotnetExecutable:config.target==='dafny'?resolve(options.dotnet):undefined,dotnetVersion:config.target==='dafny'?spawnSync(resolve(options.dotnet),['--version'],{encoding:'utf8',timeout:5000}).stdout?.trim():undefined,suite:options.suite||'full',runtimeEnvironment,recordProtocol:options.trace!=='off',obligations:options.obligations,operationTimeoutMs:options.operationTimeoutMs};
   if(options.suite==='verification-time-limit'&&config.target==='dafny')hostConfig.timeLimitReferenceImages=require('./verification-limit.cjs').referenceImages(resolve(options.dafny));
   const configPath=join(config.dir,'config.json');writeFileSync(configPath,JSON.stringify(hostConfig));
@@ -223,6 +225,7 @@ async function launch(config,options) {
     probe.observedDuringVerification=probe.started>=begin&&probe.finished<=end;
     if(result?.metrics&&probe.observedDuringVerification&&probe.focusedEditor)result.metrics.rendererKeyRoundTripMs=probe.roundTripMs;
   }
+  if(config.menuRecovery)try{require('./menu-lifecycle.cjs').verifyRecoveryReceipts(config.menuRecovery);}catch(e){error=e.message;}
   let rejectedResult,validationErrors;
   if(result){const checked=require('./core.cjs').validateHostResult(result,validationConfig(config,hostConfig));if(checked.error){error=checked.error;rejectedResult=checked.rejectedResult;validationErrors=checked.validationErrors;result=undefined;}}
   if(cleanup.refused.length)error='Owned process identity changed during cleanup; no subsequent trial admitted';
@@ -288,6 +291,7 @@ async function main(args=process.argv.slice(2)) {
       const dir=join(output,`${target}-w${workers}-${cache}-${trial<0?'warmup'+(-trial):trial}`);
       mkdirSync(dir,{recursive:true});
       const config={dir,target,workers,cache,trial,warmup:trial<0,workspace:join(dir,'workspace'),result:join(dir,'result.json'),events:join(dir,'events.jsonl'),trace:join(dir,'lsp.jsonl')};
+      if(options.menuTrust==='recovery'){config.menuRecovery=require('./menu-lifecycle.cjs').recoveryPredecessor(resolve(options.menuRecoveryFrom),target);config.workspace=config.menuRecovery.workspace;}
       process.stdout.write(`Running ${target}, workers=${workers}, cache=${cache}, trial=${trial}\n`);
       runs.push(await launch(config,options));save();
       if(['interrupted','resource-stop'].includes(runs.at(-1).status))throw new Error('Run stopped: '+runs.at(-1).status);

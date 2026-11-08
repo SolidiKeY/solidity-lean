@@ -14,13 +14,13 @@ function beginHostLifecycle(config,trusted){
  const lifecycle=(event,data={})=>appendFileSync(file,JSON.stringify({...identity,event,wallTime:Date.now(),monotonicMs:performance.now(),...data})+'\n');
  lifecycle('host.start',{previousHostRecorded:previous,trusted});
  if(previous)throw Error('Native trust host restarted; refuse replacing original source session/evidence');
- return lifecycle;
+ lifecycle.identity={...identity,event:'host.start',wallTime:Date.now(),previousHostRecorded:previous,trusted};return lifecycle;
 }
 
 async function run() {
   const vscode = require('vscode');
   const config = JSON.parse(readFileSync(process.env.PARITY_HOST_CONFIG,'utf8'));
-  if(config.menuTrust){const lifecycle=beginHostLifecycle(config,vscode.workspace.isTrusted);process.once('exit',code=>lifecycle('host.exit',{code}));process.on('uncaughtExceptionMonitor',error=>lifecycle('host.uncaught',{message:error.message}));}
+  if(config.menuTrust){const lifecycle=beginHostLifecycle(config,vscode.workspace.isTrusted);if(config.menuTrust==='recovery')config.menuRecoveryHost=lifecycle.identity;process.once('exit',code=>lifecycle('host.exit',{code}));process.on('uncaughtExceptionMonitor',error=>lifecycle('host.uncaught',{message:error.message}));}
   config.hostFilesystemCapability=require('./filesystem.cjs').recursiveCapability(config.dir);writeFileSync(join(config.dir,'host-filesystem-capability.json'),JSON.stringify(config.hostFilesystemCapability));
   // Desktop VS Code may resolve a login-shell PATH. Preserve the explicitly
   // selected backend toolchain rather than silently switching installations.
@@ -119,7 +119,7 @@ async function run() {
     }
     }
     if(config.suite==='contribution-menus'){
-      await scenario('native-contribution-menus',()=>require('./menu-lifecycle.cjs').run({vscode,config,events,sessionFor}));
+      await scenario(config.menuTrust==='recovery'?'native-contribution-menu-recovery':'native-contribution-menus',()=>require('./menu-lifecycle.cjs').run({vscode,config,events,sessionFor}));
     }else if(config.suite==='verification-time-limit'){
       await scenario('native-verification-time-limit',()=>require('./verification-limit.cjs').run({vscode,config,api,events,until}));
     }else if(config.suite==='testing-symbols'){

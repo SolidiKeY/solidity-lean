@@ -81,6 +81,12 @@
       "decision": "Incoming user answer,2026-11-07",
       "status": "implemented as versioned ledger-returning companions; full parity acceptance remains open",
       "authorization": "Factor reader/private forwarding bodies into shared internals and add versioned ledger-returning companions. Prove forget equalities preserving old signatures/defaults/results, no duplicate copies H112, no budget changes. Further refactors on these terms pre-approved; do not re-file this family."
+    },
+    {
+      "question": "Q-MENU-TRUST-HOST-EPOCH-01",
+      "decision": "Direct send_user_message_question_reply,2026-11-08",
+      "status": "answered; separate recovery harness added, native admission remains refused",
+      "authorization": "Authorize separate new-session recovery; retain original failure and all budgets."
     }
   ]
 }

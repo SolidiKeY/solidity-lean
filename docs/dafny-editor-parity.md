@@ -2235,3 +2235,26 @@ framed request/reply and stale/foreign/late controls are explicitly injected.
 Local Change/Save/cancellation outcomes are also injected service controls,
 while native local execution stays Never/compiler-only. No row completion,
 resource/semantic waiver or kernel/compiler/EVM correspondence follows.
+
+
+### Separate trust-recovery companion
+
+A direct human reply authorizes a separately judged new-host/document-session
+recovery while retaining the failed same-session case and every budget. The
+existing menu runner has an explicit `--menu-trust recovery` companion with
+`--menu-recovery-from` pointing to the retained original report. It binds raw
+failed receipt hashes, the original five-phase menu prefix and native grant,
+the attempted deny request and completed owned cleanup. New observations must
+retain the exact source URI/version/hash, use distinct host/document identities,
+start publicly untrusted and capture real mouse restoration plus menu endpoints.
+The original six-phase same-session validator is unchanged. This companion is
+not a substitute for either independent row judgment or original restoration.
+
+The stricter predecessor check refuses the saved native initial trust menus:
+separator rows have `className:null`, which does not satisfy the existing
+attribute predicate. No new native recovery was launched. An attempted change
+to drop that predecessor check was rejected by automatic approval review and
+was not applied. Q-MENU-RECOVERY-PREDECESSOR-01 asks whether a distinct failed-
+predecessor reference contract is authorized; strict admission remains in force
+until answered. Injected positive/negative controls establish harness behavior
+only, not native recovery, screenshots, raster correspondence or parity.
