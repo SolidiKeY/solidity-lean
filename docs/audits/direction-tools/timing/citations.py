@@ -4,6 +4,7 @@ python3 docs/audits/direction-tools/timing/citations.py --out DIR
 An unavailable source remains an explicit gap, never an invented figure.
 """
 import argparse,hashlib,json,pathlib,re,urllib.error,urllib.request
+HERE=pathlib.Path(__file__).resolve().parent
 SOURCES={
  'CakeML': 'https://raw.githubusercontent.com/CakeML/cakeml/b3e6ea34ca1aed91a57703a30549260ce6f6448e/build-instructions.sh',
  'CompCert': 'https://compcert.org/man/manual002.html',
@@ -25,6 +26,13 @@ def main():
                 row['boundary']='manual installation/build duration; do not normalize without matching workload and resources'
         except (urllib.error.URLError,TimeoutError) as e:
             row['status']='unavailable'; row['error']=str(e); row['settling_measurement']='retrieve a published proof-build timing with source revision, hardware and workload boundary'
+        if project=='CompCert':
+            cited=json.loads((HERE/'cited-inputs.json').read_text())[project]
+            denied=row.get('status')=='unavailable'
+            row.update(cited); row['status']='cited-public-web-extract' if denied else 'cited-source-retrieved'
+            if denied: row['shell_fetch_error']=row.pop('error')
+            row['seconds']=int(re.search(r'about (\d+) minutes',cited['excerpt'])[1])*60
+            row.pop('settling_measurement',None); row.pop('excerpts',None)
         rows.append(row)
     args.out.mkdir(parents=True,exist_ok=True); (args.out/'published-times.json').write_text(json.dumps(rows,indent=2)+'\n'); print(json.dumps(rows,indent=2))
 if __name__=='__main__': main()

@@ -7,30 +7,34 @@ use the repository host scope/12 GiB reserve policy there. No relaxed defaults.
 External logs contain full profiler output; small result JSON is in --work.
 The caller MUST hold the shared writer lock. No Lean sources are written.
 """
-import argparse,json,os,pathlib,re,signal,subprocess,time
+import argparse,json,os,pathlib,re,signal,shutil,subprocess,time
 CLOUD_VM_OPT_IN=False
 HERE=pathlib.Path(__file__).resolve().parent; ROOT=HERE.parents[3]
 def command(args,cwd,log,timeout=600):
     if not CLOUD_VM_OPT_IN: raise RuntimeError('cloud-only runner requires explicit --cloud-vm; host resource policy is not implemented')
-    start=time.monotonic(); peak=0; reason=None
+    if int(re.search(r'^SwapTotal:\s+(\d+)',pathlib.Path('/proc/meminfo').read_text(),re.M)[1])!=0: raise RuntimeError('cloud runner requires swap disabled')
+    start=time.monotonic(); peak=0; reason=None; peak_workers=0
     with log.open('w') as f:
         proc=subprocess.Popen(args,cwd=cwd,env=dict(os.environ,LEAN_NUM_THREADS='1'),stdout=f,stderr=subprocess.STDOUT,start_new_session=True)
         while proc.poll() is None:
             # Conservative summed RSS of this command process group, including
             # shared pages; stop at 12 GiB or below 3 GiB available OS memory.
-            rss=0
+            rss=0; workers=0
             for entry in pathlib.Path('/proc').iterdir():
                 if not entry.name.isdigit(): continue
                 try:
                     if os.getpgid(int(entry.name))!=proc.pid: continue
                     status=(entry/'status').read_text()
+                    if re.search(r'^Name:\s+lean$',status,re.M): workers+=1
                     match=re.search(r'^VmRSS:\s+(\d+)',status,re.M)
                     if match: rss+=int(match.group(1))
                 except (OSError,ProcessLookupError): pass
-            peak=max(peak,rss)
+            peak=max(peak,rss); peak_workers=max(peak_workers,workers)
             available=int(re.search(r'MemAvailable:\s+(\d+)',pathlib.Path('/proc/meminfo').read_text())[1])
             if time.monotonic()-start>timeout: reason='timeout'
             elif rss>12*1024**2 or available<3*1024**2: reason='memory_guard'
+            elif workers>1: reason='concurrent_lean_guard'
+            elif shutil.disk_usage(cwd).free<2*1024**3: reason='disk_guard'
             if reason:
                 try: os.killpg(proc.pid,signal.SIGTERM)
                 except ProcessLookupError: pass
@@ -40,7 +44,7 @@ def command(args,cwd,log,timeout=600):
             try: proc.wait(timeout=0.1)
             except subprocess.TimeoutExpired: pass
         code=proc.wait() if reason is None else (124 if reason=='timeout' else 125)
-    return {'command':args,'cwd':str(cwd),'exit_code':code,'wall_seconds':time.monotonic()-start,'peak_sampled_group_rss_kib':peak,'stop_reason':reason,'log':str(log)}
+    return {'command':args,'cwd':str(cwd),'exit_code':code,'wall_seconds':time.monotonic()-start,'peak_sampled_group_rss_kib':peak,'peak_sampled_lean_workers':peak_workers,'stop_reason':reason,'log':str(log)}
 def main():
     global ROOT, CLOUD_VM_OPT_IN
     ap=argparse.ArgumentParser(); ap.add_argument('--cloud-vm',action='store_true',help='explicit opt-in to H232 cloud VM isolation; unsupported on hosts'); ap.add_argument('--profiles',action='store_true'); ap.add_argument('--repo',type=pathlib.Path,required=True); ap.add_argument('--work',type=pathlib.Path,required=True); args=ap.parse_args(); ROOT=args.repo.resolve()

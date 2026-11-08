@@ -22,10 +22,13 @@
     "project": "CompCert",
     "url": "https://compcert.org/man/manual002.html",
     "kind": "cited, not measured",
-    "seconds": null,
+    "seconds": 900,
     "comparable_to_serial_module_elaboration": false,
-    "status": "unavailable",
-    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
-    "settling_measurement": "retrieve a published proof-build timing with source revision, hardware and workload boundary"
+    "status": "cited-public-web-extract",
+    "section": "2.3 Installation, Building the system",
+    "retrieval": "public-web tool, 2026-11-08; shell proxy cannot reach host",
+    "excerpt": "This step can take about 15 minutes on a recent machine with a single core",
+    "boundary": "make all: proof checking plus extraction and OCaml compiler construction; current manual not pinned source or matched hardware",
+    "shell_fetch_error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
   }
 ]

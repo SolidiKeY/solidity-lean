@@ -19,7 +19,17 @@
     "lean": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)",
     "lake": "Lake version 5.0.0-src+797c613 (Lean version 4.24.0)"
   },
-  "measurement_environment": null,
+  "measurement_environment": {
+    "metadata_scope": "latest runner invocation only; resumed rows retain original per-observation metadata or null",
+    "cloud_vm_opt_in": true,
+    "isolation": "H232 cloud VM; no systemd scope",
+    "swap_total_kib": 0,
+    "lean_num_threads": 1,
+    "rss_stop_kib": 12582912,
+    "available_memory_stop_kib": 3145728,
+    "measurement_checkout": "/workspace/da-timing-work/clean",
+    "tracked_source_clean": true
+  },
   "areas": [
     {
       "area": "Backend",
@@ -30,6 +40,9 @@
       "unmarked_not_proven_handwritten_lines": 274346,
       "unresolved_chain_agreement_lines": 2219,
       "passing_samples": 4,
+      "size_stratified_passing_samples": 4,
+      "size_stratified_seconds_per_kloc": 37.25538195678994,
+      "targeted_passing_samples": 0,
       "sample_lines": 486,
       "sample_wall_seconds": 18.10611563099991,
       "sample_seconds_per_kloc": 37.25538195678994,
@@ -44,6 +57,9 @@
       "unmarked_not_proven_handwritten_lines": 188247,
       "unresolved_chain_agreement_lines": 1876,
       "passing_samples": 4,
+      "size_stratified_passing_samples": 4,
+      "size_stratified_seconds_per_kloc": 212.02752815404014,
+      "targeted_passing_samples": 0,
       "sample_lines": 396,
       "sample_wall_seconds": 83.96290114899989,
       "sample_seconds_per_kloc": 212.02752815404014,
@@ -57,10 +73,13 @@
       "modules": 388,
       "unmarked_not_proven_handwritten_lines": 163247,
       "unresolved_chain_agreement_lines": 4533,
-      "passing_samples": 1,
-      "sample_lines": 64,
-      "sample_wall_seconds": 0.8063508310001453,
-      "sample_seconds_per_kloc": 12.59923173437727,
+      "passing_samples": 5,
+      "size_stratified_passing_samples": 4,
+      "size_stratified_seconds_per_kloc": 18.224064062735508,
+      "targeted_passing_samples": 1,
+      "sample_lines": 4736,
+      "sample_wall_seconds": 66.40841660000024,
+      "sample_seconds_per_kloc": 14.022047423986535,
       "reference_ratios": null,
       "verdict": "pending matched reference checks"
     },
@@ -71,10 +90,13 @@
       "modules": 716,
       "unmarked_not_proven_handwritten_lines": 103912,
       "unresolved_chain_agreement_lines": 318,
-      "passing_samples": 0,
-      "sample_lines": 0,
-      "sample_wall_seconds": 0,
-      "sample_seconds_per_kloc": null,
+      "passing_samples": 4,
+      "size_stratified_passing_samples": 4,
+      "size_stratified_seconds_per_kloc": 12.081494940186836,
+      "targeted_passing_samples": 0,
+      "sample_lines": 535,
+      "sample_wall_seconds": 6.463599792999958,
+      "sample_seconds_per_kloc": 12.081494940186836,
       "reference_ratios": null,
       "verdict": "pending matched reference checks"
     },
@@ -85,10 +107,13 @@
       "marker_associated_unresolved_lines": 455,
       "modules": 512,
       "unmarked_not_proven_handwritten_lines": 97875,
-      "passing_samples": 0,
-      "sample_lines": 0,
-      "sample_wall_seconds": 0,
-      "sample_seconds_per_kloc": null,
+      "passing_samples": 5,
+      "size_stratified_passing_samples": 4,
+      "size_stratified_seconds_per_kloc": 6.886125185129129,
+      "targeted_passing_samples": 1,
+      "sample_lines": 4564,
+      "sample_wall_seconds": 21.62606307300007,
+      "sample_seconds_per_kloc": 4.738401199167412,
       "reference_ratios": null,
       "verdict": "pending matched reference checks"
     },
@@ -99,6 +124,9 @@
       "unmarked_not_proven_handwritten_lines": 62806,
       "unresolved_chain_agreement_lines": 1940,
       "passing_samples": 0,
+      "size_stratified_passing_samples": 0,
+      "size_stratified_seconds_per_kloc": null,
+      "targeted_passing_samples": 0,
       "sample_lines": 0,
       "sample_wall_seconds": 0,
       "sample_seconds_per_kloc": null,
@@ -112,10 +140,13 @@
       "modules": 356,
       "unmarked_not_proven_handwritten_lines": 52622,
       "unresolved_chain_agreement_lines": 8728,
-      "passing_samples": 0,
-      "sample_lines": 0,
-      "sample_wall_seconds": 0,
-      "sample_seconds_per_kloc": null,
+      "passing_samples": 7,
+      "size_stratified_passing_samples": 4,
+      "size_stratified_seconds_per_kloc": 164.15041091558456,
+      "targeted_passing_samples": 3,
+      "sample_lines": 1165,
+      "sample_wall_seconds": 443.43525435400034,
+      "sample_seconds_per_kloc": 380.63111961716766,
       "reference_ratios": null,
       "verdict": "pending matched reference checks"
     },
@@ -126,10 +157,13 @@
       "modules": 262,
       "unmarked_not_proven_handwritten_lines": 45638,
       "unresolved_chain_agreement_lines": 3777,
-      "passing_samples": 0,
-      "sample_lines": 0,
-      "sample_wall_seconds": 0,
-      "sample_seconds_per_kloc": null,
+      "passing_samples": 5,
+      "size_stratified_passing_samples": 4,
+      "size_stratified_seconds_per_kloc": 33.66801543019504,
+      "targeted_passing_samples": 1,
+      "sample_lines": 995,
+      "sample_wall_seconds": 25.336014566999893,
+      "sample_seconds_per_kloc": 25.46333122311547,
       "reference_ratios": null,
       "verdict": "pending matched reference checks"
     },
@@ -138,10 +172,13 @@
       "lines": 45857,
       "modules": 279,
       "unmarked_not_proven_handwritten_lines": 45857,
-      "passing_samples": 0,
-      "sample_lines": 0,
-      "sample_wall_seconds": 0,
-      "sample_seconds_per_kloc": null,
+      "passing_samples": 4,
+      "size_stratified_passing_samples": 4,
+      "size_stratified_seconds_per_kloc": 7.506335655642206,
+      "targeted_passing_samples": 0,
+      "sample_lines": 514,
+      "sample_wall_seconds": 3.858256527000094,
+      "sample_seconds_per_kloc": 7.506335655642206,
       "reference_ratios": null,
       "verdict": "pending matched reference checks"
     },
@@ -151,10 +188,13 @@
       "modules": 82,
       "unmarked_not_proven_handwritten_lines": 25678,
       "unresolved_chain_agreement_lines": 112,
-      "passing_samples": 0,
-      "sample_lines": 0,
-      "sample_wall_seconds": 0,
-      "sample_seconds_per_kloc": null,
+      "passing_samples": 4,
+      "size_stratified_passing_samples": 4,
+      "size_stratified_seconds_per_kloc": 6.542551741106919,
+      "targeted_passing_samples": 0,
+      "sample_lines": 1012,
+      "sample_wall_seconds": 6.6210623620002025,
+      "sample_seconds_per_kloc": 6.542551741106919,
       "reference_ratios": null,
       "verdict": "pending matched reference checks"
     }
@@ -229,18 +269,320 @@
   ],
   "build_workloads": {
     "Bridge": {
+      "area_counts": {
+        "Backend": {
+          "lines": 16965,
+          "modules": 114
+        },
+        "Bridge": {
+          "lines": 64746,
+          "modules": 524
+        },
+        "Calculus": {
+          "lines": 102084,
+          "modules": 207
+        },
+        "Core": {
+          "lines": 3850,
+          "modules": 15
+        },
+        "Evm": {
+          "lines": 28611,
+          "modules": 123
+        },
+        "Frontend": {
+          "lines": 8475,
+          "modules": 17
+        },
+        "Hash": {
+          "lines": 1647,
+          "modules": 2
+        },
+        "Language": {
+          "lines": 1272,
+          "modules": 1
+        },
+        "Lowering": {
+          "lines": 2603,
+          "modules": 19
+        },
+        "Other": {
+          "lines": 13671,
+          "modules": 75
+        },
+        "Precompiles": {
+          "lines": 2072,
+          "modules": 11
+        },
+        "Roadmap": {
+          "lines": 1545,
+          "modules": 2
+        },
+        "Semantics": {
+          "lines": 15949,
+          "modules": 35
+        },
+        "Source": {
+          "lines": 11359,
+          "modules": 27
+        },
+        "Storage": {
+          "lines": 2188,
+          "modules": 11
+        },
+        "Syntax": {
+          "lines": 14545,
+          "modules": 21
+        },
+        "Theory": {
+          "lines": 4139,
+          "modules": 8
+        },
+        "Tools": {
+          "lines": 915,
+          "modules": 5
+        },
+        "Typing": {
+          "lines": 6740,
+          "modules": 11
+        },
+        "Yul": {
+          "lines": 23622,
+          "modules": 165
+        }
+      },
       "reachable_modules": 1393,
       "roots": [
         "SolidityBridge"
       ]
     },
     "checkpoint": {
+      "area_counts": {
+        "Automation": {
+          "lines": 84,
+          "modules": 3
+        },
+        "Backend": {
+          "lines": 279224,
+          "modules": 2015
+        },
+        "Calculus": {
+          "lines": 169330,
+          "modules": 388
+        },
+        "Core": {
+          "lines": 4284,
+          "modules": 18
+        },
+        "Counterexamples": {
+          "lines": 413,
+          "modules": 4
+        },
+        "Evm": {
+          "lines": 45857,
+          "modules": 279
+        },
+        "Frontend": {
+          "lines": 102235,
+          "modules": 512
+        },
+        "Hash": {
+          "lines": 2265,
+          "modules": 6
+        },
+        "Language": {
+          "lines": 5964,
+          "modules": 8
+        },
+        "Lowering": {
+          "lines": 104250,
+          "modules": 716
+        },
+        "Optimizer": {
+          "lines": 6658,
+          "modules": 16
+        },
+        "Other": {
+          "lines": 7530,
+          "modules": 9
+        },
+        "Precompiles": {
+          "lines": 2072,
+          "modules": 11
+        },
+        "Roadmap": {
+          "lines": 4728,
+          "modules": 20
+        },
+        "Semantics": {
+          "lines": 25790,
+          "modules": 82
+        },
+        "SolcValidation": {
+          "lines": 7626,
+          "modules": 30
+        },
+        "Solkey": {
+          "lines": 231,
+          "modules": 4
+        },
+        "SortCheck": {
+          "lines": 1281,
+          "modules": 3
+        },
+        "Source": {
+          "lines": 50041,
+          "modules": 262
+        },
+        "Stipend": {
+          "lines": 274,
+          "modules": 1
+        },
+        "Storage": {
+          "lines": 4049,
+          "modules": 21
+        },
+        "Syntax": {
+          "lines": 14545,
+          "modules": 21
+        },
+        "Theory": {
+          "lines": 8890,
+          "modules": 25
+        },
+        "Tools": {
+          "lines": 8575,
+          "modules": 31
+        },
+        "Typing": {
+          "lines": 6832,
+          "modules": 12
+        },
+        "Yul": {
+          "lines": 197439,
+          "modules": 1827
+        }
+      },
       "reachable_modules": 6324,
       "roots": [
         "Solidity"
       ]
     },
     "full": {
+      "area_counts": {
+        "Automation": {
+          "lines": 84,
+          "modules": 3
+        },
+        "Backend": {
+          "lines": 279224,
+          "modules": 2015
+        },
+        "Calculus": {
+          "lines": 169330,
+          "modules": 388
+        },
+        "Core": {
+          "lines": 4284,
+          "modules": 18
+        },
+        "Counterexamples": {
+          "lines": 413,
+          "modules": 4
+        },
+        "Evm": {
+          "lines": 45857,
+          "modules": 279
+        },
+        "Examples": {
+          "lines": 61471,
+          "modules": 356
+        },
+        "Frontend": {
+          "lines": 102235,
+          "modules": 512
+        },
+        "Hash": {
+          "lines": 2265,
+          "modules": 6
+        },
+        "Language": {
+          "lines": 5964,
+          "modules": 8
+        },
+        "Lowering": {
+          "lines": 104250,
+          "modules": 716
+        },
+        "Optimizer": {
+          "lines": 6658,
+          "modules": 16
+        },
+        "Other": {
+          "lines": 7930,
+          "modules": 13
+        },
+        "Precompiles": {
+          "lines": 2072,
+          "modules": 11
+        },
+        "Roadmap": {
+          "lines": 4728,
+          "modules": 20
+        },
+        "Semantics": {
+          "lines": 25790,
+          "modules": 82
+        },
+        "SolcValidation": {
+          "lines": 7626,
+          "modules": 30
+        },
+        "Solkey": {
+          "lines": 266,
+          "modules": 5
+        },
+        "SortCheck": {
+          "lines": 1281,
+          "modules": 3
+        },
+        "Source": {
+          "lines": 50041,
+          "modules": 262
+        },
+        "Stipend": {
+          "lines": 274,
+          "modules": 1
+        },
+        "Storage": {
+          "lines": 4049,
+          "modules": 21
+        },
+        "Syntax": {
+          "lines": 14545,
+          "modules": 21
+        },
+        "TestSuite": {
+          "lines": 4710,
+          "modules": 49
+        },
+        "Theory": {
+          "lines": 8890,
+          "modules": 25
+        },
+        "Tools": {
+          "lines": 8575,
+          "modules": 31
+        },
+        "Typing": {
+          "lines": 6832,
+          "modules": 12
+        },
+        "Yul": {
+          "lines": 197439,
+          "modules": 1827
+        }
+      },
       "reachable_modules": 6734,
       "roots": [
         "Solidity",
@@ -257,15 +599,76 @@
     "source_base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
     "use": "inventory only; not pooled with fresh timings"
   },
-  "fresh_passing_samples": 9,
-  "fresh_attempted_samples": 9,
-  "sample_plan_modules": 40,
-  "sample_method": "four deterministic physical-size quantile midpoint modules per largest area; targeted slow/generated strata still pending; no statistical representativeness asserted",
+  "samples_missing_environment_metadata": 9,
+  "fresh_passing_samples": 43,
+  "fresh_attempted_samples": 48,
+  "sample_plan_modules": 48,
+  "sample_method": "four deterministic physical-size quantile midpoint modules per largest area plus targeted slow/generated files; size-stratified rates reported separately; no statistical representativeness asserted",
   "slowest_sampled_modules": [
+    {
+      "path": "Solidity/Examples/DecisionGaps.lean",
+      "lines": 207,
+      "wall_seconds": 195.37071439500005
+    },
+    {
+      "path": "Solidity/Examples/Tactics/RevertData.lean",
+      "lines": 307,
+      "wall_seconds": 137.3613358030002
+    },
     {
       "path": "Solidity/Yul/RawIntegerInitialization.lean",
       "lines": 75,
       "wall_seconds": 79.19439813300005
+    },
+    {
+      "path": "Solidity/Examples/Tactics/QuantifiedDiamond.lean",
+      "lines": 152,
+      "wall_seconds": 42.675748285000054
+    },
+    {
+      "path": "Solidity/Calculus/ArrayProperty.lean",
+      "lines": 3142,
+      "wall_seconds": 37.35925848399984
+    },
+    {
+      "path": "Solidity/Examples/DecisionHashThreeKinds.lean",
+      "lines": 44,
+      "wall_seconds": 29.15031883300003
+    },
+    {
+      "path": "Solidity/Calculus/Closer/Facts.lean",
+      "lines": 1043,
+      "wall_seconds": 22.064303495000104
+    },
+    {
+      "path": "Solidity/Examples/Tactics/OwnStructs.lean",
+      "lines": 91,
+      "wall_seconds": 20.96397848399988
+    },
+    {
+      "path": "Solidity/Frontend/ExpressionUniqueness/AxiomPins.lean",
+      "lines": 3905,
+      "wall_seconds": 17.088106575999973
+    },
+    {
+      "path": "Solidity/Source/FailureDeploymentHorizon.lean",
+      "lines": 152,
+      "wall_seconds": 11.19858321300012
+    },
+    {
+      "path": "Solidity/Examples/Tactics/OpenLoops.lean",
+      "lines": 35,
+      "wall_seconds": 9.586551031999988
+    },
+    {
+      "path": "Solidity/Examples/Benchmark/Purchase.lean",
+      "lines": 329,
+      "wall_seconds": 8.326607522000131
+    },
+    {
+      "path": "Solidity/Source/Decode.lean",
+      "lines": 329,
+      "wall_seconds": 8.033290843000032
     },
     {
       "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/SourceOrigin.lean",
@@ -278,34 +681,29 @@
       "wall_seconds": 5.83461035199997
     },
     {
+      "path": "Solidity/Source/Horizon.lean",
+      "lines": 379,
+      "wall_seconds": 4.596517061999748
+    },
+    {
       "path": "Solidity/Backend/PrimitivePackets/CheckedMul/Controls.lean",
       "lines": 224,
       "wall_seconds": 4.426636051999992
     },
     {
+      "path": "Solidity/Calculus/JoinSequence.lean",
+      "lines": 156,
+      "wall_seconds": 4.044591385000103
+    },
+    {
+      "path": "Solidity/Semantics/NoPanic.lean",
+      "lines": 558,
+      "wall_seconds": 3.6267700040000364
+    },
+    {
       "path": "Solidity/Yul/Views/FixedDeclarationControls.lean",
       "lines": 168,
       "wall_seconds": 3.3392771869998796
-    },
-    {
-      "path": "Solidity/Backend/MemoryOps/SourceUintFixedCompound.lean",
-      "lines": 130,
-      "wall_seconds": 1.911164087999964
-    },
-    {
-      "path": "Solidity/Calculus/CallbackRules.lean",
-      "lines": 64,
-      "wall_seconds": 0.8063508310001453
-    },
-    {
-      "path": "Solidity/Yul/CoordinateUpdates.lean",
-      "lines": 103,
-      "wall_seconds": 0.7247550669999328
-    },
-    {
-      "path": "Solidity/Yul/Adapters/HeapCallOutput.lean",
-      "lines": 50,
-      "wall_seconds": 0.7044707620000281
     }
   ],
   "slowest_sampled_declarations": null,
@@ -334,11 +732,14 @@
       "project": "CompCert",
       "url": "https://compcert.org/man/manual002.html",
       "kind": "cited, not measured",
-      "seconds": null,
+      "seconds": 900,
       "comparable_to_serial_module_elaboration": false,
-      "status": "unavailable",
-      "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
-      "settling_measurement": "retrieve a published proof-build timing with source revision, hardware and workload boundary"
+      "status": "cited-public-web-extract",
+      "section": "2.3 Installation, Building the system",
+      "retrieval": "public-web tool, 2026-11-08; shell proxy cannot reach host",
+      "excerpt": "This step can take about 15 minutes on a recent machine with a single core",
+      "boundary": "make all: proof checking plus extraction and OCaml compiler construction; current manual not pinned source or matched hardware",
+      "shell_fetch_error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
     }
   ],
   "limitations": [
@@ -353,7 +754,23 @@
   "waits": [
     {
       "lane": "da-timing",
-      "item": "CompCert: <urlopen error Tunnel connection failed: 403 Forbidden>"
+      "item": "Bridge/SolidityBridge/Arith/NarrowShifts.lean: dependency-cache-unavailable"
+    },
+    {
+      "lane": "da-timing",
+      "item": "Bridge/SolidityBridge/ExternalEvm/Assembly/Automatic.lean: dependency-cache-unavailable"
+    },
+    {
+      "lane": "da-timing",
+      "item": "Bridge/SolidityBridge/RoadmapV15/P10/PublishedRemainderControls.lean: dependency-cache-unavailable"
+    },
+    {
+      "lane": "da-timing",
+      "item": "Bridge/SolidityBridge/Yul/ControlRealization.lean: dependency-cache-unavailable"
+    },
+    {
+      "lane": "da-timing",
+      "item": "Solidity.lean: dependency-cache-unavailable"
     }
   ]
 }
