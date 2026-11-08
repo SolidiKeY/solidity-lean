@@ -21,7 +21,7 @@ class DevTools {
   this.ready=new Promise((resolve,reject)=>{this.readyResolve=resolve;this.readyReject=reject;this.connectTimer=setTimer(()=>this.abort(Error('CDP connection timeout'),'connection.timeout'),5000);});
   this.note('connection.start');
   this.socket.addEventListener('open',()=>{clearTimer(this.connectTimer);if(this.failure)return;if(now()-this.connectionStarted>=5000){this.abort(Error('CDP connection timeout'),'connection.late-open',{elapsedMs:now()-this.connectionStarted});return;}this.note('connection.open');this.readyResolve();},{once:true});
-  this.socket.addEventListener('error',()=>this.abort(Error('CDP connection failed'),'socket.error'),{once:true});
+  this.socket.addEventListener('error',event=>this.abort(Error('CDP connection failed'),'socket.error',{message:event.message??null,errorMessage:event.error?.message??null}),{once:true});
   this.socket.addEventListener('close',event=>this.abort(Error('CDP disconnected'),'socket.close',{code:event.code,reason:event.reason}),{once:true});
   this.socket.addEventListener('message',event=>{
    let message;try{message=JSON.parse(event.data);}catch{this.abort(Error('Malformed CDP response'),'response.malformed');return;}

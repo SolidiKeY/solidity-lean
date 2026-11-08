@@ -2169,3 +2169,15 @@ legacy phases and the same source-session/public-trust predicates. A restarted
 host or target remains a failure, not an assumed continuation. Injected late,
 disconnect, malformed, overflow and restart controls are not native, rendered,
 kernel or compiler/EVM evidence. All original row judgments and gates remain.
+
+
+The instrumented paired Linux run retains all five legacy phases for both
+targets. Both hosts then exit during trust loss, with the source-bound transport
+journal identifying the interrupted RPC. Local's post-click DOMSnapshot returns
+before Page.captureScreenshot is aborted by socket failure; Dafny's mouse
+release is interrupted. No public loss/restoration confirmation is manufactured.
+The old DOM timeout and Dafny untitled readiness failure remain historical
+failures with unproved causes, not reclassified by this run. Source/target/host
+identities, ordered request timing, endpoint files and owned cleanup remain raw
+failed evidence. A separate new-host recovery scenario requires a human scope
+choice; original same-session predicates stay unchanged while it is pending.
