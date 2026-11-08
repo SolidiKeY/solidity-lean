@@ -1,5 +1,6 @@
 import Solidity.Lowering.G17.Conditional
 import Solidity.Lowering.G17.ShortCircuitControls
+import Solidity.Lowering.G17.ShortCircuitRevertControls
 
 /-! Concrete conditional controls reject eager evaluation, branch reversal,
 condition-effect loss and ignored failures. Existing heterogeneous P12 worlds
@@ -79,6 +80,103 @@ theorem halt_selection (choice : Bool) :
       · rw [conditionalOperand_run,P12AtomicConditions.literal_native_run]; rfl
       · rw [conditionalOperand_run]; rfl
 
+private def literal (G : Source.Glob E) (F : Source.Fr) (b : Bool) :
+    Condition G F mapping values worlds (.bool b) :=
+  P12AtomicConditions.literal G F mapping values worlds b ⟨source,target,initial⟩
+
+private def branchPanic (p : Roadmap.Pipeline) (checked side choose : Bool) :
+    Condition (globals p) {F0 with checked := checked} mapping values worlds
+      (.cond (.bool choose) (if side then V07.ShortCircuitControls.failure else .bool false)
+        (if side then .bool false else V07.ShortCircuitControls.failure)) := by
+  cases side
+  · exact conditionalCondition (globals p) {F0 with checked := checked} mapping values worlds
+      (.bool choose) (.bool false) V07.ShortCircuitControls.failure
+      (literal _ _ choose) (literal _ _ false) (RevertControls.divisionCondition _ _)
+  · exact conditionalCondition (globals p) {F0 with checked := checked} mapping values worlds
+      (.bool choose) V07.ShortCircuitControls.failure (.bool false)
+      (literal _ _ choose) (RevertControls.divisionCondition _ _) (literal _ _ false)
+
+/-- The selected arm genuinely panics in Source, with exact transported native
+payload, for either arm and both pipelines/check modes. Rejects swallowed or
+reversed-arm panics; the existing producer's revert clause is exercised. -/
+theorem taken_source_panic (p : Roadmap.Pipeline) (checked side : Bool) (fuel : Nat) :
+    let expr : Source.RExpr E SrcCtx .bool :=
+      .cond (.bool side) (if side then V07.ShortCircuitControls.failure else .bool false)
+        (if side then .bool false else V07.ShortCircuitControls.failure)
+    (Source.evalE (globals p) {F0 with checked := checked} (fuel+7) expr).run source =
+      (.error (.revert (Source.panicData .divZero)),source) ∧
+    (branchPanic p checked side side).operand.run target =
+      .error (THalt.ofData (Source.panicData .divZero)) := by
+  dsimp only
+  have run : (Source.evalE (globals p) {F0 with checked := checked} (fuel+7)
+      (.cond (.bool side) (if side then V07.ShortCircuitControls.failure else .bool false)
+        (if side then .bool false else V07.ShortCircuitControls.failure))).run source =
+      (.error (.revert (Source.panicData .divZero)),source) := by
+    rw [Source.evalE,Source.Hoare.run_bind,P12AtomicConditions.literal_source_run]
+    dsimp only []
+    rw [Source.Hoare.run_bind,source_getV_run]
+    cases side
+    all_goals
+      dsimp only []
+      simp only [Bool.false_eq_true,if_false,if_true]
+      rw [RevertControls.division_source_run,if_pos (show 6 ≤ fuel+6 from by omega)]
+  refine ⟨run,?_⟩
+  cases side
+  all_goals
+    exact (branchPanic p checked _ _).revert (fuel+7) source source target
+      (Source.panicData .divZero) initial run
+
+/-- The same Source-panic arm is skipped even when its available horizon is
+insufficient. Guards against evaluating the unselected arm or returning panic
+unconditionally; both Source execution and native alignment are witnessed. -/
+theorem skipped_source_panic (p : Roadmap.Pipeline) (checked side : Bool) (fuel : Nat) :
+    let expr : Source.RExpr E SrcCtx .bool :=
+      .cond (.bool (!side)) (if side then V07.ShortCircuitControls.failure else .bool false)
+        (if side then .bool false else V07.ShortCircuitControls.failure)
+    (Source.evalE (globals p) {F0 with checked := checked} (fuel+2) expr).run source =
+      (.ok (.val (.bool false)),source) ∧
+    ∃ out : Out C target.H TgtCtx,
+      (branchPanic p checked side (!side)).operand.run target = .ok (out,.prim false) ∧
+      Aligned mapping values worlds source out.st := by
+  dsimp only
+  have run : (Source.evalE (globals p) {F0 with checked := checked} (fuel+2)
+      (.cond (.bool (!side)) (if side then V07.ShortCircuitControls.failure else .bool false)
+        (if side then .bool false else V07.ShortCircuitControls.failure))).run source =
+      (.ok (.val (.bool false)),source) := by
+    cases side <;> rfl
+  refine ⟨run,?_⟩
+  cases side
+  all_goals
+    exact (branchPanic p checked _ _).success (fuel+2) source source target false initial run
+
+private def conditionPanic (p : Roadmap.Pipeline) (checked : Bool) :
+    Condition (globals p) {F0 with checked := checked} mapping values worlds
+      (.cond V07.ShortCircuitControls.failure (.bool true) (.bool false)) :=
+  let G := globals p
+  let F := {F0 with checked := checked}
+  conditionalCondition G F mapping values worlds V07.ShortCircuitControls.failure
+    (.bool true) (.bool false) (RevertControls.divisionCondition G F)
+    (literal G F true) (literal G F false)
+
+/-- A Source condition panic must propagate before either successful arm can
+run. Guards against treating condition failure as false or ignoring its data. -/
+theorem condition_source_panic (p : Roadmap.Pipeline) (checked : Bool) (fuel : Nat) :
+    (Source.evalE (globals p) {F0 with checked := checked} (fuel+7)
+      (.cond V07.ShortCircuitControls.failure (.bool true) (.bool false))).run source =
+      (.error (.revert (Source.panicData .divZero)),source) ∧
+    (conditionPanic p checked).operand.run target =
+      .error (THalt.ofData (Source.panicData .divZero)) := by
+  have run : (Source.evalE (globals p) {F0 with checked := checked} (fuel+7)
+      (.cond V07.ShortCircuitControls.failure (.bool true) (.bool false))).run source =
+      (.error (.revert (Source.panicData .divZero)),source) := by
+    rw [Source.evalE,Source.Hoare.run_bind,RevertControls.division_source_run,
+      if_pos (show 6 ≤ fuel+6 from by omega)]
+  exact ⟨run,(conditionPanic p checked).revert (fuel+7) source source target
+    (Source.panicData .divZero) initial run⟩
+
+#print axioms taken_source_panic
+#print axioms skipped_source_panic
+#print axioms condition_source_panic
 #print axioms source_witness
 #print axioms reached_effect_witness
 #print axioms halt_selection
