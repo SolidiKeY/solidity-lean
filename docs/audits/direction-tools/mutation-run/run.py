@@ -16,7 +16,7 @@ def catalogue():
     ms=[]
     for m in json.loads(source('docs/audits/direction-tools/mutation/mutants.json')):
         m={k:m[k] for k in ('id','path','line','old','new','definition')}
-        m['targets']=['Solidity/Examples/Tactics/Operators.lean','Solidity/Examples/Tactics/Values.lean','Solidity/Examples/Tactics/SignedCasts.lean','Solidity/Examples/Tactics/ModularArithmetic.lean','Solidity/Optimizer/Simplify.lean'] if m['path'].endswith('Ops.lean') else [m['path']]
+        m['targets']=['Solidity/Optimizer/Simplify.lean','Solidity/Examples/Tactics/Operators.lean','Solidity/Examples/Tactics/Values.lean','Solidity/Examples/Tactics/SignedCasts.lean','Solidity/Examples/Tactics/ModularArithmetic.lean'] if m['path'].endswith('Ops.lean') else [m['path']]
         # Expensive dependent slices are explicit, never inferred from lexical mentions.
         ms.append(m)
     def add(p,old,new,targets,desc):
@@ -71,7 +71,9 @@ def main():
         for r in rs:
             m=index[r['id']]
             assert all(r[k]==m[v] for k,v in [('file','path'),('line','line'),('area','area'),('description','description')])
-            assert r['baseline_pass'] and r['checks']
+            assert r['checks']
+            assert r['baseline_pass'] or r['verdict']=='BLOCKED'
+            if r['baseline_pass']: assert all(c['pristine']['returncode']==0 for c in r['checks'])
             assert r['seconds']==round(sum(c['seconds'] for c in r['checks']),3)
             assert r['checks'][0]['module']==module(m['path'])
             assert r['verdict'] in ['KILLED','SURVIVOR','BLOCKED']
@@ -139,18 +141,15 @@ def main():
                 link=overlay/(mod.replace('.','/')+'.olean'); link.parent.mkdir(parents=True,exist_ok=True); link.symlink_to(artifact)
         seed()
         menv=dict(env,LEAN_PATH=str(overlay))
-        # Same direct command baseline: validate every module that a mutant can rebuild.
-        baseline_modules=set()
-        for m in ms:
-            changed=module(m['path']); baseline_modules.add(changed)
-            for t in map(module,m['targets']): baseline_modules |= {d for d in deps(t) if changed in deps(d)}
-        for mod in sorted(baseline_modules):
-            dest=args.work/'pristine'/(mod.replace('.','/')+'.olean'); dest.parent.mkdir(parents=True,exist_ok=True)
-            c,out=run(['lean','-j1','--tstack=131072','-o',str(dest),mod.replace('.','/')+'.lean'],'pristine-'+mod,menv)
-            if c['returncode']: print('DIRECT_BASELINE_BLOCKED',mod,c,flush=True); return
-        print('DIRECT_BASELINE_PASS',len(baseline_modules),flush=True)
+        pristine_overlay=args.work/'pristine-overlay'
+        pristine_overlay.mkdir(exist_ok=True)
+        for x in pristine_overlay.rglob('*.olean'):x.unlink()
+        for mod,artifact in artifact_map.items():
+            link=pristine_overlay/(mod.replace('.','/')+'.olean');link.parent.mkdir(parents=True,exist_ok=True);link.symlink_to(artifact)
+        pristine_env=dict(env,LEAN_PATH=str(pristine_overlay)); pristine_pass={}
         rs=[]; start=time.monotonic()
-        for m in ms:
+        dump(HERE/'results.json',rs); dump(HERE/'summary.json',summarize(ms,rs))
+        for m in sorted(ms,key=lambda m:(m['area']=='Semantics',m['id'])):
             if time.monotonic()-start>args.seconds:break
             p=tree/m['path']; original=source(m['path']); lines=original.splitlines(keepends=True)
             # All edits are exact at the pinned line, not global replacement.
@@ -165,14 +164,26 @@ def main():
                 for d in imports.get(x,[]):
                     if d in wanted:visit(d)
                 order.append(x)
-            for x in sorted(wanted):visit(x)
+            for x in map(module,m['targets']):visit(x)
+            visit(changed)
             checks=[]; killed=[]; verdict='SURVIVOR'
             try:
                 for mod in order:
+                    if mod not in pristine_pass:
+                        dest=args.work/'pristine'/(mod.replace('.','/')+'.olean'); dest.parent.mkdir(parents=True,exist_ok=True)
+                        if mod==changed:p.write_text(original)
+                        try:
+                            c,out=run(['lean','-j1','--tstack=131072','-o',str(dest),mod.replace('.','/')+'.lean'],'pristine-'+mod,pristine_env)
+                        finally:
+                            if mod==changed:p.write_text(''.join(lines[:i])+tail.replace(m['old'],m['new'],1))
+                        c['module']=mod
+                        if c['returncode']:
+                            c['decisive_output']=out[:12000];c['pristine_failure']=True;checks.append(c);verdict='BLOCKED';break
+                        pristine_pass[mod]=c
                     dest=overlay/(mod.replace('.','/')+'.olean'); dest.parent.mkdir(parents=True,exist_ok=True)
                     if dest.exists() or dest.is_symlink(): dest.unlink()
                     c,out=run(['lean','-j1','--tstack=131072','-o',str(dest),mod.replace('.','/')+'.lean'],m['id']+'-'+mod,menv)
-                    c['module']=mod; checks.append(c)
+                    c['module']=mod; c['pristine']=pristine_pass[mod]; checks.append(c)
                     if c['returncode']:
                         verdict='KILLED' if c['returncode']>0 and c['returncode']!=124 and re.search(r'error(?:\([^)]*\))?:',out) and not any(e in out for e in ['unknown module prefix','object file','out of memory','stack overflow']) else 'BLOCKED'
                         c['decisive_output']=out[:12000]
@@ -184,7 +195,7 @@ def main():
                                 killed.append(mod+':'+str(n)+':'+(names[-1] if names else 'anonymous'))
                         break
             finally:p.write_text(original)
-            rs.append(dict(id=m['id'],area=m['area'],file=m['path'],line=m['line'],description=m['description'],verdict=verdict,killed_by=failure_names(checks[-1]['module'],checks[-1]['decisive_output']) if verdict=='KILLED' else [],seconds=round(sum(c['seconds'] for c in checks),3),baseline_pass=True,checks=checks))
+            rs.append(dict(id=m['id'],area=m['area'],file=m['path'],line=m['line'],description=m['description'],verdict=verdict,killed_by=failure_names(checks[-1]['module'],checks[-1]['decisive_output']) if verdict=='KILLED' else [],seconds=round(sum(c['seconds'] for c in checks),3),baseline_pass=all(c.get('pristine',{}).get('returncode')==0 for c in checks),checks=checks))
             dump(HERE/'results.json',rs); dump(HERE/'summary.json',summarize(ms,rs)); print(m['id'],verdict,rs[-1]['seconds'],killed[:2],flush=True)
 
 def summarize(ms,rs):
@@ -192,5 +203,5 @@ def summarize(ms,rs):
     for area in sorted({m['area'] for m in ms}):
         rows=[r for r in rs if r['area']==area]; killed=sum(r['verdict']=='KILLED' for r in rows); survivors=sum(r['verdict']=='SURVIVOR' for r in rows)
         areas[area]=dict(candidates=sum(m['area']==area for m in ms),ran=len(rows),killed=killed,survivors=survivors,blocked=len(rows)-killed-survivors,score=killed/(killed+survivors) if killed+survivors else None)
-    return dict(base=BASE,score_label='sampled selected-dependent-slice mutation score, not area-wide assurance',complete_catalogue_executed=len(ms)==len(rs),candidates=len(ms),ran=len(rs),areas=areas,generated_candidates=0,unmarked_candidates=len(ms),survivors=[dict(id=r['id'],importance=1 if r['area'] in ['Semantics','Calculus'] else 2,meaning='No check in the recorded affected selected-dependent slice constrains this change; no whole-repository absence-of-proof claim.',description=r['description']) for r in rs if r['verdict']=='SURVIVOR'],boundary='Kernel elaboration of pinned source and selected dependent paths; first failure stops each mutant. Not external EVM/solc conformance, exhaustive dependency coverage, or a reference-class ratio.',limitations=['no systemd scope on the cloud VM (H232)','No full rebuild from scratch; published cache and baseline selected builds required.','Unmarked is not proven handwritten.','M31 strengthens/restricts a recognizer; survival can be vacuity rather than missing proof.'])
+    return dict(base=BASE,execution_order=[r['id'] for r in rs],score_label='sampled selected-dependent-slice mutation score, not area-wide assurance',complete_catalogue_executed=len(ms)==len(rs),candidates=len(ms),ran=len(rs),areas=areas,generated_candidates=0,unmarked_candidates=len(ms),survivors=[dict(id=r['id'],importance=1 if r['area'] in ['Semantics','Calculus'] else 2,meaning='No check in the recorded affected selected-dependent slice constrains this change; no whole-repository absence-of-proof claim.',description=r['description']) for r in rs if r['verdict']=='SURVIVOR'],boundary='Kernel elaboration of pinned source and selected dependent paths; first failure stops each mutant. Not external EVM/solc conformance, exhaustive dependency coverage, or a reference-class ratio.',limitations=['no systemd scope on the cloud VM (H232)','No full rebuild from scratch; published cache and baseline selected builds required.','Unmarked is not proven handwritten.','M31 strengthens/restricts a recognizer; survival can be vacuity rather than missing proof.'])
 if __name__=='__main__':main()
