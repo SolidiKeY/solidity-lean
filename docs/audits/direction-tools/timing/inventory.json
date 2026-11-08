@@ -84,9 +84,9 @@
       "unmarked_not_proven_handwritten_lines": 6658
     },
     "Other": {
-      "detected_generated_lines": 7189,
+      "detected_generated_lines": 7224,
       "lines": 123027,
-      "marker_associated_unresolved_lines": 1078,
+      "marker_associated_unresolved_lines": 1043,
       "modules": 1037,
       "unmarked_not_proven_handwritten_lines": 112975,
       "unresolved_chain_agreement_lines": 1785
