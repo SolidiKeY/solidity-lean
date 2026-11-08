@@ -3208,6 +3208,7 @@ import Solidity.Frontend.Yul.OccurrenceParse
 import Solidity.Frontend.Yul.Parsing
 import Solidity.Frontend.Yul.ScopedParse
 import Solidity.Frontend.Yul.WordParse
+import Solidity.Goals
 import Solidity.Hash.Adaptive
 import Solidity.Hash.Bridge
 import Solidity.Hash.CollisionBound
@@ -4451,6 +4452,7 @@ import Solidity.Tools.DirectArithmetic
 import Solidity.Tools.DirectRuntime
 import Solidity.Tools.Elementary
 import Solidity.Tools.EntryReturn
+import Solidity.Tools.Goal
 import Solidity.Tools.Inspect
 import Solidity.Tools.Latex
 import Solidity.Tools.LatexSolkey
