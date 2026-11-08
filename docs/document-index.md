@@ -111,6 +111,7 @@ and open obligations. Test proposals remain proposals until applied.
 - [docs/feature-work/directruntime-memory-references.md](feature-work/directruntime-memory-references.md)
 - [docs/feature-work/directruntime-native-browser.md](feature-work/directruntime-native-browser.md)
 - [docs/feature-work/directruntime-shared-translator.md](feature-work/directruntime-shared-translator.md)
+- [docs/feature-work/e3-feature-citations.md](feature-work/e3-feature-citations.md)
 - [docs/feature-work/entrypoints-static-boundary.md](feature-work/entrypoints-static-boundary.md)
 - [docs/feature-work/executable-bytecode-selection.md](feature-work/executable-bytecode-selection.md)
 - [docs/feature-work/filtered-membership.md](feature-work/filtered-membership.md)
