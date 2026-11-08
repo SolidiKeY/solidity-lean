@@ -226,4 +226,72 @@ theorem memory_entry_zero_offset_preserved (fuel : Nat) :
   rw [copied] at succeeded
   exact succeeded
 #print axioms memory_entry_zero_offset_preserved
+
+/-! Guarded regression: a low-level panic or fuel result must not bypass entry's
+head and offset rejection. Error transport requires those outer checks; two
+positive fuel layers suffice only for this nonrecursive memory-bytes family. -/
+theorem memory_entry_error_iff (I : Input) (fuel : Nat) (failure : Fail)
+    (head : 4 + headsOf memoryParams ≤ I.size) (offset : load I.data 4 ≤ lim) :
+    entry I (fuel + 1) memoryParams = .error failure ↔
+      mdec I fuel .bytes (4 + load I.data 4) 0 = .error failure := by
+  rw [memory_entry_with_contract _ actual_memory_bytes_behavior_spec I fuel,
+    if_neg (Nat.not_lt.mpr head), if_neg (Nat.not_lt.mpr offset)]
+  cases decoded : mdec I fuel .bytes (4 + load I.data 4) 0 with
+  | error actual =>
+    constructor
+    · intro same
+      exact congrArg (fun f => (Except.error f : Except Fail (Val .bytes × Nat)))
+        (Except.error.inj same)
+    · intro same
+      exact congrArg (fun f => (Except.error f : Except Fail (Entries memoryParams)))
+        (Except.error.inj same)
+  | ok pair =>
+    rcases pair with ⟨value, next⟩
+    constructor <;> intro impossible <;> cases impossible
+
+theorem memory_entry_panic_iff (I : Input) (fuel : Nat) :
+    entry I (fuel + 2) memoryParams = .error .panic ↔
+      4 + headsOf memoryParams ≤ I.size ∧ load I.data 4 ≤ lim ∧
+        MemoryBytesPanicBounds I (4 + load I.data 4) 0 := by
+  constructor
+  · intro panic
+    have equation := memory_entry_with_contract _ actual_memory_bytes_behavior_spec I (fuel + 1)
+    by_cases short : I.size < 4 + headsOf memoryParams
+    · rw [equation, if_pos short] at panic
+      cases panic
+    · by_cases offset : lim < load I.data 4
+      · rw [equation, if_neg short, if_pos offset] at panic
+        cases panic
+      · have head := Nat.le_of_not_gt short
+        have bounded := Nat.le_of_not_gt offset
+        have low := (memory_entry_error_iff I (fuel + 1) .panic head bounded).mp panic
+        exact ⟨head, bounded, (memory_bytes_panic_bound_iff I fuel _ 0).mp low⟩
+  · rintro ⟨head, offset, bounds⟩
+    apply (memory_entry_error_iff I (fuel + 1) .panic head offset).mpr
+    exact (memory_bytes_panic_bound_iff I fuel _ 0).mpr bounds
+
+theorem memory_entry_one_fuel (I : Input) :
+    entry I 1 memoryParams =
+      if I.size < 4 + headsOf memoryParams then .error .revert
+      else if lim < load I.data 4 then .error .revert else .error .fuel := by
+  rw [memory_entry_with_contract _ actual_memory_bytes_behavior_spec I 0] <;> rfl
+
+theorem memory_entry_two_plus_ne_fuel (I : Input) (fuel : Nat) :
+    entry I (fuel + 2) memoryParams ≠ .error .fuel := by
+  intro exhausted
+  have equation := memory_entry_with_contract _ actual_memory_bytes_behavior_spec I (fuel + 1)
+  by_cases short : I.size < 4 + headsOf memoryParams
+  · rw [equation, if_pos short] at exhausted
+    cases exhausted
+  · by_cases offset : lim < load I.data 4
+    · rw [equation, if_neg short, if_pos offset] at exhausted
+      cases exhausted
+    · have low := (memory_entry_error_iff I (fuel + 1) .fuel
+        (Nat.le_of_not_gt short) (Nat.le_of_not_gt offset)).mp exhausted
+      exact memory_bytes_positive_ne_fuel I fuel _ 0 low
+
+#print axioms memory_entry_error_iff
+#print axioms memory_entry_panic_iff
+#print axioms memory_entry_one_fuel
+#print axioms memory_entry_two_plus_ne_fuel
 end Solidity.H62.AuditLanguage.AbiBytesEntry
