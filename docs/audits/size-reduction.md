@@ -108,7 +108,7 @@ saving here is measured.
   `lowering-checker-p1`. Results go under `docs/audits/shrink/` and are
   summarised in [direction audit: making it smaller](direction.md#making-it-smaller).
 
-- Yul views as one layout-indexed view: pending, lane size-yul-views.
+- [Yul views as one layout-indexed view](size-yul-views.md): 15-file pilot saves 7/1,797 lines; go for exact proof reuse, no-go for blanket layout rollout.
 
 - Test vectors as theorems (repo-wide): pending, lane size-test-vectors.
 

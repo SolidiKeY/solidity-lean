@@ -1,0 +1,372 @@
+diff --git a/Solidity/Yul/Views/AggregateMemoryWords.lean b/Solidity/Yul/Views/AggregateMemoryWords.lean
+index ceea9e989..a95a78adf 100644
+--- a/Solidity/Yul/Views/AggregateMemoryWords.lean
++++ b/Solidity/Yul/Views/AggregateMemoryWords.lean
+@@ -5,6 +5,64 @@ members use the existing Source.Val.word; references use actual child typing
+ and real Placement bounds, never inline child contents or guessed ownership. -/
+ namespace Solidity.Yul.Views
+ 
++/-- Finite word layouts: offsets are explicit, so arrays and struct fields
++share the same read relation. Packed/storage/hash layouts are not covered. -/
++inductive WordLayout where
++  | empty
++  | cell (offset : Nat) (word : Roadmap.Word) (tail : WordLayout)
++
++def WordLayout.Reads : WordLayout → ByteView → Nat → Prop
++  | .empty, _, _ => True
++  | .cell offset word tail, m, base =>
++      mload m (base+offset)=word ∧ tail.Reads m base
++
++def WordLayout.Owns : WordLayout → Nat → Prop
++  | .empty, _ => False
++  | .cell offset _ tail, a => a=offset ∨ tail.Owns a
++
++theorem WordLayout.frame (layout : WordLayout) (m next : ByteView) (base : Nat)
++    (same : ∀ offset, layout.Owns offset → mload next (base+offset)=mload m (base+offset))
++    (reads : layout.Reads m base) : layout.Reads next base := by
++  induction layout with
++  | empty => trivial
++  | cell offset word tail ih =>
++    exact ⟨(same offset (Or.inl rfl)).trans reads.1, ih (fun a owned => same a (Or.inr owned)) reads.2⟩
++
++theorem WordLayout.store_read (m : ByteView) (target address : Nat) (word : Roadmap.Word)
++    (separate : address=target ∨ address+32≤target ∨ target+32≤address) :
++    mload (mstore m target word) address=
++      if address=target then word else mload m address := by
++  by_cases same : address=target
++  · rw [if_pos same, same, mload_mstore]
++  · rw [if_neg same]
++    apply mload_congr _ m address
++    intro byte
++    apply mstore_outside
++    have small := byte.isLt
++    rcases separate with equal | before | after <;> omega
++
++def WordLayout.Separated : WordLayout → Nat → Nat → Prop
++  | .empty, _, _ => True
++  | .cell offset _ tail, base, target =>
++      (base+offset=target ∨ base+offset+32≤target ∨ target+32≤base+offset) ∧
++      tail.Separated base target
++
++def WordLayout.update : WordLayout → Nat → Nat → Roadmap.Word → WordLayout
++  | .empty, _, _, _ => .empty
++  | .cell offset old tail, base, target, word =>
++      .cell offset (if base+offset=target then word else old) (tail.update base target word)
++
++theorem WordLayout.store (layout : WordLayout) (m : ByteView) (base target : Nat) (word : Roadmap.Word)
++    (separate : layout.Separated base target) (reads : layout.Reads m base) :
++    (layout.update base target word).Reads (mstore m target word) base := by
++  induction layout with
++  | empty => trivial
++  | cell offset old tail ih =>
++    constructor
++    · change mload (mstore m target word) (base+offset)=if base+offset=target then word else old
++      rw [WordLayout.store_read m target (base+offset) word separate.1, reads.1]
++    · exact ih separate.2 reads.2
++
+ def wordListView : List Roadmap.Word → ByteView → Nat → ByteView
+   | [], m, _ => m
+   | w :: ws, m, base => mstore (wordListView ws m (base + 32)) base w
+diff --git a/Solidity/Yul/Views/ArrayWordHeap.lean b/Solidity/Yul/Views/ArrayWordHeap.lean
+index a836ee553..8a475e91e 100644
+--- a/Solidity/Yul/Views/ArrayWordHeap.lean
++++ b/Solidity/Yul/Views/ArrayWordHeap.lean
+@@ -18,7 +18,6 @@ theorem reads {D : Source.Layout} (h : Source.Heap D) (p : Placement h)
+     (e : MixedHeapEntry (memberArrayWrittenPlacement h p root τ k n hl old (replace old index value) found)) :
+     e.image.Reads (mstore memory (p.address root+arrayPayloadOffset k+index.val*32) word)
+       ((memberArrayWrittenPlacement h p root τ k n hl old (replace old index value) found).address e.id) := by
+-  first | (simp only;done) | decide | omega | rfl | skip
+   let nextValues := replace old index value
+   let nextWords := replace words index word
+   let ht := heap_ty_of_get h root _ _ found
+@@ -101,7 +100,6 @@ theorem whole {E Γ} (H : Source.HeapTy) (s : Source.EMState E Γ) (p : Placemen
+       encodeMixedHeap q (generatedHeapEntries q) patch=patch ∧
+       enumeratedMemoryWriteback after q q (retainInitial _ _) patch=.ok (some (.ok (),after)) ∧
+       ReservedOK patch q.free := by
+-  first | (simp only;done) | decide | omega | rfl | skip
+   dsimp only
+   let values := replace old index value
+   let newWords := replace words index word
+@@ -121,15 +119,7 @@ theorem whole {E Γ} (H : Source.HeapTy) (s : Source.EMState E Γ) (p : Placemen
+   have safe := memberArrayHeapPut_MemOK E H s p root τ k n hl values newWords newEnc ok
+   rw [memberArrayHeapPut_run s root τ k n hl values ht] at safe
+   have nextSupport : ∀ a σ d,after.2.heap.get a=some ⟨σ,d⟩ → InventoryTypeSupported E σ := by
+-    intro a σ d actual
+-    change (s.2.heap.write root (memberArrayData E.layout τ k n hl values) ht).get a=some ⟨σ,d⟩ at actual
+-    by_cases same : a=root
+-    · subst a
+-      rw [Source.Heap.write_get] at actual
+-      cases actual
+-      exact supported root _ _ found
+-    · rw [Source.Heap.write_other s.2.heap same] at actual
+-      exact supported a σ d actual
++    exact heapWrite_inventory_supported s.2.heap root (memberArrayData E.layout τ k n hl values) ht supported
+   have before := ownerMemOK_prepares_inventory H s p ok supported
+   have coverage := (prepareHeapInventory_ok p _ before).2.1
+   have ready := ownerMemOK_prepares_inventory H after q safe nextSupport
+diff --git a/Solidity/Yul/Views/ArrayWordRetained.lean b/Solidity/Yul/Views/ArrayWordRetained.lean
+index 58ef4d95a..9b9e631c0 100644
+--- a/Solidity/Yul/Views/ArrayWordRetained.lean
++++ b/Solidity/Yul/Views/ArrayWordRetained.lean
+@@ -12,7 +12,6 @@ theorem history {D : Source.Layout} {origin : Source.Heap D} (h : Source.Heap D)
+     (old values : Fin n → Source.Val D τ)
+     (found : h.get root=some ⟨_,memberArrayData D τ k n hl old⟩) :
+     RetainedAllocation allocated (memberArrayWrittenPlacement h p root τ k n hl old values found) := by
+-  first | (simp only;done) | decide | omega | rfl | skip
+   exact retainSameShapeWrite allocated p prior root (memberArrayData D τ k n hl values)
+     (heap_ty_of_get h root _ _ found) (by rw [memberArray_shape h p root τ k n hl old found];exact .array _ _ _)
+ 
+@@ -35,7 +34,6 @@ theorem whole {E Γ} {origin : Source.Heap E.layout} (H : Source.HeapTy) (s : So
+     (Source.writeLoc F horizon (.mem root index.val) value).run s=(.ok (),after) ∧
+       RetainedAllocation allocated q ∧ encodeMixedHeap q (generatedHeapEntries q) patch=patch ∧
+       enumeratedMemoryWriteback after allocated q nextHistory patch=.ok (some (.ok (),after)) := by
+-  first | (simp only;done) | decide | omega | rfl | skip
+   dsimp only
+   let values := replace old index value
+   let ht := heap_ty_of_get s.2.heap root _ _ found
+@@ -46,15 +44,7 @@ theorem whole {E Γ} {origin : Source.Heap E.layout} (H : Source.HeapTy) (s : So
+     index value word newEncoded memory oldReads reserved
+   have next := history s.2.heap allocated p prior root τ k n hl old values found
+   have nextSupport : ∀ a σ d,after.2.heap.get a=some ⟨σ,d⟩ → InventoryTypeSupported E σ := by
+-    intro a σ d actual
+-    change (s.2.heap.write root (memberArrayData E.layout τ k n hl values) ht).get a=some ⟨σ,d⟩ at actual
+-    by_cases same : a=root
+-    · subst a
+-      rw [Source.Heap.write_get] at actual
+-      cases actual
+-      exact supported root _ _ found
+-    · rw [Source.Heap.write_other s.2.heap same] at actual
+-      exact supported a σ d actual
++    exact heapWrite_inventory_supported s.2.heap root (memberArrayData E.layout τ k n hl values) ht supported
+   have ready := ownerMemOK_prepares_inventory H after q current.2.1 nextSupport
+   have writeback := enumeratedMemory_unchanged after allocated q next patch nextSupport _ ready
+   rw [current.2.2.2.1] at writeback
+diff --git a/Solidity/Yul/Views/ArrayWordStore.lean b/Solidity/Yul/Views/ArrayWordStore.lean
+index 5efff1077..7f379d3d6 100644
+--- a/Solidity/Yul/Views/ArrayWordStore.lean
++++ b/Solidity/Yul/Views/ArrayWordStore.lean
+@@ -12,16 +12,23 @@ def replace {α : Type} {n : Nat} (old : Fin n → α) (index : Fin n) (value :
+ theorem word_read (memory : ByteView) (base : Nat) {n : Nat} (index j : Fin n) (word : Roadmap.Word) :
+     mload (mstore memory (base+index.val*32) word) (base+j.val*32)=
+       if j.val=index.val then word else mload memory (base+j.val*32) := by
+-  first | (simp only;done) | decide | omega | rfl | skip
++  let layout := WordLayout.cell (j.val*32) (mload memory (base+j.val*32)) .empty
++  have separate : layout.Separated base (base+index.val*32) := ⟨by omega, trivial⟩
++  have reads : layout.Reads memory base := ⟨rfl, trivial⟩
++  have changed := (WordLayout.store layout memory base (base+index.val*32) word separate reads).1
+   by_cases same : j.val=index.val
+-  · rw [if_pos same,same,mload_mstore]
++  · rw [if_pos same]
++    have atTarget : base+j.val*32=base+index.val*32 := by omega
++    rw [if_pos atTarget] at changed
++    exact changed
+   · rw [if_neg same]
+-    exact mload_congr _ memory _ (fun byte => mstore_outside _ _ _ _ (by have small:=byte.isLt;omega))
++    have away : base+j.val*32≠base+index.val*32 := by omega
++    rw [if_neg away] at changed
++    exact changed
+ 
+ theorem header (k : Option Nat) (n : Nat) (memory : ByteView) (base : Nat)
+     (index : Fin n) (word : Roadmap.Word) (old : arrayLengthChoice k memory base=n) :
+     arrayLengthChoice k (mstore memory (base+arrayPayloadOffset k+index.val*32) word) base=n := by
+-  first | (simp only;done) | decide | omega | rfl | skip
+   cases k with
+   | some fixed => exact old
+   | none =>
+@@ -39,7 +46,6 @@ theorem source {E Γ} (s : Source.EMState E Γ) (F : Source.Fr) (horizon root :
+     (index : Fin n) (value : Source.Val E.layout τ) :
+     (Source.writeLoc F horizon (.mem root index.val) value).run s=
+       (Source.heapPut root ⟨_,memberArrayData E.layout τ k n hl (replace old index value)⟩).run s := by
+-  first | (simp only;done) | decide | omega | rfl | skip
+   change (Source.memSet root index.val value).run s=_
+   rw [Source.memSet,Source.Hoare.run_bind,heapObj_known s root _ found]
+   dsimp only [memberArrayData]
+@@ -66,7 +72,6 @@ theorem writeback {E Γ} (s : Source.EMState E Γ) (p : Placement s.2.heap) (es
+     memberArrayStateWriteback s p es root τ k n hl
+       (mstore memory (p.address root+arrayPayloadOffset k+index.val*32) word)=
+       some ((Source.writeLoc F horizon (.mem root index.val) value).run s) := by
+-  first | (simp only;done) | decide | omega | rfl | skip
+   have nextEncoded : ∀ j,MemoryElement p (replace old index value j) (replace words index word j) := by
+     intro j
+     unfold replace
+@@ -92,7 +97,6 @@ theorem reencode (k : Option Nat) (n : Nat) (bound : n<2^256)
+     (index : Fin n) (word : Roadmap.Word) :
+     let patched := mstore memory (base+arrayPayloadOffset k+index.val*32) word
+     memberArrayView k n bound (replace words index word) patched base=patched := by
+-  first | (simp only;done) | decide | omega | rfl | skip
+   have observed : (fun j => mload (mstore memory (base+arrayPayloadOffset k+index.val*32) word)
+       (base+arrayPayloadOffset k+j.val*32))=replace words index word := by
+     funext j
+diff --git a/Solidity/Yul/Views/MemberArray.lean b/Solidity/Yul/Views/MemberArray.lean
+index d4569ba04..68a64f06f 100644
+--- a/Solidity/Yul/Views/MemberArray.lean
++++ b/Solidity/Yul/Views/MemberArray.lean
+@@ -64,24 +64,10 @@ theorem decodeArrayMembers_reads {D : Source.Layout} {h : Source.Heap D} (p : Pl
+     (n : Nat) (values : Fin n → Source.Val D τ) (words : Fin n → Roadmap.Word)
+     (encoded : ∀ i, MemoryElement p (values i) (words i)) (m : ByteView) (base : Nat)
+     (reads : ∀ i, mload m (base + i.val * 32) = words i) : decodeArrayMembers p es τ n m base = some values := by
+-  induction n generalizing base with
+-  | zero =>
+-    have same : values = Fin.elim0 := by funext i; exact Fin.elim0 i
+-    rw [same]
+-    rfl
+-  | succ n ih =>
+-    have head : decodeMemoryMember p es τ (mload m base) = some (values 0) := by
+-      rw [show mload m base = words 0 from reads 0]
+-      exact decodeMemoryMember_encode p es coverage τ supported _ _ (encoded 0)
+-    have tail := ih (fun i => values i.succ) (fun i => words i.succ) (fun i => encoded i.succ) (base + 32) (by
+-      intro i
+-      have eq : base + i.succ.val * 32 = base + 32 + i.val * 32 := by simp only [Fin.val_succ]; omega
+-      simpa only [eq] using reads i.succ)
+-    have same : Fin.cases (values 0) (fun i => values i.succ) = values := by
+-      funext i
+-      exact Fin.cases rfl (fun _ => rfl) i
+-    simp only [decodeArrayMembers, head, tail]
+-    exact congrArg some same
++  apply decodeArrayMembers_of_decodes p es τ n m base values
++  intro i
++  rw [reads i]
++  exact decodeMemoryMember_encode p es coverage τ supported _ _ (encoded i)
+ 
+ theorem decodeArrayMembers_encode {D : Source.Layout} {h : Source.Heap D} (p : Placement h)
+     (es : List (MixedHeapEntry p)) (coverage : CoversMixedHeap es) (τ : Source.STy) (supported : OrdinaryMemberType τ)
+diff --git a/Solidity/Yul/Views/StructWordHeap.lean b/Solidity/Yul/Views/StructWordHeap.lean
+index 356150bd4..e4620b0ab 100644
+--- a/Solidity/Yul/Views/StructWordHeap.lean
++++ b/Solidity/Yul/Views/StructWordHeap.lean
+@@ -17,7 +17,6 @@ theorem reads {D : Source.Layout} (h : Source.Heap D) (p : Placement h)
+     (e : MixedHeapEntry (structWrittenPlacement h p root name fields next found)) :
+     e.image.Reads (mstore memory (p.address root+index.val*32) word)
+       ((structWrittenPlacement h p root name fields next found).address e.id) := by
+-  first | (simp only;done) | decide | omega | rfl | skip
+   let ht := heap_ty_of_get h root _ _ found
+   let q := structWrittenPlacement h p root name fields next found
+   let patch := mstore memory (p.address root+index.val*32) word
+@@ -88,7 +87,6 @@ theorem whole {E Γ} (H : Source.HeapTy) (s : Source.EMState E Γ) (p : Placemen
+       encodeMixedHeap q (generatedHeapEntries q) patch=patch ∧
+       enumeratedMemoryWriteback after q q (retainInitial _ _) patch=.ok (some (.ok (),after)) ∧
+       ReservedOK patch q.free := by
+-  first | (simp only;done) | decide | omega | rfl | skip
+   dsimp only
+   let ht := heap_ty_of_get s.2.heap root _ _ found
+   let after := withSourceHeap s (s.2.heap.write root (.struct next) ht)
+@@ -108,15 +106,7 @@ theorem whole {E Γ} (H : Source.HeapTy) (s : Source.EMState E Γ) (p : Placemen
+   have safe : Source.MemOK E H after :=
+     canonicalStructState_MemOK E H s p _ root name patch (.ok (),after) selected ok
+   have nextSupport : ∀ a σ d,after.2.heap.get a=some ⟨σ,d⟩ → InventoryTypeSupported E σ := by
+-    intro a σ d actual
+-    change (s.2.heap.write root (.struct next) ht).get a=some ⟨σ,d⟩ at actual
+-    by_cases same : a=root
+-    · subst a
+-      rw [Source.Heap.write_get] at actual
+-      cases actual
+-      exact supported root _ _ found
+-    · rw [Source.Heap.write_other s.2.heap same] at actual
+-      exact supported a σ d actual
++    exact heapWrite_inventory_supported s.2.heap root (.struct next) ht supported
+   have ready := ownerMemOK_prepares_inventory H after q safe nextSupport
+   have wholeMap : encodeMixedHeap q (generatedHeapEntries q) patch=patch :=
+     encodeMixedHeap_unchanged q _ patch (fun e _ => reads s.2.heap p _ coverage root name fields next words encoded
+diff --git a/Solidity/Yul/Views/StructWordRetained.lean b/Solidity/Yul/Views/StructWordRetained.lean
+index dc368349e..e4bc9b165 100644
+--- a/Solidity/Yul/Views/StructWordRetained.lean
++++ b/Solidity/Yul/Views/StructWordRetained.lean
+@@ -10,7 +10,6 @@ theorem history {D : Source.Layout} {origin : Source.Heap D} (h : Source.Heap D)
+     (root : Nat) (name : Source.DeclName) (old next : Source.DataList D (D.fields name))
+     (found : h.get root=some ⟨.struct .memory name,.struct old⟩) :
+     RetainedAllocation allocated (structWrittenPlacement h p root name old next found) := by
+-  first | (simp only;done) | decide | omega | rfl | skip
+   have shaped : HasMemoryShape (.struct (l:=.memory) next) (p.shape root) := by
+     have shape := p.typed root _ _ found
+     generalize he : p.shape root=sh at shape
+@@ -37,7 +36,6 @@ theorem whole {E Γ} {origin : Source.Heap E.layout} (H : Source.HeapTy) (s : So
+     (Source.writeLoc F horizon (.mem root index.val) value).run s=(.ok (),after) ∧
+       RetainedAllocation allocated q ∧ encodeMixedHeap q (generatedHeapEntries q) patch=patch ∧
+       enumeratedMemoryWriteback after allocated q nextHistory patch=.ok (some (.ok (),after)) := by
+-  first | (simp only;done) | decide | omega | rfl | skip
+   dsimp only
+   let ht := heap_ty_of_get s.2.heap root _ _ found
+   let after := withSourceHeap s (s.2.heap.write root (.struct next) ht)
+@@ -47,15 +45,7 @@ theorem whole {E Γ} {origin : Source.Heap E.layout} (H : Source.HeapTy) (s : So
+     index value word newEncoded updated memory oldReads reserved
+   have nextHistory := history s.2.heap allocated p prior root name fields next found
+   have nextSupport : ∀ a σ d,after.2.heap.get a=some ⟨σ,d⟩ → InventoryTypeSupported E σ := by
+-    intro a σ d actual
+-    change (s.2.heap.write root (.struct next) ht).get a=some ⟨σ,d⟩ at actual
+-    by_cases same : a=root
+-    · subst a
+-      rw [Source.Heap.write_get] at actual
+-      cases actual
+-      exact supported root _ _ found
+-    · rw [Source.Heap.write_other s.2.heap same] at actual
+-      exact supported a σ d actual
++    exact heapWrite_inventory_supported s.2.heap root (.struct next) ht supported
+   have ready := ownerMemOK_prepares_inventory H after q current.2.1 nextSupport
+   have writeback := enumeratedMemory_unchanged after allocated q nextHistory patch nextSupport _ ready
+   rw [current.2.2.2.1] at writeback
+diff --git a/Solidity/Yul/Views/StructWordRetainedControls.lean b/Solidity/Yul/Views/StructWordRetainedControls.lean
+index 63c5efd7b..48a6b624c 100644
+--- a/Solidity/Yul/Views/StructWordRetainedControls.lean
++++ b/Solidity/Yul/Views/StructWordRetainedControls.lean
+@@ -27,17 +27,7 @@ theorem encoded : MemoryFields q pointerFields words := by
+     (.pointer rfl 5 (.bytes .memory) rfl rfl) rfl).transport q types rfl
+ 
+ theorem supported_current : ∀ a τ d,current.2.heap.get a=some ⟨τ,d⟩ → InventoryTypeSupported mixedEnv τ := by
+-  first | (simp only;done) | decide | omega | rfl | skip
+-  intro a τ d actual
+-  by_cases same : a=3
+-  · subst a
+-    change (mixedHeap.write 3 (.struct pointerFields) (by rfl)).get 3=some ⟨τ,d⟩ at actual
+-    rw [Source.Heap.write_get] at actual
+-    cases actual
+-    exact supported
+-  · change (mixedHeap.write 3 (.struct pointerFields) (by rfl)).get a=some ⟨τ,d⟩ at actual
+-    rw [Source.Heap.write_other mixedHeap same] at actual
+-    exact StructWordHeap.Controls.support a τ d actual
++  exact heapWrite_inventory_supported mixedHeap 3 (.struct pointerFields) (by rfl) StructWordHeap.Controls.support
+ 
+ theorem current_reads : ∀ e∈generatedHeapEntries q,e.image.Reads pointerPatch (q.address e.id) := by
+   first | (simp only;done) | decide | omega | rfl | skip
+diff --git a/Solidity/Yul/Views/StructWordStore.lean b/Solidity/Yul/Views/StructWordStore.lean
+index 9da0c87f9..d814b8edb 100644
+--- a/Solidity/Yul/Views/StructWordStore.lean
++++ b/Solidity/Yul/Views/StructWordStore.lean
+@@ -10,7 +10,6 @@ theorem fields_update {D : Source.Layout} {h : Source.Heap D} {p : Placement h}
+     (encoded : MemoryFields p fields words) (index : Nat) {τ : Source.STy}
+     (value : Source.Val D τ) (word : Roadmap.Word) (newEncoded : MemoryElement p value word)
+     (updated : fields.setNth index (.val value)=.ok next) : MemoryFields p next (words.set index word) := by
+-  first | (simp only;done) | decide | omega | rfl | skip
+   induction encoded generalizing index with
+   | nil =>
+     simp only [Source.DataList.setNth,Source.stuck] at updated
+@@ -39,7 +38,6 @@ theorem word_reads (words : List Roadmap.Word) (index : Fin words.length) (word
+     (oldReads : ∀ i w,words[i]?=some w → mload memory (base+i*32)=w) :
+     ∀ i w,(words.set index.val word)[i]?=some w →
+       mload (mstore memory (base+index.val*32) word) (base+i*32)=w := by
+-  first | (simp only;done) | decide | omega | rfl | skip
+   intro i w found
+   by_cases same : i=index.val
+   · subst i
+@@ -57,7 +55,6 @@ theorem source {E Γ} (s : Source.EMState E Γ) (F : Source.Fr) (horizon root :
+     (updated : fields.setNth index (.val value)=.ok next) :
+     (Source.writeLoc F horizon (.mem root index) value).run s=
+       (Source.heapPut root ⟨.struct .memory name,.struct next⟩).run s := by
+-  first | (simp only;done) | decide | omega | rfl | skip
+   change (Source.memSet root index value).run s=_
+   rw [Source.memSet,Source.Hoare.run_bind,heapObj_known s root _ found]
+   dsimp only
+@@ -77,7 +74,6 @@ theorem writeback {E Γ} (s : Source.EMState E Γ) (p : Placement s.2.heap) (es
+     (memory : ByteView) (oldReads : ∀ i w,words[i]?=some w → mload memory (p.address root+i*32)=w) :
+     canonicalStructState s p es root name (mstore memory (p.address root+index.val*32) word)=
+       some ((Source.writeLoc F horizon (.mem root index.val) value).run s) := by
+-  first | (simp only;done) | decide | omega | rfl | skip
+   have nextEncoded := fields_update encoded index.val value word newEncoded updated
+   unfold canonicalStructState
+   rw [decodeCanonicalFields_reads p es coverage nextEncoded supported _ _ (word_reads words index word memory _ oldReads)]
+@@ -89,6 +85,5 @@ theorem reencode (words : List Roadmap.Word) (index : Fin words.length) (word :
+     (oldReads : ∀ i w,words[i]?=some w → mload memory (base+i*32)=w) :
+     let patch := mstore memory (base+index.val*32) word
+     wordListView (words.set index.val word) patch base=patch := by
+-  first | (simp only;done) | decide | omega | rfl | skip
+   exact wordList_unchanged _ _ _ (word_reads words index word memory base oldReads)
+ end Solidity.Yul.Views.StructWordStore
