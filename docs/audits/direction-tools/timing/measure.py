@@ -29,39 +29,73 @@ def capture_environment(repo):
     meminfo=pathlib.Path('/proc/meminfo').read_text()
     return {'metadata_scope':'latest runner invocation only; resumed rows retain original per-observation metadata or null','cloud_vm_opt_in':CLOUD_VM_OPT_IN,'isolation':'H232 cloud VM; no systemd scope' if CLOUD_VM_OPT_IN else 'unasserted','swap_total_kib':int(re.search(r'^SwapTotal:\s+(\d+)',meminfo,re.M)[1]),'lean_num_threads':1,'rss_stop_kib':12*1024**2,'available_memory_stop_kib':3*1024**2,'measurement_checkout':str(repo),'tracked_source_clean':not subprocess.check_output(['git','-C',str(repo),'status','--porcelain','--untracked-files=no'],text=True).strip()}
 
+def active_compilers(exclude_group=None):
+    """Fail closed if /proc cannot establish VM-wide compiler isolation.
+
+    Zombies do not execute. Never signal processes discovered by this scan;
+    the command helper may terminate only the new session it created itself.
+    """
+    found=[]
+    for entry in pathlib.Path('/proc').iterdir():
+        if not entry.name.isdigit(): continue
+        try:
+            status=(entry/'status').read_text()
+            name=re.search(r'^Name:\s+(\S+)',status,re.M)[1]
+            state=re.search(r'^State:\s+(\S+)',status,re.M)[1]
+            if name not in ('lean','lake') or state=='Z': continue
+            pid=int(entry.name)
+            if exclude_group is None or os.getpgid(pid)!=exclude_group: found.append(pid)
+        except FileNotFoundError: continue
+        except ProcessLookupError: continue
+    return found
+
 def command(args,cwd,log,timeout=600):
     if not CLOUD_VM_OPT_IN: raise RuntimeError('cloud-only runner requires explicit --cloud-vm; host resource policy is not implemented')
     if int(re.search(r'^SwapTotal:\s+(\d+)',pathlib.Path('/proc/meminfo').read_text(),re.M)[1])!=0: raise RuntimeError('cloud runner requires swap disabled')
+    foreign=active_compilers()
+    if foreign: raise RuntimeError('another active Lean/Lake process exists; refusing overlap: '+repr(foreign))
     start=time.monotonic(); peak=0; reason=None; peak_workers=0
     with log.open('w') as f:
         proc=subprocess.Popen(args,cwd=cwd,env=dict(os.environ,LEAN_NUM_THREADS='1'),stdout=f,stderr=subprocess.STDOUT,start_new_session=True)
-        while proc.poll() is None:
-            # Conservative summed RSS of this command process group, including
-            # shared pages; stop at 12 GiB or below 3 GiB available OS memory.
-            rss=0; workers=0
-            for entry in pathlib.Path('/proc').iterdir():
-                if not entry.name.isdigit(): continue
-                try:
-                    if os.getpgid(int(entry.name))!=proc.pid: continue
-                    status=(entry/'status').read_text()
-                    if re.search(r'^Name:\s+lean$',status,re.M): workers+=1
-                    match=re.search(r'^VmRSS:\s+(\d+)',status,re.M)
-                    if match: rss+=int(match.group(1))
-                except (OSError,ProcessLookupError): pass
-            peak=max(peak,rss); peak_workers=max(peak_workers,workers)
-            available=int(re.search(r'MemAvailable:\s+(\d+)',pathlib.Path('/proc/meminfo').read_text())[1])
-            if time.monotonic()-start>timeout: reason='timeout'
-            elif rss>12*1024**2 or available<3*1024**2: reason='memory_guard'
-            elif workers>1: reason='concurrent_lean_guard'
-            elif shutil.disk_usage(cwd).free<2*1024**3: reason='disk_guard'
-            if reason:
-                try: os.killpg(proc.pid,signal.SIGTERM)
+        try:
+            while proc.poll() is None:
+                # Conservative summed RSS of this command process group, including
+                # shared pages; stop at 12 GiB or below 3 GiB available OS memory.
+                rss=0; workers=0
+                for entry in pathlib.Path('/proc').iterdir():
+                    if not entry.name.isdigit(): continue
+                    try:
+                        if os.getpgid(int(entry.name))!=proc.pid: continue
+                        status=(entry/'status').read_text()
+                        if re.search(r'^Name:\s+lean$',status,re.M): workers+=1
+                        match=re.search(r'^VmRSS:\s+(\d+)',status,re.M)
+                        if match: rss+=int(match.group(1))
+                    except (OSError,ProcessLookupError): pass
+                peak=max(peak,rss); peak_workers=max(peak_workers,workers)
+                available=int(re.search(r'MemAvailable:\s+(\d+)',pathlib.Path('/proc/meminfo').read_text())[1])
+                if time.monotonic()-start>timeout: reason='timeout'
+                elif rss>12*1024**2 or available<3*1024**2: reason='memory_guard'
+                elif workers>1 or active_compilers(exclude_group=proc.pid): reason='concurrent_lean_guard'
+                elif shutil.disk_usage(cwd).free<2*1024**3: reason='disk_guard'
+                if reason:
+                    try: os.killpg(proc.pid,signal.SIGTERM)
+                    except ProcessLookupError: pass
+                    try: proc.wait(timeout=5)
+                    except subprocess.TimeoutExpired: os.killpg(proc.pid,signal.SIGKILL); proc.wait()
+                    break
+                try: proc.wait(timeout=0.1)
+                except subprocess.TimeoutExpired: pass
+        except BaseException:
+            # This session was created by this Popen invocation. Never terminate
+            # PIDs returned by the VM-wide scan: those may belong to other work.
+            try: os.killpg(proc.pid,signal.SIGTERM)
+            except ProcessLookupError: pass
+            try: proc.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                try: os.killpg(proc.pid,signal.SIGKILL)
                 except ProcessLookupError: pass
-                try: proc.wait(timeout=5)
-                except subprocess.TimeoutExpired: os.killpg(proc.pid,signal.SIGKILL); proc.wait()
-                break
-            try: proc.wait(timeout=0.1)
-            except subprocess.TimeoutExpired: pass
+                proc.wait()
+            raise
         code=proc.wait() if reason is None else (124 if reason=='timeout' else 125)
     return {'command':args,'cwd':str(cwd),'exit_code':code,'wall_seconds':time.monotonic()-start,'peak_sampled_group_rss_kib':peak,'peak_sampled_lean_workers':peak_workers,'stop_reason':reason,'log':str(log)}
 def main():

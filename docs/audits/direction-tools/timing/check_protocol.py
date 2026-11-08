@@ -21,6 +21,23 @@ def main():
         except RuntimeError as e: assert '--cloud-vm' in str(e)
         else: raise AssertionError('unguarded command helper')
         assert not (root/'must-not-write.log').exists()
+        # A surviving compiler must stop launch before creating or replacing logs.
+        with mock.patch.object(mod,'CLOUD_VM_OPT_IN',True), mock.patch.object(mod,'active_compilers',return_value=[12345]):
+            try: mod.command(['this-command-must-not-run'],root,root/'overlap-must-not-write.log')
+            except RuntimeError as e: assert 'refusing overlap' in str(e)
+            else: raise AssertionError('foreign compiler was ignored')
+        assert not (root/'overlap-must-not-write.log').exists()
+        class FakeProcess:
+            pid=999999
+            def poll(self): return None
+            def wait(self,timeout=None): return 0
+        fake=FakeProcess()
+        # Isolation failure after launch cleans up only our created session.
+        with mock.patch.object(mod,'CLOUD_VM_OPT_IN',True), mock.patch.object(mod,'active_compilers',side_effect=[[],PermissionError('scan denied')]), mock.patch.object(mod.subprocess,'Popen',return_value=fake), mock.patch.object(mod.os,'getpgid',return_value=0), mock.patch.object(mod.os,'killpg') as kill:
+            try: mod.command(['fixture-only'],root,root/'scan-failure.log')
+            except PermissionError: pass
+            else: raise AssertionError('post-launch scan failure swallowed')
+            kill.assert_called_once_with(fake.pid,mod.signal.SIGTERM)
         # Interrupt the real resume loop immediately after its first checkpoint.
         # No Lean or Git runs: these interfaces are replaced by deterministic fixtures.
         fixture=root/'resume-fixture'; fixture.mkdir(); source=fixture/'source'; source.mkdir(); output=fixture/'results'; output.mkdir()

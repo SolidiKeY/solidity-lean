@@ -5,7 +5,7 @@ python3 .../references.py --cloud-vm --project EvmYul --refs EXTERNAL --work EXT
 Mathlib cache is attempted first; a failed cache is explicit. Reference dependency
 compilation is prep, never attributed to project-only module check time.
 """
-import argparse,importlib.util,json,pathlib,re,subprocess,sys
+import argparse,importlib.util,json,pathlib,re,subprocess,sys,time
 sys.dont_write_bytecode=True
 HERE=pathlib.Path(__file__).resolve().parent
 PINS={'EvmYul':'047f63070309f436b66c61e276ab3b6d1169265a','Clear':'6ef2e7eda01080e5d5fd7474354c1a71adab5071'}
@@ -18,11 +18,13 @@ def main():
     if not args.cloud_vm: ap.error('explicit --cloud-vm required under H232; host execution unsupported')
     meter=load('measure'); meter.CLOUD_VM_OPT_IN=True; audit=load('audit'); args.refs=args.refs.resolve(); args.refs.mkdir(parents=True,exist_ok=True); args.work=args.work.resolve(); args.work.mkdir(parents=True,exist_ok=True)
     root=args.refs/args.project
-    def run(cmd,name,timeout=1800,cwd=None):
+    def fresh_log(name):
         log=args.work/(name+'.log'); suffix=0
         while log.exists():
             suffix+=1; log=args.work/(name+'-'+str(suffix)+'.log')
-        return meter.command(cmd,cwd or root,log,timeout)
+        return log
+    def run(cmd,name,timeout=1800,cwd=None):
+        return meter.command(cmd,cwd or root,fresh_log(name),timeout)
     def git(*cmd): return subprocess.check_output(['git','-C',str(root),*cmd],text=True).strip()
     if not root.exists():
         r=meter.command(['git','clone','--depth','1','https://github.com/'+REPOS[args.project]+'.git',str(root)],args.refs,args.work/'clone.log')
@@ -91,9 +93,24 @@ def main():
         if 'cache' in state and not history: history.append(state['cache'])
         state['cache']=run(['lake','exe','cache','get'],'dependency-cache-'+str(len(history)),1800)
         history.append(state['cache']); state['release_cache_retry_pending']=False; save()
+    target='EvmYul' if args.project=='EvmYul' else 'Main'
+    interrupted=state.setdefault('interrupted_builds',[])
+    if state.get('active_build'):
+        interrupted.append({**state['active_build'],'status':'no completed result persisted'})
+        state['active_build']=None; save()
+    recorded={r['log'] for r in state['build_attempts']}|{r['log'] for r in interrupted}
+    # Older collector versions did not persist a start marker. Preserve their
+    # orphan logs with unknown duration/outcome rather than inventing a result.
+    for log in sorted(args.work.glob('build-*.log')):
+        if str(log) not in recorded:
+            interrupted.append({'command':['lake','build',target],'cwd':str(root),'log':str(log),'started_unix':None,'status':'unassociated build log; completed outcome unknown'})
+    save()
     if not state['build_attempts'] or state['build_attempts'][-1]['exit_code']:
-        r=run(['lake','build','EvmYul' if args.project=='EvmYul' else 'Main'],'build-'+str(len(state['build_attempts'])),1800)
-        state['build_attempts'].append(r); save()
+        log=fresh_log('build-'+str(len(state['build_attempts'])))
+        state['active_build']={'command':['lake','build',target],'cwd':str(root),'log':str(log),'started_unix':time.time()}
+        save()
+        r=meter.command(['lake','build',target],root,log,1800)
+        state['build_attempts'].append(r); state['active_build']=None; save()
         if r['exit_code']: raise SystemExit('reference build failed; retained failure and partial artifacts')
     assert not git('status','--porcelain','--untracked-files=no'), 'build changed tracked reference source'
     verify_dependencies()
