@@ -107,4 +107,19 @@ theorem silent_empty_classifier_is_not_raw_safety :
 /-- info: 'Solidity.Frontend.Admission.OccurrenceControls.silent_empty_classifier_is_not_raw_safety' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms silent_empty_classifier_is_not_raw_safety
 
+
+theorem removed_years_payload_refused (n : NumLit) :
+    syntaxFieldRefusal? (Syn.litUnit n .years) payloadFeaturesAt
+      (fun f => decide (f ≠ .removedUnits)) = some (⟨_,Syn.litUnit n .years⟩,.removedUnits) ∧
+    (Syn.litUnit n .years).rejections = [.removedUnits] := ⟨rfl,rfl⟩
+
+theorem nested_prefix_payloads :
+    (syntaxPayloadUses (Syn.unaryPrefix .inc (Syn.unaryPrefix .delete (.ident "x")))).map Prod.snd =
+      [.increments,.deleteExpression] := rfl
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.removed_years_payload_refused' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms removed_years_payload_refused
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.nested_prefix_payloads' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms nested_prefix_payloads
+
 end Solidity.Frontend.Admission.OccurrenceControls
