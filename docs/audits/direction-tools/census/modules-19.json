@@ -10,6 +10,7 @@
     },
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 0.4406779661016949,
+    "description": "Declarations: Result, run, project",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawPreparedInteger",
@@ -35,6 +36,7 @@
     },
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.8888888888888888,
+    "description": "Declarations: run, Preserves, correct",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawDefaultScope"
@@ -58,6 +60,7 @@
     },
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 0.4098360655737705,
+    "description": "Declarations: run, correct, frameRun",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawLiteralInitialization"
@@ -83,6 +86,7 @@
     },
     "definition_lines": 31,
     "definition_to_proof_line_ratio": 1.8235294117647058,
+    "description": "Declarations: Snapshot, Snapshot.ofFrame, BoolResult",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawSourceVoidReturn"
@@ -106,6 +110,7 @@
     },
     "definition_lines": 28,
     "definition_to_proof_line_ratio": 0.35443037974683544,
+    "description": "Declarations: restore_cons, dropBool, run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawLocalDeclaration"
@@ -131,6 +136,7 @@
     },
     "definition_lines": 53,
     "definition_to_proof_line_ratio": 0.375886524822695,
+    "description": "Declarations: Flow, Supported, run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawWhile"
@@ -152,6 +158,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: conditionSuccessor, successor, conditionExtension",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawLoopBody",
@@ -174,6 +181,7 @@
       "theorem": 6
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: while_error, do_while_error, discard_error",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawBoolFailure",
@@ -199,6 +207,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.09420289855072464,
+    "description": "Declarations: noBreak, run_no_break, literal_no_false",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawSourceForPost"
@@ -220,6 +229,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_iter_no_normal, source_initialized_no_normal, source_clean_no_normal",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawNoGuardFailure"
@@ -241,6 +251,7 @@
       "theorem": 6
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: loop_no_ok, initialized_no_ok, adapter_no_normal",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawNoGuardFailure",
@@ -265,6 +276,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.20634920634920634,
+    "description": "Declarations: input, run, input_words",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawDeclarationFrame"
@@ -288,6 +300,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.35185185185185186,
+    "description": "Declarations: run, project, run_zero",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawIntegerInitialization",
@@ -310,6 +323,7 @@
       "theorem": 6
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: raw_post_timeout, raw_no_post_timeout, source_post_timeout",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawSourceLoopTimeout"
@@ -331,6 +345,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: condition, continueBody, loop",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawControlledWhile"
@@ -355,6 +370,7 @@
     },
     "definition_lines": 37,
     "definition_to_proof_line_ratio": 0.27611940298507465,
+    "description": "Declarations: Supported, run, run_cons",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawCoherent"
@@ -376,6 +392,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: successor, extension, adapterSuccessor",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawSourceAdapterDoWhile",
@@ -398,6 +415,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: successor, blockSuccessor, extension",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawSequence",
@@ -422,6 +440,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.24096385542168675,
+    "description": "Declarations: run, correct, source_agrees",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawControlSequence",
@@ -444,6 +463,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: successor, extension",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawSequenceWhile",
@@ -469,6 +489,7 @@
     },
     "definition_lines": 29,
     "definition_to_proof_line_ratio": 0.5471698113207547,
+    "description": "Declarations: rawEmpty, rawEmpty_iff, rawEmpty_ofClean",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawBoundary",
@@ -494,6 +515,7 @@
     },
     "definition_lines": 162,
     "definition_to_proof_line_ratio": 13.5,
+    "description": "Declarations: Adapter, ItemAdapter, body",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawSequenceWhile"
@@ -517,6 +539,7 @@
     },
     "definition_lines": 50,
     "definition_to_proof_line_ratio": 0.21929824561403508,
+    "description": "Declarations: after, run, sourceAfter",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawSourceAdapterIfElse"
@@ -540,6 +563,7 @@
     },
     "definition_lines": 35,
     "definition_to_proof_line_ratio": 0.4430379746835443,
+    "description": "Declarations: run, source_step, correct",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawSourceForIter"
@@ -563,6 +587,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.13286713286713286,
+    "description": "Declarations: run, source_selected, source_error",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawSourceAdapterLoop"
@@ -586,6 +611,7 @@
     },
     "definition_lines": 37,
     "definition_to_proof_line_ratio": 0.37,
+    "description": "Declarations: run, correct, source_agrees",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawSourceAdapter"
@@ -609,6 +635,7 @@
     },
     "definition_lines": 38,
     "definition_to_proof_line_ratio": 1.1875,
+    "description": "Declarations: source_unchecked, adapter",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawSourceAdapterDoWhile"
@@ -630,6 +657,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_while, correct",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawSourceAdapterLoop"
@@ -653,6 +681,7 @@
     },
     "definition_lines": 93,
     "definition_to_proof_line_ratio": 0.2672413793103448,
+    "description": "Declarations: discard, after, run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawSourceAdapterFor"
@@ -674,6 +703,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: post_timeout, no_post_timeout, post_firstDone",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawLoopFailure",
@@ -698,6 +728,7 @@
     },
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.27586206896551724,
+    "description": "Declarations: doWhile, unchecked, whileLiteral",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawSourceVoidReturn"
@@ -721,6 +752,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.5555555555555556,
+    "description": "Declarations: run, items, block",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawSourceAdapter"
@@ -742,6 +774,7 @@
       "theorem": 5
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: discardSuccessor, rawSuccessor, coherentSuccessor",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawCoherent",
@@ -766,6 +799,7 @@
     },
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 0.11818181818181818,
+    "description": "Declarations: functionRead, liftFunction, scalarRead",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawGrowingBlock"
@@ -789,6 +823,7 @@
     },
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.19230769230769232,
+    "description": "Declarations: run, correct",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawPreparedInteger",
@@ -813,6 +848,7 @@
     },
     "definition_lines": 38,
     "definition_to_proof_line_ratio": 0.6031746031746031,
+    "description": "Declarations: run, correct, adapter",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawTypedScope",
@@ -839,6 +875,7 @@
     },
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.6428571428571429,
+    "description": "Declarations: run, adapter, correct",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawU8For",
@@ -863,6 +900,7 @@
     },
     "definition_lines": 40,
     "definition_to_proof_line_ratio": 0.7017543859649122,
+    "description": "Declarations: run, correct, adapter",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawTypedScope",
@@ -888,6 +926,7 @@
     },
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 0.6756756756756757,
+    "description": "Declarations: run, correct, adapter",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawU8GrowingSequence",
@@ -912,6 +951,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.1864406779661017,
+    "description": "Declarations: run, correct",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawIntegerSequence",
@@ -934,6 +974,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: localExtension, extension, successor",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawU8Statement",
@@ -958,6 +999,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.19298245614035087,
+    "description": "Declarations: localRun, run, view",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalU8Statement",
@@ -982,6 +1024,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.1118421052631579,
+    "description": "Declarations: run, source_error, source_false",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawCondition"
@@ -1005,6 +1048,7 @@
     },
     "definition_lines": 29,
     "definition_to_proof_line_ratio": 14.5,
+    "description": "Declarations: reservedNames, reservedNames_count, slotnum_not_reserved",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Builtins"
@@ -1030,6 +1074,7 @@
     },
     "definition_lines": 57,
     "definition_to_proof_line_ratio": 0.44881889763779526,
+    "description": "Declarations: Member.position, Member.mem, Member.payload_position",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.SourceTypes",
@@ -1055,6 +1100,7 @@
     },
     "definition_lines": 69,
     "definition_to_proof_line_ratio": 0.5702479338842975,
+    "description": "Scoped assignments over the existing intrinsic assignment judgement",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.AssignmentCheck",
@@ -1081,6 +1127,7 @@
     },
     "definition_lines": 262,
     "definition_to_proof_line_ratio": 1.0194552529182879,
+    "description": "Declarations: InitializerD, BlockD, WalkD",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.BlockScope",
@@ -1107,6 +1154,7 @@
     },
     "definition_lines": 96,
     "definition_to_proof_line_ratio": 1.032258064516129,
+    "description": "Supplemental scoped correctness of existing expression derivations",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.ScopedNames"
@@ -1132,6 +1180,7 @@
     },
     "definition_lines": 46,
     "definition_to_proof_line_ratio": 0.22009569377990432,
+    "description": "Constructed scoped external names",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.ExternalKeys",
@@ -1160,6 +1209,7 @@
     },
     "definition_lines": 50,
     "definition_to_proof_line_ratio": 0.8928571428571429,
+    "description": "Combined scoped static and tier preparation",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.BlockExtract",
@@ -1186,6 +1236,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.3076923076923077,
+    "description": "Declarations: Prepared.rawProgram, Prepared.rawRun, Prepared.rawRun_stable",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.ScopedSyntax",
@@ -1212,6 +1263,7 @@
     },
     "definition_lines": 31,
     "definition_to_proof_line_ratio": 0.3563218390804598,
+    "description": "Declarations: SourceLocalRef, SourceLocalD, checkSourceLocal",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Resolved"
@@ -1233,6 +1285,7 @@
       "theorem": 10
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: bool_exhaustive, bool_key_ne_two, u8_key_bounds",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Value",
@@ -1260,6 +1313,7 @@
     },
     "definition_lines": 86,
     "definition_to_proof_line_ratio": 0.2838283828382838,
+    "description": "Declarations: Occurrence, allOccurrences, allOccurrences_complete",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.ScalarLocals",
@@ -1286,6 +1340,7 @@
     },
     "definition_lines": 140,
     "definition_to_proof_line_ratio": 0.8536585365853658,
+    "description": "Declarations: sourceWidth, sourceWidth_bits, sourceWidth_unique",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.SourceBindings",
@@ -1309,6 +1364,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: statement",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Syntax"
@@ -1333,6 +1389,7 @@
     },
     "definition_lines": 53,
     "definition_to_proof_line_ratio": 1.4324324324324325,
+    "description": "Independent static obligations and their checks",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Syntax"
@@ -1357,6 +1414,7 @@
     },
     "definition_lines": 101,
     "definition_to_proof_line_ratio": null,
+    "description": "Intrinsic Yul syntax",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Words"
@@ -1379,6 +1437,7 @@
     },
     "definition_lines": 139,
     "definition_to_proof_line_ratio": 1.2990654205607477,
+    "description": "Declarations: BuiltinP, ExternalP, builtin_iff",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Static"
@@ -1402,6 +1461,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.031914893617021274,
+    "description": "Declarations: rebase, reads_rebase, arguments_rebase",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.TypingLeaves"
@@ -1425,6 +1485,7 @@
     },
     "definition_lines": 23,
     "definition_to_proof_line_ratio": 0.2169811320754717,
+    "description": "Declarations: scoped_reads, scoped_arguments, emptyNames",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.TypingLeaves"
@@ -1451,6 +1512,7 @@
     },
     "definition_lines": 222,
     "definition_to_proof_line_ratio": 1.3875,
+    "description": "Declarations: Edge, Path, ReadLeaf",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.TypingSites",
@@ -1478,6 +1540,7 @@
     },
     "definition_lines": 203,
     "definition_to_proof_line_ratio": 1.3355263157894737,
+    "description": "Declarations: Edge, Site, Path",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.ScopedBlockTyping"
@@ -1503,6 +1566,7 @@
     },
     "definition_lines": 46,
     "definition_to_proof_line_ratio": 0.5287356321839081,
+    "description": "Declarations: Item, Item.ofD, Trace",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.TypingSites"
@@ -1524,6 +1588,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: mem_targets_rebase, WriteLeaf.spelling_unique",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.TypingLeafPaths"
@@ -1545,6 +1610,7 @@
       "theorem": 11
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: abi_fitBytes_byte, abi_readBytes_fit, abi_beValue_readBytes",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.AbiWordInput"
@@ -1566,6 +1632,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: abiDecodeArgs_late_error",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.AbiUintArrayRun"
@@ -1589,6 +1656,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.203125,
+    "description": "Declarations: adEmptyInput, adEmptyState, ad_empty_array",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.AbiUintArrayControls",
@@ -1614,6 +1682,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.1267605633802817,
+    "description": "Declarations: adInput, adData, adShape",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.AbiUintArrayWords",
@@ -1638,6 +1707,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.4090909090909091,
+    "description": "Declarations: abiArrayOffset, abiArrayLength, abiArrayPayload",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.AbiWordInput"
@@ -1661,6 +1731,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.05714285714285714,
+    "description": "Declarations: abiUintArrayShape, abiUintArray_physical",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.AbiUintArrayRun",
@@ -1683,6 +1754,7 @@
       "theorem": 6
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: abiUintArray_run, abiUintArray_alloc_MemOK, abiUintArray_missing_header",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.AbiUintArrayData"
@@ -1704,6 +1776,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: abiUintValues_get, abiUintArray_header_word, abiUintArray_element_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.AbiUintArrayPhysical",
@@ -1728,6 +1801,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.07407407407407407,
+    "description": "Declarations: abi_wordAt_bound, abiInputWord, abi_decode_uint_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ObjectMemoryAllocation",
@@ -1752,6 +1826,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.1694915254237288,
+    "description": "Declarations: actualBankedScalarWrite, actualBankedScalarWrite_source, actualBankedScalarWrite_nonstatic",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ActualScalarSafety",
@@ -1776,6 +1851,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.3333333333333333,
+    "description": "Declarations: abPersistent, abTransient, abMaps",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ActualBankedScalar",
@@ -1798,6 +1874,7 @@
       "theorem": 8
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: ac_second_source, ac_second_eval, ac_member",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.RetainedCompoundRepeatControls",
@@ -1820,6 +1897,7 @@
       "theorem": 7
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: actualScalarWrite_operation, actualScalarWrite_companion, actualScalarWrite_registry_reencode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ActualScalarTransient",
@@ -1845,6 +1923,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.24242424242424243,
+    "description": "Declarations: afBefore, afAfter, afFrame",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ActualScalarFrame",
@@ -1867,6 +1946,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: actualScalarWrite_transient_registry_reencode, actualScalarWrite_endTx_load, actualScalarWrite_endTx_journals",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ActualScalarFrame",
@@ -1891,6 +1971,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.11538461538461539,
+    "description": "Declarations: arReached, arReset, ar_view_before",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ActualScalarReset",
@@ -1915,6 +1996,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.1702127659574468,
+    "description": "Declarations: actualScalarWrite_MemOK, actualScalarWrite_locals_heap, actualScalarWritePair",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ActualScalarReset",
@@ -1937,6 +2019,7 @@
       "theorem": 13
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: safety_shrunk, safety_persistent, safety_second",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ActualScalarSafety",
@@ -1960,6 +2043,7 @@
       "theorem": 5
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: actualScalarWrite_transient_run, actualScalarWrite_transient_storage, actualScalarWrite_transient_reencode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ActualScalarWrite"
@@ -1983,6 +2067,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.2962962962962963,
+    "description": "Declarations: atCell, atRaw, atBefore",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ActualScalarTransient",
@@ -2007,6 +2092,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.09210526315789473,
+    "description": "Declarations: actualScalarWrite, actualScalarWrite_source, actualScalarWrite_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ScalarWriteback",
@@ -2031,6 +2117,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.19047619047619047,
+    "description": "Declarations: asWrite, as_coordinate, as_same_compound_store",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ActualScalarWrite",
@@ -2055,6 +2142,7 @@
     },
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.23880597014925373,
+    "description": "Declarations: encodePackedStruct, encodePackedArray, encodePackedArray_contents",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.PackedSlots"
@@ -2078,6 +2166,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.22413793103448276,
+    "description": "Declarations: MemoryObjectWords, MemoryObjectWords.read, MemoryObjectWords.fits",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.AggregateMemoryWords"
@@ -2102,6 +2191,7 @@
     },
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.20224719101123595,
+    "description": "Declarations: wordListView, wordList_residual, wordList_read",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ByteHeapRealization"
@@ -2125,6 +2215,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.25,
+    "description": "Declarations: agAliasTy, agAliases, agShrink",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.AggregateStorageControls"
@@ -2148,6 +2239,7 @@
     },
     "definition_lines": 63,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: AggregateLengthOracle, AggregateCollectFn, collectAggregateElements",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.AggregateStorageExtent",
@@ -2171,6 +2263,7 @@
     },
     "definition_lines": 27,
     "definition_to_proof_line_ratio": 0.84375,
+    "description": "Declarations: agName, agNode, agEnv",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.AggregateStorageSource",
@@ -2197,6 +2290,7 @@
     },
     "definition_lines": 36,
     "definition_to_proof_line_ratio": 1.0,
+    "description": "Declarations: AggregateStorageDeclaration, AggregateStorageFields, AggregateStorageDeclaration.pack",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.SlotTranslation"
@@ -2220,6 +2314,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.019230769230769232,
+    "description": "Declarations: AggregateStorageDeclaration.pack_end, AggregateStorageFields.pack_end, AggregateStorageDeclaration.end_slot_translation",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.AggregateStorageDeclaration"
@@ -2243,6 +2338,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.1388888888888889,
+    "description": "Declarations: aggregateSnapshotWriteback, aggregateSnapshot_reencode, aggregateSnapshot_unchanged",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.AggregateStorageCollect"
@@ -2266,6 +2362,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.13559322033898305,
+    "description": "Declarations: aggregateApplySnapshot?, aggregateApply_static, aggregateApply_MemOK",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.AggregateStorageSnapshot"
@@ -2289,6 +2386,7 @@
     },
     "definition_lines": 49,
     "definition_to_proof_line_ratio": 0.1856060606060606,
+    "description": "Declarations: decodeMemoryMember, decodeMemoryMember_sound, uintValueOfWord_inverse",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DynamicUintMemory",
@@ -2313,6 +2411,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.11627906976744186,
+    "description": "Declarations: mixed_member_support, allChangedFields, allChangedWords",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.AggregateWriteback",
@@ -2338,6 +2437,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.5,
+    "description": "Declarations: HashInputAgreement, HashInputAgreement.bounded, InputAgreement",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.MemoryLayout",
@@ -2362,6 +2462,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: retainedByteAllocation_inventory",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.AllocationInventory"
@@ -2383,6 +2484,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: retainedObjectAllocation_physical",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ObjectAllocationPhysicalView"
@@ -2404,6 +2506,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: retainedByteAllocation_physical",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.AllocationPhysicalView",
@@ -2426,6 +2529,7 @@
       "theorem": 6
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: heapAlloc_inventory_supported, heapWrite_inventory_supported, heapEntryAt_isSome_of_prepared",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.EnumeratedMemory",
@@ -2451,6 +2555,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.12048192771084337,
+    "description": "Declarations: aiBytes, aiState, aiPlacement",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.AllocatedMemory",
@@ -2477,6 +2582,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.10126582278481013,
+    "description": "Declarations: avMixedPhysical, av_mixed_reads, av_mixed_whole_map",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.AllocatedPhysicalMemory",
@@ -2499,6 +2605,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: mixedImage_reads_of_coverage, byteAllocation_image_reads, byteAllocation_computed_view",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.AllocationViewImages"
@@ -2522,6 +2629,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.05813953488372093,
+    "description": "Declarations: decode, writeNew, write_new",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.NewMemoryOperand"
@@ -2546,6 +2654,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.2972972972972973,
+    "description": "Declarations: E, F, initial",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.AllocationPointer",
@@ -2571,6 +2680,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.05309734513274336,
+    "description": "Declarations: placement, prepared, addresses",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ComputedAllocationWrite"
@@ -2594,6 +2704,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.35,
+    "description": "Declarations: E, initial, first",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.AllocationRefresh",
@@ -2620,6 +2731,7 @@
     },
     "definition_lines": 23,
     "definition_to_proof_line_ratio": 0.5348837209302325,
+    "description": "Declarations: Request, program, Certified",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.AllocationRefresh"
@@ -2643,6 +2755,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.1320754716981132,
+    "description": "Declarations: third, two, final",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.AllocationSequence",
@@ -2665,6 +2778,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: byteAlloc_images, byteAlloc_prepares, byteAllocation_old_image_reads",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.MemoryImageExtension",
@@ -2690,6 +2804,7 @@
     },
     "definition_lines": 59,
     "definition_to_proof_line_ratio": 0.6020408163265306,
+    "description": "Declarations: castDataFields, castDataFields_back, fixedArrayFields?",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.StructArray"
@@ -2711,6 +2826,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: reads, whole",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ArrayWordStore"
@@ -2734,6 +2850,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.11764705882352941,
+    "description": "Declarations: seed, memory, patched",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ArrayWordHeap",
@@ -2756,6 +2873,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: history, whole",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ArrayWordHeap"
@@ -2779,6 +2897,7 @@
     },
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 0.352112676056338,
+    "description": "Declarations: E, F, empty",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ArrayWordRetained",
@@ -2803,6 +2922,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.022988505747126436,
+    "description": "Declarations: replace, word_read, header",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.AllocationPointer"
@@ -2826,6 +2946,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.2631578947368421,
+    "description": "Declarations: prior, allocationRaw, patched",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ArrayWordStore",
@@ -2848,6 +2969,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: sub_success, sub_halt, explicit_rollback",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ByteElementStore"
@@ -2871,6 +2993,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.08928571428571429,
+    "description": "Declarations: oldBytes, post, q",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ByteElementFrames",
@@ -2895,6 +3018,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.05142857142857143,
+    "description": "Declarations: payload, header, source",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.StructWordRetained"
@@ -2918,6 +3042,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.1206896551724138,
+    "description": "Declarations: bytesAfter, bytesPlacement, bytesPatch",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ByteElementStore",
@@ -2944,6 +3069,7 @@
     },
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.14414414414414414,
+    "description": "Declarations: HeapByteEntry, encodeByteHeap, HeapByteEntry.Reads",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.RetainedAllocation",
@@ -2968,6 +3094,7 @@
     },
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.22727272727272727,
+    "description": "Declarations: actualByteEntries, actual_entries_distinct, actual_entries_cover",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ByteHeapRealization",
@@ -2992,6 +3119,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.15151515151515152,
+    "description": "Length-prefixed byte/string object views",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.MemoryLayout",
@@ -3016,6 +3144,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.06451612903225806,
+    "description": "Declarations: program, bytes_of_type, transport",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.MultiRootByteFrames",
@@ -3038,6 +3167,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: content_of_type, byte_lookup, transport",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.BytePlanHash"
@@ -3061,6 +3191,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.11363636363636363,
+    "description": "Declarations: aliases, initial, finalState",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.BytePlanHashAlias",
@@ -3085,6 +3216,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.10714285714285714,
+    "description": "Declarations: writePrefix, value, actual_writePrefix",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.BytePlanHash",
@@ -3107,6 +3239,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: transport",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.BytePlanHashAlias"
@@ -3130,6 +3263,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.04081632653061224,
+    "description": "Declarations: output, success_return, derived_return_and_map",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.BytePlanHashFrames",
@@ -3154,6 +3288,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.17721518987341772,
+    "description": "Declarations: action, program, coupled",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.RetainedByteHeader"
@@ -3177,6 +3312,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.21951219512195122,
+    "description": "Declarations: requests, payload0, payload1",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ByteWriteSequence",
@@ -3202,6 +3338,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.6333333333333333,
+    "description": "Physical byte operations",
     "implemented_by": 0,
     "imports": [
       "Solidity.Roadmap.Contracts"
@@ -3225,6 +3362,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.030303030303030304,
+    "description": "Declarations: sourceCalldataHashExpr, sourceCalldataConv_run, sourceCalldataHash_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.SourceHashBinding",
@@ -3249,6 +3387,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.2692307692307692,
+    "description": "Declarations: E, F, state",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.CalldataHashBinding",
@@ -3273,6 +3412,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.28205128205128205,
+    "description": "Declarations: readCanonAlias, canon_actual_alias_paths, canon_actual_alias_panic",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.CanonicalCompatibility",
@@ -3295,6 +3435,7 @@
       "theorem": 9
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: decodeExtendedMemoryMember_legacy, decodeCanonicalArray_legacy, decodeCanonicalFields_legacy",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.CanonicalRetained"
@@ -3318,6 +3459,7 @@
     },
     "definition_lines": 43,
     "definition_to_proof_line_ratio": 0.16475095785440613,
+    "description": "Declarations: ExtendedMemberType, CanonicalScalarType.no_memory, memoryScalarCandidate_memory_none",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.MemoryScalarCodec",
@@ -3342,6 +3484,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.22950819672131148,
+    "description": "Declarations: canonicalRetainedHeap, canonicalRetainedState, canonicalRetainedState_MemOK",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.CanonicalMemory"
@@ -3365,6 +3508,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.14814814814814814,
+    "description": "Declarations: finish, reset, persistent_reencode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.CellWritesCalldataHash"
@@ -3386,6 +3530,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: cwh_final_persistent, cwh_timeout_final",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.CellHashFinalization",
@@ -3410,6 +3555,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.05555555555555555,
+    "description": "Declarations: operations, paired, external",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.LinkedCellHash"
@@ -3433,6 +3579,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.0784313725490196,
+    "description": "Declarations: chfCaller, chfChild, chf_caller_alias",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.CellHashFrames",
@@ -3457,6 +3604,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.1125,
+    "description": "Declarations: data, shape, image",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.CellWritesCalldataHash",
@@ -3481,6 +3629,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.1,
+    "description": "Declarations: chmCurrent, chmPlacement, chmInput",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.CellHashMemory",
@@ -3505,6 +3654,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.11290322580645161,
+    "description": "Declarations: program, undo, run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.CellHashFrames"
@@ -3526,6 +3676,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: chr_actual, chr_map, chr_timeout_prefix",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.CellHashRollback",
@@ -3550,6 +3701,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.07526881720430108,
+    "description": "Declarations: afterWrites, program, locals",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FiniteCellWrites",
@@ -3574,6 +3726,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.08,
+    "description": "Declarations: cwhFrame, cwhState, cwhMemory",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.CellWritesCalldataHash",
@@ -3598,6 +3751,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.09090909090909091,
+    "description": "Declarations: roundSlot, roundSlot_spec, roundSlot_aligned",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.AggregateData"
@@ -3619,6 +3773,7 @@
       "theorem": 9
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: alloc_shape_old, alloc_position_prefix, alloc_shape_new",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ComputedPlacement",
@@ -3643,6 +3798,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.5,
+    "description": "Declarations: E, empty, bytes",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ComputedAllocation",
@@ -3667,6 +3823,7 @@
     },
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.2459016393442623,
+    "description": "Declarations: computed_fresh, nextFree, placement",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ComputedAllocation",
@@ -3691,6 +3848,7 @@
     },
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.42857142857142855,
+    "description": "Declarations: E, initial, bytes",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ComputedAllocationWrite",
@@ -3715,6 +3873,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.10526315789473684,
+    "description": "Declarations: dyn_computed_snapshot_inventory, dyn_computed_snapshot_ready, dynComputedStore",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ComputedDynamicSnapshot",
@@ -3739,6 +3898,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.34210526315789475,
+    "description": "Declarations: ComputedStorage.traceHeader, ComputedStorage.snapshotInventory, ComputedStorage.snapshot_root_member",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DynamicInventoryWriteback"
@@ -3763,6 +3923,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.18,
+    "description": "Declarations: ComputedSourceLayout, prepareComputedLayout, ComputedSourceLayout.nonwrapping",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.LayoutOrigin"
@@ -3784,6 +3945,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: prepareInherited_exact, prepareComputed_exact",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ComputedLayout"
@@ -3808,6 +3970,7 @@
     },
     "definition_lines": 54,
     "definition_to_proof_line_ratio": 0.574468085106383,
+    "description": "Declarations: objectShape, objectShape_sound, shapeAt",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.MemoryContract"
@@ -3831,6 +3994,7 @@
     },
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 2.2857142857142856,
+    "description": "Declarations: E, zeroArray, sparse",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ComputedPlacement",
@@ -3855,6 +4019,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.20833333333333334,
+    "description": "Declarations: dyn_source_snapshot_ready, dynSnapshotRun, dyn_source_snapshot_success",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ComputedSnapshotReads",
@@ -3877,6 +4042,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: ComputedStorage.applySnapshot_readLen, ComputedStorage.applySnapshot_reencode, ComputedStorage.snapshot_bank_agreement",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ComputedSnapshotSource"
@@ -3900,6 +4066,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.1320754716981132,
+    "description": "Declarations: ComputedStorage.traceHeader_member, ComputedStorage.applySnapshot?, actualApplyOp_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ComputedDynamicSnapshot",
@@ -3925,6 +4092,7 @@
     },
     "definition_lines": 24,
     "definition_to_proof_line_ratio": 1.0,
+    "description": "Declarations: ComputedStorage, prepareComputedStorage, ComputedStorage.separated",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.StorageDeclarationHeaders",
@@ -3949,6 +4117,7 @@
     },
     "definition_lines": 28,
     "definition_to_proof_line_ratio": 0.8,
+    "description": "Declarations: zero, ascending, big_endian",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Observe",
@@ -3978,6 +4147,7 @@
     },
     "definition_lines": 39,
     "definition_to_proof_line_ratio": 2.7857142857142856,
+    "description": "Declarations: DeclaredArrayStruct, DeclaredArrayStruct.first, DeclaredArrayStruct.nextByte",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DeclarationPacking"
@@ -4001,6 +4171,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.8461538461538461,
+    "description": "Declarations: declBoundaryEnv, declBoundaryRoot, declBoundary",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DeclarationBoundary",
@@ -4025,6 +4196,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.5405405405405406,
+    "description": "Declarations: declPackingEnv, declPackingRoot, declPackingCert",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DeclarationSeparation",
@@ -4047,6 +4219,7 @@
       "theorem": 8
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: zero_bytes, payload, available",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DeclarationPacking",
@@ -4069,6 +4242,7 @@
       "theorem": 8
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: dd_mixed_payload, dd_mixed_check, dd_temp_packed",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DeclarationDefaults",
@@ -4094,6 +4268,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.21052631578947367,
+    "description": "Declarations: declChildRequest, declTransientRequest, decl_child_ready",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DeclarationControls"
@@ -4119,6 +4294,7 @@
     },
     "definition_lines": 48,
     "definition_to_proof_line_ratio": 3.0,
+    "description": "Declarations: DeclarationPackingError, declarationFieldPath, declarationStart",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DeclarationScalars",
@@ -4141,6 +4317,7 @@
       "theorem": 7
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: declarationMembers_replicate, packDeclarationPaths_end, packDeclarationPaths_end_option",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DeclarationPathSeparation"
@@ -4162,6 +4339,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: packDeclarationPaths_spec",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DeclarationPacking"
@@ -4186,6 +4364,7 @@
     },
     "definition_lines": 30,
     "definition_to_proof_line_ratio": 5.0,
+    "description": "Declarations: DeclScalar, declarationScalar?, declarationMembers?",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.PackedSlots",
@@ -4209,6 +4388,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: packDeclarationFields_spec, PackedDeclaration.separated, PackedDeclaration.owned_bounds",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DeclarationPathSeparation"
@@ -4232,6 +4412,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.3333333333333333,
+    "description": "Declarations: DynamicHeader.prepareElement, DynamicHeader.prepareElement_success, DynamicHeader.prepareElement_error",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DynamicSeparation"
@@ -4255,6 +4436,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.08333333333333333,
+    "description": "Declarations: dyn_unwritten_zero_view, dyn_pure_zero_keeps_unwritten, dynExplicitZero",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DynamicStoreControls"
@@ -4278,6 +4460,7 @@
     },
     "definition_lines": 34,
     "definition_to_proof_line_ratio": 1.3076923076923077,
+    "description": "Declarations: dynName, dynPath, dynU",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DynamicAccess"
@@ -4301,6 +4484,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.2631578947368421,
+    "description": "Declarations: DynamicHeader.elementPath, DynamicHeader.element_type, DynamicHeader.elementLoc",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DynamicHeader"
@@ -4322,6 +4506,7 @@
       "theorem": 9
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: packedSlot_other_account, runPackedSlots_other_account, runPackedSlots_other_complement",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DynamicSourceSequence",
@@ -4347,6 +4532,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.14285714285714285,
+    "description": "Declarations: dynamicHeaderSeed, DynamicHeader, DynamicHeader.registration",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.StorageDeclarationHead"
@@ -4370,6 +4556,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.20512820512820512,
+    "description": "Declarations: DynamicHeader.proof_irrel, ComputedStorage.header?, ComputedStorage.header_selected",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DynamicSource"
@@ -4393,6 +4580,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.13333333333333333,
+    "description": "Declarations: DynamicHeader.elements, DynamicHeader.elements_member, DynamicHeader.element_paths_ne",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DynamicSeparation"
@@ -4416,6 +4604,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.21052631578947367,
+    "description": "Declarations: dyn_complete_live_paths, dyn_complete_live_separation, dyn_live_snapshot_ready",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DynamicInventoryWriteback",
@@ -4440,6 +4629,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.22857142857142856,
+    "description": "Declarations: DynamicHeader.inventoryWriteback, DynamicHeader.inventory_reencode, DynamicHeader.inventory_other",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DynamicInventory",
@@ -4464,6 +4654,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.4,
+    "description": "Declarations: dynCaller, dynCallerCore, dyn_actual_caller_sequence",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DynamicJournalPrepare"
@@ -4487,6 +4678,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.45,
+    "description": "Declarations: dynChildRequests, dyn_child_ready, dynChildDataPlan",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DynamicJournalCaller"
@@ -4510,6 +4702,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.03333333333333333,
+    "description": "Declarations: dynAfterDataCore, dynAfterLengthCore, dyn_child_length_request",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DynamicJournalChild"
@@ -4533,6 +4726,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.22580645161290322,
+    "description": "Declarations: dynTempRegistry, dyn_temp_actual_bank, dynResidual",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DynamicNegativeControls",
@@ -4555,6 +4749,7 @@
       "theorem": 5
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: DeclPosition.registration_encode, DynamicHeader.length_encode_value, DynamicHeader.header_find_value",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DynamicSource",
@@ -4579,6 +4774,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.20689655172413793,
+    "description": "Declarations: DynamicHeader.lengthWrapped, DynamicHeader.lengthOp, DynamicHeader.writeLen_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DynamicSource"
@@ -4602,6 +4798,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.6363636363636364,
+    "description": "Declarations: dyn_non_header_not_selected, dyn_wrong_member_is_not_cell, dynCollisionFixed",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DynamicStoreControls"
@@ -4623,6 +4820,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: packedPlanRequests",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DynamicFrameLaws"
@@ -4647,6 +4845,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 3.5,
+    "description": "Declarations: DynamicScalarKind, DynamicScalarKind.ty, DynamicScalarKind.seed",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DeclarationScalars",
@@ -4669,6 +4868,7 @@
       "theorem": 6
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: ComputedStorage.header_found, DynamicHeader.offset, DynamicHeader.width",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DynamicHeaderSelection"
@@ -4692,6 +4892,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.09090909090909091,
+    "description": "Declarations: sourceVal_transport_cancel, DynamicHeader.lengthValue, DynamicHeader.readLen",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ComputedStorage",
@@ -4716,6 +4917,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.16666666666666666,
+    "description": "Declarations: dynAliasInitial, dynAliasPrefix, dyn_source_prefix_alias_reads",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DynamicJournalControls"
@@ -4739,6 +4941,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.2857142857142857,
+    "description": "Declarations: runPackedSource, runPackedSource_nonstatic, runPackedSource_companion",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.PackedResidualFrame"
@@ -4762,6 +4965,7 @@
     },
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.45454545454545453,
+    "description": "Declarations: dynRegistry, dynRaw42, dynRaw44",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DynamicControls",
@@ -4786,6 +4990,7 @@
     },
     "definition_lines": 86,
     "definition_to_proof_line_ratio": 0.7610619469026548,
+    "description": "Declarations: dynTy, dynWords, dynOther",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.RetainedDynamicUint",
@@ -4810,6 +5015,7 @@
     },
     "definition_lines": 23,
     "definition_to_proof_line_ratio": 0.16428571428571428,
+    "description": "Declarations: dynamicUintData, dynamicUintView, decodeDynamicUint",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.StaticUintMemory"
@@ -4833,6 +5039,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.06140350877192982,
+    "description": "Declarations: enumeratedMemoryWriteback, enumeratedMemoryView, enumeratedMemoryWriteback_MemOK",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.HeapEnumerationLaws",
@@ -4859,6 +5066,7 @@
     },
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.14678899082568808,
+    "description": "Declarations: Request, Registered, program",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.RepeatedCellWrites"
@@ -4882,6 +5090,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.12244897959183673,
+    "description": "Declarations: fcwOther, fcwOtherValue, fcw_other_member",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FiniteCellWrites",
@@ -4906,6 +5115,7 @@
     },
     "definition_lines": 49,
     "definition_to_proof_line_ratio": 0.620253164556962,
+    "description": "Declarations: finiteFlag, finiteSmall, finiteWide",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FiniteWorld",
@@ -4931,6 +5141,7 @@
     },
     "definition_lines": 51,
     "definition_to_proof_line_ratio": 0.29310344827586204,
+    "description": "Declarations: ScalarPath, pathsApart, pathsApart_symm",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ScalarWorld"
@@ -4954,6 +5165,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.1111111111111111,
+    "description": "Declarations: registeredOwnership, registered_persistent_unowned, registered_transient_unowned",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FiniteWorld",
@@ -4978,6 +5190,7 @@
     },
     "definition_lines": 28,
     "definition_to_proof_line_ratio": 1.1666666666666667,
+    "description": "Declarations: finiteTxRegistration, finiteRegistered, finitePersistentKey",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FiniteControls",
@@ -5002,6 +5215,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.08823529411764706,
+    "description": "Declarations: finiteAccountWrite?, finiteTransientWrite?, finiteAccountWrite_actual",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FinitePaths"
@@ -5024,6 +5238,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: FixedDeclaration, FixedDeclarationFields",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.NestedDeclarationFinal"
@@ -5047,6 +5262,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 1.0,
+    "description": "Declarations: CheckedFixedDeclaration, checkFixedDeclaration, CheckedFixedDeclaration.separated",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedDeclarationExtent"
@@ -5070,6 +5286,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.06153846153846154,
+    "description": "Declarations: recursiveInitialCore, recursiveCallerCore, recursive_actual_sequence",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedDeclarationStore"
@@ -5093,6 +5310,7 @@
     },
     "definition_lines": 38,
     "definition_to_proof_line_ratio": 0.4175824175824176,
+    "description": "Declarations: recursiveDeclEnv, recursiveRoot, recursiveUnsigned128",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedDeclarationSource"
@@ -5116,6 +5334,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.04132231404958678,
+    "description": "Declarations: Payloads, PackDefaults, append",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DeclarationDefaults",
@@ -5140,6 +5359,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.05714285714285714,
+    "description": "Declarations: fdd_recursive_available, fdd_recursive_check, fdd_recursive_view",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedDeclarationDefaults",
@@ -5165,6 +5385,7 @@
     },
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.3050847457627119,
+    "description": "Declarations: fixedElementEnd, FixedDeclaration.endByte, FixedDeclarationFields.endByte",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedDeclarationPaths"
@@ -5186,6 +5407,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: recursive_actual_residual_snapshot, recursive_actual_whole_physical_snapshot",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedDeclarationReads"
@@ -5209,6 +5431,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.12962962962962962,
+    "description": "Declarations: recursiveChildRaw, recursive_child_ready, recursive_transient_ready",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedDeclarationComposition"
@@ -5232,6 +5455,7 @@
     },
     "definition_lines": 30,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: FixedPackFn, packFixedRow, packFixedElements",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedDeclaration"
@@ -5254,6 +5478,7 @@
     },
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.3137254901960784,
+    "description": "Declarations: fixedElementPaths, FixedDeclaration.paths, FixedDeclarationFields.paths",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedDeclarationSpec"
@@ -5277,6 +5502,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.22727272727272727,
+    "description": "Declarations: recursiveArrayTy, recursiveArrayReference, recursiveAliasState",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedDeclarationJournal"
@@ -5300,6 +5526,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.18604651162790697,
+    "description": "Declarations: CheckedFixedDeclaration.registry, CheckedFixedDeclaration.encode_writeback, CheckedFixedDeclaration.unchanged",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedDeclarationChecked"
@@ -5324,6 +5551,7 @@
     },
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.09375,
+    "description": "Declarations: fixedExtend, FixedBelow, fixedBelow_refl",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedDeclarationPack"
@@ -5347,6 +5575,7 @@
     },
     "definition_lines": 28,
     "definition_to_proof_line_ratio": 1.12,
+    "description": "Declarations: recursiveRaw8, recursiveRaw9, recursiveRaw10",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedDeclarationControls"
@@ -5370,6 +5599,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.2,
+    "description": "Declarations: recursiveSnapshot, recursiveEmptyStore, recursive_store_ready",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedDeclarationState"
@@ -5391,6 +5621,7 @@
       "theorem": 5
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: fixedPathTy_go, fixedElementPaths_typed, FixedDeclaration.paths_typed",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedDeclarationChecked"
@@ -5414,6 +5645,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.05263157894736842,
+    "description": "Declarations: recursive_all_paths_metadata_typed, recursive_actual_nested_types, recursive_structural_index_boundary",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedDeclarationTyping",
@@ -5436,6 +5668,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: runSnapshots_replay",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedInventoryHistory",
@@ -5458,6 +5691,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: prefix_replay, late_rejection_replay, replay_cannot_restore_original",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedHistoryReplay",
@@ -5481,6 +5715,7 @@
     },
     "definition_lines": 41,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: snapshot, decode, update",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.InventorySnapshot",
@@ -5505,6 +5740,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.358974358974359,
+    "description": "Declarations: payload, state, placement",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedInventoryUnchanged",
@@ -5530,6 +5766,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.1125,
+    "description": "Declarations: transport_cursor, snapshotStep, snapshotStep_eq",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedInventoryView",
@@ -5554,6 +5791,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.05128205128205128,
+    "description": "Declarations: initial, actual_step, cursor_aliases",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedInventoryCursor",
@@ -5578,6 +5816,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.1276595744680851,
+    "description": "Declarations: actual_MemOK, heap_profile, generated_whole_state",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedInventoryPreparation",
@@ -5602,6 +5841,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.06451612903225806,
+    "description": "Declarations: runSnapshots, runSnapshots_single, runSnapshots_MemOK",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedInventoryCursor",
@@ -5626,6 +5866,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.023809523809523808,
+    "description": "Declarations: dirty, changed_complete, rejected_keeps_suffix",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedInventoryHistory",
@@ -5648,6 +5889,7 @@
       "theorem": 7
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: snapshot_raw, snapshot_encode, decode_raw",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedInventory"
@@ -5669,6 +5911,7 @@
       "theorem": 5
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: fixed_element_exists, fixed_image_prepared, image_prepared",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedInventoryUnchanged",
@@ -5694,6 +5937,7 @@
     },
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.2459016393442623,
+    "description": "Declarations: words, entry, expectedState",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedInventoryTransport",
@@ -5716,6 +5960,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: updates_reject_member, snapshotStep_reject_entry, snapshotStep_reject_fixed",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedInventoryHistory",
@@ -5738,6 +5983,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: dirty_snapshot, changed_then_rejected, late_failure_prefix",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedInventoryRejection",
@@ -5760,6 +6006,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: profile_of_types, writeback_replay",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedInventoryView"
@@ -5783,6 +6030,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.11363636363636363,
+    "description": "Declarations: heap_profile, changed_replay, freshRead",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedInventoryReplay",
@@ -5805,6 +6053,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: snapshot_transport, decode_transport, realized_decode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedInventoryView",
@@ -5829,6 +6078,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.030612244897959183,
+    "description": "Declarations: TypeSupported, element_word, fixed_object_unchanged",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedInventoryLaws",
@@ -5852,6 +6102,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: update_entry, updates_ids, writeback_view",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedInventoryPreparation",
@@ -5876,6 +6127,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.24358974358974358,
+    "description": "Declarations: fromInt, decode, fromInt_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.NominalMemory"
@@ -5899,6 +6151,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.2857142857142857,
+    "description": "Declarations: env, f, inspect",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedMemory",
@@ -5925,6 +6178,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.047619047619047616,
+    "description": "Declarations: decodeFields, decodeFields_representation, decodeFields_reads",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedNominalMember"
@@ -5948,6 +6202,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.25806451612903225,
+    "description": "Declarations: fieldTypes, fields, words",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedNominalFields",
@@ -5972,6 +6227,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.14285714285714285,
+    "description": "Declarations: actual_MemOK, heap_profile, generated_roundtrip",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedNominalInventoryPreparation",
@@ -5994,6 +6250,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: runSnapshots_replay",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedNominalInventoryHistory",
@@ -6017,6 +6274,7 @@
     },
     "definition_lines": 43,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: snapshot, decode, update",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedNominalMemory",
@@ -6040,6 +6298,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.17647058823529413,
+    "description": "Declarations: words, entry, expectedState",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedNominalInventoryLaws",
@@ -6065,6 +6324,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.1125,
+    "description": "Declarations: transport_cursor, snapshotStep, snapshotStep_eq",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedNominalInventoryView",
@@ -6089,6 +6349,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.06451612903225806,
+    "description": "Declarations: runSnapshots, runSnapshots_single, runSnapshots_MemOK",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedNominalInventoryCursor",
@@ -6111,6 +6372,7 @@
       "theorem": 7
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: snapshot_raw, snapshot_encode, decode_raw",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedNominalInventory"
@@ -6132,6 +6394,7 @@
       "theorem": 7
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: scalar_no_location, supported_scalar_element, nominal_element_exists",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedNominalInventoryUnchanged",
@@ -6155,6 +6418,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: updates_reject_member, snapshotStep_reject_entry, snapshotStep_reject_nominal",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedNominalInventoryHistory",
@@ -6177,6 +6441,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: profile_of_types, writeback_replay",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedNominalInventoryView"
@@ -6198,6 +6463,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: snapshot_transport, decode_transport, realized_decode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedNominalInventoryView",
@@ -6222,6 +6488,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.05,
+    "description": "Declarations: TypeSupported, element_word, nominal_object_unchanged",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedNominalInventoryLaws",
@@ -6244,6 +6511,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: update_entry, updates_ids, writeback_view",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedNominalInventoryPreparation",
@@ -6268,6 +6536,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.3142857142857143,
+    "description": "Declarations: Supported, decode, sound",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedNominalMemory"
@@ -6291,6 +6560,7 @@
     },
     "definition_lines": 24,
     "definition_to_proof_line_ratio": 0.16216216216216217,
+    "description": "Declarations: ScalarSupported, scalar, scalar_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedMemory"
@@ -6314,6 +6584,7 @@
     },
     "definition_lines": 23,
     "definition_to_proof_line_ratio": 0.6216216216216216,
+    "description": "Declarations: name, missing, env",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedNominalMemory",
@@ -6338,6 +6609,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.16666666666666666,
+    "description": "Declarations: changed_view, changed_replay, readFirst",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedNominalInventoryReplay",
@@ -6363,6 +6635,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.03389830508474576,
+    "description": "Declarations: dirty, dirty_snapshot, changed_then_rejected",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedNominalInventoryRejection",
@@ -6387,6 +6660,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.20588235294117646,
+    "description": "Declarations: decodedFields_snapshot, snapshotStruct, snapshotStruct_raw",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedNominalFields",
@@ -6411,6 +6685,7 @@
     },
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 0.5555555555555556,
+    "description": "Declarations: scaled, box, env",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedNominalStruct",
@@ -6435,6 +6710,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.031746031746031744,
+    "description": "Declarations: initial, actual_step, cursor_aliases",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedNominalInventoryCursor",
@@ -6461,6 +6737,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.25,
+    "description": "Declarations: coverage, supported, entire_state",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FixedNominalInventoryUnchanged",
@@ -6485,6 +6762,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.1509433962264151,
+    "description": "Declarations: frameCalldataCopy, frameCalldata_whole_map, frameCalldataWriteback",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ResidualMemoryWriteback",
@@ -6509,6 +6787,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.13793103448275862,
+    "description": "Declarations: frame, emptyFrame, padded",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.FrameCalldata",
@@ -6534,6 +6813,7 @@
     },
     "definition_lines": 36,
     "definition_to_proof_line_ratio": 0.5373134328358209,
+    "description": "Declarations: FullWordLayout, FullWordFields, fullWordLayoutCheck",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.LocatedHash"
@@ -6557,6 +6837,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.38636363636363635,
+    "description": "Declarations: generatedSparseState, generated_sparse_MemOK, generatedSparsePhysical",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.HeapEnumerationBoundaryControls",
@@ -6582,6 +6863,7 @@
     },
     "definition_lines": 35,
     "definition_to_proof_line_ratio": 0.625,
+    "description": "Checked ownership following",
     "implemented_by": 0,
     "imports": [],
     "imports_in": 9,
@@ -6601,6 +6883,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: none_of_write_none",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.GenericFlow.Following"
@@ -6622,6 +6905,7 @@
       "theorem": 7
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: heap_type_present, heap_alloc_old_type, heap_write_alloc",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.HeapByteAllocation",
@@ -6646,6 +6930,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.24444444444444444,
+    "description": "Declarations: haBytes, haState, ha_fresh",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.HeapAllocationReads",
@@ -6670,6 +6955,7 @@
     },
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 1.5,
+    "description": "Declarations: haZeroData, haZeroHeap, ha_zero_only",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.HeapAllocationControls"
@@ -6693,6 +6979,7 @@
     },
     "definition_lines": 55,
     "definition_to_proof_line_ratio": 1.8333333333333333,
+    "description": "Declarations: occupied_ne_next, heap_alloc_old_present, heapAllocPlacement",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.HeapBytePlacement"
@@ -6714,6 +7001,7 @@
       "theorem": 7
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: byteAllocatedState_new, byteAllocatedState_other, byteAllocatedState_observations",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.HeapByteAllocation",
@@ -6738,6 +7026,7 @@
     },
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.12903225806451613,
+    "description": "Declarations: heapByteType_memory, byteAllocatedState, byteAllocRef_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.HeapAllocationPlacement",
@@ -6762,6 +7051,7 @@
     },
     "definition_lines": 29,
     "definition_to_proof_line_ratio": 1.0357142857142858,
+    "description": "Declarations: boundaryBytes, boundaryHeap, boundary_present_zero",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.HeapByteStateControls"
@@ -6785,6 +7075,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.11764705882352941,
+    "description": "Declarations: heapByteResultPlacement, heapByteResult_choices, readBytes_congr_on",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.HeapByteMemOK"
@@ -6808,6 +7099,7 @@
     },
     "definition_lines": 75,
     "definition_to_proof_line_ratio": 1.0869565217391304,
+    "description": "Declarations: heapByteEnv, byteOld, byteNew",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.HeapByteComposition"
@@ -6831,6 +7123,7 @@
     },
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.25,
+    "description": "Declarations: withSourceHeap, withSourceHeap_unchanged, heapByteData_OK",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.HeapBytePlacement"
@@ -6854,6 +7147,7 @@
     },
     "definition_lines": 29,
     "definition_to_proof_line_ratio": 0.4915254237288136,
+    "description": "Declarations: heap_write_occupancy, heapWritePlacement, decodeHeapByte_shape",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.HeapByteWriteback"
@@ -6877,6 +7171,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.06521739130434782,
+    "description": "Declarations: byteShape_size_mono, heapByteResizeWriteback, heapByteResize_success",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.HeapByteComposition"
@@ -6900,6 +7195,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.12,
+    "description": "Declarations: resizeBoundaryState, resizeBoundaryHeap, resizeBoundaryAfter",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.HeapByteResizeControls"
@@ -6921,6 +7217,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: bytesObject_resize_other_object",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.HeapByteResizePlacement"
@@ -6944,6 +7241,7 @@
     },
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 0.2736842105263158,
+    "description": "Declarations: growBytes, growPhysical, growHeap",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.HeapByteResizeComposition",
@@ -6968,6 +7266,7 @@
     },
     "definition_lines": 59,
     "definition_to_proof_line_ratio": 1.0727272727272728,
+    "description": "Declarations: heapResizePlacement, heapByteResizeWrittenPlacement, heapByteResizeResultPlacement",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.HeapByteResize"
@@ -6991,6 +7290,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.11538461538461539,
+    "description": "Declarations: byteState, byteStateAfter, byteStringStateAfter",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.HeapByteControls"

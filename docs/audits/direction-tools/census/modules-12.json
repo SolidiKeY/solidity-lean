@@ -10,6 +10,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.23636363636363636,
+    "description": "Declarations: C, E, source",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.AssignmentReturnFlag",
@@ -34,6 +35,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.1232876712328767,
+    "description": "Declarations: code, reached, source_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.AssignmentReturnFlag"
@@ -58,6 +60,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.16071428571428573,
+    "description": "Declarations: C, source, target",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.AssignmentWhileBreak",
@@ -82,6 +85,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.0898876404494382,
+    "description": "Declarations: body, statement, rest_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.AssignmentWhileReset"
@@ -105,6 +109,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.04878048780487805,
+    "description": "Declarations: tail, joined, body_tail_skipped",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.AssignmentWhileContinue",
@@ -129,6 +134,7 @@
     },
     "definition_lines": 23,
     "definition_to_proof_line_ratio": 0.10599078341013825,
+    "description": "Declarations: body, code, sourceAfter",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.AssignmentWhileBreak"
@@ -152,6 +158,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.08791208791208792,
+    "description": "Declarations: source, core, emitted",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.AssignmentWhileReset",
@@ -176,6 +183,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.125,
+    "description": "Declarations: statement, code, reached",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.ConditionalStatement",
@@ -200,6 +208,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.15873015873015872,
+    "description": "Declarations: statement, suffix, code",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.ConditionalReturn"
@@ -223,6 +232,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.14285714285714285,
+    "description": "Declarations: sourceTail, targetTail, eager",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.ConditionalReturnContinuation",
@@ -247,6 +257,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.14285714285714285,
+    "description": "Declarations: joined, observe, observed",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.ConditionalReturn",
@@ -271,6 +282,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.17391304347826086,
+    "description": "Declarations: statement, sourceAfter, code",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.ConditionalStatement"
@@ -294,6 +306,7 @@
     },
     "definition_lines": 32,
     "definition_to_proof_line_ratio": 0.5245901639344263,
+    "description": "Declarations: mapped, sourceObs, observeTarget",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.ConditionalSequence",
@@ -318,6 +331,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.08411214953271028,
+    "description": "Declarations: statement, code, source_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.V07.ConditionalAssignments"
@@ -341,6 +355,7 @@
     },
     "definition_lines": 24,
     "definition_to_proof_line_ratio": 0.42857142857142855,
+    "description": "Declarations: mapped, sourceObs, observeTarget",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.ConditionalStatement",
@@ -365,6 +380,7 @@
     },
     "definition_lines": 22,
     "definition_to_proof_line_ratio": 0.2018348623853211,
+    "description": "Declarations: statement, sourceAfter, code",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.ReturnTail"
@@ -388,6 +404,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.12195121951219512,
+    "description": "Declarations: joined, observe, observed",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.ReturnPair",
@@ -412,6 +429,7 @@
     },
     "definition_lines": 24,
     "definition_to_proof_line_ratio": 0.16326530612244897,
+    "description": "Declarations: statement, sourceAfter, suffix",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.AssignmentReturnFlag"
@@ -435,6 +453,7 @@
     },
     "definition_lines": 28,
     "definition_to_proof_line_ratio": 0.4057971014492754,
+    "description": "Declarations: mapped, sourceObs, observeTarget",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.ReturnTail",
@@ -457,6 +476,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_run, source_zero, correct",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.AssignmentReturnFlag"
@@ -481,6 +501,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.20967741935483872,
+    "description": "Declarations: C, E, source",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.WhileReturn",
@@ -505,6 +526,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.08333333333333333,
+    "description": "Declarations: frontend, frontend_iff, admission",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.FrozenInterface"
@@ -530,6 +552,7 @@
     },
     "definition_lines": 60,
     "definition_to_proof_line_ratio": 0.6122448979591837,
+    "description": "G15 settings-tagged checked syntax",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Checked.Certificate"
@@ -554,6 +577,7 @@
     },
     "definition_lines": 30,
     "definition_to_proof_line_ratio": 0.8333333333333334,
+    "description": "Declarations: ModelFacts, admissionHalf, producer",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.CheckedFrontendAdmission",
@@ -579,6 +603,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.5,
+    "description": "Declarations: withGraphs, from_v1_graphs, checked_contract",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.ConditionalAssembly",
@@ -602,6 +627,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: Producer",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.V07.LocationGraphInterface"
@@ -625,6 +651,7 @@
     },
     "definition_lines": 42,
     "definition_to_proof_line_ratio": 3.8181818181818183,
+    "description": "Declarations: SourceRefusesNonAdmissible, source_refuses, location_policy_eq",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.V07.GraphAdmissionAssembly",
@@ -650,6 +677,7 @@
     },
     "definition_lines": 22,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: Certificate, OriginGraphs, checkLocation",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.DeclarationGraphAdmission",
@@ -671,6 +699,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: accepted_mapping_free, program_mapping_free, mapping_program_origin_impossible",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.V07.GraphAdmissionAssembly"
@@ -692,6 +721,7 @@
       "theorem": 8
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: mixed_views, mapping_memory_policy, mapping_calldata_policy",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.DeclarationGraphCheck",
@@ -716,6 +746,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.1746031746031746,
+    "description": "Declarations: dispatchMod_mem, checkFunctionTarget, checkModifierTarget",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Admission.ProgramObservations",
@@ -740,6 +771,7 @@
     },
     "definition_lines": 34,
     "definition_to_proof_line_ratio": 0.5230769230769231,
+    "description": "Declarations: actual_target_checked, actual_target_in_scan, inherited_source_execution",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.DispatchCoverage",
@@ -766,6 +798,7 @@
     },
     "definition_lines": 39,
     "definition_to_proof_line_ratio": 13.0,
+    "description": "Declarations: functionDecl, receiveDecl, fallbackDecl",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.EntryRoots"
@@ -789,6 +822,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.34375,
+    "description": "Declarations: function_entry, special_entry, SelectedEntryRootCoverage",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.DispatchCoverage",
@@ -814,6 +848,7 @@
     },
     "definition_lines": 47,
     "definition_to_proof_line_ratio": 3.357142857142857,
+    "description": "Declarations: Projection, FullPlanCoverage, CompleteProjection",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.ResourceContractLaw1",
@@ -839,6 +874,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 1.0555555555555556,
+    "description": "Declarations: Resource, Choices, points",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.FrozenInterface",
@@ -861,6 +897,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: fields_lookup_none, fields_distinct_iff, graph_source_fields_distinct",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.ScalarSchemaControls"
@@ -884,6 +921,7 @@
     },
     "definition_lines": 50,
     "definition_to_proof_line_ratio": null,
+    "description": "FROZEN P8a producer interface (H12, 2026-11-02)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Roadmap.Contracts",
@@ -908,6 +946,7 @@
     },
     "definition_lines": 89,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: GraphCode, findNode, encodeGraph",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.ShapeSchema"
@@ -930,6 +969,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.8333333333333334,
+    "description": "Declarations: children, marker, nodeDecl",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.GraphSchema",
@@ -955,6 +995,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 1.0,
+    "description": "Declarations: producer, base_exact, inhabited",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.PlanWitness",
@@ -982,6 +1023,7 @@
     },
     "definition_lines": 146,
     "definition_to_proof_line_ratio": 1.7804878048780488,
+    "description": "An inhabited frozen P8a `Producer` (H60)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.FrozenInterface",
@@ -1010,6 +1052,7 @@
     },
     "definition_lines": 31,
     "definition_to_proof_line_ratio": 6.2,
+    "description": "Declarations: AdmissionHalf, AssemblyType, ComponentPipelineClosure",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.FrozenInterface",
@@ -1036,6 +1079,7 @@
     },
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 0.2916666666666667,
+    "description": "Declarations: Ready, (origin, ready_iff_all",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.SourceAstResolvedGraphs",
@@ -1061,6 +1105,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.3157894736842105,
+    "description": "Declarations: FrameClear, immediateFailure, immediateFailure_not_clear",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Session",
@@ -1083,6 +1128,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: nat_encodable_resource_impossible",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.FrozenInterface",
@@ -1107,6 +1153,7 @@
     },
     "definition_lines": 70,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: ScalarCode, encodeScalar, ScalarFields",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.V07.DeclarationGraph",
@@ -1130,6 +1177,7 @@
     },
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.27586206896551724,
+    "description": "Declarations: decl, unit, resolution",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.ScalarSchema"
@@ -1153,6 +1201,7 @@
     },
     "definition_lines": 93,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: ShapeCode, scalarShape, encodeShape",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.ScalarSchema"
@@ -1175,6 +1224,7 @@
     },
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.42857142857142855,
+    "description": "Declarations: nestedField, nestedDecl, nestedResolution",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.ShapeSchema",
@@ -1197,6 +1247,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: metadata_settings, input_settings",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.SourceMetadata"
@@ -1218,6 +1269,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: if_without_else_exact, if_with_else_exact, catch_plain_exact",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.SourceAstStatementCorrespondence"
@@ -1241,6 +1293,7 @@
     },
     "definition_lines": 60,
     "definition_to_proof_line_ratio": 15.0,
+    "description": "Declarations: parameterWith, parametersWith, optionalName",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.SourceAstExpressions"
@@ -1264,6 +1317,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.01990049751243781,
+    "description": "Declarations: Each, Each.length_eq, Each.mapM_ok",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.SourceAstUnit"
@@ -1285,6 +1339,7 @@
       "theorem": 10
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: member_exact, struct_ok_iff_each, using_path_exact",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.SourceAstTryCorrespondence"
@@ -1306,6 +1361,7 @@
       "theorem": 11
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: ok_bind, identifier_exact, member_ok_iff",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.SourceAstCorrespondence"
@@ -1329,6 +1385,7 @@
     },
     "definition_lines": 58,
     "definition_to_proof_line_ratio": 29.0,
+    "description": "Declarations: literal, expression, depth_zero",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.SourceAstParameters",
@@ -1351,6 +1408,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: string_kind_exact, integer_exact, boolean_exact",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.SourceAstTupleCorrespondence"
@@ -1372,6 +1430,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: parameter_exact, parameters_ok_iff_each, array_exact",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.SourceAstLiteralCorrespondence"
@@ -1395,6 +1454,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 1.2666666666666666,
+    "description": "Declarations: syntaxList, ElementsAt, elementsAt",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.SourceAstTypes"
@@ -1419,6 +1479,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.20754716981132076,
+    "description": "Declarations: Result, produceUnit, produce",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.SourceAstUnit",
@@ -1442,6 +1503,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: block_statement_exact, expression_statement_exact, return_exact",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.SourceAstTypeCorrespondence"
@@ -1465,6 +1527,7 @@
     },
     "definition_lines": 73,
     "definition_to_proof_line_ratio": 36.5,
+    "description": "Declarations: optionalExpression, blockWith, clauseParameters",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.SourceAstCompoundTypes"
@@ -1486,6 +1549,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: try_ok_iff_each, short_clauses_rejected",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.SourceAstBranchCorrespondence"
@@ -1507,6 +1571,7 @@
       "theorem": 5
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: optional_reader_agrees, optional_hole, tuple_ok_iff_each",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.SourceAstExpressionCorrespondence"
@@ -1528,6 +1593,7 @@
       "theorem": 14
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: optional_name_missing, optional_name_exact, map_key_path",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.SourceAstParameterCorrespondence"
@@ -1550,6 +1616,7 @@
     },
     "definition_lines": 66,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: path, location, decimalWidth",
     "implemented_by": 0,
     "imports": [
       "Lean.Data.Json",
@@ -1572,6 +1639,7 @@
     },
     "definition_lines": 98,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: absentOrEmpty, optionalBool, optionalExprField",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.SourceAstStatements"
@@ -1594,6 +1662,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.6296296296296297,
+    "description": "Declarations: UnitOK, unitCheck, strict_iff",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.SourceResolutions",
@@ -1619,6 +1688,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.2,
+    "description": "Declarations: parsed, input, legacy_metadata",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.SourceMetadata",
@@ -1646,6 +1716,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 3.3333333333333335,
+    "description": "Declarations: NontrivialPositive, StrictBeforeRefusal, OverrideRefusal",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.SourceMetadata",
@@ -1671,6 +1742,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.4,
+    "description": "Declarations: checkProgram, check, Allowed",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.SourcePrograms",
@@ -1697,6 +1769,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 11.0,
+    "description": "Declarations: accepted, changed, refused",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.SourceObservationAdmission",
@@ -1722,6 +1795,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.15,
+    "description": "Declarations: elaborate_acceptance, UnitsAcceptance, units_acceptance",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.SourcePrograms"
@@ -1746,6 +1820,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.16981132075471697,
+    "description": "Declarations: resolution, BaseAcceptance, ContractAcceptance",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.SourceProgramAcceptance",
@@ -1771,6 +1846,7 @@
     },
     "definition_lines": 30,
     "definition_to_proof_line_ratio": 3.75,
+    "description": "Declarations: admitted, admittedTwo, corruptInput",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.SourcePrograms",
@@ -1796,6 +1872,7 @@
     },
     "definition_lines": 30,
     "definition_to_proof_line_ratio": 0.3191489361702128,
+    "description": "Declarations: Programs, UnitsElaborate, elaborateUnits",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.SourceMetadata",
@@ -1820,6 +1897,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 1.4285714285714286,
+    "description": "Declarations: run, MachineAgreement, machineAgreement",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.FailureProjection",
@@ -1846,6 +1924,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.3508771929824561,
+    "description": "Declarations: parsed, input, legacy_resolved",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.SourceResolutions"
@@ -1870,6 +1949,7 @@
     },
     "definition_lines": 49,
     "definition_to_proof_line_ratio": 0.7101449275362319,
+    "description": "Declarations: orderDecEq, settingsDecEq, envDecEq",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.CheckedSyntax",
@@ -1893,6 +1973,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: NewArrayLengthPanicPremise.failure_of_parts",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.Premises"
@@ -1916,6 +1997,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.275,
+    "description": "Declarations: identityCert, resolved, artifact",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8b.Domain",
@@ -1940,6 +2022,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.45454545454545453,
+    "description": "Declarations: MeaningDomain, meaning_dom, environment",
     "implemented_by": 0,
     "imports": [
       "Solidity.Roadmap.Contracts"
@@ -1963,6 +2046,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: SourceInput, Admission, Producer",
     "implemented_by": 0,
     "imports": [
       "Solidity.Roadmap.Contracts"
@@ -1987,6 +2071,7 @@
     },
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 2.272727272727273,
+    "description": "One Producer interface for P8a and P8b (H57)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.DeclarationGraphAdmission",
@@ -2012,6 +2097,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.2597402597402597,
+    "description": "Witness and negative controls for the merged Producer (H57, H60)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.PlanWitness",
@@ -2037,6 +2123,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: SourceProducer, ProducerOutput, CertifiedInput",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P8.FrozenInterface",
@@ -2060,6 +2147,7 @@
     },
     "definition_lines": 28,
     "definition_to_proof_line_ratio": 1.12,
+    "description": "Declarations: truth_accepted, truth_typed_body, source_only_witness",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P9.ElaborationAdmission",
@@ -2083,6 +2171,7 @@
       "theorem": 9
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: plainB_complete, newReadyB_complete, exprB_complete",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P9.DefaultRecognizerCompleteness"
@@ -2106,6 +2195,7 @@
     },
     "definition_lines": 81,
     "definition_to_proof_line_ratio": 0.38571428571428573,
+    "description": "Declarations: plainB, plainB_sound, newReadyB",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Progress.BoundCatalogue",
@@ -2130,6 +2220,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.05,
+    "description": "Declarations: lookup, accepted, catalogue",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P9.BoundRecognizer",
@@ -2155,6 +2246,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.07547169811320754,
+    "description": "Declarations: caller, call, source_profile",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P9.ElaboratedCalls"
@@ -2176,6 +2268,7 @@
       "theorem": 5
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: graph_catalog, graph_checked, graph_calls",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P9.FunctionCatalog",
@@ -2201,6 +2294,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.045454545454545456,
+    "description": "Declarations: referenceItems, reference_ready, reference_accepted",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P9.CatalogueRecognizerCompleteness",
@@ -2223,6 +2317,7 @@
       "theorem": 6
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: entryB_mono, catalogueB_mono, entryB_complete",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P9.BodyRecognizerCompleteness"
@@ -2242,6 +2337,7 @@
     "code_lines": 5,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Decls"
@@ -2262,6 +2358,7 @@
       "theorem": 6
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: zeroReadyB_complete, finiteDefaultB_step, finiteDefaultB_mono",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P9.BoundRecognizer"
@@ -2285,6 +2382,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.03333333333333333,
+    "description": "Declarations: nested, bytes_zero, nested_zero_refused",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P9.DefaultRecognizerCompleteness",
@@ -2309,6 +2407,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.15730337078651685,
+    "description": "Declarations: function, unit, resolution",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Elaborate",
@@ -2331,6 +2430,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: elaborates_of_success, accepted_body, resolved_accepted_body",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Elaborate"
@@ -2354,6 +2454,7 @@
     },
     "definition_lines": 79,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: rationalDec, hexDec, mappingDec",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.StmtProgress",
@@ -2377,6 +2478,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.3076923076923077,
+    "description": "Declarations: functions, checkFunctions, functions_mem",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P9.ProgramAdmission"
@@ -2400,6 +2502,7 @@
     },
     "definition_lines": 31,
     "definition_to_proof_line_ratio": 0.36904761904761907,
+    "description": "Declarations: fn, leafFunction, entryFunction",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P9.ProgramAdmission",
@@ -2423,6 +2526,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: body_some, base_some",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P9.ElaborationAdmission"
@@ -2446,6 +2550,7 @@
     },
     "definition_lines": 47,
     "definition_to_proof_line_ratio": 0.16549295774647887,
+    "description": "Declarations: fn, baseFunction, derivedFunction",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P9.FunctionCatalog",
@@ -2471,6 +2576,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.17333333333333334,
+    "description": "Deriving whole-program internal-call progress (P9)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P9.FragmentDecidable",
@@ -2495,6 +2601,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.14285714285714285,
+    "description": "Declarations: checker_accepts, derived_callsOK, allowed_nonempty",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P9.CatalogControls",
@@ -2523,6 +2630,7 @@
     },
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 0.4262295081967213,
+    "description": "Declarations: function, unit, resolution",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P9.ProgramAdmission",
@@ -2548,6 +2656,7 @@
     },
     "definition_lines": 23,
     "definition_to_proof_line_ratio": 0.3194444444444444,
+    "description": "Declarations: voidFunction, boolFunction, leafFunction",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.P9.ProgramAdmission",
@@ -2573,6 +2682,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 1.125,
+    "description": "Declarations: expressions, captured, after",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.CapturedArguments",
@@ -2595,6 +2705,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: instanceAt_effect, emitEvent_effect, mark_effect",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.EvalEffectsBase"
@@ -2618,6 +2729,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.3125,
+    "description": "Declarations: global, dG, dPoke",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.PrimitiveCallable",
@@ -2642,6 +2754,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.058823529411764705,
+    "description": "Declarations: DispatchHistory, enter_history, callbacks",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.HistoryRollback",
@@ -2665,6 +2778,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: success, halted, invocation",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.InvocationFrame"
@@ -2688,6 +2802,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.038461538461538464,
+    "description": "Declarations: noCode, rejected_after_arguments, effect_not_rolled_back",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.CaptureFailures",
@@ -2710,6 +2825,7 @@
       "theorem": 9
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: get_plain, run_pure, run_st",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Hoare",
@@ -2732,6 +2848,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: get_plain, run_pure, run_st",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Hoare",
@@ -2756,6 +2873,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.4857142857142857,
+    "description": "Declarations: literal, literal_eval, arguments",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.PrimitiveLocals",
@@ -2778,6 +2896,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: Effect.map, Effect.mapM, getV_effect",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.EvalEffectsBase"
@@ -2801,6 +2920,7 @@
     },
     "definition_lines": 52,
     "definition_to_proof_line_ratio": 1.0196078431372548,
+    "description": "Declarations: creditAnswer, origin, final",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.InvocationFrame",
@@ -2825,6 +2945,7 @@
     },
     "definition_lines": 27,
     "definition_to_proof_line_ratio": 0.75,
+    "description": "Declarations: unit, E, frame",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.StoreEffects",
@@ -2849,6 +2970,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.3157894736842105,
+    "description": "Declarations: deleted, readGood, readBad",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.DeleteEffects",
@@ -2871,6 +2993,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: deleteStor_step, delete_histories",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.ReadEffects"
@@ -2892,6 +3015,7 @@
       "theorem": 10
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: of_same_ex, bind, sub",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceHistory"
@@ -2915,6 +3039,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.48148148148148145,
+    "description": "Declarations: global, start, credited",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.EnvironmentSteps",
@@ -2939,6 +3064,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.03125,
+    "description": "Declarations: run_st, run_emit, run_pure",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Hoare",
@@ -2963,6 +3089,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.3225806451612903,
+    "description": "Declarations: strategy, funded, fundedFinal",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.EnvironmentCredit",
@@ -2987,6 +3114,7 @@
     },
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.16483516483516483,
+    "description": "Declarations: CallbackHistories, restrict, lookupCode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.EnvironmentCredit",
@@ -3009,6 +3137,7 @@
       "theorem": 7
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: one_step_children, credit_only_children, static_credit_history",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.EnvironmentHistory",
@@ -3034,6 +3163,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.0625,
+    "description": "Declarations: run_bind, entered, completed",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Eval"
@@ -3055,6 +3185,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: lift, get, modSt",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.StoreEffects",
@@ -3079,6 +3210,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.047619047619047616,
+    "description": "Declarations: before, receiver_phase, value_phase",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.CapturePhases",
@@ -3105,6 +3237,7 @@
     },
     "definition_lines": 38,
     "definition_to_proof_line_ratio": 0.9047619047619048,
+    "description": "Declarations: E, frame, checkpoint",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.CallSupportEffects",
@@ -3128,6 +3261,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: operations, rewind, checkpoint",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.JournalLeaves"
@@ -3151,6 +3285,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.5652173913043478,
+    "description": "Declarations: global, entry, credited",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.CallbackFrame",
@@ -3176,6 +3311,7 @@
     },
     "definition_lines": 27,
     "definition_to_proof_line_ratio": 0.7714285714285715,
+    "description": "Declarations: Invocation, requested, mode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.StaticJournal",
@@ -3199,6 +3335,7 @@
       "theorem": 7
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: debit_history, operation_history, cell_history",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.StaticJournal"
@@ -3220,6 +3357,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: keyStep_effect",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.ReferenceEffects"
@@ -3243,6 +3381,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.14666666666666667,
+    "description": "Declarations: libraryFrame, frame_run, libraryFrame_effect",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.HistoryRollback",
@@ -3265,6 +3404,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: load_histories",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.ReadEffects"
@@ -3289,6 +3429,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.4782608695652174,
+    "description": "Declarations: E, entry, caller",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.LocalInitializationEffects",
@@ -3311,6 +3452,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: zeroVals_effect, zeroInner_effect",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.EvalEffectsBase"
@@ -3335,6 +3477,7 @@
     },
     "definition_lines": 45,
     "definition_to_proof_line_ratio": 1.1842105263157894,
+    "description": "Declarations: E, frame, checkpoint",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.LocationEffects",
@@ -3357,6 +3500,7 @@
       "theorem": 7
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: memElem_effect, memSet_effect, readLoc_effect",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.EvalEffectsBase"
@@ -3380,6 +3524,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.2153846153846154,
+    "description": "Declarations: layout, entry_related, constructed_exit",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.PrimitiveInitialization",
@@ -3407,6 +3552,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.3333333333333333,
+    "description": "Declarations: program, badType, result",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.MachineEffects",
@@ -3429,6 +3575,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: heapPut_effect, alloc_effect",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.EffectRules",
@@ -3451,6 +3598,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: complete, body_failure, wrong_frame",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.PrimitiveInitialization",
@@ -3477,6 +3625,7 @@
     },
     "definition_lines": 44,
     "definition_to_proof_line_ratio": 0.3826086956521739,
+    "description": "Declarations: Fields, Rel, cast_injective",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.PrimitiveValues",
@@ -3501,6 +3650,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.21428571428571427,
+    "description": "Declarations: defaults, zero_value, zero_values",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.PrimitiveLocals",
@@ -3525,6 +3675,7 @@
     },
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.5,
+    "description": "Declarations: targetCtx, toLocals, fromLocals",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.PrimitiveValues",
@@ -3548,6 +3699,7 @@
       "theorem": 8
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: cancel, read_of_read, read_head",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.PrimitiveFields",
@@ -3572,6 +3724,7 @@
     },
     "definition_lines": 52,
     "definition_to_proof_line_ratio": 3.25,
+    "description": "Declarations: sourceTy, toSource, fromSource",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.State",
@@ -3594,6 +3747,7 @@
       "theorem": 9
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: readCell_effect, heapObj_effect, storRef_effect",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.MachineEffects"
@@ -3617,6 +3771,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.09090909090909091,
+    "description": "Declarations: target, source_run, target_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.PrimitiveReads"
@@ -3640,6 +3795,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.4166666666666667,
+    "description": "Declarations: word, exact_value, faithful",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.CapturedArguments",
@@ -3664,6 +3820,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.6111111111111112,
+    "description": "Declarations: target, arguments, before",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.ReceiverCapture",
@@ -3687,6 +3844,7 @@
       "theorem": 6
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: bytesOfRV_effect, cdElems_effect, cdStaticToMem_effect",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.CollectionEffects"
@@ -3710,6 +3868,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.1935483870967742,
+    "description": "Declarations: dG, declared, signature",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.CallerResume",
@@ -3734,6 +3893,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.34146341463414637,
+    "description": "Declarations: Pair, layout, source",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.ReadStatement",
@@ -3756,6 +3916,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: ret32_effect, fieldsOf_effect, getterPath_effect",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourcePayloadDecodeEffects"
@@ -3777,6 +3938,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: all_at, all_callbacks, static_call_storage",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceCallAddressEffects",
@@ -3801,6 +3963,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: all_at, all_callbacks, static_call_storage",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceCallAddressEffects",
@@ -3828,6 +3991,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.375,
+    "description": "Declarations: staticCall, legacy_value, viaIR_value",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceBodyEffects",
@@ -3850,6 +4014,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: callInternal_succ, execItems_succ, runMods_succ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceExpressionEffects",
@@ -3872,6 +4037,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: evalBuiltin_succ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceAggregateReadEffects",
@@ -3896,6 +4062,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.12903225806451613,
+    "description": "Declarations: codeAt, lookup_run, callAddr_succ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceCallUnknown"
@@ -3919,6 +4086,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.21311475409836064,
+    "description": "Declarations: fund, known, fund_effect",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceHistory",
@@ -3944,6 +4112,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.23943661971830985,
+    "description": "Declarations: entered, followup, unknown",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceCallPrefix",
@@ -3968,6 +4137,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.3157894736842105,
+    "description": "Declarations: global, run, cb",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceDispatchEffects",
@@ -3991,6 +4161,7 @@
       "theorem": 6
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: dispatch_function_succ, dispatch_getter_no_function_succ, dispatch_getter_empty_succ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceLoopEffects"
@@ -4015,6 +4186,7 @@
     },
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.375,
+    "description": "Declarations: selector_length, selector_ne_empty, pickFn_empty",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceDispatchEffects"
@@ -4038,6 +4210,7 @@
     },
     "definition_lines": 27,
     "definition_to_proof_line_ratio": 0.6428571428571429,
+    "description": "Declarations: global, cbDecl, function_selected",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceDispatchInterfaceV2",
@@ -4063,6 +4236,7 @@
     },
     "definition_lines": 28,
     "definition_to_proof_line_ratio": 0.9655172413793104,
+    "description": "Declarations: scripted, readBody, readProgram",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceEnvironmentEffects",
@@ -4088,6 +4262,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.047619047619047616,
+    "description": "Declarations: lookupCode, instance_run, envLoop_succ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.EnvironmentHistory",
@@ -4110,6 +4285,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: evalE_succ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceExpressionParts.Part1",
@@ -4136,6 +4312,7 @@
       "theorem": 7
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: evalE_const_succ, evalE_bytesLit_succ, evalE_addressLit_succ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceBuiltinEffects",
@@ -4158,6 +4335,7 @@
       "theorem": 7
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: evalE_this_succ, evalE_tuple_succ, evalE_conv_succ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceBuiltinEffects",
@@ -4180,6 +4358,7 @@
       "theorem": 7
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: evalE_binary_succ, evalE_compare_succ, evalE_compareConst_succ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceBuiltinEffects",
@@ -4202,6 +4381,7 @@
       "theorem": 7
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: evalE_indexArray_succ, evalE_indexMapping_succ, evalE_indexBytes_succ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceBuiltinEffects",
@@ -4224,6 +4404,7 @@
       "theorem": 7
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: evalE_balance_succ, evalE_builtin_succ, evalE_member_succ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceBuiltinEffects",
@@ -4246,6 +4427,7 @@
       "theorem": 6
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: evalE_abiEncode_succ, evalE_assignCopy_succ, evalE_abiDecode_succ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceBuiltinEffects",
@@ -4270,6 +4452,7 @@
     },
     "definition_lines": 21,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: Effect, At",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.JournalLeaves"
@@ -4290,6 +4473,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: at_zero",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceHistory"
@@ -4311,6 +4495,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: all_known_at",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceKnownStatementEffects",
@@ -4333,6 +4518,7 @@
       "theorem": 7
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: expression_cut_0, expression_cut_1, expression_cut_2",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceKnownHistory"
@@ -4357,6 +4543,7 @@
     },
     "definition_lines": 37,
     "definition_to_proof_line_ratio": 0.33035714285714285,
+    "description": "Declarations: KnownAt, KnownAt.toAt, withLibraryCalldata_effect",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceStatementParts.Part4",
@@ -4381,6 +4568,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: library_equation, callLibrary_succ_known",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceKnownHistory",
@@ -4403,6 +4591,7 @@
       "theorem": 28
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: execItems_succ_known, runMods_succ_known, callInternal_succ_known",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceKnownExpressionEffects",
@@ -4427,6 +4616,7 @@
     },
     "definition_lines": 32,
     "definition_to_proof_line_ratio": 0.6153846153846154,
+    "description": "Declarations: payload, finish, payload_effect",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceKnownHistory"
@@ -4450,6 +4640,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 1.3333333333333333,
+    "description": "Declarations: set, writeBreak, run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceLoopEffects",
@@ -4472,6 +4663,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: forIter_succ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceBodyEffects"
@@ -4496,6 +4688,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.7407407407407407,
+    "description": "Declarations: E, frame, checkpoint",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceLvalueCallEffects",
@@ -4518,6 +4711,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: evalLoc_succ, pay_succ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.KeyStepEffects",
@@ -4544,6 +4738,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.85,
+    "description": "Declarations: E, frame, checkpoint",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourcePayloadDecodeEffects",
@@ -4567,6 +4762,7 @@
       "theorem": 7
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: decodeArg_bytes_effect, decodeArg_string_effect, decodeArg_array_effect",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourcePayloadEffects"
@@ -4588,6 +4784,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: tailBytes_effect, encodeOne_effect, encodeParts_effect",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.CallSupportEffects",
@@ -4612,6 +4809,7 @@
     },
     "definition_lines": 27,
     "definition_to_proof_line_ratio": 0.7714285714285715,
+    "description": "Declarations: unit, E, path",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceExpressionEffects",
@@ -4636,6 +4834,7 @@
     },
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.6666666666666666,
+    "description": "Declarations: first, second, arguments",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceSequenceEffects",
@@ -4658,6 +4857,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: evalPair_succ, evalArgs_succ, evalConvArgs_succ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.ReferenceEffects",
@@ -4682,6 +4882,7 @@
     },
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 1.1818181818181819,
+    "description": "Declarations: global, run, firstLocal",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceStatementEffects",
@@ -4705,6 +4906,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: execS_succ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceStatementParts.Part1",
@@ -4730,6 +4932,7 @@
       "theorem": 7
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: execS_expr_succ, execS_declVar_succ, execS_declInit_succ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceDispatchEffects"
@@ -4751,6 +4954,7 @@
       "theorem": 6
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: execS_block_succ, execS_ifThen_succ, execS_ifElse_succ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceDispatchEffects"
@@ -4772,6 +4976,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: execS_placeholder_succ, execS_declTuple_succ, execS_retVal_succ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceDispatchEffects"
@@ -4793,6 +4998,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: execS_emit_succ, execS_revertError_succ, execS_rethrow_succ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceTryEffects"
@@ -4816,6 +5022,7 @@
     },
     "definition_lines": 32,
     "definition_to_proof_line_ratio": 0.6153846153846154,
+    "description": "Declarations: payload, finish, payload_effect",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.SourceDispatchEffects"
@@ -4840,6 +5047,7 @@
     },
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.3,
+    "description": "Declarations: SameStorage, History, balance_storage",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Eval"
@@ -4861,6 +5069,7 @@
       "theorem": 9
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: storeVal_step, storeData_bytes_step, storeData_string_step",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.LoadEffects",
@@ -4883,6 +5092,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: pushVals_effect, copyInto_effect",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.ReferenceEffects"
@@ -4906,6 +5116,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.26666666666666666,
+    "description": "Declarations: allocated, exhausted, refused",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.ZeroEffects",
@@ -4928,6 +5139,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: zero_histories",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.Readonly.ReadEffects"
@@ -4951,6 +5163,7 @@
     },
     "definition_lines": 140,
     "definition_to_proof_line_ratio": 0.5343511450381679,
+    "description": "Declarations: complete, uintSyntax, mapSyntax",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceArrayDeleteTarget",
@@ -4975,6 +5188,7 @@
     },
     "definition_lines": 106,
     "definition_to_proof_line_ratio": 0.3241590214067278,
+    "description": "Declarations: bind_run_first, source_array_run, source_array_journal",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceScalarDeleteLog",
@@ -5000,6 +5214,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.04950495049504951,
+    "description": "Declarations: read, locate, represented_read",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceWordRead",
@@ -5025,6 +5240,7 @@
     },
     "definition_lines": 77,
     "definition_to_proof_line_ratio": 2.75,
+    "description": "Declarations: graph, ix, two",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceArrayIndex",
@@ -5050,6 +5266,7 @@
     },
     "definition_lines": 34,
     "definition_to_proof_line_ratio": 0.3655913978494624,
+    "description": "Declarations: default_length, readLen_after_clear, source_array_readback",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceArrayDeleteTarget"
@@ -5073,6 +5290,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.0684931506849315,
+    "description": "Declarations: write, source_run, complete_numeric",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceArrayIndex",
@@ -5097,6 +5315,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.45454545454545453,
+    "description": "Declarations: writable, payload, afterState",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceArrayWrite",
@@ -5119,6 +5338,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_outside, bounds_failure",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceArrayWrite"
@@ -5142,6 +5362,7 @@
     },
     "definition_lines": 31,
     "definition_to_proof_line_ratio": 2.066666666666667,
+    "description": "Declarations: bool_certificate, aggregate, aggregate_certificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceArrayWriteFailure",
@@ -5166,6 +5387,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.22857142857142856,
+    "description": "Declarations: observers, owner, separated",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceArrayWriteNumericControls"
@@ -5190,6 +5412,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.38235294117647056,
+    "description": "Declarations: hash, locations, run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceArrayWriteControls"
@@ -5211,6 +5434,7 @@
       "theorem": 7
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: array_clear_eq, source_array_run, clear_range_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceBoolCopyReadbacks",
@@ -5235,6 +5459,7 @@
     },
     "definition_lines": 110,
     "definition_to_proof_line_ratio": 0.2702702702702703,
+    "description": "Declarations: uintSyntax, unit, env",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceBoolArrayDeleteNumeric"
@@ -5256,6 +5481,7 @@
       "theorem": 6
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: bool_word, clear_word_false, clear_words_index",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceBoolStorageCopy",
@@ -5278,6 +5504,7 @@
       "theorem": 11
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: load_fixed, captured_copy, element_type",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceBoolCopyReadbacks"
@@ -5301,6 +5528,7 @@
     },
     "definition_lines": 69,
     "definition_to_proof_line_ratio": 0.5390625,
+    "description": "Declarations: uintSyntax, unit, env",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceBoolFixedStorageCopy"
@@ -5322,6 +5550,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: complete",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceBoolFixedStorageCopy",
@@ -5346,6 +5575,7 @@
     },
     "definition_lines": 81,
     "definition_to_proof_line_ratio": 0.4909090909090909,
+    "description": "Declarations: uintSyntax, unit, env",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceBoolFixedStorageCopyTarget"
@@ -5369,6 +5599,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.060109289617486336,
+    "description": "Declarations: scalar_clear_eq, range_clear_eq, bool_range_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceCopyReadbacks"
@@ -5390,6 +5621,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: complete, complete_numeric",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceBoolCopyReadbacks",
@@ -5414,6 +5646,7 @@
     },
     "definition_lines": 111,
     "definition_to_proof_line_ratio": 0.6201117318435754,
+    "description": "Declarations: uintSyntax, unit, env",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceBoolStorageCopyTarget",
@@ -5436,6 +5669,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: capture_all",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceVaryingByteCapture"
@@ -5459,6 +5693,7 @@
     },
     "definition_lines": 69,
     "definition_to_proof_line_ratio": 6.9,
+    "description": "Declarations: capturedPayload, initial, full",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceByteCaptureSuccess",
@@ -5481,6 +5716,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: byteWrites_other, phase_other, plans_prefix_other",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceCapturedByteCommit",
@@ -5507,6 +5743,7 @@
     },
     "definition_lines": 61,
     "definition_to_proof_line_ratio": 6.777777777777778,
+    "description": "Declarations: atPrefix, header_client, oldHeaders",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceByteCommitFrames",
@@ -5529,6 +5766,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: load_timeout",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceByteStorageCopy"
@@ -5552,6 +5790,7 @@
     },
     "definition_lines": 44,
     "definition_to_proof_line_ratio": 14.666666666666666,
+    "description": "Declarations: initial, missing, client",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceByteStorageBarrier",
@@ -5574,6 +5813,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: range_eq_int",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceByteStorageCopy"
@@ -5597,6 +5837,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.13114754098360656,
+    "description": "Declarations: load_bytes, byteWrites, store_bytes_fuel",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceStorageCopyEmpty"
@@ -5620,6 +5861,7 @@
     },
     "definition_lines": 76,
     "definition_to_proof_line_ratio": 15.2,
+    "description": "Declarations: unit, env, path",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceByteStorageCopy"
@@ -5643,6 +5885,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.3125,
+    "description": "Declarations: phaseLog, store_prepared",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceByteStorageClear"
@@ -5666,6 +5909,7 @@
     },
     "definition_lines": 109,
     "definition_to_proof_line_ratio": 18.166666666666668,
+    "description": "Declarations: unit, env, left",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceByteStoragePrepared",
@@ -5688,6 +5932,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: allocation_observations",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceByteCaptureSuccess"
@@ -5711,6 +5956,7 @@
     },
     "definition_lines": 28,
     "definition_to_proof_line_ratio": 5.6,
+    "description": "Declarations: full_client, slice_client, typed",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceCaptureReadback",
@@ -5735,6 +5981,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.10989010989010989,
+    "description": "Declarations: plans, commit_all",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceByteStoragePrepared"
@@ -5758,6 +6005,7 @@
     },
     "definition_lines": 132,
     "definition_to_proof_line_ratio": 1.7837837837837838,
+    "description": "Declarations: bs, oldLength, typed",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceCapturedByteCommit",
@@ -5780,6 +6028,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: run_phase",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceByteStoragePrepared"
@@ -5801,6 +6050,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: cleanup_timeout",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceCapturedBytePhase",
@@ -5825,6 +6075,7 @@
     },
     "definition_lines": 118,
     "definition_to_proof_line_ratio": 2.269230769230769,
+    "description": "Declarations: bytesPayload, dirtyLog, initial",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceCapturedByteTimeout",
@@ -5847,6 +6098,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: payload_timeout, write_timeout",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceCapturedBytePhase",
@@ -5871,6 +6123,7 @@
     },
     "definition_lines": 65,
     "definition_to_proof_line_ratio": 1.1818181818181819,
+    "description": "Declarations: bytesPayload, trace, after",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceCapturedByteWriteTimeout",
@@ -5895,6 +6148,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.03278688524590164,
+    "description": "Declarations: Touched, frame, overwritten",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceCopyReadbacks"
@@ -5918,6 +6172,7 @@
     },
     "definition_lines": 67,
     "definition_to_proof_line_ratio": 0.788235294117647,
+    "description": "Declarations: uintSyntax, unit, env",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceCopyCommutation"
@@ -5939,6 +6194,7 @@
       "theorem": 12
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: cell_other, writes_other, copy_other",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceStorageCopy"
@@ -5962,6 +6218,7 @@
     },
     "definition_lines": 58,
     "definition_to_proof_line_ratio": 0.7945205479452054,
+    "description": "Declarations: uintSyntax, unit, env",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceCopyFrames",
@@ -5984,6 +6241,7 @@
       "theorem": 9
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: word_cast, index_ne_header, index_ne_index",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceCopyFrames"
@@ -6005,6 +6263,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: header_readback, word_repeat, complete",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceCopyReadbacks"
@@ -6028,6 +6287,7 @@
     },
     "definition_lines": 87,
     "definition_to_proof_line_ratio": 0.8969072164948454,
+    "description": "Declarations: uintSyntax, unit, env",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceCopyRepeat",
@@ -6050,6 +6310,7 @@
       "theorem": 9
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: load_fixed, captured_copy, element_type",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceCopyReadbacks"
@@ -6073,6 +6334,7 @@
     },
     "definition_lines": 73,
     "definition_to_proof_line_ratio": 0.6239316239316239,
+    "description": "Declarations: uintSyntax, unit, env",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceFixedStorageCopy",
@@ -6095,6 +6357,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: complete",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceFixedStorageCopy",
@@ -6119,6 +6382,7 @@
     },
     "definition_lines": 85,
     "definition_to_proof_line_ratio": 0.5555555555555556,
+    "description": "Declarations: uintSyntax, unit, env",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceFixedStorageCopyTarget",
@@ -6141,6 +6405,7 @@
       "theorem": 5
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: clear_range_word, source_array_header, source_array_data",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceIntCopyReadbacks",
@@ -6165,6 +6430,7 @@
     },
     "definition_lines": 114,
     "definition_to_proof_line_ratio": 0.2893401015228426,
+    "description": "Declarations: uintSyntax, unit, env",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceIntArrayDeleteNumeric"
@@ -6188,6 +6454,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.029411764705882353,
+    "description": "Declarations: int256, signed_bounds, sourceValue",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceCopyReadbacks",
@@ -6212,6 +6479,7 @@
     },
     "definition_lines": 62,
     "definition_to_proof_line_ratio": 0.8493150684931506,
+    "description": "Declarations: mapping_delete, mapping_range, mapping_range_state",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Machine"
@@ -6235,6 +6503,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.037037037037037035,
+    "description": "Declarations: captureStep, empty_capture, timeout_prefix",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceReadFrames"
@@ -6258,6 +6527,7 @@
     },
     "definition_lines": 91,
     "definition_to_proof_line_ratio": 7.583333333333333,
+    "description": "Declarations: unit, env, left",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceNestedByteCapture",
@@ -6282,6 +6552,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.045454545454545456,
+    "description": "Declarations: allocateAt, capture, timeout_prefix",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceByteStorageCopy",
@@ -6307,6 +6578,7 @@
     },
     "definition_lines": 79,
     "definition_to_proof_line_ratio": 11.285714285714286,
+    "description": "Declarations: storage, state, seed",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceNestedByteValues",
@@ -6331,6 +6603,7 @@
     },
     "definition_lines": 55,
     "definition_to_proof_line_ratio": 0.3353658536585366,
+    "description": "Declarations: readCell_run, readCell_transport, readAt_transport",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceArrayDeleteTarget",
@@ -6355,6 +6628,7 @@
     },
     "definition_lines": 80,
     "definition_to_proof_line_ratio": 0.36036036036036034,
+    "description": "Declarations: clearOp, setCell_run, bind_run_first",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Machine"
@@ -6378,6 +6652,7 @@
     },
     "definition_lines": 68,
     "definition_to_proof_line_ratio": 1.1929824561403508,
+    "description": "Declarations: source_self, source_self_state, source_zero_budget",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Machine",
@@ -6400,6 +6675,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: complete, complete_numeric",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceIntCopyReadbacks",
@@ -6424,6 +6700,7 @@
     },
     "definition_lines": 117,
     "definition_to_proof_line_ratio": 0.16690442225392296,
+    "description": "Declarations: uintSyntax, unit, env",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceSignedStorageCopyTarget"
@@ -6447,6 +6724,7 @@
     },
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.08287292817679558,
+    "description": "Declarations: load_elems, load_array, captured_copy",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceReadFrames"
@@ -6468,6 +6746,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: load_timeout, array_timeout, copy_timeout",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceStorageCopyPrefix"
@@ -6491,6 +6770,7 @@
     },
     "definition_lines": 32,
     "definition_to_proof_line_ratio": 4.571428571428571,
+    "description": "Declarations: uniform, malformedDestination, emptyShort",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceStorageCopyBarrier",
@@ -6515,6 +6795,7 @@
     },
     "definition_lines": 75,
     "definition_to_proof_line_ratio": 1.6304347826086956,
+    "description": "Declarations: uintSyntax, unit, env",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceStorageCopy"
@@ -6536,6 +6817,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: copy_empty",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceStorageCopyPayload"
@@ -6559,6 +6841,7 @@
     },
     "definition_lines": 53,
     "definition_to_proof_line_ratio": 10.6,
+    "description": "Declarations: bothEmpty, liveTail, tooShort",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceStorageCopyEmpty",
@@ -6582,6 +6865,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: store_prefix, copy_prefix",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceStorageCopyBarrier"
@@ -6605,6 +6889,7 @@
     },
     "definition_lines": 50,
     "definition_to_proof_line_ratio": 4.545454545454546,
+    "description": "Declarations: two, three, emptyDestination",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceStorageCopyPayload",
@@ -6628,6 +6913,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: prepared",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceCopyFrames"
@@ -6651,6 +6937,7 @@
     },
     "definition_lines": 190,
     "definition_to_proof_line_ratio": 6.129032258064516,
+    "description": "Declarations: uintSyntax, unit, env",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceStorageCopyPrefix",
@@ -6673,6 +6960,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: complete, complete_numeric",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceCopyReadbacks",
@@ -6697,6 +6985,7 @@
     },
     "definition_lines": 109,
     "definition_to_proof_line_ratio": 0.6728395061728395,
+    "description": "Declarations: uintSyntax, unit, env",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceStorageCopyTarget"
@@ -6720,6 +7009,7 @@
     },
     "definition_lines": 101,
     "definition_to_proof_line_ratio": 0.5804597701149425,
+    "description": "Declarations: uintSyntax, unit, env",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceTwoArrayDeletes",
@@ -6742,6 +7032,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: data_ne_base, after_data, after_other",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceTwoArrayDeletes",
@@ -6766,6 +7057,7 @@
     },
     "definition_lines": 124,
     "definition_to_proof_line_ratio": 0.5061224489795918,
+    "description": "Declarations: graph, w0, w2",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceTwoArrayDeleteNumeric"
@@ -6789,6 +7081,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.02262443438914027,
+    "description": "Declarations: program, array_readLen_other, source_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceReadFrames",
@@ -6813,6 +7106,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: timeout_prefix",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceNestedByteValues"
@@ -6836,6 +7130,7 @@
     },
     "definition_lines": 61,
     "definition_to_proof_line_ratio": 8.714285714285714,
+    "description": "Declarations: length, payload, storage",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceVaryingByteCapture",
@@ -6860,6 +7155,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.07575757575757576,
+    "description": "Declarations: storage_commute, world_commute, two",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceWordWrite"
@@ -6884,6 +7180,7 @@
     },
     "definition_lines": 63,
     "definition_to_proof_line_ratio": 2.25,
+    "description": "Declarations: uintSyntax, unit, env",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceWordCommutation",
@@ -6906,6 +7203,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: read_total, complete",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceWordWrite"
@@ -6929,6 +7227,7 @@
     },
     "definition_lines": 27,
     "definition_to_proof_line_ratio": 27.0,
+    "description": "Declarations: source, readonly, scratchRead",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceWordRead",
@@ -6953,6 +7252,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.15384615384615385,
+    "description": "Declarations: op, after, source_write",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.StorageOps.SourceReadFrames",

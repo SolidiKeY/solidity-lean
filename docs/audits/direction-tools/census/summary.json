@@ -375,140 +375,140 @@
       "category": "axiom_pins",
       "lines": 3905,
       "path": "Solidity/Frontend/ExpressionUniqueness/AxiomPins.lean",
-      "what": "Frontend module (axiom_pins); size ranks physical source, not semantic complexity."
+      "what": "Declarations: "
     },
     {
       "area": "Backend",
       "category": "unmarked",
       "lines": 3777,
       "path": "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean",
-      "what": "Backend module (unmarked); size ranks physical source, not semantic complexity."
+      "what": "Declarations: forall_bounded_pair, w, w3"
     },
     {
       "area": "Calculus",
       "category": "unmarked",
       "lines": 3142,
       "path": "Solidity/Calculus/ArrayProperty.lean",
-      "what": "Calculus module (unmarked); size ranks physical source, not semantic complexity."
+      "what": "The array property fragment, instantiated (M7, step 5)"
     },
     {
       "area": "Calculus",
       "category": "unmarked",
       "lines": 3081,
       "path": "Solidity/Calculus/QuotientCut.lean",
-      "what": "Calculus module (unmarked); size ranks physical source, not semantic complexity."
+      "what": "Operators cut out of a leaf into fresh atoms"
     },
     {
       "area": "Backend",
       "category": "unmarked",
       "lines": 3006,
       "path": "Solidity/Backend/MemoryOps/SourceReferenceReadControls.lean",
-      "what": "Backend module (unmarked); size ranks physical source, not semantic complexity."
+      "what": "Declarations: C, B, R"
     },
     {
       "area": "Calculus",
       "category": "unmarked",
       "lines": 2846,
       "path": "Solidity/Calculus/HashKinds.lean",
-      "what": "Calculus module (unmarked); size ranks physical source, not semantic complexity."
+      "what": "Strings hashed by two kinds (M7, plan step 7)"
     },
     {
       "area": "Frontend",
       "category": "unmarked",
       "lines": 2687,
       "path": "Solidity/Frontend/SolcJson/Body.lean",
-      "what": "Frontend module (unmarked); size ranks physical source, not semantic complexity."
+      "what": "solc's JSON: types, expressions and statements"
     },
     {
       "area": "Corpus",
       "category": "corpus",
       "lines": 2624,
       "path": "Solidity/Corpus/TestSuite.lean",
-      "what": "Corpus module (corpus); size ranks physical source, not semantic complexity."
+      "what": "solkey `TestSuite.sol`, derived"
     },
     {
       "area": "Backend",
       "category": "unmarked",
       "lines": 2456,
       "path": "Solidity/Backend/MemoryOps/PhysicalStructChildControls.lean",
-      "what": "Backend module (unmarked); size ranks physical source, not semantic complexity."
+      "what": "Declarations: C, S, B"
     },
     {
       "area": "Frontend",
       "category": "unmarked",
       "lines": 2268,
       "path": "Solidity/Frontend/SolcJson/Contract.lean",
-      "what": "Frontend module (unmarked); size ranks physical source, not semantic complexity."
+      "what": "solc's JSON: a contract"
     },
     {
       "area": "Calculus",
       "category": "unmarked",
       "lines": 2238,
       "path": "Solidity/Calculus/FlattenTotality.lean",
-      "what": "Calculus module (unmarked); size ranks physical source, not semantic complexity."
+      "what": "Read flattening never refuses its fragment"
     },
     {
       "area": "Calculus",
       "category": "unmarked",
       "lines": 2183,
       "path": "Solidity/Calculus/MemSwap.lean",
-      "what": "Calculus module (unmarked); size ranks physical source, not semantic complexity."
+      "what": "Fresh memory arrays read as words (M7, plan step 6)"
     },
     {
       "area": "Syntax",
       "category": "unmarked",
       "lines": 2151,
       "path": "Solidity/Syntax/Elab/Arms.lean",
-      "what": "Syntax module (unmarked); size ranks physical source, not semantic complexity."
+      "what": "The elaborator's arms"
     },
     {
       "area": "Syntax",
       "category": "unmarked",
       "lines": 2142,
       "path": "Solidity/Syntax/Elab/Values.lean",
-      "what": "Syntax module (unmarked); size ranks physical source, not semantic complexity."
+      "what": "The elaborator's values"
     },
     {
       "area": "Calculus",
       "category": "unmarked",
       "lines": 2072,
       "path": "Solidity/Calculus/Decision.lean",
-      "what": "Calculus module (unmarked); size ranks physical source, not semantic complexity."
+      "what": "The closer's decision, stated (M7)"
     },
     {
       "area": "Calculus",
       "category": "unmarked",
       "lines": 2021,
       "path": "Solidity/Calculus/ArrayCut.lean",
-      "what": "Calculus module (unmarked); size ranks physical source, not semantic complexity."
+      "what": "Array reads cut to fresh atoms (M7, step 6)"
     },
     {
       "area": "Source",
       "category": "unmarked",
       "lines": 1980,
       "path": "Solidity/Source/Unique.lean",
-      "what": "Source module (unmarked); size ranks physical source, not semantic complexity."
+      "what": "Uniqueness of meaning for constants (Q1)"
     },
     {
       "area": "Backend",
       "category": "unmarked",
       "lines": 1915,
       "path": "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean",
-      "what": "Backend module (unmarked); size ranks physical source, not semantic complexity."
+      "what": "Declarations: C, A, H"
     },
     {
       "area": "Typing",
       "category": "unmarked",
       "lines": 1802,
       "path": "Solidity/Typing/CleanTailRun.lean",
-      "what": "Typing module (unmarked); size ranks physical source, not semantic complexity."
+      "what": "Clean tails, kept by a contract that exposes nothing"
     },
     {
       "area": "Calculus",
       "category": "unmarked",
       "lines": 1773,
       "path": "Solidity/Calculus/CloseScoped/Steps.lean",
-      "what": "Calculus module (unmarked); size ranks physical source, not semantic complexity."
+      "what": "Closing a scoped leaf: the steps"
     }
   ],
   "limitations": [
@@ -585,7 +585,7 @@
         "files": 8,
         "lines": 4079
       },
-      "import_root": {
+      "import_only_unknown": {
         "files": 49,
         "lines": 1452
       },
@@ -610,11 +610,11 @@
       "structure": 1398,
       "theorem": 65929
     },
-    "definition_lines": 219536,
-    "definition_to_proof_line_ratio": 0.3810614857745909,
+    "definition_lines": 218875,
+    "definition_to_proof_line_ratio": 0.3799365716398505,
     "files": 6717,
-    "generated_lines": 25072,
-    "generated_share": 0.022363630200890907,
+    "generated_lines": 23620,
+    "generated_share": 0.021068480589703384,
     "implemented_by": 176,
     "imports_in": 21360,
     "imports_out": 12763,
@@ -622,8 +622,9 @@
     "maxHeartbeats_options": 16,
     "native_decide": 0,
     "presumed_handwritten_lines": 1096034,
-    "proof_lines": 576117,
-    "sorry": 0
+    "proof_lines": 576083,
+    "sorry": 0,
+    "unknown_import_only_lines": 1452
   },
   "trend_sample_policy": "Last first-parent commit per committer UTC month; all reachable history, final month partial.",
   "waits": [

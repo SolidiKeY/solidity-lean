@@ -9,6 +9,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.175,
+    "description": "Declarations: write, suffix, compiled",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarContinuation"
@@ -32,6 +33,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.21052631578947367,
+    "description": "Declarations: reserve, reserve_value, reserve_error",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarClaims"
@@ -53,6 +55,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: returns, bare_revert",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDemand"
@@ -76,6 +79,7 @@
     },
     "definition_lines": 27,
     "definition_to_proof_line_ratio": 0.43548387096774194,
+    "description": "Declarations: outputPlan, good_reserve, bad_reserve",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDemandClaims",
@@ -100,6 +104,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.0273972602739726,
+    "description": "Declarations: image, reached",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarStop",
@@ -125,6 +130,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.047619047619047616,
+    "description": "Declarations: \u03c3, F, input",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarAllocatingDescent",
@@ -149,6 +155,7 @@
     },
     "definition_lines": 40,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: C, A, F",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarTurn"
@@ -171,6 +178,7 @@
     },
     "definition_lines": 34,
     "definition_to_proof_line_ratio": 0.6296296296296297,
+    "description": "Declarations: choiceGuard, choice, emitted",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameArgumentAgreement",
@@ -196,6 +204,7 @@
       "theorem": 20
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: one_image, good_guard, bad_guard",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDual"
@@ -221,6 +230,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.6129032258064516,
+    "description": "Declarations: Geometry, geometryDecidable, Emission",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3DisjointScalarReturn"
@@ -244,6 +254,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.041666666666666664,
+    "description": "Declarations: emitted, selected_root, selected_argument",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarEmitterSound",
@@ -266,6 +277,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: endpoint, argument_revert",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarEmitter"
@@ -289,6 +301,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.0196078431372549,
+    "description": "Declarations: image, complete",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDescentControls",
@@ -313,6 +326,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.034482758620689655,
+    "description": "Declarations: image, complete",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDescentInterfaceV1",
@@ -335,6 +349,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: inhabited",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarPairedTransport",
@@ -357,6 +372,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: restore",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ParentRestore",
@@ -382,6 +398,7 @@
     },
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.7894736842105263,
+    "description": "Declarations: Input, domain, coverage",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDemand",
@@ -406,6 +423,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.125,
+    "description": "Declarations: plan, entered_capacity, returned_of_eval",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarEmitterSound"
@@ -429,6 +447,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.029850746268656716,
+    "description": "Declarations: good, bad, entry",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarPlan",
@@ -454,6 +473,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.03205128205128205,
+    "description": "Declarations: atHorizon, specification, scalar_words",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarPrefixFacts"
@@ -477,6 +497,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.11764705882352941,
+    "description": "Declarations: down, zero, addresses",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarStop",
@@ -501,6 +522,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.046511627906976744,
+    "description": "Declarations: sourceAt, image, turn_more",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarUnwind",
@@ -523,6 +545,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: arm_steps, bodies, source_coherence",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveSource",
@@ -545,6 +568,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: call_all_horizons",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveSource"
@@ -569,6 +593,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.22413793103448276,
+    "description": "Declarations: A, \u0393, caller",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveCall",
@@ -591,6 +616,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: all_horizons",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveTurn"
@@ -615,6 +641,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.4444444444444444,
+    "description": "Declarations: Frame, guard, next",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveSource",
@@ -639,6 +666,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.029411764705882353,
+    "description": "Declarations: entered, zero_return, call_result",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveStep"
@@ -662,6 +690,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.16,
+    "description": "Declarations: prefixPlan, prefix_entry, prefix_cursor",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameReturnReentry",
@@ -684,6 +713,7 @@
       "theorem": 9
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: complete_observations, source_state, source_objects",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarReentryEndpoint"
@@ -708,6 +738,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.13636363636363635,
+    "description": "Declarations: input, origin, initialBase",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarReentry"
@@ -731,6 +762,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.05357142857142857,
+    "description": "Declarations: image, endpoint",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDescent"
@@ -754,6 +786,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.031007751937984496,
+    "description": "Declarations: caller, before, encoded",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarCallReturn",
@@ -779,6 +812,7 @@
     },
     "definition_lines": 74,
     "definition_to_proof_line_ratio": 12.333333333333334,
+    "description": "Declarations: checkGuard, checkZero, checkIncrement",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveSource"
@@ -802,6 +836,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.2727272727272727,
+    "description": "Declarations: canonicalHead, read_step, complete",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarSourceCheck"
@@ -826,6 +861,7 @@
     },
     "definition_lines": 61,
     "definition_to_proof_line_ratio": 1.0166666666666666,
+    "description": "Declarations: call, Selected, make",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarSourceCheckLaws",
@@ -850,6 +886,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.13333333333333333,
+    "description": "Declarations: input, selected, root",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarSourceCompiler",
@@ -875,6 +912,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.3148148148148148,
+    "description": "Declarations: A, C, alteredChild",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarSourceCompilerClient"
@@ -896,6 +934,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: stop_after_running, run_of_stopped, complete",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarPrefixes"
@@ -919,6 +958,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.11428571428571428,
+    "description": "Declarations: rhs, value, advanceCode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarParentRestore"
@@ -942,6 +982,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.057692307692307696,
+    "description": "Declarations: unwindCode, image, endpoint",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarUnwindFacts"
@@ -966,6 +1007,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.20512820512820512,
+    "description": "Declarations: A, F, origin",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarUnwind",
@@ -992,6 +1034,7 @@
     },
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 0.42,
+    "description": "Declarations: C, A, input",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScopedScalarCompiler",
@@ -1017,6 +1060,7 @@
     },
     "definition_lines": 66,
     "definition_to_proof_line_ratio": 1.2222222222222223,
+    "description": "Declarations: wrap, Selected, assemble",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameScopedSource",
@@ -1041,6 +1085,7 @@
     },
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.6666666666666666,
+    "description": "Declarations: invoke, initialized, initialized_refused",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3ScopedScalarClient"
@@ -1065,6 +1110,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.19148936170212766,
+    "description": "Declarations: F, parent, ref",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarTurn"
@@ -1088,6 +1134,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.13333333333333333,
+    "description": "Declarations: Same, refl, symm",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarTurn"
@@ -1111,6 +1158,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.0425531914893617,
+    "description": "Declarations: objects_ext, heap_ext, Defaults",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocationInventory"
@@ -1135,6 +1183,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.19047619047619047,
+    "description": "Declarations: \u03c3, altered, left",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3TypedHeapExtensionality",
@@ -1159,6 +1208,7 @@
     },
     "definition_lines": 78,
     "definition_to_proof_line_ratio": 1.4444444444444444,
+    "description": "Declarations: call_ofV3, fixed_ofV3, recursive_ofV3",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV4",
@@ -1183,6 +1233,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.75,
+    "description": "Declarations: family, familyV4, same_plan",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV4Migration",
@@ -1208,6 +1259,7 @@
     },
     "definition_lines": 32,
     "definition_to_proof_line_ratio": 0.47058823529411764,
+    "description": "Declarations: C, \u0393, base",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV4Migration",
@@ -1233,6 +1285,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.07421875,
+    "description": "Jump-destination analysis (G45.05)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Opcode"
@@ -1256,6 +1309,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.08,
+    "description": "Declarations: emptyLink, emitPrefix, labelImm",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.LabelExec.Packets",
@@ -1278,6 +1332,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: fetch_at, step_at, assembled_tag_step",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.LabelExec.Placement"
@@ -1301,6 +1356,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.11864406779661017,
+    "description": "Declarations: before, after, condition",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.LabelExec.Placement",
@@ -1323,6 +1379,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: fetch_prefix, step_prefix, push_prefix",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.LabelExec.Step"
@@ -1348,6 +1405,7 @@
     },
     "definition_lines": 38,
     "definition_to_proof_line_ratio": null,
+    "description": "The admitted numeric/control fragment and its stack effects (G45.03)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.LabelExec.ScalarTransfer",
@@ -1372,6 +1430,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.47368421052631576,
+    "description": "Declarations: dup16_underflow, swap16_underflow, overwritingCondition",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.LabelExec.FragmentSound"
@@ -1393,6 +1452,7 @@
       "theorem": 6
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: numeric_domain, exchange_domain, arity_domain",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.LabelExec.Fragment"
@@ -1416,6 +1476,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.1282051282051282,
+    "description": "Declarations: nonzeroCondition, nonzeroBlock, nonzeroItems",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.LabelExec.LiteralLoops",
@@ -1438,6 +1499,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: literal_entry_prefix, literal_loop_header_at",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.LabelExec.Placement"
@@ -1459,6 +1521,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: loop_exit_step, zero_loop_complete",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.LabelExec.Boundaries",
@@ -1483,6 +1546,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.03333333333333333,
+    "description": "Declarations: block, unsupported_stop, assembly_exists",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.LabelExec.LoopExit"
@@ -1506,6 +1570,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.14814814814814814,
+    "description": "Declarations: backPrefix, loop_backedge, checkPrefix",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.LabelExec.Assembly"
@@ -1529,6 +1594,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.14893617021276595,
+    "description": "Declarations: branchCode, jump_packet, jumpi_packet",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.LabelExec.Fetch"
@@ -1552,6 +1618,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.046875,
+    "description": "Declarations: placedItems, loop_backedge_at, loop_header_at",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.LabelExec.Loops"
@@ -1573,6 +1640,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: effect_of_scalar",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.LabelExec.Fetch"
@@ -1596,6 +1664,7 @@
     },
     "definition_lines": 18,
     "definition_to_proof_line_ratio": null,
+    "description": "Byte-PC execution of the numeric control-flow slice",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Scalar.Slice",
@@ -1619,6 +1688,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.5,
+    "description": "Declarations: selectedAlias, SelectedAlias.code, SelectedAlias.execute",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.AliasBindingInterface"
@@ -1644,6 +1714,7 @@
     },
     "definition_lines": 23,
     "definition_to_proof_line_ratio": 0.8518518518518519,
+    "description": "Declarations: child, Input, input",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.AliasBinding",
@@ -1668,6 +1739,7 @@
     },
     "definition_lines": 18,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: SelectedAlias, AliasBindingOutcome",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectStatements"
@@ -1690,6 +1762,7 @@
     },
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 0.5531914893617021,
+    "description": "Declarations: panic41Emission, panic41_packet_length, panic41_code_length",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.AllocationPanicInterface",
@@ -1715,6 +1788,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: panic41Code, Panic41EmissionCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.Premises",
@@ -1738,6 +1812,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.03278688524590164,
+    "description": "info: 'Solidity.Backend.MemoryCopies.budget_default_guard_run' depends on axioms: [propext, Classical.choice, Quot.sound]",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.BudgetedDefaultInterface"
@@ -1762,6 +1837,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.2835820895522388,
+    "description": "info: 'Solidity.Backend.MemoryCopies.BudgetedDefaultControls.certificate_inhabited' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.BudgetedDefault",
@@ -1787,6 +1863,7 @@
     },
     "definition_lines": 32,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: budgetDefaultGuard, budgetedDefaultCode, physicalDefaultBudget",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SelectedDefaultDemand"
@@ -1809,6 +1886,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.01818181818181818,
+    "description": "info: 'Solidity.Backend.MemoryCopies.budgeted_finite_run' depends on axioms: [propext, Classical.choice, Quot.sound]",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.BudgetedFiniteInterface"
@@ -1833,6 +1911,7 @@
     },
     "definition_lines": 32,
     "definition_to_proof_line_ratio": 0.5517241379310345,
+    "description": "info: 'Solidity.Backend.MemoryCopies.BudgetedFiniteControls.certificate_inhabited' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.BudgetedFinite",
@@ -1857,6 +1936,7 @@
     },
     "definition_lines": 32,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: budgetedFiniteCode, BudgetedFiniteSuccess, BudgetedFiniteCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.BudgetedDefault",
@@ -1880,6 +1960,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.015037593984962405,
+    "description": "info: 'Solidity.Backend.MemoryCopies.reference_budget_remaining' depends on axioms: [propext, Quot.sound]",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.BudgetedReferenceInterface"
@@ -1904,6 +1985,7 @@
     },
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 0.20588235294117646,
+    "description": "info: 'Solidity.Backend.MemoryCopies.BudgetedReferenceControls.certificate_inhabited' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.BudgetedReference",
@@ -1929,6 +2011,7 @@
     },
     "definition_lines": 37,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: referenceBudgetTail, referenceBudgetGuard, budgetedReferenceCode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.BudgetedDefault",
@@ -1952,6 +2035,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.019801980198019802,
+    "description": "Declarations: canonical_array_supported, canonical_array_evaluation, pointwise_loads_evaluation",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CanonicalArrayInterface"
@@ -1976,6 +2060,7 @@
     },
     "definition_lines": 29,
     "definition_to_proof_line_ratio": 0.2013888888888889,
+    "description": "Declarations: leaf, C, root",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CanonicalArray",
@@ -2000,6 +2085,7 @@
     },
     "definition_lines": 49,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: canonicalArrayExpression, canonicalArrayExpressions, canonicalArrayGuardCode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.LoadedArray",
@@ -2023,6 +2109,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.01694915254237288,
+    "description": "Declarations: canonical_rebind_source, canonical_rebind_correct, canonical_rebind_refusal",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CanonicalRebindInterface"
@@ -2047,6 +2134,7 @@
     },
     "definition_lines": 31,
     "definition_to_proof_line_ratio": 0.1949685534591195,
+    "description": "Declarations: leaf, C, root",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CanonicalRebind",
@@ -2072,6 +2160,7 @@
     },
     "definition_lines": 42,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: canonicalRebindCode, CanonicalRebindResult, CanonicalRebindCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CanonicalSingleton"
@@ -2094,6 +2183,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.03571428571428571,
+    "description": "Declarations: canonical_singleton_supported, canonical_singleton_evaluation, canonical_singleton_failed_evaluation",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CanonicalSingletonInterface"
@@ -2118,6 +2208,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.19047619047619047,
+    "description": "Declarations: leaf, C, root",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CanonicalSingleton",
@@ -2142,6 +2233,7 @@
     },
     "definition_lines": 43,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: canonicalSingletonExpression, canonicalSingletonCode, CanonicalSingletonResult",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.LoadedSingleton",
@@ -2165,6 +2257,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.008849557522123894,
+    "description": "Declarations: capture_length_run, capture_length_bounded, capture_endpoint_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedCaptureInterface"
@@ -2190,6 +2283,7 @@
     },
     "definition_lines": 32,
     "definition_to_proof_line_ratio": 0.14035087719298245,
+    "description": "Declarations: R, H, old",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedCapture",
@@ -2215,6 +2309,7 @@
     },
     "definition_lines": 23,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: captureLengthCode, captureEndpointCode, checkedTypedCaptureCode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.TypedCapture"
@@ -2237,6 +2332,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.17857142857142858,
+    "description": "info: 'Solidity.Backend.MemoryCopies.selectedCheckedDefault' depends on axioms: [propext, Classical.choice, Quot.sound]",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedDefaultInterface"
@@ -2261,6 +2357,7 @@
     },
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.2909090909090909,
+    "description": "Declarations: element, Input, input",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedDefault",
@@ -2285,6 +2382,7 @@
     },
     "definition_lines": 16,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: defaultCapacityGuard, SelectedCheckedDefault, SelectedCheckedDefault.code",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedDefaults"
@@ -2307,6 +2405,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.034482758620689655,
+    "description": "Declarations: finite_default_positive, checked_finite_run, checked_finite_success",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedFiniteDefaultInterface"
@@ -2331,6 +2430,7 @@
     },
     "definition_lines": 33,
     "definition_to_proof_line_ratio": 0.3333333333333333,
+    "description": "Declarations: Input, input, basket",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedFiniteDefault",
@@ -2355,6 +2455,7 @@
     },
     "definition_lines": 35,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: checkedFiniteDefaultCode, FiniteDefaultSuccess, CheckedFiniteDefaultCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedDefault",
@@ -2379,6 +2480,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.02564102564102564,
+    "description": "Declarations: checked_fixed_memory_run, checked_fixed_memory_success, checked_fixed_memory_correct",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedFixedMemoryInterface"
@@ -2402,6 +2504,7 @@
     },
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.06986899563318777,
+    "description": "Declarations: R, H, old",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedFixedMemory"
@@ -2425,6 +2528,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: checkedFixedMemoryCode, CheckedFixedMemoryResult, CheckedFixedMemoryCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedMemoryCopy",
@@ -2448,6 +2552,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.02127659574468085,
+    "description": "Declarations: SelectedAlias.checkedFixedDeepExecute, SelectedAlias.checkedFixedDeepBindExecute, checkedFixedPathCopy",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedFixedPathCopyInterface"
@@ -2472,6 +2577,7 @@
     },
     "definition_lines": 46,
     "definition_to_proof_line_ratio": 0.13813813813813813,
+    "description": "Declarations: R, H, old",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedFixedPathCopy",
@@ -2497,6 +2603,7 @@
     },
     "definition_lines": 56,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: SelectedAlias.checkedFixedDeepCode, SelectedAlias.checkedFixedDeepBindCode, CheckedFixedPathFailure",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedFixedMemory",
@@ -2520,6 +2627,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.023809523809523808,
+    "description": "Declarations: checked_fixed_storage_run, checked_fixed_storage_success, checked_fixed_storage_correct",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedFixedStorageInterface"
@@ -2544,6 +2652,7 @@
     },
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.11464968152866242,
+    "description": "Declarations: Input, input, values",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedFixedStorage",
@@ -2568,6 +2677,7 @@
     },
     "definition_lines": 21,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: checkedFixedStorageCode, CheckedFixedStorageResult, CheckedFixedStorageCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedStorageCopy",
@@ -2591,6 +2701,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.013071895424836602,
+    "description": "Declarations: append_run_eq, checked_fixed_storage_path_run, checked_fixed_storage_path_body_success",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedFixedStoragePathInterface"
@@ -2614,6 +2725,7 @@
     },
     "definition_lines": 37,
     "definition_to_proof_line_ratio": 0.1267123287671233,
+    "description": "Declarations: R, H, old",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedFixedStoragePath",
@@ -2638,6 +2750,7 @@
     },
     "definition_lines": 82,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: checkedFixedStoragePathCode, checkedFixedStoragePathDeclareCode, checkedFixedStoragePathRebindCode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedFixedStorage",
@@ -2662,6 +2775,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.015384615384615385,
+    "description": "Declarations: capacity_remaining, memory_capacity_guard_run, checked_memory_array_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedMemoryArrayInterface"
@@ -2686,6 +2800,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.07112970711297072,
+    "description": "Declarations: R, H, old",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedMemoryArray"
@@ -2709,6 +2824,7 @@
     },
     "definition_lines": 23,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: memoryArrayCapacityGuard, checkedMemoryArrayCode, CheckedMemoryArrayResult",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.RuntimeMemoryArray"
@@ -2731,6 +2847,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.02127659574468085,
+    "description": "Declarations: SelectedAlias.checkedDeepExecute, SelectedAlias.checkedDeepBindExecute, checkedPathCopy",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedPathCopyInterface"
@@ -2756,6 +2873,7 @@
     },
     "definition_lines": 44,
     "definition_to_proof_line_ratio": 0.1301775147928994,
+    "description": "Declarations: R, H, old",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedPathCopy",
@@ -2782,6 +2900,7 @@
     },
     "definition_lines": 56,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: SelectedAlias.checkedDeepCode, SelectedAlias.checkedDeepBindCode, CheckedPathFailure",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedMemoryArray",
@@ -2805,6 +2924,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.008130081300813009,
+    "description": "Declarations: reference_capacity_remaining, reference_capacity_iff, reference_capacity_large",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedReferenceInterface"
@@ -2829,6 +2949,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.2236842105263158,
+    "description": "Declarations: element, Input, input",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedReference",
@@ -2853,6 +2974,7 @@
     },
     "definition_lines": 29,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: referenceCapacityTail, referenceCapacityGuard, checkedReferenceCode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedDefault"
@@ -2875,6 +2997,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.016129032258064516,
+    "description": "Declarations: storage_capacity_guard_run, checked_storage_array_run, checked_storage_array_success",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedStorageArrayInterface"
@@ -2899,6 +3022,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.12195121951219512,
+    "description": "Declarations: Input, input, values",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedStorageArray",
@@ -2923,6 +3047,7 @@
     },
     "definition_lines": 22,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: storageArrayCapacityGuard, checkedStorageArrayCode, CheckedStorageArrayResult",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.RuntimeStorageArray",
@@ -2946,6 +3071,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.013071895424836602,
+    "description": "Declarations: append_run_eq, checked_storage_path_run, checked_storage_path_body_success",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedStoragePathInterface"
@@ -2970,6 +3096,7 @@
     },
     "definition_lines": 37,
     "definition_to_proof_line_ratio": 0.13553113553113552,
+    "description": "Declarations: leaf, C, root",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedStoragePath",
@@ -2994,6 +3121,7 @@
     },
     "definition_lines": 86,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: checkedStoragePathCode, checkedStoragePathDeclareCode, checkedStoragePathRebindCode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedStorageArray",
@@ -3018,6 +3146,7 @@
     },
     "definition_lines": 37,
     "definition_to_proof_line_ratio": 0.925,
+    "description": "Declarations: witness, default, value",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.InterfaceV2Laws",
@@ -3043,6 +3172,7 @@
     },
     "definition_lines": 28,
     "definition_to_proof_line_ratio": 0.417910447761194,
+    "description": "Declarations: leafType, branchType, treeType",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CopyPaths"
@@ -3066,6 +3196,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: CopyPathObserver, CopiedPathCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.TraversalFootprint"
@@ -3088,6 +3219,7 @@
     },
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.09933774834437085,
+    "description": "info: 'Solidity.Backend.MemoryCopies.mirror_path' depends on axioms: [propext]",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CopyPathInterface",
@@ -3113,6 +3245,7 @@
     },
     "definition_lines": 24,
     "definition_to_proof_line_ratio": 0.5581395348837209,
+    "description": "Declarations: storageHeapLegacy, deepCopyHeap, deepCopy_schedule_contents",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.Interface",
@@ -3138,6 +3271,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.011904761904761904,
+    "description": "Declarations: finite_default_words, finite_default_field_words, default_allocation_words",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.DefaultDemandInterface"
@@ -3161,6 +3295,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.10909090909090909,
+    "description": "Declarations: basket, person, seed",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.DefaultDemand",
@@ -3184,6 +3319,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: DefaultDemandCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.TraversalWords",
@@ -3207,6 +3343,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.10714285714285714,
+    "description": "Declarations: default_statement_selected, defaultSelection, selectedDefaultDeclaration",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.DefaultSelectionInterface",
@@ -3232,6 +3369,7 @@
     },
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.21176470588235294,
+    "description": "Declarations: Input, input, pairName",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.DefaultSelection",
@@ -3255,6 +3393,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: SelectedDefaultDeclaration, DefaultSelectionCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SelectedArrayDefaults",
@@ -3278,6 +3417,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.007874015748031496,
+    "description": "Declarations: empty_memory_snapshot, empty_memory_header, empty_memory_bounds",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.EmptyReferenceMemoryInterface"
@@ -3302,6 +3442,7 @@
     },
     "definition_lines": 22,
     "definition_to_proof_line_ratio": 0.27848101265822783,
+    "description": "Declarations: Input, initial, heap",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.EmptyReferenceMemory",
@@ -3326,6 +3467,7 @@
     },
     "definition_lines": 27,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: EmptyMemoryCopyResult, EmptyMemoryCopyCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.EmptyReferenceStorage"
@@ -3348,6 +3490,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.00980392156862745,
+    "description": "Declarations: empty_stored_copy, empty_storage_header, empty_default_facts",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.EmptyReferenceStorageInterface"
@@ -3372,6 +3515,7 @@
     },
     "definition_lines": 22,
     "definition_to_proof_line_ratio": 0.25,
+    "description": "Declarations: Input, input, source",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.EmptyReferenceStorage",
@@ -3396,6 +3540,7 @@
     },
     "definition_lines": 31,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: emptyStoredArray, EmptyStorageCopyResult, EmptyStorageCopyCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedStorageArray",
@@ -3419,6 +3564,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.018404907975460124,
+    "description": "Declarations: fixed_primitive_source, fixed_reservation, fixed_words_allocator",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedMemoryCopyInterface"
@@ -3442,6 +3588,7 @@
     },
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.09433962264150944,
+    "description": "Declarations: R, H, old",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedMemoryCopy"
@@ -3465,6 +3612,7 @@
     },
     "definition_lines": 22,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: fixedPrimitiveValue, fixedPrimitiveObject, fixedMemoryEnter",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.RuntimeMemoryArray",
@@ -3489,6 +3637,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.023255813953488372,
+    "description": "Declarations: SelectedAlias.fixedDeepExecute, SelectedAlias.fixedDeepBindExecute, fixedPathCopy",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedPathCopyInterface"
@@ -3513,6 +3662,7 @@
     },
     "definition_lines": 44,
     "definition_to_proof_line_ratio": 0.16923076923076924,
+    "description": "Declarations: R, H, old",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedPathCopy",
@@ -3538,6 +3688,7 @@
     },
     "definition_lines": 56,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: SelectedAlias.fixedDeepCode, SelectedAlias.fixedDeepBindCode, FixedPathRoom",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedMemoryCopy",
@@ -3561,6 +3712,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.022727272727272728,
+    "description": "info: 'Solidity.Backend.MemoryCopies.fixed_reference_declare_source' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferenceDeclareInterface"
@@ -3585,6 +3737,7 @@
     },
     "definition_lines": 24,
     "definition_to_proof_line_ratio": 0.19672131147540983,
+    "description": "info: 'Solidity.Backend.MemoryCopies.FixedReferenceDeclareControls.certificate_inhabited' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferenceDeclare",
@@ -3610,6 +3763,7 @@
     },
     "definition_lines": 30,
     "definition_to_proof_line_ratio": 0.17964071856287425,
+    "description": "info: 'Solidity.Backend.MemoryCopies.FixedReferenceDeclareFrameControls.nonempty_inputs' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferenceDeclare",
@@ -3634,6 +3788,7 @@
     },
     "definition_lines": 33,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: fixedReferenceDeclareCode, FixedReferenceDeclareResult, FixedReferenceDeclareCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferencePathCopy",
@@ -3657,6 +3812,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.07142857142857142,
+    "description": "info: 'Solidity.Backend.MemoryCopies.fixed_reference_live_count' depends on axioms: [propext]",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferenceLiveInterface"
@@ -3682,6 +3838,7 @@
     },
     "definition_lines": 32,
     "definition_to_proof_line_ratio": 0.3076923076923077,
+    "description": "info: 'Solidity.Backend.MemoryCopies.FixedReferenceLiveControls.certificate_inhabited' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferenceLive",
@@ -3706,6 +3863,7 @@
     },
     "definition_lines": 24,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: fixedReferenceLiveChild, fixedReferenceLiveRow, fixedReferenceLiveRows",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferenceStorageParent",
@@ -3729,6 +3887,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.003676470588235294,
+    "description": "info: 'Solidity.Backend.MemoryCopies.fixed_reference_memory_loop_more' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferenceMemoryRows"
@@ -3753,6 +3912,7 @@
     },
     "definition_lines": 32,
     "definition_to_proof_line_ratio": 0.0975609756097561,
+    "description": "info: 'Solidity.Backend.MemoryCopies.FixedReferenceMemoryLoopControls.certificate_inhabited' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferenceMemoryLoop",
@@ -3777,6 +3937,7 @@
     },
     "definition_lines": 50,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: fixedMemoryChildRows, fixedReferenceMemoryLoopCode, FixedReferenceMemoryRowsRepr",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferenceMemoryTurn",
@@ -3798,6 +3959,7 @@
       "theorem": 7
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "info: 'Solidity.Backend.MemoryCopies.fixed_memory_length' depends on axioms: [propext]",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferenceMemoryLoopInterface"
@@ -3821,6 +3983,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.00980392156862745,
+    "description": "info: 'Solidity.Backend.MemoryCopies.fixed_reference_memory_select' depends on axioms: [propext, Classical.choice, Quot.sound]",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferenceMemoryTurnInterface"
@@ -3845,6 +4008,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.07246376811594203,
+    "description": "info: 'Solidity.Backend.MemoryCopies.FixedReferenceMemoryTurnControls.certificate_inhabited' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferenceMemoryTurn",
@@ -3869,6 +4033,7 @@
     },
     "definition_lines": 38,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: fixedReferenceMemorySelectCode, fixedReferenceMemoryTurnCode, FixedReferenceMemoryTurnResult",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedMemoryTurn"
@@ -3891,6 +4056,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.05263157894736842,
+    "description": "info: 'Solidity.Backend.MemoryCopies.fixed_reference_path_select' depends on axioms: [propext, Classical.choice, Quot.sound]",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferencePathInterface"
@@ -3915,6 +4081,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.3220338983050847,
+    "description": "info: 'Solidity.Backend.MemoryCopies.FixedReferencePathControls.certificate_inhabited' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferencePath",
@@ -3939,6 +4106,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.019230769230769232,
+    "description": "info: 'Solidity.Backend.MemoryCopies.fixed_reference_path_copy_correct' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferencePathCopyInterface",
@@ -3964,6 +4132,7 @@
     },
     "definition_lines": 24,
     "definition_to_proof_line_ratio": 0.20869565217391303,
+    "description": "info: 'Solidity.Backend.MemoryCopies.FixedReferencePathCopyControls.certificate_inhabited' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferencePathCopy",
@@ -3988,6 +4157,7 @@
     },
     "definition_lines": 32,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: fixedReferencePathCopyCode, FixedReferencePathCopyResult, FixedReferencePathCopyCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferencePath"
@@ -4010,6 +4180,7 @@
     },
     "definition_lines": 18,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: FixedReferencePathResult, FixedReferencePathCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferenceLive",
@@ -4033,6 +4204,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.02040816326530612,
+    "description": "info: 'Solidity.Backend.MemoryCopies.fixed_reference_rebind_source' depends on axioms: [propext, Classical.choice, Quot.sound]",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferenceRebindInterface"
@@ -4057,6 +4229,7 @@
     },
     "definition_lines": 34,
     "definition_to_proof_line_ratio": 0.19101123595505617,
+    "description": "info: 'Solidity.Backend.MemoryCopies.FixedReferenceRebindControls.certificate_inhabited' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferenceRebind",
@@ -4081,6 +4254,7 @@
     },
     "definition_lines": 37,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: fixedReferenceRebindCode, FixedReferenceRebindResult, FixedReferenceRebindCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferenceDeclare"
@@ -4103,6 +4277,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.00423728813559322,
+    "description": "info: 'Solidity.Backend.MemoryCopies.fixed_reference_storage_loop_more' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferenceStorageLoopInterface"
@@ -4128,6 +4303,7 @@
     },
     "definition_lines": 27,
     "definition_to_proof_line_ratio": 0.08626198083067092,
+    "description": "info: 'Solidity.Backend.MemoryCopies.FixedReferenceStorageLoopControls.certificate_inhabited' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferenceStorageLoop",
@@ -4153,6 +4329,7 @@
     },
     "definition_lines": 38,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: fixedReferenceStorageLoopCode, FixedReferenceStorageLoopResult, FixedReferenceStorageLoopCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferenceStorageTurn",
@@ -4176,6 +4353,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.00966183574879227,
+    "description": "info: 'Solidity.Backend.MemoryCopies.fixed_reference_storage_parent_demand' depends on axioms: [propext, Quot.sound]",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferenceStorageParentInterface",
@@ -4202,6 +4380,7 @@
     },
     "definition_lines": 27,
     "definition_to_proof_line_ratio": 0.1115702479338843,
+    "description": "info: 'Solidity.Backend.MemoryCopies.FixedReferenceStorageParentControls.certificate_inhabited' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferenceStorageParent",
@@ -4228,6 +4407,7 @@
     },
     "definition_lines": 42,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: fixedReferenceStorageValue, fixedReferenceStorageParentDemand, fixedReferenceStorageParentCode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferenceStorageLoop",
@@ -4253,6 +4433,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.011494252873563218,
+    "description": "info: 'Solidity.Backend.MemoryCopies.fixed_reference_storage_turn_success' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferenceStorageTurnInterface"
@@ -4277,6 +4458,7 @@
     },
     "definition_lines": 22,
     "definition_to_proof_line_ratio": 0.1437908496732026,
+    "description": "info: 'Solidity.Backend.MemoryCopies.FixedReferenceStorageTurnControls.certificate_inhabited' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferenceStorageTurn",
@@ -4301,6 +4483,7 @@
     },
     "definition_lines": 34,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: fixedReferenceStorageTurnCode, FixedReferenceStorageTurnResult, FixedReferenceStorageTurnCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedStorageTurn",
@@ -4324,6 +4507,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.025423728813559324,
+    "description": "Declarations: fixed_storage_enter, runtime_fixed_storage_run, fixedStorageWords",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedStorageCopyInterface"
@@ -4348,6 +4532,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.1827956989247312,
+    "description": "Declarations: Input, input, values",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedStorageCopy",
@@ -4372,6 +4557,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: fixedStorageEnter, runtimeFixedStorageCode, FixedStorageCopyCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedMemoryCopy"
@@ -4394,6 +4580,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.013986013986013986,
+    "description": "Declarations: fixed_storage_path_rhs, fixed_storage_path_decl_source, fixed_storage_path_body",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedStoragePathInterface"
@@ -4417,6 +4604,7 @@
     },
     "definition_lines": 36,
     "definition_to_proof_line_ratio": 0.16289592760180996,
+    "description": "Declarations: R, H, old",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedStoragePath",
@@ -4441,6 +4629,7 @@
     },
     "definition_lines": 84,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: fixedStoragePathCode, fixedStoragePathDeclareCode, fixedStoragePathRebindCode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedStorageCopy",
@@ -4464,6 +4653,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.006896551724137931,
+    "description": "Declarations: forward_read_iter, forward_read_loop, forward_range_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.ForwardOverlapInterface"
@@ -4487,6 +4677,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.06779661016949153,
+    "description": "Declarations: input, certificate_inhabited, left_overlap",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.ForwardOverlap"
@@ -4510,6 +4701,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: forwardRangeCode, ForwardReadable, ForwardOverlapCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedMemoryCopy",
@@ -4533,6 +4725,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.03125,
+    "description": "info: 'Solidity.Backend.MemoryCopies.guarded_default_declaration_run' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.GuardedDefaultDeclarationInterface"
@@ -4557,6 +4750,7 @@
     },
     "definition_lines": 28,
     "definition_to_proof_line_ratio": 0.21374045801526717,
+    "description": "info: 'Solidity.Backend.MemoryCopies.GuardedDefaultDeclarationControls.certificate_inhabited' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.GuardedDefaultDeclaration",
@@ -4582,6 +4776,7 @@
     },
     "definition_lines": 44,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: guardedDefaultDeclarationCode, GuardedDefaultDeclarationSuccess, GuardedDefaultDeclarationCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.DefaultSelection",
@@ -4605,6 +4800,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.1,
+    "description": "Declarations: copyAt_eq, map_copyAt_eq, array_eq_of_contents",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.HeapContentsInterface"
@@ -4628,6 +4824,7 @@
     },
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.5454545454545454,
+    "description": "Declarations: seven, eight, eleven",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.HeapContents"
@@ -4650,6 +4847,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: MirrorContentsCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.InterfaceV2",
@@ -4672,6 +4870,7 @@
     },
     "definition_lines": 102,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: DefaultCertificate, StorageHeapCertificate, StorageWordCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryDefaultCompile",
@@ -4696,6 +4895,7 @@
     },
     "definition_lines": 31,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: AllocatorWitness, DefaultCertificate, StorageHeapCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryDefaultCompile",
@@ -4717,6 +4917,7 @@
       "theorem": 8
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: AllocatorWitness.cost_lt, DefaultCertificate.cost_lt, StorageWordCertificate.cost_lt",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.InterfaceV2"
@@ -4739,6 +4940,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: StorageWordRootCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.InterfaceV2"
@@ -4761,6 +4963,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.02531645569620253,
+    "description": "Declarations: primitive_loads_run, array_stack_run, array_fill_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.LoadedArrayInterface"
@@ -4785,6 +4988,7 @@
     },
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 0.16455696202531644,
+    "description": "Declarations: leaf, C, root",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.LoadedArray",
@@ -4809,6 +5013,7 @@
     },
     "definition_lines": 39,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: PrimitiveLoadInputs, primitiveLoadsCode, arrayStackCode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.PrimitiveArray",
@@ -4832,6 +5037,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.044444444444444446,
+    "description": "Declarations: loaded_singleton_transport, loaded_singleton_success, loaded_singleton_refusal",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.LoadedSingletonInterface"
@@ -4855,6 +5061,7 @@
     },
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.16842105263157894,
+    "description": "Declarations: C, root, value",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.LoadedSingleton",
@@ -4879,6 +5086,7 @@
     },
     "definition_lines": 29,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: singletonFillCode, loadedSingletonCopyCode, LoadedSingletonBodyResult",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SingletonCopy"
@@ -4901,6 +5109,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.1111111111111111,
+    "description": "Declarations: liveWordCount_strip, fieldWordCount_strip, elementWordCount_strip",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.MemoryCopyDemandInterface"
@@ -4926,6 +5135,7 @@
     },
     "definition_lines": 51,
     "definition_to_proof_line_ratio": 1.0851063829787233,
+    "description": "Declarations: Leaf, Parent, H",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.MemoryCopyDemand",
@@ -4950,6 +5160,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: MemoryCopyDemandCertificate, MemoryAliasDemandCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.TraversalWords",
@@ -4973,6 +5184,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.023255813953488372,
+    "description": "Declarations: child_rows_toList, parent_arrays_equal, child_read_at_eq",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.MemoryParentSnapshotInterface"
@@ -4997,6 +5209,7 @@
     },
     "definition_lines": 23,
     "definition_to_proof_line_ratio": 0.45098039215686275,
+    "description": "Declarations: R, P, child",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.MemoryParentSnapshot",
@@ -5021,6 +5234,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: memoryParentRowsValue, MemoryParentSnapshotCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedMemoryRows",
@@ -5044,6 +5258,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.023255813953488372,
+    "description": "Declarations: SelectedAlias.deepExecute, SelectedAlias.deepBindExecute, memoryPathCopy",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.MemoryPathCopyInterface"
@@ -5069,6 +5284,7 @@
     },
     "definition_lines": 43,
     "definition_to_proof_line_ratio": 0.14930555555555555,
+    "description": "Declarations: R, H, old",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.MemoryPathCopy",
@@ -5094,6 +5310,7 @@
     },
     "definition_lines": 56,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: SelectedAlias.deepCode, SelectedAlias.deepBindCode, MemoryPathRoom",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.RuntimeMemoryArray",
@@ -5117,6 +5334,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.3939393939393939,
+    "description": "Declarations: element, feasible, machine",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedDefaults",
@@ -5141,6 +5359,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: nestedArrayType, SelectedNestedDefault",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.InterfaceV2Laws"
@@ -5163,6 +5382,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.1951219512195122,
+    "description": "Declarations: nested_mapFree, nested_selection_total, selectedNestedDefault",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedDefaultInterface"
@@ -5186,6 +5406,7 @@
     },
     "definition_lines": 31,
     "definition_to_proof_line_ratio": 0.5961538461538461,
+    "description": "info: 'Solidity.Backend.MemoryCopies.nested_live_pipeline_correct' depends on axioms: [propext, Classical.choice, Quot.sound]",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedLivePipelineInterface"
@@ -5211,6 +5432,7 @@
     },
     "definition_lines": 51,
     "definition_to_proof_line_ratio": 0.2982456140350877,
+    "description": "info: 'Solidity.Backend.MemoryCopies.NestedLivePipelineControls.mixed_shadows_reach_two_fresh_copies' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedLivePipeline",
@@ -5235,6 +5457,7 @@
     },
     "definition_lines": 54,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: NestedLivePipelineResult, NestedLivePipelineRefusal, NestedLivePipelineCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedLocationPipeline",
@@ -5258,6 +5481,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.007518796992481203,
+    "description": "Declarations: primitive_elements_words, nested_elements_words, nested_location_memory_demand",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedLocationPipelineInterface"
@@ -5282,6 +5506,7 @@
     },
     "definition_lines": 46,
     "definition_to_proof_line_ratio": 0.4144144144144144,
+    "description": "Declarations: Witness, Witness.primitive, witness",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedLocationPipelineObservations",
@@ -5307,6 +5532,7 @@
     },
     "definition_lines": 59,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: nestedLocationPipelineCode, NestedLocationPipelineResult, NestedLocationPipelineRefusal",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedStorageHeader",
@@ -5329,6 +5555,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: nested_location_pipeline_observations",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedLocationPipeline"
@@ -5352,6 +5579,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.0037593984962406013,
+    "description": "Declarations: nested_memory_loop_more, nested_memory_loop_done, nested_memory_loop_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedMemoryRows"
@@ -5376,6 +5604,7 @@
     },
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 0.09615384615384616,
+    "description": "Declarations: R, P, H",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedMemoryLoop",
@@ -5400,6 +5629,7 @@
     },
     "definition_lines": 53,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: memoryChildRows, memoryChildCount, nestedMemoryLoopCode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedMemoryTurn",
@@ -5426,6 +5656,7 @@
     },
     "definition_lines": 33,
     "definition_to_proof_line_ratio": 0.4230769230769231,
+    "description": "Declarations: values, row, long",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedMemoryLoop",
@@ -5450,6 +5681,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.005714285714285714,
+    "description": "Declarations: nested_memory_parent_enter, nested_memory_parent_guard, nested_memory_parent_prefix",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedMemoryParentInterface"
@@ -5474,6 +5706,7 @@
     },
     "definition_lines": 28,
     "definition_to_proof_line_ratio": 0.07526881720430108,
+    "description": "Declarations: R, P, H",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedMemoryParent"
@@ -5495,6 +5728,7 @@
       "theorem": 5
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: primitive_live_words, row_live_words, child_live_words",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedMemoryParentInterface",
@@ -5519,6 +5753,7 @@
     },
     "definition_lines": 29,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: nestedMemoryParentBody, nestedMemoryParentCode, memoryParentDemand",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.MemoryParentSnapshot",
@@ -5543,6 +5778,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.16666666666666666,
+    "description": "Declarations: MixedParentWitness, mixed_parent_inhabited, mixed_parent_runtime",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedMemoryParent",
@@ -5568,6 +5804,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.03278688524590164,
+    "description": "info: 'Solidity.Backend.MemoryCopies.SelectedAlias.nestedDeepExecute' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedMemoryPathInterface"
@@ -5592,6 +5829,7 @@
     },
     "definition_lines": 53,
     "definition_to_proof_line_ratio": 0.16510903426791276,
+    "description": "info: 'Solidity.Backend.MemoryCopies.NestedMemoryPathControls.populated_inputs' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedMemoryPath",
@@ -5617,6 +5855,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.0625,
+    "description": "info: 'Solidity.Backend.MemoryCopies.SelectedAlias.nestedDeepFramedBindExecute' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedMemoryPath",
@@ -5641,6 +5880,7 @@
     },
     "definition_lines": 27,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: NestedMemoryPathFramedBindSuccess, NestedMemoryPathFrameCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedMemoryPathInterface"
@@ -5663,6 +5903,7 @@
     },
     "definition_lines": 62,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: SelectedAlias.nestedDeepCode, SelectedAlias.nestedDeepBindCode, NestedMemoryPathRefusal",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.AliasBinding",
@@ -5685,6 +5926,7 @@
       "theorem": 6
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: memory_rows_length, memory_rows_repr, memory_rows_kept",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedMemoryLoopInterface"
@@ -5708,6 +5950,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.009345794392523364,
+    "description": "Declarations: nested_memory_operands, nested_memory_select, nested_memory_turn_success",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedMemoryTurnInterface"
@@ -5732,6 +5975,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.07547169811320754,
+    "description": "Declarations: R, P, H",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedMemoryTurn",
@@ -5756,6 +6000,7 @@
     },
     "definition_lines": 40,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: nestedMemoryControl, nestedMemorySelectCode, nestedMemoryTurnCode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedMemoryArray",
@@ -5781,6 +6026,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.010416666666666666,
+    "description": "Declarations: nested_storage_header_values, nested_storage_header_copy, nested_storage_header_inputs",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedStorageHeaderInterface"
@@ -5806,6 +6052,7 @@
     },
     "definition_lines": 33,
     "definition_to_proof_line_ratio": 0.11301369863013698,
+    "description": "Declarations: Input, input, Row",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedStorageHeader",
@@ -5831,6 +6078,7 @@
     },
     "definition_lines": 35,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: nestedStorageHeaderValue, nestedStorageHeaderEnter, nestedStorageHeaderCode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedStorageParent"
@@ -5853,6 +6101,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.02564102564102564,
+    "description": "info: 'Solidity.Backend.MemoryCopies.nested_storage_live_bound' depends on axioms: [propext]",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedStorageLiveInterface"
@@ -5878,6 +6127,7 @@
     },
     "definition_lines": 28,
     "definition_to_proof_line_ratio": 0.3111111111111111,
+    "description": "info: 'Solidity.Backend.MemoryCopies.NestedStorageLiveControls.certificate_inhabited' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedStorageLive",
@@ -5902,6 +6152,7 @@
     },
     "definition_lines": 39,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: nestedStorageLiveRows, nestedStorageLiveCanonical, NestedStorageLiveResult",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.FixedReferenceLive",
@@ -5925,6 +6176,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.00425531914893617,
+    "description": "Declarations: nested_storage_loop_more, nested_storage_loop_done, nested_storage_loop_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedStorageLoopInterface"
@@ -5950,6 +6202,7 @@
     },
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 0.08552631578947369,
+    "description": "Declarations: Input, input, Row",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedStorageLoop",
@@ -5976,6 +6229,7 @@
     },
     "definition_lines": 50,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: PrimitiveStorageRow, nestedStorageValues, nestedStorageDemand",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedStorageTurn"
@@ -5998,6 +6252,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.006097560975609756,
+    "description": "Declarations: nested_storage_parent_source, nested_storage_parent_guard, nested_storage_parent_prefix",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedStorageParentInterface"
@@ -6023,6 +6278,7 @@
     },
     "definition_lines": 27,
     "definition_to_proof_line_ratio": 0.10887096774193548,
+    "description": "Declarations: Input, input, Row",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedStorageParent",
@@ -6049,6 +6305,7 @@
     },
     "definition_lines": 34,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: nestedStorageParentValue, nestedStorageParentExit, nestedStorageParentCode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedStorageLoop",
@@ -6075,6 +6332,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.013422818791946308,
+    "description": "info: 'Solidity.Backend.MemoryCopies.nested_storage_path_demand' depends on axioms: [propext, Quot.sound]",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedStoragePathInterface"
@@ -6099,6 +6357,7 @@
     },
     "definition_lines": 36,
     "definition_to_proof_line_ratio": 0.14937759336099585,
+    "description": "info: 'Solidity.Backend.MemoryCopies.NestedStoragePathControls.populated_inputs' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedStoragePath",
@@ -6123,6 +6382,7 @@
     },
     "definition_lines": 100,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: nestedStoragePathCode, NestedStoragePathResult, nestedStoragePathDeclareCode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedStorageLive",
@@ -6146,6 +6406,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.010752688172043012,
+    "description": "Declarations: nested_child_slot_run, nested_storage_turn_success, nested_storage_turn_correct",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedStorageTurnInterface"
@@ -6170,6 +6431,7 @@
     },
     "definition_lines": 22,
     "definition_to_proof_line_ratio": 0.11398963730569948,
+    "description": "Declarations: Input, input, values",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedStorageTurn",
@@ -6194,6 +6456,7 @@
     },
     "definition_lines": 37,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: nestedChildSlotCode, nestedStorageTurnCode, nestedStorageControl",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedStorageArray",
@@ -6216,6 +6479,7 @@
     },
     "definition_lines": 26,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: Panic41Premise, AliasPremise, LocationStepPremise",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.Interface",
@@ -6240,6 +6504,7 @@
     },
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 0.16025641025641027,
+    "description": "Declarations: primitive_array_source, array_words_shape, array_words_other",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.PrimitiveArrayInterface"
@@ -6264,6 +6529,7 @@
     },
     "definition_lines": 27,
     "definition_to_proof_line_ratio": 0.391304347826087,
+    "description": "Declarations: Input, input, values",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.PrimitiveArray",
@@ -6289,6 +6555,7 @@
     },
     "definition_lines": 24,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: primitiveArrayValue, primitiveArrayObject, PrimitiveWords",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SingletonCopy",
@@ -6312,6 +6579,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.045454545454545456,
+    "description": "Declarations: primitive_live_roundtrip, primitive_live_vector, primitive_live_bound",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.PrimitiveArrayLiveInterface"
@@ -6336,6 +6604,7 @@
     },
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.32142857142857145,
+    "description": "Declarations: sourceValue, retained, all_shadows_inhabited",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.PrimitiveArrayLive",
@@ -6360,6 +6629,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: primitiveArrayLiveValues, PrimitiveArrayLiveCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.RuntimeStorageArray"
@@ -6382,6 +6652,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.6428571428571429,
+    "description": "Declarations: published_storage_step, publishedStorageConsumer, published_storage_same_store",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.PublishedStorageInterface"
@@ -6406,6 +6677,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.4857142857142857,
+    "description": "Declarations: Input, input, values",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.PublishedStorage",
@@ -6431,6 +6703,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: PublishedStorageConsumer",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.Premises",
@@ -6454,6 +6727,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.0055248618784530384,
+    "description": "Declarations: backward_range_condition, backward_read_turn, backward_read_iter",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.RangeOverlapInterface"
@@ -6477,6 +6751,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.06818181818181818,
+    "description": "Declarations: input, certificate_inhabited, right_overlap",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.RangeOverlap",
@@ -6501,6 +6776,7 @@
     },
     "definition_lines": 23,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: backwardRangeCond, backwardReadRangeBody, backwardRangeCode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.ForwardOverlap",
@@ -6524,6 +6800,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.06451612903225806,
+    "description": "info: 'Solidity.Backend.MemoryCopies.reference_default_copy' depends on axioms: [propext]",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.ReferenceDefaultDemandInterface"
@@ -6548,6 +6825,7 @@
     },
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 0.25301204819277107,
+    "description": "info: 'Solidity.Backend.MemoryCopies.ReferenceDefaultDemandControls.certificate_inhabited' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.ReferenceDefaultDemand",
@@ -6573,6 +6851,7 @@
     },
     "definition_lines": 22,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: referenceDefaultValue, referenceDefaultWords, ReferenceDefaultDemandCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SelectedDefaultDemand",
@@ -6597,6 +6876,7 @@
     },
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 0.5208333333333334,
+    "description": "Declarations: element, dimensions, feasible",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.RuntimeArrays",
@@ -6621,6 +6901,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: runtimeNestedCost, RuntimeNestedDefault",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.NestedDefaultInterface",
@@ -6644,6 +6925,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.32075471698113206,
+    "description": "Declarations: selectedRuntimeNestedDefault, runtimeNestedCost_zero, emptyRuntimeNestedDefault",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.RuntimeArrayInterface",
@@ -6668,6 +6950,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.0136986301369863,
+    "description": "Declarations: allocator_cursor_unique, growsAllocator_of_reached, allocatorGrowth",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.RuntimeGrowthInterface"
@@ -6693,6 +6976,7 @@
     },
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 0.34210526315789475,
+    "description": "Declarations: element, dimensions, parent",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.RuntimeGrowth",
@@ -6717,6 +7001,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: RuntimeGrowthExecution, AllocatorGrowthCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.RuntimeRebind"
@@ -6739,6 +7024,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.017699115044247787,
+    "description": "Declarations: runtime_live_array_rhs, runtime_live_array_decl_source, runtime_live_array_body",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.RuntimeLiveArrayInterface"
@@ -6763,6 +7049,7 @@
     },
     "definition_lines": 38,
     "definition_to_proof_line_ratio": 0.14960629921259844,
+    "description": "Declarations: leaf, C, root",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.RuntimeLiveArray",
@@ -6787,6 +7074,7 @@
     },
     "definition_lines": 74,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: RuntimeLiveArrayBodyResult, RuntimeLiveArrayDeclarationResult, RuntimeLiveArrayRebindResult",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.RuntimePathArray",
@@ -6810,6 +7098,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.015544041450777202,
+    "description": "Declarations: memory_read_condition, memory_read_turn, memory_read_iter",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.RuntimeMemoryArrayInterface"
@@ -6834,6 +7123,7 @@
     },
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.08522727272727272,
+    "description": "Declarations: R, H, old",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.RuntimeMemoryArray"
@@ -6857,6 +7147,7 @@
     },
     "definition_lines": 23,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: memoryReadRangeBody, memoryReadEnter, runtimeMemoryArrayCode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.RuntimeStorageArray",
@@ -6880,6 +7171,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.015625,
+    "description": "Declarations: runtime_path_array_body, runtime_path_array_declaration, runtime_path_array_rebind_source",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.RuntimePathArrayInterface"
@@ -6904,6 +7196,7 @@
     },
     "definition_lines": 36,
     "definition_to_proof_line_ratio": 0.1643835616438356,
+    "description": "Declarations: leaf, C, root",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.RuntimePathArray",
@@ -6928,6 +7221,7 @@
     },
     "definition_lines": 85,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: runtimePathArrayCode, runtimePathArrayDeclareCode, runtimePathArrayRebindCode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.RuntimeStorageArray",
@@ -6949,6 +7243,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: referenceArray_keeps, referenceArray_fresh, RuntimeNestedDefault.rebind_correct",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.RuntimeRebindInterface",
@@ -6975,6 +7270,7 @@
     },
     "definition_lines": 28,
     "definition_to_proof_line_ratio": 0.5283018867924528,
+    "description": "Declarations: element, dimensions, parent",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.RuntimeRebind",
@@ -6998,6 +7294,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: RuntimeRebindResult",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.RuntimeArrayInterface"
@@ -7020,6 +7317,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.016216216216216217,
+    "description": "Declarations: storage_read_turn, storage_read_iter, storage_read_loop",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.RuntimeStorageArrayInterface"
@@ -7044,6 +7342,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.18269230769230768,
+    "description": "Declarations: Input, input, values",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.RuntimeStorageArray",
@@ -7068,6 +7367,7 @@
     },
     "definition_lines": 22,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: storageReadRangeBody, storageReadEnter, runtimeStorageArrayCode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.PrimitiveArray",

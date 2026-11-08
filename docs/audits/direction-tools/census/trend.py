@@ -3,8 +3,10 @@
 Run after metrics.py: python3 docs/audits/direction-tools/census/trend.py
 Monthly sample is last first-parent commit in each UTC author-independent committer month.
 """
+import sys
+sys.dont_write_bytecode=True
 import argparse, collections, csv, datetime, json, pathlib, re
-from metrics import BASE, OUT, aggregate, blobs, dump, git, module, tree
+from metrics import BASE, OUT, aggregate, blobs, clean, dump, git, module, tree
 
 def run(rev,out):
     log=git("log","--first-parent","--reverse","--format=%H %ct",rev).decode().splitlines()
@@ -17,7 +19,13 @@ def run(rev,out):
         paths=tree(sha); selected={p:b for p,b in paths.items() if p.startswith("Solidity/") and p.endswith(".lean")}
         missing={p:b for p,b in selected.items() if (p,b) not in cache}
         for p,t in blobs(missing).items(): cache[p,missing[p]]=module(p,t)
-        mods=[cache[p,b] for p,b in selected.items()]; headline=aggregate(mods)
+        mods=[dict(cache[p,b]) for p,b in selected.items()]
+        incoming=collections.Counter(i for m in mods for i in m["imports"])
+        outside=blobs({p:b for p,b in paths.items() if p.endswith(".lean") and p not in selected})
+        for text in outside.values():
+            for line in re.findall(r"(?m)^\s*import\s+([^\n]+)",clean(text)): incoming.update(line.split())
+        for m in mods: m["imports_in"]=incoming[m["path"][:-5].replace("/",".")]
+        headline=aggregate(mods)
         areas={a:aggregate([m for m in mods if m["area"]==a]) for a in sorted({m["area"] for m in mods})}
         # Goals.lean does not exist on this base. Preserve unavailability rather than
         # interpret theorem counts, merge counts, or absent counters as goals closed.
@@ -39,7 +47,7 @@ def run(rev,out):
         growth.append({"area":area,"initial_lines":start,"final_lines":end["lines"],"added_lines":end["lines"]-start,"growth_ratio":end["lines"]/start if start else None,"goals_moved":None,"what":f"Solidity/{area}: lexical source area; goal closure unavailable; growth alone gives no direction verdict."})
     mods=[m for f in census["module_chunks"] for m in json.loads((out/f).read_text())]
     largest=sorted(mods,key=lambda x:(-x["lines"],x["path"]))[:20]
-    summary={"revision":rev,"totals":census["solidity_totals"],"largest_modules":[{k:m[k] for k in ("path","lines","category","area")} | {"what":f"{m['area']} module ({m['category']}); size ranks physical source, not semantic complexity."} for m in largest],"fastest_growing_areas_by_added_lines":sorted(growth,key=lambda x:(-x["added_lines"],x["area"]))[:20],"fastest_growing_areas_by_ratio":sorted([g for g in growth if g["growth_ratio"] is not None],key=lambda x:-x["growth_ratio"])[:20],"over_3x_growth_candidates":[g for g in growth if g["growth_ratio"] is not None and g["growth_ratio"]>3],"over_3x_with_unchanged_goals":None,"direction_verdict":None,"waits":["Solidity/Goals.lean absent at pinned base and no history found; goals closed and lines/goal are unavailable, not zero.","scripts/differential/ and scripts/bench/ absent at pinned base; no corresponding outputs reused."],"limitations":["No matched real-world unit calibration is claimed by this census; whole-repository ratios to CompCert would not compare like with like.","Generated classification is a marker/path-based lower bound, unmarked includes possible generated code.","Monthly history samples only first-parent reachable commits; partial current month included; merge labels are not completed goals.","Timing sample predates base; matched module paths but changed line denominators possible; no current or area-total timing asserted."],"trend_sample_policy":"Last first-parent commit per committer UTC month; all reachable history, final month partial.","inventory":census["inventory"]}
+    summary={"revision":rev,"totals":census["solidity_totals"],"largest_modules":[{k:m[k] for k in ("path","lines","category","area")} | {"what":m["description"]} for m in largest],"fastest_growing_areas_by_added_lines":sorted(growth,key=lambda x:(-x["added_lines"],x["area"]))[:20],"fastest_growing_areas_by_ratio":sorted([g for g in growth if g["growth_ratio"] is not None],key=lambda x:-x["growth_ratio"])[:20],"over_3x_growth_candidates":[g for g in growth if g["growth_ratio"] is not None and g["growth_ratio"]>3],"over_3x_with_unchanged_goals":None,"direction_verdict":None,"waits":["Solidity/Goals.lean absent at pinned base and no history found; goals closed and lines/goal are unavailable, not zero.","scripts/differential/ and scripts/bench/ absent at pinned base; no corresponding outputs reused."],"limitations":["No matched real-world unit calibration is claimed by this census; whole-repository ratios to CompCert would not compare like with like.","Generated classification is a marker/path-based lower bound, unmarked includes possible generated code.","Monthly history samples only first-parent reachable commits; partial current month included; merge labels are not completed goals.","Timing sample predates base; matched module paths but changed line denominators possible; no current or area-total timing asserted."],"trend_sample_policy":"Last first-parent commit per committer UTC month; all reachable history, final month partial.","inventory":census["inventory"]}
     dump(out/"summary.json",summary)
 
 if __name__=="__main__":

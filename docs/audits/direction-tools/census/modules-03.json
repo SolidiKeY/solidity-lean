@@ -10,6 +10,7 @@
     },
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 0.36619718309859156,
+    "description": "Declarations: root, memory, available",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SelectedArrayDefaults",
@@ -34,6 +35,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: fixedDefaultType, selectedArrayCost, SelectedArrayDefault",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.RuntimeArrayInterface"
@@ -56,6 +58,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.16279069767441862,
+    "description": "Declarations: fixedDefault_mapFree, fixed_selection_total, primitive_struct_selected",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SelectedArrayDefaultInterface"
@@ -79,6 +82,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.03571428571428571,
+    "description": "info: 'Solidity.Backend.MemoryCopies.selected_default_words' depends on axioms: [propext, Classical.choice, Quot.sound]",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SelectedDefaultDemandInterface"
@@ -103,6 +107,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.2638888888888889,
+    "description": "info: 'Solidity.Backend.MemoryCopies.SelectedDefaultDemandControls.certificate_inhabited' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SelectedDefaultDemand",
@@ -127,6 +132,7 @@
     },
     "definition_lines": 15,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: SelectedDefaultDemandCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedDefault",
@@ -150,6 +156,7 @@
     },
     "definition_lines": 29,
     "definition_to_proof_line_ratio": 0.3717948717948718,
+    "description": "Declarations: singletonArrayObject, singleton_copy_source, singletonCopyMachine",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SingletonCopyInterface"
@@ -173,6 +180,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.3541666666666667,
+    "description": "Declarations: value, seven, witness",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SingletonCopy",
@@ -198,6 +206,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: singletonArrayValue, singletonCopyCode, SingletonWordCopy",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.InterfaceV2Roots",
@@ -223,6 +232,7 @@
     },
     "definition_lines": 28,
     "definition_to_proof_line_ratio": 0.4307692307692308,
+    "description": "Declarations: leafType, branchType, treeType",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SnapshotPaths"
@@ -246,6 +256,7 @@
     },
     "definition_lines": 36,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: SnapshotPathObservation, SnapshotPathSuccess, SnapshotPathFailure",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CopyPaths",
@@ -269,6 +280,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.0125,
+    "description": "Declarations: snapshot_paths_of_mirror, snapshot_path_success, snapshot_path_failure",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SnapshotPathInterface"
@@ -292,6 +304,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.022222222222222223,
+    "description": "info: 'Solidity.Backend.MemoryCopies.snapshot_restore_correct' depends on axioms: [propext, Classical.choice, Quot.sound]",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SnapshotRestoreInterface"
@@ -315,6 +328,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.21739130434782608,
+    "description": "info: 'Solidity.Backend.MemoryCopies.SnapshotRestoreControls.empty_capture_restored' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SnapshotRestore"
@@ -338,6 +352,7 @@
     },
     "definition_lines": 27,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: snapshotRestoreCode, SnapshotRestoreResult, SnapshotRestoreCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStorageCopyLaws"
@@ -360,6 +375,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.012195121951219513,
+    "description": "Declarations: snapshot_fields_step, snapshot_copy_at, snapshot_copy_ref_at",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SnapshotTransportInterface"
@@ -384,6 +400,7 @@
     },
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.2608695652173913,
+    "description": "Declarations: seven, eleven, eight",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SnapshotTransport",
@@ -407,6 +424,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: SnapshotTransportCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Theory.Typed.Mem"
@@ -429,6 +447,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.13432835820895522,
+    "description": "Declarations: PersistentSourceCell.read, sourceByteRange_run, sourceByteLength_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceBytesInterface"
@@ -452,6 +471,7 @@
     },
     "definition_lines": 59,
     "definition_to_proof_line_ratio": 1.1346153846153846,
+    "description": "Declarations: declaration, E, path",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceBytes"
@@ -475,6 +495,7 @@
     },
     "definition_lines": 12,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: PersistentSourceCell, SourceByteRange",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceRootCopies",
@@ -498,6 +519,7 @@
     },
     "definition_lines": 52,
     "definition_to_proof_line_ratio": 1.7333333333333334,
+    "description": "Declarations: SourceLeafDefault.construction, SourceConstructionCertificate.elements, SourceConstructionCertificate.fixed",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceConstructionInterface",
@@ -523,6 +545,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.4473684210526316,
+    "description": "Declarations: E, before, observe",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceConstruction",
@@ -547,6 +570,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: SourceConstructionCertificate, SourceConstructionElements",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceLeafInterface"
@@ -570,6 +594,7 @@
     },
     "definition_lines": 50,
     "definition_to_proof_line_ratio": 1.0638297872340425,
+    "description": "Declarations: E, frame, path",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceInterface",
@@ -595,6 +620,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.02564102564102564,
+    "description": "Declarations: CopyHorizonExtends.refl, CopyHorizonExtends.timeout, CopyHorizonExtends.bind",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceCopyHorizonInterface"
@@ -619,6 +645,7 @@
     },
     "definition_lines": 43,
     "definition_to_proof_line_ratio": 0.7288135593220338,
+    "description": "Declarations: declaration, payloadDecl, E",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceCopyHorizon",
@@ -643,6 +670,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: CopyHorizonExtends, SourceCopyHorizonCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Hoare"
@@ -665,6 +693,7 @@
     },
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.3333333333333333,
+    "description": "Declarations: zeroData_allocates, zeroVal_allocates, zeroElems_allocates",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceFramesCore"
@@ -688,6 +717,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.02531645569620253,
+    "description": "Declarations: zeroData_horizon, zeroVal_horizon, zeroElems_horizon",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceDefaultHorizonInterface",
@@ -713,6 +743,7 @@
     },
     "definition_lines": 42,
     "definition_to_proof_line_ratio": 0.6086956521739131,
+    "description": "Declarations: declaration, E, name",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceDefaultHorizon"
@@ -735,6 +766,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: SourceDefaultHorizonCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceCopyHorizonInterface"
@@ -756,6 +788,7 @@
     },
     "definition_lines": 91,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: SourceValueConstruction.pureDefault, SourceConstructionCertificate.value, SourceFieldsConstruction.nil",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceFieldsInterface",
@@ -779,6 +812,7 @@
     },
     "definition_lines": 35,
     "definition_to_proof_line_ratio": 0.875,
+    "description": "Declarations: basketDecl, nodeDecl, E",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceFields"
@@ -801,6 +835,7 @@
     },
     "definition_lines": 16,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: SourceValueConstruction, SourceFieldsConstruction",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceConstructionInterface"
@@ -823,6 +858,7 @@
     },
     "definition_lines": 47,
     "definition_to_proof_line_ratio": 1.175,
+    "description": "Declarations: rootDecl, E, path",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceDefaultFrames",
@@ -846,6 +882,7 @@
       "theorem": 12
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: refl, trans, pure'",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceFramesInterface"
@@ -869,6 +906,7 @@
     },
     "definition_lines": 25,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: AllocationExtension, AllocatesOnly, DefaultTraversalFrameCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceInterface"
@@ -883,10 +921,11 @@
   },
   {
     "area": "Backend",
-    "category": "import_root",
+    "category": "import_only_unknown",
     "code_lines": 1,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.Interface"
@@ -909,6 +948,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.0958904109589041,
+    "description": "Declarations: bytesLeaf, stringLeaf, dynamicLeaf",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceLeafInterface"
@@ -933,6 +973,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.2571428571428571,
+    "description": "Declarations: E, before, observe",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceLeafArrays",
@@ -957,6 +998,7 @@
     },
     "definition_lines": 12,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: SourceLeafDefault, SourceLeafElementsResult",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceRootCopies",
@@ -978,6 +1020,7 @@
       "theorem": 5
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: PersistentSourceCell.transport, SourceByteRange.transport, StoredSourceBytes.transport",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceNestedBytesInterface"
@@ -1002,6 +1045,7 @@
     },
     "definition_lines": 62,
     "definition_to_proof_line_ratio": 1.24,
+    "description": "Declarations: declaration, E, path",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceNestedBytes"
@@ -1025,6 +1069,7 @@
     },
     "definition_lines": 22,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: StoredSourceBytes, SourceByteChildren, byteChildrenHorizon",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceBytes"
@@ -1047,6 +1092,7 @@
     },
     "definition_lines": 34,
     "definition_to_proof_line_ratio": 3.7777777777777777,
+    "description": "Declarations: allocatedState, allocRef_run, storageLoadCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceStorageFrames"
@@ -1070,6 +1116,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.39285714285714285,
+    "description": "Declarations: NewArrayLengthPanicInputs.failure, NewArrayLengthPanicInputs.toPremise",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceSizeInputs"
@@ -1092,6 +1139,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: NewArrayLengthPanicInputs",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.Premises"
@@ -1114,6 +1162,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.25925925925925924,
+    "description": "Declarations: loadMem_allocates, loadElem_allocates, loadElems_allocates",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceFramesCore"
@@ -1137,6 +1186,7 @@
     },
     "definition_lines": 78,
     "definition_to_proof_line_ratio": 1.5918367346938775,
+    "description": "Declarations: SourceStoredElements.nil, SourceStoredElements.cons, SourceStoredElements.dynamicCopy",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceStoredElementsInterface"
@@ -1160,6 +1210,7 @@
     },
     "definition_lines": 92,
     "definition_to_proof_line_ratio": 1.5333333333333334,
+    "description": "Declarations: nodeDecl, rootDecl, numbersDecl",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceStoredElements"
@@ -1183,6 +1234,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: SourceStoredElements, SourceStoredDynamicArray, SourceStoredFixedArray",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceStoredReferences"
@@ -1205,6 +1257,7 @@
     },
     "definition_lines": 84,
     "definition_to_proof_line_ratio": 5.25,
+    "description": "Declarations: SourceStoredValue.primitive, SourceStoredValue.bytes, SourceStoredValue.string",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceStoredFieldsInterface",
@@ -1230,6 +1283,7 @@
     },
     "definition_lines": 47,
     "definition_to_proof_line_ratio": 1.205128205128205,
+    "description": "Declarations: structDecl, rootDecl, E",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceStoredFields"
@@ -1252,6 +1306,7 @@
     },
     "definition_lines": 18,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: SourceStoredValue, SourceStoredFields",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceNestedBytesInterface"
@@ -1274,6 +1329,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.07339449541284404,
+    "description": "Declarations: sourceReferenceCopy_of_success, SourceStoredValue.copy_result, SourceStoredValue.fresh",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceStoredFreshInterface",
@@ -1300,6 +1356,7 @@
     },
     "definition_lines": 103,
     "definition_to_proof_line_ratio": 1.3205128205128205,
+    "description": "Declarations: Mode, declaration, rootDecl",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceStoredFresh",
@@ -1324,6 +1381,7 @@
     },
     "definition_lines": 26,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: SourceStoredReferenceCertificate, SourceStoredDoubleCopy",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceStoredElementsInterface"
@@ -1346,6 +1404,7 @@
     },
     "definition_lines": 54,
     "definition_to_proof_line_ratio": 1.3846153846153846,
+    "description": "Declarations: SourceStorageCopyCertificate.allocates, SourceStoredValue.structValue, sourceEmptyArrayLoad_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceStoredReferencesInterface"
@@ -1369,6 +1428,7 @@
     },
     "definition_lines": 91,
     "definition_to_proof_line_ratio": 1.7843137254901962,
+    "description": "Declarations: innerDecl, outerDecl, nodeDecl",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceStoredReferences"
@@ -1391,6 +1451,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: SourceStoredStructValue, SourceStoredEmptyArrayValue, SourceStoredByteArrayValue",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceStoredFields"
@@ -1413,6 +1474,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.4166666666666667,
+    "description": "Declarations: sourceStringLoad_run, sourceStringCopies",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceStringsInterface",
@@ -1437,6 +1499,7 @@
     },
     "definition_lines": 44,
     "definition_to_proof_line_ratio": 1.5714285714285714,
+    "description": "Declarations: declaration, E, path",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceStrings"
@@ -1459,6 +1522,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: SourceStringCopies",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.SourceBytesInterface"
@@ -1481,6 +1545,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.009433962264150943,
+    "description": "Declarations: pipeline_first_length, pipeline_primitive_strip, pipeline_first_snapshot",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.StorageMemoryPipelineInterface"
@@ -1505,6 +1570,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.08547008547008547,
+    "description": "Declarations: Input, input, values",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.StorageMemoryPipeline",
@@ -1529,6 +1595,7 @@
     },
     "definition_lines": 49,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: storageMemoryPipelineCode, StorageMemoryPipelineResult, StorageMemoryPipelineRefusal",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.CheckedStorageArray",
@@ -1552,6 +1619,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.012345679012345678,
+    "description": "info: 'Solidity.Backend.MemoryCopies.storage_round_trip_correct' depends on axioms: [propext, Classical.choice, Quot.sound]",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.StorageRoundTripInterface"
@@ -1576,6 +1644,7 @@
     },
     "definition_lines": 44,
     "definition_to_proof_line_ratio": 0.14426229508196722,
+    "description": "info: 'Solidity.Backend.MemoryCopies.StorageRoundTripControls.pair_observation' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.StorageRoundTrip",
@@ -1600,6 +1669,7 @@
     },
     "definition_lines": 41,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: storageRoundTripCode, StorageRoundTripResult, StorageRoundTripCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.StorageMemoryPipeline",
@@ -1623,6 +1693,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.6666666666666666,
+    "description": "Declarations: child, seven, array",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.TraversalFresh"
@@ -1646,6 +1717,7 @@
     },
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 0.33783783783783783,
+    "description": "Declarations: liveObjectCount, fieldObjectCount, elementObjectCount",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.TraversalFootprintInterface"
@@ -1669,6 +1741,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.38636363636363635,
+    "description": "Declarations: leafType, branchType, seven",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.TraversalFootprint",
@@ -1692,6 +1765,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: TraversalFootprintCertificate, TraversalPairFootprint",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.TraversalInterface"
@@ -1712,6 +1786,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: traversalFresh, traversal_no_duplicate_ids",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.TraversalInterface"
@@ -1734,6 +1809,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: TraversalFreshCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Theory.Typed.Mem"
@@ -1756,6 +1832,7 @@
     },
     "definition_lines": 24,
     "definition_to_proof_line_ratio": 0.2857142857142857,
+    "description": "Declarations: objectWords, objectsWords, heapWords",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.TraversalWordsInterface"
@@ -1779,6 +1856,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.6551724137931034,
+    "description": "Declarations: leafType, branchType, seven",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.TraversalWords",
@@ -1802,6 +1880,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: TraversalWordsCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectAllocator",
@@ -1825,6 +1904,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.018691588785046728,
+    "description": "Declarations: typed_capture_array_same, typed_capture_frame, typed_capture_length",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.TypedCaptureInterface"
@@ -1850,6 +1930,7 @@
     },
     "definition_lines": 32,
     "definition_to_proof_line_ratio": 0.17391304347826086,
+    "description": "Declarations: R, H, old",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.TypedCapture",
@@ -1875,6 +1956,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: typedCaptureCode, TypedCaptureCertificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryCopies.RangeOverlap",
@@ -1896,6 +1978,7 @@
       "theorem": 6
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: boolTransfer_frame_agrees, mixedTransfer_frame_agrees, BoolChildRepr.mixedSequence_agrees",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.OverwriteAgreement"
@@ -1919,6 +2002,7 @@
     },
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.21818181818181817,
+    "description": "Declarations: DecodedArrayAt, DecodedArrayRead, decodedArrayRead_iff",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SliceBounds",
@@ -1941,6 +2025,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: BoolChildRepr.grow, array_none_congr, decodedChildRefs_wk",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.CalldataNestedChildren"
@@ -1965,6 +2050,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.09722222222222222,
+    "description": "Declarations: BoolChildTy, BoolChildRef, BoolChildRepr",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.CalldataTransport",
@@ -1991,6 +2077,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.15294117647058825,
+    "description": "Declarations: RefChildTy, RefChildRef, decodedChildRefs",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.CalldataChildren"
@@ -2014,6 +2101,7 @@
     },
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.15,
+    "description": "Published decoded calldata objects and typed memory slice reads",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.HeapSnapshot",
@@ -2038,6 +2126,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.04854368932038835,
+    "description": "Declarations: boolTransfer_result_lookup, boolTransfer_all_len, boolTransfer_none_lookup",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.CalldataTransfer",
@@ -2061,6 +2150,7 @@
       "theorem": 6
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: boolTransfer_frame_or_empty, uintTransfer_frame_or_empty, mixedTransfer_frame_or_empty",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.MixedCalldataSequence",
@@ -2086,6 +2176,7 @@
     },
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 1.2,
+    "description": "Declarations: D, bools, bool_repr",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.MixedCalldataSequence"
@@ -2107,6 +2198,7 @@
       "theorem": 18
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: checkedBoolSequence_same_checked, checkedBoolSequence_same_elems, checkedBoolSequence_second_read",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.CalldataSequence"
@@ -2130,6 +2222,7 @@
     },
     "definition_lines": 27,
     "definition_to_proof_line_ratio": 0.17880794701986755,
+    "description": "Declarations: calldataBool, calldataBoolPayload, calldataBools",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.CalldataArrayRead",
@@ -2152,6 +2245,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: decodedArray_overwrite_read, decodedArray_overwrite_transport",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.CalldataArrayRead",
@@ -2176,6 +2270,7 @@
     },
     "definition_lines": 40,
     "definition_to_proof_line_ratio": 0.23255813953488372,
+    "description": "Declarations: sourceUint, calldataUint, calldataUintPayload",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.CalldataArrayRead",
@@ -2201,6 +2296,7 @@
     },
     "definition_lines": 31,
     "definition_to_proof_line_ratio": 0.41333333333333333,
+    "description": "Declarations: calldataViewFreshBase, calldataViewFreshBase_bound, calldataViewExtendedKey",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.CalldataViewPacking",
@@ -2226,6 +2322,7 @@
     },
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 0.36231884057971014,
+    "description": "Declarations: D, bv, uv",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.CalldataViewExtension",
@@ -2252,6 +2349,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.4444444444444444,
+    "description": "Declarations: calldataViewIdentity, calldataViewIdentity_eq, calldataViewKey",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.AbiEntry.Premises.CalldataViews",
@@ -2276,6 +2374,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.2857142857142857,
+    "description": "Declarations: D, bv, uv",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.CalldataViewPacking",
@@ -2302,6 +2401,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.0784313725490196,
+    "description": "Declarations: checkedCaptureOverwrite, checkedCaptureOverwrite_none_iff, checkedCaptureOverwrite_some",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.DisjointOverwrite",
@@ -2324,6 +2424,7 @@
       "theorem": 8
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Existing locals and slice views across context and heap extension",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SliceExtension",
@@ -2346,6 +2447,7 @@
       "theorem": 5
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: mirrors_frame, fields_mirrors_frame, vec_mirrors_frame",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.InterstageBuilders",
@@ -2368,6 +2470,7 @@
       "theorem": 7
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: runCaptures_mirrors, copy_schedule_mirrors, default_schedule_mirrors",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.CopyMirrorFrame",
@@ -2392,6 +2495,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.07692307692307693,
+    "description": "Disjoint overwrite composition on the actual intrinsic heap",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.HeapSnapshot"
@@ -2415,6 +2519,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.4634146341463415,
+    "description": "Snapshot overwrite adapter over the published intrinsic heap",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.Snapshot",
@@ -2439,6 +2544,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.075,
+    "description": "Declarations: captureAfterCopy, captureAfterCopy_checked, captureAfterCopy_keeps",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.InterstageCorrespondence",
@@ -2461,6 +2567,7 @@
       "theorem": 5
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: BoolChildRepr.checkedCapture, RefChildRepr.checkedCapture, BoolChildRepr.interstage",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.InterstageGrowth",
@@ -2485,6 +2592,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.07079646017699115,
+    "description": "Declarations: checkedCaptureOverwrite_read_cases, checked_interstage_success, checked_interstage_none_iff",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SequentialTransport"
@@ -2508,6 +2616,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.08421052631578947,
+    "description": "Declarations: IntervalsApart, replaceSlice_read_cases, replaceSlice_comm",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.DisjointOverwrite"
@@ -2531,6 +2640,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.043478260869565216,
+    "description": "Declarations: bool_uint_transfer_ne, checkedBoolUintSequence, checkedBoolUintSequence_some_iff",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.CalldataSequenceLaws"
@@ -2554,6 +2664,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.08571428571428572,
+    "description": "Declarations: replaceSlice_eq_self_of_agrees, overwriteSlice_eq_self_of_agrees, overwriteSlice_ne_of_disagrees",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.CalldataSequenceChildren"
@@ -2578,6 +2689,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.06470588235294118,
+    "description": "Declarations: overwriteSlice_target_eq_iff, boolTransfer_target_eq_iff, BoolChildRepr.object_eq",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.CalldataAgreementChildren",
@@ -2602,6 +2714,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.06060606060606061,
+    "description": "Declarations: LastWriteAgrees, replaceSlice_twice_eq_iff, overwriteIntervals_target_eq_iff",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.OverwriteAgreementExact"
@@ -2623,6 +2736,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: uint_array_cells_eq",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalUintDelete"
@@ -2644,6 +2758,7 @@
       "theorem": 9
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: getBytes_length, getBytes_at, readMemory_eq_getBytes",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalWordFrame",
@@ -2666,6 +2781,7 @@
       "theorem": 5
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: pushed_toBytes, byteCode_suffix, materialize_suffix",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalByteStore",
@@ -2690,6 +2806,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.06707317073170732,
+    "description": "Declarations: high, origin, machine",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalByteStackExact"
@@ -2713,6 +2830,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.045454545454545456,
+    "description": "Declarations: mstore8_pair_revert, mstore8_pair_payload, WordFrame.mstore8_pair",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalByteStore"
@@ -2734,6 +2852,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: byteCode_stackSafe, materialize_stackSafe, materialize_checked_revert",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalByteMaterialize"
@@ -2755,6 +2874,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: byteCode_stackSafe_exact, materialize_stackSafe_exact, materialize_checked_suffix_exact",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalByteStack"
@@ -2776,6 +2896,7 @@
       "theorem": 8
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: writeByte_eq_putByte, readMemory_writeByte_frame, WordFrame.writeByte_outside",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalByteJournal"
@@ -2799,6 +2920,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.07476635514018691,
+    "description": "Declarations: high, origin, machine",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalByteStore"
@@ -2820,6 +2942,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: word_byte_store_pair",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalNestedFixedWrite",
@@ -2844,6 +2967,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.35,
+    "description": "Declarations: Producer, Producer.load_at, current_mload_boundary",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalWorldUnwind",
@@ -2869,6 +2993,7 @@
     },
     "definition_lines": 45,
     "definition_to_proof_line_ratio": 0.15463917525773196,
+    "description": "Declarations: A, P, N",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalFixedChildProgram",
@@ -2893,6 +3018,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: ReferenceArrayAt.join_word_after_store, resolved_fixed_parent_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalFixedChildWrite"
@@ -2914,6 +3040,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: ReferenceArrayAt.write_fixed_uint, ReferenceArrayAt.resolved_fixed_uint",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalReferenceChild",
@@ -2938,6 +3065,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.028169014084507043,
+    "description": "Declarations: frameBytes, frame_wordByte, frameBytes_store32",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalByteJournal",
@@ -2962,6 +3090,7 @@
     },
     "definition_lines": 30,
     "definition_to_proof_line_ratio": 0.5263157894736842,
+    "description": "Declarations: C, key, image",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalFrameImage"
@@ -2986,6 +3115,7 @@
     },
     "definition_lines": 193,
     "definition_to_proof_line_ratio": 0.3483754512635379,
+    "description": "Declarations: UintArrayReframeGoal, uint_array_reframe, ResolvedDeletePhysicalGoal",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalArrayReframe",
@@ -3013,6 +3143,7 @@
     },
     "definition_lines": 41,
     "definition_to_proof_line_ratio": 0.11918604651162791,
+    "description": "Declarations: U, H, root",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalArrayReframe",
@@ -3040,6 +3171,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: PointerFrame.numeric_write, nested_fixed_word_byte_store",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintFixedRefsExact",
@@ -3066,6 +3198,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.09722222222222222,
+    "description": "Declarations: PointerCellAt, PointerFrame, PointerFrame.write",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalReferenceStore"
@@ -3087,6 +3220,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: PointerFrame.frame_store, ReferenceArrayAt.store_frame, frame_reference_local_impossible",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalFrameImage",
@@ -3109,6 +3243,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: PointerFrame.materialize_outside, ReferenceArrayAt.materialize_outside, ReferenceArrayAt.materialize_checked_revert",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalByteStackExact",
@@ -3131,6 +3266,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: materialize_checked_complete, ReferenceArrayAt.materialize_world_unwind, ReferenceArrayAt.materialize_dirty_world_unwind",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalPointerMaterialize",
@@ -3156,6 +3292,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.12987012987012986,
+    "description": "Declarations: ReferenceSlots, ReferenceArrayAt, ReferenceArrayAt.child_bytes",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalPointerFrame",
@@ -3178,6 +3315,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: ReferenceArrayAt.set_primitive, ReferenceArrayAt.set_fixed_primitive, numeric_eight_breaks_pointer",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalReferenceArray"
@@ -3199,6 +3337,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: primitive_words_after_reference, ReferenceArrayAt.redirect_primitive",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalLocalDeleteGoal"
@@ -3223,6 +3362,7 @@
     },
     "definition_lines": 45,
     "definition_to_proof_line_ratio": 0.07293354943273905,
+    "description": "Declarations: B, P, N",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalReferenceSequence",
@@ -3246,6 +3386,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: reference_store",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalWordFrame"
@@ -3270,6 +3411,7 @@
     },
     "definition_lines": 99,
     "definition_to_proof_line_ratio": 0.07494322482967448,
+    "description": "Declarations: C, U, H",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalUintSequence",
@@ -3297,6 +3439,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.28,
+    "description": "Declarations: UintArrayAt, UintArrayAt.read",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalWordFrame",
@@ -3319,6 +3462,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: select_struct_alias_physical",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalPointerFrame",
@@ -3341,6 +3485,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: bool_array_cells_eq, assign_struct_child_physical",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalWordFrame",
@@ -3366,6 +3511,7 @@
     },
     "definition_lines": 155,
     "definition_to_proof_line_ratio": 0.08157894736842106,
+    "description": "Declarations: C, S, B",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalStructChild",
@@ -3398,6 +3544,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: delete_struct_child_physical",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalStructChild",
@@ -3420,6 +3567,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: assign_struct_reference_physical",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalPointerFrame",
@@ -3442,6 +3590,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: assign_struct_reference_child_physical, assign_struct_reference_child_reject",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalStructReference",
@@ -3464,6 +3613,7 @@
       "theorem": 5
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: uint_delete_bytes, UintArrayAt.delete_cell, UintArrayAt.delete_expression",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalUintWrite",
@@ -3486,6 +3636,7 @@
       "theorem": 6
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: UintArrayAt.write_result, resolved_uint_assign_delete_physical, resolved_uint_assign_delete_physical_reject",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalLocalDeleteGoal",
@@ -3508,6 +3659,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: UintArrayAt.write_cell",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalSourceUint",
@@ -3533,6 +3685,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.0821917808219178,
+    "description": "P6 numeric word cells and physical byte spans",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Memory",
@@ -3557,6 +3710,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.037383177570093455,
+    "description": "Declarations: worldJournal, world_reason_unwind, reason_live_bytes",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalByteJournal",
@@ -3583,6 +3737,7 @@
     },
     "definition_lines": 24,
     "definition_to_proof_line_ratio": 0.18181818181818182,
+    "description": "Declarations: ops, reached, reason",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalWorldUnwind",
@@ -3608,6 +3763,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.08064516129032258,
+    "description": "Declarations: recapturedPayload_read, captureTwice_restore_iff, checkedCaptureSequence_restore_iff",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.OverwriteRestoration",
@@ -3633,6 +3789,7 @@
     },
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.09146341463414634,
+    "description": "Declarations: captureOverwrite_all_len, captureOverwrite_read_cases, captureTwice",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.IntervalOverwrite",
@@ -3655,6 +3812,7 @@
       "theorem": 6
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: overwriteIntervals_keeps, captureTwice_keeps, BoolChildRepr.overwriteIntervals",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SequentialSnapshot",
@@ -3680,6 +3838,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.1016949152542373,
+    "description": "Bounds for typed heap slice adapters",
     "implemented_by": 0,
     "imports": [
       "Solidity.Semantics.Heap"
@@ -3701,6 +3860,7 @@
       "theorem": 5
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Slice reads across published heap extension",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SliceBounds",
@@ -3725,6 +3885,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.08163265306122448,
+    "description": "Snapshot and overlap laws for existing typed element lists",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SliceBounds"
@@ -3746,6 +3907,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: replaceSlice_map, withElems_wk, overwriteSlice_space",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.HeapSnapshot"
@@ -3769,6 +3931,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.05555555555555555,
+    "description": "Declarations: snapshotOrigin, captureOrigin, captureOrigin_append",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SnapshotSchedule"
@@ -3793,6 +3956,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.1574074074074074,
+    "description": "Declarations: cycles_agree, B, C",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SnapshotScheduleControls"
@@ -3817,6 +3981,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.06289308176100629,
+    "description": "Declarations: SnapshotArgs, runCaptures, SnapshotArgs.Valid",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.RecaptureRestoration"
@@ -3841,6 +4006,7 @@
     },
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.08421052631578947,
+    "description": "Declarations: first, repair, cycle",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SnapshotProvenance"
@@ -3865,6 +4031,7 @@
     },
     "definition_lines": 24,
     "definition_to_proof_line_ratio": 0.17142857142857143,
+    "description": "Declarations: runCaptures_keeps, runCaptures_none_keeps, runCaptures_alloc",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SnapshotReferenceSchedules"
@@ -3888,6 +4055,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.02531645569620253,
+    "description": "Declarations: sourceLocalAlias, source_locals_get_set, source_local_alias_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceIndexedDelete",
@@ -3912,6 +4080,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.03669724770642202,
+    "description": "Declarations: sourceIndexedAssign, SourceBoolMemoryAt.eval_assign_of_run, SourceBoolMemoryAt.eval_assign_bounds",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceIndexedDelete",
@@ -3936,6 +4105,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.027972027972027972,
+    "description": "Declarations: sourceBoolCalldataBind, source_locals_get_set_other, source_cd_bool_bind_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceCalldataTransfer",
@@ -3961,6 +4131,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.054945054945054944,
+    "description": "Declarations: source_bool_slice_value, sourceBoolSliceCopy, source_bool_slice_eval",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceCalldataTransfer",
@@ -3986,6 +4157,7 @@
     },
     "definition_lines": 38,
     "definition_to_proof_line_ratio": 0.2345679012345679,
+    "description": "Declarations: A, H, SU",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceRawBoolSliceSequence",
@@ -4008,6 +4180,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: SourceBoolStructAt.slice_bool_copy_native",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceCalldataBoolSlice"
@@ -4029,6 +4202,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_bool_slice_copy_late_error",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceCalldataBoolSlice"
@@ -4052,6 +4226,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.043010752688172046,
+    "description": "Declarations: sourceCalldataBoolValues, sourceBoolValuePayload, source_mapM_lift_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceStructGrowth",
@@ -4075,6 +4250,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_cd_uint_bind_bool_copy",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceCalldataUintBinding"
@@ -4096,6 +4272,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_idx_type_of_position, SourceBoolMemoryAt.write_observed, SourceBoolStructAt.bind_cd_bool_assign",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceCalldataBinding",
@@ -4120,6 +4297,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.054945054945054944,
+    "description": "Declarations: source_uint_slice_value, sourceUintSliceCopy, source_uint_slice_eval",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceCalldataUintCopy"
@@ -4144,6 +4322,7 @@
     },
     "definition_lines": 53,
     "definition_to_proof_line_ratio": 0.06760204081632654,
+    "description": "Declarations: A, H, SU",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintSliceCompoundRead",
@@ -4174,6 +4353,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.07142857142857142,
+    "description": "Declarations: oneWord_cdStaticWords, oneWord_sliceable, oneWord_cdStride",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceCalldataBoolSlice"
@@ -4198,6 +4378,7 @@
     },
     "definition_lines": 34,
     "definition_to_proof_line_ratio": 0.2833333333333333,
+    "description": "Declarations: B, U, H",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceCalldataSliceReadCopy",
@@ -4221,6 +4402,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_mapM_element, source_bool_decoded_element, source_bool_slice_index_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceCalldataSliceRead"
@@ -4244,6 +4426,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.12408759124087591,
+    "description": "Declarations: sourceBoolTable, sourceBoolTable_payload, overwrite_fresh_bools",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceCalldataCopy",
@@ -4269,6 +4452,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.04455445544554455,
+    "description": "Declarations: SourceUintArrayTy, sourceUintCalldataBind, source_cd_uint_bind_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceCalldataUintTransfer",
@@ -4293,6 +4477,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.04891304347826087,
+    "description": "Declarations: sourceCalldataUintValues, sourceUintValuePayload, source_uint_value_array",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceCalldataCopy",
@@ -4318,6 +4503,7 @@
     },
     "definition_lines": 120,
     "definition_to_proof_line_ratio": 0.10600706713780919,
+    "description": "Declarations: A, H, SU",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceGuardedUintDelete",
@@ -4348,6 +4534,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_cd_uint_bind_delete, source_cd_uint_bind_delete_bounds",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceCalldataUintMutation",
@@ -4370,6 +4557,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: SourceUintMemoryAt.write_observed, source_cd_uint_bind_assign",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceCalldataUintBinding",
@@ -4394,6 +4582,7 @@
     },
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.13533834586466165,
+    "description": "Declarations: sourceUintTable, sourceUintTable_payload, sourceUintTable_input",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceCalldataUintCopy",
@@ -4416,6 +4605,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_cond_select, word_cond_false, word_cond_true",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceShortCircuit"
@@ -4437,6 +4627,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_decl_statement_run, source_decl_statement_error, source_bool_declaration_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceDefault",
@@ -4459,6 +4650,7 @@
       "theorem": 8
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: empty_source_data, source_bool_default_run, source_bool_default_intrinsic",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceMemory",
@@ -4482,6 +4674,7 @@
       "theorem": 6
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: SourceBoolMemoryAt.write_addr, SourceBoolMemoryAt.delete_addr, SourceBoolMemoryAt.clearT",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceWrite"
@@ -4503,6 +4696,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_delete_word_target, source_delete_word_bounds",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceDelete",
@@ -4527,6 +4721,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.08620689655172414,
+    "description": "Declarations: sourceGuardedUintDelete, source_uint_entry_tail, source_guarded_uint_delete_refusal",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceRawUintDelete"
@@ -4550,6 +4745,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.023121387283236993,
+    "description": "Declarations: sourceIndexedDelete, source_local_value_run, SourceBoolMemoryAt.length_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceDeleteTarget",
@@ -4573,6 +4769,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_bool_local_delete_run, source_bool_local_delete_rebind_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceStructGrowth",
@@ -4595,6 +4792,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_bool_write_local_delete_program",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceLocalReferenceDelete"
@@ -4616,6 +4814,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: local_bool_after_reference_set, memory_scalar_position_ne, source_bool_local_delete_reject_program",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceLocalReferenceDelete",
@@ -4640,6 +4839,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.07291666666666667,
+    "description": "Declarations: sourceBoolMemory, SourceBoolMemoryAt, source_heapObj_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.WellTyped",
@@ -4663,6 +4863,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_bool_write_bounds_short_circuit",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceSequence"
@@ -4686,6 +4887,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.04330708661417323,
+    "description": "Declarations: sourceNestedLoc, sourceNestedAssign, nestedWriteCode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceNestedMutation"
@@ -4709,6 +4911,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.05847953216374269,
+    "description": "Declarations: sourceNestedDelete, nestedDeleteCode, SourceBoolRefsAt.eval_nested_delete_of_write",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceNestedAssignment"
@@ -4734,6 +4937,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.03691275167785235,
+    "description": "Declarations: SourceBoolRefsTy, BoolRefsRef, sourceBoolRefMemory",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceAlias"
@@ -4755,6 +4959,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: SourceBoolRefsAt.parent_ne_child, SourceBoolRefsAt.write_child, SourceBoolRefsAt.write_child_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceNestedSelect"
@@ -4778,6 +4983,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.06756756756756757,
+    "description": "Declarations: sourceSelectedAlias, selectedAliasCode, SourceBoolRefsAt.selected_alias_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceNestedMemory",
@@ -4802,6 +5008,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.03076923076923077,
+    "description": "Declarations: rawBoolPayload, decode_raw_bool, raw_bool_indices",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceCalldataCopy"
@@ -4826,6 +5033,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.14492753623188406,
+    "description": "Declarations: E0, A, \u0393",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceRawBoolEntry",
@@ -4848,6 +5056,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: raw_bool_frame_word, source_raw_bool_guarded_run, source_raw_bool_entry_success",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceRawBoolCopy"
@@ -4869,6 +5078,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: raw_bool_values_first_error, source_bool_slice_raw_late_error",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceRawBoolCopy",
@@ -4891,6 +5101,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_cd_uint_values_raw, source_uint_payload_sourceUint, source_raw_uint_bind_delete",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.CalldataPackets.RawUint.Execution",
@@ -4913,6 +5124,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_bool_alias_uint_frame, delete_local_of_clear, SourceBoolRefsAt.computed_alias_delete_program",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceReferenceAliasSequence",
@@ -4936,6 +5148,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: SourceBoolRefsAt.computed_alias_delete_reject",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceReferenceAliasDelete"
@@ -4957,6 +5170,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: SourceBoolRefsAt.computed_reference_alias_sequence",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceReferenceReadSequence",
@@ -4981,6 +5195,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.057692307692307696,
+    "description": "Declarations: sourceReferenceAssign, referenceWriteCode, SourceBoolRefsAt.eval_reference_loc",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceReferenceWrite"
@@ -5002,6 +5217,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: memory_array_congr, sourceBoolRefMemory_wk, SourceBoolRefsAt.transport",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceNestedMemory",
@@ -5024,6 +5240,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: SourceBoolRefsAt.fresh_redirect_separated, SourceBoolRefsAt.alloc_redirect_delete",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceReferenceGrowthWrite"
@@ -5045,6 +5262,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: SourceBoolRefsAt.alloc_redirect",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceReferenceGrowth",
@@ -5069,6 +5287,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.06164383561643835,
+    "description": "Declarations: sourceReferenceReadAssign, referenceReadWriteCode, SourceBoolRefsAt.computed_reference_assign_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceReferenceAssignment",
@@ -5094,6 +5313,7 @@
     },
     "definition_lines": 203,
     "definition_to_proof_line_ratio": 0.08515100671140939,
+    "description": "Declarations: C, B, R",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceReferenceGrowthDelete",
@@ -5134,6 +5354,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.01904761904761905,
+    "description": "Declarations: referenceReadStmt, SourceBoolRefsAt.computed_reference_delete_sequence, SourceBoolRefsAt.computed_reference_delete_reject",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceReferenceRead",
@@ -5158,6 +5379,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.039735099337748346,
+    "description": "Declarations: referenceStmt, nestedDeleteStmt, resolved_reference_delete_sequence",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceReferenceAssignment",
@@ -5180,6 +5402,7 @@
       "theorem": 5
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: refs_congr, sourceRefs_set, source_refs_write",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceNestedDelete"
@@ -5203,6 +5426,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.024242424242424242,
+    "description": "Declarations: sourceRhsAssign, source_assign_rhs_run, SourceBoolMemoryAt.assign_state",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceSequence"
@@ -5226,6 +5450,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.061855670103092786,
+    "description": "Declarations: rhsAssignValueCode, rhs_assign_value_word, rhs_assign_value_bounds_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceRhsAssignment"
@@ -5247,6 +5472,7 @@
       "theorem": 12
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: indexedWrite_elems, indexedWrite_frame, source_items_cons_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceAssignment"
@@ -5268,6 +5494,7 @@
       "theorem": 5
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_and_skip, source_and_enter, source_and_error",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceRhsValue",
@@ -5292,6 +5519,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.09183673469387756,
+    "description": "Declarations: SourceBoolStructAt.same_heaps, sourceStructSelectedAlias, structSelectedAliasCode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceStructAssignment"
@@ -5315,6 +5543,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.09473684210526316,
+    "description": "Declarations: sourceStructAssign, structReferenceWriteCode, source_struct_member_loc",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceStructMemory"
@@ -5338,6 +5567,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.0947867298578199,
+    "description": "Declarations: sourceStructChildLoc, sourceStructChildRead, sourceStructChildAssign",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceStructAlias"
@@ -5361,6 +5591,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.03164556962025317,
+    "description": "Declarations: SourceBoolMemoryAt.recontext, SourceBoolStructAt.recontext, source_items_context_pair_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceStructGrowth",
@@ -5385,6 +5616,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.044585987261146494,
+    "description": "Declarations: sourceStructChildDelete, structChildDeleteCode, SourceBoolStructAt.delete_child_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceStructChild"
@@ -5408,6 +5640,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.01,
+    "description": "Declarations: SourceBoolMemoryAt.transport, SourceBoolStructAt.transport, allocatedSourceAddress",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceDefault",
@@ -5434,6 +5667,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.125,
+    "description": "Declarations: SourceBoolArrayTy, SourceBoolStructLayout, SourceBoolStructLayout.source_types",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceReferenceSequence",
@@ -5456,6 +5690,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_uint_alias_word, source_uint_alias_read_bounds_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceCalldataUintBinding",
@@ -5480,6 +5715,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.016574585635359115,
+    "description": "Declarations: uintAliasDeleteCode, source_uint_alias_delete_word, source_uint_alias_delete_bounds_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintAlias",
@@ -5503,6 +5739,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_items_cons_error, source_uint_read_into_error_of_run, source_uint_alias_write_read_reject_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintAliasWriteRead"
@@ -5526,6 +5763,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.04716981132075472,
+    "description": "Declarations: uintAliasWriteCode, source_uint_alias_assign_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintAlias",
@@ -5548,6 +5786,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_uint_delete_objects_word, source_uint_alias_write_delete_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintAliasWrite",
@@ -5572,6 +5811,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.01818181818181818,
+    "description": "Declarations: uintReadIntoCode, source_uint_read_into_objects_word, source_uint_alias_write_read_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintAliasWrite",
@@ -5596,6 +5836,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.027777777777777776,
+    "description": "Declarations: SourceUintMemoryAt.eval_index_loc, SourceUintMemoryAt.eval_index_bounds, sourceUintIndexedAssign",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintWrite",
@@ -5620,6 +5861,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.06329113924050633,
+    "description": "Declarations: source_uint_add, source_uint_add_overflow, sourceUintIndexedAdd",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintSequence",
@@ -5645,6 +5887,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.041237113402061855,
+    "description": "Declarations: sourceUintIndexedDelete, SourceUintMemoryAt.delete_addr, SourceUintMemoryAt.delete_bounds",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintAssignment",
@@ -5667,6 +5910,7 @@
       "theorem": 6
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_locals_get_set_other, source_idx_type, source_ref_uint_ne",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceAlias",
@@ -5692,6 +5936,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.11,
+    "description": "Declarations: sourceUintFixedAliasProgram, intrinsicUintFixedAliasProgram, source_uint_fixed_alias_program_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintFixedAlias"
@@ -5715,6 +5960,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.026490066225165563,
+    "description": "Declarations: SourceUintFixedAt.eval_index_loc, SourceUintFixedAt.eval_index_bounds, sourceUintFixedIndexedAssign",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintFixedWrite",
@@ -5740,6 +5986,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.0898876404494382,
+    "description": "Declarations: sourceUintFixedBumpPair, intrinsicUintFixedBumpPair, resolved_uint_fixed_bump_pair_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintFixedDecrement",
@@ -5764,6 +6011,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.07692307692307693,
+    "description": "Declarations: fixedUintAddCode, fixed_uint_add_certificate, resolved_uint_fixed_add_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintFixedCompoundSource",
@@ -5788,6 +6036,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.04597701149425287,
+    "description": "Declarations: sourceUintFixedIndexedAdd, SourceUintFixedAt.compound_add, SourceUintFixedAt.compound_add_overflow",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintFixedAssignment",
@@ -5810,6 +6059,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_uint_fixed_alloc_memOK, source_uint_fixed_declaration_word, source_uint_fixed_declaration_timeout",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintFixedDefault",
@@ -5834,6 +6084,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.09523809523809523,
+    "description": "Declarations: sourceUintFixedDeclareAlias, intrinsicUintFixedDeclareAlias, source_uint_fixed_declare_alias_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintFixedAliasProgram",
@@ -5860,6 +6111,7 @@
     },
     "definition_lines": 63,
     "definition_to_proof_line_ratio": 0.21724137931034482,
+    "description": "Declarations: C, A, N",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintFixedDeclareAlias",
@@ -5886,6 +6138,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.07784431137724551,
+    "description": "Declarations: source_uint_sub_one, source_uint_sub_one_underflow, sourceUintFixedDecrement",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintFixedIncrement"
@@ -5907,6 +6160,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: resolved_uint_fixed_decrement_bounds_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintFixedDecrement"
@@ -5931,6 +6185,7 @@
     },
     "definition_lines": 44,
     "definition_to_proof_line_ratio": 0.24858757062146894,
+    "description": "Declarations: C, A, N",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintFixedDecrementBounds",
@@ -5957,6 +6212,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.1,
+    "description": "Declarations: sourceUintFixedDecrementTwice, intrinsicUintFixedDecrementTwice, resolved_uint_fixed_decrement_late_underflow_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintFixedBumpSequence"
@@ -5981,6 +6237,7 @@
     },
     "definition_lines": 51,
     "definition_to_proof_line_ratio": 0.15315315315315314,
+    "description": "Declarations: C, A, N",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintFixedDecrementLateTiming",
@@ -6005,6 +6262,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_uint_fixed_decrement_prefix_timeout",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintFixedDecrementLate"
@@ -6028,6 +6286,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.03619909502262444,
+    "description": "Declarations: sourceUintFixedObject, SourceUintFixedAt, sourceUintFixedZero",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintMemory",
@@ -6053,6 +6312,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.04,
+    "description": "Declarations: sourceUintFixedIndexedDelete, SourceUintFixedAt.delete_addr, SourceUintFixedAt.delete_bounds",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintFixedAssignment",
@@ -6075,6 +6335,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_uint_zeroElems_slack, source_uint_fixed_zeroVal_slack",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintFixedDeclaration"
@@ -6098,6 +6359,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.09090909090909091,
+    "description": "Declarations: sourceUintFixedIncrement, fixedUintIncrementOp, fixedUintIncrementCode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintFixedCompound"
@@ -6119,6 +6381,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: SourceUintFixedRefsAt.eval_nested_loc_bounds, SourceUintFixedRefsAt.resolved_write_bounds_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintFixedRefsTarget"
@@ -6143,6 +6406,7 @@
     },
     "definition_lines": 71,
     "definition_to_proof_line_ratio": 0.07725788900979326,
+    "description": "Declarations: A, P, H",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintFixedRefsLate",
@@ -6173,6 +6437,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.0379746835443038,
+    "description": "Declarations: sourceUintFixedNestedDelete, SourceUintFixedRefsAt.resolved_delete, SourceUintFixedRefsAt.write_delete_items",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintFixedRefsWrite",
@@ -6197,6 +6462,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.040983606557377046,
+    "description": "Declarations: uintFixedChildDeleteCode, SourceUintFixedRefsAt.resolved_delete_word, SourceUintFixedRefsAt.resolved_write_delete_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintFixedRefsTarget",
@@ -6219,6 +6485,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: uint_value_run, nested_fixed_store_exact",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintFixedRefsDeleteTarget"
@@ -6240,6 +6507,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: SourceUintFixedRefsAt.resolved_write_late_bounds_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintFixedRefsBounds"
@@ -6265,6 +6533,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.055,
+    "description": "Declarations: SourceUintFixedRefsTy, UintFixedRefsRef, sourceUintFixedRefMemory",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintFixedAssignment"
@@ -6288,6 +6557,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.16981132075471697,
+    "description": "Declarations: uintFixedChildPath, uintFixedChildWriteCode, SourceUintFixedRefsAt.resolved_write_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintFixedRefsDelete"
@@ -6311,6 +6581,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.05263157894736842,
+    "description": "Declarations: SourceUintFixedRefsAt.same_heap, SourceUintFixedRefsAt.write_child, sourceUintFixedNestedLoc",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintFixedRefsMemory"
@@ -6332,6 +6603,7 @@
       "theorem": 5
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: fixed_set, source_uint_fixed_write, SourceUintFixedAt.write_addr",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintFixedDefault",
@@ -6357,6 +6629,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.050724637681159424,
+    "description": "Declarations: sourceUintMemory, SourceUintMemoryAt, source_uint_read",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceMemory",
@@ -6382,6 +6655,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.10091743119266056,
+    "description": "Declarations: sourceUintReadAssign, source_uint_read_assign, uintReadAssignCode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintAssignment",
@@ -6407,6 +6681,7 @@
     },
     "definition_lines": 94,
     "definition_to_proof_line_ratio": 0.06021780909673286,
+    "description": "Declarations: C, A, H",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintAliasReadReject",
@@ -6437,6 +6712,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_uint_read_assign_chain_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintReadAssignment"
@@ -6458,6 +6734,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: resolved_uint_assign_delete_word, resolved_uint_delete_assign_word, resolved_uint_assign_delete_reject",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintDelete"
@@ -6481,6 +6758,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.03125,
+    "description": "Declarations: sourceUintSliceBind, source_uint_slice_bind_native, source_uint_slice_bind_delete",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintSliceNative"
@@ -6502,6 +6780,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: SourceUintMemoryAt.compound_add_observed, source_uint_slice_bind_add, source_uint_slice_bind_add_overflow",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintSliceBinding",
@@ -6524,6 +6803,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: SourceUintMemoryAt.compound_add_bounds, source_uint_add_low, source_uint_slice_bind_add_bounds",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintSliceCompound"
@@ -6545,6 +6825,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_items_triple_error, source_uint_slice_bind_add_read",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintSliceCompound"
@@ -6568,6 +6849,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.0673076923076923,
+    "description": "Declarations: source_uint_slice_raw_eval, source_uint_slice_raw_native, sourceGuardedUintSliceCopy",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceCalldataSlice",
@@ -6590,6 +6872,7 @@
       "theorem": 6
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: uintArray_congr, sourceUintMemory_set, source_uint_write",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceUintMemory",
@@ -6614,6 +6897,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.02857142857142857,
+    "description": "Declarations: boolArray_congr, sourceBoolMemory_set, source_bool_write",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceMemory"
@@ -6637,6 +6921,7 @@
     },
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.45,
+    "description": "Declarations: declaration, outerDeclaration, E",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.StructDefaults.Nested"
@@ -6660,6 +6945,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.13333333333333333,
+    "description": "Declarations: pairHeap, pairHeap_cursor, pairHeap_child",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.StructDefaults.SourcePair"
@@ -6683,6 +6969,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.23684210526315788,
+    "description": "Declarations: PairAt, default_field, default_array_length",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.StructDefaults.Frame",
@@ -6705,6 +6992,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_struct_of_fields, source_nested_default",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.StructDefaults.Frame"
@@ -6728,6 +7016,7 @@
     },
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.22058823529411764,
+    "description": "Declarations: NestedLayout, NestedLayout.inner_type, NestedLayout.flag_type",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.StructDefaults.NestedObservers",
@@ -6750,6 +7039,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_nested_default_observers",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.StructDefaults.Nested"
@@ -6771,6 +7061,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_nested_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.StructDefaults.NestedIntrinsic",
@@ -6795,6 +7086,7 @@
     },
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.7894736842105263,
+    "description": "Declarations: nestedName, layout, fields",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.StructDefaults.WordControls",
@@ -6817,6 +7109,7 @@
       "theorem": 6
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: pair_selected, nested_selected, parent_observed",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.StructDefaults.NestedWordControls"
@@ -6841,6 +7134,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.1111111111111111,
+    "description": "Declarations: SourceBoolArrayTy, PairFields, pairValues",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.SourceDefault"
@@ -6862,6 +7156,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_pair_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.StructDefaults.Intrinsic",
@@ -6886,6 +7181,7 @@
     },
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.391304347826087,
+    "description": "Declarations: pairName, C, layout",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.StructDefaults.Controls",
@@ -6913,6 +7209,7 @@
     },
     "definition_lines": 380,
     "definition_to_proof_line_ratio": 4.175824175824176,
+    "description": "Osaka instructions and their byte encoding (G45.05)",
     "implemented_by": 0,
     "imports": [],
     "imports_in": 9,
@@ -6935,6 +7232,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.18518518518518517,
+    "description": "Declarations: ReadCtx, reader, wrongReader",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryJoinedAllocation",
@@ -6959,6 +7257,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.09090909090909091,
+    "description": "Declarations: code, badCode, runs",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.AllocatedReferenceRead",
@@ -6979,6 +7278,7 @@
     "code_lines": 19,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.AllocatedReferenceReadControls"

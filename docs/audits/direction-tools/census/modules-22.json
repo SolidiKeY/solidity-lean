@@ -9,6 +9,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.05454545454545454,
+    "description": "Declarations: changed_snapshot_hash, hashAliases, hashAliasesAfter",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.SnapshotHashBinding",
@@ -33,6 +34,7 @@
     },
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.48484848484848486,
+    "description": "Declarations: sbAddress, sbGlob, sbBase",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.SourceBalanceReads",
@@ -55,6 +57,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "`BALANCE` is exact under BalancesFit",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.SourceBalanceReads",
@@ -79,6 +82,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.3783783783783784,
+    "description": "Declarations: sourceAddressOfEnvironment, sourceAddress_environment_roundtrip, environmentAddress_source_roundtrip",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.SourceTargetInputs"
@@ -102,6 +106,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.52,
+    "description": "Declarations: sboAddress, sboAfter, sboAssign",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.SourceBalanceOperands",
@@ -124,6 +129,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: sourceBalanceOperand_run, sourceBalanceOperand_halt, sourceBalanceOperand_target",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.SourceBalanceReads"
@@ -147,6 +153,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.044444444444444446,
+    "description": "Declarations: sourceUintWrapWord, sourceBalanceExpr, sourceBalanceLocal_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.SourceBalanceInputs"
@@ -170,6 +177,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.8461538461538461,
+    "description": "Declarations: allBool, perAccount, root",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.Controls"
@@ -193,6 +201,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.24242424242424243,
+    "description": "Declarations: emTx, emFrame, emSourceFrame",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.SourceMagicReads",
@@ -218,6 +227,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.11666666666666667,
+    "description": "Declarations: addressInputWord, sourceAddress_input_word, Environment.bindTransaction",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.Inputs",
@@ -242,6 +252,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.41935483870967744,
+    "description": "Declarations: nestedMappingGraphType, nestedMappingGraphKey, nestedMappingGraphKey_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.NestedMappingLayout",
@@ -266,6 +277,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.09523809523809523,
+    "description": "Declarations: sourceMemoryHashExpr, sourceMemoryHashExpr_run, sourceMemoryHash_encoded",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.SourceHashBuiltin"
@@ -287,6 +299,7 @@
       "theorem": 6
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: sourceBytesOfMemory_run, sourceBytesOfMemory_alias_run, sourceBytesOfMemory_missing",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.SourceHashWord",
@@ -311,6 +324,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.09803921568627451,
+    "description": "Declarations: hmResidual, hmMemory, hm_payload",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.SourceHashBinding",
@@ -334,6 +348,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: hashWord_fit, hashWord_observe",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.SourceMemoryPayload"
@@ -357,6 +372,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.21311475409836064,
+    "description": "Declarations: sourceTimestampExpr, sourceSenderExpr, sourceValueExpr",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.SourceEnvironmentInputs",
@@ -379,6 +395,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: encodedSourceBytes, fixedHash_physical, encodedSourceBytes_hash",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.AllocatedObjectMemory"
@@ -402,6 +419,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.1935483870967742,
+    "description": "Declarations: tiGlob, tiSource, tiFunds",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.SourceTargetInputs",
@@ -427,6 +445,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.1111111111111111,
+    "description": "Declarations: environmentWord, environmentWord_nat, environmentWord_injective",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.SourceMagicReads",
@@ -451,6 +470,7 @@
     },
     "definition_lines": 22,
     "definition_to_proof_line_ratio": 0.19642857142857142,
+    "description": "Declarations: uintValueOfWord, uintValueOfWord_word, staticUintData",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.MixedMemoryMemOK"
@@ -474,6 +494,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.6451612903225806,
+    "description": "Declarations: sbeProgram, sbeGlob, sbeState",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.StorageBalanceSequence",
@@ -497,6 +518,7 @@
       "theorem": 5
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: finiteAccountWrite_balance_fields, packedPlan_balance_fields, packedSourceStep_observed_balance",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.SourceBalanceInputs",
@@ -519,6 +541,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: runPackedSource_observed_balance, runPackedSource_observed_funds, runPackedSource_locals",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.StorageBalanceInputs",
@@ -546,6 +569,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.68,
+    "description": "Declarations: SlotView, saveSlot, find_saveSlot",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.Widths",
@@ -571,6 +595,7 @@
     },
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 0.43103448275862066,
+    "description": "Declarations: StorageDeclaration, uintHeaderCell, StorageDeclaration.pack",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DynamicScalarKind",
@@ -596,6 +621,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.14814814814814814,
+    "description": "Declarations: StorageDeclaration.isDynamic, StorageDeclarations.headers, StorageDeclarations.headers_sound",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.StorageDeclarationSpec",
@@ -618,6 +644,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: StorageDeclarations.pack_spec, StorageDeclarations.pack_paths, StorageDeclarations.pack_end",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.StorageDeclarations"
@@ -639,6 +666,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: StorageDeclarations.pack_typed",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.StorageDeclarationSpec"
@@ -663,6 +691,7 @@
     },
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 2.5714285714285716,
+    "description": "Declarations: StorageDeclarations, StorageDeclarations.pack, StorageDeclarations.pack_cons",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.StorageDeclarationHead"
@@ -686,6 +715,7 @@
     },
     "definition_lines": 61,
     "definition_to_proof_line_ratio": 0.28110599078341014,
+    "description": "Declarations: structArrayEnd, structArrayOwns, encodeStructs",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ComponentComposition"
@@ -709,6 +739,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.2549019607843137,
+    "description": "Declarations: scTypes, scLocals, scState",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.StructConstructorRun",
@@ -733,6 +764,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.12,
+    "description": "Declarations: structConstructor_types, constructorFields, constructorFields_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.AllocatedObjectMemory"
@@ -756,6 +788,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.06451612903225806,
+    "description": "Declarations: structConstructorData, structConstructor_run, structConstructorData_valid",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.LocalConstructorArguments"
@@ -777,6 +810,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: reads, whole",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.StructWordStore"
@@ -800,6 +834,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.03636363636363636,
+    "description": "Declarations: next, placement, support",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.StructWordHeap",
@@ -822,6 +857,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: history, whole",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.StructWordHeap"
@@ -845,6 +881,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.20833333333333334,
+    "description": "Declarations: current, q, prior",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.StructWordRetained",
@@ -867,6 +904,7 @@
       "theorem": 5
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: fields_update, word_reads, source",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ArrayWordRetained"
@@ -890,6 +928,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.28205128205128205,
+    "description": "Declarations: fields, supported, oldReads",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.StructWordStore",
@@ -912,6 +951,7 @@
       "theorem": 7
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source, view, reencode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.PackedCellUpdate",
@@ -936,6 +976,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.22857142857142856,
+    "description": "Declarations: tcuPath, tcu_member, tcuValue",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.TransientCellUpdate",
@@ -960,6 +1001,7 @@
     },
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.35294117647058826,
+    "description": "Declarations: ps, ts, frame",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.TransientSlots",
@@ -984,6 +1026,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.13333333333333333,
+    "description": "Declarations: transientSlotLoad, transientSlotStore?, transientSlot_load_store",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.DynamicSourceSequence"
@@ -1007,6 +1050,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 1.625,
+    "description": "Declarations: StorageWidth, StorageWidth.bounds",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.Packing"
@@ -1030,6 +1074,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.02631578947368421,
+    "description": "Declarations: readBE_lt, mload, division_byte",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.Bytes"
@@ -1053,6 +1098,7 @@
     },
     "definition_lines": 29,
     "definition_to_proof_line_ratio": 0.20422535211267606,
+    "description": "Declarations: oldStaticWords, changedStaticWords, changedStaticPhysical",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.StaticUintMemory",
@@ -1079,6 +1125,7 @@
     },
     "definition_lines": 174,
     "definition_to_proof_line_ratio": 2.175,
+    "description": "Declarations: tabulate, tabulate_get, tabulate_eq",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.WordInputs",
@@ -1104,6 +1151,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.2037037037037037,
+    "description": "Declarations: rawHolds, formula, formula_iff",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.WordAdapter",
@@ -1128,6 +1176,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.12121212121212122,
+    "description": "Declarations: Run, Run.total, Run.unique",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.WordLogic",
@@ -1153,6 +1202,7 @@
     },
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.13533834586466165,
+    "description": "Declarations: appendArg, argsModal, evalArgs",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.WordLoops"
@@ -1176,6 +1226,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.07,
+    "description": "Declarations: Program.if_, ifPost, eval_if",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.WordTerms"
@@ -1201,6 +1252,7 @@
     },
     "definition_lines": 41,
     "definition_to_proof_line_ratio": 0.3942307692307692,
+    "description": "Declarations: WordCell, WordCell.key, WordCell.key_injective",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.ScalarLocals"
@@ -1222,6 +1274,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: program_rule_exists, sound_program_rule_exists, term_rule_exists",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.WordRules"
@@ -1245,6 +1298,7 @@
     },
     "definition_lines": 37,
     "definition_to_proof_line_ratio": 0.20441988950276244,
+    "description": "Declarations: Term.literal, Term.readLocal, Term.builtin",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.WordArguments"
@@ -1269,6 +1323,7 @@
     },
     "definition_lines": 43,
     "definition_to_proof_line_ratio": 1.72,
+    "description": "Declarations: WordRead, WordAccessResult, wordAccess",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.WordLocals",
@@ -1291,6 +1346,7 @@
       "theorem": 9
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: sdiv_zero, smod_zero, addmod_zero",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Words"
@@ -1315,6 +1371,7 @@
     },
     "definition_lines": 53,
     "definition_to_proof_line_ratio": 0.3063583815028902,
+    "description": "Declarations: wordCellWidth, wordCellCount, Member.wordSlot",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.WordCells",
@@ -1341,6 +1398,7 @@
     },
     "definition_lines": 86,
     "definition_to_proof_line_ratio": 0.6370370370370371,
+    "description": "Declarations: Model, Term, Program",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.WordUpdates",
@@ -1366,6 +1424,7 @@
     },
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 0.07396449704142012,
+    "description": "Declarations: Program.for_, loopPrePost, eval_for",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.WordSwitch"
@@ -1385,6 +1444,7 @@
     "code_lines": 31,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.WordLogic"
@@ -1405,6 +1465,7 @@
       "theorem": 8
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: globals_no_members, expr_policy_words, target_policy_words",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.TierPolicy",
@@ -1428,6 +1489,7 @@
     },
     "definition_lines": 28,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: unexpandWordTerm, unexpandWordProgram, unexpandWordModal",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.WordRules",
@@ -1452,6 +1514,7 @@
     },
     "definition_lines": 114,
     "definition_to_proof_line_ratio": 2.425531914893617,
+    "description": "Declarations: Rule, Rule.sound, RuleId",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.WordExpressions"
@@ -1475,6 +1538,7 @@
     },
     "definition_lines": 47,
     "definition_to_proof_line_ratio": 0.2146118721461187,
+    "description": "Declarations: CaseSelectionResult, selectCaseCons, selectCaseNode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.WordBranches"
@@ -1500,6 +1564,7 @@
     },
     "definition_lines": 23,
     "definition_to_proof_line_ratio": 0.5227272727272727,
+    "description": "Concrete checked-syntax to closed-word program composition",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.BlockExtract",
@@ -1526,6 +1591,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.06422018348623854,
+    "description": "Declarations: Program.assignment, Program.discard, assignmentPost",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.WordNotation"
@@ -1547,6 +1613,7 @@
       "theorem": 13
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: writeTarget_same, writeTarget_other, writeTarget_shadow",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.ClosedRun"
@@ -1571,6 +1638,7 @@
     },
     "definition_lines": 54,
     "definition_to_proof_line_ratio": 1.5,
+    "description": "Pure Yul word operations",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Builtins",
@@ -1595,6 +1663,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.1357142857142857,
+    "description": "Declarations: observed, memory, answer",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.AdapterRules",
@@ -1621,6 +1690,7 @@
     },
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 0.4666666666666667,
+    "description": "Declarations: Configuration, CallStep, CopyStep",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.Adapters"
@@ -1646,6 +1716,7 @@
     },
     "definition_lines": 61,
     "definition_to_proof_line_ratio": 0.953125,
+    "description": "Declarations: ObservedEffects, FrameAnswer, BytePort",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.Frames"
@@ -1669,6 +1740,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.13953488372093023,
+    "description": "Declarations: port, load_exact, store_exact",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.Adapters",
@@ -1693,6 +1765,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.5862068965517241,
+    "description": "Declarations: calleeAddress, callBuiltin, callContinuation",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Builtins",
@@ -1717,6 +1790,7 @@
     },
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 1.0869565217391304,
+    "description": "Declarations: before, caller, highTarget",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.CallBuiltin",
@@ -1741,6 +1815,7 @@
     },
     "definition_lines": 23,
     "definition_to_proof_line_ratio": 0.5,
+    "description": "Declarations: selectCreationAddress, selected_create, selected_create2",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.CreationRules"
@@ -1764,6 +1839,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.28888888888888886,
+    "description": "Declarations: target, probeTrace, producer",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.CreationAddressing",
@@ -1790,6 +1866,7 @@
     },
     "definition_lines": 28,
     "definition_to_proof_line_ratio": 0.3835616438356164,
+    "description": "Declarations: creationNonceOp, prepareCreation, prepareCreation_exact",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.Adapters"
@@ -1813,6 +1890,7 @@
     },
     "definition_lines": 22,
     "definition_to_proof_line_ratio": 0.20754716981132076,
+    "description": "Declarations: prepared, actual_preparation, nonce_control",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.CreationRules",
@@ -1835,6 +1913,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: returned_window, witnessed",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Executable.CreationReturnInterfaceV1",
@@ -1859,6 +1938,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.09523809523809523,
+    "description": "Declarations: runtime, actual_constructor, exact_windows",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.CreationReturnWindow",
@@ -1883,6 +1963,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.22727272727272727,
+    "description": "Declarations: InitStep, initcode_step_eq, static_initcode_rule",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.CreationFrames",
@@ -1909,6 +1990,7 @@
     },
     "definition_lines": 22,
     "definition_to_proof_line_ratio": 0.9166666666666666,
+    "description": "Raw source-frame completion over the existing typed journal",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.Observations",
@@ -1934,6 +2016,7 @@
     },
     "definition_lines": 22,
     "definition_to_proof_line_ratio": 0.14102564102564102,
+    "description": "EIP-6780 lifecycle preparation over typed source accounts",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.Frames"
@@ -1957,6 +2040,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.15555555555555556,
+    "description": "Declarations: Lifecycle.destructKnown, Lifecycle.destructTerminate, destructKnown_static",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.Lifecycle"
@@ -1980,6 +2064,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.14772727272727273,
+    "description": "Declarations: burned, burn_actual, burn_then_finish",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.LifecycleAdapter",
@@ -2002,6 +2087,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "BalancesFit through the EIP-6780 lifecycle writers",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.Lifecycle",
@@ -2026,6 +2112,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.391304347826087,
+    "description": "Declarations: tagged, entry, first",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.LifecycleFrames",
@@ -2050,6 +2137,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.10714285714285714,
+    "description": "Declarations: rollbackLifecycle, rollbackLifecycle_selfDestruct, selfDestruct_journaled",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.SelfDestruct"
@@ -2073,6 +2161,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.2857142857142857,
+    "description": "Declarations: logBuiltin, log0_binding, log1_binding",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Builtins",
@@ -2097,6 +2186,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.24242424242424243,
+    "description": "Declarations: high, args0, args1",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.LogBuiltin",
@@ -2121,6 +2211,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.15789473684210525,
+    "description": "Declarations: before, after, actual_log4_continuation",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.LogPortRules",
@@ -2143,6 +2234,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: log_loaded_continuation, log_loaded_box, log_missing_box",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.AdapterRules"
@@ -2164,6 +2256,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: logAdapter_success_iff, logBuiltin_success, logBuiltin_not_identity",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.LogBuiltin"
@@ -2187,6 +2280,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.3076923076923077,
+    "description": "Declarations: decorated, emptyArgs, emptyLog",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.LogSuccess",
@@ -2213,6 +2307,7 @@
     },
     "definition_lines": 33,
     "definition_to_proof_line_ratio": 0.4714285714285714,
+    "description": "Separate G01 log/emit observation extension (YQ6)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.Raw"
@@ -2235,6 +2330,7 @@
     },
     "definition_lines": 26,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: WorldLogAt",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.WorldCalls.Premises",
@@ -2259,6 +2355,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.17708333333333334,
+    "description": "Independent raw-byte boundaries for Y07",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Observe"
@@ -2282,6 +2379,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.14285714285714285,
+    "description": "Declarations: checkedReturnSize, returndataSize, checkedReturnSize_exact",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.AdapterRules"
@@ -2305,6 +2403,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.08888888888888889,
+    "description": "Declarations: last_call_size, first, last",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.ReturnSize",
@@ -2329,6 +2428,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.1836734693877551,
+    "description": "Declarations: returndataBuiltin, returndatasize_binding, returndatacopy_binding",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Builtins",
@@ -2354,6 +2454,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.5,
+    "description": "Declarations: oldObserved, latest, before",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.ReturndataBuiltin",
@@ -2376,6 +2477,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: copy_load",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.ByteMemory",
@@ -2400,6 +2502,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.391304347826087,
+    "description": "Declarations: value, data, entry",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.ReturndataByteLoad",
@@ -2424,6 +2527,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.07692307692307693,
+    "description": "Declarations: selfDestruct, selfDestruct_success_iff, selfDestruct_static",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.LifecycleAdapter"
@@ -2447,6 +2551,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.21428571428571427,
+    "description": "Declarations: selfDestructBuiltin, selfDestructBuiltin_binding, selfDestructBuiltin_static",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.CallBuiltin",
@@ -2471,6 +2576,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.3076923076923077,
+    "description": "Declarations: entry, parent, delegated",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.SelfDestructBuiltin",
@@ -2495,6 +2601,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.21875,
+    "description": "Declarations: oldEntry, freshEntry, freshOut",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.SelfDestruct",
@@ -2519,6 +2626,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.08571428571428572,
+    "description": "Declarations: before, written, after",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.TargetCallRules",
@@ -2541,6 +2649,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: call_output_exact, call_output_readback, call_output_frame",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.ByteMemory"
@@ -2562,6 +2671,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: call_output_box",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.TargetCallMemory",
@@ -2586,6 +2696,7 @@
     },
     "definition_lines": 62,
     "definition_to_proof_line_ratio": 2.0,
+    "description": "Declarations: terminalBuiltin, terminal_stop, terminal_return",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Builtins",
@@ -2610,6 +2721,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.4,
+    "description": "Declarations: payload, image, args",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.TerminalBuiltin",
@@ -2634,6 +2746,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.12903225806451613,
+    "description": "Declarations: target, completed, loaded_full_word",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.TransientTargetPort",
@@ -2658,6 +2771,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.15,
+    "description": "Declarations: store, load_assuming_view_agreement, store_exact",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.TransientSlots",
@@ -2680,6 +2794,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: store_rollback, store_two_outer_rollback",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.TransientTargetPort"
@@ -2703,6 +2818,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.3103448275862069,
+    "description": "Declarations: decorated, first, second",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.TransientTargetRollback",
@@ -2727,6 +2843,7 @@
     },
     "definition_lines": 47,
     "definition_to_proof_line_ratio": 0.235,
+    "description": "Declarations: l0, l4, windows",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.World.Lifecycle",

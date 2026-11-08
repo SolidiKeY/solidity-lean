@@ -21,20 +21,21 @@
           "structure": 0,
           "theorem": 7
         },
-        "definition_lines": 338,
-        "definition_to_proof_line_ratio": 8.24390243902439,
+        "definition_lines": 303,
+        "definition_to_proof_line_ratio": 7.390243902439025,
         "files": 1,
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 4,
         "imports_out": 2,
         "lines": 676,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 676,
         "proof_lines": 41,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Calculus": {
         "by_category": {
@@ -55,20 +56,21 @@
           "structure": 13,
           "theorem": 921
         },
-        "definition_lines": 8222,
-        "definition_to_proof_line_ratio": 0.9722123684521699,
+        "definition_lines": 8204,
+        "definition_to_proof_line_ratio": 0.9700839541208466,
         "files": 33,
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 1,
-        "imports_in": 0,
+        "imports_in": 130,
         "imports_out": 57,
         "lines": 25263,
         "maxHeartbeats_options": 6,
         "native_decide": 0,
         "presumed_handwritten_lines": 25263,
         "proof_lines": 8457,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Corpus": {
         "by_category": {
@@ -99,14 +101,15 @@
         "generated_lines": 4156,
         "generated_share": 0.9680875844397857,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 15,
         "imports_out": 8,
         "lines": 4293,
         "maxHeartbeats_options": 7,
         "native_decide": 0,
         "presumed_handwritten_lines": 137,
         "proof_lines": 2104,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Counterexamples": {
         "by_category": {
@@ -133,14 +136,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 4,
         "imports_out": 4,
         "lines": 455,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 455,
         "proof_lines": 135,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Evm": {
         "by_category": {
@@ -167,14 +171,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 12,
         "imports_out": 10,
         "lines": 5642,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 5642,
         "proof_lines": 3464,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Examples": {
         "by_category": {
@@ -196,19 +201,20 @@
           "theorem": 431
         },
         "definition_lines": 1388,
-        "definition_to_proof_line_ratio": 0.44302585381423554,
+        "definition_to_proof_line_ratio": 0.44316730523627074,
         "files": 38,
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 40,
         "imports_out": 55,
         "lines": 11005,
         "maxHeartbeats_options": 33,
         "native_decide": 0,
         "presumed_handwritten_lines": 11005,
-        "proof_lines": 3133,
-        "sorry": 0
+        "proof_lines": 3132,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "FreshNames": {
         "by_category": {
@@ -235,14 +241,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 2,
         "imports_out": 1,
         "lines": 93,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 93,
         "proof_lines": 0,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "KeySort": {
         "by_category": {
@@ -269,14 +276,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 3,
         "imports_out": 0,
         "lines": 271,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 271,
         "proof_lines": 45,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Semantics": {
         "by_category": {
@@ -303,14 +311,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 20,
         "imports_out": 5,
         "lines": 4050,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 4050,
         "proof_lines": 1657,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "SortCheck": {
         "by_category": {
@@ -337,14 +346,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 8,
         "imports_out": 5,
         "lines": 1540,
         "maxHeartbeats_options": 0,
         "native_decide": 6,
         "presumed_handwritten_lines": 1540,
         "proof_lines": 394,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "SpecSyntax": {
         "by_category": {
@@ -371,14 +381,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 2,
         "imports_out": 1,
         "lines": 200,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 200,
         "proof_lines": 0,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Syntax": {
         "by_category": {
@@ -399,20 +410,21 @@
           "structure": 4,
           "theorem": 0
         },
-        "definition_lines": 2061,
+        "definition_lines": 2059,
         "definition_to_proof_line_ratio": null,
         "files": 1,
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 5,
         "imports_out": 2,
         "lines": 3550,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 3550,
         "proof_lines": 0,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Theorems": {
         "by_category": {
@@ -433,20 +445,21 @@
           "structure": 0,
           "theorem": 14
         },
-        "definition_lines": 52,
-        "definition_to_proof_line_ratio": 1.5757575757575757,
+        "definition_lines": 51,
+        "definition_to_proof_line_ratio": 1.5454545454545454,
         "files": 1,
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 1,
         "imports_out": 5,
         "lines": 225,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 225,
         "proof_lines": 33,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Theory": {
         "by_category": {
@@ -467,20 +480,21 @@
           "structure": 0,
           "theorem": 311
         },
-        "definition_lines": 647,
-        "definition_to_proof_line_ratio": 0.24341610233258087,
+        "definition_lines": 590,
+        "definition_to_proof_line_ratio": 0.22289384208537968,
         "files": 15,
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 44,
         "imports_out": 24,
         "lines": 5557,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 5557,
-        "proof_lines": 2658,
-        "sorry": 0
+        "proof_lines": 2647,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Tools": {
         "by_category": {
@@ -501,20 +515,21 @@
           "structure": 7,
           "theorem": 5
         },
-        "definition_lines": 974,
-        "definition_to_proof_line_ratio": 10.361702127659575,
+        "definition_lines": 972,
+        "definition_to_proof_line_ratio": 10.340425531914894,
         "files": 7,
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 17,
         "imports_out": 16,
         "lines": 1806,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 1806,
         "proof_lines": 94,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Typing": {
         "by_category": {
@@ -541,14 +556,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 14,
         "imports_out": 7,
         "lines": 8554,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 8554,
         "proof_lines": 6440,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Update": {
         "by_category": {
@@ -575,22 +591,23 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 8,
         "imports_out": 2,
         "lines": 1153,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 1153,
         "proof_lines": 360,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       }
     },
     "axiom": 0,
     "axiom_pin_lines": 0,
     "code_lines": 50184,
     "def": 1700,
-    "definition_lines": 17339,
-    "definition_to_proof_line_ratio": 0.5975874547647768,
+    "definition_lines": 17224,
+    "definition_to_proof_line_ratio": 0.5938695996965832,
     "files": 133,
     "generated_lines": 4156,
     "generated_share": 0.05591056462136602,
@@ -598,7 +615,7 @@
     "goals_closed": null,
     "goals_file_present": false,
     "implemented_by": 1,
-    "imports_in": 0,
+    "imports_in": 329,
     "imports_out": 204,
     "inductive": 131,
     "instance": 34,
@@ -613,12 +630,13 @@
     "native_decide": 6,
     "opaque": 1,
     "presumed_handwritten_lines": 70177,
-    "proof_lines": 29015,
+    "proof_lines": 29003,
     "revision": "609966231c8fa939467936431a80f693ad6d92fb",
     "roadmap_command_files": [],
     "sorry": 0,
     "structure": 44,
-    "theorem": 2828
+    "theorem": 2828,
+    "unknown_import_only_lines": 0
   },
   {
     "abbrev": 362,
@@ -642,20 +660,21 @@
           "structure": 0,
           "theorem": 20
         },
-        "definition_lines": 607,
-        "definition_to_proof_line_ratio": 4.0198675496688745,
+        "definition_lines": 571,
+        "definition_to_proof_line_ratio": 4.13768115942029,
         "files": 1,
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 7,
         "imports_out": 2,
         "lines": 1246,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 1246,
-        "proof_lines": 151,
-        "sorry": 0
+        "proof_lines": 138,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Backend": {
         "by_category": {
@@ -686,18 +705,19 @@
         "generated_lines": 1495,
         "generated_share": 0.11496462626884035,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 260,
         "imports_out": 176,
         "lines": 13004,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 11509,
         "proof_lines": 5610,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Calculus": {
         "by_category": {
-          "import_root": {
+          "import_only_unknown": {
             "files": 10,
             "lines": 442
           },
@@ -722,20 +742,21 @@
           "structure": 185,
           "theorem": 5514
         },
-        "definition_lines": 40813,
-        "definition_to_proof_line_ratio": 0.5559218143431179,
+        "definition_lines": 40483,
+        "definition_to_proof_line_ratio": 0.5514268201321256,
         "files": 290,
-        "generated_lines": 1992,
-        "generated_share": 0.012937417192736342,
+        "generated_lines": 1550,
+        "generated_share": 0.010066765385914321,
         "implemented_by": 104,
-        "imports_in": 0,
+        "imports_in": 1422,
         "imports_out": 641,
         "lines": 153972,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 151980,
         "proof_lines": 73415,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 442
       },
       "Corpus": {
         "by_category": {
@@ -766,14 +787,15 @@
         "generated_lines": 4079,
         "generated_share": 0.9702664129400571,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 18,
         "imports_out": 16,
         "lines": 4204,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 125,
         "proof_lines": 2318,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Counterexamples": {
         "by_category": {
@@ -800,14 +822,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 5,
         "imports_out": 4,
         "lines": 413,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 413,
         "proof_lines": 137,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "ERC7201": {
         "by_category": {
@@ -834,14 +857,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 3,
         "imports_out": 2,
         "lines": 38,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 38,
         "proof_lines": 4,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Eqns": {
         "by_category": {
@@ -868,14 +892,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 2,
         "imports_out": 1,
         "lines": 45,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 45,
         "proof_lines": 0,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Evm": {
         "by_category": {
@@ -896,20 +921,21 @@
           "structure": 52,
           "theorem": 1617
         },
-        "definition_lines": 6540,
-        "definition_to_proof_line_ratio": 0.3740134965114949,
+        "definition_lines": 6535,
+        "definition_to_proof_line_ratio": 0.3737275534713485,
         "files": 122,
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 5,
-        "imports_in": 0,
+        "imports_in": 311,
         "imports_out": 213,
         "lines": 30437,
         "maxHeartbeats_options": 1,
         "native_decide": 0,
         "presumed_handwritten_lines": 30437,
         "proof_lines": 17486,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Examples": {
         "by_category": {
@@ -930,20 +956,21 @@
           "structure": 4,
           "theorem": 2169
         },
-        "definition_lines": 7974,
-        "definition_to_proof_line_ratio": 0.6017659044600407,
+        "definition_lines": 7973,
+        "definition_to_proof_line_ratio": 0.6017358490566038,
         "files": 231,
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 312,
         "imports_out": 804,
         "lines": 49644,
         "maxHeartbeats_options": 15,
         "native_decide": 0,
         "presumed_handwritten_lines": 49644,
-        "proof_lines": 13251,
-        "sorry": 0
+        "proof_lines": 13250,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "FreshNames": {
         "by_category": {
@@ -970,18 +997,19 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 14,
         "imports_out": 1,
         "lines": 93,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 93,
         "proof_lines": 0,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Frontend": {
         "by_category": {
-          "import_root": {
+          "import_only_unknown": {
             "files": 1,
             "lines": 96
           },
@@ -1006,20 +1034,21 @@
           "structure": 34,
           "theorem": 442
         },
-        "definition_lines": 11659,
-        "definition_to_proof_line_ratio": 3.1257372654155495,
+        "definition_lines": 11645,
+        "definition_to_proof_line_ratio": 3.1219839142091153,
         "files": 46,
-        "generated_lines": 414,
-        "generated_share": 0.02021385674527611,
+        "generated_lines": 318,
+        "generated_share": 0.015526585615936722,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 165,
         "imports_out": 102,
         "lines": 20481,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 20067,
         "proof_lines": 3730,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 96
       },
       "Hash": {
         "by_category": {
@@ -1046,14 +1075,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 5,
         "imports_out": 1,
         "lines": 1645,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 1645,
         "proof_lines": 1104,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Hashes": {
         "by_category": {
@@ -1080,14 +1110,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 2,
         "imports_out": 0,
         "lines": 199,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 199,
         "proof_lines": 0,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Keccak": {
         "by_category": {
@@ -1114,14 +1145,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 7,
         "imports_out": 0,
         "lines": 123,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 123,
         "proof_lines": 0,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "KeySort": {
         "by_category": {
@@ -1148,14 +1180,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 3,
         "imports_out": 0,
         "lines": 271,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 271,
         "proof_lines": 45,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Language": {
         "by_category": {
@@ -1186,14 +1219,15 @@
         "generated_lines": 1943,
         "generated_share": 0.3534655266509005,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 15,
         "imports_out": 7,
         "lines": 5497,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 3554,
         "proof_lines": 1745,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Precompiles": {
         "by_category": {
@@ -1220,14 +1254,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 28,
         "imports_out": 19,
         "lines": 2058,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 2058,
         "proof_lines": 341,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "RevertBytes": {
         "by_category": {
@@ -1254,14 +1289,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 10,
         "imports_out": 1,
         "lines": 75,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 75,
         "proof_lines": 0,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Roadmap": {
         "by_category": {
@@ -1288,14 +1324,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 17,
         "imports_out": 8,
         "lines": 2843,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 2843,
         "proof_lines": 623,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Scope": {
         "by_category": {
@@ -1322,14 +1359,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 2,
         "imports_out": 1,
         "lines": 286,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 286,
         "proof_lines": 82,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Secp256k1": {
         "by_category": {
@@ -1356,18 +1394,19 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 3,
         "imports_out": 1,
         "lines": 130,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 130,
         "proof_lines": 0,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Semantics": {
         "by_category": {
-          "import_root": {
+          "import_only_unknown": {
             "files": 2,
             "lines": 55
           },
@@ -1388,20 +1427,21 @@
           "structure": 30,
           "theorem": 1012
         },
-        "definition_lines": 4125,
-        "definition_to_proof_line_ratio": 0.395797351755901,
+        "definition_lines": 4090,
+        "definition_to_proof_line_ratio": 0.3924390711955479,
         "files": 57,
-        "generated_lines": 55,
-        "generated_share": 0.002796420581655481,
+        "generated_lines": 0,
+        "generated_share": 0.0,
         "implemented_by": 35,
-        "imports_in": 0,
+        "imports_in": 241,
         "imports_out": 84,
         "lines": 19668,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 19613,
         "proof_lines": 10422,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 55
       },
       "Signature": {
         "by_category": {
@@ -1422,20 +1462,21 @@
           "structure": 0,
           "theorem": 12
         },
-        "definition_lines": 332,
-        "definition_to_proof_line_ratio": 5.824561403508772,
+        "definition_lines": 327,
+        "definition_to_proof_line_ratio": 5.7368421052631575,
         "files": 1,
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 5,
-        "imports_in": 0,
+        "imports_in": 6,
         "imports_out": 4,
         "lines": 612,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 612,
         "proof_lines": 57,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Solkey": {
         "by_category": {
@@ -1462,14 +1503,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 8,
         "imports_out": 12,
         "lines": 266,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 266,
         "proof_lines": 8,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "SortCheck": {
         "by_category": {
@@ -1496,14 +1538,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 8,
         "imports_out": 6,
         "lines": 1281,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 1281,
         "proof_lines": 94,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Source": {
         "by_category": {
@@ -1534,14 +1577,15 @@
         "generated_lines": 723,
         "generated_share": 0.03244625948032132,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 130,
         "imports_out": 68,
         "lines": 22283,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 21560,
         "proof_lines": 8089,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "SpecSyntax": {
         "by_category": {
@@ -1568,14 +1612,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 2,
         "imports_out": 1,
         "lines": 220,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 220,
         "proof_lines": 0,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Stipend": {
         "by_category": {
@@ -1602,14 +1647,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 1,
         "imports_out": 2,
         "lines": 274,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 274,
         "proof_lines": 57,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Storage": {
         "by_category": {
@@ -1636,18 +1682,19 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 47,
         "imports_out": 32,
         "lines": 4032,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 4032,
         "proof_lines": 2556,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Syntax": {
         "by_category": {
-          "import_root": {
+          "import_only_unknown": {
             "files": 2,
             "lines": 116
           },
@@ -1668,20 +1715,21 @@
           "structure": 18,
           "theorem": 23
         },
-        "definition_lines": 8928,
-        "definition_to_proof_line_ratio": 54.10909090909091,
+        "definition_lines": 8919,
+        "definition_to_proof_line_ratio": 54.054545454545455,
         "files": 20,
-        "generated_lines": 116,
-        "generated_share": 0.008399102164940988,
+        "generated_lines": 0,
+        "generated_share": 0.0,
         "implemented_by": 5,
-        "imports_in": 0,
+        "imports_in": 118,
         "imports_out": 39,
         "lines": 13811,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 13695,
         "proof_lines": 165,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 116
       },
       "TestSuite": {
         "by_category": {
@@ -1708,14 +1756,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 73,
         "imports_out": 77,
         "lines": 4468,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 4468,
         "proof_lines": 1227,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Theorems": {
         "by_category": {
@@ -1736,24 +1785,25 @@
           "structure": 0,
           "theorem": 21
         },
-        "definition_lines": 55,
-        "definition_to_proof_line_ratio": 0.8088235294117647,
+        "definition_lines": 54,
+        "definition_to_proof_line_ratio": 0.7941176470588235,
         "files": 1,
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 3,
         "imports_out": 7,
         "lines": 360,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 360,
         "proof_lines": 68,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Theory": {
         "by_category": {
-          "import_root": {
+          "import_only_unknown": {
             "files": 1,
             "lines": 41
           },
@@ -1777,17 +1827,18 @@
         "definition_lines": 422,
         "definition_to_proof_line_ratio": 0.11271367521367522,
         "files": 9,
-        "generated_lines": 41,
-        "generated_share": 0.007506407909190773,
+        "generated_lines": 0,
+        "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 35,
         "imports_out": 13,
         "lines": 5462,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 5421,
         "proof_lines": 3744,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 41
       },
       "Tools": {
         "by_category": {
@@ -1808,20 +1859,21 @@
           "structure": 14,
           "theorem": 30
         },
-        "definition_lines": 4547,
-        "definition_to_proof_line_ratio": 13.334310850439882,
+        "definition_lines": 4532,
+        "definition_to_proof_line_ratio": 13.290322580645162,
         "files": 26,
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 2,
-        "imports_in": 0,
+        "imports_in": 194,
         "imports_out": 71,
         "lines": 7201,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 7201,
         "proof_lines": 341,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "TypeGraph": {
         "by_category": {
@@ -1848,14 +1900,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 2,
         "imports_out": 1,
         "lines": 147,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 147,
         "proof_lines": 50,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Typing": {
         "by_category": {
@@ -1882,14 +1935,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 36,
         "imports_out": 16,
         "lines": 6816,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 6816,
         "proof_lines": 4691,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Update": {
         "by_category": {
@@ -1916,30 +1970,31 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 4,
         "imports_out": 1,
         "lines": 58,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 58,
         "proof_lines": 0,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       }
     },
     "axiom": 0,
     "axiom_pin_lines": 0,
     "code_lines": 275091,
     "def": 12735,
-    "definition_lines": 103129,
-    "definition_to_proof_line_ratio": 0.680221092137114,
+    "definition_lines": 102678,
+    "definition_to_proof_line_ratio": 0.6773089177226462,
     "files": 1071,
-    "generated_lines": 10858,
-    "generated_share": 0.02905826908203381,
+    "generated_lines": 10108,
+    "generated_share": 0.027051112901197067,
     "goal_status": "unavailable: no authoritative goal-closure parser/counter; absent file is not zero goals",
     "goals_closed": null,
     "goals_file_present": false,
     "implemented_by": 156,
-    "imports_in": 0,
+    "imports_in": 3519,
     "imports_out": 2434,
     "inductive": 494,
     "instance": 90,
@@ -1954,12 +2009,13 @@
     "native_decide": 0,
     "opaque": 3,
     "presumed_handwritten_lines": 362805,
-    "proof_lines": 151611,
+    "proof_lines": 151597,
     "revision": "22073f4445e7cab7560812a5ef4e081bf8ff5e87",
     "roadmap_command_files": [],
     "sorry": 0,
     "structure": 498,
-    "theorem": 15206
+    "theorem": 15206,
+    "unknown_import_only_lines": 750
   },
   {
     "abbrev": 2259,
@@ -1983,20 +2039,21 @@
           "structure": 0,
           "theorem": 20
         },
-        "definition_lines": 607,
-        "definition_to_proof_line_ratio": 4.0198675496688745,
+        "definition_lines": 571,
+        "definition_to_proof_line_ratio": 4.13768115942029,
         "files": 1,
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 8,
         "imports_out": 3,
         "lines": 1247,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 1247,
-        "proof_lines": 151,
-        "sorry": 0
+        "proof_lines": 138,
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Automation": {
         "by_category": {
@@ -2023,14 +2080,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 16,
         "imports_out": 7,
         "lines": 84,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 84,
         "proof_lines": 10,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Backend": {
         "by_category": {
@@ -2038,7 +2096,7 @@
             "files": 1,
             "lines": 149
           },
-          "import_root": {
+          "import_only_unknown": {
             "files": 3,
             "lines": 13
           },
@@ -2063,24 +2121,25 @@
           "structure": 425,
           "theorem": 15750
         },
-        "definition_lines": 37194,
-        "definition_to_proof_line_ratio": 0.2239051259669506,
+        "definition_lines": 37184,
+        "definition_to_proof_line_ratio": 0.22387188055028748,
         "files": 2015,
-        "generated_lines": 2464,
-        "generated_share": 0.00882445635045698,
+        "generated_lines": 2451,
+        "generated_share": 0.008777898747958628,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 5577,
         "imports_out": 3595,
         "lines": 279224,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 276760,
-        "proof_lines": 166115,
-        "sorry": 0
+        "proof_lines": 166095,
+        "sorry": 0,
+        "unknown_import_only_lines": 13
       },
       "Calculus": {
         "by_category": {
-          "import_root": {
+          "import_only_unknown": {
             "files": 9,
             "lines": 427
           },
@@ -2105,20 +2164,21 @@
           "structure": 217,
           "theorem": 6279
         },
-        "definition_lines": 44178,
-        "definition_to_proof_line_ratio": 0.5440573391953301,
+        "definition_lines": 43832,
+        "definition_to_proof_line_ratio": 0.5397963079272423,
         "files": 388,
-        "generated_lines": 1977,
-        "generated_share": 0.01167542668162759,
+        "generated_lines": 1550,
+        "generated_share": 0.009153723498494064,
         "implemented_by": 110,
-        "imports_in": 0,
+        "imports_in": 2021,
         "imports_out": 824,
         "lines": 169330,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 167353,
         "proof_lines": 81201,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 427
       },
       "Corpus": {
         "by_category": {
@@ -2149,14 +2209,15 @@
         "generated_lines": 4079,
         "generated_share": 0.9702664129400571,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 19,
         "imports_out": 16,
         "lines": 4204,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 125,
         "proof_lines": 2318,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Counterexamples": {
         "by_category": {
@@ -2183,14 +2244,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 11,
         "imports_out": 4,
         "lines": 413,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 413,
         "proof_lines": 137,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "ERC7201": {
         "by_category": {
@@ -2217,14 +2279,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 4,
         "imports_out": 2,
         "lines": 38,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 38,
         "proof_lines": 4,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Eqns": {
         "by_category": {
@@ -2251,14 +2314,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 2,
         "imports_out": 2,
         "lines": 46,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 46,
         "proof_lines": 0,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Evm": {
         "by_category": {
@@ -2279,24 +2343,25 @@
           "structure": 78,
           "theorem": 2395
         },
-        "definition_lines": 9746,
-        "definition_to_proof_line_ratio": 0.37283856159143075,
+        "definition_lines": 9735,
+        "definition_to_proof_line_ratio": 0.3724177505738332,
         "files": 279,
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 11,
-        "imports_in": 0,
+        "imports_in": 1058,
         "imports_out": 476,
         "lines": 45857,
         "maxHeartbeats_options": 1,
         "native_decide": 0,
         "presumed_handwritten_lines": 45857,
         "proof_lines": 26140,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Examples": {
         "by_category": {
-          "import_root": {
+          "import_only_unknown": {
             "files": 16,
             "lines": 104
           },
@@ -2318,19 +2383,20 @@
           "theorem": 3375
         },
         "definition_lines": 9860,
-        "definition_to_proof_line_ratio": 0.5574400723654455,
+        "definition_to_proof_line_ratio": 0.5574715893028778,
         "files": 356,
-        "generated_lines": 104,
-        "generated_share": 0.0016918546957101722,
+        "generated_lines": 0,
+        "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 590,
         "imports_out": 1078,
         "lines": 61471,
         "maxHeartbeats_options": 15,
         "native_decide": 0,
         "presumed_handwritten_lines": 61367,
-        "proof_lines": 17688,
-        "sorry": 0
+        "proof_lines": 17687,
+        "sorry": 0,
+        "unknown_import_only_lines": 104
       },
       "FreshNames": {
         "by_category": {
@@ -2357,14 +2423,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 14,
         "imports_out": 1,
         "lines": 93,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 93,
         "proof_lines": 0,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Frontend": {
         "by_category": {
@@ -2372,7 +2439,7 @@
             "files": 1,
             "lines": 3905
           },
-          "import_root": {
+          "import_only_unknown": {
             "files": 4,
             "lines": 114
           },
@@ -2397,20 +2464,21 @@
           "structure": 129,
           "theorem": 4863
         },
-        "definition_lines": 23060,
-        "definition_to_proof_line_ratio": 0.435505193578848,
+        "definition_lines": 22945,
+        "definition_to_proof_line_ratio": 0.43333333333333335,
         "files": 510,
-        "generated_lines": 4474,
-        "generated_share": 0.04404020120288614,
+        "generated_lines": 4360,
+        "generated_share": 0.04291803246414474,
         "implemented_by": 2,
-        "imports_in": 0,
+        "imports_in": 1767,
         "imports_out": 991,
         "lines": 101589,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 97115,
         "proof_lines": 52950,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 114
       },
       "Hash": {
         "by_category": {
@@ -2437,14 +2505,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 15,
         "imports_out": 8,
         "lines": 2265,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 2265,
         "proof_lines": 1461,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Hashes": {
         "by_category": {
@@ -2471,14 +2540,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 4,
         "imports_out": 0,
         "lines": 199,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 199,
         "proof_lines": 0,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Keccak": {
         "by_category": {
@@ -2505,14 +2575,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 9,
         "imports_out": 0,
         "lines": 123,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 123,
         "proof_lines": 0,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "KeySort": {
         "by_category": {
@@ -2539,14 +2610,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 7,
         "imports_out": 0,
         "lines": 271,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 271,
         "proof_lines": 45,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Language": {
         "by_category": {
@@ -2577,18 +2649,19 @@
         "generated_lines": 2399,
         "generated_share": 0.4022468142186452,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 30,
         "imports_out": 8,
         "lines": 5964,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 3565,
         "proof_lines": 1759,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Lowering": {
         "by_category": {
-          "import_root": {
+          "import_only_unknown": {
             "files": 1,
             "lines": 6
           },
@@ -2616,17 +2689,18 @@
         "definition_lines": 18041,
         "definition_to_proof_line_ratio": 0.34847021556053465,
         "files": 706,
-        "generated_lines": 64,
-        "generated_share": 0.0006222896369328899,
+        "generated_lines": 58,
+        "generated_share": 0.0005639499834704315,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 2176,
         "imports_out": 1346,
         "lines": 102846,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 102782,
         "proof_lines": 51772,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 6
       },
       "Optimizer": {
         "by_category": {
@@ -2653,14 +2727,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 62,
         "imports_out": 37,
         "lines": 6658,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 6658,
         "proof_lines": 3847,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Precompiles": {
         "by_category": {
@@ -2687,14 +2762,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 59,
         "imports_out": 19,
         "lines": 2072,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 2072,
         "proof_lines": 349,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "RevertBytes": {
         "by_category": {
@@ -2721,14 +2797,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 12,
         "imports_out": 1,
         "lines": 75,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 75,
         "proof_lines": 0,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Roadmap": {
         "by_category": {
@@ -2759,14 +2836,15 @@
         "generated_lines": 38,
         "generated_share": 0.008037225042301184,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 109,
         "imports_out": 33,
         "lines": 4728,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 4690,
         "proof_lines": 1424,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Scope": {
         "by_category": {
@@ -2793,14 +2871,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 4,
         "imports_out": 1,
         "lines": 286,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 286,
         "proof_lines": 82,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Secp256k1": {
         "by_category": {
@@ -2827,18 +2906,19 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 4,
         "imports_out": 1,
         "lines": 130,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 130,
         "proof_lines": 0,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Semantics": {
         "by_category": {
-          "import_root": {
+          "import_only_unknown": {
             "files": 2,
             "lines": 55
           },
@@ -2859,20 +2939,21 @@
           "structure": 45,
           "theorem": 1313
         },
-        "definition_lines": 5525,
-        "definition_to_proof_line_ratio": 0.43845726529640505,
+        "definition_lines": 5490,
+        "definition_to_proof_line_ratio": 0.43567970795968575,
         "files": 83,
-        "generated_lines": 55,
-        "generated_share": 0.0021233061807512644,
+        "generated_lines": 0,
+        "generated_share": 0.0,
         "implemented_by": 35,
-        "imports_in": 0,
+        "imports_in": 424,
         "imports_out": 123,
         "lines": 25903,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 25848,
         "proof_lines": 12601,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 55
       },
       "Signature": {
         "by_category": {
@@ -2893,20 +2974,21 @@
           "structure": 0,
           "theorem": 12
         },
-        "definition_lines": 332,
-        "definition_to_proof_line_ratio": 5.824561403508772,
+        "definition_lines": 327,
+        "definition_to_proof_line_ratio": 5.7368421052631575,
         "files": 1,
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 5,
-        "imports_in": 0,
+        "imports_in": 6,
         "imports_out": 4,
         "lines": 612,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 612,
         "proof_lines": 57,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "SolcValidation": {
         "by_category": {
@@ -2937,14 +3019,15 @@
         "generated_lines": 972,
         "generated_share": 0.12745869394177814,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 98,
         "imports_out": 61,
         "lines": 7626,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 6654,
         "proof_lines": 3368,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Solkey": {
         "by_category": {
@@ -2971,14 +3054,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 14,
         "imports_out": 12,
         "lines": 266,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 266,
         "proof_lines": 8,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "SortCheck": {
         "by_category": {
@@ -3005,18 +3089,19 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 14,
         "imports_out": 6,
         "lines": 1281,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 1281,
         "proof_lines": 94,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Source": {
         "by_category": {
-          "import_root": {
+          "import_only_unknown": {
             "files": 1,
             "lines": 8
           },
@@ -3044,17 +3129,18 @@
         "definition_lines": 10892,
         "definition_to_proof_line_ratio": 0.45959745136925606,
         "files": 262,
-        "generated_lines": 746,
-        "generated_share": 0.01490777562398833,
+        "generated_lines": 738,
+        "generated_share": 0.014747906716492476,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 1227,
         "imports_out": 440,
         "lines": 50041,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 49295,
         "proof_lines": 23699,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 8
       },
       "SpecSyntax": {
         "by_category": {
@@ -3081,14 +3167,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 3,
         "imports_out": 1,
         "lines": 220,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 220,
         "proof_lines": 0,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Stipend": {
         "by_category": {
@@ -3115,14 +3202,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 9,
         "imports_out": 2,
         "lines": 274,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 274,
         "proof_lines": 57,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Storage": {
         "by_category": {
@@ -3149,18 +3237,19 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 82,
         "imports_out": 32,
         "lines": 4049,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 4049,
         "proof_lines": 2568,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Syntax": {
         "by_category": {
-          "import_root": {
+          "import_only_unknown": {
             "files": 2,
             "lines": 116
           },
@@ -3181,20 +3270,21 @@
           "structure": 19,
           "theorem": 26
         },
-        "definition_lines": 9432,
-        "definition_to_proof_line_ratio": 54.83720930232558,
+        "definition_lines": 9423,
+        "definition_to_proof_line_ratio": 54.78488372093023,
         "files": 22,
-        "generated_lines": 116,
-        "generated_share": 0.007935964972292537,
+        "generated_lines": 0,
+        "generated_share": 0.0,
         "implemented_by": 5,
-        "imports_in": 0,
+        "imports_in": 153,
         "imports_out": 44,
         "lines": 14617,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 14501,
         "proof_lines": 172,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 116
       },
       "TestSuite": {
         "by_category": {
@@ -3221,14 +3311,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 75,
         "imports_out": 79,
         "lines": 4710,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 4710,
         "proof_lines": 1224,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Theorems": {
         "by_category": {
@@ -3249,24 +3340,25 @@
           "structure": 0,
           "theorem": 21
         },
-        "definition_lines": 55,
-        "definition_to_proof_line_ratio": 0.8088235294117647,
+        "definition_lines": 54,
+        "definition_to_proof_line_ratio": 0.7941176470588235,
         "files": 1,
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 9,
         "imports_out": 7,
         "lines": 360,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 360,
         "proof_lines": 68,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Theory": {
         "by_category": {
-          "import_root": {
+          "import_only_unknown": {
             "files": 1,
             "lines": 41
           },
@@ -3290,17 +3382,18 @@
         "definition_lines": 689,
         "definition_to_proof_line_ratio": 0.12461566286851149,
         "files": 25,
-        "generated_lines": 41,
-        "generated_share": 0.004611923509561305,
+        "generated_lines": 0,
+        "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 153,
         "imports_out": 45,
         "lines": 8890,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 8849,
         "proof_lines": 5529,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 41
       },
       "Tools": {
         "by_category": {
@@ -3321,20 +3414,21 @@
           "structure": 18,
           "theorem": 42
         },
-        "definition_lines": 5326,
-        "definition_to_proof_line_ratio": 10.716297786720322,
+        "definition_lines": 5308,
+        "definition_to_proof_line_ratio": 10.680080482897385,
         "files": 31,
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 2,
-        "imports_in": 0,
+        "imports_in": 270,
         "imports_out": 88,
         "lines": 8575,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 8575,
         "proof_lines": 497,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "TypeGraph": {
         "by_category": {
@@ -3361,14 +3455,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 3,
         "imports_out": 1,
         "lines": 147,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 147,
         "proof_lines": 50,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Typing": {
         "by_category": {
@@ -3395,14 +3490,15 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 44,
         "imports_out": 16,
         "lines": 6832,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 6832,
         "proof_lines": 4702,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Update": {
         "by_category": {
@@ -3429,18 +3525,19 @@
         "generated_lines": 0,
         "generated_share": 0.0,
         "implemented_by": 0,
-        "imports_in": 0,
+        "imports_in": 5,
         "imports_out": 1,
         "lines": 58,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 58,
         "proof_lines": 0,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 0
       },
       "Yul": {
         "by_category": {
-          "import_root": {
+          "import_only_unknown": {
             "files": 10,
             "lines": 568
           },
@@ -3465,36 +3562,37 @@
           "structure": 210,
           "theorem": 19176
         },
-        "definition_lines": 34146,
-        "definition_to_proof_line_ratio": 0.29960515925243486,
+        "definition_lines": 34071,
+        "definition_to_proof_line_ratio": 0.2989470913398263,
         "files": 1827,
-        "generated_lines": 7543,
-        "generated_share": 0.03820555938247093,
+        "generated_lines": 6975,
+        "generated_share": 0.03532861947404676,
         "implemented_by": 6,
-        "imports_in": 0,
+        "imports_in": 5193,
         "imports_out": 3348,
         "lines": 197432,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
         "presumed_handwritten_lines": 189889,
         "proof_lines": 113970,
-        "sorry": 0
+        "sorry": 0,
+        "unknown_import_only_lines": 568
       }
     },
     "axiom": 0,
     "axiom_pin_lines": 4054,
     "code_lines": 878617,
     "def": 42900,
-    "definition_lines": 219536,
-    "definition_to_proof_line_ratio": 0.3810614857745909,
+    "definition_lines": 218875,
+    "definition_to_proof_line_ratio": 0.3799365716398505,
     "files": 6717,
-    "generated_lines": 25072,
-    "generated_share": 0.022363630200890907,
+    "generated_lines": 23620,
+    "generated_share": 0.021068480589703384,
     "goal_status": "unavailable: no authoritative goal-closure parser/counter; absent file is not zero goals",
     "goals_closed": null,
     "goals_file_present": false,
     "implemented_by": 176,
-    "imports_in": 0,
+    "imports_in": 21360,
     "imports_out": 12763,
     "inductive": 1035,
     "instance": 177,
@@ -3514,11 +3612,12 @@
     "native_decide": 0,
     "opaque": 3,
     "presumed_handwritten_lines": 1096034,
-    "proof_lines": 576117,
+    "proof_lines": 576083,
     "revision": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
     "roadmap_command_files": [],
     "sorry": 0,
     "structure": 1398,
-    "theorem": 65929
+    "theorem": 65929,
+    "unknown_import_only_lines": 1452
   }
 ]

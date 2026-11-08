@@ -11,6 +11,7 @@
     },
     "definition_lines": 43,
     "definition_to_proof_line_ratio": 2.263157894736842,
+    "description": "Proof-side interpretation of the fixed store/store/revert plan. This does not",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.TryPanicCarrier"
@@ -34,6 +35,7 @@
     },
     "definition_lines": 92,
     "definition_to_proof_line_ratio": 3.2857142857142856,
+    "description": "Generated alias constraints for dependent reads",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.AliasConstraints",
@@ -59,6 +61,7 @@
     },
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 1.105263157894737,
+    "description": "Completeness of the automatic decision, on a write at a symbolic key",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.AutoComplete",
@@ -84,6 +87,7 @@
     },
     "definition_lines": 36,
     "definition_to_proof_line_ratio": 0.72,
+    "description": "Benchmark: `Coin`",
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.Run",
@@ -116,6 +120,7 @@
     },
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 1.6,
+    "description": "Benchmark: `Counter`",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.ProvesDerive",
@@ -144,6 +149,7 @@
     },
     "definition_lines": 31,
     "definition_to_proof_line_ratio": 0.5740740740740741,
+    "description": "ERC20, from solkey's benchmark",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.ProvesDerive",
@@ -171,6 +177,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.625,
+    "description": "Benchmark: `EtherWallet`",
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.Run",
@@ -200,6 +207,7 @@
     },
     "definition_lines": 31,
     "definition_to_proof_line_ratio": 0.7948717948717948,
+    "description": "Benchmark: `Mapping` and `NestedMapping`",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.ProvesDerive",
@@ -228,6 +236,7 @@
     },
     "definition_lines": 86,
     "definition_to_proof_line_ratio": 3.739130434782609,
+    "description": "Benchmark: `Purchase`",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.ProvesDerive",
@@ -257,6 +266,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 1.625,
+    "description": "Benchmark: `SimpleStorage`",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.ProvesDerive",
@@ -284,6 +294,7 @@
     },
     "definition_lines": 54,
     "definition_to_proof_line_ratio": null,
+    "description": "What elaborates away",
     "implemented_by": 0,
     "imports": [
       "Solidity.Syntax.Splice",
@@ -306,6 +317,7 @@
     },
     "definition_lines": 36,
     "definition_to_proof_line_ratio": null,
+    "description": "Comparisons and partial Boolean expressions",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DeclarationStaticReduction",
@@ -329,6 +341,7 @@
     },
     "definition_lines": 56,
     "definition_to_proof_line_ratio": 14.0,
+    "description": "Exact source calls before complete arithmetic",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.ProgramReduction",
@@ -352,6 +365,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "A whole value's write, as the writes of its words",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.ExpandLaws",
@@ -379,6 +393,7 @@
     },
     "definition_lines": 39,
     "definition_to_proof_line_ratio": 0.46987951807228917,
+    "description": "Chains: `\u03c6 ~> \u03c8`, `\u03c6 ~[r]~> \u03c8`, `\u03c6 ~*> \u03c8`, `\u03c6 ~~> \u03c8`, and `calc`",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.RewriteChains",
@@ -408,7 +423,8 @@
       "theorem": 9
     },
     "definition_lines": 6,
-    "definition_to_proof_line_ratio": 0.08695652173913043,
+    "definition_to_proof_line_ratio": 0.08823529411764706,
+    "description": "The lines after the program, as chain links",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.RewriteChains",
@@ -425,7 +441,7 @@
     ],
     "native_decide": 0,
     "path": "Solidity/Examples/ChainRewrites.lean",
-    "proof_lines": 69,
+    "proof_lines": 68,
     "roadmap_commands": 0,
     "sorry": 0
   },
@@ -435,6 +451,7 @@
     "code_lines": 190,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "Chain rewrites while the program is open",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.RewriteChains",
@@ -459,6 +476,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Arithmetic: the compound storage update",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.RewriteChains",
@@ -484,6 +502,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Checked arithmetic: the overflow that reverts",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.RewriteChains",
@@ -511,6 +530,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.2,
+    "description": "Evaluation order of indexed writes",
     "implemented_by": 0,
     "imports": [
       "Solidity.FreshNames",
@@ -538,6 +558,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.06349206349206349,
+    "description": "The fixed-length array examples as chains",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.RewriteChains",
@@ -566,6 +587,7 @@
     },
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.05693950177935943,
+    "description": "Memory examples as chains",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.RewriteChains",
@@ -594,6 +616,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.07251908396946564,
+    "description": "Memory array examples as chains",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.RewriteChains",
@@ -622,6 +645,7 @@
     },
     "definition_lines": 45,
     "definition_to_proof_line_ratio": 0.11194029850746269,
+    "description": "Memory rule coverage: one chain per rule",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.RewriteChains",
@@ -649,6 +673,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.0035026269702276708,
+    "description": "The memory `delete` examples as chains",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.RewriteChains",
@@ -677,6 +702,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.015873015873015872,
+    "description": "Memory-to-storage copies, as chains",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.RewriteChainGen",
@@ -704,6 +730,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.0625,
+    "description": "Payment: `transfer`, as chains",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.RewriteChainGen",
@@ -731,6 +758,7 @@
     },
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 0.08928571428571429,
+    "description": "The storage worked examples as chains",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.RewriteChains",
@@ -759,6 +787,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.13380281690140844,
+    "description": "The additional storage array cases as chains",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.RewriteChains",
@@ -787,6 +816,7 @@
     },
     "definition_lines": 68,
     "definition_to_proof_line_ratio": 0.12710280373831775,
+    "description": "Storage rule coverage: one chain per rule",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.RewriteChains",
@@ -814,6 +844,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.00625,
+    "description": "The storage `delete` examples as chains",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.RewriteChains",
@@ -842,6 +873,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.037383177570093455,
+    "description": "Storage-to-memory copies, as chains",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.RewriteChains",
@@ -869,6 +901,7 @@
     },
     "definition_lines": 33,
     "definition_to_proof_line_ratio": 33.0,
+    "description": "Source arithmetic retains checked failure",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DeclarationStaticReduction",
@@ -893,6 +926,7 @@
     },
     "definition_lines": 44,
     "definition_to_proof_line_ratio": 14.666666666666666,
+    "description": "Exact verification through the public tools",
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.Verify",
@@ -916,6 +950,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": null,
+    "description": "Storage declarations certified by their contract",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Problem"
@@ -938,6 +973,7 @@
     },
     "definition_lines": 212,
     "definition_to_proof_line_ratio": 17.666666666666668,
+    "description": "The closer's decision (M7): the features added to its fragment",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionGapData",
@@ -958,10 +994,11 @@
   },
   {
     "area": "Examples",
-    "category": "import_root",
+    "category": "import_only_unknown",
     "code_lines": 1,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionLedger"
@@ -976,10 +1013,11 @@
   },
   {
     "area": "Examples",
-    "category": "import_root",
+    "category": "import_only_unknown",
     "code_lines": 2,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionCore",
@@ -1003,6 +1041,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.3076923076923077,
+    "description": "The closer's decision on blocks over storage arrays (M7, feature 32)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.Decision"
@@ -1026,6 +1065,7 @@
     },
     "definition_lines": 41,
     "definition_to_proof_line_ratio": 0.41,
+    "description": "Actual assigned array-gap census",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Decision",
@@ -1051,6 +1091,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.20833333333333334,
+    "description": "Declarations: keyGap, fixedKeyGap, fieldGap",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionArrayReasons",
@@ -1075,6 +1116,7 @@
     },
     "definition_lines": 134,
     "definition_to_proof_line_ratio": 2.19672131147541,
+    "description": "Declarations: normalized0, normalized1, normalized2",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionArrayCore"
@@ -1090,10 +1132,11 @@
   },
   {
     "area": "Examples",
-    "category": "import_root",
+    "category": "import_only_unknown",
     "code_lines": 1,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "The closer's decision on blocks over storage arrays (M7, feature 32)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionArrayReplay"
@@ -1108,10 +1151,11 @@
   },
   {
     "area": "Examples",
-    "category": "import_root",
+    "category": "import_only_unknown",
     "code_lines": 1,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionAPF"
@@ -1134,6 +1178,7 @@
     },
     "definition_lines": 33,
     "definition_to_proof_line_ratio": 0.66,
+    "description": "Declarations: keySource, keyPrefix, keyWitness",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionBoundedInstanceSource",
@@ -1158,6 +1203,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.3684210526315789,
+    "description": "Declarations: keyHit, fieldHit, selected_literal_controls",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionBoundedInstanceSearch",
@@ -1182,6 +1228,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.3541666666666667,
+    "description": "Declarations: yesBody, belowThree, yes_body_qf",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionBoundedUInt",
@@ -1206,6 +1253,7 @@
     },
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.3404255319148936,
+    "description": "Inhabited controls for the source-coefficient boundary",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionCoefficientBoundary",
@@ -1231,6 +1279,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.16216216216216217,
+    "description": "Declarations: originalWitness, anotherWitness, partialWitness",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionCompoundCertificate",
@@ -1255,6 +1304,7 @@
     },
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.2727272727272727,
+    "description": "Declarations: anotherSum, partialRhs, mappingCompound",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionCompoundFieldReason",
@@ -1271,10 +1321,11 @@
   },
   {
     "area": "Examples",
-    "category": "import_root",
+    "category": "import_only_unknown",
     "code_lines": 1,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.Decision"
@@ -1297,6 +1348,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.125,
+    "description": "The closer's decision (M7): the features on `Bank` and `Allow`",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.Decision",
@@ -1322,6 +1374,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.09375,
+    "description": "Declarations: MapTy, leftPath, rightPath",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionFixedArrayPair",
@@ -1346,6 +1399,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.45454545454545453,
+    "description": "Declarations: inner, nested, arrayPrefix",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionFixedArrayPath",
@@ -1370,6 +1424,7 @@
     },
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.3076923076923077,
+    "description": "Declarations: Store, rowsType, nestedType",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionFixedArrayStorage",
@@ -1394,6 +1449,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.14285714285714285,
+    "description": "Remaining target controls for the VA1 gap census",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionMemory",
@@ -1410,10 +1466,11 @@
   },
   {
     "area": "Examples",
-    "category": "import_root",
+    "category": "import_only_unknown",
     "code_lines": 2,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionMapping",
@@ -1436,6 +1493,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: Gaps",
     "implemented_by": 0,
     "imports": [
       "Solidity.Syntax.Contract"
@@ -1450,10 +1508,11 @@
   },
   {
     "area": "Examples",
-    "category": "import_root",
+    "category": "import_only_unknown",
     "code_lines": 1,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionThreeKindCoverage"
@@ -1468,10 +1527,11 @@
   },
   {
     "area": "Examples",
-    "category": "import_root",
+    "category": "import_only_unknown",
     "code_lines": 1,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionGapCore"
@@ -1492,6 +1552,7 @@
       "theorem": 27
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "The closer's decision (M7): literal operators and hash kinds over `Gaps`",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.Decision",
@@ -1516,6 +1577,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.04477611940298507,
+    "description": "The closer's decision (M7): the former counterexamples over `Gaps`",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.Decision"
@@ -1539,6 +1601,7 @@
     },
     "definition_lines": 44,
     "definition_to_proof_line_ratio": 0.8461538461538461,
+    "description": "Declarations: computedIndex, presentIndex, partialIndex",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionGivenHeapComputedBoundary",
@@ -1565,6 +1628,7 @@
     },
     "definition_lines": 51,
     "definition_to_proof_line_ratio": 1.0625,
+    "description": "Declarations: lit, source, A",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionGivenHeapFixedBoundary",
@@ -1589,6 +1653,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.4,
+    "description": "Declarations: unequalKeys, sameKey, source_controls",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionGivenHeapExtension",
@@ -1614,6 +1679,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.36363636363636365,
+    "description": "Declarations: anotherIndex, differentKeys, nonliteralIndex",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionGivenHeapBoundary",
@@ -1639,6 +1705,7 @@
     },
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.3157894736842105,
+    "description": "Declarations: Probe, roots, claim",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionHaltingOrCertificate",
@@ -1665,6 +1732,7 @@
     },
     "definition_lines": 59,
     "definition_to_proof_line_ratio": 0.6781609195402298,
+    "description": "The halting-OR APF floor hazard",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.CloseFrame",
@@ -1690,6 +1758,7 @@
     },
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 0.4772727272727273,
+    "description": "Declarations: roots, oneMember, zeroMember",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionHaltingOrBoundary",
@@ -1712,6 +1781,7 @@
       "theorem": 5
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "The closer's decision on leaves with hashes (M7, plan step 7)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionHashes"
@@ -1731,6 +1801,7 @@
     "code_lines": 12,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "Five-string family and exact coverage controls.",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionHashCore",
@@ -1753,6 +1824,7 @@
       "theorem": 5
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Kernel checks for the existing five-string regression family",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.HashReduction"
@@ -1774,6 +1846,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: fiveChain_covered",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionHashes",
@@ -1796,6 +1869,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Two kinds of hash as mapping keys",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionHashCore"
@@ -1811,10 +1885,11 @@
   },
   {
     "area": "Examples",
-    "category": "import_root",
+    "category": "import_only_unknown",
     "code_lines": 2,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionHashThreeKinds",
@@ -1836,6 +1911,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Partly linked mixed-kind strings",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionHashCore"
@@ -1857,6 +1933,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Value quantifiers and hidden-memory refusal controls.",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionHashCore"
@@ -1878,6 +1955,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Three-kind hashes and partly linked mixed-kind strings.",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionHashCore"
@@ -1899,6 +1977,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Hashes past storage and value-local updates.",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionHashCore"
@@ -1922,6 +2001,7 @@
     },
     "definition_lines": 116,
     "definition_to_proof_line_ratio": null,
+    "description": "The closer's decision on leaves with hashes (M7, plan step 7)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Decision",
@@ -1937,10 +2017,11 @@
   },
   {
     "area": "Examples",
-    "category": "import_root",
+    "category": "import_only_unknown",
     "code_lines": 6,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "Bounded hash decision checks facade",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionHashCore",
@@ -1968,6 +2049,7 @@
     },
     "definition_lines": 73,
     "definition_to_proof_line_ratio": 0.6517857142857143,
+    "description": "Binders of KeY's `int` over two words (M7, features 30 and 31)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.Decision",
@@ -1992,6 +2074,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.22727272727272727,
+    "description": "Numeric preparation controls",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionLeafPreparation",
@@ -2008,10 +2091,11 @@
   },
   {
     "area": "Examples",
-    "category": "import_root",
+    "category": "import_only_unknown",
     "code_lines": 1,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionGapKInt"
@@ -2026,10 +2110,11 @@
   },
   {
     "area": "Examples",
-    "category": "import_root",
+    "category": "import_only_unknown",
     "code_lines": 1,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionArithmetic"
@@ -2052,6 +2137,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.3157894736842105,
+    "description": "Declarations: mappingOne, inhabited_classes, originalWitness",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionMappingFieldBoundary",
@@ -2077,6 +2163,7 @@
     },
     "definition_lines": 141,
     "definition_to_proof_line_ratio": 1.6022727272727273,
+    "description": "Fresh memory arrays and given-heap parameter witnesses (M7)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionMemoryParameterData",
@@ -2105,6 +2192,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.4117647058823529,
+    "description": "Declarations: reversed, given, forward",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionMemoryCoverage",
@@ -2130,6 +2218,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: litU, isT, allU",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionGapData",
@@ -2152,6 +2241,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: memParamSame",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionGapData",
@@ -2175,6 +2265,7 @@
     },
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.27906976744186046,
+    "description": "Negative-chain proof controls",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionNegativeInstantiation",
@@ -2197,6 +2288,7 @@
       "theorem": 6
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: two_dimensions_bridge, both_dimensions_change, both_dimensions_halt",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionNestedFixedArray",
@@ -2221,6 +2313,7 @@
     },
     "definition_lines": 29,
     "definition_to_proof_line_ratio": 1.1153846153846154,
+    "description": "Declarations: repeated, numericAtom, exhaustedBody",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionNormalizationResidue",
@@ -2245,6 +2338,7 @@
     },
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 0.2976190476190476,
+    "description": "Source-bound controls",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionNumericBounds",
@@ -2269,6 +2363,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.031578947368421054,
+    "description": "Declarations: bulk_equationDepth, oversized_equationDepth, oversized_compiler",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionNumericCompiler",
@@ -2292,6 +2387,7 @@
       "theorem": 14
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Source coverage bridge controls",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionNumericCoverage",
@@ -2317,6 +2413,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.10526315789473684,
+    "description": "Declarations: failedSeq, base, bulk",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionNumericFlatten",
@@ -2342,6 +2439,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.10204081632653061,
+    "description": "Actual numeric formula-bridge controls",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionNumericFormula",
@@ -2367,6 +2465,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.4166666666666667,
+    "description": "Declarations: samples, fits, oversize",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionNumericFuel",
@@ -2391,6 +2490,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.13793103448275862,
+    "description": "Declarations: closedTrue, closedFalse, actual_closed_leaves",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionNumericGround",
@@ -2415,6 +2515,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.2608695652173913,
+    "description": "Declarations: zero, one, partialTerm",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionNumericGroundSource",
@@ -2439,6 +2540,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.15942028985507245,
+    "description": "Declarations: reflexiveBody, positiveBody, negativeBody",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionNumericLogic",
@@ -2463,6 +2565,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.07368421052631578,
+    "description": "Declarations: collapsed, collapsed_grammar, collapsed_source_weight",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionNumericNormalization",
@@ -2488,6 +2591,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.03225806451612903,
+    "description": "Declarations: largeBody, largeBody_grammar, source_weight",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionNumericStages",
@@ -2513,6 +2617,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.038461538461538464,
+    "description": "Declarations: scope, positive_source_certificate, negative_source_certificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionNumericTraversal",
@@ -2537,6 +2642,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.5882352941176471,
+    "description": "Declarations: input, expected, actual_translation",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionNumericTwoPrefix",
@@ -2561,6 +2667,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.5454545454545454,
+    "description": "Declarations: right, body, source_client",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionNumericTwoPrefixFormula",
@@ -2577,10 +2684,11 @@
   },
   {
     "area": "Examples",
-    "category": "import_root",
+    "category": "import_only_unknown",
     "code_lines": 2,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionRefutations",
@@ -2604,6 +2712,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.7916666666666666,
+    "description": "Declarations: atom, branching, prefixed",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionPrefixNormalizationResidue",
@@ -2629,6 +2738,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.7307692307692307,
+    "description": "Negative scalar quantifiers beside ledger observations",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionKInt"
@@ -2644,10 +2754,11 @@
   },
   {
     "area": "Examples",
-    "category": "import_root",
+    "category": "import_only_unknown",
     "code_lines": 1,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionBlocks"
@@ -2670,6 +2781,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.14285714285714285,
+    "description": "The residue's fixtures and `DecisionTheorem'`'s witness controls (M7-next)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionResidue",
@@ -2702,6 +2814,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.2,
+    "description": "Declarations: reversedFive, reversedBool, mappingReversed",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionResidueReasons",
@@ -2726,6 +2839,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.05128205128205128,
+    "description": "Declarations: fixtures_noAlloc, fixtures_covered, fixtures_proved",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionSourceBoundary",
@@ -2748,6 +2862,7 @@
       "theorem": 12
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: struct_prepared, nested_prepared, key_prepared",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionSourceChain",
@@ -2772,6 +2887,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.09859154929577464,
+    "description": "Declarations: fixture_values, discovered_fixtures, struct_prepared",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionSourceDiscovery",
@@ -2796,6 +2912,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.43478260869565216,
+    "description": "Declarations: zeroCells, inhabitedStructState, structAntecedent",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionSourceInstance",
@@ -2812,10 +2929,11 @@
   },
   {
     "area": "Examples",
-    "category": "import_root",
+    "category": "import_only_unknown",
     "code_lines": 1,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionGapHashes"
@@ -2830,10 +2948,11 @@
   },
   {
     "area": "Examples",
-    "category": "import_root",
+    "category": "import_only_unknown",
     "code_lines": 2,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionOperators",
@@ -2857,6 +2976,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.13043478260869565,
+    "description": "Declarations: some_getD, routeFirst, first_some",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.Decision"
@@ -2880,6 +3000,7 @@
     },
     "definition_lines": 30,
     "definition_to_proof_line_ratio": 0.38461538461538464,
+    "description": "Declarations: current, decrement1, decrement2",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionUIntFormula",
@@ -2904,6 +3025,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 1.0,
+    "description": "Declarations: lit, accepted, nonlinear",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionUIntFormulaRecognizer",
@@ -2928,6 +3050,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.20588235294117646,
+    "description": "Declarations: partial_source_exact, partial_prepared_exact, partial_constructive_source",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionUIntPrefix",
@@ -2952,6 +3075,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.4666666666666667,
+    "description": "Declarations: two, left, right",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecisionUIntShape",
@@ -2975,6 +3099,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: verdict",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Decision"
@@ -2998,6 +3123,7 @@
     },
     "definition_lines": 70,
     "definition_to_proof_line_ratio": 0.8333333333333334,
+    "description": "Written-memory/hash composition controls",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.Decision",
@@ -3022,6 +3148,7 @@
     },
     "definition_lines": 44,
     "definition_to_proof_line_ratio": null,
+    "description": "Declaration premises are removed exactly",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DeclarationReduction",
@@ -3045,6 +3172,7 @@
     },
     "definition_lines": 45,
     "definition_to_proof_line_ratio": 22.5,
+    "description": "Dependent-read decisions through original function specifications",
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.Verify",
@@ -3069,6 +3197,7 @@
     },
     "definition_lines": 12,
     "definition_to_proof_line_ratio": null,
+    "description": "Exact reduction certificates",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.ExactReduction",
@@ -3091,6 +3220,7 @@
     },
     "definition_lines": 42,
     "definition_to_proof_line_ratio": null,
+    "description": "Exact update guards and landing witnesses",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DeclarationStaticReduction",
@@ -3114,6 +3244,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": null,
+    "description": "Printed names for the rules' fresh variables",
     "implemented_by": 0,
     "imports": [
       "Solidity.FreshNames",
@@ -3140,6 +3271,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.18867924528301888,
+    "description": "Declarations: original, rebuilt, interior_changes",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.FixedArrayFloor"
@@ -3163,6 +3295,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.25806451612903225,
+    "description": "Declarations: fixedType, rowsType, sentinel",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.FixedArrayRoot",
@@ -3188,6 +3321,7 @@
     },
     "definition_lines": 40,
     "definition_to_proof_line_ratio": 13.333333333333334,
+    "description": "Reconstructed transaction inputs and original function claims",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.InputReduction",
@@ -3214,6 +3348,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.09848484848484848,
+    "description": "Local lexicographic diamond VC regressions",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Sound.LoopLexDiamond",
@@ -3238,6 +3373,7 @@
     },
     "definition_lines": 24,
     "definition_to_proof_line_ratio": 0.2222222222222222,
+    "description": "Source tuple metrics and strict successful termination",
     "implemented_by": 0,
     "imports": [
       "Solidity.Semantics.LexMetrics",
@@ -3258,6 +3394,7 @@
     "code_lines": 79,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "Exact symbolic tuple VC notation",
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.Taclet"
@@ -3279,6 +3416,7 @@
     },
     "definition_lines": 34,
     "definition_to_proof_line_ratio": null,
+    "description": "Honest tuple VC update and node budgets",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.TermSize"
@@ -3301,6 +3439,7 @@
     },
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.35294117647058826,
+    "description": "Lexicographic VC helper regressions",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.LexVariantSound",
@@ -3325,6 +3464,7 @@
     },
     "definition_lines": 52,
     "definition_to_proof_line_ratio": 52.0,
+    "description": "Complete arithmetic decisions and extracted assignments",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.LinearCountermodel",
@@ -3350,6 +3490,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.19607843137254902,
+    "description": "Primitive-memory reconstruction controls",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.MemFloor"
@@ -3374,6 +3515,7 @@
     },
     "definition_lines": 34,
     "definition_to_proof_line_ratio": 0.7906976744186046,
+    "description": "Scoped memory-block instantiation controls",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.MemInst",
@@ -3397,6 +3539,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "The original negative memory block's empty-array countermodel",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.DecisionMemory"
@@ -3421,6 +3564,7 @@
     },
     "definition_lines": 54,
     "definition_to_proof_line_ratio": 1.9285714285714286,
+    "description": "The original negative memory block: exact closer refutation",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.MemoryNegativeCountermodel",
@@ -3446,6 +3590,7 @@
     },
     "definition_lines": 37,
     "definition_to_proof_line_ratio": 4.625,
+    "description": "Declarations: Tok, Acc, Per",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.MemStructCut"
@@ -3467,6 +3612,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "The notation, pinned",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Close",
@@ -3496,6 +3642,7 @@
     },
     "definition_lines": 43,
     "definition_to_proof_line_ratio": 21.5,
+    "description": "Guaranteed typed parameter counterinstances",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DeclarationStaticReduction",
@@ -3519,6 +3666,7 @@
     },
     "definition_lines": 15,
     "definition_to_proof_line_ratio": null,
+    "description": "Entry conditions checked separately from postconditions",
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.Preconditions",
@@ -3542,6 +3690,7 @@
     },
     "definition_lines": 81,
     "definition_to_proof_line_ratio": 20.25,
+    "description": "Exact original-program decisions",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.ProgramReduction",
@@ -3566,6 +3715,7 @@
     },
     "definition_lines": 48,
     "definition_to_proof_line_ratio": 2.6666666666666665,
+    "description": "The proof tree, pinned",
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.ProofTree",
@@ -3595,6 +3745,7 @@
     },
     "definition_lines": 94,
     "definition_to_proof_line_ratio": 2.186046511627907,
+    "description": "Arithmetic chooses dependent-read countervalues",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.QueryArithmetic",
@@ -3623,6 +3774,7 @@
     },
     "definition_lines": 59,
     "definition_to_proof_line_ratio": null,
+    "description": "Read-dependent mapping keys",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.QueryReduction",
@@ -3646,6 +3798,7 @@
     },
     "definition_lines": 79,
     "definition_to_proof_line_ratio": 79.0,
+    "description": "Source-dependent reads flattened and reconstructed automatically",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.LeafArithmetic",
@@ -3671,6 +3824,7 @@
     },
     "definition_lines": 24,
     "definition_to_proof_line_ratio": 1.3333333333333333,
+    "description": "Finite reads are actual typed storage",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.ReadRealization",
@@ -3695,6 +3849,7 @@
     },
     "definition_lines": 69,
     "definition_to_proof_line_ratio": 7.666666666666667,
+    "description": "Dependent read occurrences and aliases",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.TraceReduction",
@@ -3720,6 +3875,7 @@
     },
     "definition_lines": 171,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: z, i0, i1",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.RecursiveStorage",
@@ -3745,6 +3901,7 @@
     },
     "definition_lines": 140,
     "definition_to_proof_line_ratio": 14.0,
+    "description": "Declarations: zero, uint, mappingFields",
     "implemented_by": 0,
     "imports": [
       "Solidity.Semantics.RecursiveStorage.Arrays"
@@ -3769,6 +3926,7 @@
     },
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 0.3,
+    "description": "Declarations: Context, statement, sourceStep",
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.FailurePaths.FramedEmissionControls",
@@ -3792,6 +3950,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": null,
+    "description": "Scoped programs, run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Semantics.Run",
@@ -3815,6 +3974,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.8,
+    "description": "Declarations: roundTrip, roundTrip_exact, literals",
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.SolCases",
@@ -3838,6 +3998,7 @@
     },
     "definition_lines": 24,
     "definition_to_proof_line_ratio": null,
+    "description": "Exact-goal source counterexample certificates",
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.SourceCounterexample",
@@ -3860,6 +4021,7 @@
     },
     "definition_lines": 45,
     "definition_to_proof_line_ratio": null,
+    "description": "Guaranteed counterstates from original storage formulas",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DeclarationStaticReduction",
@@ -3883,6 +4045,7 @@
     },
     "definition_lines": 118,
     "definition_to_proof_line_ratio": 5.9,
+    "description": "ABI and ERC-7201 regressions",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Close",
@@ -3910,6 +4073,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.3333333333333333,
+    "description": "Declarations: Source, namespace_property",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Import",
@@ -3937,6 +4101,7 @@
     },
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 1.2352941176470589,
+    "description": "Declarations: literal, tuple, parameters",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Testing",
@@ -3962,6 +4127,7 @@
     },
     "definition_lines": 70,
     "definition_to_proof_line_ratio": 14.0,
+    "description": "Declarations: Views, successful, successful_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Surface",
@@ -3987,6 +4153,7 @@
     },
     "definition_lines": 87,
     "definition_to_proof_line_ratio": 43.5,
+    "description": "Fixed memory literals and local reference tuples",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Surface",
@@ -4010,6 +4177,7 @@
       "theorem": 10
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: literals_initial, copies_initial, storageElements_initial",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Testing",
@@ -4035,6 +4203,7 @@
     },
     "definition_lines": 23,
     "definition_to_proof_line_ratio": 0.7931034482758621,
+    "description": "Quantified premises at later indices",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Surface",
@@ -4061,6 +4230,7 @@
     },
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 0.46296296296296297,
+    "description": "Declarations: C, \u0393, start",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.AnonLocalCapture",
@@ -4085,6 +4255,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Derivations with `apply`",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Close",
@@ -4109,6 +4280,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "ABI element ranges through invariant loops",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Import",
@@ -4136,6 +4308,7 @@
     },
     "definition_lines": 37,
     "definition_to_proof_line_ratio": 4.111111111111111,
+    "description": "Intrinsic fixed-array shape copies",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Surface",
@@ -4164,6 +4337,7 @@
     },
     "definition_lines": 46,
     "definition_to_proof_line_ratio": 1.0454545454545454,
+    "description": "Assumption records, policies and profiles (`docs/options.md`, O10, O13)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.TargetProfile",
@@ -4188,6 +4362,7 @@
     },
     "definition_lines": 85,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: Bank, IR, funded",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Surface",
@@ -4213,6 +4388,7 @@
     },
     "definition_lines": 29,
     "definition_to_proof_line_ratio": null,
+    "description": "Typed boundaries",
     "implemented_by": 0,
     "imports": [
       "Solidity.Semantics.Run",
@@ -4234,6 +4410,7 @@
       "theorem": 8
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "A branch: `ifElseUnfold` and `ifElseSplit`",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Close",
@@ -4260,6 +4437,7 @@
     },
     "definition_lines": 47,
     "definition_to_proof_line_ratio": 0.3949579831932773,
+    "description": "`bytesN`, `bytes` and `string`",
     "implemented_by": 0,
     "imports": [
       "Solidity.Semantics.RunFuel",
@@ -4288,6 +4466,7 @@
     },
     "definition_lines": 53,
     "definition_to_proof_line_ratio": 0.5578947368421052,
+    "description": "Error operands and catchable self-call panics",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Import",
@@ -4317,6 +4496,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.11267605633802817,
+    "description": "Declarations: C, \u0393, name",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.CallFunctionAffine"
@@ -4341,6 +4521,7 @@
     },
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.2112676056338028,
+    "description": "Declarations: C, \u0393, Inputs",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.CallFunctionBase"
@@ -4365,6 +4546,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.3225806451612903,
+    "description": "Declarations: C, \u0393, name",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.CallFunctionEmit",
@@ -4390,6 +4572,7 @@
     },
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 0.25252525252525254,
+    "description": "Declarations: C, \u0393, name",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.CallFunctionLeafMetrics"
@@ -4414,6 +4597,7 @@
     },
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.18947368421052632,
+    "description": "Declarations: C, \u0393, Inputs",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.CallFunctionOperationalBase"
@@ -4438,6 +4622,7 @@
     },
     "definition_lines": 33,
     "definition_to_proof_line_ratio": 0.5892857142857143,
+    "description": "Declarations: C, \u0393, name",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.CallFunctionPlan"
@@ -4462,6 +4647,7 @@
     },
     "definition_lines": 36,
     "definition_to_proof_line_ratio": 0.8571428571428571,
+    "description": "Declarations: C, \u0393, name",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.CallFunctionSearch",
@@ -4486,6 +4672,7 @@
     },
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 1.0,
+    "description": "Declarations: Affine, affineSix, affineSeven",
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.CallFunctionShare",
@@ -4510,6 +4697,7 @@
     },
     "definition_lines": 59,
     "definition_to_proof_line_ratio": 14.75,
+    "description": "Declarations: wrongDiamond, wrongBox, Constant",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.Tactics.CallFunctionShare",
@@ -4535,6 +4723,7 @@
     },
     "definition_lines": 30,
     "definition_to_proof_line_ratio": 0.42857142857142855,
+    "description": "Declarations: C, \u0393, lit",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.CallFunctionGraph",
@@ -4560,6 +4749,7 @@
     },
     "definition_lines": 38,
     "definition_to_proof_line_ratio": 0.41304347826086957,
+    "description": "Declarations: C, \u0393, name",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.CallFunctionTermPower"
@@ -4584,6 +4774,7 @@
     },
     "definition_lines": 34,
     "definition_to_proof_line_ratio": 0.38202247191011235,
+    "description": "Declarations: C, \u0393, name",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.CallFunctionTransform",
@@ -4608,6 +4799,7 @@
     },
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.23076923076923078,
+    "description": "Call-valued operands: `values.push(makeValue());`",
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.Run",
@@ -4639,6 +4831,7 @@
     },
     "definition_lines": 23,
     "definition_to_proof_line_ratio": 0.6571428571428571,
+    "description": "Declarations: C, \u0393, start",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.CallResultCapture"
@@ -4663,6 +4856,7 @@
     },
     "definition_lines": 42,
     "definition_to_proof_line_ratio": 0.6885245901639344,
+    "description": "Declarations: C, \u0393, Ghosts",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.CallResultRestore",
@@ -4687,6 +4881,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.4782608695652174,
+    "description": "Declarations: Affine, defaultSix, defaultSeven",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Closers"
@@ -4710,6 +4905,7 @@
     },
     "definition_lines": 45,
     "definition_to_proof_line_ratio": 0.2571428571428571,
+    "description": "A call by its callee's summary (`internalCallSummary`)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.ProofTree",
@@ -4736,6 +4932,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.1417910447761194,
+    "description": "Callbacks: re-entrancy-safe and unsafe withdrawals",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Close",
@@ -4765,6 +4962,7 @@
     },
     "definition_lines": 24,
     "definition_to_proof_line_ratio": null,
+    "description": "The callback reading on typed runs",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.ScopedRuns",
@@ -4793,6 +4991,7 @@
     },
     "definition_lines": 33,
     "definition_to_proof_line_ratio": 0.2920353982300885,
+    "description": "The strategy with callbacks",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Close",
@@ -4822,6 +5021,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.07547169811320754,
+    "description": "Declarations: allocation_recovered, violation_recovered, payingLoop",
     "implemented_by": 0,
     "imports": [
       "Solidity.Semantics.CallbackUnwk",
@@ -4846,6 +5046,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.0975609756097561,
+    "description": "Declarations: freshIsNone, allocation_under_fresh_alias, prefix_scope_keeps_fresh_alias",
     "implemented_by": 0,
     "imports": [
       "Solidity.Semantics.CallbackWk",
@@ -4870,6 +5071,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.20212765957446807,
+    "description": "The caller-model lattice is strict",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Close",
@@ -4896,6 +5098,7 @@
     },
     "definition_lines": 120,
     "definition_to_proof_line_ratio": 0.5263157894736842,
+    "description": "Calls: a function's body, inlined",
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.Run",
@@ -4927,6 +5130,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.05,
+    "description": "Chains on scoped formulas, pinned",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.LastLine",
@@ -4952,6 +5156,7 @@
     },
     "definition_lines": 33,
     "definition_to_proof_line_ratio": 0.264,
+    "description": "Checked arithmetic at the narrow widths",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.RewriteChains",
@@ -4977,6 +5182,7 @@
       "theorem": 11
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "`checked { \u2026 }`: an overflow fails the proof",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Close",
@@ -5003,6 +5209,7 @@
     },
     "definition_lines": 80,
     "definition_to_proof_line_ratio": 0.8695652173913043,
+    "description": "Declarations: tokens, tokenSeven, repaired",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.CleanTailBoundary",
@@ -5028,6 +5235,7 @@
     },
     "definition_lines": 31,
     "definition_to_proof_line_ratio": 0.7948717948717948,
+    "description": "Computed reasons and raw rethrows",
     "implemented_by": 0,
     "imports": [
       "Solidity.Solkey.ComputedRevert",
@@ -5052,6 +5260,7 @@
     },
     "definition_lines": 91,
     "definition_to_proof_line_ratio": 2.5277777777777777,
+    "description": "Constructors: a deployment from the empty storage",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Problem",
@@ -5083,6 +5292,7 @@
     },
     "definition_lines": 147,
     "definition_to_proof_line_ratio": 5.25,
+    "description": "Typed world execution regressions",
     "implemented_by": 0,
     "imports": [
       "Solidity.Semantics.ContractWorld",
@@ -5109,6 +5319,7 @@
     },
     "definition_lines": 143,
     "definition_to_proof_line_ratio": 2.3833333333333333,
+    "description": "Source factories and linked storage mutation, in the typed world",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.WorldImport"
@@ -5132,6 +5343,7 @@
     },
     "definition_lines": 32,
     "definition_to_proof_line_ratio": 0.34782608695652173,
+    "description": "Calls by contract",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Close",
@@ -5159,6 +5371,7 @@
     },
     "definition_lines": 46,
     "definition_to_proof_line_ratio": 1.4375,
+    "description": "Declarations: sender, factory, first",
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.CreationTryReplay"
@@ -5182,6 +5395,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 2.0,
+    "description": "Declarations: initialIR, bothIR, original_outputs_ir",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.Tactics.CreationTrySource"
@@ -5203,6 +5417,7 @@
       "theorem": 13
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Storage and memory: the copies between them",
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.Run",
@@ -5232,6 +5447,7 @@
     },
     "definition_lines": 47,
     "definition_to_proof_line_ratio": 3.1333333333333333,
+    "description": "Dangling-resurrection claims",
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.ProofTree",
@@ -5258,6 +5474,7 @@
     },
     "definition_lines": 27,
     "definition_to_proof_line_ratio": 0.12558139534883722,
+    "description": "`sol_decide`: the storage and memory goals, decided",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecideComplete",
@@ -5288,6 +5505,7 @@
     },
     "definition_lines": 75,
     "definition_to_proof_line_ratio": 5.357142857142857,
+    "description": "Declaration metadata from validated solc identities",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Testing",
@@ -5313,6 +5531,7 @@
     },
     "definition_lines": 36,
     "definition_to_proof_line_ratio": 0.6792452830188679,
+    "description": "Declarations: CallbackContract, keep, broken",
     "implemented_by": 0,
     "imports": [
       "Solidity.Semantics.DeferredCallback",
@@ -5337,6 +5556,7 @@
     },
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.2830188679245283,
+    "description": "Declarations: resumed_allocation_captured, trapped, unset_suppresses_prefix",
     "implemented_by": 0,
     "imports": [
       "Solidity.Semantics.DeferredCorrespondence",
@@ -5361,6 +5581,7 @@
     },
     "definition_lines": 118,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: ExampleContract, getter, postIncrement",
     "implemented_by": 0,
     "imports": [
       "Solidity.Semantics.DeferredSource",
@@ -5380,6 +5601,7 @@
     "code_lines": 154,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "The scoped strategy tools",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Derive",
@@ -5403,6 +5625,7 @@
     "code_lines": 112,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "`dl!{ \u2026 }` pinned: today's reading and the scoped one",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Notation",
@@ -5427,6 +5650,7 @@
     },
     "definition_lines": 39,
     "definition_to_proof_line_ratio": 0.9285714285714286,
+    "description": "Declarations: Probe, quoteEntry, yes",
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.Upstream",
@@ -5452,6 +5676,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 4.0,
+    "description": "Declarations: Flow, start, counter",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.Tactics.EntryReturn"
@@ -5475,6 +5700,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.8,
+    "description": "Declarations: Flow, start, counter",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.Tactics.EntryReturnFlow"
@@ -5498,6 +5724,7 @@
     },
     "definition_lines": 24,
     "definition_to_proof_line_ratio": 3.0,
+    "description": "Declarations: Probe, start, counter",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.Tactics.EntryReturn"
@@ -5521,6 +5748,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 2.2,
+    "description": "Declarations: Narrow, start, counter",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.Tactics.EntryReturn"
@@ -5544,6 +5772,7 @@
     },
     "definition_lines": 35,
     "definition_to_proof_line_ratio": 1.1290322580645162,
+    "description": "Configurable expression evaluation order",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Surface",
@@ -5571,6 +5800,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 1.0,
+    "description": "Declarations: {\u03b1, C, mixed",
     "implemented_by": 0,
     "imports": [
       "Solidity.Semantics.ExternalReturnBytes"
@@ -5594,6 +5824,7 @@
     },
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 0.25,
+    "description": "State-specific external try diamonds",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.Tactics.ExternalTryWitness",
@@ -5618,6 +5849,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.23684210526315788,
+    "description": "The original source domain does not admit a universal try witness family",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.Tactics.ExternalTryFormula",
@@ -5642,6 +5874,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.6842105263157895,
+    "description": "Source-shaped external try controls with explicit oracle inputs",
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.Run",
@@ -5668,6 +5901,7 @@
     },
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 5.2,
+    "description": "Literal-domain filtered membership in source specifications",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Spec",
@@ -5695,6 +5929,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 7.0,
+    "description": "Finite equality-membership in source specifications",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Spec",
@@ -5721,6 +5956,7 @@
     },
     "definition_lines": 262,
     "definition_to_proof_line_ratio": 1.806896551724138,
+    "description": "Internal function types",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Close",
@@ -5747,6 +5983,7 @@
     },
     "definition_lines": 232,
     "definition_to_proof_line_ratio": 3.2222222222222223,
+    "description": "`keccak256`, `abi.*`, `concat` and string-keyed mappings",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Close",
@@ -5774,6 +6011,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": null,
+    "description": "The string-keyed mapping of `Examples/Tactics/Hashing.lean`",
     "implemented_by": 0,
     "imports": [
       "Solidity.Syntax"
@@ -5796,6 +6034,7 @@
     },
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 2.25,
+    "description": "Inheritance: initialization, base constructors, `super`",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Import",
@@ -5820,6 +6059,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: Source",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Import",
@@ -5841,6 +6081,7 @@
       "theorem": 13
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "A join after a conditional (`ifElseJoin`)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.ProofTree",
@@ -5867,6 +6108,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.07777777777777778,
+    "description": "Conditional notation and signed-offset controls",
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.ProofTree",
@@ -5893,6 +6135,7 @@
     },
     "definition_lines": 66,
     "definition_to_proof_line_ratio": 1.346938775510204,
+    "description": "Declarations: U, missingBoundCountermodel, wrongBoundCountermodel",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Closers",
@@ -5918,6 +6161,7 @@
     },
     "definition_lines": 74,
     "definition_to_proof_line_ratio": 1.0277777777777777,
+    "description": "Declarations: C, \u0393, uint",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Sound.JoinSequence",
@@ -5943,6 +6187,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.05813953488372093,
+    "description": "Declarations: firstInterval, unsignedInterval, checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Closers",
@@ -5967,6 +6212,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.3333333333333333,
+    "description": "info: 17 node(s), 1 branch(es), 0 open, largest leaf 57 term node(s)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Closers",
@@ -5990,6 +6236,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "info: \\begin{aligned}",
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.LatexSolkey",
@@ -6016,6 +6263,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.2537313432835821,
+    "description": "A struct with a mapping, written and deleted \u2014 both layers",
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.Run",
@@ -6043,6 +6291,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 1.0,
+    "description": "Typed tuple annotations and partial-correctness proofs",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Surface",
@@ -6068,6 +6317,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.017857142857142856,
+    "description": "Public ordinary-diamond tuple variants",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Surface",
@@ -6095,6 +6345,7 @@
     },
     "definition_lines": 28,
     "definition_to_proof_line_ratio": 1.1666666666666667,
+    "description": "Declarations: prepared, absent, refused",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.Tactics.LibraryTrySource",
@@ -6119,6 +6370,7 @@
     },
     "definition_lines": 48,
     "definition_to_proof_line_ratio": 1.6,
+    "description": "Declarations: sender, callerAddress, libraryAddress",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.LibraryTryImport"
@@ -6142,6 +6394,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 3.0,
+    "description": "Declarations: initialIR, orderedIR, original_outputs_ir",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.Tactics.LibraryTrySource"
@@ -6166,6 +6419,7 @@
     },
     "definition_lines": 42,
     "definition_to_proof_line_ratio": 0.40384615384615385,
+    "description": "Safety and possible settlement throughout an escrow's lifetime",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Lifetime",
@@ -6191,6 +6445,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": null,
+    "description": "Binding-local width and ABI metadata",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Notation"
@@ -6213,6 +6468,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 8.0,
+    "description": "Long-array certificates with a supplied local",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.Tactics.SymbolicCounterexample"
@@ -6236,6 +6492,7 @@
     },
     "definition_lines": 28,
     "definition_to_proof_line_ratio": 7.0,
+    "description": "Literal-loop notices keep unrolling",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Import",
@@ -6263,6 +6520,7 @@
     },
     "definition_lines": 63,
     "definition_to_proof_line_ratio": 0.38414634146341464,
+    "description": "Loops",
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.Run",
@@ -6292,6 +6550,7 @@
       "theorem": 5
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Loops from solc's AST",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Import",
@@ -6318,6 +6577,7 @@
       "theorem": 29
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Memory",
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.Run",
@@ -6347,6 +6607,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: duplicatedReceiver",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Testing"
@@ -6369,6 +6630,7 @@
     },
     "definition_lines": 121,
     "definition_to_proof_line_ratio": 2.372549019607843,
+    "description": "Several returns with memory ones",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Close",
@@ -6393,6 +6655,7 @@
     },
     "definition_lines": 62,
     "definition_to_proof_line_ratio": null,
+    "description": "Native modular arithmetic",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Surface",
@@ -6420,6 +6683,7 @@
     },
     "definition_lines": 23,
     "definition_to_proof_line_ratio": 0.3898305084745763,
+    "description": "info: 'Solidity.Theory.Mutability.Transient.Program.readOnly_preserves' depends on axioms: [propext,",
     "implemented_by": 0,
     "imports": [
       "Solidity.Theory.Mutability.Pure",
@@ -6446,6 +6710,7 @@
     },
     "definition_lines": 67,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: C, getter, increment",
     "implemented_by": 0,
     "imports": [
       "Solidity.Semantics.NativeDeferred",
@@ -6467,6 +6732,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: resumed_allocation, unset_before_operand, violation_before_source",
     "implemented_by": 0,
     "imports": [
       "Solidity.Semantics.NativeDeferredCallback",
@@ -6491,6 +6757,7 @@
     },
     "definition_lines": 32,
     "definition_to_proof_line_ratio": 3.5555555555555554,
+    "description": "Declarations: C, increment, callOperand",
     "implemented_by": 0,
     "imports": [
       "Solidity.Semantics.NativeDeferred",
@@ -6517,6 +6784,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.2,
+    "description": "Nested storage arrays",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Surface",
@@ -6543,6 +6811,7 @@
     },
     "definition_lines": 23,
     "definition_to_proof_line_ratio": 0.20535714285714285,
+    "description": "Payment: what a `transfer` changes",
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.Run",
@@ -6568,6 +6837,7 @@
       "theorem": 7
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Fresh arrays and allocation-size captures",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Testing"
@@ -6589,6 +6859,7 @@
       "theorem": 9
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Nonlinear arithmetic beyond literal bounds",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Surface",
@@ -6614,6 +6885,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.16129032258064516,
+    "description": "The public correctness judgement distinguishes good and bad executions",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Surface",
@@ -6639,6 +6911,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": null,
+    "description": "Concrete formulas read scoped: `cdl!{ \u2026 }`",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Notation",
@@ -6661,6 +6934,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Formerly open solc loop obligations",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Import",
@@ -6685,6 +6959,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "`binomialRowsNine`, the nested-loop binomial over nine memory rows",
     "implemented_by": 0,
     "imports": [
       "Solidity.Examples.Tactics.OpenLoops"
@@ -6708,6 +6983,7 @@
     },
     "definition_lines": 77,
     "definition_to_proof_line_ratio": 0.3888888888888889,
+    "description": "Resolved source operator aliases",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Testing",
@@ -6731,6 +7007,7 @@
       "theorem": 13
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Operators: bitwise, shifts, `unchecked`",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Close",
@@ -6758,6 +7035,7 @@
     },
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.5,
+    "description": "A contract's own structs",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Close",
@@ -6781,6 +7059,7 @@
       "theorem": 6
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Payment: `transfer` and `send`, as `\u22a2` walks",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Surface",
@@ -6808,6 +7087,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.19230769230769232,
+    "description": "Approved conditional payment controls",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.PaymentConditions"
@@ -6831,6 +7111,7 @@
     },
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 1.0,
+    "description": "The PiggyBank callback payout body",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Close",
@@ -6861,6 +7142,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.11320754716981132,
+    "description": "Guarded payment formulas",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.CallbackDerive",
@@ -6889,6 +7171,7 @@
     },
     "definition_lines": 46,
     "definition_to_proof_line_ratio": 2.4210526315789473,
+    "description": "Declarations: alice, owner, child",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.PaymentImport"
@@ -6913,6 +7196,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.07086614173228346,
+    "description": "Diamond payments: success and countercontrols",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.PaymentWitness"
@@ -6932,6 +7216,7 @@
     "code_lines": 28,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "Polynomial size: three families",
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.ProofTree",
@@ -6957,6 +7242,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.6060606060606061,
+    "description": "Declarations: C, {\u03b1, :",
     "implemented_by": 0,
     "imports": [
       "Solidity.Semantics.PrimitiveReturnProjection",
@@ -6981,6 +7267,7 @@
     },
     "definition_lines": 51,
     "definition_to_proof_line_ratio": null,
+    "description": "Scoped taclets and formulas, printed",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Delab",
@@ -7002,6 +7289,7 @@
     "code_lines": 94,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.ProgramTrace",
@@ -7022,6 +7310,7 @@
     "code_lines": 30,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "The proof tree of a scoped goal, pinned",
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.Inspect",
@@ -7045,6 +7334,7 @@
     },
     "definition_lines": 69,
     "definition_to_proof_line_ratio": 0.552,
+    "description": "Public getters through the ordinary self-call calculus",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Testing",
@@ -7071,6 +7361,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.46511627906976744,
+    "description": "A primitive push through a complex receiver",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Testing"
@@ -7090,6 +7381,7 @@
     "code_lines": 46,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Testing",
@@ -7113,6 +7405,7 @@
     },
     "definition_lines": 25,
     "definition_to_proof_line_ratio": null,
+    "description": "Guarded native push premises",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.CallbackSound",
@@ -7133,6 +7426,7 @@
     "code_lines": 120,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "Native push rule correspondence",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.SolkeyProves",
@@ -7157,6 +7451,7 @@
     },
     "definition_lines": 63,
     "definition_to_proof_line_ratio": null,
+    "description": "Typed primitive push suffix regressions",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.SoundPush"
@@ -7178,6 +7473,7 @@
     },
     "definition_lines": 47,
     "definition_to_proof_line_ratio": null,
+    "description": "Native push suffixes from Solidity source",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Testing"
@@ -7200,6 +7496,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.029850746268656716,
+    "description": "Quantified invariants under ordinary scalar diamonds",
     "implemented_by": 0,
     "imports": [
       "Solidity.Solkey.QuantifiedDiamond",
@@ -7231,6 +7528,7 @@
     },
     "definition_lines": 62,
     "definition_to_proof_line_ratio": 0.5585585585585585,
+    "description": "A witness contract for the `reachable` mode, and its controls",
     "implemented_by": 0,
     "imports": [
       "Solidity.Theory.Reachable.CallerModel",
@@ -7258,6 +7556,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.16666666666666666,
+    "description": "Declarations: rOne, recover_generator, recover_address",
     "implemented_by": 0,
     "imports": [
       "Solidity.Secp256k1"
@@ -7281,6 +7580,7 @@
     },
     "definition_lines": 128,
     "definition_to_proof_line_ratio": 0.9411764705882353,
+    "description": "Recursive functions",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Close",

@@ -11,6 +11,7 @@
     },
     "definition_lines": 158,
     "definition_to_proof_line_ratio": null,
+    "description": "The proof tree as data, and the script it writes",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.RuleKit"
@@ -34,6 +35,7 @@
     },
     "definition_lines": 45,
     "definition_to_proof_line_ratio": 1.0714285714285714,
+    "description": "Complete arithmetic over bounded typed variables",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.ScalarCode"
@@ -57,8 +59,9 @@
       "structure": 1,
       "theorem": 56
     },
-    "definition_lines": 252,
-    "definition_to_proof_line_ratio": 0.3539325842696629,
+    "definition_lines": 243,
+    "definition_to_proof_line_ratio": 0.34129213483146065,
+    "description": "Update simplification on scoped formulas",
     "implemented_by": 9,
     "imports": [
       "Solidity.Calculus.UpdateRules"
@@ -82,6 +85,7 @@
     },
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.055944055944055944,
+    "description": "The steps after the program, on the scoped sequent",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Sound"
@@ -106,6 +110,7 @@
     },
     "definition_lines": 53,
     "definition_to_proof_line_ratio": 0.43089430894308944,
+    "description": "A visited set with logarithmic membership",
     "implemented_by": 0,
     "imports": [],
     "imports_in": 4,
@@ -124,8 +129,9 @@
     "declarations": {
       "def": 8
     },
-    "definition_lines": 102,
+    "definition_lines": 97,
     "definition_to_proof_line_ratio": null,
+    "description": "The walk on a scoped goal",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Derive",
@@ -150,6 +156,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.08,
+    "description": "A weakening's scope ends, and a loop body's frame: the syntax",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Blocks"
@@ -174,6 +181,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 1.0833333333333333,
+    "description": "The solkey corpus: what an obligation is",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Logic",
@@ -198,6 +206,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.3684210526315789,
+    "description": "The corpus's `TestSuite` is the imported one",
     "implemented_by": 0,
     "imports": [
       "Solidity.Corpus.Basic",
@@ -224,6 +233,7 @@
       "theorem": 11
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "solkey `solc/SolcArrays.sol`, ported",
     "implemented_by": 0,
     "imports": [
       "Solidity.Corpus.Basic"
@@ -245,6 +255,7 @@
       "theorem": 8
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "solkey `solc/SolcControlFlow.sol`, ported",
     "implemented_by": 0,
     "imports": [
       "Solidity.Corpus.Basic"
@@ -266,6 +277,7 @@
       "theorem": 20
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "solkey `solc/SolcExpressions.sol`, ported",
     "implemented_by": 0,
     "imports": [
       "Solidity.Corpus.Basic"
@@ -287,6 +299,7 @@
       "theorem": 9
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "solkey `solc/SolcMappings.sol`, ported",
     "implemented_by": 0,
     "imports": [
       "Solidity.Corpus.Basic"
@@ -308,6 +321,7 @@
       "theorem": 11
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "solkey `solc/SolcMemory.sol`, ported",
     "implemented_by": 0,
     "imports": [
       "Solidity.Corpus.Basic"
@@ -329,6 +343,7 @@
       "theorem": 9
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "solkey `solc/SolcStructs.sol`, ported",
     "implemented_by": 0,
     "imports": [
       "Solidity.Corpus.Basic"
@@ -350,6 +365,7 @@
       "theorem": 518
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "solkey `TestSuite.sol`, derived",
     "implemented_by": 0,
     "imports": [
       "Solidity.Corpus.Imported",
@@ -372,6 +388,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "The pre-`e67a0d7c48` delete fallthroughs were inconsistent",
     "implemented_by": 0,
     "imports": [
       "Solidity.KeySort"
@@ -393,6 +410,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "External try witnesses do not establish a callback diamond",
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.CallbackHolds"
@@ -416,6 +434,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.1891891891891892,
+    "description": "The `12e72a1b4b` sort bug, caught",
     "implemented_by": 0,
     "imports": [
       "Solidity.SortCheck.Faithfulness"
@@ -437,6 +456,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Static array and mapping sorts are not their runtime nodes",
     "implemented_by": 0,
     "imports": [
       "Solidity.Typing.Sorts"
@@ -460,6 +480,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 2.25,
+    "description": "ERC-7201 namespace integers",
     "implemented_by": 0,
     "imports": [
       "Solidity.RevertBytes",
@@ -480,6 +501,7 @@
     "code_lines": 17,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "Equation lemmas named by hand",
     "implemented_by": 0,
     "imports": [
       "Lean.Meta.Eqns",
@@ -506,6 +528,7 @@
     },
     "definition_lines": 321,
     "definition_to_proof_line_ratio": 321.0,
+    "description": "The compiler over the scoped syntax",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Layout",
@@ -531,6 +554,7 @@
     },
     "definition_lines": 232,
     "definition_to_proof_line_ratio": 0.7656765676567657,
+    "description": "The checked compiler entry",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Correct",
@@ -564,6 +588,7 @@
     },
     "definition_lines": 23,
     "definition_to_proof_line_ratio": 0.025191675794085433,
+    "description": "The scoped compiler is correct",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Stmt"
@@ -590,6 +615,7 @@
     },
     "definition_lines": 48,
     "definition_to_proof_line_ratio": 0.2513089005235602,
+    "description": "The scoped compiler at work",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compile",
@@ -612,6 +638,7 @@
       "theorem": 7
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Checked exponentiation",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Layout"
@@ -635,6 +662,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.01808785529715762,
+    "description": "Expressions over the typed run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Sim"
@@ -659,6 +687,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.031914893617021274,
+    "description": "The typed run, read off the machine",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Examples",
@@ -684,6 +713,7 @@
     },
     "definition_lines": 164,
     "definition_to_proof_line_ratio": 0.8586387434554974,
+    "description": "Storage layout and the code sequences",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Machine"
@@ -708,8 +738,9 @@
       "structure": 2,
       "theorem": 41
     },
-    "definition_lines": 290,
-    "definition_to_proof_line_ratio": 2.377049180327869,
+    "definition_lines": 289,
+    "definition_to_proof_line_ratio": 2.3688524590163933,
+    "description": "An EVM-style stack machine",
     "implemented_by": 1,
     "imports": [
       "Solidity.Semantics"
@@ -736,6 +767,7 @@
     },
     "definition_lines": 159,
     "definition_to_proof_line_ratio": 0.9244186046511628,
+    "description": "The EVM machine with revert and return data (version 2)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Machine"
@@ -759,6 +791,7 @@
     },
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.2647058823529412,
+    "description": "Version-2 EVM machine: witnesses and negative controls",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MachineV2"
@@ -783,6 +816,7 @@
     },
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 0.19444444444444445,
+    "description": "Memory arrays on the word-addressed machine",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.SimLemmas",
@@ -808,6 +842,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.08050847457627118,
+    "description": "Bump allocation in word memory",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryHeap"
@@ -831,6 +866,7 @@
     },
     "definition_lines": 45,
     "definition_to_proof_line_ratio": 2.3684210526315788,
+    "description": "Declarations: cursor, nextCursor, machine",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryAlloc"
@@ -854,6 +890,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.03424657534246575,
+    "description": "Source allocation and word-memory allocation",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryAlloc",
@@ -880,6 +917,7 @@
     },
     "definition_lines": 396,
     "definition_to_proof_line_ratio": 1.0448548812664908,
+    "description": "Declarations: C, size, cursor",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryAllocSource",
@@ -905,6 +943,7 @@
     },
     "definition_lines": 231,
     "definition_to_proof_line_ratio": 0.9352226720647774,
+    "description": "Declarations: C, bases, initial",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -932,6 +971,7 @@
     },
     "definition_lines": 292,
     "definition_to_proof_line_ratio": 4.5625,
+    "description": "Checked internal calls with memory frames",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryCompile",
@@ -956,6 +996,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.09183673469387756,
+    "description": "Capturing checked bump results on the stack",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryCompound",
@@ -984,6 +1025,7 @@
     },
     "definition_lines": 670,
     "definition_to_proof_line_ratio": 1.384297520661157,
+    "description": "A checked compiler path for primitive arrays and structs",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLocals",
@@ -1023,6 +1065,7 @@
     },
     "definition_lines": 154,
     "definition_to_proof_line_ratio": 1.305084745762712,
+    "description": "Declarations: C, H, r0",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryCompile",
@@ -1048,6 +1091,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.03816793893129771,
+    "description": "Compound writes and bumps through memory references",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStatements"
@@ -1071,6 +1115,7 @@
     },
     "definition_lines": 128,
     "definition_to_proof_line_ratio": 1.9692307692307693,
+    "description": "Storage representation bounds for reached memory copies",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStorageStructCopy"
@@ -1094,6 +1139,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.140625,
+    "description": "Declarations: vectors_heq, arrays_eq_of_vectors, array_replicate_eq",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryDefaultChildrenSim"
@@ -1117,6 +1163,7 @@
     },
     "definition_lines": 62,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: DefaultBuildResult, DefaultBuilder, DefaultBuilder.empty",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectFlatFixed"
@@ -1139,6 +1186,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.15789473684210525,
+    "description": "Declarations: defaultChildrenCopy, defaultChildrenCopy_zero, defaultChildrenCopy_succ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryDefaultBuilder",
@@ -1161,6 +1209,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: defaultChildren_sim",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryDefaultChildren"
@@ -1184,6 +1233,7 @@
     },
     "definition_lines": 23,
     "definition_to_proof_line_ratio": 3.8333333333333335,
+    "description": "Declarations: defaultCells, compileDefaultAny, compileDefault",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryDefaultDynamic"
@@ -1207,6 +1257,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.030303030303030304,
+    "description": "Declarations: referenceArrayCode, referenceArray_correct",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryDefaultFixedBuilder",
@@ -1231,6 +1282,7 @@
     },
     "definition_lines": 65,
     "definition_to_proof_line_ratio": 10.833333333333334,
+    "description": "Declarations: fixedDefaultPrefix, fixedDefaultCode, fixedDefaultPrefix_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryDefaultParent"
@@ -1252,6 +1304,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: objectCells_array, AllocatorRepr.adoptDefaultParent, defaultLoop_exit",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryDefaultArraySource"
@@ -1275,6 +1328,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.25,
+    "description": "Primitive memory deletion",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStatements"
@@ -1298,6 +1352,7 @@
     },
     "definition_lines": 29,
     "definition_to_proof_line_ratio": 0.26126126126126126,
+    "description": "Declarations: C, child, parent",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -1322,6 +1377,7 @@
     },
     "definition_lines": 40,
     "definition_to_proof_line_ratio": 1.8181818181818181,
+    "description": "Declarations: H, ref, base",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Memory"
@@ -1345,6 +1401,7 @@
     },
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.10256410256410256,
+    "description": "Composing typed value code",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemorySource"
@@ -1369,6 +1426,7 @@
     },
     "definition_lines": 236,
     "definition_to_proof_line_ratio": 2.2264150943396226,
+    "description": "Declarations: first, other, element",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -1393,6 +1451,7 @@
     },
     "definition_lines": 80,
     "definition_to_proof_line_ratio": 0.6201550387596899,
+    "description": "Declarations: C, childTy, parentTy",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler"
@@ -1418,6 +1477,7 @@
     },
     "definition_lines": 190,
     "definition_to_proof_line_ratio": 0.979381443298969,
+    "description": "A typed, memory-preserving fixed-copy compiler fragment",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryFixedMixedCopy",
@@ -1443,6 +1503,7 @@
     },
     "definition_lines": 114,
     "definition_to_proof_line_ratio": 1.4074074074074074,
+    "description": "Initialized, inhabited fixed primitive-array inputs to the public compiler.",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -1467,6 +1528,7 @@
     },
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 0.26582278481012656,
+    "description": "Declarations: C, child, parent",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -1491,6 +1553,7 @@
     },
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 0.3291139240506329,
+    "description": "Declarations: C, child, parent",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -1513,6 +1576,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: assignFixedAwareArray_correct, assignFixedAwareStruct_correct",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryFixedShapeSource"
@@ -1536,6 +1600,7 @@
     },
     "definition_lines": 43,
     "definition_to_proof_line_ratio": 0.35537190082644626,
+    "description": "Declarations: C, name, H",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -1560,6 +1625,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.26153846153846155,
+    "description": "Declarations: keepCopy, popRange, fixedClear",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryFixedStorageCopy"
@@ -1581,6 +1647,7 @@
       "theorem": 7
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: primStrip, primOverlay, fixedPadStore_live",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryFixedShapeCode"
@@ -1604,6 +1671,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.0759493670886076,
+    "description": "Declarations: FixedStateRepr.storeDrop, assignFixedDynamicCode, assignFixedPadCode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryFixedShapeLaws"
@@ -1628,6 +1696,7 @@
     },
     "definition_lines": 27,
     "definition_to_proof_line_ratio": 0.2647058823529412,
+    "description": "Primitive fixed memory payloads copied to inline storage",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStorageStructCopy"
@@ -1651,6 +1720,7 @@
     },
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.43902439024390244,
+    "description": "Memory results with fresh identities",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryAllocSource"
@@ -1674,6 +1744,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.12698412698412698,
+    "description": "Separated memory objects",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Memory"
@@ -1697,6 +1768,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.04455445544554455,
+    "description": "Local operations in the memory compiler",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemorySource"
@@ -1722,6 +1794,7 @@
     },
     "definition_lines": 45,
     "definition_to_proof_line_ratio": 0.31690140845070425,
+    "description": "Checked memory loops",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryCompile"
@@ -1745,6 +1818,7 @@
     },
     "definition_lines": 50,
     "definition_to_proof_line_ratio": 0.9090909090909091,
+    "description": "Declarations: C, \u0393, R",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopExamples"
@@ -1770,6 +1844,7 @@
     },
     "definition_lines": 135,
     "definition_to_proof_line_ratio": 0.6553398058252428,
+    "description": "Declarations: StmtCert, ProgCert, StmtCert.Cost",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoop"
@@ -1793,6 +1868,7 @@
     },
     "definition_lines": 35,
     "definition_to_proof_line_ratio": 0.7,
+    "description": "Declarations: condition, loopStmt, program",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -1819,6 +1895,7 @@
     },
     "definition_lines": 31,
     "definition_to_proof_line_ratio": 0.17415730337078653,
+    "description": "Declarations: CountedLoopPrefix, CountedLoopPrefix.forget, iterN_succ_of_pending",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizon"
@@ -1842,6 +1919,7 @@
     },
     "definition_lines": 38,
     "definition_to_proof_line_ratio": 0.6229508196721312,
+    "description": "Declarations: C, \u0393, R",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopFiniteHorizon",
@@ -1867,6 +1945,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.19767441860465115,
+    "description": "Public finite-horizon transport for the actual memory-loop source and target",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoop"
@@ -1890,6 +1969,7 @@
     },
     "definition_lines": 40,
     "definition_to_proof_line_ratio": 1.0256410256410255,
+    "description": "Declarations: C, \u0393, R",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizon",
@@ -1912,6 +1992,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: iterN_add_of_pending, loopIterN_add_of_pending",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopFiniteHorizon"
@@ -1933,6 +2014,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: source_append, target_append",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonAppend",
@@ -1956,6 +2038,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: FiniteLoopRoom.succ_iff, FiniteLoopRoom.succ_of_stopped",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonRestriction"
@@ -1977,6 +2060,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: stop_room_one, spin_room_one, stop_transport",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonCapacity",
@@ -1999,6 +2083,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: CountedHorizonRelation.completed_state, LoopCert.target_completed_prefix, LoopCert.completed_runs",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopFiniteHorizon"
@@ -2020,6 +2105,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: LoopCert.completed_allocator",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonCompleted",
@@ -2042,6 +2128,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: stop_zero_prefix",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonCompletedAllocator",
@@ -2065,6 +2152,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: stop_target_one, stop_runs",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonCompleted",
@@ -2089,6 +2177,7 @@
     },
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 0.9130434782608695,
+    "description": "Declarations: stop, spin, body",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizon",
@@ -2111,6 +2200,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: CountedLoopPrefix.state_unique, CountedLoopPrefix.cost_unique, countedPrefix_of_iterN_pending_unique",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopFiniteHorizon"
@@ -2132,6 +2222,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: spin_source_one, spin_unique_zero_cost",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonCost",
@@ -2154,6 +2245,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: CountedLoopPrefix.cost_le, CountedLoopPrefix.extend_pending_mono",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonCost"
@@ -2175,6 +2267,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: spin_source_two, spin_extension, allocating_cost_exact",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonCostGrowth",
@@ -2200,6 +2293,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.4230769230769231,
+    "description": "Declarations: body, code, cert",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectFinite"
@@ -2221,6 +2315,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: body_run_ok, prefixes, source_pending",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectAllocating"
@@ -2242,6 +2337,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: target_pending, target_allocator",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectAllocatingPrefixes",
@@ -2265,6 +2361,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: ProgFrag.correct_scope",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectConstructionCompile",
@@ -2287,6 +2384,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: FiniteLoopRoom.restrict, FiniteLoopRoom.succ_iff, FiniteLoopRoom.succ_of_stopped",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectPrefix"
@@ -2308,6 +2406,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: bounded_horizons",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectCompileAllocating",
@@ -2330,6 +2429,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: checked_nested_reads_after_loop",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectAllocatingTarget"
@@ -2351,6 +2451,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: checked_local_reads_after_loop",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectAllocatingTarget"
@@ -2375,6 +2476,7 @@
     },
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.6666666666666666,
+    "description": "Declarations: CompiledLoop, compileLoop, CompiledLoop.correct_finite_horizon",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectFinite"
@@ -2396,6 +2498,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: selected, represented",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectCompile",
@@ -2418,6 +2521,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: CountedHorizonRelation.completed_state, LoopCert.target_completed_prefix, LoopCert.completed_runs",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectFinite"
@@ -2439,6 +2543,7 @@
       "theorem": 5
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: CountedLoopPrefix.state_unique, CountedLoopPrefix.cost_unique, countedPrefix_of_iterN_pending_unique",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectCoverage"
@@ -2460,6 +2565,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: CountedLoopPrefix.extend_pending, countedPrefix_of_iterN_pending",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectPrefix"
@@ -2481,6 +2587,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: bounded_execution",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectAllocatingTarget",
@@ -2506,6 +2613,7 @@
     },
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.16842105263157894,
+    "description": "Declarations: CountedHorizonRelation, CountedHorizonRelation.forget, LoopCert.finite_horizon_step",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectStep"
@@ -2529,6 +2637,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.15384615384615385,
+    "description": "Declarations: cert, represented, populated_horizons",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectFinite",
@@ -2551,6 +2660,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: bounded_heap_execution",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectCursorControls",
@@ -2573,6 +2683,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: body_heap_length, prefix_heap_length",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectAllocatingPrefixes"
@@ -2594,6 +2705,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: body_keeps_heap, prefix_keeps_heap",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectAllocatingPrefixes"
@@ -2615,6 +2727,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: body_heap_types, prefix_heap_types",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectAllocatingPrefixes"
@@ -2638,6 +2751,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.3793103448275862,
+    "description": "Declarations: OriginalLiveCell, target_old_live_cells",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectOldHeaders",
@@ -2660,6 +2774,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: body_local_ref, prefix_local_ref, target_local_aliases",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectAllocatingTarget",
@@ -2682,6 +2797,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: populated_aliases",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectLocalAlias",
@@ -2704,6 +2820,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: target_local_array_bounds",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectLocalAlias",
@@ -2726,6 +2843,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: populated_read_outcomes",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectLocalRefLoads",
@@ -2749,6 +2867,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: target_local_array_loads",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectLocalAlias",
@@ -2771,6 +2890,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: target_local_array_reads",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectLocalAlias",
@@ -2793,6 +2913,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: target_local_reference_loads",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectLocalAlias",
@@ -2815,6 +2936,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: target_nested_array_bounds",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectLocalRefLoads",
@@ -2839,6 +2961,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.17142857142857143,
+    "description": "Declarations: nestedCode, populated_nested_outcomes",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectNestedLoads",
@@ -2863,6 +2986,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: target_nested_array_loads",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectLocalRefLoads"
@@ -2884,6 +3008,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: body_ref_cases, prefix_new_empty, target_new_array_headers",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectAllocatingTarget",
@@ -2906,6 +3031,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: prefix_new_ref, target_new_array_inventory",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectNewArrays",
@@ -2928,6 +3054,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: target_new_array_separation",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectNewInventory",
@@ -2950,6 +3077,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: two_fresh_arrays",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectNewSeparation",
@@ -2972,6 +3100,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: finiteLoopRoom_iff_observations, LoopCert.correct_horizon_of_observation_room",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectCost",
@@ -2994,6 +3123,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: value_word_unique, target_old_array_elements",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectAllocatingTarget",
@@ -3016,6 +3146,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: target_old_array_headers",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectAllocatingTarget",
@@ -3038,6 +3169,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: target_old_struct_primitive_fields, target_old_struct_reference_fields",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectOldElements"
@@ -3059,6 +3191,7 @@
       "theorem": 6
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: CountedHorizonRelation.pending_iff, CountedHorizonRelation.revert_iff, CountedHorizonRelation.no_fault",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectFinite"
@@ -3080,6 +3213,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: CountedHorizonRelation.pending_state, LoopCert.target_pending_prefix, LoopCert.pending_allocator",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectFinite"
@@ -3104,6 +3238,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.5384615384615384,
+    "description": "Declarations: CountedLoopPrefix, FiniteLoopRoom, CountedLoopPrefix.iterN_eq",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectConstructionCompile",
@@ -3126,6 +3261,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: LoopCert.resume_pending",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectPendingAllocator",
@@ -3148,6 +3284,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: target_retained_new_headers",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectNewInventory",
@@ -3171,6 +3308,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: target_retained_new_refs",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectNewInventory",
@@ -3195,6 +3333,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.30303030303030304,
+    "description": "Declarations: LoopRunResult, LoopCert.correct_runs",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectFinite"
@@ -3216,6 +3355,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: StateRepr.drop, GrowingResult.drop",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectAllocationCost",
@@ -3238,6 +3378,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: populated_drop",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectScope",
@@ -3260,6 +3401,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: FiniteLoopRoom.after_completion, LoopCert.correct_horizons_after_completion",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectFinite"
@@ -3281,6 +3423,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: LoopCert.correct, LoopCert.correct_of_terminal",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectRuns",
@@ -3303,6 +3446,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: represented, populated_runs",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectStatement",
@@ -3328,6 +3472,7 @@
     },
     "definition_lines": 22,
     "definition_to_proof_line_ratio": 0.5,
+    "description": "Declarations: LoopCert, HorizonRelation, LoopCert.horizon_step",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectCoverage",
@@ -3350,6 +3495,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: CountedLoopPrefix.cost_le_turns, finiteLoopRoom_of_turn_bound",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectPrefix"
@@ -3371,6 +3517,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: finiteLoopRoom_iff_observations, LoopCert.correct_horizon_of_observation_room",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonCost"
@@ -3392,6 +3539,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: represented",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObservedRoom",
@@ -3414,6 +3562,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: CountedHorizonRelation.pending_iff, CountedHorizonRelation.revert_iff, CountedHorizonRelation.no_fault",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopFiniteHorizon"
@@ -3435,6 +3584,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: no_fault, pending_agreement",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonOutcomes",
@@ -3457,6 +3607,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: CountedHorizonRelation.pending_state, LoopCert.target_pending_prefix",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopFiniteHorizon"
@@ -3478,6 +3629,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: spin_target_one, spin_prefix_one",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonPending",
@@ -3500,6 +3652,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: FiniteLoopRoom.prefix_input, LoopCert.pending_allocator",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonPending"
@@ -3521,6 +3674,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: body_run, allocating_input",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonPrefixCapacity",
@@ -3543,6 +3697,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: FiniteLoopRoom.restrict, LoopCert.correct_horizons_le",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopFiniteHorizon"
@@ -3564,6 +3719,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: represented",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonRestriction",
@@ -3586,6 +3742,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: LoopCert.resume_pending",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonPending",
@@ -3608,6 +3765,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: spin_resume",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonResume",
@@ -3630,6 +3788,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: LoopCert.finite_revert_iff, LoopCert.reverted_runs",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonOutcomes"
@@ -3653,6 +3812,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.42105263157894735,
+    "description": "Declarations: condition, compiled, cert",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonRevert",
@@ -3675,6 +3835,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: FiniteLoopRoom.after_completion, LoopCert.correct_horizons_after_completion",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopFiniteHorizon"
@@ -3696,6 +3857,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: stop_source_one, stop_all_horizons",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonStability",
@@ -3718,6 +3880,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: CountedLoopPrefix.cost_le_turns, finiteLoopRoom_of_turn_bound",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopFiniteHorizon"
@@ -3741,6 +3904,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.3,
+    "description": "Declarations: body, body_cost, allocating_room",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonTurnBound"
@@ -3764,6 +3928,7 @@
     },
     "definition_lines": 112,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: singleton, StmtCert, ProgCert",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopCompile"
@@ -3786,6 +3951,7 @@
     },
     "definition_lines": 85,
     "definition_to_proof_line_ratio": 0.4594594594594595,
+    "description": "Declarations: C, \u0393, R",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopExamples",
@@ -3811,6 +3977,7 @@
     },
     "definition_lines": 36,
     "definition_to_proof_line_ratio": 0.34285714285714286,
+    "description": "Declarations: OldCostView, old_cost_view, singleton_finite_cost",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopScopeDemand"
@@ -3833,8 +4000,9 @@
       "structure": 2,
       "theorem": 9
     },
-    "definition_lines": 92,
-    "definition_to_proof_line_ratio": 0.696969696969697,
+    "definition_lines": 90,
+    "definition_to_proof_line_ratio": 0.6818181818181818,
+    "description": "Declarations: CompiledStmt, CompiledProg, compileBase",
     "implemented_by": 2,
     "imports": [
       "Solidity.Evm.MemoryLoopScopeRoom"
@@ -3858,6 +4026,7 @@
     },
     "definition_lines": 28,
     "definition_to_proof_line_ratio": 0.35443037974683544,
+    "description": "Declarations: StmtDemandView, DemandView, StmtDemand.view",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopScopeRoom"
@@ -3881,6 +4050,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.109375,
+    "description": "Declarations: trueSpin, trueSpin_diverges, spinCondition",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -3906,6 +4076,7 @@
     },
     "definition_lines": 35,
     "definition_to_proof_line_ratio": 1.1666666666666667,
+    "description": "Declarations: cond, turns, blockTurns",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -3928,8 +4099,9 @@
       "def": 8,
       "theorem": 2
     },
-    "definition_lines": 49,
-    "definition_to_proof_line_ratio": 1.8846153846153846,
+    "definition_lines": 47,
+    "definition_to_proof_line_ratio": 1.8076923076923077,
+    "description": "Declarations: stmtMetaM, progMetaM, stmtMeta",
     "implemented_by": 2,
     "imports": [
       "Solidity.Evm.MemoryLoopScope"
@@ -3951,6 +4123,7 @@
       "theorem": 9
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: old_stmt_cost_zero, old_cost_zero, cost_nonallocating",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopScopeSound"
@@ -3974,6 +4147,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.06666666666666667,
+    "description": "Declarations: StmtSound, ProgSound, run_singleton",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopScopeMeta"
@@ -3997,6 +4171,7 @@
     },
     "definition_lines": 51,
     "definition_to_proof_line_ratio": 0.9272727272727272,
+    "description": "Declarations: C, irC, bases",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopAllocExamples",
@@ -4022,6 +4197,7 @@
     },
     "definition_lines": 51,
     "definition_to_proof_line_ratio": 0.9272727272727272,
+    "description": "Declarations: C, irC, bases",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopAllocExamples",
@@ -4048,6 +4224,7 @@
     },
     "definition_lines": 33,
     "definition_to_proof_line_ratio": 0.4125,
+    "description": "Declarations: Certificate, Prefix, Room",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizon",
@@ -4073,6 +4250,7 @@
     },
     "definition_lines": 22,
     "definition_to_proof_line_ratio": 0.6111111111111112,
+    "description": "Declarations: C, \u0393, R",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryMixedLoopCompile",
@@ -4100,6 +4278,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.1527777777777778,
+    "description": "Declarations: Prefix.cost_zero, room_nonallocating, room_one_turn",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryMixedLoop"
@@ -4124,6 +4303,7 @@
     },
     "definition_lines": 36,
     "definition_to_proof_line_ratio": 1.125,
+    "description": "Declarations: D, condition, reset",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryMixedLoopCompile",
@@ -4150,6 +4330,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.1956521739130435,
+    "description": "Declarations: D, yes, no",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryMixedLoopCompile",
@@ -4175,6 +4356,7 @@
     },
     "definition_lines": 31,
     "definition_to_proof_line_ratio": 0.25833333333333336,
+    "description": "Declarations: CountedPrefix, CountedPrefix.forget, CountedPrefix.iterN_eq",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryMixedLoopCompile",
@@ -4199,6 +4381,7 @@
     },
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 0.26582278481012656,
+    "description": "Declarations: C, child, parent",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -4223,6 +4406,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.09243697478991597,
+    "description": "Declarations: fixedAddrCode, addressCode, readCode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjects"
@@ -4246,6 +4430,7 @@
     },
     "definition_lines": 38,
     "definition_to_proof_line_ratio": 0.926829268292683,
+    "description": "Declarations: GrowingResult, ResultRepr.growing, arrayCost",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectPrimitive",
@@ -4271,6 +4456,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.17592592592592593,
+    "description": "Declarations: HeapRepr.mem_eq, AllocatorRepr, AllocatorRepr.legacy",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectFrame"
@@ -4294,6 +4480,7 @@
     },
     "definition_lines": 101,
     "definition_to_proof_line_ratio": 0.7112676056338029,
+    "description": "Declarations: C, childTy, parentTy",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -4318,6 +4505,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.2962962962962963,
+    "description": "Declarations: childrenCondition, storeChild, childrenBody",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectReserve"
@@ -4341,6 +4529,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.05263157894736842,
+    "description": "Declarations: childrenCopy, childrenCopy_zero, childrenCopy_succ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectChildLoop"
@@ -4362,6 +4551,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: storeChildMachine_eq, children_sim",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectChildrenCopy"
@@ -4387,6 +4577,7 @@
     },
     "definition_lines": 72,
     "definition_to_proof_line_ratio": 1.6,
+    "description": "Declarations: StmtFrag, ProgFrag, CompiledStmt",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectStatements",
@@ -4413,6 +4604,7 @@
     },
     "definition_lines": 107,
     "definition_to_proof_line_ratio": 0.4495798319327731,
+    "description": "Declarations: StmtFrag, ProgFrag, CompiledStmt",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectAllocationCost",
@@ -4437,6 +4629,7 @@
     },
     "definition_lines": 83,
     "definition_to_proof_line_ratio": 0.4256410256410256,
+    "description": "Declarations: C, child, parent",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -4461,6 +4654,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.04,
+    "description": "Declarations: StateRepr.adopt, nested_decl, nested_rebind",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectNested",
@@ -4485,6 +4679,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.005917159763313609,
+    "description": "Declarations: emptyArray, emptyArray_copy, newEmptyArray_copy",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectGrow",
@@ -4509,6 +4704,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.019230769230769232,
+    "description": "Declarations: ValueSim, binaryValue_correct, unaryValue_correct",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectAllocator",
@@ -4531,6 +4727,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: cells_setStruct, HeapRepr.setStruct, StateRepr.setStruct",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectValues",
@@ -4555,6 +4752,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.031746031746031744,
+    "description": "Declarations: defaultFixed, copyPrimitiveDefaults, defaultFixed_copy",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectFlatStruct"
@@ -4578,6 +4776,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.0423728813559322,
+    "description": "Declarations: objectCells, cells_alloc_fresh, Ownership.adopt",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectReserve",
@@ -4600,6 +4799,7 @@
       "theorem": 11
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: Ownership.base_injective, cells_set, Ownership.setArray",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectAccess"
@@ -4621,6 +4821,7 @@
       "theorem": 5
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: allocRef_split, ValueRepr.wk, cells_keeps",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectAllocator",
@@ -4645,6 +4846,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.08256880733944955,
+    "description": "Declarations: nestedCopy, nestedCopy_source, nestedPrefix",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectChildrenSim"
@@ -4670,6 +4872,7 @@
     },
     "definition_lines": 30,
     "definition_to_proof_line_ratio": 0.3,
+    "description": "Declarations: PtrFrag, CompiledPtr, compilePtrAny",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectAllocator"
@@ -4691,6 +4894,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: AllocatorRepr.allocatePrimitive, StateRepr.allocatePrimitive, primitiveDeclare_correct",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectConstructionSource"
@@ -4714,6 +4918,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.05172413793103448,
+    "description": "Declarations: Gap, AllocatorRepr.reserveArray, AllocatorRepr.writeGap",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectEmpty"
@@ -4739,6 +4944,7 @@
     },
     "definition_lines": 22,
     "definition_to_proof_line_ratio": 0.1437908496732026,
+    "description": "Declarations: SrcFrag, CompiledSrc, compileSrc",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectValues",
@@ -4765,6 +4971,7 @@
     },
     "definition_lines": 54,
     "definition_to_proof_line_ratio": 3.375,
+    "description": "Declarations: ValFrag, CompiledVal, compileVal",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectPaths",
@@ -4790,6 +4997,7 @@
     },
     "definition_lines": 34,
     "definition_to_proof_line_ratio": 0.2956521739130435,
+    "description": "Typed ownership of every represented memory object",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRefArrayState"
@@ -4813,6 +5021,7 @@
     },
     "definition_lines": 311,
     "definition_to_proof_line_ratio": 1.2244094488188977,
+    "description": "Declarations: C, leafName, holderName",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler"
@@ -4838,6 +5047,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.11299435028248588,
+    "description": "Typed pointer paths through memory structs",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructSource"
@@ -4861,6 +5071,7 @@
     },
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 0.26582278481012656,
+    "description": "Declarations: C, child, parent",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -4885,6 +5096,7 @@
     },
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 0.65,
+    "description": "Declarations: C, \u0393, R",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveRoom",
@@ -4910,6 +5122,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.3392857142857143,
+    "description": "Declarations: stmtShape, stmt_shape, progShape",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveComposition"
@@ -4934,6 +5147,7 @@
     },
     "definition_lines": 27,
     "definition_to_proof_line_ratio": 1.173913043478261,
+    "description": "Declarations: D, \u0393, state",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveBranchRoom",
@@ -4958,8 +5172,9 @@
       "inductive": 7,
       "theorem": 2
     },
-    "definition_lines": 130,
-    "definition_to_proof_line_ratio": 6.5,
+    "definition_lines": 128,
+    "definition_to_proof_line_ratio": 6.4,
+    "description": "Declarations: StmtCert, ProgCert, StmtCost",
     "implemented_by": 2,
     "imports": [
       "Solidity.Evm.MemoryRecursiveLiftFull"
@@ -4982,8 +5197,9 @@
       "structure": 2,
       "theorem": 3
     },
-    "definition_lines": 116,
-    "definition_to_proof_line_ratio": 1.3975903614457832,
+    "definition_lines": 114,
+    "definition_to_proof_line_ratio": 1.3734939759036144,
+    "description": "Declarations: CompiledStmt, CompiledProg, compileBase",
     "implemented_by": 2,
     "imports": [
       "Solidity.Evm.MemoryRecursiveSound"
@@ -5007,6 +5223,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.22727272727272727,
+    "description": "Declarations: block, block_found, branch",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveNesting"
@@ -5031,6 +5248,7 @@
     },
     "definition_lines": 23,
     "definition_to_proof_line_ratio": 0.71875,
+    "description": "Declarations: D, left, \u039e",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveNestingBudget",
@@ -5056,6 +5274,7 @@
     },
     "definition_lines": 40,
     "definition_to_proof_line_ratio": 0.8695652173913043,
+    "description": "Declarations: D, condition, effects",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveHorizon",
@@ -5078,6 +5297,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: demand_cons_base_nonallocating_le, cost_cons_base_nonallocating_le, stmtDemand_loop_one_turn_le",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveDemandViews"
@@ -5101,6 +5321,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.2777777777777778,
+    "description": "Declarations: stmtDemand_base, stmtCost_base, stmtDemand_loop",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveBranchRoom",
@@ -5126,6 +5347,7 @@
     },
     "definition_lines": 30,
     "definition_to_proof_line_ratio": 0.6666666666666666,
+    "description": "Declarations: StmtCert.pushes_zero, ProgCert.pushes_zero, Choice",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -5151,6 +5373,7 @@
     },
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.72,
+    "description": "Declarations: D, program, recursiveOut",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveNesting",
@@ -5176,6 +5399,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.16666666666666666,
+    "description": "Declarations: D, yes, inner",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveHorizon",
@@ -5201,6 +5425,7 @@
     },
     "definition_lines": 31,
     "definition_to_proof_line_ratio": 0.25833333333333336,
+    "description": "Declarations: CountedPrefix, CountedPrefix.forget, CountedPrefix.iterN_eq",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveLift",
@@ -5223,6 +5448,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: ProgCert.loop_horizon, loop_room_nonallocating, ProgCert.loop_finite_horizon",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveRoom",
@@ -5249,6 +5475,7 @@
     },
     "definition_lines": 42,
     "definition_to_proof_line_ratio": 0.525,
+    "description": "Declarations: BodyProfile, BodyProfile.Sound, Certificate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizon",
@@ -5274,6 +5501,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.09302325581395349,
+    "description": "Declarations: BodyProfile.ofScope, BodyProfile.ofScope_sound, Certificate.correct",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveLift"
@@ -5297,6 +5525,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.20930232558139536,
+    "description": "Declarations: restrict_self, loopProgram, wrap",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveDispatch"
@@ -5318,6 +5547,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: compile_every_depth_budget, execution_every_depth",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveComposition"
@@ -5339,6 +5569,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: room_one_turn, loop_room_one_turn, ProgCert.loop_correct_one_turn",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveHorizon"
@@ -5360,8 +5591,9 @@
       "def": 4,
       "theorem": 10
     },
-    "definition_lines": 28,
-    "definition_to_proof_line_ratio": 0.1958041958041958,
+    "definition_lines": 26,
+    "definition_to_proof_line_ratio": 0.18181818181818182,
+    "description": "Declarations: stmtallocatesM, progallocatesM, StmtCert.allocates",
     "implemented_by": 2,
     "imports": [
       "Solidity.Evm.MemoryRecursiveCompile"
@@ -5385,6 +5617,7 @@
     },
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.07936507936507936,
+    "description": "Declarations: StmtSound, ProgSound, base_sound",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveCert"
@@ -5409,6 +5642,7 @@
     },
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 0.17105263157894737,
+    "description": "Identity words in dynamic memory arrays",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRefs"
@@ -5434,6 +5668,7 @@
     },
     "definition_lines": 56,
     "definition_to_proof_line_ratio": 1.5135135135135136,
+    "description": "Declarations: StmtFrag, ProgFrag, CompiledStmt",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRefArrayStatements"
@@ -5457,6 +5692,7 @@
     },
     "definition_lines": 63,
     "definition_to_proof_line_ratio": 0.4772727272727273,
+    "description": "Declarations: C, childTy, parentTy",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler"
@@ -5482,6 +5718,7 @@
     },
     "definition_lines": 30,
     "definition_to_proof_line_ratio": 0.7692307692307693,
+    "description": "Declarations: RefPtrFrag, CompiledRefPtr, compileRefPtrAny",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRefArrayState",
@@ -5506,6 +5743,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.03669724770642202,
+    "description": "Declarations: RefArrayStateRepr, RefArrayStateRepr.push, RefArrayStateRepr.setMem",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRefArray",
@@ -5530,6 +5768,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.03333333333333333,
+    "description": "Declarations: RefArrayResultRepr, RefPtrFrag.run_of_eval, RefPtrFrag.rebind",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRefArrayPaths"
@@ -5553,6 +5792,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.016260162601626018,
+    "description": "Fresh defaults for reference-valued memory members",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRefWrite",
@@ -5575,6 +5815,7 @@
       "theorem": 11
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Reference-valued member assignment",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryPaths"
@@ -5598,6 +5839,7 @@
     },
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 0.26582278481012656,
+    "description": "Declarations: C, child, parent",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -5622,6 +5864,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.051094890510948905,
+    "description": "Declarations: reference_decl, reference_rebind, referenceDeclareCode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryDefaultCompile",
@@ -5646,6 +5889,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.026845637583892617,
+    "description": "Declarations: RefFieldsRepr, RefFieldsRepr.withoutStructs, RefFieldsRepr.mem_eq",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructGrow"
@@ -5667,6 +5911,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Scope exit in the memory simulation",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryGrowResult"
@@ -5691,6 +5936,7 @@
     },
     "definition_lines": 37,
     "definition_to_proof_line_ratio": 0.21264367816091953,
+    "description": "Scoped source operations on represented memory",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryHeap",
@@ -5717,6 +5963,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.06,
+    "description": "Memory programs with guards and primitive storage writes",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLocals"
@@ -5742,6 +5989,7 @@
     },
     "definition_lines": 31,
     "definition_to_proof_line_ratio": 0.3974358974358974,
+    "description": "Declarations: StmtFrag, ProgFrag, CompiledStmt",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStorageObjectCopy"
@@ -5765,6 +6013,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.19718309859154928,
+    "description": "Runtime-length array copy code",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStorageCopyLoop"
@@ -5791,6 +6040,7 @@
     },
     "definition_lines": 582,
     "definition_to_proof_line_ratio": 1.1524752475247524,
+    "description": "Copy-bearing finite-memory certificates",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryCompile",
@@ -5815,6 +6065,7 @@
     },
     "definition_lines": 140,
     "definition_to_proof_line_ratio": 1.12,
+    "description": "Nonvacuous checked compiler inputs and source/compiled observations for",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -5839,6 +6090,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.03529411764705882,
+    "description": "Typed source laws for memory-to-storage array copies",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStorageCopyCode",
@@ -5863,6 +6115,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.07432432432432433,
+    "description": "Iterative memory-to-storage word copies",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Memory"
@@ -5886,6 +6139,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.06521739130434782,
+    "description": "Source simulation of runtime-length memory-to-storage copies",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStorageCopyLaws",
@@ -5910,6 +6164,7 @@
     },
     "definition_lines": 61,
     "definition_to_proof_line_ratio": 1.3863636363636365,
+    "description": "Declarations: C, recordName, \u0394",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -5932,6 +6187,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: Objects.StateRepr.fixedCopy, restoreObjects, restoreAllocator",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryFixedCompile",
@@ -5956,6 +6212,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.04411764705882353,
+    "description": "Primitive-member memory-to-storage struct copies",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStorageCopySource",
@@ -5981,6 +6238,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.12941176470588237,
+    "description": "Primitive fields in memory structs",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Memory"
@@ -6004,6 +6262,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.11864406779661017,
+    "description": "Allocator ownership of represented structs",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructHeap",
@@ -6028,6 +6287,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.036585365853658534,
+    "description": "Primitive array constructor arguments stored into memory members",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructDefaultSource"
@@ -6051,6 +6311,7 @@
     },
     "definition_lines": 57,
     "definition_to_proof_line_ratio": 0.5588235294117647,
+    "description": "Declarations: C, leaf, holderName",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler"
@@ -6074,6 +6335,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.05434782608695652,
+    "description": "Primitive-member struct copies",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructDefault"
@@ -6095,6 +6357,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Reserving a populated primitive struct",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructCopyCode"
@@ -6120,6 +6383,7 @@
     },
     "definition_lines": 36,
     "definition_to_proof_line_ratio": 0.24324324324324326,
+    "description": "Loading and initializing copied struct members",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructCopy",
@@ -6144,6 +6408,7 @@
     },
     "definition_lines": 71,
     "definition_to_proof_line_ratio": 1.0441176470588236,
+    "description": "Ordinary Solidity storage-to-memory copies retain populated primitive values",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -6168,6 +6433,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.06666666666666667,
+    "description": "Storage-to-memory primitive struct simulation",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructCopyAlloc"
@@ -6191,6 +6457,7 @@
     },
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.09615384615384616,
+    "description": "Source allocation of primitive structs",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructSource",
@@ -6217,6 +6484,7 @@
     },
     "definition_lines": 33,
     "definition_to_proof_line_ratio": 0.3793103448275862,
+    "description": "Executable finite-default layouts and their certificates",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructDefaultPlan"
@@ -6240,6 +6508,7 @@
     },
     "definition_lines": 268,
     "definition_to_proof_line_ratio": 1.6242424242424243,
+    "description": "Ordinary Solidity struct literals use the default-allocation compiler clause",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -6264,6 +6533,7 @@
     },
     "definition_lines": 35,
     "definition_to_proof_line_ratio": 0.4375,
+    "description": "Finite default-allocation sizes",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructDefault"
@@ -6288,6 +6558,7 @@
     },
     "definition_lines": 117,
     "definition_to_proof_line_ratio": 0.78,
+    "description": "Certificates for finite default construction",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructReferenceCode",
@@ -6313,6 +6584,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: DefaultPlan.declare_correct, StateRepr.stack, DefaultPlan.deleteLocal_correct",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructDefaultPlan"
@@ -6336,6 +6608,7 @@
     },
     "definition_lines": 137,
     "definition_to_proof_line_ratio": 0.5393700787401575,
+    "description": "Declarations: H, r0, r1",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructGrow",
@@ -6360,6 +6633,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.025,
+    "description": "Allocation with live structs",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructAlloc"
@@ -6384,6 +6658,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.088,
+    "description": "Framing primitive struct fields",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStruct",
@@ -6406,6 +6681,7 @@
       "theorem": 5
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Allocating a struct with initialized reference members",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructCopyAlloc"
@@ -6429,6 +6705,7 @@
     },
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.08421052631578947,
+    "description": "Initializing a parent with previously allocated children",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructReferenceAlloc"
@@ -6452,6 +6729,7 @@
     },
     "definition_lines": 46,
     "definition_to_proof_line_ratio": 0.8679245283018868,
+    "description": "Declarations: deletion, deleteCompiled, delete_cost",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructReferenceDefaultLiterals"
@@ -6475,6 +6753,7 @@
     },
     "definition_lines": 82,
     "definition_to_proof_line_ratio": 1.2058823529411764,
+    "description": "Declarations: C, bases, initial",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -6499,6 +6778,7 @@
     },
     "definition_lines": 47,
     "definition_to_proof_line_ratio": 2.238095238095238,
+    "description": "Declarations: legacy, viaIR, legacyCompiled",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructReferenceDefaultModes"
@@ -6522,6 +6802,7 @@
     },
     "definition_lines": 45,
     "definition_to_proof_line_ratio": 1.1842105263157894,
+    "description": "Declarations: C, bases, initial",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructReferenceDefaultExamples"
@@ -6545,6 +6826,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.10526315789473684,
+    "description": "Scoped primitive struct fields",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLocals"
@@ -6569,6 +6851,7 @@
     },
     "definition_lines": 64,
     "definition_to_proof_line_ratio": 0.08951048951048951,
+    "description": "The machine's storage represents the typed storage",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Layout",
@@ -6593,6 +6876,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.00872093023255814,
+    "description": "Signed words",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Layout"
@@ -6618,6 +6902,7 @@
     },
     "definition_lines": 63,
     "definition_to_proof_line_ratio": 0.08160621761658031,
+    "description": "The simulation over the scoped syntax",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.SimLemmas",
@@ -6643,6 +6928,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.014367816091954023,
+    "description": "The machine lemmas of the simulation",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Repr",
@@ -6670,6 +6956,7 @@
     },
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.01485148514851485,
+    "description": "Statements over the typed run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Expr",
@@ -6692,6 +6979,7 @@
       "theorem": 18
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "The typed storage, read along a path",
     "implemented_by": 0,
     "imports": [
       "Solidity.Theory.Typed.Obs"
@@ -6715,6 +7003,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.15517241379310345,
+    "description": "Computed image snapshots materialized in the intrinsic heap",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.TryByteImage",
@@ -6744,6 +7033,7 @@
     },
     "definition_lines": 64,
     "definition_to_proof_line_ratio": 2.2857142857142856,
+    "description": "Intrinsic scalar-frame byte images for try producer witnesses",
     "implemented_by": 0,
     "imports": [
       "Solidity.Semantics.State",
@@ -6768,6 +7058,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.3333333333333333,
+    "description": "Declarations: sourceCall, caller, mode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.TryPanicSourceControl"
@@ -6791,6 +7082,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.13580246913580246,
+    "description": "Declarations: map_error_inv, rawTail, inner",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.TryPanicProducer"
@@ -6816,6 +7108,7 @@
     },
     "definition_lines": 102,
     "definition_to_proof_line_ratio": 1.186046511627907,
+    "description": "M1: source-linked computed Panic producer, not source admission",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.TryByteCapture"
@@ -6840,6 +7133,7 @@
     },
     "definition_lines": 32,
     "definition_to_proof_line_ratio": 0.9142857142857143,
+    "description": "Declarations: Buffer, within, put",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.TryPanicSourceBytes"
@@ -6863,6 +7157,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.13559322033898305,
+    "description": "Declarations: clipped, clipped_length, clipped_get",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.TryPanicSourceBody"
@@ -6886,6 +7181,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.05555555555555555,
+    "description": "Declarations: byteAt, selector_byte, code_byte",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.TryPanicSourceControl"
@@ -6910,6 +7206,7 @@
     },
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 0.26881720430107525,
+    "description": "Declarations: Caller, Handler, return94",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.TryPanicSourceCaller"
@@ -6931,6 +7228,7 @@
       "theorem": 10
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: completed_exact, completion_iff, completion_unique",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.TryPanicSourceFrame"
@@ -6952,6 +7250,7 @@
       "theorem": 11
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: cons_put, raw_bytes, raw_image",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.TryPanicSourceBodyImage"
@@ -6975,6 +7274,7 @@
     },
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 0.18584070796460178,
+    "description": "Declarations: freshK, at64K, entryK",
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.TryPanicSourcePlan"

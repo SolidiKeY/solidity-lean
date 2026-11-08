@@ -7,6 +7,7 @@
       "theorem": 15
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: table_prefix_97_112, table_prefix_97_115, table_prefix_97_117",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.NumericLiteralProofs.WordTable.Part23"
@@ -28,6 +29,7 @@
       "theorem": 15
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: table_prefix_101_118, table_prefix_101_120, table_prefix_102_97",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.NumericLiteralProofs.WordTable.Part24"
@@ -49,6 +51,7 @@
       "theorem": 15
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: table_prefix_109_97, table_prefix_109_101, table_prefix_109_105",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.NumericLiteralProofs.WordTable.Part25"
@@ -70,6 +73,7 @@
       "theorem": 15
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: table_prefix_115_116, table_prefix_115_117, table_prefix_115_119",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.NumericLiteralProofs.WordTable.Part26"
@@ -91,6 +95,7 @@
       "theorem": 15
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: table_prefix_100, table_prefix_101, table_prefix_102",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.NumericLiteralProofs.WordTable.Part27"
@@ -112,6 +117,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: table_prefix_118, table_prefix_119, table_prefix_121",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.NumericLiteralProofs.WordTable.Part28"
@@ -135,6 +141,7 @@
     },
     "definition_lines": 66,
     "definition_to_proof_line_ratio": null,
+    "description": "Reading all override-capable families from existing Source declarations",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.OverrideValidation.Identity"
@@ -158,6 +165,7 @@
     },
     "definition_lines": 53,
     "definition_to_proof_line_ratio": 1.1521739130434783,
+    "description": "Declarations: VisibilityAllowed, visibilityAllowedB, MutabilityAllowed",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.OverrideValidation.Graph"
@@ -181,6 +189,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.3333333333333333,
+    "description": "Declarations: syntax_equality_reflect, declaration_equality_reflect, rootDeclarations",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.OverrideValidation.Graph"
@@ -205,6 +214,7 @@
     },
     "definition_lines": 62,
     "definition_to_proof_line_ratio": 0.9393939393939394,
+    "description": "Declaration edges and inherited frontiers",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.OverrideValidation.Attributes",
@@ -231,6 +241,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.38461538461538464,
+    "description": "Declaration identity for the additive G14 candidate",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Inheritance"
@@ -254,6 +265,7 @@
     },
     "definition_lines": 37,
     "definition_to_proof_line_ratio": 1.0571428571428572,
+    "description": "Declarations: tableGet, bitTable, edgeTable",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.OverrideValidation.Validator"
@@ -277,6 +289,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.875,
+    "description": "Declarations: OverrideOwn, overrideOwnB, OverrideStep",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.OverrideValidation.Graph"
@@ -301,6 +314,7 @@
     },
     "definition_lines": 84,
     "definition_to_proof_line_ratio": 1.0120481927710843,
+    "description": "Declarations: HasBase, hasBaseB, HasOverrideBase",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.OverrideValidation.Compatibility",
@@ -326,6 +340,7 @@
     },
     "definition_lines": 60,
     "definition_to_proof_line_ratio": 1.3953488372093024,
+    "description": "Declarations: OverrideEdge, overrideEdgeB, Active",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.OverrideValidation.OverrideFrontier"
@@ -350,6 +365,7 @@
     },
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.43243243243243246,
+    "description": "Finite declaration-graph routes",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.OverrideValidation.Identity"
@@ -373,6 +389,7 @@
     },
     "definition_lines": 36,
     "definition_to_proof_line_ratio": 0.5373134328358209,
+    "description": "Declarations: Exposes, exposesB, scopeChoice",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.OverrideValidation.Validity"
@@ -397,6 +414,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.25333333333333335,
+    "description": "Additive independent G14 override graph validator",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.OverrideValidation.Selection",
@@ -422,6 +440,7 @@
     },
     "definition_lines": 100,
     "definition_to_proof_line_ratio": 0.746268656716418,
+    "description": "Declarations: Descriptor, descriptorB, topOwnerB",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.OverrideValidation.OverrideLists"
@@ -443,8 +462,9 @@
       "def": 5,
       "structure": 1
     },
-    "definition_lines": 110,
+    "definition_lines": 109,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: unitEntry, wordEntry, closed",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.PaymentPlan",
@@ -469,6 +489,7 @@
     },
     "definition_lines": 146,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: Method, Plan, require",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson"
@@ -488,8 +509,9 @@
     "declarations": {
       "def": 17
     },
-    "definition_lines": 310,
+    "definition_lines": 305,
     "definition_to_proof_line_ratio": null,
+    "description": "The obligations of an imported contract",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Import",
@@ -517,6 +539,7 @@
     },
     "definition_lines": 34,
     "definition_to_proof_line_ratio": 0.16267942583732056,
+    "description": "Declarations: Failure, namespaceCandidates, mem_namespaceCandidates",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.QualifiedUnits.Specification"
@@ -540,6 +563,7 @@
     },
     "definition_lines": 22,
     "definition_to_proof_line_ratio": 0.5641025641025641,
+    "description": "Declarations: accepted_hops, refused_missing, local_shadow",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.QualifiedUnits.Checked",
@@ -564,6 +588,7 @@
     },
     "definition_lines": 113,
     "definition_to_proof_line_ratio": 0.5,
+    "description": "Declarations: marker, specimen_nil, fixture_nil",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.QualifiedUnits.References"
@@ -587,6 +612,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 1.0625,
+    "description": "Declarations: unitOf, hops, multi_hop",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.QualifiedUnits.Lookup"
@@ -610,6 +636,7 @@
     },
     "definition_lines": 73,
     "definition_to_proof_line_ratio": 4.055555555555555,
+    "description": "Declarations: typeUse, enumUnit, hopsInput",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.QualifiedUnits.Checked",
@@ -636,6 +663,7 @@
     },
     "definition_lines": 147,
     "definition_to_proof_line_ratio": 1.2049180327868851,
+    "description": "Inherited declaration namespaces on original identities",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.QualifiedUnits.UnitPaths"
@@ -659,6 +687,7 @@
     },
     "definition_lines": 118,
     "definition_to_proof_line_ratio": 1.1919191919191918,
+    "description": "Original owner-body layout",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.QualifiedUnits.Relation"
@@ -683,6 +712,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.033846153846153845,
+    "description": "Declarations: Routes, Bases, Linear",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.QualifiedUnits.MergeSpecification"
@@ -706,6 +736,7 @@
     },
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.19148936170212766,
+    "description": "Executable qualified lookup",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.QualifiedUnits.Relation",
@@ -731,6 +762,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.10106382978723404,
+    "description": "Declarations: Available, First, nonempty",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.QualifiedUnits.SignatureMembers"
@@ -755,6 +787,7 @@
     },
     "definition_lines": 33,
     "definition_to_proof_line_ratio": 0.13414634146341464,
+    "description": "Declarations: declName, erase, eraseList",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.QualifiedUnits.SignatureNormalization",
@@ -779,6 +812,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.31666666666666665,
+    "description": "Declarations: base_identity, derived_identity, inherited_distinct_parameters",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.QualifiedUnits.SignatureHiding",
@@ -803,6 +837,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.42105263157894735,
+    "description": "Declarations: member_chain, member_chain_references, nonpath_receiver",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.QualifiedUnits.References",
@@ -827,6 +862,7 @@
     },
     "definition_lines": 114,
     "definition_to_proof_line_ratio": 0.2345679012345679,
+    "description": "Declarations: rootReferences, references_eq, references_sub",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.QualifiedUnits.References"
@@ -848,8 +884,9 @@
       "def": 5,
       "theorem": 2
     },
-    "definition_lines": 461,
-    "definition_to_proof_line_ratio": 1.1299019607843137,
+    "definition_lines": 459,
+    "definition_to_proof_line_ratio": 1.125,
+    "description": "Declarations: expressionPathAnyM, expressionPathAny, expressionPathAny_eq_M",
     "implemented_by": 2,
     "imports": [
       "Solidity.Frontend.QualifiedUnits.Checked"
@@ -875,6 +912,7 @@
     },
     "definition_lines": 136,
     "definition_to_proof_line_ratio": 5.913043478260869,
+    "description": "Independent qualified declaration paths",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Units"
@@ -898,6 +936,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 1.5,
+    "description": "Preserved inherited-overload counterexample (QN-SIG)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.QualifiedUnits.Checked",
@@ -922,6 +961,7 @@
     },
     "definition_lines": 141,
     "definition_to_proof_line_ratio": 5.222222222222222,
+    "description": "Declarations: externalKey, externalKey_nominal_identity, nominalIds",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.QualifiedUnits.SignatureNormalization"
@@ -945,6 +985,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.6666666666666666,
+    "description": "Declarations: inherited_overloads, cross_unit_nominal_overloads, same_owner_duplicates_preserved",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.QualifiedUnits.SignatureMembers",
@@ -971,6 +1012,7 @@
     },
     "definition_lines": 71,
     "definition_to_proof_line_ratio": 0.39226519337016574,
+    "description": "Declarations: mergeOwners, bases, linearize",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.QualifiedUnits.SignatureHiding"
@@ -998,6 +1040,7 @@
     },
     "definition_lines": 360,
     "definition_to_proof_line_ratio": 4.0,
+    "description": "Declarations: Declared, Nominal, ContractRef",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.QualifiedUnits.TypePaths",
@@ -1023,6 +1066,7 @@
     },
     "definition_lines": 63,
     "definition_to_proof_line_ratio": 0.23333333333333334,
+    "description": "Declarations: Eligible, eligible, eligible_iff",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.QualifiedUnits.Checked",
@@ -1047,6 +1091,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.2545454545454545,
+    "description": "Declarations: multi_hop_0, missing_symbol_0, ambiguous_namespace_0",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.QualifiedUnits.SignatureResolution",
@@ -1074,6 +1119,7 @@
     },
     "definition_lines": 39,
     "definition_to_proof_line_ratio": 1.5,
+    "description": "Declarations: NamespaceStep, Head, Overloadable",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.QualifiedUnits.Inheritance"
@@ -1098,6 +1144,7 @@
     },
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 0.27956989247311825,
+    "description": "Declarations: Collected, SafeOwners, Member",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.QualifiedUnits.Linearization",
@@ -1122,6 +1169,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.05,
+    "description": "Declarations: diamond_linear, diamond_shared_base_once, diamond_local_precedence",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.QualifiedUnits.Target",
@@ -1149,6 +1197,7 @@
     },
     "definition_lines": 24,
     "definition_to_proof_line_ratio": 0.8571428571428571,
+    "description": "Declarations: step, head, Route",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.QualifiedUnits.Inheritance"
@@ -1174,6 +1223,7 @@
     },
     "definition_lines": 28,
     "definition_to_proof_line_ratio": 0.2978723404255319,
+    "description": "Declarations: BaseKind, instDecidableBaseKind, uniqueSymbol",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.QualifiedUnits.Lookup"
@@ -1189,10 +1239,11 @@
   },
   {
     "area": "Frontend",
-    "category": "import_root",
+    "category": "import_only_unknown",
     "code_lines": 2,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "solc's JSON AST, printed as `sol` text",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.Body",
@@ -1216,6 +1267,7 @@
     },
     "definition_lines": 406,
     "definition_to_proof_line_ratio": null,
+    "description": "Admission of solc source",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.Body",
@@ -1242,6 +1294,7 @@
     },
     "definition_lines": 2065,
     "definition_to_proof_line_ratio": 688.3333333333334,
+    "description": "solc's JSON: types, expressions and statements",
     "implemented_by": 0,
     "imports": [
       "Lean.Data.Json",
@@ -1269,6 +1322,7 @@
     },
     "definition_lines": 161,
     "definition_to_proof_line_ratio": 5.551724137931035,
+    "description": "Declarations: Refusal, Profile, readProfile",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Source"
@@ -1292,6 +1346,7 @@
     },
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.375,
+    "description": "Declarations: profile, summary, legacy_pure",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.CallMetadata",
@@ -1315,6 +1370,7 @@
     },
     "definition_lines": 128,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: node0, node1, node2",
     "implemented_by": 0,
     "imports": [
       "Lean.Data.Json"
@@ -1340,6 +1396,7 @@
     },
     "definition_lines": 50,
     "definition_to_proof_line_ratio": 1.1627906976744187,
+    "description": "Declarations: Edge, Path, walk",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.CallMetadataSound"
@@ -1363,6 +1420,7 @@
     },
     "definition_lines": 22,
     "definition_to_proof_line_ratio": 0.6285714285714286,
+    "description": "Declarations: legacy_id, legacy_peek, legacy_put",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.CallMetadataPath",
@@ -1385,6 +1443,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: checked_call_exact, checked_static_declaration, checked_static_target",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.CallMetadata"
@@ -1410,6 +1469,7 @@
     },
     "definition_lines": 1828,
     "definition_to_proof_line_ratio": 58.96774193548387,
+    "description": "solc's JSON: a contract",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.Admission",
@@ -1434,6 +1494,7 @@
     },
     "definition_lines": 249,
     "definition_to_proof_line_ratio": null,
+    "description": "Source ABI identities and public getter plans",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.Body",
@@ -1458,6 +1519,7 @@
     },
     "definition_lines": 37,
     "definition_to_proof_line_ratio": 0.6727272727272727,
+    "description": "Exact extraction of solc's IR output channels",
     "implemented_by": 0,
     "imports": [
       "Lean.Data.Json.Parser",
@@ -1483,6 +1545,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.25,
+    "description": "Declarations: entry, output, extracted",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.IrImport"
@@ -1506,6 +1569,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.20833333333333334,
+    "description": "Declarations: modeOf, originalCall, resolved_mode",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.TryPanicSourceCaller",
@@ -1533,6 +1597,7 @@
     },
     "definition_lines": 102,
     "definition_to_proof_line_ratio": 1.728813559322034,
+    "description": "Declarations: CallerCtx, cMetadata, clauseStatement",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.TryPanicSourcePlan"
@@ -1555,6 +1620,7 @@
     },
     "definition_lines": 295,
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: raw0, raw1, raw2",
     "implemented_by": 0,
     "imports": [
       "Lean.Data.Json",
@@ -1580,6 +1646,7 @@
     },
     "definition_lines": 97,
     "definition_to_proof_line_ratio": 1.0210526315789474,
+    "description": "Declarations: nodeField, intField, boolField",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.Getters",
@@ -1605,8 +1672,9 @@
       "structure": 4,
       "theorem": 2
     },
-    "definition_lines": 306,
-    "definition_to_proof_line_ratio": 51.0,
+    "definition_lines": 207,
+    "definition_to_proof_line_ratio": 34.5,
+    "description": "Declarations: Error, field, string",
     "implemented_by": 0,
     "imports": [
       "Lean.Data.Json",
@@ -1636,6 +1704,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.21212121212121213,
+    "description": "Declarations: Link, Link.json_injective, At",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulTargetPath"
@@ -1660,6 +1729,7 @@
     },
     "definition_lines": 45,
     "definition_to_proof_line_ratio": 0.5294117647058824,
+    "description": "Declarations: Attached.node_kind, Attached.parsed, Use",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulNamespaceBinding",
@@ -1685,6 +1755,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.16521739130434782,
+    "description": "Declarations: ChildAt, walk_indexed, decoded_fields",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulAssignmentPath",
@@ -1711,6 +1782,7 @@
     },
     "definition_lines": 41,
     "definition_to_proof_line_ratio": 0.9318181818181818,
+    "description": "Declarations: ParseError, Parsed, parse",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.BuiltinUse",
@@ -1736,6 +1808,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.6666666666666666,
+    "description": "Declarations: Checked.contextTrace, Checked.context_coverage",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulForwardJson",
@@ -1758,6 +1831,7 @@
       "theorem": 11
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: if_fields, block_fields, expression_fields",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulStatementTags"
@@ -1782,6 +1856,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.2159090909090909,
+    "description": "Declarations: ReadField, ReadField.path, ReadField.route",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulPrefix"
@@ -1803,6 +1878,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: some_positions, none_positions",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulDeclarationFields",
@@ -1825,6 +1901,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: some_fields, none_fields",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulStatementTags"
@@ -1850,6 +1927,7 @@
     },
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 0.10970464135021098,
+    "description": "Declarations: ArgumentPath, ArgumentPath.shape, ArgumentPath.unique",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulExpressionPositions",
@@ -1874,6 +1952,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.03977272727272727,
+    "description": "Declarations: ReadAt, call_lift, arguments_reads",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulObjectLookup",
@@ -1898,6 +1977,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.11764705882352941,
+    "description": "Declarations: Walks, for_positions",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulTypedChildren",
@@ -1924,6 +2004,7 @@
     },
     "definition_lines": 39,
     "definition_to_proof_line_ratio": 1.4444444444444444,
+    "description": "Declarations: Error, Checked, witnessed",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulScopedJson",
@@ -1949,6 +2030,7 @@
     },
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 0.5208333333333334,
+    "description": "Declarations: Children, function_statement, Assignments",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulIfBodyLeaves"
@@ -1973,6 +2055,7 @@
     },
     "definition_lines": 41,
     "definition_to_proof_line_ratio": 0.7192982456140351,
+    "description": "Declarations: Read, Target, assignment",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulIfRoot"
@@ -1996,6 +2079,7 @@
     },
     "definition_lines": 36,
     "definition_to_proof_line_ratio": 0.7659574468085106,
+    "description": "Declarations: Read, Statement, Children",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulControlPrefix"
@@ -2019,6 +2103,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.3076923076923077,
+    "description": "Declarations: Checked.leafTrace, Checked.leaf_coverage, Checked.leaf_scoped",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulContextTrace",
@@ -2044,6 +2129,7 @@
     },
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 0.25742574257425743,
+    "description": "Declarations: Checked, run, projection",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulBuiltinUse",
@@ -2072,6 +2158,7 @@
     },
     "definition_lines": 102,
     "definition_to_proof_line_ratio": 10.2,
+    "description": "Declarations: Declaration, IdentityD, identify",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.Yul",
@@ -2098,6 +2185,7 @@
     },
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.76,
+    "description": "Declarations: Input, input?, Input.complete",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulNames",
@@ -2126,6 +2214,7 @@
     },
     "definition_lines": 40,
     "definition_to_proof_line_ratio": 0.7547169811320755,
+    "description": "Declarations: Original, BindingD, select",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulMetadata",
@@ -2150,6 +2239,7 @@
     },
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.11428571428571428,
+    "description": "Declarations: original_member, resolve_consistent, BindingD.declarations_binding",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulMetadataWords",
@@ -2172,6 +2262,7 @@
       "theorem": 8
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: impl_lookup_member, lookup_member, lookup_ordinal",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulOccurrenceSchema",
@@ -2198,6 +2289,7 @@
     },
     "definition_lines": 78,
     "definition_to_proof_line_ratio": 3.25,
+    "description": "Declarations: Collected, CheckedChildren, CheckedChildren.flatten",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulOccurrenceSchema"
@@ -2224,6 +2316,7 @@
     },
     "definition_lines": 92,
     "definition_to_proof_line_ratio": 2.090909090909091,
+    "description": "Declarations: kind, childKeys, isIdentifier",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulReferenceAttachment"
@@ -2248,6 +2341,7 @@
     },
     "definition_lines": 22,
     "definition_to_proof_line_ratio": 0.17886178861788618,
+    "description": "Declarations: Route, Route.lift, Route.comp",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulTypedChildren"
@@ -2271,6 +2365,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.3333333333333333,
+    "description": "Declarations: run, projection, preserves",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulLocalParse",
@@ -2297,6 +2392,7 @@
     },
     "definition_lines": 43,
     "definition_to_proof_line_ratio": 1.162162162162162,
+    "description": "Declarations: Error, Attached, witnessed",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulNames"
@@ -2323,6 +2419,7 @@
     },
     "definition_lines": 71,
     "definition_to_proof_line_ratio": 0.6283185840707964,
+    "description": "Declarations: Candidate, candidate, Candidate.complete",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulOccurrenceCollect"
@@ -2349,6 +2446,7 @@
     },
     "definition_lines": 85,
     "definition_to_proof_line_ratio": 2.8333333333333335,
+    "description": "Declarations: DocTag, spaceTab, docWhitespace",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulMetadata"
@@ -2374,6 +2472,7 @@
     },
     "definition_lines": 43,
     "definition_to_proof_line_ratio": 1.162162162162162,
+    "description": "Declarations: Error, Checked, witnessed",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulMetadataWords",
@@ -2401,6 +2500,7 @@
     },
     "definition_lines": 33,
     "definition_to_proof_line_ratio": 1.064516129032258,
+    "description": "Guarded scoped source preparation",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulWords",
@@ -2423,6 +2523,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: decoded_tag, kind_of_tag",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.Yul",
@@ -2447,6 +2548,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.6,
+    "description": "Declarations: ScopedJson.Checked.statementTrace, ScopedJson.Checked.statement_positions, ForwardJson.Checked.statementTrace",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulBlockPath",
@@ -2473,6 +2575,7 @@
     },
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.04040404040404041,
+    "description": "Declarations: Link, Link.json_injective, ChildAt",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulExpressionPath",
@@ -2500,6 +2603,7 @@
     },
     "definition_lines": 62,
     "definition_to_proof_line_ratio": 0.15816326530612246,
+    "description": "Declarations: Reads, Blocks, decoded_reads",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulControlFields",
@@ -2522,6 +2626,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: decoded_walk, position_unique",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulBlockPath"
@@ -2547,6 +2652,7 @@
     },
     "definition_lines": 42,
     "definition_to_proof_line_ratio": 0.7,
+    "description": "Closed JSON word preparation",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.YulSafety",
@@ -2574,6 +2680,7 @@
     },
     "definition_lines": 318,
     "definition_to_proof_line_ratio": 79.5,
+    "description": "The compiler boundary of imported source",
     "implemented_by": 0,
     "imports": [
       "Lean.Elab.Deriving.ToExpr",
@@ -2599,6 +2706,7 @@
     },
     "definition_lines": 143,
     "definition_to_proof_line_ratio": null,
+    "description": "Original source units at the compiler boundary",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Source"
@@ -2622,6 +2730,7 @@
     },
     "definition_lines": 127,
     "definition_to_proof_line_ratio": 25.4,
+    "description": "Source-derived NatSpec origins, V1",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.Contract",
@@ -2649,6 +2758,7 @@
     },
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 0.16778523489932887,
+    "description": "Declarations: evmToks, YulBodyAtom, FlagsAtom",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.AtomTry"
@@ -2672,6 +2782,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.11688311688311688,
+    "description": "Declarations: PathAtom, ArgsAtom, ident_path_atom",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.AtomSimple"
@@ -2696,6 +2807,7 @@
     },
     "definition_lines": 32,
     "definition_to_proof_line_ratio": 0.1927710843373494,
+    "description": "Declarations: ExprAtomRparen, bool_atom_rparen, ident_atom_rparen",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.ConditionalYield"
@@ -2720,6 +2832,7 @@
     },
     "definition_lines": 108,
     "definition_to_proof_line_ratio": 0.6428571428571429,
+    "description": "Declarations: Prints, PrintsTo, prints_to_of_atom",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.AtomNested",
@@ -2745,6 +2858,7 @@
     },
     "definition_lines": 127,
     "definition_to_proof_line_ratio": 0.1972049689440994,
+    "description": "Declarations: ExprAtomSemi, NoSemiHead, bool_atom_semi",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.AtomAsm",
@@ -2769,6 +2883,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.16883116883116883,
+    "description": "Declarations: simpleHead, SimpleAtom, stmt_simple_dispatch",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.AtomConditional"
@@ -2792,6 +2907,7 @@
     },
     "definition_lines": 22,
     "definition_to_proof_line_ratio": 0.16793893129770993,
+    "description": "Declarations: catchOpen, CatchFrame, ExprAtomBrace",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.AtomCall",
@@ -2818,6 +2934,7 @@
     },
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 0.32894736842105265,
+    "description": "Declarations: AtomYield, ident_atom_yield, bool_atom_yield",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.AtomConditional"
@@ -2843,6 +2960,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.2328767123287671,
+    "description": "Balanced brace boundaries and intrinsic block witnesses",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Checked.Print"
@@ -2864,6 +2982,7 @@
       "theorem": 19
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: balanced_elem_atom, balanced_elem, balanced_path",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.BalancePr"
@@ -2887,6 +3006,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.02702702702702703,
+    "description": "Declarations: BalancedParts, balancedParts_nil, balancedParts_cons",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.Balance",
@@ -2911,6 +3031,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.034782608695652174,
+    "description": "Declarations: namedArgStart, NoNamedFrame, NoNamedParts",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.RootContract",
@@ -2937,6 +3058,7 @@
     },
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 0.1078838174273859,
+    "description": "Structural list fuel for blocks of control leaves",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.LeafCoverage",
@@ -2962,6 +3084,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.08,
+    "description": "Declarations: boolBefore, punctBefore, bool_expr_rparen",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.NestedCoverage"
@@ -2985,6 +3108,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.011299435028248588,
+    "description": "Declarations: BoundaryParts, BoundaryHeadInvariant, syntax_boundary_head_invariant",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.BoundaryHeadPr"
@@ -3008,6 +3132,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.12195121951219512,
+    "description": "Declarations: boundaryToken, BoundaryStart, boundary_start_append",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.HeadPr"
@@ -3032,6 +3157,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.12280701754385964,
+    "description": "Declarations: plainCatchInput, signatureCatchInput, catch_plain_prefix",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.ConditionalFuel"
@@ -3056,6 +3182,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.08527131782945736,
+    "description": "Declarations: NoFollowingCatch, statement_no_following_catch, catchStep",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.CatchCoverage",
@@ -3081,6 +3208,7 @@
     },
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 0.25,
+    "description": "Declarations: BooleanStatements, StatementFrame, boolean_statements_coverage",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.ConditionalPrefix"
@@ -3104,6 +3232,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.058823529411764705,
+    "description": "Declarations: boolean_statement_item_step, BooleanListBound, boolean_list_bound_items",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.ConditionalList"
@@ -3127,6 +3256,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.05555555555555555,
+    "description": "Declarations: boolean_statement_no_else_input, boolean_statement_tokens_nonempty, BooleanItemList",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.ConditionalYield",
@@ -3149,6 +3279,7 @@
       "theorem": 2
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: if_bool_prefix, if_some_contract_iff",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.LoopCoverage",
@@ -3171,6 +3302,7 @@
       "theorem": 8
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: boolean_loops_closed, boolean_statements_node, boolean_statements_nearest_else",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.ConditionalCoverage"
@@ -3194,6 +3326,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.07692307692307693,
+    "description": "Declarations: statement_fixtures_all_checked, ObservedStatementCtor, checked_fixture_observes",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureControls.Case00",
@@ -3261,6 +3394,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.16393442622950818,
+    "description": "Declarations: pathStartDelimiter, badStmtTriple, SimpleFrameSafe",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.SyntaxPair"
@@ -3284,6 +3418,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.24,
+    "description": "Declarations: contextualDeclStmt, contextualDeclTokens, contextualDeclInput",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.RootContract",
@@ -3308,6 +3443,7 @@
       "theorem": 18
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: controlFree_elem_atom, controlFree_elem, controlFree_path",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.ControlFreePr"
@@ -3332,6 +3468,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.042735042735042736,
+    "description": "Declarations: ControlFree, controlFree_flatten, ControlFree.wrap",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.SyntaxNoSemi",
@@ -3357,6 +3494,7 @@
     },
     "definition_lines": 50,
     "definition_to_proof_line_ratio": 1.25,
+    "description": "Declarations: ElseEdge, NearestSlot, NearestSlot.isOpen",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.NearestElse"
@@ -3378,6 +3516,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture0_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -3399,6 +3538,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture1_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -3420,6 +3560,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture2_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -3441,6 +3582,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture3_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -3462,6 +3604,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture4_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -3483,6 +3626,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture5_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -3504,6 +3648,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture6_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -3525,6 +3670,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture7_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -3546,6 +3692,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture8_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -3567,6 +3714,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture9_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -3588,6 +3736,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture10_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -3609,6 +3758,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture11_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -3630,6 +3780,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture12_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -3651,6 +3802,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture13_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -3672,6 +3824,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture14_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -3693,6 +3846,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture15_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -3714,6 +3868,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture16_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -3735,6 +3890,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture17_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -3756,6 +3912,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture18_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -3777,6 +3934,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture19_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -3798,6 +3956,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture20_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -3819,6 +3978,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture21_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -3840,6 +4000,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture22_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -3861,6 +4022,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture23_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -3882,6 +4044,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture24_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -3903,6 +4066,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture25_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -3924,6 +4088,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture26_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -3945,6 +4110,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture27_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -3966,6 +4132,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture28_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -3987,6 +4154,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture29_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -4008,6 +4176,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture30_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -4029,6 +4198,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture31_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -4050,6 +4220,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture32_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -4071,6 +4242,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture33_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -4092,6 +4264,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture34_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -4113,6 +4286,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture35_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -4134,6 +4308,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture36_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -4155,6 +4330,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture37_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -4176,6 +4352,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture38_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -4197,6 +4374,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture39_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -4218,6 +4396,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture40_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -4239,6 +4418,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture41_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -4260,6 +4440,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture42_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -4281,6 +4462,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture43_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -4302,6 +4484,7 @@
       "theorem": 1
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: statementFixture44_checked",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FixtureData"
@@ -4326,6 +4509,7 @@
     },
     "definition_lines": 136,
     "definition_to_proof_line_ratio": 8.0,
+    "description": "Declarations: StatementFixture, fixtureListCtors, optionalBodyCtorsAt",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Checked.Check",
@@ -4352,6 +4536,7 @@
     },
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 0.26804123711340205,
+    "description": "A statement-level yield collision independent of expression uniqueness",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Checked.Parser",
@@ -4377,6 +4562,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.0718954248366013,
+    "description": "Declarations: statement_boundary_head, statement_boundary_prefix_refusal, unchecked_yield_decompose",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.BoundaryHead",
@@ -4401,6 +4587,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.0425531914893617,
+    "description": "Declarations: FramedStatement, FramedStatements, FramedStatements_nil",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.SemicolonSplit",
@@ -4426,6 +4613,7 @@
     },
     "definition_lines": 33,
     "definition_to_proof_line_ratio": 3.6666666666666665,
+    "description": "Declarations: listCellResult, listCellAt, g0ListCell",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Syntax"
@@ -4449,6 +4637,7 @@
     },
     "definition_lines": 294,
     "definition_to_proof_line_ratio": 58.8,
+    "description": "Declarations: nodeCtorsAt, g0NodeCtors, g0NodeCtors_eq_nodes",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Ctor"
@@ -4472,6 +4661,7 @@
     },
     "definition_lines": 729,
     "definition_to_proof_line_ratio": 5.832,
+    "description": "Declarations: optValueResult, optValueAt, g0OptValue",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Ctor",
@@ -4496,6 +4686,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.11864406779661017,
+    "description": "Declarations: hardStatementToken, SafeStart, safe_start_append",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.BalanceAtoms"
@@ -4519,6 +4710,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.1111111111111111,
+    "description": "Concrete parser coverage for control leaves",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Checked.Parser"
@@ -4540,6 +4732,7 @@
       "theorem": 9
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: list_length_values, list_yield_length, list_yield_chunks_nonempty",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.FramedItemList",
@@ -4564,6 +4757,7 @@
     },
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.11650485436893204,
+    "description": "Declarations: BooleanLoops, boolean_loops_coverage, boolean_loops_yield",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.BoolCompound"
@@ -4589,6 +4783,7 @@
     },
     "definition_lines": 23,
     "definition_to_proof_line_ratio": 0.323943661971831,
+    "description": "Declarations: ControlLeaf, ControlLeaf.keyword, Chunk",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.YieldSplit"
@@ -4613,6 +4808,7 @@
     },
     "definition_lines": 32,
     "definition_to_proof_line_ratio": 1.5238095238095237,
+    "description": "The intrinsic dangling-else boundary",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Checked.Prec"
@@ -4637,6 +4833,7 @@
     },
     "definition_lines": 23,
     "definition_to_proof_line_ratio": 0.10407239819004525,
+    "description": "Declarations: NestedItems, nested_items_count_le, ItemsAt",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.BlockLeafCoverage"
@@ -4658,6 +4855,7 @@
       "theorem": 5
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: nested_items_token_unique, nested_block_toks, nested_block_derives_iff",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.NestedCoverage"
@@ -4679,6 +4877,7 @@
       "theorem": 18
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: semiFree_elem_atom, semiFree_elem, semiFree_path",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.NoSemiPr"
@@ -4703,6 +4902,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.04854368932038835,
+    "description": "Declarations: SemiFree, semiFree_flatten, SemiFree.wrap",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.BalancePr"
@@ -4726,6 +4926,7 @@
     },
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.1744186046511628,
+    "description": "Declarations: identToken, forbiddenAfterIdent, badAtomPair",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.RootHead"
@@ -4747,6 +4948,7 @@
       "theorem": 19
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: parenBalanced_elem_atom, parenBalanced_elem, parenBalanced_path",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.ParenPr"
@@ -4771,6 +4973,7 @@
     },
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.34782608695652173,
+    "description": "Declarations: ParenBalanced, parenCloseSuffix, parenBalanced_scan_frame",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Checked.Print"
@@ -4794,6 +4997,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.010526315789473684,
+    "description": "Declarations: ParenBalancedParts, parenBalancedParts_nil, parenBalancedParts_cons",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.ParenBalance",
@@ -4818,6 +5022,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.06896551724137931,
+    "description": "Declarations: PathParts, DeclShape, SemiFrameParts",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.ContextPr",
@@ -4840,6 +5045,7 @@
       "theorem": 5
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: simple_statement_yield_safe, simple_root_yield_safe, root_hard_token",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.SyntaxHead",
@@ -4864,6 +5070,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.10256410256410256,
+    "description": "Declarations: semiSuffix, semiFree_scan_frame, semiFree_end_split",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.SyntaxNoSemi",
@@ -4889,6 +5096,7 @@
     },
     "definition_lines": 28,
     "definition_to_proof_line_ratio": 0.45161290322580644,
+    "description": "Statement root inventory (H28 G11)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Syntax"
@@ -4912,6 +5120,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.008503401360544218,
+    "description": "Declarations: BalanceCat, syntax_yield_balanced, expression_yield_balanced",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.BalanceAtoms",
@@ -4934,6 +5143,7 @@
       "theorem": 4
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: syntax_yield_controlFree, expression_yield_controlFree, simple_yield_controlFree",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.ControlFreeAtoms"
@@ -4957,6 +5167,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.011299435028248588,
+    "description": "Declarations: SafeParts, HeadInvariant, syntax_head_invariant",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.HeadPr"
@@ -4980,6 +5191,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.014326647564469915,
+    "description": "Declarations: SemiFreeCat, syntax_yield_semiFree, expression_yield_semiFree",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.NoSemiAtoms"
@@ -5003,6 +5215,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.019801980198019802,
+    "description": "Declarations: PairParts, ParenParts, PairInvariant",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.PairPr"
@@ -5026,6 +5239,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.008488964346349746,
+    "description": "Declarations: ParenBalanceCat, syntax_yield_parenBalanced, expression_yield_parentheses",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.ParenAtoms"
@@ -5049,6 +5263,7 @@
     },
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.10596026490066225,
+    "description": "Declarations: PrEnsures, ensures_pure, ensures_bind",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.Shape",
@@ -5074,6 +5289,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.09433962264150944,
+    "description": "Declarations: tryCallInput, try_empty_body_prefix, try_empty_body_prefix_head",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.CatchListCoverage"
@@ -5095,6 +5311,7 @@
       "theorem": 7
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Exact block/list yield decomposition",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.Balance"
@@ -5118,6 +5335,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.03076923076923077,
+    "description": "Declarations: YulControlCat, controlFree_yulLit, yul_yield_controlFree",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.StatementGrammarH28.ControlFreeAtoms"
@@ -5139,6 +5357,7 @@
       "theorem": 11
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "C3 linearization, specified and checked (G14)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Inheritance"
@@ -5162,6 +5381,7 @@
     },
     "definition_lines": 28,
     "definition_to_proof_line_ratio": 2.8,
+    "description": "The static checkers as G05 `Checker` values",
     "implemented_by": 0,
     "imports": [
       "Solidity.Roadmap.Frontend",
@@ -5190,6 +5410,7 @@
     },
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.059782608695652176,
+    "description": "Reachability by saturation (G12)",
     "implemented_by": 0,
     "imports": [],
     "imports_in": 6,
@@ -5212,6 +5433,7 @@
     },
     "definition_lines": 141,
     "definition_to_proof_line_ratio": 0.375,
+    "description": "Checking compile-time constants (G13)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.ConstCheck",
@@ -5236,6 +5458,7 @@
     },
     "definition_lines": 506,
     "definition_to_proof_line_ratio": null,
+    "description": "Type inference for S01's expression typing (G13)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Typing"
@@ -5256,6 +5479,7 @@
       "theorem": 88
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: mem_tysOf, mem_lvsOf, exists_expr",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Static.Infer"
@@ -5279,6 +5503,7 @@
     },
     "definition_lines": 94,
     "definition_to_proof_line_ratio": 0.5251396648044693,
+    "description": "G13 controls: the checkers on S01's own examples",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Static.WellFormedCheck",
@@ -5307,6 +5532,7 @@
     },
     "definition_lines": 266,
     "definition_to_proof_line_ratio": null,
+    "description": "Statement checking for S01's `StmtD`/`ItemsD` (G13)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Static.Infer"
@@ -5327,6 +5553,7 @@
       "theorem": 13
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Completeness of statement checking (G13)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Static.InferStmt",
@@ -5351,6 +5578,7 @@
     },
     "definition_lines": 61,
     "definition_to_proof_line_ratio": 0.26521739130434785,
+    "description": "Checking inheritance (G14)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Inheritance",
@@ -5375,6 +5603,7 @@
     },
     "definition_lines": 142,
     "definition_to_proof_line_ratio": 1.1639344262295082,
+    "description": "G14 controls, cross-checked with solc's syntax tests",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Static.Inheritance",
@@ -5400,6 +5629,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.19318181818181818,
+    "description": "Overload sets across bases and overload selection (G12)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Overloads"
@@ -5423,6 +5653,7 @@
     },
     "definition_lines": 23,
     "definition_to_proof_line_ratio": 0.2948717948717949,
+    "description": "Standalone constants at their mobile types (G13, backfill item 5)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Static.InferComplete",
@@ -5448,6 +5679,7 @@
     },
     "definition_lines": 60,
     "definition_to_proof_line_ratio": 0.18404907975460122,
+    "description": "The import resolver (G12)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Units",
@@ -5472,6 +5704,7 @@
     },
     "definition_lines": 64,
     "definition_to_proof_line_ratio": 0.9696969696969697,
+    "description": "G12 controls: imports, identities, shadowing and overloads",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Static.Units",
@@ -5496,6 +5729,7 @@
     },
     "definition_lines": 71,
     "definition_to_proof_line_ratio": 0.7244897959183674,
+    "description": "Checking user-defined value type operations (G13)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.UserOps",
@@ -5520,6 +5754,7 @@
     },
     "definition_lines": 29,
     "definition_to_proof_line_ratio": 0.35802469135802467,
+    "description": "Deciding S01's well-formedness (G13)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.WellFormed",
@@ -5543,8 +5778,9 @@
       "def": 35,
       "theorem": 3
     },
-    "definition_lines": 523,
-    "definition_to_proof_line_ratio": 24.904761904761905,
+    "definition_lines": 522,
+    "definition_to_proof_line_ratio": 24.857142857142858,
+    "description": "Testing imported Solidity files",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Problems",
@@ -5577,6 +5813,7 @@
     },
     "definition_lines": 66,
     "definition_to_proof_line_ratio": 0.30697674418604654,
+    "description": "Declarations: Delim, openToken, closeToken",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Checked.Token"
@@ -5600,6 +5837,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.0875,
+    "description": "Declarations: YieldExact, exact_elem, exact_userType",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.TypeGrammarH28.Layouts"
@@ -5623,6 +5861,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.8888888888888888,
+    "description": "Declarations: atom, leftAssociated, rightAssociated",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Checked.Prec",
@@ -5650,6 +5889,7 @@
     },
     "definition_lines": 60,
     "definition_to_proof_line_ratio": 0.20618556701030927,
+    "description": "Declarations: Deps, TypeDeps, ParamDeps",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.TypeGrammarH28.ParserLengths"
@@ -5673,6 +5913,7 @@
     },
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.08,
+    "description": "Declarations: LayoutEquivalent, layoutEquivalent_symm, layoutEquivalent_trans",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Checked.Print"
@@ -5694,6 +5935,7 @@
       "theorem": 32
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: elem_name_token, elem_name_payable, elem_name_complete",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.TypeGrammarH28.ParserPaths",
@@ -5718,6 +5960,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.05970149253731343,
+    "description": "Declarations: located_nil, located_cons, located_one",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Checked.Parser"
@@ -5741,6 +5984,7 @@
     },
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.007633587786259542,
+    "description": "Declarations: checked_category_converse, elem_located_complete, elem_parseCat_complete",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Checked.Check",
@@ -5767,6 +6011,7 @@
     },
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.1297709923664122,
+    "description": "Declarations: Boundary, boundary_no_payable, boundary_no_suffix",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.TypeGrammarH28.ParserArrays"
@@ -5790,6 +6035,7 @@
     },
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.02912621359223301,
+    "description": "Declarations: dynamic_succ, brackets_snoc, array_none_yield",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.TypeGrammarH28.ParserMapping"
@@ -5814,6 +6060,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.056768558951965066,
+    "description": "Declarations: AttrLayout, fnSingles, singles_empty",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.TypeGrammarH28.ParserParams"
@@ -5837,6 +6084,7 @@
     },
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.038860103626943004,
+    "description": "Declarations: paren_prefix, returnsTokens, ReturnsAt",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.TypeGrammarH28.ParserFnAttrs"
@@ -5860,6 +6108,7 @@
     },
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.06143344709897611,
+    "description": "Declarations: ExprAt, LengthAtom, balanced_front_no_close",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.TypeGrammarH28.ParserFunctions",
@@ -5884,6 +6133,7 @@
     },
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 0.05168986083499006,
+    "description": "Declarations: opt_ident_complete, name_boundary, TailExact",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.TypeGrammarH28.ParserContexts"
@@ -5908,6 +6158,7 @@
     },
     "definition_lines": 58,
     "definition_to_proof_line_ratio": 0.13122171945701358,
+    "description": "Declarations: ListBoundary, list_boundary_type, list_boundary_no_ident",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.TypeGrammarH28.ParserReady"
@@ -5931,6 +6182,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.04020100502512563,
+    "description": "Declarations: pathStep, pathTailTokens, path_step_empty",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.TypeGrammarH28.ParserChecks"
@@ -5955,6 +6207,7 @@
     },
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.07009345794392523,
+    "description": "Declarations: Continuation, continuation_no_payable, continuation_no_path",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.TypeGrammarH28.ParserDynamicClosure"
@@ -5979,6 +6232,7 @@
     },
     "definition_lines": 41,
     "definition_to_proof_line_ratio": 0.08023483365949119,
+    "description": "Declarations: elem_region, path_tail_region, path_region",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.TypeGrammarH28.Composition",
@@ -6001,8 +6255,9 @@
       "def": 10,
       "structure": 2
     },
-    "definition_lines": 378,
+    "definition_lines": 376,
     "definition_to_proof_line_ratio": null,
+    "description": "Source creation factories in the typed contract world",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Import",
@@ -6026,6 +6281,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 3.5,
+    "description": "Declarations: parsed, parsed_mulDiv_inhabited",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Yul.ClosedParse"
@@ -6049,6 +6305,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 5.0,
+    "description": "Declarations: namedBlock, parsed_combination_inhabited",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Yul.DeclarationParse"
@@ -6072,6 +6329,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.3,
+    "description": "Declarations: parsed, parsed_inhabited",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Checks.Occurrences",
@@ -6094,6 +6352,7 @@
       "theorem": 6
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: expression_block, flags_preserved, function_loop_grammar",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Yul.Grammar"
@@ -6117,6 +6376,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.4666666666666667,
+    "description": "Declarations: parsed, parsed_inhabited, projectedWitness",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Checks.ScopedSyntax",
@@ -6141,6 +6401,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.45454545454545453,
+    "description": "Declarations: parsed, parsed_inhabited",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Checks.WordSyntax",
@@ -6166,6 +6427,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.35,
+    "description": "Declarations: Parsed, parse, Parsed.complete",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.ClosedSyntax",
@@ -6191,6 +6453,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.2571428571428571,
+    "description": "Declarations: AssemblyParse.complete, DeclarationAssembly, parseDeclarationAssembly",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Yul.Grammar",
@@ -6216,6 +6479,7 @@
     },
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 2.6666666666666665,
+    "description": "Checked assembly grammar entry point",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Checked.Check"
@@ -6240,6 +6504,7 @@
     },
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.47368421052631576,
+    "description": "Declarations: Parsed, parse, Parsed.complete",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.OccurrenceSyntax",
@@ -6256,10 +6521,11 @@
   },
   {
     "area": "Frontend",
-    "category": "import_root",
+    "category": "import_only_unknown",
     "code_lines": 6,
     "declarations": {},
     "definition_to_proof_line_ratio": null,
+    "description": "Declarations: ",
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Yul.Grammar",
@@ -6288,6 +6554,7 @@
     },
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.45454545454545453,
+    "description": "Declarations: Parsed, parse, Parsed.complete",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.ScopedSyntax",
@@ -6313,6 +6580,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.3684210526315789,
+    "description": "Declarations: Parsed, parse, Parsed.complete",
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.WordSyntax",
@@ -6337,6 +6605,7 @@
     },
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.04008016032064128,
+    "description": "Adaptive queries against a fixed random function",
     "implemented_by": 0,
     "imports": [
       "Solidity.Hash.CollisionBound"
@@ -6360,6 +6629,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.0684931506849315,
+    "description": "H112: the ideal and per-run hash readings",
     "implemented_by": 0,
     "imports": [
       "Solidity.Hash.CollisionBound",
@@ -6385,6 +6655,7 @@
     },
     "definition_lines": 51,
     "definition_to_proof_line_ratio": 0.08401976935749589,
+    "description": "Hash collisions: the per-run premise and the birthday bound",
     "implemented_by": 0,
     "imports": [],
     "imports_in": 5,
@@ -6407,6 +6678,7 @@
     },
     "definition_lines": 24,
     "definition_to_proof_line_ratio": 0.13333333333333333,
+    "description": "The adaptive random-oracle bridge (H112)",
     "implemented_by": 0,
     "imports": [
       "Solidity.Hash.Adaptive",
@@ -6431,6 +6703,7 @@
     },
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.08045977011494253,
+    "description": "Compiler corollaries of the hash bridge",
     "implemented_by": 0,
     "imports": [
       "Solidity.Hash.CollisionBridge"
@@ -6452,6 +6725,7 @@
       "theorem": 3
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Declarations: quiet_compiler_prefix, quiet_success, quiet_premise",
     "implemented_by": 0,
     "imports": [
       "Solidity.Hash.CollisionBridgeCompiler",
@@ -6475,6 +6749,7 @@
     },
     "definition_lines": 123,
     "definition_to_proof_line_ratio": null,
+    "description": "SHA-256 and RIPEMD-160, computed",
     "implemented_by": 0,
     "imports": [],
     "imports_in": 4,
@@ -6494,6 +6769,7 @@
     },
     "definition_lines": 59,
     "definition_to_proof_line_ratio": null,
+    "description": "Keccak-256, computed",
     "implemented_by": 0,
     "imports": [],
     "imports_in": 9,
@@ -6515,6 +6791,7 @@
     },
     "definition_lines": 104,
     "definition_to_proof_line_ratio": 2.311111111111111,
+    "description": "The KeY sort lattice of solkey",
     "implemented_by": 0,
     "imports": [],
     "imports_in": 7,
@@ -6536,6 +6813,7 @@
     },
     "definition_lines": 1069,
     "definition_to_proof_line_ratio": 34.483870967741936,
+    "description": "Solidity feature inspection records",
     "implemented_by": 0,
     "imports": [
       "Solidity.Language.Features"
@@ -6561,6 +6839,7 @@
     },
     "definition_lines": 1217,
     "definition_to_proof_line_ratio": 608.5,
+    "description": "Solidity feature scope",
     "implemented_by": 0,
     "imports": [
       "Lean.Data.Name"
@@ -6587,6 +6866,7 @@
     },
     "definition_lines": 114,
     "definition_to_proof_line_ratio": 0.49137931034482757,
+    "description": "Fixed-point reference semantics",
     "implemented_by": 0,
     "imports": [],
     "imports_in": 3,
@@ -6608,6 +6888,7 @@
     },
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.06635071090047394,
+    "description": "Fixed-point ABI encoding",
     "implemented_by": 0,
     "imports": [
       "Solidity.Language.FixedPoint.Laws"
@@ -6630,6 +6911,7 @@
     },
     "definition_lines": 124,
     "definition_to_proof_line_ratio": null,
+    "description": "Fixed-point conformance with the pinned upstream tests",
     "implemented_by": 0,
     "imports": [
       "Solidity.Language.FixedPoint.Literals"
@@ -6650,6 +6932,7 @@
       "theorem": 58
     },
     "definition_to_proof_line_ratio": 0.0,
+    "description": "Fixed-point laws",
     "implemented_by": 0,
     "imports": [
       "Solidity.Language.FixedPoint"
@@ -6674,6 +6957,7 @@
     },
     "definition_lines": 88,
     "definition_to_proof_line_ratio": 0.17564870259481039,
+    "description": "Fixed-point literals and constants",
     "implemented_by": 0,
     "imports": [
       "Solidity.Language.FixedPoint.Laws",
@@ -6699,6 +6983,7 @@
     },
     "definition_lines": 22,
     "definition_to_proof_line_ratio": 0.07236842105263158,
+    "description": "Fixed-point values in storage",
     "implemented_by": 0,
     "imports": [
       "Solidity.Language.FixedPoint.Abi"
@@ -6722,6 +7007,7 @@
     },
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 0.2717391304347826,
+    "description": "Declarations: sourceItems, statement, sourceAfter",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.ReturnTail"
@@ -6745,6 +7031,7 @@
     },
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 0.4262295081967213,
+    "description": "Declarations: source, target, mapping",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.AssignmentBlocks",
@@ -6769,6 +7056,7 @@
     },
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.03529411764705882,
+    "description": "Declarations: body, source_run, source_zero",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.AssignmentWhileBreak"
@@ -6792,6 +7080,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.08928571428571429,
+    "description": "Declarations: C, source, target",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.AssignmentDoWhileBreak",
@@ -6816,6 +7105,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.047058823529411764,
+    "description": "Declarations: body, source_run, source_zero",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.AssignmentWhileBreak"
@@ -6839,6 +7129,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.07142857142857142,
+    "description": "Declarations: C, source, target",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.AssignmentDoWhileContinue",
@@ -6863,6 +7154,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.13131313131313133,
+    "description": "Declarations: body, source_run, source_zero",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.AssignmentWhileBreak"
@@ -6886,6 +7178,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.08333333333333333,
+    "description": "Declarations: joined, observe, observed",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.AssignmentDoWhileReturn",
@@ -6910,6 +7203,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.05405405405405406,
+    "description": "Declarations: statement, source_run, source_zero",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.AssignmentWhileBreak"
@@ -6933,6 +7227,7 @@
     },
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.078125,
+    "description": "Declarations: C, source, target",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.AssignmentForBreak",
@@ -6957,6 +7252,7 @@
     },
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.044444444444444446,
+    "description": "Declarations: body, statement, pure_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.AssignmentWhileContinue"
@@ -6980,6 +7276,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.0975609756097561,
+    "description": "Declarations: tail, withoutPost, joined",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.AssignmentForContinue",
@@ -7004,6 +7301,7 @@
     },
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.05714285714285714,
+    "description": "Declarations: statement, iter_run, source_run",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.AssignmentForContinue"
@@ -7028,6 +7326,7 @@
     },
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.20967741935483872,
+    "description": "Declarations: C, E, source",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.G19.AssignmentForReturn",
@@ -7052,6 +7351,7 @@
     },
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.27586206896551724,
+    "description": "Declarations: boolSlot, code, reached",
     "implemented_by": 0,
     "imports": [
       "Solidity.Lowering.V07.EffectfulCondition",
