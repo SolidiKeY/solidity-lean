@@ -134,7 +134,7 @@ theorem correspondence (C : Contract) (base bits : Nat) (label : Fin W)
 def certificate : Interface.SignedGateCertificate program where
   selected := fun C base bits label => ⟨compiled C base bits label,selected C base bits label⟩
   executed := executed
-/-- info: 'Solidity.Backend.AbiEntry.SignedGate.admitted' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiEntry.SignedGate.admitted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms admitted
 /-- info: 'Solidity.Backend.AbiEntry.SignedGate.selected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms selected
