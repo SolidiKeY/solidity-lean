@@ -11,3 +11,5 @@ Missing historical receipts can be reconstructed with [rebuild_frozen_evidence.p
 [Memory-mirror premise roles](../../scripts/h62/item2/audit-theories/mirror_input_roles.py) distinguish logical heap prefixes, universal preservation and selected mirrors. [Corruption controls](../../scripts/h62/item2/audit-theories/check_mirror_role_controls.py) preserve late inputs and premise kinds. These 13 records remain separate from the prior 85 specifications.
 
 [Clean-tail witnesses](../../tests/h62/item2/audit-theories/CleanTailWitnesses.lean) include admitted deployment/entry/write and real transient-reset observations. [Occurrence-based roles](../../scripts/h62/item2/audit-theories/clean_tail_input_roles.py) preserve both same-named anonymous hypotheses and private identity; [corruption controls](../../scripts/h62/item2/audit-theories/check_clean_tail_role_controls.py) reject collapsed or altered inputs.
+
+[Historical acceptance refresh](../../scripts/h62/item2/audit-theories/refresh_history_acceptance.py) regenerates derived ledgers and snapshots from checked proof inputs in a fresh directory. It links no prior summary reports and performs no new Lean proof.
