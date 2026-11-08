@@ -1,6 +1,8 @@
 import Solidity.Semantics.AbiEntry
 
-/-! Actual one-boolean ABI entry runs, with nonzero output and observable
+/-! Guarded regression: existential success alone must not credit an error-only
+or always-success decoder, or lose exact output and failure boundaries.
+Actual one-boolean ABI entry runs, with nonzero output and observable
 refusals. These concern the existing ABI decoder, not bytecode compilation,
 gas charging, fork agreement, Source termination or complete frontend coverage. -/
 namespace Solidity.H62.AuditLanguage
@@ -66,4 +68,49 @@ theorem exhaust_all_entry_refused : ¬ BooleanEntrySuccess exhaustAllEntry := by
 #print axioms actual_entry_success
 #print axioms reject_all_entry_refused
 #print axioms exhaust_all_entry_refused
+
+/-- Stronger companion behavior for the fixed one-boolean family. All fuel
+suffixes share the same decoder; the original success contract stays unchanged. -/
+def BooleanEntryBehavior
+    (decode : Input → Nat → Except Fail (Entries boolParams)) : Prop :=
+  (∀ fuel : Nat,
+    decode (boolInput 1) (fuel + 2) = .ok (.cons (.val (.word trueWord)) .nil) ∧
+    decode (boolInput 0) (fuel + 2) = .ok (.cons (.val (.word falseWord)) .nil) ∧
+    decode (boolInput 2) (fuel + 2) = .error .revert ∧
+    decode ⟨List.replicate 35 0, 128⟩ (fuel + 2) = .error .revert) ∧
+  decode (boolInput 1) 1 = .error .fuel
+
+theorem actual_entry_behavior : BooleanEntryBehavior (fun I fuel => entry I fuel boolParams) := by
+  exact ⟨fun fuel => ⟨bool_true_success fuel, bool_false_success fuel,
+    malformed_bool_reverts fuel, truncated_bool_reverts fuel⟩, insufficient_fuel⟩
+
+/-- No fixed result can satisfy both an actual success and a malformed-input
+refusal. This covers every fixed-result decoder, including constant errors. -/
+theorem constant_boolean_behavior_refused (result : Except Fail (Entries boolParams)) :
+    ¬ BooleanEntryBehavior (fun _ _ => result) := by
+  intro h
+  have impossible := (h.1 0).1.symm.trans (h.1 0).2.2.1
+  cases impossible
+
+/-- An accept-everything decoder returns a valid-looking success even for a
+malformed word. This must fail the observable behavior contract. -/
+def acceptAllBoolean (_ : Input) (_ : Nat) : Except Fail (Entries boolParams) :=
+  .ok (.cons (.val (.word trueWord)) .nil)
+
+theorem accept_all_boolean_refused : ¬ BooleanEntryBehavior acceptAllBoolean := by
+  exact constant_boolean_behavior_refused _
+
+theorem reject_all_boolean_behavior_refused :
+    ¬ BooleanEntryBehavior (fun I fuel => rejectAllEntry I fuel boolParams) := by
+  exact constant_boolean_behavior_refused _
+
+theorem exhaust_all_boolean_behavior_refused :
+    ¬ BooleanEntryBehavior (fun I fuel => exhaustAllEntry I fuel boolParams) := by
+  exact constant_boolean_behavior_refused _
+
+#print axioms constant_boolean_behavior_refused
+#print axioms actual_entry_behavior
+#print axioms accept_all_boolean_refused
+#print axioms reject_all_boolean_behavior_refused
+#print axioms exhaust_all_boolean_behavior_refused
 end Solidity.H62.AuditLanguage
