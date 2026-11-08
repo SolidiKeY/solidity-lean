@@ -117,7 +117,7 @@ theorem protected_and_saved (word : Fin W) :
 #guard_msgs (whitespace := lax) in #print axioms raw_bool_failure
 /-- info: 'Solidity.Backend.AbiEntry.UnsignedGateControls.raw_uint8_failure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms raw_uint8_failure
-/-- info: 'Solidity.Backend.AbiEntry.UnsignedGateControls.raw_uint8_value' depends on axioms: [Quot.sound] -/
+/-- info: 'Solidity.Backend.AbiEntry.UnsignedGateControls.raw_uint8_value' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms raw_uint8_value
 /-- info: 'Solidity.Backend.AbiEntry.UnsignedGateControls.empty_word_not_entry' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms empty_word_not_entry
