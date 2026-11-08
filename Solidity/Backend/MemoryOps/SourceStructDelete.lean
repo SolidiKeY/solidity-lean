@@ -92,7 +92,7 @@ theorem SourceBoolStructAt.delete_child_bounds {E : Source.Env} {Γ : Source.RCt
       (.error (.revert (Source.panicData .index)),y) := by
   have hl : (Source.evalLoc G F (n+3) (sourceStructChildLoc layout root i)).run y=
       (.error (.revert (Source.panicData .index)),y) := by
-    rw [sourceStructChildLoc,Source.evalLoc,Source.Hoare.run_bind,hr.eval_member_child G F n root hroot]
+    rw [sourceStructChildLoc,Source.evalLoc.eq_def,Source.Hoare.run_bind,hr.eval_member_child G F n root hroot]
     change ((Source.evalE G F (n+2) (.local i)) >>= fun v => Source.indexNat v >>= fun k =>
       Source.indexLoc F (.memRef rfl (address (hp.field r layout.child_type).id) : Source.Val E.layout SourceBoolArrayTy) k).run y=_
     rw [Source.Hoare.run_bind,source_local_value_run G F (n+1) y i _ hi]
@@ -161,7 +161,7 @@ theorem SourceBoolStructAt.delete_child_word_bounds
   let q := σ.heap.field r layout.child_type
   have hn : σ.heap.writeAddr (.index q .dyn k) false=none := by
     unfold Heap.writeAddr Heap.setIndex
-    exact if_neg (Nat.not_lt.mpr hk)
+    exact ite_eq_right (Nat.not_lt.mpr hk)
   let path : MPath C Δ (.ref (.array (.prim .bool))) := .loc (.field (.var root hmf) child layout.child_type)
   let ptr := [.mload (Evm.cellOf b root)] ++ Evm.Memory.readFieldCode (Evm.Memory.fieldOffset (structDef s) child)
   have hp : Evm.Memory.PtrFrag b path ptr := .field _ _ _ (.local root hmf)
