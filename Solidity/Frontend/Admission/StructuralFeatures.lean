@@ -513,4 +513,237 @@ theorem assignment_payload_none_iff (op : AssignOp) :
 /-- info: 'Solidity.Frontend.Admission.assignment_payload_none_iff' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms assignment_payload_none_iff
 
+
+/-! Regression: visibility is metadata, so constructor-only traversal misses explicit fields in unused declarations and function types. Account for all six carriers through the generic visitor. Omission stays absent; legacy constructor visibility and syntactically invalid function-type visibility remain raw syntax evidence, not defaults, legality, admission or dispatch proofs. -/
+def ctorVisibility : CtorVis → Visibility
+  | .internal => .internal
+  | .pub => .pub
+
+def stateVisibility : StateVis → Visibility
+  | .pub => .pub
+  | .priv => .priv
+  | .internal => .internal
+
+inductive DirectVisibility : {c : Cat} → Syn c → Visibility → Prop where
+  | constructor (params mods payable body) (v : CtorVis) :
+      DirectVisibility (.constructor params mods payable (some v) body) (ctorVisibility v)
+  | function {t : Bool} (name params mutability mods virtual override returns body) (v : Visibility) :
+      DirectVisibility (.function (t := t) name params (some v) mutability mods virtual override returns body) v
+  | fallback (sig mutability mods virtual override body) :
+      DirectVisibility (.fallback sig true mutability mods virtual override body) .external
+  | receive (payable mods virtual override body) :
+      DirectVisibility (.receive true payable mods virtual override body) .external
+  | stateVar (ty const override transient name init) (v : StateVis) :
+      DirectVisibility (.stateVar ty (some v) const override transient name init) (stateVisibility v)
+  | fnType (params mutability returns) (v : Visibility) :
+      DirectVisibility (.fnType params (some v) mutability returns) v
+
+def visibilityFieldsAt {c : Cat} (s : Syn c) : List Visibility :=
+  Syn.casesOn (motive := fun _ _ => List Visibility) s
+    ([])
+    (fun _ _ => [])
+    ([])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ vis _ => vis.toList.map ctorVisibility)
+    (fun _ _ vis _ _ _ _ _ _ => vis.toList)
+    (fun _ _ _ _ _ => [])
+    (fun _ external _ _ _ _ _ => if external then [.external] else [])
+    ([])
+    (fun _ _ _ => [])
+    (fun external _ _ _ _ _ => if external then [.external] else [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ vis _ _ _ _ _ => vis.toList.map stateVisibility)
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ vis _ _ => vis.toList)
+    (fun _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    ([])
+    ([])
+    (fun _ _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    ([])
+    ([])
+    ([])
+    (fun _ _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+
+theorem DirectVisibility.mem_fields {c : Cat} {s : Syn c} {v : Visibility}
+    (field : DirectVisibility s v) : v ∈ visibilityFieldsAt s := by
+  cases field <;> exact List.mem_singleton_self _
+
+theorem visibilityFieldsAt_sound {c : Cat} (s : Syn c) (v : Visibility)
+    (present : v ∈ visibilityFieldsAt s) : DirectVisibility s v := by
+  cases s with
+  | constructor params mods payable vis body =>
+    cases vis with
+    | none => exact False.elim (List.not_mem_nil present)
+    | some value =>
+      have same := List.mem_singleton.mp present
+      cases same
+      exact .constructor params mods payable body value
+  | function name params vis mutability mods virtual override returns body =>
+    cases vis with
+    | none => exact False.elim (List.not_mem_nil present)
+    | some value =>
+      have same := List.mem_singleton.mp present
+      cases same
+      exact .function name params mutability mods virtual override returns body _
+  | fallback sig external mutability mods virtual override body =>
+    cases external with
+    | false => exact False.elim (List.not_mem_nil present)
+    | true =>
+      have same := List.mem_singleton.mp present
+      cases same
+      exact .fallback sig mutability mods virtual override body
+  | receive external payable mods virtual override body =>
+    cases external with
+    | false => exact False.elim (List.not_mem_nil present)
+    | true =>
+      have same := List.mem_singleton.mp present
+      cases same
+      exact .receive payable mods virtual override body
+  | stateVar ty vis const override transient name init =>
+    cases vis with
+    | none => exact False.elim (List.not_mem_nil present)
+    | some value =>
+      have same := List.mem_singleton.mp present
+      cases same
+      exact .stateVar ty const override transient name init value
+  | fnType params vis mutability returns =>
+    cases vis with
+    | none => exact False.elim (List.not_mem_nil present)
+    | some value =>
+      have same := List.mem_singleton.mp present
+      cases same
+      exact .fnType params mutability returns _
+  | _ => exact False.elim (List.not_mem_nil present)
+
+theorem visibilityFieldsAt_iff {c : Cat} (s : Syn c) (v : Visibility) :
+    v ∈ visibilityFieldsAt s ↔ DirectVisibility s v :=
+  ⟨visibilityFieldsAt_sound s v,DirectVisibility.mem_fields⟩
+
+def syntaxVisibilityUses {c : Cat} (root : Syn c) : List (SyntaxOccurrence × Visibility) :=
+  syntaxFieldUses root visibilityFieldsAt
+
+theorem syntaxVisibilityUses_iff {c : Cat} (root : Syn c) (site : SyntaxOccurrence) (v : Visibility) :
+    (site,v) ∈ syntaxVisibilityUses root ↔ Syn.Sub site ⟨c,root⟩ ∧ DirectVisibility site.2 v := by
+  rw [syntaxVisibilityUses, syntaxFieldUses_iff, visibilityFieldsAt_iff]
+
+def declarationVisibilityUses (E : Env) : List (DeclarationOccurrence × Visibility) :=
+  declarationFieldUses E visibilityFieldsAt
+
+theorem declarationVisibilityUses_iff (E : Env) (site : DeclarationOccurrence) (v : Visibility) :
+    (site,v) ∈ declarationVisibilityUses E ↔ site.Occurs E ∧ DirectVisibility site.2.2 v := by
+  rw [declarationVisibilityUses, declarationFieldUses_iff, visibilityFieldsAt_iff]
+
+/-- info: 'Solidity.Frontend.Admission.visibilityFieldsAt_iff' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms visibilityFieldsAt_iff
+/-- info: 'Solidity.Frontend.Admission.syntaxVisibilityUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxVisibilityUses_iff
+/-- info: 'Solidity.Frontend.Admission.declarationVisibilityUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms declarationVisibilityUses_iff
+
+
+def visibilityFeaturesAt {c : Cat} (s : Syn c) : List Feature :=
+  (visibilityFieldsAt s).map fun _ => .visibility
+
+theorem visibilityFeaturesAt_iff {c : Cat} (s : Syn c) (f : Feature) :
+    f ∈ visibilityFeaturesAt s ↔ f = .visibility ∧ ∃ v, DirectVisibility s v := by
+  change (f ∈ (visibilityFieldsAt s).map (fun _ => Feature.visibility)) ↔ _
+  rw [List.mem_map]
+  constructor
+  · rintro ⟨v,field,equal⟩
+    exact ⟨equal.symm, v, (visibilityFieldsAt_iff s v).mp field⟩
+  · rintro ⟨rfl,v,field⟩
+    exact ⟨v,(visibilityFieldsAt_iff s v).mpr field,rfl⟩
+
+/-- info: 'Solidity.Frontend.Admission.visibilityFeaturesAt_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms visibilityFeaturesAt_iff
+
 end Solidity.Frontend.Admission
