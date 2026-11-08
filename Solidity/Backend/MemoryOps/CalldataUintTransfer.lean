@@ -220,21 +220,21 @@ theorem checkedCalldataUints_frame {D : Source.Layout} {n : Option Nat}
 #guard_msgs in #print axioms calldataUints_lookup
 /-- info: 'Solidity.Backend.MemoryOps.calldataUint_exact' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms calldataUint_exact
-/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataUints_some' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataUints_some' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedCalldataUints_some
 /-- info: 'Solidity.Backend.MemoryOps.calldataUints_slice_length' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms calldataUints_slice_length
 /-- info: 'Solidity.Backend.MemoryOps.checkedCalldataUints_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedCalldataUints_none_iff
-/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataUints_result' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataUints_result' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedCalldataUints_result
-/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataUints_read' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataUints_read' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedCalldataUints_read
-/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataUints_elems' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataUints_elems' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedCalldataUints_elems
-/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataUints_outside' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataUints_outside' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedCalldataUints_outside
-/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataUints_frame' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataUints_frame' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedCalldataUints_frame
 /-- Missing/unsupported decoded objects are adapter rejection, not profile exclusions. -/
 theorem checkedCalldataUints_no_payload {D : Source.Layout} {H : HTy} {R : RefTy}
@@ -270,9 +270,9 @@ theorem checkedCalldataUints_keeps {D : Source.Layout} {n : Option Nat}
   have ho := overwriteSlice_keeps e hk dst a offset payload hd q
   simpa only [hw] using ho
 
-/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataUints_no_payload' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataUints_no_payload' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedCalldataUints_no_payload
-/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataUints_keeps' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataUints_keeps' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedCalldataUints_keeps
 /-- info: 'Solidity.Backend.MemoryOps.calldataUint_sourceUint' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms calldataUint_sourceUint
@@ -292,6 +292,6 @@ theorem checkedCalldataUints_empty {D : Source.Layout} {n : Option Nat}
     (by simpa only [Nat.sub_self, Nat.add_zero] using hd)
   simpa only [Nat.sub_self, List.take_zero, overwriteSlice_empty] using h
 
-/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataUints_empty' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedCalldataUints_empty' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedCalldataUints_empty
 end Solidity.Backend.MemoryOps
