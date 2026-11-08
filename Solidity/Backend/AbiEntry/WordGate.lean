@@ -85,7 +85,7 @@ theorem correspondence (C : Contract) (base : Nat) (kind : Solidity.AbiEntry.Kin
 def certificate : Interface.WordGateCertificate program where
   selected := fun C base kind label => ⟨compiled C base kind label,selected C base kind label⟩
   executed := executed
-/-- info: 'Solidity.Backend.AbiEntry.WordGate.admitted' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiEntry.WordGate.admitted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms admitted
 /-- info: 'Solidity.Backend.AbiEntry.WordGate.selected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms selected
