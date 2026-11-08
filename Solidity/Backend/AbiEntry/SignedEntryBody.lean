@@ -60,13 +60,13 @@ theorem composed (C : Contract) (base bits : Nat) (label : Fin W) (bodyCode : Li
     SignedBinding.run_program C base bits label machine word size initialWord initialSize
   simp only [signedBindingOutcome] at bindingRun
   by_cases short : size.val<36
-  · rw [if_pos short] at bindingRun ⊢
+  · rw [ite_eq_left short] at bindingRun ⊢
     exact run_append_revert bindingRun
-  · rw [if_neg short] at bindingRun ⊢
+  · rw [ite_eq_right short] at bindingRun ⊢
     by_cases valid : (Solidity.AbiEntry.Kind.int bits).valid word.val=true
-    · rw [if_pos valid] at bindingRun ⊢
+    · rw [ite_eq_left valid] at bindingRun ⊢
       exact run_append_ok bindingRun
-    · rw [if_neg valid] at bindingRun ⊢
+    · rw [ite_eq_right valid] at bindingRun ⊢
       exact run_append_revert bindingRun
 
 theorem executed (base bits : Nat) (label : Fin W) (body : Prog C SignedBoundCtx Δ)
@@ -87,6 +87,7 @@ theorem executed (base bits : Nat) (label : Fin W) (body : Prog C SignedBoundCtx
   rw [sameWhole,sameBody,code]
   exact composed C base bits label _ machine word size initialWord initialSize
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Raw semantic success identifies the actual local subsequently read by the body. -/
 theorem decoded_body (base bits : Nat) (label : Fin W) (body : Prog C SignedBoundCtx Δ)
     (outFrag : Frag Δ) (bodyCore : inFragP (Frag.init SignedBoundCtx) body=some outFrag)
@@ -111,7 +112,7 @@ theorem decoded_body (base bits : Nat) (label : Fin W) (body : Prog C SignedBoun
     ⟨value,semantic,_,cell,reading⟩
   refine ⟨value,semantic,cell,reading,?_⟩
   rw [executed base bits label body outFrag bodyCore whole back wholeFound bodyFound machine _ size initialWord initialSize]
-  simp only [represented,if_neg full,rawArgumentWord,if_pos valid]
+  simp only [represented,ite_eq_right full,rawArgumentWord,ite_eq_left valid]
 
 /-- A short head prevents both the word read and all body execution. -/
 theorem short_before_body (base bits : Nat) (label : Fin W) (body : Prog C SignedBoundCtx Δ)
@@ -197,7 +198,7 @@ theorem early_rejection (base bits : Nat) (payable : Bool) (label : Fin W) (body
     (machine : Machine) (blocked : (payable || decide (machine.callvalue.val=0))=false) :
     run whole.code machine=.revert := by
   rw [gated base bits payable label body outFrag bodyCore whole found machine]
-  simp only [blocked,Bool.false_eq_true,if_false]
+  simp only [blocked,Bool.false_eq_true,ite_false]
 
 theorem decoded_body (base bits : Nat) (payable : Bool) (label : Fin W) (body : Prog C SignedBoundCtx Δ)
     (outFrag : Frag Δ) (bodyCore : inFragP (Frag.init SignedBoundCtx) body=some outFrag)
@@ -221,7 +222,7 @@ theorem decoded_body (base bits : Nat) (payable : Bool) (label : Fin W) (body : 
     (Binding.whole_selected base bits label body outFrag bodyCore) bodyFound
     input fuel machine size initialWord initialSize represented full valid with ⟨value,semantic,cell,reading,bodyRun⟩
   refine ⟨value,semantic,cell,reading,?_⟩
-  rw [gated base bits payable label body outFrag bodyCore whole wholeFound machine,if_pos allowed,bodyRun]
+  rw [gated base bits payable label body outFrag bodyCore whole wholeFound machine,ite_eq_left allowed,bodyRun]
 
 def certificate : Interface.SignedEntryBodyCertificate program where
   selected := fun base bits payable label body outFrag bodyCore =>
