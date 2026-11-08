@@ -25,7 +25,7 @@ theorem SourceBoolRefsAt.eval_reference_loc {E : Source.Env} {Γ : Source.RCtx} 
     (hindex : y.1.get index=sourceUint k) (hk : k.1.toNat<hp.len r .dyn) :
     (Source.evalLoc G F (n+2) (.indexArray (.local root) (by decide) (.local index) rfl)).run y=
       (.ok (.mem a k.1.toNat),y) := by
-  rw [Source.evalLoc,Source.Hoare.run_bind,source_local_value_run G F n y root _ hroot]
+  rw [Source.evalLoc.eq_def,Source.Hoare.run_bind,source_local_value_run G F n y root _ hroot]
   change ((Source.evalE G F (n+1) (.local index)) >>= fun v => Source.indexNat v >>= fun i =>
     Source.indexLoc F (.memRef rfl a : Source.Val E.layout SourceBoolRefsTy) i).run y=_
   rw [Source.Hoare.run_bind,source_local_value_run G F n y index _ hindex]
@@ -137,7 +137,7 @@ theorem SourceBoolRefsAt.reference_assign_bounds {E : Source.Env} {Γ : Source.R
     fun loc => Source.writeLoc F (n+2) loc (.memRef rfl v) >>= fun _ => pure (Source.RVal.val (.memRef rfl v))).run y=_
   have hloc : (Source.evalLoc G F (n+2) (.indexArray (.local root) (by decide) (.local index) rfl)).run y=
       (.error (.revert (Source.panicData .index)),y) := by
-    rw [Source.evalLoc,Source.Hoare.run_bind,source_local_value_run G F n y root _ hroot]
+    rw [Source.evalLoc.eq_def,Source.Hoare.run_bind,source_local_value_run G F n y root _ hroot]
     change ((Source.evalE G F (n+1) (.local index)) >>= fun v => Source.indexNat v >>= fun i =>
       Source.indexLoc F (.memRef rfl a : Source.Val E.layout SourceBoolRefsTy) i).run y=_
     rw [Source.Hoare.run_bind,source_local_value_run G F n y index _ hindex]
@@ -181,7 +181,8 @@ theorem reference_slot_allocator {C : Contract} {Δ : Ctx} {L b frame : Nat}
     rw [Evm.upd_other _ _ (by omega)]
     exact ha.arrays.free.zero addr haddr
   · intro p q
-    simpa only [Evm.Memory.dynamicLen_setElem] using ha.arrays.live q
+    rw [Evm.Memory.dynamicLen_setElem σ.heap r q i v]
+    exact ha.arrays.live q
 
 /-- info: 'Solidity.Backend.MemoryOps.SourceBoolRefsAt.eval_reference_loc' depends on axioms: [propext,
  Classical.choice,
