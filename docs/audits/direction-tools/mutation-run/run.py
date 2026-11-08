@@ -52,7 +52,7 @@ def main():
         assert all(r['baseline_pass'] for r in rs)
         assert json.loads((HERE/'summary.json').read_text())==summarize(ms,rs)
         print('PASS pinned catalogue, unique results, baseline guards, summary arithmetic'); return
-    assert args.work and not str(args.work.resolve()).startswith(str(ROOT)+'/')
+    assert args.work and args.work.resolve()!=ROOT and not str(args.work.resolve()).startswith(str(ROOT)+'/')
     args.work.mkdir(parents=True,exist_ok=True)
     lock=pathlib.Path('/tmp/solidity-lean-feature-groups-20261025/writer.lock'); lock.parent.mkdir(exist_ok=True)
     with lock.open('a') as f:
@@ -62,7 +62,8 @@ def main():
         tree=args.work/'tree'
         if not tree.exists(): subprocess.run(['git','worktree','add','--detach',str(tree),BASE],cwd=ROOT,check=True)
         assert subprocess.check_output(['git','rev-parse','HEAD'],cwd=tree,text=True).strip()==BASE
-        # Shared immutable baseline dependencies; changed oleans go to a separate overlay.
+        assert not subprocess.check_output(['git','status','--porcelain','--untracked-files=no'],cwd=tree,text=True).strip()
+        # Shared cache metadata only. Direct imports use resolved content-addressed artifacts.
         if not (tree/'.lake').exists(): (tree/'.lake').symlink_to(ROOT/'.lake',target_is_directory=True)
         env=dict(os.environ,LEAN_NUM_THREADS='1')
         def limits(): resource.setrlimit(resource.RLIMIT_AS,(12*1024**3,12*1024**3))
@@ -89,6 +90,31 @@ def main():
                 seen.add(x)
                 for d in imports.get(x,[]):visit(d)
             visit(m); return seen
+        allmods=set()
+        for t in targets: allmods |= deps(t)
+        allmods=sorted(allmods & texts.keys())
+        q,out=run(['lake','--quiet','--no-build','query']+[t+':olean' for t in allmods],'artifact-query')
+        artifacts=[pathlib.Path(l) for l in out.splitlines() if l.startswith('/') and l.endswith('.olean')]
+        assert q['returncode']==0 and len(artifacts)==len(allmods),(q,len(artifacts),len(allmods))
+        artifact_map=dict(zip(allmods,artifacts))
+        overlay=args.work/'overlay'
+        def seed():
+            overlay.mkdir(exist_ok=True)
+            for x in overlay.rglob('*.olean'): x.unlink()
+            for mod,artifact in artifact_map.items():
+                link=overlay/(mod.replace('.','/')+'.olean'); link.parent.mkdir(parents=True,exist_ok=True); link.symlink_to(artifact)
+        seed()
+        menv=dict(env,LEAN_PATH=str(overlay))
+        # Same direct command baseline: validate every module that a mutant can rebuild.
+        baseline_modules=set()
+        for m in ms:
+            changed=module(m['path']); baseline_modules.add(changed)
+            for t in map(module,m['targets']): baseline_modules |= {d for d in deps(t) if changed in deps(d)}
+        for mod in sorted(baseline_modules):
+            dest=args.work/'pristine'/(mod.replace('.','/')+'.olean'); dest.parent.mkdir(parents=True,exist_ok=True)
+            c,out=run(['lean','-j1','--tstack=131072','-o',str(dest),mod.replace('.','/')+'.lean'],'pristine-'+mod,menv)
+            if c['returncode']: print('DIRECT_BASELINE_BLOCKED',mod,c,flush=True); return
+        print('DIRECT_BASELINE_PASS',len(baseline_modules),flush=True)
         rs=[]; start=time.monotonic()
         for m in ms:
             if time.monotonic()-start>args.seconds:break
@@ -96,11 +122,7 @@ def main():
             # All edits are exact at the pinned line, not global replacement.
             i=m['line']-1; tail=''.join(lines[i:]); assert m['old'] in tail
             p.write_text(''.join(lines[:i])+tail.replace(m['old'],m['new'],1))
-            overlay=args.work/'overlay'; overlay.mkdir(exist_ok=True)
-            for x in overlay.rglob('*.olean'):x.unlink()
-            for x in (ROOT/'.lake/build/lib/lean').rglob('*.olean'):
-                link=overlay/x.relative_to(ROOT/'.lake/build/lib/lean'); link.parent.mkdir(parents=True,exist_ok=True); link.symlink_to(x)
-            menv=dict(env,LEAN_PATH=str(overlay)+':'+str(ROOT/'.lake/build/lib/lean'))
+            seed()
             changed=module(m['path']); wanted=set()
             for target in map(module,m['targets']): wanted |= {d for d in deps(target) if changed in deps(d)}
             wanted.add(changed); order=[]
@@ -118,16 +140,17 @@ def main():
                     c,out=run(['lean','-j1','--tstack=131072','-o',str(dest),mod.replace('.','/')+'.lean'],m['id']+'-'+mod,menv)
                     c['module']=mod; checks.append(c)
                     if c['returncode']:
-                        verdict='BLOCKED' if c['returncode']==124 or 'unknown module prefix' in out or 'object file' in out else 'KILLED'
+                        verdict='KILLED' if c['returncode']>0 and c['returncode']!=124 and re.search(r'error(?:\([^)]*\))?:',out) and not any(e in out for e in ['unknown module prefix','object file','out of memory','stack overflow']) else 'BLOCKED'
+                        c['decisive_output']=out[:12000]
                         for ln in out.splitlines():
-                            match=re.match(r'.*?\.lean:(\d+):\d+: error:',ln)
+                            match=re.match(r'.*?\.lean:(\d+):\d+: error(?:\([^)]*\))?:',ln)
                             if match:
                                 n=int(match[1]); prefix=texts.get(mod,'').splitlines()[:n]
-                                names=re.findall(r'\b(?:theorem|lemma|def|example)\s+([^\s:(]+)','\n'.join(prefix))
+                                names=re.findall(r'^(?:@\[[^]]+\]\s*)?(?:private\s+)?(?:theorem|lemma|def|example)\s+([^\s:(]+)','\n'.join(prefix),re.M)
                                 killed.append(mod+':'+str(n)+':'+(names[-1] if names else 'anonymous'))
                         break
             finally:p.write_text(original)
-            rs.append(dict(id=m['id'],area=m['area'],file=m['path'],line=m['line'],description=m['description'],verdict=verdict,killed_by=killed if verdict=='KILLED' else [],seconds=round(sum(c['seconds'] for c in checks),3),baseline_pass=True,checks=checks))
+            rs.append(dict(id=m['id'],area=m['area'],file=m['path'],line=m['line'],description=m['description'],verdict=verdict,killed_by=sorted(set(killed)) if verdict=='KILLED' else [],seconds=round(sum(c['seconds'] for c in checks),3),baseline_pass=True,checks=checks))
             dump(HERE/'results.json',rs); dump(HERE/'summary.json',summarize(ms,rs)); print(m['id'],verdict,rs[-1]['seconds'],killed[:2],flush=True)
 
 def summarize(ms,rs):
