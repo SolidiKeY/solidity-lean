@@ -5,6 +5,14 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('n
 const phases=['source','unrelated','untitled','tab','restored'];
 function forbidden(events){return events.filter(e=>e.kind==='terminal.start'||e.kind==='clipboard.write'||e.kind==='command.start'&&/^(dafny|solidityLean)\.(build|buildCustomArgs|run|test|verify|showVerificationTrace|hideVerificationTrace|copyVerificationTrace)$/.test(e.data?.id));}
 async function preparation(task,deadline,now=Date.now){const remaining=deadline-now();if(remaining<=0)throw Error('Original3s menu readiness exhausted');let timer;try{const value=await Promise.race([task(),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Original3s menu readiness exhausted')),remaining);})]);if(now()>=deadline)throw Error('Late menu readiness response refused');return value;}finally{clearTimeout(timer);}}
+// Refuse an unusable/foreign native mouse target before dispatch; no hit/raster claim.
+function menuAnchorPoint(sample,uri){
+ const r=sample?.rect,v=sample?.viewport;
+ if(sample?.activeUri!==uri||typeof uri!=='string'||!r||!v||!['left','top','right','bottom','width','height'].every(k=>Number.isFinite(r[k]))||![v.width,v.height].every(x=>Number.isFinite(x)&&x>0)||r.width<=0||r.height<=0||r.right<=r.left||r.bottom<=r.top||r.left<0||r.top<0||r.right>v.width||r.bottom>v.height)throw Error('Owned menu anchor is foreign, empty or outside viewport');
+ const point={x:r.left+Math.min(60,r.width/2),y:r.top+Math.min(12,r.height/2)};
+ if(point.x<=r.left||point.x>=r.right||point.y<=r.top||point.y>=r.bottom)throw Error('Owned menu anchor point is outside its rectangle');
+ return point;
+}
 function menuErrors(value,runId,target,workspace){
  const errors=[];if(value?.runId!==runId||value?.target!==target)errors.push('foreign menu run/target');
  if(JSON.stringify(value?.phases?.map(p=>p.phase))!==JSON.stringify(phases))errors.push('missing/reordered menu phases');
@@ -144,4 +152,4 @@ function partialEvidence(directory,runId,target){
  try{bytes=fs.readFileSync(file);const observation=JSON.parse(bytes);if(observation.runId!==runId||observation.target!==target)throw Error('Foreign partial menu identity');return{status:'failed-partial',file,diagnostics,diagnosticError,sha256:createHash('sha256').update(bytes).digest('hex'),observation};}
  catch(error){return{status:'unavailable',file,diagnostics,diagnosticError,...(bytes?{sha256:createHash('sha256').update(bytes).digest('hex')}:{}),error:error.message};}
 }
-module.exports={phases,validate,run,preparation,trustErrors,partialEvidence,recoveryPredecessor,recoveryErrors,verifyRecoveryReceipts,recoveryPrefixErrors};
+module.exports={menuAnchorPoint,phases,validate,run,preparation,trustErrors,partialEvidence,recoveryPredecessor,recoveryErrors,verifyRecoveryReceipts,recoveryPrefixErrors};

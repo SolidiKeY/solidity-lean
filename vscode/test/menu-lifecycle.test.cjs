@@ -92,3 +92,27 @@ test('recovery phases complete through request and capture server transport (syn
   }
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
+
+// Injected CDP geometry controls; these do not establish native menu/raster parity.
+test('native menu collector refuses unowned or unusable anchors before any input',async()=>{
+ const {captureContributionMenu}=require('../parity/renderer.cjs'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
+ const good={activeUri:'file:///owned.sol',rect:{left:10,top:20,right:210,bottom:120,width:200,height:100},viewport:{width:1000,height:800}};
+ for(const change of [v=>v.activeUri='file:///foreign.sol',v=>v.rect.width=0,v=>v.rect.left=-1,v=>v.rect.right=1001,v=>v.rect.top=NaN,v=>v.viewport.height=0,v=>v.rect=null]){
+  const sample=structuredClone(good);change(sample);const calls=[],dir=fs.mkdtempSync(path.join(os.tmpdir(),'menu-anchor-'));
+  try{await assert.rejects(captureContributionMenu({async request(method){calls.push(method);return{result:{value:sample}};}},dir,{target:'local',kind:'editor',binding:{uri:'file:///owned.sol'}}),/Owned menu anchor/);assert.equal(calls.filter(x=>x.startsWith('Input.')).length,0);}finally{fs.rmSync(dir,{recursive:true,force:true});}
+ }
+});
+
+test('owned visible menu anchor preserves original mouse offsets and rejects inconsistent point',()=>{
+ const {menuAnchorPoint}=require('../parity/menu-lifecycle.cjs'),sample={activeUri:'file:///owned',rect:{left:10,top:20,right:210,bottom:120,width:200,height:100},viewport:{width:1000,height:800}};
+ assert.deepEqual(menuAnchorPoint(sample,'file:///owned'),{x:70,y:32});sample.rect.right=20;assert.throws(()=>menuAnchorPoint(sample,'file:///owned'),/point/);
+});
+
+test('anchor DOM cannot borrow URI from a different Monaco subtree',async()=>{
+ const {captureContributionMenu}=require('../parity/renderer.cjs'),vm=require('node:vm'),fs=require('node:fs'),os=require('node:os'),path=require('node:path'),calls=[],dir=fs.mkdtempSync(path.join(os.tmpdir(),'menu-dom-owner-')),rect={left:10,top:20,right:210,bottom:120,width:200,height:100};
+ const owned={getAttribute:()=> 'file:///owned.sol',getBoundingClientRect:()=>rect},foreign={getAttribute:()=> 'file:///foreign.sol',getBoundingClientRect:()=>rect},group={querySelectorAll:selector=>selector.includes('monaco-editor')?[owned]:[]},anchor={getBoundingClientRect:()=>rect,closest:selector=>selector.includes('editor-group')?group:foreign};
+ const document={querySelector:selector=>selector.includes('view-lines')?anchor:owned};
+ // A filtered closest() must not skip a nested Monaco lacking data-uri.
+ const nearest=anchor.closest;anchor.closest=selector=>selector.includes('[data-uri]')?owned:nearest(selector);
+ try{await assert.rejects(captureContributionMenu({async request(method,params){calls.push(method);return{result:{value:vm.runInNewContext(params.expression,{document,innerWidth:1000,innerHeight:800})}};}},dir,{target:'local',kind:'editor',binding:{uri:'file:///owned.sol'}}),/Owned menu anchor/);assert.equal(calls.filter(x=>x.startsWith('Input.')).length,0);assert.equal(JSON.parse(fs.readFileSync(path.join(dir,'menu-anchor.json'))).anchor.activeUri,null);}finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
