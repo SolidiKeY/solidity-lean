@@ -180,6 +180,9 @@ def main():
               '-c', f'user.email={os.environ.get("GIT_AUTHOR_EMAIL", "coord-ask@localhost")}',
               'commit-tree', tree, '-p', base, '-m', f'{kind[:-1] if kind != "done" else "done"}: {first}')
         ref = f'{prefix}/' + re.sub(r'[^A-Za-z0-9._/-]', '-', lane) + f'/{ts}'
+        if a.done and pre.get('head') and git('rev-parse', 'HEAD') != pre['head']:   # last look, just before reporting
+            sys.exit(f"coord-ask: HEAD moved after the pre-push check (checked {pre['head'][:12]}); nothing was reported. "
+                     'Run --done again for the new head.')
         g('push', '-q', repo, f'{c}:refs/heads/{ref}')
     print(f'{ {"acks": "acked", "done": "done", "questions": "asked"}[kind] }: {ref}')
 
