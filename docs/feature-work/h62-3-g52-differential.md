@@ -1685,7 +1685,9 @@ python3 scripts/h62/item3/g52-differential/engine_protocol_inventory.py \
 
 The output must be a new file outside the repository. The existing archive
 verifier authenticates inputs before classification, and the input digest is
-checked again afterward. Ordered cases, mixed expected-error requests, version
+checked again afterward. Extra request fields retain their exact JSON values,
+including null and structured expectations; these values are not interpreted as
+observed rejections. Ordered cases, mixed expected-error requests, version
 differences, empty sequences and parameter type gaps remain visible. An
 `outer-envelope-candidate` checks basic envelope/positional types only: payload
 contents are not validated. Every inventory has zero executed cases and zero
