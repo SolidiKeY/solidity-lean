@@ -10,7 +10,7 @@ import json
 import pathlib
 import subprocess
 
-REFERENCE_REVISION = '4d7cc2f0d3b28f5c5c3ae0ca6d21dcc652ee7678'
+REFERENCE_REVISION = '645f10caf083550552616229654e29fddd1ad767'
 REFERENCE_DIRECTORY = 'docs/audits/direction-tools/references/'
 
 def main():
@@ -46,6 +46,6 @@ def main():
         raw=json.dumps(data,indent=2,sort_keys=True)+'\n'
         assert len(raw.encode())<1_000_000
         (args.out/name).write_text(raw)
-    print('H241 reuse: exact reference pin match; partial status and missing overhead/closure evidence preserved; no new measurement')
+    print('H241 reuse: exact reference pin match; source status '+result['source_status']+' preserved; missing process overhead/closure evidence explicit; no new measurement')
 
 if __name__=='__main__':main()
