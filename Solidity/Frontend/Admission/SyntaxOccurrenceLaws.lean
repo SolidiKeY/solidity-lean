@@ -1,7 +1,6 @@
 import Solidity.Frontend.Admission.SyntaxOccurrences
 
-/-! Structural laws against the independent Source.Syn.Sub relation.
-No execution-root, feature classification or frontend adequacy is asserted. -/
+/-! Structural laws against the independent Source.Syn.Sub relation. No execution-root, feature classification or frontend adequacy is asserted. -/
 namespace Solidity.Frontend.Admission
 open Solidity.Source
 
@@ -1252,19 +1251,16 @@ theorem syntaxOccurrences_iff {c : Cat} (s : Syn c) (x : SyntaxOccurrence) :
 /-- info: 'Solidity.Frontend.Admission.syntaxOccurrences_iff' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms syntaxOccurrences_iff
 
-/-! Generic whole-syntax metadata collection. Regression: headers are not
-part of a declaration-only roster. Classifiers share the canonical visitor
-rather than introducing per-feature traversal copies. -/
+/-! Generic whole-syntax metadata collection. Regression: headers are not part of a declaration-only roster. Classifiers share the canonical visitor rather than introducing per-feature traversal copies. -/
 universe u
 
-/-- Collect direct field values with their actual intrinsic sites. -/
+
 def syntaxFieldUses {α : Type u} {c : Cat} (root : Syn c)
     (fields : ∀ {k : Cat}, Syn k → List α) : List (SyntaxOccurrence × α) :=
   (syntaxOccurrences root).flatMap fun site =>
     (fields site.2).map fun value => (site,value)
 
-/-- Exact field accounting against the independent intrinsic subterm relation;
-classifier validity/completeness and lexical positions remain separate. -/
+/-- Exact field accounting against the independent intrinsic subterm relation; classifier validity/completeness and lexical positions remain separate. -/
 theorem syntaxFieldUses_iff {α : Type u} {c : Cat} (root : Syn c)
     (fields : ∀ {k : Cat}, Syn k → List α) (site : SyntaxOccurrence) (value : α) :
     (site,value) ∈ syntaxFieldUses root fields ↔

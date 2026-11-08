@@ -2018,27 +2018,10 @@ statements, outcomes and proof limits are unchanged.
 stability for the real do/while driver with the concrete body adapter factory.
 `adapterSuccessor` and `adapterExtension` transport this to the genuine
 intrinsic P16 do/while adapter, preserving the entire raw frame.
-Body terminality comes from the actual parent result. Normal/continue evaluate
-the condition on the actual postbody frame and recurse on the actual
-postcondition frame; break bypasses the condition. The original intrinsic
-body certificate and non-timeout premise remain explicit. No coherence,
-projection, assumed child law or arbitrary-adapter raw stability is introduced.
+Body terminality comes from the actual parent result. Normal/continue evaluate the condition on the actual postbody frame and recurse on the actual postcondition frame; break bypasses the condition. The original intrinsic body certificate and non-timeout premise remain explicit. No coherence, projection, assumed child law or arbitrary-adapter raw stability is introduced.
 
-Nine controls use actual typed adapters. Break3 preserves raw2/u8257 and
-skips a guard that independently times out at fuel2. Continue5 writes false;
-normal10 executes its mutating body even with a false guard. Both preserve
-the sibling raw257. All three completed entire frames stabilize at every
-larger horizon; normal9 remains timeout. Source correctness is checked
-separately from a clean initial frame for every horizon.
-No Source/ExtCall/evaluator/layout/observation/admission/dirty-readback/compiler
-changes or adequacy claims are made. Full VY1/general P16 and final lane
-gates remain open.
+Nine controls use actual typed adapters. Break3 preserves raw2/u8257 and skips a guard that independently times out at fuel2. Continue5 writes false; normal10 executes its mutating body even with a false guard. Both preserve the sibling raw257. All three completed entire frames stabilize at every larger horizon; normal9 remains timeout. Source correctness is checked separately from a clean initial frame for every horizon. No Source/ExtCall/evaluator/layout/observation/admission/dirty-readback/compiler changes or adequacy claims are made. Full VY1/general P16 and final lane gates remain open.
 
-Independent read-only finder and skeptic core/final reviews report no
-findings. Per-file diagnostics, focused checks, affected core build and
-layer/root checks pass. Thirteen scoped axiom reports use only Lean standard
-axioms. Standard tactic failures and the redundant solved-goal tactic failure
-remain raw evidence; removing that redundant tactic changes no statement,
-expected behavior or proof limit.
+Independent read-only finder and skeptic core/final reviews report no findings. Per-file diagnostics, focused checks, affected core build and layer/root checks pass. Thirteen scoped axiom reports use only Lean standard axioms. Standard tactic failures and the redundant solved-goal tactic failure remain raw evidence; removing that redundant tactic changes no statement, expected behavior or proof limit.
 
 Literal tags in `Frontend/Admission/StructuralFeatures.lean` use the existing generic syntax collector alongside the frozen structural subset. Equal decoded bytes retain string/hex-string/Unicode distinctions; numeric spelling, contextual address literals and lexical validity need their own evidence. These tags do not establish admission.
