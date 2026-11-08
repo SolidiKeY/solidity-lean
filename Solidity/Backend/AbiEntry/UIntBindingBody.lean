@@ -110,6 +110,29 @@ theorem decoded_body (base bits : Nat) (label : Fin W) (body : Prog C UIntBoundC
   rw [executed base bits label body outFrag bodyCore whole back wholeFound bodyFound machine _ size initialWord initialSize]
   simp only [represented,ite_eq_right full,rawArgumentWord,ite_eq_left valid]
 
+/-- Raw decoder failure prevents body execution; success runs the selected body
+with the byte-derived uint binding. No successful decoder result is assumed.
+The existing source fuel boundary is retained as fuel+2. -/
+theorem raw_executed (base bits : Nat) (label : Fin W) (body : Prog C UIntBoundCtx Δ)
+    (outFrag : Frag Δ) (bodyCore : inFragP (Frag.init UIntBoundCtx) body=some outFrag)
+    (input : Solidity.AbiEntry.Input) (fuel : Nat) (machine : Machine) (size : Fin W)
+    (initialWord : machine.mem base=.val (rawArgumentWord input))
+    (initialSize : machine.mem (base+1)=.val size) (represented : size.val=input.size) :
+    run (selectedWhole base bits label body outFrag bodyCore).code machine=
+      match Solidity.AbiEntry.entry input (fuel+2) (singleWordParams (.uint bits)) with
+      | .error _ => .revert
+      | .ok _ => run (selectedBody base body outFrag bodyCore).code
+          (uintBoundMachine base label (rawArgumentWord input) machine) := by
+  rw [code,composed C base bits label _ machine _ size initialWord initialSize,
+    SingleWordGate.entry_form]
+  simp only [represented,rawArgumentWord]
+  by_cases short : input.size<36
+  · simp only [if_pos short]
+  · simp only [if_neg short]
+    by_cases valid : (Solidity.AbiEntry.Kind.uint bits).valid (Solidity.AbiEntry.load input.data 4)=true
+    · simp only [if_pos valid,dif_pos valid]
+    · simp only [if_neg valid,dif_neg valid]
+
 /-- A short head prevents both the word read and all body execution. -/
 theorem short_before_body (base bits : Nat) (label : Fin W) (body : Prog C UIntBoundCtx Δ)
     (outFrag : Frag Δ) (bodyCore : inFragP (Frag.init UIntBoundCtx) body=some outFrag)
@@ -145,4 +168,6 @@ def certificate : Interface.UIntBindingBodyCertificate program where
 #guard_msgs (whitespace := lax) in #print axioms short_before_body
 /-- info: 'Solidity.Backend.AbiEntry.UIntBindingBody.certificate' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms certificate
+/-- info: 'Solidity.Backend.AbiEntry.UIntBindingBody.raw_executed' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms raw_executed
 end Solidity.Backend.AbiEntry.UIntBindingBody

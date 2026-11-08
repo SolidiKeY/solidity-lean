@@ -136,10 +136,19 @@ theorem scope_source {c : Control} {n fuel : Nat} {rhs : Expr [] [] n 1} {body :
  evalStmt (max fuel horizon+1) .nil True.intro (.let_ 1 rhs body)
    (⟨initializer.profile,artifact.compiled.profile⟩ : StmtWordP (.let_ 1 rhs body)) (sourceLocals locals) =
  some ⟨sourceLocals (outerLocals out),.normal⟩ := by
- have expr := evalExpr_stable (Nat.le_max_left fuel horizon) .nil True.intro rhs initializer.profile
-   (sourceLocals locals) (initializer.source locals)
- have bodyRun := evalStmt_stable (Nat.le_max_right fuel horizon) .nil True.intro body artifact.compiled.profile
-   (sourceLocals (#v[initializer.value locals] ++ locals)) ran
+ have expr : evalExpr (max fuel horizon) .nil True.intro rhs initializer.profile (sourceLocals locals) =
+   some (fun _ => (initializer.value locals).toFin) := CompletionControls.completed_horizon
+   (fun budget => evalExpr budget .nil True.intro rhs initializer.profile (sourceLocals locals))
+   (fun budget extra => evalExpr_refines_add budget extra .nil True.intro rhs initializer.profile (sourceLocals locals))
+   (Nat.le_max_left fuel horizon) (initializer.source locals)
+ have bodyRun : evalStmt (max fuel horizon) .nil True.intro body artifact.compiled.profile
+   (sourceLocals (#v[initializer.value locals] ++ locals)) = some ⟨sourceLocals out,.normal⟩ :=
+   CompletionControls.completed_horizon
+     (fun budget => evalStmt budget .nil True.intro body artifact.compiled.profile
+       (sourceLocals (#v[initializer.value locals] ++ locals)))
+     (fun budget extra => evalStmt_refines_add budget extra .nil True.intro body artifact.compiled.profile
+       (sourceLocals (#v[initializer.value locals] ++ locals)))
+     (Nat.le_max_right fuel horizon) ran
  change (do
    let values ← evalExpr (max fuel horizon) .nil True.intro rhs initializer.profile (sourceLocals locals)
    let middle ← evalStmt (max fuel horizon) .nil True.intro body artifact.compiled.profile
