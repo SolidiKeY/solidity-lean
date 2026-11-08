@@ -59,3 +59,14 @@ It grants source-plan credit only. Freshen the listed witness objects and
 code; also check `tests/h62/item2/audit-language/WitnessAccountingControls.lean`.
 Keep raw leading-binder categories and closed schemas separate. This does not
 replace historical ownership acceptance or semantic interface classification.
+
+Reconcile generated diagnostics with
+`scripts/h62/item2/audit-language/witness_results.py --plan EXTERNAL_JSON --generated EXTERNAL_LEAN --log EXTERNAL_LOG --receipt EXTERNAL_RECEIPT --binding EXTERNAL_BINDING --output NEW_EXTERNAL_JSON`.
+It checks exact row coverage, source/code hashes, categories, axioms and runtime
+limits. Supplied local receipt authenticity is not established by this checker;
+semantic classification and historical acceptance remain separate.
+
+Create the execution binding with
+`scripts/h62/item2/audit-language/run_witness_results.py --plan EXTERNAL_JSON --generated EXTERNAL_LEAN --binding NEW_EXTERNAL_BINDING --label UNIQUE_LABEL`.
+It uses the existing bounded runtime and requires unchanged before/after inputs.
+An older unbound receipt cannot pass the result checker.
