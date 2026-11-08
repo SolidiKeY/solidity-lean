@@ -33,7 +33,7 @@ function trustedFixture(target='local'){
   if(menu){metadata={binding,target,kind:'editor',trustObservation:true};const item=structuredClone(v.phases[0].capture.capture.contributionMenu),visible=binding.trusted;item.binding=binding;item.submenuVisible=visible;if(!visible)item.before.items=[{...item.before.items[0],label:'Copy'}];item.after=structuredClone(item.before);captured={captured:true,screenshot:true,contributionMenu:item};}
   else{metadata={binding,desired};const before={visible:true,buttons:[{label:desired?'Trust':"Don't Trust",disabled:null}]},after={visible:true,buttons:[{label:desired?"Don't Trust":'Trust',disabled:null}]};captured={captured:true,screenshot:true,trustControl:{binding,desired,before,after,beforeCaptured:structuredClone(before),afterCaptured:structuredClone(after),nativeMouse:true}};}
   v.trust.steps.push({phase,binding,after:{...binding,trusted:menu?binding.trusted:desired},events:[],eventStart:0,eventEnd:0,capture:{runId:'run',status:'captured',phase:menu?'menus-trust-'+phase:'menus-trust-control-'+phase,metadataHash:createHash('sha256').update(JSON.stringify(metadata)).digest('hex'),capture:captured}});
- }return v;
+ }for(const row of v.phases){for(const k of ['before','after'])row.capture.capture.contributionMenu[k].rendererLifetime={timeOrigin:1,url:'vscode-file://owned'};}for(const row of v.trust.steps){const c=row.capture.capture;for(const k of ['before','after'])if(c.contributionMenu)c.contributionMenu[k].rendererLifetime={timeOrigin:1,url:'vscode-file://owned'};for(const k of ['before','after','beforeCaptured','afterCaptured'])if(c.trustControl)c.trustControl[k].rendererLifetime={timeOrigin:1,url:'vscode-file://owned'};}return v;
 }
 test('native trust envelopes require real UI/publicAPI/source bindings and unchanged legacy phases (injected)',()=>{for(const target of ['local','dafny'])assert.deepEqual(validate(trustedFixture(target),'run',target,'/','transitions'),[]);});
 test('native trust envelopes refuse missing, stale, mutated and false-restoration evidence (injected)',()=>{
@@ -52,4 +52,43 @@ test('trust runner accepts only explicit opt-in on bounded contribution suite',(
 test('missing host report retains complete failed partial menu record without promotion (injected file boundary)',()=>{
  const fs=require('node:fs'),os=require('node:os'),path=require('node:path'),{partialEvidence}=require('../parity/menu-lifecycle.cjs'),dir=fs.mkdtempSync(path.join(os.tmpdir(),'menu-partial-'));
  try{const original=trustedFixture();original.trust.steps=original.trust.steps.slice(0,3);original.trust.steps[2].error='CDP timeout DOMSnapshot.captureSnapshot';fs.writeFileSync(path.join(dir,'menu-observations.json'),JSON.stringify(original));const report=JSON.parse(JSON.stringify({status:'broken',error:'No fresh extension-host report',partialMenuEvidence:partialEvidence(dir,'run','local')}));assert.equal(report.status,'broken');assert.equal(report.result,undefined);assert.deepEqual(report.partialMenuEvidence.observation,original);assert.equal(report.partialMenuEvidence.status,'failed-partial');assert.equal(report.partialMenuEvidence.observation.trust.steps[2].error,'CDP timeout DOMSnapshot.captureSnapshot');assert.ok(validate(original,'run','local','/','transitions').length);assert.equal(partialEvidence(dir,'run','dafny').status,'unavailable');assert.equal(partialEvidence(dir,'foreign','local').observation,undefined);}finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test('trust envelopes reject a renderer restart even with unchanged source bytes (injected)',()=>{const v=trustedFixture();v.trust.steps[5].capture.capture.contributionMenu.before.rendererLifetime.timeOrigin++;v.trust.steps[5].capture.capture.contributionMenu.after.rendererLifetime.timeOrigin++;assert.ok(validate(v,'run','local','/','transitions').includes('renderer restarted or missing lifetime evidence'));});
+
+function recoveryFixture(target='local'){
+ const v=trustedFixture(target),old=v.phases[0].binding,prior={status:'retained-failed-same-session',target,runId:'old-run',binding:{...old,session:'old-document'},host:{hostSession:'old-host'},exit:{wallTime:1},receipts:[]},value={mode:'separate-new-session-recovery',runId:'run',target,predecessor:prior,settings:{enabled:true,startupPrompt:'never',enabledUserValue:true},host:{hostSession:'new-host',runId:'run',target,pid:123,birth:'123',wallTime:2,trusted:false,previousHostRecorded:false},events:[],forbiddenActions:[],steps:[v.trust.steps[0],v.trust.steps[4],v.trust.steps[5]]};
+ value.steps[0].phase='initial';value.steps[1].phase='restore';value.steps[2].phase='restored';for(const row of value.steps)row.capture.phase=row.phase==='restore'?'menus-trust-control-recovery':'menus-trust-recovery-'+row.phase;return value;
+}
+test('new-session recovery is separately bound and never satisfies original same-session validation (injected)',()=>{
+ const {recoveryErrors}=require('../parity/menu-lifecycle.cjs');for(const target of ['local','dafny']){const v=recoveryFixture(target);assert.deepEqual(recoveryErrors(v,'run',target,v.predecessor),[]);assert.ok(validate(v,'run',target,'/','transitions').length);}
+});
+test('new-session recovery refuses stale source, old session, missing native transition and renderer replacement (injected)',()=>{
+ const {recoveryErrors}=require('../parity/menu-lifecycle.cjs');for(const mutate of [v=>v.settings.enabled=false,v=>v.host.hostSession='old-host',v=>v.host.runId='foreign',v=>v.host.birth='',v=>v.host.wallTime=0,v=>v.steps[0].binding.session='old-document',v=>v.steps[0].binding.uri='file:///foreign',v=>v.steps[2].binding.version++,v=>v.steps[1].after.trusted=false,v=>v.steps[1].capture.capture.trustControl.nativeMouse=false,v=>v.steps[1].capture.error='failed capture',v=>v.steps[1].capture.status='failed',v=>v.steps[0].capture.capture.contributionMenu.before.items[0].withinViewport=false,v=>v.steps[2].capture.capture.contributionMenu.after.rendererLifetime.timeOrigin++,v=>v.events.push({kind:'terminal.start'}),v=>v.steps.reverse(),v=>v.steps[0].capture.metadataHash='foreign']){const v=recoveryFixture(),expected=structuredClone(v.predecessor);mutate(v);assert.ok(recoveryErrors(v,'run','local',expected).length);}const v=recoveryFixture(),other=structuredClone(v.predecessor);other.runId='different';assert.ok(recoveryErrors(v,'run','local',other).length);
+});
+test('recovery option requires explicit predecessor and original bounded menu dimensions',()=>{const {parse}=require('../parity/run.cjs'),base=['--suite','contribution-menus','--workers','1','--obligations','1','--trials','1','--warmups','0'];assert.throws(()=>parse([...base,'--menu-trust','recovery']),/predecessor/);assert.throws(()=>parse([...base,'--menu-recovery-from','/receipt']),/predecessor/);assert.equal(parse([...base,'--menu-trust','recovery','--menu-recovery-from','/receipt']).menuTrust,'recovery');});
+test('recovery predecessor immutable receipt and source guard rejects changed bytes (injected files)',()=>{const fs=require('fs'),os=require('os'),path=require('path'),{pathToFileURL}=require('url'),{verifyRecoveryReceipts}=require('../parity/menu-lifecycle.cjs'),dir=fs.mkdtempSync(path.join(os.tmpdir(),'recovery-receipts-'));try{const source=path.join(dir,'source'),receipt=path.join(dir,'receipt');fs.writeFileSync(source,'unchanged source');fs.writeFileSync(receipt,'original failure');const hash=p=>createHash('sha256').update(fs.readFileSync(p)).digest('hex'),prior={receipts:[{file:receipt,sha256:hash(receipt)}],binding:{uri:pathToFileURL(source).href,sourceHash:hash(source)}};verifyRecoveryReceipts(prior);fs.writeFileSync(receipt,'changed failure');assert.throws(()=>verifyRecoveryReceipts(prior),/receipt mutated/);fs.writeFileSync(receipt,'original failure');fs.writeFileSync(source,'different source');assert.throws(()=>verifyRecoveryReceipts(prior),/source mutated/);}finally{fs.rmSync(dir,{recursive:true,force:true});}});
+
+test('recovery admission validates original five endpoints and native grant, retaining only unfinished deny (injected)',()=>{const {recoveryPrefixErrors}=require('../parity/menu-lifecycle.cjs'),make=()=>{const v=trustedFixture();v.trust.steps=v.trust.steps.slice(0,3);const deny=v.trust.steps[2];delete deny.capture;delete deny.after;return v;},events=[{kind:'scenario.start',data:{id:'native-contribution-menus'}}];assert.deepEqual(recoveryPrefixErrors(make(),events,'run','local','/'),[]);for(const mutate of [v=>v.phases[0].capture.metadataHash='foreign',v=>delete v.phases[0].capture.capture.screenshot,v=>v.phases[0].error='actual error',v=>v.phases[1].capture.capture.contributionMenu.after.items=[],v=>v.trust.steps[1].capture.capture.trustControl.nativeMouse=false,v=>v.trust.steps[1].after.trusted=false,v=>v.trust.steps[1].capture.runId='foreign',v=>v.trust.steps[2].after=v.trust.steps[2].binding]){const v=make();mutate(v);assert.ok(recoveryPrefixErrors(v,events,'run','local','/').length);}assert.ok(recoveryPrefixErrors(make(),[...events,{kind:'clipboard.write'}],'run','local','/').length);});
+
+// Exercise the real file request/server transport; bytes are synthetic, not native evidence.
+test('recovery phases complete through request and capture server transport (synthetic PNG)', async()=>{
+ const fs=require('node:fs'),os=require('node:os'),path=require('node:path');
+ const {requestPhase,servePhases}=require('../parity/phase-capture.cjs');
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'recovery-phase-transport-')),seen=new Set();
+ try{
+  for(const phase of ['menus-trust-recovery-initial','menus-trust-control-recovery','menus-trust-recovery-restored']){
+   const pending=requestPhase(dir,'recovery-run',phase,{source:'unchanged'},1000);
+   const observed=[];
+   await servePhases(dir,'recovery-run',async(destination,request)=>{
+    observed.push(request.phase);
+    fs.writeFileSync(path.join(destination,'screenshot.png'),Buffer.from([137,80,78,71,13,10,26,10,0]));
+    return {captured:true,screenshot:true};
+   },seen);
+   const reply=await pending;
+   assert.equal(reply.status,'captured');
+   assert.equal(reply.phase,phase);
+   assert.deepEqual(observed,[phase]);
+  }
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });

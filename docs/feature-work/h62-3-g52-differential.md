@@ -1616,13 +1616,15 @@ Source/runtime correspondence or discharge production Bridge obligations.
 ## Immutable owner-test fixture retrieval
 
 The current `test_engine_execution_coverage.py` and
-`engine_payload_reference.test.mjs` use packet **engine-coverage-fixtures-v2** in
+`engine_payload_reference.test.mjs` use packet **engine-coverage-fixtures-v3** in
 private repository **SolidiKeY/solidity-lean-coord**, commit
-**a0e3142388aca8b1dbdf7cb43486d2ee717f50e4**, exact directory
-`evidence/solidity-h62-3-20261106/g52-differential/engine-coverage-fixtures-v2/`.
+**d4e5866fe89bcc71778542fdbd58bb2a15b9cb40**, exact directory
+`evidence/solidity-h62-3-20261106/g52-differential/engine-coverage-fixtures-v3/`.
 Its `artifact-sha256.json` SHA256 is
-`86518321e67dec60992911acd2f31072a64fca45c59a181dfd8c6f1f6f8ea768`.
+`b6aa696cd35840e8e4482ae2549400d7b4bc8f5a23ca9fd79aae87bc0ab3c2a8`.
 These are immutable fixture coordinates, not a directory tip or a runtime claim.
+Version 3 binds the current checker and control sources; its captured fixtures
+and SDK bytes match version 2.
 Earlier `review-final-*` artifacts describe the prior checker and are not the
 current test packet. No public checksum manifest is restored under tests.
 
@@ -1632,9 +1634,9 @@ From the lane code checkout, retrieve the exact private bytes:
 g52_store=$(mktemp -d)
 git -C "$g52_store" init -q
 git -C "$g52_store" remote add origin https://github.com/SolidiKeY/solidity-lean-coord.git
-git -C "$g52_store" fetch --depth=1 origin a0e3142388aca8b1dbdf7cb43486d2ee717f50e4
-git -C "$g52_store" checkout FETCH_HEAD -- evidence/solidity-h62-3-20261106/g52-differential/engine-coverage-fixtures-v2
-g52_packet="$g52_store/evidence/solidity-h62-3-20261106/g52-differential/engine-coverage-fixtures-v2"
+git -C "$g52_store" fetch --depth=1 origin d4e5866fe89bcc71778542fdbd58bb2a15b9cb40
+git -C "$g52_store" checkout FETCH_HEAD -- evidence/solidity-h62-3-20261106/g52-differential/engine-coverage-fixtures-v3
+g52_packet="$g52_store/evidence/solidity-h62-3-20261106/g52-differential/engine-coverage-fixtures-v3"
 (cd "$g52_packet" && sha256sum -c SHA256SUMS)
 ```
 
@@ -1669,3 +1671,30 @@ therefore invalidates old observations. Early metadata refusals avoid expensive
 archive work for already-invalid receipts; all archive, ancestry and admission
 checks still run for qualifying records. These external checks add no Source
 agreement, full producer, public-obligation proof or runtime-gate claim.
+
+
+## Inventory remaining Engine-X protocol profiles
+
+Run the metadata inventory under the existing writer lock and serial resource
+guard; archive regeneration is heavy:
+
+```sh
+python3 scripts/h62/item3/g52-differential/engine_protocol_inventory.py \
+  --bulk "$BULK" --output "$BULK/evidence/engine-protocol-inventory.json"
+```
+
+The output must be a new file outside the repository. The existing archive
+verifier authenticates inputs before classification, and the input digest is
+checked again afterward. Extra request fields retain their exact JSON values,
+including null and structured expectations; these values are not interpreted as
+observed rejections. Ordered cases, mixed expected-error requests, version
+differences, empty sequences and parameter type gaps remain visible. An
+`outer-envelope-candidate` checks basic envelope/positional types only: payload
+contents are not validated. Every inventory has zero executed cases and zero
+Source matches; it supplies no Engine RPC, fixture or compiler acceptance.
+
+Fixture-independent controls:
+
+```sh
+python3 tests/h62/item3/g52-differential/test_engine_protocol_inventory.py
+```

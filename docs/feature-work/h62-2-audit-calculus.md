@@ -2173,4 +2173,13 @@ StoreShapeCert requires whole plan=originalPlan, including typed store operands 
 No source/statements/definitions/interfaces/budgets/axioms/exclusions/toolchain changes; no fresh Lean/kernel/replay acceptance. H28 pauses and all STOPs remain. The exact input packet is published at private commit 80f1749dc1a89fd3381c4d78c4eeb93b4fc553f2, directory evidence/solidity-h28-sol-20261104/automation-benchmark/panic-producer-inputs-v136. The pinned reader checks manifest sizes and hashes offline; the portable packet transition compares all previous rows and owners without witness credit. Historical unavailable bytes remain UNVERIFIABLE; exact archive-backed duplicate evictions remain restorable.
 
 
-The remaining callback-frame premise interpretation is recorded in [CALLBACK-FRAME-CLASSIFICATION.md](../../tests/h62/item2/audit-calculus/CALLBACK-FRAME-CLASSIFICATION.md). Its three declarations remain pending in the pinned ledger until authenticated ledger publication; no census or witness credit is taken.
+The remaining callback-frame premise interpretation is recorded in [CALLBACK-FRAME-CLASSIFICATION.md](../../tests/h62/item2/audit-calculus/CALLBACK-FRAME-CLASSIFICATION.md). At checkpoint V138 its three exact ledger bindings are published through the authenticated private-input route:1695 reviewed/3588 pending; semantic ownership stays unresolved and no joint witness credit is taken.
+
+
+The complete frozen primitive-return projection interpretation is recorded in [PRIMITIVE-PROJECTION-CLASSIFICATION.md](../../tests/h62/item2/audit-calculus/PRIMITIVE-PROJECTION-CLASSIFICATION.md). At checkpoint V139 six exact private ledger bindings give1701 reviewed/3582 pending; semantic ownership was unresolved at V139 and is resolved by the V141 lookup below; no joint-witness credit follows.
+
+
+The complete frozen external-return byte decoder interpretation is recorded in [EXTERNAL-RETURN-CLASSIFICATION.md](../../tests/h62/item2/audit-calculus/EXTERNAL-RETURN-CLASSIFICATION.md). At checkpoint V140 eight exact private ledger bindings give1709 reviewed/3574 pending, preserving the failure-witness versus actual-byte-read distinction. Q-SEM-OWNER-05 was pending at V140 and is resolved by the V141 coordinator lookup below; no fresh joint-witness credit follows.
+
+
+Q-SEM-OWNER-05 resolves current semantic ownership of `Semantics/{CallbackFrame,PrimitiveReturnProjection,ExternalReturnBytes}.lean` to master/coordinator, with no live semantic producer. The coordinator found only registry row H62-6-MIGRATE-SEMANTICS, writeMode=isolated-migration-overlay-no-live-owner-transfer, and no semantic leases. Migration responsibility remains with migrate-root-gate;master stays Lean4.24. V141 confirms17 owners only:3901 confirmed/1382 unresolved,1709 reviewed/3574 pending,zero fresh witnesses. The lookup is acknowledged through coord-ask; no statement/interface/budget/axiom/exclusion change or semantic acceptance follows.

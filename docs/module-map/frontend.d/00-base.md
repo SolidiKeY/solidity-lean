@@ -1,5 +1,4 @@
 # The solc front end
-
 `SolkeyTestSuite` (`lake build SolkeyTestSuite`): solkey's `TestSuite.sol` from
 the AST the pinned soljson writes (`scripts/solc-ast.mjs` makes
 `tests/solc/TestSuite.ast.json`; `./scripts/check-solc-ast.sh` re-derives and
@@ -18,8 +17,8 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/Static/UnitsExamples.lean` | G12 controls: an import cycle, a diamond (one identity), a clash, aliases, a missing unit, remappings, shadowing, an ambiguous overload and overloads across bases. |
 | `Frontend/Static/Infer.lean` | G13: type inference `infer` over every category, returning S01 derivations (`Typed`, `LVal`, `TypedArgs`, `TypedSlots`): sound by construction. |
 | `Frontend/Static/InferComplete.lean` | G13: completeness of `infer` for every S01 expression rule (`typed_complete`, `lval_complete`, `args_complete`, `slots_complete`). |
-| `Frontend/Static/InferStmt.lean` | G13: statement and block checking `inferS`, returning `StmtD`/`ItemsD` derivations. |
-| `Frontend/Static/InferStmtComplete.lean` | G13: completeness of `inferS` (`stmt_complete`, `items_complete`); `stmtOK_iff`, `itemsOK_iff`. |
+| `Frontend/Static/InferStmt.lean` | G13: statement and block checking `inferS`, returning `StmtD`/`ItemsD` derivations, including H125/H157 typed library/Error enumeration via `tryLibraryRes`. |
+| `Frontend/Static/InferStmtComplete.lean` | G13: completeness of `inferS` (`stmt_complete`, `items_complete`); `stmtOK_iff`, `itemsOK_iff`; additive H125/H157 library/Error proof case with unchanged theorem statements. |
 | `Frontend/Static/WellFormedCheck.lean` | G13: `wellFormedB` decides S01's `WellFormed` (`wellFormed_iff`), every body and initializer typed by the checkers. |
 | `Frontend/Static/Consts.lean` | G13: purity checker (`pureB_iff`, `constInitsB_iff`), typed constant evaluation (`tevalP`, `nconstP`; `teval_complete`, `nconst_complete`), `evalConst`, `arrayLenB`, the cycle check (`acyclic_iff`). |
 | `Frontend/Static/UserOps.lean` | G13: the user-defined value type checker `udvtTys` (`udvt_iff`) and the binding check (`usingOpsB_iff`). |

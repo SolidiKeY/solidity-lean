@@ -393,7 +393,7 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 |---|---|
 | `Lowering/P8/FrozenInterface.lean` | Frozen P8a producer obligations (`FailureProjection`, `SourceRealization`, `Producer`); inhabited only by the model witness `P8/PlanWitness.lean`. |
 | `Frontend/Admission/Profile.lean` | Exact classification of extracted uses; features and failures kept. |
-| `Frontend/Admission/RootObservations.lean` | Typed traversal of local observation sites over supplied roots; no callee closure. |
+| `Frontend/Admission/RootObservations.lean` | Typed traversal of local observation sites, including delegated-library arguments and both continuations under the existing abstract library feature; no callee closure or ABI/linkage adequacy. |
 | `Frontend/Admission/Controls.lean` | Root, refusal, combination and `NoFail` controls. |
 | `Frontend/Admission/ProgramObservations.lean` | Container scan of a `Program` (`program_observation_iff`), modifier declarations and written base names. |
 | `Frontend/Admission/ProgramObservationControls.lean` | Seven-site container and omission controls; function host and modifier declaration/carried frame parameter checks. |
@@ -418,7 +418,7 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Lowering/P8b/Controls.lean` | Toy identity certificate, wrong-emitter refusal, loop divergence. |
 | `Lowering/P8/ResourceContractLaw1.lean` | `nat_encodable_resource_impossible`: the frozen V1 failure projection has no inhabitant over a `Nat`-encodable resource (P8-SPEC-LAW1). |
 | `Lowering/P8/FailureContractV2.lean` | V2 rebundling: `Projection` and `FullPlanCoverage` separated, `toV1`/`ofV1` roundtrips; still uninhabited over `Nat`. |
-| `Frontend/Admission/SyntaxOccurrences.lean`, `SyntaxOccurrenceLaws.lean`, `SyntaxOccurrenceControls.lean` | Typed syntax subtree inventory, `syntaxOccurrences_iff` against `Source.Syn.Sub`, order/multiplicity controls; not semantic-root extraction. |
+| `Frontend/Admission/SyntaxOccurrences.lean`, `SyntaxOccurrenceLaws.lean`, `SyntaxOccurrenceControls.lean` | Typed syntax subtree inventory, `syntaxOccurrences_iff` against `Source.Syn.Sub`, order/multiplicity controls and generic whole-syntax refusal diagnostics with classifier-relative silence and real typed sites; not semantic-root extraction or Source admission. |
 | `Frontend/Admission/ProgramRoots.lean`, `ProgramRootControls.lean` | Typed carried-field inventory and exact observation flattening; independent finite-roster lookup relation and refusal controls. |
 | `Frontend/Admission/NameResolutionRoots.lean`, `NameResolutionControls.lean` | Initial target registration from actual source lookup/Resolves/function selection, with local-shadowing and refusal controls; not full runtime-root closure. |
 | `Frontend/Admission/ModifierRoots.lean`, `ModifierRootControls.lean` | Initial modifier selection registration through actual typed paths and parameter forms, with qualified/wrong-kind/deep-path controls; not runtime closure. |

@@ -1,7 +1,8 @@
 import Solidity.Frontend.Admission.SyntaxOccurrenceLaws
+import Solidity.Frontend.Admission.ExclusionFeatures
+import Solidity.Source.Examples
 
-/-! Inhabited exact-payload/order controls. These are syntax inventories,
-not execution-root, semantic reachability or profile witnesses. -/
+/-! Inhabited exact-payload/order controls. These are syntax inventories, not execution-root, semantic reachability or profile witnesses. -/
 namespace Solidity.Frontend.Admission.OccurrenceControls
 open Solidity.Source
 
@@ -41,4 +42,69 @@ theorem omitted_child_refused :
 #guard_msgs (whitespace := lax) in #print axioms repeated_payloads_retained
 /-- info: 'Solidity.Frontend.Admission.OccurrenceControls.omitted_child_refused' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms omitted_child_refused
+/-- Regression: reuse the existing inhabited rethrow/mixed-buffer syntax, without copying its parser or claiming bytes-memory typing/admission. -/
+theorem canonical_rethrow_feature_retained :
+    rootExclusionFeaturesAt Examples.rethrow = [.canonicalRethrow] ∧
+      Examples.rethrow.rejections = [] :=
+  ⟨rfl,Examples.rethrow_inProfile⟩
+
+theorem different_buffers_remain_assembly :
+    rootExclusionFeaturesAt Examples.notRethrow = [.inlineAssembly] ∧
+      Examples.notRethrow.rejections = [.inlineAssembly] :=
+  ⟨rfl,Examples.notRethrow_rejected⟩
+
+/-- The existing whole-unit fixtures report their five exclusion IDs, including flags nested in otherwise ordinary syntax. The sixth case is checked below. -/
+theorem inherited_exclusion_features_reported :
+    .inlineAssembly ∈ sourceFeaturesWithExclusions Examples.withAssembly ∧
+    .storageLayout ∈ sourceFeaturesWithExclusions Examples.withLayout ∧
+    .unsignedRightShift ∈ sourceFeaturesWithExclusions Examples.withShr ∧
+    .removedUnits ∈ sourceFeaturesWithExclusions Examples.withYears ∧
+    .removedGenericSolidity ∈ sourceFeaturesWithExclusions Examples.withGeneric := by
+  decide
+
+/-- Malformed modifiers retain both their genuine catalog feature and raw intrinsic refusal. This is intentionally rejected syntax, not eligibility. -/
+theorem malformed_modifier_tag_retained :
+    let bad := Syn.modifier "m" .none false none
+      (.some (.block (.cons Examples.incStmt .nil)))
+    rootExclusionFeaturesAt bad = [.invalidModifierBody] ∧
+      (syntaxExclusionUses bad).map Prod.snd = [.invalidModifierBody] ∧
+      bad.rejections = [.invalidModifierBody] :=
+  ⟨rfl,rfl,Examples.modifierNoPlaceholder_rejected⟩
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.canonical_rethrow_feature_retained' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms canonical_rethrow_feature_retained
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.different_buffers_remain_assembly' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms different_buffers_remain_assembly
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.inherited_exclusion_features_reported' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms inherited_exclusion_features_reported
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.malformed_modifier_tag_retained' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms malformed_modifier_tag_retained
+
+
+open Solidity.Language
+
+theorem original_header_refusal (path : String) :
+    sourceSubsetRefusals (structuralImportUnit path) (fun f => decide (f ≠ .imports)) =
+      [(⟨_,Syn.importPath path none⟩,.imports)] ∧
+    sourceSubsetRefusal? (Syn.unit Syn.nil) (fun f => decide (f ≠ .imports)) = none ∧
+    (structuralImportUnit path).env = (Syn.unit Syn.nil).env := ⟨rfl,rfl,rfl⟩
+
+theorem literal_refusal_site (literal : Lit) :
+    syntaxFieldRefusal? (Syn.lit literal) syntaxSubsetFeaturesAt (fun _ => false) =
+      some (⟨_,Syn.lit literal⟩,literalFeature literal) := by
+  cases literal <;> rfl
+
+/-- Intentional negative control: an empty classifier silences diagnostics on genuinely refused syntax. -/
+theorem silent_empty_classifier_is_not_raw_safety :
+    syntaxFieldRefusal? Examples.withAssembly (fun _ => ([] : List Feature)) (fun _ => false) = none ∧
+      .inlineAssembly ∈ Examples.withAssembly.rejections :=
+  ⟨emptySyntaxClassifier_none _ _,by decide⟩
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.original_header_refusal' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms original_header_refusal
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.literal_refusal_site' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms literal_refusal_site
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.silent_empty_classifier_is_not_raw_safety' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms silent_empty_classifier_is_not_raw_safety
+
 end Solidity.Frontend.Admission.OccurrenceControls

@@ -2132,3 +2132,129 @@ without inventing a trust predicate. The original three-second preparation
 limit, product predicates and proof settings are unchanged. Tests use injected
 CDP/envelopes and are not native evidence. Real reload/capture failures remain
 failures; no raster/ABA, macOS, full lifecycle or row-judgment claim follows.
+
+
+The fresh paired Linux trust attempt retains failures. Both targets captured
+initial restricted menus and real trust gain with public API confirmation.
+Local retained all five trusted phases and native trust-loss UI data, then
+post-loss DOM capture timed out and no fresh host report arrived. Dafny failed
+the unchanged three-second untitled menu preparation. These are incomplete
+transitions, not successful restoration or full pairing. Owned cleanup has no
+survivors. A failed partial menu snapshot is now transported into aggregate
+reports even when the host report is absent; it cannot become a validated
+result. Original SIGTRAP/address-profile and output-reuse refusals are retained.
+No menu row is completed or judged equivalent from this evidence.
+
+
+### Bounded menu transport and host-lifetime diagnostics
+
+Menu phases now retain structured request/response/timeout/disconnect timings,
+native input dispatch, target identity and source-bound phase identity in a
+bounded journal. Journal loss/overflow fails collection. Existing target lookup,
+connection/RPC and menu-readiness deadlines remain 1.5s, 5s and 3s respectively;
+no readiness wait, retry or lifecycle-domain enabling RPC was added. Overdue
+responses and opens are refused even if event-loop delivery beats a late timer.
+Remote disconnect aborts pending work; malformed envelopes fail closed. The
+existing menu/trust reads additionally retain renderer time origin and URL;
+new renderer lifetimes cannot substitute for the original. Host start/exit
+records retain PID/birth/session, and a second host start refuses overwriting
+original evidence. Failed-partial transport includes diagnostic file hashes,
+without converting diagnostics into a passing capture.
+
+The retained local log reports renderer MessagePort closure and extension-host
+termination. The pinned editor's trust-loss participant explicitly stops and
+restarts extension hosts. This supports a lifecycle investigation; it does not
+prove the cause of the DOMSnapshot timeout. New collection must retain all five
+legacy phases and the same source-session/public-trust predicates. A restarted
+host or target remains a failure, not an assumed continuation. Injected late,
+disconnect, malformed, overflow and restart controls are not native, rendered,
+kernel or compiler/EVM evidence. All original row judgments and gates remain.
+
+
+The instrumented paired Linux run retains all five legacy phases for both
+targets. Both hosts then exit during trust loss, with the source-bound transport
+journal identifying the interrupted RPC. Local's post-click DOMSnapshot returns
+before Page.captureScreenshot is aborted by socket failure; Dafny's mouse
+release is interrupted. No public loss/restoration confirmation is manufactured.
+The old DOM timeout and Dafny untitled readiness failure remain historical
+failures with unproved causes, not reclassified by this run. Source/target/host
+identities, ordered request timing, endpoint files and owned cleanup remain raw
+failed evidence. A separate new-host recovery scenario requires a human scope
+choice; original same-session predicates stay unchanged while it is pending.
+
+
+### Automatic-verification configuration observation
+
+The existing lifecycle entry point has an opt-in `--configuration` sequence,
+using the existing stdio launcher, process/resource guards and shutdown. It
+records default, Never, Save and restored-default process epochs against one
+owned workspace/source URI. The original Check fixture and ordered edit/error/
+fix sequence are retained. Only open/change/save/configuration notifications and
+symbol barriers drive behavior; explicit verification requests are refused.
+
+Pinned `dafny.automaticVerification` defaults to `onchange`, permits `never`,
+`onchange`, `onsave`, and requires restart. The pinned client maps it to launch
+arguments and reads global configuration without a resource. The headless
+responder records actual requests/replies if requested; absent requests stay
+missing evidence. Configured client values and launch modes are separate,
+including the local UI `onchange` versus raw server/headless `never` boundary.
+Local native observation remains compiler-only. Local automatic scheduling and
+cancellation controls use the production service with injected compiler/verifier
+outcomes, not actual proof or rendered evidence.
+
+Source URI/version/hash and client session snapshots bind observations without
+inventing Dafny-native hashes/session tokens. Never and pre-save observations
+require owned Stale states through their barriers, and the final wire audit
+refuses unexpected scheduling through shutdown. This is bounded evidence, not
+unlimited silence or full lifecycle equivalence. Schema preflight occurs before
+spawn; restoration errors remain failures. All four setting/lifecycle rows stay
+incomplete until native client/rendered/full matrices and both original row
+judgments pass. No product settings, predicates, proof budgets or producer
+interfaces change.
+
+
+The initial configuration capture retains Never/Save failures: documentSymbol
+returned parser symbols before an owned Stale status arrived. Parser response
+is not treated as resolution or no-verification evidence. The observer now
+waits for the positive status event using only the remainder of the same
+per-phase operation budget; proof status, diagnostic and symbol checks share
+that deadline. No missing-status predicate or original budget is relaxed.
+
+
+The changed headless sequence completes all four reference epochs and the local
+compiler-only sample with exit0 and no owned survivors. Actual launch-default
+verification continues after a live client `never` notification; fresh Never
+and Save launches exhibit their selected behavior, and a fresh restored-default
+launch verifies again. Save mode retains real error/fix diagnostics, and every
+unsaved version is checked separately through the final wire. These are direct
+server observations, not pinned VS Code client setting-change/restart UI.
+
+All five native server processes requested `workspace/configuration` zero times.
+The native configuration-request/reply aspect therefore remains missing; the
+framed request/reply and stale/foreign/late controls are explicitly injected.
+Local Change/Save/cancellation outcomes are also injected service controls,
+while native local execution stays Never/compiler-only. No row completion,
+resource/semantic waiver or kernel/compiler/EVM correspondence follows.
+
+
+### Separate trust-recovery companion
+
+A direct human reply authorizes a separately judged new-host/document-session
+recovery while retaining the failed same-session case and every budget. The
+existing menu runner has an explicit `--menu-trust recovery` companion with
+`--menu-recovery-from` pointing to the retained original report. It binds raw
+failed receipt hashes, the original five-phase menu prefix and native grant,
+the attempted deny request and completed owned cleanup. New observations must
+retain the exact source URI/version/hash, use distinct host/document identities,
+start publicly untrusted and capture real mouse restoration plus menu endpoints.
+The original six-phase same-session validator is unchanged. This companion is
+not a substitute for either independent row judgment or original restoration.
+
+The stricter predecessor check refuses the saved native initial trust menus:
+separator rows have `className:null`, which does not satisfy the existing
+attribute predicate. No new native recovery was launched. An attempted change
+to drop that predecessor check was rejected by automatic approval review and
+was not applied. The direct Q-MENU-RECOVERY-PREDECESSOR-01 answer keeps strict
+predecessor admission and recovery blocked. No failed-predecessor alternative
+was implemented. Injected positive/negative controls establish harness behavior
+only, not native recovery, screenshots, raster correspondence or parity.

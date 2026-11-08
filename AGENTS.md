@@ -25,6 +25,7 @@ New guidance must be linked from an existing reachable document.
   `scripts/coord-tools/fragments.sh`. Do not edit generated roots or indexes.
 - Read relevant [audits and prior-art studies](docs/document-index.md#guides-audits-and-performance)
   before freezing an interface.
+- Check the [direction audit](docs/audits/direction.md) before adding a large new area.
 - Warn before a refactor that may slow checking; inspect Git history for a
   speed-motivated change it would undo. Do not raise `maxHeartbeats` to save a proof.
   Finish with `simp only [...]`, explicit signatures and typed `have`s.
@@ -49,5 +50,7 @@ separate worktrees. Read the matching conventions (`Solidity/` omitted):
 Use per-file diagnostics through the [lean-verify skill](.agents/skills/lean-verify/SKILL.md).
 Import changes and final Lean integration need the [full gates](docs/contributing.md#checks);
 documentation-only changes need path, navigation and generator checks.
+Before pushing, merge `origin/master` and run `scripts/coord-tools/gate.sh touched` on the
+merged tree; it also builds the library modules that import a change ([before pushing](docs/contributing.md#before-pushing)).
 End each milestone with independent read-only finder and skeptic reviews per area;
 neither uses the Lean server. Fix findings and record their resolution concisely.

@@ -634,6 +634,91 @@
   "Quot.sound",
   "propext"
  ],
+ "Bridge/SolidityBridge/AccessBridge/Storage.lean:SolidityBridge.AccessBridge.Storage.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/Storage.lean:SolidityBridge.AccessBridge.Storage.continuation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/Storage.lean:SolidityBridge.AccessBridge.Storage.read_charged": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/Storage.lean:SolidityBridge.AccessBridge.Storage.write_charged": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/StorageControls.lean:SolidityBridge.AccessBridge.StorageControls.absent_account_preserved": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/StorageControls.lean:SolidityBridge.AccessBridge.StorageControls.cold_read_charge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/StorageControls.lean:SolidityBridge.AccessBridge.StorageControls.gas_before_stack": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/StorageControls.lean:SolidityBridge.AccessBridge.StorageControls.inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/StorageControls.lean:SolidityBridge.AccessBridge.StorageControls.low_fuel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/StorageControls.lean:SolidityBridge.AccessBridge.StorageControls.read_persistent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/StorageControls.lean:SolidityBridge.AccessBridge.StorageControls.read_transient": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/StorageControls.lean:SolidityBridge.AccessBridge.StorageControls.stack_before_static": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/StorageControls.lean:SolidityBridge.AccessBridge.StorageControls.static_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/StorageControls.lean:SolidityBridge.AccessBridge.StorageControls.stipend_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/StorageControls.lean:SolidityBridge.AccessBridge.StorageControls.transient_read_charge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/StorageControls.lean:SolidityBridge.AccessBridge.StorageControls.write_persistent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/StorageControls.lean:SolidityBridge.AccessBridge.StorageControls.write_transient": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Bridge/SolidityBridge/AdversaryPolicy.lean:Solidity.Bridge.Adversary.callSafe_iff_reachablePolicy": [
   "Classical.choice",
   "Quot.sound",
@@ -30423,6 +30508,26 @@
  "Solidity/Backend/Selection/IRLoopPackets.lean:Solidity.Backend.Selection.IRLoop.turn_word": [
   "propext"
  ],
+ "Solidity/Backend/Selection/P20Consumer.lean:Solidity.Backend.Selection.p20_false_domain_v2": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Selection/P20Consumer.lean:Solidity.Backend.Selection.p20_joint_success_v2": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Selection/P20Consumer.lean:Solidity.Backend.Selection.p20RepresentedConsumerV2": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Selection/P20ConsumerInterface.lean:Solidity.Backend.Selection.P20RepresentedConsumerV2": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/StorageOps/AbsentRootQueries.lean:Solidity.Backend.StorageOps.AbsentRootQueries.find_missing": [
   "Quot.sound",
   "propext"
@@ -40493,6 +40598,144 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Frontend/Admission/DeclarationOccurrences.lean:Solidity.Frontend.Admission.collected_declaration_subterm": [
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/DeclarationOccurrences.lean:Solidity.Frontend.Admission.declaration_occurrence_in_source_unit": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/DeclarationOccurrences.lean:Solidity.Frontend.Admission.declaration_root_covered": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/DeclarationOccurrences.lean:Solidity.Frontend.Admission.declaration_subterm_covered": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/DeclarationOccurrences.lean:Solidity.Frontend.Admission.declarationFieldRefusal?_none_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/DeclarationOccurrences.lean:Solidity.Frontend.Admission.declarationFieldRefusal?_sound": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/DeclarationOccurrences.lean:Solidity.Frontend.Admission.declarationFieldRefusal?_source_witness": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/DeclarationOccurrences.lean:Solidity.Frontend.Admission.declarationFieldRefusals_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/DeclarationOccurrences.lean:Solidity.Frontend.Admission.declarationFieldUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/DeclarationOccurrences.lean:Solidity.Frontend.Admission.declarationFieldUses_source_witness": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/DeclarationOccurrences.lean:Solidity.Frontend.Admission.declarationOccurrences_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/DeclarationOccurrences.lean:Solidity.Frontend.Admission.pragma_env_unchanged": [],
+ "Solidity/Frontend/Admission/DeclarationOccurrences.lean:Solidity.Frontend.Admission.pragma_syntax_preserved": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/DeclarationOccurrences.lean:Solidity.Frontend.Admission.resolved_declaration_subterm_covered": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/DeclarationOccurrences.lean:Solidity.Frontend.Admission.selected_function_subterm_covered": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/DeclarationOccurrences.lean:Solidity.Frontend.Admission.source_unit_not_recoverable_from_env": [],
+ "Solidity/Frontend/Admission/DeclarationOccurrences.lean:Solidity.Frontend.Admission.syntaxSub_trans": [],
+ "Solidity/Frontend/Admission/ElementaryFeatures.lean:Solidity.Frontend.Admission.declarationElementaryFeatures_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ElementaryFeatures.lean:Solidity.Frontend.Admission.declarationElementaryFeatures_source_witness": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ElementaryFeatures.lean:Solidity.Frontend.Admission.declarationElementaryUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ElementaryFeatures.lean:Solidity.Frontend.Admission.elementaryFeature_fixedPoint_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ElementaryFeatures.lean:Solidity.Frontend.Admission.mapping_key_field": [],
+ "Solidity/Frontend/Admission/ElementaryFeatures.lean:Solidity.Frontend.Admission.value_type_field": [],
+ "Solidity/Frontend/Admission/ExclusionFeatures.lean:Solidity.Frontend.Admission.assembly_exclusion_features": [
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ExclusionFeatures.lean:Solidity.Frontend.Admission.exclusionFeature_id": [],
+ "Solidity/Frontend/Admission/ExclusionFeatures.lean:Solidity.Frontend.Admission.root_exclusion_feature_covered": [
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ExclusionFeatures.lean:Solidity.Frontend.Admission.sourceFeaturesWithExclusions_excluded": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ExclusionFeatures.lean:Solidity.Frontend.Admission.sourceFeaturesWithExclusions_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ExclusionFeatures.lean:Solidity.Frontend.Admission.sourceFeaturesWithExclusions_structural": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ExclusionFeatures.lean:Solidity.Frontend.Admission.sourceSubsetRefusal?_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ExclusionFeatures.lean:Solidity.Frontend.Admission.syntaxExclusionUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ExclusionFeatures.lean:Solidity.Frontend.Admission.syntaxExclusionUses_reported": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/LocationFeatures.lean:Solidity.Frontend.Admission.dataLocationFieldsAt_iff": [
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/LocationFeatures.lean:Solidity.Frontend.Admission.dataLocationFieldsAt_sound": [
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/LocationFeatures.lean:Solidity.Frontend.Admission.declaration_location_subterm_reported": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/LocationFeatures.lean:Solidity.Frontend.Admission.declarationLocationFeatures_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/LocationFeatures.lean:Solidity.Frontend.Admission.declarationLocationFeatures_source_witness": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/LocationFeatures.lean:Solidity.Frontend.Admission.declarationLocationUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/LocationFeatures.lean:Solidity.Frontend.Admission.DirectDataLocation.mem_fields": [],
+ "Solidity/Frontend/Admission/LocationFeatures.lean:Solidity.Frontend.Admission.explicit_location_predicate_gap": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/LocationFeatures.lean:Solidity.Frontend.Admission.explicitLocationUnit_features": [],
+ "Solidity/Frontend/Admission/LocationFeatures.lean:Solidity.Frontend.Admission.omitted_location_no_refusal": [],
+ "Solidity/Frontend/Admission/LocationFeatures.lean:Solidity.Frontend.Admission.unused_parameter_location_reported": [],
  "Solidity/Frontend/Admission/ModifierRootControls.lean:Solidity.Frontend.Admission.ModifierRootControls.selector_controls": [
   "Classical.choice",
   "Quot.sound",
@@ -40610,13 +40853,90 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.constructor_feature_covered": [
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.constructor_payload_gaps": [],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.elementary_feature_covered": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.literal_payload_tags": [],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.literal_root_uses": [],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.location_feature_covered": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.sourceStructuralSubset_elementary": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.sourceStructuralSubset_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.sourceStructuralSubset_location": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.sourceStructuralSubset_not_env_only": [],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.sourceStructuralUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.structuralImportUnit_env": [],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.structuralImportUnit_features": [],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.syntaxLiteralUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.canonical_rethrow_feature_retained": [],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.different_buffers_remain_assembly": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.distinct_payload_order": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.exact_pair_inventory": [],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.inherited_exclusion_features_reported": [
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.literal_refusal_site": [],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.malformed_modifier_tag_retained": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.omitted_child_refused": [
   "propext"
  ],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.original_header_refusal": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.repeated_payloads_retained": [],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.silent_empty_classifier_is_not_raw_safety": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceLaws.lean:Solidity.Frontend.Admission.emptySyntaxClassifier_none": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceLaws.lean:Solidity.Frontend.Admission.firstRejected_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Frontend/Admission/SyntaxOccurrenceLaws.lean:Solidity.Frontend.Admission.syntaxDescendants_children": [
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceLaws.lean:Solidity.Frontend.Admission.syntaxFieldRefusal?_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceLaws.lean:Solidity.Frontend.Admission.syntaxFieldRefusal?_sound": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceLaws.lean:Solidity.Frontend.Admission.syntaxFieldRefusals_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceLaws.lean:Solidity.Frontend.Admission.syntaxFieldUses_iff": [
+  "Quot.sound",
   "propext"
  ],
  "Solidity/Frontend/Admission/SyntaxOccurrenceLaws.lean:Solidity.Frontend.Admission.syntaxOccurrences_complete": [
@@ -46065,6 +46385,14 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Hash/Bridge.lean:Solidity.Hash.Bridge.premise_dedup": [
+  "propext"
+ ],
+ "Solidity/Hash/Bridge.lean:Solidity.Hash.Bridge.premise_unit_rootFree": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/Bridge.lean:Solidity.Hash.Bridge.transfer_prefix": [],
  "Solidity/Hash/CollisionBound.lean:Solidity.Hash.adaptive_lazy_collision_prob_le": [
   "Classical.choice",
   "Quot.sound",
@@ -46100,6 +46428,37 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Hash/CollisionBridge.lean:Solidity.Hash.CollisionBridge.run_collision_le": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CollisionBridge.lean:Solidity.Hash.CollisionBridge.run_premise_le": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CollisionBridge.lean:Solidity.Hash.CollisionBridge.run_regions_le": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CollisionBridge.lean:Solidity.Hash.CollisionBridge.stopped_collision_le": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CollisionBridge.lean:Solidity.Hash.CollisionBridge.two_mul_combined_le": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CollisionBridgeCompiler.lean:Solidity.Hash.CollisionBridge.Compiler.failure_le": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CollisionBridgeCompiler.lean:Solidity.Hash.CollisionBridge.Compiler.refines": [],
  "Solidity/Language/FixedPoint/Abi.lean:Solidity.Language.FixedPoint.Fx.abiEncode_of_abiDecodeV2": [
   "Quot.sound",
   "propext"
@@ -47392,6 +47751,21 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/Readonly/LibraryFrameEffects.lean:Solidity.Lowering.Readonly.SourceHistory.libraryFrame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/LibraryFrameEffects.lean:Solidity.Lowering.Readonly.SourceHistory.libraryFrame_effect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/LibraryFrameEffects.lean:Solidity.Lowering.Readonly.SourceHistory.libraryFrame_then": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.all_at": [
   "Classical.choice",
   "Quot.sound",
@@ -47538,6 +47912,121 @@
   "propext"
  ],
  "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.static_call_storage": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownAllHistories.lean:Solidity.Lowering.Readonly.SourceHistory.all_known_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownExpressionEffects.lean:Solidity.Lowering.Readonly.SourceHistory.evalE_succ_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownHistory.lean:Solidity.Lowering.Readonly.SourceHistory.evalArgs_succ_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownHistory.lean:Solidity.Lowering.Readonly.SourceHistory.evalArgsRev_succ_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownHistory.lean:Solidity.Lowering.Readonly.SourceHistory.evalBuiltin_succ_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownHistory.lean:Solidity.Lowering.Readonly.SourceHistory.evalConvArgs_succ_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownHistory.lean:Solidity.Lowering.Readonly.SourceHistory.evalLoc_succ_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownHistory.lean:Solidity.Lowering.Readonly.SourceHistory.evalPair_succ_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownHistory.lean:Solidity.Lowering.Readonly.SourceHistory.known_at_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownHistory.lean:Solidity.Lowering.Readonly.SourceHistory.KnownAt.toAt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownHistory.lean:Solidity.Lowering.Readonly.SourceHistory.pay_succ_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownHistory.lean:Solidity.Lowering.Readonly.SourceHistory.withLibraryCalldata_effect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownLibraryEffects.lean:Solidity.Lowering.Readonly.SourceHistory.callLibrary_succ_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownStatementEffects.lean:Solidity.Lowering.Readonly.SourceHistory.callInternal_succ_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownStatementEffects.lean:Solidity.Lowering.Readonly.SourceHistory.execItems_succ_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownStatementEffects.lean:Solidity.Lowering.Readonly.SourceHistory.execS_succ_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownStatementEffects.lean:Solidity.Lowering.Readonly.SourceHistory.forIter_succ_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownStatementEffects.lean:Solidity.Lowering.Readonly.SourceHistory.runMods_succ_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownTryEffects.lean:Solidity.Lowering.Readonly.SourceHistory.TryKnown.equation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownTryEffects.lean:Solidity.Lowering.Readonly.SourceHistory.TryKnown.finish": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownTryEffects.lean:Solidity.Lowering.Readonly.SourceHistory.TryKnown.finish_effect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownTryEffects.lean:Solidity.Lowering.Readonly.SourceHistory.TryKnown.payload": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownTryEffects.lean:Solidity.Lowering.Readonly.SourceHistory.TryKnown.payload_effect": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -70276,6 +70765,29 @@
  "tests/h28-sol/statement-grammar/TryCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.BooleanTry.attempt": [],
  "tests/h28-sol/statement-grammar/TryCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.try_empty_body_prefix": [],
  "tests/h28-sol/statement-grammar/TryCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.try_empty_body_prefix_head": [],
+ "tests/h55/vectors-tables/LibraryTryControls.lean:Solidity.Source.errorStringBytes_of_decode": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h55/vectors-tables/LibraryTryControls.lean:Solidity.Source.errorStringBytes_wrongSelector": [
+  "propext"
+ ],
+ "tests/h55/vectors-tables/LibraryTryControls.lean:Solidity.Source.withLibraryCalldata_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h55/vectors-tables/LibraryTryControls.lean:Solidity.Source.withLibraryCalldata_noncalldata": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h55/vectors-tables/LibraryTryControls.lean:Solidity.Source.withLibraryCalldata_unavailable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "tests/h55/vectors-tables/TypingV2Controls.lean:Solidity.Source.envLocOK_implies_locOK": [
   "Classical.choice",
   "Quot.sound",
@@ -70750,6 +71262,73 @@
   "propext"
  ],
  "tests/h62/item2/audit-precompiles/BridgeIdentityWitnesses.lean:H62.AuditPrecompiles.Successor.sample_nonempty": [],
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.actual_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.admitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.always_revert_excluded": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.checked_v2": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.fragment": [
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.inhabited_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.machine": [],
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.nonempty": [
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.reject_all_excluded": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.source_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.source_zero_reverts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.target_preserved": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/CompilerSuccess.lean:H62.AuditPrecompiles.CompilerSuccess.target_zero_reverts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "tests/h62/item2/audit-precompiles/OsakaWitnesses.lean:H62.AuditPrecompiles.Successor.Osaka.ecrecover_stipend_data": [],
  "tests/h62/item2/audit-precompiles/OsakaWitnesses.lean:H62.AuditPrecompiles.Successor.Osaka.fixed_failure_data": [
   "Quot.sound",
@@ -72028,6 +72607,16 @@
   "propext"
  ],
  "tests/h62/item2/audit-v09-passes/P20InterfaceV2Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV2.Controls.complete_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/P20InterfaceV2Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV2.Controls.consumerV2": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/P20InterfaceV2Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV2.Controls.consumerV2_success": [
   "Classical.choice",
   "Quot.sound",
   "propext"
