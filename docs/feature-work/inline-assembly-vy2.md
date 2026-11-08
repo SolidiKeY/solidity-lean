@@ -21,24 +21,30 @@ Separation is local to the represented live ranges and demanded slot/hash preima
 <a id="finite-owned-memory-inventory-2026-11-01"></a>
 
 
-### H171: accept the reviewed import cost with fresh bounded checks
+### H171 accepted import cost and H189 Horizon disposition
 
-H171 Option B supersedes the earlier Option A for the reviewed
-NestedMappingLayout import increment. The exact historical patch was applied
-only to an external candidate copy; production retains the existing isolated
-SourceGraphEndpoints module and contains no duplicated declarations. Three
-alternating matched checks on the same Lean4.24/cache/cwd/serial wrapper gave
-median baseline 0.38 s versus candidate 0.82 s (+115.8%), with peak VmHWM
-458,176 versus 1,089,336 KiB. Emission was disabled for both candidate copies;
-the Docker limit remains 12 GiB with no swap and a 300-second per-file bound.
-This cost is accepted specifically under H171, not under the usual 10% limit.
+H171 accepts only the reviewed NestedMappingLayout import-cost increment,
+superseding H164 Option A for that increment. The recorded matched external
+candidate check gave median 0.38 s baseline versus 0.82 s (+115.8%), peak VmHWM
+458,176 versus 1,089,336 KiB, on serial Lean4.24 with 12 GiB/no swap and a
+300-second per-file bound. This is accepted cost, not speed neutrality.
+Production retains the isolated SourceGraphEndpoints module; its registration
+includes it in the full-library build. Ordinary integration gates remain required.
 
-Fresh checks of the retained endpoint and its existing joint declaration and
-wrong-root refusal controls pass, with the same standard axiom dependencies.
-No existing declaration, proof, interface or budget changes. Documentation and
-applicable static gates remain required, as do ordinary integration gates;
-these checks do not assert a full build, cache equivalence or physical adequacy.
-The independent Horizon STOP remains and no unchanged Horizon check was rerun.
-Raw matched measurements, candidate/base source bytes and source identities are
-private H145 evidence. The decision is acknowledged through the private inbox
-once this bounded work and its available gates are recorded.
+H189 separately releases the H125 Horizon timing STOP only. It does not certify
+current Source checking, cache equivalence, any Lean/full gate or runtime result,
+and changes no existing budget. No separate VY2 Horizon failure is asserted here.
+Any concrete failure must retain its exact source/gate identity and validation
+hold; a missing historical receipt is not a current measurement or a new STOP.
+
+The endpoint proves slot identity only. Y04 physical adequacy and reached-state,
+memory agreement, Source/Yul/compiler composition and full affected validation
+remain open. H171 and H189 supply none of those obligations. All statements,
+imports, premises, exclusions, interfaces, axioms and budgets remain unchanged.
+
+Historical evidence stays private under H145. Missing historical h69 artifacts
+remain UNVERIFIABLE under H151; the 23 original frozen obligations receive zero
+original proof credit without checked original-type/premise correspondence.
+Both preserved commits remain in Git history; the historical narrative is not
+restored as current guidance. This reconciliation is comments/documentation only
+and is not a validation, producer-completion or integration receipt.

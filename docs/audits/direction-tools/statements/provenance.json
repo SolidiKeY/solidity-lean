@@ -1,0 +1,2369 @@
+{
+  "base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+  "method": "Complete frozen Lean source inventory. Known file producers and documented handwritten exceptions override markers. Unknown provenance remains explicit; no historical authorship certificate inferred.",
+  "counts": {
+    "generated_axiom_pins_files": 2,
+    "generated_axiom_pins_lines": 4054,
+    "generated_corpus_files": 8,
+    "generated_corpus_lines": 3957,
+    "generated_marked_other_files": 39,
+    "generated_marked_other_lines": 8122,
+    "generated_roots_files": 3,
+    "generated_roots_lines": 7176,
+    "generated_vector_table_files": 9,
+    "generated_vector_table_lines": 6975,
+    "handwritten_explicit_exception_files": 2,
+    "handwritten_explicit_exception_lines": 265,
+    "unmarked_other_files": 8057,
+    "unmarked_other_lines": 1252802,
+    "unresolved_chain_agreement_files": 157,
+    "unresolved_chain_agreement_lines": 25420
+  },
+  "records": [
+    {
+      "path": "Bridge/SolidityBridge.lean",
+      "category": "generated_roots",
+      "source_sha256": "e2a8a1a491bbc28996f10a66fcbd8e9df74654fb4f8482c1e187b441a4fe0181",
+      "producer": "scripts/coord-tools/register.sh",
+      "reason": "Registered generated import root.",
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Bridge/SolidityBridge/PrecompileAgreement/Bytes.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "fc0372bc130a9bb9139bee4572ea7a9dced16e908f8cb7a49cea3a325d5d7afe",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 10,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Bridge/SolidityBridge/PrecompileAgreement/Controls.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "31684e1a1e3a57c0a6b194601960dc112d8cfe865b0da7d5bcc466f3705c09ac",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 25,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Bridge/SolidityBridge/PrecompileAgreement/Gas.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "cd3a7fac1ff8700b4e1b51598e34f48e74276eb1f0c4c44409b377bb42cfd331",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 12,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Bridge/SolidityBridge/PrecompileAgreement/Header.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "d8786856403c01c8da31897d1d264a317e161aed90b70c1045ad6a3ece551490",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 16,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Bridge/SolidityBridge/PrecompileAgreement/Identity.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "bef3e3a3e8be5c7f61ea5e6f82dbe3832bbdd88a797ad4c7de8bd13cd7790d2e",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 10,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Bridge/SolidityBridge/RoadmapV15/P10/CallInAgreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "d57a9013a5a2aca6683e7ead412115b77b9647097e21bae876b0812561e87742",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 4,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Bridge/SolidityBridge/RoadmapV15/P10/DecoderAgreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "870d1f8cb2ccc97a8dc1420fc7298d75b1379f692d1fa3ddaefbcacc8b92ac89",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 7,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Bridge/SolidityBridge/RoadmapV15/P10/DecoderAgreementControls.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "4de58a84562b5c0f2a1439a3498a47831b2aa978ec2202c289c237161cc1150f",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 16,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "257d89fdc5b9595c1ef92e75f5a38f886303822b5403f968fe8b5e17fff4cec3",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 34,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Bridge/SolidityBridge/RoadmapV15/P10/PushDecoderAgreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "d4c9b65a9f90a90d6a04cb5dca560093a6e6ff8d0e1f590a9491ae8e7e18082f",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 6,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Bridge/SolidityBridge/RoadmapV15/P10/StackSelectionAgreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "8345e8c98392de474a183ea78360e3cae5fed57153cde09bbeafd5d8b619f39d",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 6,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Bridge/tests/precompile-agreement/Acceptance.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "5dd3f9a93f61efd7c2371afc900be214ef79035b8949b2b496ec5d29e54ded34",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Bridge/tests/precompile-agreement/ActualAxioms.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "20f7d5a17b8f7761f944e63b11a661d70f101fa559ee35e4f9af0b4a8c76a4a3",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Bridge/tests/precompile-agreement/AllDeclarations.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "5baac8a35db63f8c3e7f5fb5d82c6eda9da1e7a4e6702cf471a0901234454a00",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Bridge/tests/precompile-agreement/Axioms.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "aa3dd9d69762c696b3283bc64b7db5693ad2d528dff2cad35e9858c4f45a3e6d",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Bridge/tests/precompile-agreement/BoundaryVectors.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "e117eb48b8b8cfd465dbb2abad29db83d3ed50c9476a99afb61fbf0191d690f8",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Bridge/tests/precompile-agreement/CacheRequest.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "be60e70af3d4a06019761dd23c1a425607f27ceb41819d1c72458b99a7699ac1",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Bridge/tests/precompile-agreement/H70BridgeProbe.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "68b047c7f0c45e7fe9680228f305545c918dcc2271bb6b411f0154f4a621d7f6",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Bridge/tests/precompile-agreement/NativeModexpProbe.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "8e3a48512ba8d17d2a76d5396dbb72113b116eff1904deddbf39fba3bfe399a3",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Bridge/tests/precompile-agreement/TrustProbe.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "3e31948f6a11a4641ff6a11ef265893915583daedcc6a61398f881f87c6cf36e",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity.lean",
+      "category": "generated_roots",
+      "source_sha256": "f776731f916d3330488e5a18068ffad94e7d2a5d3be4f41af2595262be97e107",
+      "producer": "scripts/coord-tools/register.sh",
+      "reason": "Registered generated import root.",
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Automation/H28/Chain.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "c6ff73664c9f4ee70db158a3218f14f05f4cea6876db75372bca8fce91db2240",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 1
+      },
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/EvmVectors.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "5203af3bdafde78eefdf6d8bc7b5280bb56bc5b76ba45936f5b30cd688146c5f",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/Executable/CreationReturnInterfaceV1.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "e60ccbeb25c72bbf7b3dad5f1d9976e434b7dbecf3ef49f5559055fa1ee3241b",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/InternalDispatch/Agreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "d0814c2f671bed1cd75336e392f7bb1defa965d3ade7cb08298e8320a8e32d20",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 6,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/InternalDispatch/Chain.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "35bd7727bf7144e27620677bc1c23671fc5f08325e72de11aed1ac1acd9a6c4f",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 5,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/InternalFlow/RuntimeFrameArgumentAgreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "54f6f1140cf2ef60a0437c4f50cebec534c1c22a99863c3776ed19d2b72c6a00",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 2,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/InternalFlow/RuntimeFrameCallAgreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "2a663b3f6fb546ddaf9413fbf332a1ef07f256aaeddd161ff0623e95a61a6788",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 5,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1V2CallAgreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "4757750a4b0c636f225f61368504a9970ead7ae88fed3dd0f6a67cdd4ff63c04",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 2,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1V2CallAgreementControls.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "d83e8328d48c8b16bc55bdb0dda84875bf7b38fbb2501a894bb86fb150915940",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 4,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1V2ReferenceAgreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "58c3c98147e3693fec7b99c41eda76e926cb11a073b53b6f5a480d1a720e7780",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 4,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1V2ReferenceRebindAgreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "6379e9ea932c8fc680003ce0be4b371b7b3af16577f068252232b2c813969ab9",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 2,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1V2ValueAgreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "e96c48984c86f1ff42cc43493dbc3cdff5a2d2fde45b744af4919156ad6ab471",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 4,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1V2ValueAgreementControls.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "899405a7543259de057fb3aceb7de1420a0adced0f5cd0ebf4f137b61dac6347",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 5,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/InternalFlow/RuntimeFrameResultAgreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "a73a4ccc0581bfc4b6cb319b240bb9d8d277d04f6735e6bace90608764b772e1",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 9,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ApprovedProfile.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "d42b7ac747400932f8f513a70cb074ed1aa9ee7b6f27fe700b39f7b63390d4e2",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3NativeScalarAgreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "9d48ed4ca6608849161a8056477b41f8f125a8cfb67d5e9a27f2457b3a9e1abd",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 1,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3NativeScalarAgreementControls.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "5d9c262ada84ba004d14597e8d1c663c12a67d542d335657544ab95fc06065fb",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 1,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveAgreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "ec028d15b6ac2100bffef40d53e110dc0737f697551b29bec7597fb2fa4a8bfb",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 3,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/CalldataAgreementChildren.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "cae30c1faadba9cbe75ff56bbca681f02202df5b1279cbc94b99dabe26af1c0b",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 6,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/OverwriteAgreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "f0e05b420f19dabfb79ae6d50afee3af46744b18645f8d36a8406f4c1257cb2b",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 6,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/OverwriteAgreementExact.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "15e09d2761645137fdda01346ed266c61ab06e3a17e020e6fd7a357885c6dfc9",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 12,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/Passes/AssignmentSubtractionPins.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "10ca1d22e287025cfdc8256b8c13dcddd5ae43d0208064db4bfc6da45f7bb98f",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/Passes/AxiomPins.lean",
+      "category": "generated_axiom_pins",
+      "source_sha256": "39e8b69fe679abb97b34191343a7f504f5d2d395cfd2e2d8c42bfae4aa6e32e6",
+      "producer": null,
+      "reason": "Axiom-pin source kept separate from mathematical declarations; no claim of handwritten effort.",
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/Passes/EffectfulReferencePairPins.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "39a108908db86c76c533ea0d1f997b7a8ef3ca86941bb374bca69578f42d038e",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/Passes/EffectfulShortCircuitPins.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "9c78a126d897fdfa717920fb26638521a71881aba3ea356c4068d5b14259b6dd",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/Passes/PositiveAllocationFailurePins.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "5f3a984fd91f587d084814045bf4ced730fa120b9fca9e95e3c2ed48436dea03",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/Passes/QueueCompletionPins.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "6bd477895121fa051f749d5d60e6135991ac71e78d9ea5d2db3fa97dc88d7f4e",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/Passes/ReferenceCallArgumentPins.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "8fabbf340f1856932ef866a589672acf6739931a004ef0aac7278d39fe870238",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/Passes/ReferenceCallCaptureFailurePins.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "6ee233b4988f13915f317586e6770d3cac0fbcaa067043a1be6ccd99bb869a03",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/Passes/ReferenceCallReadbackPins.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "5674b241b530ccebb4d727676dafe1f733ae3cf3c7ad8cb7262af95388a8c198",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/Passes/RuntimeVoidCapturePins.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "337591f0b40a57ea16c09511f43559c1d66c2b6164815f3086c7579a48b9f5e1",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/Passes/RuntimeVoidReflectionPins.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "7f33e4b35c038ec9eb2de6246dd9856e4fef9f3382526f4a6acb6f549ddec3dd",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/Passes/SourceNarrowingValuePins.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "897d6a4c8e18cc9969f23c50940cc64bfd8e32eb57dc2dfb3d9d5bc56988f734",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/PrimitivePackets/BitNot/Agreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "42150f3cede4679a7b7571479efa6644c2cd5573f5a8836519b10dc40d6959b8",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 1,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/PrimitivePackets/CheckedAdd/Agreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "d109dfdaee23c618764de2b15d96232d189dbc8db6801657fa91adeaaf252cc4",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 3,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/PrimitivePackets/CheckedMul/Agreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "092f5c07647b08be4460b06ce566cb1ab25a836df0a0edf170ae80cb493c9ade",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 5,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/PrimitivePackets/CheckedSub/Agreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "339c9b4df571b28253878ff59320721961fbf3632de65e045a293b23ce9040a1",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 6,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/PrimitivePackets/Comparisons/Agreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "656646589eeb0ad33aa9bdc24a9357c8da53c7182d27eaa9ccc42c94e9c88b75",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 2,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/PrimitivePackets/Constants/Agreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "2cfaadb8bf655ba6cb432ec7689a6c7d59476eb1d3890354c1fcc3fa1a296ec4",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 1,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/PrimitivePackets/SignedCast/Agreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "244e3278c8c5fa49a6778924673e80908ee9ea9f3994786cc6c42b623887ede7",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 1,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/PrimitivePackets/SignedCheckedAdd/Agreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "20fd94cc6f768e9ee1c0418a2bf53294946c9d4131f63fca9f8ffda90d5bc3b2",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 2,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/PrimitivePackets/SignedCheckedMul/Agreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "1f32e74ab68b9682eabd30df311caf2abdea9f4353724c6e2c81c00a27387fc0",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 3,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/PrimitivePackets/SignedCheckedSub/Agreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "14ad7b2f4cd5d670860c3ea94a36de900d26499ffe5da894dfaf2e4f32210dcd",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 3,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/Scalar/CastChains.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "5b83c786eb96fe56514ed2051013c94c5decc42bda4347dfd977ea90c5905eaa",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 9,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/Scalar/PowerBounds.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "b3fc21d16c6369818565b777f9fd0d0b7232a41bba318f3dc64c51832aed16b5",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 35,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TwoClearRepresentation.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "67a209d655260b9c75c03fac241ebbe70c4ceedc454d96f4724e25511f08606c",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 3,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Calculus/ChainGen.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "dddd8240efd6c1cac837dcdb95e0426b5a157da07d767ade733cbcf6d7bf76ac",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {
+        "#chain": 1,
+        "#chain_rest": 1,
+        "sol_chain": 2
+      },
+      "selected": false
+    },
+    {
+      "path": "Solidity/Calculus/ChainKit.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "065619ca03f051a360e42ba944b90baac63d9a886d6b53799b06641699cb64c7",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 65,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Calculus/ChainRules.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "9e2fe153585ee05fe055d1ea85476ea477a70d2c5ebe4f1a7d0f9626aa7b0acd",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 2,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Calculus/Chains.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "9728bcd42cc203874b3f00e460576f45f6f10d59bbd13a9631fcde5bb7a01b7b",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Calculus/Chains/Elab.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "a7497be4e105ba027f30ab4dbadb8e674694dd0e4d80f1a7d72e4a0087333161",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 1
+      },
+      "selected": false
+    },
+    {
+      "path": "Solidity/Calculus/Chains/Proofs.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "9fc95d0d99ba187c040c7a00d21394191df567cd0fde2cc12da5186b2a1b3d9e",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Calculus/Chains/Strategy.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "a09fb131f30dffabeff461419601a2ab642147e303f32ab82abab3239c732a3a",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Calculus/Closers.lean",
+      "category": "unmarked_other",
+      "source_sha256": "92820e63eb62377e15269d9fae366a8003174e8c7b15ea0d3cf5b503891f9b89",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 2,
+      "chain_generator_lexical_uses": {},
+      "selected": true
+    },
+    {
+      "path": "Solidity/Calculus/DecisionSourceChain.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "16f1d1fe679708ead86d697d6a529a33dcc8fd896d2655b29c8a78fb6c49b7da",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 5,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Calculus/KeyTaclets.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "45c00a01e81f9bcba148cb2702c11ade936d324888ccff3c18dd7145641221e2",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Calculus/RewriteChainGen.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "79493586d7e7e6e422e2a32ea93eab303c3fc4875e0a18b66f1d90b5b33862ce",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Calculus/RewriteChains.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "ef0f2db2cfdae453255553888ff7e5b14f8eae3d5f0b2c2933ad80085d80f5f9",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 1
+      },
+      "selected": false
+    },
+    {
+      "path": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "3bc1a168b9476e28fb43f4a1294c109fda3fef0de10c12255006f3077dcf8030",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 15,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Corpus/Basic.lean",
+      "category": "handwritten_explicit_exception",
+      "source_sha256": "3b7c99cb0bb28225554a0a9eb53cc4b44afbca8b827a0a6cd8ec8c39ea7aed7b",
+      "producer": "scripts/check-corpus.sh",
+      "reason": "Gate explicitly exempts these handwritten corpus source files.",
+      "explicit_theorem_lines": 2,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Corpus/Imported.lean",
+      "category": "handwritten_explicit_exception",
+      "source_sha256": "0e3d84952194e77b61a233a3049f6e586bbecf9230a796ec6ee3cb6f73dc9c6a",
+      "producer": "scripts/check-corpus.sh",
+      "reason": "Gate explicitly exempts these handwritten corpus source files.",
+      "explicit_theorem_lines": 4,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Corpus/SolcArrays.lean",
+      "category": "generated_corpus",
+      "source_sha256": "50ceaec33665d5b3df806b9097766b5cbf2105891590d765ab349f5a3e3de453",
+      "producer": "scripts/solkey-port.mjs",
+      "reason": "Corpus producer output, excluding the two documented handwritten support files.",
+      "explicit_theorem_lines": 11,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Corpus/SolcControlFlow.lean",
+      "category": "generated_corpus",
+      "source_sha256": "0943781767be1c8d159d9f8d1b7705ad8674541408676f05032d4ad50857e1f2",
+      "producer": "scripts/solkey-port.mjs",
+      "reason": "Corpus producer output, excluding the two documented handwritten support files.",
+      "explicit_theorem_lines": 8,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Corpus/SolcExpressions.lean",
+      "category": "generated_corpus",
+      "source_sha256": "847dd7a421b582e680f679b0d5f8960b9f67163d5cfe384ce162bc0a9b4610fb",
+      "producer": "scripts/solkey-port.mjs",
+      "reason": "Corpus producer output, excluding the two documented handwritten support files.",
+      "explicit_theorem_lines": 20,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Corpus/SolcMappings.lean",
+      "category": "generated_corpus",
+      "source_sha256": "23b7d7ba1c1bb922d16aa029c56f717e91be0150192bfbcf4221d226323996ce",
+      "producer": "scripts/solkey-port.mjs",
+      "reason": "Corpus producer output, excluding the two documented handwritten support files.",
+      "explicit_theorem_lines": 9,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Corpus/SolcMemory.lean",
+      "category": "generated_corpus",
+      "source_sha256": "8b4721e00351884c15e3411fc1aa51f7468b4736d7661be7b7a0f869dc515426",
+      "producer": "scripts/solkey-port.mjs",
+      "reason": "Corpus producer output, excluding the two documented handwritten support files.",
+      "explicit_theorem_lines": 11,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Corpus/SolcStructs.lean",
+      "category": "generated_corpus",
+      "source_sha256": "a7c4fb909cb79f604caf0b61fb6095967b8251c8d811f4c9a58a20c7d4232aae",
+      "producer": "scripts/solkey-port.mjs",
+      "reason": "Corpus producer output, excluding the two documented handwritten support files.",
+      "explicit_theorem_lines": 9,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Corpus/TestSuite.lean",
+      "category": "generated_corpus",
+      "source_sha256": "b41047c169e5106a2f4129a60f331e96a84d9c6e67006f406d41a6bef8183d89",
+      "producer": "scripts/solkey-port.mjs",
+      "reason": "Corpus producer output, excluding the two documented handwritten support files.",
+      "explicit_theorem_lines": 518,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Examples/ChainExpand.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "21411fce78887ed7c2ac9ffde4b0fdaa1776330aa394bf45d137f8d017e7892a",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 3,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 7
+      },
+      "selected": false
+    },
+    {
+      "path": "Solidity/Examples/ChainNotation.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "a46f6664023f6ffe5b5a638d9d59f39cbe9faa04d97ccb9d58479bdb3bd589a5",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 7,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 38
+      },
+      "selected": false
+    },
+    {
+      "path": "Solidity/Examples/ChainRewrites.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "a992234dc00315186784dd265bfa5aa28277625507d24c2fe3b8e41687b28ee5",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 9,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 50
+      },
+      "selected": false
+    },
+    {
+      "path": "Solidity/Examples/ChainRewritesOpen.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "d5e748e02f50747df848ca05e65dff1f145b5178520425d0f5ccef042772b2b9",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 29
+      },
+      "selected": false
+    },
+    {
+      "path": "Solidity/Examples/Chains/Arithmetic.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "10fabcc99594cab9a56f4d0c8fed15c19bef1733478799042aaaaf32112baa8c",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 1,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 1
+      },
+      "selected": false
+    },
+    {
+      "path": "Solidity/Examples/Chains/CheckedArithmetic.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "fafd498a03aa3baa07623e146d545cfa8d5c122342781ca6046390e1ae06fdbf",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 2,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 2
+      },
+      "selected": false
+    },
+    {
+      "path": "Solidity/Examples/Chains/EvaluationOrder.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "d8268ecafa3865ec62818a925b72dd2be0b2abf206964a7403b58d7df40a8651",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 1,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 1
+      },
+      "selected": false
+    },
+    {
+      "path": "Solidity/Examples/Chains/FixedLength.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "85e160a26c2a070d898953292ee3d2702ccbbcd05bdf0ee56181e4d861b6e909",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 3,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 3
+      },
+      "selected": false
+    },
+    {
+      "path": "Solidity/Examples/Chains/Memory.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "36ef65f028ef818c2e8aa0a358642c4f1d0dbdd93c4127ea7eaedc9cbcbd17f6",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 11,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 11
+      },
+      "selected": false
+    },
+    {
+      "path": "Solidity/Examples/Chains/MemoryArrays.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "e56295b1c6233085d8927c1b110bc07d10559577b5890dbbdce444d322376e17",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 12,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 12
+      },
+      "selected": false
+    },
+    {
+      "path": "Solidity/Examples/Chains/MemoryCoverage.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "c7cdff01a450ac816e815bc09b410a7fa2ce4a004440b55b6f42b205bb87d751",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 32,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 41
+      },
+      "selected": false
+    },
+    {
+      "path": "Solidity/Examples/Chains/MemoryDelete.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "cd00d1c29ed48aef666a9fb106a78f981d828e2ca8586c482e9fd1a948f93f90",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 3,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 3
+      },
+      "selected": false
+    },
+    {
+      "path": "Solidity/Examples/Chains/MemoryToStorage.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "6731eceb6e8d55be4052a417f702ce56fe8c03a2121ef528b96e2b09d4656f9f",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 4,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 4
+      },
+      "selected": false
+    },
+    {
+      "path": "Solidity/Examples/Chains/Payment.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "883ff6301ea6caefe3aa494760393771024de4e3754ad370545b073ed83ea8e6",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 3,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 3
+      },
+      "selected": false
+    },
+    {
+      "path": "Solidity/Examples/Chains/Storage.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "237a849eff00b165e4e34b64bd541988b5e629e2e22531495b47c915573aa77d",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 21,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 23
+      },
+      "selected": false
+    },
+    {
+      "path": "Solidity/Examples/Chains/StorageArrays.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "d8076e235726fd8aab9937478db4e4896b207bbaff16820292a4eca7e90bea5e",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 10,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 9
+      },
+      "selected": false
+    },
+    {
+      "path": "Solidity/Examples/Chains/StorageCoverage.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "a87c03afa5b25db374befe4b1e3426688e1c09c8f6616a9b6882ac691a5d72e3",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 57,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 70
+      },
+      "selected": false
+    },
+    {
+      "path": "Solidity/Examples/Chains/StorageDelete.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "f1b9553fbf77c38b105705da416bd70d76a370763cb05073226041f619398a45",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 3,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 3
+      },
+      "selected": false
+    },
+    {
+      "path": "Solidity/Examples/Chains/StorageToMemory.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "e2cc08daa97aa1b6ba55fbbc01d25b494cfb028ea9b45b8806517756566f80c1",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 3,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 3
+      },
+      "selected": false
+    },
+    {
+      "path": "Solidity/Examples/DecisionHashFiveChain.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "ab5aaafdcead86561294bb614157497dd75cb6bd0f37173f47bc73aa9a7dab1c",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 1,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Examples/DecisionSourceChain.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "00971b8a46478717abcc40681a105844a471d4d1806e870db8c0afe002860003",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 12,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Examples/ExampleNames.lean",
+      "category": "unmarked_other",
+      "source_sha256": "7bd8aa445c2daf1c26d773ea6a441447742820ac59ac728f5e16dfb24d166463",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 1
+      },
+      "selected": false
+    },
+    {
+      "path": "Solidity/Examples/Tactics/CallOperands.lean",
+      "category": "unmarked_other",
+      "source_sha256": "3a7025db44721f7151946a33b3e3bc184c39d581487b76f382e8d9c69b1bbfbc",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 8,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 1
+      },
+      "selected": false
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Chains.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "ca064c682b371eae5a1def0c661e8204f0e069d09ddb1a3a35fa134cf353c6c6",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 12,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 20,
+        "#chain_rest": 1,
+        "#chain": 6
+      },
+      "selected": false
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Latex.lean",
+      "category": "unmarked_other",
+      "source_sha256": "2a108de2a3deb07a0fb037af162e713aa7661212c388827412aaf92ba84a42a0",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 3,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 2
+      },
+      "selected": false
+    },
+    {
+      "path": "Solidity/Examples/Tactics/LoopsImport.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "f5e8e793a27aa07ad93a1ccf49fd0b452a590945fb5282f1c690048dde926419",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 5,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Examples/Tactics/PushSource.lean",
+      "category": "unmarked_other",
+      "source_sha256": "1893e6e5df26658af6809240af8a248f649538bb0a42973eff04c7618a9102ba",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 2
+      },
+      "selected": false
+    },
+    {
+      "path": "Solidity/Frontend/Checked/Tables.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "4989b4811753c9515a07be8236f53a0fa537bf1f2ecf7cdd7c33978c65d5b2ff",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Frontend/ExpressionUniqueness/AxiomPins.lean",
+      "category": "generated_axiom_pins",
+      "source_sha256": "ed3d44a14a947e330770d907721d8739eb81def339d1b30e70921006aa78e8bf",
+      "producer": null,
+      "reason": "Axiom-pin source kept separate from mathematical declarations; no claim of handwritten effort.",
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Frontend/SolcJson/CallMetadataData.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "cf40b9cad32d099c02190cea37d533ebc2439274c3dc28b9f392fa2357332c49",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Lowering/P8/DeclarationGraphAdmission.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "ea55250d3304b568715d3500668343bb81277e51a9692224c816c10b2f790b03",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureSliceChain.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "33e6eaac3675aa0036d908affbfea6081eb2e4157db67d1b6ca662161bba567c",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 9,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureSliceChainControls.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "a77b384e1deee4e50344127b9fd29083cc87c9a09f6a786f5ca9e0ef66d5a104",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 7,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Roadmap/G49Final/PassChain.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "350daa7a780d8a694258038e494d97fc1fb314923f44e157bb3b2e0b7b9dc9bf",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 1,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Roadmap/V16/H24Input.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "5eaec4e51121c13f0f56c8b1373adfc5050a3d3ec925aec1bd70a3764b6a2f5e",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Semantics/Nondeterminism/ForkAgreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "f3b302545374de68b981ef0d655aa585104c39ad25a8b4c99e2ab7a18f216ccd",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 8,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/SolcValidation/IrCensusCreation.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "06bbc91503fd96112411f3a119df67f1848ba5fd3e3954443fc1177b3ef6bc9c",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/SolcValidation/IrCensusDeployed.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "1b596d0864cdcac9ef253458f1af9e6f4a9c7bf9b517f4b4de87a903142ba74c",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/SolcValidation/IrCensusMaps.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "b6f35f18977643f46559cc0d1fca7f4009874029a52b24a271527aca5c7fe907",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/SolcValidation/IrCensusTree.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "148520cc3d433971dd7fe691649e4519b8adbc88413c2f7c8bafdaeb9fb39446",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 2,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/SolcValidation/IrHelpers.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "f16fbe8be50d6e26033005044a3d11d65595f60cf0965664d5d2a4e929ae6021",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 1,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/SolcValidation/IrLinkedCode.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "0cc22ea8b2e8b175280892dab11598b012ea5ae38d8ea908d7bd39ce0722f3a2",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/BoolSlot.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "7d086b4c23367e27c77e66d923bd7e097f27f50baab6bde994cc378c91d1c47f",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 2,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/BoolSlotAnd.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "35d3d6e73077607805b1261f167d8366da04d2d9183046817eacc10cd0b91db2",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 3,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/BoolSlotAndControls.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "f97f5ef8d5fe69eb87317653f31e0261794d1be2efe34601d08e5ce678eb42fb",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 8,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/BoolSlotAssign.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "f9a3944d00cf7f4b991f6305680da5fe4f04743a5e5359fb3d44550b5d2acafa",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 5,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/BoolSlotConditional.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "b64a4c0f73b4a9b29851bf2e0fca9390a5828091ef072c65d86552ba664703f0",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 3,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/BoolSlotConditionalControls.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "03d22b0640e736ef5e8137761b045203858f6512aeee6c8a75027800cd31f885",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 7,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/BoolSlotControls.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "423cd2a0e227ace50a0318bc558fd240f9f68486e9c1352c3ff623ed05931b84",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 3,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/BoolSlotNot.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "695a82a3aa93d206c9186b495088289ba0bca9c625f0e6dcf08150d24a361d7e",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 6,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/BoolSlotNotControls.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "dc96a54331894ed0e4451dbbd9cf836ed8e10dd4f462ddce80d78b63e613b45b",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 5,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/BoolSlotOr.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "908b76c7e7a93606a5de6364161986bbb8c48c51d53f61c8efc087aa06e1e2e3",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 3,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/BoolSlotOrControls.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "9f95dcd3769bd23bab865ecdc9c0811a29e1bda7174742fa33993232a4445440",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 8,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/BoolSlotRead.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "e165941bf5e6dd4ec6b80d8404368739f42e2d61cd99736854cb65b6ffe9a493",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 5,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/BoolSlotReadControls.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "cf989dbe4bbb59d6a049b92ecd7301d2e9928cae2e421f2d96f9f5e29cc685af",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 7,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/BoolSlotReadWrite.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "83887d1bcc797c8d2995974f1f384671f9f2e969b6de140079b8d754af332205",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 8,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/BoolSlotRepeated.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "a3dc9f70174944469238a135ceea9fdd8c4f8d87e16108fde811b135182bd08b",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 4,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/BoolSlotRepeatedControls.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "18479a1d4b90a1f472885adc8797e53c30e91c8c30e65f561226026f1934e685",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 4,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/BoolSlotSaved.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "0de2c814d89ef65c0b55faa2f79b693f25963a3877ba2e4c843c9eba29579bcc",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 3,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/BoolSlotSavedControls.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "521b19c50bd0eb9f6a3d20b671a7a673aaea08c3ef6de47f3aedbab0a3141886",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 5,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/BoolSlotToggle.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "87f99d59ea8510ea2151ba78b0176e9b6f5446a6647319d41c6bc6a163814f1d",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 4,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/BoolSlotToggleControls.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "55d23c4ac0f856ef004550a5eb367a7cebdf082044e764647bdde27f9228326e",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 7,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/Locals.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "785edc66ac7db20880882002adfc3a2a5a51d0598f76fb5223c1db1daf6d8bad",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 3,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/NormalBoolAssign.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "40d4e51ddd6bc029a09102d386b5296637794566458aae312f30895581c6ecb7",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 5,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/NormalBoolAssignControls.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "41f9bb5622a70e67f198ae480f86453dfbeb0fe341f99361fa893fbb1e8f29de",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 6,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/NormalBoolBindings.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "379c8d30e8e0181ea38ff9b96faa882b9e25fbf3bdcca69481dd60b8eaa1881f",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 4,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/NormalBoolControls.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "90bf5ecc26acb1eb54c800ea896d689ac9c5e904773956fbe3413bffebcbb700",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 6,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/NormalComposition.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "576f1db4346ff215f44e80809333b764c43d9cc970ef3187ccc8928ee67ba61e",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 3,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/NormalControls.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "83650a5cf022d2f3a1281802d9769d39b1d1181ecc0ec6af2173c7a015760402",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 7,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/NormalCuts.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "87d6450d8dc89f929c85303ee0b48ffc7d6655d68eff381ed334fa513c3c08d6",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 4,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/NormalDefaultControls.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "fdb76d3bc63542fee022656fbc11b7a55d0ee6090bd208783a78bef530126cef",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 7,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/NormalDefaults.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "ef3902d21d6fa5dd02616b76c5f6ecf54a7ff960a759cf002a19549df60646c6",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 5,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/NormalStatement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "1de293a2a880b1976dddb96bdb6204de8dfe4b78b213c2927f72a349629492b4",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/NormalStep.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "6a134ca4a60f473bcd7e3b8ec6309efffaa757eb5d4cee1a6eb0f4bc8a272bbc",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/Primitive.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "97cbdf80664180161257155a2e2576fe0bbeeaa1401d56d81e88aa2bcc1939e5",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 5,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/PrimitiveCopySequence.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "7605fec3729c2fe12ef900564759203f28af34da2d264d85d0ab6e214b34f0c9",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 10,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/PrimitiveCopySequenceControls.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "96a40ef751af66317d20e932ea7857b607a8186dfc544698578b683c02690bb2",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 6,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/PrimitiveSavedAssign.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "38b703faf0f71f213e68c58178a2c0fec761ced67e5dc12a6392eb383f7ba2c3",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 5,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/PrimitiveSavedAssignControls.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "9f439c8a933163de0943b726bf12e97615a3c17ab342bf9e3b2599ecacb5d2f3",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 4,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/PrimitiveSlot.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "8771dd2fabcd5afef9b2ffd6ada0e78d75c9880717ad5d3043e140b194aa46cc",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 7,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/PrimitiveSlotAssign.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "2f675f2f0d0a28b8dddb7b6f563b65a5c694001d36d224aaf189b08bcae83ff9",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 5,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/PrimitiveSlotAssignControls.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "c5a20d67dd75652ccdcc68b0d273fce715ddccafa4fe1973f8cf47b7085c7447",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 6,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/PrimitiveSlotControls.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "500b14feb33266b0ab5fb1239381ad4882693d73416e7fb67efb6ab3c5e97688",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 5,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/PrimitiveSlotReverse.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "b80b698291334274312a74b28481c6c736a1ec98f72b6bd4e70c480c8b6294d4",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 5,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/PrimitiveSlotReverseControls.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "32665a70c546e199cffad4b42930d5d1ed94dee409dbb99742e1e60879878f82",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 4,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Agreement/PrimitiveTypes.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "3d5c34d683a2b92048014f8a1d9541567fef7cf840bfb0e29d719c9f4cb25e06",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Ctor.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "cbb058de6cdc41a5ea12e8a4e2d0865d91381551d27bf2ee02418dd74af53d92",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 10,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Decls.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "cb089a2a9e6eef84cc39fa987df90e8df0314d8cd456d613be312a2fdd2f86d9",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 2,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Progress/ForwardingChain.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "4b738a7014343634715ea2cddcb6ec42e1eab964186ed1de3d48e1642fc78be2",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 4,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Progress/ForwardingChainControls.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "96e1121f2f8d70e9fd10c7974dbd1b3c807fd1c67ea5d35a92b3856e8b9bfeb7",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 16,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Progress/InitializedChain.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "22e430cf38496bcc502913133aa4910bb05cad1456ce6b61c9a9d22bd11f36f9",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 4,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/Progress/InitializedChainControls.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "b91a3cd4a2f8a9abd1e56a10f61a9ecdbe760a237851b604ae3353d29f46d94a",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 16,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Source/SemanticsExamples.lean",
+      "category": "unmarked_other",
+      "source_sha256": "b5135945841939a477ba4b4d76cc87daa595da1375d1abe99b96960aaecf5368",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 33,
+      "chain_generator_lexical_uses": {},
+      "selected": true
+    },
+    {
+      "path": "Solidity/Syntax/DispatchChain.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "1a8fc2d211b89114265d04daab49865ebf1603ff55a9d0a5db10076b3f96088b",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Theorems.lean",
+      "category": "unmarked_other",
+      "source_sha256": "cb68eb68cc471970fa149faabce9dc8fe16142cdff1b884611663ab40670bcc9",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 21,
+      "chain_generator_lexical_uses": {},
+      "selected": true
+    },
+    {
+      "path": "Solidity/Yul/Adapters/MemoryAgreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "04e8b90c5471c3a8065bb0b32bbf24b5516c6d1614158be7c60528cd8664e02b",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 9,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Yul/Adapters/MemoryAgreementControls.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "065f3e8523de825e56144ad0ad49c65ad5e8a8d23400abfa244ad7b1c19fe2dc",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 6,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Yul/Adapters/P6ChainedByteAssignment.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "a0548b74f69c1670f308a61184ec77e4e071c5aeeabdd4a5aff1a82086453ea9",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 5,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Yul/Adapters/P6ChainedByteAssignmentControls.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "9acac081eb81ae440be47f32872386d7c22ba2ab6d573c07f3a15ab8d6a9f8b5",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 6,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Yul/Checks/Arithmetic/Part00.lean",
+      "category": "generated_vector_table",
+      "source_sha256": "cbc2c0d6b6eb82e1db812ffc273d00908b57d0762cb7ceb4be0401cae944d76b",
+      "producer": "scripts/h55/vectors-tables/vector_generator.py",
+      "reason": "Frozen producer manifest authenticates complete generated vector module bytes.",
+      "explicit_theorem_lines": 1000,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Yul/Checks/Arithmetic/Part01.lean",
+      "category": "generated_vector_table",
+      "source_sha256": "4824f19c1be31db914b2c7d5af57d3a3fb8877e9fda74bfbdbc6d973b46a3f36",
+      "producer": "scripts/h55/vectors-tables/vector_generator.py",
+      "reason": "Frozen producer manifest authenticates complete generated vector module bytes.",
+      "explicit_theorem_lines": 1000,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Yul/Checks/Arithmetic/Part02.lean",
+      "category": "generated_vector_table",
+      "source_sha256": "35fb72991fcddbcfcc2aed893aa0838f1a00e4155a014400dbb1723f7a93aaed",
+      "producer": "scripts/h55/vectors-tables/vector_generator.py",
+      "reason": "Frozen producer manifest authenticates complete generated vector module bytes.",
+      "explicit_theorem_lines": 8,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Yul/Checks/Bytes.lean",
+      "category": "generated_vector_table",
+      "source_sha256": "25d797ff32eb60de583447704a2896f6b0c081d857cd8b7627e3e6a0d0c7a69f",
+      "producer": "scripts/h55/vectors-tables/vector_generator.py",
+      "reason": "Frozen producer manifest authenticates complete generated vector module bytes.",
+      "explicit_theorem_lines": 947,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Yul/Checks/Powers.lean",
+      "category": "generated_vector_table",
+      "source_sha256": "f04e01f795de0980824b13ab6c1a13e244bc1a12e8ef193c631b54172aefe2fe",
+      "producer": "scripts/h55/vectors-tables/vector_generator.py",
+      "reason": "Frozen producer manifest authenticates complete generated vector module bytes.",
+      "explicit_theorem_lines": 63,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Yul/Checks/Shifts/Part00.lean",
+      "category": "generated_vector_table",
+      "source_sha256": "368690e0e7a584c2d0eaddddd8de791ab7ce67b5cf770e3c3a00bf7057ce5e8f",
+      "producer": "scripts/h55/vectors-tables/vector_generator.py",
+      "reason": "Frozen producer manifest authenticates complete generated vector module bytes.",
+      "explicit_theorem_lines": 1000,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Yul/Checks/Shifts/Part01.lean",
+      "category": "generated_vector_table",
+      "source_sha256": "109e910d239d317899411b8646a713fa4e32a86e8f06edcfe02e497e80e2dd4e",
+      "producer": "scripts/h55/vectors-tables/vector_generator.py",
+      "reason": "Frozen producer manifest authenticates complete generated vector module bytes.",
+      "explicit_theorem_lines": 1000,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Yul/Checks/Shifts/Part02.lean",
+      "category": "generated_vector_table",
+      "source_sha256": "519ce07e91562a75953fef98c24764277112f17df448abe94e7eb560ead607b3",
+      "producer": "scripts/h55/vectors-tables/vector_generator.py",
+      "reason": "Frozen producer manifest authenticates complete generated vector module bytes.",
+      "explicit_theorem_lines": 1000,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Yul/Checks/Shifts/Part03.lean",
+      "category": "generated_vector_table",
+      "source_sha256": "7d93dcaa58c40b235b0cca530021debb932817e7edbb8289aaa4cb53c701e503",
+      "producer": "scripts/h55/vectors-tables/vector_generator.py",
+      "reason": "Frozen producer manifest authenticates complete generated vector module bytes.",
+      "explicit_theorem_lines": 885,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Yul/Interfaces/P16.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "2fdf0b9a2f2aa7379325a505d613fa2e05fbfdb440ad1c870200cb3f19c54a22",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Yul/LocalBoolAgreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "fd90bbfe7415f0578de5f428fd808ab1c51d4f1ab0ff940fcf06d0554a10aacf",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 14,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Yul/LocalBoolControlAgreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "34a7402507329caae7851a065b75d0ef3875cdf0d23a178e41f54e14ffa5a6e8",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 1,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Yul/LocalU8Agreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "aa4f1d05f3dfaaf541b06a7ad147d9110349eacc70f5c6155d83a204a7a1d249",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 2,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Yul/OpenAgreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "dff77fd413041a778f2f21ba4ed7f934a0de9cf40cea9aa5a192d6ede9007345",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Yul/OpenCasesAgreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "cc009b75c0af4d2fc753bd19f9f1941ce552cc93090878e8646de28dd11901ad",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 1,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Yul/OpenExpressionAgreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "27819a206124c4eb48bd6e6c3a76521b5af5811940d146fb5089e492ae043cc5",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 2,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Yul/OpenLoopAgreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "ea1c24d9f85731d6c3cd138a4cb553bdd4b7e6abb6dc60ae1971026aae81a650",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 1,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Yul/OpenStatementAgreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "73d0bc186508f527264e30d24fcea7d8162489de168427465ed2d624aadc6147",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 1,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Yul/Views/AbiCalldataAgreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "10f4a58f29c56459dde10f8307d84226e291b49a874c6d9f681235c9688453cc",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 11,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Yul/Views/Agreements.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "6cf0765c4a58db1358064de3547e5892bbbd9641c5bdd85eb1e6c5f6b2b5040d",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 4,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Yul/Views/RetainedArrayAgreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "bfc37737b59f99df7466cc81917c585523b4385a653cfaecbb7cc272064019b0",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 6,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "Solidity/Yul/WordAgreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "76790f88010e0c9a1530e04a966c07b04f3c5b93bacab10060ad57167573ffe5",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 4,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "SolidityCorpus.lean",
+      "category": "generated_corpus",
+      "source_sha256": "6d0db41b1f6a5e4a0baf6980d66b07df76590c7fdaea4f52a7f892b4f42b16d2",
+      "producer": "scripts/solkey-port.mjs",
+      "reason": "Corpus producer output, excluding the two documented handwritten support files.",
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "SolidityExamples.lean",
+      "category": "generated_roots",
+      "source_sha256": "17f3c592687c3824c0254773e3609a01294bf9b38a37c6cb005faeb6ac542a01",
+      "producer": "scripts/coord-tools/register.sh",
+      "reason": "Registered generated import root.",
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "SoliditySlowExamples.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "a23689c369fe51e29d4a33d61b27dea35a84de5b1dfad06d3e75c82cfda1d52a",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "tests/h28-sol/automation-benchmark/ChainControls.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "863f5cccbce8db033685506ae6ca54a5683beb3beb35031ff5dddf39641532c4",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 2,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 1
+      },
+      "selected": false
+    },
+    {
+      "path": "tests/h28-sol/automation-benchmark/ChainRefusalBaseline.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "d942a8280c3101ea67288911e14feb07e9c51125f0c5c8faa5609f9b4b43ac29",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 2,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 3
+      },
+      "selected": false
+    },
+    {
+      "path": "tests/h28-sol/automation-benchmark/ChainRefusalCandidate.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "a06290b9f0bc3c8ec592b499beb78862632d1ac35eaa918e3b62a1b9ad9c245f",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 2,
+      "chain_generator_lexical_uses": {
+        "sol_chain": 1
+      },
+      "selected": false
+    },
+    {
+      "path": "tests/h55/v08-agreements/Agreements.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "57f39a6fe1342b3b077298376ab98260961d2cecada6ce73d98f24f2d4165046",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 67,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "tests/h62/item1/infer-helpers/SharedAgreement.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "8973a9801ab02c8e62f9fc42f5bf230488db963fe7be419169bf05f381908fde",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 8,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "tests/h62/item2/audit-abi-world/H62AbiWorld/BasicWitnesses.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "b0e11dd54c72dd7dde357139f2d3c81cd47d9567d4658798662ab3a1037c79c5",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 29,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "tests/h62/item2/audit-abi-world/H62AbiWorld/ControlWitnesses.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "f08948f8ef2e3d9b1c2e46a163e698a7e00e4278a769a2229cb0afd9a81c834a",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 93,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "tests/h62/item2/audit-g25-scalar-lowering/ScalarCastChainsWitnesses.lean",
+      "category": "unresolved_chain_agreement",
+      "source_sha256": "1fa5af923a291cdd1e5fa6a53068a8f0c3dc044f815a24162ec987276dc5a951",
+      "producer": null,
+      "reason": "Filename alone is not producer evidence; source remains untraced, not assumed handwritten or generated.",
+      "explicit_theorem_lines": 9,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "tests/h62/item2/audit-typing/ProvisionedCensus.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "523cb7a39eb7a5f9a82ffef6c420637f0eb517ab6a246cec277839618b1e9eb0",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "tests/h62/item4/generic-source-frontend/FixtureTable.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "8246fdec3ca1f0b558dff13e9190d0c1ba9dfa2423f21fb32930f2356a0a7914",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 95,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "tests/h62/item6/migrate-examples/InterfaceDump.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "ca87c27f3d0d3b7e07d90a3cde45d0a9e41e13b4303717b3aa7d8d1e1169421e",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 0,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "tests/h62/item6/migrate-yul/LegacyStringCases.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "f315c4e4e612416228f48fc6a4158285674d4d26e45c727c5dc3d2fde77568a3",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 2,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    },
+    {
+      "path": "tests/h62/item6/migrate-yul/NewStringCases.lean",
+      "category": "generated_marked_other",
+      "source_sha256": "aab82ff35ecfdb9befc57c5ce0a35a8f33858773ac831078a5c8002c378664cb",
+      "producer": null,
+      "reason": null,
+      "explicit_theorem_lines": 2,
+      "chain_generator_lexical_uses": {},
+      "selected": false
+    }
+  ],
+  "generator_boundary": {
+    "chain": {
+      "source": "Solidity/Calculus/ChainGen.lean",
+      "mechanism": "Chain.generate plus #chain/#chain_rest print suggested declarations; sol_chain constructs proof terms. Explicit source declarations are counted once; expanded proof terms are not source LOC.",
+      "selected_file_lexical_uses": 0
+    },
+    "agreement": "Agreement-named source modules are not automatically generated modules. No canonical file producer has been established for every such path; those records retain untraced provenance."
+  },
+  "handwritten_boundary": "Only explicit check-corpus.sh exceptions are positively labelled handwritten. Unmarked source and filename candidates are not combined with confirmed handwriting; overall historical handwriting count is unknown."
+}
