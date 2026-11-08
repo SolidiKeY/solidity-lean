@@ -229,9 +229,8 @@ theorem effectfulRead_run (target : State C Γ) (base : Idx Γ (.mem R))
   unfold effectfulReadOperand
   rw [DeferredSource.Operand.run,DeferredSource.join_run]
   unfold TRun.seq
-  have first := IndexCapture.effectfulIndexCode_run target base hm old read index
-  change (IndexCapture.effectfulIndexCode base hm index).runR target = _ at first
-  rw [first]
+  rw [show (IndexCapture.effectfulIndexCode base hm index).runR target = _ from
+    IndexCapture.effectfulIndexCode_run target base hm old read index]
   cases run : index.run target with
   | error err => rfl
   | ok result =>
@@ -239,11 +238,9 @@ theorem effectfulRead_run (target : State C Γ) (base : Idx Γ (.mem R))
     cases value with
     | prim k =>
       dsimp only [Except.map,bind,Except.bind]
-      have guard := bounds_run
+      rw [show (code array (.there .here) hm (.local .here)).runR _ = _ from bounds_run
         ((out.st.push (t := .mem R) (some (HRef.wk out.ext old))).push (t := .val .uint) k)
-        array (.there .here) hm (HRef.wk out.ext old) rfl (.local .here)
-      change (code array (.there .here) hm (.local .here)).runR _ = _ at guard
-      rw [guard]
+        array (.there .here) hm (HRef.wk out.ext old) rfl (.local .here)]
       by_cases inside : k.val.toNat < out.st.heap.len (HRef.wk out.ext old) array
       · simp only [Simple.evalT,State.push,TEnv.get,inside,if_true]
         simp only [Src.valueT,Val.evalT,MLoc.addrT,MPath.mvalT,TEnv.get,Simple.evalT,
@@ -282,9 +279,8 @@ theorem effectfulWrite_run (target : State C Γ) (base : Idx Γ (.mem R))
   unfold effectfulWriteCode
   rw [DeferredSource.join_run]
   unfold TRun.seq
-  have first := IndexCapture.effectfulIndexCode_run target base hm old read index
-  change (IndexCapture.effectfulIndexCode base hm index).runR target = _ at first
-  rw [first]
+  rw [show (IndexCapture.effectfulIndexCode base hm index).runR target = _ from
+    IndexCapture.effectfulIndexCode_run target base hm old read index]
   cases run : index.run target with
   | error err => rfl
   | ok result =>
@@ -296,10 +292,8 @@ theorem effectfulWrite_run (target : State C Γ) (base : Idx Γ (.mem R))
         .assignMem (.index array (.var (.there .here) hm) (.simple (.local .here)))
           (.val (.simple (value.wk (.drop (.drop .refl)))))
       dsimp only [Except.map,bind,Except.bind]
-      have joined := DeferredSource.join_run (code array (.there .here) hm (.local .here))
-        (.cons store .nil) captured
-      change ((code array (.there .here) hm (.local .here)).join (.cons store .nil)).runR captured = _ at joined
-      rw [joined]
+      rw [show ((code array (.there .here) hm (.local .here)).join (.cons store .nil)).runR captured = _ from
+        DeferredSource.join_run (code array (.there .here) hm (.local .here)) (.cons store .nil) captured]
       unfold TRun.seq
       have guard := bounds_run captured array (.there .here) hm (HRef.wk out.ext old) rfl (.local .here)
       change (code array (.there .here) hm (.local .here)).runR captured =
@@ -309,9 +303,8 @@ theorem effectfulWrite_run (target : State C Γ) (base : Idx Γ (.mem R))
       rw [guard]
       by_cases inside : k.val.toNat < out.st.heap.len (HRef.wk out.ext old) array
       · simp only [inside,if_true,Except.map]
-        have single := V07.singleton_run captured store
-        change (Prog.cons store .nil).runR captured = store.runR captured at single
-        rw [single]
+        rw [show (Prog.cons store .nil).runR captured = store.runR captured from
+          V07.singleton_run captured store]
         have weak := Simple.evalT_wk (.drop (t := .val .uint) (.drop (t := .mem R) .refl))
           out.st (k,some (HRef.wk out.ext old),out.st.env) value
         change (value.wk (.drop (.drop .refl))).evalT captured = value.evalT out.st at weak
