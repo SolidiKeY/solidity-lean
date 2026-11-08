@@ -40,18 +40,25 @@ compiler selection, native execution and full G40 composition remain open.
 MRS still awaits this lane's whole-decoder execution result; this increment
 does not supply it.
 
-## Charged storage access interface
+## Charged storage access
 
-AccessBridge.StorageInterface now states the charged read/write obligations
-for SLOAD, TLOAD, SSTORE and TSTORE over actual P10 sites. Every gate error,
-native state update, stack tail and low-fuel boundary remains explicit, with
-positive-fuel driver continuation kept separate. The module typechecks, but
-supplies no certificate inhabitant or compiled symbolic-path correspondence.
+AccessBridge.Storage inhabits the StorageAccessCertificate contract using the
+existing P10 decoder and actual charged driver. Its general SLOAD, TLOAD,
+SSTORE and TSTORE laws retain every gate error, native account/transient update,
+protected stack tail and low-fuel boundary, plus positive-fuel X continuation.
+No desired run, successful gate or account-presence premise is supplied.
 
-Storage and hash dependencies remain separate from calldata/memory interfaces.
-Symbolic slot transport, transaction-end reset, frame rollback and the full
-pass bridge remain open. The delivered cache was verified and unpacked before
-focused validation; transport integrity is not itself proof acceptance.
+Concrete kernel-checked controls retain unequal persistent/transient payloads,
+older stack words, exact read gas/PC/execution counts and actual gas/stack/static
+and stipend refusal ordering. A separate control preserves the pinned behavior
+that a write to an absent account does not create it; this is no new admission
+restriction or claim of compiler correspondence.
+
+Storage/hash dependencies remain separate from calldata/memory interfaces.
+Symbolic compiler-slot transport, approved collision-premise realization,
+transaction-end reset, frame rollback, Source/native origin and the full pass
+bridge remain open. The delivered cache was verified and unpacked before
+focused validation; transport integrity alone is not proof acceptance.
 
 ## Recovery and evidence boundary
 
