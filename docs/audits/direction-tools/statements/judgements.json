@@ -9,7 +9,7 @@
     "reference": "compcert;cakeml",
     "comparison": "Presentation machinery has no semantic-preservation counterpart; no strength or scale inference.",
     "priority": "none",
-    "non_comparability_reason": "ValidUnder is a local definition or printer for validity of a context-wrapped formula in every typed outer state, not an independent semantic-preservation theorem. None of the selected compiler proof endpoints or runtime vectors is the same presentation unit, so there is no like-for-like size denominator."
+    "non_comparability_reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row."
   },
   "Solidity/Theorems.lean#Derives": {
     "english_claim": "Derives names derivability using the full intrinsic calculus; it asserts no independent correctness theorem.",
@@ -21,7 +21,7 @@
     "reference": "compcert;cakeml",
     "comparison": "Presentation machinery has no semantic-preservation counterpart; no strength or scale inference.",
     "priority": "none",
-    "non_comparability_reason": "Derives is a local definition or printer for derivability using the full intrinsic calculus, not an independent semantic-preservation theorem. None of the selected compiler proof endpoints or runtime vectors is the same presentation unit, so there is no like-for-like size denominator."
+    "non_comparability_reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row."
   },
   "Solidity/Theorems.lean#DerivesK": {
     "english_claim": "DerivesK names derivability using only the intrinsic SolKey rule set; it asserts no independent correctness theorem.",
@@ -33,7 +33,7 @@
     "reference": "compcert;cakeml",
     "comparison": "Presentation machinery has no semantic-preservation counterpart; no strength or scale inference.",
     "priority": "none",
-    "non_comparability_reason": "DerivesK is a local definition or printer for derivability using only the intrinsic SolKey rule set, not an independent semantic-preservation theorem. None of the selected compiler proof endpoints or runtime vectors is the same presentation unit, so there is no like-for-like size denominator."
+    "non_comparability_reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row."
   },
   "Solidity/Theorems.lean#Rewrites": {
     "english_claim": "Rewrites names the intrinsic statement rewrite relation; it asserts no independent correctness theorem.",
@@ -45,7 +45,7 @@
     "reference": "compcert;cakeml",
     "comparison": "Presentation machinery has no semantic-preservation counterpart; no strength or scale inference.",
     "priority": "none",
-    "non_comparability_reason": "Rewrites is a local definition or printer for the intrinsic statement rewrite relation, not an independent semantic-preservation theorem. None of the selected compiler proof endpoints or runtime vectors is the same presentation unit, so there is no like-for-like size denominator."
+    "non_comparability_reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row."
   },
   "Solidity/Theorems.lean#RewritesK": {
     "english_claim": "RewritesK names the intrinsic SolKey taclet relation; it asserts no independent correctness theorem.",
@@ -57,7 +57,7 @@
     "reference": "compcert;cakeml",
     "comparison": "Presentation machinery has no semantic-preservation counterpart; no strength or scale inference.",
     "priority": "none",
-    "non_comparability_reason": "RewritesK is a local definition or printer for the intrinsic SolKey taclet relation, not an independent semantic-preservation theorem. None of the selected compiler proof endpoints or runtime vectors is the same presentation unit, so there is no like-for-like size denominator."
+    "non_comparability_reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row."
   },
   "Solidity/Theorems.lean#DoesAs": {
     "english_claim": "DoesAs names the modality-soundness relation between a statement and its premise; it asserts no independent correctness theorem.",
@@ -69,7 +69,7 @@
     "reference": "compcert;cakeml",
     "comparison": "Presentation machinery has no semantic-preservation counterpart; no strength or scale inference.",
     "priority": "none",
-    "non_comparability_reason": "DoesAs is a local definition or printer for the modality-soundness relation between a statement and its premise, not an independent semantic-preservation theorem. None of the selected compiler proof endpoints or runtime vectors is the same presentation unit, so there is no like-for-like size denominator."
+    "non_comparability_reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row."
   },
   "Solidity/Theorems.lean#Runs": {
     "english_claim": "Runs names successful execution of a typed program; it asserts no independent correctness theorem.",
@@ -81,7 +81,7 @@
     "reference": "compcert;cakeml",
     "comparison": "Presentation machinery has no semantic-preservation counterpart; no strength or scale inference.",
     "priority": "none",
-    "non_comparability_reason": "Runs is a local definition or printer for successful execution of a typed program, not an independent semantic-preservation theorem. None of the selected compiler proof endpoints or runtime vectors is the same presentation unit, so there is no like-for-like size denominator."
+    "non_comparability_reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row."
   },
   "Solidity/Theorems.lean#MRuns": {
     "english_claim": "MRuns names successful execution of the abstract machine code; it asserts no independent correctness theorem.",
@@ -93,7 +93,7 @@
     "reference": "compcert;cakeml",
     "comparison": "Presentation machinery has no semantic-preservation counterpart; no strength or scale inference.",
     "priority": "none",
-    "non_comparability_reason": "MRuns is a local definition or printer for successful execution of the abstract machine code, not an independent semantic-preservation theorem. None of the selected compiler proof endpoints or runtime vectors is the same presentation unit, so there is no like-for-like size denominator."
+    "non_comparability_reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row."
   },
   "Solidity/Theorems.lean#MReverts": {
     "english_claim": "MReverts names reversion of the abstract machine code; it asserts no independent correctness theorem.",
@@ -105,7 +105,7 @@
     "reference": "compcert;cakeml",
     "comparison": "Presentation machinery has no semantic-preservation counterpart; no strength or scale inference.",
     "priority": "none",
-    "non_comparability_reason": "MReverts is a local definition or printer for reversion of the abstract machine code, not an independent semantic-preservation theorem. None of the selected compiler proof endpoints or runtime vectors is the same presentation unit, so there is no like-for-like size denominator."
+    "non_comparability_reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row."
   },
   "Solidity/Theorems.lean#Compiles": {
     "english_claim": "Compiles names acceptance by the intrinsic compiled-fragment predicate; it asserts no independent correctness theorem.",
@@ -117,7 +117,7 @@
     "reference": "compcert;cakeml",
     "comparison": "Presentation machinery has no semantic-preservation counterpart; no strength or scale inference.",
     "priority": "none",
-    "non_comparability_reason": "Compiles is a local definition or printer for acceptance by the intrinsic compiled-fragment predicate, not an independent semantic-preservation theorem. None of the selected compiler proof endpoints or runtime vectors is the same presentation unit, so there is no like-for-like size denominator."
+    "non_comparability_reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row."
   },
   "Solidity/Theorems.lean#Represents": {
     "english_claim": "Represents names the intrinsic typed-state/abstract-machine simulation relation; it asserts no independent correctness theorem.",
@@ -129,7 +129,7 @@
     "reference": "compcert;cakeml",
     "comparison": "Presentation machinery has no semantic-preservation counterpart; no strength or scale inference.",
     "priority": "none",
-    "non_comparability_reason": "Represents is a local definition or printer for the intrinsic typed-state/abstract-machine simulation relation, not an independent semantic-preservation theorem. None of the selected compiler proof endpoints or runtime vectors is the same presentation unit, so there is no like-for-like size denominator."
+    "non_comparability_reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row."
   },
   "Solidity/Theorems.lean#rule_sound": {
     "english_claim": "Every rewrite rule preserves the modality meaning from any typed state.",
@@ -138,10 +138,10 @@
     "witness_status": "existing source witness",
     "witness": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Families.lean#every_rule_inhabited",
     "witness_needed": "Existing source instantiation; not elaborated in this audit. Does not cover every possible premise or compiler path.",
-    "reference": "compcert;cakeml",
-    "comparison": "Compared with CompCert backward simulation / CakeML non-Fail pass semantics: this claim is explicitly about its intrinsic model or local rule, not an end-to-end compiler theorem. Typed premises alone are not a defect; an external source/target bridge is separate.",
+    "reference": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cexec.v#L2163",
+    "comparison": "Similar external theorem: Executable one-step computation agrees with the relational semantics. Differences: Local deterministic statement rewriting versus nondeterministic C transitions, external-world crash alternative, and expression side effects; local theorem delegates to rule library. CompCert additionally assumes abstract external-function and inline-assembly implementations satisfy the enclosing soundness/completeness contracts; local intrinsic rewriting has no such external implementations.",
     "priority": "none",
-    "non_comparability_reason": "Soundness of one intrinsic statement rewrite is a different logical unit from whole-program compiler simulation; no corresponding reference rule and state relation were matched."
+    "non_comparability_reason": ""
   },
   "Solidity/Theorems.lean#rule_unique": {
     "english_claim": "At fixed statement, index and modality the rule premise is unique.",
@@ -150,10 +150,10 @@
     "witness_status": "existing source witness",
     "witness": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Families.lean#unique_family",
     "witness_needed": "Existing source instantiation; not elaborated in this audit. Does not cover every possible premise or compiler path.",
-    "reference": "compcert;cakeml",
-    "comparison": "Compared with CompCert backward simulation / CakeML non-Fail pass semantics: this claim is explicitly about its intrinsic model or local rule, not an end-to-end compiler theorem. Typed premises alone are not a defect; an external source/target bridge is separate.",
+    "reference": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/common/Smallstep.v#L1085",
+    "comparison": "Similar external theorem: Two one-step derivations with the same starting configuration yield the same result. Differences: CompCert fixes the trace and assumes determinate L; local intrinsic rewriting uniqueness has no external trace.",
     "priority": "none",
-    "non_comparability_reason": "Uniqueness of an internal rule premise is not uniqueness or preservation of compiled program behaviour; the selected compiler theorems do not expose that relation."
+    "non_comparability_reason": ""
   },
   "Solidity/Theorems.lean#rule_is_step": {
     "english_claim": "The strategy computes the premise of each rewrite rule.",
@@ -162,10 +162,10 @@
     "witness_status": "existing source witness",
     "witness": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Families.lean#rule_step_family",
     "witness_needed": "Existing source instantiation; not elaborated in this audit. Does not cover every possible premise or compiler path.",
-    "reference": "compcert;cakeml",
-    "comparison": "Compared with CompCert backward simulation / CakeML non-Fail pass semantics: this claim is explicitly about its intrinsic model or local rule, not an end-to-end compiler theorem. Typed premises alone are not a defect; an external source/target bridge is separate.",
+    "reference": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cexec.v#L2229",
+    "comparison": "Similar external theorem: Relational one-step result is covered by the executable step mechanism. Differences: CompCert returns a list of transitions and requires a possible external-world trace; local rule conclusion is equality to one deterministic step. CompCert additionally assumes abstract external-function and inline-assembly implementations satisfy the enclosing soundness/completeness contracts; local intrinsic rewriting has no such external implementations.",
     "priority": "none",
-    "non_comparability_reason": "This relates a Lean Rule premise to the local Stmt.step function, not a reference compiler output; no same strategy/rule consistency theorem was matched."
+    "non_comparability_reason": ""
   },
   "Solidity/Theorems.lean#rule_exists": {
     "english_claim": "Every typed statement has a rule at every index and modality.",
@@ -174,10 +174,10 @@
     "witness_status": "existing source witness",
     "witness": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Families.lean#every_rule_inhabited",
     "witness_needed": "Existing source instantiation; not elaborated in this audit. Does not cover every possible premise or compiler path.",
-    "reference": "compcert;cakeml",
-    "comparison": "Compared with CompCert backward simulation / CakeML non-Fail pass semantics: this claim is explicitly about its intrinsic model or local rule, not an end-to-end compiler theorem. Typed premises alone are not a defect; an external source/target bridge is separate.",
+    "reference": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cstrategy.v#L1397",
+    "comparison": "Similar external theorem: A suitable starting state admits a next semantic step (or has finished). Differences: CompCert assumes safe operational execution and permits final states; local intrinsic statement rewriting unconditionally produces a residual proposition at each rule index and modality, not a runtime transition.",
     "priority": "none",
-    "non_comparability_reason": "Total existence of a local typed-statement rewrite rule is not successful compilation or semantic preservation; no corresponding reference rule-coverage theorem was matched."
+    "non_comparability_reason": ""
   },
   "Solidity/Theorems.lean#rule_of_step": {
     "english_claim": "A strategy equality constructs a rewrite rule.",
@@ -186,10 +186,10 @@
     "witness_status": "existing source witness",
     "witness": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Families.lean#rule_from_step_family",
     "witness_needed": "Existing source instantiation; not elaborated in this audit. Does not cover every possible premise or compiler path.",
-    "reference": "compcert;cakeml",
-    "comparison": "Compared with CompCert backward simulation / CakeML non-Fail pass semantics: this claim is explicitly about its intrinsic model or local rule, not an end-to-end compiler theorem. Typed premises alone are not a defect; an external source/target bridge is separate.",
+    "reference": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cexec.v#L2163",
+    "comparison": "Similar external theorem: Executable one-step computation agrees with the relational semantics. Differences: Local deterministic statement rewriting versus nondeterministic C transitions, external-world crash alternative, and expression side effects; local theorem delegates to rule library. CompCert additionally assumes abstract external-function and inline-assembly implementations satisfy the enclosing soundness/completeness contracts; local intrinsic rewriting has no such external implementations.",
     "priority": "none",
-    "non_comparability_reason": "This constructs a local Rule from a Stmt.step equality; the reference compiler theorems do not state that constructor correspondence."
+    "non_comparability_reason": ""
   },
   "Solidity/Theorems.lean#solkey_rule_exists": {
     "english_claim": "On the explicit SolKey fragment the strategy rewrite is a SolKey taclet.",
@@ -198,10 +198,10 @@
     "witness_status": "existing source witness",
     "witness": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Calculus.lean#solkey_rule_application",
     "witness_needed": "Existing source instantiation; not elaborated in this audit. Does not cover every possible premise or compiler path.",
-    "reference": "compcert;cakeml",
-    "comparison": "Compared with CompCert backward simulation / CakeML non-Fail pass semantics: this claim is explicitly about its intrinsic model or local rule, not an end-to-end compiler theorem. Typed premises alone are not a defect; an external source/target bridge is separate.",
+    "reference": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cstrategy.v#L1397",
+    "comparison": "Similar external theorem: A suitable starting state admits a next semantic step (or has finished). Differences: CompCert assumes safe operational execution and permits final states; local restricted rewriting requires inSolkey and a step-equality witness and yields a residual proposition, not a runtime transition.",
     "priority": "none",
-    "non_comparability_reason": "Membership in the Lean Taclet relation on the inSolkey fragment is not a theorem about execution of upstream Java SolKey; no cross-implementation rule counterpart was established."
+    "non_comparability_reason": ""
   },
   "Solidity/Theorems.lean#solkey_rule_lt_calculus": {
     "english_claim": "Zero-unwind loop has a calculus rule but no SolKey taclet.",
@@ -213,7 +213,7 @@
     "reference": "compcert;cakeml",
     "comparison": "Compared with CompCert backward simulation / CakeML non-Fail pass semantics: this claim is explicitly about its intrinsic model or local rule, not an end-to-end compiler theorem. Typed premises alone are not a defect; an external source/target bridge is separate.",
     "priority": "none",
-    "non_comparability_reason": "This separates the two Lean rule relations using a zero-unwind loop; no external theorem with the same rule universes and witness was matched."
+    "non_comparability_reason": "The closest inspected compiler results embed one execution strategy into general C semantics. Neither exhibits a formula or rule derivable in one proof system and underivable in another; thus neither is a similar strict-separation witness. No such theorem was found in the bounded compiler/Solidity theorem catalog."
   },
   "Solidity/Theorems.lean#solkey_step_taclet": {
     "english_claim": "An admitted SolKey strategy step is a taclet.",
@@ -222,10 +222,10 @@
     "witness_status": "existing source witness",
     "witness": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Calculus.lean#solkey_admission_application",
     "witness_needed": "Existing source instantiation; not elaborated in this audit. Does not cover every possible premise or compiler path.",
-    "reference": "compcert;cakeml",
-    "comparison": "Compared with CompCert backward simulation / CakeML non-Fail pass semantics: this claim is explicitly about its intrinsic model or local rule, not an end-to-end compiler theorem. Typed premises alone are not a defect; an external source/target bridge is separate.",
+    "reference": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cstrategy.v#L1388",
+    "comparison": "Similar external theorem: A restricted stepping discipline embeds into the general semantic relation. Differences: CompCert relates strategy transitions to positive sequences of C steps; local theorem relates SolKey taclet rewriting to the calculus under its shape premise.",
     "priority": "none",
-    "non_comparability_reason": "Local SolKey-rule admission implies a Lean Taclet; the reference compiler theorems have no matching admission predicate or strategy relation."
+    "non_comparability_reason": ""
   },
   "Solidity/Theorems.lean#solkey_eq_calculus": {
     "english_claim": "On goals in the fragment SolKey and all-rule derivability coincide.",
@@ -237,7 +237,7 @@
     "reference": "compcert;cakeml",
     "comparison": "Compared with CompCert backward simulation / CakeML non-Fail pass semantics: this claim is explicitly about its intrinsic model or local rule, not an end-to-end compiler theorem. Typed premises alone are not a defect; an external source/target bridge is separate.",
     "priority": "none",
-    "non_comparability_reason": "Equivalence of two Lean derivability relations on inSolkey goals is not source-to-target semantic preservation; no external theorem with those two rule sets was matched."
+    "non_comparability_reason": "The inspected strategy simulation relates program behaviours in one direction; the WP/postcondition pair relates semantic predicates to verification conditions. None establishes equivalence of derivability in two proof calculi under a formula-fragment premise, so these are not a similar proof-system equivalence theorem in this bounded search."
   },
   "Solidity/Theorems.lean#solkey_lt_calculus": {
     "english_claim": "Some goal is derivable in the calculus but not by SolKey rules.",
@@ -249,7 +249,7 @@
     "reference": "compcert;cakeml",
     "comparison": "Compared with CompCert backward simulation / CakeML non-Fail pass semantics: this claim is explicitly about its intrinsic model or local rule, not an end-to-end compiler theorem. Typed premises alone are not a defect; an external source/target bridge is separate.",
     "priority": "none",
-    "non_comparability_reason": "This is an existential separation of the two Lean derivability relations, rather than an external compiler-correctness statement or finite runtime test."
+    "non_comparability_reason": "The closest inspected compiler results embed one execution strategy into general C semantics. Neither exhibits a formula or rule derivable in one proof system and underivable in another; thus neither is a similar strict-separation witness. No such theorem was found in the bounded compiler/Solidity theorem catalog."
   },
   "Solidity/Theorems.lean#soundness": {
     "english_claim": "Any derivation is valid under its hypothesis context in the typed model.",
@@ -258,10 +258,10 @@
     "witness_status": "existing source witness",
     "witness": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Calculus.lean#calculus_application",
     "witness_needed": "Existing source instantiation; not elaborated in this audit. Does not cover every possible premise or compiler path.",
-    "reference": "compcert;cakeml",
-    "comparison": "Compared with CompCert backward simulation / CakeML non-Fail pass semantics: this claim is explicitly about its intrinsic model or local rule, not an end-to-end compiler theorem. Typed premises alone are not a defect; an external source/target bridge is separate.",
+    "reference": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L830",
+    "comparison": "Similar external theorem: Verification evidence implies the semantic postcondition for an execution. Differences: The closest compiler candidate preserves specifications across compilation; the closer Solidity candidate assumes WP and an effect, whereas local theorems assume calculus derivability and quantify validity. Isabelle WP is partial correctness (NT allowed).",
     "priority": "none",
-    "non_comparability_reason": "Contextual dynamic-logic validity over the intrinsic typed model is not CompCert backward simulation or CakeML translation semantics; no same-logic soundness unit was matched."
+    "non_comparability_reason": ""
   },
   "Solidity/Theorems.lean#soundness'": {
     "english_claim": "A closed derivation proves a closed specification valid.",
@@ -270,10 +270,10 @@
     "witness_status": "existing source witness",
     "witness": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Calculus.lean#Main.soundness'",
     "witness_needed": "Existing source instantiation; not elaborated in this audit. Does not cover every possible premise or compiler path.",
-    "reference": "compcert;cakeml",
-    "comparison": "Compared with CompCert backward simulation / CakeML non-Fail pass semantics: this claim is explicitly about its intrinsic model or local rule, not an end-to-end compiler theorem. Typed premises alone are not a defect; an external source/target bridge is separate.",
+    "reference": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L830",
+    "comparison": "Similar external theorem: Verification evidence implies the semantic postcondition for an execution. Differences: The closest compiler candidate preserves specifications across compilation; the closer Solidity candidate assumes WP and an effect, whereas local theorems assume calculus derivability and quantify validity. Isabelle WP is partial correctness (NT allowed).",
     "priority": "none",
-    "non_comparability_reason": "Validity of a closed intrinsic specification from a closed derivation has no matched compiler endpoint with the same proof judgement and specification semantics."
+    "non_comparability_reason": ""
   },
   "Solidity/Theorems.lean#solkey_soundness": {
     "english_claim": "SolKey-only closed derivations are valid in the typed model.",
@@ -282,10 +282,10 @@
     "witness_status": "existing source witness",
     "witness": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Calculus.lean#solkey_application",
     "witness_needed": "Existing source instantiation; not elaborated in this audit. Does not cover every possible premise or compiler path.",
-    "reference": "compcert;cakeml",
-    "comparison": "Compared with CompCert backward simulation / CakeML non-Fail pass semantics: this claim is explicitly about its intrinsic model or local rule, not an end-to-end compiler theorem. Typed premises alone are not a defect; an external source/target bridge is separate.",
+    "reference": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L830",
+    "comparison": "Similar external theorem: Verification evidence implies the semantic postcondition for an execution. Differences: The closest compiler candidate preserves specifications across compilation; the closer Solidity candidate assumes WP and an effect, whereas local theorems assume calculus derivability and quantify validity. Isabelle WP is partial correctness (NT allowed).",
     "priority": "none",
-    "non_comparability_reason": "Validity of a SolKey-only Lean derivation is not certification of the upstream SolKey implementation; no external same-judgement soundness theorem was matched."
+    "non_comparability_reason": ""
   },
   "Solidity/Theorems.lean#callback_soundness": {
     "english_claim": "Callback-aware derivations imply validity for invariant-respecting environments.",
@@ -294,10 +294,10 @@
     "witness_status": "existing source witness",
     "witness": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Callbacks.lean#payment_headline",
     "witness_needed": "Existing source instantiation; not elaborated in this audit. Does not cover every possible premise or compiler path.",
-    "reference": "compcert;cakeml",
-    "comparison": "Compared with CompCert backward simulation / CakeML non-Fail pass semantics: this claim is explicitly about its intrinsic model or local rule, not an end-to-end compiler theorem. Typed premises alone are not a defect; an external source/target bridge is separate.",
+    "reference": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L824",
+    "comparison": "Similar external theorem: Verification obligations imply invariant properties of semantic outcomes. Differences: Local derivability includes callback/no-callback invariant regimes; Isabelle assumes a WP over an effect and does not encode those same callback policies. This compares the invariant-soundness layer, not callback feature coverage.",
     "priority": "none",
-    "non_comparability_reason": "This quantifies over invariant-respecting callback runs in the intrinsic model; the selected compiler endpoints do not have that callback policy or invariant judgement."
+    "non_comparability_reason": ""
   },
   "Solidity/Theorems.lean#noCallback_soundness": {
     "english_claim": "Derivations with payment callbacks disabled imply validity for that callback model.",
@@ -306,10 +306,10 @@
     "witness_status": "existing source witness",
     "witness": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Callbacks.lean#noCallback_payment_headline",
     "witness_needed": "Existing source instantiation; not elaborated in this audit. Does not cover every possible premise or compiler path.",
-    "reference": "compcert;cakeml",
-    "comparison": "Compared with CompCert backward simulation / CakeML non-Fail pass semantics: this claim is explicitly about its intrinsic model or local rule, not an end-to-end compiler theorem. Typed premises alone are not a defect; an external source/target bridge is separate.",
+    "reference": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L824",
+    "comparison": "Similar external theorem: Verification obligations imply invariant properties of semantic outcomes. Differences: Local derivability includes callback/no-callback invariant regimes; Isabelle assumes a WP over an effect and does not encode those same callback policies. This compares the invariant-soundness layer, not callback feature coverage.",
     "priority": "none",
-    "non_comparability_reason": "This proves validity for the payment-callback-disabled model; no reference theorem with the same payment policy and invariant-respecting environment was matched."
+    "non_comparability_reason": ""
   },
   "Solidity/Theorems.lean#noCallback_iff": {
     "english_claim": "If no callback-capable constructs remain, noCallback and deterministic validity coincide.",
@@ -321,7 +321,7 @@
     "reference": "compcert;cakeml",
     "comparison": "Compared with CompCert backward simulation / CakeML non-Fail pass semantics: this claim is explicitly about its intrinsic model or local rule, not an end-to-end compiler theorem. Typed premises alone are not a defect; an external source/target bridge is separate.",
     "priority": "none",
-    "non_comparability_reason": "This equates two intrinsic validity readings under a no-callback syntax predicate, rather than comparing source and compiled execution."
+    "non_comparability_reason": "The nearest inspected strategy and external-call verification theorems do not state that restricting callbacks leaves validity of a callback-free formula unchanged. Transfer WP handles an external operation, and inv_wp proves an outcome invariant; neither is the required validity equivalence. No similar proposition was found in the searched files."
   },
   "Solidity/Theorems.lean#cleanTail_holds": {
     "english_claim": "Clean-tail validity gives truth in each clean-tail typed state.",
@@ -333,7 +333,7 @@
     "reference": "compcert;cakeml",
     "comparison": "Compared with CompCert backward simulation / CakeML non-Fail pass semantics: this claim is explicitly about its intrinsic model or local rule, not an end-to-end compiler theorem. Typed premises alone are not a defect; an external source/target bridge is separate.",
     "priority": "none",
-    "non_comparability_reason": "This instantiates clean-tail validity in a clean-tail storage state; the selected reference compiler theorems do not express the same array-tail assumption and validity judgement."
+    "non_comparability_reason": "The inspected CompCert memory encoding and Solidity array-update typing theorems establish value encoding or well-typed writes, not validity of a universally quantified clean/zero array-tail formula under its heap-layout premises. No similar tail-invariant theorem was found in this bounded catalog."
   },
   "Solidity/Theorems.lean#symex_sound": {
     "english_claim": "Truth of the fuelled residual symbolic-execution formula implies truth of its input.",
@@ -342,10 +342,10 @@
     "witness_status": "existing source witness",
     "witness": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Calculus.lean#Main.symex_sound",
     "witness_needed": "Existing source instantiation; not elaborated in this audit. Does not cover every possible premise or compiler path.",
-    "reference": "compcert;cakeml",
-    "comparison": "Compared with CompCert backward simulation / CakeML non-Fail pass semantics: this claim is explicitly about its intrinsic model or local rule, not an end-to-end compiler theorem. Typed premises alone are not a defect; an external source/target bridge is separate.",
+    "reference": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L251",
+    "comparison": "Similar external theorem: A backwards verification condition is sufficient for the composed program's postcondition. Differences: Local theorem is fuel-indexed symbolic formula transformation; Isabelle's rule handles one monadic bind and separate exception postconditions.",
     "priority": "none",
-    "non_comparability_reason": "This proves a residual-formula implication at supplied symbolic-execution fuel, not successful translation or complete solving; no same residual strategy and logic counterpart was matched."
+    "non_comparability_reason": ""
   },
   "Solidity/Theorems.lean#compiler_correct": {
     "english_claim": "Compiled-fragment runs agree modulo panic/revert, payment refusal and divergence/fault cases.",
@@ -357,7 +357,7 @@
     "reference": "compcert;cakeml",
     "comparison": "CompCert success-conditioned backward simulation and CakeML non-Fail semantic equality do not license an additional failure on an otherwise defined paying source execution. Target here is an abstract machine, not deployed bytecode.",
     "priority": "high",
-    "non_comparability_reason": null
+    "non_comparability_reason": "A similar public compiler correctness theorem is already measured against CompCert and CakeML in calibration.json; no second null measurement is emitted."
   },
   "Solidity/Theorems.lean#compiler_net": {
     "english_claim": "Successful target execution has a successful source run and preserves external-account net loss.",
@@ -366,10 +366,10 @@
     "witness_status": "existing source witness",
     "witness": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Families.lean#net_success",
     "witness_needed": "Existing source instantiation; not elaborated in this audit. Does not cover every possible premise or compiler path.",
-    "reference": "compcert;cakeml",
-    "comparison": "Conditional success-only ledger theorem; target failure is outside its premise. Not an unconditional behavioural-refinement claim. No bytecode/gas/hash bridge.",
+    "reference": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/driver/Complements.v#L31",
+    "comparison": "Similar external theorem: A target execution has a corresponding source execution and a preserved observable. Differences: Local result is success-conditional and compares net account balances only; CompCert covers whole program behaviours with behavior_improves, including source undefined behaviour.",
     "priority": "none",
-    "non_comparability_reason": "This is a success-conditional ledger/net-loss observation corollary. The reference endpoints assert general compilation preservation, not the same account-loss observation under a target-success premise."
+    "non_comparability_reason": ""
   },
   "Solidity/Theorems.lean#compiler_checked": {
     "english_claim": "Any accepted compiler certificate satisfying Input yields its branch-specific Agrees relation.",
@@ -381,7 +381,7 @@
     "reference": "compcert;cakeml",
     "comparison": "CompCert success-conditioned backward simulation and CakeML non-Fail semantic equality do not license an additional failure on an otherwise defined paying source execution. Target here is an abstract machine, not deployed bytecode.",
     "priority": "high",
-    "non_comparability_reason": null
+    "non_comparability_reason": "A similar public compiler correctness theorem is already measured against CompCert and CakeML in calibration.json; no second null measurement is emitted."
   },
   "Solidity/Calculus/Closers.lean#_root_.Solidity.Modality.afterRunTR_not_panic": {
     "english_claim": "No modality accepts a panicking run.",
@@ -393,7 +393,7 @@
     "reference": "compcert;cakeml",
     "comparison": "Local semantic exclusion lemma, not compiler correctness. Both reference systems also separate failure from successful behaviours; no meaningful effort ratio to an end-to-end theorem.",
     "priority": "none",
-    "non_comparability_reason": "No modality accepts a panicking run. This is an intentional contradiction eliminator for the intrinsic afterRunTR reading, not a compiler endpoint or a finite runtime vector; no same-modality exclusion lemma was matched."
+    "non_comparability_reason": "The closest compiler step-soundness/progress results admit stuck/crash alternatives or assume safety. They do not eliminate a contradictory symbolic modality premise by deriving False as these closers do. No similar contradiction-elimination theorem was found in the searched catalog; a general progress theorem is not this proof unit."
   },
   "Solidity/Calculus/Closers.lean#_root_.Solidity.Modality.afterRunTR_diamond_fail": {
     "english_claim": "Diamond validity cannot coexist with a failed run.",
@@ -405,7 +405,7 @@
     "reference": "compcert;cakeml",
     "comparison": "Local semantic exclusion lemma, not compiler correctness. Both reference systems also separate failure from successful behaviours; no meaningful effort ratio to an end-to-end theorem.",
     "priority": "none",
-    "non_comparability_reason": "Diamond validity cannot coexist with a failed run. This is an intentional contradiction eliminator for the intrinsic afterRunTR reading, not a compiler endpoint or a finite runtime vector; no same-modality exclusion lemma was matched."
+    "non_comparability_reason": "The closest compiler step-soundness/progress results admit stuck/crash alternatives or assume safety. They do not eliminate a contradictory symbolic modality premise by deriving False as these closers do. No similar contradiction-elimination theorem was found in the searched catalog; a general progress theorem is not this proof unit."
   },
   "Solidity/Source/SemanticsExamples.lean#add_overflow_checked": {
     "english_claim": "For uint8 x=255, checked x+1 returns arithmetic-panic revert data.",
@@ -414,10 +414,10 @@
     "witness_status": "existing concrete source instance",
     "witness": "Solidity/Source/SemanticsExamples.lean#add_overflow_checked",
     "witness_needed": "No hypotheses (closed concrete instance).",
-    "reference": "cakeml;compcert",
-    "comparison": "A concrete evaluator regression is narrower than CakeML pass semantic equality or CompCert backward simulation, but matches its own test claim. No compiler-correctness verdict follows.",
+    "reference": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L75",
+    "comparison": "Similar external theorem: Checked unsigned addition can succeed only within its representable range. Differences: Local closed uint8 evaluation proves a particular overflow panic payload; Isabelle's generic uint256 success inversion implies rejection out of range but does not prove that payload or exact evaluator outcome.",
     "priority": "none",
-    "non_comparability_reason": null
+    "non_comparability_reason": ""
   },
   "Solidity/Source/SemanticsExamples.lean#add_overflow_unchecked": {
     "english_claim": "For uint8 x=255, unchecked x+1 returns zero.",
@@ -426,10 +426,10 @@
     "witness_status": "existing concrete source instance",
     "witness": "Solidity/Source/SemanticsExamples.lean#add_overflow_unchecked",
     "witness_needed": "No hypotheses (closed concrete instance).",
-    "reference": "cakeml;compcert",
-    "comparison": "A concrete evaluator regression is narrower than CakeML pass semantic equality or CompCert backward simulation, but matches its own test claim. No compiler-correctness verdict follows.",
+    "reference": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/lib/Integers.v#L701",
+    "comparison": "Similar external theorem: Unsigned unchecked addition wraps modulo the word width. Differences: Local uint8 fixed input result versus a generic word arithmetic identity; CompCert is not a Solidity expression evaluator.",
     "priority": "none",
-    "non_comparability_reason": "For uint8 x=255, unchecked x+1 returns zero. No reference test with this behaviour, fixed input and observation tuple was matched in the bounded arithmetic/control sample; the generic compiler-preservation statements are not finite-test denominators."
+    "non_comparability_reason": ""
   },
   "Solidity/Source/SemanticsExamples.lean#div_by_zero": {
     "english_claim": "For the fixed unsigned division example, dividing by zero still returns division-by-zero panic data with checked arithmetic disabled.",
@@ -441,7 +441,7 @@
     "reference": "cakeml;compcert",
     "comparison": "A concrete evaluator regression is narrower than CakeML pass semantic equality or CompCert backward simulation, but matches its own test claim. No compiler-correctness verdict follows.",
     "priority": "none",
-    "non_comparability_reason": null
+    "non_comparability_reason": "The closest inspected word-division identity and generic assertion/exception execution theorem do not specify Solidity's unchecked zero-divisor panic. A same-operation solc finite input/output comparison already exists in calibration.json; no similar compiler theorem for the panic payload was found in this bounded catalog."
   },
   "Solidity/Source/SemanticsExamples.lean#order_legacy": {
     "english_claim": "The fixed ++a+a example from a=1 returns 3 under the legacy evaluation schedule.",
@@ -453,7 +453,7 @@
     "reference": "cakeml;compcert",
     "comparison": "A concrete evaluator regression is narrower than CakeML pass semantic equality or CompCert backward simulation, but matches its own test claim. No compiler-correctness verdict follows.",
     "priority": "none",
-    "non_comparability_reason": "The fixed ++a+a example from a=1 returns 3 under the legacy evaluation schedule. No reference test with this behaviour, fixed input and observation tuple was matched in the bounded arithmetic/control sample; the generic compiler-preservation statements are not finite-test denominators."
+    "non_comparability_reason": "The closest compiler strategy simulations and monadic sequencing theorem specify or relate one evaluation discipline. They do not compare two Solidity compiler profiles on the same side-effecting expression or constructor-order fixture, and do not derive this differing numeric result. No similar profile-difference proposition was found in the searched catalog."
   },
   "Solidity/Source/SemanticsExamples.lean#order_viaIR": {
     "english_claim": "The fixed ++a+a example from a=1 returns 4 under the viaIR evaluation schedule.",
@@ -465,7 +465,7 @@
     "reference": "cakeml;compcert",
     "comparison": "A concrete evaluator regression is narrower than CakeML pass semantic equality or CompCert backward simulation, but matches its own test claim. No compiler-correctness verdict follows.",
     "priority": "none",
-    "non_comparability_reason": "The fixed ++a+a example from a=1 returns 4 under the viaIR evaluation schedule. No reference test with this behaviour, fixed input and observation tuple was matched in the bounded arithmetic/control sample; the generic compiler-preservation statements are not finite-test denominators."
+    "non_comparability_reason": "The closest compiler strategy simulations and monadic sequencing theorem specify or relate one evaluation discipline. They do not compare two Solidity compiler profiles on the same side-effecting expression or constructor-order fixture, and do not derive this differing numeric result. No similar profile-difference proposition was found in the searched catalog."
   },
   "Solidity/Source/SemanticsExamples.lean#order_differs": {
     "english_claim": "The legacy run of the fixed ++a+a example does not return 4.",
@@ -477,7 +477,7 @@
     "reference": "cakeml;compcert",
     "comparison": "A concrete evaluator regression is narrower than CakeML pass semantic equality or CompCert backward simulation, but matches its own test claim. No compiler-correctness verdict follows.",
     "priority": "none",
-    "non_comparability_reason": "The legacy run of the fixed ++a+a example does not return 4. No reference test with this behaviour, fixed input and observation tuple was matched in the bounded arithmetic/control sample; the generic compiler-preservation statements are not finite-test denominators."
+    "non_comparability_reason": "The closest compiler strategy simulations and monadic sequencing theorem specify or relate one evaluation discipline. They do not compare two Solidity compiler profiles on the same side-effecting expression or constructor-order fixture, and do not derive this differing numeric result. No similar profile-difference proposition was found in the searched catalog."
   },
   "Solidity/Source/SemanticsExamples.lean#short_circuit": {
     "english_claim": "The fixed false-and-increment expression followed by reading a returns 1 from initial a=1.",
@@ -486,10 +486,10 @@
     "witness_status": "existing concrete source instance",
     "witness": "Solidity/Source/SemanticsExamples.lean#short_circuit",
     "witness_needed": "No hypotheses (closed concrete instance).",
-    "reference": "cakeml;compcert",
-    "comparison": "A concrete evaluator regression is narrower than CakeML pass semantic equality or CompCert backward simulation, but matches its own test claim. No compiler-correctness verdict follows.",
+    "reference": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/Solidity.thy#L468",
+    "comparison": "Similar external theorem: A false condition selects one branch without executing the other branch's effects. Differences: Local conjunction with a state-changing right operand versus a generic false conditional in Isabelle's monadic evaluator; not a theorem equating complete evaluators.",
     "priority": "none",
-    "non_comparability_reason": null
+    "non_comparability_reason": ""
   },
   "Solidity/Source/SemanticsExamples.lean#hex_literal_bytes": {
     "english_claim": "The fixed bytes2 hexadecimal literal evaluates to the byte list [0x12, 0x34].",
@@ -501,7 +501,7 @@
     "reference": "cakeml;compcert",
     "comparison": "A concrete evaluator regression is narrower than CakeML pass semantic equality or CompCert backward simulation, but matches its own test claim. No compiler-correctness verdict follows.",
     "priority": "none",
-    "non_comparability_reason": "The fixed bytes2 hexadecimal literal evaluates to the byte list [0x12, 0x34]. No reference test with this behaviour, fixed input and observation tuple was matched in the bounded arithmetic/control sample; the generic compiler-preservation statements are not finite-test denominators."
+    "non_comparability_reason": "The inspected compiler byte encoding/decoding round-trip theorems map integer or machine-value representations to memory chunks. This row instead evaluates a Solidity hex-string literal to a fixedBytes value without an integer-memory round trip. No similar literal-construction theorem was found in the bounded catalog."
   },
   "Solidity/Source/SemanticsExamples.lean#modifier_twice_legacy": {
     "english_claim": "The fixed repeated-placeholder modifier call with twice=true returns 2 under legacy.",
@@ -513,7 +513,7 @@
     "reference": "cakeml;compcert",
     "comparison": "A concrete evaluator regression is narrower than CakeML pass semantic equality or CompCert backward simulation, but matches its own test claim. No compiler-correctness verdict follows.",
     "priority": "none",
-    "non_comparability_reason": "The fixed repeated-placeholder modifier call with twice=true returns 2 under legacy. No reference test with this behaviour, fixed input and observation tuple was matched in the bounded arithmetic/control sample; the generic compiler-preservation statements are not finite-test denominators."
+    "non_comparability_reason": "The closest inspected sequencing/strategy theorems do not describe a Solidity modifier placeholder used once or twice, nor legacy/viaIR continuation handling. Generic bind execution alone cannot state whether that placeholder reruns the body. No similar modifier-semantics theorem was found in the bounded compiler/Solidity catalog."
   },
   "Solidity/Source/SemanticsExamples.lean#modifier_twice_viaIR": {
     "english_claim": "The fixed repeated-placeholder modifier call with twice=true returns 1 under viaIR.",
@@ -525,7 +525,7 @@
     "reference": "cakeml;compcert",
     "comparison": "A concrete evaluator regression is narrower than CakeML pass semantic equality or CompCert backward simulation, but matches its own test claim. No compiler-correctness verdict follows.",
     "priority": "none",
-    "non_comparability_reason": "The fixed repeated-placeholder modifier call with twice=true returns 1 under viaIR. No reference test with this behaviour, fixed input and observation tuple was matched in the bounded arithmetic/control sample; the generic compiler-preservation statements are not finite-test denominators."
+    "non_comparability_reason": "The closest inspected sequencing/strategy theorems do not describe a Solidity modifier placeholder used once or twice, nor legacy/viaIR continuation handling. Generic bind execution alone cannot state whether that placeholder reruns the body. No similar modifier-semantics theorem was found in the bounded compiler/Solidity catalog."
   },
   "Solidity/Source/SemanticsExamples.lean#modifier_once": {
     "english_claim": "The fixed modifier call with twice=false returns 1 under both legacy and viaIR.",
@@ -537,7 +537,7 @@
     "reference": "cakeml;compcert",
     "comparison": "A concrete evaluator regression is narrower than CakeML pass semantic equality or CompCert backward simulation, but matches its own test claim. No compiler-correctness verdict follows.",
     "priority": "none",
-    "non_comparability_reason": "The fixed modifier call with twice=false returns 1 under both legacy and viaIR. No reference test with this behaviour, fixed input and observation tuple was matched in the bounded arithmetic/control sample; the generic compiler-preservation statements are not finite-test denominators."
+    "non_comparability_reason": "The closest inspected sequencing/strategy theorems do not describe a Solidity modifier placeholder used once or twice, nor legacy/viaIR continuation handling. Generic bind execution alone cannot state whether that placeholder reruns the body. No similar modifier-semantics theorem was found in the bounded compiler/Solidity catalog."
   },
   "Solidity/Source/SemanticsExamples.lean#dX_ty": {
     "english_claim": "The fixed declaration x has uint256 variable type in environment EB.",
@@ -546,10 +546,10 @@
     "witness_status": "existing concrete source instance",
     "witness": "Solidity/Source/SemanticsExamples.lean#dX_ty",
     "witness_needed": "No hypotheses (closed concrete instance).",
-    "reference": "cakeml;compcert",
-    "comparison": "Fixed source-environment metadata observation; the selected compiler-preservation endpoints and runtime vector tests are different units.",
+    "reference": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Ctyping.v#L1095",
+    "comparison": "Similar external theorem: Variable metadata/lookup supplies the variable's typing evidence. Differences: Local fixed declaration lookup returns a uint type; CompCert generically converts successful variable lookup into wt_expr. These are analogous lookup/typing interfaces, not equal algorithms.",
     "priority": "none",
-    "non_comparability_reason": "The fixed declaration x has uint256 variable type in environment EB. No reference fixture with the same declaration/environment metadata lookup was matched; compiler preservation and runtime arithmetic/control vectors are different units."
+    "non_comparability_reason": ""
   },
   "Solidity/Source/SemanticsExamples.lean#dT_ty": {
     "english_claim": "The fixed transient declaration t has uint256 variable type in environment EB.",
@@ -558,10 +558,10 @@
     "witness_status": "existing concrete source instance",
     "witness": "Solidity/Source/SemanticsExamples.lean#dT_ty",
     "witness_needed": "No hypotheses (closed concrete instance).",
-    "reference": "cakeml;compcert",
-    "comparison": "Fixed source-environment metadata observation; the selected compiler-preservation endpoints and runtime vector tests are different units.",
+    "reference": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Ctyping.v#L1095",
+    "comparison": "Similar external theorem: Variable metadata/lookup supplies the variable's typing evidence. Differences: Local fixed declaration lookup returns a uint type; CompCert generically converts successful variable lookup into wt_expr. These are analogous lookup/typing interfaces, not equal algorithms.",
     "priority": "none",
-    "non_comparability_reason": "The fixed transient declaration t has uint256 variable type in environment EB. No reference fixture with the same declaration/environment metadata lookup was matched; compiler preservation and runtime arithmetic/control vectors are different units."
+    "non_comparability_reason": ""
   },
   "Solidity/Source/SemanticsExamples.lean#dPing_sig": {
     "english_claim": "The fixed ping declaration has no arguments and no results in environment EB.",
@@ -570,10 +570,10 @@
     "witness_status": "existing concrete source instance",
     "witness": "Solidity/Source/SemanticsExamples.lean#dPing_sig",
     "witness_needed": "No hypotheses (closed concrete instance).",
-    "reference": "cakeml;compcert",
-    "comparison": "Fixed source-environment metadata observation; the selected compiler-preservation endpoints and runtime vector tests are different units.",
+    "reference": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Ctyping.v#L1243",
+    "comparison": "Similar external theorem: Call-signature typing evidence supports an accepted function application. Differences: Local fixed zero-argument/zero-result signature lookup versus CompCert generic call well-typedness, with additional well-typed function/argument premises.",
     "priority": "none",
-    "non_comparability_reason": "The fixed ping declaration has no arguments and no results in environment EB. No reference fixture with the same declaration/environment metadata lookup was matched; compiler preservation and runtime arithmetic/control vectors are different units."
+    "non_comparability_reason": ""
   },
   "Solidity/Source/SemanticsExamples.lean#lit_ok": {
     "english_claim": "For arbitrary name relations B/M and natural k fitting uint256, implicit conversion of the rational literal k to uint256 is accepted.",
@@ -582,10 +582,10 @@
     "witness_status": "existing source witness",
     "witness": "Solidity/Source/SemanticsExamples.lean#litAB",
     "witness_needed": "Literal conversion is used by lit and litAB with a FitsInt proof; k=0 is a satisfiable example.",
-    "reference": "cakeml;compcert",
-    "comparison": "Local type-conversion acceptance under a range premise. CompCert/CakeML compiler semantic preservation is a different claim; this lemma alone gives no evaluation or source-to-target agreement.",
+    "reference": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Ctyping.v#L1115",
+    "comparison": "Similar external theorem: An integer literal is accepted at an appropriate integer type. Differences: Local rational-to-uint implicit conversion requires FitsInt and fixed uint metadata; CompCert starts from a bounded integer representation and proves expression well-typedness.",
     "priority": "none",
-    "non_comparability_reason": "This universally quantifies literal conversion acceptance over name relations and a fitting uint256 literal. The selected compiler endpoints and fixed runtime vectors do not supply the same range-conditional conversion lemma."
+    "non_comparability_reason": ""
   },
   "Solidity/Source/SemanticsExamples.lean#revert_rolls_back": {
     "english_claim": "The fixed reverting poke transaction returns revert and restores x=3 rather than retaining x=1.",
@@ -594,10 +594,10 @@
     "witness_status": "existing concrete source instance",
     "witness": "Solidity/Source/SemanticsExamples.lean#revert_rolls_back",
     "witness_needed": "No hypotheses (closed concrete instance).",
-    "reference": "cakeml;compcert",
-    "comparison": "A concrete evaluator regression is narrower than CakeML pass semantic equality or CompCert backward simulation, but matches its own test claim. No compiler-correctness verdict follows.",
+    "reference": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/Solidity.thy#L796",
+    "comparison": "Similar external theorem: An exceptional execution preserves predicates of the pre-call state by restoring it. Differences: Local closed transactions include storage, logs or transient-storage observations; Isabelle's exc wrapper restores its entire modeled state but has no EVM transient-storage feature or matching event/panic payload claim. Only the rollback principle is shared.",
     "priority": "none",
-    "non_comparability_reason": "The fixed reverting poke transaction returns revert and restores x=3 rather than retaining x=1. No reference test with this behaviour, fixed input and observation tuple was matched in the bounded arithmetic/control sample; the generic compiler-preservation statements are not finite-test denominators."
+    "non_comparability_reason": ""
   },
   "Solidity/Source/SemanticsExamples.lean#revert_rolls_back_transient": {
     "english_claim": "Before transaction-end clearing, the fixed reverted call restores transient t=4 rather than retaining t=2.",
@@ -606,10 +606,10 @@
     "witness_status": "existing concrete source instance",
     "witness": "Solidity/Source/SemanticsExamples.lean#revert_rolls_back_transient",
     "witness_needed": "No hypotheses (closed concrete instance).",
-    "reference": "cakeml;compcert",
-    "comparison": "A concrete evaluator regression is narrower than CakeML pass semantic equality or CompCert backward simulation, but matches its own test claim. No compiler-correctness verdict follows.",
+    "reference": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/Solidity.thy#L796",
+    "comparison": "Similar external theorem: An exceptional execution preserves predicates of the pre-call state by restoring it. Differences: Local closed transactions include storage, logs or transient-storage observations; Isabelle's exc wrapper restores its entire modeled state but has no EVM transient-storage feature or matching event/panic payload claim. Only the rollback principle is shared.",
     "priority": "none",
-    "non_comparability_reason": "Before transaction-end clearing, the fixed reverted call restores transient t=4 rather than retaining t=2. No reference test with this behaviour, fixed input and observation tuple was matched in the bounded arithmetic/control sample; the generic compiler-preservation statements are not finite-test denominators."
+    "non_comparability_reason": ""
   },
   "Solidity/Source/SemanticsExamples.lean#commit_keeps_storage": {
     "english_claim": "The fixed successful g transaction returns encoded 12 and retains x=5.",
@@ -618,10 +618,10 @@
     "witness_status": "existing concrete source instance",
     "witness": "Solidity/Source/SemanticsExamples.lean#commit_keeps_storage",
     "witness_needed": "No hypotheses (closed concrete instance).",
-    "reference": "cakeml;compcert",
-    "comparison": "A concrete evaluator regression is narrower than CakeML pass semantic equality or CompCert backward simulation, but matches its own test claim. No compiler-correctness verdict follows.",
+    "reference": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy#L163",
+    "comparison": "Similar external theorem: A successful storage write is observed when that location is read. Differences: Local full transaction also checks a return value and committed storage; Isabelle proves one generic storage update/read identity in the Contract locale.",
     "priority": "none",
-    "non_comparability_reason": "The fixed successful g transaction returns encoded 12 and retains x=5. No reference test with this behaviour, fixed input and observation tuple was matched in the bounded arithmetic/control sample; the generic compiler-preservation statements are not finite-test denominators."
+    "non_comparability_reason": ""
   },
   "Solidity/Source/SemanticsExamples.lean#transient_cleared": {
     "english_claim": "After the fixed successful g transaction, transient t is zero.",
@@ -633,7 +633,7 @@
     "reference": "cakeml;compcert",
     "comparison": "A concrete evaluator regression is narrower than CakeML pass semantic equality or CompCert backward simulation, but matches its own test claim. No compiler-correctness verdict follows.",
     "priority": "none",
-    "non_comparability_reason": "After the fixed successful g transaction, transient t is zero. No reference test with this behaviour, fixed input and observation tuple was matched in the bounded arithmetic/control sample; the generic compiler-preservation statements are not finite-test denominators."
+    "non_comparability_reason": "The closest memory and rollback theorems describe encoding or restoration after an exception. Neither states that EVM transient storage is cleared at successful transaction end; the searched Isabelle Solidity state does not model that transient-storage domain. No similar lifecycle theorem was found in this bounded search."
   },
   "Solidity/Source/SemanticsExamples.lean#reentrant_callback": {
     "english_claim": "The fixed reenter-once strategy leaves x=4, returns success, and records the specified call/callback/answer/transaction event sequence.",
@@ -645,7 +645,7 @@
     "reference": "cakeml;compcert",
     "comparison": "A concrete evaluator regression is narrower than CakeML pass semantic equality or CompCert backward simulation, but matches its own test claim. No compiler-correctness verdict follows.",
     "priority": "none",
-    "non_comparability_reason": "The fixed reenter-once strategy leaves x=4, returns success, and records the specified call/callback/answer/transaction event sequence. No reference test with this behaviour, fixed input and observation tuple was matched in the bounded arithmetic/control sample; the generic compiler-preservation statements are not finite-test denominators."
+    "non_comparability_reason": "The closest inspected compiler external-step and Solidity transfer/invariant WP theorems permit generic external effects. They do not specify this callback trace or static-call refusal of a state write/value transfer, nor its exact result. No similar EVM callback/static-policy proposition was found in the searched theorem catalog."
   },
   "Solidity/Source/SemanticsExamples.lean#no_callback": {
     "english_claim": "The fixed answer-only strategy for callOut leaves x=3.",
@@ -657,7 +657,7 @@
     "reference": "cakeml;compcert",
     "comparison": "A concrete evaluator regression is narrower than CakeML pass semantic equality or CompCert backward simulation, but matches its own test claim. No compiler-correctness verdict follows.",
     "priority": "none",
-    "non_comparability_reason": "The fixed answer-only strategy for callOut leaves x=3. No reference test with this behaviour, fixed input and observation tuple was matched in the bounded arithmetic/control sample; the generic compiler-preservation statements are not finite-test denominators."
+    "non_comparability_reason": "The closest inspected compiler external-step and Solidity transfer/invariant WP theorems permit generic external effects. They do not specify this callback trace or static-call refusal of a state write/value transfer, nor its exact result. No similar EVM callback/static-policy proposition was found in the searched theorem catalog."
   },
   "Solidity/Source/SemanticsExamples.lean#outside_revert_rolls_back": {
     "english_claim": "The fixed outside call reverting with data [7] undoes callback storage changes, leaving x=3 and four events.",
@@ -666,10 +666,10 @@
     "witness_status": "existing concrete source instance",
     "witness": "Solidity/Source/SemanticsExamples.lean#outside_revert_rolls_back",
     "witness_needed": "No hypotheses (closed concrete instance).",
-    "reference": "cakeml;compcert",
-    "comparison": "A concrete evaluator regression is narrower than CakeML pass semantic equality or CompCert backward simulation, but matches its own test claim. No compiler-correctness verdict follows.",
+    "reference": "https://github.com/isabelle-prover/mirror-afp-devel/blob/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/Solidity.thy#L796",
+    "comparison": "Similar external theorem: An exceptional execution preserves predicates of the pre-call state by restoring it. Differences: Local closed transactions include storage, logs or transient-storage observations; Isabelle's exc wrapper restores its entire modeled state but has no EVM transient-storage feature or matching event/panic payload claim. Only the rollback principle is shared.",
     "priority": "none",
-    "non_comparability_reason": "The fixed outside call reverting with data [7] undoes callback storage changes, leaving x=3 and four events. No reference test with this behaviour, fixed input and observation tuple was matched in the bounded arithmetic/control sample; the generic compiler-preservation statements are not finite-test denominators."
+    "non_comparability_reason": ""
   },
   "Solidity/Source/SemanticsExamples.lean#static_callback_refused": {
     "english_claim": "In the fixed static-call scenario, x remains 3 and a callback-reverted event is recorded.",
@@ -681,7 +681,7 @@
     "reference": "cakeml;compcert",
     "comparison": "A concrete evaluator regression is narrower than CakeML pass semantic equality or CompCert backward simulation, but matches its own test claim. No compiler-correctness verdict follows.",
     "priority": "none",
-    "non_comparability_reason": "In the fixed static-call scenario, x remains 3 and a callback-reverted event is recorded. No reference test with this behaviour, fixed input and observation tuple was matched in the bounded arithmetic/control sample; the generic compiler-preservation statements are not finite-test denominators."
+    "non_comparability_reason": "The closest inspected compiler external-step and Solidity transfer/invariant WP theorems permit generic external effects. They do not specify this callback trace or static-call refusal of a state write/value transfer, nor its exact result. No similar EVM callback/static-policy proposition was found in the searched theorem catalog."
   },
   "Solidity/Source/SemanticsExamples.lean#static_value_call_halts": {
     "english_claim": "The fixed value call from a static frame halts that frame; its nonstatic unfunded counterpart returns a call-level revert.",
@@ -693,7 +693,7 @@
     "reference": "cakeml;compcert",
     "comparison": "A concrete evaluator regression is narrower than CakeML pass semantic equality or CompCert backward simulation, but matches its own test claim. No compiler-correctness verdict follows.",
     "priority": "none",
-    "non_comparability_reason": "The fixed value call from a static frame halts that frame; its nonstatic unfunded counterpart returns a call-level revert. No reference test with this behaviour, fixed input and observation tuple was matched in the bounded arithmetic/control sample; the generic compiler-preservation statements are not finite-test denominators."
+    "non_comparability_reason": "The closest inspected compiler external-step and Solidity transfer/invariant WP theorems permit generic external effects. They do not specify this callback trace or static-call refusal of a state write/value transfer, nor its exact result. No similar EVM callback/static-policy proposition was found in the searched theorem catalog."
   },
   "Solidity/Source/SemanticsExamples.lean#dA_ty": {
     "english_claim": "The fixed inherited declaration a has uint256 variable type in environment EAB.",
@@ -702,10 +702,10 @@
     "witness_status": "existing concrete source instance",
     "witness": "Solidity/Source/SemanticsExamples.lean#dA_ty",
     "witness_needed": "No hypotheses (closed concrete instance).",
-    "reference": "cakeml;compcert",
-    "comparison": "Fixed source-environment metadata observation; the selected compiler-preservation endpoints and runtime vector tests are different units.",
+    "reference": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Ctyping.v#L1095",
+    "comparison": "Similar external theorem: Variable metadata/lookup supplies the variable's typing evidence. Differences: Local fixed declaration lookup returns a uint type; CompCert generically converts successful variable lookup into wt_expr. These are analogous lookup/typing interfaces, not equal algorithms.",
     "priority": "none",
-    "non_comparability_reason": "The fixed inherited declaration a has uint256 variable type in environment EAB. No reference fixture with the same declaration/environment metadata lookup was matched; compiler preservation and runtime arithmetic/control vectors are different units."
+    "non_comparability_reason": ""
   },
   "Solidity/Source/SemanticsExamples.lean#dB_ty": {
     "english_claim": "The fixed declaration b has uint256 variable type in environment EAB.",
@@ -714,10 +714,10 @@
     "witness_status": "existing concrete source instance",
     "witness": "Solidity/Source/SemanticsExamples.lean#dB_ty",
     "witness_needed": "No hypotheses (closed concrete instance).",
-    "reference": "cakeml;compcert",
-    "comparison": "Fixed source-environment metadata observation; the selected compiler-preservation endpoints and runtime vector tests are different units.",
+    "reference": "https://github.com/AbsInt/CompCert/blob/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Ctyping.v#L1095",
+    "comparison": "Similar external theorem: Variable metadata/lookup supplies the variable's typing evidence. Differences: Local fixed declaration lookup returns a uint type; CompCert generically converts successful variable lookup into wt_expr. These are analogous lookup/typing interfaces, not equal algorithms.",
     "priority": "none",
-    "non_comparability_reason": "The fixed declaration b has uint256 variable type in environment EAB. No reference fixture with the same declaration/environment metadata lookup was matched; compiler preservation and runtime arithmetic/control vectors are different units."
+    "non_comparability_reason": ""
   },
   "Solidity/Source/SemanticsExamples.lean#ctor_order_legacy": {
     "english_claim": "The fixed inheritance/deployment example observes b=1 under legacy constructor ordering.",
@@ -729,7 +729,7 @@
     "reference": "cakeml;compcert",
     "comparison": "A concrete evaluator regression is narrower than CakeML pass semantic equality or CompCert backward simulation, but matches its own test claim. No compiler-correctness verdict follows.",
     "priority": "none",
-    "non_comparability_reason": "The fixed inheritance/deployment example observes b=1 under legacy constructor ordering. No reference test with this behaviour, fixed input and observation tuple was matched in the bounded arithmetic/control sample; the generic compiler-preservation statements are not finite-test denominators."
+    "non_comparability_reason": "The closest compiler strategy simulations and monadic sequencing theorem specify or relate one evaluation discipline. They do not compare two Solidity compiler profiles on the same side-effecting expression or constructor-order fixture, and do not derive this differing numeric result. No similar profile-difference proposition was found in the searched catalog."
   },
   "Solidity/Source/SemanticsExamples.lean#ctor_order_viaIR": {
     "english_claim": "The fixed inheritance/deployment example observes b=2 under viaIR constructor ordering.",
@@ -741,7 +741,7 @@
     "reference": "cakeml;compcert",
     "comparison": "A concrete evaluator regression is narrower than CakeML pass semantic equality or CompCert backward simulation, but matches its own test claim. No compiler-correctness verdict follows.",
     "priority": "none",
-    "non_comparability_reason": "The fixed inheritance/deployment example observes b=2 under viaIR constructor ordering. No reference test with this behaviour, fixed input and observation tuple was matched in the bounded arithmetic/control sample; the generic compiler-preservation statements are not finite-test denominators."
+    "non_comparability_reason": "The closest compiler strategy simulations and monadic sequencing theorem specify or relate one evaluation discipline. They do not compare two Solidity compiler profiles on the same side-effecting expression or constructor-order fixture, and do not derive this differing numeric result. No similar profile-difference proposition was found in the searched catalog."
   },
   "Solidity/Source/SemanticsExamples.lean#horizon_stable": {
     "english_claim": "The fixed g transaction has the same observed outcome at horizons 20 and 40.",
@@ -813,6 +813,6 @@
     "reference": "compcert;cakeml",
     "comparison": "Presentation machinery has no semantic-preservation counterpart; no strength or scale inference.",
     "priority": "none",
-    "non_comparability_reason": "unexpandValid is a local definition or printer for pretty-printing intrinsic validity in scoped notation, not an independent semantic-preservation theorem. None of the selected compiler proof endpoints or runtime vectors is the same presentation unit, so there is no like-for-like size denominator."
+    "non_comparability_reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row."
   }
 }
