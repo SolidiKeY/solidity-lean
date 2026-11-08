@@ -15,3 +15,18 @@ test('invalid or historical symbol payload recovers only on a later refresh',asy
 test('valid empty compiler result stays cached without invented declarations or outcomes',async()=>{const e=setup();e.doc.text='';let calls=0;e.service.request=async(_,doc)=>{if(doc===e.doc)calls++;return[];};try{await e.controller.resolveHandler();await e.controller.resolveHandler();assert.equal(calls,1);const file=e.controller.items.get(e.doc.uri.toString());assert.ok(file);assert.equal(file.children.size,0);assert.equal(e.runs.length,0);assert.equal(e.proofs(),0);}finally{await e.api.dispose();}});
 test('late old cancellation cannot evict a replacement in-flight symbol snapshot',async()=>{const e=setup();let calls=0,rejectOld,resolveNew;e.service.request=(_,doc)=>{if(doc!==e.doc)return Promise.resolve([]);calls++;return new Promise((resolve,reject)=>{if(calls===1)rejectOld=reject;else resolveNew=resolve;});};try{const old=e.controller.resolveHandler();await tick();e.commands.get('solidityLean.cancel')();const newer=e.controller.resolveHandler();await tick();assert.equal(calls,2);rejectOld(Object.assign(Error('old cancelled reply'),{code:-32800}));await old;await e.controller.resolveHandler();assert.equal(calls,2,'replacement remains coalesced');resolveNew(symbols());await newer;assert.ok(e.controller.items.get(e.doc.uri.toString()));assert.equal(e.proofs(),0);}finally{resolveNew?.(symbols());await e.api.dispose();}});
 test('ordinary compiler-service failure remains visible and a later refresh can recover',async()=>{const e=setup();let calls=0;e.service.request=async(_,doc)=>{if(doc!==e.doc)return[];calls++;if(calls===1)throw Error('owned symbol transport failure');return symbols();};try{await e.controller.resolveHandler();assert.equal(e.logs.filter(line=>line.includes('owned symbol transport failure')).length,1);await e.controller.resolveHandler();assert.equal(calls,2);assert.ok(e.controller.items.get(e.doc.uri.toString()));assert.equal(e.proofs(),0);}finally{await e.api.dispose();}});
+
+// Malformed sparse provider payloads must be refused before Testing tree mutation.
+test('sparse compiler symbol collections are refused at every nesting level',()=>{
+ const {currentSymbols}=require('../src/testing-tree.cjs');
+ for(const value of [new Array(1),[...symbols(),...new Array(1)]])assert.equal(currentSymbols(value,source),null);
+ const nested=symbols();nested[0].children=new Array(1);assert.equal(currentSymbols(nested,source),null);
+ const tail=symbols();tail[0].children.length++;assert.equal(currentSymbols(tail,source),null);
+ assert.deepEqual(currentSymbols(symbols(),source),symbols());assert.deepEqual(currentSymbols([],source),[]);
+});
+
+test('sparse refused symbols leave an existing compiler tree untouched',()=>{
+ const e=require('./mock.cjs').mock(),metadata=new Map(),tree=require('../src/testing-tree.cjs').install(e.vscode,e.controller,metadata);e.doc.text=source;
+ assert.equal(tree.renderCompiler(e.doc,symbols()),true);const file=e.controller.items.get(e.doc.uri.toString()),before=[...metadata.entries()];
+ for(const value of [new Array(1),(()=>{const s=symbols();s[0].children.length++;return s;})()]){assert.equal(tree.renderCompiler(e.doc,value),false);assert.equal(e.controller.items.get(e.doc.uri.toString()),file);assert.deepEqual([...metadata.entries()],before);}
+});
