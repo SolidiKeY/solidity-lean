@@ -39,7 +39,7 @@ def export(a):
         contexts[label]={"repository_provenance":str(repo),"git_head":subprocess.check_output(["git","rev-parse","HEAD"],cwd=repo,text=True).strip(),"lean_version":version,"modules":records,"reports":reports,"mapped_sources":mapped_sources}
     history=json.loads(a.history_record.read_text());assert contexts["original"]["git_head"]==history["frozen_commit"]and history["original_tracked_sources_unchanged"]is True
     attachments={"frozen-history-audit.json":blob(a.history_record),"original-typed-census.json":blob(a.historical_evidence/"verified-census.json")}
-    for name in["original-frozen-assignment.txt","original-work-and-backfill-queue.md","scope-manifest.json","CURRENT-QUEUE-20261107.md","COORDINATOR-ANSWERS-20261107.json"]:
+    for name in["original-frozen-assignment.txt","original-work-and-backfill-queue.md","scope-manifest.json","CONFLICT-RESOLUTION-20261108.md","COORDINATOR-ANSWERS-20261107.json"]:
         attachments[name]=blob(a.current_repository/"scripts/h62/item2/audit-theories/handoff"/name)
     index={"schema_version":1,"contexts":contexts,"attachments":attachments,"blob_sizes":sizes,
       "boundary":"Portable source/import/artifact/log/hash and axiom-log checks only; no kernel rerun, original/current equivalence, operational static refusal or full assignment acceptance.","full_assignment_acceptance":False}

@@ -149,3 +149,151 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+PROJECTION_TEMPLATE = r'''
+namespace Solidity.H62.BytecodeSelection.ProjectionAudit
+open Lean Meta Elab Command
+
+-- Guard inferring projection structure/type arguments from spelling alone.
+structure RegistryBase where
+  flag : Bool
+structure RegistryChild extends RegistryBase where
+  count : Nat
+class RegistryClass where
+  flag : Bool
+def registryValue : Nat := 0
+
+private def registryIndex : CommandElabM (Std.HashMap String (List Lean.Name)) := do
+  let mut index : Std.HashMap String (List Lean.Name) := {}
+  for (name, _) in (← getEnv).constants.toList do
+    index := index.insert name.toString (name :: index.getD name.toString [])
+  return index
+
+private def constantSnapshot (info : ConstantInfo) : Json :=
+  Json.mkObj [("name",toJson info.name.toString),("type_expr",toJson (reprStr info.type)),
+    ("level_params",toJson (info.levelParams.map Lean.Name.toString))]
+
+private def observeProjection (index : Std.HashMap String (List Lean.Name))
+    (target expectedType expectedModule : String) : CommandElabM Json := do
+  let names := index.getD target []
+  unless names.length == 1 do throwError "projection audit: missing or ambiguous name"
+  let name := names.head!
+  let info ← getConstInfo name
+  unless reprStr info.type == expectedType do throwError "projection audit: recorded type differs"
+  let env ← getEnv
+  let some moduleIndex := env.getModuleIdxFor? name
+    | throwError "projection audit: target module unavailable"
+  let moduleName := env.header.moduleNames[moduleIndex.toNat]!.toString
+  unless moduleName == expectedModule do throwError "projection audit: recorded module differs"
+  let mut status := "no_registered_projection"
+  let mut registry : Json := .null
+  let mut constructorData : Json := .null
+  let mut inductiveData : Json := .null
+  let mut structureInfo : Json := .null
+  if let some projection := env.getProjectionFnInfo? name then
+    registry := Json.mkObj [("ctor_name",toJson projection.ctorName.toString),
+      ("num_params",toJson projection.numParams),("field_index",toJson projection.i),
+      ("from_class",toJson projection.fromClass)]
+    status := "constructor_metadata_unavailable"
+    if let some (.ctorInfo value) := env.find? projection.ctorName then
+      constructorData := Json.mkObj [("name",toJson value.name.toString),
+        ("type_expr",toJson (reprStr value.type)),
+        ("level_params",toJson (value.levelParams.map Lean.Name.toString)),
+        ("inductive",toJson value.induct.toString),("num_params",toJson value.numParams),
+        ("num_fields",toJson value.numFields),("constructor_index",toJson value.cidx)]
+      status := "inductive_metadata_unavailable"
+      if let some owner@(.inductInfo _) := env.find? value.induct then
+        inductiveData := constantSnapshot owner
+        status := "structure_metadata_unavailable"
+        if let some structureData := getStructureInfo? env value.induct then
+          structureInfo := Json.mkObj [("name",toJson value.induct.toString),
+            ("projections",toJson (structureData.fieldInfo.map fun field => field.projFn.toString)),
+            ("parents",toJson (structureData.parentInfo.map fun parent => Json.mkObj [
+              ("structure",toJson parent.structName.toString),
+              ("projection",toJson parent.projFn.toString),("subobject",toJson parent.subobject)]))]
+          status := "registered_projection_observed"
+  return Json.mkObj [("fingerprint",toJson ("FINGERPRINT" : String)),
+    ("name",toJson name.toString),("module",toJson moduleName),("private",toJson (isPrivateName name)),
+    ("type_expr",toJson (reprStr info.type)),("level_params",toJson (info.levelParams.map Lean.Name.toString)),
+    ("metadata_status",toJson status),("registry",registry),("constructor",constructorData),
+    ("inductive",inductiveData),("structure",structureInfo)]
+
+run_cmd do
+  let env ← getEnv
+  let some base := env.getProjectionFnInfo? ``RegistryBase.flag
+    | throwError "projection control: missing direct field"
+  unless base.ctorName == ``RegistryBase.mk && base.numParams == 0 && base.i == 0 do
+    throwError "projection control: wrong direct field metadata"
+  let some parent := env.getProjectionFnInfo? ``RegistryChild.toRegistryBase
+    | throwError "projection control: missing parent projection"
+  unless parent.ctorName == ``RegistryChild.mk do
+    throwError "projection control: wrong parent constructor"
+  let some classField := env.getProjectionFnInfo? ``RegistryClass.flag
+    | throwError "projection control: missing class field"
+  unless classField.fromClass do throwError "projection control: class flag lost"
+  unless (env.getProjectionFnInfo? ``registryValue).isNone do
+    throwError "projection control: nonprojection falsely tagged"
+
+/-- error: projection audit: missing or ambiguous name -/
+#guard_msgs in
+run_cmd do
+  let _ ← observeProjection (← registryIndex) "missing.kernel.name" "" ""
+  pure ()
+/-- error: projection audit: recorded type differs -/
+#guard_msgs in
+run_cmd do
+  let _ ← observeProjection (← registryIndex)
+    "Solidity.H62.BytecodeSelection.ProjectionAudit.RegistryBase.flag" "corrupted type" ""
+  pure ()
+
+/-- error: projection audit: recorded module differs -/
+#guard_msgs in
+run_cmd do
+  let index ← registryIndex
+  let target : String := FIRST_TARGET
+  let name := (index.getD target []).head!
+  let info ← getConstInfo name
+  let _ ← observeProjection index target (reprStr info.type) "wrong.recorded.module"
+  pure ()
+
+run_cmd do
+  let targets : List (String × String × String) := [TARGETS]
+  let index ← registryIndex
+  for (name, expectedType, expectedModule) in targets do
+    let record ← observeProjection index name expectedType expectedModule
+    Lean.Elab.Command.liftCoreM <| Lean.Core.liftIOCore <|
+      IO.println ("H62_PROJECTION_JSON " ++ record.compress)
+  Lean.Elab.Command.liftCoreM <| Lean.Core.liftIOCore <|
+    IO.println ("H62_PROJECTION_DONE " ++ (Json.mkObj [
+      ("fingerprint",toJson ("FINGERPRINT" : String)),("count",toJson targets.length)]).compress)
+end Solidity.H62.BytecodeSelection.ProjectionAudit
+'''
+
+
+def projection_inspection_source(repo, rows):
+    """Supplement the existing inspector with actual registry/constructor data.
+
+    Old TEMPLATE/FIELDS and source generation remain unchanged. Registry facts
+    are observations, not source ownership or instantiated inherited proofs.
+    """
+    import kernel_metadata as metadata
+    from exact_domains import _frozen_scope
+    metadata.validate_rows(rows)
+    selected=sorted((row for row in rows if row["is_projection"]),key=lambda row:row["name"])
+    if not selected:
+        raise ValueError("no supplied projection records")
+    modules=sorted({row["module"] for row in selected})
+    frozen_map,sources=_frozen_scope(repo,modules)
+    pins={"base":BASE,"targets":{row["name"]:metadata.observed_type(row) for row in selected},
+        "modules":modules,"source_sha256":sources,
+        "frozen_map_sha256":hashlib.sha256(frozen_map).hexdigest(),
+        "projection_template_sha256":hashlib.sha256(PROJECTION_TEMPLATE.encode()).hexdigest()}
+    fingerprint=hashlib.sha256(json.dumps(pins,sort_keys=True,separators=(",",":"),ensure_ascii=False).encode()).hexdigest()
+    entries=["("+",".join(json.dumps(value,ensure_ascii=False) for value in (row["name"],row["type_expr"],row["module"]))+")" for row in selected]
+    program="import Lean\n"+"".join("import "+module+"\n" for module in modules)
+    program+="/-! Guard projection metadata from name-prefix guesses and stale field types. Registry data is uninstantiated; no source or proof acceptance. -/\n"
+    program+=PROJECTION_TEMPLATE.replace("FINGERPRINT",fingerprint).replace("TARGETS",",\n".join(entries)).replace("FIRST_TARGET",json.dumps(selected[0]["name"],ensure_ascii=False))
+    pins.update(fingerprint=fingerprint,generated_lean_sha256=hashlib.sha256(program.encode()).hexdigest(),
+                kernel_accepted=False,source_correspondence_established=False,inherited_instantiation_accepted=False)
+    return program,pins

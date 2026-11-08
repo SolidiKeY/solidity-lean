@@ -1,9 +1,0 @@
-PASS	build-touched	0	/workspace/solidity-lean-ucast-1104/tests/primitive-packets-1104/UnsignedCast/evidence/checkpoint/1.log	build_touched
-FAIL	run-lean	1	/workspace/solidity-lean-ucast-1104/tests/primitive-packets-1104/UnsignedCast/evidence/checkpoint/2.log	bash run-lean.sh
-PASS	trust	10	/workspace/solidity-lean-ucast-1104/tests/primitive-packets-1104/UnsignedCast/evidence/checkpoint/3.log	bash scripts/check-trust.sh
-FAIL	orphans	0	/workspace/solidity-lean-ucast-1104/tests/primitive-packets-1104/UnsignedCast/evidence/checkpoint/4.log	node scripts/check-orphans.mjs
-PASS	layers	0	/workspace/solidity-lean-ucast-1104/tests/primitive-packets-1104/UnsignedCast/evidence/checkpoint/5.log	node scripts/check-layers.mjs
-FAIL	roots	0	/workspace/solidity-lean-ucast-1104/tests/primitive-packets-1104/UnsignedCast/evidence/checkpoint/6.log	bash scripts/coord-tools/register.sh --check
-PASS	doc-paths	7	/workspace/solidity-lean-ucast-1104/tests/primitive-packets-1104/UnsignedCast/evidence/checkpoint/7.log	bash scripts/check-doc-paths.sh
-PASS	axiom-pins	11	/workspace/solidity-lean-ucast-1104/tests/primitive-packets-1104/UnsignedCast/evidence/checkpoint/8.log	node scripts/check-axiom-pins.mjs
-PASS	testsuite	0	/workspace/solidity-lean-ucast-1104/tests/primitive-packets-1104/UnsignedCast/evidence/checkpoint/9.log	bash scripts/check-testsuite.sh

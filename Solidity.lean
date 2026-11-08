@@ -1960,6 +1960,18 @@ import Solidity.Backend.StructuredFlow.ReturnTailCompiler
 import Solidity.Backend.StructuredFlow.ReturnTailCompilerControls
 import Solidity.Backend.StructuredFlow.ScopedMappedSequence
 import Solidity.Backend.StructuredFlow.ScopedMappedSequenceControls
+import Solidity.Backend.StructuredFlow.SourceDispatch
+import Solidity.Backend.StructuredFlow.SourceDispatchAxioms
+import Solidity.Backend.StructuredFlow.SourceDispatchControls
+import Solidity.Backend.StructuredFlow.SourceDispatchCorrect
+import Solidity.Backend.StructuredFlow.SourceDispatchCoverage
+import Solidity.Backend.StructuredFlow.SourceDispatchDomain
+import Solidity.Backend.StructuredFlow.SourceDispatchLower
+import Solidity.Backend.StructuredFlow.SourceDispatchRecognitionLaws
+import Solidity.Backend.StructuredFlow.SourceDispatchRecognize
+import Solidity.Backend.StructuredFlow.SourceDispatchSlotLaws
+import Solidity.Backend.StructuredFlow.SourceDispatchSlots
+import Solidity.Backend.StructuredFlow.SourceDispatchViews
 import Solidity.Backend.StructuredFlow.WhileBreakCompiler
 import Solidity.Backend.StructuredFlow.WhileBreakCompilerControls
 import Solidity.Backend.StructuredFlow.WhileContinueCompiler
@@ -2295,6 +2307,8 @@ import Solidity.Calculus.QueryReduction
 import Solidity.Calculus.Quote
 import Solidity.Calculus.QuotientCut
 import Solidity.Calculus.ReadBounds
+import Solidity.Calculus.ReadBoundsStack
+import Solidity.Calculus.ReadBoundsStackCorrect
 import Solidity.Calculus.ReadFlattening
 import Solidity.Calculus.ReadFree
 import Solidity.Calculus.ReadLayout
@@ -3261,6 +3275,7 @@ import Solidity.Lowering.P8.GraphSchemaControls
 import Solidity.Lowering.P8.PlanGraphAdmission
 import Solidity.Lowering.P8.PlanWitness
 import Solidity.Lowering.P8.ProducerAssembly
+import Solidity.Lowering.P8.ResolvedGraphAdmissionV2
 import Solidity.Lowering.P8.ResourceBoundary
 import Solidity.Lowering.P8.ResourceContractLaw1
 import Solidity.Lowering.P8.ScalarSchema
@@ -3277,6 +3292,7 @@ import Solidity.Lowering.P8.SourceAstExpressions
 import Solidity.Lowering.P8.SourceAstLiteralCorrespondence
 import Solidity.Lowering.P8.SourceAstParameterCorrespondence
 import Solidity.Lowering.P8.SourceAstParameters
+import Solidity.Lowering.P8.SourceAstResolvedGraphs
 import Solidity.Lowering.P8.SourceAstStatementCorrespondence
 import Solidity.Lowering.P8.SourceAstStatements
 import Solidity.Lowering.P8.SourceAstTryCorrespondence
@@ -5535,6 +5551,7 @@ import Solidity.Yul.Views.FrameCalldata
 import Solidity.Yul.Views.FrameCalldataControls
 import Solidity.Yul.Views.FullWordLayout
 import Solidity.Yul.Views.GeneratedRetainedControls
+import Solidity.Yul.Views.GenericFlow.Following
 import Solidity.Yul.Views.HeapAllocationCommute
 import Solidity.Yul.Views.HeapAllocationControls
 import Solidity.Yul.Views.HeapAllocationFreshnessControls

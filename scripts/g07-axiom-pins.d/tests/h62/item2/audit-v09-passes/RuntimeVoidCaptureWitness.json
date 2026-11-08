@@ -1,0 +1,58 @@
+{
+ "tests/h62/item2/audit-v09-passes/RuntimeVoidCaptureWitness.lean:Solidity.Backend.Passes.AuditRuntimeVoidCapture.corrupt_tail_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/RuntimeVoidCaptureWitness.lean:Solidity.Backend.Passes.AuditRuntimeVoidCapture.evaluated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/RuntimeVoidCaptureWitness.lean:Solidity.Backend.Passes.AuditRuntimeVoidCapture.evaluated_before": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/RuntimeVoidCaptureWitness.lean:Solidity.Backend.Passes.AuditRuntimeVoidCapture.failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/RuntimeVoidCaptureWitness.lean:Solidity.Backend.Passes.AuditRuntimeVoidCapture.failure_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/RuntimeVoidCaptureWitness.lean:Solidity.Backend.Passes.AuditRuntimeVoidCapture.failure_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/RuntimeVoidCaptureWitness.lean:Solidity.Backend.Passes.AuditRuntimeVoidCapture.fragment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/RuntimeVoidCaptureWitness.lean:Solidity.Backend.Passes.AuditRuntimeVoidCapture.insufficient_private_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/RuntimeVoidCaptureWitness.lean:Solidity.Backend.Passes.AuditRuntimeVoidCapture.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/RuntimeVoidCaptureWitness.lean:Solidity.Backend.Passes.AuditRuntimeVoidCapture.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/RuntimeVoidCaptureWitness.lean:Solidity.Backend.Passes.AuditRuntimeVoidCapture.premature_capture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/RuntimeVoidCaptureWitness.lean:Solidity.Backend.Passes.AuditRuntimeVoidCapture.stale_capture_refused": []
+}

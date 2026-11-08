@@ -1,5 +1,22 @@
 # H62 item 2: ABI-world empty-statement audit
 
+## H151: historical evidence gaps
+
+The lost audit evidence archive and member checksum manifest are UNVERIFIABLE.
+Historical portable-archive verification, execution/timing receipts and archived
+external gas/fork observations that depend on those bytes remain unproven.
+Their recorded hashes and the reports below do not establish current validation.
+The unavailable original launcher rendering is also UNVERIFIABLE; the authorized
+thread-copy transcription is distinct and must never be described as a hash match.
+
+These historical gaps are removed from waits. They do not block independent
+work, and their bytes or results must not be reconstructed or relabelled.
+Available Lean sources and checkers can be checked afresh; fresh evidence must
+bind the actual code and inputs and stay separate from historical claims.
+The recent retained cf1 decoder subset replay supplies only its stated length
+and bounds observations, not this audit's missing external or timing evidence.
+Full original audit obligations and all frozen statements remain unchanged.
+
 Owner: `solidity-h62-2-20261106/audit-abi-world`. Frozen base:
 `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`. Assigned branch:
 `codex/solidity-h62-2-20261106/audit-abi-world`.
@@ -49,7 +66,7 @@ The verified ownership snapshot identifies
 `H30-WRITER-solidity-v12-v17-20261031--v13-abi-world`, owner
 `solidity-v12-v17-20261031/v13-abi-world`, status `coordination-only`, covering
 `Solidity/Backend/AbiWorld/**`. Snapshot SHA256:
-`7f5d40d46d386ed17731db55ed87f0564f5c9e667bddee00c0f12b28772f9cce`.
+`49fa4e0ef45307428a026b414efc6a99efcbf4911dd23e9574e806be54dbfefe`.
 Git authorship is recorded separately and is not ownership authority. No original
 owned file was edited; the audit's exclusive additive scope was sufficient.
 

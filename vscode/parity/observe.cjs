@@ -8,7 +8,7 @@ const {sep}=require('node:path');
 const {createHash,randomUUID}=require('node:crypto');
 
 /** Observe calls on real VS Code objects. No mocked renderer or verifier. */
-function observe(vscode, record, extensionPath, tracePath,workspacePath) {
+function observe(vscode, record, extensionPath, tracePath,workspacePath,options={}) {
   const controllers = [], profiles = [], decorations = [], outputs=[], finalizers=[];
   function instrument(object, handlers) {
     return new Proxy(object, {get(target,key) {
@@ -73,21 +73,34 @@ function observe(vscode, record, extensionPath, tracePath,workspacePath) {
     terminalSubscriptions.push(vscode.window.onDidEndTerminalShellExecution(event=>{if(!restored&&relevant(event.execution,event.terminal))record('terminal.end',{commandLine:event.execution.commandLine.value,executionId:identity(event.execution),exitCode:event.exitCode});}));
   }
   const original = Module._load;
+  let processSequence=0;
   const spawnObserved=(...args)=>{
+    if(restored)return childProcess.spawn(...args);
     const child=childProcess.spawn(...args);
+    const owner={processSession:randomUUID(),processSequence:++processSequence,pid:child.pid,birth:require('../src/process-state.cjs').processState(child.pid)?.birth};
+    record('process.spawn',{...owner,executable:args[0],args:args[1]||[],cwd:args[2]?.cwd});
+    if(options.captureServerArtifacts&&args[1]?.some(a=>a==='server'||typeof a==='string'&&a.endsWith('lsp-server.cjs'))){
+      const fs=require('node:fs'),path=require('node:path'),describe=file=>({file:fs.realpathSync(file),bytes:fs.statSync(file).size,sha256:createHash('sha256').update(fs.readFileSync(file)).digest('hex')});
+      try{const directory=path.dirname(args[0]),files=[args[0],...(args[1]||[]).filter(a=>typeof a==='string'&&path.isAbsolute(a)&&fs.existsSync(a)&&fs.statSync(a).isFile()),...fs.readdirSync(directory).filter(name=>/^Dafny.*\.dll$/.test(name)||name.endsWith('.runtimeconfig.json')).map(name=>path.join(directory,name))];
+        record('process.artifacts',{...owner,files:[...new Set(files)].map(file=>{const actual=describe(file),reference=options.artifactReferenceDirectory&&path.join(options.artifactReferenceDirectory,path.basename(file));return{...actual,...(reference&&fs.existsSync(reference)?{reference:describe(reference)}:{})};})});
+      }catch(error){record('process.artifacts.error',{...owner,message:diagnostic(error)});}
+    }
+    child.once('error',error=>!restored&&record('process.error',{...owner,message:diagnostic(error)}));
+    child.once('exit',(code,signal)=>!restored&&record('process.exit',{...owner,code,signal}));
+    child.once('close',(code,signal)=>!restored&&record('process.close',{...owner,code,signal}));
     if(tracePath&&(args[1]?.includes('server')||args[1]?.some(a=>typeof a==='string'&&a.endsWith('lsp-server.cjs')))&&child.stdin&&child.stdout) {
       const parser=direction=>{
         const frames=new LspFrames();
         let finalized=false;
-        frames.on('message',message=>appendFileSync(tracePath,JSON.stringify({time:Date.now(),direction,message})+'\n'));
+        frames.on('message',message=>appendFileSync(tracePath,JSON.stringify({time:Date.now(),...owner,direction,message})+'\n'));
         const finish=()=>{
           if(finalized)return;finalized=true;
-          try{frames.end();appendFileSync(tracePath,JSON.stringify({direction,framingFinalized:true})+'\n');}
-          catch(error){appendFileSync(tracePath,JSON.stringify({direction,error:error.message})+'\n');}
+          try{frames.end();appendFileSync(tracePath,JSON.stringify({...owner,direction,framingFinalized:true})+'\n');}
+          catch(error){appendFileSync(tracePath,JSON.stringify({...owner,direction,error:error.message})+'\n');}
         };
         finalizers.push(finish);
         (direction==='server'?child.stdout:child.stdin).once(direction==='server'?'end':'finish',finish);
-        return chunk=>{if(finalized)return;try{frames.push(Buffer.isBuffer(chunk)?chunk:Buffer.from(chunk));}catch(error){appendFileSync(tracePath,JSON.stringify({direction,error:error.message})+'\n');}};
+        return chunk=>{if(finalized)return;try{frames.push(Buffer.isBuffer(chunk)?chunk:Buffer.from(chunk));}catch(error){appendFileSync(tracePath,JSON.stringify({...owner,direction,error:error.message})+'\n');}};
       };
       child.stdout.on('data',parser('server'));
       const outgoing=parser('client'),write=child.stdin.write.bind(child.stdin);

@@ -1,29 +1,76 @@
-#!/usr/bin/env bash
-# coord-ask [-t TITLE] "question"   (or question on stdin)
-# Pushes the question to refs/heads/coord-q/<lane>/<ts>; a GitHub Action turns it into an issue.
-# Needs only git push; does not touch the working tree, index or the lane branch.
-set -euo pipefail
-title=""
-while getopts t: o; do case $o in t) title=$OPTARG;; *) echo "usage: coord-ask [-t TITLE] TEXT" >&2; exit 2;; esac; done
-shift $((OPTIND-1))
-body=${1:-$(cat)}
-[ -n "$body" ] || { echo "coord-ask: empty question" >&2; exit 2; }
-[ -n "$title" ] || title=$(printf '%s' "$body" | head -1 | cut -c1-80)
-base=${COORD_Q_BASE:-origin/master}
-lane=$(git rev-parse --abbrev-ref HEAD); head=$(git rev-parse HEAD)
-IFS=/ read -r _ b_batch b_slug _ <<<"$lane/" || true
-ts=$(date -u +%Y%m%dT%H%M%SZ)
-git fetch -q origin "${base#origin/}"
-basec=$(git rev-parse FETCH_HEAD)
-f=coord/questions/$ts.md
-blob=$(printf 'title: %s\nlane: %s\nhead: %s\nbatch: %s\nslug: %s\n---\n%s\n' \
-  "$title" "$lane" "$head" "${CLOUDVM_BATCH:-$b_batch}" "${CLOUDVM_SLUG:-$b_slug}" "$body" | git hash-object -w --stdin)
-idx=$(mktemp -u); trap 'rm -f "$idx"' EXIT
-GIT_INDEX_FILE=$idx git read-tree "$basec"
-GIT_INDEX_FILE=$idx git update-index --add --cacheinfo 100644 "$blob" "$f"
-tree=$(GIT_INDEX_FILE=$idx git write-tree)
-c=$(git -c user.name="${GIT_AUTHOR_NAME:-coord-ask}" -c user.email="${GIT_AUTHOR_EMAIL:-coord-ask@localhost}" \
-  commit-tree "$tree" -p "$basec" -m "question: $title")
-ref="coord-q/$(printf '%s' "$lane" | tr -c 'A-Za-z0-9._/-' '-')/$ts"
-GIT_TERMINAL_PROMPT=0 git push -q origin "$c:refs/heads/$ref"
-echo "asked: $ref"
+#!/usr/bin/env python3
+"""coord-ask — the lane's only channel to the coordinator (runs on a lane VM; needs git and push access to the
+coordination repository, nothing else; it does not touch the lane's own repository).
+
+  coord-ask [-t TITLE] [-q QID] TEXT     ask a question (TEXT may also come on stdin); the QID leads the title
+  coord-ask --ack QID [NOTE]             the coordinator's answer to QID was applied: closes the question
+  coord-ask --done [--result FILE]       this turn finished; FILE (or - for stdin) is the turn's CLOUDVM-RESULT
+                                            JSON, which the coordinator uses as the lane's result the moment it lands
+
+Each call commits one small file on top of the coordination repo's main in a tree-less shallow clone and pushes it
+to coord-q/<lane>/<ts>, coord-ack/<lane>/<ts> or coord-done/<lane>/<ts>. The coordinator's inbox receives the push
+through a GitHub webhook and opens, follows up (same lane + QID) or closes the issue, then deletes the ref.
+Environment: COORD_Q_REPO (repository URL; default: this project's coordination repository), CLOUDVM_BATCH / CLOUDVM_SLUG
+(override the batch/slug parsed from a codex/<batch>/<slug> branch name).
+"""
+import argparse, os, re, subprocess, sys, tempfile, time
+
+
+def git(*a, inp=None, env=None):
+    r = subprocess.run(['git', *a], input=inp, capture_output=True, text=True, env=env)
+    if r.returncode: sys.exit(f'coord_ask: git {a[0]} failed: {r.stderr.strip()[-300:]}')
+    return r.stdout.strip()
+
+
+def main():
+    ap = argparse.ArgumentParser(usage=__doc__)
+    ap.add_argument('-t', dest='title', default=''); ap.add_argument('-q', dest='qid', default='')
+    ap.add_argument('--ack', metavar='QID'); ap.add_argument('--done', action='store_true')
+    ap.add_argument('--result', metavar='FILE')
+    ap.add_argument('text', nargs='?')
+    a = ap.parse_args()
+    repo = os.environ.get('COORD_Q_REPO') or 'https://github.com/SolidiKeY/solidity-lean-coord.git'
+    if a.ack: kind, prefix, first, body = 'acks', 'coord-ack', f'qid: {a.ack}', a.text or 'acknowledged'
+    elif a.done:
+        kind, prefix, first, body = 'done', 'coord-done', 'done: turn finished', a.text or 'turn finished'
+        if a.result:
+            import json
+            body = sys.stdin.read() if a.result == '-' else open(a.result).read()
+            body = body.strip()
+            if body.startswith('```'): body = body.strip('`').partition('\n')[2].rstrip('`').strip()
+            try: json.loads(body)
+            except ValueError as e: sys.exit(f'coord_ask: --result is not JSON ({e})')
+    else:
+        body = a.text if a.text is not None else sys.stdin.read()
+        if not body.strip(): sys.exit('coord_ask: empty question')
+        title = a.title or body.splitlines()[0][:80]
+        if a.qid and not title.startswith(f'{a.qid}:'): title = f'{a.qid}: {title}'
+        kind, prefix, first = 'questions', 'coord-q', f'title: {title}'
+    lane = git('rev-parse', '--abbrev-ref', 'HEAD'); head = git('rev-parse', 'HEAD')
+    parts = lane.split('/')
+    batch = os.environ.get('CLOUDVM_BATCH') or (parts[1] if len(parts) > 2 else '')
+    slug = os.environ.get('CLOUDVM_SLUG') or (parts[2] if len(parts) > 2 else '')
+    blob = f'{first}\nlane: {lane}\nhead: {head}\nbatch: {batch}\nslug: {slug}\n---\n{body}\n'
+    ts = time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())
+    with tempfile.TemporaryDirectory() as tmp:
+        env = dict(os.environ, GIT_TERMINAL_PROMPT='0', GIT_DIR=os.path.join(tmp, 'q'))
+        clone_env = {k: v for k, v in env.items() if k != 'GIT_DIR'}
+        if subprocess.run(['git', 'clone', '-q', '--bare', '--depth', '1', '--filter=tree:0', repo, env['GIT_DIR']],
+                          env=clone_env).returncode: sys.exit('coord_ask: clone of the coordination repository failed')
+        g = lambda *x, inp=None: git(*x, inp=inp, env=env)
+        base = g('rev-parse', 'HEAD')
+        b = g('hash-object', '-w', '--stdin', inp=blob)
+        qt = g('mktree', inp=f'100644 blob {b}\t{ts}.md\n')
+        ct = g('mktree', inp=f'040000 tree {qt}\t{kind}\n')
+        rest = [l for l in g('ls-tree', f'{base}^{{tree}}').splitlines() if not l.endswith('\tcoord')]
+        tree = g('mktree', '--missing', inp='\n'.join(rest + [f'040000 tree {ct}\tcoord']) + '\n')
+        c = g('-c', f'user.name={os.environ.get("GIT_AUTHOR_NAME", "coord-ask")}',
+              '-c', f'user.email={os.environ.get("GIT_AUTHOR_EMAIL", "coord-ask@localhost")}',
+              'commit-tree', tree, '-p', base, '-m', f'{kind[:-1] if kind != "done" else "done"}: {first}')
+        ref = f'{prefix}/' + re.sub(r'[^A-Za-z0-9._/-]', '-', lane) + f'/{ts}'
+        g('push', '-q', repo, f'{c}:refs/heads/{ref}')
+    print(f'{ {"acks": "acked", "done": "done", "questions": "asked"}[kind] }: {ref}')
+
+
+if __name__ == '__main__':
+    main()

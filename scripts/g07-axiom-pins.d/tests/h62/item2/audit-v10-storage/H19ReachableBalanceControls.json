@@ -1,0 +1,17 @@
+{
+ "tests/h62/item2/audit-v10-storage/H19ReachableBalanceControls.lean:H19.ReachableBalanceControls.execution_ranges": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/H19ReachableBalanceControls.lean:H19.ReachableBalanceControls.lossless_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/H19ReachableBalanceControls.lean:H19.ReachableBalanceControls.observed_values": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

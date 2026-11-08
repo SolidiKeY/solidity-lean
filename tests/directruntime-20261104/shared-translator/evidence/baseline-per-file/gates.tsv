@@ -1,1 +1,0 @@
-FAIL	lean:Solidity/Tools/DirectRuntime.lean	1	/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/evidence/baseline-per-file/1.log	lake env lean --tstack=131072 Solidity/Tools/DirectRuntime.lean 

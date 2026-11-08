@@ -1,3 +1,0 @@
-PASS lean:Solidity/Frontend/ExecutableAst/Shared/Boundary.lean 4s /workspace/solidity-lean/tests/directruntime-20261104/shared-translator/evidence/shared-reader-check/1.log
-{"childMaxRssKiB": 522584, "command": ["env", "GATE_LOGS=tests/directruntime-20261104/shared-translator/evidence/shared-reader-check", "bash", "scripts/coord-tools/gate.sh", "per-file", "Solidity/Frontend/ExecutableAst/Shared/Boundary.lean"], "exit": 0, "scopeMemoryPeakBytes": "132624384", "wallSeconds": 4.8285713579999765}
-{"outerExit": 0, "resourceStop": false, "minimumOuterAvailableBytes": 16342577152, "outerWallSeconds": 7.511024332000034}

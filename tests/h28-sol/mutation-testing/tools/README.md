@@ -30,5 +30,5 @@ re-hashes the production inputs and `Calculus/Taclet.lean`.
 fields drove the Docker backend against `/workspace/...` caches and the H44
 off-Git bulk archive of the Codex VM. None of that exists elsewhere and it is
 not used by the current runner; the files stay for the record of the pilot
-runs (`docs/feature-work/h28-mutation-testing.md`). Their digests in
+runs ([mutation-testing](..)). Their digests in
 `bulk-data.json` describe the Codex VM archive, which was not moved.

@@ -1,0 +1,17 @@
+{
+ "tests/h62/item2/audit-v10-storage/ConditionalH24V2Controls.lean:H128.ConditionalH24V2Controls.malformed_receipt_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/ConditionalH24V2Controls.lean:H128.ConditionalH24V2Controls.model_receipt_graph_premises": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/ConditionalH24V2Controls.lean:H128.ConditionalH24V2Controls.receipt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

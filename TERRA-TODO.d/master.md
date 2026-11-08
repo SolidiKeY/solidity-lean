@@ -2,15 +2,16 @@
 
 <!-- Preserved V10 routine obligations; none is marked discharged by this merge. -->
 
-# C157 routine adapter
+# C157 captured-write adapter — completed
 
 Module: `Solidity/Lowering/StorageOps/SourceWordCommutation.lean`.
 Lemma: `Solidity.Lowering.StorageOps.SourceWordCommutation.complete`.
 Why routine: combine checked `run` in both orders, `world_commute`, and
 `journal_order` in both orders; no new soundness argument or premise.
 
-The statement elaborated in the failed automation scratch. It is NOT a compiled
-Lean declaration or a closed proof. Keep every premise and exact journal snapshot.
+The exact statement below is now compiled as `SourceWordCommutation.complete`
+and used by the existing populated world-equality control. Every premise and
+exact journal snapshot is retained.
 Do not claim full Source states/journals commute, fresh lvalue compilation,
 whole compiler or implicit rollback. No admission is permitted.
 
@@ -36,16 +37,17 @@ theorem complete {E : Source.Env} {Γ : Source.RCtx} (frame : Source.Fr)
 end Solidity.Lowering.StorageOps.SourceWordCommutation
 ```
 
-The historical twelve adapters remain in the preserved original checkout and prior handoffs; they are not resubmitted here. This adds one pending routine adapter.
+The historical twelve adapters remain in the preserved original checkout and prior handoffs; they are not resubmitted here. C157 is closed; the other historical adapters remain open.
 
-## C159 routine captured failure adapter
+## C159 captured failure adapter — completed
 
 Module: `Solidity/Lowering/StorageOps/SourceWriteRollback.lean`.
 Lemma: `Solidity.Lowering.StorageOps.SourceWriteRollback.run_refused`.
 Why routine: unfold the existing pair, use checked `SourceWordWrite.source_write`
 for the first operation and `static_write` for the second through `Hoare.run_bind`.
 The producer arguments and actual complete controls are checked separately.
-This statement is uncompiled; no stub, admission or implicit rollback claim.
+The exact statement below is compiled as `SourceWriteRollback.run_refused` and
+consumed by the existing outcome control; no implicit rollback is claimed.
 
 ```lean
 namespace Solidity.Lowering.StorageOps.SourceWriteRollback
@@ -61,8 +63,9 @@ theorem run_refused {E : Source.Env} {Γ : Source.RCtx}
 end Solidity.Lowering.StorageOps.SourceWriteRollback
 ```
 
-Two routine adapters are specified here; the historical twelve remain preserved
-separately, for fourteen pending adapters total. Neither statement is compiled.
+These two routine adapters were originally recorded alongside twelve historical
+adapters. C157 and C159 are now compiled; the twelve historical adapters remain
+pending. Later subtotal statements below record their checkpoint history.
 
 ## C166: complete primitive-copy fuel classification
 
@@ -177,15 +180,15 @@ theorem copy_timeout :
 
 Two adapters added to the prior sixteen: eighteen remain pending.
 
-## C171: nested allocating-capture wrapper
+## C171: nested allocating-capture wrapper — completed
 
 Module: `Solidity.Lowering.StorageOps.SourceNestedByteCapture`.
 Lemma: `copy_timeout_prefix`.
 Why routine: unfold actual storRef/loadMem outer capture, use OLD outer header,
 then apply checked `timeout_prefix` at start0. The existing producer proves the
 allocation prefix; do not assume full-state preservation or erase its heap.
-No destination or writable-frame premise is required. Proposition type only;
-no theorem/stub registered.
+No destination or writable-frame premise is required. The exact statement below
+is now compiled and consumed by the existing storage-observation control.
 
 ```lean
 theorem copy_timeout_prefix :
@@ -199,7 +202,8 @@ theorem copy_timeout_prefix :
  (.error .timeout,(locals,Nat.repeatTR Solidity.Lowering.StorageOps.SourceNestedByteCapture.captureStep count state))
 ```
 
-One adapter added to the prior eighteen: nineteen remain pending.
+This checkpoint originally brought the recorded subtotal to nineteen. C171 is
+now compiled; other adapters retain their individual recorded status.
 
 ## C172: nonempty nested capture outer wrapper
 

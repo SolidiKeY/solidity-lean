@@ -1,6 +1,0 @@
-{
-  "source": "Original visible user turn reconstructed from this conversation, including full original work/backfill and owner map; not fetched from a coordinator-local path.",
-  "expected_rendered_prompt_sha256": "518e26e7e6b82308414777d768ebcce02a2dcaae3ff79a678ed32da3630d9e9c",
-  "limitation": "Byte-exact full rendered prompt not exposed as a retrievable file/tool resource; reconstruction formatting/order may differ. Do not claim expected rendered SHA verification. Original visible assignment content and all owner-map values are retained.",
-  "actual_visible_assignment_sha256": "d4503522bb0eb406b940640994ac38d9160ab74b7a55ad7a14d0cc096f46c469"
-}

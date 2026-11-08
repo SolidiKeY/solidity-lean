@@ -1,0 +1,135 @@
+import Solidity.Backend.AbiEntry.ValueCheckedBodies
+
+/-! Guards accepting reject-all or always-revert compilers from conditional body
+certificates alone. General nil-continuation lemmas retain the actual compiler
+selection, memory representation and payability gate. Refusal controls keep dirty
+and short input behavior visible. These are gasless intrinsic IR results, not
+Source/native/physical memory, Osaka gas, fork or global census acceptance. -/
+namespace Solidity.H62.BytecodeSelection.ValueCheckedBodySuccess
+open Solidity Solidity.Evm Solidity.Backend.AbiEntry
+open Solidity.Backend.AbiEntry.Interface
+variable {C : Contract}
+
+/-- Actual selected Boolean entry with a feasible nil continuation succeeds. -/
+theorem bool_nil_success (base : Nat) (payable : Bool) (label word : Fin W)
+    (machine : Machine) (initialWord : machine.mem base = .val word)
+    (initialSize : machine.mem (base+1) = .val (wmod 36))
+    (allowed : (payable || decide (machine.callvalue.val=0))=true)
+    (valid : Solidity.AbiEntry.Kind.bool.valid word.val=true) :
+    run (ValueCheckedBodies.Bool.compiled (C:=C) base payable label .nil
+      (Frag.init BoolBoundCtx) rfl).code machine =
+      .ok (boolBoundMachine base label word machine) 0 := by
+  rw [ValueCheckedBodies.Bool.executed base payable label .nil (Frag.init BoolBoundCtx) rfl
+    _ (BoolBindingBody.selectedBody base .nil (Frag.init BoolBoundCtx) rfl)
+    (ValueCheckedBodies.Bool.selected base payable label .nil (Frag.init BoolBoundCtx) rfl)
+    (BoolBindingBody.body_selected base .nil (Frag.init BoolBoundCtx) rfl)
+    machine word (wmod 36) initialWord initialSize]
+  have full : ¬ (wmod 36).val < 36 := by decide
+  simp only [allowed, if_true, if_neg full, if_pos valid]
+  rfl
+
+/-- Actual selected unsigned entry with a feasible nil continuation succeeds. -/
+theorem uint_nil_success (base bits : Nat) (payable : Bool) (label word : Fin W)
+    (machine : Machine) (initialWord : machine.mem base = .val word)
+    (initialSize : machine.mem (base+1) = .val (wmod 36))
+    (allowed : (payable || decide (machine.callvalue.val=0))=true)
+    (valid : (Solidity.AbiEntry.Kind.uint bits).valid word.val=true) :
+    run (ValueCheckedBodies.UInt.compiled (C:=C) base bits payable label .nil
+      (Frag.init UIntBoundCtx) rfl).code machine =
+      .ok (uintBoundMachine base label word machine) 0 := by
+  rw [ValueCheckedBodies.UInt.executed base bits payable label .nil (Frag.init UIntBoundCtx) rfl
+    _ (UIntBindingBody.selectedBody base .nil (Frag.init UIntBoundCtx) rfl)
+    (ValueCheckedBodies.UInt.selected base bits payable label .nil (Frag.init UIntBoundCtx) rfl)
+    (UIntBindingBody.body_selected base .nil (Frag.init UIntBoundCtx) rfl)
+    machine word (wmod 36) initialWord initialSize]
+  have full : ¬ (wmod 36).val < 36 := by decide
+  simp only [allowed, if_true, if_neg full, if_pos valid]
+  rfl
+
+/-- Seed both cells in one machine; later-cell priority is intentional. -/
+def seeded (base : Nat) (word size : Fin W) (machine : Machine) : Machine :=
+  { machine with mem := fun cell =>
+    if cell = base+1 then .val size else if cell=base then .val word else machine.mem cell }
+
+private theorem seeded_word (base : Nat) (word size : Fin W) (machine : Machine) :
+    (seeded base word size machine).mem base = .val word := by
+  have distinct : base ≠ base+1 := Nat.ne_of_lt (Nat.lt_succ_self base)
+  simp only [seeded, if_neg distinct, ite_true]
+private theorem seeded_size (base : Nat) (word size : Fin W) (machine : Machine) :
+    (seeded base word size machine).mem (base+1) = .val size := by
+  simp only [seeded, ite_true]
+
+/-- The admitted certificate, selected artifact and actual success coexist. -/
+theorem bool_joint_success :
+    ∃ (program : {C : Contract} → {Δ : Ctx} → Bool → Fin W → Prog C BoolBoundCtx Δ → Prog C RouteCtx Δ)
+      (_certificate : ValueCheckedBoolBodyCertificate program) (C : Contract)
+      (whole : Compiler.Compilation 7 (Frag.init RouteCtx)
+        (program (C:=C) true (wmod 13) (.nil : Prog C BoolBoundCtx BoolBoundCtx)))
+      (machine : Machine),
+      @program = @ValueCheckedBodies.Bool.program ∧
+      Compiler.compile 7 (Frag.init RouteCtx)
+        (program (C:=C) true (wmod 13) (.nil : Prog C BoolBoundCtx BoolBoundCtx)) = some whole ∧
+      machine.mem 7 = .val (wmod 1) ∧ machine.mem 8 = .val (wmod 36) ∧
+      run whole.code machine = .ok (boolBoundMachine 7 (wmod 13) (wmod 1) machine) 0 := by
+  refine ⟨ValueCheckedBodies.Bool.program, ValueCheckedBodies.Bool.certificate, {vars:=[]},
+    ValueCheckedBodies.Bool.compiled 7 true (wmod 13) .nil (Frag.init BoolBoundCtx) rfl,
+    seeded 7 (wmod 1) (wmod 36) Machine.init, rfl,
+    ValueCheckedBodies.Bool.selected 7 true (wmod 13) .nil (Frag.init BoolBoundCtx) rfl,
+    seeded_word 7 _ _ _, seeded_size 7 _ _ _, ?_⟩
+  exact bool_nil_success 7 true (wmod 13) (wmod 1) _
+    (seeded_word 7 _ _ _) (seeded_size 7 _ _ _) rfl (by decide)
+
+/-- A reject-all compiler contradicts this family's real selection. -/
+theorem bool_reject_all_refused (base : Nat) (payable : Bool) (label : Fin W) :
+    (none : Option (Compiler.Compilation base (Frag.init RouteCtx)
+      (ValueCheckedBodies.Bool.program (C:=C) payable label (.nil : Prog C BoolBoundCtx BoolBoundCtx)))) ≠
+    Compiler.compile base (Frag.init RouteCtx)
+      (ValueCheckedBodies.Bool.program payable label (.nil : Prog C BoolBoundCtx BoolBoundCtx)) := by
+  rw [ValueCheckedBodies.Bool.selected base payable label .nil (Frag.init BoolBoundCtx) rfl]
+  intro impossible
+  cases impossible
+
+/-- Always-revert disagrees on every represented valid payable Boolean input. -/
+theorem bool_always_revert_refused (base : Nat) (label word : Fin W) (machine : Machine)
+    (valid : Solidity.AbiEntry.Kind.bool.valid word.val=true) :
+    run [.revert] (seeded base word (wmod 36) machine) ≠
+      run (ValueCheckedBodies.Bool.compiled (C:=C) base true label .nil
+        (Frag.init BoolBoundCtx) rfl).code (seeded base word (wmod 36) machine) := by
+  rw [bool_nil_success base true label word _ (seeded_word base _ _ _)
+    (seeded_size base _ _ _) rfl valid]
+  intro impossible
+  cases impossible
+
+/-- A full dirty Boolean still reverts in the same selected implementation. -/
+theorem bool_dirty_reverts (base : Nat) (label : Fin W) (machine : Machine) :
+    run (ValueCheckedBodies.Bool.compiled (C:=C) base true label .nil
+      (Frag.init BoolBoundCtx) rfl).code (seeded base (wmod 2) (wmod 36) machine) = .revert := by
+  rw [ValueCheckedBodies.Bool.executed base true label .nil (Frag.init BoolBoundCtx) rfl
+    _ (BoolBindingBody.selectedBody base .nil (Frag.init BoolBoundCtx) rfl)
+    (ValueCheckedBodies.Bool.selected base true label .nil (Frag.init BoolBoundCtx) rfl)
+    (BoolBindingBody.body_selected base .nil (Frag.init BoolBoundCtx) rfl)
+    _ (wmod 2) (wmod 36) (seeded_word base _ _ _) (seeded_size base _ _ _)]
+  have full : ¬ (wmod 36).val < 36 := by decide
+  have dirty : ¬ Solidity.AbiEntry.Kind.bool.valid (wmod 2).val=true := by decide
+  simp only [Bool.true_or, if_true, if_neg full, if_neg dirty]
+
+/-- A short head reverts without needing a validity premise. -/
+theorem bool_short_reverts (base : Nat) (label word : Fin W) (machine : Machine) :
+    run (ValueCheckedBodies.Bool.compiled (C:=C) base true label .nil
+      (Frag.init BoolBoundCtx) rfl).code (seeded base word (wmod 35) machine) = .revert := by
+  rw [ValueCheckedBodies.Bool.executed base true label .nil (Frag.init BoolBoundCtx) rfl
+    _ (BoolBindingBody.selectedBody base .nil (Frag.init BoolBoundCtx) rfl)
+    (ValueCheckedBodies.Bool.selected base true label .nil (Frag.init BoolBoundCtx) rfl)
+    (BoolBindingBody.body_selected base .nil (Frag.init BoolBoundCtx) rfl)
+    _ word (wmod 35) (seeded_word base _ _ _) (seeded_size base _ _ _)]
+  have short : (wmod 35).val < 36 := by decide
+  simp only [Bool.true_or, if_true, if_pos short]
+
+#print axioms bool_nil_success
+#print axioms uint_nil_success
+#print axioms bool_joint_success
+#print axioms bool_reject_all_refused
+#print axioms bool_always_revert_refused
+#print axioms bool_dirty_reverts
+#print axioms bool_short_reverts
+end Solidity.H62.BytecodeSelection.ValueCheckedBodySuccess

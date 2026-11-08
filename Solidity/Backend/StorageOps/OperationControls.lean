@@ -98,6 +98,13 @@ theorem late_failure_forward :
 theorem late_failure_reverse :
     (modifyMany clears [1] numericSlots).bind (modifyMany pops [0, 0]) = none := rfl
 
+/-- Regression: an actual successful disjoint clear leaves the repeated-pop
+failure intact at the exact produced store, not just as an outer bind result. -/
+theorem late_failure_after_successful_clear :
+    modifyMany pops [0, 0] (Slots.write numericSlots 1 live.clear) = none :=
+  modifyMany_failure_after_disjoint numericSlots (Slots.write numericSlots 1 live.clear)
+    [0, 0] [1] pops clears (by decide) rfl rfl
+
 /-- The family scheduler is not an always-failing implementation. -/
 theorem family_success : ((modifyMany pops [0] numericSlots).bind
     (modifyMany clears [1])).map
@@ -302,4 +309,6 @@ theorem recursive_suffix_failure :
 /-- info: 'Solidity.Backend.StorageOps.generated_family_outside' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms generated_family_outside
 
+/-- info: 'Solidity.Backend.StorageOps.OperationControls.late_failure_after_successful_clear' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms late_failure_after_successful_clear
 end Solidity.Backend.StorageOps.OperationControls

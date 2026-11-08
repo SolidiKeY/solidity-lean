@@ -13,4 +13,5 @@ import Solidity.Examples.DecisionResidue
 import Solidity.Examples.DecisionStorageArrays
 import Solidity.Examples.DecisionThreeKindCoverage
 import Solidity.Examples.Tactics.OpenLoops
+import Solidity.Examples.Tactics.OpenLoops.RowsNine
 import Solidity.Examples.Tactics.RevertData
