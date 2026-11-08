@@ -652,3 +652,42 @@ def source_range_bindings(rows, sources, source_sha256):
         "sources":[{"module":m,"sha256":source_sha256[m],"bytes":len(sources[m]),
                     "supplied_records":counts[m]} for m in sorted(sources)],
         "boundary":"Pinned snapshot range bytes only; line slices can exceed declarations. Caller authenticates pins/metadata; no source identity, ownership, statement correspondence, inherited instantiation or witness coverage."}
+
+
+def federated_hypothesis_reports(slices):
+    """Guard supplemental observations from erasing inspection boundaries.
+
+    Reuse the single-inspection join independently; never normalize fingerprints
+    or infer one coherent environment. Disjoint names and module scopes make
+    union counts explicit without duplicate statement or witness credit.
+    """
+    if not isinstance(slices,list) or not slices:
+        raise ValueError("inspection slices missing")
+    ids,names,modules=set(),set(),set()
+    packets=[]
+    for part in slices:
+        if (not isinstance(part,dict) or set(part)!={"id","rows","mapping","artifacts"}
+                or not text(part["id"]) or part["id"] in ids):
+            raise ValueError("invalid or duplicate inspection slice")
+        validate_rows(part["rows"])
+        if not part["rows"]:
+            raise ValueError("empty inspection slice")
+        # Calling the existing join preserves its mixed-fingerprint rejection.
+        index=hypothesis_report_index(part["rows"],part["mapping"],part["artifacts"])
+        current_names={r["name"] for r in part["rows"]}
+        current_modules={r["module"] for r in part["rows"]}|set(part["mapping"])
+        if names&current_names or modules&current_modules:
+            raise ValueError("overlapping inspection names or module scopes")
+        ids.add(part["id"]);names.update(current_names);modules.update(current_modules)
+        packets.append({"id":part["id"],"module_scope":sorted(current_modules),
+            "inspection_fingerprint":part["rows"][0]["manifest_sha256"],"index":index})
+    packets.sort(key=lambda p:p["id"])
+    return {"inspection_slices":packets,
+        "summary":{"slices":len(packets),"disjoint_records":len(names),
+            "disjoint_module_scopes":len(modules),
+            "reported_proof_targets":sum(p["index"]["summary"]["distinct_reported_proof_targets"] for p in packets),
+            "unreported_records":sum(p["index"]["summary"]["unreported_records"] for p in packets)},
+        "coherent_environment_established":False,"proof_acceptance_established":False,
+        "source_correspondence_established":False,"full_census_accepted":False,
+        "global_witness_ledger_linked":False,
+        "boundary":"Disjoint supplied inspection slices only; individual fingerprints and all gaps retained, no coherent kernel environment, accepted proof, source or witness coverage inferred."}

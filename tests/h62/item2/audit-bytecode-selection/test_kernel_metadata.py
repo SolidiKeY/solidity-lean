@@ -56,6 +56,42 @@ class MetadataSchemaTests(unittest.TestCase):
             with self.subTest(change=change),self.assertRaises(ValueError):hypothesis_report_index([row],{'M':[]},[bad])
         saved=copy.deepcopy(result);a['entries'][0]['target']['type_expr']='mutation';self.assertEqual(result,saved)
 
+    def federation_fixture(self):
+        base=self.ranged_row();field,_=self.projection_report_fixture()
+        field.update(module='Supplement',name='Supplement.Cert.ok',manifest_sha256='supplement-fingerprint')
+        return [dict(id='base',rows=[base],mapping={'M':[self.source_candidate(base)]},artifacts=[]),
+                dict(id='supplement',rows=[field],mapping={'Supplement':[]},artifacts=[self.report_fixture(field,'supplement')])]
+    def test_federation_preserves_fingerprints_reports_and_base_gaps(self):
+        parts=self.federation_fixture();result=federated_hypothesis_reports(parts)
+        self.assertEqual(result['summary'],{'slices':2,'disjoint_records':2,'disjoint_module_scopes':2,'reported_proof_targets':1,'unreported_records':1})
+        self.assertEqual([p['inspection_fingerprint'] for p in result['inspection_slices']],['fingerprint','supplement-fingerprint'])
+        first,second=[p['index']['declarations'][0] for p in result['inspection_slices']]
+        self.assertEqual(first['report_status'],'no_report');self.assertEqual(second['report_status'],'reported_proof')
+        self.assertEqual(second['source_ids'],[])
+        for key in ['coherent_environment_established','proof_acceptance_established','source_correspondence_established','full_census_accepted','global_witness_ledger_linked']:
+            self.assertFalse(result[key])
+        self.assertEqual(result,federated_hypothesis_reports(list(reversed(parts))))
+        for part,packet in zip(parts,result['inspection_slices']):
+            self.assertEqual(packet['index']['declarations'][0]['record_sha256'],observed_type(part['rows'][0])['record_sha256'])
+        with_empty=copy.deepcopy(parts);with_empty[0]['mapping']['Empty']=[]
+        empty_result=federated_hypothesis_reports(with_empty)
+        self.assertEqual(empty_result['inspection_slices'][0]['module_scope'],['Empty','M'])
+        self.assertEqual(empty_result['summary']['disjoint_module_scopes'],3)
+        saved=copy.deepcopy(result);parts[1]['rows'][0]['type_expr']='changed';self.assertEqual(result,saved)
+    def test_federation_refuses_overlap_ids_empty_and_mixed_contexts(self):
+        parts=self.federation_fixture()
+        for change in ['id','name','module','mapping']:
+            bad=copy.deepcopy(parts)
+            if change=='id':bad[1]['id']=bad[0]['id']
+            elif change=='name':bad[1]['rows'][0]['name']=bad[0]['rows'][0]['name']
+            elif change=='module':bad[1]['rows'][0]['module']='M'
+            else:bad[1]['mapping']['M']=[]
+            with self.subTest(change=change),self.assertRaises(ValueError):federated_hypothesis_reports(bad)
+        with self.assertRaises(ValueError):federated_hypothesis_reports([])
+        with self.assertRaises(ValueError):federated_hypothesis_reports([dict(id='empty',rows=[],mapping={},artifacts=[])])
+        mixed=dict(id='mixed',rows=parts[0]['rows']+parts[1]['rows'],mapping=dict(parts[0]['mapping'],**parts[1]['mapping']),artifacts=[])
+        with self.assertRaises(ValueError):federated_hypothesis_reports([mixed])
+
     def test_hypothesis_reports_deduplicate_successes_and_retain_failures_and_gaps(self):
         row=self.ranged_row();other=self.row();other.update(name="unreported",user_name="unreported",declaration_range=None)
         mapping={"M":[self.source_candidate(row)]}

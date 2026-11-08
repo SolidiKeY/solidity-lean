@@ -3099,3 +3099,18 @@ native-packet identities for the field-report slice are indexed privately:
 ```text
 evidence: 30264d332317fbc05cc9719da0ccd2e5982fa945 evidence/solidity-parallel-20261103/executable-bytecode/proof-field-report-links-1d683ac4/INDEX.json
 ```
+
+
+### Disjoint inspection slices
+
+Never flatten inspection fingerprints to feed a single-snapshot report join.
+`federated_hypothesis_reports` applies that join independently and refuses
+shared declaration names or module scopes. Keep each slice's fingerprint,
+module roster (including empty entries), report pointers and unresolved records.
+Union counts do not establish a coherent kernel environment or proof/source
+acceptance. The supplemental premise-record replay and its original receipts
+are indexed privately:
+
+```text
+evidence: eaddb0624de9a751bff875327f96b9a57f7068c1 evidence/solidity-parallel-20261103/executable-bytecode/combined-premise-report-links-b4edbd63/INDEX.json
+```
