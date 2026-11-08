@@ -228,3 +228,10 @@ commands; it never enters the core import graph.
 | `Theorems.lean` | The headline theorems in notation, over the scoped calculus and the typed run, their axioms pinned: soundness, the rule table against the strategy (`rule_exists`, `rule_of_step`), the solkey fragment at the rule level (`solkey_rule_exists`, `solkey_rule_lt_calculus`, `solkey_step_taclet`) and at the judgement level (`solkey_eq_calculus`, `solkey_lt_calculus`), the compiler (`σ ≈[C, L, b, F] m`: `Evm.Sim` of the typed state). |
 
 | `Semantics/StaticCallState.lean` | Existing-frame resumption and exact visible havoc equality; no execution producer. |
+| `tests/h62/item4/generic-v08/IntrinsicWidthsV2.lean` | Explicit-mapFree fixed-bytes width consumers; isolated checker `scripts/h62/item4/generic-v08/check-width-v2.sh`. Frozen v1 headers remain unresolved; this test proves no historical correspondence or execution adequacy. |
+
+The v2 checker uses the pinned toolchain and unchanged serial resource limits.
+Its explicit `mapFree` consumers neither import nor certify the frozen original
+module. Predicate independence compares two current-signature calls only.
+The five original headers remain unresolved. Missing dirty work and unrecovered
+historical validation remain UNVERIFIABLE under H151.
