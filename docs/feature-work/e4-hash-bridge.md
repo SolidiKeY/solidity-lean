@@ -312,8 +312,9 @@ pinned base; the lane adds none. These inherited failures are documented,
 not treated as passing whole-tree gates. They do not authorize deleting
 historical baseline files or fixtures.
 
-E4-Q1 is resolved as option A. No scope question or producer dependency
-remains. Registration and backfill preserve the original combined bound,
+E4-Q1 is resolved as option A. Acceptance of the inherited H145 whole-tree
+failures is tracked as E4-Q2 in the private handoff; no option changes a
+theorem or premise. Registration and backfill preserve the original combined bound,
 its premises, exclusions and observations. Code changes are committed only
 on the assigned branch; no code push, merge or PR is authorized. The only
 remote writes are the explicitly requested question relay and private
