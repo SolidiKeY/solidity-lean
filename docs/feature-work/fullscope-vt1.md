@@ -47,7 +47,8 @@ configuration. Docker hard12GiB/no-swap, CPU1, LEAN_NUM_THREADS1, one observed L
 frontend, >=4GiB admission/ongoing reserve,180s/file and300s/group remain guarded.
 Generated roots/maps/pins stay central: register Solidity.SolcValidation.IrHex
 and its six pins through serialized integration. Exact final gates, HEAD,
-reviews, cache identity and checksum-bound handoff are archived with coord-evidence.
+reviews, cache identity and checksum-bound handoff remain on this VM for H41
+coordinator pull. Only the required result is submitted through coord-ask.
 
 T02 wait:normal inherited-proxy request to
 https://binaries.soliditylang.org/linux-amd64/list.json returned HTTP403 and
