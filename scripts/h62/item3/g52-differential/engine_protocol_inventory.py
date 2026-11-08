@@ -8,6 +8,7 @@ shape candidates below are metadata, not supported/executed fixtures.
 """
 import argparse
 from collections import Counter
+from copy import deepcopy
 import gzip
 import hashlib
 import json
@@ -42,7 +43,8 @@ def request_profile(request):
             issues.append('beacon-root-shape')
         if not isinstance(params[3], list):
             issues.append('execution-requests-shape')
-    return dict(extra_keys=extra, new_payload_version=request.get('newPayloadVersion'),
+    return dict(extra_keys=extra, extra_fields={key: deepcopy(request[key]) for key in extra},
+                new_payload_version=request.get('newPayloadVersion'),
                 forkchoice_version=request.get('forkchoiceUpdatedVersion'),
                 parameter_count=len(params) if isinstance(params, list) else None,
                 parameter_types=[type(value).__name__ for value in params] if isinstance(params, list) else None,
