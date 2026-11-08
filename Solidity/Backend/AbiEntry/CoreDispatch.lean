@@ -87,9 +87,9 @@ theorem run_route (L base : Nat) (frag : Frag Γ) (index : Idx Γ (.val .uint))
         state machine represented rowRoom selector initial
     rw [step]
     by_cases matched : row.tag.val=selector.val
-    · rw [if_pos matched,target_hit frag row rest fallback selector matched]
+    · rw [ite_eq_left matched,target_hit frag row rest fallback selector matched]
       rfl
-    · rw [if_neg matched,target_miss frag row rest fallback selector matched]
+    · rw [ite_eq_right matched,target_miss frag row rest fallback selector matched]
       exact ih tailRoom
 
 theorem executed (L base : Nat) (frag : Frag Γ) (index : Idx Γ (.val .uint))
