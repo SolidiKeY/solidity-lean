@@ -28,7 +28,7 @@ def summarize(counter, hashed=False):
 def verify_revision_sources(root, rev, nodes):
     for node in nodes:
         path = node.replace(".", "/") + ".lean"
-        result = subprocess.run(["git", "ls-tree", "-z", rev, "--", path], cwd=root,
+        result = subprocess.run(["git", "--no-replace-objects", "ls-tree", "-z", rev, "--", path], cwd=root,
                                 capture_output=True, check=True).stdout
         records = [record for record in result.split(b"\0") if record]
         if len(records) != 1 or b"\t" not in records[0]:
@@ -48,14 +48,14 @@ def main():
                     help="select one owner registrations or their integrated union")
     args = ap.parse_args()
     generate.render(require_sources=False)
-    baseline = subprocess.run(["git", "show", BASE + ":" + generate.NAME], cwd=generate.ROOT,
+    baseline = subprocess.run(["git", "--no-replace-objects", "show", BASE + ":" + generate.NAME], cwd=generate.ROOT,
                               capture_output=True, check=True).stdout.decode("utf-8")
     if args.after_rev:
         if not re.fullmatch(r"[0-9a-f]{40}", args.after_rev):
             raise ValueError("after revision must be a full lowercase commit SHA")
-        subprocess.run(["git", "merge-base", "--is-ancestor", BASE, args.after_rev], cwd=generate.ROOT,
+        subprocess.run(["git", "--no-replace-objects", "merge-base", "--is-ancestor", BASE, args.after_rev], cwd=generate.ROOT,
                        capture_output=True, check=True)
-        after_bytes = subprocess.run(["git", "show", args.after_rev + ":" + generate.NAME], cwd=generate.ROOT,
+        after_bytes = subprocess.run(["git", "--no-replace-objects", "show", args.after_rev + ":" + generate.NAME], cwd=generate.ROOT,
                                      capture_output=True, check=True).stdout
         source_label = "git:" + args.after_rev
     else:

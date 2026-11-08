@@ -27,6 +27,18 @@ class VectorGeneratorTests(unittest.TestCase):
         self.assertEqual({r["op"] for rows in inputs["files"].values() for r in rows},set(g.codec.ARITY))
         for path in census.PATHS: self.assertEqual(outputs[path],(ROOT/path).read_bytes())
         self.assertEqual(outputs,g.generate(copy.deepcopy(inputs)))
+    def test_file_inventory_mutations(self):
+        original = g.inputs_from_sources()
+        missing = copy.deepcopy(original)
+        del missing["files"][census.PATHS[0]]
+        extra = copy.deepcopy(original)
+        extra["files"]["Solidity/Yul/Checks/Extra.lean"] = []
+        reordered = copy.deepcopy(original)
+        reordered["files"] = dict(reversed(list(reordered["files"].items())))
+        for label, data in [("missing", missing), ("extra", extra), ("order", reordered)]:
+            with self.subTest(label=label), self.assertRaises(ValueError):
+                g.generate(data)
+
     def test_inventory_and_schema_mutations(self):
         original=g.inputs_from_sources(); expected=g.generate(original)
         variants={}
