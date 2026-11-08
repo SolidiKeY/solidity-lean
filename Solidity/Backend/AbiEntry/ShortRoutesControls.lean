@@ -27,7 +27,7 @@ private theorem actual (selector size value : Fin W) :
 
 theorem all_short (selector size value : Fin W) (small : size.val<4) :
     run compiled.code (machine selector size value)=.ok (written selector size value short) 0 := by
-  simpa only [shortRouteOutcome,if_pos small] using actual selector size value
+  simpa only [written,Bool.false_eq_true,shortRouteOutcome,ite_eq_left small] using actual selector size value
 
 theorem zero_through_three (selector value : Fin W) :
     run compiled.code (machine selector (wmod 0) value)=.ok (written selector (wmod 0) value short) 0 ∧
@@ -52,8 +52,8 @@ theorem four_nonzero (value : Fin W) (nonzero : value.val≠0) :
   have selected : Interface.payableRouteResult table fallback (wmod 0xdeadbe00)=(wmod 11,false) := by decide
   have full : ¬(wmod 4).val<4 := by decide
   have observed : (machine (wmod 0xdeadbe00) (wmod 4) value).callvalue.val≠0 := nonzero
-  simpa only [shortRouteOutcome,if_neg full,Interface.payableRouteOutcome,selected,Bool.false_or,
-    decide_eq_false observed,if_false] using reached
+  simpa only [written,Bool.false_eq_true,shortRouteOutcome,ite_eq_right full,Interface.payableRouteOutcome,selected,Bool.false_or,
+    decide_eq_false observed,ite_false] using reached
 
 private def bytes : List UInt8 := [0xde,0xad,0xbe]
 private def frame : Source.Fr := {Source.SemanticsExamples.F0 with cd := bytes}
@@ -73,7 +73,8 @@ theorem padded_collision_unguarded :
     (PayableRoutes.selected C 7 table fallback) (machine (rawSelectorWord frame) (wmod bytes.length) (wmod 0))
       (rawSelectorWord frame) rfl
   have chosen : Interface.payableRouteResult table fallback (rawSelectorWord frame)=(wmod 11,false) := by decide
-  simpa only [Interface.payableRouteOutcome,chosen,Bool.false_or,decide_true,if_true] using reached
+  have observed : (machine (rawSelectorWord frame) (wmod bytes.length) (wmod 0)).callvalue.val=0 := rfl
+  simpa only [written,Interface.payableRouteOutcome,chosen,Bool.false_or,decide_eq_true observed,ite_true] using reached
 
 theorem source_no_ordinary (pipeline : Roadmap.Pipeline) :
     (Source.SemanticsExamples.GAB pipeline).pickFn frame bytes=none :=
