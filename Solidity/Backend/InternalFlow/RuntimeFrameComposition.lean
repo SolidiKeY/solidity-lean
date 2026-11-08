@@ -529,6 +529,6 @@ theorem recursive_index {b : Nat} {Γ ps rs Δ : Ctx} (F : Frag Γ) (name : Name
     (body : Unit → Prog C (rs ++ ps) (rs ++ ps)) :
     (compileRecursive b F name first args ret body).map (fun out => out.checked.code) =
     (compileRecursive b F name second args ret body).map (fun out => out.checked.code) := by
-  simp only [compileRecursive,Option.map_map]
-  rfl
+  unfold compileRecursive
+  cases compileCall b F name args ret (RuntimeFrame.program (body ())) <;> rfl
 end Solidity.Backend.InternalFlow.RuntimeFrame.Composition
