@@ -42,9 +42,9 @@
     "process_ids": 18
   },
   "Solidity/Frontend": {
-    "comment_lines": 9080,
+    "comment_lines": 9093,
     "docs_lines": 0,
-    "docstring_lines": 8314,
+    "docstring_lines": 8327,
     "process_ids": 171
   },
   "Solidity/Hash": {
@@ -193,7 +193,7 @@
   },
   "docs/feature-work": {
     "comment_lines": 0,
-    "docs_lines": 114522,
+    "docs_lines": 114532,
     "docstring_lines": 0,
     "process_ids": 0
   },
