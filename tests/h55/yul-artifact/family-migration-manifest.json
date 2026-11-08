@@ -378,7 +378,8 @@
       "path": "Solidity/Yul/Compilation/SwitchSequence.lean",
       "status": "proof_reuse_partial",
       "migrated_declarations": [
-        "Solidity.Yul.Compilation.SwitchSequence.Artifact.normal_to_model"
+        "Solidity.Yul.Compilation.SwitchSequence.Artifact.normal_to_model",
+        "Solidity.Yul.Compilation.SwitchSequence.Artifact.join_source"
       ],
       "existing_definitions_changed": false
     },
