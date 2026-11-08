@@ -2254,7 +2254,7 @@ The stricter predecessor check refuses the saved native initial trust menus:
 separator rows have `className:null`, which does not satisfy the existing
 attribute predicate. No new native recovery was launched. An attempted change
 to drop that predecessor check was rejected by automatic approval review and
-was not applied. Q-MENU-RECOVERY-PREDECESSOR-01 asks whether a distinct failed-
-predecessor reference contract is authorized; strict admission remains in force
-until answered. Injected positive/negative controls establish harness behavior
+was not applied. The direct Q-MENU-RECOVERY-PREDECESSOR-01 answer keeps strict
+predecessor admission and recovery blocked. No failed-predecessor alternative
+was implemented. Injected positive/negative controls establish harness behavior
 only, not native recovery, screenshots, raster correspondence or parity.

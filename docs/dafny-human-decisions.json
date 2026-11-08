@@ -87,6 +87,12 @@
       "decision": "Direct send_user_message_question_reply,2026-11-08",
       "status": "answered; separate recovery harness added, native admission remains refused",
       "authorization": "Authorize separate new-session recovery; retain original failure and all budgets."
+    },
+    {
+      "question": "Q-MENU-RECOVERY-PREDECESSOR-01",
+      "decision": "Direct send_user_message_question_reply,2026-11-08",
+      "status": "answered; native recovery blocked",
+      "authorization": "Keep strict predecessor admission; recovery remains blocked"
     }
   ]
 }
