@@ -97,7 +97,7 @@ def certificate : Interface.ValueCheckedUIntBodyCertificate program where
   executed := executed
   early_rejection := early_rejection
 
-/-- info: 'Solidity.Backend.AbiEntry.ValueCheckedBodies.UInt.admitted' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiEntry.ValueCheckedBodies.UInt.admitted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms admitted
 /-- info: 'Solidity.Backend.AbiEntry.ValueCheckedBodies.UInt.selected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms selected
@@ -202,7 +202,7 @@ def certificate : Interface.ValueCheckedBoolBodyCertificate program where
   executed := executed
   early_rejection := early_rejection
 
-/-- info: 'Solidity.Backend.AbiEntry.ValueCheckedBodies.Bool.admitted' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiEntry.ValueCheckedBodies.Bool.admitted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms admitted
 /-- info: 'Solidity.Backend.AbiEntry.ValueCheckedBodies.Bool.selected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms selected
