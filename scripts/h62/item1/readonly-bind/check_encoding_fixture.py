@@ -14,7 +14,9 @@ import re
 import subprocess
 
 ROOT = Path(__file__).resolve().parents[4]
-LEAN = Path('/workspace/.setup/tools/lean-4.24.0-linux/bin/lean')
+if os.environ.get('AUDIT_RESOURCE_MODE')=='host' and not os.environ.get('AUDIT_LEAN_SDK'):
+    raise ValueError('host checker requires explicitly configured SDK')
+LEAN=Path(os.environ.get('AUDIT_LEAN_SDK','/workspace/.setup/tools/lean-4.24.0-linux'))/'bin/lean'
 LEAVES = ['Solidity/Source/Hoare.lean',
           'Solidity/Lowering/Readonly/CapturePhases.lean',
           'Solidity/Lowering/Readonly/CaptureFailures.lean']
