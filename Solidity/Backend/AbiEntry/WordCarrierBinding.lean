@@ -40,21 +40,21 @@ theorem run_program (C : Contract) (base : Nat) (kind : Solidity.AbiEntry.Kind) 
     SingleWordGate.run_program C base kind label machine word size initialWord initialSize
   simp only [Interface.singleWordOutcome,Interface.wordGateOutcome] at gate
   by_cases short : size.val<36
-  · rw [if_pos short] at gate
+  · rw [ite_eq_left short] at gate
     rw [run_append_revert gate]
-    exact (if_pos short).symm
-  · rw [if_neg short] at gate
+    exact (ite_eq_left short).symm
+  · rw [ite_eq_right short] at gate
     by_cases valid : kind.valid word.val=true
-    · rw [if_pos valid] at gate
+    · rw [ite_eq_left valid] at gate
       rw [run_append_ok gate]
       have preserved : upd machine.mem (base+1) (.val label) base=.val word :=
         (upd_other machine.mem (.val label) (Nat.ne_of_lt (Nat.lt_succ_self base))).trans initialWord
-      simp only [wordCarrierOutcome,if_neg short,if_pos valid,run,exec_cons_zero,Instr.step,Machine.next,
+      simp only [wordCarrierOutcome,ite_eq_right short,ite_eq_left valid,run,exec_cons_zero,Instr.step,Machine.next,
         Out.bind,preserved]
       rfl
-    · rw [if_neg valid] at gate
+    · rw [ite_eq_right valid] at gate
       rw [run_append_revert gate]
-      simp only [wordCarrierOutcome,if_neg short,if_neg valid]
+      simp only [wordCarrierOutcome,ite_eq_right short,ite_eq_right valid]
 
 theorem executed (C : Contract) (base : Nat) (kind : Solidity.AbiEntry.Kind) (label : Fin W)
     (result : Compiler.Compilation base (Frag.init RouteCtx) (program C kind label))
@@ -66,6 +66,7 @@ theorem executed (C : Contract) (base : Nat) (kind : Solidity.AbiEntry.Kind) (la
   rw [same]
   exact run_program C base kind label machine word size initialWord initialSize
 
+set_option backward.isDefEq.respectTransparency false in
 theorem entry_rejection (C : Contract) (base : Nat) (kind : Solidity.AbiEntry.Kind) (label : Fin W)
     (result : Compiler.Compilation base (Frag.init RouteCtx) (program C kind label))
     (found : Compiler.compile base (Frag.init RouteCtx) (program C kind label)=some result)
@@ -77,13 +78,14 @@ theorem entry_rejection (C : Contract) (base : Nat) (kind : Solidity.AbiEntry.Ki
   rw [executed C base kind label result found machine _ size initialWord initialSize,SingleWordGate.entry_form]
   simp only [wordCarrierOutcome,represented,rawArgumentWord]
   by_cases short : input.size<36
-  · simp only [if_pos short]
-  · simp only [if_neg short]
+  · simp only [ite_eq_left short]
+  · simp only [ite_eq_right short]
     by_cases valid : kind.valid (Solidity.AbiEntry.load input.data 4)=true
-    · simp only [if_pos valid,dif_pos valid]
+    · simp only [ite_eq_left valid,dite_eq_left valid]
       constructor <;> intro impossible <;> cases impossible
-    · simp only [if_neg valid,dif_neg valid]
+    · simp only [ite_eq_right valid,dite_eq_right valid]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The newly declared local is the typed semantic word decoded from bytes. -/
 theorem decoded_and_bound (C : Contract) (base : Nat) (kind : Solidity.AbiEntry.Kind) (label : Fin W)
     (result : Compiler.Compilation base (Frag.init RouteCtx) (program C kind label))
@@ -102,7 +104,7 @@ theorem decoded_and_bound (C : Contract) (base : Nat) (kind : Solidity.AbiEntry.
   refine ⟨⟨Solidity.AbiEntry.load input.data 4,Solidity.AbiEntry.load_lt _ _,valid⟩,
     SingleWordGate.entry_success input fuel kind full valid,?_,?_⟩
   · rw [executed C base kind label result found machine _ size initialWord initialSize]
-    simp only [wordCarrierOutcome,represented,if_neg full,rawArgumentWord,if_pos valid]
+    simp only [wordCarrierOutcome,represented,ite_eq_right full,rawArgumentWord,ite_eq_left valid]
   · exact upd_same _ _ _
 
 def certificate : Interface.WordCarrierBindingCertificate program where
