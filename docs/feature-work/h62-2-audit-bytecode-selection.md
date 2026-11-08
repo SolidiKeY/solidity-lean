@@ -3031,3 +3031,42 @@ not establish arbitrary-body success, Source authenticity/correspondence,
 physical byte loading, charged execution/fork acceptance, full census closure,
 Bridge/package validation or performance acceptance. The original aggregate
 source receipt remains RED and all original STOPs remain binding.
+
+
+### Selected continuations: local mutation and intentional revert
+
+`value-checked-body-continuations.lean.txt` extends the nil-body controls by
+instantiating the existing value-checked compiler with two admitted nonempty
+bodies. The uint body assigns 77 to the validated local. Its general theorem
+retains same-machine word/size representation, payability and validity premises,
+and proves the exact final machine update. A closed certificate/selection/run
+witness uses word 7 and size 36, proves local cell 9 becomes 77, and preserves
+the caller stack `[11,99]`.
+
+The Boolean body deliberately reverts after a valid full input. The resulting
+control refutes unconditional body success for every proposed successful final
+machine and pending skip. This is an intentional body outcome with feasible
+admission, not an impossible input premise. Dirty uint8 word 256 produces revert
+in the selected mutating program. That result does not establish a separate
+intermediate trace, mutation-order or rollback theorem.
+
+All five printed declarations passed the native serial check in 4.589 seconds,
+with a 163815424-byte workload peak and standard-only axioms. The existing
+seeded-input helper is reused through its exact previously checked module and
+artifact, with its identical 246 frozen dependencies; no product is reconstructed
+or rekeyed. The first attempt stopped before Lean because the helper directory
+was not mounted. A later proof attempt needed explicit memory/update types.
+Both failures are retained separately. The repaired run used the same unextended
+epoch and unchanged guards, with no PowerBounds, Bridge or prerequisite build.
+Separate finder/skeptic source and verifier reviews pass. Exact source, artifact,
+helper/import identities, native/axiom/resource records, reviews and failures
+were privately archived and read back byte-for-byte before this claim:
+
+```text
+evidence: 6f0645ac60be82621774491f52666f6896e22194 evidence/solidity-parallel-20261103/executable-bytecode/value-checked-body-continuations-9c6a1e49.json
+```
+
+These gasless intrinsic IR controls do not establish arbitrary-body completion,
+Source/runtime/G01 correspondence, physical byte loading, charged/fork behavior,
+full Bridge/package/performance validation or original census closure. The
+703-source/190-core/37-Bridge obligations and all existing STOPs remain open.
