@@ -50,7 +50,7 @@ def main():
         assert "version "+pin+"," in version,(pin,version)
         save("setup.json",dict(frozen_base=BASE,overlay_head=head,overlay_sha256=digest(out/"audit-overlay.tar"),scope=SCOPE,lean_version=version,checkout=str(checkout),full_assignment_acceptance=False))
     tool=checkout/"scripts/h62/item2/audit-theories"
-    targets=sorted(str(p.relative_to(checkout)) for p in (checkout/"tests/h62/item2/audit-theories").glob("*.lean"))
+    targets=sorted(str(p.relative_to(checkout)) for p in (checkout/"tests/h62/item2/audit-theories").rglob("*.lean"))
     run([sys.executable,tool/"serial_check.py","--lean",lean,"--out",out/"serial",*targets],"serial-driver.log",{"H62_AUDIT_CENSUS_OUT":str(out/"elaborated.json")})
     with LOCK.open("a") as lock:
         fcntl.flock(lock,fcntl.LOCK_EX)
