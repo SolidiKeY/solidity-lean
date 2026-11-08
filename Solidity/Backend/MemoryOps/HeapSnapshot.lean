@@ -89,16 +89,16 @@ theorem captureOverwrite_read {H : HTy} {R Q : RefTy} {E : Ty} (hp : Heap H)
   · rw [sliceElems_length hp src sa hs]
     exact hi
 
-/-- info: 'Solidity.Backend.MemoryOps.captureOverwrite_read' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.captureOverwrite_read' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms captureOverwrite_read
 
-/-- info: 'Solidity.Backend.MemoryOps.overwriteSlice_elems' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.overwriteSlice_elems' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms overwriteSlice_elems
-/-- info: 'Solidity.Backend.MemoryOps.overwriteSlice_frame' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.overwriteSlice_frame' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms overwriteSlice_frame
-/-- info: 'Solidity.Backend.MemoryOps.overwriteSlice_inside' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.overwriteSlice_inside' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms overwriteSlice_inside
-/-- info: 'Solidity.Backend.MemoryOps.overwriteSlice_outside' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.overwriteSlice_outside' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms overwriteSlice_outside
 
 end Solidity.Backend.MemoryOps
