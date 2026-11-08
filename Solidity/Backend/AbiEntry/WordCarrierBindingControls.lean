@@ -154,6 +154,6 @@ theorem protected_and_saved :
 #guard_msgs (whitespace := lax) in #print axioms insufficient_fuel
 /-- info: 'Solidity.Backend.AbiEntry.WordCarrierBindingControls.bound_argument_read' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms bound_argument_read
-/-- info: 'Solidity.Backend.AbiEntry.WordCarrierBindingControls.protected_and_saved' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.AbiEntry.WordCarrierBindingControls.protected_and_saved' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms protected_and_saved
 end Solidity.Backend.AbiEntry.WordCarrierBindingControls
