@@ -276,9 +276,9 @@ theorem resolved_assign_delete_reject {E : Source.Env} {Γ : Source.RCtx} {C : C
   refine ⟨mid,ym,mm,hw1,hs1,hc1,hseq,intrinsic_heap_pair_error σ _ _ mid .revert hi1 hi2,hb.2,?_,hr1,hmem1,hy1⟩
   rw [Evm.run_append_ok hc1];exact hb.2
 
-/-- info: 'Solidity.Backend.MemoryOps.indexedWrite_elems' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.MemoryOps.indexedWrite_elems' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms indexedWrite_elems
-/-- info: 'Solidity.Backend.MemoryOps.indexedWrite_frame' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.MemoryOps.indexedWrite_frame' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms indexedWrite_frame
 /-- info: 'Solidity.Backend.MemoryOps.source_items_cons_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms source_items_cons_run
