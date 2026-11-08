@@ -133,7 +133,7 @@ theorem overwriteIntervals_path {C : Contract} {Γ : Ctx} {R : RefTy} {E T : Ty}
 
 /-- info: 'Solidity.Backend.MemoryOps.replaceSlice_comm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms replaceSlice_comm
-/-- info: 'Solidity.Backend.MemoryOps.overwriteSlice_all_len' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.overwriteSlice_all_len' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms overwriteSlice_all_len
 /-- info: 'Solidity.Backend.MemoryOps.overwriteIntervals_comm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms overwriteIntervals_comm
