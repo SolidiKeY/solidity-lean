@@ -3231,6 +3231,7 @@ import Solidity.Lowering.G17.IndexCaptureControls
 import Solidity.Lowering.G17.OperandStore
 import Solidity.Lowering.G17.ShortCircuit
 import Solidity.Lowering.G17.ShortCircuitControls
+import Solidity.Lowering.G17.ShortCircuitRevertControls
 import Solidity.Lowering.G17.ShortCircuitSource
 import Solidity.Lowering.G19.AssignmentBlocks
 import Solidity.Lowering.G19.AssignmentBlocksControls
