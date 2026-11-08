@@ -55,6 +55,7 @@ theorem source_bool_value_array {D : Source.Layout} (vs : List (Source.Val D .bo
   simp only [sourceBoolValuePayload,List.get_eq_getElem,Fin.getElem_fin,List.getElem_map]
   exact calldataBool_exact (.val vs[i])
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The actual Source copy either fails before allocation, retaining its
 actual input state, or allocates the actual decoded payload. No successful
 copy, postheap or conversion agreement is a premise. -/
@@ -235,10 +236,10 @@ theorem source_cd_bool_eval {E : Source.Env} {Γ : Source.RCtx}
     (hi : y.1.get i=.cdRef rfl off len) :
     (Source.evalE G F (n+2) (sourceBoolCalldataCopy i)).run y=
       (Source.cdToMem F SourceBoolArrayTy off len).run y := by
-  rw [sourceBoolCalldataCopy,Source.evalE,Source.Hoare.run_bind,source_local_value_run G F n y i _ hi]
+  rw [sourceBoolCalldataCopy,Source.evalE.eq_def,Source.Hoare.run_bind,source_local_value_run G F n y i _ hi]
   change (Source.convRV F (n+1) (.array .memory .bool none) (.val (.cdRef rfl off len) : Source.RVal E.layout (.array .calldata .bool none))).run y=_
   unfold Source.convRV
-  rw [dif_neg (show (Source.STy.array .calldata .bool none)≠.array .memory .bool none from by intro h;cases h)]
+  rw [dite_eq_right (show (Source.STy.array .calldata .bool none)≠.array .memory .bool none from by intro h;cases h)]
   rfl
 
 /-- info: 'Solidity.Backend.MemoryOps.source_cd_bool_eval' depends on axioms: [propext, Classical.choice, Quot.sound] -/
