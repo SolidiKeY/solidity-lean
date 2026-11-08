@@ -52,17 +52,17 @@ function index(text,ast,project){
   };
   const nameRange=node=>{
     if(!node)return null;
-    let range=nodeRange(node,node.nameLocation||node.memberLocation||node.nameLocations?.at(-1)||node.pathNode?.nameLocations?.at(-1));
-    if(range)return range;
-    const whole=nodeRange(node);if(!whole)return null;
-    const source=origins.get(node).text,start=offset(source,whole.start),end=offset(source,whole.end),name=node.name||node.memberName;
-    const at=name?source.slice(start,end).indexOf(name):-1;
-    return at>=0?{start:position(source,start+at),end:position(source,start+at+name.length)}:whole;
+    if((node.nameLocations!=null&&!Array.isArray(node.nameLocations))||(node.pathNode?.nameLocations!=null&&!Array.isArray(node.pathNode.nameLocations)))return null;
+    const explicit=node.nameLocation??node.memberLocation??node.nameLocations?.at(-1)??node.pathNode?.nameLocations?.at(-1);
+    // solc reports this sentinel for genuinely unnamed function forms.
+    if(explicit==='-1:-1:-1'&&node.nodeType==='FunctionDefinition'&&node.name===''&&['constructor','receive','fallback'].includes(node.kind))return nodeRange(node);
+    // Invalid explicit compiler metadata cannot be replaced by a text guess.
+    return explicit!=null?(typeof explicit==='string'?nodeRange(node,explicit):null):nodeRange(node);
   };
   const occurrence=point=>{
     const matches=nodes.filter(n=>contains(nameRange(n),point)&&(Number.isSafeInteger(n.referencedDeclaration)||declarations.has(n.id))).sort((a,b)=>{
       const size=n=>{const r=nodeRange(n);return r?offset(text,r.end)-offset(text,r.start):Infinity;};return size(a)-size(b);
-    });const node=matches[0];return node?{node,range:nameRange(node),declaration:declarations.get(node.referencedDeclaration??node.id)}:null;
+    });const node=matches[0],declaration=node&&declarations.get(node.referencedDeclaration??node.id);return node&&(!declaration||nameRange(declaration))?{node,range:nameRange(node),declaration}:null;
   };
   const location=node=>({uri:origins.get(node)?.uri,range:nameRange(node),version:origins.get(node)?.version,sourceHash:origins.get(node)?.hash});
   const referenceNodes=(declaration,include=true)=>{
