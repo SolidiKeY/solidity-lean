@@ -294,4 +294,75 @@ theorem memory_entry_two_plus_ne_fuel (I : Input) (fuel : Nat) :
 #print axioms memory_entry_panic_iff
 #print axioms memory_entry_one_fuel
 #print axioms memory_entry_two_plus_ne_fuel
+
+/-! Guarded regression: zero entry fuel does not check the offset, one fuel does,
+and both remain subordinate to head-size rejection. Revert bounds at sufficient
+fuel must retain outer rejection before low-level payload failure. -/
+def MemoryEntryRevertBounds (I : Input) : Prop :=
+  I.size < 4 + headsOf memoryParams ∨
+    (4 + headsOf memoryParams ≤ I.size ∧
+      (lim < load I.data 4 ∨
+        (load I.data 4 ≤ lim ∧ MemoryBytesRevertBounds I (4 + load I.data 4) 0)))
+
+def MemoryEntryFuelBounds (I : Input) (fuel : Nat) : Prop :=
+  4 + headsOf memoryParams ≤ I.size ∧
+    (fuel = 0 ∨ (fuel = 1 ∧ load I.data 4 ≤ lim))
+
+theorem memory_entry_revert_iff (I : Input) (fuel : Nat) :
+    entry I (fuel + 2) memoryParams = .error .revert ↔ MemoryEntryRevertBounds I := by
+  constructor
+  · intro reverted
+    by_cases short : I.size < 4 + headsOf memoryParams
+    · exact Or.inl short
+    · have head := Nat.le_of_not_gt short
+      by_cases offset : lim < load I.data 4
+      · exact Or.inr ⟨head, Or.inl offset⟩
+      · have bounded := Nat.le_of_not_gt offset
+        have low := (memory_entry_error_iff I (fuel + 1) .revert head bounded).mp reverted
+        exact Or.inr ⟨head, Or.inr ⟨bounded, (memory_bytes_revert_numeric_iff I fuel _ 0).mp low⟩⟩
+  · rintro (short | ⟨head, offset | ⟨bounded, low⟩⟩)
+    · rw [memory_entry_with_contract _ actual_memory_bytes_behavior_spec I (fuel + 1), if_pos short]
+    · rw [memory_entry_with_contract _ actual_memory_bytes_behavior_spec I (fuel + 1),
+        if_neg (Nat.not_lt.mpr head), if_pos offset]
+    · apply (memory_entry_error_iff I (fuel + 1) .revert head bounded).mpr
+      exact (memory_bytes_revert_numeric_iff I fuel _ 0).mpr low
+
+theorem memory_entry_fuel_iff (I : Input) (fuel : Nat) :
+    entry I fuel memoryParams = .error .fuel ↔ MemoryEntryFuelBounds I fuel := by
+  cases fuel with
+  | zero =>
+    constructor
+    · intro exhausted
+      by_cases short : I.size < 4 + headsOf memoryParams
+      · rw [memory_entry_zero_fuel, if_pos short] at exhausted
+        cases exhausted
+      · exact ⟨Nat.le_of_not_gt short, Or.inl rfl⟩
+    · rintro ⟨head, _⟩
+      rw [memory_entry_zero_fuel, if_neg (Nat.not_lt.mpr head)]
+  | succ fuel =>
+    cases fuel with
+    | zero =>
+      constructor
+      · intro exhausted
+        by_cases short : I.size < 4 + headsOf memoryParams
+        · rw [memory_entry_one_fuel, if_pos short] at exhausted
+          cases exhausted
+        · by_cases offset : lim < load I.data 4
+          · rw [memory_entry_one_fuel, if_neg short, if_pos offset] at exhausted
+            cases exhausted
+          · exact ⟨Nat.le_of_not_gt short, Or.inr ⟨rfl, Nat.le_of_not_gt offset⟩⟩
+      · rintro ⟨head, impossible | ⟨_, offset⟩⟩
+        · cases impossible
+        · rw [memory_entry_one_fuel, if_neg (Nat.not_lt.mpr head), if_neg (Nat.not_lt.mpr offset)]
+    | succ fuel =>
+      constructor
+      · intro exhausted
+        exact False.elim (memory_entry_two_plus_ne_fuel I fuel exhausted)
+      · rintro ⟨_, impossible | ⟨one, _⟩⟩
+        · cases impossible
+        · have impossible : Nat.succ fuel = 0 := Nat.succ.inj one
+          cases impossible
+
+#print axioms memory_entry_revert_iff
+#print axioms memory_entry_fuel_iff
 end Solidity.H62.AuditLanguage.AbiBytesEntry
