@@ -1,0 +1,1 @@
+| `Frontend/Admission/DeclarationOccurrences.lean` | Canonical enumeration of every carried Source declaration and intrinsic syntax descendant, with exact membership and resolver-selected target coverage. Root identity does not assert lexical scope; feature classification and operational admission remain separate. |
