@@ -51,3 +51,11 @@ Freshen the entry witness object before checking
 `tests/h62/item2/audit-language/AbiBytesEntrySpec.lean`. Its zero/one-fuel clauses
 are necessary alongside sufficiently fueled outcomes; success preservation alone
 does not certify failure priority.
+
+Use `scripts/h62/item2/audit-language/witness_plan.py` with repeated `--witness`
+module paths and new external `--output`/`--index` paths to plan fresh accounting.
+It grants source-plan credit only. Freshen the listed witness objects and
+`tests/h62/item2/audit-language/WitnessAccounting.lean` before checking generated
+code; also check `tests/h62/item2/audit-language/WitnessAccountingControls.lean`.
+Keep raw leading-binder categories and closed schemas separate. This does not
+replace historical ownership acceptance or semantic interface classification.
