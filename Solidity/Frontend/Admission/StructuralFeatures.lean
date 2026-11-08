@@ -126,17 +126,7 @@ def sourceStructuralUses (unit : Syn .unit) : List (SyntaxOccurrence × Feature)
 theorem sourceStructuralUses_iff (unit : Syn .unit) (site : SyntaxOccurrence) (f : Feature) :
     (site,f) ∈ sourceStructuralUses unit ↔
       Syn.Sub site ⟨.unit,unit⟩ ∧ f ∈ structuralFeaturesAt site.2 := by
-  simp only [sourceStructuralUses, List.mem_flatMap, List.mem_map]
-  constructor
-  · rintro ⟨other,member,feature,present,equality⟩
-    have sites := congrArg Prod.fst equality
-    have features := congrArg Prod.snd equality
-    dsimp only at sites features
-    cases sites
-    cases features
-    exact ⟨(syntaxOccurrences_iff unit site).mp member,present⟩
-  · rintro ⟨subterm,present⟩
-    exact ⟨site,(syntaxOccurrences_iff unit site).mpr subterm,f,present,rfl⟩
+  exact syntaxFieldUses_iff unit structuralFeaturesAt site f
 
 /-- Ordered, duplicate-preserving projection of this explicitly partial
 feature subset. This is not a Source admission certificate. -/
