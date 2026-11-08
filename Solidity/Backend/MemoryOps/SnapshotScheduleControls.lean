@@ -248,7 +248,7 @@ theorem frozen_full (n : Nat) (hn : n+3 < 2^256) :
   refine ⟨h1,h2,?_,hv,hne⟩
   simpa only [restoreCycles,List.append_nil] using primitive_cycles n 1 hn
 
-/-- info: 'Solidity.Backend.MemoryOps.ScheduleControls.touching' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.ScheduleControls.touching' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms touching
 /-- info: 'Solidity.Backend.MemoryOps.ScheduleControls.frozen_full' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms frozen_full
@@ -256,7 +256,9 @@ theorem frozen_full (n : Nat) (hn : n+3 < 2^256) :
  Classical.choice,
  Quot.sound] -/
 #guard_msgs in #print axioms three_meaningful
-/-- info: 'Solidity.Backend.MemoryOps.ScheduleControls.reversed_negative' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.ScheduleControls.reversed_negative' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in #print axioms reversed_negative
 /-- info: 'Solidity.Backend.MemoryOps.ScheduleControls.frozen_negative' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms frozen_negative
@@ -272,7 +274,9 @@ theorem frozen_full (n : Nat) (hn : n+3 < 2^256) :
 #guard_msgs in #print axioms cycles_length
 /-- info: 'Solidity.Backend.MemoryOps.ScheduleControls.cycle_origin' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms cycle_origin
-/-- info: 'Solidity.Backend.MemoryOps.ScheduleControls.primitive_provenance' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.ScheduleControls.primitive_provenance' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in #print axioms primitive_provenance
 /-- info: 'Solidity.Backend.MemoryOps.ScheduleControls.primitive_cycles' depends on axioms: [propext,
  Classical.choice,
