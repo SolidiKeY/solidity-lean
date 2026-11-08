@@ -52,9 +52,9 @@ theorem inhabited_frame :
 #guard_msgs (whitespace := lax) in #print axioms raw_eager_array_panic
 /-- info: 'Solidity.Backend.AbiEntry.LengthCheckControls.raw_eager_bytes_panic' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms raw_eager_bytes_panic
-/-- info: 'Solidity.Backend.AbiEntry.LengthCheckControls.short_before_panic' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.AbiEntry.LengthCheckControls.short_before_panic' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms short_before_panic
-/-- info: 'Solidity.Backend.AbiEntry.LengthCheckControls.fuel_before_panic' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.AbiEntry.LengthCheckControls.fuel_before_panic' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms fuel_before_panic
 /-- info: 'Solidity.Backend.AbiEntry.LengthCheckControls.inhabited_frame' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms inhabited_frame
