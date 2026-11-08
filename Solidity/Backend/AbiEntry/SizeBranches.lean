@@ -115,9 +115,9 @@ def certificate : Interface.SizeBranchesCertificate program where
   executed := executed
   body_outcome := branch_outcome
 
-/-- info: 'Solidity.Backend.AbiEntry.SizeBranches.condition_code' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.AbiEntry.SizeBranches.condition_code' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms condition_code
-/-- info: 'Solidity.Backend.AbiEntry.SizeBranches.admitted' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiEntry.SizeBranches.admitted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms admitted
 /-- info: 'Solidity.Backend.AbiEntry.SizeBranches.whole_selected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms whole_selected
