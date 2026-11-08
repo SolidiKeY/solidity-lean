@@ -31,13 +31,13 @@ theorem decode_uint (D : Source.Layout) (w : Nat) :
     change (if Source.IntTy.u256.lo ≤ ((Source.toWord w).val : Int) ∧
       ((Source.toWord w).val : Int) ≤ Source.IntTy.u256.hi then
       some ((Source.toWord w).val : Int) else none)=_
-    exact if_pos hr
+    exact ite_eq_left hr
   change (match Source.readInt .u256 (Source.toWord w) with
     | some v => Source.mkInt Source.IntTy.u256 v
     | none => .error (.revert []))=_
   rw [rd]
   change Source.mkInt Source.IntTy.u256 ((Source.toWord w).val : Int)=_
-  rw [Source.mkInt,dif_pos hr]
+  rw [Source.mkInt,dite_eq_left hr]
   rfl
 
 /-- The 32-byte reader is bounded even when its requested offset is beyond EOF. -/
@@ -82,6 +82,7 @@ private theorem uint_array_values {D : Source.Layout} (xs : List PrimTy.uint.Den
   intro i
   simp only [List.get_eq_getElem,List.getElem_map,Fin.getElem_fin]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Exact Source allocation for all runtime lengths and all raw input frames.
 No byte-span bound is imposed on this standalone helper. -/
 theorem copy_run {E : Source.Env} {Γ : Source.RCtx}
@@ -138,7 +139,7 @@ theorem guarded_run {E : Source.Env} {Γ : Source.RCtx}
 theorem entry_short_head (data : List UInt8) (i : Nat)
     (short : data.length<Source.wordAt data i+32) :
     Source.cdTail data i 32=.error (.revert []) := by
-  simp only [Source.cdTail,if_pos short]
+  simp only [Source.cdTail,ite_eq_left short]
 
 /-- Allocation-size refusal precedes the element-span check, with the actual
 calldata-entry empty-data revert (not the memory-decoder allocation panic). -/
@@ -146,7 +147,7 @@ theorem entry_large_length (data : List UInt8) (i : Nat)
     (head : ¬data.length<Source.wordAt data i+32)
     (large : 2^64 ≤ Source.wordAt (data.drop (Source.wordAt data i)) 0) :
     Source.cdTail data i 32=.error (.revert []) := by
-  simp only [Source.cdTail,if_neg head,if_pos large]
+  simp only [Source.cdTail,ite_eq_right head,ite_eq_left large]
 
 /-- Truncated elements fail at the published entry span guard. -/
 theorem entry_short_elements (data : List UInt8) (i : Nat)
@@ -154,7 +155,7 @@ theorem entry_short_elements (data : List UInt8) (i : Nat)
     (small : ¬2^64 ≤ Source.wordAt (data.drop (Source.wordAt data i)) 0)
     (short : ¬Source.wordAt data i+32+32*Source.wordAt (data.drop (Source.wordAt data i)) 0≤data.length) :
     Source.cdTail data i 32=.error (.revert []) := by
-  simp only [Source.cdTail,if_neg head,if_neg small,if_neg short]
+  simp only [Source.cdTail,ite_eq_right head,ite_eq_right small,ite_eq_right short]
 
 
 /-- Raw argument bytes after the four-byte selector; not an ABI encoder. -/
@@ -191,13 +192,13 @@ theorem guarded_frame_run {E : Source.Env} {Γ : Source.RCtx}
   rw [guarded_run]
   dsimp only
   by_cases head : data.length<Source.wordAt data i+32
-  · simp only [Source.cdTail,if_pos head]
+  · simp only [Source.cdTail,ite_eq_left head]
   · by_cases large : 2^64≤Source.wordAt (data.drop (Source.wordAt data i)) 0
-    · simp only [Source.cdTail,if_neg head,if_pos large]
+    · simp only [Source.cdTail,ite_eq_right head,ite_eq_left large]
     · by_cases span : Source.wordAt data i+32+32*Source.wordAt (data.drop (Source.wordAt data i)) 0≤data.length
-      · simp only [Source.cdTail,if_neg head,if_neg large,if_pos span,pure,Except.pure]
+      · simp only [Source.cdTail,ite_eq_right head,ite_eq_right large,ite_eq_left span,pure,Except.pure]
         rw [Nat.add_assoc,payload_frame F selectorBytes data four binding]
-      · simp only [Source.cdTail,if_neg head,if_neg large,if_neg span]
+      · simp only [Source.cdTail,ite_eq_right head,ite_eq_right large,ite_eq_right span]
 
 /-- The real resolved implicit conversion, with no target compiler assumed. -/
 def copyExpr {E : Source.Env} {Γ : Source.RCtx}
@@ -212,11 +213,11 @@ theorem eval_copy {E : Source.Env} {Γ : Source.RCtx}
       (.ok (.val (.memRef rfl y.2.heap.next)),
         (y.1,{y.2 with heap := (y.2.heap.alloc
           ⟨ArrayTy,sourceUintMemory (payload F off len)⟩).1})) := by
-  rw [copyExpr,Source.evalE,Source.Hoare.run_bind,source_local_value_run G F n y i _ localRef]
+  rw [copyExpr,Source.evalE.eq_def,Source.Hoare.run_bind,source_local_value_run G F n y i _ localRef]
   change (Source.convRV F (n+1) ArrayTy
     (.val (.cdRef rfl off len) : Source.RVal E.layout (.array .calldata (.int .u256) none))).run y=_
   unfold Source.convRV
-  rw [dif_neg (show (Source.STy.array .calldata (.int .u256) none)≠ArrayTy from by intro h;cases h)]
+  rw [dite_eq_right (show (Source.STy.array .calldata (.int .u256) none)≠ArrayTy from by intro h;cases h)]
   exact copy_run F off len y
 
 /-- A structural decoded table whose contents are DERIVED from raw bytes.
@@ -236,6 +237,7 @@ theorem table_uints {D : Source.Layout} (F : Source.Fr) (off len : Nat) :
     (Source.Data.val (sourceUint (D := D) (payload F off len)[i]))))=_
   rw [calldataUint_values]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Existing intrinsic checked transfer consumes the same raw-derived values.
 Bounds are operation-side slice/destination validity, not decoded payloads. -/
 theorem transfer {D : Source.Layout} {H : HTy} {R : RefTy}
@@ -250,7 +252,7 @@ theorem transfer {D : Source.Layout} {H : HTy} {R : RefTy}
   unfold checkedCalldataUints
   rw [table_uints]
   simp only [Bind.bind,Option.bind,payload_length,
-    dif_pos (show start≤stop ∧ stop≤len from ⟨bounds.ordered,bounds.bounded⟩),dif_pos fits]
+    dite_eq_left (show start≤stop ∧ stop≤len from ⟨bounds.ordered,bounds.bounded⟩),dite_eq_left fits]
 
 /-- A demanded uint256 view computed from the actual frame bytes. Missing
 words retain the existing standalone reader's zero padding; this is not an
@@ -269,6 +271,7 @@ supplied payload agreement and offsets may overlap without a canonical cutoff. -
 def rawViews {D : Source.Layout} (F : Source.Fr) (requests : List (Nat × Nat)) :
     List (AbiEntry.Premises.CalldataView D) := requests.map (rawView F)
 
+set_option backward.isDefEq.respectTransparency false in
 theorem rawViews_coherent {D : Source.Layout} (F : Source.Fr)
     (requests : List (Nat × Nat)) :
     AbiEntry.Premises.V11G34_ViewCoherence (rawViews (D := D) F requests) := by
@@ -288,6 +291,7 @@ def packedViews {D : Source.Layout} (F : Source.Fr) (requests : List (Nat × Nat
     AbiEntry.Premises.V11G34_PackedViews F.cd (rawViews (D := D) F requests) :=
   packCalldataViews F.cd (rawViews F requests) (rawViews_coherent F requests)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The existing intrinsic uint transfer reads exactly the raw-derived payload
 at every captured logical key; no decoded value or successful run is assumed. -/
 theorem packedViews_uints {D : Source.Layout} (F : Source.Fr)
@@ -306,6 +310,7 @@ theorem packedViews_uints {D : Source.Layout} (F : Source.Fr)
       (payload F requests[i.val].1 requests[i.val].2)[j]))))=_
   rw [calldataUint_values]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Every captured raw view feeds the existing checked intrinsic transfer.
 The only bounds are its original source-slice and destination-capacity checks. -/
 theorem packedViews_transfer {D : Source.Layout} {H : HTy} {R : RefTy}
@@ -324,7 +329,7 @@ theorem packedViews_transfer {D : Source.Layout} {H : HTy} {R : RefTy}
   unfold checkedCalldataUints
   rw [packedViews_uints]
   simp only [Bind.bind,Option.bind,payload_length,
-    dif_pos (show start≤stop ∧ stop≤requests[i.val].2 from ⟨bounds.ordered,bounds.bounded⟩),dif_pos fits]
+    dite_eq_left (show start≤stop ∧ stop≤requests[i.val].2 from ⟨bounds.ordered,bounds.bounded⟩),dite_eq_left fits]
 
 /-- info: 'Solidity.Backend.CalldataPackets.RawUint.rawViews_coherent' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms rawViews_coherent
