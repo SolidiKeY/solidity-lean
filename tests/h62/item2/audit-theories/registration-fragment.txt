@@ -74,3 +74,5 @@ row Theory/Audit/H62/PureBoundaryWitnesses.lean | Eight selected Pure input pack
 | `tests/h62/item2/audit-theories/ObservationDomains.lean` | Supplemental Obs.ext joint packet with inhabited word/length domains and observed fields; abstract Obs only. |
 
 | `tests/h62/item2/audit-theories/CleanTailWitnesses.lean` | All six original CleanTail joint telescopes, private input, admitted flag-write system and actual transient reset; source-model only. |
+
+| `tests/h62/item2/audit-theories/ReachableModeWitnesses.lean` | All11 original Reachable/Mode input packets includingprivate, universal setter success and persistent box obligations; source-model only. |
