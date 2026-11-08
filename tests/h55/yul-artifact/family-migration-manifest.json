@@ -331,7 +331,8 @@
       "path": "Solidity/Yul/Compilation/StructuredSequenceCompletion.lean",
       "status": "proof_reuse_partial",
       "migrated_declarations": [
-        "Solidity.Yul.Compilation.StructuredSequenceCompletion.completion_iff"
+        "Solidity.Yul.Compilation.StructuredSequenceCompletion.completion_iff",
+        "Solidity.Yul.Compilation.StructuredSequenceCompletion.model_to_source"
       ],
       "existing_definitions_changed": false
     },
