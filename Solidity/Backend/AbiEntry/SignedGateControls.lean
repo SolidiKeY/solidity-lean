@@ -19,10 +19,10 @@ private theorem actual (bits : Nat) (word : Fin W) :
   SignedGate.executed C 7 bits label (compiled bits) (SignedGate.selected C 7 bits label) (machine word) word rfl
 private theorem accept (bits : Nat) (word : Fin W) (valid : (Solidity.AbiEntry.Kind.int bits).valid word.val=true) :
     run (compiled bits).code (machine word)=.ok (written word) 0 := by
-  simpa only [signedGateOutcome,valid,if_true] using actual bits word
+  simpa only [written,signedGateOutcome,valid,ite_true] using actual bits word
 private theorem reject (bits : Nat) (word : Fin W) (invalid : (Solidity.AbiEntry.Kind.int bits).valid word.val=false) :
     run (compiled bits).code (machine word)=.revert := by
-  simpa only [signedGateOutcome,invalid,Bool.false_eq_true,if_false] using actual bits word
+  simpa only [signedGateOutcome,invalid,Bool.false_eq_true,ite_false] using actual bits word
 
 theorem signed8_edges :
     run (compiled 8).code (machine (wmod 127))=.ok (written (wmod 127)) 0 ∧
@@ -70,7 +70,7 @@ theorem raw_negative_value (fuel len : Nat) :
   constructor
   · decide
   · have valid : (Solidity.AbiEntry.Kind.int 8).valid (Solidity.AbiEntry.load negative.data 1)=true := by decide
-    simp only [Solidity.AbiEntry.cval,dif_pos valid]
+    simp only [Solidity.AbiEntry.cval,dite_eq_left valid]
     exact ⟨_,rfl⟩
 
 theorem malformed_word_fault :
