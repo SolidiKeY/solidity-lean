@@ -25,7 +25,7 @@ def uints (bs : List U) : Source.Calldata D := ⟨[], fun off => if off = 9 then
     (fun i => .val (sourceUint bs[i]))⟩ else none⟩
 theorem uint_repr (bs : List U) : DecodedArrayAt (n := none) (uints bs) 9 bs.length
     (fun _ h => by cases h) (fun i => .val (sourceUint bs[i])) := rfl
-/-- info: 'Solidity.Backend.MemoryOps.SequenceFixtures.bool_repr' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.MemoryOps.SequenceFixtures.bool_repr' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms bool_repr
 /-- info: 'Solidity.Backend.MemoryOps.SequenceFixtures.bool_values' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms bool_values
