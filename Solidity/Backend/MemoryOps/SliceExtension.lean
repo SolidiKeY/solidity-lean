@@ -45,15 +45,15 @@ theorem old_ne_fresh {H : HTy} {R A : RefTy} (hp : Heap H) (o : MObj H A)
     (r.wk (List.prefix_append H [A])).id ≠ (hp.alloc o).2.id :=
   Nat.ne_of_lt r.id_lt
 
-/-- info: 'Solidity.Backend.MemoryOps.sliceElems_keeps' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.MemoryOps.sliceElems_keeps' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms sliceElems_keeps
-/-- info: 'Solidity.Backend.MemoryOps.sliceBounds_keeps' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.MemoryOps.sliceBounds_keeps' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms sliceBounds_keeps
-/-- info: 'Solidity.Backend.MemoryOps.sliceElems_alloc' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.MemoryOps.sliceElems_alloc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms sliceElems_alloc
 /-- info: 'Solidity.Backend.MemoryOps.alias_iff_wk' depends on axioms: [propext] -/
 #guard_msgs in #print axioms alias_iff_wk
-/-- info: 'Solidity.Backend.MemoryOps.old_ne_fresh' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.MemoryOps.old_ne_fresh' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms old_ne_fresh
 
 end Solidity.Backend.MemoryOps

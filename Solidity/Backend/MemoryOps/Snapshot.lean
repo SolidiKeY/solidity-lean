@@ -144,7 +144,7 @@ theorem boundary_empty {α : Type} (xs : List α) : snapshotCopy xs 32 0 32 = xs
 
 /-- info: 'Solidity.Backend.MemoryOps.checkedSnapshotCopy_correct' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms checkedSnapshotCopy_correct
-/-- info: 'Solidity.Backend.MemoryOps.checkedSnapshotCopy_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedSnapshotCopy_none_iff' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms checkedSnapshotCopy_none_iff
 /-- info: 'Solidity.Backend.MemoryOps.snapshotCopy_read' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms snapshotCopy_read

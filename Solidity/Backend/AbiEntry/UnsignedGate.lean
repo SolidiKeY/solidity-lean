@@ -181,7 +181,7 @@ theorem bool_correspondence (C : Contract) (base : Nat) (label : Fin W)
 def certificate : Interface.UnsignedGateCertificate program where
   selected := fun C base bound label => ⟨compiled C base bound label,selected C base bound label⟩
   executed := executed
-/-- info: 'Solidity.Backend.AbiEntry.UnsignedGate.admitted' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiEntry.UnsignedGate.admitted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms admitted
 /-- info: 'Solidity.Backend.AbiEntry.UnsignedGate.selected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms selected
@@ -205,6 +205,6 @@ def certificate : Interface.UnsignedGateCertificate program where
 #guard_msgs (whitespace := lax) in #print axioms uint_correspondence
 /-- info: 'Solidity.Backend.AbiEntry.UnsignedGate.bool_correspondence' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms bool_correspondence
-/-- info: 'Solidity.Backend.AbiEntry.UnsignedGate.condition_code' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.AbiEntry.UnsignedGate.condition_code' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms condition_code
 end Solidity.Backend.AbiEntry.UnsignedGate
