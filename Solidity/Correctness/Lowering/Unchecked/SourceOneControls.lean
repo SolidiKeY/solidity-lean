@@ -1,10 +1,11 @@
-import Solidity.Correctness.Lowering.Unchecked.SourceOne
+import Solidity.Correctness.Lowering.Unchecked.SourceSpelling
 
 /-!
 # Typed Source association controls
 
 Guards losing original Source widths, replacing the actual StmtD.toR result,
-and accepting a different local or operation direction. Positive controls
+accepting a different local or operation direction, and confusing initial
+prefix/postfix or compound spellings. Positive controls
 supply real production typing derivations at every legal integer type; they
 are structural checks, not sampled semantic runs or a Source/model bridge.
 -/
@@ -69,10 +70,44 @@ theorem wrong_source_local_rejected (E : Source.Env) (t : Source.IntTy) :
     (checkTypedSourceOne raw (otherLocal E t)).isNone = true := by
   rfl
 
+/-- Exact initial raw and Source postfix spellings associate. -/
+theorem typed_spelling_accepted (E : Source.Env) (t : Source.IntTy) :
+    (checkTypedSourceSpelling (.incDec .postInc (.name "x")) (postfixDerivation E t)).isSome = true := by
+  rfl
+
+/-- Discarded-result equivalence does not justify changing the input spelling. -/
+theorem prefix_suffix_mismatch_rejected (E : Source.Env) (t : Source.IntTy) :
+    (checkTypedSourceSpelling (.incDec .preInc (.name "x")) (postfixDerivation E t)).isNone = true := by
+  rfl
+
+/-- The raw name must be the actual initial Source identifier. -/
+theorem typed_raw_name_rejected (E : Source.Env) (t : Source.IntTy) :
+    (checkTypedSourceSpelling (.incDec .postInc (.name "y")) (postfixDerivation E t)).isNone = true := by
+  rfl
+
+/-- Canonical compound syntax passes the combined initial/typed boundary. -/
+theorem typed_compound_spelling_accepted (E : Source.Env) (t : Source.IntTy)
+    (fits : Source.AssignOp.add.fits E.isBase E.mapFree
+      (.rational (Source.Q.ofInt 1)) (.int t) = true) :
+    (checkTypedSourceSpelling (.opAssign .add (.name "x") (.num 1)) (compound E t fits)).isSome = true := by
+  rfl
+
+/-- A normalization-related compound is not the spelling of an initial ++. -/
+theorem cross_family_spelling_rejected (E : Source.Env) (t : Source.IntTy)
+    (fits : Source.AssignOp.add.fits E.isBase E.mapFree
+      (.rational (Source.Q.ofInt 1)) (.int t) = true) :
+    (checkTypedSourceSpelling (.incDec .postInc (.name "x")) (compound E t fits)).isNone = true := by
+  rfl
+
 #print axioms typed_postfix_accepted
 #print axioms original_width_retained
 #print axioms typed_compound_accepted
 #print axioms wrong_direction_rejected
 #print axioms wrong_source_local_rejected
+#print axioms typed_spelling_accepted
+#print axioms prefix_suffix_mismatch_rejected
+#print axioms typed_raw_name_rejected
+#print axioms typed_compound_spelling_accepted
+#print axioms cross_family_spelling_rejected
 
 end Solidity.Correctness.Lowering.Unchecked.SourceOneControls
