@@ -46,7 +46,9 @@ full build. Run the same check first:
 1. `git fetch origin master && git merge origin/master` (or a temporary worktree
    with the merge), then `bash scripts/coord-tools/gate.sh touched` in that tree.
    Fix failures there: the pre-gate rejects a head that builds only on an older
-   base, or only in the files it changed.
+   base, or only in the files it changed. On a lane, `coord-ask --done` runs this
+   check itself and does not report a head that fails it or conflicts with master
+   (`--no-check REASON` when the failure is not yours).
 2. A change to a module with many importers (for example `Solidity/Source/**`)
    keeps existing statements: add the new form beside the old one as a versioned
    pair (H57) and move the importers in the same head, or keep the old form until
