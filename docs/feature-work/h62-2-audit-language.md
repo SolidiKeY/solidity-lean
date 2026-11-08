@@ -27,3 +27,9 @@ Repeat `--family SOURCE WITNESS` to check several complete named families
 together; duplicate target and resolved witness identities are refused. This
 remains source accounting. Freshly compile the witness objects before checking
 `tests/h62/item2/audit-language/FixedPointWitnessSuite.lean` for import composition.
+
+Closed counterexamples must be recorded separately from input-tuple certificates.
+`#verify_closed_theorem` checks theorem/Prop status and absence of leading
+parameters; an explicit statement guard must establish the counterexample's
+meaning. Expected telescope-mismatch errors remain negative tests, never
+positive associations or grounds to weaken an original premise.
