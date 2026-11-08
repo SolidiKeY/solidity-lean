@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "auditedOn": "2026-10-25",
   "upstream": {
     "repository": "argotorg/solidity",
@@ -129,7 +129,18 @@
         "tests/solc/Shadowing.sol",
         "scripts/source-shadowing.test.mjs",
         "docs/feature-work/dafny-verification.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.nameOf",
+          "module": "Solidity.Frontend.SolcJson.Body",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Importer name lookup; general declaration identity, scope and shadowing preservation remain unproved.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "comments",
@@ -152,7 +163,18 @@
         "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
         "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.Checked.trivia",
+          "module": "Solidity.Frontend.Checked.Lexer",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Trivia recognition implementation; source-span and specification-annotation preservation remain separate.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "numericLiterals",
@@ -175,14 +197,32 @@
         "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
         "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.parseRational",
+          "module": "Solidity.Frontend.SolcJson.Body",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Frontend.NumericLiteralProofs.fixture_observations_pass",
+          "module": "Solidity.Frontend.NumericLiteralProofs.Fixtures",
+          "class": "c",
+          "premises": [],
+          "direction": "model-to-solc"
+        }
+      ],
+      "citationNotes": "Exact rational parser implementation, not universal importer correspondence or contextual-width preservation. Finite paired numeric-token observations: 42 spellings, 18 accepted exact values and five retained lexical-versus-expression-stage differences. The kernel pins the model observations; the original external solc fixture checker and differential.py validate the pair. This is not universal lexer, constant-expression or compiler parity.",
+      "modelToSolcGap": "General source/compiler numeric correspondence remains open beyond these finite observations; stage differences are retained, not excluded."
     },
     {
       "id": "booleanLiterals",
       "category": "lexical",
       "syntax": "true; false",
       "scope": "model",
-      "current": "present",
+      "current": "partial",
       "requirement": "Produce Boolean values, without numeric implicit coercion.",
       "upstream": [
         {
@@ -192,7 +232,18 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Body.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.expr",
+          "module": "Solidity.Frontend.SolcJson.Body",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Definition-only Boolean import branch; no general source/importer correspondence theorem. Downgraded present to partial under the non-d present gate (F8).",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "stringLiterals",
@@ -215,7 +266,18 @@
         "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
         "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.byteLiteralText",
+          "module": "Solidity.Frontend.SolcJson.Body",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Compiler-supplied literal bytes validation/rendering; not a source-decoder theorem.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "unicodeLiterals",
@@ -238,7 +300,18 @@
         "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
         "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.byteLiteralText",
+          "module": "Solidity.Frontend.SolcJson.Body",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Supplied UTF-8 byte validation; no general source correspondence theorem.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "hexLiterals",
@@ -261,7 +334,18 @@
         "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
         "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.validHexBytes",
+          "module": "Solidity.Frontend.SolcJson.Body",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Even-length hexadecimal predicate; not complete source byte-string decoding.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "addressLiterals",
@@ -284,7 +368,18 @@
         "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
         "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.expr",
+          "module": "Solidity.Frontend.SolcJson.Body",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Numeric/address literal importer branch; checksum and source-admission parity remain open.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "etherUnits",
@@ -301,14 +396,32 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Body.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Source.TypingExamples.w_litUnit",
+          "module": "Solidity.Source.TypingExamples",
+          "class": "c",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.unitFactor?",
+          "module": "Solidity.Syntax.Grammar",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Concrete typed one-ether derivation only; factor table is definitional. No theorem covers all denomination folding and range checks.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "timeUnits",
       "category": "lexical",
       "syntax": "seconds; minutes; hours; days; weeks",
       "scope": "model",
-      "current": "present",
+      "current": "partial",
       "requirement": "Fold literal unit factors; do not infer real-world clock guarantees or calendar arithmetic.",
       "upstream": [
         {
@@ -318,7 +431,18 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Body.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.unitFactor?",
+          "module": "Solidity.Syntax.Grammar",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Definition-only literal factor table; no unit-folding preservation theorem. Downgraded present to partial (F8).",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "pragmaVersion",
@@ -341,7 +465,18 @@
         "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
         "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.Source.readPragmas",
+          "module": "Solidity.Frontend.Source",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Records constraints; not a general compiler-version-range decision theorem.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "pragmaAbicoder",
@@ -370,7 +505,18 @@
         "outcome": "twoPipelines",
         "record": "docs/solidity-scope.md#second-round-2026-10-29",
         "note": "The legacy pipeline takes the pragma coder (v1 or v2); the via-IR pipeline takes coder v2."
-      }
+      },
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.Source.readPragmas",
+          "module": "Solidity.Frontend.Source",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Coder selection and conflicting-directive refusals by implementation.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "pragmaOther",
@@ -392,7 +538,18 @@
         "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
         "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.Source.readPragmas",
+          "module": "Solidity.Frontend.Source",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Recognized mode directives/refusals by implementation; no compiler agreement theorem.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "sourceUnits",
@@ -414,7 +571,18 @@
         "Solidity/Examples/Tactics/SourceUnitsMetadata.lean",
         "scripts/source-units.test.mjs",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.Source.readCompilationUnit",
+          "module": "Solidity.Frontend.SourceUnits",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Compilation-unit reader; cross-file declaration identity preservation unproved here.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "imports",
@@ -436,7 +604,18 @@
         "Solidity/Examples/Tactics/SourceUnitsMetadata.lean",
         "scripts/source-units.test.mjs",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.Source.readCompilationUnit",
+          "module": "Solidity.Frontend.SourceUnits",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Consumes compiler-resolved units; does not prove solc import/remapping resolution.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "contracts",
@@ -453,7 +632,18 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.readContract",
+          "module": "Solidity.Frontend.SolcJson.Contract",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Importer implementation; no all-contract source correspondence theorem.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "interfaces",
@@ -470,7 +660,18 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.readContract",
+          "module": "Solidity.Frontend.SolcJson.Contract",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Interface importer paths; no general inheritance/signature preservation theorem.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "libraries",
@@ -492,7 +693,24 @@
         "Solidity/Examples/Tactics/LibraryTrySource.lean",
         "Solidity/Examples/Tactics/LibraryTryControls.lean",
         "Solidity/Examples/Tactics/LibraryTrySourceIR.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.ContractWorld.LibraryTryFrame.library_frame",
+          "module": "Solidity.Semantics.LibraryTryFrame",
+          "class": "b",
+          "premises": [
+            "role: library kind enabled",
+            "callerRole: caller is ordinary",
+            "static: context is nonstatic",
+            "installed: library address has declared storage",
+            "callerInstalled: caller handle has caller storage"
+          ],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Explicit installed-world library-call frame equation; no general source linking or delegatecall correspondence.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "inheritance",
@@ -509,7 +727,18 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.contractLineage",
+          "module": "Solidity.Frontend.SolcJson.Contract",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Checks/consumes C3 metadata; general source inheritance preservation remains open.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "overrideDeclarations",
@@ -531,7 +760,18 @@
         "tests/upstream/EntryPointsAdmission.lean",
         "scripts/entry-points-left.test.mjs",
         "docs/feature-work/declarations-metadata.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.overrideAliases",
+          "module": "Solidity.Frontend.SolcJson.Contract",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Declaration-identity aliases; full override validation is delegated to solc.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "functions",
@@ -549,7 +789,18 @@
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean",
         "tests/solc/DeclarationMetadata.sol"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.SolcFun.member",
+          "module": "Solidity.Frontend.SolcJson.Contract",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Selected function rendering; no general calling-semantics theorem.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "freeFunctions",
@@ -566,7 +817,18 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.callees",
+          "module": "Solidity.Frontend.SolcJson.Contract",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Declaration-ID call discovery; complete resolution unproved.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "constructors",
@@ -583,7 +845,18 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.SolcFun.ctorMember",
+          "module": "Solidity.Frontend.SolcJson.Contract",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Constructor rendering only; exactly-once initialization, payment and rollback remain separate.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "modifiers",
@@ -600,7 +873,18 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.wrapMods",
+          "module": "Solidity.Syntax.Elab.Lower",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Modifier lowering implementation; order and return/revert preservation unproved.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "modifierPlaceholder",
@@ -625,7 +909,18 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.RawStmt.fillHole",
+          "module": "Solidity.Syntax.Elab.Lower",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Placeholder substitution; no generic continuation-preservation theorem.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "receiveFunction",
@@ -647,7 +942,18 @@
         "tests/upstream/EntryPointsAdmission.lean",
         "scripts/entry-points-left.test.mjs",
         "docs/feature-work/declarations-metadata.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.readContract",
+          "module": "Solidity.Frontend.SolcJson.Contract",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Selected receive paths/refusals; no general raw-call correctness theorem.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "fallbackFunction",
@@ -669,7 +975,18 @@
         "tests/upstream/EntryPointsAdmission.lean",
         "scripts/entry-points-left.test.mjs",
         "docs/feature-work/declarations-metadata.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.readContract",
+          "module": "Solidity.Frontend.SolcJson.Contract",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Selected fallback paths/refusals; arbitrary calldata dispatch not established.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "visibility",
@@ -686,7 +1003,18 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.readContract",
+          "module": "Solidity.Frontend.SolcJson.Contract",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Visibility-dependent dispatch implementation; access-control preservation unproved.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "stateMutability",
@@ -703,7 +1031,18 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.readContract",
+          "module": "Solidity.Frontend.SolcJson.Contract",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Mutability mode handling/refusals; no general static/payment-entry preservation theorem.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "stateVariables",
@@ -720,7 +1059,18 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.renderInitializers",
+          "module": "Solidity.Frontend.SolcJson.Contract",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Initializer rendering, not complete declaration-order correctness.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "constants",
@@ -737,7 +1087,18 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.constVal",
+          "module": "Solidity.Frontend.SolcJson.Body",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Supported constant evaluator; contextual/mobile-width completeness unproved.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "immutables",
@@ -754,7 +1115,18 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.renderInitializers",
+          "module": "Solidity.Frontend.SolcJson.Contract",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Phased substitution implementation, not a general immutable-lifetime theorem.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "publicGetters",
@@ -778,7 +1150,18 @@
         "tests/upstream/EntryPointsAdmission.lean",
         "scripts/entry-points-left.test.mjs",
         "docs/feature-work/declarations-metadata.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.publicGetterPlan",
+          "module": "Solidity.Frontend.SolcJson.Getters",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Getter plan construction/refusals; general correspondence unproved.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "structDeclarations",
@@ -795,7 +1178,18 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.readStructs",
+          "module": "Solidity.Frontend.SolcJson.Body",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Struct schema construction; recursive source legality remains open.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "enumDeclarations",
@@ -812,7 +1206,18 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.specEnumValues",
+          "module": "Solidity.Frontend.SolcJson.Contract",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Declaration-based specification values; runtime conversion/range correctness separate.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "valueTypeDeclarations",
@@ -829,7 +1234,18 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.valueTypeExpr",
+          "module": "Solidity.Frontend.SolcJson.Body",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Supported UDVT expression recognition; nominal preservation unproved.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "errorDeclarations",
@@ -851,7 +1267,18 @@
         "Solidity/Examples/Tactics/SourceUnitsMetadata.lean",
         "scripts/source-units.test.mjs",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.checkErrorAggregateParams",
+          "module": "Solidity.Frontend.SolcJson.Body",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Aggregate parameter checks only; full selector/evaluation/encoding correspondence open.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "eventDeclarations",
@@ -868,7 +1295,18 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.readContract",
+          "module": "Solidity.Frontend.SolcJson.Contract",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Declaration importer only, not observable log preservation.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "usingFor",
@@ -890,7 +1328,18 @@
         "Solidity/Examples/Tactics/SourceUnitsMetadata.lean",
         "scripts/source-units.test.mjs",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.call",
+          "module": "Solidity.Frontend.SolcJson.Body",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Supported extension-call branches; complete applicability/evaluation preservation unproved.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "operatorAliases",
@@ -909,14 +1358,25 @@
         "Solidity/Frontend/SolcJson/Body.lean",
         "Solidity/Examples/Tactics/OperatorAliasesImport.lean",
         "docs/feature-work/numeric-operators.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.operatorAlias?",
+          "module": "Solidity.Frontend.SolcJson.Body",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Compiler-selected alias recognition; nominal/operator correspondence unproved.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "boolType",
       "category": "types",
       "syntax": "bool",
       "scope": "model",
-      "current": "present",
+      "current": "partial",
       "requirement": "Keep Boolean typing distinct from integers and ABI words.",
       "upstream": [
         {
@@ -926,7 +1386,18 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.PrimTy.Denote",
+          "module": "Solidity.Semantics",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Boolean carrier is Bool by definition; no theorem of the full source typing requirement. Downgraded present to partial (F8).",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "integerTypes",
@@ -943,7 +1414,18 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Source.IntTy",
+          "module": "Solidity.Source.Const",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Independent source signedness/valid-width representation; no compiler preservation claim.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "addressTypes",
@@ -960,7 +1442,18 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Source.Val.address",
+          "module": "Solidity.Source.State",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Independent source address carries Fin(2^160); payable conversion correspondence remains separate.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "fixedBytesTypes",
@@ -977,7 +1470,18 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Source.Val.fixedBytes",
+          "module": "Solidity.Source.State",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Source fixed-byte value enforces length; operation/conversion preservation unproved here.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "dynamicBytesType",
@@ -994,7 +1498,18 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Source.Data.bytes",
+          "module": "Solidity.Source.State",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Source byte-content representation; copying/location rules need separate evidence.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "stringType",
@@ -1011,7 +1526,18 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Source.Data.string",
+          "module": "Solidity.Source.State",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Source byte-content representation; member/conversion admission separate.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "dynamicArrays",
@@ -1028,7 +1554,18 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Source.Data.array",
+          "module": "Solidity.Source.State",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Source length/indexed-content representation; no generic assignment/copy theorem.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "fixedArrays",
@@ -1045,7 +1582,18 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Source.Data.array",
+          "module": "Solidity.Source.State",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Static length equals runtime length by representation; length evaluation/ABI preservation separate.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "mappings",
@@ -1062,7 +1610,18 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Source.Data.mapping",
+          "module": "Solidity.Source.State",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Total function keyed representation; source-key admission/default/copy correctness separate.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "structTypes",
@@ -1079,7 +1638,18 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.structDef_nodup",
+          "module": "Solidity.AST",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Only distinct keys in the repository struct table, not recursive source identity/layout correctness.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "enumTypes",
@@ -1096,7 +1666,18 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Source.Val.enum",
+          "module": "Solidity.Source.State",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Source enum value carries Fin(layout size); ABI/conversion preservation separate.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "valueTypes",
@@ -1113,7 +1694,18 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Source.Val.udvt",
+          "module": "Solidity.Source.State",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Source UDVT retains declaration identity and underlying value; erasure/operator correspondence unproved.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "internalFunctionTypes",
@@ -1130,7 +1722,18 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Source.Val.internalFn",
+          "module": "Solidity.Source.State",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Source declaration identity representation; dispatch/uninitialized failure needs separate evidence.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "externalFunctionTypes",
@@ -1154,7 +1757,18 @@
         "outcome": "followsG01",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
-      }
+      },
+      "theorems": [
+        {
+          "name": "Solidity.Source.Val.externalFn",
+          "module": "Solidity.Source.State",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Source bounded address/four-byte selector representation; external-call/compiler agreement separate.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "tupleTypes",
@@ -1171,7 +1785,18 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Source.STy.tuple",
+          "module": "Solidity.Source.Types",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Source tuple representation; simultaneous scheduling not proved by constructor.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "storageLocation",
@@ -1188,7 +1813,18 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Source.Val.storRef",
+          "module": "Solidity.Source.State",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Source typed logical storage reference; binding/copy correspondence separate.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "memoryLocation",
@@ -1205,7 +1841,18 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Source.Val.memRef",
+          "module": "Solidity.Source.State",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Source memory address representation; allocation/alias/copy preservation unproved.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "calldataLocation",
@@ -1222,7 +1869,18 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Source.Val.cdRef",
+          "module": "Solidity.Source.State",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Source calldata offset/length representation; immutability/bounds/compiler agreement separate.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "recursiveTypes",
@@ -1241,7 +1899,9 @@
         "Solidity/TypeGraph.lean",
         "Solidity/Semantics/RecursiveStorage.lean",
         "docs/feature-work/recursive-types.md"
-      ]
+      ],
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "names",
@@ -1258,14 +1918,25 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.expandIdent",
+          "module": "Solidity.Syntax.Grammar",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Embedded-language name expansion; complete source declaration resolution unproved.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "parentheses",
       "category": "expressions",
       "syntax": "(e)",
       "scope": "model",
-      "current": "present",
+      "current": "partial",
       "requirement": "Preserve grouping without introducing a tuple or changing evaluation.",
       "upstream": [
         {
@@ -1275,7 +1946,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.expandExpr",
+          "module": "Solidity.Syntax.Grammar",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Grouping macro branch only; no source evaluation-preservation theorem. Downgraded present to partial (F8).",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "tupleExpressions",
@@ -1292,7 +1974,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.expandExpr",
+          "module": "Solidity.Syntax.Grammar",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Tuple syntax expansion; capture/assignment timing needs semantic proof.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "inlineArrays",
@@ -1314,7 +2007,18 @@
         "Solidity/Examples/Tactics/Aggregates.lean",
         "Solidity/Examples/Tactics/AggregatesImport.lean",
         "docs/feature-work/aggregates.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.inlineArrayTy",
+          "module": "Solidity.Syntax.Elab.Lower",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Mobile/common-type inference implementation; no generic source-preservation theorem.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "memberAccess",
@@ -1331,7 +2035,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.fieldChain",
+          "module": "Solidity.Syntax.Grammar",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Member-chain construction, not resolved-type/member correctness.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "indexAccess",
@@ -1348,7 +2063,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.expandExpr",
+          "module": "Solidity.Syntax.Grammar",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Index syntax expansion; bounds/key conversion/once-only effects not proved here.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "rangeAccess",
@@ -1370,7 +2096,18 @@
         "Solidity/Syntax/Elab/SliceCopy.lean",
         "Solidity/Examples/Tactics/SliceReferenceCopies.lean",
         "docs/calldata-slice-copies.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.sliceElementCopy",
+          "module": "Solidity.Syntax.Elab.SliceCopy",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Slice-copy construction; general endpoint/view correctness separate.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "unaryArithmetic",
@@ -1387,7 +2124,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.expandExpr",
+          "module": "Solidity.Syntax.Grammar",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Unary syntax expansion; checked arithmetic/type preservation separate.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "increments",
@@ -1404,7 +2152,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.incDecParts?",
+          "module": "Solidity.Syntax.Grammar",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Syntax decomposition, not once-only lvalue/overflow correctness.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "deleteExpression",
@@ -1421,7 +2180,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.expandStmt",
+          "module": "Solidity.Syntax.Grammar",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Delete syntax expansion; type defaults/mapping retention require separate theorem.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "arithmetic",
@@ -1438,7 +2208,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.binParts?",
+          "module": "Solidity.Syntax.Grammar",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Operator decomposition, not arithmetic/overflow/division correspondence.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "bitwise",
@@ -1455,7 +2236,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.binParts?",
+          "module": "Solidity.Syntax.Grammar",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Operator decomposition; finite-width source meaning separate.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "shifts",
@@ -1472,7 +2264,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.binParts?",
+          "module": "Solidity.Syntax.Grammar",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Shift decomposition; signedness and width preservation unproved.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "comparisons",
@@ -1489,7 +2292,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.binParts?",
+          "module": "Solidity.Syntax.Grammar",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Comparison decomposition; source admissibility/meaning separate.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "shortCircuit",
@@ -1506,7 +2320,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.expandExpr",
+          "module": "Solidity.Syntax.Grammar",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Syntax expansion; skipped effects preservation unproved.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "conditional",
@@ -1523,7 +2348,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.expandExpr",
+          "module": "Solidity.Syntax.Grammar",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Syntax expansion; inferred/mobile type and lazy arms preservation separate.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "assignment",
@@ -1540,7 +2376,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.assignText",
+          "module": "Solidity.Frontend.SolcJson.Body",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Importer rendering; scheduling/reference-versus-copy preservation separate.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "compoundAssignment",
@@ -1557,7 +2404,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.pushCompoundParts?",
+          "module": "Solidity.Syntax.Grammar",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Syntax decomposition; target capture and arithmetic width correctness unproved.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "explicitConversions",
@@ -1574,7 +2432,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.sourceCast",
+          "module": "Solidity.Frontend.SolcJson.Body",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Cast rendering; legality/truncation/sign/enum preservation separate.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "implicitConversions",
@@ -1591,7 +2460,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Source.implicit_int_range",
+          "module": "Solidity.Source.Types",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Range inclusion for accepted independent-source integer widening only, not all source/compiler conversions.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "structConstruction",
@@ -1608,7 +2488,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.expandExpr",
+          "module": "Solidity.Syntax.Grammar",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Construction syntax expansion; allocation/order preservation unproved.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "namedArguments",
@@ -1625,7 +2516,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.call",
+          "module": "Solidity.Frontend.SolcJson.Body",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Named-call importer paths; complete binding/evaluation-order correctness unproved.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "newMemory",
@@ -1642,7 +2544,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.expandExpr",
+          "module": "Solidity.Syntax.Grammar",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "New-memory syntax expansion; freshness/default/failure proof separate.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "functionCalls",
@@ -1659,7 +2572,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.call",
+          "module": "Solidity.Frontend.SolcJson.Body",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Call importer; receiver/argument capture and fresh-frame preservation unproved here.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "callOptions",
@@ -1676,7 +2600,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.call",
+          "module": "Solidity.Frontend.SolcJson.Body",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Implemented option branches/refusals, not general gas/salt/value correctness.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "metaTypeExpression",
@@ -1693,7 +2628,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.typeBoundExpr",
+          "module": "Solidity.Syntax.Grammar",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Recognized metatype-bound construction; general upstream admission separate.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "blocks",
@@ -1714,7 +2660,18 @@
         "tests/solc/Shadowing.sol",
         "scripts/source-shadowing.test.mjs",
         "docs/feature-work/dafny-verification.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.sound_block",
+          "module": "Solidity.Calculus.SoundControl",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Intrinsic block unfolding pops locals; source shadowing/admission preservation separate.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "uncheckedBlock",
@@ -1731,7 +2688,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Scoped.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.uncheckStmts",
+          "module": "Solidity.Syntax.Elab.Lower",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Unchecked syntax rewriting, not preservation.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "variableDeclarations",
@@ -1748,7 +2716,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Scoped.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.TRun.declLocal",
+          "module": "Solidity.Semantics.Run",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Intrinsic local initialization definition.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "expressionStatements",
@@ -1765,7 +2744,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Scoped.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.RawStmt.eval",
+          "module": "Solidity.Syntax.Raw",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Argument-evaluation constructor, not source correspondence.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "ifStatement",
@@ -1782,7 +2772,29 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Scoped.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.iteStep_sound",
+          "module": "Solidity.Calculus.SoundControl",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.compile_correct",
+          "module": "Solidity.Evm.Correct",
+          "class": "b",
+          "premises": [
+            "hP: inFragP F P = some F' (fragment admission)",
+            "hm: Sim C L b F sigma m (initial simulation)",
+            "hL: L + Prog.pushes P <= Lmax (local room)"
+          ],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Rule soundness is against intrinsic repository semantics. Compiler theorem additionally requires fragment admission, state simulation and local-room bound; neither proves source lowering or solc agreement.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "whileStatement",
@@ -1803,7 +2815,18 @@
         "Solidity/Examples/Tactics/QuantifiedDiamond.lean",
         "tests/solc/QuantifiedDiamond.sol",
         "docs/loops.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Stmt.sound_loop",
+          "module": "Solidity.Calculus.SoundLoops",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Intrinsic loop rule soundness, including its invariant/unwind alternatives. This does not prove source while lowering or unconditional termination (F2/F3).",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "forStatement",
@@ -1824,7 +2847,18 @@
         "Solidity/Examples/Tactics/QuantifiedDiamond.lean",
         "tests/solc/QuantifiedDiamond.sol",
         "docs/loops.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.lowerLoops",
+          "module": "Solidity.Syntax.Elab.Lower",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Source loop lowering; intrinsic loop soundness does not prove this transformation.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "doWhileStatement",
@@ -1841,7 +2875,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Scoped.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.lowerLoops",
+          "module": "Solidity.Syntax.Elab.Lower",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Source loop lowering implementation only.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "breakStatement",
@@ -1858,7 +2903,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Scoped.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.lowerLoops",
+          "module": "Solidity.Syntax.Elab.Lower",
+          "class": "c",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Class c traces lowerLoops plus guard-message regressions in Solidity/Examples/Tactics/Loops.lean:60-106; transformed syntax tests do not prove general lowering correctness (F3).",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "continueStatement",
@@ -1875,7 +2931,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Scoped.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.lowerLoops",
+          "module": "Solidity.Syntax.Elab.Lower",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Flag-based abrupt-control lowering; preservation unproved.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "returnStatement",
@@ -1892,7 +2959,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Scoped.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.lowerReturns",
+          "module": "Solidity.Syntax.Elab.Lower",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Return lowering used during inlining, not general correctness.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "tryStatement",
@@ -1921,7 +2999,36 @@
         "outcome": "followsG01",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
-      }
+      },
+      "theorems": [
+        {
+          "name": "Solidity.Stmt.sound_tryCall",
+          "module": "Solidity.Calculus.SoundCalls",
+          "class": "b",
+          "premises": [
+            "hp: exact Stmt.step result",
+            "sigma.tx.ext: supplied typed external-outcome table"
+          ],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.holdsC_tryCb",
+          "module": "Solidity.Calculus.CallbackSound.Rules",
+          "class": "b",
+          "premises": [
+            "hI: I.FO = true",
+            "hT: I.hasTransfer = false",
+            "hx: closed invariant at caller",
+            "hok: invariant-preserving success continuation",
+            "herr: Error continuation",
+            "hpnc: panic-code continuation",
+            "hoth: other-error continuation"
+          ],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Ordinary typed call outcomes use sigma.tx.ext; the callback rule separately assumes a first-order transfer-free invariant and all named continuation obligations. No arbitrary external-code, source-lowering or solc correspondence proof (F3/F10).",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "catchClauses",
@@ -1946,7 +3053,18 @@
         "Solidity/Semantics/RevertData.lean",
         "Solidity/Calculus/DataIn.lean",
         "Solidity/Examples/Tactics/TryConditions.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.CatchKind.decode_reason",
+          "module": "Solidity.Semantics.Run",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Definitional reason-decoding identity, not full catch correctness.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "revertStatement",
@@ -1963,7 +3081,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Scoped.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.TRun.revertData",
+          "module": "Solidity.Semantics.Run",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Model payload execution definition, not full source/solc agreement.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "emitStatement",
@@ -1980,7 +3109,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Scoped.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.RawStmt.eval",
+          "module": "Solidity.Syntax.Raw",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Definition-level trace: emit arguments are evaluated for effects/failure and the log is dropped. No log-observation theorem; this is class d, not proof of the full row.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "canonicalRethrow",
@@ -2004,7 +3144,18 @@
         "outcome": "followsG01",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
-      }
+      },
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.memoryRethrow?",
+          "module": "Solidity.Frontend.SolcJson.Body",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Canonical memory-rethrow recognizer, not preservation proof.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "assertBuiltin",
@@ -2021,7 +3172,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Elab.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.assertStep_sound",
+          "module": "Solidity.Calculus.SoundControl",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Intrinsic assert rule soundness; the proof does not establish exact Solidity panic-byte observations (F5).",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "requireBuiltin",
@@ -2038,7 +3200,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Elab.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.requireStep_sound",
+          "module": "Solidity.Calculus.SoundControl",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Intrinsic require rule soundness; exact source error payload encoding and all lowering contexts remain separate (F3/F5).",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "revertBuiltin",
@@ -2055,7 +3228,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Elab.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.TRun.revertData",
+          "module": "Solidity.Semantics.Run",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Own-model failure/payload execution only.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "addmodBuiltin",
@@ -2076,7 +3260,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Elab.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.ModOp.evalT",
+          "module": "Solidity.Semantics.Ops",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Wide addition then reduction by definition.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "mulmodBuiltin",
@@ -2097,7 +3292,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Elab.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.ModOp.evalT",
+          "module": "Solidity.Semantics.Ops",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Wide multiplication then reduction by definition.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "keccakBuiltin",
@@ -2124,7 +3330,18 @@
         "outcome": "approved",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "Opaque hash approved; a fixed parameter instantiated by keccak, not an environment input. Collisions: per-run premise plus probability bound (G01 Q3)."
-      }
+      },
+      "theorems": [
+        {
+          "name": "Solidity.keccakBytes",
+          "module": "Solidity.Semantics.Heap",
+          "class": "c",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Computed model Keccak is backed by five fixed guards in Solidity/Keccak.lean. Finite vectors do not prove cryptographic or solc agreement or injectivity (F4).",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "sha256Builtin",
@@ -2151,7 +3368,18 @@
         "outcome": "approved",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "Opaque hash approved as a fixed function."
-      }
+      },
+      "theorems": [
+        {
+          "name": "Solidity.sha256Bytes",
+          "module": "Solidity.Semantics.Heap",
+          "class": "c",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Computed implementation with fixed hash vectors, not universal precompile agreement.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "ripemd160Builtin",
@@ -2178,7 +3406,18 @@
         "outcome": "approved",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "Opaque hash approved as a fixed function."
-      }
+      },
+      "theorems": [
+        {
+          "name": "Solidity.ripemd160Bytes",
+          "module": "Solidity.Semantics.Heap",
+          "class": "c",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Computed implementation with fixed hash vectors, not universal precompile agreement.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "ecrecoverBuiltin",
@@ -2208,7 +3447,18 @@
         "outcome": "approved",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "Opaque ecrecover approved as a fixed function."
-      }
+      },
+      "theorems": [
+        {
+          "name": "Solidity.ecrecoverBytes",
+          "module": "Solidity.Semantics.Heap",
+          "class": "c",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Computed recovery with finite controls; group-law/precompile correctness still open.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "erc7201Builtin",
@@ -2237,7 +3487,32 @@
         "docs/feature-work/abi-hashes.md",
         "Solidity/ERC7201.lean",
         "Solidity/Syntax/Elab/Lower.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Examples.Tactics.AbiFeatures.erc20_namespace",
+          "module": "Solidity.Examples.Tactics.AbiFeatures",
+          "class": "c",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Examples.Tactics.AbiFeatures.empty_namespace",
+          "module": "Solidity.Examples.Tactics.AbiFeatures",
+          "class": "c",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Examples.Tactics.AbiFeatures.utf8_namespace",
+          "module": "Solidity.Examples.Tactics.AbiFeatures",
+          "class": "c",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Three concrete kernel namespace computations; no theorem relates runtime lowering to the ERC7201 root formula. General runtime formula agreement remains open.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "wrapUnwrap",
@@ -2254,7 +3529,18 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Elab.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.call",
+          "module": "Solidity.Frontend.SolcJson.Body",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Importer wrap/unwrap branch only; complete nominal preservation unproved.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "bytesConcat",
@@ -2274,7 +3560,18 @@
         "Solidity/Examples/Tactics/AbiFeatures.lean",
         "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
         "docs/feature-work/abi-hashes.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.abiEncodeWith",
+          "module": "Solidity.Syntax.Elab.Arms",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Shared concatenation encoder implementation, not a general correctness theorem.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "stringConcat",
@@ -2294,14 +3591,25 @@
         "Solidity/Examples/Tactics/AbiFeatures.lean",
         "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
         "docs/feature-work/abi-hashes.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.abiEncodeWith",
+          "module": "Solidity.Syntax.Elab.Arms",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Shared concatenation encoder implementation, not a general correctness theorem.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "msgSender",
       "category": "environment",
       "syntax": "msg.sender",
       "scope": "abstract",
-      "current": "present",
+      "current": "partial",
       "requirement": "Supply a bounded caller identity per call frame; external self-calls change sender.",
       "upstream": [
         {
@@ -2318,7 +3626,18 @@
         "outcome": "approved",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "Universally quantified input approved."
-      }
+      },
+      "theorems": [
+        {
+          "name": "Solidity.TTx.msgSender",
+          "module": "Solidity.Semantics.State",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Definition-only uint256 context field, not address160 bound or external-self-call transition proof. Downgraded present to partial (F8).",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "msgValue",
@@ -2342,7 +3661,18 @@
         "outcome": "approved",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "Universally quantified input approved; bounded by the sender ledger balance (follow-up: sender funds)."
-      }
+      },
+      "theorems": [
+        {
+          "name": "Solidity.TTx.msgValue",
+          "module": "Solidity.Semantics.State",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Context value field; payment/frame validity requires separate assumptions.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "thisAddress",
@@ -2366,7 +3696,18 @@
         "outcome": "approved",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "Approved; this comes from deployment."
-      }
+      },
+      "theorems": [
+        {
+          "name": "Solidity.TTx.selfAddress",
+          "module": "Solidity.Semantics.State",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "uint256 model field, not address160/compiler-dispatch correspondence.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "addressBalance",
@@ -2390,14 +3731,25 @@
         "outcome": "approved",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "Approved as a quantified input; the own balance follows the ledger."
-      }
+      },
+      "theorems": [
+        {
+          "name": "Solidity.State.selfBalance",
+          "module": "Solidity.Semantics.State",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Own-model balance field, not arbitrary chain-account execution proof.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "blockTimestamp",
       "category": "environment",
       "syntax": "block.timestamp",
       "scope": "abstract",
-      "current": "present",
+      "current": "partial",
       "requirement": "Read the environment timestamp; monotonicity, accuracy and miner constraints require explicit premises.",
       "upstream": [
         {
@@ -2414,7 +3766,18 @@
         "outcome": "approved",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "Universally quantified input approved."
-      }
+      },
+      "theorems": [
+        {
+          "name": "Solidity.TTx.timestamp",
+          "module": "Solidity.Semantics.State",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Definition-only environment field; no clock guarantees asserted. Downgraded present to partial (F8).",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "blockCoinbase",
@@ -2435,7 +3798,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "blockDifficulty",
@@ -2456,7 +3821,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "blockPrevrandao",
@@ -2477,7 +3844,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "blockNumber",
@@ -2498,7 +3867,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "blockGaslimit",
@@ -2519,7 +3890,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "blockChainid",
@@ -2540,7 +3913,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "blockBasefee",
@@ -2561,7 +3936,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "blockBlobbasefee",
@@ -2582,7 +3959,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "blockSlotnum",
@@ -2603,7 +3982,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "txOrigin",
@@ -2624,7 +4005,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "txGasprice",
@@ -2645,7 +4028,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "blockhashBuiltin",
@@ -2666,7 +4051,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "blobhashBuiltin",
@@ -2687,7 +4074,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "internalCalls",
@@ -2704,7 +4093,18 @@
       ],
       "localEvidence": [
         "Solidity/Semantics.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Stmt.sound_call",
+          "module": "Solidity.Calculus.SoundCalls",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Intrinsic call-rule soundness after lowering; no importer correctness claim.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "recursiveCalls",
@@ -2721,7 +4121,18 @@
       ],
       "localEvidence": [
         "Solidity/Semantics.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.sound_recursiveCallUnfold",
+          "module": "Solidity.Calculus.SoundControl",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Depth-indexed unfolding, not unconditional termination.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "externalTypedCalls",
@@ -2745,7 +4156,36 @@
         "outcome": "followsG01",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
-      }
+      },
+      "theorems": [
+        {
+          "name": "Solidity.Stmt.sound_tryCall",
+          "module": "Solidity.Calculus.SoundCalls",
+          "class": "b",
+          "premises": [
+            "hp: exact Stmt.step result",
+            "sigma.tx.ext: supplied typed external-outcome table"
+          ],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.holdsC_tryCb",
+          "module": "Solidity.Calculus.CallbackSound.Rules",
+          "class": "b",
+          "premises": [
+            "hI: I.FO = true",
+            "hT: I.hasTransfer = false",
+            "hx: closed invariant at caller",
+            "hok: invariant-preserving success continuation",
+            "herr: Error continuation",
+            "hpnc: panic-code continuation",
+            "hoth: other-error continuation"
+          ],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Ordinary typed call outcomes use sigma.tx.ext; the callback rule separately assumes a first-order transfer-free invariant and all named continuation obligations. No arbitrary external-code, source-lowering or solc correspondence proof (F3/F10).",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "externalSelfCalls",
@@ -2762,7 +4202,18 @@
       ],
       "localEvidence": [
         "Solidity/Semantics.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Premise.sound_trySelfBox",
+          "module": "Solidity.Calculus.SoundCalls",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Intrinsic self=true boxed-call rule executes the supplied modeled self body. It is distinct from the ordinary external oracle branch; no source lowering, complete caller-frame or solc correspondence claim.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "extensionCalls",
@@ -2779,7 +4230,18 @@
       ],
       "localEvidence": [
         "Solidity/Semantics.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Stmt.sound_call",
+          "module": "Solidity.Calculus.SoundCalls",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Intrinsic internal call after lowering; extension resolution not proved.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "functionValues",
@@ -2796,7 +4258,18 @@
       ],
       "localEvidence": [
         "Solidity/Semantics.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.fnTag",
+          "module": "Solidity.Syntax.Elab.Values",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Finite function-tag implementation, not machine-address equality.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "valueOption",
@@ -2813,7 +4286,18 @@
       ],
       "localEvidence": [
         "Solidity/Semantics.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.ExtCall.keyT",
+          "module": "Solidity.Semantics.Run",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Call-key construction, not payment/rollback refinement.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "sendTransfer",
@@ -2852,7 +4336,23 @@
         "outcome": "replace",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "Payment-acceptance boolean not approved: replace it or propose it again. Candidate per G04 Q3: an untyped recipient may accept or refuse each payment depending on history; typed recipients run their own code (G47)."
-      }
+      },
+      "theorems": [
+        {
+          "name": "Solidity.holdsC_transferCb",
+          "module": "Solidity.Calculus.CallbackSound.Rules",
+          "class": "b",
+          "premises": [
+            "hI: I.FO = true",
+            "hT: I.hasTransfer = false",
+            "hx: invariant after booked payment",
+            "hr: continuation after invariant-preserving havoc"
+          ],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Callback invariant and continuation obligations, not a gas-based no-callback theorem.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "emptyDataValueCall",
@@ -2876,7 +4376,18 @@
         "outcome": "replace",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "Payment-acceptance boolean not approved: replace it or propose it again. Candidate per G04 Q3: an untyped recipient may accept or refuse each payment depending on history; typed recipients run their own code (G47)."
-      }
+      },
+      "theorems": [
+        {
+          "name": "Solidity.ContractWorld.World.call_empty",
+          "module": "Solidity.Semantics.ContractWorldCertificates",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Existing operation equation/packaging, not new source correspondence.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "newContract",
@@ -2903,7 +4414,18 @@
         "outcome": "followsG01",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
-      }
+      },
+      "theorems": [
+        {
+          "name": "Solidity.ContractWorld.World.create_installs",
+          "module": "Solidity.Semantics.ContractWorld",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Successful model creation installs storage; no complete dynamic source creation proof.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "creationTry",
@@ -2934,7 +4456,18 @@
         "outcome": "followsG01",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
-      }
+      },
+      "theorems": [
+        {
+          "name": "Solidity.ContractWorld.CreationTryFrame.atomic_tail_failure",
+          "module": "Solidity.Semantics.CreationTryFrame",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Model creation-frame failure atomicity only.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "callbackSemantics",
@@ -2967,7 +4500,26 @@
         "outcome": "provedSpecialCase",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "The no-callback reading must become a proved special case of history-dependent callees with unbounded reentrancy (G01 Q4), not a premise; not yet proved."
-      }
+      },
+      "theorems": [
+        {
+          "name": "Solidity.holdsC_tryCb",
+          "module": "Solidity.Calculus.CallbackSound.Rules",
+          "class": "b",
+          "premises": [
+            "hI: I.FO = true",
+            "hT: I.hasTransfer = false",
+            "hx: invariant at external exit",
+            "hok: success continuation",
+            "herr: error continuation",
+            "hpnc: panic continuation",
+            "hoth: other-error continuation"
+          ],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Invariant-based callback abstraction, not execution of arbitrary external code.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "externalLibraryCalls",
@@ -2994,7 +4546,18 @@
         "outcome": "followsG01",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
-      }
+      },
+      "theorems": [
+        {
+          "name": "Solidity.ContractWorld.Operation.libraryCall_certificate",
+          "module": "Solidity.Semantics.ContractWorldCertificates",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Definition-level operation/result-erasure packaging.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "abiEncode",
@@ -3014,7 +4577,18 @@
         "Solidity/Examples/Tactics/AbiFeatures.lean",
         "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
         "docs/feature-work/abi-hashes.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.abiEncodeNested?",
+          "module": "Solidity.Syntax.Elab.Lower",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Nested encoder lowering, not general source correctness.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "abiEncodePacked",
@@ -3034,7 +4608,18 @@
         "Solidity/Examples/Tactics/AbiFeatures.lean",
         "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
         "docs/feature-work/abi-hashes.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.abiEncodeWith",
+          "module": "Solidity.Syntax.Elab.Arms",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Packed encoder implementation branch, not proof of complete shape coverage.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "abiEncodeWithSelector",
@@ -3055,7 +4640,18 @@
         "Solidity/Examples/Tactics/AbiFeatures.lean",
         "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
         "docs/feature-work/abi-hashes.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.encodeSelector?",
+          "module": "Solidity.Syntax.Elab.Lower",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Selector-prefix construction implementation.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "abiEncodeWithSignature",
@@ -3076,7 +4672,18 @@
         "Solidity/Examples/Tactics/AbiFeatures.lean",
         "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
         "docs/feature-work/abi-hashes.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.encodeSelector?",
+          "module": "Solidity.Syntax.Elab.Lower",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Signature-selector construction implementation.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "abiEncodeCall",
@@ -3097,7 +4704,18 @@
         "Solidity/Examples/Tactics/AbiFeatures.lean",
         "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
         "docs/feature-work/abi-hashes.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.encodeCallTypes?",
+          "module": "Solidity.Syntax.Elab.Values",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Parameter-type lookup only, not complete encodeCall correctness.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "abiDecode",
@@ -3117,7 +4735,18 @@
         "Solidity/Examples/Tactics/AbiFeatures.lean",
         "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
         "docs/feature-work/abi-hashes.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.abiDecodeWith",
+          "module": "Solidity.Syntax.Elab.Lower",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Decoder lowering implementation, not all recursive ABI shapes.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "typeBounds",
@@ -3134,7 +4763,18 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Body.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.typeBound?",
+          "module": "Solidity.Frontend.SolcJson.Body",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Compiler metadata bound extraction, not universal source agreement.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "typeName",
@@ -3154,7 +4794,18 @@
         "Solidity/Examples/Tactics/DeclarationMetadata.lean",
         "tests/solc/DeclarationMetadata.sol",
         "docs/feature-work/declarations-metadata.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.declarationMetadata",
+          "module": "Solidity.Frontend.SolcJson.Body",
+          "class": "c",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Importer definition tested by tests/solc/DeclarationMetadata.sol:26-29; compiler-supplied metadata, not an all-input source correspondence theorem.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "interfaceId",
@@ -3174,7 +4825,18 @@
         "Solidity/Examples/Tactics/DeclarationMetadata.lean",
         "tests/solc/DeclarationMetadata.sol",
         "docs/feature-work/declarations-metadata.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Examples.Tactics.DeclarationMetadata.ownInterface",
+          "module": "Solidity.Examples.Tactics.DeclarationMetadata",
+          "class": "c",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Concrete imported own-interface fixture only; selectors supplied by solc, not independently computed and proved equivalent.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "functionSelector",
@@ -3193,7 +4855,18 @@
         "Solidity/Syntax/Elab/Values.lean",
         "Solidity/Frontend/SolcJson/Contract.lean",
         "tests/solc/DeclarationMetadata.sol"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.fnSelector?",
+          "module": "Solidity.Syntax.Elab.Values",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Function selector metadata computation; general signature agreement unproved.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "functionAddress",
@@ -3212,7 +4885,18 @@
         "Solidity/Syntax/Elab/Values.lean",
         "Solidity/Frontend/SolcJson/Contract.lean",
         "tests/solc/DeclarationMetadata.sol"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.fnPure",
+          "module": "Solidity.Syntax.Elab.Values",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Packed external-function address projection by implementation.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "errorEventSelector",
@@ -3232,7 +4916,25 @@
         "Solidity/Examples/Tactics/DeclarationMetadata.lean",
         "tests/solc/DeclarationMetadata.sol",
         "docs/feature-work/declarations-metadata.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Examples.Tactics.DeclarationMetadata.errorSelectors",
+          "module": "Solidity.Examples.Tactics.DeclarationMetadata",
+          "class": "c",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Examples.Tactics.DeclarationMetadata.eventSelector",
+          "module": "Solidity.Examples.Tactics.DeclarationMetadata",
+          "class": "c",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Concrete imported error/event selector fixtures only; no general signature-hash agreement theorem.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "arrayLength",
@@ -3249,7 +4951,18 @@
       ],
       "localEvidence": [
         "Solidity/Semantics/Storage/Ops.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Storage.len",
+          "module": "Solidity.Semantics.Storage.Ops",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Logical array length by definition.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "arrayPush",
@@ -3266,7 +4979,18 @@
       ],
       "localEvidence": [
         "Solidity/Semantics/Storage/Ops.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.pushStep_sound",
+          "module": "Solidity.Calculus.SoundStore",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Intrinsic typed storage push rule soundness, not complete source evaluation-order or physical layout agreement.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "arrayPushReference",
@@ -3283,7 +5007,18 @@
       ],
       "localEvidence": [
         "Solidity/Semantics/Storage/Ops.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Storage.pushPlace_len",
+          "module": "Solidity.Semantics.Storage.Ops",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Successful logical push-place grows length; no full source-copy/order theorem.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "arrayPop",
@@ -3300,7 +5035,18 @@
       ],
       "localEvidence": [
         "Solidity/Semantics/Storage/Ops.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.popStep_sound",
+          "module": "Solidity.Calculus.SoundStore",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Intrinsic typed storage pop rule soundness, not complete source mapping-tail or physical slot agreement.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "storageCopy",
@@ -3317,7 +5063,18 @@
       ],
       "localEvidence": [
         "Solidity/Semantics/Storage/Ops.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.TRun.assign",
+          "module": "Solidity.Semantics.Run",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Assignment evaluates source value and writes logical storage; full deep-copy/source agreement unproved.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "memoryAliasing",
@@ -3334,7 +5091,18 @@
       ],
       "localEvidence": [
         "Solidity/Semantics/Storage/Ops.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Heap.readAddr",
+          "module": "Solidity.Semantics.Run",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Logical heap-address lookup implementation.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "storageAliasing",
@@ -3351,7 +5119,18 @@
       ],
       "localEvidence": [
         "Solidity/Semantics/Storage/Ops.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Storage.findLive",
+          "module": "Solidity.Semantics.Storage.Ops",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Live logical storage path lookup, not reference-copy correctness.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "deleteMappingTails",
@@ -3368,7 +5147,18 @@
       ],
       "localEvidence": [
         "Solidity/Semantics/Storage/Ops.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.SVal.defaultOf",
+          "module": "Solidity.Semantics.Storage.Ops",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Model defaulting/mapping-tail behavior by definition.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "danglingReferences",
@@ -3385,7 +5175,18 @@
       ],
       "localEvidence": [
         "Solidity/Semantics/Storage/Ops.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Storage.findLive",
+          "module": "Solidity.Semantics.Storage.Ops",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Live-path behavior; general Solidity dangling-reference agreement open.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "transientState",
@@ -3413,7 +5214,18 @@
         "Solidity/Frontend/WorldImport.lean",
         "Solidity/Examples/Tactics/TransientWorldSource.lean",
         "scripts/check-transient-world-vectors.mjs"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.ContractWorld.World.resetTransient_persistent",
+          "module": "Solidity.Semantics.TransientWorld",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Persistent state survives transient reset; remaining world/source/layout obligations separate.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "checkedArithmetic",
@@ -3430,7 +5242,142 @@
       ],
       "localEvidence": [
         "docs/solc-alignment.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Evm.exp_tail",
+          "module": "Solidity.Evm.Exp",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.compile_correct",
+          "module": "Solidity.Evm.Correct",
+          "class": "b",
+          "premises": [
+            "hP: inFragP F P = some F' (fragment admission)",
+            "hm: Sim C L b F sigma m (initial simulation)",
+            "hL: L + Prog.pushes P <= Lmax (local room)"
+          ],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.add_tail",
+          "module": "Solidity.Evm.SimLemmas",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.sub_tail",
+          "module": "Solidity.Evm.SimLemmas",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.mul_tail",
+          "module": "Solidity.Evm.SimLemmas",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.div_tail",
+          "module": "Solidity.Evm.SimLemmas",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.mod_tail",
+          "module": "Solidity.Evm.SimLemmas",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.sadd_tail",
+          "module": "Solidity.Evm.Signed",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.ssub_tail",
+          "module": "Solidity.Evm.Signed",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.smul_tail",
+          "module": "Solidity.Evm.Signed",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.sdiv_tail",
+          "module": "Solidity.Evm.Signed",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.smod_tail",
+          "module": "Solidity.Evm.Signed",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.neg_run",
+          "module": "Solidity.Evm.Signed",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.tail_simT",
+          "module": "Solidity.Evm.SimLemmas",
+          "class": "b",
+          "premises": [
+            "hop: binInFrag op p = true",
+            "hand: op != and",
+            "hor: op != or",
+            "hacc: op.accepts p = true",
+            "ha: ReprV p a wa",
+            "hb: ReprV p b wb"
+          ],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.compound_simT",
+          "module": "Solidity.Evm.SimLemmas",
+          "class": "b",
+          "premises": [
+            "hop: op.hasCompoundAssign = true",
+            "hp: p.isNumeric = true",
+            "ha: ReprV p a wa",
+            "hb: ReprV p b wb"
+          ],
+          "direction": "model"
+        },
+        {
+          "name": "Solidity.Evm.bump_simT",
+          "module": "Solidity.Evm.SimLemmas",
+          "class": "b",
+          "premises": [
+            "hp: p.isNumeric = true",
+            "h: ReprV p a w"
+          ],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "uint256/int256 admitted symbolic-machine compiler fragment only. compile_correct has hP/hm/hL premises and permits coarse revert/fault outcomes; guards do not establish all source intermediate widths, pipeline orders or exact panic bytes. F8 under-citation corrected without upgrading partial. F1/F10 payment-disjunction and oracle limits, F2 source composition, F3 lowering, F4 symbolic storage, F5 coarse failures and F6 fragment boundaries remain open.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "uncheckedArithmetic",
@@ -3447,7 +5394,18 @@
       ],
       "localEvidence": [
         "docs/solc-alignment.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.uncheckStmts",
+          "module": "Solidity.Syntax.Elab.Lower",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Unchecked syntax rewriting only. No theorem that every intermediate source width/mode, called function lexical mode, division or indexing is preserved (F3/F6).",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "evaluationOrder",
@@ -3471,7 +5429,18 @@
         "outcome": "twoPipelines",
         "record": "docs/solidity-scope.md#second-round-2026-10-29",
         "note": "Settings are solc's two pipelines only: the legacy order with the pragma coder, and the via-IR order with coder v2; the other six EvalOrder flag combinations are not in the profile."
-      }
+      },
+      "theorems": [
+        {
+          "name": "Solidity.Args.evalT",
+          "module": "Solidity.Semantics.Run",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Model argument traversal definition only. It does not impose a universal source order or prove the selected compiler pipeline preserves scheduling (F3).",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "exactConstants",
@@ -3494,7 +5463,18 @@
         "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
         "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.constVal",
+          "module": "Solidity.Frontend.SolcJson.Body",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Supported exact constant evaluation implementation, not complete contextual/mobile typing correspondence.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "defaultInitialization",
@@ -3511,7 +5491,18 @@
       ],
       "localEvidence": [
         "docs/solc-alignment.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Storage.init",
+          "module": "Solidity.Semantics.Storage.Ops",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Logical storage defaults by definition; location/function defaults separate.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "referenceCopyRules",
@@ -3530,7 +5521,18 @@
         "docs/solc-alignment.md",
         "Solidity/Examples/Tactics/Aggregates.lean",
         "docs/feature-work/aggregates.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.State.copyStToM",
+          "module": "Solidity.Semantics.State",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Storage-to-memory copy implementation only; baseline examples/tests are not a general proof.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "panicCodes",
@@ -3550,7 +5552,18 @@
         "docs/feature-work/calls-exceptions.md",
         "Solidity/Examples/Tactics/SelfPowerData.lean",
         "tests/solc/SelfPowerData.sol"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.TRun.selfPanicCode",
+          "module": "Solidity.Semantics.Run",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Model self-call panic-code table; baseline examples/tests do not establish all panic-byte agreement.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "revertPayloads",
@@ -3570,7 +5583,18 @@
         "docs/feature-work/calls-exceptions.md",
         "Solidity/Examples/Tactics/SelfPowerData.lean",
         "tests/solc/SelfPowerData.sol"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.TRun.revertData",
+          "module": "Solidity.Semantics.Run",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Model payload assembly; baseline examples/tests do not prove arbitrary payload correspondence.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "rollback",
@@ -3587,7 +5611,18 @@
       ],
       "localEvidence": [
         "docs/solc-alignment.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.StaticInvocation.Frame.rollback",
+          "module": "Solidity.Semantics.StaticInvocation",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Definitional checkpoint equality stored by the Frame relation; not a substantive operational/source rollback theorem.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "abiEntryValidation",
@@ -3615,7 +5650,18 @@
         "outcome": "followsG01",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
-      }
+      },
+      "theorems": [
+        {
+          "name": "Solidity.AbiEntry.verdict_revert_iff",
+          "module": "Solidity.Semantics.AbiEntryProofs",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Definitional classification of the entry checker result; this wrapper identity does not establish decoder validity, source acceptance or complete shape/range checks.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "constructorLifetime",
@@ -3639,7 +5685,18 @@
         "outcome": "followsG01",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
-      }
+      },
+      "theorems": [
+        {
+          "name": "Solidity.Lifetime.System.Init",
+          "module": "Solidity.Semantics.Lifetime",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Initial lifetime states require successful admitted deployment by definition, not arbitrary typed states.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "nonpayableEntry",
@@ -3656,7 +5713,18 @@
       ],
       "localEvidence": [
         "docs/solc-alignment.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Lifetime.System.run",
+          "module": "Solidity.Semantics.Lifetime",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "External entry rejects nonzero value when not payable; internal calls use separate semantics.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "staticCallRestriction",
@@ -3680,7 +5748,18 @@
         "outcome": "followsG01",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
-      }
+      },
+      "theorems": [
+        {
+          "name": "Solidity.StaticInvocation.Exec.storage",
+          "module": "Solidity.Semantics.StaticInvocation",
+          "class": "a",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Static model execution preserves storage; other resource/observable restrictions separate.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "termination",
@@ -3697,7 +5776,23 @@
       ],
       "localEvidence": [
         "docs/solc-alignment.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.TLoop.run_measure",
+          "module": "Solidity.Semantics.Termination",
+          "class": "b",
+          "premises": [
+            "keep: invariant preserved",
+            "decreases: rank strictly decreases",
+            "stop: terminal postcondition",
+            "hI: initial invariant"
+          ],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Natural-rank conditional termination; no totality claim for all source programs.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "worldAssumptions",
@@ -3721,7 +5816,18 @@
         "outcome": "replace",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "Not approved: replace it or propose it again. The G01 Q4 environment (history-dependent callees) is the candidate replacement, not part of this decision."
-      }
+      },
+      "theorems": [
+        {
+          "name": "Solidity.TTx.ext",
+          "module": "Solidity.Semantics.State",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Supplied typed external-outcome table, not derived chain behavior.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "typeValidation",
@@ -3744,7 +5850,18 @@
         "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
         "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.Admission.scan",
+          "module": "Solidity.Frontend.SolcJson.Admission",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Admission scanner, not a replacement source typechecker/correspondence theorem.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "featureDetection",
@@ -3766,7 +5883,18 @@
         "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
         "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.Source.ScopeScan.within",
+          "module": "Solidity.Frontend.Source",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Stored feature-list contract follows admitted constructor; not extractor completeness.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "inlineAssembly",
@@ -3787,7 +5915,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "gasleft",
@@ -3808,7 +5938,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "gasOption",
@@ -3829,7 +5961,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "rawCalldata",
@@ -3850,7 +5984,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "rawReturndata",
@@ -3871,7 +6007,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "lowLevelCall",
@@ -3892,7 +6030,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "delegatecall",
@@ -3913,7 +6053,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "lowLevelStaticcall",
@@ -3934,7 +6076,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "selfdestruct",
@@ -3955,7 +6099,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "create2Salt",
@@ -3976,7 +6122,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "addressCode",
@@ -3997,7 +6145,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "addressCodehash",
@@ -4018,7 +6168,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "creationCode",
@@ -4037,7 +6189,18 @@
         "Solidity/Frontend/Source.lean",
         "Solidity/Frontend/SolcJson/Body.lean",
         "scripts/solc-code.mjs"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.Source.readCompilerCode",
+          "module": "Solidity.Frontend.Source",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Reads supplied compiler bytes; source/settings identity and deployed-code agreement separate.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "runtimeCode",
@@ -4056,7 +6219,18 @@
         "Solidity/Frontend/Source.lean",
         "Solidity/Frontend/SolcJson/Body.lean",
         "scripts/solc-code.mjs"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.Source.readCompilerCode",
+          "module": "Solidity.Frontend.Source",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "Reads supplied compiler bytes; deployed account-code agreement unproved.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "logicalStorageBase",
@@ -4074,7 +6248,18 @@
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Admission.lean",
         "Solidity/Semantics/Storage/Anon.lean"
-      ]
+      ],
+      "theorems": [
+        {
+          "name": "Solidity.Frontend.Admission.scan",
+          "module": "Solidity.Frontend.SolcJson.Admission",
+          "class": "d",
+          "premises": [],
+          "direction": "model"
+        }
+      ],
+      "citationNotes": "In-range literal-base admission only, not physical slot/layout correspondence.",
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "storageLayout",
@@ -4095,7 +6280,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "memoryLayout",
@@ -4116,7 +6303,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "transientLayout",
@@ -4137,7 +6326,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "eventLog",
@@ -4158,7 +6349,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "machineResources",
@@ -4179,7 +6372,9 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. The legacy scope label is not an exclusion from the approved full compiler endpoint."
     },
     {
       "id": "fixedPoint",
@@ -4201,7 +6396,9 @@
         "outcome": "fullSupport",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "Moved from upstream into the profile; current is missing, not an implementation claim."
-      }
+      },
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
     },
     {
       "id": "removedAliases",
@@ -4216,7 +6413,9 @@
           "line": 3879
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. Upstream/reserved inventory status is not an implementation proof."
     },
     {
       "id": "unsignedRightShift",
@@ -4231,7 +6430,9 @@
           "line": 575
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. Upstream/reserved inventory status is not an implementation proof."
     },
     {
       "id": "removedUnits",
@@ -4246,7 +6447,9 @@
           "line": 3985
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. Upstream/reserved inventory status is not an implementation proof."
     },
     {
       "id": "reservedKeywords",
@@ -4261,7 +6464,9 @@
           "line": 6
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. Upstream/reserved inventory status is not an implementation proof."
     },
     {
       "id": "invalidLexemes",
@@ -4276,7 +6481,9 @@
           "line": 232
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. Upstream/reserved inventory status is not an implementation proof."
     },
     {
       "id": "removedGenericSolidity",
@@ -4291,7 +6498,9 @@
           "line": 46
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. Upstream/reserved inventory status is not an implementation proof."
     },
     {
       "id": "invalidModifierBody",
@@ -4310,7 +6519,9 @@
           "line": 402
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "theorems": [],
+      "modelToSolcGap": "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement. Upstream/reserved inventory status is not an implementation proof."
     }
   ]
 }
