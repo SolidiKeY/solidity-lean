@@ -226,4 +226,162 @@ theorem constructor_payload_gaps :
 /-- info: 'Solidity.Frontend.Admission.constructor_payload_gaps' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms constructor_payload_gaps
 
+/-! Literal payload tags must survive collection even in unused syntax. These
+markers classify the existing intrinsic literal form only: lexical spelling,
+UTF-8 validity, contextual address classification, exact constant folding and
+admission are not inferred from decoded bytes or a numeric value. -/
+
+/-- Preserve the five distinct intrinsic literal forms in the feature catalog. -/
+def literalFeature : Lit → Feature
+  | .str _ => .stringLiterals
+  | .hexStr _ => .hexLiterals
+  | .unicodeStr _ => .unicodeLiterals
+  | .bool _ => .booleanLiterals
+  | .num _ => .numericLiterals
+
+/-- Direct literal fields; descendants are handled by the canonical visitor.
+A denomination also contains a numeric literal, but its unit feature is separate. -/
+def literalFeaturesAt {c : Cat} (s : Syn c) : List Feature :=
+  Syn.casesOn (motive := fun _ _ => List Feature) s
+    ([]) -- nil
+    (fun _ _ => []) -- cons
+    ([]) -- none
+    (fun _ => []) -- some
+    (fun _ => []) -- unit
+    (fun _ => []) -- pragma
+    (fun _ _ => []) -- importPath
+    (fun _ _ _ => []) -- importSymbols
+    (fun _ _ => []) -- importStar
+    (fun _ _ => []) -- importAlias
+    (fun _ _ _ _ _ => []) -- contract
+    (fun _ _ _ => []) -- interface
+    (fun _ _ => []) -- library
+    (fun _ => []) -- topPart
+    (fun _ _ => []) -- inherit
+    (fun _ _ _ _ _ => []) -- constructor
+    (fun _ _ _ _ _ _ _ _ _ => []) -- function
+    (fun _ _ _ _ _ => []) -- modifier
+    (fun _ _ _ _ _ _ _ => []) -- fallback
+    ([]) -- fbNoParams
+    (fun _ _ _ => []) -- fbParams
+    (fun _ _ _ _ _ _ => []) -- receive
+    (fun _ _ _ => []) -- struct
+    (fun _ _ => []) -- structMember
+    (fun _ _ _ => []) -- enum
+    (fun _ _ => []) -- udvt
+    (fun _ _ _ _ _ _ _ => []) -- stateVar
+    (fun _ _ _ => []) -- constant
+    (fun _ _ _ => []) -- event
+    (fun _ _ _ => []) -- eventParam
+    (fun _ _ => []) -- error
+    (fun _ _ => []) -- errorParam
+    (fun _ => []) -- usingPart
+    (fun _ _ _ => []) -- usingPath
+    (fun _ _ _ _ => []) -- usingAliases
+    (fun _ _ => []) -- usingAlias
+    (fun _ => []) -- positional
+    (fun _ => []) -- named
+    (fun _ _ => []) -- namedArg
+    (fun _ _ => []) -- modInv
+    (fun _ _ _ => []) -- param
+    (fun _ => []) -- elem
+    (fun _ _ _ _ => []) -- fnType
+    (fun _ _ _ _ => []) -- mapping
+    (fun _ => []) -- userType
+    (fun _ _ => []) -- array
+    (fun _ _ _ => []) -- varDecl
+    (fun _ _ => []) -- index
+    (fun _ _ _ => []) -- slice
+    (fun _ _ => []) -- member
+    (fun _ _ _ => []) -- callOptions
+    (fun _ _ => []) -- call
+    (fun _ => []) -- payableConv
+    (fun _ => []) -- metaType
+    (fun _ _ => []) -- unaryPrefix
+    (fun _ _ => []) -- unarySuffix
+    (fun _ _ => []) -- exp
+    (fun _ _ _ => []) -- mulDivMod
+    (fun _ _ _ => []) -- addSub
+    (fun _ _ _ => []) -- shift
+    (fun _ _ => []) -- bitAnd
+    (fun _ _ => []) -- bitXor
+    (fun _ _ => []) -- bitOr
+    (fun _ _ _ => []) -- order
+    (fun _ _ _ => []) -- equality
+    (fun _ _ => []) -- and
+    (fun _ _ => []) -- or
+    (fun _ _ _ => []) -- cond
+    (fun _ _ _ => []) -- assign
+    (fun _ => []) -- new
+    (fun _ _ => []) -- tuple
+    (fun _ _ => []) -- inlineArray
+    (fun _ => []) -- ident
+    (fun value => [literalFeature value]) -- lit
+    (fun _ _ => [.numericLiterals]) -- litUnit
+    (fun _ _ => []) -- elemType
+    (fun _ _ => []) -- declVar
+    (fun _ _ _ _ => []) -- declTuple
+    (fun _ => []) -- exprStmt
+    (fun _ => []) -- blockStmt
+    (fun _ => []) -- simpleStmt
+    (fun _ _ _ => []) -- ifStmt
+    (fun _ _ _ _ => []) -- forStmt
+    (fun _ _ => []) -- whileStmt
+    (fun _ _ => []) -- doWhile
+    ([]) -- continueStmt
+    ([]) -- breakStmt
+    (fun _ _ _ _ _ => []) -- tryStmt
+    (fun _ => []) -- catchPlain
+    (fun _ _ _ _ => []) -- catchSig
+    (fun _ => []) -- returnStmt
+    (fun _ _ => []) -- emit
+    (fun _ _ => []) -- revert
+    (fun _ _ _ => []) -- assembly
+    (fun _ => []) -- block
+    (fun _ => []) -- stmtItem
+    (fun _ => []) -- uncheckedItem
+    (fun _ => []) -- yulBlock
+    (fun _ _ _ => []) -- yulLet
+    (fun _ _ _ => []) -- yulAssign
+    (fun _ => []) -- yulExprStmt
+    (fun _ _ => []) -- yulIf
+    (fun _ _ _ _ => []) -- yulFor
+    (fun _ _ _ => []) -- yulSwitch
+    (fun _ _ => []) -- yulCase
+    ([]) -- yulLeave
+    ([]) -- yulBreak
+    ([]) -- yulContinue
+    (fun _ _ _ _ => []) -- yulFun
+    (fun _ _ => []) -- yulPath
+    (fun _ _ => []) -- yulCall
+    (fun _ => []) -- yulLit
+
+/-- Literal observations reuse the generic collector over the original syntax. -/
+def syntaxLiteralUses {c : Cat} (root : Syn c) : List (SyntaxOccurrence × Feature) :=
+  syntaxFieldUses root literalFeaturesAt
+
+theorem syntaxLiteralUses_iff {c : Cat} (root : Syn c) (site : SyntaxOccurrence)
+    (f : Feature) :
+    (site,f) ∈ syntaxLiteralUses root ↔
+      Syn.Sub site ⟨c,root⟩ ∧ f ∈ literalFeaturesAt site.2 :=
+  syntaxFieldUses_iff root literalFeaturesAt site f
+
+/-- Equal decoded byte payloads retain their distinct intrinsic literal tags.
+This is not a proof that any byte sequence is well formed or admitted. -/
+theorem literal_payload_tags (bytes : List UInt8) (b : Bool) (n : NumLit) :
+    ([Lit.str bytes,.hexStr bytes,.unicodeStr bytes,.bool b,.num n].map literalFeature) =
+      [.stringLiterals,.hexLiterals,.unicodeLiterals,.booleanLiterals,.numericLiterals] := rfl
+
+/-- Root and denomination occurrences are genuine sites in the generic collector. -/
+theorem literal_root_uses (l : Lit) (n : NumLit) (u : Denom) :
+    syntaxLiteralUses (.lit l) = [(⟨_,.lit l⟩,literalFeature l)] ∧
+    syntaxLiteralUses (.litUnit n u) = [(⟨_,.litUnit n u⟩,.numericLiterals)] := ⟨rfl,rfl⟩
+
+/-- info: 'Solidity.Frontend.Admission.syntaxLiteralUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxLiteralUses_iff
+/-- info: 'Solidity.Frontend.Admission.literal_payload_tags' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms literal_payload_tags
+/-- info: 'Solidity.Frontend.Admission.literal_root_uses' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms literal_root_uses
+
 end Solidity.Frontend.Admission
