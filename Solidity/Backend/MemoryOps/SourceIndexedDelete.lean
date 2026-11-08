@@ -37,7 +37,7 @@ theorem SourceBoolMemoryAt.indexLoc_run {E : Source.Env} {Γ : Source.RCtx} {H :
     (F : Source.Fr) (k : Nat) (hk : k<hp.len r a) :
     (Source.indexLoc (E := E) (Γ := Γ) F
       (.memRef rfl address : Source.Val E.layout (.array .memory .bool none)) k).run y=(.ok (.mem address k),y) := by
-  rw [Source.indexLoc,Source.Hoare.run_bind,hr.length_run F]
+  rw [Source.indexLoc.eq_def,Source.Hoare.run_bind,hr.length_run F]
   simp only [hk,↓reduceIte]
   rfl
 
@@ -48,7 +48,7 @@ theorem SourceBoolMemoryAt.indexLoc_bounds {E : Source.Env} {Γ : Source.RCtx} {
     (Source.indexLoc (E := E) (Γ := Γ) F
       (.memRef rfl address : Source.Val E.layout (.array .memory .bool none)) k).run y=
       (.error (.revert (Source.panicData .index)),y) := by
-  rw [Source.indexLoc,Source.Hoare.run_bind,hr.length_run F]
+  rw [Source.indexLoc.eq_def,Source.Hoare.run_bind,hr.length_run F]
   simp only [show ¬k<hp.len r a from Nat.not_lt.mpr hk,↓reduceIte]
   rfl
 
@@ -72,7 +72,7 @@ theorem SourceBoolMemoryAt.eval_index_loc {E : Source.Env} {Γ : Source.RCtx} {H
     (hindex : y.1.get index=sourceUint k) (hk : k.1.toNat<hp.len r a) :
     (Source.evalLoc G F (fuel+2) (.indexArray (.local root) (by decide) (.local index) rfl)).run y=
       (.ok (.mem address k.1.toNat),y) := by
-  rw [Source.evalLoc,Source.Hoare.run_bind,source_local_value_run G F fuel y root _ hroot]
+  rw [Source.evalLoc.eq_def,Source.Hoare.run_bind,source_local_value_run G F fuel y root _ hroot]
   change ((Source.evalE G F (fuel+1) (.local index)) >>= fun value =>
     Source.indexNat value >>= fun n => Source.indexLoc F
       (.memRef rfl address : Source.Val E.layout (.array .memory .bool none)) n).run y=_
@@ -90,7 +90,7 @@ theorem SourceBoolMemoryAt.eval_index_bounds {E : Source.Env} {Γ : Source.RCtx}
     (hindex : y.1.get index=sourceUint k) (hk : hp.len r a≤k.1.toNat) :
     (Source.evalLoc G F (fuel+2) (.indexArray (.local root) (by decide) (.local index) rfl)).run y=
       (.error (.revert (Source.panicData .index)),y) := by
-  rw [Source.evalLoc,Source.Hoare.run_bind,source_local_value_run G F fuel y root _ hroot]
+  rw [Source.evalLoc.eq_def,Source.Hoare.run_bind,source_local_value_run G F fuel y root _ hroot]
   change ((Source.evalE G F (fuel+1) (.local index)) >>= fun value =>
     Source.indexNat value >>= fun n => Source.indexLoc F
       (.memRef rfl address : Source.Val E.layout (.array .memory .bool none)) n).run y=_
