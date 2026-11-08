@@ -43,6 +43,7 @@ theorem wireBytes_values (bs : List Int) :
   intro b _
   simp only [Function.comp_apply, UInt8.toNat_ofNat', Nat.mod_mod]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The intrinsic Keccak value is the actual computed word, with no new hash
 premise. Its defensive out-of-range branch is unreachable by the committed bound. -/
 theorem source_digest (bs : List Int) : keccakBytes bs = digest (wireBytes bs) := by
@@ -50,7 +51,7 @@ theorem source_digest (bs : List Int) : keccakBytes bs = digest (wireBytes bs) :
     keccak_bound (wireBytes bs)
   rw [wireBytes_values] at h
   apply Subtype.ext
-  simp only [keccakBytes, dif_pos h, digest, lenU, wireBytes_values]
+  simp only [keccakBytes, dite_eq_left h, digest, lenU, wireBytes_values]
 
 /-- Word interpretation shared with G06's concrete fixed-function instance. -/
 theorem digest_fixed (bs : List UInt8) : digest bs |>.1.toNat = Roadmap.Evm.keccakWord bs := by
@@ -222,7 +223,7 @@ theorem lowerHash_success {C : Contract} {Γ : Ctx} {R : RefTy}
 
 theorem ecrecover_wrong_length (bs : List Int) (h : bs.length ≠ 128) :
     HashKind.apply .ecrecover bs = uintOfNat 0 := by
-  simp only [HashKind.apply, ecrecoverBytes, List.length_map, h, false_and, if_false]
+  simp only [HashKind.apply, ecrecoverBytes, List.length_map, h, false_and, ite_false]
 
 /-- Read-only precompile input is the very same byte sequence, in order. -/
 theorem precompile_preimage (s : Slice) (offset length : W256) (bs : List Int)
