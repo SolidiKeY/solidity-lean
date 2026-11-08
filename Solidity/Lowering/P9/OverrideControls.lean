@@ -188,7 +188,7 @@ theorem calls_override (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) (s : St re
     rfl
   unfold call
   rw [Source.evalE]
-  simp only [Source.evalConvArgs, pure_bind]
+  simp only [Source.evalConvArgs, Source.withLibraryCalldata, pure_bind]
   unfold Source.EM.sub
   dsimp only [Bind.bind, Pure.pure, ExceptT.run, ExceptT.mk, ExceptT.bind, ExceptT.bindCont,
     ExceptT.pure, StateT.bind, StateT.pure]
@@ -384,7 +384,7 @@ theorem calls_override (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) (s : St re
     rfl
   unfold call
   rw [Source.evalE]
-  simp only [Source.evalConvArgs, pure_bind]
+  simp only [Source.evalConvArgs, Source.withLibraryCalldata, pure_bind]
   unfold Source.EM.sub
   dsimp only [Bind.bind, Pure.pure, ExceptT.run, ExceptT.mk, ExceptT.bind, ExceptT.bindCont,
     ExceptT.pure, StateT.bind, StateT.pure]
