@@ -19,6 +19,8 @@ def withElems {H : HTy} {R : RefTy} {E : Ty} (a : ArrTy R E) :
     (fun {_} o xs hl => ⟨xs, by rw [hl, MObj.elems_dyn]; exact o.property⟩)
     (fun {_} {_} o xs hl => ⟨xs, by rw [hl, MObj.elems_fixed]; exact o.property⟩)
 
+-- Retain typed object-alias matching only for this existing projection proof.
+set_option backward.isDefEq.respectTransparency false in
 theorem elems_withElems {H : HTy} {R : RefTy} {E : Ty} (a : ArrTy R E)
     (o : MObj H R) (xs : List (MVal H E)) (hl : xs.length = (MObj.elems a o).length) :
     MObj.elems a (withElems a o xs hl) = xs := by
