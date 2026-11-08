@@ -1,5 +1,15 @@
 {
-  "status": "partial",
+  "status": "done",
+  "scope": "bounded reference census",
+  "completion_authorization": "H242: explicit unavailable fields, lexical-estimate caveats and inconclusive verdicts are authorized for completion",
+  "counts": {
+    "reference_projects": 8,
+    "pairs": 41,
+    "outliers": 22,
+    "non_outlier_pairs": 19,
+    "historical_timing_samples": 60,
+    "matched_reference_timings": 0
+  },
   "method": "physical source lines, lexical declaration markers and proof/definition region estimates, not kernel declarations; generated detected by path/header, remaining handwritten candidates retain uncertainty",
   "outliers": [
     {
@@ -1217,7 +1227,8 @@
       "reason": "SolKey specification grammar: Nearest parser component; different surface languages. No redundancy or direction conclusion follows without matching the semantic obligations."
     }
   ],
-  "waits": [
+  "waits": [],
+  "limitations": [
     "Numeric reference check times not established; published-times.json records bounded source search",
     "Native declaration metrics and exact proof/definition separation remain unsupported for mixed implementation languages; lexical estimates only"
   ],
