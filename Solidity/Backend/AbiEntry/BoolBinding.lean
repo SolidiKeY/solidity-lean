@@ -69,6 +69,7 @@ theorem executed (C : Contract) (base : Nat) (label : Fin W)
   rw [same]
   exact run_program C base label machine word size initialWord initialSize
 
+set_option backward.isDefEq.respectTransparency false in
 theorem entry_rejection (C : Contract) (base : Nat) (label : Fin W)
     (result : Compiler.Compilation base (Frag.init RouteCtx) (program C label))
     (found : Compiler.compile base (Frag.init RouteCtx) (program C label)=some result)
@@ -100,6 +101,7 @@ theorem validated_word (word : Fin W) (valid : Solidity.AbiEntry.Kind.bool.valid
   · simp only [boolValueWord,bword,decide_eq_true one,if_true]
     exact one.symm
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The newly declared Boolean local is the semantic validated bit from bytes. -/
 theorem decoded_and_bound (C : Contract) (base : Nat) (label : Fin W)
     (result : Compiler.Compilation base (Frag.init RouteCtx) (program C label))
