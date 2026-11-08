@@ -159,7 +159,7 @@ theorem source_ordinary {E : Source.Env} (global : Source.Glob E) (frame : Sourc
 def certificate : Interface.EntryRoutesCertificate route where
   selected := fun C base table receive fallback => ⟨compiled C base table receive fallback,selected C base table receive fallback⟩
   executed := executed
-/-- info: 'Solidity.Backend.AbiEntry.EntryRoutes.admitted' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiEntry.EntryRoutes.admitted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms admitted
 /-- info: 'Solidity.Backend.AbiEntry.EntryRoutes.selected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms selected
