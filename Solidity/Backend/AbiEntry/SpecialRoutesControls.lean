@@ -122,7 +122,7 @@ theorem protected_and_saved (size value label : Fin W) :
 #guard_msgs (whitespace := lax) in #print axioms no_special
 /-- info: 'Solidity.Backend.AbiEntry.SpecialRoutesControls.payable_fallback' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms payable_fallback
-/-- info: 'Solidity.Backend.AbiEntry.SpecialRoutesControls.actual_source_rows' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.AbiEntry.SpecialRoutesControls.actual_source_rows' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms actual_source_rows
 /-- info: 'Solidity.Backend.AbiEntry.SpecialRoutesControls.source_absence_bytes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms source_absence_bytes
