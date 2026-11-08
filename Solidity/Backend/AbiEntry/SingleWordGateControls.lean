@@ -101,6 +101,6 @@ theorem protected_and_saved :
 #guard_msgs (whitespace := lax) in #print axioms full_word_fault
 /-- info: 'Solidity.Backend.AbiEntry.SingleWordGateControls.fuel_boundary' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms fuel_boundary
-/-- info: 'Solidity.Backend.AbiEntry.SingleWordGateControls.protected_and_saved' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.AbiEntry.SingleWordGateControls.protected_and_saved' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms protected_and_saved
 end Solidity.Backend.AbiEntry.SingleWordGateControls
