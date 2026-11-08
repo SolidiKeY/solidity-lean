@@ -25,10 +25,13 @@ heads `e2dd4428d73d94b28a1cb82867d7cf5e8d65aca4` (flow/reads) and
 The former shares intrinsic preparation proofs while preserving computational
 bodies. It is proof factoring, not an established whole-area reduction. Reuse that
 interface work instead of claiming another schema/fixture layer is a migration.
-No published `tv-yul` branch was available during inventory. Its assigned
-translation-validation experiment remains separate: a generic layout relation
-can be the representation invariant consumed by a validator's soundness proof;
-validator completeness and exact Source/Yul results must still be proved.
+No published `tv-yul` branch was available during initial inventory. At
+integration its [audit](shrink/tv-yul/summary.json) and
+[H264 candidate family](shrink/tv-yul/family.json) are now on master: the
+skip recognizer is incomplete, no Views replacement is proved, and the selected
+follow-up is Compilation. A generic layout relation could supply a future
+validator's representation invariant, but does not establish its completeness
+or bridge the different machine-state models. No combined saving is counted.
 
 ## Ranked ideas
 
