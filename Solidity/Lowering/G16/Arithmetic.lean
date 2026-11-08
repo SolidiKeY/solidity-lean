@@ -66,8 +66,69 @@ theorem wrapping_transport {E : Source.Env} {srcΓ : Source.RCtx}
     | sub => exact SignedNarrowSubtraction.locals_transport bits valid G F fuel source target si ti family a b x y hx hy readA readB
     | mul => exact SignedNarrowMultiplication.locals_transport bits valid G F fuel source target si ti family a b x y hx hy readA readB
 
+
+/-- Select the published V07 assignment/read operand without rebuilding its
+capture prefix or changing its pipeline order. -/
+def wrappingAssignmentOperand {C : Contract} {Γ : Ctx} (t : Source.IntTy)
+    (op : RingOp) (pipeline : Roadmap.Pipeline) :
+    Idx Γ (.val (integerPrim t)) → Idx Γ (.val (integerPrim t)) →
+      DeferredSource.Operand C Γ (.prim (integerPrim t)) :=
+  match t with
+  | ⟨false,bits,_⟩ => match op with
+    | .add => UnsignedAddition.assignReadOperand pipeline bits
+    | .sub => UnsignedNarrowing.assignReadOperand pipeline bits
+    | .mul => UnsignedMultiplication.assignReadOperand pipeline bits
+  | ⟨true,bits,_⟩ => match op with
+    | .add => SignedNarrowAddition.assignReadOperand bits pipeline
+    | .sub => SignedNarrowSubtraction.assignReadOperand bits pipeline
+    | .mul => SignedNarrowMultiplication.assignReadOperand bits pipeline
+
+/-- A single ring-family clause includes the actual pipeline-sensitive
+assignment/read pair, all valid widths/signs, and the derived caller update.
+Only initial alignment and reads are premises. This operational leaf does not
+supply frontend selection or the held validator association. -/
+theorem wrapping_assignment_transport {E : Source.Env} {srcΓ : Source.RCtx}
+    {C : Contract} {Γ : Ctx} {ι : Type}
+    (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
+    (source : Source.EMState E srcΓ) (target : State C Γ)
+    (t : Source.IntTy) (op : RingOp)
+    (si : ι → Source.Idx srcΓ (.int t)) (ti : ι → Idx Γ (.val (integerPrim t)))
+    (family : IntegerLocalFamily t si ti source.1 target.env)
+    (i a : ι) (x y : Int) (hx : t.lo ≤ x ∧ x ≤ t.hi) (hy : t.lo ≤ y ∧ y ≤ t.hi)
+    (readA : source.1.get (si a) = .int x hx) (readI : source.1.get (si i) = .int y hy) :
+    (Source.evalE G {F with checked := false} (fuel+4)
+      (.binary op.source (.assign (.local (si i)) (.local (si a))) (.local (si i)))).run source =
+      (.ok (.val (Source.intWrap t (op.calculate x (if G.pipeline = .legacy then y else x)))),
+        (source.1.set (si i) (.int x hx),source.2)) ∧
+    (wrappingAssignmentOperand t op G.pipeline (ti i) (ti a)).run target =
+      .ok (⟨target.setLocal (ti i) (integerValue t x hx),List.prefix_refl _⟩,
+        .prim (integerValue t (t.wrap (op.calculate x (if G.pipeline = .legacy then y else x)))
+          (t.wrap_mem (op.calculate x (if G.pipeline = .legacy then y else x))))) ∧
+    IntValueRel t
+      (Source.intWrap t (op.calculate x (if G.pipeline = .legacy then y else x)) : Source.Val E.layout (.int t))
+      (integerValue t (t.wrap (op.calculate x (if G.pipeline = .legacy then y else x)))
+        (t.wrap_mem (op.calculate x (if G.pipeline = .legacy then y else x)))) ∧
+    IntegerLocalFamily t si ti (source.1.set (si i) (.int x hx))
+      (TEnv.set (ti i) (integerValue t x hx) target.env) := by
+  obtain ⟨sign,bits,valid⟩ := t
+  cases sign with
+  | false =>
+    cases op with
+    | add => exact UnsignedAddition.assignment_transport G F fuel source target bits valid si ti family i a x y hx hy readA readI
+    | sub => exact UnsignedNarrowing.assignment_transport G F fuel source target bits valid si ti family i a x y hx hy readA readI
+    | mul => exact UnsignedMultiplication.assignment_transport G F fuel source target bits valid si ti family i a x y hx hy readA readI
+  | true =>
+    cases op with
+    | add => exact SignedNarrowAddition.assignment_transport bits valid G F fuel source target si ti family i a x y hx hy readA readI
+    | sub => exact SignedNarrowSubtraction.assignment_transport bits valid G F fuel source target si ti family i a x y hx hy readA readI
+    | mul => exact SignedNarrowMultiplication.assignment_transport bits valid G F fuel source target si ti family i a x y hx hy readA readI
+
 end Solidity.Lowering.G16.Arithmetic
 
 /-- info: 'Solidity.Lowering.G16.Arithmetic.wrapping_transport' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Lowering.G16.Arithmetic.wrapping_transport
+
+/-- info: 'Solidity.Lowering.G16.Arithmetic.wrapping_assignment_transport' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Lowering.G16.Arithmetic.wrapping_assignment_transport
