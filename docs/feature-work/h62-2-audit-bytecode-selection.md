@@ -3084,3 +3084,18 @@ reassembly and oversized-input retention details are indexed privately:
 ```text
 evidence: 3985e3705bf522bddefcf6a653698320ce690600 evidence/solidity-parallel-20261103/executable-bytecode/source-range-accounting-77ed8f61/INDEX.json
 ```
+
+
+### Projection report slices
+
+Keep original kernel kind independent of presentation kind: proof projections
+in this frozen snapshot are original theorem constants even when displayed as
+`field`. Neither label supplies a lexical source-candidate match. A
+`reported_proof` entry points to separately validated native receipts; it does
+not make the pure index a proof checker. `Unreported` is relative to the supplied
+artifact slice, not an assertion that a statement lacks a witness. Replay and
+native-packet identities for the field-report slice are indexed privately:
+
+```text
+evidence: 30264d332317fbc05cc9719da0ccd2e5982fa945 evidence/solidity-parallel-20261103/executable-bytecode/proof-field-report-links-1d683ac4/INDEX.json
+```

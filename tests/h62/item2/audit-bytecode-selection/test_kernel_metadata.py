@@ -25,6 +25,37 @@ class MetadataSchemaTests(unittest.TestCase):
             ("artifact_manifest_sha256","source_sha256","output_sha256","native_result_sha256","seal_sha256")},
             "entries":[{"target":observed_type(row),"helper":"Audit.h","status":status,
                         "reason":"" if status=="proved" else "no supported default"}]}
+    def projection_report_fixture(self):
+        row=self.row();row.update(name="N.Cert.ok",user_name="N.Cert.ok",private=False,
+            original_kind="Lean.ConstantKind.thm",is_theorem=True,is_projection=True,kind="field",
+            body_status="proof body intentionally omitted; declaration retained")
+        return row,self.report_fixture(row)
+    def test_hypothesis_reports_keep_checked_field_reports_without_theorem_source_credit(self):
+        row,artifact=self.projection_report_fixture();other=self.row();other['name']='unreported'
+        result=hypothesis_report_index([row,other],{"M":[]},[artifact]);entry=next(v for v in result['declarations'] if v['name']==row['name'])
+        self.assertTrue(entry['is_projection']);self.assertEqual(entry['record_kind'],'field')
+        self.assertTrue(entry['original_theorem']);self.assertEqual(entry['report_status'],'reported_proof')
+        self.assertEqual(entry['source_ids'],[]);self.assertEqual(entry['accounting_status'],'unmatched')
+        self.assertEqual(result['summary']['distinct_reported_proof_targets'],1)
+        self.assertEqual(result['summary']['unreported_records'],1)
+        for flag in ['proof_acceptance_established','joint_witness_established','statement_correspondence_established','inherited_obligations_established','global_witness_ledger_linked']:
+            self.assertFalse(entry[flag])
+    def test_hypothesis_reports_still_reject_data_projections_and_unrelated_proof_constants(self):
+        row,artifact=self.projection_report_fixture()
+        for changes in [{'original_kind':'Lean.ConstantKind.defn','is_theorem':False,'proof_type':False,'body_status':'no available value'},
+                        {'original_kind':'Lean.ConstantKind.defn','is_theorem':False,'is_projection':False,'kind':'constant'}]:
+            bad=copy.deepcopy(row);bad.update(changes);a=self.report_fixture(bad)
+            with self.subTest(changes=changes),self.assertRaises(ValueError):hypothesis_report_index([bad],{'M':[]},[a])
+    def test_hypothesis_field_reports_deduplicate_and_refuse_stale_snapshots(self):
+        row,a=self.projection_report_fixture();b=copy.deepcopy(a);b['id']='repeat'
+        result=hypothesis_report_index([row],{'M':[]},[a,b])
+        self.assertEqual(result['summary']['artifact_reports'],2);self.assertEqual(result['summary']['distinct_reported_proof_targets'],1)
+        self.assertEqual(result,hypothesis_report_index([row],{'M':[]},[b,a]))
+        for change in [{'type_expr':'stale'},{'private':True},{'level_params':['u']}]:
+            bad=copy.deepcopy(a);bad['entries'][0]['target'].update(change)
+            with self.subTest(change=change),self.assertRaises(ValueError):hypothesis_report_index([row],{'M':[]},[bad])
+        saved=copy.deepcopy(result);a['entries'][0]['target']['type_expr']='mutation';self.assertEqual(result,saved)
+
     def test_hypothesis_reports_deduplicate_successes_and_retain_failures_and_gaps(self):
         row=self.ranged_row();other=self.row();other.update(name="unreported",user_name="unreported",declaration_range=None)
         mapping={"M":[self.source_candidate(row)]}
