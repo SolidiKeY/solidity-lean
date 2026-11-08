@@ -296,7 +296,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
       automaticTests.status(doc,params);
     };
     const receiveDiagnostics=params=>{
-      const doc=documents.get(params.uri);if(!doc||doc.isClosed||doc.version!==params.version)return;
+      const doc=documents.get(params.uri);if(!doc||doc.isClosed||doc.version!==params.version||params.sourceHash!==undefined&&hash(doc.getText())!==params.sourceHash)return;
       diagnostics.set(doc.uri,params.diagnostics.map(row=>{const d=new vscode.Diagnostic(toRange(row.range),row.message,row.severity-1);d.source=row.source;d.code=row.code;if(row.relatedInformation)d.relatedInformation=row.relatedInformation.map(r=>new vscode.DiagnosticRelatedInformation(new vscode.Location(vscode.Uri.parse(r.location.uri),toRange(r.location.range)),r.message));return d;}));
     };
     const invalidated=params=>{const doc=documents.get(params.uri);if(doc?.version===params.version){tracePresentation.reset(doc.uri);clear(doc.uri,false);}};
