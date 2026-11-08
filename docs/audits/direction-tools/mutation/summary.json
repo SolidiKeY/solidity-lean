@@ -1,0 +1,46 @@
+{
+  "axioms_added": 0,
+  "base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+  "cheap_checker_survivors": 32,
+  "conclusion": "Cheap structural checks do not constrain these operator/closer mutations. Whether existing proofs kill them remains unassessed; static references cannot establish coverage gaps.",
+  "differential": {
+    "agreement_including_unsupported": null,
+    "disagreed": 0,
+    "disagreement_boundary": "No mismatches reported for admitted primitive fragment; unsupported rows are not agreements",
+    "disagreement_classes": [],
+    "matched": 320,
+    "matched_subset_agreement": 1.0,
+    "pending_eest": 19093,
+    "per_input_time_ratios": null,
+    "provenance": "cited committed report, not replayed",
+    "reference_only_unsupported": 732,
+    "source": "docs/feature-work/h62-3-g52-differential.md",
+    "source_sha256": "4110f3923608d46d7955dd4fe0a555313ac59f6e168e3afa8f06c5753a607c18",
+    "time_boundary": "Matched per-input repository and solc compile/run timings unavailable; no ratio invented"
+  },
+  "lean_elaborations": 0,
+  "mutants": 32,
+  "mutation_selection": {
+    "basis": "Both selected source files inspected; broad inventory classification remains heuristic",
+    "files": [
+      "Solidity/Calculus/Closers.lean",
+      "Solidity/Semantics/Ops.lean"
+    ],
+    "generated": 0,
+    "handwritten": 32
+  },
+  "reproduce": "python3 docs/audits/direction-tools/mutation/audit.py --scratch ABSOLUTE_BASE_WORKTREE",
+  "semantic_kills": null,
+  "semantic_survivors": null,
+  "sorry_added": 0,
+  "waits": [
+    {
+      "id": "W-TIMING",
+      "reason": "Named va3/vu1 paths and matched raw timing outputs absent at pinned base; G52 private bulk results not present on VM"
+    },
+    {
+      "id": "W-LEAN",
+      "reason": "No Lean elaborations performed; systemd resource scope unavailable on this VM (no user bus); highest-value next checks are M32 afterRunTR_diamond_fail, M07 bitwise and M10 shifts. Structural survivors are not semantic survivors"
+    }
+  ]
+}

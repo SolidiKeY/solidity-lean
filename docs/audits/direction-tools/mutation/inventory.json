@@ -1,0 +1,46 @@
+{
+  "SolcValidation": {
+    "present": false,
+    "tracked_files": 0
+  },
+  "corpus": {
+    "boundary": "SolKey verdict parity, not solc execution agreement; check-corpus invokes prohibited project builds and was not run",
+    "data_rows": 774,
+    "path": "tests/solkey/expected.tsv"
+  },
+  "docs/audits/architecture-tools/timing-sample.tsv": {
+    "present": true,
+    "tracked_files": 1
+  },
+  "docs/audits/build-speed-tools": {
+    "present": true,
+    "tracked_files": 6
+  },
+  "docs/feature-work/h62-3-g52-differential.md": {
+    "present": true,
+    "tracked_files": 1
+  },
+  "lean_partition": {
+    "generated_or_generator_named": {
+      "files": 177,
+      "lines": 41412
+    },
+    "other_unclassified": {
+      "files": 8100,
+      "lines": 1267359
+    }
+  },
+  "partition_caveat": "Path heuristic only, not a verified generated/handwritten split: Agreement and Chain names can be handwritten. Counts cannot support a generated-code-adjusted verdict. Both mutated source files are handwritten by inspection; broad inventory classification remains incomplete.",
+  "scripts/bench": {
+    "present": false,
+    "tracked_files": 0
+  },
+  "scripts/differential": {
+    "present": false,
+    "tracked_files": 0
+  },
+  "scripts/h62/item3/g52-differential": {
+    "present": true,
+    "tracked_files": 19
+  }
+}
