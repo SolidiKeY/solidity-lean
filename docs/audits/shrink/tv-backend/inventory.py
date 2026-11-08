@@ -5,7 +5,7 @@ Reads Git blobs, never the build cache. Generated Solidity umbrella import edges
 are deliberately omitted: they express inventory policy, not semantic consumers.
 The reflective scripts/AxiomAudit.lean consumer must be rebuilt separately.
 """
-import collections, hashlib, json, pathlib, re, runpy, subprocess, sys
+import argparse, collections, hashlib, json, pathlib, re, runpy, subprocess, sys
 BASE = "381328f608032dd19c405373c2b265e83a969850"
 PREFIX = "Solidity.Backend.InternalFlow."
 ROOT = pathlib.Path(subprocess.check_output(["git", "rev-parse", "--show-toplevel"], text=True).strip())
@@ -25,6 +25,12 @@ def closure(graph, roots):
         todo.extend(graph.get(name, set()) - seen)
     return seen
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("output", type=pathlib.Path)
+    parser.add_argument("--write-family", type=pathlib.Path)
+    parser.add_argument("--check-family", action="store_true")
+    args = parser.parse_args()
+    assert not args.output.resolve().is_relative_to(ROOT), "inventory evidence must be external"
     paths = [p for p in git("ls-tree", "-r", "--name-only", BASE).splitlines() if p.endswith(".lean")]
     raw = {p[:-5].replace("/", "."): git("show", BASE + ":" + p) for p in paths}
     paths = {p[:-5].replace("/", "."): p for p in paths}
@@ -59,6 +65,11 @@ def main():
               "retained_import_edges_to_selected": 0,
               "limitations": ["Static import graph; no claim about dynamic or reflective consumers.", "Deleted theorem exports are not preserved by the prototype; no retained statement is edited."]}
     assert not result["facade_import_overlap"]
-    pathlib.Path(sys.argv[1]).write_text(json.dumps(result, indent=2) + "\n")
+    args.output.write_text(json.dumps(result, indent=2) + "\n")
+    if args.write_family:
+        args.write_family.write_text(json.dumps(result["modules"], indent=2) + "\n")
+    if args.check_family:
+        assert json.loads(pathlib.Path(__file__).with_name("family.json").read_text()) == result["modules"]
+        print("FAMILY_SELECTION_CHECK_PASS", len(result["modules"]))
     print("INVENTORY_PASS", result["selected"])
 if __name__ == "__main__": main()

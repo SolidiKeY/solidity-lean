@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Serial kernel recheck of the affected library root, with cached imports.
+"""Serial root import/elaboration measurement of the affected library root, with cached imports.
 Run after `lake build Solidity` and `restore-lake-artifacts.py`, under the
 repository writer lock. Output must be outside the code checkout.
 No systemd scope on the cloud VM (H232). Lean heap cap 12 GiB; VM has no swap.
-The timing includes importing, kernel rechecking (-t0), and root elaboration;
+The timing includes importing, trust-zero import loading (-t0), and root elaboration;
 it is not an isolated kernel CPU profiler or a clean-build timing.
 """
 import json, os, pathlib, resource, subprocess, sys, time
