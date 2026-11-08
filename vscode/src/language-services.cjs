@@ -147,15 +147,15 @@ function completion(text,point,analysis){
   return {isIncomplete:true,items:[...new Map(items.filter(i=>i.label.startsWith(prefix)).map(i=>[i.label,i])).values()]};
 }
 function signatureHelp(text,point,analysis){
-  const before=text.slice(0,offset(text,point));let depth=0,open=-1;
-  for(let i=before.length-1;i>=0;i--){if(before[i]===')')depth++;if(before[i]==='('){if(depth===0){open=i;break;}depth--;}}
-  if(open<0)return null;
-  const name=/([A-Za-z_$][\w$]*)\s*$/.exec(before.slice(0,open))?.[1];if(!name)return null;
-  const call=analysis?.nodes.filter(n=>n.nodeType==='FunctionCall'&&contains(analysis.nodeRange(n),point)).sort((a,b)=>(a.src?.length||0)-(b.src?.length||0))[0];
+  const before=text.slice(0,offset(text,point)),ts=require('./solidity-text.cjs').tokens(before).filter(t=>t.kind!=='comment'&&t.kind!=='string');let depth=0,open=-1;
+  for(let i=ts.length-1;i>=0;i--){if(ts[i].text===')')depth++;if(ts[i].text==='('){if(depth===0){open=i;break;}depth--;}}
+  if(open<0||ts[open-1]?.kind!=='word')return null;
+  const name=ts[open-1].text;
+  const call=analysis?.nodes.filter(n=>n.nodeType==='FunctionCall').map(node=>{const range=analysis.nodeRange(node);return contains(range,point)&&!(range.end.line===point.line&&range.end.character===point.character)?{node,size:offset(text,range.end)-offset(text,range.start)}:null;}).filter(Boolean).sort((a,b)=>a.size-b.size)[0]?.node;
   const resolved=analysis?.declarations.get(call?.expression?.referencedDeclaration);
   const declarations=resolved?.nodeType==='FunctionDefinition'?[resolved]:[...(analysis?.declarations.values()||[])].filter(n=>n.nodeType==='FunctionDefinition'&&n.name===name);
   if(!declarations.length)return null;
-  let nested=0,argument=0;for(const char of before.slice(open+1)){if('([{'.includes(char))nested++;if(')]}'.includes(char))nested--;if(char===','&&nested===0)argument++;}
+  let nested=0,argument=0;for(const token of ts.slice(open+1)){const char=token.text;if('([{'.includes(char))nested++;if(')]}'.includes(char))nested--;if(char===','&&nested===0)argument++;}
   return {signatures:declarations.map(n=>({label:`${n.name}(${n.parameters.parameters.map(p=>`${p.typeDescriptions?.typeString||''} ${p.name}`).join(', ')})`,
     parameters:n.parameters.parameters.map(p=>({label:p.name||p.typeDescriptions?.typeString||'argument'}))})),activeSignature:0,
     activeParameter:Math.min(argument,Math.max(0,declarations[0].parameters.parameters.length-1))};

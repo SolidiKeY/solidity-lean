@@ -38,7 +38,7 @@ From the repository root:
 node --test vscode/test/*.test.cjs scripts/source-locations.test.mjs
 ```
 
-Compiler source-range integration checks require the existing pinned solc setup:
+Compiler-backed language-service integration checks require the existing pinned solc setup:
 
 ```sh
 SOLKEY_ROOT=/path/to/solkey npm --prefix vscode run test:compiler-ranges
