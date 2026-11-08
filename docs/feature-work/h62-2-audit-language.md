@@ -42,3 +42,7 @@ For eager-bytes outcome checks, freshly compile
 `tests/h62/item2/audit-language/AbiBytesSpec.lean`. Keep the swapped-failure
 control: exact success alone does not certify panic/revert distinctions. These
 are decoder reference contracts, not compiler or EVM gas contracts.
+
+Check `tests/h62/item2/audit-language/AbiBytesEntry.lean` after freshening the
+bytes-specification object when auditing its entry consumer. Preserve the outer
+head-size/offset checks and extra fuel layer when substituting a decoder.
