@@ -7300,6 +7300,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/AbiEntry/UIntBindingBody.lean:Solidity.Backend.AbiEntry.UIntBindingBody.raw_executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/AbiEntry/UIntBindingBody.lean:Solidity.Backend.AbiEntry.UIntBindingBody.short_before_body": [
   "Classical.choice",
   "Quot.sound",
