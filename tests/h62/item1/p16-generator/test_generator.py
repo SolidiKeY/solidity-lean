@@ -454,12 +454,12 @@ class GeneratorControls(unittest.TestCase):
         drift = self.safe_run(checker, cwd=self.root, text=True, capture_output=True)
         self.assertNotEqual(drift.returncode, 0)
 
-    def test_live_gate_proposal_applies(self):
+    def test_adopted_gate_matches_reviewed_patch(self):
         gate = self.root / "scripts/coord-tools/gate.sh"
         gate.parent.mkdir(parents=True)
         shutil.copyfile(ROOT / "scripts/coord-tools/gate.sh", gate)
         patch = (ROOT / "tests/h62/item1/p16-generator/proposed-gate.patch").read_text()
-        checked = self.safe_run(["git", "apply", "--check", "--whitespace=error-all", "-"],
+        checked = self.safe_run(["git", "apply", "--reverse", "--check", "--whitespace=error-all", "-"],
                                 cwd=self.root, input=patch, text=True, capture_output=True)
         self.assertEqual(checked.returncode, 0, checked.stderr)
 
@@ -487,6 +487,55 @@ class GeneratorControls(unittest.TestCase):
         checked = self.safe_run([sys.executable, "-B", str(lane / "census.py"), "--baseline"],
                                 cwd=self.root, text=True, capture_output=True)
         self.assertEqual(checked.returncode, 1, checked.stdout + checked.stderr)
+
+    def test_checkpoint_and_full_gate_dispatch_fail_closed(self):
+        # Execute the real gate script. Unrelated gates/builds are explicit
+        # stubs: this is dispatch/failure propagation, not whole-gate acceptance.
+        gate = self.root / "scripts/coord-tools/gate.sh"
+        gate.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(ROOT / "scripts/coord-tools/gate.sh", gate)
+        for script in ("check-private-paths.sh", "check-evidence-files.sh", "check-trust.sh",
+                       "check-doc-paths.sh", "check-testsuite.sh", "check-corpus.sh",
+                       "coord-tools/register.sh", "coord-tools/fragments.sh"):
+            target = self.root / "scripts" / script
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text("#!/bin/sh\nexit 0\n")
+        (self.root / "run-lean.sh").write_text("#!/bin/sh\nexit 0\n")
+        (self.root / "SoliditySlowExamples.lean").write_text("")
+        tools = self.root / "stub-tools"
+        tools.mkdir()
+        for command in ("node", "lake"):
+            target = tools / command
+            target.write_text("#!/bin/sh\nexit 0\n")
+            target.chmod(0o755)
+        self.environment.update(PATH=str(tools) + os.pathsep + os.environ["PATH"],
+                                GATE_BASE=self.fixture_base)
+        generated = self.safe_run([sys.executable, "-B", str(self.root / LANE / "generate.py"),
+                                   "--migration", "--render"], text=True,
+                                  capture_output=True, check=True).stdout
+        target = self.root / TARGET
+        for scenario in ("exact", "drift", "missing-baseline"):
+            target.write_text(generated + ("-- drift\n" if scenario == "drift" else ""))
+            census = self.root / LANE / "census.py"
+            original = census.read_text()
+            if scenario == "missing-baseline":
+                self.assertEqual(original.count(self.fixture_base), 1)
+                census.write_text(original.replace(self.fixture_base, "0" * 40))
+            try:
+                for mode in ("checkpoint", "full"):
+                    logs = self.root / ("logs-" + scenario + "-" + mode)
+                    self.environment["GATE_LOGS"] = str(logs)
+                    result = self.safe_run(["bash", str(gate), mode], cwd=self.root,
+                                           text=True, capture_output=True)
+                    rows = [line.split("\t") for line in (logs / "gates.tsv").read_text().splitlines()]
+                    p16 = [row for row in rows if row[1] == "p16-generated"]
+                    self.assertEqual(len(p16), 1, result.stdout + result.stderr)
+                    self.assertEqual(p16[0][0], "PASS" if scenario == "exact" else "FAIL")
+                    self.assertEqual(result.returncode, 0 if scenario == "exact" else 1,
+                                     result.stdout + result.stderr)
+                    self.assertIn("scripts/h62/item1/p16-generator/check.py", p16[0][4])
+            finally:
+                census.write_text(original)
 
     def test_bad_input(self):
         entries = sorted((self.root / LANE / "imports").glob("*.txt"))

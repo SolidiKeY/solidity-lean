@@ -1490,8 +1490,9 @@ marker, complete P16 bytes, ordered import/documentation census and pinned Git
 baseline. Edit registered fragments rather than the generated interface. The
 baseline commit must exist locally. This integrity check does not certify live
 producer completeness, semantic coverage or Lean elaboration. Extension ordering
-and producer membership require separate reconciliation; central gate adoption
-remains pending.
+and producer membership require separate reconciliation. Checkpoint and full
+gates run this checker as `p16-generated`; the pinned baseline object must be
+present locally, including in CI checkouts. A missing object fails closed.
 
 ### P20 represented-success consumer (V2)
 
