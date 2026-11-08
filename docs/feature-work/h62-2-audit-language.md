@@ -36,3 +36,9 @@ Closed counterexamples must be recorded separately from input-tuple certificates
 parameters; an explicit statement guard must establish the counterexample's
 meaning. Expected telescope-mismatch errors remain negative tests, never
 positive associations or grounds to weaken an original premise.
+
+For eager-bytes outcome checks, freshly compile
+`tests/h62/item2/audit-language/AbiDynamicWitness.lean` before kernel-checking
+`tests/h62/item2/audit-language/AbiBytesSpec.lean`. Keep the swapped-failure
+control: exact success alone does not certify panic/revert distinctions. These
+are decoder reference contracts, not compiler or EVM gas contracts.
