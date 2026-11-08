@@ -65,6 +65,7 @@ structure SourceBoolStructAt {E : Source.Env} {Γ : Source.RCtx} {H : HTy}
       (address (hp.field r layout.child_type).id)⟩
   leaf : SourceBoolMemoryAt y (address (hp.field r layout.child_type).id) hp (hp.field r layout.child_type) .dyn
 
+set_option backward.isDefEq.respectTransparency false in
 theorem SourceBoolStructAt.read_tag {E : Source.Env} {Γ : Source.RCtx} {H : HTy}
     {y : Source.EMState E Γ} {a : Nat} {hp : Heap H} {r : HRef H (.struct s)}
     {address : Nat → Nat} {layout : SourceBoolStructLayout E dn s tag child}
@@ -76,6 +77,7 @@ theorem SourceBoolStructAt.read_tag {E : Source.Env} {Γ : Source.RCtx} {H : HTy
   simp only [sourceBoolStructData,pairFields_tag]
   rfl
 
+set_option backward.isDefEq.respectTransparency false in
 theorem SourceBoolStructAt.read_child {E : Source.Env} {Γ : Source.RCtx} {H : HTy}
     {y : Source.EMState E Γ} {a : Nat} {hp : Heap H} {r : HRef H (.struct s)}
     {address : Nat → Nat} {layout : SourceBoolStructLayout E dn s tag child}
@@ -144,6 +146,7 @@ theorem SourceBoolStructAt.eval_member_child {E : Source.Env} {Γ : Source.RCtx}
   rw [Source.Hoare.run_bind,hr.read_child F]
   rfl
 
+set_option backward.isDefEq.respectTransparency false in
 /-- All reached content follows the actual existing Source setNth and intrinsic
 setField; aliases to old children survive even when no longer selected. -/
 theorem SourceBoolStructAt.write_reference {E : Source.Env} {Γ : Source.RCtx} {H : HTy}
