@@ -19,6 +19,8 @@ import re
 import subprocess
 import sys
 import tomllib
+import tarfile
+import types
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[3]
@@ -35,9 +37,9 @@ def git(*args):
 
 def load(name):
     p = ROOT / 'docs/audits/architecture-tools' / (name + '.py')
-    spec = importlib.util.spec_from_file_location(name, p)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
+    mod = types.ModuleType(name)
+    mod.__file__=str(p)
+    exec(compile(git('show',BASE+':'+str(p.relative_to(ROOT))),str(p),'exec'),mod.__dict__)
     return mod
 
 
@@ -99,10 +101,28 @@ def counters(nodes, ids, modules):
     return {k: dict(v) for k, v in sorted(out.items())}
 
 
+def snapshot_texts():
+    """Read frozen inputs from Git objects; integrations cannot change a census."""
+    tracked=git('ls-tree','-r','--name-only',BASE).splitlines()
+    inputs=[p for p in tracked if p.endswith('.lean') or
+            p.startswith('scripts/') and p.endswith(('.py','.mjs','.js','.sh')) or
+            p.startswith('.github/workflows/') or p in ('lakefile.toml','docs/audits/architecture-tools/timing-sample.tsv')]
+    command=['git','-C',str(ROOT),'archive',BASE,'--',*inputs]
+    proc=subprocess.Popen(command,stdout=subprocess.PIPE)
+    result={}
+    with tarfile.open(fileobj=proc.stdout,mode='r|') as archive:
+        for member in archive:
+            if member.isfile():result[member.name]=archive.extractfile(member).read().decode()
+    proc.stdout.close()
+    if proc.wait():raise ValueError('cannot read pinned Git source snapshot')
+    return result
+
+
 def build():
-    tracked = git('ls-files').splitlines()
+    tracked = git('ls-tree','-r','--name-only',BASE).splitlines()
+    snapshot=snapshot_texts()
     paths = sorted(p for p in tracked if p.endswith('.lean'))
-    texts = {p: (ROOT/p).read_text() for p in paths}
+    texts = {p: snapshot[p] for p in paths}
     modules, module_path = {}, {}
     for p in paths:
         relative = p.removeprefix('Bridge/vendor/').removeprefix('vendor/LeanTeX/').removeprefix('Bridge/')
@@ -174,8 +194,8 @@ def build():
     # library trees. CI aggregate build roots get a separate import-only metric.
     testmods = {m for m,v in modules.items() if v['provenance']=='external_lean_consumer' or v['path'].startswith(('tests/','Bridge/tests/')) or re.search(r'(?:TestSuite|Examples|Controls|Checks|Tests|Test\.|TrustAudit|SolCases)', m)}
     testroots = {i for m in testmods for i in bymod[m]}
-    ci_text = '\n'.join((ROOT/p).read_text() for p in tracked if p.startswith('.github/workflows/'))
-    config=tomllib.loads((ROOT/'lakefile.toml').read_text())
+    ci_text = '\n'.join(snapshot[p] for p in tracked if p.startswith('.github/workflows/'))
+    config=tomllib.loads(snapshot['lakefile.toml'])
     aliases={v['name']:v.get('root',v['name']) for kind in ('lean_lib','lean_exe') for v in config.get(kind,[])}
     ci_targets = sorted(set(aliases.get(x,x) for row in re.findall(r'\blake build ([^\n]+)', ci_text) for x in row.split() if aliases.get(x,x) in modules))
     testmods.update(ci_targets)
@@ -216,13 +236,13 @@ def build():
                        'scripts/differential/','scripts/bench/','Solidity/Goals.lean']
     inventory = {p: [x for x in tracked if x == p or x.startswith(p)] for p in inventory_paths}
     timing = []
-    for row in (ROOT/'docs/audits/architecture-tools/timing-sample.tsv').read_text().splitlines():
+    for row in snapshot['docs/audits/architecture-tools/timing-sample.tsv'].splitlines():
         cells = row.split('\t')
         if len(cells) == 5:
             timing.append(dict(group=cells[0],path=cells[1],wall_seconds=float(cells[2]),other_seconds=float(cells[3]),status=cells[4]))
     # Generator linkage is textual provenance, separate from Lean dependencies.
     scriptpaths = [p for p in tracked if p.startswith('scripts/') and p.endswith(('.py','.mjs','.sh','.js'))]
-    scripttexts = {p:(ROOT/p).read_text(errors='replace') for p in scriptpaths}
+    scripttexts = {p:snapshot[p] for p in scriptpaths}
     entryscripts = {p for p in scriptpaths if p in ci_text}
     sg = {p:{q for q in scriptpaths if q != p and q in text} for p,text in scripttexts.items()}
     scriptreach = closure(sg,entryscripts)
@@ -274,7 +294,7 @@ def build():
             for key,v in counts.items():
                 for metric in ('declarations','source_span_lines'):
                     v[metric+'_share']=v.get(metric,0)/totals[key].get(metric,1)
-    return report, unreachable, nodes, modules, texts, generators
+    return report, unreachable, nodes, modules, texts, generators, graph
 
 
 def duplicates(nodes, modules, texts, generators):
@@ -337,7 +357,7 @@ def duplicates(nodes, modules, texts, generators):
 
 
 def render():
-    report,unreachable,nodes,modules,texts,generators=build()
+    report,unreachable,nodes,modules,texts,generators,graph=build()
     duplication,clusters=duplicates(nodes,modules,texts,generators)
     # Largest unreachable groups by source directory; disjoint within this class.
     areas=C.defaultdict(list)
@@ -366,7 +386,7 @@ def render():
                  implicit_sensitivity=report['implicit_sensitivity'],duplication=duplication,duplicate_cluster_files=list(shards),
                  unassigned_physical_lines=report['unassigned_physical_lines'],generation_candidates=report['generation_candidates'],
                  largest_30_clusters=top,root_drift=report['root_drift'],
-                 waits=[dict(item=p,reason='absent at pinned base; continue available source census') for p in report['root_drift']],
+                 waits=[],
                  review_fixes=['Finder/skeptic: same-line attributed and opaque declarations now parsed; all tracked Lean consumers included.',
                                'Finder: imported vendor source roots mapped from Lake source roots; declaration names removed from reference tokens; inherited module context included conservatively.',
                                'Finder: full duplicate cluster membership/line totals saved in indexed small shards.',
@@ -374,12 +394,15 @@ def render():
                                'Finder: physical span lines include interior comments/blanks; outside-span remainder reported.'],
                  findings=['CI import coverage measures build inclusion; it does not show how much supports a headline theorem.',
                            'All keep suggestions are provisional; no deletion or redundant/wrong-direction verdict follows from a lexical census.'],
-                 reference_class=dict(counterpart='same-repository source dependency graph versus CI import closure',
-                                      ratio_policy='Pending coordinator question DAREACH-REF: no cross-system ratio or >3x judgment until counterpart goal roots and dependency universes are matched.',
+                 reference_class=dict(counterpart='CompCert compiler semantic-preservation roots, authorized by H238',
+                                      artifact='calibration.json',
+                                      ratios=json.loads((HERE/'calibration.json').read_text())['ratios'],
+                                      headline_sensitivity_ratios=json.loads((HERE/'calibration.json').read_text())['headline_sensitivity_ratios'],
+                                      ratio_policy='Compiler-only source slices; language/parser/theorem-scope limits in calibration.json; no whole-repository cross-system reachability fraction.',
                                       external_figures_used=False),
                  limitations=report['limitations'],citations=['Solidity/Theorems.lean','lakefile.toml','.github/workflows/lean.yml',
                    'docs/audits/architecture-tools/dup_decls.py','docs/audits/architecture-tools/near_files.py',
-                   'scripts/core-import-closure.mjs','docs/audits/build-speed.md','docs/audits/proof-coverage-tools/theorem_census.py'])
+                   'scripts/core-import-closure.mjs','docs/audits/direction-tools/reachability/calibration.json','docs/audits/build-speed.md','docs/audits/proof-coverage-tools/theorem_census.py'])
     out=io.StringIO();writer=csv.DictWriter(out,fieldnames=['module','decls','lines','last_touched','generated','path'],lineterminator='\n');writer.writeheader();writer.writerows(sorted(unreachable,key=lambda r:(-r['lines'],r['module'])))
     return {**shards,'reach.json':json.dumps(report,indent=2,ensure_ascii=False)+'\n',
             'summary.json':json.dumps(summary,indent=2,ensure_ascii=False)+'\n','unreachable.csv':out.getvalue()}
@@ -388,11 +411,7 @@ def render():
 def main():
     ap=argparse.ArgumentParser(description=__doc__);ap.add_argument('--check',action='store_true');args=ap.parse_args()
     if git('rev-parse',BASE).strip()!=BASE: raise SystemExit('pinned base missing')
-    # A lane checkout may add only audit files; source measurement must remain
-    # byte-identical to the pinned base, including uncommitted source edits.
-    changed=git('diff',BASE,'--name-only').splitlines()
-    if any(not p.startswith('docs/audits/direction-tools/reachability/') for p in changed):
-        raise SystemExit('source drift outside lane; use clean pinned checkout')
+    # All measured source/helper inputs come from BASE, even after integration.
     for name,text in render().items():
         if len(text.encode())>=1_000_000: raise SystemExit(name+' exceeds small data limit')
         if args.check:

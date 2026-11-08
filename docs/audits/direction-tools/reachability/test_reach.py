@@ -8,6 +8,7 @@ import importlib.util
 import json
 from pathlib import Path
 import subprocess
+import tarfile
 import unittest
 
 HERE=Path(__file__).resolve().parent
@@ -37,16 +38,45 @@ class Parser(unittest.TestCase):
         self.assertEqual(r.closure({'a':{'b'},'b':{'a','c'}},['a']),{'a','b','c'})
 
 
+class CalibrationParser(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        spec=importlib.util.spec_from_file_location('calibrate',HERE/'calibrate.py')
+        cls.c=importlib.util.module_from_spec(spec);spec.loader.exec_module(cls.c)
+
+    def test_proof_local_ltac_does_not_disconnect_pipeline(self):
+        text='Lemma compiler : True.\nProof.\nLtac destruct_m := idtac.\n apply pipeline_preservation.\nQed.\nDefinition after := 0.\n'
+        spans=self.c.coq_spans(text)
+        self.assertEqual([m.group(2) for m,end in spans],['compiler','after'])
+        match,end=spans[0]
+        self.assertIn('pipeline_preservation',text[match.start():end])
+        self.assertIn('Qed.',text[match.start():end])
+
+    def test_coq_comments_and_template_declarations(self):
+        text='(* Lemma fake : True. (* nested *) *)\nNondetfunction select (x: expr) := x.\n'
+        cleaned=self.c.coq_clean(text)
+        self.assertEqual(len(cleaned),len(text))
+        self.assertEqual([(m.group(1),m.group(2)) for m,end in self.c.coq_spans(cleaned)],[('Nondetfunction','select')])
+
+
 class SavedOutputs(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.report=json.loads((HERE/'reach.json').read_text());cls.summary=json.loads((HERE/'summary.json').read_text())
 
-    def test_all_tracked_lean_files_counted(self):
-        paths=subprocess.check_output(['git','-C',str(r.ROOT),'ls-files'],text=True).splitlines()
-        paths=[p for p in paths if p.endswith('.lean')]
-        self.assertEqual(len(paths),self.report['source_totals']['modules'])
-        self.assertEqual(sum(len((r.ROOT/p).read_text().splitlines()) for p in paths),self.report['source_totals']['physical_lines'])
+    def test_pinned_lean_snapshot_counted(self):
+        # Integration can add/change Lean modules after this frozen audit.
+        # Read the exact report base, not the caller's index or working tree.
+        proc=subprocess.Popen(['git','-C',str(r.ROOT),'archive',self.report['base'],'--','*.lean'],stdout=subprocess.PIPE)
+        count=lines=0
+        with tarfile.open(fileobj=proc.stdout,mode='r|') as archive:
+            for member in archive:
+                if member.isfile() and member.name.endswith('.lean'):
+                    count+=1
+                    lines+=len(archive.extractfile(member).read().decode().splitlines())
+        proc.stdout.close();self.assertEqual(proc.wait(),0)
+        self.assertEqual(count,self.report['source_totals']['modules'])
+        self.assertEqual(lines,self.report['source_totals']['physical_lines'])
 
     def test_partitions_and_denominators(self):
         totals=self.report['source_totals']['node_totals']
@@ -67,6 +97,27 @@ class SavedOutputs(unittest.TestCase):
         self.assertEqual(sum(int(x['lines']) for x in rows),self.report['implicit_sensitivity']['neither']['all']['source_span_lines'])
         self.assertEqual(len(rows),len({x['module'] for x in rows}))
 
+    def test_calibration_accounting(self):
+        data=json.loads((HERE/'calibration.json').read_text())
+        self.assertEqual(data['solidity_base'],self.report['base'])
+        for field,lean_key in [('ratios','solidity_core'),('headline_sensitivity_ratios','solidity_headline_sensitivity')]:
+            for row in data[field]:
+                section,metric=row['metric'].split('.')
+                a=data[lean_key][section][metric];b=data['compcert_program'][section][metric]
+                self.assertEqual((row['solidity'],row['compcert']),(a,b))
+                self.assertAlmostEqual(row['solidity_over_compcert'],a/b)
+                self.assertEqual(row['outlier_over_3x_either_way'],a/b>3 or a/b<1/3)
+        for key in ('solidity_core','solidity_headline_sensitivity','compcert_program','compcert_semantic_companion'):
+            lexical=data[key]['lexical'];imports=data[key]['import_slice']
+            self.assertEqual(lexical['declarations'],lexical['marked_generated_declarations']+lexical['handwritten_or_unmarked_declarations'])
+            self.assertEqual(imports['physical_lines'],imports['marked_generated_physical_lines']+imports['handwritten_or_unmarked_physical_lines'])
+            self.assertEqual(imports['physical_lines'],imports['vendored_physical_lines']+imports['own_physical_lines'])
+            self.assertGreaterEqual(data[key]['within_import_slice_declaration_share'],0)
+            self.assertLessEqual(data[key]['within_import_slice_declaration_share'],1)
+        self.assertTrue(data['reference']['template_generator']['build_prerequisite_link_verified'])
+        self.assertTrue(all(p.endswith('.vp') for p in data['reference']['template_inputs']))
+        self.assertEqual(self.summary['reference_class']['ratios'],data['ratios'])
+
     def test_duplicates_and_citations(self):
         clusters=[]
         for name in self.summary['duplicate_cluster_files']:
@@ -75,7 +126,11 @@ class SavedOutputs(unittest.TestCase):
         self.assertEqual(counts['near_file'],self.summary['duplication']['near_file_clusters'])
         self.assertEqual(counts['same_normalized_statement'],self.summary['duplication']['same_statement_clusters'])
         self.assertTrue(all(c['lines']>0 and len(c['modules'])>1 for c in clusters))
-        for p in self.summary['citations']: self.assertTrue((r.ROOT/p).is_file(),p)
+        for p in self.summary['citations']:
+            if p.startswith('docs/audits/direction-tools/reachability/'):
+                self.assertTrue((r.ROOT/p).is_file(),p)
+            else:
+                r.git('cat-file','-e',self.report['base']+':'+p)
         self.assertEqual(len(self.summary['largest_30_clusters']),30)
         for p in HERE.glob('*.json'): self.assertLess(p.stat().st_size,1_000_000)
 

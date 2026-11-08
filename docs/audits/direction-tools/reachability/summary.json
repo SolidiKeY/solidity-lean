@@ -3804,20 +3804,7 @@
     "scripts/bench/ absent at pinned base",
     "Solidity/Goals.lean absent at pinned base"
   ],
-  "waits": [
-    {
-      "item": "scripts/differential/ absent at pinned base",
-      "reason": "absent at pinned base; continue available source census"
-    },
-    {
-      "item": "scripts/bench/ absent at pinned base",
-      "reason": "absent at pinned base; continue available source census"
-    },
-    {
-      "item": "Solidity/Goals.lean absent at pinned base",
-      "reason": "absent at pinned base; continue available source census"
-    }
-  ],
+  "waits": [],
   "review_fixes": [
     "Finder/skeptic: same-line attributed and opaque declarations now parsed; all tracked Lean consumers included.",
     "Finder: imported vendor source roots mapped from Lake source roots; declaration names removed from reference tokens; inherited module context included conservatively.",
@@ -3830,8 +3817,139 @@
     "All keep suggestions are provisional; no deletion or redundant/wrong-direction verdict follows from a lexical census."
   ],
   "reference_class": {
-    "counterpart": "same-repository source dependency graph versus CI import closure",
-    "ratio_policy": "Pending coordinator question DAREACH-REF: no cross-system ratio or >3x judgment until counterpart goal roots and dependency universes are matched.",
+    "counterpart": "CompCert compiler semantic-preservation roots, authorized by H238",
+    "artifact": "calibration.json",
+    "ratios": [
+      {
+        "metric": "lexical.declarations",
+        "solidity": 1512,
+        "compcert": 8054,
+        "solidity_over_compcert": 0.18773280357586292,
+        "outlier_over_3x_either_way": true,
+        "judgement": "justified",
+        "reason": "The Solidity root covers an intrinsic core fragment selected by inFragP; CompCert composes the C frontend and optimizing target pipeline. Smaller source slices do not establish better proof engineering."
+      },
+      {
+        "metric": "lexical.source_span_lines",
+        "solidity": 14197,
+        "compcert": 99008,
+        "solidity_over_compcert": 0.14339245313510018,
+        "outlier_over_3x_either_way": true,
+        "judgement": "justified",
+        "reason": "The Solidity root covers an intrinsic core fragment selected by inFragP; CompCert composes the C frontend and optimizing target pipeline. Smaller source slices do not establish better proof engineering."
+      },
+      {
+        "metric": "lexical.modules_with_reachable_declarations",
+        "solidity": 39,
+        "compcert": 150,
+        "solidity_over_compcert": 0.26,
+        "outlier_over_3x_either_way": true,
+        "judgement": "justified",
+        "reason": "The Solidity root covers an intrinsic core fragment selected by inFragP; CompCert composes the C frontend and optimizing target pipeline. Smaller source slices do not establish better proof engineering."
+      },
+      {
+        "metric": "import_slice.modules",
+        "solidity": 44,
+        "compcert": 157,
+        "solidity_over_compcert": 0.2802547770700637,
+        "outlier_over_3x_either_way": true,
+        "judgement": "justified",
+        "reason": "The Solidity root covers an intrinsic core fragment selected by inFragP; CompCert composes the C frontend and optimizing target pipeline. Smaller source slices do not establish better proof engineering."
+      },
+      {
+        "metric": "import_slice.physical_lines",
+        "solidity": 23890,
+        "compcert": 150614,
+        "solidity_over_compcert": 0.1586173928054497,
+        "outlier_over_3x_either_way": true,
+        "judgement": "justified",
+        "reason": "The Solidity root covers an intrinsic core fragment selected by inFragP; CompCert composes the C frontend and optimizing target pipeline. Smaller source slices do not establish better proof engineering."
+      },
+      {
+        "metric": "import_slice.handwritten_or_unmarked_physical_lines",
+        "solidity": 23890,
+        "compcert": 134101,
+        "solidity_over_compcert": 0.17814930537430743,
+        "outlier_over_3x_either_way": true,
+        "judgement": "justified",
+        "reason": "The Solidity root covers an intrinsic core fragment selected by inFragP; CompCert composes the C frontend and optimizing target pipeline. Smaller source slices do not establish better proof engineering."
+      },
+      {
+        "metric": "import_slice.own_physical_lines",
+        "solidity": 23890,
+        "compcert": 126120,
+        "solidity_over_compcert": 0.18942277196320964,
+        "outlier_over_3x_either_way": true,
+        "judgement": "justified",
+        "reason": "The Solidity root covers an intrinsic core fragment selected by inFragP; CompCert composes the C frontend and optimizing target pipeline. Smaller source slices do not establish better proof engineering."
+      }
+    ],
+    "headline_sensitivity_ratios": [
+      {
+        "metric": "lexical.declarations",
+        "solidity": 2345,
+        "compcert": 8054,
+        "solidity_over_compcert": 0.29115967221256517,
+        "outlier_over_3x_either_way": true,
+        "judgement": "justified",
+        "reason": "The Solidity root covers an intrinsic core fragment selected by inFragP; CompCert composes the C frontend and optimizing target pipeline. Smaller source slices do not establish better proof engineering."
+      },
+      {
+        "metric": "lexical.source_span_lines",
+        "solidity": 25474,
+        "compcert": 99008,
+        "solidity_over_compcert": 0.2572923400129282,
+        "outlier_over_3x_either_way": true,
+        "judgement": "justified",
+        "reason": "The Solidity root covers an intrinsic core fragment selected by inFragP; CompCert composes the C frontend and optimizing target pipeline. Smaller source slices do not establish better proof engineering."
+      },
+      {
+        "metric": "lexical.modules_with_reachable_declarations",
+        "solidity": 110,
+        "compcert": 150,
+        "solidity_over_compcert": 0.7333333333333333,
+        "outlier_over_3x_either_way": false,
+        "judgement": "within 3x; this proxy looks fine",
+        "reason": "No reference-class outlier at this source-proxy resolution; theorem coverage and language constructs still differ."
+      },
+      {
+        "metric": "import_slice.modules",
+        "solidity": 253,
+        "compcert": 157,
+        "solidity_over_compcert": 1.6114649681528663,
+        "outlier_over_3x_either_way": false,
+        "judgement": "within 3x; this proxy looks fine",
+        "reason": "No reference-class outlier at this source-proxy resolution; theorem coverage and language constructs still differ."
+      },
+      {
+        "metric": "import_slice.physical_lines",
+        "solidity": 96547,
+        "compcert": 150614,
+        "solidity_over_compcert": 0.6410227468893994,
+        "outlier_over_3x_either_way": false,
+        "judgement": "within 3x; this proxy looks fine",
+        "reason": "No reference-class outlier at this source-proxy resolution; theorem coverage and language constructs still differ."
+      },
+      {
+        "metric": "import_slice.handwritten_or_unmarked_physical_lines",
+        "solidity": 94997,
+        "compcert": 134101,
+        "solidity_over_compcert": 0.708398893371414,
+        "outlier_over_3x_either_way": false,
+        "judgement": "within 3x; this proxy looks fine",
+        "reason": "No reference-class outlier at this source-proxy resolution; theorem coverage and language constructs still differ."
+      },
+      {
+        "metric": "import_slice.own_physical_lines",
+        "solidity": 96547,
+        "compcert": 126120,
+        "solidity_over_compcert": 0.7655169679670155,
+        "outlier_over_3x_either_way": false,
+        "judgement": "within 3x; this proxy looks fine",
+        "reason": "No reference-class outlier at this source-proxy resolution; theorem coverage and language constructs still differ."
+      }
+    ],
+    "ratio_policy": "Compiler-only source slices; language/parser/theorem-scope limits in calibration.json; no whole-repository cross-system reachability fraction.",
     "external_figures_used": false
   },
   "limitations": [
@@ -3850,6 +3968,7 @@
     "docs/audits/architecture-tools/dup_decls.py",
     "docs/audits/architecture-tools/near_files.py",
     "scripts/core-import-closure.mjs",
+    "docs/audits/direction-tools/reachability/calibration.json",
     "docs/audits/build-speed.md",
     "docs/audits/proof-coverage-tools/theorem_census.py"
   ]
