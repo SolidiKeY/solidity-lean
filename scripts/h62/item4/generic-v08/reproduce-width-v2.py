@@ -58,11 +58,11 @@ def version_matches(text):
     return ('version ' + VERSION + ',') in text and ('commit ' + COMMIT + ',') in text
 
 
-def bounded_command(lean, record, seconds, args, *, lease_fd):
+def bounded_command(lean, record, seconds, args, *, lease_fd, cloud_vm_h232=False):
     if not 1 <= seconds <= SECONDS:
         raise ValueError('remaining budget must be between1 and300 seconds')
     return [sys.executable, '-B', str(ROOT/'scripts/h62/item4/generic-v08/bounded.py'),
-            '--record', str(record), '--seconds', str(seconds), '--aggregate', '--aggregate-parent', '--parent-pid', str(os.getpid()), '--lease-fd', str(lease_fd), '--',
+            *(['--cloud-vm-h232'] if cloud_vm_h232 else []), '--record', str(record), '--seconds', str(seconds), '--aggregate', '--aggregate-parent', '--parent-pid', str(os.getpid()), '--lease-fd', str(lease_fd), '--',
             str(lean), '-j1', '--tstack=131072', *args]
 
 
@@ -108,11 +108,12 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--toolchain', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--cloud-vm-h232', action='store_true', help='Explicit H232 cloud-VM execution only; ordinary hosts retain strict hard-scope admission')
     args = parser.parse_args(argv)
     start = time.monotonic()
     try:
         output = checked_output(ROOT, args.output)
-        scope = require_scope()
+        scope = require_scope(cloud_vm_h232=args.cloud_vm_h232)
         lean = (args.toolchain/'bin/lean').resolve(strict=True)
         if (ROOT/'lean-toolchain').read_text().strip() != 'leanprover/lean4:v' + VERSION:
             raise ValueError('master toolchain differs from explicit v2 pin')
@@ -151,7 +152,7 @@ def main(argv=None):
             if remaining < 1:
                 (output/'STOP.txt').write_text('overall300second deadline exhausted\n')
                 return 1
-            run = bounded_command(lean, output/(name+'.json'), remaining, command, lease_fd=lock.fileno())
+            run = bounded_command(lean, output/(name+'.json'), remaining, command, lease_fd=lock.fileno(), cloud_vm_h232=args.cloud_vm_h232)
             try:
                 with (output/(name+'.log')).open('w') as log:
                     result = run_monitor(run, cwd=ROOT, env=env, stdout=log, stderr=subprocess.STDOUT,
