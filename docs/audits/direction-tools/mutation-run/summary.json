@@ -107,6 +107,6 @@
     "No full rebuild from scratch; published cache and baseline selected builds required.",
     "Unmarked is not proven handwritten.",
     "Kills measure existing proof recheck failures, including tactic dependence on definitional form; they do not alone prove a theorem statement semantically distinguishes the mutant.",
-    "M31 strengthens/restricts a recognizer; survival can be vacuity rather than missing proof."
+    "M31 passes the local recognizer theorem vacuously but is killed by the positive checked-block consumer; local-only survival would understate existing coverage."
   ]
 }
