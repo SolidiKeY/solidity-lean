@@ -21,8 +21,9 @@ async function run() {
     appendFileSync(config.events,JSON.stringify(event)+'\n');
   };
   const extension=vscode.extensions.getExtension(target==='dafny'?'dafny-lang.ide-vscode':'SolidiKeY.solidity-lean');
-  assert.ok(extension,'target extension is installed');
-  const observation = observe(vscode,record,extension.extensionPath,config.recordProtocol?config.trace:null,config.workspace,{captureServerArtifacts:config.suite==='verification-time-limit',artifactReferenceDirectory:target==='dafny'?require('node:path').dirname(config.dafnyExecutable):undefined});
+  if(!config.menuTrust)assert.ok(extension,'target extension is installed');
+  const observedExtensionPath=extension?.extensionPath||config.observedExtensionPath;assert.ok(observedExtensionPath,'missing target extension source path');
+  const observation = observe(vscode,record,observedExtensionPath,config.recordProtocol?config.trace:null,config.workspace,{captureServerArtifacts:config.suite==='verification-time-limit',artifactReferenceDirectory:target==='dafny'?require('node:path').dirname(config.dafnyExecutable):undefined});
   const heartbeat = [];
   let last = performance.now();
   const timer = setInterval(()=>{const now=performance.now();heartbeat.push(Math.max(0,now-last-25));last=now;},25);
@@ -95,7 +96,7 @@ async function run() {
     return {elapsedMs:performance.now()-start,value};
   }
   try {
-    const activation=performance.now(); api=await bounded(extension.activate(),'extension activation');
+    if(!config.menuTrust){const activation=performance.now(); api=await bounded(extension.activate(),'extension activation');
     metrics.activationMs=performance.now()-activation;
     assert.ok(api,'activation returned no runtime');
     if (target==='dafny') {
@@ -104,6 +105,7 @@ async function run() {
       // The LSP connection allows one handler per method. Use Dafny's public
       // multicast event so observation cannot replace its UI handlers.
       client.OnVerificationSymbolStatus(params=>{states.set(params.uri,params);record('symbolStatus',params);});
+    }
     }
     if(config.suite==='contribution-menus'){
       await scenario('native-contribution-menus',()=>require('./menu-lifecycle.cjs').run({vscode,config,events,sessionFor}));
