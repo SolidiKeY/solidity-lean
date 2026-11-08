@@ -47,6 +47,18 @@ class Generator(unittest.TestCase):
             with self.assertRaises(ValueError):
                 generator.render(changed)
 
+    def test_stream_changes_only_enumeration_sort(self):
+        line = '  let constants := environment.constants.toList.mergeSort (fun a b => a.1.toString ≤ b.1.toString)\n'
+        sorted_source = generator.render(TEMPLATE)
+        stream_source = generator.render(TEMPLATE, stream=True)
+        self.assertEqual(stream_source, sorted_source.replace(line,
+                         '  let constants := environment.constants.toList\n', 1).replace(
+                         'Collector body is reused verbatim from P8StatementCensus.',
+                         'P8 collector fields/filter are retained; only the global enumeration sort is omitted.'))
+        changed = TEMPLATE.replace('fun a b => a.1.toString ≤ b.1.toString', 'fun _ _ => true')
+        with self.assertRaisesRegex(ValueError, 'sort changed'):
+            generator.render(changed, stream=True)
+
     def test_generation_is_exclusive_in_both_modes(self):
         for optimized in (False, True):
             with tempfile.TemporaryDirectory() as folder:

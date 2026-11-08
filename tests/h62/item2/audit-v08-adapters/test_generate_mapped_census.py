@@ -29,10 +29,10 @@ class Generator(unittest.TestCase):
         t.write_text(TEMPLATE)
         return repo
 
-    def prepare(self, repo, snapshot=SNAPSHOT, paths=None):
+    def prepare(self, repo, snapshot=SNAPSHOT, paths=None, **kwargs):
         with patch.object(module, 'frozen_blobs', return_value={PATH: 'blob'}):
             with patch.object(module.subprocess, 'check_output', return_value=DATA):
-                return module.prepare(repo, snapshot, [PATH] if paths is None else paths)
+                return module.prepare(repo, snapshot, [PATH] if paths is None else paths, **kwargs)
 
     def test_collector_body_and_target(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -42,6 +42,17 @@ class Generator(unittest.TestCase):
             self.assertIn('import Solidity.Test\n', source)
             self.assertEqual(len(bindings), 1)
             self.assertIn(module.MARKER, source)
+
+    def test_stream_retains_bindings_and_target(self):
+        with tempfile.TemporaryDirectory() as folder:
+            repo = self.setup_repo(folder)
+            sorted_source, sorted_bindings, sorted_template = self.prepare(repo)
+            source, bindings, template = self.prepare(repo, stream=True)
+            self.assertEqual((bindings, template), (sorted_bindings, sorted_template))
+            self.assertIn('import Solidity.Test\n', source)
+            self.assertNotIn('constants.toList.mergeSort', source)
+            self.assertIn('let constants := environment.constants.toList\n', source)
+            self.assertEqual(source.count(module.MARKER), sorted_source.count(module.MARKER))
 
     def test_selection_bounds_and_duplicates(self):
         with tempfile.TemporaryDirectory() as folder:

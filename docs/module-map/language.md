@@ -228,6 +228,15 @@ commands; it never enters the core import graph.
 | `Theorems.lean` | The headline theorems in notation, over the scoped calculus and the typed run, their axioms pinned: soundness, the rule table against the strategy (`rule_exists`, `rule_of_step`), the solkey fragment at the rule level (`solkey_rule_exists`, `solkey_rule_lt_calculus`, `solkey_step_taclet`) and at the judgement level (`solkey_eq_calculus`, `solkey_lt_calculus`), the compiler (`σ ≈[C, L, b, F] m`: `Evm.Sim` of the typed state). |
 
 | `Semantics/StaticCallState.lean` | Existing-frame resumption and exact visible havoc equality; no execution producer. |
+The diagnostic generators `scripts/h62/item2/audit-v08-adapters/generate_mapped_census.py`
+and `scripts/h62/item2/audit-v08-adapters/generate_calldata_census.py` accept
+`--stream` to omit the global imported-constant sort. This still materializes
+`toList`; it is not lazy or a bounded-memory guarantee. Default generated source
+is unchanged. Source hashes, selected-module filtering, captured fields and
+exclusive-write guards are retained. Bind any new capture to the current
+collector/template hashes; do not relabel historical receipts. Sort captured
+rows outside Lean when deterministic presentation is needed. Inventory and
+name matching do not establish feasibility, statement fidelity or H68 adequacy.
 | `tests/h62/item4/generic-v08/IntrinsicWidthsV2.lean` | Explicit-mapFree fixed-bytes width consumers; isolated checker `scripts/h62/item4/generic-v08/check-width-v2.sh`. Frozen v1 headers remain unresolved; this test proves no historical correspondence or execution adequacy. |
 
 The v2 checker uses the pinned toolchain and unchanged serial resource limits.

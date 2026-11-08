@@ -16,7 +16,7 @@ from generate_calldata_census import render, TEMPLATE, OUTPUT_ROOT
 MARKER = 'H62_MAPPED_CENSUS_JSON '
 
 
-def prepare(repo, snapshot, paths):
+def prepare(repo, snapshot, paths, *, stream=False):
     if not paths or len(paths) > 4 or len(set(paths)) != len(paths):
         raise ValueError('Select one to four distinct mapped files')
     records = snapshot['modules']
@@ -41,7 +41,7 @@ def prepare(repo, snapshot, paths):
         modules.append(path[:-5].replace('/', '.'))
         bindings.append(dict(file=path, blob=frozen[path], sha256=digest))
     template = (repo / TEMPLATE).read_text()
-    return render(template, tuple(modules), MARKER), bindings, hashlib.sha256(template.encode()).hexdigest()
+    return render(template, tuple(modules), MARKER, stream=stream), bindings, hashlib.sha256(template.encode()).hexdigest()
 
 
 def main():
@@ -51,6 +51,7 @@ def main():
     parser.add_argument('--file', action='append', required=True)
     parser.add_argument('--name', required=True)
     parser.add_argument('--expect-sha256')
+    parser.add_argument('--stream', action='store_true', help='Skip global sort; retain selected rows and fields')
     args = parser.parse_args()
     repo = args.repo.resolve()
     if re.fullmatch(r'[A-Za-z][A-Za-z0-9_-]*', args.name) is None:
@@ -59,7 +60,7 @@ def main():
     if root.resolve() != root:
         raise ValueError('Output escapes the owned repository scope')
     raw = args.snapshot.read_bytes()
-    source, bindings, template_sha = prepare(repo, json.loads(raw), args.file)
+    source, bindings, template_sha = prepare(repo, json.loads(raw), args.file, stream=args.stream)
     digest = hashlib.sha256(source.encode()).hexdigest()
     if args.expect_sha256 is not None and args.expect_sha256 != digest:
         raise ValueError('Generated diagnostic hash differs from pinned packet')
@@ -69,7 +70,7 @@ def main():
         handle.write(source)
     print(json.dumps(dict(status='GENERATED_NOT_LEAN_CHECKED', output=str(out),
                          sha256=digest, bindings=bindings,
-                         template_sha256=template_sha,
+                         template_sha256=template_sha, enumeration='stream' if args.stream else 'sorted',
                          snapshot_sha256=hashlib.sha256(raw).hexdigest()), sort_keys=True))
 
 
