@@ -82,3 +82,9 @@ For source observations, check
 `Solidity/Source/Observe.lean`. The closed `readInt_reject` schema must receive
 no input-tuple credit; retain its actual rejection statement. Full-word encoding
 injectivity and panic-code separation do not imply selector injectivity.
+
+For heap/storage feasibility, check
+`tests/h62/item2/audit-language/SourceStateWitness.lean` against the frozen
+`Solidity/Source/State.lean` family. Preserve the populated-source copy premise,
+write type equality and distinct-address/path hypotheses. Empty heaps alone
+cannot witness the copy interfaces.
