@@ -3108,9 +3108,11 @@ Never flatten inspection fingerprints to feed a single-snapshot report join.
 shared declaration names or module scopes. Keep each slice's fingerprint,
 module roster (including empty entries), report pointers and unresolved records.
 Union counts do not establish a coherent kernel environment or proof/source
-acceptance. The supplemental premise-record replay and its original receipts
-are indexed privately:
+acceptance. Retain unsupported attempts beside successful report pointers; an
+unsupported attempt is neither refutation nor additional domain credit. The
+replay of existing selection, composition and premise reports and its original
+receipts are indexed privately:
 
 ```text
-evidence: eaddb0624de9a751bff875327f96b9a57f7068c1 evidence/solidity-parallel-20261103/executable-bytecode/combined-premise-report-links-b4edbd63/INDEX.json
+evidence: 367dedb39a7abbff68043ae3cce925f9c8ea2772 evidence/solidity-parallel-20261103/executable-bytecode/selection-report-extension-badea2c2/INDEX.json
 ```

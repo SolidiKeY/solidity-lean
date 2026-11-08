@@ -78,6 +78,17 @@ class MetadataSchemaTests(unittest.TestCase):
         self.assertEqual(empty_result['inspection_slices'][0]['module_scope'],['Empty','M'])
         self.assertEqual(empty_result['summary']['disjoint_module_scopes'],3)
         saved=copy.deepcopy(result);parts[1]['rows'][0]['type_expr']='changed';self.assertEqual(result,saved)
+    def test_federation_retains_failed_attempt_beside_proof_without_duplicate_credit(self):
+        parts=self.federation_fixture();earlier=copy.deepcopy(parts[1]['artifacts'][0]);earlier['id']='earlier'
+        earlier['entries'][0].update(status='unsupported-default',reason='no supported fixture')
+        parts[1]['artifacts'].append(earlier);result=federated_hypothesis_reports(parts)
+        self.assertEqual(result['summary']['reported_proof_targets'],1)
+        packet=result['inspection_slices'][1]['index'];self.assertEqual(packet['summary']['artifact_reports'],2)
+        declaration=packet['declarations'][0]
+        self.assertEqual({r['reported_status'] for r in declaration['hypothesis_reports']},{'proved','unsupported-default'})
+        self.assertFalse(declaration['proof_acceptance_established'])
+        self.assertFalse(result['global_witness_ledger_linked'])
+
     def test_federation_refuses_overlap_ids_empty_and_mixed_contexts(self):
         parts=self.federation_fixture()
         for change in ['id','name','module','mapping']:
@@ -86,6 +97,8 @@ class MetadataSchemaTests(unittest.TestCase):
             elif change=='name':bad[1]['rows'][0]['name']=bad[0]['rows'][0]['name']
             elif change=='module':bad[1]['rows'][0]['module']='M'
             else:bad[1]['mapping']['M']=[]
+            if change in ('name','module'):
+                bad[1]['artifacts']=[self.report_fixture(bad[1]['rows'][0],'supplement')]
             with self.subTest(change=change),self.assertRaises(ValueError):federated_hypothesis_reports(bad)
         with self.assertRaises(ValueError):federated_hypothesis_reports([])
         with self.assertRaises(ValueError):federated_hypothesis_reports([dict(id='empty',rows=[],mapping={},artifacts=[])])
