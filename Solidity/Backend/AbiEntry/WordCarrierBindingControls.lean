@@ -33,11 +33,11 @@ private theorem actual (kind : Solidity.AbiEntry.Kind) (input : Solidity.AbiEntr
 private theorem accept (kind : Solidity.AbiEntry.Kind) (input : Solidity.AbiEntry.Input)
     (full : ¬(wmod input.size).val<36) (valid : kind.valid (rawArgumentWord input).val=true) :
     run (compiled kind).code (machine input)=.ok (bound input) 0 := by
-  simpa only [wordCarrierOutcome,if_neg full,if_pos valid] using actual kind input
+  simpa only [wordCarrierOutcome,ite_eq_right full,ite_eq_left valid,bound] using actual kind input
 private theorem reject (kind : Solidity.AbiEntry.Kind) (input : Solidity.AbiEntry.Input)
     (full : ¬(wmod input.size).val<36) (invalid : ¬kind.valid (rawArgumentWord input).val=true) :
     run (compiled kind).code (machine input)=.revert := by
-  simpa only [wordCarrierOutcome,if_neg full,if_neg invalid] using actual kind input
+  simpa only [wordCarrierOutcome,ite_eq_right full,ite_eq_right invalid] using actual kind input
 
 theorem enum_raw_value_and_frame (fuel : Nat) :
     Solidity.AbiEntry.load enumGood.data 4=2 ∧ enumGood.size=38 ∧
@@ -102,7 +102,7 @@ theorem large_enum_accepts (members : Nat) (large : W≤members) (word size : Fi
     run (compiled (.enumBelow members)).code initial=.ok (uintBoundMachine 7 label word initial) 0 := by
   have valid : (Solidity.AbiEntry.Kind.enumBelow members).valid word.val=true :=
     decide_eq_true (Nat.lt_of_lt_of_le word.isLt large)
-  simpa only [wordCarrierOutcome,if_neg full,if_pos valid] using
+  simpa only [wordCarrierOutcome,ite_eq_right full,ite_eq_left valid] using
     WordCarrierBinding.executed C 7 (.enumBelow members) label (compiled (.enumBelow members))
       (WordCarrierBinding.selected C 7 (.enumBelow members) label) initial word size wordCell sizeCell
 
