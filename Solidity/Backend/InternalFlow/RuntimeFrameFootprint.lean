@@ -99,13 +99,14 @@ theorem array_write (repr : StateRepr L b frame F σ base m)
   · have actual : σ.heap.writeAddr (.index ref .dyn (indexValue index)) value =
         some (σ.heap.set ref (MObj.setElem .dyn (σ.heap.get ref) index.val value)) := by
       simp only [Heap.writeAddr,Heap.setIndex,indexValue,Int.toNat_natCast]
-      exact if_pos live
+      exact ite_eq_left live
     exact ⟨actual,htarget,repr.set ref index.val live value word represented,
       write_above m _ word (by have bound := repr.heap.above ref;omega)⟩
   · have impossible : σ.heap.writeAddr (.index ref .dyn (indexValue index)) value ≠ none := by
       simp only [Heap.writeAddr,Heap.setIndex,indexValue,Int.toNat_natCast]
-      rw [if_pos (show index.val < (MObj.elems .dyn (σ.heap.get ref)).length from live)]
-      exact Option.noConfusion
+      exact fun absent =>
+        Option.noConfusion ((ite_eq_left
+          (show index.val < (MObj.elems .dyn (σ.heap.get ref)).length from live)).symm.trans absent)
     exact (impossible hsource).elim
 
 /-- Full expression/receiver/index pipeline of the published local-array
