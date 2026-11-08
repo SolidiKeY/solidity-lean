@@ -17,6 +17,8 @@ when a task needs it.
   never hand-edit generated roots or indexes.
 - Never raise `maxHeartbeats`; warn before a change that may slow checking
   ([design and speed](docs/contributing.md#design-and-speed)).
+- Before adding a large area or growing Backend, Yul or Lowering, read the
+  [direction](docs/audits/direction.md) and [size reduction](docs/audits/size-reduction.md) audits.
 
 ## Workflow
 
