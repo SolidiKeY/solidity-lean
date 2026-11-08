@@ -587,3 +587,68 @@ def hypothesis_report_index(rows, mapping, artifacts):
         "proof_acceptance_established":False,"source_correspondence_established":False,
         "full_census_accepted":False,"global_witness_ledger_linked":False,
         "boundary":"Supplied report/source-position accounting only. Reported proof is a pointer, not independent kernel acceptance, feasibility, inherited instantiation or source coverage; raw metadata and native receipts remain caller obligations."}
+
+
+def source_range_bindings(rows, sources, source_sha256):
+    """Guard Unicode positions and missing ranges from becoming source coverage.
+
+    Bind supplied line/selection positions to pinned UTF-8 snapshot bytes. Full
+    line slices may contain more than the declaration: no source identity,
+    signature correspondence, ownership, inheritance or witness is established.
+    """
+    validate_rows(rows)
+    if (not isinstance(sources, dict) or not isinstance(source_sha256, dict)
+            or set(sources) != set(source_sha256)
+            or any(not text(m) for m in sources)):
+        raise ValueError("range source membership differs")
+    snapshots = {}
+    for module, raw in sources.items():
+        if (type(raw) is not bytes or not isinstance(source_sha256[module], str)
+                or re.fullmatch(r"[0-9a-f]{64}", source_sha256[module]) is None
+                or hashlib.sha256(raw).hexdigest() != source_sha256[module]):
+            raise ValueError("range source snapshot hash differs")
+        # Lean FileMap line breaks are LF, not Python's broader splitlines set.
+        lines = raw.decode("utf-8").split("\n")
+        starts = [0]
+        for line in lines[:-1]:
+            starts.append(starts[-1] + len(line.encode("utf-8")) + 1)
+        snapshots[module] = (raw, lines, starts)
+    if not {r["module"] for r in rows} <= set(sources):
+        raise ValueError("ranged record outside source scope")
+    result = []
+    for row in sorted(rows, key=lambda r:r["name"]):
+        raw, lines, starts = snapshots[row["module"]]
+        span = row["declaration_range"]
+        bound = None
+        status = "no_declaration_range"
+        if span is not None:
+            if span["end_line"] > len(lines):
+                raise ValueError("declaration range outside source snapshot")
+            start = starts[span["start_line"]-1]
+            end = starts[span["end_line"]] if span["end_line"] < len(lines) else len(raw)
+            bound = {"line_byte_start":start, "line_byte_end":end,
+                     "line_bytes_sha256":hashlib.sha256(raw[start:end]).hexdigest(),
+                     "selection":None}
+            status = "line_range_only"
+            if "selection_column" in span:
+                first, last = span["selection_line"]-1, span["selection_end_line"]-1
+                left, right = span["selection_column"], span["selection_end_column"]
+                if left > len(lines[first]) or right > len(lines[last]):
+                    raise ValueError("selection column outside source snapshot")
+                left = starts[first] + len(lines[first][:left].encode("utf-8"))
+                right = starts[last] + len(lines[last][:right].encode("utf-8"))
+                selected = raw[left:right]
+                bound["selection"] = {"byte_start":left, "byte_end":right,
+                    "text":selected.decode("utf-8"),
+                    "sha256":hashlib.sha256(selected).hexdigest()}
+                status = "line_and_selection_bytes_bound"
+        result.append({"observed_type":observed_type(row),
+            "source_sha256":source_sha256[row["module"]], "binding_status":status,
+            "range_bytes":bound, "source_identity_established":False,
+            "statement_correspondence_established":False,
+            "inherited_obligations_established":False, "joint_witness_established":False})
+    counts = Counter(r["module"] for r in rows)
+    return {"records":result,
+        "sources":[{"module":m,"sha256":source_sha256[m],"bytes":len(sources[m]),
+                    "supplied_records":counts[m]} for m in sorted(sources)],
+        "boundary":"Pinned snapshot range bytes only; line slices can exceed declarations. Caller authenticates pins/metadata; no source identity, ownership, statement correspondence, inherited instantiation or witness coverage."}

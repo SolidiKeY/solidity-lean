@@ -453,5 +453,52 @@ class RecordPartitionTests(unittest.TestCase):
         self.assertEqual([e["record"]["name"] for e in groups["unattributed_no_range"]],["odd_auxiliary_name"])
 
 
+
+class SourceRangeBindingTests(unittest.TestCase):
+    def fixture(self, raw="α theorem 名 : True := by\n  trivial\n"):
+        row=MetadataSchemaTests().ranged_row()
+        row["declaration_range"].update(selection_column=10,selection_end_column=11)
+        sources={"M":raw.encode()}
+        return row,sources,{"M":hashlib.sha256(raw.encode()).hexdigest()}
+    def test_unicode_selection_is_utf8_bytes_and_keeps_raw_type(self):
+        row,sources,pins=self.fixture();packet=source_range_bindings([row],sources,pins)
+        entry=packet["records"][0];selection=entry["range_bytes"]["selection"]
+        self.assertEqual(selection["text"],"名")
+        self.assertEqual(sources["M"][selection["byte_start"]:selection["byte_end"]],"名".encode())
+        self.assertEqual(selection["byte_start"],11);self.assertEqual(selection["byte_end"],14)
+        self.assertEqual(entry["observed_type"],observed_type(row))
+        self.assertFalse(any(entry[k] for k in ["source_identity_established","statement_correspondence_established","inherited_obligations_established","joint_witness_established"]))
+    def test_missing_and_legacy_ranges_are_not_selection_bindings(self):
+        row,sources,pins=self.fixture();missing=copy.deepcopy(row);missing.update(name="missing",declaration_range=None)
+        legacy=copy.deepcopy(row);legacy.update(name="legacy",declaration_range={"start_line":1,"end_line":2,"selection_line":1})
+        packet=source_range_bindings([row,missing,legacy],sources,pins);by={r["observed_type"]["name"]:r for r in packet["records"]}
+        self.assertEqual(by["missing"]["binding_status"],"no_declaration_range");self.assertIsNone(by["missing"]["range_bytes"])
+        self.assertEqual(by["legacy"]["binding_status"],"line_range_only");self.assertIsNone(by["legacy"]["range_bytes"]["selection"])
+        self.assertEqual(len(packet["records"]),3)
+    def test_invalid_positions_pins_and_scope_fail_closed(self):
+        row,sources,pins=self.fixture()
+        for change in [{"end_line":99},{"selection_column":999,"selection_end_column":999}]:
+            bad=copy.deepcopy(row);bad["declaration_range"].update(change)
+            with self.subTest(change=change),self.assertRaises(ValueError):source_range_bindings([bad],sources,pins)
+        with self.assertRaises(ValueError):source_range_bindings([row],{"M":sources["M"]+b"drift"},pins)
+        with self.assertRaises(ValueError):source_range_bindings([row],sources,{"M":"g"*64})
+        with self.assertRaises(ValueError):source_range_bindings([row],{"N":sources["M"]},{"N":pins["M"]})
+    def test_multiline_crlf_unicode_separator_and_eof_positions(self):
+        row,sources,pins=self.fixture("α\r\n名\u2028x\n")
+        row["declaration_range"].update(start_line=1,end_line=3,selection_line=1,selection_column=1,selection_end_line=2,selection_end_column=2)
+        entry=source_range_bindings([row],sources,pins)["records"][0]
+        self.assertEqual(entry["range_bytes"]["selection"]["text"],"\r\n名\u2028")
+        self.assertEqual(entry["range_bytes"]["line_byte_end"],len(sources["M"]))
+        row["declaration_range"].update(selection_line=3,selection_column=0,selection_end_line=3,selection_end_column=0)
+        self.assertEqual(source_range_bindings([row],sources,pins)["records"][0]["range_bytes"]["selection"]["text"],"")
+    def test_ordering_uninspected_modules_and_mutation_isolation(self):
+        row,sources,pins=self.fixture();other=copy.deepcopy(row);other["name"]="other";sources["Unseen"]=b"";pins["Unseen"]=hashlib.sha256(b"").hexdigest()
+        packet=source_range_bindings([row,other],sources,pins)
+        self.assertEqual(packet,source_range_bindings([other,row],dict(reversed(list(sources.items()))),dict(reversed(list(pins.items())))))
+        self.assertEqual(packet["sources"][1]["supplied_records"],0)
+        saved=copy.deepcopy(packet);row["binders"].append({"external":"mutation"});self.assertEqual(packet,saved)
+        packet["records"][0]["observed_type"]["declaration_range"]["start_line"]=99
+        self.assertEqual(other["declaration_range"]["start_line"],1)
+
 if __name__ == "__main__":
     unittest.main()
