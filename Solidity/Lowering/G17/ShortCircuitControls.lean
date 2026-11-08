@@ -2,9 +2,7 @@ import Solidity.Lowering.G17.ShortCircuitSource
 import Solidity.Lowering.V07.P12AtomicConditions
 import Solidity.Lowering.V07.P12AssignedConditionControls
 
-/-! Nonvacuity and negative controls for G17 lazy composition. The inhabited
-fixture retains heterogeneous locals, memory and storage references. These
-controls reject eager RHS effects and incorrectly ignored taken-branch halts. -/
+/-! Nonvacuity and negative controls for lazy composition. The inhabited fixture retains heterogeneous locals, memory and storage references. These controls reject eager RHS effects and incorrectly ignored taken-branch halts. -/
 namespace Solidity.Lowering.G17.Controls
 open V07 V07.P12NextInterface Source.SemanticsExamples
 open V07.P12Controls (C E SrcCtx TgtCtx source target mapping)
@@ -25,8 +23,7 @@ theorem skipped_run (conj : Bool) :
   rw [shortOperand_run,P12AtomicConditions.literal_native_run]
   cases conj <;> rfl
 
-/-- Eager RHS execution changes a live caller slot; it is observably different
-for both operators, even when its result equals the short-circuit result. -/
+/-- Eager RHS execution changes a live caller slot; it is observably different for both operators, even when its result equals the short-circuit result. -/
 theorem eager_effect_rejected (conj : Bool) :
     (skipped conj).run target ≠ (assignLocalOperand .here (.there .here)).run target := by
   intro same
@@ -48,8 +45,7 @@ theorem halt_control (conj : Bool) :
     rw [shortOperand_run,P12AtomicConditions.literal_native_run]
     cases conj <;> rfl
 
-/-- Concrete input producers for the generic Source relation, with a real
-inhabited alignment rather than an assumed whole-expression execution law. -/
+/-- Concrete input producers for the generic Source relation, with a real inhabited alignment rather than an assumed whole-expression execution law. -/
 def producer (p : Roadmap.Pipeline) (checked conj : Bool) :=
   shortCondition (globals p) {F0 with checked := checked} mapping values worlds conj
     (.bool (!conj)) assignment
@@ -57,8 +53,7 @@ def producer (p : Roadmap.Pipeline) (checked conj : Bool) :=
       (!conj) ⟨source,target,initial⟩)
     (P12AssignedConditionControls.producer p checked)
 
-/-- Kernel-checked successful Source execution and its transported target
-execution, for both pipelines, both checking modes and both operators. -/
+/-- Kernel-checked successful Source execution and its transported target execution, for both pipelines, both checking modes and both operators. -/
 theorem source_witness (p : Roadmap.Pipeline) (checked conj : Bool) (fuel : Nat) :
     (Source.evalE (globals p) {F0 with checked := checked} (fuel+2)
       (.binary (if conj then .and else .or) (.bool (!conj)) assignment)).run source =
@@ -80,8 +75,7 @@ def takenProducer (p : Roadmap.Pipeline) (checked : Bool) :=
     (P12AssignedCondition.assignment (globals p) {F0 with checked := checked} mapping values worlds
       bool_reflect ⟨source,target,initial⟩ (.there .here) .here (.there .here) .here rfl rfl)
 
-/-- The taken RHS reads the value written by the left assignment. This guards
-against reading the RHS from the initial state or dropping caller writes. -/
+/-- The taken RHS reads the value written by the left assignment. This guards against reading the RHS from the initial state or dropping caller writes. -/
 theorem taken_source_witness (p : Roadmap.Pipeline) (checked : Bool) (fuel : Nat) :
     let after : Source.EMState E SrcCtx :=
       ((source.1.set .here (.bool true)).set (.there .here) (.bool true),source.2)
