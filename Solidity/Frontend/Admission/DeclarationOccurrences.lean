@@ -226,4 +226,107 @@ theorem declarationFieldUses_source_witness {α : Type u} (unit : Syn .unit)
 /-- info: 'Solidity.Frontend.Admission.declarationFieldUses_source_witness' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms declarationFieldUses_source_witness
 
+/-! Intrinsic refusal diagnostics preserve the actual field provenance.
+Regression: selecting a first error must not discard later rejected fields or
+substitute a caller-provided declaration roster. The supplied Boolean predicate
+is not itself a Source admission policy or evidence of classifier adequacy. -/
+
+/-- All refused fields, in traversal order, retaining declaration and typed
+syntax site. The complete use inventory remains independently available. -/
+def declarationFieldRefusals {α : Type u} (E : Env)
+    (fields : ∀ {c : Cat}, Syn c → List α) (accepts : α → Bool) :
+    List (DeclarationOccurrence × α) :=
+  (declarationFieldUses E fields).filter fun use => !(accepts use.2)
+
+/-- First intrinsic refusal; this selects from the complete refusal list. -/
+def declarationFieldRefusal? {α : Type u} (E : Env)
+    (fields : ∀ {c : Cat}, Syn c → List α) (accepts : α → Bool) :
+    Option (DeclarationOccurrence × α) :=
+  (declarationFieldRefusals E fields accepts).head?
+
+/-- Every refused direct field is retained, including after the first error. -/
+theorem declarationFieldRefusals_iff {α : Type u} (E : Env)
+    (fields : ∀ {c : Cat}, Syn c → List α) (accepts : α → Bool)
+    (site : DeclarationOccurrence) (value : α) :
+    (site,value) ∈ declarationFieldRefusals E fields accepts ↔
+      site.Occurs E ∧ value ∈ fields site.2.2 ∧ accepts value = false := by
+  constructor
+  · intro member
+    have selected := List.mem_filter.mp member
+    have actual := (declarationFieldUses_iff E fields site value).mp selected.1
+    refine ⟨actual.1,actual.2,?_⟩
+    cases decision : accepts value with
+    | false => rfl
+    | true =>
+      have rejected : (!accepts value) = true := selected.2
+      rw [decision] at rejected
+      cases rejected
+  · rintro ⟨occurs,field,rejected⟩
+    refine List.mem_filter.mpr ⟨(declarationFieldUses_iff E fields site value).mpr
+      ⟨occurs,field⟩,?_⟩
+    change (!accepts value) = true
+    rw [rejected]
+    rfl
+
+/-- A reported refusal names an actual declaration/site/classified field that
+fails the supplied predicate. It is not merely a matching feature name. -/
+theorem declarationFieldRefusal?_sound {α : Type u} (E : Env)
+    (fields : ∀ {c : Cat}, Syn c → List α) (accepts : α → Bool)
+    (site : DeclarationOccurrence) (value : α)
+    (reported : declarationFieldRefusal? E fields accepts = some (site,value)) :
+    site.Occurs E ∧ value ∈ fields site.2.2 ∧ accepts value = false :=
+  (declarationFieldRefusals_iff E fields accepts site value).mp
+    (List.mem_of_head? reported)
+
+/-- Silence is exact for the supplied classifier and predicate over the actual
+roster. Classifier validity/completeness and policy linkage remain separate. -/
+theorem declarationFieldRefusal?_none_iff {α : Type u} (E : Env)
+    (fields : ∀ {c : Cat}, Syn c → List α) (accepts : α → Bool) :
+    declarationFieldRefusal? E fields accepts = none ↔
+      ∀ (site : DeclarationOccurrence) (value : α),
+        site.Occurs E → value ∈ fields site.2.2 → accepts value = true := by
+  constructor
+  · intro silent site value occurs field
+    cases decision : accepts value with
+    | true => rfl
+    | false =>
+      have refused := (declarationFieldRefusals_iff E fields accepts site value).mpr
+        ⟨occurs,field,decision⟩
+      have empty : declarationFieldRefusals E fields accepts = [] :=
+        List.head?_eq_none_iff.mp silent
+      rw [empty] at refused
+      exact False.elim (List.not_mem_nil refused)
+  · intro allowed
+    cases refusals : declarationFieldRefusals E fields accepts with
+    | nil => exact congrArg List.head? refusals
+    | cons use tail =>
+      have member : use ∈ declarationFieldRefusals E fields accepts := by
+        rw [refusals]
+        exact List.mem_cons_self ..
+      rcases use with ⟨site,value⟩
+      have refused := (declarationFieldRefusals_iff E fields accepts site value).mp member
+      have impossible : false = true := refused.2.2.symm.trans
+        (allowed site value refused.1 refused.2.1)
+      cases impossible
+
+/-- The first diagnostic retains its original source-unit syntax site and
+field/predicate facts. No unique character offset or lexical scope is claimed. -/
+theorem declarationFieldRefusal?_source_witness {α : Type u} (unit : Syn .unit)
+    (fields : ∀ {c : Cat}, Syn c → List α) (accepts : α → Bool)
+    (site : DeclarationOccurrence) (value : α)
+    (reported : declarationFieldRefusal? unit.env fields accepts = some (site,value)) :
+    site.2 ∈ syntaxOccurrences unit ∧ value ∈ fields site.2.2 ∧ accepts value = false := by
+  have found := declarationFieldRefusal?_sound unit.env fields accepts site value reported
+  exact ⟨declaration_occurrence_in_source_unit unit site
+    ((declarationOccurrences_iff unit.env site).mpr found.1),found.2⟩
+
+/-- info: 'Solidity.Frontend.Admission.declarationFieldRefusals_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms declarationFieldRefusals_iff
+/-- info: 'Solidity.Frontend.Admission.declarationFieldRefusal?_sound' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms declarationFieldRefusal?_sound
+/-- info: 'Solidity.Frontend.Admission.declarationFieldRefusal?_none_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms declarationFieldRefusal?_none_iff
+/-- info: 'Solidity.Frontend.Admission.declarationFieldRefusal?_source_witness' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms declarationFieldRefusal?_source_witness
+
 end Solidity.Frontend.Admission
