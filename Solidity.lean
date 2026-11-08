@@ -5552,6 +5552,7 @@ import Solidity.Yul.Views.FrameCalldataControls
 import Solidity.Yul.Views.FullWordLayout
 import Solidity.Yul.Views.GeneratedRetainedControls
 import Solidity.Yul.Views.GenericFlow.Following
+import Solidity.Yul.Views.GenericFlow.FollowingLaws
 import Solidity.Yul.Views.HeapAllocationCommute
 import Solidity.Yul.Views.HeapAllocationControls
 import Solidity.Yul.Views.HeapAllocationFreshnessControls
