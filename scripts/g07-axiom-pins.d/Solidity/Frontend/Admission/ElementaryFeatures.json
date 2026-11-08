@@ -1,0 +1,16 @@
+{
+ "Solidity/Frontend/Admission/ElementaryFeatures.lean:Solidity.Frontend.Admission.declarationElementaryUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ElementaryFeatures.lean:Solidity.Frontend.Admission.mapping_key_field": [],
+ "Solidity/Frontend/Admission/ElementaryFeatures.lean:Solidity.Frontend.Admission.value_type_field": [],
+ "Solidity/Frontend/Admission/ElementaryFeatures.lean:Solidity.Frontend.Admission.elementaryFeature_fixedPoint_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ElementaryFeatures.lean:Solidity.Frontend.Admission.declarationElementaryFeatures_iff": [
+  "Quot.sound",
+  "propext"
+ ]
+}
