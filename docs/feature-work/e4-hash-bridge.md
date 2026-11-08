@@ -271,14 +271,18 @@ Axiom-pin entries (ten new; no existing pin changes):
 
 ## Validation boundaries and handoff
 
-The registered library checkpoint and full runner pass, including corpus,
-TestSuite, trust, layer, orphan, generated-root/fragment, documentation,
-axiom-pin and strict automatic checks. All four new modules have clean
+The pinned-base registered library checkpoint and full runner pass, including
+corpus, TestSuite, trust, layer, orphan, generated-root/fragment, documentation
+path, axiom-pin and strict automatic checks. Those receipts validate reviewed
+source commit `b3f6968fdc86967f9cbb92dc0beeb981c87a9ae9`; they do not claim
+that the later navigation or H145 checks passed on that pinned tree. All four new modules have clean
 per-file diagnostics and checked axiom pins. No new sorry, axiom,
 native_decide, implemented_by or raised maxHeartbeats is introduced.
 Existing frozen theorem statements and semantic definitions are untouched.
-The final committed head and exact-head gate receipts are recorded in the
-private handoff rather than a self-referential source document.
+All four Lean modules remain byte-identical to that reviewed source. On the
+authorized clean base `797923f0808b2dff670ba2dcbba08b46c6d9ce17`, both H145
+whole-tree checks and generated documentation navigation pass with E4 applied.
+Clean-base full validation is still in progress; acceptance is not claimed.
 
 Checking-time comparison uses balanced paired fresh Lean checks of the
 pinned-base root and generated root with the same already-built imports.
@@ -302,20 +306,25 @@ Under H145, detailed receipts, logs, timings, provenance, resource records,
 handoffs and checksum manifests are kept outside the code branch in the
 private repository `SolidiKeY/solidity-lean-coord`, under
 `evidence/solidity-plan-e4-hash-bridge-20261107/e4-hash-bridge/`.
-Earlier records are available at private evidence commits
-`fa3c994dcc064d17970dfe8f0be75b7685bf7d54` and
-`77932fbea1aa3040ce1ccade5755afa5be86583a`; the final handoff identifies the
-subsequent archive commit and seals the patch/bundle/checksum manifest.
+The reviewed pinned-base full-gate and timing receipts have an immutable
+[private archive citation](https://github.com/SolidiKeY/solidity-lean-coord/tree/d2a57a853b27550aa0e7461e97d354301a7979e0/evidence/solidity-plan-e4-hash-bridge-20261107/e4-hash-bridge/b3f6968fdc86).
+In that exact commit/path, `evidence.tar.gz` contains
+`validation/final-exact/HEAD` (the reviewed source commit above),
+`validation/final-exact/gates.tsv` and `validation/timing/timing.json`;
+`HANDOFF.md` and the sealed manifest bind the patch and bundle to the same
+source. This citation supports the pinned-base claims, not completion of
+the still-pending clean-base full gate.
 No evidence files were added under tests/ or Bridge/tests/. The later H145
 whole-tree scripts report inherited evidence/private-path violations at the
 pinned base; the lane adds none. These inherited failures are documented,
 not treated as passing whole-tree gates. They do not authorize deleting
 historical baseline files or fixtures.
 
-E4-Q1 is resolved as option A. Acceptance of the inherited H145 whole-tree
-failures is tracked as E4-Q2 in the private handoff; no option changes a
-theorem or premise. Registration and backfill preserve the original combined bound,
-its premises, exclusions and observations. Code changes are committed only
-on the assigned branch; no code push, merge or PR is authorized. The only
+E4-Q1 is resolved as option A. H174 resolves E4-Q2 as option A: validate on
+a clean descendant base and rerun every H145 whole-tree check before
+completion, with no acceptance-policy change. The answer was acknowledged
+through `coord-ask --ack E4-Q2`; the pinned-tree failures remain preserved. Registration and backfill preserve the original combined bound,
+its premises, exclusions and observations. The pinned branch is preserved and clean-base validation uses isolated
+commits; no code push, merge or PR is authorized. The only
 remote writes are the explicitly requested question relay and private
 H145 evidence archive.
