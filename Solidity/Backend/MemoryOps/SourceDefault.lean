@@ -58,6 +58,7 @@ theorem source_bool_default_memOK {E : Source.Env} {Γ : Source.RCtx}
   rw [he]
   exact h
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Old represented contents survive BOTH actual builders; new-root logical
 identity and Source address separation are derived from existing allocation facts. -/
 theorem SourceBoolMemoryAt.default_frame {E : Source.Env} {Γ : Source.RCtx} {H : HTy} {R : RefTy}
@@ -89,6 +90,7 @@ theorem SourceBoolMemoryAt.default_frame {E : Source.Env} {Γ : Source.RCtx} {H 
     change (hp.allocDefault (.array (.prim .bool)) rfl).val.id≠r.id
     omega
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Supported constructor application of the EXISTING word allocator compiler.
 Initial allocator/frame/capacity premises stay explicit, never final preservation. -/
 theorem source_bool_default_word {E : Source.Env} {Γ : Source.RCtx} {C : Contract} {Δ : Ctx}
