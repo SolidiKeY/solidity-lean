@@ -202,7 +202,7 @@ theorem reference_slot_allocator {C : Contract} {Δ : Ctx} {L b frame : Nat}
 /-- info: 'Solidity.Backend.MemoryOps.reference_assign_low_horizon' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms reference_assign_low_horizon
 
-/-- info: 'Solidity.Backend.MemoryOps.reference_slot_allocator' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.reference_slot_allocator' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms reference_slot_allocator
 
 end Solidity.Backend.MemoryOps
