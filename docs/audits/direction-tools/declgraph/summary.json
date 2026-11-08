@@ -86,7 +86,7 @@
     }
   },
   "goal_roots": 0,
-  "graph_sha256": "ec156bfee7acb5c095f18dafa255f57ccec8ecda6ccbe7bc89f65c5cf423f63a",
+  "graph_sha256": "cc5827ebdb31467cdd0a6bbb898747780fa86183d1eb60e71cf6700aa93779b7",
   "indexed_physical_lines": 1126116,
   "limitations": [
     "No systemd scope on the cloud VM (H232).",
@@ -162,7 +162,7 @@
   "missing_files": 1574,
   "missing_physical_lines": 185014,
   "module_universe": 6717,
-  "native_and_source_edges": 5090267,
+  "native_and_source_edges": 5090192,
   "native_declarations": 310797,
   "provenance": {
     "axiom_pins": {
@@ -202,21 +202,21 @@
       "unreached_source_span_lines": 5404,
       "unreached_source_spanned_native_constants": 437,
       "unreached_unowned_reference_nodes": 1441,
-      "zero_incoming_declarations": 690
+      "zero_incoming_declarations": 697
     },
     "untraced": {
       "declarations_without_source_span": 181599,
       "facade_used_declarations": 11386,
       "facade_used_source_span_lines": 54944,
-      "policy_check_only_declarations": 151791,
+      "policy_check_only_declarations": 151780,
       "policy_check_only_source_span_lines": 527379,
       "source_spanned_native_constants": 108953,
       "unattributed_physical_lines": 273295,
-      "unreached_declarations": 127375,
+      "unreached_declarations": 127386,
       "unreached_source_span_lines": 223757,
       "unreached_source_spanned_native_constants": 28273,
       "unreached_unowned_reference_nodes": 93782,
-      "zero_incoming_declarations": 68610
+      "zero_incoming_declarations": 68678
     }
   },
   "reproduction": [
