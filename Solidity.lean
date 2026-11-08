@@ -4246,6 +4246,8 @@ import Solidity.Source.MonetaryStorageControls
 import Solidity.Source.MonetaryWorld
 import Solidity.Source.Observe
 import Solidity.Source.Overloads
+import Solidity.Source.PowerV2
+import Solidity.Source.PowerV2Correct
 import Solidity.Source.Preservation.AllocatingControls
 import Solidity.Source.Preservation.AllocatingFragment
 import Solidity.Source.Preservation.AllocationBodyControls

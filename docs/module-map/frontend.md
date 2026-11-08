@@ -297,7 +297,6 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/LiteralGrammarH28/TaggedEncoding.lean` | Constructive hex/unicode literal encodings passing the line/bidi guards. |
 | `Frontend/LiteralGrammarH28/Utf8Shape.lean` | `\u` escape byte shape (lead/continuation, non-overlong) and code-point recovery; no scalar check. |
 | `Frontend/LiteralGrammarH28/WordTable.lean` | Exhaustive word-table return classes, proved by a checked proof-producing tactic. |
-
 ### SOL-QN final target, C3 and normalization adequacy
 | Module | Purpose |
 |---|---|

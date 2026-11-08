@@ -1,4 +1,3 @@
-
 ### SOL-QN final target, C3 and normalization adequacy
 | Module | Purpose |
 |---|---|
