@@ -8,7 +8,7 @@ const {checkStartup,serverIdentity,startupError,cancelled,waitForServerVersion}=
 const {processState,groupMembers,running,ownedProcess}=require('./process-state.cjs');
 const {incrementalChange}=require('./diagnostic-state.cjs');
 const {terminateTree,parseReport}=require('./backend.cjs');
-const {trackChild,waitForClose,waitForGroup}=require('./child-lifetime.cjs');
+const {trackChild,waitForClose,waitForGroup,enableChildLifetimeObservation}=require('./child-lifetime.cjs');
 
 class LanguageClient extends EventEmitter {
   constructor(configuration){
@@ -23,7 +23,7 @@ class LanguageClient extends EventEmitter {
     const configuration=this.configuration;
     this.child=spawn(configuration.nodePath||'node',[join(__dirname,'lsp-server.cjs')],{cwd:configuration.backendPath,
       detached:process.platform!=='win32',windowsHide:true,stdio:['pipe','pipe','pipe']});
-    this.child.ownedGroup=process.platform!=='win32';trackChild(this.child);
+    this.child.ownedGroup=process.platform!=='win32';if(configuration.diagnosticChildLifetime===true)enableChildLifetimeObservation(this.child);trackChild(this.child);
     this.stderr='';this.child.stderr.on('data',chunk=>{this.stderr=(this.stderr+chunk).slice(-12000);});
     this.peer=new RpcPeer(this.child.stdout,this.child.stdin);
     this.closed=new Promise(resolve=>this.child.once('close',()=>{this.childClosureConfirmed=true;resolve();}));
