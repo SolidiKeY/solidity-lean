@@ -107,4 +107,43 @@ theorem silent_empty_classifier_is_not_raw_safety :
 /-- info: 'Solidity.Frontend.Admission.OccurrenceControls.silent_empty_classifier_is_not_raw_safety' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms silent_empty_classifier_is_not_raw_safety
 
+
+theorem removed_years_payload_refused (n : NumLit) :
+    syntaxFieldRefusal? (Syn.litUnit n .years) payloadFeaturesAt
+      (fun f => decide (f ≠ .removedUnits)) = some (⟨_,Syn.litUnit n .years⟩,.removedUnits) ∧
+    (Syn.litUnit n .years).rejections = [.removedUnits] := ⟨rfl,rfl⟩
+
+theorem nested_prefix_payloads :
+    (syntaxPayloadUses (Syn.unaryPrefix .inc (Syn.unaryPrefix .delete (.ident "x")))).map Prod.snd =
+      [.increments,.deleteExpression] := rfl
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.removed_years_payload_refused' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms removed_years_payload_refused
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.nested_prefix_payloads' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms nested_prefix_payloads
+
+
+/-! Regression: metadata visibility must survive unused-declaration traversal; absent fields must not acquire defaults, and function-type payloads must not be treated as legality evidence. -/
+def explicitVisibilityUnit (vis : Option Visibility) : Syn .unit :=
+  .unit (.cons (.topPart (.function (.ident "unused") .nil vis none .nil false none .nil .none)) .nil)
+
+theorem explicit_visibility_unused (vis : Option Visibility) :
+    (declarationVisibilityUses (explicitVisibilityUnit vis).env).map Prod.snd = vis.toList ∧
+    (syntaxVisibilityUses (explicitVisibilityUnit vis)).map Prod.snd = vis.toList := by
+  cases vis <;> exact ⟨rfl,rfl⟩
+
+theorem visibility_carriers (v : Visibility) (cv : CtorVis) (sv : StateVis) :
+    [visibilityFieldsAt (Syn.constructor .nil .nil false (some cv) (.block .nil)),
+     visibilityFieldsAt (Syn.function (t := true) (.ident "f") .nil (some v) none .nil false none .nil .none),
+     visibilityFieldsAt (Syn.fallback .fbNoParams true none .nil false none .none),
+     visibilityFieldsAt (Syn.receive true false .nil false none .none),
+     visibilityFieldsAt (Syn.stateVar (.elem .bool) (some sv) none none false "x" .none),
+     visibilityFieldsAt (Syn.fnType .nil (some v) none .nil)] =
+      [[ctorVisibility cv],[v],[.external],[.external],[stateVisibility sv],[v]] := rfl
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.explicit_visibility_unused' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms explicit_visibility_unused
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.visibility_carriers' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms visibility_carriers
+
 end Solidity.Frontend.Admission.OccurrenceControls
