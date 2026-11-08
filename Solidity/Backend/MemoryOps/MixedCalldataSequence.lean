@@ -53,6 +53,7 @@ theorem checkedBoolUintSequence_none_iff {D : Source.Layout} {H : HTy} {R Q : Re
     exact uintTransfer_none_length c' off' hp mid q b u v f
       (boolTransfer_all_len c off hp r a s t d mid hf q b)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Actual computed payloads feed the existing disjoint-object operation. -/
 theorem checkedBoolUintSequence_checked {D : Source.Layout} {n n' : Option Nat}
     {c c' : Source.Calldata D} {off off' L L' : Nat}
@@ -191,6 +192,7 @@ theorem checkedUintBoolSequence_none_iff {D : Source.Layout} {H : HTy} {R Q : Re
     exact boolTransfer_none_length c' off' hp mid q b u v f
       (uintTransfer_all_len c off hp r a s t d mid hf q b)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Actual computed payloads feed the existing disjoint-object operation. -/
 theorem checkedUintBoolSequence_checked {D : Source.Layout} {n n' : Option Nat}
     {c c' : Source.Calldata D} {off off' L L' : Nat}
