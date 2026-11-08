@@ -62,8 +62,16 @@ theorem Artifact.join_source {c n f g} {a b : Stmt [] [] c n}
  (last : evalStmt hb .nil True.intro b artifact.right.compiled.profile (sourceLocals mid) = some ⟨sourceLocals out,.normal⟩) :
  evalStmt (max ha hb+1) .nil True.intro (.seq a b) artifact.profile (sourceLocals locals) =
  some ⟨sourceLocals out,.normal⟩ := by
- have first' := evalStmt_stable (Nat.le_max_left ha hb) .nil True.intro a artifact.left.compiled.profile (sourceLocals locals) first
- have last' := evalStmt_stable (Nat.le_max_right ha hb) .nil True.intro b artifact.right.compiled.profile (sourceLocals mid) last
+ have first' : evalStmt (max ha hb) .nil True.intro a artifact.left.compiled.profile (sourceLocals locals) =
+   some ⟨sourceLocals mid,.normal⟩ := CompletionControls.completed_horizon
+   (fun fuel => evalStmt fuel .nil True.intro a artifact.left.compiled.profile (sourceLocals locals))
+   (fun fuel extra => evalStmt_refines_add fuel extra .nil True.intro a artifact.left.compiled.profile (sourceLocals locals))
+   (Nat.le_max_left ha hb) first
+ have last' : evalStmt (max ha hb) .nil True.intro b artifact.right.compiled.profile (sourceLocals mid) =
+   some ⟨sourceLocals out,.normal⟩ := CompletionControls.completed_horizon
+   (fun fuel => evalStmt fuel .nil True.intro b artifact.right.compiled.profile (sourceLocals mid))
+   (fun fuel extra => evalStmt_refines_add fuel extra .nil True.intro b artifact.right.compiled.profile (sourceLocals mid))
+   (Nat.le_max_right ha hb) last
  change Option.bind (evalStmt (max ha hb) .nil True.intro a artifact.left.compiled.profile (sourceLocals locals)) _ = _
  rw [first']
  exact last'

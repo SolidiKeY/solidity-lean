@@ -1,0 +1,9 @@
+{
+  "CompCert": {
+    "url": "https://compcert.org/man/manual002.html",
+    "section": "2.3 Installation, Building the system",
+    "retrieval": "public-web tool, 2026-11-08; shell proxy cannot reach host",
+    "excerpt": "This step can take about 15 minutes on a recent machine with a single core",
+    "boundary": "make all: proof checking plus extraction and OCaml compiler construction; current manual not pinned source or matched hardware"
+  }
+}

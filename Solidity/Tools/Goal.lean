@@ -59,8 +59,6 @@ def status (e : Entry) : MetaM Status := do
   let axioms ← collectAxioms e.proof
   if axioms.any (fun a => (mkConst a).isSorry) then return .sorried
   if pi matches .axiomInfo _ then return .assumed
-  -- Only the repository's standard logical foundations support a completed proof.
-  -- In particular, compiler/interpreter trust and custom assumptions do not.
   if axioms.any (fun a => a != ``propext && a != ``Classical.choice && a != ``Quot.sound) then
     return .assumed
   return .proved

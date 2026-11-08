@@ -40858,6 +40858,10 @@
   "propext"
  ],
  "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.constructor_payload_gaps": [],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.declarationMutabilityUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.declarationVisibilityUses_iff": [
   "Quot.sound",
   "propext"
@@ -40871,6 +40875,13 @@
  "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.literal_root_uses": [],
  "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.location_feature_covered": [
   "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.mutabilityFeaturesAt_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.mutabilityFieldsAt_iff": [
   "propext"
  ],
  "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.prefix_payload_tags": [],
@@ -40897,6 +40908,10 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.syntaxMutabilityUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.syntaxPayloadUses_iff": [
   "Quot.sound",
   "propext"
@@ -40916,12 +40931,14 @@
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.different_buffers_remain_assembly": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.distinct_payload_order": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.exact_pair_inventory": [],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.explicit_mutability_unused": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.explicit_visibility_unused": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.inherited_exclusion_features_reported": [
   "propext"
  ],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.literal_refusal_site": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.malformed_modifier_tag_retained": [],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.mutability_carriers": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.nested_prefix_payloads": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.omitted_child_refused": [
   "propext"
