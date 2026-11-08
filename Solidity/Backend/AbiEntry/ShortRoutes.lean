@@ -111,7 +111,7 @@ theorem source_short {E : Source.Env} (global : Source.Glob E) (frame : Source.F
 def certificate : Interface.ShortRoutesCertificate route where
   selected := fun C base table fallback short => ⟨compiled C base table fallback short,selected C base table fallback short⟩
   executed := executed
-/-- info: 'Solidity.Backend.AbiEntry.ShortRoutes.admitted' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiEntry.ShortRoutes.admitted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms admitted
 /-- info: 'Solidity.Backend.AbiEntry.ShortRoutes.selected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms selected
