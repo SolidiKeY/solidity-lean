@@ -5,6 +5,7 @@ Primitive Boolean case only. Source fuel timeout and index panic are distinct;
 no emitted target or source-profile change. -/
 namespace Solidity.Backend.MemoryOps
 
+set_option backward.isDefEq.respectTransparency false in
 theorem SourceBoolMemoryAt.write_addr {E : Source.Env} {Γ : Source.RCtx} {H : HTy} {R : RefTy}
     {y : Source.EMState E Γ} {address : Nat} {hp : Heap H} {r : HRef H R}
     {a : ArrTy R (.prim .bool)} (hr : SourceBoolMemoryAt y address hp r a)
