@@ -1,0 +1,162 @@
+{
+  "2026-09": {
+    "bridge_trust_source_metrics": {},
+    "line_categories": {
+      "ci": 42,
+      "docs": 2925,
+      "generated_corpus": 4293,
+      "generated_docs": 65,
+      "generated_roots": 128,
+      "other": 706,
+      "other_lean": 94,
+      "scripts_other": 1676,
+      "solidity_header_unmarked_proofs_and_definitions": 70040
+    },
+    "native_allowlist_status": "unknown: no current-style explicit trust policy/inventory at snapshot",
+    "overhead": {
+      "denominator": "header-unmarked Solidity Lean sources: definitions, proofs, comments, tactics and controls; NOT proof-only lines",
+      "header_unmarked_solidity_source_lines": 70040,
+      "infrastructure_lines": 4836,
+      "proof_block_heuristic_ratio": 0.16473634010083119,
+      "ratio": 0.06904625928041119
+    },
+    "revision": "609966231c8fa939467936431a80f693ad6d92fb",
+    "trust_source_metrics": {
+      "axiom_declarations": 0,
+      "axiom_pin_lines_lower_bound": 0,
+      "chain_agreement_generator_commands": 0,
+      "definition_block_nonblank_code_lines_heuristic": 16864,
+      "implemented_by": 1,
+      "lean_files": 135,
+      "lines": 74461,
+      "native_decide": 6,
+      "native_decide_allowlist_entries": null,
+      "pin_command_lines": 0,
+      "pin_expected_output_lines": 0,
+      "proof_block_nonblank_code_lines_heuristic": 29356,
+      "recovery_dot_admit_tokens": 0,
+      "sorry_admit_tokens": 0,
+      "theorem_lemma_declarations": 2653
+    }
+  },
+  "2026-10": {
+    "bridge_trust_source_metrics": {
+      "axiom_declarations": 1,
+      "axiom_pin_lines_lower_bound": 507,
+      "chain_agreement_generator_commands": 0,
+      "definition_block_nonblank_code_lines_heuristic": 12499,
+      "implemented_by": 1,
+      "lean_files": 209,
+      "lines": 36814,
+      "native_decide": 0,
+      "pin_command_lines": 343,
+      "pin_expected_output_lines": 164,
+      "proof_block_nonblank_code_lines_heuristic": 11902,
+      "recovery_dot_admit_tokens": 1,
+      "sorry_admit_tokens": 0,
+      "theorem_lemma_declarations": 1345
+    },
+    "line_categories": {
+      "ci": 362,
+      "docs": 141922,
+      "generated_corpus": 4204,
+      "generated_docs": 404,
+      "generated_embedded_regions": 626,
+      "generated_other": 3363,
+      "generated_registry": 3724,
+      "generated_roots": 1002,
+      "other": 2440528,
+      "other_lean": 43310,
+      "scripts_other": 22759,
+      "solidity_header_unmarked_proofs_and_definitions": 365470
+    },
+    "native_allowlist_status": "measured explicit forbidden policy plus trust inventory; no native exception in audit()",
+    "overhead": {
+      "denominator": "header-unmarked Solidity Lean sources: definitions, proofs, comments, tactics and controls; NOT proof-only lines",
+      "header_unmarked_solidity_source_lines": 365470,
+      "infrastructure_lines": 170173,
+      "proof_block_heuristic_ratio": 1.0986842105263157,
+      "ratio": 0.4656278217090322
+    },
+    "revision": "22073f4445e7cab7560812a5ef4e081bf8ff5e87",
+    "trust_source_metrics": {
+      "axiom_declarations": 0,
+      "axiom_pin_lines_lower_bound": 2486,
+      "chain_agreement_generator_commands": 7,
+      "definition_block_nonblank_code_lines_heuristic": 98357,
+      "embedded_generated_region_lines": 626,
+      "implemented_by": 156,
+      "lean_files": 1074,
+      "lines": 374630,
+      "native_decide": 0,
+      "native_decide_allowlist_entries": 0,
+      "pin_command_lines": 1473,
+      "pin_expected_output_lines": 1013,
+      "proof_block_nonblank_code_lines_heuristic": 154888,
+      "recovery_dot_admit_tokens": 3,
+      "sorry_admit_tokens": 0,
+      "theorem_lemma_declarations": 15152
+    }
+  },
+  "2026-11": {
+    "bridge_trust_source_metrics": {
+      "axiom_declarations": 1,
+      "axiom_pin_lines_lower_bound": 3554,
+      "chain_agreement_generator_commands": 0,
+      "definition_block_nonblank_code_lines_heuristic": 18713,
+      "implemented_by": 1,
+      "lean_files": 636,
+      "lines": 85057,
+      "native_decide": 0,
+      "pin_command_lines": 2513,
+      "pin_expected_output_lines": 1041,
+      "proof_block_nonblank_code_lines_heuristic": 38430,
+      "recovery_dot_admit_tokens": 1,
+      "sorry_admit_tokens": 0,
+      "theorem_lemma_declarations": 3807
+    },
+    "line_categories": {
+      "axiom_pins_files": 4054,
+      "ci": 757,
+      "coordination": 1660,
+      "docs": 253515,
+      "generated_corpus": 4204,
+      "generated_docs": 5319,
+      "generated_embedded_regions": 626,
+      "generated_other": 5031,
+      "generated_registry": 78586,
+      "generated_roots": 7211,
+      "other": 3001041,
+      "other_lean": 179438,
+      "scripts_other": 238045,
+      "solidity_header_unmarked_proofs_and_definitions": 1107348
+    },
+    "native_allowlist_status": "measured explicit forbidden policy plus trust inventory; no native exception in audit()",
+    "overhead": {
+      "denominator": "header-unmarked Solidity Lean sources: definitions, proofs, comments, tactics and controls; NOT proof-only lines",
+      "header_unmarked_solidity_source_lines": 1107348,
+      "infrastructure_lines": 585093,
+      "proof_block_heuristic_ratio": 1.004158443029502,
+      "ratio": 0.5283731943345723
+    },
+    "revision": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+    "trust_source_metrics": {
+      "axiom_declarations": 0,
+      "axiom_pin_lines_lower_bound": 38177,
+      "chain_agreement_generator_commands": 7,
+      "definition_block_nonblank_code_lines_heuristic": 211103,
+      "embedded_generated_region_lines": 626,
+      "implemented_by": 176,
+      "lean_files": 6722,
+      "lines": 1127798,
+      "native_decide": 0,
+      "native_decide_allowlist_entries": 0,
+      "pin_command_lines": 24025,
+      "pin_expected_output_lines": 14152,
+      "proof_block_nonblank_code_lines_heuristic": 582670,
+      "recovery_dot_admit_tokens": 3,
+      "sorry_admit_tokens": 0,
+      "theorem_lemma_declarations": 65791
+    }
+  }
+}
