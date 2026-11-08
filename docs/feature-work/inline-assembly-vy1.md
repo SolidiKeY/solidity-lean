@@ -2040,3 +2040,5 @@ layer/root checks pass. Thirteen scoped axiom reports use only Lean standard
 axioms. Standard tactic failures and the redundant solved-goal tactic failure
 remain raw evidence; removing that redundant tactic changes no statement,
 expected behavior or proof limit.
+
+Literal tags in `Frontend/Admission/StructuralFeatures.lean` use the existing generic syntax collector alongside the frozen structural subset. Equal decoded bytes retain string/hex-string/Unicode distinctions; numeric spelling, contextual address literals and lexical validity need their own evidence. These tags do not establish admission.
