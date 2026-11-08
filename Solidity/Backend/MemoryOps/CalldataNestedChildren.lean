@@ -99,6 +99,7 @@ theorem refChild_leaf_ne {H : HTy} {R : RefTy} (dst : HRef H R)
   have ht := (HRef.heq_of_id dst q he).1
   cases a <;> cases ht
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Arbitrary runtime slices of reference-containing children have nested
 correspondence at the output heap. Both footprint levels are separate by
 intrinsic typing. No pairwise separation among children is needed. -/
