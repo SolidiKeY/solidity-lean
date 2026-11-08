@@ -177,8 +177,11 @@ obligations open until integrated. Splitting a proof into smaller lemmas does
 not automatically allocate another VM. Never replace an unfinished deliverable
 with a refusal, a new exclusion or a promise of a later proof.
 
-- Start with `LEAN_NUM_THREADS=1`, explicit `-j1`, a process-group
-  `MemoryMax=12G` and `MemorySwapMax=0`; leave the remaining RAM for the OS.
+- Start with `LEAN_NUM_THREADS=1` and explicit `-j1`. On the host, add a
+  process-group `MemoryMax=12G` and `MemorySwapMax=0`; on a cloud VM without
+  systemd, follow the cloud-VM rule in
+  [resource bounds](refactoring-progress.md#resource-bounds-and-resuming-work)
+  (H232). Leave the remaining RAM for the OS.
   Use disk-backed private caches, monitor aggregate RSS and available memory,
   and stop before exhausting the VM. Run Lean MCP or a build, not both.
 - Seed the build first: `bash scripts/ci/fetch-lake-cache.sh` installs
