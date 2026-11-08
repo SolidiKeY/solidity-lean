@@ -2132,26 +2132,3 @@ without inventing a trust predicate. The original three-second preparation
 limit, product predicates and proof settings are unchanged. Tests use injected
 CDP/envelopes and are not native evidence. Real reload/capture failures remain
 failures; no raster/ABA, macOS, full lifecycle or row-judgment claim follows.
-
-
-The supervisor's explicit `native-editor` profile preserves the original
-native runner's RSS guards and headroom checks without applying Lean's virtual
-address-space cap to Electron. Observed Lean/Lake children fail that profile; process sampling cannot prove
-absence of short-lived invocations, so this is restricted to reviewed
-editor-only collection and never admits proof work. Finite inherited address
-limits refuse native admission without being lifted.
-The default Lean profile retains its existing address-space and aggregate
-limits. This distinguishes Electron address reservation from resident memory;
-it grants no proof-budget or resource-stop waiver.
-
-
-The fresh paired Linux trust attempt retains failures. Both targets captured
-initial restricted menus and real trust gain with public API confirmation.
-Local retained all five trusted phases and native trust-loss UI data, then
-post-loss DOM capture timed out and no fresh host report arrived. Dafny failed
-the unchanged three-second untitled menu preparation. These are incomplete
-transitions, not successful restoration or full pairing. Owned cleanup has no
-survivors. A failed partial menu snapshot is now transported into aggregate
-reports even when the host report is absent; it cannot become a validated
-result. Original SIGTRAP/address-profile and output-reuse refusals are retained.
-No menu row is completed or judged equivalent from this evidence.
