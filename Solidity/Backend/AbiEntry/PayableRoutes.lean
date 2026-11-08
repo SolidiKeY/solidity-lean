@@ -77,6 +77,7 @@ private theorem body_run (base : Nat) (label : Fin W) (payable : Bool) (rest : L
   rw [ValueGateBody.composed]
   simp only [run,List.cons_append,List.nil_append,exec_cons_zero,Instr.step,Machine.next,Out.bind,exec_length]
 
+set_option backward.isDefEq.respectTransparency false in
 theorem run_route (C : Contract) (base : Nat) (table : PayableRouteTable) (fallback : Fin W)
     (machine : Machine) (selector : Fin W) (initial : machine.mem base=.val selector) :
     run (compileProg base (route C table fallback)) machine=payableRouteOutcome base table fallback selector machine := by
