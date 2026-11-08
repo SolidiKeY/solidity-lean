@@ -46,8 +46,12 @@ theorem branch_source (b : Scalar.Word) :
 theorem body_source (b : Scalar.Word) :
  evalStmt 9 .nil True.intro body bodyArtifact.compiled.profile (sourceLocals #v[0,b]) =
  some ⟨sourceLocals #v[dirty,update b],.normal⟩ := by
- have last := evalStmt_stable (show 7 ≤ 8 by omega) .nil True.intro tail tailCompiled.profile
-   (sourceLocals #v[0,intermediate b]) (tail_source (intermediate b))
+ have last := CompletionControls.completed_horizon
+   (fun fuel => evalStmt fuel .nil True.intro tail tailCompiled.profile
+     (sourceLocals #v[0,intermediate b]))
+   (fun fuel extra => evalStmt_refines_add fuel extra .nil True.intro tail tailCompiled.profile
+     (sourceLocals #v[0,intermediate b]))
+   (show 7 ≤ 8 by omega) (tail_source (intermediate b))
  exact LoopControlCompilation.sequence_source branch tail ⟨True.intro,conditionalCompiled.profile⟩ tailCompiled.profile
    8 (sourceLocals #v[0,b]) (sourceLocals #v[0,intermediate b])
    (sourceLocals #v[dirty,update b]) (branch_source b) last
