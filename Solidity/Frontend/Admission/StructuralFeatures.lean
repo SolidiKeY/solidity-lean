@@ -353,4 +353,164 @@ theorem literal_root_uses (l : Lit) (n : NumLit) (u : Denom) :
 /-- info: 'Solidity.Frontend.Admission.literal_root_uses' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms literal_root_uses
 
+
+/-! Regression: identical constructor tags must retain prefix/compound/unit distinctions, including removed years. These are intrinsic syntax markers, not typing, arithmetic/folding, lvalue scheduling, lexical validity or admission proofs. Compose through the generic collector; old subsets stay frozen. -/
+def prefixFeature : PrefixOp → Feature
+  | .inc | .dec => .increments
+  | .not | .bitNot | .neg => .unaryArithmetic
+  | .delete => .deleteExpression
+
+def assignmentPayloadFeatures : AssignOp → List Feature
+  | .assign => []
+  | .bitOr | .bitXor | .bitAnd | .shl | .sar | .shr | .add | .sub | .mul | .div | .mod =>
+      [.compoundAssignment]
+
+def denominationFeature : Denom → Feature
+  | .wei | .gwei | .ether => .etherUnits
+  | .seconds | .minutes | .hours | .days | .weeks => .timeUnits
+  | .years => .removedUnits
+
+def payloadFeaturesAt {c : Cat} (s : Syn c) : List Feature :=
+  Syn.casesOn (motive := fun _ _ => List Feature) s
+    ([])
+    (fun _ _ => [])
+    ([])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ _ => [])
+    (fun _ _ _ _ _ _ _ _ _ => [])
+    (fun _ _ _ _ _ => [])
+    (fun _ _ _ _ _ _ _ => [])
+    ([])
+    (fun _ _ _ => [])
+    (fun _ _ _ _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun op _ => [prefixFeature op])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun op _ _ => assignmentPayloadFeatures op)
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ unit => [denominationFeature unit])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    ([])
+    ([])
+    (fun _ _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    ([])
+    ([])
+    ([])
+    (fun _ _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+
+def syntaxPayloadUses {c : Cat} (root : Syn c) : List (SyntaxOccurrence × Feature) :=
+  syntaxFieldUses root payloadFeaturesAt
+
+theorem syntaxPayloadUses_iff {c : Cat} (root : Syn c) (site : SyntaxOccurrence) (f : Feature) :
+    (site,f) ∈ syntaxPayloadUses root ↔ Syn.Sub site ⟨c,root⟩ ∧ f ∈ payloadFeaturesAt site.2 :=
+  syntaxFieldUses_iff root payloadFeaturesAt site f
+
+theorem prefix_payload_tags :
+    ([PrefixOp.inc,.dec,.not,.bitNot,.delete,.neg].map prefixFeature) =
+      [.increments,.increments,.unaryArithmetic,.unaryArithmetic,.deleteExpression,.unaryArithmetic] := rfl
+
+theorem denomination_payload_tags :
+    ([Denom.wei,.gwei,.ether,.seconds,.minutes,.hours,.days,.weeks,.years].map denominationFeature) =
+      [.etherUnits,.etherUnits,.etherUnits,.timeUnits,.timeUnits,.timeUnits,.timeUnits,.timeUnits,.removedUnits] := rfl
+
+theorem assignment_payload_none_iff (op : AssignOp) :
+    assignmentPayloadFeatures op = [] ↔ op = .assign := by
+  cases op <;> decide
+
+/-- info: 'Solidity.Frontend.Admission.syntaxPayloadUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxPayloadUses_iff
+/-- info: 'Solidity.Frontend.Admission.prefix_payload_tags' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms prefix_payload_tags
+/-- info: 'Solidity.Frontend.Admission.denomination_payload_tags' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms denomination_payload_tags
+/-- info: 'Solidity.Frontend.Admission.assignment_payload_none_iff' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms assignment_payload_none_iff
+
 end Solidity.Frontend.Admission
