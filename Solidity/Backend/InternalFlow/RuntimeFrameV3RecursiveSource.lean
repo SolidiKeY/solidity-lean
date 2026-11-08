@@ -22,14 +22,15 @@ def step {C : Contract} (R : RefTy) (hm : (Ty.ref R).mapFree=true) (d : Nat)
 def body {C : Contract} (R : RefTy) (hm : (Ty.ref R).mapFree=true) (n : Nat) : Prog C (Parameters R) (Parameters R) :=
  recUnroll Prog.recBase (step R hm) n
 
+set_option backward.isDefEq.respectTransparency false in
 theorem guard_eval {C : Contract} {R : RefTy} (σ : State C (Parameters R)) (n : Nat)
  (h : (TEnv.get (.here : Idx (Parameters R) (.val .uint)) σ.env).val=(n:Int)) :
  (nonzero (C:=C) (R:=R)).evalT σ=.ok (decide (0<n)) := by
  change Except.ok (decide ((0:Int)<(TEnv.get (.here : Idx (Parameters R) (.val .uint)) σ.env).val))=_
  rw [h]
- have positive : ((0:Int)<(n:Int)) ↔ 0<n := by omega
- simp only [positive]
+ simp only [show ((0:Int)<(n:Int)) ↔ 0<n from by omega]
 
+set_option backward.isDefEq.respectTransparency false in
 theorem next_eval {C : Contract} {R : RefTy} (hm : (Ty.ref R).mapFree=true)
  (σ : State C (Parameters R)) (n : Nat) (bound : n+1<W)
  (ref : HRef σ.H R)
@@ -42,7 +43,7 @@ theorem next_eval {C : Contract} {R : RefTy} (hm : (Ty.ref R).mapFree=true)
  have subtract : ((n+1:Nat):Int)-1=(n:Int) := by omega
  simp only [nextArgs,Args.evalT,MPath.mvalT,alias,Val.evalT,Simple.evalT,counter,
    PrimTy.ofLit,BinOp.shortT,BinOp.evalT,BinOp.evalNum,BinOp.arithInt,countValue,indexValue,
-   subtract,Option.bind_some,PrimTy.ofInt?,range,dif_pos,TRes.ofOpt,ok_bind]
+   subtract,Option.bind_some,PrimTy.ofInt?,range,dite_eq_left,TRes.ofOpt,ok_bind]
  rfl
 /-- Exact execution at EVERY intrinsic unrolling horizon. Exhaustion stays
 exhaustion; successful recursion restores the complete caller state, including
@@ -67,7 +68,7 @@ theorem all_horizons {C : Contract} {R : RefTy} (hm : (Ty.ref R).mapFree=true)
    cases count with
    | zero =>
      simp only [TRun.seq,TRun.ite,evaluated,show decide (0<(0:Nat))=false from rfl,
-       boolT,TRun.nil,ok_bind,Except.map,Nat.zero_lt_succ,if_true]
+       boolT,TRun.nil,ok_bind,Except.map,Nat.zero_lt_succ,ite_true]
      rfl
    | succ count =>
      have args := next_eval hm σ count bound ref counter alias
@@ -84,18 +85,18 @@ theorem all_horizons {C : Contract} {R : RefTy} (hm : (Ty.ref R).mapFree=true)
            (List.prefix_refl σ.H).trans out.ext⟩ : Solidity.Out C σ.H (Parameters R))) = _
        rw [nested]
        by_cases enough : count<depth
-       · simp only [if_pos enough,ok_bind]
+       · simp only [ite_eq_left enough,ok_bind]
          change (Except.ok (⟨child.withEnv (TEnv.wk (List.prefix_refl σ.H) (Parameters R) σ.env),List.prefix_refl _⟩ : Solidity.Out C σ.H (Parameters R)) : TRes (Solidity.Out C σ.H (Parameters R))) = _
          rw [weakened]
          rfl
-       · simp only [if_neg enough,error_bind]
+       · simp only [ite_eq_right enough,error_bind]
      have enough : count+1<depth+1 ↔ count<depth := by omega
      simp only [TRun.seq,TRun.ite,evaluated,show decide (0<count+1)=true from decide_eq_true (by omega),
        boolT,recursive,enough]
      by_cases done : count<depth
-     · simp only [if_pos done,ok_bind,TRun.nil,Except.map]
+     · simp only [ite_eq_left done,ok_bind,TRun.nil,Except.map]
        rfl
-     · simp only [if_neg done]
+     · simp only [ite_eq_right done]
        rfl
 
 /-- Ordinary source entry arguments use existing typed caller destinations.
@@ -121,11 +122,11 @@ theorem call_all_horizons {C : Contract} {Γ : Ctx} {R : RefTy}
      (List.prefix_refl caller.H).trans out.ext⟩ : Solidity.Out C caller.H Γ)) = _
  rw [inner]
  by_cases enough : count<depth
- · simp only [if_pos enough,ok_bind]
+ · simp only [ite_eq_left enough,ok_bind]
    change (Except.ok (⟨child.withEnv (TEnv.wk (List.prefix_refl caller.H) Γ caller.env),List.prefix_refl _⟩ : Solidity.Out C caller.H Γ) : TRes (Solidity.Out C caller.H Γ)) = _
    rw [TEnv.wk_self]
    rfl
- · simp only [if_neg enough,error_bind]
+ · simp only [ite_eq_right enough,error_bind]
 
 /-- The actual source-coherence duty for this effect-free countdown family.
 No successful source output or desired coherence equation is assumed. -/
@@ -149,8 +150,7 @@ theorem source_coherence {C : Contract} {Γ : Ctx} {R : RefTy}
    have args : (entryArgs R hm reference counter).evalT caller=
        .ok (countValue value.word.val value.word.isLt,(some ref,())) := by
      simp only [entryArgs,Args.evalT,MPath.mvalT,hasRef,Val.evalT,Simple.evalT,ok_bind]
-     change Except.ok (TEnv.get counter caller.env,(some ref,()))=_
-     rw [←numeric]
+     exact congrArg (fun v => Except.ok (v,(some ref,()))) numeric
    have first := call_all_horizons hm f (entryArgs R hm reference counter) n caller value.word.val value.word.isLt ref args
    have second := call_all_horizons hm f (entryArgs R hm reference counter) k caller value.word.val value.word.isLt ref args
    rw [first] at leftRun
