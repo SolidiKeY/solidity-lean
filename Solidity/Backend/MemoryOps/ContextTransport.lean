@@ -81,18 +81,18 @@ theorem allocDefault_old_ne_fresh {H : HTy} {Q : RefTy} (hp : Heap H)
       ((hp.allocDefault A hm).val : HRef _ A).id :=
   copyStToM_old_ne_fresh hp (SVal.dflt (.ref A)) hm r
 
-/-- info: 'Solidity.Backend.MemoryOps.sliceElems_allocDefault' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.sliceElems_allocDefault' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms sliceElems_allocDefault
-/-- info: 'Solidity.Backend.MemoryOps.allocDefault_old_ne_fresh' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.MemoryOps.allocDefault_old_ne_fresh' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms allocDefault_old_ne_fresh
 
-/-- info: 'Solidity.Backend.MemoryOps.local_slice_push_wk' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.MemoryOps.local_slice_push_wk' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms local_slice_push_wk
-/-- info: 'Solidity.Backend.MemoryOps.adopt_local_slice' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.MemoryOps.adopt_local_slice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms adopt_local_slice
-/-- info: 'Solidity.Backend.MemoryOps.sliceElems_copyStToM' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.sliceElems_copyStToM' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms sliceElems_copyStToM
-/-- info: 'Solidity.Backend.MemoryOps.copyStToM_old_ne_fresh' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.MemoryOps.copyStToM_old_ne_fresh' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms copyStToM_old_ne_fresh
 
 end Solidity.Backend.MemoryOps
