@@ -216,12 +216,12 @@ theorem reference_allocated (n copies : Nat) (hn : n+3 < 2^256) :
  Quot.sound] -/
 #guard_msgs in #print axioms reference_allocated
 end ScheduleReferenceGrowthControls
-/-- info: 'Solidity.Backend.MemoryOps.runCaptures_keeps' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.runCaptures_keeps' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms runCaptures_keeps
-/-- info: 'Solidity.Backend.MemoryOps.runCaptures_none_keeps' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.runCaptures_none_keeps' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms runCaptures_none_keeps
-/-- info: 'Solidity.Backend.MemoryOps.runCaptures_alloc' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.runCaptures_alloc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms runCaptures_alloc
-/-- info: 'Solidity.Backend.MemoryOps.runCaptures_interstage_alloc' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.runCaptures_interstage_alloc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms runCaptures_interstage_alloc
 end Solidity.Backend.MemoryOps
