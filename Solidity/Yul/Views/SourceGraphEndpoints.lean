@@ -9,13 +9,18 @@ value adequacy, selected-code provenance or a reached execution. It instantiates
 the existing graph/producer interface without a second state or path syntax.
 
 The bridge is isolated: NestedMappingLayout retains its original imports.
-Lean 4.24.0, serial LEAN_NUM_THREADS=1 on the existing 12 GiB/no-swap VM:
+Historical H126 measurements: Lean 4.24.0, serial LEAN_NUM_THREADS=1
+on the existing 12 GiB/no-swap VM:
 three import-only checks have median 0.54 s, peak VmHWM 1,050,020 KiB.
 The existing layout-only import has median 0.18 s (423,856 KiB peak): this
 separate producer dependency costs 0.36 s and is not a speed-neutral replacement.
 NestedMappingLayout itself is byte-identical; its checks remain 0.40 s median
-versus the pre-extraction 0.43 s sample. Its earlier import-expansion STOP is
-retained; NestedMappingLayout gains no bridge import. Solidity.lean registers
+versus the pre-extraction 0.43 s sample. H171 later accepts the reviewed import
+cost only, subject to fresh bounded measurement and ordinary integration gates;
+it supersedes Option A for that increment. Fresh matched external copies checked
+at median 0.38 s baseline versus 0.82 s with the exact historical import patch
+(+115.8%); this is accepted cost, not speed neutrality. NestedMappingLayout
+retains its original imports and the separate Horizon STOP is unchanged. Solidity.lean registers
 this module in the default full-library build: isolation protects the layout's
 import closure, not default-build membership. The import-only comparison does
 not measure the full-build delta.
