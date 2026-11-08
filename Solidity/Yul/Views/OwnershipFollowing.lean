@@ -1,11 +1,34 @@
 import Solidity.Yul.Views.OwnershipReads
+import Solidity.Yul.Views.GenericFlow.Following
 
 namespace Solidity.Yul.Views
 
-/-- Reuse PROVED actual output provenance, without evaluating the preceding
-source/residual journals again. The theorem below identifies this with fresh
-preparation at the exact resulting state, not a second semantics. -/
-def OwnershipPlan.following? {E ds d active Γ F layout fixed written value s r}
+private abbrev OwnershipPlan.flowShape {E ds d active Γ F layout fixed written value s r}
+    (_ : @OwnershipPlan E ds d active Γ F layout fixed written value s r)
+    (q v : Roadmap.Word) (state : Unit → Source.EMState E Γ)
+    (journal : Unit → ResidualJournal complementCarrierOwnership) :
+    GenericFlow.PreparationShape (List (ScalarPath E.layout (E.lay F.this))) SlotView
+      (Source.Op E.layout E.lay E.lay) (OwnershipPlan F layout fixed q v (state ()) (journal ())) :=
+  ⟨fun _ => layout.sourceInventory? F fixed (state ()),
+    fun old => finiteEncode old ((state ()).2.ex.world.accounts F.this).storage
+      (fun slot => (journal ()).cells (complementKey false F.this slot)),
+    packedSeparationCheck,
+    fun raw => packedSeparationCheck (layout.snapshotInventory fixed (saveSlot raw q v)),
+    fun raw => finiteAccountWrite? F.this (layout.snapshotInventory fixed (saveSlot raw q v)) (saveSlot raw q v),
+    fun old computed raw encoded checked nextChecked op prepared =>
+      ⟨old,computed,raw,encoded,checked,nextChecked,op,prepared⟩⟩
+
+private abbrev OwnershipPlan.flowInput {E ds d active Γ F layout fixed written value s r}
+    (p : @OwnershipPlan E ds d active Γ F layout fixed written value s r)
+    (static : F.static = false) (q v : Roadmap.Word) :
+    GenericFlow.Following (p.flowShape q v (fun _ => p.step.1.2) (fun _ => p.step.2)) :=
+  ⟨(fun _ => p.next),layout.sourceInventory_view F fixed p.step.1.2 p.nextRaw
+    (fun c member => p.view static c (layout.snapshot_root_member fixed p.nextRaw c member)),
+    p.nextRaw,p.reencode static,p.nextChecked⟩
+
+/-- Keep the established computational unfolding contract; the preparation
+proofs below specialize the shared checked interface. -/
+abbrev OwnershipPlan.following? {E ds d active Γ F layout fixed written value s r}
     (p : @OwnershipPlan E ds d active Γ F layout fixed written value s r)
     (static : F.static = false) (q v : Roadmap.Word) :
     Option (OwnershipPlan F layout fixed q v p.step.1.2 p.step.2) :=
@@ -18,73 +41,28 @@ def OwnershipPlan.following? {E ds d active Γ F layout fixed written value s r}
         p.nextRaw,p.reencode static,p.nextChecked,checked,op,prepared⟩
   else none
 
+-- Normal delta reduction identifies legacy and generic matcher helpers.
+set_option smartUnfolding false in
 theorem OwnershipPlan.following_fresh {E ds d active Γ F layout fixed written value s r}
     (p : @OwnershipPlan E ds d active Γ F layout fixed written value s r)
     (static : F.static = false) (q v : Roadmap.Word) :
     p.following? static q v = prepareOwnership? F layout fixed q v p.step.1.2 p.step.2 := by
-  have roots : finiteView layout.registrations (p.step.1.2.2.ex.world.accounts F.this).storage p.nextRaw :=
-    fun c member => p.view static c (layout.snapshot_root_member fixed p.nextRaw c member)
-  unfold prepareOwnership?
-  split
-  next missing =>
-    have found := layout.sourceInventory_view F fixed p.step.1.2 p.nextRaw roots
-    rw [missing] at found
-    cases found
-  next old found =>
-    have same := Option.some.inj (found.symm.trans (layout.sourceInventory_view F fixed p.step.1.2 p.nextRaw roots))
-    subst old
-    split
-    next missing =>
-      have encoded := p.reencode static
-      change finiteEncode (layout.snapshotInventory fixed p.nextRaw) _ _ = some p.nextRaw at encoded
-      rw [missing] at encoded
-      cases encoded
-    next raw encoded =>
-      have same := Option.some.inj (encoded.symm.trans (p.reencode static))
-      subst raw
-      split
-      next checked =>
-        unfold following?
-        split <;> rfl
-      next rejected => exact False.elim (rejected p.nextChecked)
+  exact (p.flowInput static q v).fresh
 
+set_option smartUnfolding false in
 theorem OwnershipPlan.following_ready {E ds d active Γ F layout fixed written value s r}
     (p : @OwnershipPlan E ds d active Γ F layout fixed written value s r)
     (static : F.static = false) (q v : Roadmap.Word)
     (checked : packedSeparationCheck (layout.snapshotInventory fixed (saveSlot p.nextRaw q v)) = true)
     (decoded : (finiteAccountWrite? (T := E.lay) F.this (layout.snapshotInventory fixed (saveSlot p.nextRaw q v)) (saveSlot p.nextRaw q v)).isSome) :
     (p.following? static q v).isSome := by
-  unfold following?
-  rw [dif_pos checked]
-  split
-  next missing => rw [missing] at decoded; cases decoded
-  next op found => rfl
+  exact (p.flowInput static q v).ready checked decoded
 
+set_option smartUnfolding false in
 theorem OwnershipPlan.prepare_eq {E ds d active Γ F layout fixed written value s r}
     (p : @OwnershipPlan E ds d active Γ F layout fixed written value s r) :
     prepareOwnership? F layout fixed written value s r = some p := by
-  unfold prepareOwnership?
-  split
-  next absent => have found := p.oldComputed; rw [absent] at found; cases found
-  next old found =>
-    have same := Option.some.inj (found.symm.trans p.oldComputed)
-    subst old
-    split
-    next absent => have encoded := p.encoded; rw [absent] at encoded; cases encoded
-    next raw encoded =>
-      have same := Option.some.inj (encoded.symm.trans p.encoded)
-      subst raw
-      split
-      next checked =>
-        split
-        next checkedNext =>
-          split
-          next absent => have ready := p.prepared; rw [absent] at ready; cases ready
-          next op prepared =>
-            have same := Option.some.inj (prepared.symm.trans p.prepared)
-            subst op
-            rfl
-        next rejected => exact False.elim (rejected p.nextChecked)
-      next rejected => exact False.elim (rejected p.oldChecked)
+  exact (p.flowShape written value (fun _ => s) (fun _ => r)).prepare_eq p.old p.oldComputed p.raw p.encoded
+    p.oldChecked p.nextChecked p.sourceOp p.prepared
 
 end Solidity.Yul.Views
