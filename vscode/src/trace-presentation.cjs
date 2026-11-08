@@ -8,7 +8,7 @@ const unavailable='Positioned verification traces are unavailable: the backend d
 function normalize(text){if(text.startsWith('assume '))text=text.slice(7);if(text.endsWith(';'))text=text.slice(0,-1).trimEnd();return text.split(' && ').map(v=>/^.* == [\w'?]+$/.test(v)?v.split(' == ')[1]+' == '+v.split(' == ')[0]:v).join(', ');}
 function install(vscode,context,{request=null,clock={set:setTimeout,clear:clearTimeout},notify=message=>vscode.window.showInformationMessage?.(message)}={}){
  const states=new Map(),sessions=new WeakMap();let disposed=false;
- const uri=d=>d.uri.toString(),eligible=e=>!disposed&&vscode.workspace.isTrusted&&e&&!e.document.isClosed&&e.document.uri.scheme==='file'&&/\.sol$/i.test(e.document.uri.fsPath);
+ const uri=d=>d.uri.toString(),eligible=e=>!disposed&&vscode.workspace.isTrusted&&e&&require('./editor-document.cjs').isSolidityFile(e.document);
  const colors=d=>vscode.workspace.getConfiguration('solidityLean',d.uri).get('verificationTraceColor',{backgroundColor:null,fontColor:null});
  function session(doc){if(!sessions.has(doc))sessions.set(doc,randomUUID());return sessions.get(doc);}
  function state(doc){let s=states.get(uri(doc));if(s&&s.doc!==doc){stop(s);states.delete(uri(doc));s=null;}if(!s){s={doc,enabled:false,epoch:0};states.set(uri(doc),s);}return s;}

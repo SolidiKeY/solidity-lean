@@ -18,7 +18,7 @@ function mock() {
   const commands = new Map(), events = {}, notices = [], logs = [], diagnosticMap = new Map(), runs = [];
   const doc = {
     uri: { scheme: 'file', fsPath: '/tmp/contract.sol', toString() { return pathToFileURL(this.fsPath).href; } },
-    version: 1, isDirty: false, isClosed: false, text: 'contract C {}', getText() { return this.text; },
+    languageId: 'solidity', version: 1, isDirty: false, isClosed: false, text: 'contract C {}', getText() { return this.text; },
     async save() { this.isDirty = false; return true; }
   };
   const config = {},documentConfigs=new Map(),listeners=new Map();

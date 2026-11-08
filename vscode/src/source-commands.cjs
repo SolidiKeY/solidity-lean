@@ -61,9 +61,9 @@ function install(vscode,context,{settings,output,cancelVerification}){
   if(retiring.has(uri))return retiring.get(uri);const job=jobs.get(uri);if(!job)return Promise.resolve();job.abort.abort();
   const promise=job.promise.then(()=>{},error=>{if(error.cleanupFailed)throw error;}).then(()=>{if(retiring.get(uri)===promise)retiring.delete(uri);});retiring.set(uri,promise);return promise;
  }
- const isCurrent=(doc,version,text,epoch)=>epochs.get(doc.uri.toString())===epoch&&!disposed&&!doc.isClosed&&doc.version===version&&doc.getText()===text&&vscode.window.activeTextEditor?.document===doc&&vscode.workspace.isTrusted;
+ const isCurrent=(doc,version,text,epoch)=>epochs.get(doc.uri.toString())===epoch&&!disposed&&!doc.isClosed&&doc.version===version&&doc.getText()===text&&vscode.window.activeTextEditor?.document===doc&&vscode.workspace.isTrusted&&require('./editor-document.cjs').isSolidityFile(doc);
  const command=operation=>async()=>{
-  const doc=vscode.window.activeTextEditor?.document;if(disposed||!vscode.workspace.isTrusted||doc?.uri.scheme!=='file'||!doc.uri.fsPath.endsWith('.sol'))return;
+  const doc=vscode.window.activeTextEditor?.document;if(disposed||!vscode.workspace.isTrusted||!require('./editor-document.cjs').isSolidityFile(doc)||!doc.uri.fsPath.endsWith('.sol'))return;
   const uri=doc.uri.toString();documents.set(uri,doc);touch(uri);const epoch=epochs.get(uri),commandId=randomUUID();let version=doc.version,text=doc.getText(),job;
   const receipt=(phase,extra={})=>output.appendLine(JSON.stringify({schemaVersion:1,kind:'source-command',commandId,operation,phase,uri,version,sourceHash:digest(text),sourceSession:epoch,verification:'not-run',...extra}));
   try{

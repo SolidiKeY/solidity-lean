@@ -74,3 +74,14 @@ observation requires one worker/obligation/trial, zero warmups and protocol on.
 It reuses the original `Fixes.sol` fixture and records actual VS Code provide,
 resolve and apply APIs plus owned LSP traffic, stale refusal and byte restoration.
 It does not certify a rendered lightbulb/menu, raster identity or proof outcome.
+
+Document language services and source commands require a file-backed Solidity
+document in Solidity language mode. Changing a `.sol` editor to plaintext stops
+automatic document work and removes its document providers; global workspace
+symbol search keeps its existing resource configuration.
+
+`--suite editor-language-scope --targets local,dafny` records public language
+changes, symbol APIs and owned LSP traffic for source/plaintext/restored phases.
+Use one worker/obligation/trial, zero warmups and protocol on. Each target keeps
+its original fixture and settings; this API observation does not certify rendered
+UI, verification outcomes, runtime equivalence or whole parity.
