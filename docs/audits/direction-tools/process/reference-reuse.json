@@ -1,5 +1,5 @@
 {
-  "closure_receipt": "not supplied by merged reference artifacts; no kernel claim inferred from source metrics or integration acknowledgement",
+  "closure_receipt": "resolved separately by pinned archived full-gate reuse; see closure_reuse",
   "comparison_boundary": "Reference inventory includes multiple source languages and uses a different lexical proof-region classifier. Its line total must not replace the process audit .v denominator or turn a partial size calibration into a matched process-overhead verdict.",
   "compcert_inventory_reused": {
     "check_seconds": null,
@@ -51,32 +51,29 @@
     }
   ],
   "process_overhead_calibration": "not supplied by these merged artifacts; no overhead numerator in reference inventory",
-  "reference_waits_reused": [
-    "Numeric reference check times not established; published-times.json records bounded source search",
-    "Native declaration metrics and exact proof/definition separation remain unsupported for mixed implementation languages; lexical estimates only"
-  ],
+  "reference_waits_reused": [],
   "source_inputs": {
     "boundaries.json": {
       "path": "docs/audits/direction-tools/references/boundaries.json",
-      "revision": "4d7cc2f0d3b28f5c5c3ae0ca6d21dcc652ee7678",
+      "revision": "645f10caf083550552616229654e29fddd1ad767",
       "sha256": "13a43ff8e92a6c8f93be6d876384ed825d7d756e6e4350806cb30086974f6f88"
     },
     "inventory.json": {
       "path": "docs/audits/direction-tools/references/inventory.json",
-      "revision": "4d7cc2f0d3b28f5c5c3ae0ca6d21dcc652ee7678",
+      "revision": "645f10caf083550552616229654e29fddd1ad767",
       "sha256": "2daf1c939a72534f91de42cef59c5925e1ec25e5a0445fd2f49112ee1c753a34"
     },
     "pins.json": {
       "path": "docs/audits/direction-tools/references/pins.json",
-      "revision": "4d7cc2f0d3b28f5c5c3ae0ca6d21dcc652ee7678",
+      "revision": "645f10caf083550552616229654e29fddd1ad767",
       "sha256": "5fdb343a3f15a008fb3cc6b813f21be71230d7fc49ca39c6540015bee27a1af8"
     },
     "summary.json": {
       "path": "docs/audits/direction-tools/references/summary.json",
-      "revision": "4d7cc2f0d3b28f5c5c3ae0ca6d21dcc652ee7678",
-      "sha256": "432972b6c7851a62d44b8fe9f637915d3f58d88496f4b5b0664ca118d206ac81"
+      "revision": "645f10caf083550552616229654e29fddd1ad767",
+      "sha256": "bc762a51e099fc58ddd0c2abf5a45d488859451d6ebb2c905aa79b06d8131ff8"
     }
   },
-  "source_status": "partial",
-  "status": "blocked pending exact archived successful closure receipt and matched process calibration"
+  "source_status": "done",
+  "status": "blocked pending matched process-overhead calibration only"
 }

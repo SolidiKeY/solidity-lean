@@ -50,6 +50,11 @@ for row in top:
     if row['closed_goal'].startswith('source_complete'):
         assert row['base_metrics']['theorem_lemma_declarations'] > 0
         assert row['kernel_closure_confirmed'] is None
+    if row['closed_goal'].startswith('closed_by_reused'):
+        assert row['kernel_closure_confirmed'] is True
+        receipt=row['closure_evidence']['archived_validation']
+        assert receipt['local_import_source_blobs_identical'] and receipt['toolchain_blob_identical']
+        assert receipt['audited_revision']==h.BASE
 for month, snap in snapshots.items():
     counts = snap['line_categories']; overhead = snap['overhead']
     assert overhead['infrastructure_lines'] == sum(counts.get(k,0) for k in h.INFRA)

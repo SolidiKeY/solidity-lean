@@ -644,8 +644,30 @@
       "theorem_lemma_declarations": 33
     },
     "category": "solidity_header_unmarked_proofs_and_definitions",
-    "closed_goal": "source_complete_kernel_unverified: theorem declarations present, no sorry/admit/axiom tokens",
+    "closed_goal": "closed_by_reused_successful_archived_full_gate",
     "closure_evidence": {
+      "archived_validation": {
+        "archive_prefix": "evidence/plan-e3-feature-citations-1107/e3-feature-citations/e3-feature-citations-evidence/completed-final-retry/full/",
+        "archive_repository": "https://github.com/SolidiKeY/solidity-lean-coord",
+        "archive_revision": "a2d55ac49baddb40486aabc66b26957deb2787e4",
+        "audited_revision": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+        "boundary": "Successful archived Lake full-gate replay, not a fresh kernel check. Entire local source import graph and toolchain pin match audited base; cached build provenance is inherited from the archived gate. No timing is extrapolated.",
+        "build_configuration_blobs_identical": true,
+        "external_imports": [
+          "Lean.Elab.Attributes",
+          "Lean.Elab.Deriving",
+          "Lean.Elab.Tactic",
+          "Lean.Meta.Eqns",
+          "Lean.Util.ShareCommon",
+          "Std.Data.HashMap"
+        ],
+        "local_import_modules_verified": 63,
+        "local_import_source_blobs_identical": true,
+        "module": "Solidity.Calculus.Decide",
+        "source_revision": "b2968a3b994fa7dd4b62600e48cbb00299d1eab6",
+        "status": "historical closure confirmed by reused archived validation",
+        "toolchain_blob_identical": true
+      },
       "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:Solidity/Calculus/Decide.lean",
       "historical_timing_matches": [],
       "source_metrics": {
@@ -667,7 +689,7 @@
     "deletions": 0,
     "edit_count": 89,
     "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
-    "kernel_closure_confirmed": null,
+    "kernel_closure_confirmed": true,
     "last_change_subject": "Modifies sets: frame loop bodies by the roots they write",
     "last_nonmerge_change": "2c1ce2e7415ea588ce5bd177e13a96154d09993f",
     "path": "Solidity/Calculus/Decide.lean",

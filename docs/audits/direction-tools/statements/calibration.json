@@ -1,0 +1,134 @@
+{
+  "base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+  "scope": "Matched public compiler facades and matched finite arithmetic/control scenarios only; unmatched rows retain null rather than an unlike denominator.",
+  "metric_boundary": "No check-time or transitive lemma-count measurement. Facade LOC is statement plus proof code, unlike the superseded header-only ratios. Finite-case counts compare selected operation scenarios, not language coverage or proof strength.",
+  "comparisons": [
+    {
+      "unit": "Solidity/Theorems.lean#compiler_correct",
+      "reference": "compcert#transf_c_program_correct",
+      "metric": "nonblank public theorem declaration lines including proof, excluding contextual imports/open/shared definitions",
+      "local": 11,
+      "reference_value": 7,
+      "ratio": 1.571429,
+      "outlier": false,
+      "verdict": null,
+      "reason": "Public correctness facades. The small checked facade compresses premises/conclusion into Input/Agrees and calls the certificate correctness theorem; CakeML exposes a pass composition. Both delegate. This compares declaration source only, not transitive proof cost or language coverage."
+    },
+    {
+      "unit": "Solidity/Theorems.lean#compiler_correct",
+      "reference": "cakeml#compile_semantics",
+      "metric": "nonblank public theorem declaration lines including proof, excluding contextual imports/open/shared definitions",
+      "local": 11,
+      "reference_value": 17,
+      "ratio": 0.647059,
+      "outlier": false,
+      "verdict": null,
+      "reason": "Public correctness facades. The small checked facade compresses premises/conclusion into Input/Agrees and calls the certificate correctness theorem; CakeML exposes a pass composition. Both delegate. This compares declaration source only, not transitive proof cost or language coverage."
+    },
+    {
+      "unit": "Solidity/Theorems.lean#compiler_checked",
+      "reference": "compcert#transf_c_program_correct",
+      "metric": "nonblank public theorem declaration lines including proof, excluding contextual imports/open/shared definitions",
+      "local": 5,
+      "reference_value": 7,
+      "ratio": 0.714286,
+      "outlier": false,
+      "verdict": null,
+      "reason": "Public correctness facades. The small checked facade compresses premises/conclusion into Input/Agrees and calls the certificate correctness theorem; CakeML exposes a pass composition. Both delegate. This compares declaration source only, not transitive proof cost or language coverage."
+    },
+    {
+      "unit": "Solidity/Theorems.lean#compiler_checked",
+      "reference": "cakeml#compile_semantics",
+      "metric": "nonblank public theorem declaration lines including proof, excluding contextual imports/open/shared definitions",
+      "local": 5,
+      "reference_value": 17,
+      "ratio": 0.294118,
+      "outlier": true,
+      "verdict": "justified",
+      "reason": "Public correctness facades. The small checked facade compresses premises/conclusion into Input/Agrees and calls the certificate correctness theorem; CakeML exposes a pass composition. Both delegate. This compares declaration source only, not transitive proof cost or language coverage."
+    },
+    {
+      "unit": "Solidity/Source/SemanticsExamples.lean#add_overflow_checked",
+      "reference": "solc#test/libsolidity/semanticTests/viaYul/detect_add_overflow.sol",
+      "metric": "distinct fixed input/output cases for matched operation",
+      "local": 1,
+      "local_case_evidence": "Closed theorem header with one explicit evalE invocation; counted and shape-checked by script",
+      "reference_value": 3,
+      "ratio": 0.333333,
+      "outlier": false,
+      "verdict": null,
+      "reason": "Checked uint8 addition: local overflow input versus upstream same-width valid/boundary/overflow inputs. This compares finite scenario coverage, not kernel proofs with runtime tests or whole suites. No solc run is claimed."
+    },
+    {
+      "unit": "Solidity/Source/SemanticsExamples.lean#div_by_zero",
+      "reference": "solc#test/libsolidity/semanticTests/arithmetics/unchecked_div_by_zero.sol",
+      "metric": "distinct fixed input/output cases for matched operation",
+      "local": 1,
+      "local_case_evidence": "Closed theorem header with one explicit evalE invocation; counted and shape-checked by script",
+      "reference_value": 2,
+      "ratio": 0.5,
+      "outlier": false,
+      "verdict": null,
+      "reason": "Unchecked unsigned division: local zero-divisor input versus upstream nonzero and zero divisors; local uint8 versus reference uint256 does not change the zero-divisor rule. This compares finite scenario coverage, not kernel proofs with runtime tests or whole suites. No solc run is claimed."
+    },
+    {
+      "unit": "Solidity/Source/SemanticsExamples.lean#short_circuit",
+      "reference": "solc#test/libsolidity/semanticTests/viaYul/short_circuit.sol",
+      "metric": "distinct fixed input/output cases for matched operation",
+      "local": 1,
+      "local_case_evidence": "Closed theorem header with one explicit evalE invocation; counted and shape-checked by script",
+      "reference_value": 2,
+      "ratio": 0.5,
+      "outlier": false,
+      "verdict": null,
+      "reason": "Short-circuit conjunction with a state-changing right operand; local false-left input versus upstream true/false-left inputs. This compares finite scenario coverage, not kernel proofs with runtime tests or whole suites. No solc run is claimed."
+    }
+  ],
+  "solc_snapshot": {
+    "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+    "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+    "manifest": "tests/upstream/snapshot.json",
+    "excerpts": [
+      {
+        "path": "test/libsolidity/semanticTests/viaYul/detect_add_overflow.sol",
+        "url": "https://github.com/argotorg/solidity/blob/1835d247de183f23e7b0e2bc4a50732af525b77c/test/libsolidity/semanticTests/viaYul/detect_add_overflow.sol",
+        "sha256": "627ef6d7bf0f790f8273815ecd4f7ef800da218122904bb4751c8412d8a6aa05",
+        "selector": "g(uint8,uint8)",
+        "vectors": [
+          "// g(uint8,uint8): 128, 64 -> 192",
+          "// g(uint8,uint8): 128, 127 -> 255",
+          "// g(uint8,uint8): 128, 128 -> FAILURE, hex\"4e487b71\", 0x11"
+        ],
+        "source": "contract C {\n    function f(uint a, uint b) public pure returns (uint x) {\n        x = a + b;\n    }\n    function g(uint8 a, uint8 b) public pure returns (uint8 x) {\n        x = a + b;\n    }\n}\n// ----\n// f(uint256,uint256): 5, 6 -> 11\n// f(uint256,uint256): -2, 1 -> -1\n// f(uint256,uint256): -2, 2 -> FAILURE, hex\"4e487b71\", 0x11\n// f(uint256,uint256): 2, -2 -> FAILURE, hex\"4e487b71\", 0x11\n// g(uint8,uint8): 128, 64 -> 192\n// g(uint8,uint8): 128, 127 -> 255\n// g(uint8,uint8): 128, 128 -> FAILURE, hex\"4e487b71\", 0x11\n"
+      },
+      {
+        "path": "test/libsolidity/semanticTests/arithmetics/unchecked_div_by_zero.sol",
+        "url": "https://github.com/argotorg/solidity/blob/1835d247de183f23e7b0e2bc4a50732af525b77c/test/libsolidity/semanticTests/arithmetics/unchecked_div_by_zero.sol",
+        "sha256": "4c7868d649ed283ddb9309d43398ec8dc7dc34e10a08329d74c97d5a833a2090",
+        "selector": "div(uint256,uint256)",
+        "vectors": [
+          "// div(uint256,uint256): 7, 2 -> 3",
+          "// div(uint256,uint256): 7, 0 -> FAILURE, hex\"4e487b71\", 0x12 # throws #"
+        ],
+        "source": "contract C {\n    function div(uint256 a, uint256 b) public returns (uint256) {\n        // Does not disable div by zero check\n        unchecked {\n            return a / b;\n        }\n    }\n\n    function mod(uint256 a, uint256 b) public returns (uint256) {\n        // Does not disable div by zero check\n        unchecked {\n            return a % b;\n        }\n    }\n}\n// ----\n// div(uint256,uint256): 7, 2 -> 3\n// div(uint256,uint256): 7, 0 -> FAILURE, hex\"4e487b71\", 0x12 # throws #\n// mod(uint256,uint256): 7, 2 -> 1\n// mod(uint256,uint256): 7, 0 -> FAILURE, hex\"4e487b71\", 0x12 # throws #\n"
+      },
+      {
+        "path": "test/libsolidity/semanticTests/viaYul/short_circuit.sol",
+        "url": "https://github.com/argotorg/solidity/blob/1835d247de183f23e7b0e2bc4a50732af525b77c/test/libsolidity/semanticTests/viaYul/short_circuit.sol",
+        "sha256": "8d27de715ea5ca55d6cbf1a695a57f645314e80c5c849d2e9911bb4c8e242c19",
+        "selector": "and(uint256)",
+        "vectors": [
+          "// and(uint256): 0 -> true, 8",
+          "// and(uint256): 1 -> false, 1"
+        ],
+        "source": "contract C {\n    function or(uint x) public returns (bool t, uint y) {\n        t = (x == 0 || ((x = 8) > 0));\n        y = x;\n    }\n    function and(uint x) public returns (bool t, uint y) {\n        t = (x == 0 && ((x = 8) > 0));\n        y = x;\n    }\n}\n// ----\n// or(uint256): 0 -> true, 0\n// and(uint256): 0 -> true, 8\n// or(uint256): 1 -> true, 8\n// and(uint256): 1 -> false, 1\n"
+      }
+    ]
+  },
+  "counts": {
+    "comparisons": 7,
+    "matched_units": 5,
+    "outliers": 1
+  },
+  "conclusion": "The small checked compiler facade is an outlier against the CakeML facade because it delegates to a certificate theorem. Other measured facade and finite-case ratios are within 3x. Semantic compiler weaknesses are assessed from permitted behaviours, not inferred from these sizes."
+}
