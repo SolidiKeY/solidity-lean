@@ -13,6 +13,7 @@ const {servePhases,atomicJson}=require('./phase-capture.cjs');
 const repo=resolve(__dirname,'../..');
 
 function validationConfig(config,hostConfig){
+ if(config.suite==='workspace-symbols-resolved'&&(!Number.isSafeInteger(config.operationTimeoutMs)||config.operationTimeoutMs<1))throw Error('Missing trusted launch operation deadline');
  if(config.suite==='verification-time-limit'&&config.target==='dafny'&&!Array.isArray(hostConfig.timeLimitReferenceImages))throw Error('Missing trusted reference image set');
  return{...config,timeLimitReferenceImages:hostConfig.timeLimitReferenceImages};
 }
@@ -96,7 +97,7 @@ function shortSummary(report) {
   return lines.join('\n');
 }
 async function launch(config,options) {
-  config={...config,suite:options.suite||'full',menuTrust:options.menuTrust,...(options.menuAnchor?{menuAnchor:options.menuAnchor}:{}),runId:randomUUID(),sourceHead:git(repo)};
+  config={...config,operationTimeoutMs:options.operationTimeoutMs,suite:options.suite||'full',menuTrust:options.menuTrust,...(options.menuAnchor?{menuAnchor:options.menuAnchor}:{}),runId:randomUUID(),sourceHead:git(repo)};
   mkdirSync(config.dir,{recursive:true});mkdirSync(config.workspace,{recursive:true});config.filesystemCapability=require('./filesystem.cjs').recursiveCapability(config.dir);
   const cache={'none':'No caching',basic:'Basic caching',advanced:'Advanced caching'}[config.cache];
   const settings= config.target==='dafny' ? {'dafny.version':'custom','dafny.cliPath':resolve(options.dafny),'dafny.dotnetExecutablePath':resolve(options.dotnet),
