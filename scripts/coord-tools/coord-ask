@@ -11,8 +11,8 @@ Each call commits one small file on top of the coordination repo's main in a tre
 to coord-q/<lane>/<ts>, coord-ack/<lane>/<ts> or coord-done/<lane>/<ts>. The coordinator's inbox receives the push
 through a GitHub webhook and opens, follows up (same lane + QID) or closes the issue, then deletes the ref.
 --done first runs the pre-push check: the head merged onto the fetched master in a temporary worktree (sharing the
-checkout's build caches, COORD_CACHE_DIRS), then COORD_PREPUSH_CMD there (default `bash scripts/coord-tools/gate.sh
-touched`), exactly what the merge pre-gate runs. On a failure or a conflict it prints the first errors and does not
+checkout's build caches, COORD_CACHE_DIRS), then `bash scripts/coord-tools/gate.sh touched` there, exactly what the
+merge pre-gate runs. On a failure or a conflict it prints the first errors and does not
 report done: fix it and push, or pass `--no-check REASON` when the failure is not yours. Only a pass, or an explicit
 `--no-check REASON`, reports: a failed fetch, a missing tool (lake, node) or a broken worktree also refuses, with what
 is missing. Results are cached per (head, master, check). `prepush:` is recorded in the push.
@@ -67,7 +67,7 @@ def prepush(no_check):
     cache_f = os.path.join(common, 'coord-prepush.json')
     try: cache = json.load(open(cache_f))
     except (OSError, ValueError): cache = {}
-    cmd = os.environ.get('COORD_PREPUSH_CMD') or CHECK_CMD
+    cmd = CHECK_CMD   # this project's merge gate, never overridden here: --no-check REASON is the only bypass
     # a cached verdict holds only for the same head, master, command and gate options (GATE_EXAMPLES widens it)
     key = f'{head}:{master}:' + json.dumps([cmd, os.environ.get('GATE_EXAMPLES', ''), os.environ.get('COORD_CACHE_DIRS', '')])
     base = {'master': master, 'head': head, 'cmd': cmd}
