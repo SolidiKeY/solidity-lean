@@ -18,6 +18,7 @@ ROOT = Path(__file__).resolve().parents[4]
 SCRIPTS = ROOT/'scripts/h62/item4/generic-v08'
 sys.path.insert(0, str(SCRIPTS))
 from width_resources import process_usage, MeasurementError
+from width_scope import require_scope, ScopeError
 
 
 class Measurement(unittest.TestCase):
@@ -113,17 +114,10 @@ def wait_for(predicate, seconds=10):
 @unittest.skipUnless(sys.platform == 'linux', 'Linux process/lock regression')
 class Ownership(unittest.TestCase):
     def setUp(self):
-        # Missing sandbox observations are not successful lifecycle validation.
         try:
-            fields = dict(x.split(':', 1) for x in Path('/proc/meminfo').read_text().splitlines())
-            available = int(fields['MemAvailable'].split()[0])*1024
-            cap = Path('/sys/fs/cgroup/memory.max').read_text().strip()
-            current = int(Path('/sys/fs/cgroup/memory.current').read_text())
-            available = min(available, int(cap)-current) if cap != 'max' else available
-            if available < 4*1024**3 or int(fields['SwapTotal'].split()[0]):
-                self.skipTest('resource admission unavailable; lifecycle NOT VALIDATED')
-        except (OSError, KeyError, ValueError) as error:
-            self.skipTest('resource observation unavailable; lifecycle NOT VALIDATED: '+str(error))
+            require_scope()
+        except ScopeError as error:
+            self.skipTest('hard resource scope unavailable; lifecycle NOT VALIDATED: '+str(error))
 
     def exercise(self, case):
         with tempfile.TemporaryDirectory() as folder:

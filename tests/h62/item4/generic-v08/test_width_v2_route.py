@@ -65,6 +65,7 @@ class Route(unittest.TestCase):
                      'scripts/h62/item4/generic-v08/census.py',
                      'scripts/h62/item4/generic-v08/bounded.py',
                      'scripts/h62/item4/generic-v08/width_resources.py',
+                     'scripts/h62/item4/generic-v08/width_scope.py',
                      'scripts/h62/item4/generic-v08/reproduce-width-v2.py',
                      'scripts/h62/item4/generic-v08/check-width-v2.sh']
             for name in paths:
@@ -76,7 +77,7 @@ class Route(unittest.TestCase):
             (tool/'bin/lean').write_text('')
             output = root/'fresh'
             version = 'Lean (version 4.24.0, commit ' + v2.COMMIT + ', Release)'
-            with patch.object(v2, 'ROOT', repo), patch.object(v2.subprocess, 'check_output', return_value=version), patch.object(v2, 'run_monitor', return_value=Mock(returncode=0)) as run, patch.object(v2.fcntl, 'flock'), patch.object(v2.time, 'monotonic', side_effect=[0, 1, 301]):
+            with patch.object(v2, 'require_scope', return_value={'memory_max_bytes': 12*1024**3, 'memory_swap_max_bytes': 0, 'host_reserve_bytes': 12*1024**3}), patch.object(v2, 'ROOT', repo), patch.object(v2.subprocess, 'check_output', return_value=version), patch.object(v2, 'run_monitor', return_value=Mock(returncode=0)) as run, patch.object(v2.fcntl, 'flock'), patch.object(v2.time, 'monotonic', side_effect=[0, 1, 301]):
                 result = v2.main(['--toolchain', str(tool), '--output', str(output)])
             self.assertEqual(result, 1)
             self.assertEqual(run.call_count, 1)
@@ -90,7 +91,7 @@ class Route(unittest.TestCase):
 
 class Refusal(unittest.TestCase):
     def exercise(self, swap=0, reserve=16*1024**3, rows=None, seconds=300,
-                 measurement_error=None, aggregate=True, finished=False, interrupt_signal=False, owned_status_error=None):
+                 measurement_error=None, aggregate=True, finished=False, interrupt_signal=False, owned_status_error=None, scope_max=None):
         rows = rows or {}
         original_read = Path.read_text
         original_glob = Path.glob
@@ -99,8 +100,12 @@ class Refusal(unittest.TestCase):
             value = str(path)
             if value == '/proc/meminfo':
                 return f'MemAvailable: {reserve//1024} kB\nSwapTotal: {swap} kB\n'
+            if value == '/proc/self/cgroup':
+                return '0::/\n'
             if value == '/sys/fs/cgroup/memory.max':
-                return str(16*1024**3)
+                return str(scope_max if scope_max is not None else (12 if aggregate else 16)*1024**3)
+            if value in ('/sys/fs/cgroup/memory.swap.max','/sys/fs/cgroup/memory.swap.current'):
+                return '0'
             if value == '/sys/fs/cgroup/memory.current':
                 return '0'
             if value == f'/proc/{os.getpid()}/status':
@@ -152,6 +157,12 @@ class Refusal(unittest.TestCase):
     def test_swap_and_low_reserve_refuse_before_spawn(self):
         for options in ({'swap': 1024}, {'reserve': 3*1024**3}):
             result, spawned, _ = self.exercise(**options)
+            self.assertIsNone(result)
+            self.assertFalse(spawned)
+
+    def test_unisolated_v2_scope_refuses_before_spawn(self):
+        for maximum in (16*1024**3, 'max'):
+            result, spawned, _ = self.exercise(scope_max=maximum)
             self.assertIsNone(result)
             self.assertFalse(spawned)
 

@@ -2,6 +2,7 @@
 """One bounded process group; report actual resource/time data, never a fake pass."""
 import argparse,ctypes,json,os,pathlib,resource,signal,stat,subprocess,time
 from width_resources import process_usage
+from width_scope import require_scope, ScopeError, HOST_RESERVE
 p=argparse.ArgumentParser(__doc__)
 p.add_argument('--record',type=pathlib.Path,required=True)
 p.add_argument('--seconds',type=int,default=300)
@@ -43,13 +44,20 @@ def preexec():
         signal.pthread_sigmask(signal.SIG_SETMASK,spawn_mask)
 
 def available():
+    if a.aggregate:
+        return require_scope(check_reserve=False)["host_available_bytes"]
     fields=dict(line.split(':',1) for line in pathlib.Path('/proc/meminfo').read_text().splitlines())
     host=int(fields['MemAvailable'].split()[0])*1024
     cap=pathlib.Path('/sys/fs/cgroup/memory.max').read_text().strip()
     current=int(pathlib.Path('/sys/fs/cgroup/memory.current').read_text())
     return min(host,int(cap)-current) if cap!='max' else host
 
-if available()<4*1024**3: raise SystemExit('BLOCKED: less than 4 GiB headroom')
+scope_snapshot=None
+reserve_bytes=HOST_RESERVE if a.aggregate else 4*1024**3
+if a.aggregate:
+    try: scope_snapshot=require_scope()
+    except ScopeError as error: raise SystemExit('BLOCKED: '+str(error))
+if available()<reserve_bytes: raise SystemExit('BLOCKED: required host reserve unavailable')
 if int(pathlib.Path('/proc/meminfo').read_text().split('SwapTotal:')[1].split()[0])!=0:
     raise SystemExit('BLOCKED: active swap configuration requires no-swap isolation')
 original_parent=a.parent_pid if a.aggregate_parent else None
@@ -84,8 +92,11 @@ try:
             stop='parent-lost'
             break
         if time.monotonic()-start>a.seconds: stop='timeout'
-        elif available()<4*1024**3: stop='headroom'
+        elif available()<reserve_bytes: stop='headroom'
         if a.aggregate:
+            current_scope=require_scope(check_reserve=False)
+            if current_scope['membership']!=scope_snapshot['membership']:
+                raise ScopeError('monitor left its verified hard scope')
             rss, lean_processes = process_usage(proc.pid)
             for pid in [os.getpid()] + ([original_parent] if a.aggregate_parent else []):
                 status = pathlib.Path(f'/proc/{pid}/status').read_text()
@@ -149,7 +160,7 @@ if not a.aggregate:
 usage=resource.getrusage(resource.RUSAGE_CHILDREN)
 record=dict(command=cmd,exit=proc.returncode if proc is not None else None,stop=stop,wall_seconds=time.monotonic()-start,
             cpu_seconds=usage.ru_utime+usage.ru_stime,max_rss_kib=usage.ru_maxrss,
-            requested_threads=1,per_process_address_space_bytes=12*1024**3,headroom_bytes=4*1024**3,
+            requested_threads=1,per_process_address_space_bytes=12*1024**3,headroom_bytes=reserve_bytes,
             rss_measurement='RUSAGE_CHILDREN high-water; not aggregate RSS')
 if a.aggregate:
     record.update(peak_sampled_aggregate_rss=peak_aggregate, max_lean_processes=max_lean_processes,
@@ -157,6 +168,7 @@ if a.aggregate:
                   requested_seconds=a.seconds, polling_seconds=.25, termination_grace_seconds=5,
                   monitor_error=monitor_error, original_parent_pid=original_parent,
                   worker_parent_death_signal='SIGKILL', worker_lease_fd=a.lease_fd,
+                  hard_scope=scope_snapshot, memory_enforcement='kernel cgroup hard limit; sampled RSS is additional diagnostic/stop',
                   aggregate_scope='Lean tree + monitor' + (' + serial v2 driver' if a.aggregate_parent else ''))
 a.record.write_text(json.dumps(record,indent=2)+'\n')
 print(json.dumps(record),flush=True)

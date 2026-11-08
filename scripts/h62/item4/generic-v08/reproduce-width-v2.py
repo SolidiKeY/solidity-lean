@@ -15,6 +15,7 @@ import subprocess
 import sys
 import time
 from census import ROOT, mask
+from width_scope import require_scope, ScopeError
 
 VERSION = '4.24.0'
 COMMIT = '797c613eb9b6d4ec95db23e3e00af9ac6657f24b'
@@ -111,6 +112,7 @@ def main(argv=None):
     start = time.monotonic()
     try:
         output = checked_output(ROOT, args.output)
+        scope = require_scope()
         lean = (args.toolchain/'bin/lean').resolve(strict=True)
         if (ROOT/'lean-toolchain').read_text().strip() != 'leanprover/lean4:v' + VERSION:
             raise ValueError('master toolchain differs from explicit v2 pin')
@@ -118,10 +120,11 @@ def main(argv=None):
         if not version_matches(version):
             raise ValueError('v2 requires Lean4.24.0 commit ' + COMMIT)
         modules = dependency_order(ROOT)
-    except (ValueError, OSError, subprocess.SubprocessError) as error:
+    except (ValueError, OSError, subprocess.SubprocessError, ScopeError) as error:
         parser.error(str(error))
     output.mkdir(parents=True, exist_ok=False)
     (output/'version.txt').write_text(version)
+    (output/'scope-before.json').write_text(json.dumps(scope, indent=2)+'\n')
     lockpath = Path('/tmp/solidity-lean-feature-groups-20261025/writer.lock')
     lockpath.parent.mkdir(parents=True, exist_ok=True)
     with lockpath.open('a') as lock:
@@ -132,6 +135,7 @@ def main(argv=None):
             'lean-toolchain', 'scripts/h62/item4/generic-v08/census.py',
             'scripts/h62/item4/generic-v08/bounded.py',
             'scripts/h62/item4/generic-v08/width_resources.py',
+            'scripts/h62/item4/generic-v08/width_scope.py',
             'scripts/h62/item4/generic-v08/reproduce-width-v2.py',
             'scripts/h62/item4/generic-v08/check-width-v2.sh']
         before = input_bindings(ROOT, bound_paths)
@@ -171,7 +175,7 @@ def main(argv=None):
             return 1
         (output/'summary.json').write_text(json.dumps(dict(status='V2_ONLY_PASS',
             wall_seconds=time.monotonic()-start, overall_seconds_limit=SECONDS,
-            toolchain=VERSION, commit=COMMIT, input_sha256=before,
+            toolchain=VERSION, commit=COMMIT, input_sha256=before, hard_scope=scope,
             deadline_observation='No pass accepted after observed deadline; monitor polling0.25s and failed-check termination grace up to5s',
             frozen_v1='UNCHANGED_AND_UNRESOLVED'), indent=2)+'\n')
     return 0

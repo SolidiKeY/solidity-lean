@@ -251,7 +251,8 @@ outside the checkout. It explicitly requires master Lean4.24.0 commit
 `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`; ambient Lake is not used. The frozen
 v1 `reproduce-width.py` keeps its separate Lean4.35.0/archive pin unchanged.
 The existing `bounded.py` runs every local import and the v2 test with `-j1`,
-12GiB address-space/aggregate RSS caps,4GiB RAM reserve,no swap, and a shared
+verified kernel MemoryMax=12GiB and MemorySwapMax=0, a12GiB host reserve,
+plus the existing address-space and sampled-RSS diagnostics, and a shared
 300second execution deadline. No pass is accepted after the observed deadline;
 monitor sampling is0.25seconds and failed-check termination has up to5seconds
 grace. Runtime monitor exceptions/signals fail closed and clean the child
@@ -278,3 +279,11 @@ regressions separately cover the fork-to-assignment window and monitor death.
 If sandbox cgroup observations are unavailable, those lifecycle tests report
 NOT VALIDATED/skipped; that is not successful cleanup evidence. The public
 checker itself still refuses unavailable resource observations.
+
+The v2 checker refuses to start Lean without observable hard scope limits;
+polling RSS is not a substitute. Enter an existing approved scope, for example
+with `systemd-run --user --scope -p MemoryMax=12G -p MemorySwapMax=0` before
+the checker command. The inherited scope is verified by `width_scope.py` and
+recorded in receipts. Missing delegation or controller data is a resource wait,
+not a passing gate. Frozen v1 defaults are separate and do not authorize a v2
+resource-policy exception.
