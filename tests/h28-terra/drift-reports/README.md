@@ -32,3 +32,19 @@ old report; it does not silently replace that report's meaning. Coordinator full
 item-2 acceptance remains separate. Routing is not checked by these commands;
 item 3 checks retained diagnostics and a supplied identity, not fresh provenance.
 Raw outputs, measurements, receipts and handoffs belong in the private H145 archive.
+
+
+## Routing controls and unresolved conflict policy
+
+Run `python3 -B -m unittest discover -s tests/h28-terra/drift-reports -p 'test_route.py' -v`
+for the separate lexical-routing controls. They cover every Lean path at the
+original pinned base using a literal-position oracle and fixture owner records,
+plus sorting, complete payloads, duplicate file occurrences, repeated tokens,
+raw-source/path matching, suffix selection and boundary/metacharacter controls.
+Fixture owners are test data, not a live ownership registry or Bridge assignment.
+
+Full routing acceptance remains open on `Q-H152-ROUTE-CONFLICT`: the current
+router keeps only the last ownership row when IDs collide. The retained router
+is unchanged; no duplicate-owner policy is silently imposed by these controls.
+A versioned preserving/refusing contract or explicit retention of existing
+last-row semantics requires the queued scope choice before completing acceptance.
