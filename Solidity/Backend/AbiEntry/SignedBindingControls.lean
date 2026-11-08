@@ -121,7 +121,7 @@ theorem protected_and_saved :
 #guard_msgs (whitespace := lax) in #print axioms zero_full_width_controls
 /-- info: 'Solidity.Backend.AbiEntry.SignedBindingControls.wide_accepts' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms wide_accepts
-/-- info: 'Solidity.Backend.AbiEntry.SignedBindingControls.negative_reading' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.AbiEntry.SignedBindingControls.negative_reading' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms negative_reading
 /-- info: 'Solidity.Backend.AbiEntry.SignedBindingControls.raw_decoded_and_bound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms raw_decoded_and_bound
@@ -133,6 +133,6 @@ theorem protected_and_saved :
 #guard_msgs (whitespace := lax) in #print axioms typed_signed_branch
 /-- info: 'Solidity.Backend.AbiEntry.SignedBindingControls.fuel_boundary' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms fuel_boundary
-/-- info: 'Solidity.Backend.AbiEntry.SignedBindingControls.protected_and_saved' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.AbiEntry.SignedBindingControls.protected_and_saved' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms protected_and_saved
 end Solidity.Backend.AbiEntry.SignedBindingControls
