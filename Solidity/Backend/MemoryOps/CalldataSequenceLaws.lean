@@ -124,19 +124,21 @@ theorem checkedBoolSequence_keeps {D : Source.Layout} {n n' : Option Nat}
   obtain ⟨mid', hf, hk1⟩ := checkedCalldataBools_keeps hc e hk r a s t d mid hfirst
   obtain ⟨out', hs, hk2⟩ := checkedCalldataBools_keeps hc' e hk1 q b u v f out hsecond
   exact ⟨out', (checkedBoolSequence_some_iff c off c' off' hp' (r.wk e) a s t d (q.wk e) b u v f out').mpr ⟨mid', hf, hs⟩, hk2⟩
-/-- info: 'Solidity.Backend.MemoryOps.checkedBoolSequence_same_checked' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedBoolSequence_same_checked' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedBoolSequence_same_checked
-/-- info: 'Solidity.Backend.MemoryOps.checkedBoolSequence_same_elems' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedBoolSequence_same_elems' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedBoolSequence_same_elems
-/-- info: 'Solidity.Backend.MemoryOps.checkedBoolSequence_second_read' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedBoolSequence_second_read' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedBoolSequence_second_read
-/-- info: 'Solidity.Backend.MemoryOps.checkedBoolSequence_first_exterior' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedBoolSequence_first_exterior' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in #print axioms checkedBoolSequence_first_exterior
 /-- info: 'Solidity.Backend.MemoryOps.checkedBoolSequence_same_comm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedBoolSequence_same_comm
-/-- info: 'Solidity.Backend.MemoryOps.checkedBoolSequence_frame' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedBoolSequence_frame' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedBoolSequence_frame
-/-- info: 'Solidity.Backend.MemoryOps.checkedBoolSequence_keeps' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedBoolSequence_keeps' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedBoolSequence_keeps
 
 set_option backward.isDefEq.respectTransparency false in
@@ -258,19 +260,21 @@ theorem checkedUintSequence_keeps {D : Source.Layout} {n n' : Option Nat}
   obtain ⟨mid', hf, hk1⟩ := checkedCalldataUints_keeps hc e hk r a s t d mid hfirst
   obtain ⟨out', hs, hk2⟩ := checkedCalldataUints_keeps hc' e hk1 q b u v f out hsecond
   exact ⟨out', (checkedUintSequence_some_iff c off c' off' hp' (r.wk e) a s t d (q.wk e) b u v f out').mpr ⟨mid', hf, hs⟩, hk2⟩
-/-- info: 'Solidity.Backend.MemoryOps.checkedUintSequence_same_checked' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedUintSequence_same_checked' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedUintSequence_same_checked
-/-- info: 'Solidity.Backend.MemoryOps.checkedUintSequence_same_elems' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedUintSequence_same_elems' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedUintSequence_same_elems
-/-- info: 'Solidity.Backend.MemoryOps.checkedUintSequence_second_read' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedUintSequence_second_read' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedUintSequence_second_read
-/-- info: 'Solidity.Backend.MemoryOps.checkedUintSequence_first_exterior' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedUintSequence_first_exterior' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in #print axioms checkedUintSequence_first_exterior
 /-- info: 'Solidity.Backend.MemoryOps.checkedUintSequence_same_comm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedUintSequence_same_comm
-/-- info: 'Solidity.Backend.MemoryOps.checkedUintSequence_frame' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedUintSequence_frame' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedUintSequence_frame
-/-- info: 'Solidity.Backend.MemoryOps.checkedUintSequence_keeps' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedUintSequence_keeps' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedUintSequence_keeps
 
 set_option backward.isDefEq.respectTransparency false in
@@ -308,9 +312,11 @@ theorem checkedBoolSequence_other_comm {D : Source.Layout} {n n' : Option Nat} {
   congr 1
   apply overwriteTwo_comm
 
-/-- info: 'Solidity.Backend.MemoryOps.checkedBoolSequence_other_checked' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedBoolSequence_other_checked' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in #print axioms checkedBoolSequence_other_checked
-/-- info: 'Solidity.Backend.MemoryOps.checkedBoolSequence_other_comm' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedBoolSequence_other_comm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedBoolSequence_other_comm
 
 set_option backward.isDefEq.respectTransparency false in
@@ -348,8 +354,10 @@ theorem checkedUintSequence_other_comm {D : Source.Layout} {n n' : Option Nat} {
   congr 1
   apply overwriteTwo_comm
 
-/-- info: 'Solidity.Backend.MemoryOps.checkedUintSequence_other_checked' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedUintSequence_other_checked' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in #print axioms checkedUintSequence_other_checked
-/-- info: 'Solidity.Backend.MemoryOps.checkedUintSequence_other_comm' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedUintSequence_other_comm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedUintSequence_other_comm
 end Solidity.Backend.MemoryOps
