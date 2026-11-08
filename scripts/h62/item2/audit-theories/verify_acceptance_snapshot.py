@@ -7,11 +7,13 @@ preserved and cannot become H69 or joint witnesses through a report edit.
 import argparse,json,re,subprocess
 from collections import Counter
 from pathlib import Path
-from census import ROOT,BASE,scan
+from census import ROOT,BASE,MAP,scan
 from input_roles import digest,annotate,SPECS as BRIDGE_OUTCOME
 from mutability_input_roles import SPECS as CLOSER_PAYABLE,EQ
 from assignable_input_roles import SPECS as ASSIGNABLE
+from pure_input_roles import SPECS as PURE
 from pending_impossibility import PENDING
+from audit_dispositions import ACCEPTED,accepted_fields,HISTORY_POLICY
 import verify_census as v
 
 def main():
@@ -46,7 +48,7 @@ def main():
         name=row["source_name"];orig=originals[name]
         for key in("file","line","visibility","source_header","elaborated_type_sha256","documented_producing_lane","proving_owner"):assert row[key]==orig[key]
         frozen=subprocess.check_output(["git","show",BASE+":"+row["file"]],cwd=ROOT)
-        status="byte-unchanged"if(ROOT/row["file"]).read_bytes()==frozen else"changed-frozen-file-version-pending"
+        status="byte-unchanged"if(ROOT/row["file"]).read_bytes()==frozen else"changed-rebased-file-original-history-separate"
         assert row["frozen_file_status"]==status
         if status!="byte-unchanged":changed.add(row["file"])
         if name in v.WITNESSES:
@@ -56,6 +58,7 @@ def main():
             intentional.add(name);assert row["status"]=="H69-intentional-impossibility-certificate-present"
             assert row["current_certificate"]==v.certificate(proof/"serial",*v.IMPOSSIBLE[name])
             assert row["intentional_reason"]==v.INTENTIONAL_REASONS[name]
+            if name in ACCEPTED:assert all(row[k]==value for k,value in accepted_fields(name).items()),"H69 disposition metadata mismatch"
         elif orig["status"]=="no-inputs":assert row["status"]=="historical-empty-input-telescope"
         else:
             gap_name=orig["elaborated"]["name"];expected_gaps.add(gap_name)
@@ -80,9 +83,10 @@ def main():
     records=roles["declarations"];names=[r["theorem"]for r in records]
     assert len(names)==len(set(names))==roles["reviewed_role_records"]==roles["cumulative_original_roles"],"Role declaration/count mismatch"
     assert roles["remaining_original_roles"]==500-len(names)and set(names)<=set(originals)
-    role_joint=0;role_pending=0
+    role_joint=0;role_pending=0;role_intentional=0
     specs=dict(BRIDGE_OUTCOME);assert not set(specs)&set(CLOSER_PAYABLE);specs.update(CLOSER_PAYABLE)
     assert not set(specs)&set(ASSIGNABLE);specs.update(ASSIGNABLE)
+    assert not set(specs)&set(PURE);specs.update(PURE)
     assert set(names)==set(specs)
     for row in records:
         name=row["theorem"];orig=originals[name]
@@ -99,17 +103,43 @@ def main():
             assert row["status"]==item["status"],"Ordinary pending status mismatch"
             assert row["question"]==item["question"],"Ordinary pending question mismatch"
             assert row["pending_impossibility_certificate"]==v.certificate(proof/"serial",item["module"],item["helper"]);role_pending+=1
+        elif name in ACCEPTED:
+            item=ACCEPTED[name];assert name in intentional and name not in joint
+            assert all(row[k]==value for k,value in accepted_fields(name).items()),"Accepted H69 role metadata mismatch"
+            assert "current_joint_certificate"not in row and "pending_impossibility_certificate"not in row,"H69 boundary promoted to joint witness"
+            assert row["current_impossibility_certificate"]==v.certificate(proof/"serial",item["module"],item["helper"]);role_intentional+=1
         else:
             assert row.get("status","joint-witness-checked")=="joint-witness-checked"and not row.get("accepted_H69",False),"Joint role status mismatch"
             assert"pending_impossibility_certificate"not in row
             assert name in joint and row["current_joint_certificate"]==v.certificate(proof/"serial",*v.WITNESSES[name]);role_joint+=1
-    assert role_joint==roles["joint_certificates_in_role_union"]and role_pending==roles["ordinary_pending_impossibilities"]
+    assert role_joint==roles["joint_certificates_in_role_union"]and role_pending==roles["ordinary_pending_impossibilities"]and role_intentional==roles["accepted_H69_in_role_union"]
+    assert ledger["fidelity_disposition"]==HISTORY_POLICY
+    frozen_map=subprocess.check_output(["git","show",BASE+":"+MAP],cwd=ROOT)
+    mapped=["Solidity/"+name for name in re.findall(r"^\| `(Theory/[^`]+\.lean)`",frozen_map.decode(),re.M)]
+    assert len(mapped)==len(set(mapped))==25
+    assert{row["file"]for row in entries}<=set(mapped)
+    module_rows=[]
+    for file in mapped:
+        frozen=subprocess.check_output(["git","show",BASE+":"+file],cwd=ROOT)
+        original_names={name for name,orig in originals.items()if orig["file"]==file}
+        assert{row["source_name"]for row in scan(frozen.decode(),file)}==original_names
+        dispositions=[row for row in entries if row["file"]==file]
+        assert len(dispositions)==len(original_names)
+        module_rows.append({"file":file,"original_explicit_declarations":len(original_names),"original_dispositions":dict(Counter(row["status"]for row in dispositions)),
+          "original_source_sha256":v.sha(frozen),"current_source_sha256":digest(ROOT/file),"source_byte_unchanged":(ROOT/file).read_bytes()==frozen,
+          "boundary":"Zero declarations does not prove its definitions equivalent; full original source/definition fidelity remains separate."})
+    assert sum(row["original_explicit_declarations"]for row in module_rows)==len(originals)
+    mapped_report={"frozen_assignment_base":BASE,"module_map":MAP,"original_module_map_sha256":v.sha(frozen_map),"current_module_map_sha256":digest(ROOT/MAP),
+      "module_map_byte_unchanged":(ROOT/MAP).read_bytes()==frozen_map,"original_mapped_files":len(module_rows),"modules":module_rows,
+      "zero_declaration_files":[row["file"]for row in module_rows if row["original_explicit_declarations"]==0],"full_assignment_acceptance":False}
     payload={"current_head":subprocess.check_output(["git","rev-parse","HEAD"],cwd=ROOT,text=True).strip(),"frozen_assignment_base":BASE,
       "checked_helper_theorems":len(helper_names),"joint_certificates":len(joint),"accepted_H69":len(intentional),"original_explicit_declarations":len(entries),
       "original_generated_pending":len(generated),"remaining_original_records":len(expected_gaps),"reviewed_roles":len(names),"remaining_roles":500-len(names),
+      "fidelity_disposition":HISTORY_POLICY,"original_mapped_files":len(module_rows),"zero_declaration_files":mapped_report["zero_declaration_files"],"mapped_file_fidelity_changes":[row["file"]for row in module_rows if not row["source_byte_unchanged"]],
       "ordinary_impossibility_questions":[dict(theorem=n,question=i["question"],accepted_H69=False)for n,i in PENDING.items()],"changed_frozen_files":sorted(changed),
       "input_sha256":{str(p):digest(p)for p in(source,ledger_path,helpers_path,gaps_path,roles_path)},"full_assignment_acceptance":False,"lean_jobs":0,
       "boundary":"External coherent accounting/current kernel-receipt validation only; no original-version definition equivalence, generated exclusion, full compiler target totality or final runtime acceptance."}
     out.mkdir(parents=True,exist_ok=True);(out/"acceptance-snapshot.json").write_text(json.dumps(payload,indent=2)+"\n")
+    (out/"mapped-module-dispositions.json").write_text(json.dumps(mapped_report,indent=2)+"\n")
     print("ACCEPTANCE_SNAPSHOT_PASS "+json.dumps({k:payload[k]for k in("checked_helper_theorems","joint_certificates","remaining_original_records","reviewed_roles","remaining_roles","full_assignment_acceptance")}))
 if __name__=="__main__":main()
