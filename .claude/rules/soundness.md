@@ -63,7 +63,7 @@ substitutes for the general proof below.
   an evaluator and every write but a push end (`Semantics/Ends.lean`); a
   push at the bound is `exhausted`, which both modalities accept.
 - Develop an arm as a standalone lemma in a scratch module importing
-  `Calculus/SoundKit.lean`; the arms' files elaborate in tens of seconds.
+  `Calculus/SoundKit.lean`.
 
 ## A new rule: one file in `Calculus/Sound/`
 
@@ -113,8 +113,4 @@ lists the places a new rule is registered.
 Do not weaken the theorem. Find the state where the premise and the statement
 end differently, check which one solc agrees with, and fix that side: the rule
 (`Calculus/Rules.lean`, its arm) or the run (`Semantics/Run.lean`, recording
-it in `docs/solc-alignment.md`). An unset memory local (decision 17',
-`docs/intrinsic.md`) is such a fix: `memoryLocalDeclInitDrop`'s hidden
-binder had no typed value naming the object the initializer was about to
-allocate, until the binder's type admitted an unset local.
-A refutation worth keeping goes in `Counterexamples/`, one file each.
+it in `docs/solc-alignment.md`). A refutation worth keeping goes in `Counterexamples/`, one file each.
