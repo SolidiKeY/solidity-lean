@@ -125,11 +125,11 @@ def run(graph,view,out):
         # committed family shard must be less than 1 MB.
         name=pre.strip('/').replace('/','_')+'-unreached.tsv'
         with (out/name).open('w') as h:
-            w=csv.writer(h,delimiter='\t');w.writerow(['serialized_module_owner_path','name','kind','first_line','last_line','zero_incoming']);w.writerows(rows)
+            w=csv.writer(h,delimiter='\t',lineterminator='\n');w.writerow(['serialized_module_owner_path','name','kind','first_line','last_line','zero_incoming']);w.writerows(rows)
     for name,table in [('directories',dirs),('areas',areas)]:
         fields=sorted(set().union(*(r.keys() for r in table.values())))
         with (out/(name+'.csv')).open('w') as h:
-            w=csv.writer(h);w.writerow(['path']+fields)
+            w=csv.writer(h,lineterminator="\n");w.writerow(['path']+fields)
             for k,r in sorted(table.items()):w.writerow([k]+[r[f] for f in fields])
     missing=[p for p in src if p not in indexed.values()]
     summary=dict(base=BASE,graph_sha256=hashlib.sha256(graph.read_bytes()).hexdigest(),status='partial',indexed_physical_lines=sum(len(src[p].splitlines()) for p in indexed.values()),module_universe=len(indexed),native_declarations=sum(n not in commands for n in nodes),
