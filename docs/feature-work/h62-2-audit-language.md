@@ -88,3 +88,10 @@ For heap/storage feasibility, check
 `Solidity/Source/State.lean` family. Preserve the populated-source copy premise,
 write type equality and distinct-address/path hypotheses. Empty heaps alone
 cannot witness the copy interfaces.
+
+For current typing schemas, check
+`tests/h62/item2/audit-language/SourceTypingWitness.lean` and the named-header
+family in `Solidity/Source/Typing.lean`. Header agreement after a module split
+does not establish equivalence of evolved dependent typing definitions.
+A `Type`-valued derivation is a real feasibility constraint even when the raw
+leading-binder category contains no `Prop` premise.
