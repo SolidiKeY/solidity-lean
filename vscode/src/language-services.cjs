@@ -21,7 +21,11 @@ function position(text,n){const lines=text.slice(0,n).split(/\r\n|\r|\n/);return
 function byteRange(text,src){
   const m=/^(\d+):(\d+):0$/.exec(src??'');if(!m)return null;
   const bytes=Buffer.from(text),start=Number(m[1]),end=start+Number(m[2]);
-  if(end>bytes.length)return null;
+  if(!Number.isSafeInteger(start)||!Number.isSafeInteger(end)||start>bytes.length||end>bytes.length)return null;
+  // Compiler offsets are UTF-8 byte boundaries; LSP cannot represent a partial
+  // codepoint or the interior of CRLF. Never decode either as a replacement.
+  const boundary=n=>(n===bytes.length||(bytes[n]&0xc0)!==0x80)&&!(bytes[n-1]===13&&bytes[n]===10);
+  if(!boundary(start)||!boundary(end))return null;
   return {start:position(text,bytes.subarray(0,start).toString('utf8').length),end:position(text,bytes.subarray(0,end).toString('utf8').length)};
 }
 const kinds={ContractDefinition:5,FunctionDefinition:12,VariableDeclaration:13,StructDefinition:23,EnumDefinition:10,EnumValue:22,EventDefinition:24,ErrorDefinition:5,ModifierDefinition:6,UserDefinedValueTypeDefinition:26};
