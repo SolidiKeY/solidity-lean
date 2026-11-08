@@ -25,6 +25,7 @@ New guidance must be linked from an existing reachable document.
   `scripts/coord-tools/fragments.sh`. Do not edit generated roots or indexes.
 - Read relevant [audits and prior-art studies](docs/document-index.md#guides-audits-and-performance)
   before freezing an interface.
+- Check the [direction audit](docs/audits/direction.md) before adding a large new area.
 - Warn before a refactor that may slow checking; inspect Git history for a
   speed-motivated change it would undo. Do not raise `maxHeartbeats` to save a proof.
   Finish with `simp only [...]`, explicit signatures and typed `have`s.
