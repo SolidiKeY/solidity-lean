@@ -90,16 +90,16 @@ theorem RefChildRepr.mixedSequence {D : Source.Layout} {H : HTy} {R Q : RefTy}
     rw [hf] at hl
     exact (hi.2.2 leaf hl).mixedSequence c off c' off' r a s t d q b u v f out ho (hleaves leaf hl)
 
-/-- info: 'Solidity.Backend.MemoryOps.boolTransfer_frame_or_empty' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.boolTransfer_frame_or_empty' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms boolTransfer_frame_or_empty
-/-- info: 'Solidity.Backend.MemoryOps.uintTransfer_frame_or_empty' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.uintTransfer_frame_or_empty' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms uintTransfer_frame_or_empty
-/-- info: 'Solidity.Backend.MemoryOps.mixedTransfer_frame_or_empty' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.mixedTransfer_frame_or_empty' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms mixedTransfer_frame_or_empty
-/-- info: 'Solidity.Backend.MemoryOps.primitiveTransfer_ref_root_ne' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.MemoryOps.primitiveTransfer_ref_root_ne' depends on axioms: [propext] -/
 #guard_msgs in #print axioms primitiveTransfer_ref_root_ne
-/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.mixedSequence' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.mixedSequence' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms BoolChildRepr.mixedSequence
-/-- info: 'Solidity.Backend.MemoryOps.RefChildRepr.mixedSequence' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.RefChildRepr.mixedSequence' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms RefChildRepr.mixedSequence
 end Solidity.Backend.MemoryOps
