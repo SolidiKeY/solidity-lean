@@ -52,15 +52,16 @@ theorem target_choice (frag : Frag Γ) (receive fallback : Option (SpecialBody C
     dispatchTarget (rows frag receive fallback) (endpoint frag fallback) size=
       endpoint frag (specialBodyChoice receive fallback size) := by
   by_cases empty : size.val=0
-  · rw [specialBodyChoice,if_pos empty]
+  · rw [specialBodyChoice,ite_eq_left empty]
     have hit : (wmod 0).val=size.val := empty.symm
     exact CoreDispatch.target_hit frag _ [] (endpoint frag fallback) size hit
-  · rw [specialBodyChoice,if_neg empty]
+  · rw [specialBodyChoice,ite_eq_right empty]
     have missed : (wmod 0).val≠size.val := fun impossible => empty impossible.symm
     change dispatchTarget [⟨wmod 0,endpoint frag (receive.orElse (fun _ => fallback))⟩] (endpoint frag fallback) size=_
     rw [CoreDispatch.target_miss frag _ [] (endpoint frag fallback) size missed]
     rfl
 
+set_option backward.isDefEq.respectTransparency false in
 theorem executed (L base : Nat) (frag : Frag Γ) (index : Idx Γ (.val .uint))
     (receive fallback : Option (SpecialBody C Γ frag))
     (result : Compiler.Compilation base frag (route frag index receive fallback))
@@ -101,7 +102,7 @@ theorem nonempty (base : Nat) (frag : Frag Γ) (index : Idx Γ (.val .uint))
       (CoreDispatch.body_selected base frag (endpoint frag (receive.orElse (fun _ => fallback))))
       (CoreDispatch.selected base frag index [] (endpoint frag fallback)) machine size initial
   have missed : (wmod 0).val≠size.val := fun impossible => notEmpty impossible.symm
-  rw [step,if_neg missed]
+  rw [step,ite_eq_right missed]
   change run (compileProg base (endpoint frag fallback).program++[]) machine=_
   rw [List.append_nil]
 
