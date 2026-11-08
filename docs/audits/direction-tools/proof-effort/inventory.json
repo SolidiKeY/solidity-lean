@@ -1,0 +1,116 @@
+{
+  "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+  "changed_lean_paths": [
+    "Solidity.lean",
+    "Solidity/Frontend/Admission/DeclarationOccurrences.lean",
+    "Solidity/Frontend/Admission/LocationFeatures.lean",
+    "Solidity/Frontend/Admission/StructuralFeatures.lean",
+    "Solidity/Lowering/G17/Conditional.lean",
+    "Solidity/Lowering/G17/ConditionalControls.lean",
+    "Solidity/Lowering/G17/IndexBounds.lean",
+    "Solidity/Lowering/G17/IndexCapture.lean",
+    "Solidity/Lowering/G17/IndexCaptureControls.lean",
+    "Solidity/Lowering/G17/OperandStore.lean",
+    "Solidity/Lowering/G17/ShortCircuit.lean",
+    "Solidity/Lowering/G17/ShortCircuitControls.lean",
+    "Solidity/Lowering/G17/ShortCircuitRevertControls.lean",
+    "Solidity/Lowering/G17/ShortCircuitSource.lean",
+    "Solidity/Yul/Compilation/Artifact.lean",
+    "Solidity/Yul/Compilation/CompletionControls.lean",
+    "Solidity/Yul/Compilation/LetBranchCompilation.lean",
+    "Solidity/Yul/Compilation/LetControlCompilation.lean",
+    "Solidity/Yul/Compilation/LetScopeCompilation.lean",
+    "Solidity/Yul/Compilation/LetSequenceCompilation.lean",
+    "Solidity/Yul/Compilation/MultiSwitchCompletion.lean",
+    "Solidity/Yul/Compilation/ScopedControlCompilation.lean",
+    "Solidity/Yul/Compilation/ScopedForCompilation.lean",
+    "Solidity/Yul/Compilation/ScopedForCompletion.lean",
+    "Solidity/Yul/Compilation/ScopedLoopCompletion.lean",
+    "Solidity/Yul/Compilation/SourceLoopCompletion.lean",
+    "Solidity/Yul/Compilation/SourceLoopModelCompletion.lean",
+    "Solidity/Yul/Compilation/StructuredSequenceCompilation.lean",
+    "Solidity/Yul/Compilation/SwitchCompilation.lean",
+    "Solidity/Yul/Compilation/SwitchSequence.lean",
+    "Solidity/Yul/Compilation/ZeroControlCompilation.lean",
+    "Solidity/Yul/Views/Generic/Plan.lean",
+    "Solidity/Yul/Views/IntOwnershipPlan.lean",
+    "Solidity/Yul/Views/MemberOwnershipPlan.lean",
+    "Solidity/Yul/Views/OwnershipPlan.lean",
+    "Solidity/Yul/Views/PackedOwnershipPlan.lean",
+    "Solidity/Yul/Views/PrimitiveOwnershipPlan.lean",
+    "Solidity/Yul/Views/RecursiveOwnershipPlan.lean",
+    "Solidity/Yul/Views/ScalarOwnershipPlan.lean",
+    "Solidity/Yul/Views/SourceGraphEndpoints.lean",
+    "tests/h55/yul-artifact/LetCompletionFixtures.lean"
+  ],
+  "inputs": [
+    {
+      "paths": [
+        "docs/audits/architecture-tools/core_closure.py",
+        "docs/audits/architecture-tools/doc_names.py",
+        "docs/audits/architecture-tools/dup_decls.py",
+        "docs/audits/architecture-tools/dup_general.py",
+        "docs/audits/architecture-tools/imports.py",
+        "docs/audits/architecture-tools/near_files.py",
+        "docs/audits/architecture-tools/olean_sizes.py",
+        "docs/audits/architecture-tools/timing-sample.tsv",
+        "docs/audits/architecture-tools/unreferenced.py"
+      ],
+      "prefix": "docs/audits/architecture-tools/",
+      "status": "reused inventory; no fresh build"
+    },
+    {
+      "paths": [
+        "docs/audits/proof-coverage-tools/statement-sample.txt",
+        "docs/audits/proof-coverage-tools/theorem_census.py"
+      ],
+      "prefix": "docs/audits/proof-coverage-tools/",
+      "status": "reused inventory; no fresh build"
+    },
+    {
+      "paths": [
+        "docs/audits/build-speed-tools/churn.py",
+        "docs/audits/build-speed-tools/import_graph.py",
+        "docs/audits/build-speed-tools/measure.sh",
+        "docs/audits/build-speed-tools/pins.py",
+        "docs/audits/build-speed-tools/profile.sh",
+        "docs/audits/build-speed-tools/scan.py",
+        "docs/audits/build-speed.md"
+      ],
+      "prefix": "docs/audits/build-speed",
+      "status": "reused inventory; no fresh build"
+    },
+    {
+      "paths": [
+        "scripts/build-measure-report.py",
+        "scripts/build-measure.py"
+      ],
+      "prefix": "scripts/build-measure",
+      "status": "reused inventory; no fresh build"
+    },
+    {
+      "paths": [],
+      "prefix": "scripts/differential/",
+      "status": "absent at base"
+    },
+    {
+      "paths": [],
+      "prefix": "scripts/bench/",
+      "status": "absent at base"
+    }
+  ],
+  "physical_lean_lines": 1311130,
+  "previous_duplicate_inventory": {
+    "caveat": "candidate sketch may miss near pairs; transitive clusters need not be pairwise similar; alpha-renamed numeric constants do not establish semantic equivalence",
+    "exact_canonical_file_groups": 57,
+    "file_candidate_pairs": 11360,
+    "method": "architecture dup_decls.statement/norm and near_files.canon; stable bottom-12 10-token shingle candidates, exact Jaccard >=0.8; >=300 tokens",
+    "near_cluster_physical_lines": 26599,
+    "near_file_clusters": 88,
+    "same_statement_clusters": 2743,
+    "verified_near_pairs": 292
+  },
+  "previous_duplicates_base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+  "previous_source_base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+  "tracked_lean_files": 8291
+}
