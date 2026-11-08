@@ -2084,3 +2084,28 @@ regenerated at the committed head, retaining the original 96/21 failed run.
 Compiler-output equations do not establish selected-clause failure at a
 retained candidate, source-span attribution, rendered parity or EVM behavior.
 Publication remains fail-closed and all original parity/final gates remain.
+
+
+### Content-bound metadata prerequisite inspection
+
+`vscode/parity/lake-content-probe.lean` is a standalone installed-Lake tool.
+Run the pinned Lean executable with `-j1 --run` and the path to a JSON file
+containing an array of objects with `path` and `kind` (`text` or `binary`). It prints Lake content hashes;
+for text it also prints the parsed import-header flags and names. The hash and
+header share one read buffer. The tool does not elaborate inspected modules,
+restore caches, write hash sidecars or build workspace targets.
+
+These noncryptographic hashes are diagnostic inputs, not certificates of a
+current dependency closure. Retain separate cryptographic source hashes, compare
+actual cached bytes, and require Lake's current configuration and `importArts`
+bindings before using artifacts. A newer local trace can describe a different
+input key than the matching cached artifact; neither timestamps nor an old
+metadata binary establish source correspondence. Use supported Lake per-file
+setup rather than assuming `lake env lean` selects cached imports.
+
+Provisioning the metadata closure does not establish a selected source clause's
+failure. The current selected-post controls retain their exact typed-family
+check and fail closed at the typed-formula reader when that correspondence is
+unavailable. A passing numeric retained-formula slot control remains separate
+from source attribution, span publication and full editor parity. Existing
+compiler-expansion ownership holds, proof budgets and final gates are unchanged.

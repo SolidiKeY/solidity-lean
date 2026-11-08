@@ -16,7 +16,7 @@ IFS=/ read -r _ b_batch b_slug _ <<<"$lane/" || true
 ts=$(date -u +%Y%m%dT%H%M%SZ)
 blob=$(printf 'title: %s\nlane: %s\nhead: %s\nbatch: %s\nslug: %s\n---\n%s\n' \
   "$title" "$lane" "$head" "${CLOUDVM_BATCH:-$b_batch}" "${CLOUDVM_SLUG:-$b_slug}" "$body")
-# The issue workflow is read from the pushed commit, so the question commit sits on the coord repo's
+# The question commit sits on the coord repo's
 # main. A tree-less shallow clone keeps this to a few kB; only main's root tree is fetched (lazily).
 tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
 GIT_TERMINAL_PROMPT=0 git clone -q --bare --depth 1 --filter=tree:0 "$repo" "$tmp/q"
