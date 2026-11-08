@@ -19,6 +19,16 @@ const {activity}=require('./analyze.cjs');
 const {workload,servicesWorkload,verificationOutcomes,assertServiceResponse,assertServiceSymbols}=require('./workloads.cjs');
 const repo=resolve(__dirname,'../..');
 
+// A secondary evidence read must never replace the primary failed scenario.
+function failedScenario(id,elapsedMs,error,scope,dir,io=fs){
+ const row={id,status:error.code===-32601?'missing':error.code==='TIMEOUT'||/timed out/i.test(error.message)?'timeout':'broken',elapsedMs,error:error.stack};
+ if(!['configuration','ghost'].includes(scope))return row;
+ const file=join(dir,scope==='ghost'?'ghost-observations.json':'configuration-observations.json');let evidence={file};
+ try{const bytes=io.readFileSync(file);evidence={file,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')};row.failedPartialObservation=JSON.parse(bytes.toString());}
+ catch(readError){evidence={...evidence,error:readError.message,code:readError.code};}
+ row.failedPartialEvidence=evidence;return row;
+}
+
 function parse(args) {
   const o={targets:['dafny','local'],workers:[1,2,4],trials:5,warmups:1,scope:'services',timeoutMs:60000,obligations:8,memoryReserveMiB:12288,memoryMaxMiB:4096};
   const keys={'--dafny':'dafny','--output':'output','--targets':'targets','--workers':'workers','--trials':'trials','--warmups':'warmups','--scope':'scope','--timeout-ms':'timeoutMs','--obligations':'obligations','--memory-reserve-mib':'memoryReserveMiB','--memory-max-mib':'memoryMaxMiB','--configuration-mode':'configurationMode','--configuration-workspace':'configurationWorkspace','--ghost-notifications':'ghostMode'};
@@ -86,7 +96,7 @@ async function trial(target,workers,options,dir,dependencies={}) {
   const scenario=async(id,fn)=>{
     record('scenario.start',{id});const start=performance.now();
     try{const observation=await fn();scenarios.push({id,status:observation?.status||'passed',elapsedMs:performance.now()-start,observation});}
-    catch(e){scenarios.push({id,status:e.code===-32601?'missing':e.code==='TIMEOUT'||/timed out/i.test(e.message)?'timeout':'broken',elapsedMs:performance.now()-start,error:e.stack,...(['configuration','ghost'].includes(options.scope)&&fs.existsSync(join(dir,ghost?'ghost-observations.json':'configuration-observations.json'))?{failedPartialObservation:JSON.parse(fs.readFileSync(join(dir,ghost?'ghost-observations.json':'configuration-observations.json'),'utf8'))}:{})});}
+    catch(e){scenarios.push(failedScenario(id,performance.now()-start,e,options.scope,dir));}
     record('scenario.end',{id});
   };
   const open=(name,text)=>{
@@ -431,5 +441,5 @@ async function main(args=process.argv.slice(2)){
   finally{try{report.finished=new Date().toISOString();save();}finally{fs.rmSync(lock,{recursive:true,force:true});}}
   if(report.status==='incomplete')process.exitCode=1;return report;
 }
-module.exports={parse,trial,main};
+module.exports={parse,trial,main,failedScenario};
 if(require.main===module)main().catch(e=>{process.stderr.write(e.stack+'\n');process.exitCode=1;});
