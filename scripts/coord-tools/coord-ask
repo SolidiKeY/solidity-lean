@@ -1,39 +1,191 @@
-#!/usr/bin/env bash
-# coord-ask [-t TITLE] [-q QID] "question"   (or question on stdin)
-# coord-ask --ack QID ["note"]               acknowledge the coordinator's answer to QID (closes the question)
-# Pushes refs/heads/coord-q/<lane>/<ts> (question) or coord-ack/<lane>/<ts> (ack) to the private coordination
-# repo ($COORD_Q_REPO, default SolidiKeY/solidity-lean-coord); the coordinator's inbox gets the push at once
-# (GitHub webhook) and opens, follows up or closes the issue. One issue per (lane, QID): asking the same QID
-# again comments on it. Needs only clone/push access to that repo; does not touch the lane's repository.
-set -euo pipefail
-title=""; qid=""; ack=""
-if [ "${1:-}" = --ack ]; then ack=1; qid=${2:?usage: coord-ask --ack QID [NOTE]}; shift 2; fi
-while getopts t:q: o; do case $o in t) title=$OPTARG;; q) qid=$OPTARG;; *) echo "usage: coord-ask [-t TITLE] [-q QID] TEXT | --ack QID [NOTE]" >&2; exit 2;; esac; done
-shift $((OPTIND-1))
-if [ -n "$ack" ]; then body=${1:-acknowledged}; else body=${1:-$(cat)}; fi
-[ -n "$body" ] || { echo "coord-ask: empty question" >&2; exit 2; }
-[ -n "$title" ] || title=$(printf '%s' "$body" | head -1 | cut -c1-80)
-# The QID leads the title ("QID: ..."), which is how the coordinator matches a re-ask to its issue.
-if [ -z "$ack" ] && [ -n "$qid" ] && [ "${title#"$qid:"}" = "$title" ]; then title="$qid: $title"; fi
-repo=${COORD_Q_REPO:-https://github.com/SolidiKeY/solidity-lean-coord.git}
-lane=$(git rev-parse --abbrev-ref HEAD); head=$(git rev-parse HEAD)
-IFS=/ read -r _ b_batch b_slug _ <<<"$lane/" || true
-ts=$(date -u +%Y%m%dT%H%M%SZ)
-if [ -n "$ack" ]; then kind=acks; prefix=coord-ack; first="qid: $qid"; msg="ack: $qid"; done=acked
-else kind=questions; prefix=coord-q; first="title: $title"; msg="question: $title"; done=asked; fi
-blob=$(printf '%s\nlane: %s\nhead: %s\nbatch: %s\nslug: %s\n---\n%s\n' \
-  "$first" "$lane" "$head" "${CLOUDVM_BATCH:-$b_batch}" "${CLOUDVM_SLUG:-$b_slug}" "$body")
-# The commit sits on the coord repo's main. A tree-less shallow clone keeps this to a few kB.
-tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
-GIT_TERMINAL_PROMPT=0 git clone -q --bare --depth 1 --filter=tree:0 "$repo" "$tmp/q"
-export GIT_DIR=$tmp/q
-basec=$(git rev-parse HEAD)
-b=$(printf '%s' "$blob" | git hash-object -w --stdin)
-qt=$(printf '100644 blob %s\t%s.md\n' "$b" "$ts" | git mktree)
-ct=$(printf '040000 tree %s\t%s\n' "$qt" "$kind" | git mktree)
-tree=$({ git ls-tree "$basec^{tree}" | grep -v $'\tcoord$'; printf '040000 tree %s\tcoord\n' "$ct"; } | git mktree --missing)
-c=$(git -c user.name="${GIT_AUTHOR_NAME:-coord-ask}" -c user.email="${GIT_AUTHOR_EMAIL:-coord-ask@localhost}" \
-  commit-tree "$tree" -p "$basec" -m "$msg")
-ref="$prefix/$(printf '%s' "$lane" | tr -c 'A-Za-z0-9._/-' '-')/$ts"
-GIT_TERMINAL_PROMPT=0 git push -q "$repo" "$c:refs/heads/$ref"
-echo "$done: $ref"
+#!/usr/bin/env python3
+"""coord-ask — the lane's only channel to the coordinator (runs on a lane VM; needs git and push access to the
+coordination repository, nothing else; in the lane's own repository it only fetches master, for --done).
+
+  coord-ask [-t TITLE] [-q QID] TEXT     ask a question (TEXT may also come on stdin); the QID leads the title
+  coord-ask --ack QID [NOTE]             the coordinator's answer to QID was applied: closes the question
+  coord-ask --done [--result FILE]       this turn finished; FILE (or - for stdin) is the turn's CLOUDVM-RESULT
+                                            JSON, which the coordinator uses as the lane's result the moment it lands
+
+Each call commits one small file on top of the coordination repo's main in a tree-less shallow clone and pushes it
+to coord-q/<lane>/<ts>, coord-ack/<lane>/<ts> or coord-done/<lane>/<ts>. The coordinator's inbox receives the push
+through a GitHub webhook and opens, follows up (same lane + QID) or closes the issue, then deletes the ref.
+--done first runs the pre-push check: the head merged onto the fetched master in a temporary worktree (sharing the
+checkout's build caches, COORD_CACHE_DIRS), then `bash scripts/coord-tools/gate.sh touched` there, exactly what the
+merge pre-gate runs. On a failure or a conflict it prints the first errors and does not
+report done: fix it and push, or pass `--no-check REASON` when the failure is not yours. Only a pass, or an explicit
+`--no-check REASON`, reports: a failed fetch, a missing tool (lake, node) or a broken worktree also refuses, with what
+is missing. No verdict is cached: every --done runs the check (Lake's own cache keeps an unchanged re-run quick). `prepush:` is recorded in the push.
+--done also checks the head against the fetched master: when it lacks master commits older than COORD_STALE_HOURS
+(6), it warns (the merge pre-gate builds the head merged onto current master) and records `behind:` in the push; it
+never refuses.
+Environment: COORD_Q_REPO (repository URL; default: this project's coordination repository), CLOUDVM_BATCH / CLOUDVM_SLUG
+(override the batch/slug parsed from a codex/<batch>/<slug> branch name).
+"""
+import argparse, json, os, re, shutil, subprocess, sys, tempfile, time
+
+
+def git(*a, inp=None, env=None):
+    r = subprocess.run(['git', *a], input=inp, capture_output=True, text=True, env=env)
+    if r.returncode: sys.exit(f'coord-ask: git {a[0]} failed: {r.stderr.strip()[-300:]}')
+    return r.stdout.strip()
+
+
+def behind_master(hours):
+    """(commits, age of the oldest in hours) of the fetched origin master that HEAD lacks, if the oldest is at least
+    `hours` old. Compares against FETCH_HEAD, so a lane clone whose fetch refspec omits master is still checked."""
+    if subprocess.run(['git', 'fetch', '-q', 'origin', 'master'], capture_output=True).returncode: return None
+    r = subprocess.run(['git', 'log', '--format=%ct', 'HEAD..FETCH_HEAD'], capture_output=True, text=True)
+    ts = [int(x) for x in r.stdout.split()] if r.returncode == 0 else []
+    if not ts: return None
+    age = (time.time() - min(ts)) / 3600
+    return (len(ts), age) if age >= hours else None
+
+
+CHECK_CMD = 'bash scripts/coord-tools/gate.sh touched'
+TOOL_MISSING = re.compile(r'\b(lake|node|python3|bash)\b[^\n]{0,40}(command not found|not found|No such file or directory)')
+
+
+def first_errors(text, limit=30):
+    out, keep = [], 0
+    for l in text.splitlines():
+        if re.match(r'^(error\b|.*\berror:|FAIL\b|✖)', l): out.append(l); keep = 4
+        elif keep and l.strip(): out.append(l); keep -= 1
+        else: keep = 0
+        if len(out) >= limit: break
+    return '\n'.join(out) or '\n'.join(text.splitlines()[-15:])
+
+
+def prepush(no_check):
+    """The merge pre-gate's own check, run here first. Returns {state: pass|fail|conflict|skipped, detail, master}."""
+    if no_check: return {'state': 'skipped', 'detail': f'--no-check: {no_check}'}
+    if subprocess.run(['git', 'fetch', '-q', 'origin', 'master'], capture_output=True).returncode:
+        return {'state': 'unavailable', 'detail': 'git fetch origin master failed (network?)'}
+    rp = lambda *x: subprocess.run(['git', *x], capture_output=True, text=True).stdout.strip()
+    master, head, top = rp('rev-parse', 'FETCH_HEAD'), rp('rev-parse', 'HEAD'), rp('rev-parse', '--show-toplevel')
+    cmd = CHECK_CMD   # this project's merge gate, never overridden here: --no-check REASON is the only bypass
+    base = {'master': master, 'head': head, 'cmd': cmd}
+    if subprocess.run(['git', 'merge-base', '--is-ancestor', head, master]).returncode == 0:
+        return dict(base, state='pass', detail='head already on master (master passed the merge gate)')
+    print(f'coord-ask: pre-push check: your head merged onto master {master[:12]}, then the gate (can take minutes)...',
+          file=sys.stderr, flush=True)
+    tmp = tempfile.mkdtemp(prefix='coord-prepush-'); w = os.path.join(tmp, 'tree')
+    res = dict(base, state='unavailable', detail='could not create the temporary worktree')
+    try:
+        if subprocess.run(['git', 'worktree', 'add', '-q', '--detach', w, head], capture_output=True).returncode: return res
+        m = subprocess.run(['git', '-C', w, '-c', 'user.name=coord-ask', '-c', 'user.email=coord-ask@localhost', 'merge', '-q',
+                            '--no-edit', '--no-ff', master], capture_output=True, text=True)
+        if m.returncode:
+            files = subprocess.run(['git', '-C', w, 'diff', '--name-only', '--diff-filter=U'], capture_output=True,
+                                   text=True).stdout.split()
+            res = dict(base, state='conflict', detail='merge conflict with master in: ' + ' '.join(files[:20]))
+        else:
+            for c in (os.environ.get('COORD_CACHE_DIRS') or '.lake Bridge/.lake').split():
+                src, dst = os.path.join(top, c), os.path.join(w, c)
+                if os.path.isdir(src) and not os.path.lexists(dst):
+                    os.makedirs(os.path.dirname(dst), exist_ok=True); os.symlink(src, dst)
+            logs = os.path.join(tmp, 'logs'); os.makedirs(logs)
+            r = subprocess.run(cmd, shell=True, cwd=w, capture_output=True,
+                               text=True, env=dict(os.environ, GATE_BASE=master, GATE_LOGS=logs))
+            text = r.stdout + r.stderr + ''.join(open(os.path.join(logs, f), errors='replace').read()
+                                                for f in sorted(os.listdir(logs)) if f.endswith('.log'))
+            if r.returncode == 0: res = dict(base, state='pass', detail='gate passed on the merged tree')
+            elif TOOL_MISSING.search(text) and not re.search(r'^(error\b|.*\berror:)', text, re.M):
+                res = dict(base, state='unavailable', detail='a tool the gate needs is missing: ' + TOOL_MISSING.search(text).group(0)[:120]
+                           + '; install it (the pinned lean-toolchain with elan, node) or report with --no-check REASON')
+            else:
+                res = dict(base, state='fail', detail=first_errors(text).replace(w + '/', ''))
+    finally:
+        subprocess.run(['git', 'worktree', 'remove', '--force', w], capture_output=True)
+        shutil.rmtree(tmp, ignore_errors=True); subprocess.run(['git', 'worktree', 'prune'], capture_output=True)
+    return res
+
+
+def main():
+    ap = argparse.ArgumentParser(usage=__doc__)
+    ap.add_argument('-t', dest='title', default=''); ap.add_argument('-q', dest='qid', default='')
+    ap.add_argument('--ack', metavar='QID'); ap.add_argument('--done', action='store_true')
+    ap.add_argument('--result', metavar='FILE')
+    ap.add_argument('--no-check', metavar='REASON', default='', help='--done without the pre-push check (say why)')
+    ap.add_argument('text', nargs='?')
+    a = ap.parse_args()
+    repo = os.environ.get('COORD_Q_REPO') or 'https://github.com/SolidiKeY/solidity-lean-coord.git'
+    if a.ack: kind, prefix, first, body = 'acks', 'coord-ack', f'qid: {a.ack}', a.text or 'acknowledged'
+    elif a.done:
+        kind, prefix, first, body = 'done', 'coord-done', 'done: turn finished', a.text or 'turn finished'
+        if a.result:
+            import json
+            body = sys.stdin.read() if a.result == '-' else open(a.result).read()
+            body = body.strip()
+            if body.startswith('```'): body = body.strip('`').partition('\n')[2].rstrip('`').strip()
+            try: json.loads(body)
+            except ValueError as e: sys.exit(f'coord-ask: --result is not JSON ({e})')
+        pre = prepush(a.no_check)
+        if pre['state'] in ('fail', 'conflict', 'unavailable'):
+            why = 'The merge pre-gate would reject this head.' if pre['state'] != 'unavailable' else 'The check could not run.'
+            sys.exit(f"coord-ask: pre-push check {pre['state'].upper()} for your head merged onto master "
+                     f"{pre.get('master', '')[:12]}; nothing was reported. {why}\n{pre['detail']}\n"
+                     'Fix it (merge origin/master, repair, push a new head) and run --done again; if the failure is not '
+                     "yours (e.g. master itself is broken, or a tool cannot be installed), run --done --no-check 'REASON'.")
+        if pre.get('head') and git('rev-parse', 'HEAD') != pre['head']:
+            sys.exit(f"coord-ask: HEAD moved during the pre-push check (checked {pre['head'][:12]}); nothing was reported. "
+                     'Run --done again for the new head.')
+        rhead = (json.loads(body).get('head') or '') if a.result else ''
+        if pre.get('head') and a.result and rhead != pre['head']:
+            sys.exit(f"coord-ask: the result's head {rhead[:12] or '(missing)'} is not the checked head {pre['head'][:12]}; nothing was reported. "
+                     'Report the head you checked (git rev-parse HEAD) in the result.')
+        if pre['state'] == 'skipped': print(f"coord-ask: pre-push check skipped: {pre['detail']}", file=sys.stderr)
+    else:
+        body = a.text if a.text is not None else sys.stdin.read()
+        if not body.strip(): sys.exit('coord-ask: empty question')
+        title = a.title or body.splitlines()[0][:80]
+        if a.qid and not title.startswith(f'{a.qid}:'): title = f'{a.qid}: {title}'
+        kind, prefix, first = 'questions', 'coord-q', f'title: {title}'
+    lane = git('rev-parse', '--abbrev-ref', 'HEAD'); head = git('rev-parse', 'HEAD')
+    if a.done and pre.get('head'): head = pre['head']   # the report names exactly the head that was checked
+    parts = lane.split('/')
+    batch = os.environ.get('CLOUDVM_BATCH') or (parts[1] if len(parts) > 2 else '')
+    slug = os.environ.get('CLOUDVM_SLUG') or (parts[2] if len(parts) > 2 else '')
+    extra = ''
+    if a.done:
+        note = pre['detail'].splitlines()[0][:120] if pre['state'] in ('pass', 'skipped') else ''
+        if pre.get('cmd') and pre['cmd'] != CHECK_CMD: note += f"; command: {pre['cmd'][:100]}"   # an override is never silent
+        if pre.get('head'): note += f"; checked {pre['head'][:12]} on master {pre.get('master', '')[:12]}"
+        extra += f"prepush: {pre['state']} ({note.lstrip('; ')})\n"
+        try: hours = float(os.environ.get('COORD_STALE_HOURS') or 6)
+        except ValueError: hours = 6.0
+        if not 0 <= hours < float('inf'): hours = 6.0   # nan, inf and negatives fall back too
+        b = behind_master(hours)
+        if b:
+            extra += f'behind: {b[0]} commits, oldest {b[1]:.0f}h\n'
+            print(f'coord-ask: WARNING: your head lacks {b[0]} commits of origin/master (the oldest is {b[1]:.0f} h old). '
+                  'The merge pre-gate builds your head merged onto current master: merge origin/master and run '
+                  '`bash scripts/coord-tools/gate.sh touched` before your next push (docs/contributing.md#before-pushing).',
+                  file=sys.stderr)
+    blob = f'{first}\nlane: {lane}\nhead: {head}\nbatch: {batch}\nslug: {slug}\n{extra}---\n{body}\n'
+    ts = time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())
+    with tempfile.TemporaryDirectory() as tmp:
+        env = dict(os.environ, GIT_TERMINAL_PROMPT='0', GIT_DIR=os.path.join(tmp, 'q'))
+        clone_env = {k: v for k, v in env.items() if k != 'GIT_DIR'}
+        if subprocess.run(['git', 'clone', '-q', '--bare', '--depth', '1', '--filter=tree:0', repo, env['GIT_DIR']],
+                          env=clone_env).returncode: sys.exit('coord-ask: clone of the coordination repository failed')
+        g = lambda *x, inp=None: git(*x, inp=inp, env=env)
+        base = g('rev-parse', 'HEAD')
+        b = g('hash-object', '-w', '--stdin', inp=blob)
+        qt = g('mktree', inp=f'100644 blob {b}\t{ts}.md\n')
+        ct = g('mktree', inp=f'040000 tree {qt}\t{kind}\n')
+        rest = [l for l in g('ls-tree', f'{base}^{{tree}}').splitlines() if not l.endswith('\tcoord')]
+        tree = g('mktree', '--missing', inp='\n'.join(rest + [f'040000 tree {ct}\tcoord']) + '\n')
+        c = g('-c', f'user.name={os.environ.get("GIT_AUTHOR_NAME", "coord-ask")}',
+              '-c', f'user.email={os.environ.get("GIT_AUTHOR_EMAIL", "coord-ask@localhost")}',
+              'commit-tree', tree, '-p', base, '-m', f'{kind[:-1] if kind != "done" else "done"}: {first}')
+        ref = f'{prefix}/' + re.sub(r'[^A-Za-z0-9._/-]', '-', lane) + f'/{ts}'
+        if a.done and pre.get('head') and git('rev-parse', 'HEAD') != pre['head']:   # last look, just before reporting
+            sys.exit(f"coord-ask: HEAD moved after the pre-push check (checked {pre['head'][:12]}); nothing was reported. "
+                     'Run --done again for the new head.')
+        g('push', '-q', repo, f'{c}:refs/heads/{ref}')
+    print(f'{ {"acks": "acked", "done": "done", "questions": "asked"}[kind] }: {ref}')
+
+
+if __name__ == '__main__':
+    main()

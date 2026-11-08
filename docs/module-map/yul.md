@@ -204,6 +204,9 @@
 | `Yul/Compilation/NormalFramedTransportControls.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/World/LifecycleBalancesFit.lean` | BalancesFit through the EIP-6780 self-beneficiary burn, destruct transfer and finalization. |
 | `Yul/Views/SourceBalanceExact.lean` | The actual evaluator's `BALANCE` of an instance returns its exact Nat balance under BalancesFit; a `2 ^ 256` balance is observed as `0` without it. |
+| `Yul/Views/Generic/Plan.lean` | Intrinsic ownership preparation interface, checked Plan data and shared Plan laws; existing family APIs remain specialized abbreviations. |
+| `Yul/Views/GenericFlow/Following.lean` | Intrinsic checked preparation and following over existing typed Plan constructors; shared freshness, readiness and preparation equations. |
+| `Yul/Views/GenericFlow/FollowingLaws.lean` | Shared decoder-failure law for checked following; consumers avoid concrete dependent-match splitting. |
 | `Yul/RawFrameLogic.lean` | Intrinsic raw-local frame logic and transport used by P16; retained typed frame obligations remain explicit. |
 | `Yul/Views/MemberDynamicLayout.lean` | Concrete member-dynamic environment, declarations and computed layout; serial elaboration piece. |
 | `Yul/Views/MemberDynamicInitial.lean` | Original concrete member coordinates, headers, initial state, views and encoding. |

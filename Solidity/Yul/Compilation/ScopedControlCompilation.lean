@@ -1,6 +1,7 @@
 import Solidity.Yul.Compilation.LetScopeCompilation
 import Solidity.Yul.Compilation.ZeroLoopScope
 import Solidity.Yul.Compilation.FramedBranch
+import Solidity.Yul.Compilation.CompletionControls
 /-! Original-AST compiler certificates indexed by the varying local context.
 Recursive seq/if/zero/single-word let nodes emit existing Backend.Block;
 existing concrete LoopControl artifacts are leaves. No alternative source
@@ -316,10 +317,8 @@ theorem Artifact.normal_to_model {c : Control} {n fuel : Nat} {stmt : Stmt [] []
    some ⟨sourceLocals out,.normal⟩) (m : Evm.Machine) (caller : List Evm.Word) :
  Evm.run artifact.code {m with stack := locals.toList.map coreWord++caller} =
  .ok {m with stack := out.toList.map coreWord++caller} 0 := by
- obtain ⟨actual,same,target⟩ := artifact.source_to_model horizon locals ⟨sourceLocals out,.normal⟩ ran m caller
- have equal : out = actual := SourceLoopCompletion.sourceLocals_injective (congrArg Outcome.vars same)
- cases equal
- exact target
+ exact CompletionControls.normal_output out _
+   (artifact.source_to_model horizon locals ⟨sourceLocals out,.normal⟩ ran m caller)
 
 /-- info: 'Solidity.Yul.Compilation.ScopedControlCompilation.scope_selected' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in

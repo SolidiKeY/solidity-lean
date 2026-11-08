@@ -1,0 +1,64 @@
+{
+  "base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+  "inputs": {
+    "docs/audits/architecture-tools": {
+      "present": true,
+      "files": [
+        "docs/audits/architecture-tools/core_closure.py",
+        "docs/audits/architecture-tools/doc_names.py",
+        "docs/audits/architecture-tools/dup_decls.py",
+        "docs/audits/architecture-tools/dup_general.py",
+        "docs/audits/architecture-tools/imports.py",
+        "docs/audits/architecture-tools/near_files.py",
+        "docs/audits/architecture-tools/olean_sizes.py",
+        "docs/audits/architecture-tools/timing-sample.tsv",
+        "docs/audits/architecture-tools/unreferenced.py"
+      ]
+    },
+    "docs/audits/proof-coverage-tools": {
+      "present": true,
+      "files": [
+        "docs/audits/proof-coverage-tools/statement-sample.txt",
+        "docs/audits/proof-coverage-tools/theorem_census.py"
+      ]
+    },
+    "docs/audits/build-speed-tools": {
+      "present": true,
+      "files": [
+        "docs/audits/build-speed-tools/churn.py",
+        "docs/audits/build-speed-tools/import_graph.py",
+        "docs/audits/build-speed-tools/measure.sh",
+        "docs/audits/build-speed-tools/pins.py",
+        "docs/audits/build-speed-tools/profile.sh",
+        "docs/audits/build-speed-tools/scan.py"
+      ]
+    },
+    "docs/audits/build-speed.md": {
+      "present": true,
+      "files": [
+        "docs/audits/build-speed.md"
+      ]
+    },
+    "scripts/build-measure.py": {
+      "present": true,
+      "files": [
+        "scripts/build-measure.py"
+      ]
+    },
+    "scripts/build-measure-report.py": {
+      "present": true,
+      "files": [
+        "scripts/build-measure-report.py"
+      ]
+    },
+    "scripts/differential": {
+      "present": false,
+      "files": []
+    },
+    "scripts/bench": {
+      "present": false,
+      "files": []
+    }
+  },
+  "policy": "reuse historical timing sample; no project build or Lean elaboration"
+}

@@ -113,6 +113,7 @@ else
     run_gate trust bash scripts/check-trust.sh
     run_gate orphans node scripts/check-orphans.mjs
     run_gate roots bash scripts/coord-tools/register.sh --check
+    run_gate p16-generated python3 -B scripts/h62/item1/p16-generator/check.py
     run_gate fragments bash scripts/coord-tools/fragments.sh --check
     run_gate doc-paths bash scripts/check-doc-paths.sh
     run_gate axiom-pins node scripts/check-axiom-pins.mjs

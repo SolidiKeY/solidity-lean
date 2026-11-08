@@ -44,9 +44,7 @@ theorem source_done (b c : Scalar.Word) :
     show (1 : Fin 6).val = 1 from rfl,Nat.reduceLT,Nat.reduceSub,dite_true,dite_false]
   simp only [literal_dirty]
   rfl
- have ran := reference.source #v[b,c]
- rw [same] at ran
- exact ran
+ simpa only [same] using reference.source #v[b,c]
 
 theorem target_done (b c : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) :
  Evm.run artifact.code {m with stack := coreWord b::coreWord c::caller} =
@@ -98,9 +96,7 @@ theorem last_source (b : Scalar.Word) :
     Vector.getElem_append,Vector.getElem_singleton,Vector.getElem_replicate
     ]
   rfl
- have ran := lastReference.source #v[b]
- rw [same] at ran
- exact ran
+ simpa only [same] using lastReference.source #v[b]
 
 theorem last_target (b : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) :
  Evm.run lastArtifact.code {m with stack := coreWord b::caller} =

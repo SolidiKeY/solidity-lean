@@ -22,7 +22,7 @@ theorem source_run {E : Source.Env} {srcΓ : Source.RCtx}
     (Source.execS G F (fuel+6) nps ph (R := R) (M := M)
       (.doWhile (l := l) (u := u) (body i a) condition) ls).run (.nil,st) =
       (.ok (Source.Out.normal (ls.set i (.bool choice))),(.nil,st)) := by
-  have hr : Source.evalE G F (fuel+2) (.assign (.local i) (.local a)) (plan := none) (ls,st) =
+  have hr : Source.evalE G F (fuel+2) (.assign (.local i) (.local a)) (plan := none) (calldataKnown := true) (ls,st) =
       (.ok (.val (.bool choice)),(ls.set i (.bool choice),st)) :=
     source_assign_local_run G F fuel (ls,st) i a (.bool choice) read
   have sub : (Source.EM.sub ls (Source.evalE G F (fuel+2)

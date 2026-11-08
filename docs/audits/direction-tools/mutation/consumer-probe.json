@@ -1,0 +1,91 @@
+{
+  "base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+  "baseline": {
+    "command": [
+      "prlimit",
+      "--as=12884901888",
+      "--",
+      "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+      "-j1",
+      "-M11000",
+      "--tstack=131072",
+      "--root=/workspace/da-mutation-consumer-evidence",
+      "-o",
+      "/workspace/da-mutation-consumer-evidence/Attempt9_ConsumerBaseline.olean",
+      "/workspace/da-mutation-consumer-evidence/Attempt9_ConsumerBaseline.lean"
+    ],
+    "log": "/workspace/da-mutation-consumer-evidence/Attempt9_ConsumerBaseline.log",
+    "name": "ConsumerBaseline",
+    "output": "",
+    "returncode": 0,
+    "source_path": "/workspace/da-mutation-consumer-evidence/Attempt9_ConsumerBaseline.lean",
+    "source_sha256": "c475887fafd9e320f7147a752ec236e16376142a0e5478a4bce50007fc617bf3"
+  },
+  "boundary": "Exact existing underflowChecked declaration and its local instance/scoped-notation context appended to exact full BASE Closers source; no new theorem statement or premise. Only this consumer proof-script coupling is checked; no claim its final statement became false, no project-wide score, and no fresh differential run.",
+  "cache_receipt_sha256": "1ca49ed735a4f2378c37af71bc5ef9e33f5e76e931c94c4f790685db5f9cbd34",
+  "effective_lean_path": "/workspace/coordinator-inputs/qlean-cache-20261108/extracted/lib",
+  "keysort": {
+    "command": [
+      "prlimit",
+      "--as=12884901888",
+      "--",
+      "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+      "-j1",
+      "-M11000",
+      "--tstack=131072",
+      "--root=/workspace/da-mutation-lean-evidence",
+      "-o",
+      "/workspace/da-mutation-lean-evidence/KeySort.olean",
+      "/workspace/da-mutation-lean-evidence/KeySort.lean"
+    ],
+    "log": "/workspace/da-mutation-lean-evidence/KeySort.log",
+    "name": "KeySort",
+    "output": "",
+    "returncode": 0,
+    "source_sha256": "d47ce39b0149d9701ac32ac36a72b535200ba1a25e59571203a1f4fa6be9f3b0"
+  },
+  "limitation": "no systemd scope on the cloud VM (H232)",
+  "mutant": {
+    "command": [
+      "prlimit",
+      "--as=12884901888",
+      "--",
+      "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+      "-j1",
+      "-M11000",
+      "--tstack=131072",
+      "--root=/workspace/da-mutation-consumer-evidence",
+      "-o",
+      "/workspace/da-mutation-consumer-evidence/Attempt10_ConsumerM31.olean",
+      "/workspace/da-mutation-consumer-evidence/Attempt10_ConsumerM31.lean"
+    ],
+    "log": "/workspace/da-mutation-consumer-evidence/Attempt10_ConsumerM31.log",
+    "name": "ConsumerM31",
+    "output": "/workspace/da-mutation-consumer-evidence/Attempt10_ConsumerM31.lean:244:64: error: Tactic `decide` proved that the proposition\n  (Prog.runFrames (State.init StandardExample)\n        (Prog.cons (Stmt.declLocal PrimTy.uint (Var.user \"x\") (some (Val.simple (Simple.lit 0 \u22ef))))\n          (Prog.cons\n            (Stmt.assert (Val.binop BinOp.le \u22ef \u22ef (Val.simple (Simple.lit 1 \u22ef)) (Val.simple (Simple.local Idx.here))))\n            (Prog.cons (Stmt.opAssign BinOp.sub \u22ef \u22ef (OpLoc.local Idx.here) (Val.simple (Simple.lit 1 \u22ef))) Prog.nil)))\n        Frames.nil).isPanic =\n    true\nis false\n",
+    "returncode": 1,
+    "source_path": "/workspace/da-mutation-consumer-evidence/Attempt10_ConsumerM31.lean",
+    "source_sha256": "91d20d4293027e63682fee32b3b0c9522c730c954a7d2e2b3752c73ed61947cc"
+  },
+  "outcome": "existing-consumer-proof-failed",
+  "policy_commit": "1d35d15f5e585bee177aa841e28638f16d9a44f0",
+  "source_bindings": [
+    {
+      "end": "/-! ## 1",
+      "line": 24,
+      "path": "Solidity/Examples/Tactics/CheckedBlock.lean",
+      "sha256": "1ea08ed454fddfa9d9364071cecc6bace3b1ae5619c09db8e43f63d0b940f62f",
+      "start": "namespace Solidity.Examples.Tactics.CheckedBlock"
+    },
+    {
+      "end": "/-! What the block writes",
+      "line": 38,
+      "path": "Solidity/Examples/Tactics/CheckedBlock.lean",
+      "sha256": "ef9b70a3deda059d5579cb963a596a0f7bbe69e65fd00696e365bf3ee382e5f5",
+      "start": "theorem underflowChecked"
+    }
+  ],
+  "total_elaborations": 10,
+  "versions": {
+    "lean": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)"
+  }
+}

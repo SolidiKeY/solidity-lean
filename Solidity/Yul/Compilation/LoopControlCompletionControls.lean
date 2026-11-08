@@ -33,9 +33,11 @@ theorem reflected (locals : Vector Scalar.Word 2) (m final : Evm.Machine)
 theorem pending_refused (locals : Vector Scalar.Word 2) (m final : Evm.Machine)
  (caller : List Evm.Word) (skip : Nat) :
  Evm.run artifact.code {m with stack := locals.toList.map coreWord++caller} ≠ .ok final (skip+1) := by
- intro ran
- obtain ⟨horizon,out,source,zero,frame⟩ := reflected locals m final caller (skip+1) ran
- omega
+ exact CompletionControls.pending_refused (code := artifact.code)
+   (initial := {m with stack := locals.toList.map coreWord++caller})
+   (fun actual pending ran => by
+     obtain ⟨_,_,_,done,_⟩ := reflected locals m actual caller pending ran
+     exact done) final skip
 
 #guard (evalStmt 0 .nil True.intro source artifact.compiled.profile (sourceLocals #v[99,dirty])).isNone
 #guard (LoopControlCompilation.lower 0 source 0).isNone
