@@ -221,9 +221,9 @@ theorem captureTwice_checked {H : HTy} {R : RefTy} {E : Ty} (hp : Heap H)
     (by simpa only [captureOverwrite_all_len] using hu)
     (by simpa only [captureOverwrite_all_len] using he)
 
-/-- info: 'Solidity.Backend.MemoryOps.captureTwice_frame' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.captureTwice_frame' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms captureTwice_frame
-/-- info: 'Solidity.Backend.MemoryOps.captureTwice_checked' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.captureTwice_checked' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms captureTwice_checked
 
 /-- info: 'Solidity.Backend.MemoryOps.captureTwice_inside' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -236,7 +236,7 @@ theorem captureTwice_checked {H : HTy} {R : RefTy} {E : Ty} (hp : Heap H)
 #guard_msgs in #print axioms captureTwice_frozen
 /-- info: 'Solidity.Backend.MemoryOps.captureTwice_comm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms captureTwice_comm
-/-- info: 'Solidity.Backend.MemoryOps.checkedCaptureSequence_some_iff' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedCaptureSequence_some_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedCaptureSequence_some_iff
 /-- info: 'Solidity.Backend.MemoryOps.checkedCaptureSequence_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedCaptureSequence_none_iff
