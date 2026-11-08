@@ -42,7 +42,7 @@ def main():
         def interrupt_after_save(path,data):
             original_write(path,data)
             raise InterruptedAfterCheckpoint()
-        with mock.patch.object(mod,'HERE',fixture), mock.patch.object(mod,'capture_environment',return_value={'swap_total_kib':0,'metadata_scope':'test fixture'}), mock.patch.object(mod.subprocess,'check_output',side_effect=fake_output), mock.patch.object(mod,'command',side_effect=fake_command), mock.patch.object(mod,'atomic_write_json',side_effect=interrupt_after_save), mock.patch.object(mod,'CLOUD_VM_OPT_IN',False), mock.patch.object(sys,'argv',['measure.py','--cloud-vm','--repo',str(source),'--work',str(output)]):
+        with mock.patch.object(mod,'HERE',fixture), mock.patch.object(mod,'capture_environment',return_value={'swap_total_kib':0,'metadata_scope':'test fixture'}), mock.patch.object(mod.subprocess,'check_output',side_effect=fake_output), mock.patch.object(mod,'command',side_effect=fake_command), mock.patch.object(mod,'atomic_write_json',side_effect=interrupt_after_save), mock.patch.object(mod,'CLOUD_VM_OPT_IN',False), mock.patch.object(sys,'argv',['measure.py','--cloud-vm','--repo',str(source),'--work',str(output),'--only','A.lean']):
             try: mod.main()
             except InterruptedAfterCheckpoint: pass
             else: raise AssertionError('interruption fixture did not run')

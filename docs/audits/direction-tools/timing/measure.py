@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Serial measured sample, dependency cache only (never build cold imports).
 Run from repository root with Lean/Lake/elan on PATH:
-python3 docs/audits/direction-tools/timing/measure.py --repo /absolute/clean/checkout --work /absolute/external/dir [--profiles] --cloud-vm
+python3 docs/audits/direction-tools/timing/measure.py --repo /absolute/clean/checkout --work /absolute/external/dir [--profiles] [--only PATH] --cloud-vm
+Use a fresh --work directory to retime a path; saved observations are reused.
 Cloud execution under H232 requires explicit --cloud-vm. Host execution is unsupported;
 use the repository host scope/12 GiB reserve policy there. No relaxed defaults.
 External logs contain full profiler output; small result JSON is in --work.
@@ -65,7 +66,7 @@ def command(args,cwd,log,timeout=600):
     return {'command':args,'cwd':str(cwd),'exit_code':code,'wall_seconds':time.monotonic()-start,'peak_sampled_group_rss_kib':peak,'peak_sampled_lean_workers':peak_workers,'stop_reason':reason,'log':str(log)}
 def main():
     global ROOT, CLOUD_VM_OPT_IN
-    ap=argparse.ArgumentParser(); ap.add_argument('--cloud-vm',action='store_true',help='explicit opt-in to H232 cloud VM isolation; unsupported on hosts'); ap.add_argument('--profiles',action='store_true'); ap.add_argument('--repo',type=pathlib.Path,required=True); ap.add_argument('--work',type=pathlib.Path,required=True); args=ap.parse_args(); ROOT=args.repo.resolve()
+    ap=argparse.ArgumentParser(); ap.add_argument('--cloud-vm',action='store_true',help='explicit opt-in to H232 cloud VM isolation; unsupported on hosts'); ap.add_argument('--profiles',action='store_true'); ap.add_argument('--only',action='append',default=[],help='measure only these exact planned paths; preserve all saved rows'); ap.add_argument('--repo',type=pathlib.Path,required=True); ap.add_argument('--work',type=pathlib.Path,required=True); args=ap.parse_args(); ROOT=args.repo.resolve()
     if not args.cloud_vm: ap.error('execution requires explicit --cloud-vm under H232; host execution unsupported')
     CLOUD_VM_OPT_IN=True
     args.work.mkdir(parents=True,exist_ok=True)
@@ -75,6 +76,7 @@ def main():
     assert not subprocess.check_output(['git','-C',str(ROOT),'status','--porcelain','--untracked-files=no'],text=True).strip(), 'dirty measured source'
     data=json.loads((HERE/'inventory.json').read_text())
     assert len({r['path'] for r in data['sample_plan']})==len(data['sample_plan']), 'duplicate plan paths'
+    if set(args.only)-{r['path'] for r in data['sample_plan']}: ap.error('--only path is not in the committed plan')
     saved=args.work/'sample-results.json'
     saved_rows=json.loads(saved.read_text())['samples'] if saved.exists() else []
     previous={r['path']:r for r in saved_rows}
@@ -93,6 +95,7 @@ def main():
     key=command(['lake','env','lean','-j1','Solidity/KeySort.lean'],ROOT,args.work/'KeySort.log')
     if key['exit_code']: raise SystemExit('KeySort failed: '+key['log'])
     for i,row in enumerate(data['sample_plan']):
+        if args.only and row['path'] not in args.only: continue
         p=row['path']; bridge=p.startswith('Bridge/'); cwd=ROOT/'Bridge' if bridge else ROOT
         file=p.removeprefix('Bridge/') if bridge else p
         module=file.removesuffix('.lean').replace('/','.')
