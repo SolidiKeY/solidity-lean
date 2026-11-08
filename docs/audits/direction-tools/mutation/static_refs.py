@@ -69,6 +69,7 @@ def augment(lean,specs):
         refs[symbol]=found
     # Stronger candidates found outside the initially searched example directory.
     overrides={
+      "M31":("Solidity/Examples/Tactics/CheckedBlock.lean","theorem underflowChecked","underflowChecked: positive panic-recognition premise in existing consumer proof"),
       "M17":("Solidity/Optimizer/Simplify.lean","theorem lt_self","lt_self: equal operands must produce false"),
       "M18":("Solidity/Optimizer/Simplify.lean","theorem gt_self","gt_self: equal operands must produce false"),
       "M19":("Solidity/Optimizer/Simplify.lean","theorem le_self","le_self: equal operands must produce true"),
@@ -82,7 +83,7 @@ def augment(lean,specs):
         if m["id"] in overrides:
             path,anchor,name=overrides[m["id"]];source=lean[path]
             assert source.count(anchor)==1
-            m["expected_failing_candidate"]={"path":path,"line":source[:source.index(anchor)].count("\n")+1,"name":name,"status":"strong source-level candidate; elaboration not run","source_sha256":hashlib.sha256(source.encode()).hexdigest()}
+            m["expected_failing_candidate"]={"path":path,"line":source[:source.index(anchor)].count("\n")+1,"name":name,"status":"source-level candidate; consult bounded results for execution scope and status","source_sha256":hashlib.sha256(source.encode()).hexdigest()}
         if m["id"]=="M29":
             path="Solidity/Lowering/V07/WordCastControls.lean";anchor="checkU p Semantics.intBound (-Semantics.intBound)"
             assert lean[path].count(anchor)==1

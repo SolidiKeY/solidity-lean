@@ -4727,7 +4727,7 @@
       "name": "lt_self: equal operands must produce false",
       "path": "Solidity/Optimizer/Simplify.lean",
       "source_sha256": "00f394102c032397fbf00b53603dfddb846019c197b09fc689035a7e85e2bbce",
-      "status": "strong source-level candidate; elaboration not run"
+      "status": "source-level candidate; consult bounded results for execution scope and status"
     },
     "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
     "explicit_code_mention_count": 151,
@@ -5023,7 +5023,7 @@
       "name": "gt_self: equal operands must produce false",
       "path": "Solidity/Optimizer/Simplify.lean",
       "source_sha256": "00f394102c032397fbf00b53603dfddb846019c197b09fc689035a7e85e2bbce",
-      "status": "strong source-level candidate; elaboration not run"
+      "status": "source-level candidate; consult bounded results for execution scope and status"
     },
     "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
     "explicit_code_mention_count": 151,
@@ -5319,7 +5319,7 @@
       "name": "le_self: equal operands must produce true",
       "path": "Solidity/Optimizer/Simplify.lean",
       "source_sha256": "00f394102c032397fbf00b53603dfddb846019c197b09fc689035a7e85e2bbce",
-      "status": "strong source-level candidate; elaboration not run"
+      "status": "source-level candidate; consult bounded results for execution scope and status"
     },
     "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
     "explicit_code_mention_count": 151,
@@ -5615,7 +5615,7 @@
       "name": "ge_self: equal operands must produce true",
       "path": "Solidity/Optimizer/Simplify.lean",
       "source_sha256": "00f394102c032397fbf00b53603dfddb846019c197b09fc689035a7e85e2bbce",
-      "status": "strong source-level candidate; elaboration not run"
+      "status": "source-level candidate; consult bounded results for execution scope and status"
     },
     "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
     "explicit_code_mention_count": 151,
@@ -5911,7 +5911,7 @@
       "name": "and_true_l: choose a false right operand",
       "path": "Solidity/Optimizer/Simplify.lean",
       "source_sha256": "00f394102c032397fbf00b53603dfddb846019c197b09fc689035a7e85e2bbce",
-      "status": "strong source-level candidate; elaboration not run"
+      "status": "source-level candidate; consult bounded results for execution scope and status"
     },
     "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
     "explicit_code_mention_count": 27,
@@ -6180,7 +6180,7 @@
       "name": "or_false_l: choose a true right operand",
       "path": "Solidity/Optimizer/Simplify.lean",
       "source_sha256": "00f394102c032397fbf00b53603dfddb846019c197b09fc689035a7e85e2bbce",
-      "status": "strong source-level candidate; elaboration not run"
+      "status": "source-level candidate; consult bounded results for execution scope and status"
     },
     "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
     "explicit_code_mention_count": 27,
@@ -7421,7 +7421,7 @@
       "name": "bool_not_init_model: pushed value is explicitly inverse of old operand",
       "path": "Solidity/Source/Agreement/BoolSlotNot.lean",
       "source_sha256": "695a82a3aa93d206c9186b495088289ba0bca9c625f0e6dcf08150d24a361d7e",
-      "status": "strong source-level candidate; elaboration not run"
+      "status": "source-level candidate; consult bounded results for execution scope and status"
     },
     "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
     "explicit_code_mention_count": 55,
@@ -8019,7 +8019,7 @@
       "name": "to_int_eval: all admitted uint256 values, including 2^255",
       "path": "Solidity/Lowering/V07/WordCasts.lean",
       "source_sha256": "e78af9e401850b8aae5990425c9fa748fc15ead100ecf54337894a99b791b5e5",
-      "status": "strong source-level candidate; elaboration not run"
+      "status": "source-level candidate; consult bounded results for execution scope and status"
     },
     "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
     "explicit_code_mention_count": 55,
@@ -8315,7 +8315,7 @@
       "name": "to_uint_eval: source wrapping cast fixes the returned word",
       "path": "Solidity/Lowering/V07/WordCasts.lean",
       "source_sha256": "e78af9e401850b8aae5990425c9fa748fc15ead100ecf54337894a99b791b5e5",
-      "status": "strong source-level candidate; elaboration not run"
+      "status": "source-level candidate; consult bounded results for execution scope and status"
     },
     "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
     "explicit_code_mention_count": 55,
@@ -8607,10 +8607,11 @@
     "definition": "TRes.isPanic",
     "expected_constraint": "Modality.afterRunTR_not_panic may become vacuous; require boundary example, not merely successful elaboration",
     "expected_failing_candidate": {
-      "line": 218,
-      "name": "Modality.afterRunTR_not_panic",
-      "path": "Solidity/Calculus/Closers.lean",
-      "status": "unvalidated; M31 may make premise vacuous rather than fail"
+      "line": 38,
+      "name": "underflowChecked: positive panic-recognition premise in existing consumer proof",
+      "path": "Solidity/Examples/Tactics/CheckedBlock.lean",
+      "source_sha256": "9fb4e3f1328f258151113e3ee7e7fdb69fb9646e2250a8270f49187dabd6b8a0",
+      "status": "source-level candidate; consult bounded results for execution scope and status"
     },
     "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
     "explicit_code_mention_count": 0,
@@ -8633,7 +8634,7 @@
       "line": 225,
       "name": "Modality.afterRunTR_diamond_fail",
       "path": "Solidity/Calculus/Closers.lean",
-      "status": "unvalidated; M31 may make premise vacuous rather than fail"
+      "status": "static candidate; consult bounded results for executed module/caller outcomes"
     },
     "explicit_code_boundary": "Comments, ordinary/raw strings and character literals removed; Interpolated strings with quoted expressions are not structurally parsed and may leak apparent references; counts are approximate. Explicit qualified spellings only. Local bare names, aliases, imports and transitive uses are missed; qualified-name collisions are still possible. Not proof dependency or mutant-kill evidence.",
     "explicit_code_mention_count": 0,
