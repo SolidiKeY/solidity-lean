@@ -57,14 +57,14 @@ theorem uint_payable_all_values (value : Fin W) :
     run (uWhole true).code (machine (input 255) value)=.ok (uDone (input 255) value) 0 := by
   have full : ¬(wmod (input 255).size).val<36 := by decide
   have valid : (Solidity.AbiEntry.Kind.uint 8).valid (rawArgumentWord (input 255)).val=true := by decide
-  rw [uActual,Bool.true_or,if_pos (rfl : true=true),if_neg full,if_pos valid]
+  rw [uActual,Bool.true_or,ite_eq_left (rfl : true=true),ite_eq_right full,ite_eq_left valid]
   rfl
 
 theorem bool_payable_all_values (value : Fin W) :
     run (bWhole true).code (machine (input 1) value)=.ok (bDone (input 1) value (wmod 11)) 0 := by
   have full : ¬(wmod (input 1).size).val<36 := by decide
   have valid : Solidity.AbiEntry.Kind.bool.valid (rawArgumentWord (input 1)).val=true := by decide
-  rw [bActual,Bool.true_or,if_pos (rfl : true=true),if_neg full,if_pos valid]
+  rw [bActual,Bool.true_or,ite_eq_left (rfl : true=true),ite_eq_right full,ite_eq_left valid]
   rfl
 
 theorem zero_nonpayable :
@@ -75,12 +75,12 @@ theorem zero_nonpayable :
         if false || decide ((wmod 0).val=0) then run uBack.code (uBound (input 255) (wmod 0)) else .revert := by
       have full : ¬(wmod (input 255).size).val<36 := by decide
       have valid : (Solidity.AbiEntry.Kind.uint 8).valid (rawArgumentWord (input 255)).val=true := by decide
-      simpa only [if_neg full,if_pos valid] using uActual false (input 255) (wmod 0)
+      simpa only [ite_eq_right full,ite_eq_left valid] using uActual false (input 255) (wmod 0)
     rw [actual]
     rfl
   · have full : ¬(wmod (input 0).size).val<36 := by decide
     have valid : Solidity.AbiEntry.Kind.bool.valid (rawArgumentWord (input 0)).val=true := by decide
-    rw [bActual,if_neg full,if_pos valid]
+    rw [bActual,ite_eq_right full,ite_eq_left valid]
     rfl
 
 theorem value_before_any_local (value : Fin W) (nonzero : value.val≠0) :
@@ -104,11 +104,11 @@ theorem zero_value_still_validates :
   constructor
   · have full : ¬(wmod dirtyUint.size).val<36 := by decide
     have invalid : ¬(Solidity.AbiEntry.Kind.uint 8).valid (rawArgumentWord dirtyUint).val=true := by decide
-    rw [uActual,if_neg full,if_neg invalid]
+    rw [uActual,ite_eq_right full,ite_eq_right invalid]
     rfl
   · have full : ¬(wmod (input 2).size).val<36 := by decide
     have invalid : ¬Solidity.AbiEntry.Kind.bool.valid (rawArgumentWord (input 2)).val=true := by decide
-    rw [bActual,if_neg full,if_neg invalid]
+    rw [bActual,ite_eq_right full,ite_eq_right invalid]
     rfl
 
 theorem uint_raw_body (fuel : Nat) :
@@ -152,7 +152,7 @@ theorem body_rejection_preserved (fuel : Nat) :
   · have allowed : (false || decide ((wmod 0).val=0))=true := by decide
     have full : ¬(wmod (input 255).size).val<36 := by decide
     have valid : (Solidity.AbiEntry.Kind.uint 8).valid (rawArgumentWord (input 255)).val=true := by decide
-    rw [ordered,if_pos allowed,if_neg full,if_pos valid]
+    rw [ordered,ite_eq_left allowed,ite_eq_right full,ite_eq_left valid]
     rfl
   · exact ⟨_,SingleWordGate.entry_success (input 255) fuel (.uint 8) (by decide) (by decide)⟩
 
