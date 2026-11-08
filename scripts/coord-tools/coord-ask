@@ -131,8 +131,8 @@ def main():
             sys.exit(f"coord-ask: HEAD moved during the pre-push check (checked {pre['head'][:12]}); nothing was reported. "
                      'Run --done again for the new head.')
         rhead = (json.loads(body).get('head') or '') if a.result else ''
-        if pre.get('head') and rhead and rhead != pre['head']:
-            sys.exit(f"coord-ask: the result's head {rhead[:12]} is not the checked head {pre['head'][:12]}; nothing was reported. "
+        if pre.get('head') and a.result and rhead != pre['head']:
+            sys.exit(f"coord-ask: the result's head {rhead[:12] or '(missing)'} is not the checked head {pre['head'][:12]}; nothing was reported. "
                      'Report the head you checked (git rev-parse HEAD) in the result.')
         if pre['state'] == 'skipped': print(f"coord-ask: pre-push check skipped: {pre['detail']}", file=sys.stderr)
     else:
