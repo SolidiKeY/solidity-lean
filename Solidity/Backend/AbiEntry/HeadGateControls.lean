@@ -29,10 +29,10 @@ private theorem actual (parameters : List Solidity.AbiEntry.Param) (size : Fin W
 
 private theorem reject (parameters : List Solidity.AbiEntry.Param) (size : Fin W)
     (short : size.val<HeadCheck.need parameters) : run (compiled parameters).code (machine size)=.revert := by
-  simpa only [headGateOutcome,if_pos short] using actual parameters size
+  simpa only [headGateOutcome,ite_eq_left short] using actual parameters size
 private theorem accept (parameters : List Solidity.AbiEntry.Param) (size : Fin W)
     (full : ¬size.val<HeadCheck.need parameters) : run (compiled parameters).code (machine size)=.ok (written size) 0 := by
-  simpa only [headGateOutcome,if_neg full] using actual parameters size
+  simpa only [written,headGateOutcome,ite_eq_right full] using actual parameters size
 
 theorem empty_boundary :
     run (compiled []).code (machine (wmod 3))=.revert ∧
