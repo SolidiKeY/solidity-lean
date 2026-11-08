@@ -137,20 +137,20 @@ theorem checkedCaptureOverwrite_keeps {H H' : HTy} {R Q : RefTy} {E : Ty}
   intro T t
   exact captureOverwrite_keeps e hk src sa dst da start stop offset hs hd t
 
-/-- info: 'Solidity.Backend.MemoryOps.captureOverwrite_keeps' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.captureOverwrite_keeps' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms captureOverwrite_keeps
-/-- info: 'Solidity.Backend.MemoryOps.checkedCaptureOverwrite_keeps' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedCaptureOverwrite_keeps' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedCaptureOverwrite_keeps
 
 /-- info: 'Solidity.Backend.MemoryOps.checkedCaptureOverwrite_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedCaptureOverwrite_none_iff
-/-- info: 'Solidity.Backend.MemoryOps.checkedCaptureOverwrite_some_iff' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedCaptureOverwrite_some_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedCaptureOverwrite_some_iff
-/-- info: 'Solidity.Backend.MemoryOps.checkedCaptureOverwrite_read' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedCaptureOverwrite_read' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedCaptureOverwrite_read
-/-- info: 'Solidity.Backend.MemoryOps.checkedCaptureOverwrite_frame' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedCaptureOverwrite_frame' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedCaptureOverwrite_frame
-/-- info: 'Solidity.Backend.MemoryOps.checkedCaptureOverwrite_empty' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedCaptureOverwrite_empty' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedCaptureOverwrite_empty
 /-- info: 'Solidity.Backend.MemoryOps.checkedCaptureOverwrite_none_keeps' depends on axioms: [propext,
  Classical.choice,
