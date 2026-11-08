@@ -1,8 +1,6 @@
 import Solidity.Lowering.V07.P12ContextExtension
 
-/-! Execute an arbitrary effectful Boolean operand and store its captured value.
-The prefix remains scoped; caller writes, heap growth and halts are retained.
-This helper does not assert admitted-syntax coverage or a whole compiler pass. -/
+/-! Execute an arbitrary effectful Boolean operand and store its captured value. The prefix remains scoped; caller writes, heap growth and halts are retained. This helper does not assert admitted-syntax coverage or a whole compiler pass. -/
 namespace Solidity.Lowering.G17
 
 variable {C : Contract} {Γ : Ctx}
