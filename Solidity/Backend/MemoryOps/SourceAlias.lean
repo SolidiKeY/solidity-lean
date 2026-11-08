@@ -96,7 +96,7 @@ theorem source_local_alias_low_horizon {E : Source.Env} {Γ : Source.RCtx} {τ :
   | 1 => rfl
   | n+2 => omega
 
-/-- info: 'Solidity.Backend.MemoryOps.source_locals_get_set' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.MemoryOps.source_locals_get_set' depends on axioms: [propext] -/
 #guard_msgs in #print axioms source_locals_get_set
 /-- info: 'Solidity.Backend.MemoryOps.source_local_alias_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms source_local_alias_run
