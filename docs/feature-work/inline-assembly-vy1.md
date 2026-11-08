@@ -1521,6 +1521,16 @@ arbitrary assembly refusal. The import control shows why `Env` alone is
 insufficient; retain the original unit or equivalent header information.
 Membership bridges do not promise equality of old/new ordering or counts.
 
+`ExclusionFeatures.lean` supplements the subset using the existing `Syn.excl`.
+All six exclusion IDs match the catalog exactly; canonical-rethrow syntax keeps
+its existing exception. Retain and check the intrinsic rejection channel
+independently of catalog feature extraction. `syntaxExclusionUses` supplies
+actual typed sites, and reported flags also occur in `Syn.rejections`; no
+converse list/order equality is claimed. `syntaxFieldUses` shares whole-unit
+metadata traversal with the structural collector. The inherited Source syntax
+examples cover general assembly, mixed buffers, removed constructs and malformed
+modifiers; none is presented as operational admission evidence.
+
 ### P16 generated-file maintenance
 
 Run `python3 -B scripts/h62/item1/p16-generator/check.py` to verify the generated
