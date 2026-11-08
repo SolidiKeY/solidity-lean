@@ -26,7 +26,8 @@ theorem empty_receive (value : Fin W) :
     run (compiled (some recv) (some fb)).code (machine (wmod 0) value)=
       .ok (written (wmod 0) value recv.1) 0 := by
   have reached := actual (some recv) (some fb) (wmod 0) value
-  simpa only [specialOutcome,specialResult,specialRowOutcome,recv,Bool.true_or,if_true] using reached
+  have empty : (wmod 0).val=0 := rfl
+  simpa only [written,Bool.false_eq_true,specialOutcome,specialResult,ite_eq_left empty,Option.orElse_some,specialRowOutcome,recv,Bool.true_or,ite_true] using reached
 
 theorem absent_receive_fallback_zero :
     run (compiled none (some fb)).code (machine (wmod 0) (wmod 0))=
@@ -38,31 +39,31 @@ theorem nonempty_fallback_reject (size value : Fin W) (nonempty : size.val≠0) 
     run (compiled (some recv) (some fb)).code (machine size value)=.revert := by
   have reached := actual (some recv) (some fb) size value
   have observed : (machine size value).callvalue.val≠0 := nonzero
-  simpa only [specialOutcome,specialResult,if_neg nonempty,specialRowOutcome,fb,Bool.false_or,
-    decide_eq_false observed,if_false] using reached
+  simpa only [written,Bool.false_eq_true,specialOutcome,specialResult,ite_eq_right nonempty,specialRowOutcome,fb,Bool.false_or,
+    decide_eq_false observed,ite_false] using reached
 
 theorem absent_receive_reject (value : Fin W) (nonzero : value.val≠0) :
     run (compiled none (some fb)).code (machine (wmod 0) value)=.revert := by
   have reached := actual none (some fb) (wmod 0) value
   have empty : (wmod 0).val=0 := rfl
   have observed : (machine (wmod 0) value).callvalue.val≠0 := nonzero
-  simpa only [specialOutcome,specialResult,if_pos empty,Option.orElse_none,specialRowOutcome,fb,
-    Bool.false_or,decide_eq_false observed,if_false] using reached
+  simpa only [written,Bool.false_eq_true,specialOutcome,specialResult,ite_eq_left empty,Option.orElse_none,specialRowOutcome,fb,
+    Bool.false_or,decide_eq_false observed,ite_false] using reached
 
 theorem no_special (size value : Fin W) :
     run (compiled none none).code (machine size value)=.revert := by
   have reached := actual none none size value
   by_cases empty : size.val=0
-  · simpa only [specialOutcome,specialResult,if_pos empty,Option.orElse_none,specialRowOutcome] using reached
-  · simpa only [specialOutcome,specialResult,if_neg empty,specialRowOutcome] using reached
+  · simpa only [written,Bool.false_eq_true,specialOutcome,specialResult,ite_eq_left empty,Option.orElse_none,specialRowOutcome] using reached
+  · simpa only [written,Bool.false_eq_true,specialOutcome,specialResult,ite_eq_right empty,specialRowOutcome] using reached
 
 theorem payable_fallback (size value : Fin W) :
     run (compiled none (some (wmod 22,true))).code (machine size value)=
       .ok (written size value (wmod 22)) 0 := by
   have reached := actual none (some (wmod 22,true)) size value
   by_cases empty : size.val=0
-  · simpa only [specialOutcome,specialResult,if_pos empty,Option.orElse_none,specialRowOutcome,Bool.true_or,if_true] using reached
-  · simpa only [specialOutcome,specialResult,if_neg empty,specialRowOutcome,Bool.true_or,if_true] using reached
+  · simpa only [written,Bool.false_eq_true,specialOutcome,specialResult,ite_eq_left empty,Option.orElse_none,specialRowOutcome,Bool.true_or,ite_true] using reached
+  · simpa only [written,Bool.false_eq_true,specialOutcome,specialResult,ite_eq_right empty,specialRowOutcome,Bool.true_or,ite_true] using reached
 
 private def receiveDecl : Source.Decl :=
   {kind := .receive,name := "",scope := some "C",top := false,
