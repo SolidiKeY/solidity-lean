@@ -2258,3 +2258,15 @@ was not applied. The direct Q-MENU-RECOVERY-PREDECESSOR-01 answer keeps strict
 predecessor admission and recovery blocked. No failed-predecessor alternative
 was implemented. Injected positive/negative controls establish harness behavior
 only, not native recovery, screenshots, raster correspondence or parity.
+
+
+For source-only launch-argument observations, run
+`node vscode/parity/lifecycle-trace.cjs --launch-arguments NEW_OUTPUT.json`.
+This requires the pinned extension checkout and its TypeScript dependency; it
+executes the original client builder with injected configuration and installer
+boundaries. It never starts a server or loads a plugin. Explicit bounded fixture
+settings are not observations of native defaults, and malformed plugin inputs
+exercise the builder only. The compiler must be absent from the module cache;
+its exact recorded file and the schema bytes are verified before use. Native
+configuration/restart, plugin loading, ghost decorations, local correspondence
+and both independent row judgments remain separate unfinished obligations.
