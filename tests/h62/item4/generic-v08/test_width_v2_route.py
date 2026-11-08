@@ -51,6 +51,9 @@ class Route(unittest.TestCase):
     def test_commands_enforce_existing_bounds(self):
         cmd = v2.bounded_command(Path('/pin/bin/lean'), Path('/offgit/record'), 17, ['x.lean'], lease_fd=3)
         self.assertIn('--aggregate', cmd)
+        self.assertNotIn('--cloud-vm-h232', cmd)
+        cloud = v2.bounded_command(Path('/pin/bin/lean'), Path('/offgit/record'), 17, ['x.lean'], lease_fd=3, cloud_vm_h232=True)
+        self.assertIn('--cloud-vm-h232', cloud)
         self.assertEqual(cmd[-3:], ['-j1', '--tstack=131072', 'x.lean'])
         self.assertIn('/pin/bin/lean', cmd)
         for seconds in (0, 301):
@@ -91,17 +94,20 @@ class Route(unittest.TestCase):
 
 class Refusal(unittest.TestCase):
     def exercise(self, swap=0, reserve=16*1024**3, rows=None, seconds=300,
-                 measurement_error=None, aggregate=True, finished=False, interrupt_signal=False, owned_status_error=None, scope_max=None):
+                 measurement_error=None, aggregate=True, finished=False, interrupt_signal=False, owned_status_error=None, scope_max=None, cloud_vm_h232=True, migrate=False):
         rows = rows or {}
+        membership_reads = 0
         original_read = Path.read_text
         original_glob = Path.glob
         original_iterdir = Path.iterdir
         def read(path, *args, **kwargs):
+            nonlocal membership_reads
             value = str(path)
             if value == '/proc/meminfo':
                 return f'MemAvailable: {reserve//1024} kB\nSwapTotal: {swap} kB\n'
             if value == '/proc/self/cgroup':
-                return '0::/\n'
+                membership_reads += 1
+                return '0::/moved\n' if migrate and membership_reads >= 3 else '0::/\n'
             if value == '/sys/fs/cgroup/memory.max':
                 return str(scope_max if scope_max is not None else (12 if aggregate else 16)*1024**3)
             if value in ('/sys/fs/cgroup/memory.swap.max','/sys/fs/cgroup/memory.swap.current'):
@@ -148,7 +154,7 @@ class Refusal(unittest.TestCase):
             proc = Mock(pid=321, returncode=0 if finished else -15)
             proc.poll.return_value = 0 if finished else None
             proc.wait.return_value = proc.returncode
-            with patch.object(sys, 'argv', ['bounded', '--record', str(record), '--seconds', str(seconds), *(['--aggregate'] if aggregate else []), '--', 'lean', '-j1', 'x.lean']), patch.object(Path, 'read_text', read), patch.object(Path, 'glob', glob), patch.object(Path, 'iterdir', iterdir), patch('os.kill', side_effect=liveness), patch('subprocess.Popen', return_value=proc) as spawn, patch('os.killpg', side_effect=ProcessLookupError if finished else None) as kill:
+            with patch.object(sys, 'argv', ['bounded', '--record', str(record), '--seconds', str(seconds), *(['--aggregate'] if aggregate else []), *(['--cloud-vm-h232'] if aggregate and cloud_vm_h232 else []), '--', 'lean', '-j1', 'x.lean']), patch.object(Path, 'read_text', read), patch.object(Path, 'glob', glob), patch.object(Path, 'iterdir', iterdir), patch('os.kill', side_effect=liveness), patch('subprocess.Popen', return_value=proc) as spawn, patch('os.killpg', side_effect=ProcessLookupError if finished else None) as kill:
                 with self.assertRaises(SystemExit):
                     runpy.run_path(str(SCRIPTS/'bounded.py'), run_name='__main__')
                 result = json.loads(record.read_text()) if record.exists() else None
@@ -166,6 +172,19 @@ class Refusal(unittest.TestCase):
             self.assertTrue(spawned)
             self.assertIsNone(result['stop'])
             self.assertFalse(result['hard_scope']['hard_scope'])
+
+    def test_default_host_still_requires_hard_scope(self):
+        for maximum in (16*1024**3, 'max'):
+            result, spawned, _ = self.exercise(scope_max=maximum, cloud_vm_h232=False)
+            self.assertIsNone(result)
+            self.assertFalse(spawned)
+
+    def test_cloud_membership_migration_fails_closed(self):
+        result, spawned, kills = self.exercise(migrate=True)
+        self.assertTrue(spawned)
+        self.assertEqual(result['stop'], 'monitor-error')
+        self.assertIn('left its verified', result['monitor_error'])
+        self.assertTrue(kills)
 
     def test_aggregate_stop_is_observable(self):
         row = f'Name: lean\nPPid: 1\nVmRSS: {12*1024**2+1} kB\n'

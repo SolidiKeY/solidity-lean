@@ -82,14 +82,14 @@ class Measurement(unittest.TestCase):
                 with self.assertRaises(MeasurementError):
                     process_usage(321, root, lambda _: True)
 
-    def test_missing_cgroup_reports_unvalidated_lifecycle(self):
+    def test_missing_observations_report_unvalidated_lifecycle(self):
         fixture = Ownership('test_monitor_sigkill_cannot_orphan_worker')
-        # Admission may read /review.scope/memory.max, not the cgroup root.
+        # Missing required observations must skip rather than claim cleanup validation.
         failure = Mock(side_effect=ScopeError('scope observation unavailable'))
         with patch.dict(Ownership.setUp.__globals__, require_scope=failure):
             with self.assertRaisesRegex(unittest.SkipTest, 'NOT VALIDATED'):
                 fixture.setUp()
-        failure.assert_called_once_with()
+        failure.assert_called_once_with(cloud_vm_h232=True)
 
     def test_valid_nested_scope_admission_is_not_skipped(self):
         fixture = Ownership('test_monitor_sigkill_cannot_orphan_worker')
@@ -98,7 +98,7 @@ class Measurement(unittest.TestCase):
         admitted = Mock(return_value=observation)
         with patch.dict(Ownership.setUp.__globals__, require_scope=admitted):
             self.assertIsNone(fixture.setUp())
-        admitted.assert_called_once_with()
+        admitted.assert_called_once_with(cloud_vm_h232=True)
 
 
 def running(pid):
@@ -122,7 +122,7 @@ def wait_for(predicate, seconds=10):
 class Ownership(unittest.TestCase):
     def setUp(self):
         try:
-            require_scope()
+            require_scope(cloud_vm_h232=True)
         except ScopeError as error:
             self.skipTest('required memory observations unavailable; lifecycle NOT VALIDATED: '+str(error))
 
@@ -177,7 +177,7 @@ module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
 with Path({str(lock)!r}).open('a') as owner:
     fcntl.flock(owner,fcntl.LOCK_EX)
     command=[sys.executable,'-B',{str(launcher)!r},'--record',{str(record)!r},'--seconds','15',
-        '--aggregate','--aggregate-parent','--parent-pid',str(os.getpid()),'--lease-fd',str(owner.fileno()),
+        '--cloud-vm-h232','--aggregate','--aggregate-parent','--parent-pid',str(os.getpid()),'--lease-fd',str(owner.fileno()),
         '--',{str(worker)!r},'-j1']
     try: result=module.run_monitor(command,pass_fds=(owner.fileno(),))
     except BaseException: raise SystemExit(1)

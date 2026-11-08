@@ -34,10 +34,14 @@ If required host-memory/no-swap observations are unavailable, those lifecycle te
 NOT VALIDATED/skipped; that is not successful cleanup evidence. The public
 checker itself still refuses unavailable resource observations.
 
+Only on the authorized cloud VM, explicitly add `--cloud-vm-h232` to select
+H232 admission. It is propagated explicitly to each monitor; absent that flag,
+the driver and monitor require the strict12GiB/no-swap hard scope. No ambient
+variable or ordinary-host fallback selects the cloud exception. Both modes
+record actual unified cgroup membership and fail on observed migration.
 H232 authorizes serial execution without a systemd scope: no systemd scope on
 the cloud VM (H232). The VM is the isolation; the host pre-gate separately
 enforces its16GiB/no-swap merge cap. Local checks retain one Lean process,
 12GiB address-space and sampled aggregate-RSS bounds, no swap, the existing
 host reserve and deadline. Local success does not certify the host pre-gate.
-The separate strict scope verifier remains regression-tested but is not cloud
-admission. Frozen v1 defaults remain unchanged.
+The separate strict scope verifier remains regression-tested and is the default admission route. Frozen v1 defaults remain unchanged.

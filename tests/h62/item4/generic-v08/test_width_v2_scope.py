@@ -95,17 +95,28 @@ class CloudAdmission(unittest.TestCase):
     def test_h232_no_systemd_or_cgroup_required(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
+            (root/'self').mkdir()
+            (root/'self/cgroup').write_text('0::/actual-vm\n')
             (root/'meminfo').write_text('MemAvailable: 18874368 kB\nSwapTotal: 0 kB\n')
-            observation = cloud_scope(root, root/'absent')
+            observation = cloud_scope(root, root/'absent', cloud_vm_h232=True)
             self.assertFalse(observation['hard_scope'])
+            self.assertEqual(observation['membership'], '/actual-vm')
             self.assertEqual(observation['limitation'], 'no systemd scope on the cloud VM (H232)')
 
+    def test_cloud_missing_membership_fails_closed(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            (root/'meminfo').write_text('MemAvailable: 18874368 kB\nSwapTotal: 0 kB\n')
+            with self.assertRaises(ScopeError): cloud_scope(root, cloud_vm_h232=True)
+
     def test_h232_measurement_and_swap_fail_closed(self):
-        for content in ('MemAvailable: 18874368 kB\nSwapTotal: 1 kB\n', 'bad'):
+        for content, message in (('MemAvailable: 18874368 kB\nSwapTotal: 1 kB\n', 'swap enabled'), ('bad', 'observation unavailable')):
             with tempfile.TemporaryDirectory() as folder:
                 root = Path(folder)
+                (root/'self').mkdir()
+                (root/'self/cgroup').write_text('0::/actual-vm\n')
                 (root/'meminfo').write_text(content)
-                with self.assertRaises(ScopeError): cloud_scope(root)
+                with self.assertRaisesRegex(ScopeError, message): cloud_scope(root, cloud_vm_h232=True)
 
 
 if __name__ == '__main__':

@@ -6,6 +6,7 @@ from width_scope import require_scope, ScopeError, HOST_RESERVE
 p=argparse.ArgumentParser(__doc__)
 p.add_argument('--record',type=pathlib.Path,required=True)
 p.add_argument('--seconds',type=int,default=300)
+p.add_argument('--cloud-vm-h232',action='store_true',help='Explicit H232 cloud-VM isolation; never infer it on ordinary hosts')
 p.add_argument('--aggregate',action='store_true',help='Also enforce aggregate12GiB RSS and one Lean process')
 p.add_argument('--aggregate-parent',action='store_true',help='Include the serial v2 driver RSS')
 p.add_argument('--parent-pid',type=int,help='Original v2 driver; never follow reparenting')
@@ -14,6 +15,7 @@ p.add_argument('command',nargs=argparse.REMAINDER)
 a=p.parse_args()
 cmd=a.command[1:] if a.command[:1]==['--'] else a.command
 if not cmd: p.error('command required')
+if a.cloud_vm_h232 and not a.aggregate: p.error('--cloud-vm-h232 requires --aggregate')
 if a.aggregate_parent and not a.aggregate: p.error('--aggregate-parent requires --aggregate')
 if a.aggregate_parent and (a.parent_pid is None or a.parent_pid <= 1):
     p.error('--aggregate-parent requires the original --parent-pid')
@@ -45,7 +47,7 @@ def preexec():
 
 def available():
     if a.aggregate:
-        return require_scope(check_reserve=False)["host_available_bytes"]
+        return require_scope(check_reserve=False, cloud_vm_h232=a.cloud_vm_h232)["host_available_bytes"]
     fields=dict(line.split(':',1) for line in pathlib.Path('/proc/meminfo').read_text().splitlines())
     host=int(fields['MemAvailable'].split()[0])*1024
     cap=pathlib.Path('/sys/fs/cgroup/memory.max').read_text().strip()
@@ -55,7 +57,7 @@ def available():
 scope_snapshot=None
 reserve_bytes=HOST_RESERVE if a.aggregate else 4*1024**3
 if a.aggregate:
-    try: scope_snapshot=require_scope()
+    try: scope_snapshot=require_scope(cloud_vm_h232=a.cloud_vm_h232)
     except ScopeError as error: raise SystemExit('BLOCKED: '+str(error))
 if available()<reserve_bytes: raise SystemExit('BLOCKED: required host reserve unavailable')
 if int(pathlib.Path('/proc/meminfo').read_text().split('SwapTotal:')[1].split()[0])!=0:
@@ -94,7 +96,7 @@ try:
         if time.monotonic()-start>a.seconds: stop='timeout'
         elif available()<reserve_bytes: stop='headroom'
         if a.aggregate:
-            current_scope=require_scope(check_reserve=False)
+            current_scope=require_scope(check_reserve=False, cloud_vm_h232=a.cloud_vm_h232)
             if current_scope['membership']!=scope_snapshot['membership']:
                 raise ScopeError('monitor left its verified hard scope')
             rss, lean_processes = process_usage(proc.pid)
@@ -168,7 +170,7 @@ if a.aggregate:
                   requested_seconds=a.seconds, polling_seconds=.25, termination_grace_seconds=5,
                   monitor_error=monitor_error, original_parent_pid=original_parent,
                   worker_parent_death_signal='SIGKILL', worker_lease_fd=a.lease_fd,
-                  hard_scope=scope_snapshot, memory_enforcement='H232 cloud VM isolation; RLIMIT_AS and sampled aggregate RSS; host pre-gate separately enforces 16GiB/no-swap',
+                  hard_scope=scope_snapshot, memory_enforcement=('explicit H232 cloud VM isolation; RLIMIT_AS and sampled aggregate RSS; host pre-gate separately enforces 16GiB/no-swap' if a.cloud_vm_h232 else 'kernel cgroup hard limit; sampled RSS is additional diagnostic/stop'),
                   aggregate_scope='Lean tree + monitor' + (' + serial v2 driver' if a.aggregate_parent else ''))
 a.record.write_text(json.dumps(record,indent=2)+'\n')
 print(json.dumps(record),flush=True)
