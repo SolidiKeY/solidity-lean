@@ -20,6 +20,7 @@
   },
   "historical_capture": {
     "archive_sha256": "0389822b7ea06dbe7068896e38aa3abbdfe7c56376d631061efefea0bfd6a881",
+    "audit_base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
     "captured_agreement": 1.0,
     "captured_comparisons": 320,
     "captured_halts": {
@@ -58,8 +59,8 @@
     "per_input_time_ratios": null,
     "producer_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
     "producer_manifest_files_checked": 29,
-    "producer_source_drift_boundary": "Only files enumerated by archived producer manifest; not all repository dependencies or reference environment",
-    "producer_sources_changed_vs_audit_checkout": [],
+    "producer_source_drift_boundary": "Only archived producer-manifest files compared to pinned audit BASE Git blobs; not live checkout, all dependencies, or reference environment",
+    "producer_sources_changed_vs_audit_base": [],
     "reference_environment_reproduction": "UNVERIFIABLE",
     "report_bindings_verified": 3,
     "scope": "Historical captured observation analysis only; no fresh execution, theorem validation, source runtime rebuild or full G52 qualification",
@@ -80,6 +81,11 @@
   "semantic_kills": null,
   "semantic_survivors": null,
   "sorry_added": 0,
+  "source_revision": {
+    "commit": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+    "read_method": "git archive of pinned commit; no live source reads",
+    "tree": "276a7b4573d6c7a26f4b81317c997365993bd596"
+  },
   "static_constraints": {
     "boundary": "Candidate existence and source spelling only; no Lean name resolution or elaboration",
     "lexical_limitations": "Interpolated strings with nested quoted expressions may leak apparent code references; neither tokenizer nor qualified-name search is Lean name resolution",

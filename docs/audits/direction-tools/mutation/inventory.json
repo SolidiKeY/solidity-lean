@@ -42,5 +42,10 @@
   "scripts/h62/item3/g52-differential": {
     "present": true,
     "tracked_files": 19
+  },
+  "source_revision": {
+    "commit": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+    "read_method": "git archive of pinned commit; no live source reads",
+    "tree": "276a7b4573d6c7a26f4b81317c997365993bd596"
   }
 }

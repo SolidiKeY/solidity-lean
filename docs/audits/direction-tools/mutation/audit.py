@@ -5,8 +5,8 @@ No Lean is executed. Scratch must be an owned disposable worktree at the pinned 
 import argparse, hashlib, json, re, subprocess, sys
 sys.dont_write_bytecode=True
 from static_refs import augment
+from base_tree import BASE, read_base_blobs
 from pathlib import Path
-BASE="d4ad633a9624263a59b14fd2c520b9bc602f88f3"
 ROOT=Path(__file__).resolve().parents[4]
 OUT=Path(__file__).resolve().parent
 
@@ -22,15 +22,21 @@ def main():
     ap=argparse.ArgumentParser();ap.add_argument("--scratch",type=Path);a=ap.parse_args()
     assert git("merge-base",BASE,"HEAD")==BASE
     tracked=git("ls-tree","-r","--name-only",BASE).splitlines()
-    lean={x:(ROOT/x).read_text() for x in tracked if x.endswith(".lean")}
+    report_path="docs/feature-work/h62-3-g52-differential.md"
+    corpus_path="tests/solkey/expected.tsv"
+    blobs=read_base_blobs([x for x in tracked if x.endswith(".lean")]+[report_path,corpus_path])
+    assert set(blobs)=={x for x in tracked if x.endswith(".lean")}|{report_path,corpus_path}
+    lean={x:blob.decode("utf-8") for x,blob in blobs.items() if x.endswith(".lean")}
+    source_revision={"commit":BASE,"tree":git("rev-parse",BASE+"^{tree}"),"read_method":"git archive of pinned commit; no live source reads"}
     paths=["scripts/differential","scripts/bench","SolcValidation","docs/audits/architecture-tools/timing-sample.tsv","docs/audits/build-speed-tools","scripts/h62/item3/g52-differential","docs/feature-work/h62-3-g52-differential.md"]
-    inventory={x:{"present":(ROOT/x).exists(),"tracked_files":sum(y==x or y.startswith(x+"/") for y in tracked)} for x in paths}
+    inventory={x:{"present":any(y==x or y.startswith(x+"/") for y in tracked),"tracked_files":sum(y==x or y.startswith(x+"/") for y in tracked)} for x in paths}
     counts={k:{"files":0,"lines":0} for k in ["generated_or_generator_named","other_unclassified"]}
     for path,s in lean.items():
         c=counts["generated_or_generator_named" if generated(path) else "other_unclassified"];c["files"]+=1;c["lines"]+=len(s.splitlines())
+    inventory["source_revision"]=source_revision
     inventory["lean_partition"]=counts
     inventory["partition_caveat"]="Path heuristic only, not a verified generated/handwritten split: Agreement and Chain names can be handwritten. Counts cannot support a generated-code-adjusted verdict. Both mutated source files are handwritten by inspection; broad inventory classification remains incomplete."
-    inventory["corpus"]={"path":"tests/solkey/expected.tsv","data_rows":sum(bool(x.strip()) for x in (ROOT/"tests/solkey/expected.tsv").read_text().splitlines()),"boundary":"SolKey verdict parity, not solc execution agreement; check-corpus invokes prohibited project builds and was not run"}
+    inventory["corpus"]={"path":"tests/solkey/expected.tsv","data_rows":sum(bool(x.strip()) for x in blobs[corpus_path].decode("utf-8").splitlines()),"boundary":"SolKey verdict parity, not solc execution agreement; check-corpus invokes prohibited project builds and was not run"}
     write("inventory.json",inventory)
     specs=[]
     def add(path,old,new,reason):
@@ -104,7 +110,7 @@ def main():
         finally:path.write_text(original)
         results.append(dict(id=m["id"],checker=r,status="cheap-check-survived; Lean-unassessed" if baseline["returncode"]==0 and r["returncode"]==0 else "checker-failed-unattributed",semantic_kill_established=False))
     write("checker-results.json",dict(baseline=baseline,mutants=results,boundary="Structural layer/source/trust/generation checker; no execution of changed Lean bodies. No semantic mutation score inferred."))
-    source="docs/feature-work/h62-3-g52-differential.md";text=(ROOT/source).read_text()
+    source=report_path;text=blobs[source].decode("utf-8")
     assert hashlib.sha256(text.encode()).hexdigest()=="4110f3923608d46d7955dd4fe0a555313ac59f6e168e3afa8f06c5753a607c18","cited snapshot changed; re-audit its denominators"
     assert "320 real comparisons produced zero mismatches" in text
     matched=int(re.search(r"(\d+) real primitive-fragment observations match",text)[1]);unsupported=int(re.search(r"(\d+) observations have reference execution only",text)[1])
@@ -112,10 +118,12 @@ def main():
       conclusion="Cheap structural checks do not constrain these operator/closer mutations. Whether existing proofs kill them remains unassessed; static references cannot establish coverage gaps.",
       differential=dict(source=source,source_sha256=hashlib.sha256(text.encode()).hexdigest(),pending_eest=int(re.search(r"All ([\d,]+) EEST rows are pending",text)[1].replace(",","")),provenance="cited committed report, not replayed",matched=matched,disagreed=0,matched_subset_agreement=matched/matched,reference_only_unsupported=unsupported,agreement_including_unsupported=None,disagreement_classes=[],disagreement_boundary="No mismatches reported for admitted primitive fragment; unsupported rows are not agreements",per_input_time_ratios=None,time_boundary="Matched per-input repository and solc compile/run timings unavailable; no ratio invented"),
       waits=[dict(id="W-TIMING",reason="Named va3/vu1 paths and matched raw timing outputs absent at pinned base; G52 private bulk results not present on VM"),dict(id="W-LEAN",reason="No Lean elaborations performed; systemd resource scope unavailable on this VM (no user bus); highest-value next checks are M32 afterRunTR_diamond_fail, M07 bitwise and M10 shifts. Structural survivors are not semantic survivors")],reproduce="python3 docs/audits/direction-tools/mutation/audit.py --scratch ABSOLUTE_BASE_WORKTREE")
+    summary["source_revision"]=source_revision
     summary["static_constraints"]=constraint_summary
     captured=OUT/"captured-results.json"
     if captured.exists():
         summary["historical_capture"]=json.loads(captured.read_text())
+        assert summary["historical_capture"]["audit_base"]==BASE,"regenerate captured results for pinned-base provenance"
         summary["waits"][0]={"id":"QDATA-TIMINGS","reason":"Historical archive verified and analyzed; matched per-input timings absent. Coordinator awaits existing matched archive or separate bounded-run authorization; no rerun authorized"}
         summary["waits"].append({"id":"W-REFERENCE-LOCK","reason":"Exact historical reference lock bytes not delivered; reference-environment reproduction UNVERIFIABLE under H151"})
     write("summary.json",summary)

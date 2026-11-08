@@ -2,7 +2,9 @@
 """Verify coordinator archive and analyze captured records; never execute Lean/solc/EVM.
 Reproduce: python3 docs/audits/direction-tools/mutation/captured.py ARCHIVE --extract OUTSIDE_CHECKOUT
 """
-import argparse, collections, hashlib, json, re, tarfile
+import argparse, collections, hashlib, json, re, tarfile, sys
+sys.dont_write_bytecode=True
+from base_tree import BASE, read_base_blobs
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[4]
 OUT=Path(__file__).resolve().parent
@@ -59,9 +61,10 @@ def main():
  assert seen=={(x['index'],mode) for x in inputs for mode in ['legacy','via-ir']}
  assert dict(counts)==report['counts'] and len(rows)==report['expected']
  sources=json.loads(blobs['evidence/producer-sources.json']);drift=[]
+ base_sources=read_base_blobs(sources['source_sha256'])
  for name,digest in sources['source_sha256'].items():
-  if not (ROOT/name).exists() or sha((ROOT/name).read_bytes())!=digest:drift.append(name)
- result=dict(archive_sha256=ARCHIVE_SHA,manifest_files_verified=len(manifest['files']),report_bindings_verified=len(bindings),source_inputs=len(inputs),captured_comparisons=len(rows),counts=dict(counts),modes=dict(modes),families=dict(families),captured_halts=dict(halts),captured_agreement=counts['match']/len(rows),disagreement_classes=dict(classes),producer_base=sources['base'],producer_sources_changed_vs_audit_checkout=drift,producer_manifest_files_checked=len(sources['source_sha256']),producer_source_drift_boundary='Only files enumerated by archived producer manifest; not all repository dependencies or reference environment',expected_adapter_boundary='Halt and return/revert bytes reconstructed from bound producer records; logs/rollback pins checked. Hashed storage trie adapter not independently reconstructed; serialized expected/actual storage compared only',reference_environment_reproduction='UNVERIFIABLE',historical_reference_lock_sha256=report['reference_lock_sha256'],excluded_current_reference_lock_sha256=manifest['rejected_current_reference_lock_sha256'],per_input_time_ratios=None,scope='Historical captured observation analysis only; no fresh execution, theorem validation, source runtime rebuild or full G52 qualification',limitations=manifest['limitations'])
+  if name not in base_sources or sha(base_sources[name])!=digest:drift.append(name)
+ result=dict(archive_sha256=ARCHIVE_SHA,manifest_files_verified=len(manifest['files']),report_bindings_verified=len(bindings),source_inputs=len(inputs),captured_comparisons=len(rows),counts=dict(counts),modes=dict(modes),families=dict(families),captured_halts=dict(halts),captured_agreement=counts['match']/len(rows),disagreement_classes=dict(classes),producer_base=sources['base'],audit_base=BASE,producer_sources_changed_vs_audit_base=drift,producer_manifest_files_checked=len(sources['source_sha256']),producer_source_drift_boundary='Only archived producer-manifest files compared to pinned audit BASE Git blobs; not live checkout, all dependencies, or reference environment',expected_adapter_boundary='Halt and return/revert bytes reconstructed from bound producer records; logs/rollback pins checked. Hashed storage trie adapter not independently reconstructed; serialized expected/actual storage compared only',reference_environment_reproduction='UNVERIFIABLE',historical_reference_lock_sha256=report['reference_lock_sha256'],excluded_current_reference_lock_sha256=manifest['rejected_current_reference_lock_sha256'],per_input_time_ratios=None,scope='Historical captured observation analysis only; no fresh execution, theorem validation, source runtime rebuild or full G52 qualification',limitations=manifest['limitations'])
  data=json.dumps(result,indent=2,sort_keys=True)+'\n';assert len(data.encode())<1000000
  (OUT/'captured-results.json').write_text(data);print(data)
 if __name__=='__main__':main()
