@@ -2697,6 +2697,8 @@ import Solidity.Evm.TryPanicSourceFrame
 import Solidity.Evm.TryPanicSourcePlan
 import Solidity.FreshNames
 import Solidity.Frontend.Admission.Controls
+import Solidity.Frontend.Admission.DeclarationOccurrences
+import Solidity.Frontend.Admission.ElementaryFeatures
 import Solidity.Frontend.Admission.ModifierRootControls
 import Solidity.Frontend.Admission.ModifierRoots
 import Solidity.Frontend.Admission.NameResolutionControls
@@ -3374,6 +3376,7 @@ import Solidity.Lowering.Readonly.HistoryRollbackControls
 import Solidity.Lowering.Readonly.InvocationFrame
 import Solidity.Lowering.Readonly.JournalLeaves
 import Solidity.Lowering.Readonly.KeyStepEffects
+import Solidity.Lowering.Readonly.LibraryFrameEffects
 import Solidity.Lowering.Readonly.LoadEffects
 import Solidity.Lowering.Readonly.LocalInitializationControls
 import Solidity.Lowering.Readonly.LocalInitializationEffects
@@ -3419,6 +3422,12 @@ import Solidity.Lowering.Readonly.SourceExpressionParts.Part5
 import Solidity.Lowering.Readonly.SourceExpressionParts.Part6
 import Solidity.Lowering.Readonly.SourceHistory
 import Solidity.Lowering.Readonly.SourceHistoryBase
+import Solidity.Lowering.Readonly.SourceKnownAllHistories
+import Solidity.Lowering.Readonly.SourceKnownExpressionEffects
+import Solidity.Lowering.Readonly.SourceKnownHistory
+import Solidity.Lowering.Readonly.SourceKnownLibraryEffects
+import Solidity.Lowering.Readonly.SourceKnownStatementEffects
+import Solidity.Lowering.Readonly.SourceKnownTryEffects
 import Solidity.Lowering.Readonly.SourceLoopControls
 import Solidity.Lowering.Readonly.SourceLoopEffects
 import Solidity.Lowering.Readonly.SourceLvalueCallControls
@@ -4155,6 +4164,7 @@ import Solidity.Source.Elaborated
 import Solidity.Source.Eval
 import Solidity.Source.Examples
 import Solidity.Source.ExprProgress
+import Solidity.Source.ExpressionTyping
 import Solidity.Source.FailureApproxControls
 import Solidity.Source.FailureConstructorControls
 import Solidity.Source.FailureCursor
@@ -4194,6 +4204,8 @@ import Solidity.Source.Funds
 import Solidity.Source.FundsControls
 import Solidity.Source.Hoare
 import Solidity.Source.Horizon
+import Solidity.Source.HorizonApproxExpressions
+import Solidity.Source.HorizonApproxStatements
 import Solidity.Source.HorizonConst
 import Solidity.Source.HorizonDeploy
 import Solidity.Source.HorizonFuel
@@ -4203,6 +4215,8 @@ import Solidity.Source.InferHelpers
 import Solidity.Source.Inheritance
 import Solidity.Source.InlineExamples
 import Solidity.Source.Ledger
+import Solidity.Source.LibrarySemantics
+import Solidity.Source.LibraryTyping
 import Solidity.Source.Machine
 import Solidity.Source.MemoryLocalDelete
 import Solidity.Source.Monetary

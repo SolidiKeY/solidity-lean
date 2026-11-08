@@ -73,6 +73,10 @@ def checkStmt (rule : STy → Option DataLoc → Bool → Bool)
   case tryCall =>
     intro k L L1 L2 c f args rets okb cl dn d ps rs sigmas tys name cb target argv overload signature fit named same success catchClause failure
     exact checkItems rule success && checkItems rule failure
+  case tryLibrary =>
+    intros
+    rename_i success failure
+    exact checkItems rule success && checkItems rule failure
   all_goals (intros; exact true)
 termination_by structural d
 
@@ -152,6 +156,8 @@ def checkStmt_valid (rule : STy → Option DataLoc → Bool → Bool)
   | .forInit initial _ _ _ body =>
       Bool.and_eq_true_iff.mpr ⟨checkStmt_valid rule respects initial, checkStmt_valid rule respects body⟩
   | .tryCall _ _ _ _ _ _ _ success _ failure =>
+      Bool.and_eq_true_iff.mpr ⟨checkItems_valid rule respects success, checkItems_valid rule respects failure⟩
+  | .tryLibrary _ _ _ _ _ _ _ success failure =>
       Bool.and_eq_true_iff.mpr ⟨checkItems_valid rule respects success, checkItems_valid rule respects failure⟩
   | .expr _ _ | .placeholder _ | .declTuple _ _ _ | .brk | .cont |
     .ret _ | .retVal _ _ _ | .retTuple _ _ _ _ | .emit _ _ |

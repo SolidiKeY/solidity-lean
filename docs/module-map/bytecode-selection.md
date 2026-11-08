@@ -70,8 +70,8 @@
 | `Bridge/SolidityBridge/AccessBridge/HostWriteControls.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/CalldataPackets/RawUint/Controls.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/CalldataPackets/RawUint/Execution.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
-| `Backend/Selection/P20ConsumerInterface.lean` | Statement-only assembly consumer of the published P20 pending G24 lowering field, retaining actual compilation and same assembler output. |
-| `Backend/Selection/P20Consumer.lean` | H26 consumer of explicit P20 lowering into existing same-artifact composition, finite IR byte execution and false-domain refusal. |
+| `Backend/Selection/P20ConsumerInterface.lean` | Frozen V1 assembly consumer plus additive V2 represented-success consumer contract, retaining actual compilation, G24 Input/Rep and joint witness. |
+| `Backend/Selection/P20Consumer.lean` | Frozen V1 assembly composition and H198 V2 represented-success consumption, actual joint Input/source/Yul/target witness and false-domain refusal; no inferred stack-only lowering. |
 | `Backend/Selection/P20ConsumerControls.lean` | Reused nonidentity closed Yul producer lowered to actual numeric IR and35 fetched bytes, protected suffix and dirty-word/wrong-slot negatives; no pending G24 instance. |
 | `Backend/AbiEntry/CalldataWordInterface.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/Executable/CreationFreshness.lean` | Bounded v14-payments-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
