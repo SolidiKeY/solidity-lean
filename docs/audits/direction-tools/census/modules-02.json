@@ -1,0 +1,7084 @@
+[
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 52,
+    "declarations": {
+      "def": 6,
+      "theorem": 12
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.175,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarContinuation"
+    ],
+    "imports_in": 1,
+    "lines": 73,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarContinuationRevert.lean",
+    "proof_lines": 40,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 50,
+    "declarations": {
+      "def": 2,
+      "theorem": 4
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.21052631578947367,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarClaims"
+    ],
+    "imports_in": 4,
+    "lines": 64,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarDemand.lean",
+    "proof_lines": 38,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 46,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDemand"
+    ],
+    "imports_in": 4,
+    "lines": 54,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarDemandClaims.lean",
+    "proof_lines": 42,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 95,
+    "declarations": {
+      "def": 3,
+      "theorem": 12
+    },
+    "definition_lines": 27,
+    "definition_to_proof_line_ratio": 0.43548387096774194,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDemandClaims",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDualControls"
+    ],
+    "imports_in": 2,
+    "lines": 118,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarDemandDual.lean",
+    "proof_lines": 62,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 80,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.0273972602739726,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarStop",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveHistory"
+    ],
+    "imports_in": 2,
+    "lines": 90,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarDescent.lean",
+    "proof_lines": 73,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 119,
+    "declarations": {
+      "abbrev": 2,
+      "def": 3,
+      "theorem": 2
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.047619047619047616,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarAllocatingDescent",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingPrefixes"
+    ],
+    "imports_in": 10,
+    "lines": 130,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarDescentControls.lean",
+    "proof_lines": 105,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 44,
+    "declarations": {
+      "abbrev": 3,
+      "structure": 1
+    },
+    "definition_lines": 40,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarTurn"
+    ],
+    "imports_in": 3,
+    "lines": 58,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarDescentInterfaceV1.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 97,
+    "declarations": {
+      "def": 9,
+      "theorem": 12
+    },
+    "definition_lines": 34,
+    "definition_to_proof_line_ratio": 0.6296296296296297,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameArgumentAgreement",
+      "Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV3",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarClaims",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarPlanControls",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveAgreement"
+    ],
+    "imports_in": 2,
+    "lines": 122,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarDual.lean",
+    "proof_lines": 54,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 62,
+    "declarations": {
+      "theorem": 20
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDual"
+    ],
+    "imports_in": 2,
+    "lines": 90,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarDualControls.lean",
+    "proof_lines": 57,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 54,
+    "declarations": {
+      "def": 3,
+      "instance": 1,
+      "structure": 1,
+      "theorem": 4
+    },
+    "definition_lines": 19,
+    "definition_to_proof_line_ratio": 0.6129032258064516,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3DisjointScalarReturn"
+    ],
+    "imports_in": 2,
+    "lines": 72,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarEmitter.lean",
+    "proof_lines": 31,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 56,
+    "declarations": {
+      "def": 2,
+      "theorem": 17
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.041666666666666664,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarEmitterSound",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3DisjointScalarControls"
+    ],
+    "imports_in": 3,
+    "lines": 81,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarEmitterControls.lean",
+    "proof_lines": 48,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 41,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarEmitter"
+    ],
+    "imports_in": 3,
+    "lines": 51,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarEmitterSound.lean",
+    "proof_lines": 37,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 60,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.0196078431372549,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDescentControls",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3FullScalarLoop"
+    ],
+    "imports_in": 1,
+    "lines": 70,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarPairedExecution.lean",
+    "proof_lines": 51,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 67,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.034482758620689655,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDescentInterfaceV1",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3FullScalarLoop"
+    ],
+    "imports_in": 4,
+    "lines": 77,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarPairedTransport.lean",
+    "proof_lines": 58,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 28,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarPairedTransport",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDescentControls"
+    ],
+    "imports_in": 1,
+    "lines": 35,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarPairedTransportControls.lean",
+    "proof_lines": 21,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 77,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ParentRestore",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveSource"
+    ],
+    "imports_in": 3,
+    "lines": 88,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarParentRestore.lean",
+    "proof_lines": 70,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 39,
+    "declarations": {
+      "def": 1,
+      "structure": 1,
+      "theorem": 2
+    },
+    "definition_lines": 15,
+    "definition_to_proof_line_ratio": 0.7894736842105263,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDemand",
+      "Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV3"
+    ],
+    "imports_in": 2,
+    "lines": 53,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarPhysicalInputs.lean",
+    "proof_lines": 19,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 58,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.125,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarEmitterSound"
+    ],
+    "imports_in": 3,
+    "lines": 67,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarPlan.lean",
+    "proof_lines": 48,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 76,
+    "declarations": {
+      "def": 2,
+      "theorem": 11
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.029850746268656716,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarPlan",
+      "Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV2",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarEmitterControls"
+    ],
+    "imports_in": 3,
+    "lines": 93,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarPlanControls.lean",
+    "proof_lines": 67,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 166,
+    "declarations": {
+      "def": 3,
+      "theorem": 17
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.03205128205128205,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarPrefixFacts"
+    ],
+    "imports_in": 1,
+    "lines": 192,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarPrefixControls.lean",
+    "proof_lines": 156,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 44,
+    "declarations": {
+      "def": 4,
+      "theorem": 8
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.11764705882352941,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarStop",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarUnwindFacts"
+    ],
+    "imports_in": 2,
+    "lines": 58,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarPrefixFacts.lean",
+    "proof_lines": 34,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 95,
+    "declarations": {
+      "def": 2,
+      "theorem": 3
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.046511627906976744,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarUnwind",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3PairedUnwind"
+    ],
+    "imports_in": 2,
+    "lines": 108,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarPrefixes.lean",
+    "proof_lines": 86,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 46,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveSource",
+      "Solidity.Backend.InternalFlow.RuntimeFrameResultAgreement"
+    ],
+    "imports_in": 3,
+    "lines": 58,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveAgreement.lean",
+    "proof_lines": 41,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 30,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveSource"
+    ],
+    "imports_in": 5,
+    "lines": 37,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveCall.lean",
+    "proof_lines": 26,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 76,
+    "declarations": {
+      "abbrev": 1,
+      "def": 8,
+      "theorem": 14
+    },
+    "definition_lines": 13,
+    "definition_to_proof_line_ratio": 0.22413793103448276,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveCall",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CountdownWitness"
+    ],
+    "imports_in": 3,
+    "lines": 97,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveControls.lean",
+    "proof_lines": 58,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 25,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveTurn"
+    ],
+    "imports_in": 8,
+    "lines": 29,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveSource.lean",
+    "proof_lines": 21,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 70,
+    "declarations": {
+      "abbrev": 1,
+      "def": 9,
+      "theorem": 5
+    },
+    "definition_lines": 20,
+    "definition_to_proof_line_ratio": 0.4444444444444444,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveSource",
+      "Solidity.Semantics.RunAccel"
+    ],
+    "imports_in": 2,
+    "lines": 85,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveStep.lean",
+    "proof_lines": 45,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 74,
+    "declarations": {
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.029411764705882353,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveStep"
+    ],
+    "imports_in": 2,
+    "lines": 83,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveTurn.lean",
+    "proof_lines": 68,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 64,
+    "declarations": {
+      "def": 5,
+      "theorem": 10
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.16,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameReturnReentry",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarContinuationControls"
+    ],
+    "imports_in": 2,
+    "lines": 83,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarReentry.lean",
+    "proof_lines": 50,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 103,
+    "declarations": {
+      "theorem": 9
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarReentryEndpoint"
+    ],
+    "imports_in": 2,
+    "lines": 119,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarReentryControls.lean",
+    "proof_lines": 97,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 80,
+    "declarations": {
+      "abbrev": 4,
+      "def": 4,
+      "theorem": 10
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.13636363636363635,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarReentry"
+    ],
+    "imports_in": 3,
+    "lines": 100,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarReentryEndpoint.lean",
+    "proof_lines": 66,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 63,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.05357142857142857,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDescent"
+    ],
+    "imports_in": 3,
+    "lines": 71,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarReturn.lean",
+    "proof_lines": 56,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 138,
+    "declarations": {
+      "def": 4,
+      "theorem": 16
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.031007751937984496,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarCallReturn",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatorReturn"
+    ],
+    "imports_in": 1,
+    "lines": 161,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarReturnControls.lean",
+    "proof_lines": 129,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 84,
+    "declarations": {
+      "def": 8,
+      "structure": 1,
+      "theorem": 1
+    },
+    "definition_lines": 74,
+    "definition_to_proof_line_ratio": 12.333333333333334,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveSource"
+    ],
+    "imports_in": 2,
+    "lines": 105,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarSourceCheck.lean",
+    "proof_lines": 6,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 18,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.2727272727272727,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarSourceCheck"
+    ],
+    "imports_in": 4,
+    "lines": 25,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarSourceCheckLaws.lean",
+    "proof_lines": 11,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 126,
+    "declarations": {
+      "def": 5,
+      "structure": 1,
+      "theorem": 5
+    },
+    "definition_lines": 61,
+    "definition_to_proof_line_ratio": 1.0166666666666666,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarSourceCheckLaws",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDemandClaims"
+    ],
+    "imports_in": 4,
+    "lines": 150,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarSourceCompiler.lean",
+    "proof_lines": 60,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 57,
+    "declarations": {
+      "def": 2,
+      "theorem": 12
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.13333333333333333,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarSourceCompiler",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarReentryControls"
+    ],
+    "imports_in": 2,
+    "lines": 81,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarSourceCompilerClient.lean",
+    "proof_lines": 45,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 76,
+    "declarations": {
+      "abbrev": 2,
+      "def": 7,
+      "theorem": 17
+    },
+    "definition_lines": 17,
+    "definition_to_proof_line_ratio": 0.3148148148148148,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarSourceCompilerClient"
+    ],
+    "imports_in": 3,
+    "lines": 105,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarSourceCompilerControls.lean",
+    "proof_lines": 54,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 61,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarPrefixes"
+    ],
+    "imports_in": 3,
+    "lines": 71,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarStop.lean",
+    "proof_lines": 57,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 96,
+    "declarations": {
+      "def": 4,
+      "theorem": 3
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.11428571428571428,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarParentRestore"
+    ],
+    "imports_in": 5,
+    "lines": 123,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarUnwind.lean",
+    "proof_lines": 70,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 59,
+    "declarations": {
+      "def": 2,
+      "theorem": 1
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.057692307692307696,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarUnwindFacts"
+    ],
+    "imports_in": 2,
+    "lines": 67,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarUnwindEndpoint.lean",
+    "proof_lines": 52,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 53,
+    "declarations": {
+      "abbrev": 2,
+      "def": 5,
+      "theorem": 5
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.20512820512820512,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarUnwind",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveControls",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveHistory"
+    ],
+    "imports_in": 3,
+    "lines": 63,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarUnwindFacts.lean",
+    "proof_lines": 39,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 77,
+    "declarations": {
+      "abbrev": 2,
+      "def": 4,
+      "theorem": 12
+    },
+    "definition_lines": 21,
+    "definition_to_proof_line_ratio": 0.42,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScopedScalarCompiler",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarSourceCompilerControls"
+    ],
+    "imports_in": 2,
+    "lines": 99,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScopedScalarClient.lean",
+    "proof_lines": 50,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 125,
+    "declarations": {
+      "def": 5,
+      "structure": 1,
+      "theorem": 4
+    },
+    "definition_lines": 66,
+    "definition_to_proof_line_ratio": 1.2222222222222223,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameScopedSource",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarSourceCompiler"
+    ],
+    "imports_in": 2,
+    "lines": 145,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScopedScalarCompiler.lean",
+    "proof_lines": 54,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 36,
+    "declarations": {
+      "def": 4,
+      "theorem": 7
+    },
+    "definition_lines": 12,
+    "definition_to_proof_line_ratio": 0.6666666666666666,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScopedScalarClient"
+    ],
+    "imports_in": 2,
+    "lines": 54,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScopedScalarControls.lean",
+    "proof_lines": 18,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 63,
+    "declarations": {
+      "abbrev": 1,
+      "def": 6,
+      "theorem": 1
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.19148936170212766,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarTurn"
+    ],
+    "imports_in": 2,
+    "lines": 70,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3SecondAllocatingEntry.lean",
+    "proof_lines": 47,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 28,
+    "declarations": {
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.13333333333333333,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarTurn"
+    ],
+    "imports_in": 3,
+    "lines": 44,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3StateShell.lean",
+    "proof_lines": 15,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 118,
+    "declarations": {
+      "def": 1,
+      "theorem": 8
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.0425531914893617,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocationInventory"
+    ],
+    "imports_in": 3,
+    "lines": 152,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3TypedHeapExtensionality.lean",
+    "proof_lines": 94,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 32,
+    "declarations": {
+      "abbrev": 3,
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.19047619047619047,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3TypedHeapExtensionality",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarTarget"
+    ],
+    "imports_in": 1,
+    "lines": 39,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3TypedHeapExtensionalityControls.lean",
+    "proof_lines": 21,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 146,
+    "declarations": {
+      "def": 9,
+      "theorem": 8
+    },
+    "definition_lines": 78,
+    "definition_to_proof_line_ratio": 1.4444444444444444,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV4",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3GeneralBoundary"
+    ],
+    "imports_in": 3,
+    "lines": 204,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV4Migration.lean",
+    "proof_lines": 54,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 22,
+    "declarations": {
+      "def": 2,
+      "theorem": 2
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.75,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV4Migration",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3FrozenScopeCoverage"
+    ],
+    "imports_in": 1,
+    "lines": 37,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV4MigrationControls.lean",
+    "proof_lines": 8,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 115,
+    "declarations": {
+      "abbrev": 8,
+      "def": 8,
+      "theorem": 18
+    },
+    "definition_lines": 32,
+    "definition_to_proof_line_ratio": 0.47058823529411764,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV4Migration",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3FixedThunkProducer"
+    ],
+    "imports_in": 2,
+    "lines": 191,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV4TrivialFamily.lean",
+    "proof_lines": 68,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 278,
+    "declarations": {
+      "def": 6,
+      "inductive": 1,
+      "theorem": 19
+    },
+    "definition_lines": 19,
+    "definition_to_proof_line_ratio": 0.07421875,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.Opcode"
+    ],
+    "imports_in": 4,
+    "lines": 352,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/Jumpdest.lean",
+    "proof_lines": 256,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 112,
+    "declarations": {
+      "def": 4,
+      "theorem": 5
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.08,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.LabelExec.Packets",
+      "Solidity.Backend.Control"
+    ],
+    "imports_in": 2,
+    "lines": 137,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/LabelExec/Assembly.lean",
+    "proof_lines": 100,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 37,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.LabelExec.Placement"
+    ],
+    "imports_in": 3,
+    "lines": 50,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/LabelExec/Boundaries.lean",
+    "proof_lines": 34,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 70,
+    "declarations": {
+      "def": 5,
+      "theorem": 9
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.11864406779661017,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.LabelExec.Placement",
+      "Solidity.Backend.LabelExec.FragmentControls"
+    ],
+    "imports_in": 2,
+    "lines": 96,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/LabelExec/Checks.lean",
+    "proof_lines": 59,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 16,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.LabelExec.Step"
+    ],
+    "imports_in": 3,
+    "lines": 26,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/LabelExec/Fetch.lean",
+    "proof_lines": 13,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 43,
+    "declarations": {
+      "abbrev": 1,
+      "def": 2,
+      "inductive": 3,
+      "structure": 1
+    },
+    "definition_lines": 38,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.LabelExec.ScalarTransfer",
+      "Solidity.Backend.Scalar.Heights",
+      "Solidity.Backend.Control"
+    ],
+    "imports_in": 3,
+    "lines": 75,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/LabelExec/Fragment.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 31,
+    "declarations": {
+      "def": 2,
+      "theorem": 5
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.47368421052631576,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.LabelExec.FragmentSound"
+    ],
+    "imports_in": 3,
+    "lines": 50,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/LabelExec/FragmentControls.lean",
+    "proof_lines": 19,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 130,
+    "declarations": {
+      "theorem": 6
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.LabelExec.Fragment"
+    ],
+    "imports_in": 4,
+    "lines": 150,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/LabelExec/FragmentSound.lean",
+    "proof_lines": 127,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 48,
+    "declarations": {
+      "def": 3,
+      "theorem": 3
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.1282051282051282,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.LabelExec.LiteralLoops",
+      "Solidity.Backend.LabelExec.Checks"
+    ],
+    "imports_in": 1,
+    "lines": 63,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/LabelExec/LiteralChecks.lean",
+    "proof_lines": 39,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 64,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.LabelExec.Placement"
+    ],
+    "imports_in": 3,
+    "lines": 75,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/LabelExec/LiteralLoops.lean",
+    "proof_lines": 61,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 39,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.LabelExec.Boundaries",
+      "Solidity.Backend.LabelExec.LiteralLoops"
+    ],
+    "imports_in": 2,
+    "lines": 48,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/LabelExec/LoopExit.lean",
+    "proof_lines": 35,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 34,
+    "declarations": {
+      "def": 1,
+      "theorem": 3
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.03333333333333333,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.LabelExec.LoopExit"
+    ],
+    "imports_in": 1,
+    "lines": 47,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/LabelExec/LoopExitControls.lean",
+    "proof_lines": 30,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 65,
+    "declarations": {
+      "def": 3,
+      "theorem": 2
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.14814814814814814,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.LabelExec.Assembly"
+    ],
+    "imports_in": 2,
+    "lines": 84,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/LabelExec/Loops.lean",
+    "proof_lines": 54,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 57,
+    "declarations": {
+      "def": 2,
+      "theorem": 3
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.14893617021276595,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.LabelExec.Fetch"
+    ],
+    "imports_in": 2,
+    "lines": 74,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/LabelExec/Packets.lean",
+    "proof_lines": 47,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 70,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.046875,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.LabelExec.Loops"
+    ],
+    "imports_in": 4,
+    "lines": 82,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/LabelExec/Placement.lean",
+    "proof_lines": 64,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 14,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.LabelExec.Fetch"
+    ],
+    "imports_in": 2,
+    "lines": 22,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/LabelExec/ScalarTransfer.lean",
+    "proof_lines": 11,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 22,
+    "declarations": {
+      "def": 3,
+      "structure": 1
+    },
+    "definition_lines": 18,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.Scalar.Slice",
+      "Solidity.Backend.Creation.Execution"
+    ],
+    "imports_in": 2,
+    "lines": 45,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/LabelExec/Step.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 33,
+    "declarations": {
+      "def": 2,
+      "theorem": 1
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.5,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.AliasBindingInterface"
+    ],
+    "imports_in": 9,
+    "lines": 41,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/AliasBinding.lean",
+    "proof_lines": 18,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 61,
+    "declarations": {
+      "abbrev": 1,
+      "def": 4,
+      "structure": 1,
+      "theorem": 6
+    },
+    "definition_lines": 23,
+    "definition_to_proof_line_ratio": 0.8518518518518519,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.AliasBinding",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 76,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/AliasBindingControls.lean",
+    "proof_lines": 27,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 22,
+    "declarations": {
+      "def": 1,
+      "structure": 1
+    },
+    "definition_lines": 18,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryObjectStatements"
+    ],
+    "imports_in": 2,
+    "lines": 31,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/AliasBindingInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 92,
+    "declarations": {
+      "def": 5,
+      "theorem": 8
+    },
+    "definition_lines": 26,
+    "definition_to_proof_line_ratio": 0.5531914893617021,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.AllocationPanicInterface",
+      "Solidity.Backend.MemoryCopies.SourceSize",
+      "Solidity.Backend.Failure.SliceChecks"
+    ],
+    "imports_in": 1,
+    "lines": 118,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/AllocationPanic.lean",
+    "proof_lines": 47,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 15,
+    "declarations": {
+      "def": 1,
+      "structure": 1
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.Premises",
+      "Solidity.Lowering.V08.LiteralFailureLowering"
+    ],
+    "imports_in": 2,
+    "lines": 25,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/AllocationPanicInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 79,
+    "declarations": {
+      "def": 1,
+      "theorem": 5
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.03278688524590164,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.BudgetedDefaultInterface"
+    ],
+    "imports_in": 4,
+    "lines": 107,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/BudgetedDefault.lean",
+    "proof_lines": 61,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 114,
+    "declarations": {
+      "def": 6,
+      "structure": 1,
+      "theorem": 12
+    },
+    "definition_lines": 19,
+    "definition_to_proof_line_ratio": 0.2835820895522388,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.BudgetedDefault",
+      "Solidity.Evm.MemoryObjectArrayExamples",
+      "Solidity.Backend.MemoryCopies.HeapContents"
+    ],
+    "imports_in": 1,
+    "lines": 183,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/BudgetedDefaultControls.lean",
+    "proof_lines": 67,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 36,
+    "declarations": {
+      "def": 4,
+      "structure": 1
+    },
+    "definition_lines": 32,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.SelectedDefaultDemand"
+    ],
+    "imports_in": 2,
+    "lines": 46,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/BudgetedDefaultInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 70,
+    "declarations": {
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.01818181818181818,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.BudgetedFiniteInterface"
+    ],
+    "imports_in": 2,
+    "lines": 94,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/BudgetedFinite.lean",
+    "proof_lines": 55,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 121,
+    "declarations": {
+      "def": 8,
+      "structure": 1,
+      "theorem": 13
+    },
+    "definition_lines": 32,
+    "definition_to_proof_line_ratio": 0.5517241379310345,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.BudgetedFinite",
+      "Solidity.Evm.MemoryStructDefaultExamples"
+    ],
+    "imports_in": 1,
+    "lines": 206,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/BudgetedFiniteControls.lean",
+    "proof_lines": 58,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 37,
+    "declarations": {
+      "def": 2,
+      "structure": 1
+    },
+    "definition_lines": 32,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.BudgetedDefault",
+      "Solidity.Backend.MemoryCopies.CheckedFiniteDefault"
+    ],
+    "imports_in": 2,
+    "lines": 47,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/BudgetedFiniteInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 157,
+    "declarations": {
+      "def": 1,
+      "theorem": 8
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.015037593984962405,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.BudgetedReferenceInterface"
+    ],
+    "imports_in": 2,
+    "lines": 197,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/BudgetedReference.lean",
+    "proof_lines": 133,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 159,
+    "declarations": {
+      "def": 6,
+      "structure": 1,
+      "theorem": 17
+    },
+    "definition_lines": 21,
+    "definition_to_proof_line_ratio": 0.20588235294117646,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.BudgetedReference",
+      "Solidity.Backend.MemoryCopies.HeapContents",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 258,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/BudgetedReferenceControls.lean",
+    "proof_lines": 102,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 42,
+    "declarations": {
+      "def": 4,
+      "structure": 1
+    },
+    "definition_lines": 37,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.BudgetedDefault",
+      "Solidity.Backend.MemoryCopies.ReferenceDefaultDemand"
+    ],
+    "imports_in": 2,
+    "lines": 52,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/BudgetedReferenceInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 114,
+    "declarations": {
+      "def": 1,
+      "theorem": 7
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.019801980198019802,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CanonicalArrayInterface"
+    ],
+    "imports_in": 2,
+    "lines": 126,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CanonicalArray.lean",
+    "proof_lines": 101,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 188,
+    "declarations": {
+      "abbrev": 1,
+      "def": 14,
+      "theorem": 19
+    },
+    "definition_lines": 29,
+    "definition_to_proof_line_ratio": 0.2013888888888889,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CanonicalArray",
+      "Solidity.Evm.Correct"
+    ],
+    "imports_in": 1,
+    "lines": 207,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CanonicalArrayControls.lean",
+    "proof_lines": 144,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 54,
+    "declarations": {
+      "def": 5,
+      "structure": 1
+    },
+    "definition_lines": 49,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.LoadedArray",
+      "Solidity.Theory.Typed.Leaves"
+    ],
+    "imports_in": 2,
+    "lines": 63,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CanonicalArrayInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 68,
+    "declarations": {
+      "def": 1,
+      "theorem": 3
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.01694915254237288,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CanonicalRebindInterface"
+    ],
+    "imports_in": 2,
+    "lines": 76,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CanonicalRebind.lean",
+    "proof_lines": 59,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 206,
+    "declarations": {
+      "abbrev": 3,
+      "def": 18,
+      "theorem": 19
+    },
+    "definition_lines": 31,
+    "definition_to_proof_line_ratio": 0.1949685534591195,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CanonicalRebind",
+      "Solidity.Backend.MemoryCopies.AliasBinding",
+      "Solidity.Evm.Correct"
+    ],
+    "imports_in": 1,
+    "lines": 228,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CanonicalRebindControls.lean",
+    "proof_lines": 159,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 46,
+    "declarations": {
+      "def": 2,
+      "structure": 1
+    },
+    "definition_lines": 42,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CanonicalSingleton"
+    ],
+    "imports_in": 2,
+    "lines": 52,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CanonicalRebindInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 69,
+    "declarations": {
+      "def": 1,
+      "theorem": 6
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.03571428571428571,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CanonicalSingletonInterface"
+    ],
+    "imports_in": 3,
+    "lines": 80,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CanonicalSingleton.lean",
+    "proof_lines": 56,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 142,
+    "declarations": {
+      "abbrev": 1,
+      "def": 10,
+      "theorem": 21
+    },
+    "definition_lines": 20,
+    "definition_to_proof_line_ratio": 0.19047619047619047,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CanonicalSingleton",
+      "Solidity.Evm.Correct"
+    ],
+    "imports_in": 1,
+    "lines": 166,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CanonicalSingletonControls.lean",
+    "proof_lines": 105,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 48,
+    "declarations": {
+      "def": 3,
+      "structure": 1
+    },
+    "definition_lines": 43,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.LoadedSingleton",
+      "Solidity.Theory.Typed.Leaves"
+    ],
+    "imports_in": 2,
+    "lines": 55,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CanonicalSingletonInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 125,
+    "declarations": {
+      "def": 1,
+      "theorem": 6
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.008849557522123894,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedCaptureInterface"
+    ],
+    "imports_in": 2,
+    "lines": 136,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedCapture.lean",
+    "proof_lines": 113,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 284,
+    "declarations": {
+      "abbrev": 3,
+      "def": 16,
+      "structure": 1,
+      "theorem": 25
+    },
+    "definition_lines": 32,
+    "definition_to_proof_line_ratio": 0.14035087719298245,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedCapture",
+      "Solidity.Backend.MemoryCopies.RangeOverlapControls",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 307,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedCaptureControls.lean",
+    "proof_lines": 228,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 27,
+    "declarations": {
+      "def": 3,
+      "structure": 1
+    },
+    "definition_lines": 23,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.TypedCapture"
+    ],
+    "imports_in": 2,
+    "lines": 34,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedCaptureInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 84,
+    "declarations": {
+      "def": 3,
+      "theorem": 4
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.17857142857142858,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedDefaultInterface"
+    ],
+    "imports_in": 7,
+    "lines": 122,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedDefault.lean",
+    "proof_lines": 56,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 89,
+    "declarations": {
+      "def": 4,
+      "structure": 1,
+      "theorem": 14
+    },
+    "definition_lines": 16,
+    "definition_to_proof_line_ratio": 0.2909090909090909,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedDefault",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 107,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedDefaultControls.lean",
+    "proof_lines": 55,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 20,
+    "declarations": {
+      "def": 2,
+      "structure": 2
+    },
+    "definition_lines": 16,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedDefaults"
+    ],
+    "imports_in": 2,
+    "lines": 27,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedDefaultInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 70,
+    "declarations": {
+      "def": 1,
+      "theorem": 5
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.034482758620689655,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedFiniteDefaultInterface"
+    ],
+    "imports_in": 3,
+    "lines": 80,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedFiniteDefault.lean",
+    "proof_lines": 58,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 149,
+    "declarations": {
+      "def": 9,
+      "structure": 1,
+      "theorem": 15
+    },
+    "definition_lines": 33,
+    "definition_to_proof_line_ratio": 0.3333333333333333,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedFiniteDefault",
+      "Solidity.Evm.MemoryStructDefaultExamples"
+    ],
+    "imports_in": 1,
+    "lines": 170,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedFiniteDefaultControls.lean",
+    "proof_lines": 99,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 41,
+    "declarations": {
+      "def": 2,
+      "structure": 1
+    },
+    "definition_lines": 35,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedDefault",
+      "Solidity.Backend.MemoryCopies.DefaultDemand",
+      "Solidity.Evm.MemoryStructDefaultSource"
+    ],
+    "imports_in": 2,
+    "lines": 49,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedFiniteDefaultInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 49,
+    "declarations": {
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.02564102564102564,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedFixedMemoryInterface"
+    ],
+    "imports_in": 3,
+    "lines": 60,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedFixedMemory.lean",
+    "proof_lines": 39,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 265,
+    "declarations": {
+      "def": 10,
+      "theorem": 24
+    },
+    "definition_lines": 16,
+    "definition_to_proof_line_ratio": 0.06986899563318777,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedFixedMemory"
+    ],
+    "imports_in": 1,
+    "lines": 288,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedFixedMemoryControls.lean",
+    "proof_lines": 229,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 25,
+    "declarations": {
+      "def": 2,
+      "structure": 1
+    },
+    "definition_lines": 20,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedMemoryCopy",
+      "Solidity.Backend.MemoryCopies.CheckedDefault"
+    ],
+    "imports_in": 2,
+    "lines": 31,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedFixedMemoryInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 55,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.02127659574468085,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedFixedPathCopyInterface"
+    ],
+    "imports_in": 2,
+    "lines": 62,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedFixedPathCopy.lean",
+    "proof_lines": 47,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 402,
+    "declarations": {
+      "def": 22,
+      "structure": 1,
+      "theorem": 33
+    },
+    "definition_lines": 46,
+    "definition_to_proof_line_ratio": 0.13813813813813813,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedFixedPathCopy",
+      "Solidity.Evm.Correct",
+      "Solidity.Evm.MemoryFixedChildArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 428,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedFixedPathCopyControls.lean",
+    "proof_lines": 333,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 61,
+    "declarations": {
+      "def": 5,
+      "structure": 1
+    },
+    "definition_lines": 56,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedFixedMemory",
+      "Solidity.Backend.MemoryCopies.AliasBinding"
+    ],
+    "imports_in": 2,
+    "lines": 70,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedFixedPathCopyInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 52,
+    "declarations": {
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.023809523809523808,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedFixedStorageInterface"
+    ],
+    "imports_in": 3,
+    "lines": 63,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedFixedStorage.lean",
+    "proof_lines": 42,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 196,
+    "declarations": {
+      "def": 9,
+      "structure": 1,
+      "theorem": 21
+    },
+    "definition_lines": 18,
+    "definition_to_proof_line_ratio": 0.11464968152866242,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedFixedStorage",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 222,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedFixedStorageControls.lean",
+    "proof_lines": 157,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 26,
+    "declarations": {
+      "def": 2,
+      "structure": 1
+    },
+    "definition_lines": 21,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedStorageCopy",
+      "Solidity.Backend.MemoryCopies.CheckedDefault"
+    ],
+    "imports_in": 2,
+    "lines": 32,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedFixedStorageInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 170,
+    "declarations": {
+      "def": 1,
+      "theorem": 11
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.013071895424836602,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedFixedStoragePathInterface"
+    ],
+    "imports_in": 2,
+    "lines": 186,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedFixedStoragePath.lean",
+    "proof_lines": 153,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 351,
+    "declarations": {
+      "def": 21,
+      "theorem": 30
+    },
+    "definition_lines": 37,
+    "definition_to_proof_line_ratio": 0.1267123287671233,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedFixedStoragePath",
+      "Solidity.Evm.Correct"
+    ],
+    "imports_in": 1,
+    "lines": 375,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedFixedStoragePathControls.lean",
+    "proof_lines": 292,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 88,
+    "declarations": {
+      "def": 6,
+      "structure": 1
+    },
+    "definition_lines": 82,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedFixedStorage",
+      "Solidity.Backend.MemoryCopies.FixedStoragePath",
+      "Solidity.Backend.MemoryCopies.RuntimeLiveArray"
+    ],
+    "imports_in": 2,
+    "lines": 99,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedFixedStoragePathInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 76,
+    "declarations": {
+      "def": 1,
+      "theorem": 5
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.015384615384615385,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedMemoryArrayInterface"
+    ],
+    "imports_in": 5,
+    "lines": 86,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedMemoryArray.lean",
+    "proof_lines": 65,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 273,
+    "declarations": {
+      "abbrev": 2,
+      "def": 8,
+      "theorem": 20
+    },
+    "definition_lines": 17,
+    "definition_to_proof_line_ratio": 0.07112970711297072,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedMemoryArray"
+    ],
+    "imports_in": 1,
+    "lines": 291,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedMemoryArrayControls.lean",
+    "proof_lines": 239,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 27,
+    "declarations": {
+      "def": 3,
+      "structure": 1
+    },
+    "definition_lines": 23,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.RuntimeMemoryArray"
+    ],
+    "imports_in": 2,
+    "lines": 34,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedMemoryArrayInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 55,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.02127659574468085,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedPathCopyInterface"
+    ],
+    "imports_in": 2,
+    "lines": 62,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedPathCopy.lean",
+    "proof_lines": 47,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 403,
+    "declarations": {
+      "abbrev": 3,
+      "def": 18,
+      "structure": 1,
+      "theorem": 32
+    },
+    "definition_lines": 44,
+    "definition_to_proof_line_ratio": 0.1301775147928994,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedPathCopy",
+      "Solidity.Backend.MemoryCopies.MemoryPathCopyInterface",
+      "Solidity.Evm.Correct",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 426,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedPathCopyControls.lean",
+    "proof_lines": 338,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 61,
+    "declarations": {
+      "def": 5,
+      "structure": 1
+    },
+    "definition_lines": 56,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedMemoryArray",
+      "Solidity.Backend.MemoryCopies.AliasBinding"
+    ],
+    "imports_in": 2,
+    "lines": 70,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedPathCopyInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 137,
+    "declarations": {
+      "def": 1,
+      "theorem": 8
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.008130081300813009,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedReferenceInterface"
+    ],
+    "imports_in": 4,
+    "lines": 150,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedReference.lean",
+    "proof_lines": 123,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 110,
+    "declarations": {
+      "def": 5,
+      "structure": 1,
+      "theorem": 15
+    },
+    "definition_lines": 17,
+    "definition_to_proof_line_ratio": 0.2236842105263158,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedReference",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 128,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedReferenceControls.lean",
+    "proof_lines": 76,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 33,
+    "declarations": {
+      "def": 4,
+      "structure": 1
+    },
+    "definition_lines": 29,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedDefault"
+    ],
+    "imports_in": 2,
+    "lines": 41,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedReferenceInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 72,
+    "declarations": {
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.016129032258064516,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedStorageArrayInterface"
+    ],
+    "imports_in": 6,
+    "lines": 81,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedStorageArray.lean",
+    "proof_lines": 62,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 203,
+    "declarations": {
+      "def": 9,
+      "structure": 1,
+      "theorem": 21
+    },
+    "definition_lines": 20,
+    "definition_to_proof_line_ratio": 0.12195121951219512,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedStorageArray",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 224,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedStorageArrayControls.lean",
+    "proof_lines": 164,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 27,
+    "declarations": {
+      "def": 3,
+      "structure": 1
+    },
+    "definition_lines": 22,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.RuntimeStorageArray",
+      "Solidity.Backend.MemoryCopies.CheckedMemoryArray"
+    ],
+    "imports_in": 2,
+    "lines": 34,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedStorageArrayInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 170,
+    "declarations": {
+      "def": 1,
+      "theorem": 11
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.013071895424836602,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedStoragePathInterface"
+    ],
+    "imports_in": 2,
+    "lines": 186,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedStoragePath.lean",
+    "proof_lines": 153,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 330,
+    "declarations": {
+      "abbrev": 3,
+      "def": 19,
+      "theorem": 27
+    },
+    "definition_lines": 37,
+    "definition_to_proof_line_ratio": 0.13553113553113552,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedStoragePath",
+      "Solidity.Evm.Correct"
+    ],
+    "imports_in": 1,
+    "lines": 359,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedStoragePathControls.lean",
+    "proof_lines": 273,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 92,
+    "declarations": {
+      "def": 6,
+      "structure": 1
+    },
+    "definition_lines": 86,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedStorageArray",
+      "Solidity.Backend.MemoryCopies.RuntimePathArray",
+      "Solidity.Backend.MemoryCopies.LoadedArray"
+    ],
+    "imports_in": 2,
+    "lines": 102,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CheckedStoragePathInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 90,
+    "declarations": {
+      "def": 6,
+      "theorem": 10
+    },
+    "definition_lines": 37,
+    "definition_to_proof_line_ratio": 0.925,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.InterfaceV2Laws",
+      "Solidity.Backend.MemoryCopies.InterfaceV2Roots",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 2,
+    "lines": 116,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/ControlsV2.lean",
+    "proof_lines": 40,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 115,
+    "declarations": {
+      "def": 25,
+      "theorem": 17
+    },
+    "definition_lines": 28,
+    "definition_to_proof_line_ratio": 0.417910447761194,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CopyPaths"
+    ],
+    "imports_in": 1,
+    "lines": 136,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CopyPathControls.lean",
+    "proof_lines": 67,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 13,
+    "declarations": {
+      "abbrev": 1,
+      "structure": 1
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.TraversalFootprint"
+    ],
+    "imports_in": 2,
+    "lines": 18,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CopyPathInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 188,
+    "declarations": {
+      "def": 3,
+      "theorem": 8
+    },
+    "definition_lines": 15,
+    "definition_to_proof_line_ratio": 0.09933774834437085,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CopyPathInterface",
+      "Solidity.Backend.MemoryCopies.HeapContents"
+    ],
+    "imports_in": 3,
+    "lines": 230,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/CopyPaths.lean",
+    "proof_lines": 151,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 82,
+    "declarations": {
+      "abbrev": 1,
+      "def": 12,
+      "theorem": 5
+    },
+    "definition_lines": 24,
+    "definition_to_proof_line_ratio": 0.5581395348837209,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.Interface",
+      "Solidity.Backend.MemoryCopies.HeapContents",
+      "Solidity.Backend.MemoryOps.CopyMirrorSchedule"
+    ],
+    "imports_in": 2,
+    "lines": 106,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/DeepCopyContents.lean",
+    "proof_lines": 43,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 100,
+    "declarations": {
+      "def": 1,
+      "theorem": 8
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.011904761904761904,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.DefaultDemandInterface"
+    ],
+    "imports_in": 4,
+    "lines": 114,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/DefaultDemand.lean",
+    "proof_lines": 84,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 78,
+    "declarations": {
+      "def": 4,
+      "theorem": 12
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.10909090909090909,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.DefaultDemand",
+      "Solidity.Backend.MemoryCopies.InterfaceV2Laws"
+    ],
+    "imports_in": 1,
+    "lines": 101,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/DefaultDemandControls.lean",
+    "proof_lines": 55,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 11,
+    "declarations": {
+      "structure": 1
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.TraversalWords",
+      "Solidity.Evm.MemoryStructDefaultPlan"
+    ],
+    "imports_in": 2,
+    "lines": 17,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/DefaultDemandInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 106,
+    "declarations": {
+      "def": 2,
+      "theorem": 6
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.10714285714285714,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.DefaultSelectionInterface",
+      "Solidity.Backend.MemoryCopies.NestedDefaults"
+    ],
+    "imports_in": 3,
+    "lines": 118,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/DefaultSelection.lean",
+    "proof_lines": 84,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 122,
+    "declarations": {
+      "def": 5,
+      "structure": 1,
+      "theorem": 14
+    },
+    "definition_lines": 18,
+    "definition_to_proof_line_ratio": 0.21176470588235294,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.DefaultSelection",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 141,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/DefaultSelectionControls.lean",
+    "proof_lines": 85,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 15,
+    "declarations": {
+      "structure": 2
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.SelectedArrayDefaults",
+      "Solidity.Evm.MemoryObjectConstructionCompile"
+    ],
+    "imports_in": 2,
+    "lines": 20,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/DefaultSelectionInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 142,
+    "declarations": {
+      "def": 1,
+      "theorem": 9
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.007874015748031496,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.EmptyReferenceMemoryInterface"
+    ],
+    "imports_in": 2,
+    "lines": 156,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/EmptyReferenceMemory.lean",
+    "proof_lines": 127,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 119,
+    "declarations": {
+      "def": 10,
+      "structure": 1,
+      "theorem": 17
+    },
+    "definition_lines": 22,
+    "definition_to_proof_line_ratio": 0.27848101265822783,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.EmptyReferenceMemory",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 137,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/EmptyReferenceMemoryControls.lean",
+    "proof_lines": 79,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 31,
+    "declarations": {
+      "def": 1,
+      "structure": 1
+    },
+    "definition_lines": 27,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.EmptyReferenceStorage"
+    ],
+    "imports_in": 2,
+    "lines": 38,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/EmptyReferenceMemoryInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 117,
+    "declarations": {
+      "def": 1,
+      "theorem": 9
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.00980392156862745,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.EmptyReferenceStorageInterface"
+    ],
+    "imports_in": 3,
+    "lines": 131,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/EmptyReferenceStorage.lean",
+    "proof_lines": 102,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 128,
+    "declarations": {
+      "def": 10,
+      "structure": 1,
+      "theorem": 16
+    },
+    "definition_lines": 22,
+    "definition_to_proof_line_ratio": 0.25,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.EmptyReferenceStorage",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 148,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/EmptyReferenceStorageControls.lean",
+    "proof_lines": 88,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 36,
+    "declarations": {
+      "def": 2,
+      "structure": 1
+    },
+    "definition_lines": 31,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedStorageArray",
+      "Solidity.Evm.MemoryDefaultCompile"
+    ],
+    "imports_in": 2,
+    "lines": 43,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/EmptyReferenceStorageInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 178,
+    "declarations": {
+      "def": 2,
+      "theorem": 7
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.018404907975460124,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedMemoryCopyInterface"
+    ],
+    "imports_in": 6,
+    "lines": 190,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedMemoryCopy.lean",
+    "proof_lines": 163,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 187,
+    "declarations": {
+      "def": 9,
+      "theorem": 14
+    },
+    "definition_lines": 15,
+    "definition_to_proof_line_ratio": 0.09433962264150944,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedMemoryCopy"
+    ],
+    "imports_in": 1,
+    "lines": 199,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedMemoryCopyControls.lean",
+    "proof_lines": 159,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 28,
+    "declarations": {
+      "def": 4,
+      "structure": 1
+    },
+    "definition_lines": 22,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.RuntimeMemoryArray",
+      "Solidity.Backend.MemoryCopies.PrimitiveArrayLive",
+      "Solidity.Evm.MemoryFixedStorageCopy"
+    ],
+    "imports_in": 2,
+    "lines": 36,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedMemoryCopyInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 51,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.023255813953488372,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedPathCopyInterface"
+    ],
+    "imports_in": 2,
+    "lines": 58,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedPathCopy.lean",
+    "proof_lines": 43,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 322,
+    "declarations": {
+      "def": 20,
+      "structure": 1,
+      "theorem": 26
+    },
+    "definition_lines": 44,
+    "definition_to_proof_line_ratio": 0.16923076923076924,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedPathCopy",
+      "Solidity.Evm.Correct",
+      "Solidity.Evm.MemoryFixedChildArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 341,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedPathCopyControls.lean",
+    "proof_lines": 260,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 61,
+    "declarations": {
+      "def": 5,
+      "structure": 1
+    },
+    "definition_lines": 56,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedMemoryCopy",
+      "Solidity.Backend.MemoryCopies.AliasBinding"
+    ],
+    "imports_in": 3,
+    "lines": 70,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedPathCopyInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 55,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.022727272727272728,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferenceDeclareInterface"
+    ],
+    "imports_in": 4,
+    "lines": 75,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferenceDeclare.lean",
+    "proof_lines": 44,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 163,
+    "declarations": {
+      "abbrev": 2,
+      "def": 11,
+      "theorem": 13
+    },
+    "definition_lines": 24,
+    "definition_to_proof_line_ratio": 0.19672131147540983,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferenceDeclare",
+      "Solidity.Evm.Correct"
+    ],
+    "imports_in": 1,
+    "lines": 210,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferenceDeclareControls.lean",
+    "proof_lines": 122,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 210,
+    "declarations": {
+      "abbrev": 3,
+      "def": 14,
+      "theorem": 13
+    },
+    "definition_lines": 30,
+    "definition_to_proof_line_ratio": 0.17964071856287425,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferenceDeclare",
+      "Solidity.Evm.Correct"
+    ],
+    "imports_in": 1,
+    "lines": 244,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferenceDeclareFrameControls.lean",
+    "proof_lines": 167,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 38,
+    "declarations": {
+      "def": 2,
+      "structure": 1
+    },
+    "definition_lines": 33,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferencePathCopy",
+      "Solidity.Backend.MemoryCopies.LoadedArray"
+    ],
+    "imports_in": 2,
+    "lines": 46,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferenceDeclareInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 78,
+    "declarations": {
+      "def": 1,
+      "theorem": 6
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.07142857142857142,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferenceLiveInterface"
+    ],
+    "imports_in": 4,
+    "lines": 110,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferenceLive.lean",
+    "proof_lines": 56,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 161,
+    "declarations": {
+      "abbrev": 1,
+      "def": 13,
+      "structure": 1,
+      "theorem": 17
+    },
+    "definition_lines": 32,
+    "definition_to_proof_line_ratio": 0.3076923076923077,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferenceLive",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 218,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferenceLiveControls.lean",
+    "proof_lines": 104,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 29,
+    "declarations": {
+      "def": 4,
+      "structure": 1
+    },
+    "definition_lines": 24,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferenceStorageParent",
+      "Solidity.Backend.MemoryCopies.PrimitiveArrayLive"
+    ],
+    "imports_in": 2,
+    "lines": 40,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferenceLiveInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 295,
+    "declarations": {
+      "def": 1,
+      "theorem": 10
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.003676470588235294,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferenceMemoryRows"
+    ],
+    "imports_in": 2,
+    "lines": 356,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferenceMemoryLoop.lean",
+    "proof_lines": 272,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 387,
+    "declarations": {
+      "abbrev": 5,
+      "def": 17,
+      "theorem": 23
+    },
+    "definition_lines": 32,
+    "definition_to_proof_line_ratio": 0.0975609756097561,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferenceMemoryLoop",
+      "Solidity.Backend.MemoryCopies.StorageMemoryPipeline"
+    ],
+    "imports_in": 1,
+    "lines": 463,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferenceMemoryLoopControls.lean",
+    "proof_lines": 328,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 55,
+    "declarations": {
+      "def": 4,
+      "structure": 1
+    },
+    "definition_lines": 50,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferenceMemoryTurn",
+      "Solidity.Backend.MemoryCopies.NestedMemoryLoopInterface"
+    ],
+    "imports_in": 2,
+    "lines": 64,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferenceMemoryLoopInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 143,
+    "declarations": {
+      "theorem": 7
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferenceMemoryLoopInterface"
+    ],
+    "imports_in": 2,
+    "lines": 177,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferenceMemoryRows.lean",
+    "proof_lines": 125,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 115,
+    "declarations": {
+      "def": 1,
+      "theorem": 3
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.00980392156862745,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferenceMemoryTurnInterface"
+    ],
+    "imports_in": 3,
+    "lines": 142,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferenceMemoryTurn.lean",
+    "proof_lines": 102,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 327,
+    "declarations": {
+      "abbrev": 3,
+      "def": 10,
+      "theorem": 23
+    },
+    "definition_lines": 20,
+    "definition_to_proof_line_ratio": 0.07246376811594203,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferenceMemoryTurn",
+      "Solidity.Backend.MemoryCopies.StorageMemoryPipeline"
+    ],
+    "imports_in": 1,
+    "lines": 409,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferenceMemoryTurnControls.lean",
+    "proof_lines": 276,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 42,
+    "declarations": {
+      "def": 4,
+      "structure": 1
+    },
+    "definition_lines": 38,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedMemoryTurn"
+    ],
+    "imports_in": 2,
+    "lines": 52,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferenceMemoryTurnInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 28,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.05263157894736842,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferencePathInterface"
+    ],
+    "imports_in": 3,
+    "lines": 40,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferencePath.lean",
+    "proof_lines": 19,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 95,
+    "declarations": {
+      "abbrev": 2,
+      "def": 9,
+      "theorem": 10
+    },
+    "definition_lines": 19,
+    "definition_to_proof_line_ratio": 0.3220338983050847,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferencePath",
+      "Solidity.Evm.Correct"
+    ],
+    "imports_in": 1,
+    "lines": 138,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferencePathControls.lean",
+    "proof_lines": 59,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 62,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.019230769230769232,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferencePathCopyInterface",
+      "Solidity.Backend.MemoryCopies.NestedStorageHeader"
+    ],
+    "imports_in": 3,
+    "lines": 76,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferencePathCopy.lean",
+    "proof_lines": 52,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 156,
+    "declarations": {
+      "abbrev": 2,
+      "def": 11,
+      "theorem": 12
+    },
+    "definition_lines": 24,
+    "definition_to_proof_line_ratio": 0.20869565217391303,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferencePathCopy",
+      "Solidity.Evm.Correct"
+    ],
+    "imports_in": 1,
+    "lines": 202,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferencePathCopyControls.lean",
+    "proof_lines": 115,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 36,
+    "declarations": {
+      "def": 2,
+      "structure": 1
+    },
+    "definition_lines": 32,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferencePath"
+    ],
+    "imports_in": 2,
+    "lines": 44,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferencePathCopyInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 23,
+    "declarations": {
+      "def": 1,
+      "structure": 1
+    },
+    "definition_lines": 18,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferenceLive",
+      "Solidity.Evm.Expr"
+    ],
+    "imports_in": 2,
+    "lines": 30,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferencePathInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 60,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.02040816326530612,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferenceRebindInterface"
+    ],
+    "imports_in": 2,
+    "lines": 78,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferenceRebind.lean",
+    "proof_lines": 49,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 231,
+    "declarations": {
+      "abbrev": 4,
+      "def": 17,
+      "theorem": 15
+    },
+    "definition_lines": 34,
+    "definition_to_proof_line_ratio": 0.19101123595505617,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferenceRebind",
+      "Solidity.Evm.Correct"
+    ],
+    "imports_in": 1,
+    "lines": 285,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferenceRebindControls.lean",
+    "proof_lines": 178,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 41,
+    "declarations": {
+      "def": 2,
+      "structure": 1
+    },
+    "definition_lines": 37,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferenceDeclare"
+    ],
+    "imports_in": 2,
+    "lines": 49,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferenceRebindInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 257,
+    "declarations": {
+      "def": 1,
+      "theorem": 7
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.00423728813559322,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferenceStorageLoopInterface"
+    ],
+    "imports_in": 3,
+    "lines": 307,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferenceStorageLoop.lean",
+    "proof_lines": 236,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 380,
+    "declarations": {
+      "abbrev": 1,
+      "def": 14,
+      "structure": 1,
+      "theorem": 23
+    },
+    "definition_lines": 27,
+    "definition_to_proof_line_ratio": 0.08626198083067092,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferenceStorageLoop",
+      "Solidity.Evm.MemoryObjectArrayExamples",
+      "Solidity.Backend.MemoryCopies.TraversalFresh"
+    ],
+    "imports_in": 2,
+    "lines": 487,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferenceStorageLoopControls.lean",
+    "proof_lines": 313,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 43,
+    "declarations": {
+      "def": 2,
+      "structure": 1
+    },
+    "definition_lines": 38,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferenceStorageTurn",
+      "Solidity.Backend.MemoryCopies.NestedStorageLoop"
+    ],
+    "imports_in": 2,
+    "lines": 51,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferenceStorageLoopInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 236,
+    "declarations": {
+      "def": 1,
+      "theorem": 12
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.00966183574879227,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferenceStorageParentInterface",
+      "Solidity.Backend.MemoryCopies.NestedStorageHeader"
+    ],
+    "imports_in": 3,
+    "lines": 296,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferenceStorageParent.lean",
+    "proof_lines": 207,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 312,
+    "declarations": {
+      "abbrev": 1,
+      "def": 15,
+      "structure": 1,
+      "theorem": 25
+    },
+    "definition_lines": 27,
+    "definition_to_proof_line_ratio": 0.1115702479338843,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferenceStorageParent",
+      "Solidity.Backend.MemoryCopies.FixedReferenceStorageLoopControls",
+      "Solidity.Evm.MemoryObjectArrayExamples",
+      "Solidity.Backend.MemoryCopies.TraversalFresh"
+    ],
+    "imports_in": 1,
+    "lines": 426,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferenceStorageParentControls.lean",
+    "proof_lines": 242,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 49,
+    "declarations": {
+      "def": 4,
+      "structure": 1
+    },
+    "definition_lines": 42,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferenceStorageLoop",
+      "Solidity.Backend.MemoryCopies.NestedStorageParent",
+      "Solidity.Backend.MemoryCopies.TraversalWords",
+      "Solidity.Evm.MemoryDefaultFixedBuilder"
+    ],
+    "imports_in": 2,
+    "lines": 61,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferenceStorageParentInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 98,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.011494252873563218,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferenceStorageTurnInterface"
+    ],
+    "imports_in": 3,
+    "lines": 118,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferenceStorageTurn.lean",
+    "proof_lines": 87,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 200,
+    "declarations": {
+      "def": 9,
+      "structure": 1,
+      "theorem": 14
+    },
+    "definition_lines": 22,
+    "definition_to_proof_line_ratio": 0.1437908496732026,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferenceStorageTurn",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 266,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferenceStorageTurnControls.lean",
+    "proof_lines": 153,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 39,
+    "declarations": {
+      "def": 2,
+      "structure": 1
+    },
+    "definition_lines": 34,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedStorageTurn",
+      "Solidity.Evm.MemoryDefaultArraySource"
+    ],
+    "imports_in": 2,
+    "lines": 47,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedReferenceStorageTurnInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 133,
+    "declarations": {
+      "def": 2,
+      "theorem": 7
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.025423728813559324,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedStorageCopyInterface"
+    ],
+    "imports_in": 4,
+    "lines": 146,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedStorageCopy.lean",
+    "proof_lines": 118,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 124,
+    "declarations": {
+      "def": 8,
+      "structure": 1,
+      "theorem": 11
+    },
+    "definition_lines": 17,
+    "definition_to_proof_line_ratio": 0.1827956989247312,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedStorageCopy",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 137,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedStorageCopyControls.lean",
+    "proof_lines": 93,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 23,
+    "declarations": {
+      "def": 2,
+      "structure": 1
+    },
+    "definition_lines": 19,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedMemoryCopy"
+    ],
+    "imports_in": 2,
+    "lines": 29,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedStorageCopyInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 159,
+    "declarations": {
+      "def": 1,
+      "theorem": 9
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.013986013986013986,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedStoragePathInterface"
+    ],
+    "imports_in": 3,
+    "lines": 173,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedStoragePath.lean",
+    "proof_lines": 143,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 275,
+    "declarations": {
+      "def": 20,
+      "theorem": 24
+    },
+    "definition_lines": 36,
+    "definition_to_proof_line_ratio": 0.16289592760180996,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedStoragePath",
+      "Solidity.Evm.Correct"
+    ],
+    "imports_in": 1,
+    "lines": 293,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedStoragePathControls.lean",
+    "proof_lines": 221,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 89,
+    "declarations": {
+      "def": 6,
+      "structure": 1
+    },
+    "definition_lines": 84,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedStorageCopy",
+      "Solidity.Backend.MemoryCopies.RuntimeLiveArray"
+    ],
+    "imports_in": 2,
+    "lines": 100,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/FixedStoragePathInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 156,
+    "declarations": {
+      "def": 1,
+      "theorem": 5
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.006896551724137931,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.ForwardOverlapInterface"
+    ],
+    "imports_in": 3,
+    "lines": 167,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/ForwardOverlap.lean",
+    "proof_lines": 145,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 142,
+    "declarations": {
+      "def": 3,
+      "theorem": 12
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.06779661016949153,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.ForwardOverlap"
+    ],
+    "imports_in": 2,
+    "lines": 160,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/ForwardOverlapControls.lean",
+    "proof_lines": 118,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 25,
+    "declarations": {
+      "def": 2,
+      "structure": 1
+    },
+    "definition_lines": 20,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedMemoryCopy",
+      "Solidity.Backend.MemoryOps.Snapshot"
+    ],
+    "imports_in": 2,
+    "lines": 31,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/ForwardOverlapInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 80,
+    "declarations": {
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.03125,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.GuardedDefaultDeclarationInterface"
+    ],
+    "imports_in": 2,
+    "lines": 113,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/GuardedDefaultDeclaration.lean",
+    "proof_lines": 64,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 189,
+    "declarations": {
+      "def": 8,
+      "structure": 1,
+      "theorem": 18
+    },
+    "definition_lines": 28,
+    "definition_to_proof_line_ratio": 0.21374045801526717,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.GuardedDefaultDeclaration",
+      "Solidity.Backend.MemoryCopies.HeapContents",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 272,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/GuardedDefaultDeclarationControls.lean",
+    "proof_lines": 131,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 49,
+    "declarations": {
+      "def": 2,
+      "structure": 1
+    },
+    "definition_lines": 44,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.DefaultSelection",
+      "Solidity.Backend.MemoryCopies.SelectedDefaultDemand"
+    ],
+    "imports_in": 2,
+    "lines": 58,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/GuardedDefaultDeclarationInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 92,
+    "declarations": {
+      "def": 2,
+      "theorem": 6
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.1,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.HeapContentsInterface"
+    ],
+    "imports_in": 15,
+    "lines": 115,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/HeapContents.lean",
+    "proof_lines": 70,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 62,
+    "declarations": {
+      "def": 14,
+      "theorem": 9
+    },
+    "definition_lines": 18,
+    "definition_to_proof_line_ratio": 0.5454545454545454,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.HeapContents"
+    ],
+    "imports_in": 1,
+    "lines": 86,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/HeapContentsControls.lean",
+    "proof_lines": 33,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 8,
+    "declarations": {
+      "structure": 1
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.InterfaceV2",
+      "Solidity.Theory.Typed.MemMirror"
+    ],
+    "imports_in": 2,
+    "lines": 16,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/HeapContentsInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 109,
+    "declarations": {
+      "structure": 13
+    },
+    "definition_lines": 102,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryDefaultCompile",
+      "Solidity.Evm.MemoryStructCopySource",
+      "Solidity.Backend.MemoryOps.Snapshot",
+      "Solidity.Source.Hoare"
+    ],
+    "imports_in": 5,
+    "lines": 168,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/Interface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 36,
+    "declarations": {
+      "structure": 4
+    },
+    "definition_lines": 31,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryDefaultCompile",
+      "Solidity.Evm.MemoryStructCopySource"
+    ],
+    "imports_in": 4,
+    "lines": 59,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/InterfaceV2.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 58,
+    "declarations": {
+      "theorem": 8
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.InterfaceV2"
+    ],
+    "imports_in": 7,
+    "lines": 69,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/InterfaceV2Laws.lean",
+    "proof_lines": 47,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 18,
+    "declarations": {
+      "structure": 1
+    },
+    "definition_lines": 14,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.InterfaceV2"
+    ],
+    "imports_in": 3,
+    "lines": 25,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/InterfaceV2Roots.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 176,
+    "declarations": {
+      "def": 2,
+      "theorem": 9
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.02531645569620253,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.LoadedArrayInterface"
+    ],
+    "imports_in": 7,
+    "lines": 191,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/LoadedArray.lean",
+    "proof_lines": 158,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 198,
+    "declarations": {
+      "abbrev": 1,
+      "def": 12,
+      "theorem": 17
+    },
+    "definition_lines": 26,
+    "definition_to_proof_line_ratio": 0.16455696202531644,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.LoadedArray",
+      "Solidity.Evm.Correct"
+    ],
+    "imports_in": 1,
+    "lines": 215,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/LoadedArrayControls.lean",
+    "proof_lines": 158,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 44,
+    "declarations": {
+      "def": 5,
+      "structure": 2
+    },
+    "definition_lines": 39,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.PrimitiveArray",
+      "Solidity.Evm.Expr"
+    ],
+    "imports_in": 2,
+    "lines": 54,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/LoadedArrayInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 105,
+    "declarations": {
+      "def": 2,
+      "theorem": 6
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.044444444444444446,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.LoadedSingletonInterface"
+    ],
+    "imports_in": 3,
+    "lines": 117,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/LoadedSingleton.lean",
+    "proof_lines": 90,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 126,
+    "declarations": {
+      "def": 9,
+      "theorem": 18
+    },
+    "definition_lines": 16,
+    "definition_to_proof_line_ratio": 0.16842105263157894,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.LoadedSingleton",
+      "Solidity.Evm.Correct"
+    ],
+    "imports_in": 1,
+    "lines": 148,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/LoadedSingletonControls.lean",
+    "proof_lines": 95,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 33,
+    "declarations": {
+      "def": 3,
+      "structure": 1
+    },
+    "definition_lines": 29,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.SingletonCopy"
+    ],
+    "imports_in": 2,
+    "lines": 40,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/LoadedSingletonInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 74,
+    "declarations": {
+      "def": 2,
+      "theorem": 7
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.1111111111111111,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.MemoryCopyDemandInterface"
+    ],
+    "imports_in": 3,
+    "lines": 91,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/MemoryCopyDemand.lean",
+    "proof_lines": 54,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 116,
+    "declarations": {
+      "abbrev": 7,
+      "def": 21,
+      "structure": 1,
+      "theorem": 13
+    },
+    "definition_lines": 51,
+    "definition_to_proof_line_ratio": 1.0851063829787233,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.MemoryCopyDemand",
+      "Solidity.Backend.MemoryCopies.AliasBinding",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 136,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/MemoryCopyDemandControls.lean",
+    "proof_lines": 47,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 21,
+    "declarations": {
+      "structure": 2
+    },
+    "definition_lines": 17,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.TraversalWords",
+      "Solidity.Backend.MemoryCopies.DeepCopyContents"
+    ],
+    "imports_in": 2,
+    "lines": 27,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/MemoryCopyDemandInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 52,
+    "declarations": {
+      "def": 1,
+      "theorem": 5
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.023255813953488372,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.MemoryParentSnapshotInterface"
+    ],
+    "imports_in": 3,
+    "lines": 62,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/MemoryParentSnapshot.lean",
+    "proof_lines": 43,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 92,
+    "declarations": {
+      "abbrev": 3,
+      "def": 15,
+      "theorem": 13
+    },
+    "definition_lines": 23,
+    "definition_to_proof_line_ratio": 0.45098039215686275,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.MemoryParentSnapshot",
+      "Solidity.Backend.MemoryCopies.TraversalWords"
+    ],
+    "imports_in": 1,
+    "lines": 111,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/MemoryParentSnapshotControls.lean",
+    "proof_lines": 51,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 16,
+    "declarations": {
+      "def": 1,
+      "structure": 1
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedMemoryRows",
+      "Solidity.Backend.MemoryCopies.NestedStorageParentInterface"
+    ],
+    "imports_in": 2,
+    "lines": 23,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/MemoryParentSnapshotInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 51,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.023255813953488372,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.MemoryPathCopyInterface"
+    ],
+    "imports_in": 2,
+    "lines": 58,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/MemoryPathCopy.lean",
+    "proof_lines": 43,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 349,
+    "declarations": {
+      "abbrev": 3,
+      "def": 17,
+      "structure": 1,
+      "theorem": 27
+    },
+    "definition_lines": 43,
+    "definition_to_proof_line_ratio": 0.14930555555555555,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.MemoryPathCopy",
+      "Solidity.Evm.Correct",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 368,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/MemoryPathCopyControls.lean",
+    "proof_lines": 288,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 61,
+    "declarations": {
+      "def": 5,
+      "structure": 1
+    },
+    "definition_lines": 56,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.RuntimeMemoryArray",
+      "Solidity.Backend.MemoryCopies.AliasBinding"
+    ],
+    "imports_in": 4,
+    "lines": 70,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/MemoryPathCopyInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 58,
+    "declarations": {
+      "def": 5,
+      "theorem": 7
+    },
+    "definition_lines": 13,
+    "definition_to_proof_line_ratio": 0.3939393939393939,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedDefaults",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 74,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedDefaultControls.lean",
+    "proof_lines": 33,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 13,
+    "declarations": {
+      "def": 1,
+      "structure": 1
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.InterfaceV2Laws"
+    ],
+    "imports_in": 3,
+    "lines": 24,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedDefaultInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 59,
+    "declarations": {
+      "def": 1,
+      "theorem": 5
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.1951219512195122,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedDefaultInterface"
+    ],
+    "imports_in": 5,
+    "lines": 75,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedDefaults.lean",
+    "proof_lines": 41,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 91,
+    "declarations": {
+      "def": 2,
+      "theorem": 1
+    },
+    "definition_lines": 31,
+    "definition_to_proof_line_ratio": 0.5961538461538461,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedLivePipelineInterface"
+    ],
+    "imports_in": 2,
+    "lines": 106,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedLivePipeline.lean",
+    "proof_lines": 52,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 245,
+    "declarations": {
+      "abbrev": 2,
+      "def": 15,
+      "structure": 1,
+      "theorem": 19
+    },
+    "definition_lines": 51,
+    "definition_to_proof_line_ratio": 0.2982456140350877,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedLivePipeline",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 313,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedLivePipelineControls.lean",
+    "proof_lines": 171,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 59,
+    "declarations": {
+      "def": 2,
+      "structure": 1
+    },
+    "definition_lines": 54,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedLocationPipeline",
+      "Solidity.Backend.MemoryCopies.NestedStorageLive"
+    ],
+    "imports_in": 2,
+    "lines": 66,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedLivePipelineInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 144,
+    "declarations": {
+      "def": 1,
+      "theorem": 7
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.007518796992481203,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedLocationPipelineInterface"
+    ],
+    "imports_in": 3,
+    "lines": 156,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedLocationPipeline.lean",
+    "proof_lines": 133,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 172,
+    "declarations": {
+      "def": 10,
+      "structure": 2,
+      "theorem": 14
+    },
+    "definition_lines": 46,
+    "definition_to_proof_line_ratio": 0.4144144144144144,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedLocationPipelineObservations",
+      "Solidity.Backend.MemoryCopies.NestedStorageHeaderControls",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 194,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedLocationPipelineControls.lean",
+    "proof_lines": 111,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 65,
+    "declarations": {
+      "def": 3,
+      "structure": 1
+    },
+    "definition_lines": 59,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedStorageHeader",
+      "Solidity.Backend.MemoryCopies.NestedMemoryParent",
+      "Solidity.Backend.MemoryCopies.NestedMemoryParentDemand"
+    ],
+    "imports_in": 2,
+    "lines": 73,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedLocationPipelineInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 48,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedLocationPipeline"
+    ],
+    "imports_in": 2,
+    "lines": 52,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedLocationPipelineObservations.lean",
+    "proof_lines": 43,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 280,
+    "declarations": {
+      "def": 1,
+      "theorem": 10
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.0037593984962406013,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedMemoryRows"
+    ],
+    "imports_in": 4,
+    "lines": 297,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedMemoryLoop.lean",
+    "proof_lines": 266,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 300,
+    "declarations": {
+      "abbrev": 3,
+      "def": 12,
+      "theorem": 20
+    },
+    "definition_lines": 25,
+    "definition_to_proof_line_ratio": 0.09615384615384616,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedMemoryLoop",
+      "Solidity.Backend.MemoryCopies.StorageMemoryPipeline"
+    ],
+    "imports_in": 1,
+    "lines": 316,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedMemoryLoopControls.lean",
+    "proof_lines": 260,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 60,
+    "declarations": {
+      "def": 5,
+      "structure": 1
+    },
+    "definition_lines": 53,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedMemoryTurn",
+      "Solidity.Backend.MemoryCopies.NestedStorageLoopInterface",
+      "Solidity.Backend.MemoryCopies.SnapshotTransport",
+      "Solidity.Backend.MemoryCopies.TraversalFresh"
+    ],
+    "imports_in": 3,
+    "lines": 70,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedMemoryLoopInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 117,
+    "declarations": {
+      "def": 5,
+      "structure": 1,
+      "theorem": 3
+    },
+    "definition_lines": 33,
+    "definition_to_proof_line_ratio": 0.4230769230769231,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedMemoryLoop",
+      "Solidity.Backend.MemoryCopies.NestedStorageHeaderControls"
+    ],
+    "imports_in": 2,
+    "lines": 126,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedMemoryMixedControls.lean",
+    "proof_lines": 78,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 188,
+    "declarations": {
+      "def": 1,
+      "theorem": 7
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.005714285714285714,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedMemoryParentInterface"
+    ],
+    "imports_in": 5,
+    "lines": 200,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedMemoryParent.lean",
+    "proof_lines": 175,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 418,
+    "declarations": {
+      "abbrev": 3,
+      "def": 15,
+      "theorem": 28
+    },
+    "definition_lines": 28,
+    "definition_to_proof_line_ratio": 0.07526881720430108,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedMemoryParent"
+    ],
+    "imports_in": 1,
+    "lines": 440,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedMemoryParentControls.lean",
+    "proof_lines": 372,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 33,
+    "declarations": {
+      "theorem": 5
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedMemoryParentInterface",
+      "Solidity.Backend.MemoryCopies.MemoryCopyDemand"
+    ],
+    "imports_in": 4,
+    "lines": 42,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedMemoryParentDemand.lean",
+    "proof_lines": 26,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 35,
+    "declarations": {
+      "def": 4,
+      "structure": 1
+    },
+    "definition_lines": 29,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.MemoryParentSnapshot",
+      "Solidity.Backend.MemoryCopies.NestedMemoryLoop",
+      "Solidity.Backend.MemoryCopies.NestedStorageParent"
+    ],
+    "imports_in": 3,
+    "lines": 45,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedMemoryParentInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 43,
+    "declarations": {
+      "structure": 1,
+      "theorem": 2
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.16666666666666666,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedMemoryParent",
+      "Solidity.Backend.MemoryCopies.NestedMemoryParentDemand",
+      "Solidity.Backend.MemoryCopies.NestedMemoryMixedControls"
+    ],
+    "imports_in": 1,
+    "lines": 50,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedMemoryParentMixedControls.lean",
+    "proof_lines": 30,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 73,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.03278688524590164,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedMemoryPathInterface"
+    ],
+    "imports_in": 3,
+    "lines": 94,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedMemoryPath.lean",
+    "proof_lines": 61,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 400,
+    "declarations": {
+      "abbrev": 4,
+      "def": 28,
+      "theorem": 27
+    },
+    "definition_lines": 53,
+    "definition_to_proof_line_ratio": 0.16510903426791276,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedMemoryPath",
+      "Solidity.Backend.MemoryCopies.NestedMemoryPathFrame",
+      "Solidity.Evm.Correct"
+    ],
+    "imports_in": 1,
+    "lines": 478,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedMemoryPathControls.lean",
+    "proof_lines": 321,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 43,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.0625,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedMemoryPath",
+      "Solidity.Backend.MemoryCopies.NestedMemoryPathFrameInterface"
+    ],
+    "imports_in": 2,
+    "lines": 58,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedMemoryPathFrame.lean",
+    "proof_lines": 32,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 31,
+    "declarations": {
+      "def": 1,
+      "structure": 1
+    },
+    "definition_lines": 27,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedMemoryPathInterface"
+    ],
+    "imports_in": 2,
+    "lines": 37,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedMemoryPathFrameInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 68,
+    "declarations": {
+      "def": 5,
+      "structure": 1
+    },
+    "definition_lines": 62,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.AliasBinding",
+      "Solidity.Backend.MemoryCopies.NestedMemoryParent",
+      "Solidity.Backend.MemoryCopies.NestedMemoryParentDemand"
+    ],
+    "imports_in": 3,
+    "lines": 79,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedMemoryPathInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 128,
+    "declarations": {
+      "theorem": 6
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedMemoryLoopInterface"
+    ],
+    "imports_in": 3,
+    "lines": 138,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedMemoryRows.lean",
+    "proof_lines": 118,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 117,
+    "declarations": {
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.009345794392523364,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedMemoryTurnInterface"
+    ],
+    "imports_in": 4,
+    "lines": 126,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedMemoryTurn.lean",
+    "proof_lines": 107,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 302,
+    "declarations": {
+      "abbrev": 3,
+      "def": 10,
+      "theorem": 21
+    },
+    "definition_lines": 20,
+    "definition_to_proof_line_ratio": 0.07547169811320754,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedMemoryTurn",
+      "Solidity.Backend.MemoryCopies.StorageMemoryPipeline"
+    ],
+    "imports_in": 1,
+    "lines": 318,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedMemoryTurnControls.lean",
+    "proof_lines": 265,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 47,
+    "declarations": {
+      "def": 5,
+      "structure": 1
+    },
+    "definition_lines": 40,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedMemoryArray",
+      "Solidity.Backend.MemoryCopies.HeapContents",
+      "Solidity.Evm.MemoryDefaultChildren",
+      "Solidity.Evm.MemoryObjectAccess"
+    ],
+    "imports_in": 2,
+    "lines": 57,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedMemoryTurnInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 110,
+    "declarations": {
+      "def": 1,
+      "theorem": 8
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.010416666666666666,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedStorageHeaderInterface"
+    ],
+    "imports_in": 6,
+    "lines": 123,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedStorageHeader.lean",
+    "proof_lines": 96,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 344,
+    "declarations": {
+      "abbrev": 2,
+      "def": 17,
+      "structure": 1,
+      "theorem": 23
+    },
+    "definition_lines": 33,
+    "definition_to_proof_line_ratio": 0.11301369863013698,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedStorageHeader",
+      "Solidity.Evm.MemoryObjectArrayExamples",
+      "Solidity.Backend.MemoryCopies.TraversalFresh"
+    ],
+    "imports_in": 3,
+    "lines": 367,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedStorageHeaderControls.lean",
+    "proof_lines": 292,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 39,
+    "declarations": {
+      "def": 4,
+      "structure": 1
+    },
+    "definition_lines": 35,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedStorageParent"
+    ],
+    "imports_in": 2,
+    "lines": 49,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedStorageHeaderInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 96,
+    "declarations": {
+      "def": 1,
+      "theorem": 5
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.02564102564102564,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedStorageLiveInterface"
+    ],
+    "imports_in": 4,
+    "lines": 124,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedStorageLive.lean",
+    "proof_lines": 78,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 137,
+    "declarations": {
+      "abbrev": 2,
+      "def": 13,
+      "structure": 1,
+      "theorem": 15
+    },
+    "definition_lines": 28,
+    "definition_to_proof_line_ratio": 0.3111111111111111,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedStorageLive",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 181,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedStorageLiveControls.lean",
+    "proof_lines": 90,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 44,
+    "declarations": {
+      "def": 3,
+      "structure": 1
+    },
+    "definition_lines": 39,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.FixedReferenceLive",
+      "Solidity.Backend.MemoryCopies.NestedStorageHeader"
+    ],
+    "imports_in": 2,
+    "lines": 53,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedStorageLiveInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 248,
+    "declarations": {
+      "def": 1,
+      "theorem": 7
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.00425531914893617,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedStorageLoopInterface"
+    ],
+    "imports_in": 4,
+    "lines": 260,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedStorageLoop.lean",
+    "proof_lines": 235,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 352,
+    "declarations": {
+      "abbrev": 1,
+      "def": 13,
+      "structure": 1,
+      "theorem": 22
+    },
+    "definition_lines": 26,
+    "definition_to_proof_line_ratio": 0.08552631578947369,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedStorageLoop",
+      "Solidity.Evm.MemoryObjectArrayExamples",
+      "Solidity.Backend.MemoryCopies.TraversalFresh"
+    ],
+    "imports_in": 2,
+    "lines": 375,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedStorageLoopControls.lean",
+    "proof_lines": 304,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 54,
+    "declarations": {
+      "abbrev": 1,
+      "def": 5,
+      "structure": 1
+    },
+    "definition_lines": 50,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedStorageTurn"
+    ],
+    "imports_in": 3,
+    "lines": 66,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedStorageLoopInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 177,
+    "declarations": {
+      "def": 1,
+      "theorem": 7
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.006097560975609756,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedStorageParentInterface"
+    ],
+    "imports_in": 5,
+    "lines": 189,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedStorageParent.lean",
+    "proof_lines": 164,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 299,
+    "declarations": {
+      "abbrev": 1,
+      "def": 15,
+      "structure": 1,
+      "theorem": 24
+    },
+    "definition_lines": 27,
+    "definition_to_proof_line_ratio": 0.10887096774193548,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedStorageParent",
+      "Solidity.Backend.MemoryCopies.NestedStorageLoopControls",
+      "Solidity.Evm.MemoryObjectArrayExamples",
+      "Solidity.Backend.MemoryCopies.TraversalFresh"
+    ],
+    "imports_in": 1,
+    "lines": 324,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedStorageParentControls.lean",
+    "proof_lines": 248,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 42,
+    "declarations": {
+      "def": 5,
+      "structure": 1
+    },
+    "definition_lines": 34,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedStorageLoop",
+      "Solidity.Backend.MemoryCopies.CheckedReference",
+      "Solidity.Backend.MemoryCopies.HeapContents",
+      "Solidity.Evm.MemoryDefaultParent",
+      "Solidity.Evm.MemoryObjectNested"
+    ],
+    "imports_in": 3,
+    "lines": 53,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedStorageParentInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 169,
+    "declarations": {
+      "def": 1,
+      "theorem": 9
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.013422818791946308,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedStoragePathInterface"
+    ],
+    "imports_in": 2,
+    "lines": 208,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedStoragePath.lean",
+    "proof_lines": 149,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 298,
+    "declarations": {
+      "abbrev": 4,
+      "def": 17,
+      "theorem": 18
+    },
+    "definition_lines": 36,
+    "definition_to_proof_line_ratio": 0.14937759336099585,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedStoragePath",
+      "Solidity.Evm.Correct"
+    ],
+    "imports_in": 1,
+    "lines": 360,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedStoragePathControls.lean",
+    "proof_lines": 241,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 105,
+    "declarations": {
+      "def": 6,
+      "structure": 1
+    },
+    "definition_lines": 100,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedStorageLive",
+      "Solidity.Backend.MemoryCopies.LoadedArray"
+    ],
+    "imports_in": 2,
+    "lines": 120,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedStoragePathInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 102,
+    "declarations": {
+      "def": 1,
+      "theorem": 3
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.010752688172043012,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedStorageTurnInterface"
+    ],
+    "imports_in": 4,
+    "lines": 110,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedStorageTurn.lean",
+    "proof_lines": 93,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 234,
+    "declarations": {
+      "def": 9,
+      "structure": 1,
+      "theorem": 18
+    },
+    "definition_lines": 22,
+    "definition_to_proof_line_ratio": 0.11398963730569948,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedStorageTurn",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 254,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedStorageTurnControls.lean",
+    "proof_lines": 193,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 42,
+    "declarations": {
+      "def": 4,
+      "structure": 1
+    },
+    "definition_lines": 37,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.CheckedStorageArray",
+      "Solidity.Evm.MemoryDefaultChildren"
+    ],
+    "imports_in": 2,
+    "lines": 52,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/NestedStorageTurnInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 31,
+    "declarations": {
+      "structure": 5
+    },
+    "definition_lines": 26,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.Interface",
+      "Solidity.Source.Eval",
+      "Solidity.Source.Hoare"
+    ],
+    "imports_in": 5,
+    "lines": 56,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/Premises.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 195,
+    "declarations": {
+      "def": 1,
+      "theorem": 9
+    },
+    "definition_lines": 25,
+    "definition_to_proof_line_ratio": 0.16025641025641027,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.PrimitiveArrayInterface"
+    ],
+    "imports_in": 5,
+    "lines": 209,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/PrimitiveArray.lean",
+    "proof_lines": 156,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 113,
+    "declarations": {
+      "def": 8,
+      "structure": 1,
+      "theorem": 12
+    },
+    "definition_lines": 27,
+    "definition_to_proof_line_ratio": 0.391304347826087,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.PrimitiveArray",
+      "Solidity.Backend.MemoryCopies.InterfaceV2Laws",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 132,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/PrimitiveArrayControls.lean",
+    "proof_lines": 69,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 29,
+    "declarations": {
+      "def": 5,
+      "structure": 2
+    },
+    "definition_lines": 24,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.SingletonCopy",
+      "Solidity.Evm.MemoryObjectReserve"
+    ],
+    "imports_in": 2,
+    "lines": 39,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/PrimitiveArrayInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 80,
+    "declarations": {
+      "def": 1,
+      "theorem": 6
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.045454545454545456,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.PrimitiveArrayLiveInterface"
+    ],
+    "imports_in": 5,
+    "lines": 91,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/PrimitiveArrayLive.lean",
+    "proof_lines": 66,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 85,
+    "declarations": {
+      "def": 6,
+      "structure": 1,
+      "theorem": 8
+    },
+    "definition_lines": 18,
+    "definition_to_proof_line_ratio": 0.32142857142857145,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.PrimitiveArrayLive",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 96,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/PrimitiveArrayLiveControls.lean",
+    "proof_lines": 56,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 17,
+    "declarations": {
+      "def": 1,
+      "structure": 1
+    },
+    "definition_lines": 13,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.RuntimeStorageArray"
+    ],
+    "imports_in": 2,
+    "lines": 22,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/PrimitiveArrayLiveInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 35,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.6428571428571429,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.PublishedStorageInterface"
+    ],
+    "imports_in": 2,
+    "lines": 42,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/PublishedStorage.lean",
+    "proof_lines": 14,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 65,
+    "declarations": {
+      "def": 7,
+      "structure": 1,
+      "theorem": 8
+    },
+    "definition_lines": 17,
+    "definition_to_proof_line_ratio": 0.4857142857142857,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.PublishedStorage",
+      "Solidity.Backend.MemoryCopies.PrimitiveArray",
+      "Solidity.Backend.StorageOps.ProducerInterfaceControls",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 75,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/PublishedStorageControls.lean",
+    "proof_lines": 35,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 16,
+    "declarations": {
+      "structure": 1
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.Premises",
+      "Solidity.Backend.StorageOps.ProducerInterface"
+    ],
+    "imports_in": 2,
+    "lines": 21,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/PublishedStorageInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 195,
+    "declarations": {
+      "def": 1,
+      "theorem": 8
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.0055248618784530384,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.RangeOverlapInterface"
+    ],
+    "imports_in": 3,
+    "lines": 208,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/RangeOverlap.lean",
+    "proof_lines": 181,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 111,
+    "declarations": {
+      "def": 2,
+      "theorem": 12
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.06818181818181818,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.RangeOverlap",
+      "Solidity.Backend.MemoryCopies.ForwardOverlapControls"
+    ],
+    "imports_in": 3,
+    "lines": 129,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/RangeOverlapControls.lean",
+    "proof_lines": 88,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 28,
+    "declarations": {
+      "def": 5,
+      "structure": 1
+    },
+    "definition_lines": 23,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.ForwardOverlap",
+      "Solidity.Evm.MemoryExpr"
+    ],
+    "imports_in": 2,
+    "lines": 37,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/RangeOverlapInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 47,
+    "declarations": {
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.06451612903225806,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.ReferenceDefaultDemandInterface"
+    ],
+    "imports_in": 3,
+    "lines": 71,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/ReferenceDefaultDemand.lean",
+    "proof_lines": 31,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 134,
+    "declarations": {
+      "def": 6,
+      "structure": 1,
+      "theorem": 14
+    },
+    "definition_lines": 21,
+    "definition_to_proof_line_ratio": 0.25301204819277107,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.ReferenceDefaultDemand",
+      "Solidity.Backend.MemoryCopies.HeapContents",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 215,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/ReferenceDefaultDemandControls.lean",
+    "proof_lines": 83,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 27,
+    "declarations": {
+      "def": 2,
+      "structure": 1
+    },
+    "definition_lines": 22,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.SelectedDefaultDemand",
+      "Solidity.Backend.MemoryCopies.CheckedReference"
+    ],
+    "imports_in": 2,
+    "lines": 35,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/ReferenceDefaultDemandInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 86,
+    "declarations": {
+      "def": 8,
+      "structure": 1,
+      "theorem": 8
+    },
+    "definition_lines": 25,
+    "definition_to_proof_line_ratio": 0.5208333333333334,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.RuntimeArrays",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 103,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/RuntimeArrayControls.lean",
+    "proof_lines": 48,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 14,
+    "declarations": {
+      "def": 1,
+      "structure": 1
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.NestedDefaultInterface",
+      "Solidity.Evm.MemoryReferenceDefaultSource"
+    ],
+    "imports_in": 4,
+    "lines": 24,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/RuntimeArrayInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 81,
+    "declarations": {
+      "def": 3,
+      "theorem": 4
+    },
+    "definition_lines": 17,
+    "definition_to_proof_line_ratio": 0.32075471698113206,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.RuntimeArrayInterface",
+      "Solidity.Backend.MemoryCopies.NestedDefaults"
+    ],
+    "imports_in": 3,
+    "lines": 99,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/RuntimeArrays.lean",
+    "proof_lines": 53,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 84,
+    "declarations": {
+      "def": 1,
+      "theorem": 5
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.0136986301369863,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.RuntimeGrowthInterface"
+    ],
+    "imports_in": 2,
+    "lines": 94,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/RuntimeGrowth.lean",
+    "proof_lines": 73,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 117,
+    "declarations": {
+      "abbrev": 1,
+      "def": 11,
+      "structure": 1,
+      "theorem": 10
+    },
+    "definition_lines": 26,
+    "definition_to_proof_line_ratio": 0.34210526315789475,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.RuntimeGrowth",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 131,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/RuntimeGrowthControls.lean",
+    "proof_lines": 76,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 23,
+    "declarations": {
+      "def": 1,
+      "structure": 1
+    },
+    "definition_lines": 19,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.RuntimeRebind"
+    ],
+    "imports_in": 2,
+    "lines": 28,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/RuntimeGrowthInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 126,
+    "declarations": {
+      "def": 1,
+      "theorem": 6
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.017699115044247787,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.RuntimeLiveArrayInterface"
+    ],
+    "imports_in": 4,
+    "lines": 137,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/RuntimeLiveArray.lean",
+    "proof_lines": 113,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 313,
+    "declarations": {
+      "abbrev": 3,
+      "def": 18,
+      "theorem": 28
+    },
+    "definition_lines": 38,
+    "definition_to_proof_line_ratio": 0.14960629921259844,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.RuntimeLiveArray",
+      "Solidity.Evm.Correct"
+    ],
+    "imports_in": 1,
+    "lines": 342,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/RuntimeLiveArrayControls.lean",
+    "proof_lines": 254,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 79,
+    "declarations": {
+      "def": 3,
+      "structure": 1
+    },
+    "definition_lines": 74,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.RuntimePathArray",
+      "Solidity.Backend.MemoryCopies.PrimitiveArrayLive"
+    ],
+    "imports_in": 2,
+    "lines": 86,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/RuntimeLiveArrayInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 210,
+    "declarations": {
+      "def": 2,
+      "theorem": 9
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.015544041450777202,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.RuntimeMemoryArrayInterface"
+    ],
+    "imports_in": 5,
+    "lines": 225,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/RuntimeMemoryArray.lean",
+    "proof_lines": 193,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 203,
+    "declarations": {
+      "abbrev": 2,
+      "def": 7,
+      "theorem": 14
+    },
+    "definition_lines": 15,
+    "definition_to_proof_line_ratio": 0.08522727272727272,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.RuntimeMemoryArray"
+    ],
+    "imports_in": 1,
+    "lines": 214,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/RuntimeMemoryArrayControls.lean",
+    "proof_lines": 176,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 28,
+    "declarations": {
+      "def": 4,
+      "structure": 1
+    },
+    "definition_lines": 23,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.RuntimeStorageArray",
+      "Solidity.Evm.MemoryStorageCopyLaws"
+    ],
+    "imports_in": 2,
+    "lines": 36,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/RuntimeMemoryArrayInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 142,
+    "declarations": {
+      "def": 1,
+      "theorem": 7
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.015625,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.RuntimePathArrayInterface"
+    ],
+    "imports_in": 4,
+    "lines": 154,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/RuntimePathArray.lean",
+    "proof_lines": 128,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 272,
+    "declarations": {
+      "abbrev": 3,
+      "def": 18,
+      "theorem": 22
+    },
+    "definition_lines": 36,
+    "definition_to_proof_line_ratio": 0.1643835616438356,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.RuntimePathArray",
+      "Solidity.Evm.Correct"
+    ],
+    "imports_in": 1,
+    "lines": 297,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/RuntimePathArrayControls.lean",
+    "proof_lines": 219,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 90,
+    "declarations": {
+      "def": 6,
+      "structure": 1
+    },
+    "definition_lines": 85,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.RuntimeStorageArray",
+      "Solidity.Backend.MemoryCopies.LoadedArray"
+    ],
+    "imports_in": 2,
+    "lines": 100,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/RuntimePathArrayInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 38,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.RuntimeRebindInterface",
+      "Solidity.Backend.MemoryCopies.RuntimeArrays"
+    ],
+    "imports_in": 3,
+    "lines": 46,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/RuntimeRebind.lean",
+    "proof_lines": 30,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 92,
+    "declarations": {
+      "abbrev": 1,
+      "def": 10,
+      "structure": 1,
+      "theorem": 6
+    },
+    "definition_lines": 28,
+    "definition_to_proof_line_ratio": 0.5283018867924528,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.RuntimeRebind",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 107,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/RuntimeRebindControls.lean",
+    "proof_lines": 53,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 24,
+    "declarations": {
+      "def": 1
+    },
+    "definition_lines": 20,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.RuntimeArrayInterface"
+    ],
+    "imports_in": 2,
+    "lines": 30,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/RuntimeRebindInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 203,
+    "declarations": {
+      "def": 2,
+      "theorem": 10
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.016216216216216217,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.RuntimeStorageArrayInterface"
+    ],
+    "imports_in": 6,
+    "lines": 219,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/RuntimeStorageArray.lean",
+    "proof_lines": 185,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 137,
+    "declarations": {
+      "def": 8,
+      "structure": 1,
+      "theorem": 12
+    },
+    "definition_lines": 19,
+    "definition_to_proof_line_ratio": 0.18269230769230768,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.RuntimeStorageArray",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 151,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/RuntimeStorageArrayControls.lean",
+    "proof_lines": 104,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 27,
+    "declarations": {
+      "def": 3,
+      "structure": 1
+    },
+    "definition_lines": 22,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryCopies.PrimitiveArray",
+      "Solidity.Evm.MemoryStorageCopyLoop"
+    ],
+    "imports_in": 2,
+    "lines": 34,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/MemoryCopies/RuntimeStorageArrayInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  }
+]

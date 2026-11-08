@@ -1,0 +1,7302 @@
+[
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 67,
+    "declarations": {
+      "def": 6,
+      "inductive": 1,
+      "structure": 3,
+      "theorem": 3
+    },
+    "definition_lines": 43,
+    "definition_to_proof_line_ratio": 2.263157894736842,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.TryPanicCarrier"
+    ],
+    "imports_in": 2,
+    "lines": 99,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/TryPanicSourcePlan.lean",
+    "proof_lines": 19,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 136,
+    "declarations": {
+      "def": 31,
+      "theorem": 5
+    },
+    "definition_lines": 92,
+    "definition_to_proof_line_ratio": 3.2857142857142856,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.AliasConstraints",
+      "Solidity.Examples.QueryArithmetic",
+      "Solidity.Examples.QueryReduction"
+    ],
+    "imports_in": 1,
+    "lines": 205,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/AliasConstraints.lean",
+    "proof_lines": 28,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 60,
+    "declarations": {
+      "def": 10,
+      "theorem": 13
+    },
+    "definition_lines": 21,
+    "definition_to_proof_line_ratio": 1.105263157894737,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.AutoComplete",
+      "Solidity.Examples.ReadRealization",
+      "Solidity.Tools.CompleteVerification"
+    ],
+    "imports_in": 1,
+    "lines": 130,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/AutoComplete.lean",
+    "proof_lines": 19,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 98,
+    "declarations": {
+      "def": 7,
+      "theorem": 15
+    },
+    "definition_lines": 36,
+    "definition_to_proof_line_ratio": 0.72,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Tools.Run",
+      "Solidity.Calculus.ProvesDerive",
+      "Solidity.Calculus.SurfaceSpec",
+      "Solidity.Calculus.DecideComplete",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Deploy",
+      "Solidity.Calculus.Closers",
+      "Solidity.Tools.Inspect"
+    ],
+    "imports_in": 2,
+    "lines": 195,
+    "maxHeartbeats": [
+      "400000"
+    ],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Benchmark/Coin.lean",
+    "proof_lines": 50,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 36,
+    "declarations": {
+      "def": 1,
+      "theorem": 5
+    },
+    "definition_lines": 16,
+    "definition_to_proof_line_ratio": 1.6,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.ProvesDerive",
+      "Solidity.Calculus.DecideComplete",
+      "Solidity.Calculus.SurfaceSpec",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Tools.Inspect"
+    ],
+    "imports_in": 1,
+    "lines": 111,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Benchmark/Counter.lean",
+    "proof_lines": 10,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 93,
+    "declarations": {
+      "def": 1,
+      "theorem": 13
+    },
+    "definition_lines": 31,
+    "definition_to_proof_line_ratio": 0.5740740740740741,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.ProvesDerive",
+      "Solidity.Calculus.DecideComplete",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Tools.Inspect"
+    ],
+    "imports_in": 1,
+    "lines": 190,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Benchmark/ERC20.lean",
+    "proof_lines": 54,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 62,
+    "declarations": {
+      "def": 5,
+      "theorem": 8
+    },
+    "definition_lines": 20,
+    "definition_to_proof_line_ratio": 0.625,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Tools.Run",
+      "Solidity.Calculus.ProvesDerive",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Deploy",
+      "Solidity.Calculus.Closers",
+      "Solidity.Tools.Inspect"
+    ],
+    "imports_in": 1,
+    "lines": 120,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Benchmark/EtherWallet.lean",
+    "proof_lines": 32,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 86,
+    "declarations": {
+      "def": 2,
+      "theorem": 14
+    },
+    "definition_lines": 31,
+    "definition_to_proof_line_ratio": 0.7948717948717948,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.ProvesDerive",
+      "Solidity.Calculus.DecideComplete",
+      "Solidity.Calculus.SurfaceSpec",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Tools.Inspect"
+    ],
+    "imports_in": 1,
+    "lines": 195,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Benchmark/Mapping.lean",
+    "proof_lines": 39,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 121,
+    "declarations": {
+      "def": 1,
+      "theorem": 6
+    },
+    "definition_lines": 86,
+    "definition_to_proof_line_ratio": 3.739130434782609,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.ProvesDerive",
+      "Solidity.Calculus.DecideComplete",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Surface",
+      "Solidity.Syntax.Inlined",
+      "Solidity.Calculus.Closers",
+      "Solidity.Tools.Inspect"
+    ],
+    "imports_in": 1,
+    "lines": 329,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Benchmark/Purchase.lean",
+    "proof_lines": 23,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 30,
+    "declarations": {
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 13,
+    "definition_to_proof_line_ratio": 1.625,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.ProvesDerive",
+      "Solidity.Calculus.DecideComplete",
+      "Solidity.Calculus.SurfaceSpec",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Tools.Inspect"
+    ],
+    "imports_in": 1,
+    "lines": 72,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Benchmark/SimpleStorage.lean",
+    "proof_lines": 8,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 98,
+    "declarations": {
+      "def": 9
+    },
+    "definition_lines": 54,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Syntax.Splice",
+      "Solidity.Syntax.Inlined"
+    ],
+    "imports_in": 1,
+    "lines": 268,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Benchmark/Syntax.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 84,
+    "declarations": {
+      "def": 28
+    },
+    "definition_lines": 36,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DeclarationStaticReduction",
+      "Solidity.Examples.ReadRealization"
+    ],
+    "imports_in": 1,
+    "lines": 145,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/BooleanLinear.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 87,
+    "declarations": {
+      "def": 28,
+      "theorem": 1
+    },
+    "definition_lines": 56,
+    "definition_to_proof_line_ratio": 14.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.ProgramReduction",
+      "Solidity.Calculus.Spec",
+      "Solidity.Calculus.Surface"
+    ],
+    "imports_in": 1,
+    "lines": 146,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/CallReduction.lean",
+    "proof_lines": 4,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 65,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.ExpandLaws",
+      "Solidity.Calculus.Chains",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.DecideComplete",
+      "Solidity.Calculus.Surface"
+    ],
+    "imports_in": 1,
+    "lines": 111,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/ChainExpand.lean",
+    "proof_lines": 33,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 265,
+    "declarations": {
+      "def": 4,
+      "theorem": 7
+    },
+    "definition_lines": 39,
+    "definition_to_proof_line_ratio": 0.46987951807228917,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.RewriteChains",
+      "Solidity.Calculus.RewriteChainGen",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.DecideComplete",
+      "Solidity.Calculus.LastLine",
+      "Solidity.Calculus.Surface",
+      "Solidity.Examples.Chains.Storage",
+      "Solidity.Examples.Chains.Payment"
+    ],
+    "imports_in": 1,
+    "lines": 675,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/ChainNotation.lean",
+    "proof_lines": 83,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 325,
+    "declarations": {
+      "def": 1,
+      "theorem": 9
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.08695652173913043,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.RewriteChains",
+      "Solidity.Calculus.RewriteSyntax",
+      "Solidity.Examples.Chains.Storage",
+      "Solidity.Calculus.LastLine",
+      "Solidity.Calculus.Surface"
+    ],
+    "imports_in": 1,
+    "lines": 700,
+    "maxHeartbeats": [
+      "2000000",
+      "300000"
+    ],
+    "native_decide": 0,
+    "path": "Solidity/Examples/ChainRewrites.lean",
+    "proof_lines": 69,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 190,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.RewriteChains",
+      "Solidity.Calculus.RewriteSyntax",
+      "Solidity.Examples.Chains.Storage",
+      "Solidity.Calculus.LastLine",
+      "Solidity.Calculus.Surface"
+    ],
+    "imports_in": 1,
+    "lines": 353,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/ChainRewritesOpen.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 24,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.RewriteChains",
+      "Solidity.Calculus.RewriteChainGen",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.LastLine",
+      "Solidity.Calculus.Surface"
+    ],
+    "imports_in": 1,
+    "lines": 49,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Chains/Arithmetic.lean",
+    "proof_lines": 9,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 52,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.RewriteChains",
+      "Solidity.Calculus.RewriteChainGen",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.LastLine",
+      "Solidity.Calculus.Surface"
+    ],
+    "imports_in": 1,
+    "lines": 91,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Chains/CheckedArithmetic.lean",
+    "proof_lines": 36,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 28,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.2,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.FreshNames",
+      "Solidity.Calculus.RewriteChains",
+      "Solidity.Calculus.RewriteChainGen",
+      "Solidity.Calculus.LastLine",
+      "Solidity.Calculus.Surface"
+    ],
+    "imports_in": 1,
+    "lines": 81,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Chains/EvaluationOrder.lean",
+    "proof_lines": 10,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 86,
+    "declarations": {
+      "def": 2,
+      "theorem": 3
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.06349206349206349,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.RewriteChains",
+      "Solidity.Calculus.RewriteChainGen",
+      "Solidity.Calculus.Close",
+      "Solidity.FreshNames",
+      "Solidity.Calculus.LastLine",
+      "Solidity.Calculus.Surface"
+    ],
+    "imports_in": 2,
+    "lines": 123,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Chains/FixedLength.lean",
+    "proof_lines": 63,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 353,
+    "declarations": {
+      "def": 6,
+      "theorem": 11
+    },
+    "definition_lines": 16,
+    "definition_to_proof_line_ratio": 0.05693950177935943,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.RewriteChains",
+      "Solidity.Calculus.RewriteChainGen",
+      "Solidity.Calculus.Close",
+      "Solidity.FreshNames",
+      "Solidity.Calculus.LastLine",
+      "Solidity.Calculus.Surface"
+    ],
+    "imports_in": 1,
+    "lines": 493,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Chains/Memory.lean",
+    "proof_lines": 281,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 351,
+    "declarations": {
+      "def": 8,
+      "theorem": 12
+    },
+    "definition_lines": 19,
+    "definition_to_proof_line_ratio": 0.07251908396946564,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.RewriteChains",
+      "Solidity.Calculus.RewriteChainGen",
+      "Solidity.Calculus.Close",
+      "Solidity.FreshNames",
+      "Solidity.Calculus.LastLine",
+      "Solidity.Calculus.Surface"
+    ],
+    "imports_in": 1,
+    "lines": 496,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Chains/MemoryArrays.lean",
+    "proof_lines": 262,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 516,
+    "declarations": {
+      "def": 10,
+      "theorem": 32
+    },
+    "definition_lines": 45,
+    "definition_to_proof_line_ratio": 0.11194029850746269,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.RewriteChains",
+      "Solidity.Calculus.RewriteChainGen",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.LastLine",
+      "Solidity.Calculus.Surface"
+    ],
+    "imports_in": 1,
+    "lines": 690,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Chains/MemoryCoverage.lean",
+    "proof_lines": 402,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 1174,
+    "declarations": {
+      "def": 2,
+      "theorem": 3
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.0035026269702276708,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.RewriteChains",
+      "Solidity.Calculus.RewriteChainGen",
+      "Solidity.Calculus.Close",
+      "Solidity.FreshNames",
+      "Solidity.Calculus.LastLine",
+      "Solidity.Calculus.Surface"
+    ],
+    "imports_in": 1,
+    "lines": 1248,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Chains/MemoryDelete.lean",
+    "proof_lines": 1142,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 412,
+    "declarations": {
+      "def": 3,
+      "theorem": 4
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.015873015873015872,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.RewriteChainGen",
+      "Solidity.Calculus.RewriteChains",
+      "Solidity.FreshNames",
+      "Solidity.Calculus.LastLine",
+      "Solidity.Calculus.Surface"
+    ],
+    "imports_in": 1,
+    "lines": 504,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Chains/MemoryToStorage.lean",
+    "proof_lines": 378,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 54,
+    "declarations": {
+      "def": 1,
+      "theorem": 3
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.0625,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.RewriteChainGen",
+      "Solidity.Calculus.Close",
+      "Solidity.FreshNames",
+      "Solidity.Calculus.LastLine",
+      "Solidity.Calculus.Surface"
+    ],
+    "imports_in": 2,
+    "lines": 105,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Chains/Payment.lean",
+    "proof_lines": 32,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 408,
+    "declarations": {
+      "def": 11,
+      "theorem": 21
+    },
+    "definition_lines": 25,
+    "definition_to_proof_line_ratio": 0.08928571428571429,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.RewriteChains",
+      "Solidity.Calculus.RewriteChainGen",
+      "Solidity.Calculus.Close",
+      "Solidity.FreshNames",
+      "Solidity.Calculus.LastLine",
+      "Solidity.Calculus.Surface"
+    ],
+    "imports_in": 11,
+    "lines": 572,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Chains/Storage.lean",
+    "proof_lines": 280,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 215,
+    "declarations": {
+      "def": 7,
+      "theorem": 10
+    },
+    "definition_lines": 19,
+    "definition_to_proof_line_ratio": 0.13380281690140844,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.RewriteChains",
+      "Solidity.Calculus.RewriteChainGen",
+      "Solidity.Calculus.Close",
+      "Solidity.FreshNames",
+      "Solidity.Calculus.LastLine",
+      "Solidity.Calculus.Surface"
+    ],
+    "imports_in": 1,
+    "lines": 301,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Chains/StorageArrays.lean",
+    "proof_lines": 142,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 701,
+    "declarations": {
+      "def": 14,
+      "theorem": 57
+    },
+    "definition_lines": 68,
+    "definition_to_proof_line_ratio": 0.12710280373831775,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.RewriteChains",
+      "Solidity.Calculus.RewriteChainGen",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.LastLine",
+      "Solidity.Calculus.Surface"
+    ],
+    "imports_in": 1,
+    "lines": 955,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Chains/StorageCoverage.lean",
+    "proof_lines": 535,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 350,
+    "declarations": {
+      "def": 1,
+      "theorem": 3
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.00625,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.RewriteChains",
+      "Solidity.Calculus.RewriteChainGen",
+      "Solidity.Calculus.Close",
+      "Solidity.FreshNames",
+      "Solidity.Calculus.LastLine",
+      "Solidity.Calculus.Surface"
+    ],
+    "imports_in": 1,
+    "lines": 396,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Chains/StorageDelete.lean",
+    "proof_lines": 320,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 134,
+    "declarations": {
+      "def": 2,
+      "theorem": 3
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.037383177570093455,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.RewriteChains",
+      "Solidity.Calculus.RewriteChainGen",
+      "Solidity.FreshNames",
+      "Solidity.Calculus.LastLine",
+      "Solidity.Calculus.Surface"
+    ],
+    "imports_in": 1,
+    "lines": 187,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Chains/StorageToMemory.lean",
+    "proof_lines": 107,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 74,
+    "declarations": {
+      "def": 24,
+      "theorem": 1
+    },
+    "definition_lines": 33,
+    "definition_to_proof_line_ratio": 33.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DeclarationStaticReduction",
+      "Solidity.Examples.ReadRealization"
+    ],
+    "imports_in": 1,
+    "lines": 133,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/CheckedLinear.lean",
+    "proof_lines": 1,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 62,
+    "declarations": {
+      "def": 5,
+      "theorem": 3
+    },
+    "definition_lines": 44,
+    "definition_to_proof_line_ratio": 14.666666666666666,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Tools.Verify",
+      "Solidity.Calculus.Surface"
+    ],
+    "imports_in": 1,
+    "lines": 140,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/CompleteVerification.lean",
+    "proof_lines": 3,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 57,
+    "declarations": {
+      "def": 1
+    },
+    "definition_lines": 13,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Problem"
+    ],
+    "imports_in": 1,
+    "lines": 97,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/ContractTypes.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 266,
+    "declarations": {
+      "def": 153,
+      "theorem": 10
+    },
+    "definition_lines": 212,
+    "definition_to_proof_line_ratio": 17.666666666666668,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionGapData",
+      "Solidity.Examples.DecisionMemoryFixtureData",
+      "Solidity.Examples.DecisionVerdictData",
+      "Solidity.Calculus.Decision",
+      "Solidity.Examples.ReadRealization",
+      "Solidity.Examples.DecisionHashes"
+    ],
+    "imports_in": 16,
+    "lines": 579,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Decision.lean",
+    "proof_lines": 12,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "import_root",
+    "code_lines": 1,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionLedger"
+    ],
+    "imports_in": 2,
+    "lines": 5,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionAPF.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "import_root",
+    "code_lines": 2,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionCore",
+      "Solidity.Examples.DecisionFeatures"
+    ],
+    "imports_in": 2,
+    "lines": 6,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionArithmetic.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 25,
+    "declarations": {
+      "def": 2,
+      "theorem": 8
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.3076923076923077,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.Decision"
+    ],
+    "imports_in": 3,
+    "lines": 58,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionArrayCore.lean",
+    "proof_lines": 13,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 151,
+    "declarations": {
+      "def": 11,
+      "theorem": 32
+    },
+    "definition_lines": 41,
+    "definition_to_proof_line_ratio": 0.41,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Decision",
+      "Solidity.Calculus.Surface",
+      "Solidity.Syntax.Contract"
+    ],
+    "imports_in": 8,
+    "lines": 231,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionArrayGaps.lean",
+    "proof_lines": 100,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 65,
+    "declarations": {
+      "def": 5,
+      "theorem": 13
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.20833333333333334,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionArrayReasons",
+      "Solidity.Examples.DecisionSourceChain"
+    ],
+    "imports_in": 1,
+    "lines": 87,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionArrayReasons.lean",
+    "proof_lines": 48,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 201,
+    "declarations": {
+      "def": 9,
+      "theorem": 7
+    },
+    "definition_lines": 134,
+    "definition_to_proof_line_ratio": 2.19672131147541,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionArrayCore"
+    ],
+    "imports_in": 2,
+    "lines": 230,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionArrayReplay.lean",
+    "proof_lines": 61,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "import_root",
+    "code_lines": 1,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionArrayReplay"
+    ],
+    "imports_in": 1,
+    "lines": 18,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionArrays.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "import_root",
+    "code_lines": 1,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionAPF"
+    ],
+    "imports_in": 2,
+    "lines": 5,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionBlocks.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 90,
+    "declarations": {
+      "def": 18,
+      "theorem": 16
+    },
+    "definition_lines": 33,
+    "definition_to_proof_line_ratio": 0.66,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionBoundedInstanceSource",
+      "Solidity.Examples.DecisionArrayGaps"
+    ],
+    "imports_in": 2,
+    "lines": 130,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionBoundedInstance.lean",
+    "proof_lines": 50,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 34,
+    "declarations": {
+      "def": 5,
+      "theorem": 9
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.3684210526315789,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionBoundedInstanceSearch",
+      "Solidity.Examples.DecisionBoundedInstance"
+    ],
+    "imports_in": 1,
+    "lines": 57,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionBoundedInstanceSearch.lean",
+    "proof_lines": 19,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 72,
+    "declarations": {
+      "def": 14,
+      "theorem": 22
+    },
+    "definition_lines": 17,
+    "definition_to_proof_line_ratio": 0.3541666666666667,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionBoundedUInt",
+      "Solidity.Examples.DecisionArrayGaps"
+    ],
+    "imports_in": 1,
+    "lines": 113,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionBoundedUInt.lean",
+    "proof_lines": 48,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 71,
+    "declarations": {
+      "def": 7,
+      "theorem": 20
+    },
+    "definition_lines": 16,
+    "definition_to_proof_line_ratio": 0.3404255319148936,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionCoefficientBoundary",
+      "Solidity.Calculus.Notation",
+      "Solidity.Examples.DecisionMemoryParameterData"
+    ],
+    "imports_in": 4,
+    "lines": 119,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionCoefficientBoundary.lean",
+    "proof_lines": 47,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 50,
+    "declarations": {
+      "def": 3,
+      "theorem": 8
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.16216216216216217,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionCompoundCertificate",
+      "Solidity.Examples.DecisionCompoundFieldReason"
+    ],
+    "imports_in": 1,
+    "lines": 73,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionCompoundCertificate.lean",
+    "proof_lines": 37,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 63,
+    "declarations": {
+      "def": 6,
+      "theorem": 19
+    },
+    "definition_lines": 12,
+    "definition_to_proof_line_ratio": 0.2727272727272727,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionCompoundFieldReason",
+      "Solidity.Examples.DecisionGapCensus"
+    ],
+    "imports_in": 2,
+    "lines": 97,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionCompoundFieldReason.lean",
+    "proof_lines": 44,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "import_root",
+    "code_lines": 1,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.Decision"
+    ],
+    "imports_in": 2,
+    "lines": 5,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionCore.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 110,
+    "declarations": {
+      "def": 2,
+      "theorem": 43
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.125,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.Decision",
+      "Solidity.Tools.Common"
+    ],
+    "imports_in": 2,
+    "lines": 249,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionFeatures.lean",
+    "proof_lines": 64,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 42,
+    "declarations": {
+      "abbrev": 1,
+      "def": 2,
+      "theorem": 9
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.09375,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionFixedArrayPair",
+      "Solidity.Examples.DecisionFixedArrayPath"
+    ],
+    "imports_in": 1,
+    "lines": 63,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionFixedArrayPair.lean",
+    "proof_lines": 32,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 38,
+    "declarations": {
+      "def": 5,
+      "theorem": 9
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.45454545454545453,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionFixedArrayPath",
+      "Solidity.Examples.FixedArrayFloor"
+    ],
+    "imports_in": 3,
+    "lines": 57,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionFixedArrayPath.lean",
+    "proof_lines": 22,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 57,
+    "declarations": {
+      "def": 4,
+      "theorem": 9
+    },
+    "definition_lines": 12,
+    "definition_to_proof_line_ratio": 0.3076923076923077,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionFixedArrayStorage",
+      "Solidity.Examples.DecisionFixedArrayPath"
+    ],
+    "imports_in": 1,
+    "lines": 79,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionFixedArrayStorage.lean",
+    "proof_lines": 39,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 22,
+    "declarations": {
+      "def": 1,
+      "theorem": 11
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.14285714285714285,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionMemory",
+      "Solidity.Calculus.DecisionMemoryCoverage"
+    ],
+    "imports_in": 6,
+    "lines": 56,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionGapCensus.lean",
+    "proof_lines": 14,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "import_root",
+    "code_lines": 2,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionMapping",
+      "Solidity.Examples.DecisionGaps"
+    ],
+    "imports_in": 2,
+    "lines": 6,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionGapCore.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 13,
+    "declarations": {
+      "def": 1
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Syntax.Contract"
+    ],
+    "imports_in": 6,
+    "lines": 18,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionGapData.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "import_root",
+    "code_lines": 1,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionThreeKindCoverage"
+    ],
+    "imports_in": 2,
+    "lines": 5,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionGapHashes.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "import_root",
+    "code_lines": 1,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionGapCore"
+    ],
+    "imports_in": 2,
+    "lines": 5,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionGapKInt.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 45,
+    "declarations": {
+      "theorem": 27
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.Decision",
+      "Solidity.Examples.DecisionThreeKindProof"
+    ],
+    "imports_in": 2,
+    "lines": 95,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionGapOperators.lean",
+    "proof_lines": 32,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 103,
+    "declarations": {
+      "def": 1,
+      "theorem": 60
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.04477611940298507,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.Decision"
+    ],
+    "imports_in": 3,
+    "lines": 207,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionGaps.lean",
+    "proof_lines": 67,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 105,
+    "declarations": {
+      "def": 25,
+      "theorem": 17
+    },
+    "definition_lines": 44,
+    "definition_to_proof_line_ratio": 0.8461538461538461,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionGivenHeapComputedBoundary",
+      "Solidity.Calculus.Surface",
+      "Solidity.Examples.DecisionGapData"
+    ],
+    "imports_in": 1,
+    "lines": 143,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionGivenHeapComputedReason.lean",
+    "proof_lines": 52,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 104,
+    "declarations": {
+      "abbrev": 1,
+      "def": 31,
+      "theorem": 14
+    },
+    "definition_lines": 51,
+    "definition_to_proof_line_ratio": 1.0625,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionGivenHeapFixedBoundary",
+      "Solidity.Examples.DecisionGapData"
+    ],
+    "imports_in": 1,
+    "lines": 134,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionGivenHeapFixed.lean",
+    "proof_lines": 48,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 16,
+    "declarations": {
+      "def": 2,
+      "theorem": 2
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.4,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionGivenHeapExtension",
+      "Solidity.Calculus.Surface",
+      "Solidity.Examples.Decision"
+    ],
+    "imports_in": 1,
+    "lines": 27,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionGivenHeapNegative.lean",
+    "proof_lines": 5,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 85,
+    "declarations": {
+      "def": 13,
+      "theorem": 23
+    },
+    "definition_lines": 20,
+    "definition_to_proof_line_ratio": 0.36363636363636365,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionGivenHeapBoundary",
+      "Solidity.Calculus.DecisionGivenHeapComputedBoundary",
+      "Solidity.Examples.DecisionGapCensus"
+    ],
+    "imports_in": 1,
+    "lines": 140,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionGivenHeapReason.lean",
+    "proof_lines": 55,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 69,
+    "declarations": {
+      "def": 6,
+      "theorem": 11
+    },
+    "definition_lines": 12,
+    "definition_to_proof_line_ratio": 0.3157894736842105,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionHaltingOrCertificate",
+      "Solidity.Calculus.Decision",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.CloseFrame"
+    ],
+    "imports_in": 1,
+    "lines": 96,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionHaltingOrCertificate.lean",
+    "proof_lines": 38,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 160,
+    "declarations": {
+      "def": 37,
+      "theorem": 26
+    },
+    "definition_lines": 59,
+    "definition_to_proof_line_ratio": 0.6781609195402298,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.CloseFrame",
+      "Solidity.Calculus.Decision",
+      "Solidity.Examples.DecisionCoefficientBoundary"
+    ],
+    "imports_in": 3,
+    "lines": 199,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionHaltingOrGaps.lean",
+    "proof_lines": 87,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 72,
+    "declarations": {
+      "def": 8,
+      "theorem": 15
+    },
+    "definition_lines": 21,
+    "definition_to_proof_line_ratio": 0.4772727272727273,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionHaltingOrBoundary",
+      "Solidity.Examples.DecisionHaltingOrGaps"
+    ],
+    "imports_in": 1,
+    "lines": 94,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionHaltingOrReason.lean",
+    "proof_lines": 44,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 20,
+    "declarations": {
+      "theorem": 5
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionHashes"
+    ],
+    "imports_in": 9,
+    "lines": 68,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionHashCore.lean",
+    "proof_lines": 6,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 12,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionHashCore",
+      "Solidity.Examples.DecisionHashFamilyCheck",
+      "Solidity.Examples.DecisionHashFiveChain"
+    ],
+    "imports_in": 2,
+    "lines": 33,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionHashFamilies.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 17,
+    "declarations": {
+      "theorem": 5
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.HashReduction"
+    ],
+    "imports_in": 3,
+    "lines": 33,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionHashFamilyCheck.lean",
+    "proof_lines": 7,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 19,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionHashes",
+      "Solidity.Examples.DecisionHashFamilyCheck"
+    ],
+    "imports_in": 2,
+    "lines": 31,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionHashFiveChain.lean",
+    "proof_lines": 12,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 12,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionHashCore"
+    ],
+    "imports_in": 2,
+    "lines": 38,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionHashKeys.lean",
+    "proof_lines": 2,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "import_root",
+    "code_lines": 2,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionHashThreeKinds",
+      "Solidity.Examples.DecisionHashMixed"
+    ],
+    "imports_in": 2,
+    "lines": 4,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionHashKinds.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 25,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionHashCore"
+    ],
+    "imports_in": 2,
+    "lines": 50,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionHashMixed.lean",
+    "proof_lines": 14,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 12,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionHashCore"
+    ],
+    "imports_in": 2,
+    "lines": 36,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionHashQuantifiers.lean",
+    "proof_lines": 1,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 26,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionHashCore"
+    ],
+    "imports_in": 2,
+    "lines": 44,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionHashThreeKinds.lean",
+    "proof_lines": 16,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 15,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionHashCore"
+    ],
+    "imports_in": 2,
+    "lines": 40,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionHashUpdates.lean",
+    "proof_lines": 3,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 127,
+    "declarations": {
+      "abbrev": 5,
+      "def": 63
+    },
+    "definition_lines": 116,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Decision",
+      "Solidity.Examples.Tactics.HashingNames"
+    ],
+    "imports_in": 4,
+    "lines": 277,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionHashes.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "import_root",
+    "code_lines": 6,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionHashCore",
+      "Solidity.Examples.DecisionHashUpdates",
+      "Solidity.Examples.DecisionHashFamilies",
+      "Solidity.Examples.DecisionHashQuantifiers",
+      "Solidity.Examples.DecisionHashKinds",
+      "Solidity.Examples.DecisionHashKeys"
+    ],
+    "imports_in": 1,
+    "lines": 13,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionHashesChecks.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 201,
+    "declarations": {
+      "def": 24,
+      "theorem": 47
+    },
+    "definition_lines": 73,
+    "definition_to_proof_line_ratio": 0.6517857142857143,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.Decision",
+      "Solidity.Calculus.FunContract"
+    ],
+    "imports_in": 2,
+    "lines": 329,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionKInt.lean",
+    "proof_lines": 112,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 62,
+    "declarations": {
+      "def": 6,
+      "theorem": 18
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.22727272727272727,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionLeafPreparation",
+      "Solidity.Examples.DecisionUIntBridge"
+    ],
+    "imports_in": 2,
+    "lines": 83,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionLeafPreparation.lean",
+    "proof_lines": 44,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "import_root",
+    "code_lines": 1,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionGapKInt"
+    ],
+    "imports_in": 2,
+    "lines": 5,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionLedger.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "import_root",
+    "code_lines": 1,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionArithmetic"
+    ],
+    "imports_in": 2,
+    "lines": 5,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionMapping.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 33,
+    "declarations": {
+      "def": 3,
+      "theorem": 7
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.3157894736842105,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionMappingFieldBoundary",
+      "Solidity.Examples.DecisionResidueReasons"
+    ],
+    "imports_in": 2,
+    "lines": 54,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionMappingFieldReason.lean",
+    "proof_lines": 19,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 292,
+    "declarations": {
+      "abbrev": 1,
+      "def": 39,
+      "theorem": 42
+    },
+    "definition_lines": 141,
+    "definition_to_proof_line_ratio": 1.6022727272727273,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionMemoryParameterData",
+      "Solidity.Examples.DecisionMemoryFixtureData",
+      "Solidity.Examples.DecisionVerdictData",
+      "Solidity.Examples.MemoryStructWitness",
+      "Solidity.Calculus.DecisionGivenHeapBoundary",
+      "Solidity.Calculus.DecisionCompoundCoverage"
+    ],
+    "imports_in": 5,
+    "lines": 533,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionMemory.lean",
+    "proof_lines": 88,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 34,
+    "declarations": {
+      "def": 5,
+      "theorem": 9
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.4117647058823529,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionMemoryCoverage",
+      "Solidity.Calculus.DecisionGivenHeapBoundary",
+      "Solidity.Calculus.Surface",
+      "Solidity.Examples.Decision"
+    ],
+    "imports_in": 1,
+    "lines": 61,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionMemoryCoverageClient.lean",
+    "proof_lines": 17,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 10,
+    "declarations": {
+      "def": 4
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionGapData",
+      "Solidity.Calculus.Fml"
+    ],
+    "imports_in": 3,
+    "lines": 16,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionMemoryFixtureData.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 9,
+    "declarations": {
+      "def": 1
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionGapData",
+      "Solidity.Calculus.Surface"
+    ],
+    "imports_in": 3,
+    "lines": 15,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionMemoryParameterData.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 62,
+    "declarations": {
+      "def": 9,
+      "theorem": 11
+    },
+    "definition_lines": 12,
+    "definition_to_proof_line_ratio": 0.27906976744186046,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionNegativeInstantiation",
+      "Solidity.Examples.DecisionArrayGaps"
+    ],
+    "imports_in": 1,
+    "lines": 87,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionNegativeInstantiation.lean",
+    "proof_lines": 43,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 65,
+    "declarations": {
+      "theorem": 6
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionNestedFixedArray",
+      "Solidity.Examples.FixedArrayFloor"
+    ],
+    "imports_in": 1,
+    "lines": 83,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionNestedFixedArray.lean",
+    "proof_lines": 59,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 78,
+    "declarations": {
+      "def": 13,
+      "theorem": 10
+    },
+    "definition_lines": 29,
+    "definition_to_proof_line_ratio": 1.1153846153846154,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionNormalizationResidue",
+      "Solidity.Examples.Decision"
+    ],
+    "imports_in": 2,
+    "lines": 109,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionNormalizationResidue.lean",
+    "proof_lines": 26,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 119,
+    "declarations": {
+      "def": 11,
+      "theorem": 33
+    },
+    "definition_lines": 25,
+    "definition_to_proof_line_ratio": 0.2976190476190476,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionNumericBounds",
+      "Solidity.Examples.DecisionNumericFormula"
+    ],
+    "imports_in": 4,
+    "lines": 166,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionNumericBounds.lean",
+    "proof_lines": 84,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 107,
+    "declarations": {
+      "def": 2,
+      "theorem": 16
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.031578947368421054,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionNumericCompiler",
+      "Solidity.Examples.DecisionNumericStages",
+      "Solidity.Examples.DecisionNumericFlatten"
+    ],
+    "imports_in": 1,
+    "lines": 132,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionNumericCompiler.lean",
+    "proof_lines": 95,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 48,
+    "declarations": {
+      "theorem": 14
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionNumericCoverage",
+      "Solidity.Examples.DecisionNumericBounds",
+      "Solidity.Examples.DecisionGapCensus"
+    ],
+    "imports_in": 1,
+    "lines": 71,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionNumericCoverage.lean",
+    "proof_lines": 37,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 71,
+    "declarations": {
+      "def": 4,
+      "theorem": 15
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.10526315789473684,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionNumericFlatten",
+      "Solidity.Examples.DecisionNumericGround",
+      "Solidity.Examples.DecisionNumericBounds"
+    ],
+    "imports_in": 2,
+    "lines": 97,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionNumericFlatten.lean",
+    "proof_lines": 57,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 64,
+    "declarations": {
+      "def": 3,
+      "theorem": 17
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.10204081632653061,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionNumericFormula",
+      "Solidity.Examples.DecisionUIntPrefix",
+      "Solidity.Examples.DecisionLeafPreparation"
+    ],
+    "imports_in": 2,
+    "lines": 90,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionNumericFormula.lean",
+    "proof_lines": 49,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 53,
+    "declarations": {
+      "def": 7,
+      "theorem": 8
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.4166666666666667,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionNumericFuel",
+      "Solidity.Examples.Decision"
+    ],
+    "imports_in": 1,
+    "lines": 78,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionNumericFuel.lean",
+    "proof_lines": 24,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 40,
+    "declarations": {
+      "def": 4,
+      "theorem": 6
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.13793103448275862,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionNumericGround",
+      "Solidity.Examples.DecisionCoefficientBoundary"
+    ],
+    "imports_in": 3,
+    "lines": 52,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionNumericGround.lean",
+    "proof_lines": 29,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 36,
+    "declarations": {
+      "def": 6,
+      "theorem": 12
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.2608695652173913,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionNumericGroundSource",
+      "Solidity.Examples.DecisionNumericGround"
+    ],
+    "imports_in": 2,
+    "lines": 49,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionNumericGroundSource.lean",
+    "proof_lines": 23,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 90,
+    "declarations": {
+      "def": 9,
+      "theorem": 26
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.15942028985507245,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionNumericLogic",
+      "Solidity.Examples.DecisionUIntBridge"
+    ],
+    "imports_in": 3,
+    "lines": 134,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionNumericLogic.lean",
+    "proof_lines": 69,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 112,
+    "declarations": {
+      "def": 6,
+      "theorem": 27
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.07368421052631578,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionNumericNormalization",
+      "Solidity.Examples.DecisionNumericLogic",
+      "Solidity.Examples.DecisionArrayGaps"
+    ],
+    "imports_in": 1,
+    "lines": 167,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionNumericNormalization.lean",
+    "proof_lines": 95,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 41,
+    "declarations": {
+      "def": 1,
+      "theorem": 7
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.03225806451612903,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionNumericStages",
+      "Solidity.Examples.DecisionNumericBounds",
+      "Solidity.Examples.DecisionNumericGroundSource"
+    ],
+    "imports_in": 2,
+    "lines": 54,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionNumericStages.lean",
+    "proof_lines": 31,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 35,
+    "declarations": {
+      "def": 1,
+      "theorem": 9
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.038461538461538464,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionNumericTraversal",
+      "Solidity.Examples.DecisionNumericLogic"
+    ],
+    "imports_in": 1,
+    "lines": 55,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionNumericTraversal.lean",
+    "proof_lines": 26,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 35,
+    "declarations": {
+      "def": 4,
+      "theorem": 5
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.5882352941176471,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionNumericTwoPrefix",
+      "Solidity.Examples.Decision"
+    ],
+    "imports_in": 2,
+    "lines": 58,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionNumericTwoPrefix.lean",
+    "proof_lines": 17,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 29,
+    "declarations": {
+      "def": 3,
+      "theorem": 2
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.5454545454545454,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionNumericTwoPrefixFormula",
+      "Solidity.Examples.DecisionNumericTwoPrefix"
+    ],
+    "imports_in": 2,
+    "lines": 45,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionNumericTwoPrefixFormula.lean",
+    "proof_lines": 11,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "import_root",
+    "code_lines": 2,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionRefutations",
+      "Solidity.Examples.DecisionGapOperators"
+    ],
+    "imports_in": 2,
+    "lines": 6,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionOperators.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 54,
+    "declarations": {
+      "def": 9,
+      "theorem": 9
+    },
+    "definition_lines": 19,
+    "definition_to_proof_line_ratio": 0.7916666666666666,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionPrefixNormalizationResidue",
+      "Solidity.Calculus.DecisionNormalizationResidue",
+      "Solidity.Examples.Decision"
+    ],
+    "imports_in": 1,
+    "lines": 88,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionPrefixNormalizationResidue.lean",
+    "proof_lines": 24,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 56,
+    "declarations": {
+      "def": 11,
+      "theorem": 8
+    },
+    "definition_lines": 19,
+    "definition_to_proof_line_ratio": 0.7307692307692307,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionKInt"
+    ],
+    "imports_in": 3,
+    "lines": 100,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionQuantLedger.lean",
+    "proof_lines": 26,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "import_root",
+    "code_lines": 1,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionBlocks"
+    ],
+    "imports_in": 2,
+    "lines": 5,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionRefutations.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 137,
+    "declarations": {
+      "def": 4,
+      "theorem": 24
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.14285714285714285,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionResidue",
+      "Solidity.Examples.DecisionHaltingOrGaps",
+      "Solidity.Examples.DecisionMappingFieldReason",
+      "Solidity.Examples.DecisionNormalizationResidue",
+      "Solidity.Examples.DecisionHashCore",
+      "Solidity.Examples.DecisionQuantLedger",
+      "Solidity.Examples.DecisionArrayCore",
+      "Solidity.Examples.DecisionArrayGaps",
+      "Solidity.Examples.DecisionGapCensus",
+      "Solidity.Examples.DecisionGaps"
+    ],
+    "imports_in": 1,
+    "lines": 293,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionResidue.lean",
+    "proof_lines": 77,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 67,
+    "declarations": {
+      "def": 5,
+      "theorem": 22
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.2,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionResidueReasons",
+      "Solidity.Examples.DecisionGapCensus"
+    ],
+    "imports_in": 2,
+    "lines": 111,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionResidueReasons.lean",
+    "proof_lines": 50,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 47,
+    "declarations": {
+      "def": 1,
+      "theorem": 9
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.05128205128205128,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionSourceBoundary",
+      "Solidity.Examples.DecisionSourceDiscovery"
+    ],
+    "imports_in": 1,
+    "lines": 69,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionSourceBoundary.lean",
+    "proof_lines": 39,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 53,
+    "declarations": {
+      "theorem": 12
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionSourceChain",
+      "Solidity.Examples.DecisionSourceInstance"
+    ],
+    "imports_in": 3,
+    "lines": 74,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionSourceChain.lean",
+    "proof_lines": 45,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 84,
+    "declarations": {
+      "def": 2,
+      "theorem": 17
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.09859154929577464,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionSourceDiscovery",
+      "Solidity.Examples.DecisionSourceChain"
+    ],
+    "imports_in": 2,
+    "lines": 120,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionSourceDiscovery.lean",
+    "proof_lines": 71,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 73,
+    "declarations": {
+      "def": 8,
+      "theorem": 8
+    },
+    "definition_lines": 20,
+    "definition_to_proof_line_ratio": 0.43478260869565216,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionSourceInstance",
+      "Solidity.Examples.DecisionArrayGaps"
+    ],
+    "imports_in": 2,
+    "lines": 94,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionSourceInstance.lean",
+    "proof_lines": 46,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "import_root",
+    "code_lines": 1,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionGapHashes"
+    ],
+    "imports_in": 1,
+    "lines": 5,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionStorageArrays.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "import_root",
+    "code_lines": 2,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionOperators",
+      "Solidity.Examples.DecisionThreeKindProof"
+    ],
+    "imports_in": 2,
+    "lines": 6,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionThreeKindCoverage.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 57,
+    "declarations": {
+      "def": 3,
+      "theorem": 14
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.13043478260869565,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.Decision"
+    ],
+    "imports_in": 3,
+    "lines": 66,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionThreeKindProof.lean",
+    "proof_lines": 46,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 115,
+    "declarations": {
+      "def": 16,
+      "theorem": 34
+    },
+    "definition_lines": 30,
+    "definition_to_proof_line_ratio": 0.38461538461538464,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionUIntFormula",
+      "Solidity.Examples.DecisionCoefficientBoundary"
+    ],
+    "imports_in": 5,
+    "lines": 166,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionUIntBridge.lean",
+    "proof_lines": 78,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 31,
+    "declarations": {
+      "def": 4,
+      "theorem": 2
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 1.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionUIntFormulaRecognizer",
+      "Solidity.Examples.DecisionNumericTwoPrefixFormula"
+    ],
+    "imports_in": 1,
+    "lines": 47,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionUIntFormulaRecognizer.lean",
+    "proof_lines": 9,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 49,
+    "declarations": {
+      "def": 4,
+      "theorem": 14
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.20588235294117646,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionUIntPrefix",
+      "Solidity.Examples.DecisionUIntBridge"
+    ],
+    "imports_in": 2,
+    "lines": 72,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionUIntPrefix.lean",
+    "proof_lines": 34,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 30,
+    "declarations": {
+      "def": 5,
+      "theorem": 9
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.4666666666666667,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecisionUIntShape",
+      "Solidity.Examples.DecisionUIntBridge"
+    ],
+    "imports_in": 1,
+    "lines": 49,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionUIntShape.lean",
+    "proof_lines": 15,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 9,
+    "declarations": {
+      "def": 1
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Decision"
+    ],
+    "imports_in": 3,
+    "lines": 13,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionVerdictData.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 232,
+    "declarations": {
+      "abbrev": 1,
+      "def": 19,
+      "theorem": 17
+    },
+    "definition_lines": 70,
+    "definition_to_proof_line_ratio": 0.8333333333333334,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.Decision",
+      "Solidity.Calculus.HashWritten",
+      "Solidity.Calculus.FunContract"
+    ],
+    "imports_in": 1,
+    "lines": 340,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DecisionWrittenMemory.lean",
+    "proof_lines": 84,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 54,
+    "declarations": {
+      "def": 13
+    },
+    "definition_lines": 44,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DeclarationReduction",
+      "Solidity.Examples.QueryReduction"
+    ],
+    "imports_in": 1,
+    "lines": 87,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DeclarationReduction.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 65,
+    "declarations": {
+      "def": 10,
+      "theorem": 2
+    },
+    "definition_lines": 45,
+    "definition_to_proof_line_ratio": 22.5,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Tools.Verify",
+      "Solidity.Examples.ReadFlattening",
+      "Solidity.Examples.ReadTrace"
+    ],
+    "imports_in": 1,
+    "lines": 118,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/DependentReduction.lean",
+    "proof_lines": 2,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 19,
+    "declarations": {
+      "def": 3
+    },
+    "definition_lines": 12,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.ExactReduction",
+      "Solidity.Calculus.Surface"
+    ],
+    "imports_in": 1,
+    "lines": 40,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/ExactReduction.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 67,
+    "declarations": {
+      "def": 24
+    },
+    "definition_lines": 42,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DeclarationStaticReduction",
+      "Solidity.Calculus.FunContract",
+      "Solidity.Examples.ReadRealization"
+    ],
+    "imports_in": 1,
+    "lines": 116,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/ExactUpdates.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 49,
+    "declarations": {
+      "def": 4
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.FreshNames",
+      "Solidity.Calculus.RewriteChains",
+      "Solidity.Examples.Chains.Storage",
+      "Solidity.Calculus.ChainGen",
+      "Solidity.Calculus.Surface"
+    ],
+    "imports_in": 1,
+    "lines": 131,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/ExampleNames.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 68,
+    "declarations": {
+      "def": 5,
+      "theorem": 13
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.18867924528301888,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.FixedArrayFloor"
+    ],
+    "imports_in": 4,
+    "lines": 95,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/FixedArrayFloor.lean",
+    "proof_lines": 53,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 47,
+    "declarations": {
+      "def": 4,
+      "theorem": 9
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.25806451612903225,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.FixedArrayRoot",
+      "Solidity.Examples.FixedArrayFloor",
+      "Solidity.Examples.DecisionArrayGaps"
+    ],
+    "imports_in": 1,
+    "lines": 66,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/FixedArrayRoot.lean",
+    "proof_lines": 31,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 79,
+    "declarations": {
+      "def": 17,
+      "theorem": 3
+    },
+    "definition_lines": 40,
+    "definition_to_proof_line_ratio": 13.333333333333334,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.InputReduction",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Spec",
+      "Solidity.Tools.CompleteVerification"
+    ],
+    "imports_in": 1,
+    "lines": 130,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/InputReduction.lean",
+    "proof_lines": 3,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 151,
+    "declarations": {
+      "def": 7,
+      "theorem": 14
+    },
+    "definition_lines": 13,
+    "definition_to_proof_line_ratio": 0.09848484848484848,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Sound.LoopLexDiamond",
+      "Solidity.Examples.LexMetrics"
+    ],
+    "imports_in": 2,
+    "lines": 194,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/LexDiamond.lean",
+    "proof_lines": 132,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 140,
+    "declarations": {
+      "def": 8,
+      "theorem": 14
+    },
+    "definition_lines": 24,
+    "definition_to_proof_line_ratio": 0.2222222222222222,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Semantics.LexMetrics",
+      "Solidity.Examples.Termination"
+    ],
+    "imports_in": 4,
+    "lines": 195,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/LexMetrics.lean",
+    "proof_lines": 108,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 79,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Tools.Taclet"
+    ],
+    "imports_in": 2,
+    "lines": 110,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/LexRuleSyntax.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 38,
+    "declarations": {
+      "def": 3
+    },
+    "definition_lines": 34,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.TermSize"
+    ],
+    "imports_in": 1,
+    "lines": 57,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/LexTermSize.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 51,
+    "declarations": {
+      "def": 8,
+      "theorem": 7
+    },
+    "definition_lines": 12,
+    "definition_to_proof_line_ratio": 0.35294117647058826,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.LexVariantSound",
+      "Solidity.Examples.LexMetrics"
+    ],
+    "imports_in": 1,
+    "lines": 76,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/LexVariant.lean",
+    "proof_lines": 34,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 67,
+    "declarations": {
+      "def": 16,
+      "theorem": 1
+    },
+    "definition_lines": 52,
+    "definition_to_proof_line_ratio": 52.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.LinearCountermodel",
+      "Solidity.Calculus.LinearSyntax"
+    ],
+    "imports_in": 1,
+    "lines": 114,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/LinearDecision.lean",
+    "proof_lines": 1,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 87,
+    "declarations": {
+      "abbrev": 2,
+      "def": 4,
+      "theorem": 12
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.19607843137254902,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.MemFloor"
+    ],
+    "imports_in": 1,
+    "lines": 146,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/MemoryFloor.lean",
+    "proof_lines": 51,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 109,
+    "declarations": {
+      "abbrev": 1,
+      "def": 12,
+      "theorem": 13
+    },
+    "definition_lines": 34,
+    "definition_to_proof_line_ratio": 0.7906976744186046,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.MemInst",
+      "Solidity.Calculus.FunContract",
+      "Solidity.Examples.DecisionMemory"
+    ],
+    "imports_in": 1,
+    "lines": 174,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/MemoryInstantiation.lean",
+    "proof_lines": 43,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 42,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.DecisionMemory"
+    ],
+    "imports_in": 2,
+    "lines": 62,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/MemoryNegativeCountermodel.lean",
+    "proof_lines": 35,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 108,
+    "declarations": {
+      "abbrev": 1,
+      "def": 10,
+      "theorem": 7
+    },
+    "definition_lines": 54,
+    "definition_to_proof_line_ratio": 1.9285714285714286,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.MemoryNegativeCountermodel",
+      "Solidity.Calculus.FunContract"
+    ],
+    "imports_in": 1,
+    "lines": 171,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/MemoryNegativeDecision.lean",
+    "proof_lines": 28,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 51,
+    "declarations": {
+      "abbrev": 3,
+      "def": 6,
+      "theorem": 4
+    },
+    "definition_lines": 37,
+    "definition_to_proof_line_ratio": 4.625,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.MemStructCut"
+    ],
+    "imports_in": 2,
+    "lines": 77,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/MemoryStructWitness.lean",
+    "proof_lines": 8,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 151,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Closers",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Derive",
+      "Solidity.Tools.Inspect",
+      "Solidity.Calculus.SequentNotation",
+      "Solidity.Calculus.Print"
+    ],
+    "imports_in": 1,
+    "lines": 421,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Notation.lean",
+    "proof_lines": 17,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 94,
+    "declarations": {
+      "def": 28,
+      "theorem": 1
+    },
+    "definition_lines": 43,
+    "definition_to_proof_line_ratio": 21.5,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DeclarationStaticReduction",
+      "Solidity.Examples.ReadRealization"
+    ],
+    "imports_in": 1,
+    "lines": 155,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/ParameterReduction.lean",
+    "proof_lines": 2,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 35,
+    "declarations": {
+      "def": 5
+    },
+    "definition_lines": 15,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Tools.Preconditions",
+      "Solidity.Calculus.Spec"
+    ],
+    "imports_in": 1,
+    "lines": 69,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Preconditions.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 133,
+    "declarations": {
+      "def": 44,
+      "theorem": 1
+    },
+    "definition_lines": 81,
+    "definition_to_proof_line_ratio": 20.25,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.ProgramReduction",
+      "Solidity.Examples.ReadRealization"
+    ],
+    "imports_in": 1,
+    "lines": 223,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/ProgramReduction.lean",
+    "proof_lines": 4,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 380,
+    "declarations": {
+      "def": 12,
+      "theorem": 4
+    },
+    "definition_lines": 48,
+    "definition_to_proof_line_ratio": 2.6666666666666665,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Tools.ProofTree",
+      "Solidity.Tools.Inspect",
+      "Solidity.Calculus.Derive",
+      "Solidity.Calculus.CallbackDerive",
+      "Solidity.Calculus.Closers",
+      "Solidity.Calculus.ProvesDerive",
+      "Solidity.Tools.CompleteVerification"
+    ],
+    "imports_in": 1,
+    "lines": 1195,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/ProofTree.lean",
+    "proof_lines": 18,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 165,
+    "declarations": {
+      "def": 15,
+      "theorem": 7
+    },
+    "definition_lines": 94,
+    "definition_to_proof_line_ratio": 2.186046511627907,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.QueryArithmetic",
+      "Solidity.Calculus.LinearForms",
+      "Solidity.Calculus.CheckedScalar",
+      "Solidity.Calculus.LinearSyntax",
+      "Solidity.Calculus.TraceReduction",
+      "Solidity.Tools.QueryArithmetic",
+      "Solidity.Examples.ReadRealization"
+    ],
+    "imports_in": 2,
+    "lines": 225,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/QueryArithmetic.lean",
+    "proof_lines": 43,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 72,
+    "declarations": {
+      "def": 17
+    },
+    "definition_lines": 59,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.QueryReduction",
+      "Solidity.Examples.ReadRealization"
+    ],
+    "imports_in": 4,
+    "lines": 128,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/QueryReduction.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 96,
+    "declarations": {
+      "def": 29,
+      "theorem": 1
+    },
+    "definition_lines": 79,
+    "definition_to_proof_line_ratio": 79.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.LeafArithmetic",
+      "Solidity.Tools.LeafArithmetic",
+      "Solidity.Examples.QueryReduction"
+    ],
+    "imports_in": 2,
+    "lines": 137,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/ReadFlattening.lean",
+    "proof_lines": 1,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 48,
+    "declarations": {
+      "def": 9,
+      "theorem": 2
+    },
+    "definition_lines": 24,
+    "definition_to_proof_line_ratio": 1.3333333333333333,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.ReadRealization",
+      "Solidity.Calculus.Surface"
+    ],
+    "imports_in": 12,
+    "lines": 78,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/ReadRealization.lean",
+    "proof_lines": 18,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 96,
+    "declarations": {
+      "def": 20,
+      "theorem": 2
+    },
+    "definition_lines": 69,
+    "definition_to_proof_line_ratio": 7.666666666666667,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.TraceReduction",
+      "Solidity.Calculus.DeclarationStaticReduction",
+      "Solidity.Examples.ReadRealization"
+    ],
+    "imports_in": 2,
+    "lines": 154,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/ReadTrace.lean",
+    "proof_lines": 9,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 184,
+    "declarations": {
+      "abbrev": 2,
+      "def": 32
+    },
+    "definition_lines": 171,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.RecursiveStorage",
+      "Solidity.Semantics.RecursiveStorage.Admission",
+      "Solidity.Semantics.RecursiveStorage.Legacy",
+      "Solidity.Semantics.RecursiveStorage.Observations"
+    ],
+    "imports_in": 1,
+    "lines": 217,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/RecursiveCopy.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 157,
+    "declarations": {
+      "def": 27,
+      "theorem": 1
+    },
+    "definition_lines": 140,
+    "definition_to_proof_line_ratio": 14.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Semantics.RecursiveStorage.Arrays"
+    ],
+    "imports_in": 2,
+    "lines": 196,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/RecursiveStorage.lean",
+    "proof_lines": 10,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 118,
+    "declarations": {
+      "abbrev": 2,
+      "def": 5,
+      "theorem": 10
+    },
+    "definition_lines": 21,
+    "definition_to_proof_line_ratio": 0.3,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.FramedEmissionControls",
+      "Solidity.Semantics.CtxEquiv.RevertFml"
+    ],
+    "imports_in": 1,
+    "lines": 170,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Roadmap/V16/FramedReasonConsumer.lean",
+    "proof_lines": 70,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 28,
+    "declarations": {
+      "def": 4
+    },
+    "definition_lines": 20,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Semantics.Run",
+      "Solidity.Syntax.Splice"
+    ],
+    "imports_in": 2,
+    "lines": 54,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/ScopedRuns.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 18,
+    "declarations": {
+      "def": 2,
+      "theorem": 3
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.8,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Tools.SolCases",
+      "Solidity.Syntax.Splice"
+    ],
+    "imports_in": 1,
+    "lines": 25,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/SolCases.lean",
+    "proof_lines": 5,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 104,
+    "declarations": {
+      "def": 8
+    },
+    "definition_lines": 24,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Tools.SourceCounterexample",
+      "Solidity.Calculus.Spec"
+    ],
+    "imports_in": 3,
+    "lines": 133,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/SourceCounterexample.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 74,
+    "declarations": {
+      "def": 20
+    },
+    "definition_lines": 45,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DeclarationStaticReduction",
+      "Solidity.Examples.ReadRealization"
+    ],
+    "imports_in": 1,
+    "lines": 121,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/StaticLinear.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 195,
+    "declarations": {
+      "def": 4,
+      "theorem": 4
+    },
+    "definition_lines": 118,
+    "definition_to_proof_line_ratio": 5.9,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Tools.Run",
+      "Solidity.ERC7201"
+    ],
+    "imports_in": 1,
+    "lines": 294,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/AbiFeatures.lean",
+    "proof_lines": 20,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 30,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.3333333333333333,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Frontend.Import",
+      "Solidity.Tools.Run",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Closers",
+      "Solidity.Calculus.Surface"
+    ],
+    "imports_in": 1,
+    "lines": 63,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
+    "proof_lines": 3,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 83,
+    "declarations": {
+      "def": 6,
+      "theorem": 3
+    },
+    "definition_lines": 21,
+    "definition_to_proof_line_ratio": 1.2352941176470589,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Frontend.Testing",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Closers"
+    ],
+    "imports_in": 1,
+    "lines": 117,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/AbiHexCall.lean",
+    "proof_lines": 17,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 82,
+    "declarations": {
+      "def": 6,
+      "theorem": 4
+    },
+    "definition_lines": 70,
+    "definition_to_proof_line_ratio": 14.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Calculus.Close"
+    ],
+    "imports_in": 1,
+    "lines": 94,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/AggregateSlices.lean",
+    "proof_lines": 5,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 114,
+    "declarations": {
+      "def": 17,
+      "theorem": 1
+    },
+    "definition_lines": 87,
+    "definition_to_proof_line_ratio": 43.5,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Calculus.Close"
+    ],
+    "imports_in": 1,
+    "lines": 153,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Aggregates.lean",
+    "proof_lines": 2,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 29,
+    "declarations": {
+      "theorem": 10
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Frontend.Testing",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Closers"
+    ],
+    "imports_in": 1,
+    "lines": 54,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/AggregatesImport.lean",
+    "proof_lines": 20,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 59,
+    "declarations": {
+      "def": 2,
+      "theorem": 3
+    },
+    "definition_lines": 23,
+    "definition_to_proof_line_ratio": 0.7931034482758621,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Calculus.Close"
+    ],
+    "imports_in": 2,
+    "lines": 89,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/AllLeftLater.lean",
+    "proof_lines": 29,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 107,
+    "declarations": {
+      "abbrev": 2,
+      "def": 8,
+      "theorem": 14
+    },
+    "definition_lines": 25,
+    "definition_to_proof_line_ratio": 0.46296296296296297,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.AnonLocalCapture",
+      "Solidity.Calculus.Closers",
+      "Solidity.Tools.ProofTree",
+      "Solidity.Tools.Counterexample"
+    ],
+    "imports_in": 1,
+    "lines": 145,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/AnonLocalCapture.lean",
+    "proof_lines": 54,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 41,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Tools.Inspect"
+    ],
+    "imports_in": 1,
+    "lines": 119,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/ApplySteps.lean",
+    "proof_lines": 24,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 22,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Frontend.Import",
+      "Solidity.Frontend.Problems",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers"
+    ],
+    "imports_in": 2,
+    "lines": 42,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/ArrayScans.lean",
+    "proof_lines": 11,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 103,
+    "declarations": {
+      "def": 7,
+      "theorem": 2
+    },
+    "definition_lines": 37,
+    "definition_to_proof_line_ratio": 4.111111111111111,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Print",
+      "Solidity.Syntax.Splice",
+      "Solidity.Typing.Values"
+    ],
+    "imports_in": 1,
+    "lines": 139,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/ArrayShapeCopy.lean",
+    "proof_lines": 9,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 109,
+    "declarations": {
+      "def": 5,
+      "theorem": 16
+    },
+    "definition_lines": 46,
+    "definition_to_proof_line_ratio": 1.0454545454545454,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.TargetProfile",
+      "Solidity.Examples.Tactics.TailMode",
+      "Solidity.Examples.Tactics.Callback"
+    ],
+    "imports_in": 1,
+    "lines": 203,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Assumptions.lean",
+    "proof_lines": 44,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 94,
+    "declarations": {
+      "def": 4
+    },
+    "definition_lines": 85,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.CorrectCallback",
+      "Solidity.Calculus.CallbackSound"
+    ],
+    "imports_in": 1,
+    "lines": 124,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/AuditRepairs.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 34,
+    "declarations": {
+      "def": 1
+    },
+    "definition_lines": 29,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Semantics.Run",
+      "Solidity.Evm.Machine"
+    ],
+    "imports_in": 1,
+    "lines": 64,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Boundaries.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 77,
+    "declarations": {
+      "theorem": 8
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Tools.Inspect"
+    ],
+    "imports_in": 1,
+    "lines": 255,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Branch.lean",
+    "proof_lines": 48,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 178,
+    "declarations": {
+      "def": 6,
+      "theorem": 30
+    },
+    "definition_lines": 47,
+    "definition_to_proof_line_ratio": 0.3949579831932773,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Semantics.RunFuel",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Tools.Inspect"
+    ],
+    "imports_in": 1,
+    "lines": 322,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Bytes.lean",
+    "proof_lines": 119,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 174,
+    "declarations": {
+      "abbrev": 1,
+      "def": 18,
+      "theorem": 29
+    },
+    "definition_lines": 53,
+    "definition_to_proof_line_ratio": 0.5578947368421052,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Frontend.Import",
+      "Solidity.Tools.Run",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Closers",
+      "Solidity.Calculus.Surface",
+      "Solidity.Semantics.RevertMemory"
+    ],
+    "imports_in": 1,
+    "lines": 278,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/CallExceptions.lean",
+    "proof_lines": 95,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 83,
+    "declarations": {
+      "abbrev": 2,
+      "def": 4,
+      "theorem": 13
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.11267605633802817,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.CallFunctionAffine"
+    ],
+    "imports_in": 1,
+    "lines": 114,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/CallFunctionAffine.lean",
+    "proof_lines": 71,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 90,
+    "declarations": {
+      "abbrev": 3,
+      "def": 6,
+      "theorem": 11
+    },
+    "definition_lines": 15,
+    "definition_to_proof_line_ratio": 0.2112676056338028,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.CallFunctionBase"
+    ],
+    "imports_in": 1,
+    "lines": 119,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/CallFunctionBase.lean",
+    "proof_lines": 71,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 87,
+    "declarations": {
+      "abbrev": 2,
+      "def": 10,
+      "theorem": 11
+    },
+    "definition_lines": 20,
+    "definition_to_proof_line_ratio": 0.3225806451612903,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.CallFunctionEmit",
+      "Solidity.Calculus.CallFunctionLeafMetrics"
+    ],
+    "imports_in": 1,
+    "lines": 121,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/CallFunctionEmit.lean",
+    "proof_lines": 62,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 128,
+    "declarations": {
+      "abbrev": 2,
+      "def": 9,
+      "theorem": 15
+    },
+    "definition_lines": 25,
+    "definition_to_proof_line_ratio": 0.25252525252525254,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.CallFunctionLeafMetrics"
+    ],
+    "imports_in": 1,
+    "lines": 168,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/CallFunctionLeaf.lean",
+    "proof_lines": 99,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 117,
+    "declarations": {
+      "abbrev": 3,
+      "def": 7,
+      "theorem": 14
+    },
+    "definition_lines": 18,
+    "definition_to_proof_line_ratio": 0.18947368421052632,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.CallFunctionOperationalBase"
+    ],
+    "imports_in": 1,
+    "lines": 154,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/CallFunctionOperationalBase.lean",
+    "proof_lines": 95,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 93,
+    "declarations": {
+      "abbrev": 3,
+      "def": 12,
+      "theorem": 13
+    },
+    "definition_lines": 33,
+    "definition_to_proof_line_ratio": 0.5892857142857143,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.CallFunctionPlan"
+    ],
+    "imports_in": 2,
+    "lines": 130,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/CallFunctionPlan.lean",
+    "proof_lines": 56,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 83,
+    "declarations": {
+      "abbrev": 2,
+      "def": 14,
+      "theorem": 11
+    },
+    "definition_lines": 36,
+    "definition_to_proof_line_ratio": 0.8571428571428571,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.CallFunctionSearch",
+      "Solidity.Examples.Tactics.CallFunctionPlan"
+    ],
+    "imports_in": 1,
+    "lines": 119,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/CallFunctionSearch.lean",
+    "proof_lines": 42,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 37,
+    "declarations": {
+      "def": 1,
+      "theorem": 3
+    },
+    "definition_lines": 12,
+    "definition_to_proof_line_ratio": 1.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Tools.CallFunctionShare",
+      "Solidity.Calculus.Closers"
+    ],
+    "imports_in": 2,
+    "lines": 52,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/CallFunctionShare.lean",
+    "proof_lines": 12,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 77,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 59,
+    "definition_to_proof_line_ratio": 14.75,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.Tactics.CallFunctionShare",
+      "Solidity.Tools.Counterexample"
+    ],
+    "imports_in": 1,
+    "lines": 80,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/CallFunctionShareControls.lean",
+    "proof_lines": 4,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 105,
+    "declarations": {
+      "abbrev": 4,
+      "def": 11,
+      "theorem": 14
+    },
+    "definition_lines": 30,
+    "definition_to_proof_line_ratio": 0.42857142857142855,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.CallFunctionGraph",
+      "Solidity.Calculus.CallResultCapture"
+    ],
+    "imports_in": 1,
+    "lines": 144,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/CallFunctionTable.lean",
+    "proof_lines": 70,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 134,
+    "declarations": {
+      "abbrev": 2,
+      "def": 14,
+      "theorem": 15
+    },
+    "definition_lines": 38,
+    "definition_to_proof_line_ratio": 0.41304347826086957,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.CallFunctionTermPower"
+    ],
+    "imports_in": 1,
+    "lines": 173,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/CallFunctionTermPower.lean",
+    "proof_lines": 92,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 128,
+    "declarations": {
+      "abbrev": 3,
+      "def": 14,
+      "theorem": 14
+    },
+    "definition_lines": 34,
+    "definition_to_proof_line_ratio": 0.38202247191011235,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.CallFunctionTransform",
+      "Solidity.Calculus.CallFunctionLeafMetrics"
+    ],
+    "imports_in": 1,
+    "lines": 170,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/CallFunctionTransform.lean",
+    "proof_lines": 89,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 128,
+    "declarations": {
+      "def": 4,
+      "theorem": 8
+    },
+    "definition_lines": 18,
+    "definition_to_proof_line_ratio": 0.23076923076923078,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Tools.Run",
+      "Solidity.Calculus.RewriteChains",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Calculus.Chains",
+      "Solidity.Tools.Inspect",
+      "Solidity.Syntax.Inlined"
+    ],
+    "imports_in": 1,
+    "lines": 317,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/CallOperands.lean",
+    "proof_lines": 78,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 62,
+    "declarations": {
+      "abbrev": 2,
+      "def": 9,
+      "theorem": 11
+    },
+    "definition_lines": 23,
+    "definition_to_proof_line_ratio": 0.6571428571428571,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.CallResultCapture"
+    ],
+    "imports_in": 1,
+    "lines": 86,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/CallResultCapture.lean",
+    "proof_lines": 35,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 108,
+    "declarations": {
+      "abbrev": 6,
+      "def": 17,
+      "theorem": 16
+    },
+    "definition_lines": 42,
+    "definition_to_proof_line_ratio": 0.6885245901639344,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.CallResultRestore",
+      "Solidity.Calculus.CallFunctionGraph"
+    ],
+    "imports_in": 1,
+    "lines": 150,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/CallResultRestore.lean",
+    "proof_lines": 61,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 38,
+    "declarations": {
+      "def": 1,
+      "theorem": 5
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.4782608695652174,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Closers"
+    ],
+    "imports_in": 1,
+    "lines": 53,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/CallSharingDefault.lean",
+    "proof_lines": 23,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 259,
+    "declarations": {
+      "def": 5,
+      "theorem": 33
+    },
+    "definition_lines": 45,
+    "definition_to_proof_line_ratio": 0.2571428571428571,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Tools.ProofTree",
+      "Solidity.Tools.Taclet",
+      "Solidity.Tools.Counterexample",
+      "Solidity.Calculus.Closers"
+    ],
+    "imports_in": 1,
+    "lines": 543,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/CallSummary.lean",
+    "proof_lines": 175,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 166,
+    "declarations": {
+      "def": 9,
+      "theorem": 11
+    },
+    "definition_lines": 19,
+    "definition_to_proof_line_ratio": 0.1417910447761194,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Calculus.CallbackSound",
+      "Solidity.Calculus.WalkSyntax"
+    ],
+    "imports_in": 2,
+    "lines": 329,
+    "maxHeartbeats": [
+      "2000000",
+      "2000000"
+    ],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Callback.lean",
+    "proof_lines": 134,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 56,
+    "declarations": {
+      "def": 1
+    },
+    "definition_lines": 24,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.ScopedRuns",
+      "Solidity.Semantics.Callback",
+      "Solidity.Calculus.Callback",
+      "Solidity.Calculus.CallbackHolds",
+      "Solidity.Calculus.CallbackSound",
+      "Solidity.Calculus.Notation",
+      "Solidity.Calculus.WalkSyntax"
+    ],
+    "imports_in": 1,
+    "lines": 128,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/CallbackRuns.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 182,
+    "declarations": {
+      "def": 6,
+      "theorem": 22
+    },
+    "definition_lines": 33,
+    "definition_to_proof_line_ratio": 0.2920353982300885,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Calculus.CallbackDerive",
+      "Solidity.Calculus.WalkSyntax",
+      "Solidity.Calculus.Spec",
+      "Solidity.Calculus.SolSpec"
+    ],
+    "imports_in": 5,
+    "lines": 442,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/CallbackStrategy.lean",
+    "proof_lines": 113,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 62,
+    "declarations": {
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.07547169811320754,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Semantics.CallbackUnwk",
+      "Solidity.Examples.Tactics.DeferredCallback"
+    ],
+    "imports_in": 1,
+    "lines": 77,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/CallbackUnwk.lean",
+    "proof_lines": 53,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 50,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.0975609756097561,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Semantics.CallbackWk",
+      "Solidity.Examples.Tactics.DeferredCallback"
+    ],
+    "imports_in": 1,
+    "lines": 65,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/CallbackWk.lean",
+    "proof_lines": 41,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 133,
+    "declarations": {
+      "def": 11,
+      "theorem": 14
+    },
+    "definition_lines": 19,
+    "definition_to_proof_line_ratio": 0.20212765957446807,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Theory.CallerModel.Static"
+    ],
+    "imports_in": 1,
+    "lines": 251,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/CallerModel.lean",
+    "proof_lines": 94,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 380,
+    "declarations": {
+      "def": 7,
+      "theorem": 51
+    },
+    "definition_lines": 120,
+    "definition_to_proof_line_ratio": 0.5263157894736842,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Tools.Run",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.ProvesDerive",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Tools.Inspect"
+    ],
+    "imports_in": 1,
+    "lines": 655,
+    "maxHeartbeats": [
+      "2000000",
+      "2000000"
+    ],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Calls.lean",
+    "proof_lines": 228,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 220,
+    "declarations": {
+      "def": 2,
+      "theorem": 12
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.05,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.LastLine",
+      "Solidity.Calculus.Surface",
+      "Solidity.FreshNames"
+    ],
+    "imports_in": 1,
+    "lines": 493,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Chains.lean",
+    "proof_lines": 100,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 219,
+    "declarations": {
+      "def": 3,
+      "theorem": 33
+    },
+    "definition_lines": 33,
+    "definition_to_proof_line_ratio": 0.264,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.RewriteChains",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Tools.Inspect"
+    ],
+    "imports_in": 1,
+    "lines": 470,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Checked.lean",
+    "proof_lines": 125,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 51,
+    "declarations": {
+      "theorem": 11
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Tools.Inspect"
+    ],
+    "imports_in": 1,
+    "lines": 158,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/CheckedBlock.lean",
+    "proof_lines": 31,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 182,
+    "declarations": {
+      "def": 17,
+      "theorem": 22
+    },
+    "definition_lines": 80,
+    "definition_to_proof_line_ratio": 0.8695652173913043,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.CleanTailBoundary",
+      "Solidity.Typing.Constructibility",
+      "Solidity.Syntax.Splice"
+    ],
+    "imports_in": 1,
+    "lines": 227,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/CleanTail.lean",
+    "proof_lines": 92,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 99,
+    "declarations": {
+      "def": 10,
+      "theorem": 14
+    },
+    "definition_lines": 31,
+    "definition_to_proof_line_ratio": 0.7948717948717948,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Solkey.ComputedRevert",
+      "Solidity.Semantics.RevertMemory"
+    ],
+    "imports_in": 2,
+    "lines": 163,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/ComputedRevert.lean",
+    "proof_lines": 39,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 168,
+    "declarations": {
+      "def": 15,
+      "theorem": 10
+    },
+    "definition_lines": 91,
+    "definition_to_proof_line_ratio": 2.5277777777777777,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Problem",
+      "Solidity.Tools.Run",
+      "Solidity.Tools.Inspect",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Calculus.Deploy"
+    ],
+    "imports_in": 1,
+    "lines": 444,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Constructors.lean",
+    "proof_lines": 36,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 183,
+    "declarations": {
+      "def": 47,
+      "inductive": 1,
+      "instance": 1,
+      "structure": 1,
+      "theorem": 19
+    },
+    "definition_lines": 147,
+    "definition_to_proof_line_ratio": 5.25,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Semantics.ContractWorld",
+      "Solidity.Syntax.Splice"
+    ],
+    "imports_in": 1,
+    "lines": 273,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/ContractWorld.lean",
+    "proof_lines": 28,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 234,
+    "declarations": {
+      "def": 29,
+      "instance": 1,
+      "structure": 1,
+      "theorem": 19
+    },
+    "definition_lines": 143,
+    "definition_to_proof_line_ratio": 2.3833333333333333,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Frontend.WorldImport"
+    ],
+    "imports_in": 1,
+    "lines": 330,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/ContractWorldSource.lean",
+    "proof_lines": 60,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 132,
+    "declarations": {
+      "def": 2,
+      "theorem": 7
+    },
+    "definition_lines": 32,
+    "definition_to_proof_line_ratio": 0.34782608695652173,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Calculus.FunContract",
+      "Solidity.Calculus.WalkSyntax"
+    ],
+    "imports_in": 1,
+    "lines": 196,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Contracts.lean",
+    "proof_lines": 92,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 91,
+    "declarations": {
+      "def": 14,
+      "theorem": 8
+    },
+    "definition_lines": 46,
+    "definition_to_proof_line_ratio": 1.4375,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Tools.CreationTryReplay"
+    ],
+    "imports_in": 2,
+    "lines": 128,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/CreationTrySource.lean",
+    "proof_lines": 32,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 16,
+    "declarations": {
+      "def": 2,
+      "theorem": 1
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 2.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.Tactics.CreationTrySource"
+    ],
+    "imports_in": 2,
+    "lines": 24,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/CreationTrySourceIR.lean",
+    "proof_lines": 3,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 180,
+    "declarations": {
+      "theorem": 13
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Tools.Run",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Tools.Inspect"
+    ],
+    "imports_in": 1,
+    "lines": 272,
+    "maxHeartbeats": [
+      "1000000"
+    ],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/CrossDomain.lean",
+    "proof_lines": 165,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 74,
+    "declarations": {
+      "def": 10,
+      "theorem": 5
+    },
+    "definition_lines": 47,
+    "definition_to_proof_line_ratio": 3.1333333333333333,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Tools.ProofTree",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Tools.Counterexample"
+    ],
+    "imports_in": 1,
+    "lines": 131,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Dangling.lean",
+    "proof_lines": 15,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 283,
+    "declarations": {
+      "def": 9,
+      "theorem": 43
+    },
+    "definition_lines": 27,
+    "definition_to_proof_line_ratio": 0.12558139534883722,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.DecideComplete",
+      "Solidity.Calculus.Closer",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Tools.Inspect"
+    ],
+    "imports_in": 2,
+    "lines": 599,
+    "maxHeartbeats": [
+      "400000",
+      "1600000"
+    ],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Decide.lean",
+    "proof_lines": 215,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 99,
+    "declarations": {
+      "def": 3,
+      "theorem": 5
+    },
+    "definition_lines": 75,
+    "definition_to_proof_line_ratio": 5.357142857142857,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Frontend.Testing",
+      "Solidity.Tools.Run"
+    ],
+    "imports_in": 1,
+    "lines": 139,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/DeclarationMetadata.lean",
+    "proof_lines": 14,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 94,
+    "declarations": {
+      "abbrev": 1,
+      "def": 12,
+      "theorem": 5
+    },
+    "definition_lines": 36,
+    "definition_to_proof_line_ratio": 0.6792452830188679,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Semantics.DeferredCallback",
+      "Solidity.Syntax.Splice"
+    ],
+    "imports_in": 4,
+    "lines": 134,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/DeferredCallback.lean",
+    "proof_lines": 53,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 78,
+    "declarations": {
+      "def": 3,
+      "theorem": 5
+    },
+    "definition_lines": 15,
+    "definition_to_proof_line_ratio": 0.2830188679245283,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Semantics.DeferredCorrespondence",
+      "Solidity.Examples.Tactics.DeferredCallback",
+      "Solidity.Examples.Tactics.DeferredSource"
+    ],
+    "imports_in": 2,
+    "lines": 99,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/DeferredCorrespondence.lean",
+    "proof_lines": 53,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 123,
+    "declarations": {
+      "def": 22
+    },
+    "definition_lines": 118,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Semantics.DeferredSource",
+      "Solidity.Syntax.Splice"
+    ],
+    "imports_in": 2,
+    "lines": 162,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/DeferredSource.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 154,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Derive",
+      "Solidity.Calculus.Notation",
+      "Solidity.Calculus.Delab",
+      "Solidity.Calculus.WalkSyntax",
+      "Solidity.Calculus.ProvesDerive",
+      "Solidity.Calculus.SolkeyProves"
+    ],
+    "imports_in": 1,
+    "lines": 317,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Derive.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 112,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Notation",
+      "Solidity.Calculus.Delab",
+      "Solidity.Calculus.Surface"
+    ],
+    "imports_in": 1,
+    "lines": 275,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/DlNotation.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 110,
+    "declarations": {
+      "def": 12,
+      "theorem": 19
+    },
+    "definition_lines": 39,
+    "definition_to_proof_line_ratio": 0.9285714285714286,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Tools.Upstream",
+      "Solidity.Semantics.EntryReturn",
+      "Solidity.Calculus.ReadRealization"
+    ],
+    "imports_in": 4,
+    "lines": 177,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/EntryReturn.lean",
+    "proof_lines": 42,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 30,
+    "declarations": {
+      "def": 5,
+      "theorem": 3
+    },
+    "definition_lines": 20,
+    "definition_to_proof_line_ratio": 4.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.Tactics.EntryReturn"
+    ],
+    "imports_in": 2,
+    "lines": 44,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/EntryReturnFlow.lean",
+    "proof_lines": 5,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 16,
+    "declarations": {
+      "def": 3,
+      "theorem": 3
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.8,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.Tactics.EntryReturnFlow"
+    ],
+    "imports_in": 1,
+    "lines": 25,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/EntryReturnFlowIR.lean",
+    "proof_lines": 5,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 45,
+    "declarations": {
+      "def": 10,
+      "theorem": 4
+    },
+    "definition_lines": 24,
+    "definition_to_proof_line_ratio": 3.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.Tactics.EntryReturn"
+    ],
+    "imports_in": 1,
+    "lines": 65,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/EntryReturnFunction.lean",
+    "proof_lines": 8,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 21,
+    "declarations": {
+      "def": 4,
+      "theorem": 2
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 2.2,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.Tactics.EntryReturn"
+    ],
+    "imports_in": 1,
+    "lines": 31,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/EntryReturnMetadata.lean",
+    "proof_lines": 5,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 74,
+    "declarations": {
+      "def": 2,
+      "theorem": 1
+    },
+    "definition_lines": 35,
+    "definition_to_proof_line_ratio": 1.1290322580645162,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Calculus.Close",
+      "Solidity.Frontend.Import"
+    ],
+    "imports_in": 1,
+    "lines": 113,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/EvaluationOrder.lean",
+    "proof_lines": 31,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 46,
+    "declarations": {
+      "def": 6,
+      "instance": 2,
+      "theorem": 10
+    },
+    "definition_lines": 17,
+    "definition_to_proof_line_ratio": 1.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Semantics.ExternalReturnBytes"
+    ],
+    "imports_in": 2,
+    "lines": 66,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/ExternalReturnBytes.lean",
+    "proof_lines": 17,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 139,
+    "declarations": {
+      "def": 10,
+      "theorem": 17
+    },
+    "definition_lines": 25,
+    "definition_to_proof_line_ratio": 0.25,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.Tactics.ExternalTryWitness",
+      "Solidity.Calculus.Sound.ExternalTryWitness"
+    ],
+    "imports_in": 2,
+    "lines": 205,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/ExternalTryFormula.lean",
+    "proof_lines": 100,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 56,
+    "declarations": {
+      "def": 4,
+      "theorem": 6
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.23684210526315788,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.Tactics.ExternalTryFormula",
+      "Solidity.Frontend.Problems"
+    ],
+    "imports_in": 2,
+    "lines": 103,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/ExternalTryUniversal.lean",
+    "proof_lines": 38,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 44,
+    "declarations": {
+      "def": 4,
+      "theorem": 7
+    },
+    "definition_lines": 13,
+    "definition_to_proof_line_ratio": 0.6842105263157895,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Tools.Run",
+      "Solidity.Calculus.Surface",
+      "Solidity.Semantics.ExternalTryWitness",
+      "Solidity.Counterexamples.DiamondTry"
+    ],
+    "imports_in": 2,
+    "lines": 82,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/ExternalTryWitness.lean",
+    "proof_lines": 19,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 111,
+    "declarations": {
+      "def": 4,
+      "theorem": 5
+    },
+    "definition_lines": 26,
+    "definition_to_proof_line_ratio": 5.2,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Spec",
+      "Solidity.Calculus.SolSpec",
+      "Solidity.Tools.Show",
+      "Solidity.Tools.Counterexample",
+      "Solidity.Frontend.Import"
+    ],
+    "imports_in": 2,
+    "lines": 154,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/FilteredSets.lean",
+    "proof_lines": 5,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 56,
+    "declarations": {
+      "def": 3,
+      "theorem": 2
+    },
+    "definition_lines": 14,
+    "definition_to_proof_line_ratio": 7.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Spec",
+      "Solidity.Calculus.SolSpec",
+      "Solidity.Tools.Show",
+      "Solidity.Tools.Counterexample"
+    ],
+    "imports_in": 1,
+    "lines": 85,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/FiniteSets.lean",
+    "proof_lines": 2,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 474,
+    "declarations": {
+      "def": 39,
+      "theorem": 44
+    },
+    "definition_lines": 262,
+    "definition_to_proof_line_ratio": 1.806896551724138,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Tools.Inspect"
+    ],
+    "imports_in": 2,
+    "lines": 798,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/FunctionTypes.lean",
+    "proof_lines": 145,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 357,
+    "declarations": {
+      "def": 8,
+      "theorem": 20
+    },
+    "definition_lines": 232,
+    "definition_to_proof_line_ratio": 3.2222222222222223,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Tools.Inspect",
+      "Solidity.Tools.Run",
+      "Solidity.Examples.Tactics.HashingNames"
+    ],
+    "imports_in": 1,
+    "lines": 660,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Hashing.lean",
+    "proof_lines": 72,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 6,
+    "declarations": {
+      "def": 1
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Syntax"
+    ],
+    "imports_in": 3,
+    "lines": 20,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/HashingNames.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 52,
+    "declarations": {
+      "def": 2,
+      "theorem": 2
+    },
+    "definition_lines": 18,
+    "definition_to_proof_line_ratio": 2.25,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Frontend.Import",
+      "Solidity.Tools.Run",
+      "Solidity.Semantics.Deploy"
+    ],
+    "imports_in": 1,
+    "lines": 134,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Inheritance.lean",
+    "proof_lines": 8,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 18,
+    "declarations": {
+      "def": 1
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Frontend.Import",
+      "Solidity.Tools.Run"
+    ],
+    "imports_in": 1,
+    "lines": 61,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/InheritedSelectorsImport.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 94,
+    "declarations": {
+      "theorem": 13
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Tools.ProofTree",
+      "Solidity.Tools.Counterexample",
+      "Solidity.Calculus.Closers"
+    ],
+    "imports_in": 1,
+    "lines": 230,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Join.lean",
+    "proof_lines": 79,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 166,
+    "declarations": {
+      "abbrev": 1,
+      "def": 4,
+      "theorem": 25
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.07777777777777778,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Tools.ProofTree",
+      "Solidity.Tools.Counterexample",
+      "Solidity.Calculus.Closers",
+      "Solidity.Calculus.Print"
+    ],
+    "imports_in": 1,
+    "lines": 246,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/JoinControls.lean",
+    "proof_lines": 90,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 163,
+    "declarations": {
+      "abbrev": 1,
+      "theorem": 6
+    },
+    "definition_lines": 66,
+    "definition_to_proof_line_ratio": 1.346938775510204,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Closers",
+      "Solidity.Tools.Counterexample"
+    ],
+    "imports_in": 1,
+    "lines": 189,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/JoinIntervals.lean",
+    "proof_lines": 49,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 151,
+    "declarations": {
+      "abbrev": 6,
+      "def": 22,
+      "theorem": 19
+    },
+    "definition_lines": 74,
+    "definition_to_proof_line_ratio": 1.0277777777777777,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Sound.JoinSequence",
+      "Solidity.Calculus.JoinSequenceSize",
+      "Solidity.Calculus.Rules"
+    ],
+    "imports_in": 1,
+    "lines": 213,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/JoinSequence.lean",
+    "proof_lines": 72,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 122,
+    "declarations": {
+      "def": 2,
+      "theorem": 9
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.05813953488372093,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Closers",
+      "Solidity.Tools.Counterexample"
+    ],
+    "imports_in": 1,
+    "lines": 160,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/JoinSigned.lean",
+    "proof_lines": 86,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 54,
+    "declarations": {
+      "abbrev": 3,
+      "theorem": 11
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.3333333333333333,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Closers",
+      "Solidity.Tools.ProofTree",
+      "Solidity.Tools.Counterexample"
+    ],
+    "imports_in": 2,
+    "lines": 109,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/JoinWalk.lean",
+    "proof_lines": 24,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 153,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Tools.LatexSolkey",
+      "Solidity.Calculus.Surface",
+      "Solidity.Examples.Chains.FixedLength"
+    ],
+    "imports_in": 1,
+    "lines": 355,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Latex.lean",
+    "proof_lines": 12,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 106,
+    "declarations": {
+      "abbrev": 4,
+      "def": 6,
+      "theorem": 7
+    },
+    "definition_lines": 17,
+    "definition_to_proof_line_ratio": 0.2537313432835821,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Tools.Run",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Tools.Inspect"
+    ],
+    "imports_in": 1,
+    "lines": 211,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/LedgerDelete.lean",
+    "proof_lines": 67,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 46,
+    "declarations": {
+      "def": 2,
+      "theorem": 1
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 1.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Tools.Inspect"
+    ],
+    "imports_in": 2,
+    "lines": 72,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/LexAnnotations.lean",
+    "proof_lines": 7,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 122,
+    "declarations": {
+      "def": 1,
+      "theorem": 5
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.017857142857142856,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Calculus.CallbackDerive",
+      "Solidity.Tools.Inspect",
+      "Solidity.Examples.LexRuleSyntax"
+    ],
+    "imports_in": 2,
+    "lines": 154,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/LexDiamond.lean",
+    "proof_lines": 112,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 58,
+    "declarations": {
+      "def": 6,
+      "theorem": 13
+    },
+    "definition_lines": 28,
+    "definition_to_proof_line_ratio": 1.1666666666666667,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.Tactics.LibraryTrySource",
+      "Solidity.Tools.LibraryTryReplay"
+    ],
+    "imports_in": 1,
+    "lines": 105,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/LibraryTryControls.lean",
+    "proof_lines": 24,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 84,
+    "declarations": {
+      "def": 11,
+      "theorem": 8
+    },
+    "definition_lines": 48,
+    "definition_to_proof_line_ratio": 1.6,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Frontend.LibraryTryImport"
+    ],
+    "imports_in": 4,
+    "lines": 118,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/LibraryTrySource.lean",
+    "proof_lines": 30,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 19,
+    "declarations": {
+      "def": 2,
+      "theorem": 1
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 3.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.Tactics.LibraryTrySource"
+    ],
+    "imports_in": 1,
+    "lines": 27,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/LibraryTrySourceIR.lean",
+    "proof_lines": 3,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 159,
+    "declarations": {
+      "def": 13,
+      "inductive": 1,
+      "theorem": 20
+    },
+    "definition_lines": 42,
+    "definition_to_proof_line_ratio": 0.40384615384615385,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Lifetime",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Calculus.Close"
+    ],
+    "imports_in": 1,
+    "lines": 252,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Lifetime.lean",
+    "proof_lines": 104,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 45,
+    "declarations": {
+      "def": 6
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Notation"
+    ],
+    "imports_in": 1,
+    "lines": 72,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/LocalBindings.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 28,
+    "declarations": {
+      "def": 4,
+      "theorem": 1
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 8.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.Tactics.SymbolicCounterexample"
+    ],
+    "imports_in": 1,
+    "lines": 49,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/LongContext.lean",
+    "proof_lines": 1,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 98,
+    "declarations": {
+      "def": 11,
+      "theorem": 2
+    },
+    "definition_lines": 28,
+    "definition_to_proof_line_ratio": 7.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Frontend.Import",
+      "Solidity.Syntax.LoopWarnings",
+      "Solidity.Tools.ProofTree",
+      "Solidity.Tools.Counterexample",
+      "Solidity.Calculus.Closers"
+    ],
+    "imports_in": 1,
+    "lines": 151,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/LoopNotices.lean",
+    "proof_lines": 4,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 361,
+    "declarations": {
+      "def": 11,
+      "theorem": 14
+    },
+    "definition_lines": 63,
+    "definition_to_proof_line_ratio": 0.38414634146341464,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Tools.Run",
+      "Solidity.Tools.Inspect",
+      "Solidity.Tools.ProofTree",
+      "Solidity.Calculus.ProvesDerive",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Calculus.Chains",
+      "Solidity.Semantics.RunFuel",
+      "Solidity.Syntax.Inlined"
+    ],
+    "imports_in": 1,
+    "lines": 839,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Loops.lean",
+    "proof_lines": 164,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 38,
+    "declarations": {
+      "theorem": 5
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Frontend.Import",
+      "Solidity.Frontend.Problems",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Tools.Show"
+    ],
+    "imports_in": 1,
+    "lines": 121,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/LoopsImport.lean",
+    "proof_lines": 19,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 460,
+    "declarations": {
+      "theorem": 29
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Tools.Run",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Tools.Inspect"
+    ],
+    "imports_in": 1,
+    "lines": 718,
+    "maxHeartbeats": [
+      "300000",
+      "400000"
+    ],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Memory.lean",
+    "proof_lines": 400,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 37,
+    "declarations": {
+      "def": 1
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Frontend.Testing"
+    ],
+    "imports_in": 1,
+    "lines": 70,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/MemoryPush.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 187,
+    "declarations": {
+      "def": 19,
+      "theorem": 16
+    },
+    "definition_lines": 121,
+    "definition_to_proof_line_ratio": 2.372549019607843,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers"
+    ],
+    "imports_in": 2,
+    "lines": 323,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/MemoryReturns.lean",
+    "proof_lines": 51,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 91,
+    "declarations": {
+      "def": 15
+    },
+    "definition_lines": 62,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.SolkeyFragment",
+      "Solidity.Syntax.Splice"
+    ],
+    "imports_in": 1,
+    "lines": 136,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/ModularArithmetic.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 117,
+    "declarations": {
+      "abbrev": 1,
+      "def": 17,
+      "theorem": 17
+    },
+    "definition_lines": 23,
+    "definition_to_proof_line_ratio": 0.3898305084745763,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Theory.Mutability.Pure",
+      "Solidity.Theory.Mutability.Payable",
+      "Solidity.Theory.Mutability.Assignable",
+      "Solidity.Theory.Mutability.Closer",
+      "Solidity.Calculus.Surface"
+    ],
+    "imports_in": 1,
+    "lines": 270,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Mutability.lean",
+    "proof_lines": 59,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 71,
+    "declarations": {
+      "def": 16
+    },
+    "definition_lines": 67,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Semantics.NativeDeferred",
+      "Solidity.Syntax.Splice"
+    ],
+    "imports_in": 1,
+    "lines": 98,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/NativeDeferred.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 32,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Semantics.NativeDeferredCallback",
+      "Solidity.Examples.Tactics.DeferredCorrespondence"
+    ],
+    "imports_in": 1,
+    "lines": 45,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/NativeDeferredCallback.lean",
+    "proof_lines": 25,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 84,
+    "declarations": {
+      "def": 11,
+      "theorem": 4
+    },
+    "definition_lines": 32,
+    "definition_to_proof_line_ratio": 3.5555555555555554,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Semantics.NativeDeferred",
+      "Solidity.Syntax.Splice",
+      "Solidity.Calculus.Completeness",
+      "Solidity.Calculus.PrintStmt"
+    ],
+    "imports_in": 1,
+    "lines": 108,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/NativeDeferredSource.lean",
+    "proof_lines": 9,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 18,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.2,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Calculus.Close"
+    ],
+    "imports_in": 1,
+    "lines": 44,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/NestedArrays.lean",
+    "proof_lines": 10,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 145,
+    "declarations": {
+      "abbrev": 1,
+      "def": 8,
+      "theorem": 25
+    },
+    "definition_lines": 23,
+    "definition_to_proof_line_ratio": 0.20535714285714285,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Tools.Run",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Tools.Inspect"
+    ],
+    "imports_in": 2,
+    "lines": 285,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Net.lean",
+    "proof_lines": 112,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 33,
+    "declarations": {
+      "theorem": 7
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Frontend.Testing"
+    ],
+    "imports_in": 1,
+    "lines": 52,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/NewArrays.lean",
+    "proof_lines": 28,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 63,
+    "declarations": {
+      "theorem": 9
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Calculus.Close"
+    ],
+    "imports_in": 2,
+    "lines": 95,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Nonlinear.lean",
+    "proof_lines": 56,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 46,
+    "declarations": {
+      "def": 3,
+      "theorem": 5
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.16129032258064516,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Sound"
+    ],
+    "imports_in": 2,
+    "lines": 81,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Nonvacuity.lean",
+    "proof_lines": 31,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 31,
+    "declarations": {
+      "def": 1
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Notation",
+      "Solidity.Calculus.Delab",
+      "Solidity.Tools.Inspect"
+    ],
+    "imports_in": 1,
+    "lines": 113,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Notation.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 12,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Frontend.Import",
+      "Solidity.Frontend.Problems",
+      "Solidity.Calculus.Closers",
+      "Solidity.Calculus.ProveChunked"
+    ],
+    "imports_in": 3,
+    "lines": 35,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/OpenLoops.lean",
+    "proof_lines": 2,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 6,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Examples.Tactics.OpenLoops"
+    ],
+    "imports_in": 1,
+    "lines": 22,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/OpenLoops/RowsNine.lean",
+    "proof_lines": 2,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 299,
+    "declarations": {
+      "def": 6,
+      "theorem": 50
+    },
+    "definition_lines": 77,
+    "definition_to_proof_line_ratio": 0.3888888888888889,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Frontend.Testing",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Closers"
+    ],
+    "imports_in": 1,
+    "lines": 434,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/OperatorAliasesImport.lean",
+    "proof_lines": 198,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 89,
+    "declarations": {
+      "theorem": 13
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Close",
+      "Solidity.Evm.Examples",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Tools.Inspect"
+    ],
+    "imports_in": 6,
+    "lines": 180,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Operators.lean",
+    "proof_lines": 77,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 51,
+    "declarations": {
+      "def": 1,
+      "theorem": 6
+    },
+    "definition_lines": 12,
+    "definition_to_proof_line_ratio": 0.5,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers"
+    ],
+    "imports_in": 1,
+    "lines": 91,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/OwnStructs.lean",
+    "proof_lines": 24,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 65,
+    "declarations": {
+      "theorem": 6
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Calculus.Sequents",
+      "Solidity.Tools.Inspect"
+    ],
+    "imports_in": 1,
+    "lines": 160,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Payment.lean",
+    "proof_lines": 52,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 43,
+    "declarations": {
+      "abbrev": 2,
+      "def": 1,
+      "theorem": 9
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.19230769230769232,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.PaymentConditions"
+    ],
+    "imports_in": 1,
+    "lines": 72,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/PaymentConditions.lean",
+    "proof_lines": 26,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 64,
+    "declarations": {
+      "def": 3,
+      "theorem": 2
+    },
+    "definition_lines": 25,
+    "definition_to_proof_line_ratio": 1.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.PaymentClose",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Calculus.CallbackSound",
+      "Solidity.Calculus.CallbackDerive",
+      "Solidity.Calculus.WalkSyntax"
+    ],
+    "imports_in": 1,
+    "lines": 95,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/PaymentCorpus.lean",
+    "proof_lines": 25,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 75,
+    "declarations": {
+      "abbrev": 3,
+      "def": 1,
+      "theorem": 7
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.11320754716981132,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.CallbackDerive",
+      "Solidity.Calculus.CallbackSound",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Closers",
+      "Solidity.Calculus.Surface"
+    ],
+    "imports_in": 1,
+    "lines": 103,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/PaymentRules.lean",
+    "proof_lines": 53,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 79,
+    "declarations": {
+      "def": 13,
+      "structure": 2,
+      "theorem": 9
+    },
+    "definition_lines": 46,
+    "definition_to_proof_line_ratio": 2.4210526315789473,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Frontend.PaymentImport"
+    ],
+    "imports_in": 2,
+    "lines": 108,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/PaymentSource.lean",
+    "proof_lines": 19,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 149,
+    "declarations": {
+      "abbrev": 3,
+      "def": 3,
+      "theorem": 14
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.07086614173228346,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.PaymentWitness"
+    ],
+    "imports_in": 1,
+    "lines": 199,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/PaymentWitness.lean",
+    "proof_lines": 127,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 28,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Tools.ProofTree",
+      "Solidity.Calculus.Closers"
+    ],
+    "imports_in": 1,
+    "lines": 81,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/PolySize.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 82,
+    "declarations": {
+      "abbrev": 1,
+      "def": 5,
+      "instance": 3,
+      "theorem": 12
+    },
+    "definition_lines": 20,
+    "definition_to_proof_line_ratio": 0.6060606060606061,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Semantics.PrimitiveReturnProjection",
+      "Solidity.Examples.Tactics.ExternalReturnBytes"
+    ],
+    "imports_in": 2,
+    "lines": 123,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/PrimitiveReturnProjection.lean",
+    "proof_lines": 33,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 133,
+    "declarations": {
+      "abbrev": 1,
+      "def": 18
+    },
+    "definition_lines": 51,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Delab",
+      "Solidity.Examples.Tactics.Symex",
+      "Solidity.Tools.Inspect",
+      "Solidity.Tools.Taclet"
+    ],
+    "imports_in": 1,
+    "lines": 344,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Print.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 94,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Tools.ProgramTrace",
+      "Solidity.Calculus.Surface",
+      "Solidity.Examples.Chains.Storage"
+    ],
+    "imports_in": 1,
+    "lines": 129,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/ProgramTrace.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 30,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Tools.Inspect",
+      "Solidity.Calculus.Notation"
+    ],
+    "imports_in": 1,
+    "lines": 207,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/ProofTree.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 247,
+    "declarations": {
+      "def": 8,
+      "theorem": 35
+    },
+    "definition_lines": 69,
+    "definition_to_proof_line_ratio": 0.552,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Frontend.Testing",
+      "Solidity.Tools.Run",
+      "Solidity.Syntax.Contract",
+      "Solidity.Semantics.RunFuel"
+    ],
+    "imports_in": 1,
+    "lines": 411,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/PublicGetters.lean",
+    "proof_lines": 125,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 72,
+    "declarations": {
+      "def": 7,
+      "theorem": 12
+    },
+    "definition_lines": 20,
+    "definition_to_proof_line_ratio": 0.46511627906976744,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Frontend.Testing"
+    ],
+    "imports_in": 1,
+    "lines": 129,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/PushReceiver.lean",
+    "proof_lines": 43,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 46,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Frontend.Testing",
+      "Solidity.Calculus.Chains",
+      "Solidity.Calculus.Surface"
+    ],
+    "imports_in": 1,
+    "lines": 89,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/PushSource.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 50,
+    "declarations": {
+      "def": 3
+    },
+    "definition_lines": 25,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.CallbackSound",
+      "Solidity.Calculus.ProvesDerive",
+      "Solidity.Calculus.Quote"
+    ],
+    "imports_in": 1,
+    "lines": 79,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/PushSuffixGuards.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 120,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.SolkeyProves",
+      "Solidity.Calculus.CallbackSound",
+      "Solidity.SortCheck.Faithfulness",
+      "Solidity.Tools.Taclet"
+    ],
+    "imports_in": 1,
+    "lines": 172,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/PushSuffixRules.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 66,
+    "declarations": {
+      "def": 15
+    },
+    "definition_lines": 63,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.SoundPush"
+    ],
+    "imports_in": 1,
+    "lines": 96,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/PushSuffixRun.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 55,
+    "declarations": {
+      "def": 1
+    },
+    "definition_lines": 47,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Frontend.Testing"
+    ],
+    "imports_in": 1,
+    "lines": 112,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/PushSuffixSource.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 92,
+    "declarations": {
+      "def": 2,
+      "theorem": 22
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.029850746268656716,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Solkey.QuantifiedDiamond",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Semantics.RevertMemory",
+      "Solidity.Tools.Counterexample",
+      "Solidity.Examples.Termination"
+    ],
+    "imports_in": 1,
+    "lines": 152,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/QuantifiedDiamond.lean",
+    "proof_lines": 67,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 187,
+    "declarations": {
+      "abbrev": 1,
+      "def": 21,
+      "inductive": 2,
+      "theorem": 32
+    },
+    "definition_lines": 62,
+    "definition_to_proof_line_ratio": 0.5585585585585585,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Theory.Reachable.CallerModel",
+      "Solidity.Calculus.DecideComplete",
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers"
+    ],
+    "imports_in": 1,
+    "lines": 380,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Reachable.lean",
+    "proof_lines": 111,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 29,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.16666666666666666,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Secp256k1"
+    ],
+    "imports_in": 3,
+    "lines": 43,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Recovery.lean",
+    "proof_lines": 6,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Examples",
+    "category": "unmarked",
+    "code_lines": 307,
+    "declarations": {
+      "def": 12,
+      "theorem": 25
+    },
+    "definition_lines": 128,
+    "definition_to_proof_line_ratio": 0.9411764705882353,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Close",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.Closers",
+      "Solidity.Calculus.Recursion",
+      "Solidity.Calculus.RecursionCallback",
+      "Solidity.Calculus.MemContract"
+    ],
+    "imports_in": 1,
+    "lines": 556,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Examples/Tactics/Recursion.lean",
+    "proof_lines": 136,
+    "roadmap_commands": 0,
+    "sorry": 0
+  }
+]

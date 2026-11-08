@@ -1,0 +1,7090 @@
+[
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 81,
+    "declarations": {
+      "def": 2,
+      "theorem": 13
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.05084745762711865,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.GuardBodySelection",
+      "Solidity.Backend.FailurePaths.GuardSequencesControls"
+    ],
+    "imports_in": 2,
+    "lines": 101,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/GuardBodySelectionControls.lean",
+    "proof_lines": 59,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 124,
+    "declarations": {
+      "def": 2,
+      "theorem": 5
+    },
+    "definition_lines": 17,
+    "definition_to_proof_line_ratio": 0.17346938775510204,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.CheckedGuards"
+    ],
+    "imports_in": 3,
+    "lines": 137,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/GuardLowering.lean",
+    "proof_lines": 98,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 82,
+    "declarations": {
+      "def": 3,
+      "theorem": 16
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.08928571428571429,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.GuardLowering",
+      "Solidity.Backend.FailurePaths.CheckedGuardsControls"
+    ],
+    "imports_in": 2,
+    "lines": 100,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/GuardLoweringControls.lean",
+    "proof_lines": 56,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 157,
+    "declarations": {
+      "def": 3,
+      "theorem": 5
+    },
+    "definition_lines": 17,
+    "definition_to_proof_line_ratio": 0.1297709923664122,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.GuardLowering"
+    ],
+    "imports_in": 3,
+    "lines": 170,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/GuardSequences.lean",
+    "proof_lines": 131,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 101,
+    "declarations": {
+      "def": 3,
+      "theorem": 15
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.06756756756756757,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.GuardSequences",
+      "Solidity.Backend.FailurePaths.GuardLoweringControls"
+    ],
+    "imports_in": 2,
+    "lines": 121,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/GuardSequencesControls.lean",
+    "proof_lines": 74,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 21,
+    "declarations": {
+      "def": 3
+    },
+    "definition_lines": 16,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Source.Eval",
+      "Solidity.Backend.Failure.Unwind"
+    ],
+    "imports_in": 3,
+    "lines": 40,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/Interface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 79,
+    "declarations": {
+      "def": 3,
+      "structure": 2,
+      "theorem": 2
+    },
+    "definition_lines": 29,
+    "definition_to_proof_line_ratio": 0.6590909090909091,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.RuntimeGuard"
+    ],
+    "imports_in": 5,
+    "lines": 93,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/LocalGuardSelection.lean",
+    "proof_lines": 44,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 73,
+    "declarations": {
+      "def": 3,
+      "theorem": 8
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.1320754716981132,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.LocalGuardSelection",
+      "Solidity.Backend.FailurePaths.RuntimeGuardControls"
+    ],
+    "imports_in": 2,
+    "lines": 89,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/LocalGuardSelectionControls.lean",
+    "proof_lines": 53,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 129,
+    "declarations": {
+      "def": 9,
+      "theorem": 7
+    },
+    "definition_lines": 21,
+    "definition_to_proof_line_ratio": 0.22105263157894736,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryCompile",
+      "Solidity.Source.Hoare",
+      "Solidity.Source.Eval"
+    ],
+    "imports_in": 3,
+    "lines": 155,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/LogicalGuard.lean",
+    "proof_lines": 95,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 77,
+    "declarations": {
+      "def": 6,
+      "theorem": 13
+    },
+    "definition_lines": 20,
+    "definition_to_proof_line_ratio": 0.5128205128205128,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.LogicalGuard",
+      "Solidity.Backend.FailurePaths.Statements",
+      "Solidity.Backend.PrimitivePackets.Comparisons.Controls"
+    ],
+    "imports_in": 2,
+    "lines": 130,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/LogicalGuardControls.lean",
+    "proof_lines": 39,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 109,
+    "declarations": {
+      "def": 3,
+      "structure": 2,
+      "theorem": 2
+    },
+    "definition_lines": 51,
+    "definition_to_proof_line_ratio": 1.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.LocalGuardSelection",
+      "Solidity.Backend.FailurePaths.LogicalGuard"
+    ],
+    "imports_in": 3,
+    "lines": 122,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/LogicalGuardSelection.lean",
+    "proof_lines": 51,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 104,
+    "declarations": {
+      "def": 3,
+      "theorem": 12
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.12987012987012986,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.LogicalGuardSelection",
+      "Solidity.Backend.FailurePaths.LogicalGuardControls"
+    ],
+    "imports_in": 1,
+    "lines": 124,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/LogicalGuardSelectionControls.lean",
+    "proof_lines": 77,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 56,
+    "declarations": {
+      "def": 2,
+      "theorem": 3
+    },
+    "definition_lines": 14,
+    "definition_to_proof_line_ratio": 0.4,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.Statements"
+    ],
+    "imports_in": 3,
+    "lines": 75,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/Parametric.lean",
+    "proof_lines": 35,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 62,
+    "declarations": {
+      "def": 4,
+      "theorem": 8
+    },
+    "definition_lines": 13,
+    "definition_to_proof_line_ratio": 0.38235294117647056,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.Parametric",
+      "Solidity.Backend.FailurePaths.Controls"
+    ],
+    "imports_in": 2,
+    "lines": 83,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/ParametricControls.lean",
+    "proof_lines": 34,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 171,
+    "declarations": {
+      "def": 2,
+      "theorem": 11
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.043478260869565216,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.EncodedError"
+    ],
+    "imports_in": 2,
+    "lines": 213,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/PrefixFailure.lean",
+    "proof_lines": 138,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 79,
+    "declarations": {
+      "def": 3,
+      "theorem": 10
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.06,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.PrefixFailure",
+      "Solidity.Backend.FailurePaths.EncodedErrorControls"
+    ],
+    "imports_in": 1,
+    "lines": 106,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/PrefixFailureControls.lean",
+    "proof_lines": 50,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 29,
+    "declarations": {
+      "abbrev": 1,
+      "def": 4
+    },
+    "definition_lines": 22,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.Interface",
+      "Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV1",
+      "Solidity.Backend.Transient.Frames",
+      "Solidity.Backend.MemoryOps.PhysicalByteJournal"
+    ],
+    "imports_in": 3,
+    "lines": 61,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/Premises.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 49,
+    "declarations": {
+      "def": 1,
+      "theorem": 3
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.07894736842105263,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.Parametric",
+      "Solidity.Backend.AbiWorld.ErrorRoundtrip"
+    ],
+    "imports_in": 3,
+    "lines": 62,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/ReasonCodec.lean",
+    "proof_lines": 38,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 26,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.07142857142857142,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.ReasonCodec",
+      "Solidity.Backend.FailurePaths.ParametricControls"
+    ],
+    "imports_in": 2,
+    "lines": 32,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/ReasonCodecControls.lean",
+    "proof_lines": 14,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 92,
+    "declarations": {
+      "def": 3,
+      "theorem": 5
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.136986301369863,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.PrimitivePackets.Comparisons.Agreement"
+    ],
+    "imports_in": 3,
+    "lines": 114,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/RelationalGuard.lean",
+    "proof_lines": 73,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 86,
+    "declarations": {
+      "def": 1,
+      "theorem": 10
+    },
+    "definition_lines": 18,
+    "definition_to_proof_line_ratio": 0.34615384615384615,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.RelationalGuard",
+      "Solidity.Backend.FailurePaths.Statements",
+      "Solidity.Backend.PrimitivePackets.Comparisons.Controls"
+    ],
+    "imports_in": 3,
+    "lines": 133,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/RelationalGuardControls.lean",
+    "proof_lines": 52,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 127,
+    "declarations": {
+      "def": 5,
+      "structure": 3,
+      "theorem": 2
+    },
+    "definition_lines": 67,
+    "definition_to_proof_line_ratio": 1.2407407407407407,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.RelationalGuard"
+    ],
+    "imports_in": 3,
+    "lines": 143,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/RelationalGuardSelection.lean",
+    "proof_lines": 54,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 131,
+    "declarations": {
+      "abbrev": 2,
+      "def": 9,
+      "theorem": 13
+    },
+    "definition_lines": 31,
+    "definition_to_proof_line_ratio": 0.3780487804878049,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.RelationalGuardSelection",
+      "Solidity.Backend.FailurePaths.RelationalGuardControls"
+    ],
+    "imports_in": 2,
+    "lines": 154,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/RelationalGuardSelectionControls.lean",
+    "proof_lines": 82,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 28,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.Premises",
+      "Solidity.Backend.FailurePaths.WorldUnwind"
+    ],
+    "imports_in": 5,
+    "lines": 43,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/Returns.lean",
+    "proof_lines": 21,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 89,
+    "declarations": {
+      "def": 3,
+      "theorem": 6
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.11267605633802817,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.PrimitivePackets.Comparisons.Agreement"
+    ],
+    "imports_in": 3,
+    "lines": 104,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/RuntimeGuard.lean",
+    "proof_lines": 71,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 49,
+    "declarations": {
+      "def": 5,
+      "theorem": 8
+    },
+    "definition_lines": 14,
+    "definition_to_proof_line_ratio": 0.5833333333333334,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.RuntimeGuard",
+      "Solidity.Backend.FailurePaths.Statements",
+      "Solidity.Backend.PrimitivePackets.Comparisons.Controls"
+    ],
+    "imports_in": 2,
+    "lines": 63,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/RuntimeGuardControls.lean",
+    "proof_lines": 24,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 92,
+    "declarations": {
+      "def": 2,
+      "theorem": 5
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.10810810810810811,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.Interface",
+      "Solidity.Lowering.V08.LiteralFailureLowering",
+      "Solidity.Lowering.V08.BoolErrorStatement"
+    ],
+    "imports_in": 7,
+    "lines": 124,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/Statements.lean",
+    "proof_lines": 74,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 40,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.TransientSharing",
+      "Solidity.Backend.Transient.SourceCallback"
+    ],
+    "imports_in": 2,
+    "lines": 53,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/TransientCallback.lean",
+    "proof_lines": 32,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 44,
+    "declarations": {
+      "def": 3,
+      "theorem": 3
+    },
+    "definition_lines": 15,
+    "definition_to_proof_line_ratio": 0.7142857142857143,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.TransientSharing",
+      "Solidity.Backend.Transient.Mixed"
+    ],
+    "imports_in": 2,
+    "lines": 60,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/TransientComposition.lean",
+    "proof_lines": 21,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 82,
+    "declarations": {
+      "def": 6,
+      "theorem": 6
+    },
+    "definition_lines": 35,
+    "definition_to_proof_line_ratio": 1.09375,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.TransientUnwind",
+      "Solidity.Backend.FailurePaths.Premises",
+      "Solidity.Roadmap.Controls"
+    ],
+    "imports_in": 2,
+    "lines": 108,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/TransientControls.lean",
+    "proof_lines": 32,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 101,
+    "declarations": {
+      "def": 4,
+      "theorem": 7
+    },
+    "definition_lines": 20,
+    "definition_to_proof_line_ratio": 0.2898550724637681,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.Transient.CallbackObservation",
+      "Solidity.Backend.Transient.SourceFrames"
+    ],
+    "imports_in": 3,
+    "lines": 126,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/TransientSharing.lean",
+    "proof_lines": 69,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 70,
+    "declarations": {
+      "def": 3,
+      "theorem": 8
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.1875,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.TransientComposition",
+      "Solidity.Backend.FailurePaths.TransientCallback"
+    ],
+    "imports_in": 1,
+    "lines": 85,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/TransientSharingControls.lean",
+    "proof_lines": 48,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 79,
+    "declarations": {
+      "def": 1,
+      "theorem": 5
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.09523809523809523,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.Statements",
+      "Solidity.Backend.Transient.SourceFrames"
+    ],
+    "imports_in": 2,
+    "lines": 106,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/TransientUnwind.lean",
+    "proof_lines": 63,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 28,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FailurePaths.Statements",
+      "Solidity.Backend.MemoryOps.PhysicalWorldUnwind"
+    ],
+    "imports_in": 2,
+    "lines": 42,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FailurePaths/WorldUnwind.lean",
+    "proof_lines": 22,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 56,
+    "declarations": {
+      "def": 4,
+      "theorem": 11
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.15555555555555556,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FunctionValues.Execution"
+    ],
+    "imports_in": 3,
+    "lines": 75,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FunctionValues/Controls.lean",
+    "proof_lines": 45,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 61,
+    "declarations": {
+      "def": 3,
+      "theorem": 10
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.16326530612244897,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FunctionValues.Representation"
+    ],
+    "imports_in": 2,
+    "lines": 80,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FunctionValues/Execution.lean",
+    "proof_lines": 49,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 36,
+    "declarations": {
+      "theorem": 6
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FunctionValues.Controls"
+    ],
+    "imports_in": 1,
+    "lines": 47,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FunctionValues/Inequality.lean",
+    "proof_lines": 30,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 15,
+    "declarations": {
+      "def": 3,
+      "structure": 1
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Source.Value",
+      "Solidity.Evm.Machine"
+    ],
+    "imports_in": 3,
+    "lines": 27,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FunctionValues/Interface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 16,
+    "declarations": {
+      "structure": 2
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FunctionValues.Interface",
+      "Solidity.Backend.WorldCalls.ExternalCalls"
+    ],
+    "imports_in": 1,
+    "lines": 29,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FunctionValues/Premises.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 47,
+    "declarations": {
+      "abbrev": 1,
+      "def": 2,
+      "theorem": 7
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.24242424242424243,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FunctionValues.Interface",
+      "Solidity.Yul.Views.ScalarCodecs"
+    ],
+    "imports_in": 2,
+    "lines": 63,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FunctionValues/Representation.lean",
+    "proof_lines": 33,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 52,
+    "declarations": {
+      "def": 4,
+      "theorem": 6
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.2777777777777778,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.FunctionValues.Controls"
+    ],
+    "imports_in": 1,
+    "lines": 70,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/FunctionValues/RuntimeConstruction.lean",
+    "proof_lines": 36,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "import_root",
+    "code_lines": 2,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalDispatch.FrozenV2",
+      "Solidity.Backend.InternalDispatch.FrozenV3"
+    ],
+    "imports_in": 1,
+    "lines": 6,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalDispatch.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 87,
+    "declarations": {
+      "abbrev": 1,
+      "def": 4,
+      "structure": 1,
+      "theorem": 6
+    },
+    "definition_lines": 33,
+    "definition_to_proof_line_ratio": 0.717391304347826,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalDispatch.Typed"
+    ],
+    "imports_in": 2,
+    "lines": 121,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalDispatch/Agreement.lean",
+    "proof_lines": 46,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 83,
+    "declarations": {
+      "def": 2,
+      "theorem": 5
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.11764705882352941,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalDispatch.Agreement"
+    ],
+    "imports_in": 3,
+    "lines": 99,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalDispatch/Chain.lean",
+    "proof_lines": 68,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 165,
+    "declarations": {
+      "abbrev": 3,
+      "def": 11,
+      "theorem": 23
+    },
+    "definition_lines": 59,
+    "definition_to_proof_line_ratio": 0.7023809523809523,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalDispatch.Chain",
+      "Solidity.Lowering.V08.SourceCallableControls"
+    ],
+    "imports_in": 2,
+    "lines": 197,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalDispatch/Controls.lean",
+    "proof_lines": 84,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 106,
+    "declarations": {
+      "def": 1,
+      "structure": 3,
+      "theorem": 6
+    },
+    "definition_lines": 21,
+    "definition_to_proof_line_ratio": 0.28378378378378377,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalDispatch.Chain",
+      "Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV1"
+    ],
+    "imports_in": 4,
+    "lines": 131,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalDispatch/FrozenV1.lean",
+    "proof_lines": 74,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 27,
+    "declarations": {
+      "def": 2,
+      "theorem": 5
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.13333333333333333,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalDispatch.Controls",
+      "Solidity.Backend.InternalDispatch.FrozenV1"
+    ],
+    "imports_in": 3,
+    "lines": 38,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalDispatch/FrozenV1Controls.lean",
+    "proof_lines": 15,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 153,
+    "declarations": {
+      "theorem": 8
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalDispatch.FrozenV1",
+      "Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV2"
+    ],
+    "imports_in": 3,
+    "lines": 186,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalDispatch/FrozenV2.lean",
+    "proof_lines": 134,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 34,
+    "declarations": {
+      "def": 1,
+      "theorem": 7
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.047619047619047616,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalDispatch.FrozenV2",
+      "Solidity.Backend.InternalDispatch.FrozenV1Controls"
+    ],
+    "imports_in": 1,
+    "lines": 47,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalDispatch/FrozenV2Controls.lean",
+    "proof_lines": 21,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 66,
+    "declarations": {
+      "abbrev": 1,
+      "theorem": 5
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.2391304347826087,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalDispatch.FrozenV1",
+      "Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV3"
+    ],
+    "imports_in": 3,
+    "lines": 87,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalDispatch/FrozenV3.lean",
+    "proof_lines": 46,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 26,
+    "declarations": {
+      "theorem": 6
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalDispatch.FrozenV3",
+      "Solidity.Backend.InternalDispatch.FrozenV1Controls"
+    ],
+    "imports_in": 1,
+    "lines": 39,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalDispatch/FrozenV3Controls.lean",
+    "proof_lines": 21,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 88,
+    "declarations": {
+      "def": 5,
+      "structure": 2,
+      "theorem": 6
+    },
+    "definition_lines": 38,
+    "definition_to_proof_line_ratio": 0.8837209302325582,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Source.Eval",
+      "Solidity.Evm.Machine"
+    ],
+    "imports_in": 2,
+    "lines": 116,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalDispatch/Typed.lean",
+    "proof_lines": 43,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 38,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3DisjointScalarEntry"
+    ],
+    "imports_in": 2,
+    "lines": 45,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameArgumentAgreement.lean",
+    "proof_lines": 34,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 119,
+    "declarations": {
+      "def": 3,
+      "theorem": 8
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.0761904761904762,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameRestore",
+      "Solidity.Backend.MemoryOps.PhysicalByteJournal"
+    ],
+    "imports_in": 2,
+    "lines": 148,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameBytes.lean",
+    "proof_lines": 105,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 51,
+    "declarations": {
+      "theorem": 5
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameTransport"
+    ],
+    "imports_in": 7,
+    "lines": 63,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameCallAgreement.lean",
+    "proof_lines": 46,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 70,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameRestoredRepresentation"
+    ],
+    "imports_in": 4,
+    "lines": 81,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameCapturedProgram.lean",
+    "proof_lines": 66,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 140,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameCapturedProgram",
+      "Solidity.Backend.InternalFlow.RuntimeFrameReference"
+    ],
+    "imports_in": 2,
+    "lines": 156,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameCapturedReference.lean",
+    "proof_lines": 135,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 68,
+    "declarations": {
+      "def": 2,
+      "theorem": 7
+    },
+    "definition_lines": 20,
+    "definition_to_proof_line_ratio": 0.3076923076923077,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameCodeEquality"
+    ],
+    "imports_in": 2,
+    "lines": 84,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameCodeAuthentication.lean",
+    "proof_lines": 65,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 61,
+    "declarations": {
+      "def": 2,
+      "theorem": 13
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.12244897959183673,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameCodeAuthentication",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarEmitterControls"
+    ],
+    "imports_in": 1,
+    "lines": 83,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameCodeAuthenticationControls.lean",
+    "proof_lines": 49,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 66,
+    "declarations": {
+      "def": 2,
+      "theorem": 2
+    },
+    "definition_lines": 48,
+    "definition_to_proof_line_ratio": 3.4285714285714284,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Machine"
+    ],
+    "imports_in": 2,
+    "lines": 76,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameCodeEquality.lean",
+    "proof_lines": 14,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 463,
+    "declarations": {
+      "def": 23,
+      "structure": 2,
+      "theorem": 7
+    },
+    "definition_lines": 384,
+    "definition_to_proof_line_ratio": 5.408450704225352,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameFootprint",
+      "Solidity.Backend.InternalFlow.RuntimeFrameTarget",
+      "Solidity.Evm.MemoryCalls"
+    ],
+    "imports_in": 5,
+    "lines": 534,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameComposition.lean",
+    "proof_lines": 71,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 290,
+    "declarations": {
+      "structure": 2,
+      "theorem": 5
+    },
+    "definition_lines": 16,
+    "definition_to_proof_line_ratio": 0.05947955390334572,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameRestore",
+      "Solidity.Backend.InternalFlow.RuntimeFrameComposition"
+    ],
+    "imports_in": 4,
+    "lines": 324,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameContext.lean",
+    "proof_lines": 269,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 198,
+    "declarations": {
+      "def": 2,
+      "theorem": 12
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.03260869565217391,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameSaved",
+      "Solidity.Evm.MemoryAllocSource",
+      "Solidity.Evm.MemoryCompile"
+    ],
+    "imports_in": 5,
+    "lines": 240,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameFootprint.lean",
+    "proof_lines": 184,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 121,
+    "declarations": {
+      "def": 9,
+      "structure": 7
+    },
+    "definition_lines": 116,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameContext",
+      "Solidity.Backend.InternalFlow.RuntimeFrameTransport"
+    ],
+    "imports_in": 11,
+    "lines": 181,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameInterfaceV1.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 49,
+    "declarations": {
+      "def": 2,
+      "structure": 4
+    },
+    "definition_lines": 45,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV1"
+    ],
+    "imports_in": 5,
+    "lines": 76,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameInterfaceV2.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 78,
+    "declarations": {
+      "abbrev": 1,
+      "def": 6,
+      "structure": 4
+    },
+    "definition_lines": 74,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV2"
+    ],
+    "imports_in": 15,
+    "lines": 114,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameInterfaceV3.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 39,
+    "declarations": {
+      "structure": 3
+    },
+    "definition_lines": 33,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV3"
+    ],
+    "imports_in": 3,
+    "lines": 63,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameInterfaceV4.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 93,
+    "declarations": {
+      "def": 5
+    },
+    "definition_lines": 87,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameComposition"
+    ],
+    "imports_in": 4,
+    "lines": 113,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameMutation.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 112,
+    "declarations": {
+      "abbrev": 1,
+      "def": 11,
+      "theorem": 4
+    },
+    "definition_lines": 85,
+    "definition_to_proof_line_ratio": 4.25,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameMutation"
+    ],
+    "imports_in": 1,
+    "lines": 141,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameNested.lean",
+    "proof_lines": 20,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 103,
+    "declarations": {
+      "def": 4,
+      "theorem": 5
+    },
+    "definition_lines": 37,
+    "definition_to_proof_line_ratio": 0.6379310344827587,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameCallAgreement",
+      "Solidity.Backend.InternalFlow.RuntimeFrameCapturedReference",
+      "Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV2"
+    ],
+    "imports_in": 5,
+    "lines": 128,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameNoneProducer.lean",
+    "proof_lines": 58,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 80,
+    "declarations": {
+      "abbrev": 1,
+      "def": 6,
+      "theorem": 12
+    },
+    "definition_lines": 31,
+    "definition_to_proof_line_ratio": 0.8157894736842105,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameP1Lang",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV4TrivialFamily"
+    ],
+    "imports_in": 1,
+    "lines": 149,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1Bridge.lean",
+    "proof_lines": 38,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 126,
+    "declarations": {
+      "abbrev": 1,
+      "def": 12,
+      "theorem": 12
+    },
+    "definition_lines": 42,
+    "definition_to_proof_line_ratio": 0.5454545454545454,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameP1LangV2",
+      "Solidity.Evm.Repr"
+    ],
+    "imports_in": 2,
+    "lines": 200,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1BridgeV2.lean",
+    "proof_lines": 77,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 96,
+    "declarations": {
+      "def": 5,
+      "theorem": 14
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.11538461538461539,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameP1BridgeV2",
+      "Solidity.Evm.MachineV2Controls"
+    ],
+    "imports_in": 1,
+    "lines": 151,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1BridgeV2Controls.lean",
+    "proof_lines": 78,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 53,
+    "declarations": {
+      "def": 6,
+      "structure": 1
+    },
+    "definition_lines": 47,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV4",
+      "Solidity.Roadmap.G49Final.BridgeGoal"
+    ],
+    "imports_in": 3,
+    "lines": 105,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1Lang.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 122,
+    "declarations": {
+      "abbrev": 1,
+      "def": 14,
+      "inductive": 2,
+      "structure": 1,
+      "theorem": 3
+    },
+    "definition_lines": 98,
+    "definition_to_proof_line_ratio": 5.764705882352941,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MachineV2",
+      "Solidity.Semantics.Run",
+      "Solidity.Roadmap.G49Final.BridgeGoal"
+    ],
+    "imports_in": 4,
+    "lines": 213,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1LangV2.lean",
+    "proof_lines": 17,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 36,
+    "declarations": {
+      "def": 3,
+      "theorem": 6
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.36363636363636365,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameP1Lang",
+      "Solidity.Backend.InternalFlow.RuntimeFrameP1LangV2"
+    ],
+    "imports_in": 2,
+    "lines": 66,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1LangV2Migration.lean",
+    "proof_lines": 22,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 41,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameP1V2FramedRevert"
+    ],
+    "imports_in": 4,
+    "lines": 55,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1V2CallAgreement.lean",
+    "proof_lines": 37,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 32,
+    "declarations": {
+      "def": 3,
+      "theorem": 4
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.35,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameP1V2CallAgreement",
+      "Solidity.Backend.InternalFlow.RuntimeFrameP1V2FramedRevertControls"
+    ],
+    "imports_in": 2,
+    "lines": 48,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1V2CallAgreementControls.lean",
+    "proof_lines": 20,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 29,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3BareRevertProducer",
+      "Solidity.Backend.InternalFlow.RuntimeFrameP1V2Lift"
+    ],
+    "imports_in": 3,
+    "lines": 41,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1V2FramedRevert.lean",
+    "proof_lines": 24,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 36,
+    "declarations": {
+      "def": 1,
+      "theorem": 6
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.10344827586206896,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameP1V2FramedRevert"
+    ],
+    "imports_in": 2,
+    "lines": 56,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1V2FramedRevertControls.lean",
+    "proof_lines": 29,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 21,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameP1LangV2Migration"
+    ],
+    "imports_in": 2,
+    "lines": 35,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1V2Lift.lean",
+    "proof_lines": 16,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 68,
+    "declarations": {
+      "def": 10,
+      "theorem": 4
+    },
+    "definition_lines": 47,
+    "definition_to_proof_line_ratio": 3.1333333333333333,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameP1V2ValueAgreementControls"
+    ],
+    "imports_in": 2,
+    "lines": 109,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1V2ReadAtBridge.lean",
+    "proof_lines": 15,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 57,
+    "declarations": {
+      "theorem": 9
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReadAtBridge"
+    ],
+    "imports_in": 1,
+    "lines": 82,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1V2ReadAtBridgeControls.lean",
+    "proof_lines": 53,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 71,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerRef",
+      "Solidity.Backend.InternalFlow.RuntimeFrameP1V2CallAgreement"
+    ],
+    "imports_in": 4,
+    "lines": 92,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1V2ReferenceAgreement.lean",
+    "proof_lines": 63,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 156,
+    "declarations": {
+      "def": 10,
+      "theorem": 9
+    },
+    "definition_lines": 71,
+    "definition_to_proof_line_ratio": 0.9466666666666667,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReferenceAgreement"
+    ],
+    "imports_in": 2,
+    "lines": 203,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1V2ReferenceBridge.lean",
+    "proof_lines": 75,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 177,
+    "declarations": {
+      "abbrev": 17,
+      "def": 4,
+      "theorem": 23
+    },
+    "definition_lines": 51,
+    "definition_to_proof_line_ratio": 0.4434782608695652,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReferenceBridge",
+      "Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReferenceRebindExecutionControls",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerRefTupleControls"
+    ],
+    "imports_in": 1,
+    "lines": 230,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1V2ReferenceBridgeControls.lean",
+    "proof_lines": 115,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 49,
+    "declarations": {
+      "def": 1,
+      "theorem": 6
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.047619047619047616,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReferenceAgreement",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerRefStructDefaultControls"
+    ],
+    "imports_in": 1,
+    "lines": 73,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1V2ReferenceControls.lean",
+    "proof_lines": 42,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 31,
+    "declarations": {
+      "abbrev": 7,
+      "theorem": 2
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.5294117647058824,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReferenceAgreement",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerRefStructRebindControls"
+    ],
+    "imports_in": 2,
+    "lines": 47,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1V2ReferenceRebindAgreement.lean",
+    "proof_lines": 17,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 22,
+    "declarations": {
+      "abbrev": 3,
+      "theorem": 2
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.2857142857142857,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReferenceRebindAgreement"
+    ],
+    "imports_in": 2,
+    "lines": 31,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1V2ReferenceRebindExecutionControls.lean",
+    "proof_lines": 14,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 74,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducer",
+      "Solidity.Backend.InternalFlow.RuntimeFrameP1V2CallAgreement"
+    ],
+    "imports_in": 3,
+    "lines": 93,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1V2ValueAgreement.lean",
+    "proof_lines": 66,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 42,
+    "declarations": {
+      "def": 2,
+      "theorem": 5
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.12121212121212122,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameP1V2ValueAgreement",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerControls"
+    ],
+    "imports_in": 3,
+    "lines": 61,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1V2ValueAgreementControls.lean",
+    "proof_lines": 33,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 151,
+    "declarations": {
+      "def": 10,
+      "theorem": 9
+    },
+    "definition_lines": 69,
+    "definition_to_proof_line_ratio": 0.9583333333333334,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameP1V2ValueAgreement"
+    ],
+    "imports_in": 2,
+    "lines": 195,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1V2ValueBridge.lean",
+    "proof_lines": 72,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 30,
+    "declarations": {
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.4117647058823529,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameP1V2ValueBridge",
+      "Solidity.Backend.InternalFlow.RuntimeFrameP1V2ValueAgreementControls"
+    ],
+    "imports_in": 1,
+    "lines": 43,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1V2ValueBridgeControls.lean",
+    "proof_lines": 17,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 77,
+    "declarations": {
+      "def": 2,
+      "theorem": 5
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.07462686567164178,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameResult"
+    ],
+    "imports_in": 3,
+    "lines": 102,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameReference.lean",
+    "proof_lines": 67,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 84,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameReference",
+      "Solidity.Evm.MemoryCalls"
+    ],
+    "imports_in": 1,
+    "lines": 96,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameReferenceProgram.lean",
+    "proof_lines": 78,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 88,
+    "declarations": {
+      "def": 6,
+      "theorem": 9
+    },
+    "definition_lines": 14,
+    "definition_to_proof_line_ratio": 0.20588235294117646,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameFootprint",
+      "Solidity.Evm.MemoryCapture"
+    ],
+    "imports_in": 4,
+    "lines": 122,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameRestore.lean",
+    "proof_lines": 68,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 196,
+    "declarations": {
+      "def": 2,
+      "theorem": 9
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.03260869565217391,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV1",
+      "Solidity.Evm.Correct"
+    ],
+    "imports_in": 12,
+    "lines": 221,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameRestoredRepresentation.lean",
+    "proof_lines": 184,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 58,
+    "declarations": {
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.0625,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryScope",
+      "Solidity.Evm.MemoryCapture",
+      "Solidity.Calculus.CallResultRestore"
+    ],
+    "imports_in": 5,
+    "lines": 78,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameResult.lean",
+    "proof_lines": 48,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 81,
+    "declarations": {
+      "def": 2,
+      "theorem": 9
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.0547945205479452,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameTransport"
+    ],
+    "imports_in": 5,
+    "lines": 96,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameResultAgreement.lean",
+    "proof_lines": 73,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 31,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV1",
+      "Solidity.Evm.MemoryCalls"
+    ],
+    "imports_in": 2,
+    "lines": 39,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameReturnContinuation.lean",
+    "proof_lines": 26,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 55,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV1"
+    ],
+    "imports_in": 2,
+    "lines": 64,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameReturnReentry.lean",
+    "proof_lines": 51,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 33,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CallerReframe"
+    ],
+    "imports_in": 2,
+    "lines": 40,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameSameGlobals.lean",
+    "proof_lines": 29,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 106,
+    "declarations": {
+      "def": 1,
+      "structure": 1,
+      "theorem": 7
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.12643678160919541,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameStack",
+      "Solidity.Evm.MemoryScope",
+      "Solidity.Evm.MemoryLocals"
+    ],
+    "imports_in": 3,
+    "lines": 134,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameSaved.lean",
+    "proof_lines": 87,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 26,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.09523809523809523,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Semantics.Run"
+    ],
+    "imports_in": 4,
+    "lines": 39,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameScopedSource.lean",
+    "proof_lines": 21,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 54,
+    "declarations": {
+      "def": 2,
+      "theorem": 3
+    },
+    "definition_lines": 13,
+    "definition_to_proof_line_ratio": 0.34210526315789475,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Semantics.Run"
+    ],
+    "imports_in": 2,
+    "lines": 64,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameSemantics.lean",
+    "proof_lines": 38,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 78,
+    "declarations": {
+      "def": 6,
+      "theorem": 7
+    },
+    "definition_lines": 12,
+    "definition_to_proof_line_ratio": 0.1935483870967742,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Machine"
+    ],
+    "imports_in": 2,
+    "lines": 100,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameStack.lean",
+    "proof_lines": 62,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 51,
+    "declarations": {
+      "def": 4,
+      "theorem": 2
+    },
+    "definition_lines": 32,
+    "definition_to_proof_line_ratio": 2.4615384615384617,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameSemantics",
+      "Solidity.Evm.MemoryCalls"
+    ],
+    "imports_in": 3,
+    "lines": 69,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameTarget.lean",
+    "proof_lines": 13,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 92,
+    "declarations": {
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.10126582278481013,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameTarget"
+    ],
+    "imports_in": 4,
+    "lines": 108,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameTransport.lean",
+    "proof_lines": 79,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 307,
+    "declarations": {
+      "abbrev": 1,
+      "def": 17,
+      "theorem": 24
+    },
+    "definition_lines": 30,
+    "definition_to_proof_line_ratio": 0.11194029850746269,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3DomainTransport"
+    ],
+    "imports_in": 2,
+    "lines": 362,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingActivation.lean",
+    "proof_lines": 268,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 166,
+    "declarations": {
+      "abbrev": 9,
+      "def": 4,
+      "theorem": 13
+    },
+    "definition_lines": 13,
+    "definition_to_proof_line_ratio": 0.08904109589041095,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingZero"
+    ],
+    "imports_in": 3,
+    "lines": 194,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingArguments.lean",
+    "proof_lines": 146,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 68,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarSource",
+      "Solidity.Backend.InternalFlow.RuntimeFrameResultAgreement"
+    ],
+    "imports_in": 2,
+    "lines": 85,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingCallCoherence.lean",
+    "proof_lines": 55,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 56,
+    "declarations": {
+      "abbrev": 3,
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.14285714285714285,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingCallCoherence",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarReturn",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarTarget"
+    ],
+    "imports_in": 1,
+    "lines": 63,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingCallCoherenceControls.lean",
+    "proof_lines": 42,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 101,
+    "declarations": {
+      "def": 7,
+      "structure": 4
+    },
+    "definition_lines": 89,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingCallViews"
+    ],
+    "imports_in": 2,
+    "lines": 121,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingCallLeaves.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 53,
+    "declarations": {
+      "def": 5,
+      "structure": 4
+    },
+    "definition_lines": 50,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarLeaves"
+    ],
+    "imports_in": 2,
+    "lines": 67,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingCallViews.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 81,
+    "declarations": {
+      "def": 2,
+      "theorem": 6
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.07575757575757576,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingSource",
+      "Solidity.Backend.InternalFlow.RuntimeFrameResultAgreement"
+    ],
+    "imports_in": 2,
+    "lines": 107,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingCoherence.lean",
+    "proof_lines": 66,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 64,
+    "declarations": {
+      "abbrev": 1,
+      "def": 2,
+      "theorem": 1
+    },
+    "definition_lines": 21,
+    "definition_to_proof_line_ratio": 0.5675675675675675,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingHeadViews"
+    ],
+    "imports_in": 3,
+    "lines": 73,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingDeclarationCheck.lean",
+    "proof_lines": 37,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 288,
+    "declarations": {
+      "abbrev": 5,
+      "def": 12,
+      "theorem": 34
+    },
+    "definition_lines": 45,
+    "definition_to_proof_line_ratio": 0.19148936170212766,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveIngress",
+      "Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV3"
+    ],
+    "imports_in": 2,
+    "lines": 348,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingEmission.lean",
+    "proof_lines": 235,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 141,
+    "declarations": {
+      "abbrev": 3,
+      "def": 5,
+      "theorem": 18
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.072,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingReturn"
+    ],
+    "imports_in": 2,
+    "lines": 179,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingFailure.lean",
+    "proof_lines": 125,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 30,
+    "declarations": {
+      "def": 3,
+      "structure": 1
+    },
+    "definition_lines": 23,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingTurnViews",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarLeaves"
+    ],
+    "imports_in": 3,
+    "lines": 40,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingGuardedTurn.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 130,
+    "declarations": {
+      "def": 9,
+      "inductive": 1,
+      "structure": 8
+    },
+    "definition_lines": 126,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingSourceViews"
+    ],
+    "imports_in": 4,
+    "lines": 153,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingHeadViews.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 64,
+    "declarations": {
+      "def": 4,
+      "theorem": 10
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.3,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingDeclarationCheck",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarTarget"
+    ],
+    "imports_in": 1,
+    "lines": 93,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingHeadViewsControls.lean",
+    "proof_lines": 30,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 102,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingResume"
+    ],
+    "imports_in": 2,
+    "lines": 113,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingHistory.lean",
+    "proof_lines": 98,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 223,
+    "declarations": {
+      "abbrev": 10,
+      "def": 4,
+      "structure": 1,
+      "theorem": 16
+    },
+    "definition_lines": 33,
+    "definition_to_proof_line_ratio": 0.1864406779661017,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ArgumentCalleeFailure"
+    ],
+    "imports_in": 2,
+    "lines": 263,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOutcome.lean",
+    "proof_lines": 177,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 139,
+    "declarations": {
+      "theorem": 7
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOuterZero",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarOutcomes"
+    ],
+    "imports_in": 3,
+    "lines": 159,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaims.lean",
+    "proof_lines": 120,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 52,
+    "declarations": {
+      "abbrev": 2,
+      "def": 2,
+      "theorem": 3
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.10810810810810811,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOuterClaims",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOuterPlanControls"
+    ],
+    "imports_in": 4,
+    "lines": 64,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaimsControls.lean",
+    "proof_lines": 37,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 171,
+    "declarations": {
+      "def": 2,
+      "theorem": 3
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.01935483870967742,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3OuterAllocatingCall",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3NativeReturnRepresentation",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDescentControls",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarReturn"
+    ],
+    "imports_in": 3,
+    "lines": 193,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterFamily.lean",
+    "proof_lines": 155,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 114,
+    "declarations": {
+      "abbrev": 2,
+      "def": 6,
+      "theorem": 5
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.08695652173913043,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOuterFamily"
+    ],
+    "imports_in": 3,
+    "lines": 135,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterFamilyControls.lean",
+    "proof_lines": 92,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 49,
+    "declarations": {
+      "def": 2,
+      "theorem": 2
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.20588235294117646,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOuterFamily"
+    ],
+    "imports_in": 3,
+    "lines": 60,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterPlan.lean",
+    "proof_lines": 34,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 49,
+    "declarations": {
+      "abbrev": 2,
+      "theorem": 3
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.05555555555555555,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOuterPlan",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOuterFamilyControls"
+    ],
+    "imports_in": 3,
+    "lines": 59,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterPlanControls.lean",
+    "proof_lines": 36,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 183,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOuterPlan"
+    ],
+    "imports_in": 3,
+    "lines": 200,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterZero.lean",
+    "proof_lines": 173,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 65,
+    "declarations": {
+      "abbrev": 2,
+      "def": 1,
+      "theorem": 5
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.06382978723404255,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOuterZero",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOuterFamilyControls"
+    ],
+    "imports_in": 2,
+    "lines": 81,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterZeroControls.lean",
+    "proof_lines": 47,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 222,
+    "declarations": {
+      "def": 4,
+      "theorem": 14
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.03398058252427184,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingCoherence"
+    ],
+    "imports_in": 4,
+    "lines": 256,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingPrefixes.lean",
+    "proof_lines": 206,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 136,
+    "declarations": {
+      "abbrev": 9,
+      "def": 4,
+      "theorem": 13
+    },
+    "definition_lines": 13,
+    "definition_to_proof_line_ratio": 0.11206896551724138,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingArguments"
+    ],
+    "imports_in": 2,
+    "lines": 165,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingQuotations.lean",
+    "proof_lines": 116,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 74,
+    "declarations": {
+      "def": 4,
+      "structure": 2,
+      "theorem": 1
+    },
+    "definition_lines": 58,
+    "definition_to_proof_line_ratio": 11.6,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingCallLeaves",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingGuardedTurn"
+    ],
+    "imports_in": 3,
+    "lines": 94,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingRecursiveCheck.lean",
+    "proof_lines": 5,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 115,
+    "declarations": {
+      "abbrev": 1,
+      "def": 4,
+      "theorem": 18
+    },
+    "definition_lines": 15,
+    "definition_to_proof_line_ratio": 0.2542372881355932,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingRecursiveCheck",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarLeavesControls"
+    ],
+    "imports_in": 2,
+    "lines": 162,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingRecursiveCheckControls.lean",
+    "proof_lines": 59,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 275,
+    "declarations": {
+      "def": 8,
+      "theorem": 16
+    },
+    "definition_lines": 17,
+    "definition_to_proof_line_ratio": 0.06827309236947791,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingPrefixes"
+    ],
+    "imports_in": 4,
+    "lines": 323,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingResume.lean",
+    "proof_lines": 249,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 205,
+    "declarations": {
+      "def": 4,
+      "theorem": 13
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.025906735751295335,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingHistory"
+    ],
+    "imports_in": 2,
+    "lines": 227,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingReturn.lean",
+    "proof_lines": 193,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 83,
+    "declarations": {
+      "abbrev": 2,
+      "def": 11,
+      "theorem": 12
+    },
+    "definition_lines": 19,
+    "definition_to_proof_line_ratio": 0.59375,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarOutcomes",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarReturn",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CountdownWitness"
+    ],
+    "imports_in": 2,
+    "lines": 128,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarControls.lean",
+    "proof_lines": 32,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 101,
+    "declarations": {
+      "abbrev": 1,
+      "def": 7,
+      "theorem": 5
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.11688311688311688,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3FullScalarUnwind",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3SecondAllocatingEntry"
+    ],
+    "imports_in": 2,
+    "lines": 121,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarEndpoint.lean",
+    "proof_lines": 77,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 65,
+    "declarations": {
+      "abbrev": 3,
+      "def": 2,
+      "theorem": 1
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.09433962264150944,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarChildEntry",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarTarget"
+    ],
+    "imports_in": 2,
+    "lines": 75,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarEntry.lean",
+    "proof_lines": 53,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 70,
+    "declarations": {
+      "def": 8,
+      "structure": 1,
+      "theorem": 1
+    },
+    "definition_lines": 56,
+    "definition_to_proof_line_ratio": 9.333333333333334,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingValueViews"
+    ],
+    "imports_in": 3,
+    "lines": 87,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarLeaves.lean",
+    "proof_lines": 6,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 66,
+    "declarations": {
+      "abbrev": 1,
+      "theorem": 14
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.030303030303030304,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingGuardedTurn"
+    ],
+    "imports_in": 2,
+    "lines": 98,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarLeavesControls.lean",
+    "proof_lines": 33,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 59,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarSource"
+    ],
+    "imports_in": 5,
+    "lines": 70,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarOutcomes.lean",
+    "proof_lines": 51,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 79,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarSource"
+    ],
+    "imports_in": 8,
+    "lines": 93,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarReturn.lean",
+    "proof_lines": 69,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 151,
+    "declarations": {
+      "def": 8,
+      "theorem": 5
+    },
+    "definition_lines": 16,
+    "definition_to_proof_line_ratio": 0.13333333333333333,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveSource",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3DomainTransport"
+    ],
+    "imports_in": 4,
+    "lines": 173,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarSource.lean",
+    "proof_lines": 120,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 80,
+    "declarations": {
+      "abbrev": 1,
+      "def": 7,
+      "theorem": 12
+    },
+    "definition_lines": 15,
+    "definition_to_proof_line_ratio": 0.40540540540540543,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarControls"
+    ],
+    "imports_in": 6,
+    "lines": 125,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarTarget.lean",
+    "proof_lines": 37,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 84,
+    "declarations": {
+      "abbrev": 3,
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.0684931506849315,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarEntry"
+    ],
+    "imports_in": 6,
+    "lines": 93,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarTurn.lean",
+    "proof_lines": 73,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 115,
+    "declarations": {
+      "def": 4,
+      "structure": 3
+    },
+    "definition_lines": 107,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingHeadViews"
+    ],
+    "imports_in": 2,
+    "lines": 129,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScopeView.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 28,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 16,
+    "definition_to_proof_line_ratio": 3.2,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScopeView",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingRecursiveCheck"
+    ],
+    "imports_in": 3,
+    "lines": 37,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScopedCheck.lean",
+    "proof_lines": 5,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 66,
+    "declarations": {
+      "abbrev": 1,
+      "theorem": 10
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.025,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScopedCheck",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingRecursiveCheckControls"
+    ],
+    "imports_in": 2,
+    "lines": 92,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScopedCheckControls.lean",
+    "proof_lines": 40,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 92,
+    "declarations": {
+      "abbrev": 4,
+      "def": 3,
+      "theorem": 5
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.171875,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScopedCheckControls",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScopedTransport",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOuterPlanControls",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOuterZeroControls"
+    ],
+    "imports_in": 2,
+    "lines": 113,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScopedEndpoint.lean",
+    "proof_lines": 64,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 49,
+    "declarations": {
+      "theorem": 5
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScopedEndpoint"
+    ],
+    "imports_in": 2,
+    "lines": 65,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScopedEndpointControls.lean",
+    "proof_lines": 35,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 13,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScopedCheck"
+    ],
+    "imports_in": 2,
+    "lines": 21,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScopedTransport.lean",
+    "proof_lines": 7,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 43,
+    "declarations": {
+      "abbrev": 2,
+      "theorem": 2
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.0625,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScopedEndpointControls",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOuterClaimsControls"
+    ],
+    "imports_in": 1,
+    "lines": 53,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScopedTransportControls.lean",
+    "proof_lines": 32,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 207,
+    "declarations": {
+      "def": 3,
+      "theorem": 18
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.03664921465968586,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingActivation"
+    ],
+    "imports_in": 2,
+    "lines": 250,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingSource.lean",
+    "proof_lines": 191,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 86,
+    "declarations": {
+      "def": 3,
+      "inductive": 1,
+      "theorem": 7
+    },
+    "definition_lines": 16,
+    "definition_to_proof_line_ratio": 0.3137254901960784,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOuterClaims",
+      "Solidity.Backend.InternalFlow.RuntimeFrameScopedSource"
+    ],
+    "imports_in": 3,
+    "lines": 111,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingSourceCertificate.lean",
+    "proof_lines": 51,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 53,
+    "declarations": {
+      "abbrev": 2,
+      "def": 1,
+      "theorem": 5
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.11764705882352941,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingSourceCertificate",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOuterClaimsControls"
+    ],
+    "imports_in": 1,
+    "lines": 69,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingSourceCertificateControls.lean",
+    "proof_lines": 34,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 85,
+    "declarations": {
+      "def": 7,
+      "structure": 2,
+      "theorem": 1
+    },
+    "definition_lines": 71,
+    "definition_to_proof_line_ratio": 8.875,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingSourceCertificate"
+    ],
+    "imports_in": 3,
+    "lines": 102,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingSourceViews.lean",
+    "proof_lines": 8,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 48,
+    "declarations": {
+      "def": 1,
+      "theorem": 7
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.11538461538461539,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingSourceViews",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOuterClaimsControls"
+    ],
+    "imports_in": 1,
+    "lines": 68,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingSourceViewsControls.lean",
+    "proof_lines": 26,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 50,
+    "declarations": {
+      "def": 4,
+      "structure": 2
+    },
+    "definition_lines": 42,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingDeclarationCheck"
+    ],
+    "imports_in": 3,
+    "lines": 64,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingTurnViews.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 48,
+    "declarations": {
+      "abbrev": 1,
+      "theorem": 8
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.037037037037037035,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingTurnViews"
+    ],
+    "imports_in": 1,
+    "lines": 69,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingTurnViewsControls.lean",
+    "proof_lines": 27,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 53,
+    "declarations": {
+      "def": 5,
+      "structure": 4
+    },
+    "definition_lines": 48,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingHeadViews"
+    ],
+    "imports_in": 2,
+    "lines": 69,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingValueViews.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 191,
+    "declarations": {
+      "abbrev": 4,
+      "def": 11,
+      "theorem": 32
+    },
+    "definition_lines": 17,
+    "definition_to_proof_line_ratio": 0.10179640718562874,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ArgumentCall"
+    ],
+    "imports_in": 2,
+    "lines": 243,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingZero.lean",
+    "proof_lines": 167,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 65,
+    "declarations": {
+      "def": 1,
+      "theorem": 3
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.10204081632653061,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarTurn",
+      "Solidity.Semantics.AllocBytes"
+    ],
+    "imports_in": 3,
+    "lines": 83,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocationInventory.lean",
+    "proof_lines": 49,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 36,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDescentControls"
+    ],
+    "imports_in": 1,
+    "lines": 42,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocationInventoryControls.lean",
+    "proof_lines": 30,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 102,
+    "declarations": {
+      "def": 1,
+      "theorem": 8
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.010869565217391304,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CountdownWitness"
+    ],
+    "imports_in": 4,
+    "lines": 135,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatorReturn.lean",
+    "proof_lines": 92,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 32,
+    "declarations": {
+      "abbrev": 1,
+      "def": 1,
+      "structure": 2
+    },
+    "definition_lines": 26,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV3",
+      "Solidity.Lowering.P8.ProducerAssembly"
+    ],
+    "imports_in": 1,
+    "lines": 62,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ApprovedProfile.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 194,
+    "declarations": {
+      "abbrev": 8,
+      "def": 8,
+      "theorem": 34
+    },
+    "definition_lines": 17,
+    "definition_to_proof_line_ratio": 0.09826589595375723,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ArgumentEntry"
+    ],
+    "imports_in": 2,
+    "lines": 246,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ArgumentCall.lean",
+    "proof_lines": 173,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 143,
+    "declarations": {
+      "abbrev": 5,
+      "def": 12,
+      "theorem": 26
+    },
+    "definition_lines": 18,
+    "definition_to_proof_line_ratio": 0.15254237288135594,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingQuotations"
+    ],
+    "imports_in": 2,
+    "lines": 182,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ArgumentCalleeFailure.lean",
+    "proof_lines": 118,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 154,
+    "declarations": {
+      "abbrev": 6,
+      "def": 8,
+      "theorem": 31
+    },
+    "definition_lines": 16,
+    "definition_to_proof_line_ratio": 0.12307692307692308,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3MemoryArgument",
+      "Solidity.Calculus.SoundCalls"
+    ],
+    "imports_in": 3,
+    "lines": 205,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ArgumentEntry.lean",
+    "proof_lines": 130,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 76,
+    "declarations": {
+      "abbrev": 3,
+      "def": 5,
+      "theorem": 13
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.19642857142857142,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ParentStop"
+    ],
+    "imports_in": 2,
+    "lines": 104,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ArrayProbe.lean",
+    "proof_lines": 56,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 97,
+    "declarations": {
+      "abbrev": 8,
+      "def": 4,
+      "theorem": 14
+    },
+    "definition_lines": 13,
+    "definition_to_proof_line_ratio": 0.17333333333333334,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3BareRevertProducer"
+    ],
+    "imports_in": 1,
+    "lines": 121,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3BarePrefix.lean",
+    "proof_lines": 75,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 286,
+    "declarations": {
+      "abbrev": 9,
+      "def": 18,
+      "structure": 2,
+      "theorem": 22
+    },
+    "definition_lines": 97,
+    "definition_to_proof_line_ratio": 0.6783216783216783,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV3",
+      "Solidity.Backend.InternalFlow.RuntimeFrameNoneProducer",
+      "Solidity.Backend.InternalFlow.RuntimeFrameMutation",
+      "Solidity.Evm.MemoryCompileExamples"
+    ],
+    "imports_in": 4,
+    "lines": 341,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3BareRevertProducer.lean",
+    "proof_lines": 143,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 275,
+    "declarations": {
+      "abbrev": 1,
+      "def": 5,
+      "theorem": 5
+    },
+    "definition_lines": 51,
+    "definition_to_proof_line_ratio": 0.2372093023255814,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV3",
+      "Solidity.Backend.InternalFlow.RuntimeFrameCapturedProgram",
+      "Solidity.Backend.InternalFlow.RuntimeFrameCallAgreement"
+    ],
+    "imports_in": 4,
+    "lines": 315,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3CallProducer.lean",
+    "proof_lines": 215,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 129,
+    "declarations": {
+      "abbrev": 7,
+      "def": 12,
+      "theorem": 20
+    },
+    "definition_lines": 30,
+    "definition_to_proof_line_ratio": 0.3191489361702128,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducer",
+      "Solidity.Evm.MemoryCompileExamples"
+    ],
+    "imports_in": 3,
+    "lines": 157,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3CallProducerControls.lean",
+    "proof_lines": 94,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 134,
+    "declarations": {
+      "abbrev": 1,
+      "def": 3,
+      "inductive": 1,
+      "theorem": 5
+    },
+    "definition_lines": 44,
+    "definition_to_proof_line_ratio": 0.5238095238095238,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameCapturedProgram",
+      "Solidity.Backend.InternalFlow.RuntimeFrameCallAgreement",
+      "Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV3"
+    ],
+    "imports_in": 5,
+    "lines": 163,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3CallProducerRef.lean",
+    "proof_lines": 84,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 118,
+    "declarations": {
+      "abbrev": 9,
+      "def": 16,
+      "theorem": 17
+    },
+    "definition_lines": 39,
+    "definition_to_proof_line_ratio": 0.5416666666666666,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerRef",
+      "Solidity.Backend.MemoryOps.StructDefaults.WordControls"
+    ],
+    "imports_in": 9,
+    "lines": 155,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3CallProducerRefArrayControls.lean",
+    "proof_lines": 72,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 73,
+    "declarations": {
+      "abbrev": 1,
+      "def": 4
+    },
+    "definition_lines": 65,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerRefStructDefaultTarget",
+      "Solidity.Backend.InternalFlow.RuntimeFrameComposition",
+      "Solidity.Evm.MemoryStructDefaultSource"
+    ],
+    "imports_in": 2,
+    "lines": 88,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3CallProducerRefStructDefaultCompile.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 130,
+    "declarations": {
+      "abbrev": 9,
+      "def": 11,
+      "theorem": 19
+    },
+    "definition_lines": 54,
+    "definition_to_proof_line_ratio": 0.8571428571428571,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerRefStructDefaultCompile",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerRefArrayControls",
+      "Solidity.Backend.MemoryOps.StructDefaults.NestedWordControls"
+    ],
+    "imports_in": 3,
+    "lines": 164,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3CallProducerRefStructDefaultControls.lean",
+    "proof_lines": 63,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 188,
+    "declarations": {
+      "def": 3,
+      "theorem": 8
+    },
+    "definition_lines": 19,
+    "definition_to_proof_line_ratio": 0.11949685534591195,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameFootprint",
+      "Solidity.Evm.MemoryStructDefaultPlan"
+    ],
+    "imports_in": 2,
+    "lines": 215,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3CallProducerRefStructDefaultTarget.lean",
+    "proof_lines": 159,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 183,
+    "declarations": {
+      "abbrev": 4,
+      "def": 18,
+      "theorem": 22
+    },
+    "definition_lines": 69,
+    "definition_to_proof_line_ratio": 0.6831683168316832,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerRefStructDefaultControls"
+    ],
+    "imports_in": 2,
+    "lines": 228,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3CallProducerRefStructRebindControls.lean",
+    "proof_lines": 101,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 72,
+    "declarations": {
+      "def": 7,
+      "theorem": 4
+    },
+    "definition_lines": 22,
+    "definition_to_proof_line_ratio": 0.5,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerRef"
+    ],
+    "imports_in": 2,
+    "lines": 90,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3CallProducerRefTuple.lean",
+    "proof_lines": 44,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 103,
+    "declarations": {
+      "abbrev": 1,
+      "def": 2,
+      "theorem": 3
+    },
+    "definition_lines": 79,
+    "definition_to_proof_line_ratio": 4.157894736842105,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerRefTupleTyped"
+    ],
+    "imports_in": 2,
+    "lines": 116,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3CallProducerRefTupleCall.lean",
+    "proof_lines": 19,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 123,
+    "declarations": {
+      "abbrev": 5,
+      "def": 11,
+      "theorem": 17
+    },
+    "definition_lines": 40,
+    "definition_to_proof_line_ratio": 0.5797101449275363,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerRefTupleCall",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerRefArrayControls"
+    ],
+    "imports_in": 5,
+    "lines": 155,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3CallProducerRefTupleControls.lean",
+    "proof_lines": 69,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 55,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerRefTuple"
+    ],
+    "imports_in": 3,
+    "lines": 68,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3CallProducerRefTupleFrame.lean",
+    "proof_lines": 49,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 30,
+    "declarations": {
+      "def": 2,
+      "theorem": 7
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.1111111111111111,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerRefTupleFrame",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerRefArrayControls"
+    ],
+    "imports_in": 1,
+    "lines": 45,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3CallProducerRefTupleFrameControls.lean",
+    "proof_lines": 18,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 182,
+    "declarations": {
+      "def": 3,
+      "structure": 1,
+      "theorem": 8
+    },
+    "definition_lines": 28,
+    "definition_to_proof_line_ratio": 0.1917808219178082,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerRefTupleFrame"
+    ],
+    "imports_in": 2,
+    "lines": 216,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3CallProducerRefTupleTyped.lean",
+    "proof_lines": 146,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 244,
+    "declarations": {
+      "abbrev": 1,
+      "def": 1,
+      "theorem": 14
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.021739130434782608,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3GuardedCaller"
+    ],
+    "imports_in": 2,
+    "lines": 280,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerPrefixes.lean",
+    "proof_lines": 230,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 123,
+    "declarations": {
+      "abbrev": 5,
+      "def": 4,
+      "theorem": 15
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.09433962264150944,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingFailure"
+    ],
+    "imports_in": 6,
+    "lines": 153,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerReframe.lean",
+    "proof_lines": 106,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 42,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CallerReframe"
+    ],
+    "imports_in": 3,
+    "lines": 51,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerStorageFrame.lean",
+    "proof_lines": 36,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 149,
+    "declarations": {
+      "abbrev": 2,
+      "def": 25,
+      "theorem": 22
+    },
+    "definition_lines": 29,
+    "definition_to_proof_line_ratio": 0.4027777777777778,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CallerStorageFrame"
+    ],
+    "imports_in": 2,
+    "lines": 227,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerStorageFrameControls.lean",
+    "proof_lines": 72,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 121,
+    "declarations": {
+      "abbrev": 9,
+      "def": 7,
+      "theorem": 14
+    },
+    "definition_lines": 21,
+    "definition_to_proof_line_ratio": 0.22826086956521738,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveReturn",
+      "Solidity.Evm.MemoryCompileExamples"
+    ],
+    "imports_in": 5,
+    "lines": 147,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3CountdownWitness.lean",
+    "proof_lines": 92,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 160,
+    "declarations": {
+      "abbrev": 3,
+      "def": 8,
+      "theorem": 27
+    },
+    "definition_lines": 12,
+    "definition_to_proof_line_ratio": 0.08391608391608392,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3DisjointScalarReturn",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarCallerReturn"
+    ],
+    "imports_in": 3,
+    "lines": 195,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3DisjointScalarControls.lean",
+    "proof_lines": 143,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 116,
+    "declarations": {
+      "def": 2,
+      "theorem": 2
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.0673076923076923,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameSameGlobals",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarReturn"
+    ],
+    "imports_in": 3,
+    "lines": 128,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3DisjointScalarEntry.lean",
+    "proof_lines": 104,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 103,
+    "declarations": {
+      "def": 2,
+      "theorem": 1
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.12643678160919541,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3DisjointScalarEntry",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveCall"
+    ],
+    "imports_in": 3,
+    "lines": 114,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3DisjointScalarReturn.lean",
+    "proof_lines": 87,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 131,
+    "declarations": {
+      "abbrev": 1,
+      "def": 9,
+      "theorem": 16
+    },
+    "definition_lines": 12,
+    "definition_to_proof_line_ratio": 0.14634146341463414,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3DistinctParentRestore",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CountdownWitness"
+    ],
+    "imports_in": 2,
+    "lines": 186,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctParentControls.lean",
+    "proof_lines": 82,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 87,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarParentRestore",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveSource"
+    ],
+    "imports_in": 3,
+    "lines": 97,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctParentRestore.lean",
+    "proof_lines": 80,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 89,
+    "declarations": {
+      "abbrev": 7,
+      "def": 5,
+      "theorem": 10
+    },
+    "definition_lines": 14,
+    "definition_to_proof_line_ratio": 0.2916666666666667,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3DistinctScalarUnwind",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3DistinctParentControls"
+    ],
+    "imports_in": 2,
+    "lines": 127,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctScalarControls.lean",
+    "proof_lines": 48,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 101,
+    "declarations": {
+      "abbrev": 6,
+      "def": 7,
+      "theorem": 15
+    },
+    "definition_lines": 13,
+    "definition_to_proof_line_ratio": 0.2549019607843137,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3DistinctScalarControls",
+      "Solidity.Backend.InternalFlow.RuntimeFrameResult"
+    ],
+    "imports_in": 1,
+    "lines": 153,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctScalarExport.lean",
+    "proof_lines": 51,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 47,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3DistinctParentRestore",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarUnwind"
+    ],
+    "imports_in": 2,
+    "lines": 55,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctScalarUnwind.lean",
+    "proof_lines": 39,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 150,
+    "declarations": {
+      "abbrev": 2,
+      "def": 12,
+      "theorem": 24
+    },
+    "definition_lines": 17,
+    "definition_to_proof_line_ratio": 0.13821138211382114,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3HeapDomain",
+      "Solidity.Backend.InternalFlow.RuntimeFrameFootprint"
+    ],
+    "imports_in": 3,
+    "lines": 193,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3DomainTransport.lean",
+    "proof_lines": 123,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 131,
+    "declarations": {
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.02459016393442623,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulSourceSelection",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDemand"
+    ],
+    "imports_in": 3,
+    "lines": 148,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulRuntime.lean",
+    "proof_lines": 122,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 117,
+    "declarations": {
+      "def": 1,
+      "theorem": 16
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.028037383177570093,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulRuntime",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulSourceSelectionControls"
+    ],
+    "imports_in": 1,
+    "lines": 142,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulRuntimeControls.lean",
+    "proof_lines": 107,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 133,
+    "declarations": {
+      "def": 9,
+      "theorem": 19
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.08620689655172414,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulScalarSource",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3DisjointScalarControls"
+    ],
+    "imports_in": 2,
+    "lines": 162,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulScalarCall.lean",
+    "proof_lines": 116,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 115,
+    "declarations": {
+      "abbrev": 1,
+      "def": 3,
+      "theorem": 16
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.09183673469387756,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulScalarCall",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3SameCallControls"
+    ],
+    "imports_in": 2,
+    "lines": 146,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulScalarFailure.lean",
+    "proof_lines": 98,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 71,
+    "declarations": {
+      "abbrev": 1,
+      "def": 4,
+      "theorem": 2
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.18867924528301888,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveCall"
+    ],
+    "imports_in": 4,
+    "lines": 84,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulScalarSource.lean",
+    "proof_lines": 53,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 44,
+    "declarations": {
+      "abbrev": 1,
+      "def": 2,
+      "theorem": 3
+    },
+    "definition_lines": 18,
+    "definition_to_proof_line_ratio": 1.2,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulScalarSource",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarSourceCheckLaws"
+    ],
+    "imports_in": 3,
+    "lines": 69,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulSourceCheck.lean",
+    "proof_lines": 15,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 40,
+    "declarations": {
+      "abbrev": 1,
+      "def": 2,
+      "theorem": 10
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.21428571428571427,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulSourceCheck",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3OrderedCalleeFailure",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3OrderedEffectfulClient"
+    ],
+    "imports_in": 2,
+    "lines": 60,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulSourceCheckControls.lean",
+    "proof_lines": 28,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 126,
+    "declarations": {
+      "abbrev": 1,
+      "def": 5,
+      "structure": 1,
+      "theorem": 5
+    },
+    "definition_lines": 54,
+    "definition_to_proof_line_ratio": 0.8059701492537313,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulSourceCheck",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3OrderedCalleeFailure"
+    ],
+    "imports_in": 3,
+    "lines": 148,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulSourceSelection.lean",
+    "proof_lines": 67,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 65,
+    "declarations": {
+      "abbrev": 1,
+      "def": 6,
+      "theorem": 11
+    },
+    "definition_lines": 19,
+    "definition_to_proof_line_ratio": 0.475,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulSourceSelection",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulSourceCheckControls"
+    ],
+    "imports_in": 2,
+    "lines": 90,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulSourceSelectionControls.lean",
+    "proof_lines": 40,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 91,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulRuntime",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3OrderedEffectfulStorage"
+    ],
+    "imports_in": 2,
+    "lines": 110,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulStorageRuntime.lean",
+    "proof_lines": 79,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 116,
+    "declarations": {
+      "def": 7,
+      "theorem": 15
+    },
+    "definition_lines": 12,
+    "definition_to_proof_line_ratio": 0.1791044776119403,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulStorageRuntime",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3OrderedEffectfulStorageControls"
+    ],
+    "imports_in": 2,
+    "lines": 171,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulStorageRuntimeControls.lean",
+    "proof_lines": 67,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 320,
+    "declarations": {
+      "abbrev": 2,
+      "def": 4,
+      "theorem": 24
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.019543973941368076,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingEmission"
+    ],
+    "imports_in": 2,
+    "lines": 363,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3EmissionPrefixes.lean",
+    "proof_lines": 307,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 167,
+    "declarations": {
+      "abbrev": 1,
+      "def": 1,
+      "theorem": 11
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.01910828025477707,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3EmissionPrefixes"
+    ],
+    "imports_in": 2,
+    "lines": 196,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3EmissionUnwind.lean",
+    "proof_lines": 157,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 227,
+    "declarations": {
+      "abbrev": 10,
+      "def": 16,
+      "theorem": 18
+    },
+    "definition_lines": 96,
+    "definition_to_proof_line_ratio": 1.0666666666666667,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameNoneProducer",
+      "Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV3",
+      "Solidity.Backend.InternalFlow.RuntimeFrameMutation",
+      "Solidity.Evm.MemoryCompileExamples"
+    ],
+    "imports_in": 3,
+    "lines": 365,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3FixedThunkProducer.lean",
+    "proof_lines": 90,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 69,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarAllocatingDescent",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingPrefixes",
+      "Solidity.Semantics.AllocBytes"
+    ],
+    "imports_in": 2,
+    "lines": 78,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3FreshAllocationContents.lean",
+    "proof_lines": 61,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 47,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3FreshAllocationContents",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDescentControls"
+    ],
+    "imports_in": 1,
+    "lines": 54,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3FreshAllocationContentsControls.lean",
+    "proof_lines": 40,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 68,
+    "declarations": {
+      "def": 2,
+      "theorem": 20
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.07142857142857142,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3FrozenScopeCompiler",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3SameCallControls"
+    ],
+    "imports_in": 2,
+    "lines": 99,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3FrozenScopeClient.lean",
+    "proof_lines": 56,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 54,
+    "declarations": {
+      "def": 3,
+      "theorem": 4
+    },
+    "definition_lines": 17,
+    "definition_to_proof_line_ratio": 0.53125,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3FrozenScopeFamily",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveScopeCompiler"
+    ],
+    "imports_in": 2,
+    "lines": 67,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3FrozenScopeCompiler.lean",
+    "proof_lines": 32,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 41,
+    "declarations": {
+      "def": 2,
+      "theorem": 6
+    },
+    "definition_lines": 19,
+    "definition_to_proof_line_ratio": 1.1875,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarPhysicalInputs",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3FrozenScopeHorizons"
+    ],
+    "imports_in": 3,
+    "lines": 61,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3FrozenScopeCoverage.lean",
+    "proof_lines": 16,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 49,
+    "declarations": {
+      "def": 2,
+      "theorem": 4
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.15789473684210525,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveScopeLaws",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveAgreement"
+    ],
+    "imports_in": 2,
+    "lines": 62,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3FrozenScopeFamily.lean",
+    "proof_lines": 38,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 43,
+    "declarations": {
+      "theorem": 6
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3FrozenScopeRuntime"
+    ],
+    "imports_in": 2,
+    "lines": 63,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3FrozenScopeHorizons.lean",
+    "proof_lines": 39,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 21,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 2.2,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3FrozenScopeClient"
+    ],
+    "imports_in": 2,
+    "lines": 29,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3FrozenScopeRuntime.lean",
+    "proof_lines": 5,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 118,
+    "declarations": {
+      "abbrev": 1,
+      "def": 2,
+      "theorem": 5
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.05102040816326531,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3FullScalarUnwind",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3PairedUnwind"
+    ],
+    "imports_in": 5,
+    "lines": 141,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3FullScalarLoop.lean",
+    "proof_lines": 98,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 90,
+    "declarations": {
+      "abbrev": 1,
+      "def": 2,
+      "theorem": 2
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.038461538461538464,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3FullScalarLoop",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarEndpoint"
+    ],
+    "imports_in": 2,
+    "lines": 101,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3FullScalarLoopControls.lean",
+    "proof_lines": 78,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 94,
+    "declarations": {
+      "abbrev": 1,
+      "def": 2,
+      "theorem": 1
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.03571428571428571,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3FullScalarPrefixes",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3FullScalarLoopControls"
+    ],
+    "imports_in": 1,
+    "lines": 102,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3FullScalarPrefixControls.lean",
+    "proof_lines": 84,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 77,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3FullScalarLoop"
+    ],
+    "imports_in": 2,
+    "lines": 88,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3FullScalarPrefixes.lean",
+    "proof_lines": 69,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 60,
+    "declarations": {
+      "def": 3,
+      "theorem": 2
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.08333333333333333,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarUnwind"
+    ],
+    "imports_in": 4,
+    "lines": 73,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3FullScalarUnwind.lean",
+    "proof_lines": 48,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 145,
+    "declarations": {
+      "def": 3,
+      "theorem": 12
+    },
+    "definition_lines": 34,
+    "definition_to_proof_line_ratio": 0.34,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV3"
+    ],
+    "imports_in": 3,
+    "lines": 220,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3GeneralBoundary.lean",
+    "proof_lines": 100,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 36,
+    "declarations": {
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.625,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3GeneralBoundary",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3FrozenScopeCoverage"
+    ],
+    "imports_in": 1,
+    "lines": 66,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3GeneralBoundaryControls.lean",
+    "proof_lines": 16,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 175,
+    "declarations": {
+      "def": 5,
+      "theorem": 18
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.0641025641025641,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3GuardedPrefixes"
+    ],
+    "imports_in": 2,
+    "lines": 212,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3GuardedCaller.lean",
+    "proof_lines": 156,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 219,
+    "declarations": {
+      "abbrev": 1,
+      "def": 1,
+      "theorem": 12
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.019417475728155338,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3GuardedRecursion"
+    ],
+    "imports_in": 2,
+    "lines": 262,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3GuardedPrefixes.lean",
+    "proof_lines": 206,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 295,
+    "declarations": {
+      "abbrev": 2,
+      "def": 8,
+      "theorem": 31
+    },
+    "definition_lines": 17,
+    "definition_to_proof_line_ratio": 0.06273062730627306,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ArrayProbe"
+    ],
+    "imports_in": 2,
+    "lines": 355,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3GuardedRecursion.lean",
+    "proof_lines": 271,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 156,
+    "declarations": {
+      "def": 1,
+      "theorem": 22
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.028169014084507043,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CallerPrefixes",
+      "Solidity.Theory.Typed.Mem"
+    ],
+    "imports_in": 2,
+    "lines": 204,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3HeapDomain.lean",
+    "proof_lines": 142,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 158,
+    "declarations": {
+      "abbrev": 3,
+      "def": 13,
+      "theorem": 31
+    },
+    "definition_lines": 19,
+    "definition_to_proof_line_ratio": 0.14074074074074075,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarArgument"
+    ],
+    "imports_in": 2,
+    "lines": 197,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3MemoryArgument.lean",
+    "proof_lines": 135,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 366,
+    "declarations": {
+      "abbrev": 5,
+      "def": 16,
+      "theorem": 33
+    },
+    "definition_lines": 30,
+    "definition_to_proof_line_ratio": 0.0911854103343465,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3NativeUnwind"
+    ],
+    "imports_in": 4,
+    "lines": 422,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3MutatingActivation.lean",
+    "proof_lines": 329,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 78,
+    "declarations": {
+      "abbrev": 1,
+      "theorem": 1
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.013888888888888888,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingArguments",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3MutatingCompletion"
+    ],
+    "imports_in": 2,
+    "lines": 88,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3MutatingCaller.lean",
+    "proof_lines": 72,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 131,
+    "declarations": {
+      "abbrev": 7,
+      "def": 8,
+      "theorem": 12
+    },
+    "definition_lines": 16,
+    "definition_to_proof_line_ratio": 0.1509433962264151,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3MutatingCaller"
+    ],
+    "imports_in": 1,
+    "lines": 155,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3MutatingCallerClient.lean",
+    "proof_lines": 106,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 249,
+    "declarations": {
+      "abbrev": 2,
+      "def": 6,
+      "theorem": 21
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.039301310043668124,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3MutatingHistory",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3MutatingReturn"
+    ],
+    "imports_in": 4,
+    "lines": 286,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3MutatingCompletion.lean",
+    "proof_lines": 229,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 54,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3MutatingCompletion",
+      "Solidity.Evm.MemoryCalls"
+    ],
+    "imports_in": 2,
+    "lines": 62,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3MutatingContinuation.lean",
+    "proof_lines": 49,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 212,
+    "declarations": {
+      "abbrev": 4,
+      "def": 15,
+      "theorem": 33
+    },
+    "definition_lines": 24,
+    "definition_to_proof_line_ratio": 0.13186813186813187,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3MutatingContinuation"
+    ],
+    "imports_in": 1,
+    "lines": 254,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3MutatingContinuationClient.lean",
+    "proof_lines": 182,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 110,
+    "declarations": {
+      "abbrev": 2,
+      "def": 1,
+      "theorem": 13
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.03,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3MutatingCompletion"
+    ],
+    "imports_in": 1,
+    "lines": 141,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3MutatingFailure.lean",
+    "proof_lines": 100,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 93,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3MutatingResume"
+    ],
+    "imports_in": 2,
+    "lines": 101,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3MutatingHistory.lean",
+    "proof_lines": 89,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 315,
+    "declarations": {
+      "abbrev": 5,
+      "def": 7,
+      "theorem": 23
+    },
+    "definition_lines": 13,
+    "definition_to_proof_line_ratio": 0.04406779661016949,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3MutatingActivation"
+    ],
+    "imports_in": 2,
+    "lines": 351,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3MutatingPrefixes.lean",
+    "proof_lines": 295,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 331,
+    "declarations": {
+      "abbrev": 1,
+      "def": 7,
+      "theorem": 24
+    },
+    "definition_lines": 15,
+    "definition_to_proof_line_ratio": 0.048701298701298704,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3MutatingSource",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingResume"
+    ],
+    "imports_in": 2,
+    "lines": 383,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3MutatingResume.lean",
+    "proof_lines": 308,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 159,
+    "declarations": {
+      "abbrev": 1,
+      "def": 2,
+      "theorem": 16
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.034013605442176874,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3MutatingSource"
+    ],
+    "imports_in": 2,
+    "lines": 179,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3MutatingReturn.lean",
+    "proof_lines": 147,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 281,
+    "declarations": {
+      "abbrev": 1,
+      "def": 9,
+      "theorem": 21
+    },
+    "definition_lines": 17,
+    "definition_to_proof_line_ratio": 0.06640625,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3MutatingPrefixes",
+      "Solidity.Backend.InternalFlow.RuntimeFrameResultAgreement"
+    ],
+    "imports_in": 3,
+    "lines": 326,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3MutatingSource.lean",
+    "proof_lines": 256,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 51,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarReturn",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarOutcomes"
+    ],
+    "imports_in": 2,
+    "lines": 62,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3NativeAllocationCoherence.lean",
+    "proof_lines": 42,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 28,
+    "declarations": {
+      "abbrev": 3,
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.4,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3NativeAllocationCoherence",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarTarget"
+    ],
+    "imports_in": 1,
+    "lines": 36,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3NativeAllocationCoherenceControls.lean",
+    "proof_lines": 15,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 36,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3NativeHeapProfile",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarAllocatingDescent"
+    ],
+    "imports_in": 2,
+    "lines": 43,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3NativeDescentHeap.lean",
+    "proof_lines": 29,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 36,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3NativeDescentHeap",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDescentControls"
+    ],
+    "imports_in": 1,
+    "lines": 42,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3NativeDescentHeapControls.lean",
+    "proof_lines": 29,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 68,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3StateShell",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3TypedHeapExtensionality",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarReturn"
+    ],
+    "imports_in": 3,
+    "lines": 78,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3NativeHeapProfile.lean",
+    "proof_lines": 58,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 85,
+    "declarations": {
+      "theorem": 5
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ParentStop"
+    ],
+    "imports_in": 1,
+    "lines": 109,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3NativeParents.lean",
+    "proof_lines": 76,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 116,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarAllocatingDescent",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarPairedTransport",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3NativeHeapProfile"
+    ],
+    "imports_in": 4,
+    "lines": 127,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3NativeReturnRepresentation.lean",
+    "proof_lines": 106,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 71,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3NativeReturnRepresentation",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDescentControls",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarReturn"
+    ],
+    "imports_in": 1,
+    "lines": 77,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3NativeReturnRepresentationControls.lean",
+    "proof_lines": 63,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 58,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarPairedTransport",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarOutcomes"
+    ],
+    "imports_in": 2,
+    "lines": 67,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3NativeScalarAgreement.lean",
+    "proof_lines": 51,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 34,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3NativeScalarAgreement",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDescentControls"
+    ],
+    "imports_in": 1,
+    "lines": 41,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3NativeScalarAgreementControls.lean",
+    "proof_lines": 27,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 336,
+    "declarations": {
+      "abbrev": 1,
+      "def": 3,
+      "theorem": 11
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.025,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3EmissionUnwind",
+      "Solidity.Backend.InternalFlow.RuntimeFrameCallAgreement"
+    ],
+    "imports_in": 3,
+    "lines": 362,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3NativeUnwind.lean",
+    "proof_lines": 320,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 89,
+    "declarations": {
+      "def": 2,
+      "theorem": 13
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.05194805194805195,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3OrderedEffectfulClient"
+    ],
+    "imports_in": 2,
+    "lines": 115,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3OrderedArgumentFailure.lean",
+    "proof_lines": 77,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 168,
+    "declarations": {
+      "abbrev": 2,
+      "def": 9,
+      "theorem": 15
+    },
+    "definition_lines": 15,
+    "definition_to_proof_line_ratio": 0.10273972602739725,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3OrderedArgumentFailure"
+    ],
+    "imports_in": 3,
+    "lines": 198,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3OrderedCalleeFailure.lean",
+    "proof_lines": 146,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 135,
+    "declarations": {
+      "abbrev": 4,
+      "def": 5,
+      "theorem": 19
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.07627118644067797,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3OrderedEffectfulScalar",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarReentryEndpoint"
+    ],
+    "imports_in": 3,
+    "lines": 161,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3OrderedEffectfulClient.lean",
+    "proof_lines": 118,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 142,
+    "declarations": {
+      "abbrev": 1,
+      "def": 4,
+      "theorem": 3
+    },
+    "definition_lines": 14,
+    "definition_to_proof_line_ratio": 0.11382113821138211,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulScalarFailure",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CallerReframe"
+    ],
+    "imports_in": 3,
+    "lines": 155,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3OrderedEffectfulScalar.lean",
+    "proof_lines": 123,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 121,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3OrderedEffectfulScalar",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CallerStorageFrame"
+    ],
+    "imports_in": 3,
+    "lines": 131,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3OrderedEffectfulStorage.lean",
+    "proof_lines": 114,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 190,
+    "declarations": {
+      "abbrev": 11,
+      "def": 8,
+      "theorem": 17
+    },
+    "definition_lines": 19,
+    "definition_to_proof_line_ratio": 0.1484375,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3OrderedEffectfulStorage",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CallerStorageFrameControls"
+    ],
+    "imports_in": 2,
+    "lines": 251,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3OrderedEffectfulStorageControls.lean",
+    "proof_lines": 128,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 104,
+    "declarations": {
+      "abbrev": 2,
+      "def": 2,
+      "theorem": 1
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.07954545454545454,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3OuterScalarRestore",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3NativeReturnRepresentation",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDescentControls",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarReturn"
+    ],
+    "imports_in": 2,
+    "lines": 115,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3OuterAllocatingCall.lean",
+    "proof_lines": 88,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 42,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.058823529411764705,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3FullScalarUnwind"
+    ],
+    "imports_in": 2,
+    "lines": 52,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3OuterScalarRestore.lean",
+    "proof_lines": 34,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 116,
+    "declarations": {
+      "abbrev": 1,
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.027777777777777776,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveHistory",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveUnwind"
+    ],
+    "imports_in": 4,
+    "lines": 131,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3PairedUnwind.lean",
+    "proof_lines": 108,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 163,
+    "declarations": {
+      "def": 2,
+      "theorem": 4
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.019867549668874173,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ParentRestore"
+    ],
+    "imports_in": 2,
+    "lines": 177,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ParentPrefixes.lean",
+    "proof_lines": 151,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 96,
+    "declarations": {
+      "abbrev": 1,
+      "theorem": 3
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.011627906976744186,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatorReturn"
+    ],
+    "imports_in": 3,
+    "lines": 111,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ParentRestore.lean",
+    "proof_lines": 86,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 110,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ParentPrefixes"
+    ],
+    "imports_in": 3,
+    "lines": 128,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ParentStop.lean",
+    "proof_lines": 101,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 105,
+    "declarations": {
+      "abbrev": 5,
+      "def": 11,
+      "theorem": 14
+    },
+    "definition_lines": 21,
+    "definition_to_proof_line_ratio": 0.4375,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3PrimitiveCallerFrame",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveControls",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulScalarSource"
+    ],
+    "imports_in": 1,
+    "lines": 155,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3PrimitiveCallerControls.lean",
+    "proof_lines": 48,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 45,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameCallAgreement"
+    ],
+    "imports_in": 2,
+    "lines": 62,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3PrimitiveCallerFrame.lean",
+    "proof_lines": 33,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 208,
+    "declarations": {
+      "def": 6,
+      "theorem": 14
+    },
+    "definition_lines": 15,
+    "definition_to_proof_line_ratio": 0.08021390374331551,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveSource",
+      "Solidity.Backend.InternalFlow.RuntimeFrameCallAgreement"
+    ],
+    "imports_in": 2,
+    "lines": 245,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveActivation.lean",
+    "proof_lines": 187,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 114,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveActivation"
+    ],
+    "imports_in": 2,
+    "lines": 132,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveDescent.lean",
+    "proof_lines": 110,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 152,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveDescent"
+    ],
+    "imports_in": 4,
+    "lines": 172,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveHistory.lean",
+    "proof_lines": 148,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 156,
+    "declarations": {
+      "abbrev": 1,
+      "def": 6,
+      "theorem": 16
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.05673758865248227,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOutcome"
+    ],
+    "imports_in": 2,
+    "lines": 191,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveIngress.lean",
+    "proof_lines": 141,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 61,
+    "declarations": {
+      "def": 2,
+      "theorem": 3
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.05555555555555555,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameSaved"
+    ],
+    "imports_in": 2,
+    "lines": 78,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveProducer.lean",
+    "proof_lines": 54,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 27,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatorReturn"
+    ],
+    "imports_in": 1,
+    "lines": 42,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveResult.lean",
+    "proof_lines": 20,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 201,
+    "declarations": {
+      "def": 3,
+      "theorem": 6
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.02617801047120419,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3PairedUnwind",
+      "Solidity.Backend.InternalFlow.RuntimeFrameRestoredRepresentation"
+    ],
+    "imports_in": 2,
+    "lines": 220,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveReturn.lean",
+    "proof_lines": 191,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 52,
+    "declarations": {
+      "def": 5,
+      "structure": 1,
+      "theorem": 1
+    },
+    "definition_lines": 36,
+    "definition_to_proof_line_ratio": 3.272727272727273,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarSourceCheckLaws",
+      "Solidity.Backend.InternalFlow.RuntimeFrameScopedSource"
+    ],
+    "imports_in": 2,
+    "lines": 74,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveScopeCheck.lean",
+    "proof_lines": 11,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 84,
+    "declarations": {
+      "abbrev": 2,
+      "def": 4,
+      "theorem": 13
+    },
+    "definition_lines": 21,
+    "definition_to_proof_line_ratio": 0.375,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveScopeCompiler",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarSourceCompilerControls"
+    ],
+    "imports_in": 3,
+    "lines": 104,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveScopeClient.lean",
+    "proof_lines": 56,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 122,
+    "declarations": {
+      "def": 4,
+      "structure": 1,
+      "theorem": 5
+    },
+    "definition_lines": 54,
+    "definition_to_proof_line_ratio": 0.8852459016393442,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveScopeLaws",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarSourceCompiler",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDemandClaims"
+    ],
+    "imports_in": 3,
+    "lines": 146,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveScopeCompiler.lean",
+    "proof_lines": 61,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 44,
+    "declarations": {
+      "def": 5,
+      "theorem": 12
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.44,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveScopeClient",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScopedScalarControls"
+    ],
+    "imports_in": 1,
+    "lines": 66,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveScopeControls.lean",
+    "proof_lines": 25,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 31,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveScopeCheck"
+    ],
+    "imports_in": 3,
+    "lines": 38,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveScopeLaws.lean",
+    "proof_lines": 27,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 144,
+    "declarations": {
+      "abbrev": 1,
+      "def": 6,
+      "theorem": 5
+    },
+    "definition_lines": 15,
+    "definition_to_proof_line_ratio": 0.12096774193548387,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV1",
+      "Solidity.Semantics.RunWk"
+    ],
+    "imports_in": 3,
+    "lines": 164,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveSource.lean",
+    "proof_lines": 124,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 268,
+    "declarations": {
+      "def": 2,
+      "theorem": 15
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.015444015444015444,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveProducer",
+      "Solidity.Backend.InternalFlow.RuntimeFrameRestore"
+    ],
+    "imports_in": 2,
+    "lines": 308,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveUnwind.lean",
+    "proof_lines": 259,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 80,
+    "declarations": {
+      "def": 3,
+      "theorem": 8
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.043478260869565216,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3SameCallDual"
+    ],
+    "imports_in": 3,
+    "lines": 93,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3SameCallControls.lean",
+    "proof_lines": 69,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 58,
+    "declarations": {
+      "def": 3,
+      "theorem": 10
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.08695652173913043,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3SameCallInputs"
+    ],
+    "imports_in": 2,
+    "lines": 79,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3SameCallDual.lean",
+    "proof_lines": 46,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 49,
+    "declarations": {
+      "abbrev": 5,
+      "def": 10,
+      "theorem": 10
+    },
+    "definition_lines": 16,
+    "definition_to_proof_line_ratio": 0.6153846153846154,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveScopeClient"
+    ],
+    "imports_in": 2,
+    "lines": 65,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3SameCallInputs.lean",
+    "proof_lines": 26,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 149,
+    "declarations": {
+      "def": 10,
+      "theorem": 22
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.11363636363636363,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulStorageRuntimeControls"
+    ],
+    "imports_in": 1,
+    "lines": 226,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3SameSelectedRevert.lean",
+    "proof_lines": 88,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 244,
+    "declarations": {
+      "abbrev": 3,
+      "def": 2,
+      "theorem": 7
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.05238095238095238,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3StateShell",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocationInventory",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarTurn",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDescentInterfaceV1"
+    ],
+    "imports_in": 5,
+    "lines": 277,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarAllocatingDescent.lean",
+    "proof_lines": 210,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 135,
+    "declarations": {
+      "abbrev": 3,
+      "def": 12,
+      "theorem": 24
+    },
+    "definition_lines": 17,
+    "definition_to_proof_line_ratio": 0.14912280701754385,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CallerReframe"
+    ],
+    "imports_in": 2,
+    "lines": 170,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarArgument.lean",
+    "proof_lines": 114,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 100,
+    "declarations": {
+      "def": 3,
+      "theorem": 4
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.10588235294117647,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarReturn",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveCall",
+      "Solidity.Backend.InternalFlow.RuntimeFrameResult"
+    ],
+    "imports_in": 2,
+    "lines": 115,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarCallReturn.lean",
+    "proof_lines": 85,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 73,
+    "declarations": {
+      "def": 2,
+      "theorem": 12
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.029850746268656716,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarCallerReturn"
+    ],
+    "imports_in": 1,
+    "lines": 92,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarCallerControls.lean",
+    "proof_lines": 67,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 124,
+    "declarations": {
+      "abbrev": 2,
+      "def": 8,
+      "theorem": 5
+    },
+    "definition_lines": 14,
+    "definition_to_proof_line_ratio": 0.1346153846153846,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarUnwindEndpoint",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3CallerReframe",
+      "Solidity.Backend.InternalFlow.RuntimeFrameResult"
+    ],
+    "imports_in": 3,
+    "lines": 137,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarCallerReturn.lean",
+    "proof_lines": 104,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 76,
+    "declarations": {
+      "def": 4,
+      "theorem": 4
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.21153846153846154,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveSource",
+      "Solidity.Backend.InternalFlow.RuntimeFrameContext"
+    ],
+    "imports_in": 2,
+    "lines": 94,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarChildEntry.lean",
+    "proof_lines": 52,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 76,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarPlan"
+    ],
+    "imports_in": 4,
+    "lines": 86,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarClaims.lean",
+    "proof_lines": 72,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 52,
+    "declarations": {
+      "def": 2,
+      "theorem": 12
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.045454545454545456,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarClaims",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarPlanControls"
+    ],
+    "imports_in": 1,
+    "lines": 71,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarClaimsControls.lean",
+    "proof_lines": 44,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 112,
+    "declarations": {
+      "abbrev": 1,
+      "def": 20,
+      "theorem": 16
+    },
+    "definition_lines": 23,
+    "definition_to_proof_line_ratio": 0.2839506172839506,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameReturnContinuation",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDemandDual"
+    ],
+    "imports_in": 3,
+    "lines": 138,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarContinuation.lean",
+    "proof_lines": 81,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Backend",
+    "category": "unmarked",
+    "code_lines": 92,
+    "declarations": {
+      "theorem": 11
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarContinuation"
+    ],
+    "imports_in": 2,
+    "lines": 109,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarContinuationControls.lean",
+    "proof_lines": 87,
+    "roadmap_commands": 0,
+    "sorry": 0
+  }
+]

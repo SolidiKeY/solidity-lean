@@ -1,0 +1,6991 @@
+[
+  {
+    "area": "Calculus",
+    "category": "unmarked",
+    "code_lines": 168,
+    "declarations": {
+      "def": 30,
+      "inductive": 1,
+      "instance": 1,
+      "structure": 2
+    },
+    "definition_lines": 158,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.RuleKit"
+    ],
+    "imports_in": 4,
+    "lines": 279,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Calculus/TreeData.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Calculus",
+    "category": "unmarked",
+    "code_lines": 96,
+    "declarations": {
+      "def": 11,
+      "structure": 1,
+      "theorem": 5
+    },
+    "definition_lines": 45,
+    "definition_to_proof_line_ratio": 1.0714285714285714,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.ScalarCode"
+    ],
+    "imports_in": 4,
+    "lines": 143,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Calculus/TypedLinear.lean",
+    "proof_lines": 42,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Calculus",
+    "category": "unmarked",
+    "code_lines": 971,
+    "declarations": {
+      "def": 39,
+      "inductive": 2,
+      "structure": 1,
+      "theorem": 56
+    },
+    "definition_lines": 252,
+    "definition_to_proof_line_ratio": 0.3539325842696629,
+    "implemented_by": 9,
+    "imports": [
+      "Solidity.Calculus.UpdateRules"
+    ],
+    "imports_in": 3,
+    "lines": 1336,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Calculus/UpdRuleScoped.lean",
+    "proof_lines": 712,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Calculus",
+    "category": "unmarked",
+    "code_lines": 318,
+    "declarations": {
+      "def": 2,
+      "theorem": 19
+    },
+    "definition_lines": 16,
+    "definition_to_proof_line_ratio": 0.055944055944055944,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Sound"
+    ],
+    "imports_in": 5,
+    "lines": 426,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Calculus/UpdateRules.lean",
+    "proof_lines": 286,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Calculus",
+    "category": "unmarked",
+    "code_lines": 185,
+    "declarations": {
+      "def": 10,
+      "inductive": 2,
+      "theorem": 9
+    },
+    "definition_lines": 53,
+    "definition_to_proof_line_ratio": 0.43089430894308944,
+    "implemented_by": 0,
+    "imports": [],
+    "imports_in": 4,
+    "lines": 264,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Calculus/VisitedSet.lean",
+    "proof_lines": 123,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Calculus",
+    "category": "unmarked",
+    "code_lines": 186,
+    "declarations": {
+      "def": 8
+    },
+    "definition_lines": 102,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Derive",
+      "Solidity.Calculus.Surface",
+      "Solidity.Calculus.TacticSyntax"
+    ],
+    "imports_in": 10,
+    "lines": 282,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Calculus/WalkSyntax.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Calculus",
+    "category": "unmarked",
+    "code_lines": 64,
+    "declarations": {
+      "inductive": 1,
+      "theorem": 7
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.08,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Blocks"
+    ],
+    "imports_in": 3,
+    "lines": 106,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Calculus/WkOver.lean",
+    "proof_lines": 50,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Corpus",
+    "category": "unmarked",
+    "code_lines": 42,
+    "declarations": {
+      "abbrev": 2,
+      "def": 2,
+      "theorem": 2
+    },
+    "definition_lines": 13,
+    "definition_to_proof_line_ratio": 1.0833333333333333,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.Logic",
+      "Solidity.Syntax.Splice"
+    ],
+    "imports_in": 9,
+    "lines": 125,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Corpus/Basic.lean",
+    "proof_lines": 12,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Corpus",
+    "category": "corpus",
+    "code_lines": 46,
+    "declarations": {
+      "def": 3,
+      "theorem": 4
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.3684210526315789,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Corpus.Basic",
+      "Solidity.Calculus.Problem",
+      "Solidity.Calculus.Sound",
+      "Solidity.Calculus.Spec",
+      "Solidity.Calculus.Close",
+      "Solidity.Solkey.TestSuite"
+    ],
+    "imports_in": 2,
+    "lines": 140,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Corpus/Imported.lean",
+    "proof_lines": 19,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Corpus",
+    "category": "corpus",
+    "code_lines": 133,
+    "declarations": {
+      "theorem": 11
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Corpus.Basic"
+    ],
+    "imports_in": 1,
+    "lines": 238,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Corpus/SolcArrays.lean",
+    "proof_lines": 129,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Corpus",
+    "category": "corpus",
+    "code_lines": 103,
+    "declarations": {
+      "theorem": 8
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Corpus.Basic"
+    ],
+    "imports_in": 1,
+    "lines": 188,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Corpus/SolcControlFlow.lean",
+    "proof_lines": 99,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Corpus",
+    "category": "corpus",
+    "code_lines": 182,
+    "declarations": {
+      "theorem": 20
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Corpus.Basic"
+    ],
+    "imports_in": 2,
+    "lines": 331,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Corpus/SolcExpressions.lean",
+    "proof_lines": 178,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Corpus",
+    "category": "corpus",
+    "code_lines": 102,
+    "declarations": {
+      "theorem": 9
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Corpus.Basic"
+    ],
+    "imports_in": 1,
+    "lines": 171,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Corpus/SolcMappings.lean",
+    "proof_lines": 98,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Corpus",
+    "category": "corpus",
+    "code_lines": 128,
+    "declarations": {
+      "theorem": 11
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Corpus.Basic"
+    ],
+    "imports_in": 1,
+    "lines": 206,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Corpus/SolcMemory.lean",
+    "proof_lines": 124,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Corpus",
+    "category": "corpus",
+    "code_lines": 109,
+    "declarations": {
+      "theorem": 9
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Corpus.Basic"
+    ],
+    "imports_in": 1,
+    "lines": 181,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Corpus/SolcStructs.lean",
+    "proof_lines": 105,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Corpus",
+    "category": "corpus",
+    "code_lines": 1561,
+    "declarations": {
+      "theorem": 518
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Corpus.Imported",
+      "Solidity.TestSuite.Report"
+    ],
+    "imports_in": 1,
+    "lines": 2624,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Corpus/TestSuite.lean",
+    "proof_lines": 1554,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Counterexamples",
+    "category": "unmarked",
+    "code_lines": 81,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.KeySort"
+    ],
+    "imports_in": 4,
+    "lines": 188,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Counterexamples/DeleteFamilyGenericOverlap.lean",
+    "proof_lines": 69,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Counterexamples",
+    "category": "unmarked",
+    "code_lines": 21,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Calculus.CallbackHolds"
+    ],
+    "imports_in": 3,
+    "lines": 40,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Counterexamples/DiamondTry.lean",
+    "proof_lines": 13,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Counterexamples",
+    "category": "unmarked",
+    "code_lines": 53,
+    "declarations": {
+      "def": 4,
+      "theorem": 7
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.1891891891891892,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.SortCheck.Faithfulness"
+    ],
+    "imports_in": 2,
+    "lines": 114,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Counterexamples/PreFixSortAnnotations.lean",
+    "proof_lines": 37,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Counterexamples",
+    "category": "unmarked",
+    "code_lines": 25,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Typing.Sorts"
+    ],
+    "imports_in": 2,
+    "lines": 71,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Counterexamples/StaticRuntimeSort.lean",
+    "proof_lines": 18,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "ERC7201",
+    "category": "unmarked",
+    "code_lines": 17,
+    "declarations": {
+      "def": 3,
+      "theorem": 2
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 2.25,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.RevertBytes",
+      "Lean.Elab.Tactic.Omega"
+    ],
+    "imports_in": 4,
+    "lines": 38,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/ERC7201.lean",
+    "proof_lines": 4,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Eqns",
+    "category": "unmarked",
+    "code_lines": 17,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Lean.Meta.Eqns",
+      "Lean.Elab.Attributes"
+    ],
+    "imports_in": 2,
+    "lines": 46,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Eqns.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 339,
+    "declarations": {
+      "abbrev": 2,
+      "def": 44,
+      "inductive": 1,
+      "structure": 1,
+      "theorem": 1
+    },
+    "definition_lines": 321,
+    "definition_to_proof_line_ratio": 321.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Layout",
+      "Solidity.Syntax.Scoped"
+    ],
+    "imports_in": 5,
+    "lines": 487,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/Compile.lean",
+    "proof_lines": 1,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 550,
+    "declarations": {
+      "def": 22,
+      "inductive": 1,
+      "theorem": 16
+    },
+    "definition_lines": 232,
+    "definition_to_proof_line_ratio": 0.7656765676567657,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Correct",
+      "Solidity.Evm.MemoryCompile",
+      "Solidity.Evm.MemoryStorageCopyCompile",
+      "Solidity.Evm.MemoryFixedCompile",
+      "Solidity.Evm.MemoryStorageConstructionCompile",
+      "Solidity.Evm.MemoryCalls",
+      "Solidity.Evm.MemoryRefArrayCompile",
+      "Solidity.Evm.MemoryObjectCompile",
+      "Solidity.Evm.MemoryObjectConstructionCompile",
+      "Solidity.Evm.MemoryLoopScopeCompile"
+    ],
+    "imports_in": 38,
+    "lines": 637,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/Compiler.lean",
+    "proof_lines": 303,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 967,
+    "declarations": {
+      "def": 3,
+      "inductive": 1,
+      "theorem": 58
+    },
+    "definition_lines": 23,
+    "definition_to_proof_line_ratio": 0.025191675794085433,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Stmt"
+    ],
+    "imports_in": 59,
+    "lines": 1232,
+    "maxHeartbeats": [
+      "11000"
+    ],
+    "native_decide": 0,
+    "path": "Solidity/Evm/Correct.lean",
+    "proof_lines": 913,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 272,
+    "declarations": {
+      "abbrev": 5,
+      "def": 18,
+      "theorem": 52
+    },
+    "definition_lines": 48,
+    "definition_to_proof_line_ratio": 0.2513089005235602,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Compile",
+      "Solidity.Syntax.Splice"
+    ],
+    "imports_in": 4,
+    "lines": 481,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/Examples.lean",
+    "proof_lines": 191,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 163,
+    "declarations": {
+      "theorem": 7
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Layout"
+    ],
+    "imports_in": 3,
+    "lines": 202,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/Exp.lean",
+    "proof_lines": 158,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 401,
+    "declarations": {
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.01808785529715762,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Sim"
+    ],
+    "imports_in": 5,
+    "lines": 452,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/Expr.lean",
+    "proof_lines": 387,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 103,
+    "declarations": {
+      "abbrev": 1,
+      "def": 1,
+      "theorem": 8
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.031914893617021274,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Examples",
+      "Solidity.Evm.Correct"
+    ],
+    "imports_in": 2,
+    "lines": 143,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/Interpreter.lean",
+    "proof_lines": 94,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 361,
+    "declarations": {
+      "def": 36,
+      "inductive": 2,
+      "theorem": 26
+    },
+    "definition_lines": 164,
+    "definition_to_proof_line_ratio": 0.8586387434554974,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Machine"
+    ],
+    "imports_in": 6,
+    "lines": 623,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/Layout.lean",
+    "proof_lines": 191,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 421,
+    "declarations": {
+      "def": 32,
+      "inductive": 4,
+      "instance": 5,
+      "structure": 2,
+      "theorem": 41
+    },
+    "definition_lines": 290,
+    "definition_to_proof_line_ratio": 2.377049180327869,
+    "implemented_by": 1,
+    "imports": [
+      "Solidity.Semantics"
+    ],
+    "imports_in": 21,
+    "lines": 697,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/Machine.lean",
+    "proof_lines": 122,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 338,
+    "declarations": {
+      "def": 27,
+      "inductive": 2,
+      "instance": 1,
+      "structure": 2,
+      "theorem": 35
+    },
+    "definition_lines": 159,
+    "definition_to_proof_line_ratio": 0.9244186046511628,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Machine"
+    ],
+    "imports_in": 5,
+    "lines": 533,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MachineV2.lean",
+    "proof_lines": 172,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 96,
+    "declarations": {
+      "def": 6,
+      "theorem": 15
+    },
+    "definition_lines": 18,
+    "definition_to_proof_line_ratio": 0.2647058823529412,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MachineV2"
+    ],
+    "imports_in": 2,
+    "lines": 175,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MachineV2Controls.lean",
+    "proof_lines": 68,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 133,
+    "declarations": {
+      "def": 8,
+      "structure": 1,
+      "theorem": 7
+    },
+    "definition_lines": 21,
+    "definition_to_proof_line_ratio": 0.19444444444444445,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.SimLemmas",
+      "Solidity.Theory.Typed.Mem"
+    ],
+    "imports_in": 10,
+    "lines": 180,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/Memory.lean",
+    "proof_lines": 108,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 258,
+    "declarations": {
+      "def": 3,
+      "structure": 2,
+      "theorem": 15
+    },
+    "definition_lines": 19,
+    "definition_to_proof_line_ratio": 0.08050847457627118,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryHeap"
+    ],
+    "imports_in": 4,
+    "lines": 316,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryAlloc.lean",
+    "proof_lines": 236,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 67,
+    "declarations": {
+      "def": 17,
+      "theorem": 3
+    },
+    "definition_lines": 45,
+    "definition_to_proof_line_ratio": 2.3684210526315788,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryAlloc"
+    ],
+    "imports_in": 2,
+    "lines": 95,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryAllocExamples.lean",
+    "proof_lines": 19,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 157,
+    "declarations": {
+      "def": 2,
+      "theorem": 8
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.03424657534246575,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryAlloc",
+      "Solidity.Evm.MemoryLocals",
+      "Solidity.Semantics.AllocBytes"
+    ],
+    "imports_in": 6,
+    "lines": 189,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryAllocSource.lean",
+    "proof_lines": 146,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 780,
+    "declarations": {
+      "abbrev": 1,
+      "def": 94,
+      "theorem": 84
+    },
+    "definition_lines": 396,
+    "definition_to_proof_line_ratio": 1.0448548812664908,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryAllocSource",
+      "Solidity.Evm.Compiler",
+      "Solidity.Syntax.Splice"
+    ],
+    "imports_in": 7,
+    "lines": 960,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryAllocSourceExamples.lean",
+    "proof_lines": 379,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 514,
+    "declarations": {
+      "def": 53,
+      "theorem": 45
+    },
+    "definition_lines": 231,
+    "definition_to_proof_line_ratio": 0.9352226720647774,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Compiler",
+      "Solidity.Syntax.Splice",
+      "Solidity.Backend.Failure.Observe"
+    ],
+    "imports_in": 6,
+    "lines": 612,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryCallExamples.lean",
+    "proof_lines": 247,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 363,
+    "declarations": {
+      "abbrev": 1,
+      "def": 20,
+      "structure": 2,
+      "theorem": 6
+    },
+    "definition_lines": 292,
+    "definition_to_proof_line_ratio": 4.5625,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryCompile",
+      "Solidity.Calculus.SoundCalls"
+    ],
+    "imports_in": 7,
+    "lines": 416,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryCalls.lean",
+    "proof_lines": 64,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 113,
+    "declarations": {
+      "def": 2,
+      "theorem": 6
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.09183673469387756,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryCompound",
+      "Solidity.Evm.MemoryGrowResult",
+      "Solidity.Evm.MemoryLocals"
+    ],
+    "imports_in": 4,
+    "lines": 138,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryCapture.lean",
+    "proof_lines": 98,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 1180,
+    "declarations": {
+      "abbrev": 2,
+      "def": 16,
+      "inductive": 3,
+      "structure": 3,
+      "theorem": 20
+    },
+    "definition_lines": 670,
+    "definition_to_proof_line_ratio": 1.384297520661157,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLocals",
+      "Solidity.Evm.MemoryStructSource",
+      "Solidity.Evm.MemoryStructDefault",
+      "Solidity.Evm.MemoryStructDefaultSource",
+      "Solidity.Evm.MemoryStructDefaultCode",
+      "Solidity.Evm.MemoryStructArrayChild",
+      "Solidity.Evm.MemoryStructCopySource",
+      "Solidity.Evm.MemoryPaths",
+      "Solidity.Evm.MemoryRefWrite",
+      "Solidity.Evm.MemoryRefDelete",
+      "Solidity.Evm.MemoryExpr",
+      "Solidity.Evm.MemoryStatements",
+      "Solidity.Evm.MemoryDelete",
+      "Solidity.Evm.MemoryCompound",
+      "Solidity.Evm.MemoryCapture",
+      "Solidity.Evm.MemoryScope"
+    ],
+    "imports_in": 28,
+    "lines": 1266,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryCompile.lean",
+    "proof_lines": 484,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 277,
+    "declarations": {
+      "abbrev": 2,
+      "def": 36,
+      "theorem": 13
+    },
+    "definition_lines": 154,
+    "definition_to_proof_line_ratio": 1.305084745762712,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryCompile",
+      "Solidity.Evm.Correct",
+      "Solidity.Evm.Compiler"
+    ],
+    "imports_in": 24,
+    "lines": 339,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryCompileExamples.lean",
+    "proof_lines": 118,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 140,
+    "declarations": {
+      "def": 2,
+      "theorem": 12
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.03816793893129771,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStatements"
+    ],
+    "imports_in": 4,
+    "lines": 178,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryCompound.lean",
+    "proof_lines": 131,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 200,
+    "declarations": {
+      "def": 12,
+      "theorem": 11
+    },
+    "definition_lines": 128,
+    "definition_to_proof_line_ratio": 1.9692307692307693,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStorageStructCopy"
+    ],
+    "imports_in": 3,
+    "lines": 231,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryCopyBound.lean",
+    "proof_lines": 65,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 76,
+    "declarations": {
+      "def": 2,
+      "theorem": 6
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.140625,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryDefaultChildrenSim"
+    ],
+    "imports_in": 3,
+    "lines": 88,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryDefaultArraySource.lean",
+    "proof_lines": 64,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 66,
+    "declarations": {
+      "def": 4,
+      "structure": 1
+    },
+    "definition_lines": 62,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryObjectFlatFixed"
+    ],
+    "imports_in": 3,
+    "lines": 80,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryDefaultBuilder.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 70,
+    "declarations": {
+      "def": 4,
+      "theorem": 7
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.15789473684210525,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryDefaultBuilder",
+      "Solidity.Evm.MemoryObjectChildLoop"
+    ],
+    "imports_in": 4,
+    "lines": 82,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryDefaultChildren.lean",
+    "proof_lines": 57,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 121,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryDefaultChildren"
+    ],
+    "imports_in": 2,
+    "lines": 127,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryDefaultChildrenSim.lean",
+    "proof_lines": 118,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 33,
+    "declarations": {
+      "def": 3,
+      "theorem": 1
+    },
+    "definition_lines": 23,
+    "definition_to_proof_line_ratio": 3.8333333333333335,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryDefaultDynamic"
+    ],
+    "imports_in": 6,
+    "lines": 41,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryDefaultCompile.lean",
+    "proof_lines": 6,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 72,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.030303030303030304,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryDefaultFixedBuilder",
+      "Solidity.Evm.MemoryObjectNested"
+    ],
+    "imports_in": 2,
+    "lines": 77,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryDefaultDynamic.lean",
+    "proof_lines": 66,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 74,
+    "declarations": {
+      "def": 3,
+      "theorem": 1
+    },
+    "definition_lines": 65,
+    "definition_to_proof_line_ratio": 10.833333333333334,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryDefaultParent"
+    ],
+    "imports_in": 3,
+    "lines": 82,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryDefaultFixedBuilder.lean",
+    "proof_lines": 6,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 59,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryDefaultArraySource"
+    ],
+    "imports_in": 3,
+    "lines": 68,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryDefaultParent.lean",
+    "proof_lines": 56,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 39,
+    "declarations": {
+      "def": 2,
+      "theorem": 5
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.25,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStatements"
+    ],
+    "imports_in": 7,
+    "lines": 64,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryDelete.lean",
+    "proof_lines": 28,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 146,
+    "declarations": {
+      "def": 17,
+      "theorem": 20
+    },
+    "definition_lines": 29,
+    "definition_to_proof_line_ratio": 0.26126126126126126,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Compiler",
+      "Solidity.Syntax.Splice"
+    ],
+    "imports_in": 4,
+    "lines": 173,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryDynamicFixedDefaultExamples.lean",
+    "proof_lines": 111,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 65,
+    "declarations": {
+      "def": 9,
+      "theorem": 1
+    },
+    "definition_lines": 40,
+    "definition_to_proof_line_ratio": 1.8181818181818181,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Memory"
+    ],
+    "imports_in": 2,
+    "lines": 87,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryExamples.lean",
+    "proof_lines": 22,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 176,
+    "declarations": {
+      "def": 4,
+      "theorem": 3
+    },
+    "definition_lines": 16,
+    "definition_to_proof_line_ratio": 0.10256410256410256,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemorySource"
+    ],
+    "imports_in": 6,
+    "lines": 194,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryExpr.lean",
+    "proof_lines": 156,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 355,
+    "declarations": {
+      "def": 63,
+      "inductive": 2,
+      "theorem": 25
+    },
+    "definition_lines": 236,
+    "definition_to_proof_line_ratio": 2.2264150943396226,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Compiler",
+      "Solidity.Evm.MemoryCompileExamples"
+    ],
+    "imports_in": 6,
+    "lines": 436,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryExprExamples.lean",
+    "proof_lines": 106,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 217,
+    "declarations": {
+      "def": 35,
+      "theorem": 25
+    },
+    "definition_lines": 80,
+    "definition_to_proof_line_ratio": 0.6201550387596899,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Compiler"
+    ],
+    "imports_in": 5,
+    "lines": 257,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryFixedChildArrayExamples.lean",
+    "proof_lines": 129,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 394,
+    "declarations": {
+      "def": 8,
+      "inductive": 2,
+      "structure": 2,
+      "theorem": 15
+    },
+    "definition_lines": 190,
+    "definition_to_proof_line_ratio": 0.979381443298969,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryFixedMixedCopy",
+      "Solidity.Evm.MemoryCompile",
+      "Solidity.Evm.MemoryCopyBound"
+    ],
+    "imports_in": 3,
+    "lines": 435,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryFixedCompile.lean",
+    "proof_lines": 194,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 210,
+    "declarations": {
+      "def": 33,
+      "theorem": 20
+    },
+    "definition_lines": 114,
+    "definition_to_proof_line_ratio": 1.4074074074074074,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Compiler",
+      "Solidity.Syntax.Splice"
+    ],
+    "imports_in": 2,
+    "lines": 246,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryFixedCopyExamples.lean",
+    "proof_lines": 81,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 106,
+    "declarations": {
+      "def": 14,
+      "theorem": 15
+    },
+    "definition_lines": 21,
+    "definition_to_proof_line_ratio": 0.26582278481012656,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Compiler",
+      "Solidity.Syntax.Splice"
+    ],
+    "imports_in": 3,
+    "lines": 126,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryFixedDefaultExamples.lean",
+    "proof_lines": 79,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 111,
+    "declarations": {
+      "def": 14,
+      "theorem": 15
+    },
+    "definition_lines": 26,
+    "definition_to_proof_line_ratio": 0.3291139240506329,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Compiler",
+      "Solidity.Syntax.Splice"
+    ],
+    "imports_in": 3,
+    "lines": 131,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryFixedDynamicDefaultExamples.lean",
+    "proof_lines": 79,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 83,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryFixedShapeSource"
+    ],
+    "imports_in": 2,
+    "lines": 90,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryFixedMixedCopy.lean",
+    "proof_lines": 77,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 171,
+    "declarations": {
+      "def": 15,
+      "theorem": 8
+    },
+    "definition_lines": 43,
+    "definition_to_proof_line_ratio": 0.35537190082644626,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Compiler",
+      "Solidity.Syntax.Splice"
+    ],
+    "imports_in": 3,
+    "lines": 178,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryFixedMixedExamples.lean",
+    "proof_lines": 121,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 86,
+    "declarations": {
+      "def": 8,
+      "theorem": 7
+    },
+    "definition_lines": 17,
+    "definition_to_proof_line_ratio": 0.26153846153846155,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryFixedStorageCopy"
+    ],
+    "imports_in": 2,
+    "lines": 98,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryFixedShapeCode.lean",
+    "proof_lines": 65,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 94,
+    "declarations": {
+      "theorem": 7
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryFixedShapeCode"
+    ],
+    "imports_in": 2,
+    "lines": 103,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryFixedShapeLaws.lean",
+    "proof_lines": 90,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 90,
+    "declarations": {
+      "def": 2,
+      "theorem": 3
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.0759493670886076,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryFixedShapeLaws"
+    ],
+    "imports_in": 2,
+    "lines": 99,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryFixedShapeSource.lean",
+    "proof_lines": 79,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 134,
+    "declarations": {
+      "def": 4,
+      "structure": 3,
+      "theorem": 9
+    },
+    "definition_lines": 27,
+    "definition_to_proof_line_ratio": 0.2647058823529412,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStorageStructCopy"
+    ],
+    "imports_in": 3,
+    "lines": 172,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryFixedStorageCopy.lean",
+    "proof_lines": 102,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 63,
+    "declarations": {
+      "def": 4,
+      "theorem": 6
+    },
+    "definition_lines": 18,
+    "definition_to_proof_line_ratio": 0.43902439024390244,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryAllocSource"
+    ],
+    "imports_in": 5,
+    "lines": 89,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryGrowResult.lean",
+    "proof_lines": 41,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 74,
+    "declarations": {
+      "structure": 1,
+      "theorem": 4
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.12698412698412698,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Memory"
+    ],
+    "imports_in": 4,
+    "lines": 97,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryHeap.lean",
+    "proof_lines": 63,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 215,
+    "declarations": {
+      "def": 3,
+      "theorem": 9
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.04455445544554455,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemorySource"
+    ],
+    "imports_in": 8,
+    "lines": 242,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLocals.lean",
+    "proof_lines": 202,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 191,
+    "declarations": {
+      "def": 3,
+      "inductive": 2,
+      "structure": 1,
+      "theorem": 8
+    },
+    "definition_lines": 45,
+    "definition_to_proof_line_ratio": 0.31690140845070425,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryCompile"
+    ],
+    "imports_in": 3,
+    "lines": 228,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoop.lean",
+    "proof_lines": 142,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 118,
+    "declarations": {
+      "def": 27,
+      "theorem": 11
+    },
+    "definition_lines": 50,
+    "definition_to_proof_line_ratio": 0.9090909090909091,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopExamples"
+    ],
+    "imports_in": 5,
+    "lines": 146,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopAllocExamples.lean",
+    "proof_lines": 55,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 345,
+    "declarations": {
+      "def": 14,
+      "inductive": 3,
+      "structure": 2,
+      "theorem": 18
+    },
+    "definition_lines": 135,
+    "definition_to_proof_line_ratio": 0.6553398058252428,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoop"
+    ],
+    "imports_in": 2,
+    "lines": 406,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopCompile.lean",
+    "proof_lines": 206,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 120,
+    "declarations": {
+      "def": 16,
+      "theorem": 4
+    },
+    "definition_lines": 35,
+    "definition_to_proof_line_ratio": 0.7,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Compiler",
+      "Solidity.Evm.MemoryCompileExamples",
+      "Solidity.Evm.MemoryAllocSourceExamples"
+    ],
+    "imports_in": 3,
+    "lines": 151,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopExamples.lean",
+    "proof_lines": 50,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 213,
+    "declarations": {
+      "def": 1,
+      "inductive": 2,
+      "theorem": 12
+    },
+    "definition_lines": 31,
+    "definition_to_proof_line_ratio": 0.17415730337078653,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizon"
+    ],
+    "imports_in": 13,
+    "lines": 250,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopFiniteHorizon.lean",
+    "proof_lines": 178,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 117,
+    "declarations": {
+      "def": 21,
+      "theorem": 11
+    },
+    "definition_lines": 38,
+    "definition_to_proof_line_ratio": 0.6229508196721312,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopFiniteHorizon",
+      "Solidity.Evm.MemoryLoopAllocExamples"
+    ],
+    "imports_in": 1,
+    "lines": 144,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopFiniteHorizonControls.lean",
+    "proof_lines": 61,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 107,
+    "declarations": {
+      "def": 1,
+      "inductive": 1,
+      "theorem": 4
+    },
+    "definition_lines": 17,
+    "definition_to_proof_line_ratio": 0.19767441860465115,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoop"
+    ],
+    "imports_in": 6,
+    "lines": 132,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizon.lean",
+    "proof_lines": 86,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 97,
+    "declarations": {
+      "def": 21,
+      "theorem": 7
+    },
+    "definition_lines": 40,
+    "definition_to_proof_line_ratio": 1.0256410256410255,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizon",
+      "Solidity.Evm.MemoryLoopAllocExamples"
+    ],
+    "imports_in": 1,
+    "lines": 115,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonAllocControls.lean",
+    "proof_lines": 39,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 34,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopFiniteHorizon"
+    ],
+    "imports_in": 4,
+    "lines": 42,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonAppend.lean",
+    "proof_lines": 31,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 12,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonAppend",
+      "Solidity.Evm.MemoryLoopHorizonCostControls",
+      "Solidity.Evm.MemoryLoopHorizonPendingControls"
+    ],
+    "imports_in": 1,
+    "lines": 19,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonAppendControls.lean",
+    "proof_lines": 6,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 31,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonRestriction"
+    ],
+    "imports_in": 2,
+    "lines": 40,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonCapacity.lean",
+    "proof_lines": 27,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 24,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonCapacity",
+      "Solidity.Evm.MemoryLoopHorizonControls"
+    ],
+    "imports_in": 3,
+    "lines": 33,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonCapacityControls.lean",
+    "proof_lines": 19,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 41,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopFiniteHorizon"
+    ],
+    "imports_in": 3,
+    "lines": 51,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonCompleted.lean",
+    "proof_lines": 37,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 26,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonCompleted",
+      "Solidity.Evm.MemoryLoopHorizonPrefixCapacity"
+    ],
+    "imports_in": 2,
+    "lines": 33,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonCompletedAllocator.lean",
+    "proof_lines": 21,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 19,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonCompletedAllocator",
+      "Solidity.Evm.MemoryLoopHorizonCompletedControls",
+      "Solidity.Evm.MemoryLoopHorizonCapacityControls"
+    ],
+    "imports_in": 1,
+    "lines": 26,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonCompletedAllocatorControls.lean",
+    "proof_lines": 13,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 14,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonCompleted",
+      "Solidity.Evm.MemoryLoopHorizonControls"
+    ],
+    "imports_in": 2,
+    "lines": 21,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonCompletedControls.lean",
+    "proof_lines": 9,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 53,
+    "declarations": {
+      "def": 9,
+      "theorem": 2
+    },
+    "definition_lines": 21,
+    "definition_to_proof_line_ratio": 0.9130434782608695,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizon",
+      "Solidity.Evm.MemoryCompileExamples"
+    ],
+    "imports_in": 8,
+    "lines": 66,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonControls.lean",
+    "proof_lines": 23,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 29,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopFiniteHorizon"
+    ],
+    "imports_in": 4,
+    "lines": 38,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonCost.lean",
+    "proof_lines": 25,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 16,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonCost",
+      "Solidity.Evm.MemoryLoopHorizonControls"
+    ],
+    "imports_in": 3,
+    "lines": 23,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonCostControls.lean",
+    "proof_lines": 11,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 28,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonCost"
+    ],
+    "imports_in": 2,
+    "lines": 36,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonCostGrowth.lean",
+    "proof_lines": 24,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 24,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonCostGrowth",
+      "Solidity.Evm.MemoryLoopHorizonCostControls",
+      "Solidity.Evm.MemoryLoopHorizonTurnBoundControls"
+    ],
+    "imports_in": 1,
+    "lines": 32,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonCostGrowthControls.lean",
+    "proof_lines": 18,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 42,
+    "declarations": {
+      "def": 3,
+      "theorem": 3
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.4230769230769231,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectFinite"
+    ],
+    "imports_in": 3,
+    "lines": 54,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectAllocating.lean",
+    "proof_lines": 26,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 21,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectAllocating"
+    ],
+    "imports_in": 5,
+    "lines": 31,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectAllocatingPrefixes.lean",
+    "proof_lines": 17,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 50,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectAllocatingPrefixes",
+      "Solidity.Evm.MemoryLoopHorizonObjectCompile",
+      "Solidity.Evm.MemoryLoopHorizonObjectCost"
+    ],
+    "imports_in": 8,
+    "lines": 59,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectAllocatingTarget.lean",
+    "proof_lines": 44,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 15,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryObjectConstructionCompile",
+      "Solidity.Evm.MemoryLoopHorizonObjectScope"
+    ],
+    "imports_in": 1,
+    "lines": 23,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectBodyScope.lean",
+    "proof_lines": 10,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 37,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectPrefix"
+    ],
+    "imports_in": 2,
+    "lines": 47,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectCapacity.lean",
+    "proof_lines": 33,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 25,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectCompileAllocating",
+      "Solidity.Evm.MemoryObjectConstructionExamples"
+    ],
+    "imports_in": 1,
+    "lines": 33,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectCapacityControls.lean",
+    "proof_lines": 21,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 49,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectAllocatingTarget"
+    ],
+    "imports_in": 1,
+    "lines": 59,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectCheckedNested.lean",
+    "proof_lines": 45,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 31,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectAllocatingTarget"
+    ],
+    "imports_in": 1,
+    "lines": 41,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectCheckedReads.lean",
+    "proof_lines": 27,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 34,
+    "declarations": {
+      "def": 1,
+      "structure": 1,
+      "theorem": 3
+    },
+    "definition_lines": 12,
+    "definition_to_proof_line_ratio": 0.6666666666666666,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectFinite"
+    ],
+    "imports_in": 3,
+    "lines": 46,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectCompile.lean",
+    "proof_lines": 18,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 27,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectCompile",
+      "Solidity.Evm.MemoryLoopHorizonObjectAllocating"
+    ],
+    "imports_in": 3,
+    "lines": 36,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectCompileAllocating.lean",
+    "proof_lines": 22,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 62,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectFinite"
+    ],
+    "imports_in": 1,
+    "lines": 73,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectCompletedAllocator.lean",
+    "proof_lines": 58,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 53,
+    "declarations": {
+      "theorem": 5
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectCoverage"
+    ],
+    "imports_in": 3,
+    "lines": 66,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectCost.lean",
+    "proof_lines": 49,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 35,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectPrefix"
+    ],
+    "imports_in": 3,
+    "lines": 44,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectCoverage.lean",
+    "proof_lines": 31,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 33,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectAllocatingTarget",
+      "Solidity.Evm.MemoryLoopHorizonObjectCompileAllocating",
+      "Solidity.Evm.MemoryObjectConstructionExamples"
+    ],
+    "imports_in": 3,
+    "lines": 41,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectCursorControls.lean",
+    "proof_lines": 28,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 115,
+    "declarations": {
+      "inductive": 1,
+      "theorem": 4
+    },
+    "definition_lines": 16,
+    "definition_to_proof_line_ratio": 0.16842105263157894,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectStep"
+    ],
+    "imports_in": 10,
+    "lines": 133,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectFinite.lean",
+    "proof_lines": 95,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 35,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.15384615384615385,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectFinite",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 2,
+    "lines": 43,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectFiniteControls.lean",
+    "proof_lines": 26,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 31,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectCursorControls",
+      "Solidity.Evm.MemoryLoopHorizonObjectHeapGrowth"
+    ],
+    "imports_in": 1,
+    "lines": 40,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectHeapControls.lean",
+    "proof_lines": 27,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 18,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectAllocatingPrefixes"
+    ],
+    "imports_in": 2,
+    "lines": 27,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectHeapGrowth.lean",
+    "proof_lines": 14,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 15,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectAllocatingPrefixes"
+    ],
+    "imports_in": 7,
+    "lines": 24,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectHeapKeeps.lean",
+    "proof_lines": 11,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 18,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectAllocatingPrefixes"
+    ],
+    "imports_in": 2,
+    "lines": 27,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectHeapTypes.lean",
+    "proof_lines": 14,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 46,
+    "declarations": {
+      "inductive": 1,
+      "theorem": 1
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.3793103448275862,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectOldHeaders",
+      "Solidity.Evm.MemoryLoopHorizonObjectOldStructs"
+    ],
+    "imports_in": 1,
+    "lines": 56,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectLiveCells.lean",
+    "proof_lines": 29,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 57,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectAllocatingTarget",
+      "Solidity.Evm.MemoryObjectEmpty"
+    ],
+    "imports_in": 6,
+    "lines": 68,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectLocalAlias.lean",
+    "proof_lines": 52,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 32,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectLocalAlias",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 41,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectLocalAliasControls.lean",
+    "proof_lines": 28,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 48,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectLocalAlias",
+      "Solidity.Evm.MemoryLoopHorizonObjectHeapKeeps"
+    ],
+    "imports_in": 3,
+    "lines": 57,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectLocalBounds.lean",
+    "proof_lines": 43,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 36,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectLocalRefLoads",
+      "Solidity.Evm.MemoryLoopHorizonObjectLocalBounds",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 45,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectLocalLoadControls.lean",
+    "proof_lines": 31,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 55,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectLocalAlias",
+      "Solidity.Evm.MemoryLoopHorizonObjectHeapKeeps"
+    ],
+    "imports_in": 1,
+    "lines": 64,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectLocalLoads.lean",
+    "proof_lines": 50,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 42,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectLocalAlias",
+      "Solidity.Evm.MemoryLoopHorizonObjectOldElements"
+    ],
+    "imports_in": 1,
+    "lines": 52,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectLocalReads.lean",
+    "proof_lines": 37,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 57,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectLocalAlias",
+      "Solidity.Evm.MemoryLoopHorizonObjectHeapKeeps"
+    ],
+    "imports_in": 4,
+    "lines": 67,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectLocalRefLoads.lean",
+    "proof_lines": 52,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 56,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectLocalRefLoads",
+      "Solidity.Evm.MemoryLoopHorizonObjectLocalBounds"
+    ],
+    "imports_in": 2,
+    "lines": 66,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectNestedBounds.lean",
+    "proof_lines": 51,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 47,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.17142857142857143,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectNestedLoads",
+      "Solidity.Evm.MemoryLoopHorizonObjectNestedBounds",
+      "Solidity.Evm.MemoryLoopHorizonObjectOldElements",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 58,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectNestedControls.lean",
+    "proof_lines": 35,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 54,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectLocalRefLoads"
+    ],
+    "imports_in": 2,
+    "lines": 64,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectNestedLoads.lean",
+    "proof_lines": 50,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 57,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectAllocatingTarget",
+      "Solidity.Evm.MemoryLoopHorizonObjectHeapKeeps"
+    ],
+    "imports_in": 2,
+    "lines": 67,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectNewArrays.lean",
+    "proof_lines": 52,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 36,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectNewArrays",
+      "Solidity.Evm.MemoryLoopHorizonObjectHeapTypes"
+    ],
+    "imports_in": 4,
+    "lines": 46,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectNewInventory.lean",
+    "proof_lines": 31,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 46,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectNewInventory",
+      "Solidity.Evm.MemoryObjectFrame"
+    ],
+    "imports_in": 2,
+    "lines": 54,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectNewSeparation.lean",
+    "proof_lines": 41,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 43,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectNewSeparation",
+      "Solidity.Evm.MemoryLoopHorizonObjectCursorControls"
+    ],
+    "imports_in": 1,
+    "lines": 51,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectNewSeparationControls.lean",
+    "proof_lines": 39,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 34,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectCost",
+      "Solidity.Evm.MemoryLoopHorizonObjectFinite"
+    ],
+    "imports_in": 1,
+    "lines": 43,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectObservedRoom.lean",
+    "proof_lines": 29,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 49,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectAllocatingTarget",
+      "Solidity.Evm.MemoryLoopHorizonObjectHeapKeeps"
+    ],
+    "imports_in": 4,
+    "lines": 58,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectOldElements.lean",
+    "proof_lines": 44,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 25,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectAllocatingTarget",
+      "Solidity.Evm.MemoryLoopHorizonObjectHeapKeeps"
+    ],
+    "imports_in": 3,
+    "lines": 33,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectOldHeaders.lean",
+    "proof_lines": 20,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 56,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectOldElements"
+    ],
+    "imports_in": 2,
+    "lines": 65,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectOldStructs.lean",
+    "proof_lines": 51,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 53,
+    "declarations": {
+      "theorem": 6
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectFinite"
+    ],
+    "imports_in": 1,
+    "lines": 67,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectOutcomes.lean",
+    "proof_lines": 49,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 49,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectFinite"
+    ],
+    "imports_in": 2,
+    "lines": 59,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectPendingAllocator.lean",
+    "proof_lines": 45,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 45,
+    "declarations": {
+      "def": 1,
+      "inductive": 1,
+      "theorem": 3
+    },
+    "definition_lines": 14,
+    "definition_to_proof_line_ratio": 0.5384615384615384,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryObjectConstructionCompile",
+      "Solidity.Evm.MemoryLoopFiniteHorizon"
+    ],
+    "imports_in": 4,
+    "lines": 58,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectPrefix.lean",
+    "proof_lines": 26,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 21,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectPendingAllocator",
+      "Solidity.Evm.MemoryLoopHorizonObjectCapacity"
+    ],
+    "imports_in": 1,
+    "lines": 29,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectResume.lean",
+    "proof_lines": 16,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 36,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectNewInventory",
+      "Solidity.Evm.MemoryLoopHorizonObjectOldHeaders",
+      "Solidity.Evm.MemoryLoopHorizonAppend"
+    ],
+    "imports_in": 1,
+    "lines": 45,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectRetainedNew.lean",
+    "proof_lines": 30,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 42,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectNewInventory",
+      "Solidity.Evm.MemoryLoopHorizonAppend"
+    ],
+    "imports_in": 1,
+    "lines": 51,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectRetainedRefs.lean",
+    "proof_lines": 37,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 47,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.30303030303030304,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectFinite"
+    ],
+    "imports_in": 2,
+    "lines": 57,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectRuns.lean",
+    "proof_lines": 33,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 24,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryObjectAllocationCost",
+      "Solidity.Evm.MemoryScope"
+    ],
+    "imports_in": 4,
+    "lines": 33,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectScope.lean",
+    "proof_lines": 19,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 12,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectScope",
+      "Solidity.Evm.MemoryObjectArrayExamples"
+    ],
+    "imports_in": 1,
+    "lines": 19,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectScopeControls.lean",
+    "proof_lines": 8,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 29,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectFinite"
+    ],
+    "imports_in": 2,
+    "lines": 38,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectStability.lean",
+    "proof_lines": 25,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 34,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectRuns",
+      "Solidity.Evm.MemoryLoopHorizonObjectStability"
+    ],
+    "imports_in": 2,
+    "lines": 43,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectStatement.lean",
+    "proof_lines": 29,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 23,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectStatement",
+      "Solidity.Evm.MemoryLoopHorizonObjectFiniteControls"
+    ],
+    "imports_in": 1,
+    "lines": 31,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectStatementControls.lean",
+    "proof_lines": 19,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 71,
+    "declarations": {
+      "inductive": 1,
+      "structure": 1,
+      "theorem": 1
+    },
+    "definition_lines": 22,
+    "definition_to_proof_line_ratio": 0.5,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectCoverage",
+      "Solidity.Evm.MemoryLoopHorizonObjectScope"
+    ],
+    "imports_in": 2,
+    "lines": 81,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectStep.lean",
+    "proof_lines": 44,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 31,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObjectPrefix"
+    ],
+    "imports_in": 1,
+    "lines": 40,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObjectTurnBound.lean",
+    "proof_lines": 27,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 33,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonCost"
+    ],
+    "imports_in": 2,
+    "lines": 42,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObservedRoom.lean",
+    "proof_lines": 29,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 19,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonObservedRoom",
+      "Solidity.Evm.MemoryLoopHorizonControls"
+    ],
+    "imports_in": 1,
+    "lines": 26,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonObservedRoomControls.lean",
+    "proof_lines": 14,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 36,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopFiniteHorizon"
+    ],
+    "imports_in": 3,
+    "lines": 46,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonOutcomes.lean",
+    "proof_lines": 32,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 15,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonOutcomes",
+      "Solidity.Evm.MemoryLoopHorizonRestrictionControls"
+    ],
+    "imports_in": 1,
+    "lines": 22,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonOutcomesControls.lean",
+    "proof_lines": 10,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 28,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopFiniteHorizon"
+    ],
+    "imports_in": 4,
+    "lines": 37,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonPending.lean",
+    "proof_lines": 24,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 19,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonPending",
+      "Solidity.Evm.MemoryLoopHorizonControls"
+    ],
+    "imports_in": 3,
+    "lines": 26,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonPendingControls.lean",
+    "proof_lines": 14,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 34,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonPending"
+    ],
+    "imports_in": 3,
+    "lines": 43,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonPrefixCapacity.lean",
+    "proof_lines": 30,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 21,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonPrefixCapacity",
+      "Solidity.Evm.MemoryLoopHorizonTurnBoundControls"
+    ],
+    "imports_in": 1,
+    "lines": 29,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonPrefixCapacityControls.lean",
+    "proof_lines": 17,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 21,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopFiniteHorizon"
+    ],
+    "imports_in": 4,
+    "lines": 30,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonRestriction.lean",
+    "proof_lines": 17,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 14,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonRestriction",
+      "Solidity.Evm.MemoryLoopHorizonControls"
+    ],
+    "imports_in": 2,
+    "lines": 21,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonRestrictionControls.lean",
+    "proof_lines": 9,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 21,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonPending",
+      "Solidity.Evm.MemoryLoopHorizonRestriction"
+    ],
+    "imports_in": 2,
+    "lines": 28,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonResume.lean",
+    "proof_lines": 16,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 16,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonResume",
+      "Solidity.Evm.MemoryLoopHorizonPendingControls"
+    ],
+    "imports_in": 1,
+    "lines": 23,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonResumeControls.lean",
+    "proof_lines": 11,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 21,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonOutcomes"
+    ],
+    "imports_in": 2,
+    "lines": 29,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonRevert.lean",
+    "proof_lines": 17,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 32,
+    "declarations": {
+      "def": 3,
+      "theorem": 3
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.42105263157894735,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonRevert",
+      "Solidity.Evm.MemoryLoopHorizonControls"
+    ],
+    "imports_in": 1,
+    "lines": 42,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonRevertControls.lean",
+    "proof_lines": 19,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 29,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopFiniteHorizon"
+    ],
+    "imports_in": 2,
+    "lines": 38,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonStability.lean",
+    "proof_lines": 25,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 17,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonStability",
+      "Solidity.Evm.MemoryLoopHorizonCapacityControls"
+    ],
+    "imports_in": 1,
+    "lines": 24,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonStabilityControls.lean",
+    "proof_lines": 12,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 31,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopFiniteHorizon"
+    ],
+    "imports_in": 2,
+    "lines": 40,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonTurnBound.lean",
+    "proof_lines": 27,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 16,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.3,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizonTurnBound"
+    ],
+    "imports_in": 3,
+    "lines": 25,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopHorizonTurnBoundControls.lean",
+    "proof_lines": 10,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 121,
+    "declarations": {
+      "def": 3,
+      "inductive": 6
+    },
+    "definition_lines": 112,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopCompile"
+    ],
+    "imports_in": 2,
+    "lines": 134,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopScope.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 305,
+    "declarations": {
+      "def": 47,
+      "theorem": 26
+    },
+    "definition_lines": 85,
+    "definition_to_proof_line_ratio": 0.4594594594594595,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopExamples",
+      "Solidity.Evm.MemoryLoopScopeBudget",
+      "Solidity.Evm.MemoryLoopScopeDivergenceExamples"
+    ],
+    "imports_in": 1,
+    "lines": 366,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopScopeAllocExamples.lean",
+    "proof_lines": 185,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 145,
+    "declarations": {
+      "def": 3,
+      "theorem": 6
+    },
+    "definition_lines": 36,
+    "definition_to_proof_line_ratio": 0.34285714285714286,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopScopeDemand"
+    ],
+    "imports_in": 7,
+    "lines": 160,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopScopeBudget.lean",
+    "proof_lines": 105,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 229,
+    "declarations": {
+      "def": 5,
+      "structure": 2,
+      "theorem": 9
+    },
+    "definition_lines": 92,
+    "definition_to_proof_line_ratio": 0.696969696969697,
+    "implemented_by": 2,
+    "imports": [
+      "Solidity.Evm.MemoryLoopScopeRoom"
+    ],
+    "imports_in": 4,
+    "lines": 247,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopScopeCompile.lean",
+    "proof_lines": 132,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 111,
+    "declarations": {
+      "def": 3,
+      "theorem": 7
+    },
+    "definition_lines": 28,
+    "definition_to_proof_line_ratio": 0.35443037974683544,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopScopeRoom"
+    ],
+    "imports_in": 2,
+    "lines": 128,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopScopeDemand.lean",
+    "proof_lines": 79,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 155,
+    "declarations": {
+      "def": 9,
+      "theorem": 11
+    },
+    "definition_lines": 14,
+    "definition_to_proof_line_ratio": 0.109375,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Compiler",
+      "Solidity.Evm.MemoryLoopScopeBudget",
+      "Solidity.Evm.MemoryCompileExamples"
+    ],
+    "imports_in": 2,
+    "lines": 177,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopScopeDivergenceExamples.lean",
+    "proof_lines": 128,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 99,
+    "declarations": {
+      "def": 18,
+      "theorem": 5
+    },
+    "definition_lines": 35,
+    "definition_to_proof_line_ratio": 1.1666666666666667,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Compiler",
+      "Solidity.Evm.MemoryCompileExamples"
+    ],
+    "imports_in": 1,
+    "lines": 119,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopScopeExamples.lean",
+    "proof_lines": 30,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 81,
+    "declarations": {
+      "def": 8,
+      "theorem": 2
+    },
+    "definition_lines": 49,
+    "definition_to_proof_line_ratio": 1.8846153846153846,
+    "implemented_by": 2,
+    "imports": [
+      "Solidity.Evm.MemoryLoopScope"
+    ],
+    "imports_in": 2,
+    "lines": 88,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopScopeMeta.lean",
+    "proof_lines": 26,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 102,
+    "declarations": {
+      "theorem": 9
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopScopeSound"
+    ],
+    "imports_in": 3,
+    "lines": 113,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopScopeRoom.lean",
+    "proof_lines": 98,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 180,
+    "declarations": {
+      "def": 2,
+      "theorem": 10
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.06666666666666667,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopScopeMeta"
+    ],
+    "imports_in": 5,
+    "lines": 193,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopScopeSound.lean",
+    "proof_lines": 165,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 122,
+    "declarations": {
+      "def": 18,
+      "theorem": 5
+    },
+    "definition_lines": 51,
+    "definition_to_proof_line_ratio": 0.9272727272727272,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopAllocExamples",
+      "Solidity.Evm.MemoryLoopScopeBudget",
+      "Solidity.Syntax.Splice"
+    ],
+    "imports_in": 1,
+    "lines": 142,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopScopeSourceExamples.lean",
+    "proof_lines": 55,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 121,
+    "declarations": {
+      "def": 18,
+      "theorem": 5
+    },
+    "definition_lines": 51,
+    "definition_to_proof_line_ratio": 0.9272727272727272,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopAllocExamples",
+      "Solidity.Syntax.Splice"
+    ],
+    "imports_in": 1,
+    "lines": 141,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryLoopSourceExamples.lean",
+    "proof_lines": 55,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 119,
+    "declarations": {
+      "def": 1,
+      "inductive": 2,
+      "structure": 1,
+      "theorem": 3
+    },
+    "definition_lines": 33,
+    "definition_to_proof_line_ratio": 0.4125,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizon",
+      "Solidity.Evm.MemoryLoopScopeSound",
+      "Solidity.Evm.MemoryLoopScopeCompile"
+    ],
+    "imports_in": 2,
+    "lines": 135,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryMixedLoop.lean",
+    "proof_lines": 80,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 67,
+    "declarations": {
+      "def": 15,
+      "theorem": 8
+    },
+    "definition_lines": 22,
+    "definition_to_proof_line_ratio": 0.6111111111111112,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryMixedLoopCompile",
+      "Solidity.Evm.MemoryMixedLoopFinite",
+      "Solidity.Evm.MemoryLoopScopeBudget",
+      "Solidity.Evm.MemoryAllocSourceExamples"
+    ],
+    "imports_in": 1,
+    "lines": 78,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryMixedLoopAllocation.lean",
+    "proof_lines": 36,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 87,
+    "declarations": {
+      "def": 1,
+      "structure": 1,
+      "theorem": 5
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.1527777777777778,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryMixedLoop"
+    ],
+    "imports_in": 5,
+    "lines": 104,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryMixedLoopCompile.lean",
+    "proof_lines": 72,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 89,
+    "declarations": {
+      "abbrev": 1,
+      "def": 13,
+      "theorem": 10
+    },
+    "definition_lines": 36,
+    "definition_to_proof_line_ratio": 1.125,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryMixedLoopCompile",
+      "Solidity.Evm.MemoryMixedLoopFinite",
+      "Solidity.Evm.MemoryExprExamples"
+    ],
+    "imports_in": 1,
+    "lines": 116,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryMixedLoopControls.lean",
+    "proof_lines": 32,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 61,
+    "declarations": {
+      "abbrev": 1,
+      "def": 6,
+      "theorem": 7
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.1956521739130435,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryMixedLoopCompile",
+      "Solidity.Evm.MemoryExprExamples"
+    ],
+    "imports_in": 1,
+    "lines": 74,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryMixedLoopDivergence.lean",
+    "proof_lines": 46,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 156,
+    "declarations": {
+      "def": 1,
+      "inductive": 2,
+      "theorem": 8
+    },
+    "definition_lines": 31,
+    "definition_to_proof_line_ratio": 0.25833333333333336,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryMixedLoopCompile",
+      "Solidity.Evm.MemoryLoopFiniteHorizon"
+    ],
+    "imports_in": 3,
+    "lines": 171,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryMixedLoopFinite.lean",
+    "proof_lines": 120,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 106,
+    "declarations": {
+      "def": 14,
+      "theorem": 15
+    },
+    "definition_lines": 21,
+    "definition_to_proof_line_ratio": 0.26582278481012656,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Compiler",
+      "Solidity.Syntax.Splice"
+    ],
+    "imports_in": 3,
+    "lines": 126,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryNestedFixedDefaultExamples.lean",
+    "proof_lines": 79,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 133,
+    "declarations": {
+      "def": 5,
+      "theorem": 8
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.09243697478991597,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryObjects"
+    ],
+    "imports_in": 3,
+    "lines": 156,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryObjectAccess.lean",
+    "proof_lines": 119,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 87,
+    "declarations": {
+      "def": 7,
+      "theorem": 5
+    },
+    "definition_lines": 38,
+    "definition_to_proof_line_ratio": 0.926829268292683,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryObjectPrimitive",
+      "Solidity.Evm.MemoryDefaultCompile"
+    ],
+    "imports_in": 3,
+    "lines": 107,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryObjectAllocationCost.lean",
+    "proof_lines": 41,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 131,
+    "declarations": {
+      "def": 3,
+      "structure": 1,
+      "theorem": 10
+    },
+    "definition_lines": 19,
+    "definition_to_proof_line_ratio": 0.17592592592592593,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryObjectFrame"
+    ],
+    "imports_in": 5,
+    "lines": 157,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryObjectAllocator.lean",
+    "proof_lines": 108,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 252,
+    "declarations": {
+      "def": 41,
+      "theorem": 29
+    },
+    "definition_lines": 101,
+    "definition_to_proof_line_ratio": 0.7112676056338029,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Compiler",
+      "Solidity.Evm.MemoryObjectEmpty"
+    ],
+    "imports_in": 53,
+    "lines": 297,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryObjectArrayExamples.lean",
+    "proof_lines": 142,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 38,
+    "declarations": {
+      "def": 5,
+      "theorem": 3
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.2962962962962963,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryObjectReserve"
+    ],
+    "imports_in": 3,
+    "lines": 48,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryObjectChildLoop.lean",
+    "proof_lines": 27,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 63,
+    "declarations": {
+      "def": 1,
+      "theorem": 7
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.05263157894736842,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryObjectChildLoop"
+    ],
+    "imports_in": 2,
+    "lines": 76,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryObjectChildrenCopy.lean",
+    "proof_lines": 57,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 114,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryObjectChildrenCopy"
+    ],
+    "imports_in": 2,
+    "lines": 122,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryObjectChildrenSim.lean",
+    "proof_lines": 111,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 123,
+    "declarations": {
+      "def": 2,
+      "inductive": 2,
+      "structure": 2,
+      "theorem": 4
+    },
+    "definition_lines": 72,
+    "definition_to_proof_line_ratio": 1.6,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryObjectStatements",
+      "Solidity.Evm.MemoryCompile"
+    ],
+    "imports_in": 3,
+    "lines": 136,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryObjectCompile.lean",
+    "proof_lines": 45,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 351,
+    "declarations": {
+      "def": 2,
+      "inductive": 2,
+      "structure": 2,
+      "theorem": 7
+    },
+    "definition_lines": 107,
+    "definition_to_proof_line_ratio": 0.4495798319327731,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryObjectAllocationCost",
+      "Solidity.Evm.MemoryReferenceDefaultSource"
+    ],
+    "imports_in": 6,
+    "lines": 369,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryObjectConstructionCompile.lean",
+    "proof_lines": 238,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 287,
+    "declarations": {
+      "def": 34,
+      "theorem": 37
+    },
+    "definition_lines": 83,
+    "definition_to_proof_line_ratio": 0.4256410256410256,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Compiler",
+      "Solidity.Syntax.Splice"
+    ],
+    "imports_in": 7,
+    "lines": 336,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryObjectConstructionExamples.lean",
+    "proof_lines": 195,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 135,
+    "declarations": {
+      "def": 2,
+      "theorem": 5
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.04,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryObjectNested",
+      "Solidity.Evm.MemoryObjectCompile"
+    ],
+    "imports_in": 3,
+    "lines": 145,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryObjectConstructionSource.lean",
+    "proof_lines": 125,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 175,
+    "declarations": {
+      "def": 1,
+      "theorem": 10
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.005917159763313609,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryObjectGrow",
+      "Solidity.Typing.Values"
+    ],
+    "imports_in": 5,
+    "lines": 194,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryObjectEmpty.lean",
+    "proof_lines": 169,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 164,
+    "declarations": {
+      "def": 1,
+      "theorem": 3
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.019230769230769232,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryObjectAllocator",
+      "Solidity.Evm.MemoryExpr"
+    ],
+    "imports_in": 2,
+    "lines": 173,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryObjectExpr.lean",
+    "proof_lines": 156,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 70,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryObjectValues",
+      "Solidity.Evm.MemoryStructSource"
+    ],
+    "imports_in": 2,
+    "lines": 79,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryObjectFieldFrame.lean",
+    "proof_lines": 65,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 68,
+    "declarations": {
+      "def": 1,
+      "theorem": 3
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.031746031746031744,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryObjectFlatStruct"
+    ],
+    "imports_in": 2,
+    "lines": 77,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryObjectFlatFixed.lean",
+    "proof_lines": 63,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 128,
+    "declarations": {
+      "def": 1,
+      "theorem": 5
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.0423728813559322,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryObjectReserve",
+      "Solidity.Evm.MemoryStructDefault"
+    ],
+    "imports_in": 2,
+    "lines": 141,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryObjectFlatStruct.lean",
+    "proof_lines": 118,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 188,
+    "declarations": {
+      "theorem": 11
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryObjectAccess"
+    ],
+    "imports_in": 3,
+    "lines": 209,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryObjectFrame.lean",
+    "proof_lines": 184,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 101,
+    "declarations": {
+      "theorem": 5
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryObjectAllocator",
+      "Solidity.Evm.MemoryGrowResult"
+    ],
+    "imports_in": 2,
+    "lines": 112,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryObjectGrow.lean",
+    "proof_lines": 96,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 121,
+    "declarations": {
+      "def": 3,
+      "theorem": 4
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.08256880733944955,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryObjectChildrenSim"
+    ],
+    "imports_in": 4,
+    "lines": 134,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryObjectNested.lean",
+    "proof_lines": 109,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 135,
+    "declarations": {
+      "def": 2,
+      "inductive": 1,
+      "structure": 1,
+      "theorem": 5
+    },
+    "definition_lines": 30,
+    "definition_to_proof_line_ratio": 0.3,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryObjectAllocator"
+    ],
+    "imports_in": 2,
+    "lines": 149,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryObjectPaths.lean",
+    "proof_lines": 100,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 116,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryObjectConstructionSource"
+    ],
+    "imports_in": 3,
+    "lines": 126,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryObjectPrimitive.lean",
+    "proof_lines": 113,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 65,
+    "declarations": {
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.05172413793103448,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryObjectEmpty"
+    ],
+    "imports_in": 4,
+    "lines": 78,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryObjectReserve.lean",
+    "proof_lines": 58,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 181,
+    "declarations": {
+      "def": 2,
+      "inductive": 1,
+      "structure": 1,
+      "theorem": 7
+    },
+    "definition_lines": 22,
+    "definition_to_proof_line_ratio": 0.1437908496732026,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryObjectValues",
+      "Solidity.Evm.MemoryObjectFieldFrame"
+    ],
+    "imports_in": 9,
+    "lines": 196,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryObjectStatements.lean",
+    "proof_lines": 153,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 76,
+    "declarations": {
+      "def": 1,
+      "inductive": 1,
+      "structure": 1,
+      "theorem": 1
+    },
+    "definition_lines": 54,
+    "definition_to_proof_line_ratio": 3.375,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryObjectPaths",
+      "Solidity.Evm.MemoryObjectExpr"
+    ],
+    "imports_in": 3,
+    "lines": 83,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryObjectValues.lean",
+    "proof_lines": 16,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 153,
+    "declarations": {
+      "def": 3,
+      "structure": 4,
+      "theorem": 14
+    },
+    "definition_lines": 34,
+    "definition_to_proof_line_ratio": 0.2956521739130435,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryRefArrayState"
+    ],
+    "imports_in": 3,
+    "lines": 194,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryObjects.lean",
+    "proof_lines": 115,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 583,
+    "declarations": {
+      "def": 78,
+      "theorem": 46
+    },
+    "definition_lines": 311,
+    "definition_to_proof_line_ratio": 1.2244094488188977,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Compiler"
+    ],
+    "imports_in": 3,
+    "lines": 661,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryPathExamples.lean",
+    "proof_lines": 254,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 202,
+    "declarations": {
+      "def": 2,
+      "inductive": 1,
+      "structure": 1,
+      "theorem": 9
+    },
+    "definition_lines": 20,
+    "definition_to_proof_line_ratio": 0.11299435028248588,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStructSource"
+    ],
+    "imports_in": 5,
+    "lines": 228,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryPaths.lean",
+    "proof_lines": 177,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 106,
+    "declarations": {
+      "def": 14,
+      "theorem": 15
+    },
+    "definition_lines": 21,
+    "definition_to_proof_line_ratio": 0.26582278481012656,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Compiler",
+      "Solidity.Syntax.Splice"
+    ],
+    "imports_in": 3,
+    "lines": 126,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryPrimitiveStructArrayDefaultExamples.lean",
+    "proof_lines": 79,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 74,
+    "declarations": {
+      "def": 17,
+      "theorem": 9
+    },
+    "definition_lines": 26,
+    "definition_to_proof_line_ratio": 0.65,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryRecursiveRoom",
+      "Solidity.Evm.MemoryRecursiveDemandBounds",
+      "Solidity.Evm.MemoryAllocSourceExamples"
+    ],
+    "imports_in": 1,
+    "lines": 105,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRecursiveAllocation.lean",
+    "proof_lines": 40,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 79,
+    "declarations": {
+      "def": 3,
+      "theorem": 7
+    },
+    "definition_lines": 19,
+    "definition_to_proof_line_ratio": 0.3392857142857143,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryRecursiveComposition"
+    ],
+    "imports_in": 3,
+    "lines": 97,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRecursiveBranchRoom.lean",
+    "proof_lines": 56,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 61,
+    "declarations": {
+      "abbrev": 1,
+      "def": 17,
+      "theorem": 6
+    },
+    "definition_lines": 27,
+    "definition_to_proof_line_ratio": 1.173913043478261,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryRecursiveBranchRoom",
+      "Solidity.Evm.MemoryRecursiveControls",
+      "Solidity.Evm.MemoryAllocSourceExamples"
+    ],
+    "imports_in": 1,
+    "lines": 75,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRecursiveBranchRoomControls.lean",
+    "proof_lines": 23,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 162,
+    "declarations": {
+      "def": 6,
+      "inductive": 7,
+      "theorem": 2
+    },
+    "definition_lines": 130,
+    "definition_to_proof_line_ratio": 6.5,
+    "implemented_by": 2,
+    "imports": [
+      "Solidity.Evm.MemoryRecursiveLiftFull"
+    ],
+    "imports_in": 2,
+    "lines": 179,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRecursiveCert.lean",
+    "proof_lines": 20,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 204,
+    "declarations": {
+      "def": 6,
+      "structure": 2,
+      "theorem": 3
+    },
+    "definition_lines": 116,
+    "definition_to_proof_line_ratio": 1.3975903614457832,
+    "implemented_by": 2,
+    "imports": [
+      "Solidity.Evm.MemoryRecursiveSound"
+    ],
+    "imports_in": 2,
+    "lines": 218,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRecursiveCompile.lean",
+    "proof_lines": 83,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 58,
+    "declarations": {
+      "def": 3,
+      "theorem": 8
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.22727272727272727,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryRecursiveNesting"
+    ],
+    "imports_in": 3,
+    "lines": 73,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRecursiveComposition.lean",
+    "proof_lines": 44,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 66,
+    "declarations": {
+      "abbrev": 2,
+      "def": 11,
+      "theorem": 5
+    },
+    "definition_lines": 23,
+    "definition_to_proof_line_ratio": 0.71875,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryRecursiveNestingBudget",
+      "Solidity.Evm.MemoryRecursiveControls"
+    ],
+    "imports_in": 1,
+    "lines": 80,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRecursiveCompositionControls.lean",
+    "proof_lines": 32,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 101,
+    "declarations": {
+      "abbrev": 1,
+      "def": 14,
+      "theorem": 11
+    },
+    "definition_lines": 40,
+    "definition_to_proof_line_ratio": 0.8695652173913043,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryRecursiveHorizon",
+      "Solidity.Evm.MemoryExprExamples"
+    ],
+    "imports_in": 4,
+    "lines": 127,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRecursiveControls.lean",
+    "proof_lines": 46,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 58,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryRecursiveDemandViews"
+    ],
+    "imports_in": 2,
+    "lines": 71,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRecursiveDemandBounds.lean",
+    "proof_lines": 54,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 51,
+    "declarations": {
+      "def": 1,
+      "theorem": 5
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.2777777777777778,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryRecursiveBranchRoom",
+      "Solidity.Evm.MemoryLoopScopeBudget"
+    ],
+    "imports_in": 2,
+    "lines": 64,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRecursiveDemandViews.lean",
+    "proof_lines": 36,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 82,
+    "declarations": {
+      "abbrev": 1,
+      "def": 5,
+      "theorem": 7
+    },
+    "definition_lines": 30,
+    "definition_to_proof_line_ratio": 0.6666666666666666,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Compiler",
+      "Solidity.Evm.MemoryRecursiveRoom"
+    ],
+    "imports_in": 2,
+    "lines": 103,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRecursiveDispatch.lean",
+    "proof_lines": 45,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 55,
+    "declarations": {
+      "abbrev": 1,
+      "def": 7,
+      "theorem": 8
+    },
+    "definition_lines": 18,
+    "definition_to_proof_line_ratio": 0.72,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryRecursiveNesting",
+      "Solidity.Evm.MemoryRecursiveControls"
+    ],
+    "imports_in": 1,
+    "lines": 74,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRecursiveDispatchControls.lean",
+    "proof_lines": 25,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 48,
+    "declarations": {
+      "abbrev": 1,
+      "def": 4,
+      "theorem": 4
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.16666666666666666,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryRecursiveHorizon",
+      "Solidity.Evm.MemoryExprExamples"
+    ],
+    "imports_in": 1,
+    "lines": 58,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRecursiveDivergence.lean",
+    "proof_lines": 36,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 156,
+    "declarations": {
+      "def": 1,
+      "inductive": 2,
+      "theorem": 8
+    },
+    "definition_lines": 31,
+    "definition_to_proof_line_ratio": 0.25833333333333336,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryRecursiveLift",
+      "Solidity.Evm.MemoryLoopFiniteHorizon"
+    ],
+    "imports_in": 2,
+    "lines": 171,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRecursiveFinite.lean",
+    "proof_lines": 120,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 34,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryRecursiveRoom",
+      "Solidity.Evm.MemoryRecursiveFinite"
+    ],
+    "imports_in": 4,
+    "lines": 45,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRecursiveHorizon.lean",
+    "proof_lines": 29,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 128,
+    "declarations": {
+      "def": 2,
+      "inductive": 2,
+      "structure": 2,
+      "theorem": 3
+    },
+    "definition_lines": 42,
+    "definition_to_proof_line_ratio": 0.525,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLoopHorizon",
+      "Solidity.Evm.MemoryLoopScopeSound",
+      "Solidity.Evm.MemoryLoopScopeCompile"
+    ],
+    "imports_in": 3,
+    "lines": 148,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRecursiveLift.lean",
+    "proof_lines": 80,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 51,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.09302325581395349,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryRecursiveLift"
+    ],
+    "imports_in": 2,
+    "lines": 60,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRecursiveLiftFull.lean",
+    "proof_lines": 43,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 56,
+    "declarations": {
+      "def": 3,
+      "theorem": 4
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.20930232558139536,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryRecursiveDispatch"
+    ],
+    "imports_in": 3,
+    "lines": 73,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRecursiveNesting.lean",
+    "proof_lines": 43,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 35,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryRecursiveComposition"
+    ],
+    "imports_in": 2,
+    "lines": 44,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRecursiveNestingBudget.lean",
+    "proof_lines": 31,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 43,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryRecursiveHorizon"
+    ],
+    "imports_in": 1,
+    "lines": 59,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRecursiveOneTurn.lean",
+    "proof_lines": 36,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 177,
+    "declarations": {
+      "def": 4,
+      "theorem": 10
+    },
+    "definition_lines": 28,
+    "definition_to_proof_line_ratio": 0.1958041958041958,
+    "implemented_by": 2,
+    "imports": [
+      "Solidity.Evm.MemoryRecursiveCompile"
+    ],
+    "imports_in": 4,
+    "lines": 193,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRecursiveRoom.lean",
+    "proof_lines": 143,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 208,
+    "declarations": {
+      "def": 3,
+      "theorem": 12
+    },
+    "definition_lines": 15,
+    "definition_to_proof_line_ratio": 0.07936507936507936,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryRecursiveCert"
+    ],
+    "imports_in": 2,
+    "lines": 226,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRecursiveSound.lean",
+    "proof_lines": 189,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 182,
+    "declarations": {
+      "def": 1,
+      "structure": 2,
+      "theorem": 10
+    },
+    "definition_lines": 26,
+    "definition_to_proof_line_ratio": 0.17105263157894737,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryRefs"
+    ],
+    "imports_in": 3,
+    "lines": 212,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRefArray.lean",
+    "proof_lines": 152,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 98,
+    "declarations": {
+      "def": 2,
+      "inductive": 2,
+      "structure": 2,
+      "theorem": 4
+    },
+    "definition_lines": 56,
+    "definition_to_proof_line_ratio": 1.5135135135135136,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryRefArrayStatements"
+    ],
+    "imports_in": 2,
+    "lines": 114,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRefArrayCompile.lean",
+    "proof_lines": 37,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 201,
+    "declarations": {
+      "def": 29,
+      "theorem": 20
+    },
+    "definition_lines": 63,
+    "definition_to_proof_line_ratio": 0.4772727272727273,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Compiler"
+    ],
+    "imports_in": 5,
+    "lines": 237,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRefArrayExamples.lean",
+    "proof_lines": 132,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 75,
+    "declarations": {
+      "def": 2,
+      "inductive": 1,
+      "structure": 1,
+      "theorem": 1
+    },
+    "definition_lines": 30,
+    "definition_to_proof_line_ratio": 0.7692307692307693,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryRefArrayState",
+      "Solidity.Evm.MemoryPaths"
+    ],
+    "imports_in": 2,
+    "lines": 84,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRefArrayPaths.lean",
+    "proof_lines": 39,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 119,
+    "declarations": {
+      "structure": 1,
+      "theorem": 6
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.03669724770642202,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryRefArray",
+      "Solidity.Evm.MemoryLocals"
+    ],
+    "imports_in": 4,
+    "lines": 132,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRefArrayState.lean",
+    "proof_lines": 109,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 129,
+    "declarations": {
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.03333333333333333,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryRefArrayPaths"
+    ],
+    "imports_in": 4,
+    "lines": 137,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRefArrayStatements.lean",
+    "proof_lines": 120,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 131,
+    "declarations": {
+      "def": 1,
+      "theorem": 7
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.016260162601626018,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryRefWrite",
+      "Solidity.Evm.MemoryStructDefault"
+    ],
+    "imports_in": 3,
+    "lines": 150,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRefDelete.lean",
+    "proof_lines": 123,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 189,
+    "declarations": {
+      "theorem": 11
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryPaths"
+    ],
+    "imports_in": 5,
+    "lines": 210,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRefWrite.lean",
+    "proof_lines": 184,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 106,
+    "declarations": {
+      "def": 14,
+      "theorem": 15
+    },
+    "definition_lines": 21,
+    "definition_to_proof_line_ratio": 0.26582278481012656,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Compiler",
+      "Solidity.Syntax.Splice"
+    ],
+    "imports_in": 3,
+    "lines": 126,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryReferenceArrayRebindExamples.lean",
+    "proof_lines": 79,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 149,
+    "declarations": {
+      "def": 3,
+      "theorem": 5
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.051094890510948905,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryDefaultCompile",
+      "Solidity.Evm.MemoryObjectConstructionSource"
+    ],
+    "imports_in": 4,
+    "lines": 160,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryReferenceDefaultSource.lean",
+    "proof_lines": 137,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 157,
+    "declarations": {
+      "def": 1,
+      "theorem": 12
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.026845637583892617,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStructGrow"
+    ],
+    "imports_in": 3,
+    "lines": 184,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryRefs.lean",
+    "proof_lines": 149,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 36,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryGrowResult"
+    ],
+    "imports_in": 5,
+    "lines": 52,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryScope.lean",
+    "proof_lines": 32,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 218,
+    "declarations": {
+      "def": 8,
+      "structure": 1,
+      "theorem": 8
+    },
+    "definition_lines": 37,
+    "definition_to_proof_line_ratio": 0.21264367816091953,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryHeap",
+      "Solidity.Evm.MemoryRefs",
+      "Solidity.Evm.Expr",
+      "Solidity.Semantics.RunFrame"
+    ],
+    "imports_in": 6,
+    "lines": 262,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemorySource.lean",
+    "proof_lines": 174,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 57,
+    "declarations": {
+      "def": 1,
+      "theorem": 3
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.06,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLocals"
+    ],
+    "imports_in": 5,
+    "lines": 72,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStatements.lean",
+    "proof_lines": 50,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 113,
+    "declarations": {
+      "def": 2,
+      "inductive": 2,
+      "structure": 2,
+      "theorem": 6
+    },
+    "definition_lines": 31,
+    "definition_to_proof_line_ratio": 0.3974358974358974,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStorageObjectCopy"
+    ],
+    "imports_in": 2,
+    "lines": 131,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStorageConstructionCompile.lean",
+    "proof_lines": 78,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 89,
+    "declarations": {
+      "def": 6,
+      "theorem": 5
+    },
+    "definition_lines": 14,
+    "definition_to_proof_line_ratio": 0.19718309859154928,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStorageCopyLoop"
+    ],
+    "imports_in": 2,
+    "lines": 111,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStorageCopyCode.lean",
+    "proof_lines": 71,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 1097,
+    "declarations": {
+      "abbrev": 2,
+      "def": 12,
+      "inductive": 2,
+      "structure": 2,
+      "theorem": 20
+    },
+    "definition_lines": 582,
+    "definition_to_proof_line_ratio": 1.1524752475247524,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryCompile",
+      "Solidity.Evm.MemoryCopyBound"
+    ],
+    "imports_in": 2,
+    "lines": 1164,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStorageCopyCompile.lean",
+    "proof_lines": 505,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 285,
+    "declarations": {
+      "def": 33,
+      "theorem": 31
+    },
+    "definition_lines": 140,
+    "definition_to_proof_line_ratio": 1.12,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Compiler",
+      "Solidity.Syntax.Splice"
+    ],
+    "imports_in": 3,
+    "lines": 339,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStorageCopyExamples.lean",
+    "proof_lines": 125,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 93,
+    "declarations": {
+      "def": 1,
+      "theorem": 9
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.03529411764705882,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStorageCopyCode",
+      "Solidity.Evm.MemoryPaths"
+    ],
+    "imports_in": 5,
+    "lines": 119,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStorageCopyLaws.lean",
+    "proof_lines": 85,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 163,
+    "declarations": {
+      "def": 5,
+      "theorem": 9
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.07432432432432433,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Memory"
+    ],
+    "imports_in": 4,
+    "lines": 199,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStorageCopyLoop.lean",
+    "proof_lines": 148,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 56,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.06521739130434782,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStorageCopyLaws",
+      "Solidity.Evm.MemoryStatements"
+    ],
+    "imports_in": 2,
+    "lines": 71,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStorageCopySource.lean",
+    "proof_lines": 46,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 114,
+    "declarations": {
+      "def": 13,
+      "theorem": 16
+    },
+    "definition_lines": 61,
+    "definition_to_proof_line_ratio": 1.3863636363636365,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Compiler",
+      "Solidity.Syntax.Splice"
+    ],
+    "imports_in": 3,
+    "lines": 128,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStorageLifecycleExamples.lean",
+    "proof_lines": 44,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 47,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryFixedCompile",
+      "Solidity.Evm.MemoryObjectConstructionCompile"
+    ],
+    "imports_in": 2,
+    "lines": 57,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStorageObjectCopy.lean",
+    "proof_lines": 41,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 150,
+    "declarations": {
+      "def": 2,
+      "theorem": 7
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.04411764705882353,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStorageCopySource",
+      "Solidity.Evm.MemoryStructDefault"
+    ],
+    "imports_in": 3,
+    "lines": 176,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStorageStructCopy.lean",
+    "proof_lines": 136,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 100,
+    "declarations": {
+      "def": 4,
+      "structure": 1,
+      "theorem": 7
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.12941176470588237,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Memory"
+    ],
+    "imports_in": 2,
+    "lines": 129,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStruct.lean",
+    "proof_lines": 85,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 71,
+    "declarations": {
+      "structure": 1,
+      "theorem": 6
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.11864406779661017,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStructHeap",
+      "Solidity.Evm.MemoryAlloc"
+    ],
+    "imports_in": 2,
+    "lines": 93,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStructAlloc.lean",
+    "proof_lines": 59,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 89,
+    "declarations": {
+      "def": 1,
+      "theorem": 3
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.036585365853658534,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStructDefaultSource"
+    ],
+    "imports_in": 2,
+    "lines": 105,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStructArrayChild.lean",
+    "proof_lines": 82,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 165,
+    "declarations": {
+      "def": 29,
+      "theorem": 13
+    },
+    "definition_lines": 57,
+    "definition_to_proof_line_ratio": 0.5588235294117647,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Compiler"
+    ],
+    "imports_in": 3,
+    "lines": 182,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStructArrayInputExamples.lean",
+    "proof_lines": 102,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 102,
+    "declarations": {
+      "def": 1,
+      "theorem": 10
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.05434782608695652,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStructDefault"
+    ],
+    "imports_in": 2,
+    "lines": 128,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStructCopy.lean",
+    "proof_lines": 92,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 149,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStructCopyCode"
+    ],
+    "imports_in": 3,
+    "lines": 164,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStructCopyAlloc.lean",
+    "proof_lines": 144,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 190,
+    "declarations": {
+      "def": 4,
+      "inductive": 1,
+      "structure": 1,
+      "theorem": 9
+    },
+    "definition_lines": 36,
+    "definition_to_proof_line_ratio": 0.24324324324324326,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStructCopy",
+      "Solidity.Evm.MemoryRefWrite"
+    ],
+    "imports_in": 2,
+    "lines": 223,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStructCopyCode.lean",
+    "proof_lines": 148,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 146,
+    "declarations": {
+      "def": 16,
+      "theorem": 12
+    },
+    "definition_lines": 71,
+    "definition_to_proof_line_ratio": 1.0441176470588236,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Compiler",
+      "Solidity.Syntax.Splice"
+    ],
+    "imports_in": 4,
+    "lines": 173,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStructCopyExamples.lean",
+    "proof_lines": 68,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 133,
+    "declarations": {
+      "def": 3,
+      "theorem": 3
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.06666666666666667,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStructCopyAlloc"
+    ],
+    "imports_in": 4,
+    "lines": 152,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStructCopySource.lean",
+    "proof_lines": 120,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 178,
+    "declarations": {
+      "def": 5,
+      "theorem": 11
+    },
+    "definition_lines": 15,
+    "definition_to_proof_line_ratio": 0.09615384615384616,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStructSource",
+      "Solidity.Evm.MemoryAllocSource",
+      "Solidity.Typing.Values"
+    ],
+    "imports_in": 8,
+    "lines": 212,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStructDefault.lean",
+    "proof_lines": 156,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 124,
+    "declarations": {
+      "def": 5,
+      "structure": 2,
+      "theorem": 6
+    },
+    "definition_lines": 33,
+    "definition_to_proof_line_ratio": 0.3793103448275862,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStructDefaultPlan"
+    ],
+    "imports_in": 2,
+    "lines": 149,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStructDefaultCode.lean",
+    "proof_lines": 87,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 455,
+    "declarations": {
+      "def": 40,
+      "theorem": 40
+    },
+    "definition_lines": 268,
+    "definition_to_proof_line_ratio": 1.6242424242424243,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Compiler",
+      "Solidity.Syntax.Splice"
+    ],
+    "imports_in": 6,
+    "lines": 565,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStructDefaultExamples.lean",
+    "proof_lines": 165,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 121,
+    "declarations": {
+      "def": 5,
+      "theorem": 7
+    },
+    "definition_lines": 35,
+    "definition_to_proof_line_ratio": 0.4375,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStructDefault"
+    ],
+    "imports_in": 2,
+    "lines": 151,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStructDefaultLayout.lean",
+    "proof_lines": 80,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 275,
+    "declarations": {
+      "def": 10,
+      "structure": 2,
+      "theorem": 6
+    },
+    "definition_lines": 117,
+    "definition_to_proof_line_ratio": 0.78,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStructReferenceCode",
+      "Solidity.Evm.MemoryStructDefaultLayout",
+      "Solidity.Evm.MemoryRefDelete",
+      "Solidity.Evm.MemoryGrowResult",
+      "Solidity.Semantics.RunWk"
+    ],
+    "imports_in": 7,
+    "lines": 310,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStructDefaultPlan.lean",
+    "proof_lines": 150,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 103,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStructDefaultPlan"
+    ],
+    "imports_in": 5,
+    "lines": 115,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStructDefaultSource.lean",
+    "proof_lines": 99,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 399,
+    "declarations": {
+      "def": 54,
+      "theorem": 28
+    },
+    "definition_lines": 137,
+    "definition_to_proof_line_ratio": 0.5393700787401575,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStructGrow",
+      "Solidity.Evm.Compiler"
+    ],
+    "imports_in": 5,
+    "lines": 480,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStructExamples.lean",
+    "proof_lines": 254,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 291,
+    "declarations": {
+      "def": 3,
+      "theorem": 18
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.025,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStructAlloc"
+    ],
+    "imports_in": 3,
+    "lines": 340,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStructGrow.lean",
+    "proof_lines": 280,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 141,
+    "declarations": {
+      "def": 1,
+      "structure": 1,
+      "theorem": 11
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.088,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStruct",
+      "Solidity.Evm.MemoryHeap"
+    ],
+    "imports_in": 2,
+    "lines": 169,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStructHeap.lean",
+    "proof_lines": 125,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 182,
+    "declarations": {
+      "theorem": 5
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStructCopyAlloc"
+    ],
+    "imports_in": 2,
+    "lines": 200,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStructReferenceAlloc.lean",
+    "proof_lines": 177,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 210,
+    "declarations": {
+      "def": 3,
+      "theorem": 7
+    },
+    "definition_lines": 16,
+    "definition_to_proof_line_ratio": 0.08421052631578947,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStructReferenceAlloc"
+    ],
+    "imports_in": 2,
+    "lines": 238,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStructReferenceCode.lean",
+    "proof_lines": 190,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 111,
+    "declarations": {
+      "def": 14,
+      "theorem": 13
+    },
+    "definition_lines": 46,
+    "definition_to_proof_line_ratio": 0.8679245283018868,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStructReferenceDefaultLiterals"
+    ],
+    "imports_in": 2,
+    "lines": 127,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStructReferenceDefaultBoundaries.lean",
+    "proof_lines": 53,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 160,
+    "declarations": {
+      "def": 17,
+      "theorem": 12
+    },
+    "definition_lines": 82,
+    "definition_to_proof_line_ratio": 1.2058823529411764,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Compiler",
+      "Solidity.Syntax.Splice"
+    ],
+    "imports_in": 4,
+    "lines": 179,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStructReferenceDefaultExamples.lean",
+    "proof_lines": 68,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 76,
+    "declarations": {
+      "def": 9,
+      "theorem": 10
+    },
+    "definition_lines": 47,
+    "definition_to_proof_line_ratio": 2.238095238095238,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStructReferenceDefaultModes"
+    ],
+    "imports_in": 2,
+    "lines": 85,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStructReferenceDefaultLiterals.lean",
+    "proof_lines": 21,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 89,
+    "declarations": {
+      "def": 10,
+      "theorem": 7
+    },
+    "definition_lines": 45,
+    "definition_to_proof_line_ratio": 1.1842105263157894,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryStructReferenceDefaultExamples"
+    ],
+    "imports_in": 3,
+    "lines": 103,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStructReferenceDefaultModes.lean",
+    "proof_lines": 38,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 68,
+    "declarations": {
+      "def": 2,
+      "theorem": 3
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.10526315789473684,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.MemoryLocals"
+    ],
+    "imports_in": 5,
+    "lines": 82,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/MemoryStructSource.lean",
+    "proof_lines": 57,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 791,
+    "declarations": {
+      "def": 7,
+      "inductive": 3,
+      "theorem": 42
+    },
+    "definition_lines": 64,
+    "definition_to_proof_line_ratio": 0.08951048951048951,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Layout",
+      "Solidity.Evm.StorageLemmas"
+    ],
+    "imports_in": 4,
+    "lines": 1023,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/Repr.lean",
+    "proof_lines": 715,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 352,
+    "declarations": {
+      "def": 2,
+      "theorem": 35
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.00872093023255814,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Layout"
+    ],
+    "imports_in": 7,
+    "lines": 458,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/Signed.lean",
+    "proof_lines": 344,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 876,
+    "declarations": {
+      "abbrev": 3,
+      "def": 12,
+      "structure": 1,
+      "theorem": 97
+    },
+    "definition_lines": 63,
+    "definition_to_proof_line_ratio": 0.08160621761658031,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.SimLemmas",
+      "Solidity.Evm.Compile",
+      "Solidity.Semantics.Run"
+    ],
+    "imports_in": 2,
+    "lines": 1157,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/Sim.lean",
+    "proof_lines": 772,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 716,
+    "declarations": {
+      "def": 4,
+      "theorem": 66
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.014367816091954023,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Repr",
+      "Solidity.Evm.Signed",
+      "Solidity.Evm.Exp",
+      "Solidity.Semantics.Run"
+    ],
+    "imports_in": 7,
+    "lines": 938,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/SimLemmas.lean",
+    "proof_lines": 696,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 836,
+    "declarations": {
+      "inductive": 1,
+      "structure": 1,
+      "theorem": 38
+    },
+    "definition_lines": 12,
+    "definition_to_proof_line_ratio": 0.01485148514851485,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.Expr",
+      "Solidity.Semantics.NoPanic"
+    ],
+    "imports_in": 3,
+    "lines": 980,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/Stmt.lean",
+    "proof_lines": 808,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 156,
+    "declarations": {
+      "theorem": 18
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Theory.Typed.Obs"
+    ],
+    "imports_in": 2,
+    "lines": 214,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/StorageLemmas.lean",
+    "proof_lines": 147,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 74,
+    "declarations": {
+      "def": 3,
+      "theorem": 11
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.15517241379310345,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.TryByteImage",
+      "Solidity.Semantics.AllocBytes",
+      "Solidity.Semantics.RevertMemory",
+      "Solidity.Theory.Typed.Mem"
+    ],
+    "imports_in": 2,
+    "lines": 114,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/TryByteCapture.lean",
+    "proof_lines": 58,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 96,
+    "declarations": {
+      "abbrev": 1,
+      "def": 5,
+      "inductive": 1,
+      "structure": 4,
+      "theorem": 9
+    },
+    "definition_lines": 64,
+    "definition_to_proof_line_ratio": 2.2857142857142856,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Semantics.State",
+      "Solidity.RevertBytes"
+    ],
+    "imports_in": 4,
+    "lines": 149,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/TryByteImage.lean",
+    "proof_lines": 28,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 21,
+    "declarations": {
+      "def": 2,
+      "theorem": 5
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.3333333333333333,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.TryPanicSourceControl"
+    ],
+    "imports_in": 3,
+    "lines": 36,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/TryPanicCallMetadata.lean",
+    "proof_lines": 12,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 97,
+    "declarations": {
+      "def": 6,
+      "theorem": 13
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.13580246913580246,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.TryPanicProducer"
+    ],
+    "imports_in": 3,
+    "lines": 127,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/TryPanicCarrier.lean",
+    "proof_lines": 81,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 192,
+    "declarations": {
+      "abbrev": 1,
+      "def": 28,
+      "structure": 4,
+      "theorem": 20
+    },
+    "definition_lines": 102,
+    "definition_to_proof_line_ratio": 1.186046511627907,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.TryByteCapture"
+    ],
+    "imports_in": 4,
+    "lines": 288,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/TryPanicProducer.lean",
+    "proof_lines": 86,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 72,
+    "declarations": {
+      "abbrev": 1,
+      "def": 7,
+      "theorem": 3
+    },
+    "definition_lines": 32,
+    "definition_to_proof_line_ratio": 0.9142857142857143,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.TryPanicSourceBytes"
+    ],
+    "imports_in": 2,
+    "lines": 96,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/TryPanicSourceBody.lean",
+    "proof_lines": 35,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 73,
+    "declarations": {
+      "def": 3,
+      "theorem": 8
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.13559322033898305,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.TryPanicSourceBody"
+    ],
+    "imports_in": 2,
+    "lines": 97,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/TryPanicSourceBodyImage.lean",
+    "proof_lines": 59,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 100,
+    "declarations": {
+      "def": 2,
+      "theorem": 15
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.05555555555555555,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.TryPanicSourceControl"
+    ],
+    "imports_in": 2,
+    "lines": 134,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/TryPanicSourceBytes.lean",
+    "proof_lines": 90,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 122,
+    "declarations": {
+      "abbrev": 2,
+      "def": 7,
+      "theorem": 11
+    },
+    "definition_lines": 25,
+    "definition_to_proof_line_ratio": 0.26881720430107525,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Frontend.SolcJson.TryPanicSourceCaller"
+    ],
+    "imports_in": 3,
+    "lines": 169,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/TryPanicSourceControl.lean",
+    "proof_lines": 93,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 119,
+    "declarations": {
+      "theorem": 10
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.TryPanicSourceFrame"
+    ],
+    "imports_in": 3,
+    "lines": 152,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/TryPanicSourceDeterminism.lean",
+    "proof_lines": 114,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 74,
+    "declarations": {
+      "theorem": 11
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.TryPanicSourceBodyImage"
+    ],
+    "imports_in": 2,
+    "lines": 106,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/TryPanicSourceExecution.lean",
+    "proof_lines": 69,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Evm",
+    "category": "unmarked",
+    "code_lines": 139,
+    "declarations": {
+      "def": 6,
+      "theorem": 12
+    },
+    "definition_lines": 21,
+    "definition_to_proof_line_ratio": 0.18584070796460178,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Evm.TryPanicSourcePlan"
+    ],
+    "imports_in": 3,
+    "lines": 175,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Evm/TryPanicSourceFrame.lean",
+    "proof_lines": 113,
+    "roadmap_commands": 0,
+    "sorry": 0
+  }
+]

@@ -1,0 +1,7030 @@
+[
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 108,
+    "declarations": {
+      "def": 1,
+      "theorem": 3
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.043478260869565216,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.ScopedControlCompilation"
+    ],
+    "imports_in": 4,
+    "lines": 121,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/ScopedLoopExecution.lean",
+    "proof_lines": 92,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 119,
+    "declarations": {
+      "def": 17,
+      "theorem": 8
+    },
+    "definition_lines": 21,
+    "definition_to_proof_line_ratio": 0.30434782608695654,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.ScopedLoopExecution",
+      "Solidity.Yul.Compilation.ScopedControlCompletion",
+      "Solidity.Yul.Compilation.SourceLoopControls"
+    ],
+    "imports_in": 3,
+    "lines": 157,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/ScopedLoopExecutionControls.lean",
+    "proof_lines": 69,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 40,
+    "declarations": {
+      "def": 5,
+      "theorem": 2
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.5238095238095238,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.ScopedRawStatements",
+      "Solidity.Yul.Compilation.OpenExpressionControls"
+    ],
+    "imports_in": 1,
+    "lines": 40,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/ScopedRawStatementControls.lean",
+    "proof_lines": 21,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 60,
+    "declarations": {
+      "def": 2,
+      "theorem": 1
+    },
+    "definition_lines": 44,
+    "definition_to_proof_line_ratio": 5.5,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.ScopedStatements",
+      "Solidity.Yul.Compilation.OpenStatements"
+    ],
+    "imports_in": 2,
+    "lines": 67,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/ScopedRawStatements.lean",
+    "proof_lines": 8,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 56,
+    "declarations": {
+      "def": 16
+    },
+    "definition_lines": 48,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.ScopedStatements"
+    ],
+    "imports_in": 1,
+    "lines": 60,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/ScopedStatementControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 135,
+    "declarations": {
+      "def": 5,
+      "theorem": 2
+    },
+    "definition_lines": 109,
+    "definition_to_proof_line_ratio": 7.266666666666667,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.PureStatements",
+      "Solidity.Yul.Compilation.LocalScopeLowering"
+    ],
+    "imports_in": 12,
+    "lines": 149,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/ScopedStatements.lean",
+    "proof_lines": 15,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 128,
+    "declarations": {
+      "def": 1,
+      "theorem": 6
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.07339449541284404,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.PureAssignmentShapes",
+      "Solidity.Yul.Compilation.ScopedStatements"
+    ],
+    "imports_in": 2,
+    "lines": 155,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/ScopedVisitorShapes.lean",
+    "proof_lines": 109,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 117,
+    "declarations": {
+      "def": 20,
+      "theorem": 20
+    },
+    "definition_lines": 29,
+    "definition_to_proof_line_ratio": 0.46774193548387094,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.ScopedVisitorShapes"
+    ],
+    "imports_in": 2,
+    "lines": 193,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/ScopedVisitorShapesControls.lean",
+    "proof_lines": 62,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 125,
+    "declarations": {
+      "def": 5,
+      "inductive": 1,
+      "structure": 1,
+      "theorem": 2
+    },
+    "definition_lines": 61,
+    "definition_to_proof_line_ratio": 1.1296296296296295,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.MultiSwitchCompilation"
+    ],
+    "imports_in": 4,
+    "lines": 149,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SequenceCompilation.lean",
+    "proof_lines": 54,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 64,
+    "declarations": {
+      "def": 6,
+      "theorem": 10
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.22580645161290322,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.SequenceCompilation",
+      "Solidity.Yul.Compilation.SwitchSequenceControls"
+    ],
+    "imports_in": 5,
+    "lines": 107,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SequenceCompilationControls.lean",
+    "proof_lines": 31,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 75,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.CompletionControls",
+      "Solidity.Yul.Compilation.SequenceCompilation",
+      "Solidity.Yul.Compilation.ScopedControlCompletion",
+      "Solidity.Yul.Compilation.MultiSwitchCompletion"
+    ],
+    "imports_in": 7,
+    "lines": 88,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SequenceCompletion.lean",
+    "proof_lines": 61,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 62,
+    "declarations": {
+      "theorem": 7
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.SequenceCompletion",
+      "Solidity.Yul.Compilation.SequenceCompilationControls"
+    ],
+    "imports_in": 1,
+    "lines": 99,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SequenceCompletionControls.lean",
+    "proof_lines": 42,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 66,
+    "declarations": {
+      "theorem": 7
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.LabelExec.FragmentSound"
+    ],
+    "imports_in": 4,
+    "lines": 93,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/ShapeCapacity.lean",
+    "proof_lines": 48,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 66,
+    "declarations": {
+      "def": 4,
+      "theorem": 8
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.12121212121212122,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.ShapeCapacity"
+    ],
+    "imports_in": 1,
+    "lines": 95,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/ShapeCapacityControls.lean",
+    "proof_lines": 33,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 51,
+    "declarations": {
+      "def": 10,
+      "theorem": 9
+    },
+    "definition_lines": 13,
+    "definition_to_proof_line_ratio": 0.4482758620689655,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.NumericMachine",
+      "Solidity.Yul.Compilation.PureExpressions"
+    ],
+    "imports_in": 3,
+    "lines": 66,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/ShiftSubMachine.lean",
+    "proof_lines": 29,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 68,
+    "declarations": {
+      "def": 3
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.ShiftSubMachine",
+      "Solidity.Backend.Scalar.Heights"
+    ],
+    "imports_in": 1,
+    "lines": 76,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/ShiftSubMachineControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 81,
+    "declarations": {
+      "theorem": 5
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.SignedExecution",
+      "Solidity.Yul.Compilation.WordClosedExecution"
+    ],
+    "imports_in": 2,
+    "lines": 106,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SignedClosedExecution.lean",
+    "proof_lines": 66,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 122,
+    "declarations": {
+      "abbrev": 10,
+      "def": 6,
+      "theorem": 13
+    },
+    "definition_lines": 19,
+    "definition_to_proof_line_ratio": 0.3877551020408163,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.SignedInstructionCertificates",
+      "Solidity.Yul.Compilation.SignedExecutionControls"
+    ],
+    "imports_in": 3,
+    "lines": 192,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SignedClosedExecutionControls.lean",
+    "proof_lines": 49,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 40,
+    "declarations": {
+      "def": 6,
+      "theorem": 7
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.34782608695652173,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.SignedMachine",
+      "Solidity.Yul.Compilation.PureExpressions"
+    ],
+    "imports_in": 3,
+    "lines": 53,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SignedComparisonMachine.lean",
+    "proof_lines": 23,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 47,
+    "declarations": {
+      "def": 7
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.SignedComparisonMachine",
+      "Solidity.Backend.Scalar.Heights"
+    ],
+    "imports_in": 1,
+    "lines": 53,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SignedComparisonMachineControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 144,
+    "declarations": {
+      "theorem": 11
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.WordExecution",
+      "Solidity.Yul.Compilation.SignedMachine",
+      "Solidity.Yul.Compilation.SignedComparisonMachine",
+      "Solidity.Yul.EvmSigned"
+    ],
+    "imports_in": 3,
+    "lines": 185,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SignedExecution.lean",
+    "proof_lines": 125,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 129,
+    "declarations": {
+      "def": 21,
+      "theorem": 17
+    },
+    "definition_lines": 28,
+    "definition_to_proof_line_ratio": 0.5833333333333334,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.SignedExecution"
+    ],
+    "imports_in": 2,
+    "lines": 191,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SignedExecutionControls.lean",
+    "proof_lines": 48,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 179,
+    "declarations": {
+      "def": 12,
+      "theorem": 3
+    },
+    "definition_lines": 150,
+    "definition_to_proof_line_ratio": 9.375,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.BitExpressions"
+    ],
+    "imports_in": 2,
+    "lines": 195,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SignedExpressions.lean",
+    "proof_lines": 16,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 59,
+    "declarations": {
+      "def": 2,
+      "theorem": 4
+    },
+    "definition_lines": 31,
+    "definition_to_proof_line_ratio": 1.8235294117647058,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.SignedClosedExecution",
+      "Solidity.Backend.Selection.Interface"
+    ],
+    "imports_in": 3,
+    "lines": 84,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SignedInstructionCertificates.lean",
+    "proof_lines": 17,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 17,
+    "declarations": {
+      "def": 2,
+      "theorem": 1
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 3.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.WordMachine"
+    ],
+    "imports_in": 5,
+    "lines": 27,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SignedMachine.lean",
+    "proof_lines": 3,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 53,
+    "declarations": {
+      "def": 6,
+      "theorem": 6
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.23529411764705882,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.SignedMachine",
+      "Solidity.Yul.Compilation.PureExpressions",
+      "Solidity.Yul.EvmSigned"
+    ],
+    "imports_in": 2,
+    "lines": 66,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SignedQuotientMachine.lean",
+    "proof_lines": 34,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 52,
+    "declarations": {
+      "def": 9
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.SignedQuotientMachine",
+      "Solidity.Backend.Scalar.Heights"
+    ],
+    "imports_in": 1,
+    "lines": 58,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SignedQuotientMachineControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 94,
+    "declarations": {
+      "def": 7,
+      "structure": 1,
+      "theorem": 4
+    },
+    "definition_lines": 61,
+    "definition_to_proof_line_ratio": 2.652173913043478,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.Scalar.Heights"
+    ],
+    "imports_in": 5,
+    "lines": 123,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/Slices.lean",
+    "proof_lines": 23,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 134,
+    "declarations": {
+      "theorem": 14
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.Slices"
+    ],
+    "imports_in": 3,
+    "lines": 170,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SlotSemantics.lean",
+    "proof_lines": 116,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 50,
+    "declarations": {
+      "def": 2
+    },
+    "definition_lines": 46,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.SlotSemantics"
+    ],
+    "imports_in": 1,
+    "lines": 67,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SlotSemanticsControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 148,
+    "declarations": {
+      "abbrev": 1,
+      "def": 1,
+      "theorem": 6
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.05042016806722689,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.WhileWordExecution",
+      "Solidity.Yul.Compilation.ProducerStatements",
+      "Solidity.Yul.ClosedHorizon"
+    ],
+    "imports_in": 3,
+    "lines": 184,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SourceLoop.lean",
+    "proof_lines": 119,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 112,
+    "declarations": {
+      "theorem": 5
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.SourceLoop"
+    ],
+    "imports_in": 2,
+    "lines": 140,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SourceLoopCompletion.lean",
+    "proof_lines": 94,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 70,
+    "declarations": {
+      "theorem": 7
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.SourceLoopModelCompletion",
+      "Solidity.Yul.Compilation.SourceLoopControls"
+    ],
+    "imports_in": 1,
+    "lines": 107,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SourceLoopCompletionControls.lean",
+    "proof_lines": 46,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 80,
+    "declarations": {
+      "def": 13,
+      "theorem": 6
+    },
+    "definition_lines": 19,
+    "definition_to_proof_line_ratio": 0.5588235294117647,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.SourceLoop",
+      "Solidity.Yul.Compilation.PureExpressions",
+      "Solidity.Yul.Compilation.ScopedStatements",
+      "Solidity.Yul.Compilation.WordBlockFramed"
+    ],
+    "imports_in": 5,
+    "lines": 104,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SourceLoopControls.lean",
+    "proof_lines": 34,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 94,
+    "declarations": {
+      "def": 1,
+      "theorem": 3
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.08450704225352113,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.SourceLoopModelCompletion"
+    ],
+    "imports_in": 3,
+    "lines": 117,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SourceLoopInitializer.lean",
+    "proof_lines": 71,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 40,
+    "declarations": {
+      "def": 6,
+      "theorem": 3
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.4117647058823529,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.SourceLoopInitializer",
+      "Solidity.Yul.Compilation.SourceLoopControls"
+    ],
+    "imports_in": 3,
+    "lines": 60,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SourceLoopInitializerControls.lean",
+    "proof_lines": 17,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 118,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.SourceLoopCompletion",
+      "Solidity.Yul.Compilation.FramedLoop"
+    ],
+    "imports_in": 3,
+    "lines": 144,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SourceLoopModelCompletion.lean",
+    "proof_lines": 102,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 92,
+    "declarations": {
+      "theorem": 5
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.ArithmeticVisitorShapes",
+      "Solidity.Yul.Compilation.ProducerStatements"
+    ],
+    "imports_in": 3,
+    "lines": 113,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/StatementVisitorShapes.lean",
+    "proof_lines": 83,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 94,
+    "declarations": {
+      "abbrev": 2,
+      "def": 15,
+      "theorem": 11
+    },
+    "definition_lines": 22,
+    "definition_to_proof_line_ratio": 0.6666666666666666,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.StatementVisitorShapes",
+      "Solidity.Yul.Compilation.ArithmeticVisitorShapesControls"
+    ],
+    "imports_in": 1,
+    "lines": 144,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/StatementVisitorShapesControls.lean",
+    "proof_lines": 33,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 108,
+    "declarations": {
+      "def": 1,
+      "theorem": 3
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.043478260869565216,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.StructuredSequenceCompilation"
+    ],
+    "imports_in": 2,
+    "lines": 121,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/StructuredLoopExecution.lean",
+    "proof_lines": 92,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 109,
+    "declarations": {
+      "def": 9,
+      "theorem": 10
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.1388888888888889,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.StructuredLoopExecution",
+      "Solidity.Yul.Compilation.ScopedLoopExecutionControls",
+      "Solidity.Yul.Compilation.MultiSwitchCompilationControls"
+    ],
+    "imports_in": 1,
+    "lines": 154,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/StructuredLoopExecutionControls.lean",
+    "proof_lines": 72,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 294,
+    "declarations": {
+      "def": 4,
+      "inductive": 1,
+      "structure": 1,
+      "theorem": 3
+    },
+    "definition_lines": 109,
+    "definition_to_proof_line_ratio": 0.6374269005847953,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.SequenceCompilation"
+    ],
+    "imports_in": 4,
+    "lines": 330,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/StructuredSequenceCompilation.lean",
+    "proof_lines": 171,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 79,
+    "declarations": {
+      "def": 11,
+      "theorem": 12
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.2894736842105263,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.StructuredSequenceCompilation",
+      "Solidity.Yul.Compilation.ZeroSequenceCompilationControls"
+    ],
+    "imports_in": 3,
+    "lines": 130,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/StructuredSequenceCompilationControls.lean",
+    "proof_lines": 38,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 162,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.CompletionControls",
+      "Solidity.Yul.Compilation.StructuredSequenceCompilation",
+      "Solidity.Yul.Compilation.SequenceCompletion"
+    ],
+    "imports_in": 3,
+    "lines": 184,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/StructuredSequenceCompletion.lean",
+    "proof_lines": 149,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 66,
+    "declarations": {
+      "theorem": 8
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.StructuredSequenceCompletion",
+      "Solidity.Yul.Compilation.StructuredSequenceCompilationControls"
+    ],
+    "imports_in": 1,
+    "lines": 107,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/StructuredSequenceCompletionControls.lean",
+    "proof_lines": 44,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 264,
+    "declarations": {
+      "def": 7,
+      "inductive": 1,
+      "structure": 1,
+      "theorem": 5
+    },
+    "definition_lines": 83,
+    "definition_to_proof_line_ratio": 0.50920245398773,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.ScopedControlCompilation"
+    ],
+    "imports_in": 4,
+    "lines": 302,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SwitchCompilation.lean",
+    "proof_lines": 163,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 61,
+    "declarations": {
+      "def": 8,
+      "theorem": 5
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.391304347826087,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.SwitchCompilation",
+      "Solidity.Yul.Compilation.ScopedControlCompilationControls"
+    ],
+    "imports_in": 4,
+    "lines": 89,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SwitchCompilationControls.lean",
+    "proof_lines": 23,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 112,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.CompletionControls",
+      "Solidity.Yul.Compilation.SwitchCompilation",
+      "Solidity.Yul.Compilation.ScopedControlCompletion"
+    ],
+    "imports_in": 3,
+    "lines": 124,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SwitchCompletion.lean",
+    "proof_lines": 101,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 59,
+    "declarations": {
+      "theorem": 6
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.SwitchCompletion",
+      "Solidity.Yul.Compilation.SwitchCompilationControls"
+    ],
+    "imports_in": 1,
+    "lines": 91,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SwitchCompletionControls.lean",
+    "proof_lines": 31,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 70,
+    "declarations": {
+      "def": 4,
+      "structure": 1,
+      "theorem": 4
+    },
+    "definition_lines": 13,
+    "definition_to_proof_line_ratio": 0.28888888888888886,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.MultiSwitchCompilation"
+    ],
+    "imports_in": 3,
+    "lines": 99,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SwitchSequence.lean",
+    "proof_lines": 45,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 53,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.CompletionControls",
+      "Solidity.Yul.Compilation.SwitchSequence",
+      "Solidity.Yul.Compilation.MultiSwitchCompletion"
+    ],
+    "imports_in": 3,
+    "lines": 66,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SwitchSequenceCompletion.lean",
+    "proof_lines": 42,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 58,
+    "declarations": {
+      "theorem": 6
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.SwitchSequenceCompletion",
+      "Solidity.Yul.Compilation.SwitchSequenceControls"
+    ],
+    "imports_in": 1,
+    "lines": 90,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SwitchSequenceCompletionControls.lean",
+    "proof_lines": 40,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 43,
+    "declarations": {
+      "def": 3,
+      "theorem": 6
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.19047619047619047,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.SwitchSequence",
+      "Solidity.Yul.Compilation.MultiSwitchCompilationControls"
+    ],
+    "imports_in": 3,
+    "lines": 68,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/SwitchSequenceControls.lean",
+    "proof_lines": 21,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 121,
+    "declarations": {
+      "def": 6,
+      "theorem": 7
+    },
+    "definition_lines": 37,
+    "definition_to_proof_line_ratio": 0.5606060606060606,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.ShapeCapacity",
+      "Solidity.Yul.Compilation.ScopedStatements",
+      "Solidity.Backend.Selection.FrameCapacityV2"
+    ],
+    "imports_in": 2,
+    "lines": 155,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/TraceFrameCapacity.lean",
+    "proof_lines": 66,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 118,
+    "declarations": {
+      "abbrev": 1,
+      "def": 8,
+      "theorem": 13
+    },
+    "definition_lines": 14,
+    "definition_to_proof_line_ratio": 0.23728813559322035,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.TraceFrameCapacity",
+      "Solidity.Yul.Compilation.ArithmeticMachine"
+    ],
+    "imports_in": 1,
+    "lines": 174,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/TraceFrameCapacityControls.lean",
+    "proof_lines": 59,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 28,
+    "declarations": {
+      "def": 6,
+      "theorem": 2
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.5,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.UnaryMachine",
+      "Solidity.Yul.Compilation.NormalControl"
+    ],
+    "imports_in": 2,
+    "lines": 36,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/UnaryBranch.lean",
+    "proof_lines": 14,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 32,
+    "declarations": {
+      "def": 3
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.UnaryBranch",
+      "Solidity.Yul.Compilation.NormalStackTransport"
+    ],
+    "imports_in": 1,
+    "lines": 35,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/UnaryBranchControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 38,
+    "declarations": {
+      "def": 6,
+      "theorem": 6
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.36363636363636365,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.WordMachine",
+      "Solidity.Yul.Compilation.PureExpressions"
+    ],
+    "imports_in": 5,
+    "lines": 48,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/UnaryMachine.lean",
+    "proof_lines": 22,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 51,
+    "declarations": {
+      "def": 5
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.UnaryMachine",
+      "Solidity.Backend.Scalar.Heights"
+    ],
+    "imports_in": 1,
+    "lines": 57,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/UnaryMachineControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 164,
+    "declarations": {
+      "theorem": 8
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.WordExecution",
+      "Solidity.Yul.Compilation.WordControl"
+    ],
+    "imports_in": 4,
+    "lines": 202,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/WhileWordExecution.lean",
+    "proof_lines": 145,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 166,
+    "declarations": {
+      "def": 20,
+      "theorem": 16
+    },
+    "definition_lines": 26,
+    "definition_to_proof_line_ratio": 0.3023255813953488,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.WhileWordExecution"
+    ],
+    "imports_in": 2,
+    "lines": 237,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/WhileWordExecutionControls.lean",
+    "proof_lines": 86,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 115,
+    "declarations": {
+      "theorem": 8
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.WordExecution",
+      "Solidity.Yul.Compilation.WordControl",
+      "Solidity.Backend.Selection.Interface"
+    ],
+    "imports_in": 3,
+    "lines": 133,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/WordBlockExecution.lean",
+    "proof_lines": 106,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 36,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 20,
+    "definition_to_proof_line_ratio": 2.5,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.FramedLoop"
+    ],
+    "imports_in": 3,
+    "lines": 50,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/WordBlockFramed.lean",
+    "proof_lines": 8,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 91,
+    "declarations": {
+      "def": 6,
+      "theorem": 7
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.22,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.WordBlockFramed",
+      "Solidity.Yul.Compilation.WhileWordExecutionControls"
+    ],
+    "imports_in": 1,
+    "lines": 145,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/WordBlockFramedControls.lean",
+    "proof_lines": 50,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 109,
+    "declarations": {
+      "theorem": 6
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.WordExecution"
+    ],
+    "imports_in": 3,
+    "lines": 129,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/WordClosedExecution.lean",
+    "proof_lines": 95,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 96,
+    "declarations": {
+      "def": 8,
+      "theorem": 12
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.2,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.WordInstructionCertificates"
+    ],
+    "imports_in": 1,
+    "lines": 155,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/WordClosedExecutionControls.lean",
+    "proof_lines": 40,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 17,
+    "declarations": {
+      "def": 2
+    },
+    "definition_lines": 12,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.WordMachine",
+      "Solidity.Yul.Compilation.MachineControl"
+    ],
+    "imports_in": 5,
+    "lines": 25,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/WordControl.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 175,
+    "declarations": {
+      "theorem": 14
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.NumericExecution",
+      "Solidity.Yul.Compilation.WordMachine"
+    ],
+    "imports_in": 7,
+    "lines": 214,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/WordExecution.lean",
+    "proof_lines": 158,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 119,
+    "declarations": {
+      "def": 16,
+      "theorem": 15
+    },
+    "definition_lines": 27,
+    "definition_to_proof_line_ratio": 0.5869565217391305,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.WordExecution"
+    ],
+    "imports_in": 2,
+    "lines": 170,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/WordExecutionControls.lean",
+    "proof_lines": 46,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 136,
+    "declarations": {
+      "def": 11,
+      "structure": 1,
+      "theorem": 2
+    },
+    "definition_lines": 115,
+    "definition_to_proof_line_ratio": 12.777777777777779,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.QuotientExpressions"
+    ],
+    "imports_in": 3,
+    "lines": 152,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/WordExpressions.lean",
+    "proof_lines": 9,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 59,
+    "declarations": {
+      "def": 2,
+      "theorem": 4
+    },
+    "definition_lines": 31,
+    "definition_to_proof_line_ratio": 1.8235294117647058,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.WordClosedExecution",
+      "Solidity.Backend.Selection.Interface"
+    ],
+    "imports_in": 2,
+    "lines": 83,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/WordInstructionCertificates.lean",
+    "proof_lines": 17,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 19,
+    "declarations": {
+      "def": 2,
+      "theorem": 1
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 3.6666666666666665,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.NumericMachine"
+    ],
+    "imports_in": 8,
+    "lines": 28,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/WordMachine.lean",
+    "proof_lines": 3,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 87,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.ExpressionShapes",
+      "Solidity.Yul.Compilation.WordExpressions"
+    ],
+    "imports_in": 2,
+    "lines": 98,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/WordVisitorShapes.lean",
+    "proof_lines": 80,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 95,
+    "declarations": {
+      "def": 10,
+      "theorem": 12
+    },
+    "definition_lines": 14,
+    "definition_to_proof_line_ratio": 0.358974358974359,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.WordVisitorShapes"
+    ],
+    "imports_in": 1,
+    "lines": 142,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/WordVisitorShapesControls.lean",
+    "proof_lines": 39,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 113,
+    "declarations": {
+      "def": 4,
+      "inductive": 1,
+      "structure": 1,
+      "theorem": 3
+    },
+    "definition_lines": 34,
+    "definition_to_proof_line_ratio": 0.53125,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.LetControlCompilation",
+      "Solidity.Yul.Compilation.ZeroLoopScope"
+    ],
+    "imports_in": 3,
+    "lines": 143,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/ZeroControlCompilation.lean",
+    "proof_lines": 64,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 89,
+    "declarations": {
+      "def": 15,
+      "theorem": 7
+    },
+    "definition_lines": 20,
+    "definition_to_proof_line_ratio": 0.5128205128205128,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.ZeroControlCompilation",
+      "Solidity.Yul.Compilation.LetControlCompilationControls"
+    ],
+    "imports_in": 3,
+    "lines": 124,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/ZeroControlCompilationControls.lean",
+    "proof_lines": 39,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 61,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.CompletionControls",
+      "Solidity.Yul.Compilation.ZeroControlCompilation",
+      "Solidity.Yul.Compilation.LetControlCompletion"
+    ],
+    "imports_in": 3,
+    "lines": 77,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/ZeroControlCompletion.lean",
+    "proof_lines": 51,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 91,
+    "declarations": {
+      "def": 7,
+      "theorem": 8
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.125,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.ZeroControlCompletion",
+      "Solidity.Yul.Compilation.ZeroControlCompilationControls"
+    ],
+    "imports_in": 1,
+    "lines": 131,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/ZeroControlCompletionControls.lean",
+    "proof_lines": 56,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 90,
+    "declarations": {
+      "def": 2,
+      "theorem": 4
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.10606060606060606,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.LoopControlCompilation",
+      "Solidity.Yul.Compilation.ScopedStatements"
+    ],
+    "imports_in": 5,
+    "lines": 115,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/ZeroLoopScope.lean",
+    "proof_lines": 66,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 78,
+    "declarations": {
+      "def": 7,
+      "theorem": 7
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.20930232558139536,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.ZeroLoopScope",
+      "Solidity.Yul.Compilation.LoopControlCompilationControls"
+    ],
+    "imports_in": 3,
+    "lines": 116,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/ZeroLoopScopeControls.lean",
+    "proof_lines": 43,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 63,
+    "declarations": {
+      "def": 4,
+      "inductive": 1,
+      "structure": 1,
+      "theorem": 2
+    },
+    "definition_lines": 31,
+    "definition_to_proof_line_ratio": 1.55,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.ZeroScopeCompletion"
+    ],
+    "imports_in": 3,
+    "lines": 93,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/ZeroScopeCompilation.lean",
+    "proof_lines": 20,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 63,
+    "declarations": {
+      "def": 4,
+      "theorem": 7
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.13333333333333333,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.ZeroScopeCompilation",
+      "Solidity.Yul.Compilation.ZeroScopeCompletionControls"
+    ],
+    "imports_in": 2,
+    "lines": 99,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/ZeroScopeCompilationControls.lean",
+    "proof_lines": 30,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 66,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.CompletionControls",
+      "Solidity.Yul.Compilation.ZeroLoopScope",
+      "Solidity.Yul.Compilation.LoopControlCompletion"
+    ],
+    "imports_in": 3,
+    "lines": 81,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/ZeroScopeCompletion.lean",
+    "proof_lines": 56,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 73,
+    "declarations": {
+      "def": 7,
+      "theorem": 7
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.2,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.ZeroScopeCompletion",
+      "Solidity.Yul.Compilation.ZeroLoopScopeControls"
+    ],
+    "imports_in": 2,
+    "lines": 106,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/ZeroScopeCompletionControls.lean",
+    "proof_lines": 40,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 136,
+    "declarations": {
+      "def": 4,
+      "structure": 1,
+      "theorem": 5
+    },
+    "definition_lines": 22,
+    "definition_to_proof_line_ratio": 0.22,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.SequenceCompletion"
+    ],
+    "imports_in": 2,
+    "lines": 170,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/ZeroSequenceCompilation.lean",
+    "proof_lines": 100,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 77,
+    "declarations": {
+      "def": 6,
+      "theorem": 11
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.13953488372093023,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Compilation.ZeroSequenceCompilation",
+      "Solidity.Yul.Compilation.SequenceCompilationControls"
+    ],
+    "imports_in": 4,
+    "lines": 129,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Compilation/ZeroSequenceCompilationControls.lean",
+    "proof_lines": 43,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 122,
+    "declarations": {
+      "def": 11,
+      "theorem": 28
+    },
+    "definition_lines": 31,
+    "definition_to_proof_line_ratio": 0.38271604938271603,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.CatchFunctionPhysical"
+    ],
+    "imports_in": 3,
+    "lines": 164,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/AttemptPhysical.lean",
+    "proof_lines": 81,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 100,
+    "declarations": {
+      "def": 5,
+      "theorem": 24
+    },
+    "definition_lines": 13,
+    "definition_to_proof_line_ratio": 0.16883116883116883,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.RawCatchPhysical"
+    ],
+    "imports_in": 3,
+    "lines": 133,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/CatchFunctionPhysical.lean",
+    "proof_lines": 77,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 66,
+    "declarations": {
+      "theorem": 5
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.Interface"
+    ],
+    "imports_in": 5,
+    "lines": 87,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/Concrete.lean",
+    "proof_lines": 55,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 28,
+    "declarations": {
+      "def": 7,
+      "theorem": 3
+    },
+    "definition_lines": 14,
+    "definition_to_proof_line_ratio": 2.8,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.Concrete",
+      "Solidity.Source.StateExamples"
+    ],
+    "imports_in": 2,
+    "lines": 42,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/Controls.lean",
+    "proof_lines": 5,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 90,
+    "declarations": {
+      "def": 8,
+      "theorem": 10
+    },
+    "definition_lines": 45,
+    "definition_to_proof_line_ratio": 1.125,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.CorrectnessInstances",
+      "Solidity.Roadmap.Controls"
+    ],
+    "imports_in": 2,
+    "lines": 113,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/CorrectnessControls.lean",
+    "proof_lines": 40,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 167,
+    "declarations": {
+      "def": 7,
+      "structure": 1,
+      "theorem": 10
+    },
+    "definition_lines": 33,
+    "definition_to_proof_line_ratio": 0.25984251968503935,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Roadmap.Contracts"
+    ],
+    "imports_in": 3,
+    "lines": 211,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/CorrectnessInstances.lean",
+    "proof_lines": 127,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 79,
+    "declarations": {
+      "def": 2,
+      "structure": 1,
+      "theorem": 1
+    },
+    "definition_lines": 42,
+    "definition_to_proof_line_ratio": 1.4,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.CorrectnessInstances"
+    ],
+    "imports_in": 2,
+    "lines": 99,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/CorrectnessPublic.lean",
+    "proof_lines": 30,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 36,
+    "declarations": {
+      "def": 1,
+      "theorem": 3
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.47619047619047616,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.CorrectnessPublic",
+      "Solidity.Yul.Composition.CorrectnessControls"
+    ],
+    "imports_in": 2,
+    "lines": 43,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/CorrectnessPublicControls.lean",
+    "proof_lines": 21,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 180,
+    "declarations": {
+      "def": 5,
+      "theorem": 20
+    },
+    "definition_lines": 21,
+    "definition_to_proof_line_ratio": 0.13548387096774195,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.ForPhysical"
+    ],
+    "imports_in": 2,
+    "lines": 215,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/DoWhilePhysical.lean",
+    "proof_lines": 155,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 349,
+    "declarations": {
+      "abbrev": 1,
+      "def": 11,
+      "theorem": 30
+    },
+    "definition_lines": 31,
+    "definition_to_proof_line_ratio": 0.09872611464968153,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.UncheckedLoopPhysical"
+    ],
+    "imports_in": 3,
+    "lines": 411,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/ForPhysical.lean",
+    "proof_lines": 314,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 145,
+    "declarations": {
+      "abbrev": 1,
+      "def": 14,
+      "theorem": 26
+    },
+    "definition_lines": 33,
+    "definition_to_proof_line_ratio": 0.3402061855670103,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.LoopPhysical"
+    ],
+    "imports_in": 3,
+    "lines": 184,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/FunctionPhysical.lean",
+    "proof_lines": 97,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 195,
+    "declarations": {
+      "def": 9,
+      "theorem": 38
+    },
+    "definition_lines": 29,
+    "definition_to_proof_line_ratio": 0.1858974358974359,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.AttemptPhysical"
+    ],
+    "imports_in": 3,
+    "lines": 254,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/HeapCatchPhysical.lean",
+    "proof_lines": 156,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 18,
+    "declarations": {
+      "def": 2
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.World.Frames",
+      "Solidity.Yul.Compilation.Slices",
+      "Solidity.Backend.Environment.ByteConstants"
+    ],
+    "imports_in": 4,
+    "lines": 36,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/Interface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 96,
+    "declarations": {
+      "def": 1,
+      "theorem": 5
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.11842105263157894,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.PhysicalFrames",
+      "Solidity.Yul.LocalBlock"
+    ],
+    "imports_in": 2,
+    "lines": 120,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/LocalPhysical.lean",
+    "proof_lines": 76,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 204,
+    "declarations": {
+      "abbrev": 1,
+      "def": 43,
+      "theorem": 24
+    },
+    "definition_lines": 95,
+    "definition_to_proof_line_ratio": 1.1046511627906976,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.LocalPhysicalMemory",
+      "Solidity.Yul.Composition.PhysicalControls"
+    ],
+    "imports_in": 3,
+    "lines": 247,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/LocalPhysicalControls.lean",
+    "proof_lines": 86,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 50,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.LocalPhysical",
+      "Solidity.Yul.Composition.PhysicalMemory"
+    ],
+    "imports_in": 2,
+    "lines": 61,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/LocalPhysicalMemory.lean",
+    "proof_lines": 42,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 62,
+    "declarations": {
+      "def": 9,
+      "theorem": 12
+    },
+    "definition_lines": 22,
+    "definition_to_proof_line_ratio": 0.7333333333333333,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.LocalPhysicalControls"
+    ],
+    "imports_in": 2,
+    "lines": 81,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/LoopPhysical.lean",
+    "proof_lines": 30,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 275,
+    "declarations": {
+      "abbrev": 1,
+      "def": 15,
+      "theorem": 30
+    },
+    "definition_lines": 55,
+    "definition_to_proof_line_ratio": 0.2558139534883721,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.RuntimeBlockPhysical"
+    ],
+    "imports_in": 3,
+    "lines": 344,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/ModifierPhysical.lean",
+    "proof_lines": 215,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 580,
+    "declarations": {
+      "def": 12,
+      "theorem": 37
+    },
+    "definition_lines": 44,
+    "definition_to_proof_line_ratio": 0.08286252354048965,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.ModifierPhysical",
+      "Solidity.Yul.Composition.UncheckedLoopPhysical"
+    ],
+    "imports_in": 3,
+    "lines": 634,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/ModifierPostPhysical.lean",
+    "proof_lines": 531,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 34,
+    "declarations": {
+      "def": 3,
+      "theorem": 5
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.3333333333333333,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.World.Lifecycle",
+      "Solidity.Source.StateExamples"
+    ],
+    "imports_in": 1,
+    "lines": 56,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/MonetaryLifecycleControls.lean",
+    "proof_lines": 18,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 330,
+    "declarations": {
+      "abbrev": 1,
+      "def": 7,
+      "theorem": 23
+    },
+    "definition_lines": 27,
+    "definition_to_proof_line_ratio": 0.0903010033444816,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.ModifierPostPhysical"
+    ],
+    "imports_in": 2,
+    "lines": 362,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/NestedModifierPhysical.lean",
+    "proof_lines": 299,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 192,
+    "declarations": {
+      "def": 23,
+      "theorem": 24
+    },
+    "definition_lines": 41,
+    "definition_to_proof_line_ratio": 0.2887323943661972,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.P6FrameCorrectness"
+    ],
+    "imports_in": 1,
+    "lines": 235,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/P6FrameControls.lean",
+    "proof_lines": 142,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 78,
+    "declarations": {
+      "abbrev": 1,
+      "def": 2,
+      "theorem": 5
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.1044776119402985,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.MemoryOps.PhysicalFrameImage"
+    ],
+    "imports_in": 2,
+    "lines": 101,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/P6FrameCorrectness.lean",
+    "proof_lines": 67,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 48,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.Concrete",
+      "Solidity.Yul.Views.Bytes"
+    ],
+    "imports_in": 3,
+    "lines": 64,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/PhysicalBytes.lean",
+    "proof_lines": 39,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 125,
+    "declarations": {
+      "def": 22,
+      "theorem": 13
+    },
+    "definition_lines": 41,
+    "definition_to_proof_line_ratio": 0.6307692307692307,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.PhysicalFrames",
+      "Solidity.Yul.Composition.PhysicalBytes",
+      "Solidity.Yul.Views.OwnedBoolDeclarationControls"
+    ],
+    "imports_in": 3,
+    "lines": 164,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/PhysicalControls.lean",
+    "proof_lines": 65,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 140,
+    "declarations": {
+      "def": 1,
+      "theorem": 7
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.024390243902439025,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.Interface",
+      "Solidity.Yul.Views.OwnedBoolFrame"
+    ],
+    "imports_in": 4,
+    "lines": 172,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/PhysicalFrames.lean",
+    "proof_lines": 123,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 62,
+    "declarations": {
+      "def": 3,
+      "theorem": 3
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.08695652173913043,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.PhysicalBytes",
+      "Solidity.Yul.Views.MemoryImages",
+      "Solidity.Yul.Views.MemoryControls"
+    ],
+    "imports_in": 3,
+    "lines": 78,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/PhysicalMemory.lean",
+    "proof_lines": 46,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 116,
+    "declarations": {
+      "def": 10,
+      "theorem": 26
+    },
+    "definition_lines": 12,
+    "definition_to_proof_line_ratio": 0.12903225806451613,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.RecursivePhysical"
+    ],
+    "imports_in": 3,
+    "lines": 155,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/RawCatchPhysical.lean",
+    "proof_lines": 93,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 102,
+    "declarations": {
+      "abbrev": 1,
+      "def": 9,
+      "theorem": 18
+    },
+    "definition_lines": 25,
+    "definition_to_proof_line_ratio": 0.38461538461538464,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.FunctionPhysical"
+    ],
+    "imports_in": 3,
+    "lines": 110,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/RecursivePhysical.lean",
+    "proof_lines": 65,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 133,
+    "declarations": {
+      "def": 4,
+      "theorem": 20
+    },
+    "definition_lines": 19,
+    "definition_to_proof_line_ratio": 0.17757009345794392,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.ScopeCatchPhysical"
+    ],
+    "imports_in": 3,
+    "lines": 169,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/RethrowPhysical.lean",
+    "proof_lines": 107,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 204,
+    "declarations": {
+      "def": 10,
+      "theorem": 28
+    },
+    "definition_lines": 36,
+    "definition_to_proof_line_ratio": 0.2222222222222222,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.RethrowPhysical"
+    ],
+    "imports_in": 5,
+    "lines": 264,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/RuntimeBlockPhysical.lean",
+    "proof_lines": 162,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 176,
+    "declarations": {
+      "abbrev": 2,
+      "def": 14,
+      "theorem": 28
+    },
+    "definition_lines": 47,
+    "definition_to_proof_line_ratio": 0.3949579831932773,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.HeapCatchPhysical"
+    ],
+    "imports_in": 3,
+    "lines": 231,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/ScopeCatchPhysical.lean",
+    "proof_lines": 119,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 40,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.14285714285714285,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.Concrete",
+      "Solidity.Yul.Compilation.NestedWrites"
+    ],
+    "imports_in": 2,
+    "lines": 51,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/ScopeTransport.lean",
+    "proof_lines": 28,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 148,
+    "declarations": {
+      "abbrev": 1,
+      "def": 8,
+      "theorem": 20
+    },
+    "definition_lines": 23,
+    "definition_to_proof_line_ratio": 0.23,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.Readonly.SourceTryEffects",
+      "Solidity.Source.FailureRuntimeControls"
+    ],
+    "imports_in": 1,
+    "lines": 234,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/SourceCatchBinding.lean",
+    "proof_lines": 100,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 25,
+    "declarations": {
+      "def": 3,
+      "theorem": 2
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.5833333333333334,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.Concrete"
+    ],
+    "imports_in": 2,
+    "lines": 35,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/TargetRepeat.lean",
+    "proof_lines": 12,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 221,
+    "declarations": {
+      "def": 9,
+      "theorem": 24
+    },
+    "definition_lines": 29,
+    "definition_to_proof_line_ratio": 0.15425531914893617,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.RuntimeBlockPhysical"
+    ],
+    "imports_in": 4,
+    "lines": 273,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/UncheckedLoopPhysical.lean",
+    "proof_lines": 188,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 19,
+    "declarations": {
+      "def": 2,
+      "theorem": 3
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.18181818181818182,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Composition.Interface"
+    ],
+    "imports_in": 2,
+    "lines": 28,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Composition/WordBridge.lean",
+    "proof_lines": 11,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 103,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.CoordinateUpdates",
+      "Solidity.Yul.DirectControl"
+    ],
+    "imports_in": 3,
+    "lines": 112,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/CoordinateControl.lean",
+    "proof_lines": 98,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 92,
+    "declarations": {
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.03571428571428571,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalCoordinates",
+      "Solidity.Yul.DirectUpdates"
+    ],
+    "imports_in": 4,
+    "lines": 103,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/CoordinateUpdates.lean",
+    "proof_lines": 84,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 92,
+    "declarations": {
+      "def": 6,
+      "structure": 3,
+      "theorem": 7
+    },
+    "definition_lines": 28,
+    "definition_to_proof_line_ratio": 0.4827586206896552,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.BlockHeaders",
+      "Solidity.Yul.ReservedNames",
+      "Solidity.Frontend.Checked.Lexer"
+    ],
+    "imports_in": 5,
+    "lines": 120,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/DeclarationCheck.lean",
+    "proof_lines": 58,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "import_root",
+    "code_lines": 1,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Frontend.Yul.DeclarationParse"
+    ],
+    "imports_in": 1,
+    "lines": 3,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/DeclarationParse.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 326,
+    "declarations": {
+      "abbrev": 3,
+      "def": 12,
+      "inductive": 6,
+      "theorem": 10
+    },
+    "definition_lines": 167,
+    "definition_to_proof_line_ratio": 1.0986842105263157,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.DeclarationCheck"
+    ],
+    "imports_in": 6,
+    "lines": 396,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/DeclarationScope.lean",
+    "proof_lines": 152,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 211,
+    "declarations": {
+      "def": 1,
+      "inductive": 1,
+      "theorem": 4
+    },
+    "definition_lines": 45,
+    "definition_to_proof_line_ratio": 0.2777777777777778,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.CoordinateControl"
+    ],
+    "imports_in": 4,
+    "lines": 224,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/DirectBindings.lean",
+    "proof_lines": 162,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 174,
+    "declarations": {
+      "def": 1,
+      "inductive": 1,
+      "theorem": 4
+    },
+    "definition_lines": 55,
+    "definition_to_proof_line_ratio": 0.4782608695652174,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.DirectUpdates"
+    ],
+    "imports_in": 4,
+    "lines": 187,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/DirectControl.lean",
+    "proof_lines": 115,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 136,
+    "declarations": {
+      "def": 3,
+      "theorem": 4
+    },
+    "definition_lines": 23,
+    "definition_to_proof_line_ratio": 0.21296296296296297,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.DirectWords",
+      "Solidity.Yul.WordUpdates"
+    ],
+    "imports_in": 6,
+    "lines": 150,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/DirectUpdates.lean",
+    "proof_lines": 108,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 103,
+    "declarations": {
+      "def": 2,
+      "theorem": 5
+    },
+    "definition_lines": 36,
+    "definition_to_proof_line_ratio": 0.5714285714285714,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.WordAdapter"
+    ],
+    "imports_in": 8,
+    "lines": 120,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/DirectWords.lean",
+    "proof_lines": 63,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 431,
+    "declarations": {
+      "abbrev": 1,
+      "def": 10,
+      "theorem": 38
+    },
+    "definition_lines": 64,
+    "definition_to_proof_line_ratio": 0.17679558011049723,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawBoundary",
+      "Solidity.Yul.CleanFunctions"
+    ],
+    "imports_in": 3,
+    "lines": 599,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/DirtyReadback.lean",
+    "proof_lines": 362,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 64,
+    "declarations": {
+      "def": 1,
+      "theorem": 6
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.10909090909090909,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.EvmSigned"
+    ],
+    "imports_in": 4,
+    "lines": 79,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/EvmArithmetic.lean",
+    "proof_lines": 55,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 185,
+    "declarations": {
+      "theorem": 14
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.EvmArithmetic"
+    ],
+    "imports_in": 3,
+    "lines": 209,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/EvmBitwise.lean",
+    "proof_lines": 182,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 102,
+    "declarations": {
+      "def": 1,
+      "theorem": 10
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.010309278350515464,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.Words",
+      "Solidity.Evm.Signed"
+    ],
+    "imports_in": 6,
+    "lines": 126,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/EvmSigned.lean",
+    "proof_lines": 97,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 268,
+    "declarations": {
+      "def": 10,
+      "inductive": 3,
+      "structure": 1,
+      "theorem": 13
+    },
+    "definition_lines": 109,
+    "definition_to_proof_line_ratio": 0.7266666666666667,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.CatalogLaws",
+      "Solidity.Source.Syntax"
+    ],
+    "imports_in": 8,
+    "lines": 336,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/ExpressionCheck.lean",
+    "proof_lines": 150,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 109,
+    "declarations": {
+      "abbrev": 2,
+      "def": 3,
+      "inductive": 2,
+      "theorem": 6
+    },
+    "definition_lines": 38,
+    "definition_to_proof_line_ratio": 0.5588235294117647,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.CatalogLaws"
+    ],
+    "imports_in": 7,
+    "lines": 133,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/ExternalCheck.lean",
+    "proof_lines": 68,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 166,
+    "declarations": {
+      "def": 6,
+      "instance": 1,
+      "theorem": 15
+    },
+    "definition_lines": 23,
+    "definition_to_proof_line_ratio": 0.16546762589928057,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.ExpressionCheck",
+      "Solidity.Yul.ExternalCheck"
+    ],
+    "imports_in": 3,
+    "lines": 204,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/ExternalKeys.lean",
+    "proof_lines": 139,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 139,
+    "declarations": {
+      "def": 3,
+      "inductive": 3,
+      "theorem": 10
+    },
+    "definition_lines": 42,
+    "definition_to_proof_line_ratio": 0.44680851063829785,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.GlobalExternal"
+    ],
+    "imports_in": 6,
+    "lines": 165,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/ExternalScope.lean",
+    "proof_lines": 94,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 88,
+    "declarations": {
+      "abbrev": 2,
+      "def": 7,
+      "inductive": 1,
+      "theorem": 5
+    },
+    "definition_lines": 33,
+    "definition_to_proof_line_ratio": 0.6346153846153846,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalScope"
+    ],
+    "imports_in": 7,
+    "lines": 113,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/FunctionScope.lean",
+    "proof_lines": 52,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 87,
+    "declarations": {
+      "def": 4,
+      "inductive": 1,
+      "theorem": 6
+    },
+    "definition_lines": 34,
+    "definition_to_proof_line_ratio": 0.68,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.ExternalCheck"
+    ],
+    "imports_in": 5,
+    "lines": 111,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/GlobalExternal.lean",
+    "proof_lines": 50,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 52,
+    "declarations": {
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.06666666666666667,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.ClosedHorizon",
+      "Solidity.Source.Semantics"
+    ],
+    "imports_in": 5,
+    "lines": 61,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/HorizonAdapter.lean",
+    "proof_lines": 45,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "import_root",
+    "code_lines": 39,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawFrameLogic",
+      "Solidity.Yul.RawHorizon",
+      "Solidity.Yul.RawContinueLoop",
+      "Solidity.Yul.RawU8ForAbsent",
+      "Solidity.Yul.RawU8For",
+      "Solidity.Yul.RawCheckedGrowingAbsent",
+      "Solidity.Yul.RawU8ForPost",
+      "Solidity.Yul.RawU8GrowingBlock",
+      "Solidity.Yul.RawU8GrowingSequence",
+      "Solidity.Yul.RawU8Declaration",
+      "Solidity.Yul.RawIntegerBlock",
+      "Solidity.Yul.RawIntegerSequence",
+      "Solidity.Yul.RawPreparedInteger",
+      "Solidity.Yul.RawCheckedAdapter",
+      "Solidity.Yul.RawTypedScope",
+      "Solidity.Yul.RawControlGrowingBlock",
+      "Solidity.Yul.RawControlGrowingSequence",
+      "Solidity.Yul.RawControlForPost",
+      "Solidity.Yul.RawControlDeclaration",
+      "Solidity.Yul.RawGrowingForPost",
+      "Solidity.Yul.RawGrowingBlock",
+      "Solidity.Yul.RawGrowingSequence",
+      "Solidity.Yul.RawPreparedDeclaration",
+      "Solidity.Yul.RawDeclarationFrame",
+      "Solidity.Yul.RawCheckedInitializedForPost",
+      "Solidity.Yul.RawCheckedForPost",
+      "Solidity.Yul.RawCheckedAdapterAbsent",
+      "Solidity.Yul.RawCheckedAdapterFor",
+      "Solidity.Yul.RawCheckedAdapterDoWhile",
+      "Solidity.Yul.RawCheckedAdapterLoop",
+      "Solidity.Yul.RawCheckedAdapterIfElse",
+      "Solidity.Yul.RawCheckedAdapterSequence",
+      "Solidity.Yul.Syntax",
+      "Solidity.Yul.BlockTyping",
+      "Solidity.Yul.Words",
+      "Solidity.Yul.WordAdapter",
+      "Solidity.Yul.RawFrame",
+      "Solidity.Yul.RawSourceAdapter",
+      "Solidity.Yul.RawSourceVoidReturn"
+    ],
+    "imports_in": 2,
+    "lines": 341,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/Interfaces/P16.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 86,
+    "declarations": {
+      "def": 3,
+      "structure": 1,
+      "theorem": 6
+    },
+    "definition_lines": 15,
+    "definition_to_proof_line_ratio": 0.234375,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalWriteback",
+      "Solidity.Yul.LocalState",
+      "Solidity.Yul.WordAdapterLogic"
+    ],
+    "imports_in": 7,
+    "lines": 106,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBlock.lean",
+    "proof_lines": 64,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 125,
+    "declarations": {
+      "def": 2,
+      "theorem": 8
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.0990990990990991,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBlock"
+    ],
+    "imports_in": 5,
+    "lines": 146,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBlockLogic.lean",
+    "proof_lines": 111,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 188,
+    "declarations": {
+      "def": 1,
+      "theorem": 14
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.027932960893854747,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolExpr",
+      "Solidity.Source.Eval"
+    ],
+    "imports_in": 5,
+    "lines": 210,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolAgreement.lean",
+    "proof_lines": 179,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 200,
+    "declarations": {
+      "def": 4,
+      "inductive": 1,
+      "theorem": 2
+    },
+    "definition_lines": 42,
+    "definition_to_proof_line_ratio": 0.2709677419354839,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolInitialization"
+    ],
+    "imports_in": 3,
+    "lines": 217,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolBinding.lean",
+    "proof_lines": 155,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 195,
+    "declarations": {
+      "def": 2,
+      "inductive": 1,
+      "theorem": 10
+    },
+    "definition_lines": 67,
+    "definition_to_proof_line_ratio": 0.536,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolAgreement"
+    ],
+    "imports_in": 7,
+    "lines": 214,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolControl.lean",
+    "proof_lines": 125,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 164,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolControlSource"
+    ],
+    "imports_in": 4,
+    "lines": 170,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolControlAgreement.lean",
+    "proof_lines": 160,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 120,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolControl"
+    ],
+    "imports_in": 4,
+    "lines": 129,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolControlEvidence.lean",
+    "proof_lines": 117,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 144,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolRepresentation"
+    ],
+    "imports_in": 4,
+    "lines": 151,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolControlRepresentation.lean",
+    "proof_lines": 141,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 105,
+    "declarations": {
+      "theorem": 9
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolControl"
+    ],
+    "imports_in": 3,
+    "lines": 119,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolControlSource.lean",
+    "proof_lines": 102,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 56,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolWhile"
+    ],
+    "imports_in": 3,
+    "lines": 67,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolDivergence.lean",
+    "proof_lines": 53,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 54,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolDoWhile"
+    ],
+    "imports_in": 2,
+    "lines": 65,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolDoDivergence.lean",
+    "proof_lines": 51,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 128,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 17,
+    "definition_to_proof_line_ratio": 0.1574074074074074,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolWhile"
+    ],
+    "imports_in": 4,
+    "lines": 135,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolDoWhile.lean",
+    "proof_lines": 108,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 104,
+    "declarations": {
+      "def": 1,
+      "inductive": 1,
+      "theorem": 8
+    },
+    "definition_lines": 40,
+    "definition_to_proof_line_ratio": 0.6666666666666666,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalOperations",
+      "Solidity.Yul.LocalState"
+    ],
+    "imports_in": 3,
+    "lines": 125,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolExpr.lean",
+    "proof_lines": 60,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 156,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolControl"
+    ],
+    "imports_in": 3,
+    "lines": 164,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolFailure.lean",
+    "proof_lines": 153,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 114,
+    "declarations": {
+      "def": 2,
+      "theorem": 1
+    },
+    "definition_lines": 18,
+    "definition_to_proof_line_ratio": 0.1978021978021978,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolWhile",
+      "Solidity.Yul.RawSourceForIter",
+      "Solidity.Yul.RawLocalScope"
+    ],
+    "imports_in": 4,
+    "lines": 124,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolFor.lean",
+    "proof_lines": 91,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 91,
+    "declarations": {
+      "def": 2,
+      "theorem": 4
+    },
+    "definition_lines": 13,
+    "definition_to_proof_line_ratio": 0.17333333333333334,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolForPost"
+    ],
+    "imports_in": 4,
+    "lines": 111,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolForNoGuard.lean",
+    "proof_lines": 75,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 110,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 14,
+    "definition_to_proof_line_ratio": 0.15217391304347827,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolFor",
+      "Solidity.Yul.LocalBoolPostIter"
+    ],
+    "imports_in": 5,
+    "lines": 118,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolForPost.lean",
+    "proof_lines": 92,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 34,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolForRepresentation",
+      "Solidity.Yul.LocalBoolPostRepresentation",
+      "Solidity.Yul.LocalBoolForPost"
+    ],
+    "imports_in": 2,
+    "lines": 40,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolForPostRepresentation.lean",
+    "proof_lines": 29,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 43,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolWhileRepresentation",
+      "Solidity.Yul.LocalBoolFor"
+    ],
+    "imports_in": 3,
+    "lines": 51,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolForRepresentation.lean",
+    "proof_lines": 39,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 195,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolControl"
+    ],
+    "imports_in": 9,
+    "lines": 202,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolHorizon.lean",
+    "proof_lines": 192,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 107,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 13,
+    "definition_to_proof_line_ratio": 0.14444444444444443,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolItemScope",
+      "Solidity.Yul.RawSequence"
+    ],
+    "imports_in": 5,
+    "lines": 119,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolIf.lean",
+    "proof_lines": 90,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 138,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 16,
+    "definition_to_proof_line_ratio": 0.13445378151260504,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolIf"
+    ],
+    "imports_in": 2,
+    "lines": 147,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolIfElse.lean",
+    "proof_lines": 119,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 102,
+    "declarations": {
+      "def": 3,
+      "inductive": 1,
+      "theorem": 1
+    },
+    "definition_lines": 22,
+    "definition_to_proof_line_ratio": 0.2857142857142857,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalExprStatement"
+    ],
+    "imports_in": 5,
+    "lines": 115,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolInitialization.lean",
+    "proof_lines": 77,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 103,
+    "declarations": {
+      "inductive": 2,
+      "theorem": 3
+    },
+    "definition_lines": 13,
+    "definition_to_proof_line_ratio": 0.15294117647058825,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolControlRepresentation",
+      "Solidity.Yul.LocalBoolItems"
+    ],
+    "imports_in": 3,
+    "lines": 116,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolItemRepresentation.lean",
+    "proof_lines": 85,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 183,
+    "declarations": {
+      "def": 4,
+      "theorem": 9
+    },
+    "definition_lines": 22,
+    "definition_to_proof_line_ratio": 0.13924050632911392,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolItems"
+    ],
+    "imports_in": 6,
+    "lines": 217,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolItemScope.lean",
+    "proof_lines": 158,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 232,
+    "declarations": {
+      "def": 2,
+      "inductive": 2,
+      "theorem": 3
+    },
+    "definition_lines": 56,
+    "definition_to_proof_line_ratio": 0.3236994219653179,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolBinding"
+    ],
+    "imports_in": 5,
+    "lines": 252,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolItems.lean",
+    "proof_lines": 173,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 173,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 22,
+    "definition_to_proof_line_ratio": 0.14864864864864866,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolWhile"
+    ],
+    "imports_in": 3,
+    "lines": 182,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolPostIter.lean",
+    "proof_lines": 148,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 69,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolScopeRepresentation",
+      "Solidity.Yul.LocalBoolPostIter"
+    ],
+    "imports_in": 3,
+    "lines": 75,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolPostRepresentation.lean",
+    "proof_lines": 65,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 173,
+    "declarations": {
+      "def": 3,
+      "inductive": 3,
+      "theorem": 8
+    },
+    "definition_lines": 26,
+    "definition_to_proof_line_ratio": 0.18055555555555555,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolControl"
+    ],
+    "imports_in": 4,
+    "lines": 200,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolRepresentation.lean",
+    "proof_lines": 144,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 119,
+    "declarations": {
+      "def": 3,
+      "theorem": 1
+    },
+    "definition_lines": 22,
+    "definition_to_proof_line_ratio": 0.23655913978494625,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolInitialization",
+      "Solidity.Yul.RawLocalScope"
+    ],
+    "imports_in": 2,
+    "lines": 130,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolScope.lean",
+    "proof_lines": 93,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 112,
+    "declarations": {
+      "theorem": 6
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolItemRepresentation",
+      "Solidity.Yul.LocalBoolIf"
+    ],
+    "imports_in": 5,
+    "lines": 128,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolScopeRepresentation.lean",
+    "proof_lines": 108,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 133,
+    "declarations": {
+      "def": 2,
+      "theorem": 2
+    },
+    "definition_lines": 22,
+    "definition_to_proof_line_ratio": 0.2037037037037037,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolItemScope"
+    ],
+    "imports_in": 2,
+    "lines": 143,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolUnchecked.lean",
+    "proof_lines": 108,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 126,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 18,
+    "definition_to_proof_line_ratio": 0.17307692307692307,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolIf",
+      "Solidity.Yul.RawSequence"
+    ],
+    "imports_in": 6,
+    "lines": 136,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolWhile.lean",
+    "proof_lines": 104,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 103,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolScopeRepresentation",
+      "Solidity.Yul.LocalBoolDoWhile"
+    ],
+    "imports_in": 3,
+    "lines": 111,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalBoolWhileRepresentation.lean",
+    "proof_lines": 99,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 96,
+    "declarations": {
+      "def": 1,
+      "theorem": 3
+    },
+    "definition_lines": 14,
+    "definition_to_proof_line_ratio": 0.18181818181818182,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalU8Compare",
+      "Solidity.Yul.LocalBoolControlAgreement",
+      "Solidity.Yul.LocalBoolControlEvidence"
+    ],
+    "imports_in": 6,
+    "lines": 108,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalCompareControl.lean",
+    "proof_lines": 77,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 66,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalCompareControl",
+      "Solidity.Yul.LocalU8CompareHorizon",
+      "Solidity.Yul.LocalBoolHorizon"
+    ],
+    "imports_in": 2,
+    "lines": 73,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalCompareHorizon.lean",
+    "proof_lines": 61,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 150,
+    "declarations": {
+      "def": 6,
+      "structure": 1,
+      "theorem": 10
+    },
+    "definition_lines": 77,
+    "definition_to_proof_line_ratio": 1.1666666666666667,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.DirectWords"
+    ],
+    "imports_in": 3,
+    "lines": 173,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalCoordinates.lean",
+    "proof_lines": 66,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 169,
+    "declarations": {
+      "def": 4,
+      "theorem": 5
+    },
+    "definition_lines": 33,
+    "definition_to_proof_line_ratio": 0.25,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolItemScope",
+      "Solidity.Yul.RawDefaultDeclaration"
+    ],
+    "imports_in": 3,
+    "lines": 196,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalDefaultBinding.lean",
+    "proof_lines": 132,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 145,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalDefaultRepresentation",
+      "Solidity.Yul.LocalDefaultIfElse",
+      "Solidity.Yul.LocalDefaultDoWhile"
+    ],
+    "imports_in": 3,
+    "lines": 157,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalDefaultControlRepresentation.lean",
+    "proof_lines": 140,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 215,
+    "declarations": {
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 17,
+    "definition_to_proof_line_ratio": 0.08717948717948718,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalDefaultWhile"
+    ],
+    "imports_in": 5,
+    "lines": 238,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalDefaultDoWhile.lean",
+    "proof_lines": 195,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 69,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalDefaultItems",
+      "Solidity.Yul.LocalItemHorizon"
+    ],
+    "imports_in": 7,
+    "lines": 78,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalDefaultHorizon.lean",
+    "proof_lines": 65,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 171,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 16,
+    "definition_to_proof_line_ratio": 0.10526315789473684,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalItemWorld"
+    ],
+    "imports_in": 4,
+    "lines": 186,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalDefaultIfElse.lean",
+    "proof_lines": 152,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 184,
+    "declarations": {
+      "def": 4,
+      "inductive": 1,
+      "theorem": 5
+    },
+    "definition_lines": 46,
+    "definition_to_proof_line_ratio": 0.34074074074074073,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalDefaultBinding"
+    ],
+    "imports_in": 5,
+    "lines": 212,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalDefaultItems.lean",
+    "proof_lines": 135,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 91,
+    "declarations": {
+      "def": 2,
+      "theorem": 8
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.14473684210526316,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalDefaultPostIter",
+      "Solidity.Yul.LocalBoolForNoGuard"
+    ],
+    "imports_in": 4,
+    "lines": 112,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalDefaultNoGuard.lean",
+    "proof_lines": 76,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 284,
+    "declarations": {
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 22,
+    "definition_to_proof_line_ratio": 0.08494208494208494,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalDefaultWhile"
+    ],
+    "imports_in": 4,
+    "lines": 301,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalDefaultPostIter.lean",
+    "proof_lines": 259,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 97,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalDefaultControlRepresentation",
+      "Solidity.Yul.LocalDefaultNoGuard"
+    ],
+    "imports_in": 2,
+    "lines": 108,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalDefaultPostRepresentation.lean",
+    "proof_lines": 93,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 124,
+    "declarations": {
+      "theorem": 6
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolScopeRepresentation",
+      "Solidity.Yul.LocalDefaultUnchecked"
+    ],
+    "imports_in": 3,
+    "lines": 140,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalDefaultRepresentation.lean",
+    "proof_lines": 120,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 133,
+    "declarations": {
+      "def": 2,
+      "theorem": 2
+    },
+    "definition_lines": 22,
+    "definition_to_proof_line_ratio": 0.2037037037037037,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalDefaultItems"
+    ],
+    "imports_in": 5,
+    "lines": 150,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalDefaultUnchecked.lean",
+    "proof_lines": 108,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 213,
+    "declarations": {
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 18,
+    "definition_to_proof_line_ratio": 0.09375,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalItemWorld"
+    ],
+    "imports_in": 5,
+    "lines": 239,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalDefaultWhile.lean",
+    "proof_lines": 192,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 65,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalDefaultDoWhile",
+      "Solidity.Yul.LocalDefaultHorizon",
+      "Solidity.Yul.LocalBoolHorizon"
+    ],
+    "imports_in": 2,
+    "lines": 71,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalDoWhileHorizon.lean",
+    "proof_lines": 60,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 114,
+    "declarations": {
+      "def": 2,
+      "theorem": 4
+    },
+    "definition_lines": 17,
+    "definition_to_proof_line_ratio": 0.18085106382978725,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalCompareControl"
+    ],
+    "imports_in": 6,
+    "lines": 133,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalExprStatement.lean",
+    "proof_lines": 94,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 46,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalForTimeout",
+      "Solidity.Source.Semantics"
+    ],
+    "imports_in": 2,
+    "lines": 52,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalForFirstDone.lean",
+    "proof_lines": 42,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 145,
+    "declarations": {
+      "theorem": 6
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolForPost",
+      "Solidity.Yul.LocalForPostHorizon"
+    ],
+    "imports_in": 4,
+    "lines": 158,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalForInitHorizon.lean",
+    "proof_lines": 141,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 122,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolForNoGuard",
+      "Solidity.Yul.LocalForInitHorizon",
+      "Solidity.Yul.LocalBoolDivergence"
+    ],
+    "imports_in": 3,
+    "lines": 133,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalForNoGuardFailure.lean",
+    "proof_lines": 117,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 97,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalForInitHorizon",
+      "Solidity.Yul.LocalWhileHorizon"
+    ],
+    "imports_in": 3,
+    "lines": 107,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalForNoPostHorizon.lean",
+    "proof_lines": 93,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 83,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalDefaultPostIter",
+      "Solidity.Yul.LocalDefaultHorizon",
+      "Solidity.Yul.LocalBoolHorizon"
+    ],
+    "imports_in": 3,
+    "lines": 89,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalForPostHorizon.lean",
+    "proof_lines": 78,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 171,
+    "declarations": {
+      "theorem": 6
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalForNoGuardFailure",
+      "Solidity.Yul.LocalForNoPostHorizon",
+      "Solidity.Yul.LocalPostHorizon"
+    ],
+    "imports_in": 3,
+    "lines": 181,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalForTimeout.lean",
+    "proof_lines": 166,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 59,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalDefaultIfElse",
+      "Solidity.Yul.LocalDefaultHorizon",
+      "Solidity.Yul.LocalBoolHorizon"
+    ],
+    "imports_in": 2,
+    "lines": 65,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalIfHorizon.lean",
+    "proof_lines": 54,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 107,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolFailure",
+      "Solidity.Yul.LocalDefaultItems"
+    ],
+    "imports_in": 4,
+    "lines": 118,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalItemFailure.lean",
+    "proof_lines": 103,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 96,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolItems",
+      "Solidity.Yul.LocalBoolHorizon"
+    ],
+    "imports_in": 3,
+    "lines": 102,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalItemHorizon.lean",
+    "proof_lines": 92,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 160,
+    "declarations": {
+      "def": 1,
+      "theorem": 7
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.01948051948051948,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalDefaultUnchecked"
+    ],
+    "imports_in": 4,
+    "lines": 181,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalItemWorld.lean",
+    "proof_lines": 154,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 96,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalItemFailure",
+      "Solidity.Yul.LocalDefaultNoGuard"
+    ],
+    "imports_in": 3,
+    "lines": 107,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalLoopFailure.lean",
+    "proof_lines": 92,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 82,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalPostHorizon"
+    ],
+    "imports_in": 2,
+    "lines": 93,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalLoopReductions.lean",
+    "proof_lines": 79,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 142,
+    "declarations": {
+      "abbrev": 1,
+      "def": 12,
+      "theorem": 17
+    },
+    "definition_lines": 43,
+    "definition_to_proof_line_ratio": 0.4479166666666667,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalWordWrite"
+    ],
+    "imports_in": 5,
+    "lines": 192,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalOperations.lean",
+    "proof_lines": 96,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 121,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalLoopFailure",
+      "Solidity.Yul.LocalDefaultDoWhile"
+    ],
+    "imports_in": 4,
+    "lines": 133,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalPostHorizon.lean",
+    "proof_lines": 117,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 109,
+    "declarations": {
+      "def": 3,
+      "theorem": 11
+    },
+    "definition_lines": 18,
+    "definition_to_proof_line_ratio": 0.20454545454545456,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.SourceContext"
+    ],
+    "imports_in": 4,
+    "lines": 133,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalProjection.lean",
+    "proof_lines": 88,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 101,
+    "declarations": {
+      "def": 2,
+      "inductive": 1,
+      "theorem": 9
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.11363636363636363,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.CatalogLaws"
+    ],
+    "imports_in": 3,
+    "lines": 133,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalScope.lean",
+    "proof_lines": 88,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 60,
+    "declarations": {
+      "abbrev": 1,
+      "def": 4,
+      "theorem": 7
+    },
+    "definition_lines": 16,
+    "definition_to_proof_line_ratio": 0.41025641025641024,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalValues"
+    ],
+    "imports_in": 5,
+    "lines": 81,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalState.lean",
+    "proof_lines": 39,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 169,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalU8Source"
+    ],
+    "imports_in": 5,
+    "lines": 178,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalU8Agreement.lean",
+    "proof_lines": 166,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 267,
+    "declarations": {
+      "def": 2,
+      "theorem": 9
+    },
+    "definition_lines": 26,
+    "definition_to_proof_line_ratio": 0.10970464135021098,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalU8Agreement"
+    ],
+    "imports_in": 5,
+    "lines": 286,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalU8Compare.lean",
+    "proof_lines": 237,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 108,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalU8Horizon",
+      "Solidity.Yul.LocalU8Compare"
+    ],
+    "imports_in": 3,
+    "lines": 114,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalU8CompareHorizon.lean",
+    "proof_lines": 104,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 158,
+    "declarations": {
+      "abbrev": 1,
+      "def": 1,
+      "inductive": 1,
+      "theorem": 9
+    },
+    "definition_lines": 50,
+    "definition_to_proof_line_ratio": 0.47619047619047616,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolAgreement"
+    ],
+    "imports_in": 4,
+    "lines": 176,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalU8Expr.lean",
+    "proof_lines": 105,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 117,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalU8Expr"
+    ],
+    "imports_in": 4,
+    "lines": 124,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalU8Horizon.lean",
+    "proof_lines": 114,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 227,
+    "declarations": {
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.0136986301369863,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBoolRepresentation",
+      "Solidity.Yul.LocalCompareControl",
+      "Solidity.Yul.LocalBoolControlRepresentation"
+    ],
+    "imports_in": 2,
+    "lines": 243,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalU8Representation.lean",
+    "proof_lines": 219,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 112,
+    "declarations": {
+      "def": 1,
+      "theorem": 8
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.04807692307692308,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalU8Expr"
+    ],
+    "imports_in": 3,
+    "lines": 125,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalU8Source.lean",
+    "proof_lines": 104,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 79,
+    "declarations": {
+      "def": 1,
+      "theorem": 3
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.11940298507462686,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalU8Agreement",
+      "Solidity.Yul.LocalExprStatement"
+    ],
+    "imports_in": 3,
+    "lines": 90,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalU8Statement.lean",
+    "proof_lines": 67,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 77,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalDefaultUnchecked",
+      "Solidity.Yul.LocalDefaultHorizon"
+    ],
+    "imports_in": 2,
+    "lines": 86,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalUncheckedHorizon.lean",
+    "proof_lines": 73,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 147,
+    "declarations": {
+      "def": 14,
+      "inductive": 1,
+      "theorem": 10
+    },
+    "definition_lines": 83,
+    "definition_to_proof_line_ratio": 1.5961538461538463,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.SourceTypes",
+      "Solidity.Yul.ScalarLocals",
+      "Solidity.Yul.Words",
+      "Solidity.Source.Machine"
+    ],
+    "imports_in": 5,
+    "lines": 190,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalValues.lean",
+    "proof_lines": 52,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 64,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalDefaultWhile",
+      "Solidity.Yul.LocalDefaultHorizon",
+      "Solidity.Yul.LocalBoolHorizon"
+    ],
+    "imports_in": 3,
+    "lines": 70,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalWhileHorizon.lean",
+    "proof_lines": 59,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 164,
+    "declarations": {
+      "def": 9,
+      "structure": 1,
+      "theorem": 18
+    },
+    "definition_lines": 38,
+    "definition_to_proof_line_ratio": 0.3220338983050847,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.CleanFunctions",
+      "Solidity.Yul.WordLocals"
+    ],
+    "imports_in": 4,
+    "lines": 199,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalWordView.lean",
+    "proof_lines": 118,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 240,
+    "declarations": {
+      "def": 2,
+      "theorem": 19
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.030434782608695653,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalWordView"
+    ],
+    "imports_in": 4,
+    "lines": 270,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalWordWrite.lean",
+    "proof_lines": 230,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 77,
+    "declarations": {
+      "def": 4,
+      "theorem": 7
+    },
+    "definition_lines": 12,
+    "definition_to_proof_line_ratio": 0.1935483870967742,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalWordWrite"
+    ],
+    "imports_in": 3,
+    "lines": 95,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/LocalWriteback.lean",
+    "proof_lines": 62,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 215,
+    "declarations": {
+      "def": 5,
+      "inductive": 3,
+      "instance": 2,
+      "theorem": 6
+    },
+    "definition_lines": 99,
+    "definition_to_proof_line_ratio": 0.8918918918918919,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.ExpressionCheck",
+      "Solidity.Source.Syntax"
+    ],
+    "imports_in": 4,
+    "lines": 256,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/OccurrenceCheck.lean",
+    "proof_lines": 111,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 50,
+    "declarations": {
+      "def": 2,
+      "inductive": 1,
+      "structure": 1,
+      "theorem": 5
+    },
+    "definition_lines": 15,
+    "definition_to_proof_line_ratio": 0.5172413793103449,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.OccurrenceCheck",
+      "Solidity.Yul.WordSyntax"
+    ],
+    "imports_in": 4,
+    "lines": 71,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/OccurrenceSyntax.lean",
+    "proof_lines": 29,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 38,
+    "declarations": {
+      "structure": 1
+    },
+    "definition_lines": 33,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.OpenRun"
+    ],
+    "imports_in": 6,
+    "lines": 44,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/OpenAgreement.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 43,
+    "declarations": {
+      "def": 2,
+      "theorem": 5
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.32142857142857145,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.OpenComposition",
+      "Solidity.Yul.WordAdapterLogic"
+    ],
+    "imports_in": 3,
+    "lines": 60,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/OpenCalculus.lean",
+    "proof_lines": 28,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 34,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.OpenAgreement"
+    ],
+    "imports_in": 3,
+    "lines": 37,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/OpenCasesAgreement.lean",
+    "proof_lines": 29,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 68,
+    "declarations": {
+      "theorem": 7
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.OpenExpressionAgreement",
+      "Solidity.Yul.OpenStatementAgreement",
+      "Solidity.Yul.OpenCasesAgreement",
+      "Solidity.Yul.OpenLoopAgreement"
+    ],
+    "imports_in": 4,
+    "lines": 82,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/OpenComposition.lean",
+    "proof_lines": 60,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 113,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.04854368932038835,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.OpenAgreement"
+    ],
+    "imports_in": 3,
+    "lines": 122,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/OpenExpressionAgreement.lean",
+    "proof_lines": 103,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 113,
+    "declarations": {
+      "abbrev": 1,
+      "def": 5,
+      "inductive": 1,
+      "structure": 1,
+      "theorem": 9
+    },
+    "definition_lines": 42,
+    "definition_to_proof_line_ratio": 0.6268656716417911,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.CoordinateUpdates"
+    ],
+    "imports_in": 3,
+    "lines": 136,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/OpenFunctions.lean",
+    "proof_lines": 67,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 27,
+    "declarations": {
+      "def": 1,
+      "theorem": 3
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.2777777777777778,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.OpenComposition",
+      "Solidity.Yul.LocalBlock"
+    ],
+    "imports_in": 4,
+    "lines": 34,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/OpenLocal.lean",
+    "proof_lines": 18,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 119,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.OpenAgreement"
+    ],
+    "imports_in": 3,
+    "lines": 122,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/OpenLoopAgreement.lean",
+    "proof_lines": 114,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 182,
+    "declarations": {
+      "def": 8
+    },
+    "definition_lines": 176,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.OpenFunctions"
+    ],
+    "imports_in": 3,
+    "lines": 196,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/OpenRun.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 20,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.3333333333333333,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.OpenCalculus",
+      "Solidity.Yul.ScopedWordSyntax"
+    ],
+    "imports_in": 5,
+    "lines": 25,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/OpenScoped.lean",
+    "proof_lines": 12,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 252,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.OpenAgreement"
+    ],
+    "imports_in": 3,
+    "lines": 257,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/OpenStatementAgreement.lean",
+    "proof_lines": 247,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 201,
+    "declarations": {
+      "def": 8,
+      "inductive": 3,
+      "structure": 1,
+      "theorem": 3
+    },
+    "definition_lines": 123,
+    "definition_to_proof_line_ratio": 1.662162162162162,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Source.Syntax"
+    ],
+    "imports_in": 5,
+    "lines": 229,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/PlacementCheck.lean",
+    "proof_lines": 74,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 76,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawSourceAdapterLoop",
+      "Solidity.Yul.RawControlledWhileHorizon"
+    ],
+    "imports_in": 4,
+    "lines": 83,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawAdapterLoopHorizon.lean",
+    "proof_lines": 72,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 87,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawSourceAdapterLoop",
+      "Solidity.Yul.RawSequenceWhileHorizon"
+    ],
+    "imports_in": 3,
+    "lines": 95,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawAdapterSequenceLoopHorizon.lean",
+    "proof_lines": 83,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 111,
+    "declarations": {
+      "theorem": 5
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawLoopBody",
+      "Solidity.Yul.LocalItemFailure"
+    ],
+    "imports_in": 3,
+    "lines": 122,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawBoolFailure.lean",
+    "proof_lines": 107,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 288,
+    "declarations": {
+      "abbrev": 1,
+      "def": 7,
+      "theorem": 15
+    },
+    "definition_lines": 29,
+    "definition_to_proof_line_ratio": 0.11372549019607843,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawFrame",
+      "Solidity.Yul.LocalOperations"
+    ],
+    "imports_in": 8,
+    "lines": 338,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawBoundary.lean",
+    "proof_lines": 255,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 34,
+    "declarations": {
+      "def": 3,
+      "structure": 1
+    },
+    "definition_lines": 31,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawCheckedControlIfElse"
+    ],
+    "imports_in": 9,
+    "lines": 47,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawCheckedAdapter.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 18,
+    "declarations": {
+      "def": 1
+    },
+    "definition_lines": 14,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawCheckedAdapter",
+      "Solidity.Yul.RawSourceForPost"
+    ],
+    "imports_in": 4,
+    "lines": 26,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawCheckedAdapterAbsent.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 98,
+    "declarations": {
+      "def": 2,
+      "theorem": 2
+    },
+    "definition_lines": 25,
+    "definition_to_proof_line_ratio": 0.373134328358209,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawCheckedAdapter",
+      "Solidity.Yul.RawSourceAdapterDoWhile"
+    ],
+    "imports_in": 3,
+    "lines": 110,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawCheckedAdapterDoWhile.lean",
+    "proof_lines": 67,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 100,
+    "declarations": {
+      "def": 2,
+      "theorem": 2
+    },
+    "definition_lines": 26,
+    "definition_to_proof_line_ratio": 0.38235294117647056,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawCheckedAdapterLoop",
+      "Solidity.Yul.RawSourceAdapterFor"
+    ],
+    "imports_in": 3,
+    "lines": 110,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawCheckedAdapterFor.lean",
+    "proof_lines": 68,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 95,
+    "declarations": {
+      "def": 2,
+      "theorem": 1
+    },
+    "definition_lines": 21,
+    "definition_to_proof_line_ratio": 0.3088235294117647,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawCheckedAdapter",
+      "Solidity.Yul.RawSourceAdapterIfElse"
+    ],
+    "imports_in": 4,
+    "lines": 106,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawCheckedAdapterIfElse.lean",
+    "proof_lines": 68,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 128,
+    "declarations": {
+      "def": 2,
+      "theorem": 2
+    },
+    "definition_lines": 29,
+    "definition_to_proof_line_ratio": 0.3118279569892473,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawCheckedAdapter",
+      "Solidity.Yul.RawControlledWhile"
+    ],
+    "imports_in": 5,
+    "lines": 139,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawCheckedAdapterLoop.lean",
+    "proof_lines": 93,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 126,
+    "declarations": {
+      "def": 7,
+      "structure": 1,
+      "theorem": 2
+    },
+    "definition_lines": 58,
+    "definition_to_proof_line_ratio": 0.9206349206349206,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawCheckedAdapter"
+    ],
+    "imports_in": 5,
+    "lines": 143,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawCheckedAdapterSequence.lean",
+    "proof_lines": 63,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 69,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 16,
+    "definition_to_proof_line_ratio": 0.3404255319148936,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawCheckedControlSequence",
+      "Solidity.Yul.RawSourceAdapterDoWhile"
+    ],
+    "imports_in": 3,
+    "lines": 78,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawCheckedControlDoWhile.lean",
+    "proof_lines": 47,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 103,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawCheckedControlDoWhile",
+      "Solidity.Yul.RawCheckedControlSequenceHorizon",
+      "Solidity.Yul.RawLoopBodyHorizon"
+    ],
+    "imports_in": 2,
+    "lines": 110,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawCheckedControlDoWhileHorizon.lean",
+    "proof_lines": 98,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 88,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 14,
+    "definition_to_proof_line_ratio": 0.20588235294117646,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawCheckedControlSequence",
+      "Solidity.Yul.RawSourceAdapterIfElse"
+    ],
+    "imports_in": 3,
+    "lines": 96,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawCheckedControlIfElse.lean",
+    "proof_lines": 68,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 161,
+    "declarations": {
+      "def": 2,
+      "inductive": 1,
+      "theorem": 4
+    },
+    "definition_lines": 46,
+    "definition_to_proof_line_ratio": 0.4144144144144144,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawControlSequence",
+      "Solidity.Yul.RawU8Statement"
+    ],
+    "imports_in": 6,
+    "lines": 173,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawCheckedControlSequence.lean",
+    "proof_lines": 111,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 136,
+    "declarations": {
+      "theorem": 6
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawCheckedControlSequence",
+      "Solidity.Yul.RawLoopBodyHorizon",
+      "Solidity.Yul.RawU8Horizon"
+    ],
+    "imports_in": 4,
+    "lines": 147,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawCheckedControlSequenceHorizon.lean",
+    "proof_lines": 131,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 94,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 20,
+    "definition_to_proof_line_ratio": 0.2857142857142857,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawCheckedControlSequence",
+      "Solidity.Yul.RawControlledWhile"
+    ],
+    "imports_in": 3,
+    "lines": 101,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawCheckedControlWhile.lean",
+    "proof_lines": 70,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 102,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawCheckedControlWhile",
+      "Solidity.Yul.RawCheckedControlSequenceHorizon",
+      "Solidity.Yul.RawLoopBodyHorizon"
+    ],
+    "imports_in": 2,
+    "lines": 109,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawCheckedControlWhileHorizon.lean",
+    "proof_lines": 97,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 55,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 12,
+    "definition_to_proof_line_ratio": 0.3076923076923077,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawCheckedSequence",
+      "Solidity.Yul.RawSourceAdapterDoWhile"
+    ],
+    "imports_in": 3,
+    "lines": 61,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawCheckedDoWhile.lean",
+    "proof_lines": 39,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 96,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawCheckedDoWhile",
+      "Solidity.Yul.RawCheckedSequenceHorizon",
+      "Solidity.Yul.RawLoopBodyHorizon"
+    ],
+    "imports_in": 2,
+    "lines": 103,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawCheckedDoWhileHorizon.lean",
+    "proof_lines": 91,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 103,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 20,
+    "definition_to_proof_line_ratio": 0.2597402597402597,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawCheckedAdapter",
+      "Solidity.Yul.RawSourceForPost"
+    ],
+    "imports_in": 7,
+    "lines": 111,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawCheckedForPost.lean",
+    "proof_lines": 77,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 32,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.6111111111111112,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawCheckedAdapterAbsent"
+    ],
+    "imports_in": 4,
+    "lines": 36,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawCheckedGrowingAbsent.lean",
+    "proof_lines": 18,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 81,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 13,
+    "definition_to_proof_line_ratio": 0.203125,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawCheckedSequence",
+      "Solidity.Yul.RawIfThen"
+    ],
+    "imports_in": 3,
+    "lines": 91,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawCheckedIf.lean",
+    "proof_lines": 64,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 82,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 14,
+    "definition_to_proof_line_ratio": 0.21875,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawCheckedSequence",
+      "Solidity.Yul.RawIfElse"
+    ],
+    "imports_in": 3,
+    "lines": 89,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawCheckedIfElse.lean",
+    "proof_lines": 64,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 90,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawCheckedIfElse",
+      "Solidity.Yul.RawCheckedSequenceHorizon",
+      "Solidity.Yul.RawLoopBodyHorizon"
+    ],
+    "imports_in": 2,
+    "lines": 97,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawCheckedIfElseHorizon.lean",
+    "proof_lines": 85,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 83,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawCheckedIf",
+      "Solidity.Yul.RawCheckedSequenceHorizon",
+      "Solidity.Yul.RawLoopBodyHorizon"
+    ],
+    "imports_in": 2,
+    "lines": 90,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawCheckedIfHorizon.lean",
+    "proof_lines": 78,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 79,
+    "declarations": {
+      "def": 2,
+      "theorem": 1
+    },
+    "definition_lines": 34,
+    "definition_to_proof_line_ratio": 0.8947368421052632,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawCheckedForPost"
+    ],
+    "imports_in": 3,
+    "lines": 87,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawCheckedInitializedForPost.lean",
+    "proof_lines": 38,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 158,
+    "declarations": {
+      "def": 2,
+      "inductive": 1,
+      "theorem": 4
+    },
+    "definition_lines": 47,
+    "definition_to_proof_line_ratio": 0.4392523364485981,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawU8Statement",
+      "Solidity.Yul.RawSequence"
+    ],
+    "imports_in": 7,
+    "lines": 171,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawCheckedSequence.lean",
+    "proof_lines": 107,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 128,
+    "declarations": {
+      "theorem": 5
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawCheckedSequence",
+      "Solidity.Yul.RawStatementHorizon",
+      "Solidity.Yul.RawU8Horizon"
+    ],
+    "imports_in": 6,
+    "lines": 139,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawCheckedSequenceHorizon.lean",
+    "proof_lines": 123,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 88,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 17,
+    "definition_to_proof_line_ratio": 0.2537313432835821,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawCheckedSequence",
+      "Solidity.Yul.RawWhile"
+    ],
+    "imports_in": 3,
+    "lines": 95,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawCheckedWhile.lean",
+    "proof_lines": 67,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 95,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawCheckedWhile",
+      "Solidity.Yul.RawCheckedSequenceHorizon",
+      "Solidity.Yul.RawLoopBodyHorizon"
+    ],
+    "imports_in": 3,
+    "lines": 102,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawCheckedWhileHorizon.lean",
+    "proof_lines": 90,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 156,
+    "declarations": {
+      "def": 6,
+      "theorem": 13
+    },
+    "definition_lines": 29,
+    "definition_to_proof_line_ratio": 0.23387096774193547,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawSource"
+    ],
+    "imports_in": 7,
+    "lines": 186,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawCoherent.lean",
+    "proof_lines": 124,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 58,
+    "declarations": {
+      "def": 1,
+      "theorem": 5
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.1,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawSequence"
+    ],
+    "imports_in": 4,
+    "lines": 69,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawCondition.lean",
+    "proof_lines": 50,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 666,
+    "declarations": {
+      "def": 6,
+      "theorem": 28
+    },
+    "definition_lines": 22,
+    "definition_to_proof_line_ratio": 0.0343213728549142,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawU8ForAbsent"
+    ],
+    "imports_in": 3,
+    "lines": 727,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawContinueLoop.lean",
+    "proof_lines": 641,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 89,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 15,
+    "definition_to_proof_line_ratio": 0.22058823529411764,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawDeclarationFrame",
+      "Solidity.Yul.LocalBoolInitialization"
+    ],
+    "imports_in": 5,
+    "lines": 97,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawControlDeclaration.lean",
+    "proof_lines": 68,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 106,
+    "declarations": {
+      "def": 2,
+      "theorem": 1
+    },
+    "definition_lines": 40,
+    "definition_to_proof_line_ratio": 0.7017543859649122,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawGrowingBlock",
+      "Solidity.Yul.RawControlDeclaration",
+      "Solidity.Yul.RawCheckedForPost"
+    ],
+    "imports_in": 3,
+    "lines": 115,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawControlForPost.lean",
+    "proof_lines": 57,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 70,
+    "declarations": {
+      "def": 2,
+      "theorem": 1
+    },
+    "definition_lines": 25,
+    "definition_to_proof_line_ratio": 0.6756756756756757,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawControlGrowingSequence",
+      "Solidity.Yul.RawGrowingBlock"
+    ],
+    "imports_in": 3,
+    "lines": 77,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawControlGrowingBlock.lean",
+    "proof_lines": 37,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 76,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.1864406779661017,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawGrowingSequence",
+      "Solidity.Yul.RawControlDeclaration"
+    ],
+    "imports_in": 4,
+    "lines": 81,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawControlGrowingSequence.lean",
+    "proof_lines": 59,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 153,
+    "declarations": {
+      "def": 2,
+      "inductive": 1,
+      "theorem": 6
+    },
+    "definition_lines": 34,
+    "definition_to_proof_line_ratio": 0.29310344827586204,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawLoopBody"
+    ],
+    "imports_in": 4,
+    "lines": 165,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawControlSequence.lean",
+    "proof_lines": 116,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 86,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawControlSequence",
+      "Solidity.Yul.RawLoopBodyHorizon"
+    ],
+    "imports_in": 3,
+    "lines": 94,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawControlSequenceHorizon.lean",
+    "proof_lines": 82,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 188,
+    "declarations": {
+      "def": 1,
+      "theorem": 5
+    },
+    "definition_lines": 20,
+    "definition_to_proof_line_ratio": 0.12121212121212122,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawLoopBody"
+    ],
+    "imports_in": 7,
+    "lines": 199,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawControlledWhile.lean",
+    "proof_lines": 165,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 80,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawControlledWhile",
+      "Solidity.Yul.RawLoopBodyHorizon"
+    ],
+    "imports_in": 3,
+    "lines": 86,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawControlledWhileHorizon.lean",
+    "proof_lines": 76,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 66,
+    "declarations": {
+      "def": 3,
+      "theorem": 9
+    },
+    "definition_lines": 21,
+    "definition_to_proof_line_ratio": 0.525,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawLiteralInitialization"
+    ],
+    "imports_in": 5,
+    "lines": 85,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawDeclarationFrame.lean",
+    "proof_lines": 40,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 90,
+    "declarations": {
+      "def": 5,
+      "inductive": 1,
+      "structure": 1,
+      "theorem": 3
+    },
+    "definition_lines": 37,
+    "definition_to_proof_line_ratio": 0.7551020408163265,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawLocalScope"
+    ],
+    "imports_in": 4,
+    "lines": 105,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawDefaultDeclaration.lean",
+    "proof_lines": 49,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 119,
+    "declarations": {
+      "def": 6,
+      "theorem": 3
+    },
+    "definition_lines": 34,
+    "definition_to_proof_line_ratio": 0.41975308641975306,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawDefaultDeclaration"
+    ],
+    "imports_in": 3,
+    "lines": 133,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawDefaultScope.lean",
+    "proof_lines": 81,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 122,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawSourceAdapterDoWhile",
+      "Solidity.Yul.RawLoopBodyHorizon"
+    ],
+    "imports_in": 2,
+    "lines": 130,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawDoWhileHorizon.lean",
+    "proof_lines": 118,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 114,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawSourceForPost",
+      "Solidity.Yul.RawLoopBodyHorizon"
+    ],
+    "imports_in": 3,
+    "lines": 122,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawForPostHorizon.lean",
+    "proof_lines": 110,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 174,
+    "declarations": {
+      "def": 8,
+      "structure": 2,
+      "theorem": 18
+    },
+    "definition_lines": 29,
+    "definition_to_proof_line_ratio": 0.20422535211267606,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.LocalBlock"
+    ],
+    "imports_in": 5,
+    "lines": 225,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawFrame.lean",
+    "proof_lines": 142,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 325,
+    "declarations": {
+      "def": 2,
+      "theorem": 20
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.03559870550161812,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawFrame",
+      "Solidity.Yul.DirtyReadback",
+      "Solidity.Yul.WordAdapterLogic"
+    ],
+    "imports_in": 3,
+    "lines": 392,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawFrameLogic.lean",
+    "proof_lines": 309,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 140,
+    "declarations": {
+      "def": 4,
+      "theorem": 4
+    },
+    "definition_lines": 31,
+    "definition_to_proof_line_ratio": 0.3069306930693069,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawGrowingSequence",
+      "Solidity.Yul.LocalBoolItemScope"
+    ],
+    "imports_in": 7,
+    "lines": 155,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawGrowingBlock.lean",
+    "proof_lines": 101,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 101,
+    "declarations": {
+      "def": 2,
+      "theorem": 1
+    },
+    "definition_lines": 37,
+    "definition_to_proof_line_ratio": 0.6607142857142857,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawGrowingBlock",
+      "Solidity.Yul.RawCheckedForPost"
+    ],
+    "imports_in": 3,
+    "lines": 110,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawGrowingForPost.lean",
+    "proof_lines": 56,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 97,
+    "declarations": {
+      "abbrev": 1,
+      "def": 3,
+      "theorem": 2
+    },
+    "definition_lines": 26,
+    "definition_to_proof_line_ratio": 0.4126984126984127,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawPreparedDeclaration",
+      "Solidity.Yul.RawCheckedAdapterSequence"
+    ],
+    "imports_in": 6,
+    "lines": 109,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawGrowingSequence.lean",
+    "proof_lines": 63,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 110,
+    "declarations": {
+      "theorem": 5
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawFrame",
+      "Solidity.Yul.HorizonAdapter"
+    ],
+    "imports_in": 3,
+    "lines": 125,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawHorizon.lean",
+    "proof_lines": 106,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 162,
+    "declarations": {
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 14,
+    "definition_to_proof_line_ratio": 0.09655172413793103,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawCondition"
+    ],
+    "imports_in": 3,
+    "lines": 172,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawIfElse.lean",
+    "proof_lines": 145,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 154,
+    "declarations": {
+      "def": 1,
+      "theorem": 5
+    },
+    "definition_lines": 13,
+    "definition_to_proof_line_ratio": 0.09420289855072464,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawCondition"
+    ],
+    "imports_in": 3,
+    "lines": 165,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawIfThen.lean",
+    "proof_lines": 138,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 109,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawSourceAdapterFor",
+      "Solidity.Yul.RawAdapterLoopHorizon"
+    ],
+    "imports_in": 2,
+    "lines": 118,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawInitializedForHorizon.lean",
+    "proof_lines": 105,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 110,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawForPostHorizon"
+    ],
+    "imports_in": 2,
+    "lines": 119,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawInitializedForPostHorizon.lean",
+    "proof_lines": 107,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 79,
+    "declarations": {
+      "def": 3,
+      "theorem": 2
+    },
+    "definition_lines": 24,
+    "definition_to_proof_line_ratio": 0.5106382978723404,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawIntegerSequence",
+      "Solidity.Yul.RawTypedScope"
+    ],
+    "imports_in": 4,
+    "lines": 87,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawIntegerBlock.lean",
+    "proof_lines": 47,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 59,
+    "declarations": {
+      "def": 2,
+      "theorem": 4
+    },
+    "definition_lines": 18,
+    "definition_to_proof_line_ratio": 0.4864864864864865,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawLiteralScope"
+    ],
+    "imports_in": 4,
+    "lines": 75,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawIntegerInitialization.lean",
+    "proof_lines": 37,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Yul",
+    "category": "unmarked",
+    "code_lines": 101,
+    "declarations": {
+      "def": 3,
+      "theorem": 2
+    },
+    "definition_lines": 29,
+    "definition_to_proof_line_ratio": 0.4264705882352941,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Yul.RawIntegerInitialization"
+    ],
+    "imports_in": 2,
+    "lines": 126,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Yul/RawIntegerScope.lean",
+    "proof_lines": 68,
+    "roadmap_commands": 0,
+    "sorry": 0
+  }
+]

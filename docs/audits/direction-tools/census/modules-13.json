@@ -1,0 +1,7136 @@
+[
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 89,
+    "declarations": {
+      "def": 29,
+      "theorem": 5
+    },
+    "definition_lines": 57,
+    "definition_to_proof_line_ratio": 2.4782608695652173,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.StorageOps.SourceWordWrite"
+    ],
+    "imports_in": 5,
+    "lines": 116,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/StorageOps/SourceWordWriteControls.lean",
+    "proof_lines": 23,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 54,
+    "declarations": {
+      "def": 1,
+      "theorem": 3
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.14634146341463414,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.StorageOps.SourceWordWrite"
+    ],
+    "imports_in": 2,
+    "lines": 73,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/StorageOps/SourceWriteRollback.lean",
+    "proof_lines": 41,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 60,
+    "declarations": {
+      "def": 18,
+      "theorem": 2
+    },
+    "definition_lines": 41,
+    "definition_to_proof_line_ratio": 5.125,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.StorageOps.SourceWriteRollback",
+      "Solidity.Lowering.StorageOps.SourceWordCommutationControls"
+    ],
+    "imports_in": 1,
+    "lines": 79,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/StorageOps/SourceWriteRollbackControls.lean",
+    "proof_lines": 8,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 294,
+    "declarations": {
+      "def": 38,
+      "theorem": 20
+    },
+    "definition_lines": 71,
+    "definition_to_proof_line_ratio": 0.3333333333333333,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Backend.StorageOps.TwoClearRepresentation"
+    ],
+    "imports_in": 1,
+    "lines": 329,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/StorageOps/TwoClearRepresentationControls.lean",
+    "proof_lines": 213,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 44,
+    "declarations": {
+      "def": 1,
+      "theorem": 3
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.20689655172413793,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.P8Bindings",
+      "Solidity.Lowering.V07.RecursiveGraph",
+      "Solidity.Lowering.V07.GraphAdmissionBoundary"
+    ],
+    "imports_in": 1,
+    "lines": 60,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/AcceptedGraphProducer.lean",
+    "proof_lines": 29,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 122,
+    "declarations": {
+      "def": 17
+    },
+    "definition_lines": 69,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.AddressComparisons",
+      "Solidity.Lowering.V07.AddressConversionControls",
+      "Solidity.Lowering.V07.NumericComparisonControls"
+    ],
+    "imports_in": 1,
+    "lines": 190,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/AddressComparisonControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 112,
+    "declarations": {
+      "def": 1,
+      "theorem": 6
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.021505376344086023,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.AddressConversions",
+      "Solidity.Lowering.V07.NumericComparisons"
+    ],
+    "imports_in": 2,
+    "lines": 139,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/AddressComparisons.lean",
+    "proof_lines": 93,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 212,
+    "declarations": {
+      "abbrev": 2,
+      "def": 43,
+      "theorem": 2
+    },
+    "definition_lines": 106,
+    "definition_to_proof_line_ratio": 7.571428571428571,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.AddressConversions",
+      "Solidity.Lowering.V07.WordCastControls",
+      "Solidity.Lowering.V07.P12Controls"
+    ],
+    "imports_in": 5,
+    "lines": 352,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/AddressConversionControls.lean",
+    "proof_lines": 14,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 243,
+    "declarations": {
+      "def": 4,
+      "theorem": 22
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.04838709677419355,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UnsignedNarrowing",
+      "Solidity.Lowering.V07.ContextMapWrite"
+    ],
+    "imports_in": 7,
+    "lines": 326,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/AddressConversions.lean",
+    "proof_lines": 186,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 136,
+    "declarations": {
+      "abbrev": 1,
+      "def": 19,
+      "theorem": 2
+    },
+    "definition_lines": 75,
+    "definition_to_proof_line_ratio": 5.357142857142857,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.AddressQualifiers",
+      "Solidity.Lowering.V07.AddressConversionControls"
+    ],
+    "imports_in": 2,
+    "lines": 204,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/AddressQualifierControls.lean",
+    "proof_lines": 14,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 115,
+    "declarations": {
+      "theorem": 9
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.AddressConversions"
+    ],
+    "imports_in": 3,
+    "lines": 148,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/AddressQualifiers.lean",
+    "proof_lines": 93,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 133,
+    "declarations": {
+      "theorem": 5
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.AllAliasPair",
+      "Solidity.Lowering.V07.DoubleSubtraction"
+    ],
+    "imports_in": 4,
+    "lines": 145,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/AliasRhsSubtraction.lean",
+    "proof_lines": 129,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 127,
+    "declarations": {
+      "abbrev": 3,
+      "def": 7,
+      "theorem": 11
+    },
+    "definition_lines": 21,
+    "definition_to_proof_line_ratio": 0.21212121212121213,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.AliasRhsSubtraction",
+      "Solidity.Lowering.V07.MixedAssignmentControls",
+      "Solidity.Lowering.V07.Controls",
+      "Solidity.Lowering.V07.DoubleControls"
+    ],
+    "imports_in": 2,
+    "lines": 145,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/AllAliasControls.lean",
+    "proof_lines": 99,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 106,
+    "declarations": {
+      "theorem": 5
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.DoubleAssignmentFamily"
+    ],
+    "imports_in": 6,
+    "lines": 118,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/AllAliasPair.lean",
+    "proof_lines": 98,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 49,
+    "declarations": {
+      "def": 3,
+      "theorem": 7
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.15384615384615385,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.MixedAssignmentControls"
+    ],
+    "imports_in": 2,
+    "lines": 59,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/AssignmentBoundaries.lean",
+    "proof_lines": 39,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 114,
+    "declarations": {
+      "def": 5,
+      "theorem": 17
+    },
+    "definition_lines": 14,
+    "definition_to_proof_line_ratio": 0.14736842105263157,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.IntegerAssignmentPrefixes",
+      "Solidity.Lowering.V07.ReadControls"
+    ],
+    "imports_in": 3,
+    "lines": 140,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/AssignmentControls.lean",
+    "proof_lines": 95,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 64,
+    "declarations": {
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.10909090909090909,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.Operands"
+    ],
+    "imports_in": 2,
+    "lines": 77,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/AssignmentOperands.lean",
+    "proof_lines": 55,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 63,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 12,
+    "definition_to_proof_line_ratio": 0.25,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.AssignmentOperands"
+    ],
+    "imports_in": 3,
+    "lines": 70,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/AssignmentOrder.lean",
+    "proof_lines": 48,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 86,
+    "declarations": {
+      "def": 1,
+      "theorem": 3
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.12162162162162163,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.IntegerSubtraction"
+    ],
+    "imports_in": 3,
+    "lines": 94,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/AssignmentSubtraction.lean",
+    "proof_lines": 74,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 164,
+    "declarations": {
+      "def": 26,
+      "theorem": 1
+    },
+    "definition_lines": 86,
+    "definition_to_proof_line_ratio": 12.285714285714286,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.BooleanComparisons",
+      "Solidity.Lowering.V07.P12Controls"
+    ],
+    "imports_in": 1,
+    "lines": 253,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/BooleanComparisonControls.lean",
+    "proof_lines": 7,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 179,
+    "declarations": {
+      "def": 6,
+      "theorem": 12
+    },
+    "definition_lines": 16,
+    "definition_to_proof_line_ratio": 0.11764705882352941,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.EffectfulCondition"
+    ],
+    "imports_in": 2,
+    "lines": 227,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/BooleanComparisons.lean",
+    "proof_lines": 136,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 85,
+    "declarations": {
+      "abbrev": 5,
+      "def": 10,
+      "theorem": 14
+    },
+    "definition_lines": 23,
+    "definition_to_proof_line_ratio": 0.39655172413793105,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.P12Controls"
+    ],
+    "imports_in": 1,
+    "lines": 106,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/ConditionLoopControl.lean",
+    "proof_lines": 58,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 165,
+    "declarations": {
+      "def": 5,
+      "theorem": 7
+    },
+    "definition_lines": 23,
+    "definition_to_proof_line_ratio": 0.16546762589928057,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.ShortCircuit"
+    ],
+    "imports_in": 6,
+    "lines": 188,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/ConditionalAssignments.lean",
+    "proof_lines": 139,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 152,
+    "declarations": {
+      "abbrev": 4,
+      "def": 37,
+      "theorem": 2
+    },
+    "definition_lines": 92,
+    "definition_to_proof_line_ratio": 3.066666666666667,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.ConditionalAssignments",
+      "Solidity.Lowering.V07.P12Controls"
+    ],
+    "imports_in": 4,
+    "lines": 183,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/ConditionalControls.lean",
+    "proof_lines": 30,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 91,
+    "declarations": {
+      "def": 4,
+      "structure": 1,
+      "theorem": 6
+    },
+    "definition_lines": 33,
+    "definition_to_proof_line_ratio": 0.6226415094339622,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.DoubleAssignment"
+    ],
+    "imports_in": 4,
+    "lines": 117,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/ContextMap.lean",
+    "proof_lines": 53,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 53,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.ContextMap"
+    ],
+    "imports_in": 8,
+    "lines": 64,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/ContextMapWrite.lean",
+    "proof_lines": 44,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 27,
+    "declarations": {
+      "def": 1,
+      "theorem": 8
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.047619047619047616,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.Conversions",
+      "Solidity.Lowering.V07.SourceReads"
+    ],
+    "imports_in": 3,
+    "lines": 34,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/Controls.lean",
+    "proof_lines": 21,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 33,
+    "declarations": {
+      "theorem": 7
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.Scalar"
+    ],
+    "imports_in": 4,
+    "lines": 44,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/Conversions.lean",
+    "proof_lines": 29,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 81,
+    "declarations": {
+      "inductive": 2,
+      "structure": 1,
+      "theorem": 4
+    },
+    "definition_lines": 44,
+    "definition_to_proof_line_ratio": 1.5172413793103448,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.Scalar",
+      "Solidity.Source.Machine",
+      "Solidity.TypeGraph"
+    ],
+    "imports_in": 7,
+    "lines": 103,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/DeclarationGraph.lean",
+    "proof_lines": 29,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 101,
+    "declarations": {
+      "def": 1,
+      "theorem": 5
+    },
+    "definition_lines": 14,
+    "definition_to_proof_line_ratio": 0.17721518987341772,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.IntegerLocalFamily"
+    ],
+    "imports_in": 8,
+    "lines": 117,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/DoubleAssignment.lean",
+    "proof_lines": 79,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 28,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.DoubleAssignment"
+    ],
+    "imports_in": 4,
+    "lines": 34,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/DoubleAssignmentFamily.lean",
+    "proof_lines": 22,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 92,
+    "declarations": {
+      "abbrev": 5,
+      "def": 5,
+      "theorem": 10
+    },
+    "definition_lines": 19,
+    "definition_to_proof_line_ratio": 0.2835820895522388,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.DoubleSubtraction",
+      "Solidity.Lowering.V07.LocalFamilyControls",
+      "Solidity.Lowering.V07.MixedAssignmentControls"
+    ],
+    "imports_in": 3,
+    "lines": 107,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/DoubleControls.lean",
+    "proof_lines": 67,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 122,
+    "declarations": {
+      "abbrev": 4,
+      "def": 10,
+      "theorem": 11
+    },
+    "definition_lines": 24,
+    "definition_to_proof_line_ratio": 0.25806451612903225,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.DoubleControls",
+      "Solidity.Lowering.V07.AssignmentBoundaries"
+    ],
+    "imports_in": 1,
+    "lines": 144,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/DoubleNegativeControls.lean",
+    "proof_lines": 93,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 125,
+    "declarations": {
+      "def": 2,
+      "theorem": 4
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.0990990990990991,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.DoubleAssignmentFamily"
+    ],
+    "imports_in": 3,
+    "lines": 136,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/DoubleSubtraction.lean",
+    "proof_lines": 111,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 61,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.ContextMapWrite"
+    ],
+    "imports_in": 7,
+    "lines": 75,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/EffectfulCondition.lean",
+    "proof_lines": 58,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 198,
+    "declarations": {
+      "abbrev": 3,
+      "def": 37,
+      "theorem": 3
+    },
+    "definition_lines": 112,
+    "definition_to_proof_line_ratio": 4.869565217391305,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.EnumConversions",
+      "Solidity.Lowering.V07.WordCastControls",
+      "Solidity.Lowering.V07.P12Controls"
+    ],
+    "imports_in": 6,
+    "lines": 289,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/EnumConversionControls.lean",
+    "proof_lines": 23,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 189,
+    "declarations": {
+      "def": 2,
+      "theorem": 15
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.033112582781456956,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.AddressConversions"
+    ],
+    "imports_in": 7,
+    "lines": 251,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/EnumConversions.lean",
+    "proof_lines": 151,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 173,
+    "declarations": {
+      "def": 4,
+      "theorem": 11
+    },
+    "definition_lines": 16,
+    "definition_to_proof_line_ratio": 0.12213740458015267,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.EnumConversions",
+      "Solidity.Lowering.V07.UnsignedQuotRemGuard"
+    ],
+    "imports_in": 4,
+    "lines": 216,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/EnumGuard.lean",
+    "proof_lines": 131,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 136,
+    "declarations": {
+      "def": 22
+    },
+    "definition_lines": 80,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.EnumGuard",
+      "Solidity.Lowering.V07.EnumConversionControls"
+    ],
+    "imports_in": 3,
+    "lines": 200,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/EnumGuardControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 194,
+    "declarations": {
+      "abbrev": 4,
+      "def": 32,
+      "theorem": 3
+    },
+    "definition_lines": 119,
+    "definition_to_proof_line_ratio": 7.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.EnumSignedCasts",
+      "Solidity.Lowering.V07.EnumConversionControls"
+    ],
+    "imports_in": 2,
+    "lines": 267,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/EnumSignedCastControls.lean",
+    "proof_lines": 17,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 115,
+    "declarations": {
+      "def": 2,
+      "theorem": 8
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.056179775280898875,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.EnumConversions",
+      "Solidity.Lowering.V07.SignedNarrowing"
+    ],
+    "imports_in": 3,
+    "lines": 147,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/EnumSignedCasts.lean",
+    "proof_lines": 89,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 77,
+    "declarations": {
+      "theorem": 7
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.EnumConversions",
+      "Solidity.Lowering.V07.WordCasts"
+    ],
+    "imports_in": 3,
+    "lines": 104,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/EnumSignedWord.lean",
+    "proof_lines": 58,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 119,
+    "declarations": {
+      "def": 20
+    },
+    "definition_lines": 72,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.EnumSignedWord",
+      "Solidity.Lowering.V07.EnumConversionControls",
+      "Solidity.Lowering.V07.UnsignedCasts"
+    ],
+    "imports_in": 1,
+    "lines": 171,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/EnumSignedWordControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 105,
+    "declarations": {
+      "def": 19
+    },
+    "definition_lines": 66,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.EnumUnsignedCasts",
+      "Solidity.Lowering.V07.EnumConversionControls"
+    ],
+    "imports_in": 1,
+    "lines": 158,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/EnumUnsignedCastControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 84,
+    "declarations": {
+      "theorem": 7
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.EnumConversions",
+      "Solidity.Lowering.V07.UnsignedCasts"
+    ],
+    "imports_in": 3,
+    "lines": 110,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/EnumUnsignedCasts.lean",
+    "proof_lines": 65,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 101,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.RecursiveGraph"
+    ],
+    "imports_in": 2,
+    "lines": 106,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/FieldCompleteness.lean",
+    "proof_lines": 98,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 84,
+    "declarations": {
+      "def": 2,
+      "theorem": 6
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.08064516129032258,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.SourceReads",
+      "Solidity.Lowering.V07.ContextMapWrite",
+      "Solidity.Yul.Views.ScalarCodecs"
+    ],
+    "imports_in": 5,
+    "lines": 106,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/FixedBytesAssignment.lean",
+    "proof_lines": 62,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 136,
+    "declarations": {
+      "abbrev": 2,
+      "def": 15,
+      "theorem": 2
+    },
+    "definition_lines": 63,
+    "definition_to_proof_line_ratio": 4.2,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.FixedBytesAssignment",
+      "Solidity.Lowering.V07.P12Controls",
+      "Solidity.Lowering.V07.UnsignedCasts"
+    ],
+    "imports_in": 5,
+    "lines": 192,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/FixedBytesAssignmentControls.lean",
+    "proof_lines": 15,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 162,
+    "declarations": {
+      "def": 19,
+      "theorem": 2
+    },
+    "definition_lines": 80,
+    "definition_to_proof_line_ratio": 6.153846153846154,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.FixedBytesComparisons",
+      "Solidity.Lowering.V07.FixedBytesAssignmentControls"
+    ],
+    "imports_in": 1,
+    "lines": 232,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/FixedBytesComparisonControls.lean",
+    "proof_lines": 13,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 122,
+    "declarations": {
+      "def": 1,
+      "theorem": 7
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.009708737864077669,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.FixedBytesAssignment",
+      "Solidity.Lowering.V07.NumericComparisons"
+    ],
+    "imports_in": 2,
+    "lines": 151,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/FixedBytesComparisons.lean",
+    "proof_lines": 103,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 125,
+    "declarations": {
+      "def": 8,
+      "structure": 2,
+      "theorem": 13
+    },
+    "definition_lines": 48,
+    "definition_to_proof_line_ratio": 0.9795918367346939,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.LocationGraphCompleteness",
+      "Solidity.Lowering.V07.LocationProducerControls",
+      "Solidity.Lowering.V07.LocationGraphCompletenessControls",
+      "Solidity.Lowering.V07.SourceRefusal",
+      "Solidity.Lowering.P8.DeclarationGraphAdmission"
+    ],
+    "imports_in": 4,
+    "lines": 224,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/GraphAdmissionAssembly.lean",
+    "proof_lines": 49,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 178,
+    "declarations": {
+      "def": 11,
+      "theorem": 16
+    },
+    "definition_lines": 46,
+    "definition_to_proof_line_ratio": 0.36220472440944884,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.DeclarationGraph",
+      "Solidity.Source.WellFormed",
+      "Solidity.Frontend.Static.Certificates"
+    ],
+    "imports_in": 4,
+    "lines": 212,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/GraphAdmissionBoundary.lean",
+    "proof_lines": 127,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 49,
+    "declarations": {
+      "def": 5,
+      "theorem": 4
+    },
+    "definition_lines": 41,
+    "definition_to_proof_line_ratio": 8.2,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.DeclarationGraph"
+    ],
+    "imports_in": 2,
+    "lines": 55,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/GraphControls.lean",
+    "proof_lines": 5,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 63,
+    "declarations": {
+      "def": 5,
+      "theorem": 5
+    },
+    "definition_lines": 41,
+    "definition_to_proof_line_ratio": 2.1578947368421053,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.GraphControls"
+    ],
+    "imports_in": 3,
+    "lines": 73,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/GraphIdentityControls.lean",
+    "proof_lines": 19,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 49,
+    "declarations": {
+      "theorem": 6
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.RecursiveGraph"
+    ],
+    "imports_in": 2,
+    "lines": 61,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/GraphRanks.lean",
+    "proof_lines": 45,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 428,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.SignedNarrowArithmeticControls",
+      "Solidity.Lowering.V07.SignedWidthCastControls",
+      "Solidity.Lowering.V07.UnsignedWidthCastControls",
+      "Solidity.Lowering.V07.UnsignedCastControls",
+      "Solidity.Lowering.V07.SignedArithmeticControls",
+      "Solidity.Lowering.V07.UnsignedAddition",
+      "Solidity.Lowering.V07.UnsignedMultiplication",
+      "Solidity.Lowering.V07.WordCasts",
+      "Solidity.Lowering.V07.ConditionalAssignments",
+      "Solidity.Lowering.V07.WrappedMultiplicationPair",
+      "Solidity.Lowering.V07.SignedWordSubtraction",
+      "Solidity.Lowering.V07.ReferenceCaptureRelated",
+      "Solidity.Lowering.V07.ReferenceOrderRelated",
+      "Solidity.Lowering.V07.LocationGraphCompleteness"
+    ],
+    "imports_in": 1,
+    "lines": 1064,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/HeadlineAxioms.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 47,
+    "declarations": {
+      "def": 2,
+      "theorem": 2
+    },
+    "definition_lines": 12,
+    "definition_to_proof_line_ratio": 0.375,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.IntegerLocalFamily"
+    ],
+    "imports_in": 2,
+    "lines": 57,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/IntegerAssignmentPrefixes.lean",
+    "proof_lines": 32,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 92,
+    "declarations": {
+      "def": 2,
+      "theorem": 5
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.11428571428571428,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.IntegerConstants",
+      "Solidity.Lowering.V07.IntegerLocalFamily"
+    ],
+    "imports_in": 3,
+    "lines": 115,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/IntegerConstantAssignment.lean",
+    "proof_lines": 70,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 127,
+    "declarations": {
+      "def": 16,
+      "theorem": 3
+    },
+    "definition_lines": 64,
+    "definition_to_proof_line_ratio": 3.5555555555555554,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.IntegerConstantAssignment",
+      "Solidity.Lowering.V07.WordCastControls"
+    ],
+    "imports_in": 1,
+    "lines": 190,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/IntegerConstantAssignmentControls.lean",
+    "proof_lines": 18,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 101,
+    "declarations": {
+      "abbrev": 1,
+      "def": 15
+    },
+    "definition_lines": 43,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.IntegerConstants",
+      "Solidity.Lowering.V07.P12Controls",
+      "Solidity.Lowering.V07.UnsignedCasts"
+    ],
+    "imports_in": 1,
+    "lines": 151,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/IntegerConstantControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 111,
+    "declarations": {
+      "def": 3,
+      "theorem": 10
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.1,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.Operands"
+    ],
+    "imports_in": 5,
+    "lines": 147,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/IntegerConstants.lean",
+    "proof_lines": 80,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 69,
+    "declarations": {
+      "structure": 1,
+      "theorem": 6
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.12962962962962962,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.AssignmentSubtraction"
+    ],
+    "imports_in": 6,
+    "lines": 83,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/IntegerLocalFamily.lean",
+    "proof_lines": 54,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 85,
+    "declarations": {
+      "theorem": 7
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.AssignmentOrder"
+    ],
+    "imports_in": 2,
+    "lines": 98,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/IntegerSubtraction.lean",
+    "proof_lines": 82,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 109,
+    "declarations": {
+      "theorem": 11
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.IntegerConstantAssignment"
+    ],
+    "imports_in": 3,
+    "lines": 150,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/IntegralRationalConstants.lean",
+    "proof_lines": 84,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 146,
+    "declarations": {
+      "def": 22
+    },
+    "definition_lines": 73,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.IntegralRationalConstants",
+      "Solidity.Lowering.V07.WordCastControls",
+      "Solidity.Lowering.V07.UnsignedCasts"
+    ],
+    "imports_in": 1,
+    "lines": 211,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/IntegralRationalControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 180,
+    "declarations": {
+      "def": 5,
+      "theorem": 10
+    },
+    "definition_lines": 18,
+    "definition_to_proof_line_ratio": 0.13043478260869565,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.AssignmentOrder",
+      "Solidity.Lowering.V07.DoubleAssignment"
+    ],
+    "imports_in": 3,
+    "lines": 219,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/LessThan.lean",
+    "proof_lines": 138,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 157,
+    "declarations": {
+      "def": 24
+    },
+    "definition_lines": 87,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.LessThan",
+      "Solidity.Lowering.V07.WordCastControls"
+    ],
+    "imports_in": 2,
+    "lines": 215,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/LessThanControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 81,
+    "declarations": {
+      "abbrev": 3,
+      "def": 7,
+      "theorem": 11
+    },
+    "definition_lines": 23,
+    "definition_to_proof_line_ratio": 0.42592592592592593,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.AssignmentControls"
+    ],
+    "imports_in": 3,
+    "lines": 97,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/LocalFamilyControls.lean",
+    "proof_lines": 54,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 89,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.06172839506172839,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.FieldCompleteness"
+    ],
+    "imports_in": 2,
+    "lines": 96,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/LocalFieldSupport.lean",
+    "proof_lines": 81,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 71,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.LocalFieldSupport",
+      "Solidity.Lowering.V07.NodeRank"
+    ],
+    "imports_in": 4,
+    "lines": 80,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/LocationGraphCompleteness.lean",
+    "proof_lines": 67,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 50,
+    "declarations": {
+      "def": 7
+    },
+    "definition_lines": 37,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.LocationGraphCompleteness",
+      "Solidity.Lowering.V07.LocationProducerControls"
+    ],
+    "imports_in": 2,
+    "lines": 59,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/LocationGraphCompletenessControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 65,
+    "declarations": {
+      "def": 4,
+      "instance": 2,
+      "structure": 2
+    },
+    "definition_lines": 61,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.P8Bindings"
+    ],
+    "imports_in": 5,
+    "lines": 106,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/LocationGraphInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 76,
+    "declarations": {
+      "abbrev": 3,
+      "def": 7,
+      "theorem": 10
+    },
+    "definition_lines": 43,
+    "definition_to_proof_line_ratio": 1.5925925925925926,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.RecursiveGraphControls",
+      "Solidity.Lowering.V07.LocationGraphInterface"
+    ],
+    "imports_in": 3,
+    "lines": 97,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/LocationGraphLaws.lean",
+    "proof_lines": 27,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 116,
+    "declarations": {
+      "def": 14,
+      "instance": 2,
+      "theorem": 4
+    },
+    "definition_lines": 83,
+    "definition_to_proof_line_ratio": 3.074074074074074,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.RecursiveGraph",
+      "Solidity.Lowering.V07.LocationGraphInterface"
+    ],
+    "imports_in": 5,
+    "lines": 147,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/LocationGraphProducer.lean",
+    "proof_lines": 27,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 78,
+    "declarations": {
+      "abbrev": 1,
+      "def": 9,
+      "theorem": 19
+    },
+    "definition_lines": 12,
+    "definition_to_proof_line_ratio": 0.2,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.LocationGraphLaws",
+      "Solidity.Lowering.V07.LocationGraphProducer"
+    ],
+    "imports_in": 4,
+    "lines": 107,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/LocationProducerControls.lean",
+    "proof_lines": 60,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 76,
+    "declarations": {
+      "def": 13,
+      "theorem": 9
+    },
+    "definition_lines": 28,
+    "definition_to_proof_line_ratio": 0.6511627906976745,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.AssignmentControls",
+      "Solidity.Semantics.AllocBytes"
+    ],
+    "imports_in": 8,
+    "lines": 92,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/MixedAssignmentControls.lean",
+    "proof_lines": 43,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 84,
+    "declarations": {
+      "def": 1,
+      "theorem": 6
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.025974025974025976,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.RankConvergence",
+      "Solidity.Lowering.V07.LocationGraphProducer"
+    ],
+    "imports_in": 4,
+    "lines": 101,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/NodeRank.lean",
+    "proof_lines": 77,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 157,
+    "declarations": {
+      "def": 23
+    },
+    "definition_lines": 94,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.NumericComparisons",
+      "Solidity.Lowering.V07.LessThanControls"
+    ],
+    "imports_in": 2,
+    "lines": 242,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/NumericComparisonControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 215,
+    "declarations": {
+      "def": 5,
+      "theorem": 10
+    },
+    "definition_lines": 23,
+    "definition_to_proof_line_ratio": 0.13609467455621302,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.LessThan"
+    ],
+    "imports_in": 4,
+    "lines": 257,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/NumericComparisons.lean",
+    "proof_lines": 169,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 42,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.SourceReads",
+      "Solidity.Semantics.DeferredSource"
+    ],
+    "imports_in": 5,
+    "lines": 50,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/Operands.lean",
+    "proof_lines": 38,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 92,
+    "declarations": {
+      "def": 1,
+      "theorem": 5
+    },
+    "definition_lines": 27,
+    "definition_to_proof_line_ratio": 0.5510204081632653,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.P12NextInterface"
+    ],
+    "imports_in": 2,
+    "lines": 118,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/P12AssignedCondition.lean",
+    "proof_lines": 49,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 136,
+    "declarations": {
+      "def": 19,
+      "theorem": 3
+    },
+    "definition_lines": 64,
+    "definition_to_proof_line_ratio": 3.0476190476190474,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.P12AssignedCondition",
+      "Solidity.Lowering.V07.P12Controls"
+    ],
+    "imports_in": 7,
+    "lines": 215,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/P12AssignedConditionControls.lean",
+    "proof_lines": 21,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 107,
+    "declarations": {
+      "def": 14,
+      "theorem": 2
+    },
+    "definition_lines": 55,
+    "definition_to_proof_line_ratio": 6.875,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.P12AtomicConditions",
+      "Solidity.Lowering.V07.P12AssignedConditionControls",
+      "Solidity.Lowering.V07.P12NegatedCondition"
+    ],
+    "imports_in": 1,
+    "lines": 165,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/P12AtomicConditionControls.lean",
+    "proof_lines": 8,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 98,
+    "declarations": {
+      "def": 4,
+      "theorem": 7
+    },
+    "definition_lines": 34,
+    "definition_to_proof_line_ratio": 0.8292682926829268,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.P12NextInterface"
+    ],
+    "imports_in": 2,
+    "lines": 146,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/P12AtomicConditions.lean",
+    "proof_lines": 41,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 66,
+    "declarations": {
+      "def": 1,
+      "theorem": 5
+    },
+    "definition_lines": 21,
+    "definition_to_proof_line_ratio": 0.75,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.P12NextInterface"
+    ],
+    "imports_in": 2,
+    "lines": 94,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/P12ContextExtension.lean",
+    "proof_lines": 28,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 116,
+    "declarations": {
+      "abbrev": 2,
+      "def": 19,
+      "theorem": 4
+    },
+    "definition_lines": 57,
+    "definition_to_proof_line_ratio": 3.5625,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.P12ContextExtension",
+      "Solidity.Lowering.V07.P12AssignedConditionControls"
+    ],
+    "imports_in": 1,
+    "lines": 183,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/P12ContextExtensionControls.lean",
+    "proof_lines": 16,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 127,
+    "declarations": {
+      "abbrev": 4,
+      "def": 8,
+      "theorem": 12
+    },
+    "definition_lines": 29,
+    "definition_to_proof_line_ratio": 0.31521739130434784,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.EffectfulCondition",
+      "Solidity.Lowering.V07.ReferenceCapture",
+      "Solidity.Lowering.V07.MixedAssignmentControls"
+    ],
+    "imports_in": 18,
+    "lines": 154,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/P12Controls.lean",
+    "proof_lines": 92,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 212,
+    "declarations": {
+      "abbrev": 2,
+      "def": 8,
+      "theorem": 11
+    },
+    "definition_lines": 67,
+    "definition_to_proof_line_ratio": 0.7052631578947368,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.P12AssignedConditionControls"
+    ],
+    "imports_in": 1,
+    "lines": 295,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/P12MemoryCaptureControls.lean",
+    "proof_lines": 95,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 139,
+    "declarations": {
+      "def": 3,
+      "theorem": 10
+    },
+    "definition_lines": 25,
+    "definition_to_proof_line_ratio": 0.28735632183908044,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.P12NextInterface",
+      "Solidity.Source.ValueProgress"
+    ],
+    "imports_in": 3,
+    "lines": 179,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/P12NegatedCondition.lean",
+    "proof_lines": 87,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 138,
+    "declarations": {
+      "def": 22,
+      "theorem": 2
+    },
+    "definition_lines": 69,
+    "definition_to_proof_line_ratio": 11.5,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.P12NegatedCondition",
+      "Solidity.Lowering.V07.P12AssignedConditionControls",
+      "Solidity.Lowering.V07.ShortCircuitControls"
+    ],
+    "imports_in": 1,
+    "lines": 221,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/P12NegatedConditionControls.lean",
+    "proof_lines": 6,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 77,
+    "declarations": {
+      "abbrev": 2,
+      "def": 1,
+      "structure": 3
+    },
+    "definition_lines": 73,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.EffectfulCondition",
+      "Solidity.Lowering.V07.ReferenceCaptureRelated"
+    ],
+    "imports_in": 9,
+    "lines": 113,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/P12NextInterface.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 184,
+    "declarations": {
+      "abbrev": 2,
+      "def": 7,
+      "theorem": 10
+    },
+    "definition_lines": 59,
+    "definition_to_proof_line_ratio": 0.7468354430379747,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.P12AssignedConditionControls"
+    ],
+    "imports_in": 1,
+    "lines": 262,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/P12StorageCaptureControls.lean",
+    "proof_lines": 79,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 97,
+    "declarations": {
+      "abbrev": 1,
+      "def": 2,
+      "theorem": 12
+    },
+    "definition_lines": 16,
+    "definition_to_proof_line_ratio": 0.2191780821917808,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.P8.FrozenInterface",
+      "Solidity.Lowering.V07.DeclarationGraph",
+      "Solidity.Lowering.V07.WrappedAssignmentPair"
+    ],
+    "imports_in": 3,
+    "lines": 135,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/P8Bindings.lean",
+    "proof_lines": 73,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 195,
+    "declarations": {
+      "def": 14,
+      "instance": 2,
+      "theorem": 14
+    },
+    "definition_lines": 76,
+    "definition_to_proof_line_ratio": 0.6551724137931034,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.DeclarationGraph"
+    ],
+    "imports_in": 3,
+    "lines": 244,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/PrimitiveGraph.lean",
+    "proof_lines": 116,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 76,
+    "declarations": {
+      "def": 14,
+      "theorem": 18
+    },
+    "definition_lines": 30,
+    "definition_to_proof_line_ratio": 0.7317073170731707,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.PrimitiveGraph",
+      "Solidity.Lowering.V07.GraphIdentityControls"
+    ],
+    "imports_in": 2,
+    "lines": 104,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/PrimitiveGraphControls.lean",
+    "proof_lines": 41,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 64,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.GraphRanks"
+    ],
+    "imports_in": 2,
+    "lines": 74,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/RankConvergence.lean",
+    "proof_lines": 60,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 46,
+    "declarations": {
+      "def": 2,
+      "theorem": 5
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.14285714285714285,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.Controls",
+      "Solidity.Lowering.V07.Operands",
+      "Solidity.Source.SemanticsExamples"
+    ],
+    "imports_in": 2,
+    "lines": 55,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/ReadControls.lean",
+    "proof_lines": 35,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 133,
+    "declarations": {
+      "def": 11,
+      "instance": 1,
+      "theorem": 6
+    },
+    "definition_lines": 93,
+    "definition_to_proof_line_ratio": 2.5833333333333335,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.PrimitiveGraph"
+    ],
+    "imports_in": 6,
+    "lines": 164,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/RecursiveGraph.lean",
+    "proof_lines": 36,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 159,
+    "declarations": {
+      "def": 18,
+      "theorem": 29
+    },
+    "definition_lines": 34,
+    "definition_to_proof_line_ratio": 0.2857142857142857,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.RecursiveGraph",
+      "Solidity.Lowering.V07.GraphAdmissionBoundary",
+      "Solidity.Lowering.V07.PrimitiveGraphControls"
+    ],
+    "imports_in": 2,
+    "lines": 204,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/RecursiveGraphControls.lean",
+    "proof_lines": 119,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 106,
+    "declarations": {
+      "def": 2,
+      "theorem": 8
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.061855670103092786,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.ContextMap"
+    ],
+    "imports_in": 4,
+    "lines": 124,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/ReferenceCapture.lean",
+    "proof_lines": 97,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 62,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.ReferenceCapture",
+      "Solidity.Lowering.V07.ContextMapWrite"
+    ],
+    "imports_in": 6,
+    "lines": 76,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/ReferenceCaptureRelated.lean",
+    "proof_lines": 58,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 117,
+    "declarations": {
+      "abbrev": 3,
+      "def": 14,
+      "theorem": 14
+    },
+    "definition_lines": 28,
+    "definition_to_proof_line_ratio": 0.34146341463414637,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.ReferenceEffects",
+      "Solidity.Source.SemanticsExamples",
+      "Solidity.Theory.Typed.Mem",
+      "Solidity.Semantics.AllocBytes"
+    ],
+    "imports_in": 2,
+    "lines": 137,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/ReferenceControls.lean",
+    "proof_lines": 82,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 101,
+    "declarations": {
+      "def": 1,
+      "theorem": 5
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.11363636363636363,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.ReferenceCapture"
+    ],
+    "imports_in": 4,
+    "lines": 115,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/ReferenceEffects.lean",
+    "proof_lines": 88,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 67,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.ReferenceEffects",
+      "Solidity.Lowering.V07.ContextMapWrite"
+    ],
+    "imports_in": 3,
+    "lines": 77,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/ReferenceOrderRelated.lean",
+    "proof_lines": 63,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 113,
+    "declarations": {
+      "abbrev": 11,
+      "def": 15
+    },
+    "definition_lines": 102,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.ReferenceCaptureRelated",
+      "Solidity.Lowering.V07.P12Controls",
+      "Solidity.Lowering.V07.ReferenceControls",
+      "Solidity.Lowering.V07.ReferenceOrderRelated",
+      "Solidity.Lowering.V07.ContextMapWrite"
+    ],
+    "imports_in": 1,
+    "lines": 129,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/ReferenceRegisteredControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 93,
+    "declarations": {
+      "abbrev": 5,
+      "def": 20
+    },
+    "definition_lines": 87,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UnsignedAddition",
+      "Solidity.Lowering.V07.UnsignedMultiplication",
+      "Solidity.Lowering.V07.AllAliasControls"
+    ],
+    "imports_in": 1,
+    "lines": 102,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/RegisteredScalarClients.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 36,
+    "declarations": {
+      "def": 3,
+      "theorem": 4
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.391304347826087,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Source.Value",
+      "Solidity.Semantics.Value"
+    ],
+    "imports_in": 8,
+    "lines": 48,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/Scalar.lean",
+    "proof_lines": 23,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 213,
+    "declarations": {
+      "def": 4,
+      "theorem": 8
+    },
+    "definition_lines": 15,
+    "definition_to_proof_line_ratio": 0.07731958762886598,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.AllAliasPair",
+      "Solidity.Lowering.V07.EffectfulCondition"
+    ],
+    "imports_in": 4,
+    "lines": 236,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/ShortCircuit.lean",
+    "proof_lines": 194,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 139,
+    "declarations": {
+      "def": 7,
+      "theorem": 17
+    },
+    "definition_lines": 13,
+    "definition_to_proof_line_ratio": 0.10833333333333334,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.ShortCircuit",
+      "Solidity.Lowering.V07.P12Controls"
+    ],
+    "imports_in": 2,
+    "lines": 164,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/ShortCircuitControls.lean",
+    "proof_lines": 120,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 214,
+    "declarations": {
+      "def": 42
+    },
+    "definition_lines": 122,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.SignedWordAddition",
+      "Solidity.Lowering.V07.SignedWordMultiplication",
+      "Solidity.Lowering.V07.SignedSubtractionControls"
+    ],
+    "imports_in": 2,
+    "lines": 241,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/SignedArithmeticControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 67,
+    "declarations": {
+      "def": 1,
+      "theorem": 5
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.0392156862745098,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.SignedNarrowSubtraction"
+    ],
+    "imports_in": 2,
+    "lines": 90,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/SignedComplement.lean",
+    "proof_lines": 51,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 77,
+    "declarations": {
+      "def": 12
+    },
+    "definition_lines": 41,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.SignedComplement",
+      "Solidity.Lowering.V07.SignedNegation"
+    ],
+    "imports_in": 1,
+    "lines": 114,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/SignedComplementControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 200,
+    "declarations": {
+      "def": 37,
+      "theorem": 1
+    },
+    "definition_lines": 101,
+    "definition_to_proof_line_ratio": 10.1,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.SignedEnumTransport",
+      "Solidity.Lowering.V07.EnumGuardControls"
+    ],
+    "imports_in": 1,
+    "lines": 289,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/SignedEnumControls.lean",
+    "proof_lines": 10,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 168,
+    "declarations": {
+      "def": 4,
+      "theorem": 11
+    },
+    "definition_lines": 13,
+    "definition_to_proof_line_ratio": 0.1015625,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.EnumGuard",
+      "Solidity.Lowering.V07.SignedWidthCasts"
+    ],
+    "imports_in": 2,
+    "lines": 207,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/SignedEnumGuard.lean",
+    "proof_lines": 128,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 141,
+    "declarations": {
+      "theorem": 9
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.SignedEnumGuard"
+    ],
+    "imports_in": 3,
+    "lines": 175,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/SignedEnumTransport.lean",
+    "proof_lines": 119,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 171,
+    "declarations": {
+      "def": 3,
+      "theorem": 6
+    },
+    "definition_lines": 13,
+    "definition_to_proof_line_ratio": 0.09352517985611511,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.SignedNarrowAddition",
+      "Solidity.Lowering.V07.SignedNarrowSubtraction",
+      "Solidity.Lowering.V07.UnsignedLocalUpdate"
+    ],
+    "imports_in": 2,
+    "lines": 202,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/SignedLocalUpdate.lean",
+    "proof_lines": 139,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 161,
+    "declarations": {
+      "def": 19
+    },
+    "definition_lines": 82,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.SignedLocalUpdate",
+      "Solidity.Lowering.V07.WordCastControls"
+    ],
+    "imports_in": 1,
+    "lines": 252,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/SignedLocalUpdateControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 186,
+    "declarations": {
+      "def": 2,
+      "theorem": 9
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.046511627906976744,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.SignedNarrowing",
+      "Solidity.Lowering.V07.SignedWordAddition"
+    ],
+    "imports_in": 3,
+    "lines": 206,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/SignedNarrowAddition.lean",
+    "proof_lines": 172,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 355,
+    "declarations": {
+      "def": 50
+    },
+    "definition_lines": 274,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.SignedNarrowAddition",
+      "Solidity.Lowering.V07.SignedNarrowSubtraction",
+      "Solidity.Lowering.V07.SignedNarrowMultiplication",
+      "Solidity.Lowering.V07.WordCastControls"
+    ],
+    "imports_in": 2,
+    "lines": 414,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/SignedNarrowArithmeticControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 186,
+    "declarations": {
+      "def": 2,
+      "theorem": 9
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.046511627906976744,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.SignedNarrowing",
+      "Solidity.Lowering.V07.SignedWordMultiplication"
+    ],
+    "imports_in": 2,
+    "lines": 206,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/SignedNarrowMultiplication.lean",
+    "proof_lines": 172,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 186,
+    "declarations": {
+      "def": 2,
+      "theorem": 9
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.046511627906976744,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.SignedNarrowing",
+      "Solidity.Lowering.V07.SignedWordSubtraction"
+    ],
+    "imports_in": 5,
+    "lines": 206,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/SignedNarrowSubtraction.lean",
+    "proof_lines": 172,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 47,
+    "declarations": {
+      "theorem": 2
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.SignedWidthCasts"
+    ],
+    "imports_in": 5,
+    "lines": 52,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/SignedNarrowing.lean",
+    "proof_lines": 43,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 100,
+    "declarations": {
+      "def": 8,
+      "theorem": 4
+    },
+    "definition_lines": 23,
+    "definition_to_proof_line_ratio": 0.5897435897435898,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.SignedNarrowSubtraction",
+      "Solidity.Lowering.V07.WordCastControls"
+    ],
+    "imports_in": 3,
+    "lines": 126,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/SignedNegation.lean",
+    "proof_lines": 39,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 170,
+    "declarations": {
+      "def": 32
+    },
+    "definition_lines": 124,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.SignedNegationEffects"
+    ],
+    "imports_in": 1,
+    "lines": 240,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/SignedNegationEffectControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 96,
+    "declarations": {
+      "def": 2,
+      "theorem": 3
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.1038961038961039,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.SignedNegation"
+    ],
+    "imports_in": 2,
+    "lines": 120,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/SignedNegationEffects.lean",
+    "proof_lines": 77,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 145,
+    "declarations": {
+      "abbrev": 2,
+      "def": 31
+    },
+    "definition_lines": 96,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.SignedWordSubtraction",
+      "Solidity.Lowering.V07.WordCastControls"
+    ],
+    "imports_in": 2,
+    "lines": 171,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/SignedSubtractionControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 107,
+    "declarations": {
+      "def": 17
+    },
+    "definition_lines": 70,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.SignedWidthCasts",
+      "Solidity.Lowering.V07.WordCastControls"
+    ],
+    "imports_in": 2,
+    "lines": 129,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/SignedWidthCastControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 185,
+    "declarations": {
+      "def": 3,
+      "theorem": 9
+    },
+    "definition_lines": 14,
+    "definition_to_proof_line_ratio": 0.08383233532934131,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UnsignedWidthCasts",
+      "Solidity.Lowering.V07.SignedWordSubtraction"
+    ],
+    "imports_in": 6,
+    "lines": 205,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/SignedWidthCasts.lean",
+    "proof_lines": 167,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 196,
+    "declarations": {
+      "def": 2,
+      "theorem": 10
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.04945054945054945,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.SignedWordSubtraction",
+      "Solidity.Lowering.V07.UnsignedAddition"
+    ],
+    "imports_in": 3,
+    "lines": 217,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/SignedWordAddition.lean",
+    "proof_lines": 182,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 196,
+    "declarations": {
+      "def": 2,
+      "theorem": 10
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.04945054945054945,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.SignedWordSubtraction",
+      "Solidity.Lowering.V07.UnsignedMultiplication"
+    ],
+    "imports_in": 3,
+    "lines": 217,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/SignedWordMultiplication.lean",
+    "proof_lines": 182,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 203,
+    "declarations": {
+      "abbrev": 1,
+      "def": 2,
+      "theorem": 12
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.05291005291005291,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.WordCasts",
+      "Solidity.Lowering.V07.UnsignedNarrowing"
+    ],
+    "imports_in": 9,
+    "lines": 226,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/SignedWordSubtraction.lean",
+    "proof_lines": 189,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 47,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.Scalar",
+      "Solidity.Source.Eval",
+      "Solidity.Source.Hoare",
+      "Solidity.Semantics.Run"
+    ],
+    "imports_in": 11,
+    "lines": 55,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/SourceReads.lean",
+    "proof_lines": 40,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 197,
+    "declarations": {
+      "def": 3,
+      "instance": 1,
+      "theorem": 17
+    },
+    "definition_lines": 15,
+    "definition_to_proof_line_ratio": 0.09146341463414634,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.LocationGraphInterface",
+      "Solidity.Lowering.V07.LocationGraphLaws"
+    ],
+    "imports_in": 3,
+    "lines": 304,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/SourceRefusal.lean",
+    "proof_lines": 164,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 62,
+    "declarations": {
+      "def": 2,
+      "theorem": 4
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.13953488372093023,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UdvtAssignment",
+      "Solidity.Lowering.V07.AddressConversions"
+    ],
+    "imports_in": 2,
+    "lines": 78,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UdvtAddressAssignment.lean",
+    "proof_lines": 43,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 145,
+    "declarations": {
+      "abbrev": 2,
+      "def": 17,
+      "theorem": 4
+    },
+    "definition_lines": 63,
+    "definition_to_proof_line_ratio": 3.3157894736842106,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UdvtAddressAssignment",
+      "Solidity.Lowering.V07.AddressConversionControls",
+      "Solidity.Lowering.V07.UnsignedCasts"
+    ],
+    "imports_in": 2,
+    "lines": 202,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UdvtAddressAssignmentControls.lean",
+    "proof_lines": 19,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 105,
+    "declarations": {
+      "def": 2,
+      "theorem": 9
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.07792207792207792,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.ContextMapWrite",
+      "Solidity.Lowering.V07.Conversions"
+    ],
+    "imports_in": 6,
+    "lines": 138,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UdvtAssignment.lean",
+    "proof_lines": 77,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 162,
+    "declarations": {
+      "abbrev": 2,
+      "def": 22,
+      "theorem": 4
+    },
+    "definition_lines": 81,
+    "definition_to_proof_line_ratio": 4.5,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UdvtAssignment",
+      "Solidity.Lowering.V07.WordCastControls",
+      "Solidity.Lowering.V07.P12Controls"
+    ],
+    "imports_in": 2,
+    "lines": 216,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UdvtAssignmentControls.lean",
+    "proof_lines": 18,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 54,
+    "declarations": {
+      "def": 2,
+      "theorem": 4
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.13157894736842105,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UdvtAssignment"
+    ],
+    "imports_in": 2,
+    "lines": 70,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UdvtBoolAssignment.lean",
+    "proof_lines": 38,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 123,
+    "declarations": {
+      "abbrev": 2,
+      "def": 17,
+      "theorem": 3
+    },
+    "definition_lines": 63,
+    "definition_to_proof_line_ratio": 3.9375,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UdvtBoolAssignment",
+      "Solidity.Lowering.V07.P12Controls"
+    ],
+    "imports_in": 2,
+    "lines": 175,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UdvtBoolAssignmentControls.lean",
+    "proof_lines": 16,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 74,
+    "declarations": {
+      "def": 2,
+      "theorem": 5
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.1320754716981132,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UdvtAssignment",
+      "Solidity.Lowering.V07.FixedBytesAssignment"
+    ],
+    "imports_in": 2,
+    "lines": 97,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UdvtFixedBytesAssignment.lean",
+    "proof_lines": 53,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 145,
+    "declarations": {
+      "abbrev": 2,
+      "def": 18,
+      "theorem": 4
+    },
+    "definition_lines": 69,
+    "definition_to_proof_line_ratio": 3.6315789473684212,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UdvtFixedBytesAssignment",
+      "Solidity.Lowering.V07.FixedBytesAssignmentControls"
+    ],
+    "imports_in": 2,
+    "lines": 206,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UdvtFixedBytesAssignmentControls.lean",
+    "proof_lines": 19,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 228,
+    "declarations": {
+      "def": 2,
+      "theorem": 10
+    },
+    "definition_lines": 12,
+    "definition_to_proof_line_ratio": 0.05660377358490566,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UnsignedNarrowing"
+    ],
+    "imports_in": 14,
+    "lines": 251,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UnsignedAddition.lean",
+    "proof_lines": 212,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 89,
+    "declarations": {
+      "def": 14
+    },
+    "definition_lines": 60,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UnsignedCasts",
+      "Solidity.Lowering.V07.WordCastControls"
+    ],
+    "imports_in": 2,
+    "lines": 107,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UnsignedCastControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 118,
+    "declarations": {
+      "def": 2,
+      "theorem": 7
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.0660377358490566,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UnsignedNarrowing",
+      "Solidity.Lowering.V07.WordCasts"
+    ],
+    "imports_in": 10,
+    "lines": 134,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UnsignedCasts.lean",
+    "proof_lines": 106,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 101,
+    "declarations": {
+      "def": 1,
+      "theorem": 6
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.024096385542168676,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UnsignedWidthCasts"
+    ],
+    "imports_in": 3,
+    "lines": 126,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UnsignedComplement.lean",
+    "proof_lines": 83,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 79,
+    "declarations": {
+      "def": 13
+    },
+    "definition_lines": 42,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UnsignedComplement",
+      "Solidity.Lowering.V07.WordCastControls"
+    ],
+    "imports_in": 1,
+    "lines": 124,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UnsignedComplementControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 139,
+    "declarations": {
+      "theorem": 10
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.EnumGuard",
+      "Solidity.Lowering.V07.UnsignedWidthCasts"
+    ],
+    "imports_in": 3,
+    "lines": 175,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UnsignedEnumGuard.lean",
+    "proof_lines": 114,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 132,
+    "declarations": {
+      "def": 19,
+      "theorem": 1
+    },
+    "definition_lines": 71,
+    "definition_to_proof_line_ratio": 7.1,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UnsignedEnumGuard",
+      "Solidity.Lowering.V07.EnumGuardControls"
+    ],
+    "imports_in": 1,
+    "lines": 200,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UnsignedEnumGuardControls.lean",
+    "proof_lines": 10,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 169,
+    "declarations": {
+      "def": 4,
+      "theorem": 6
+    },
+    "definition_lines": 14,
+    "definition_to_proof_line_ratio": 0.10071942446043165,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UnsignedAddition"
+    ],
+    "imports_in": 4,
+    "lines": 201,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UnsignedLocalUpdate.lean",
+    "proof_lines": 139,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 143,
+    "declarations": {
+      "def": 19
+    },
+    "definition_lines": 82,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UnsignedLocalUpdate",
+      "Solidity.Lowering.V07.WordCastControls"
+    ],
+    "imports_in": 1,
+    "lines": 226,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UnsignedLocalUpdateControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 228,
+    "declarations": {
+      "def": 2,
+      "theorem": 10
+    },
+    "definition_lines": 12,
+    "definition_to_proof_line_ratio": 0.05660377358490566,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UnsignedNarrowing"
+    ],
+    "imports_in": 8,
+    "lines": 251,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UnsignedMultiplication.lean",
+    "proof_lines": 212,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 266,
+    "declarations": {
+      "def": 3,
+      "theorem": 15
+    },
+    "definition_lines": 14,
+    "definition_to_proof_line_ratio": 0.056451612903225805,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.DoubleAssignment",
+      "Solidity.Lowering.V07.SourceReads"
+    ],
+    "imports_in": 11,
+    "lines": 295,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UnsignedNarrowing.lean",
+    "proof_lines": 248,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 155,
+    "declarations": {
+      "abbrev": 4,
+      "def": 9,
+      "theorem": 18
+    },
+    "definition_lines": 24,
+    "definition_to_proof_line_ratio": 0.1951219512195122,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UnsignedNarrowing",
+      "Solidity.Lowering.V07.AliasRhsSubtraction",
+      "Solidity.Lowering.V07.MixedAssignmentControls"
+    ],
+    "imports_in": 3,
+    "lines": 181,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UnsignedNarrowingControls.lean",
+    "proof_lines": 123,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 212,
+    "declarations": {
+      "def": 3,
+      "theorem": 9
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.021621621621621623,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UnsignedAddition",
+      "Solidity.Lowering.V07.AliasRhsSubtraction"
+    ],
+    "imports_in": 3,
+    "lines": 251,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UnsignedQuotRem.lean",
+    "proof_lines": 185,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 139,
+    "declarations": {
+      "def": 23
+    },
+    "definition_lines": 89,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UnsignedQuotRem",
+      "Solidity.Lowering.V07.WordCastControls"
+    ],
+    "imports_in": 2,
+    "lines": 213,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UnsignedQuotRemControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 243,
+    "declarations": {
+      "def": 3,
+      "theorem": 10
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.04807692307692308,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UnsignedQuotRemGuard"
+    ],
+    "imports_in": 3,
+    "lines": 291,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UnsignedQuotRemEffects.lean",
+    "proof_lines": 208,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 204,
+    "declarations": {
+      "def": 32,
+      "instance": 1
+    },
+    "definition_lines": 125,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UnsignedQuotRemEffects",
+      "Solidity.Lowering.V07.WordCastControls"
+    ],
+    "imports_in": 2,
+    "lines": 328,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UnsignedQuotRemEffectsControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 158,
+    "declarations": {
+      "def": 4,
+      "theorem": 10
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.09243697478991597,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UnsignedQuotRem",
+      "Solidity.Syntax.Checked",
+      "Solidity.Lowering.V08.AbiObservations",
+      "Solidity.Backend.Failure.Observe"
+    ],
+    "imports_in": 4,
+    "lines": 196,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UnsignedQuotRemGuard.lean",
+    "proof_lines": 119,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 140,
+    "declarations": {
+      "def": 19
+    },
+    "definition_lines": 74,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UnsignedQuotRemGuard",
+      "Solidity.Lowering.V07.UnsignedQuotRemControls"
+    ],
+    "imports_in": 1,
+    "lines": 232,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UnsignedQuotRemGuardControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 105,
+    "declarations": {
+      "def": 4,
+      "theorem": 8
+    },
+    "definition_lines": 15,
+    "definition_to_proof_line_ratio": 0.22058823529411764,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UnsignedQuotRemEffects"
+    ],
+    "imports_in": 2,
+    "lines": 136,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UnsignedQuotRemPass.lean",
+    "proof_lines": 68,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 155,
+    "declarations": {
+      "def": 18
+    },
+    "definition_lines": 86,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UnsignedQuotRemPass",
+      "Solidity.Lowering.V07.UnsignedQuotRemEffectsControls"
+    ],
+    "imports_in": 1,
+    "lines": 247,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UnsignedQuotRemPassControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 97,
+    "declarations": {
+      "def": 15
+    },
+    "definition_lines": 66,
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UnsignedWidthCasts",
+      "Solidity.Lowering.V07.WordCastControls"
+    ],
+    "imports_in": 2,
+    "lines": 115,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UnsignedWidthCastControls.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 93,
+    "declarations": {
+      "theorem": 8
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UnsignedCasts"
+    ],
+    "imports_in": 6,
+    "lines": 107,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/UnsignedWidthCasts.lean",
+    "proof_lines": 88,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 150,
+    "declarations": {
+      "def": 30,
+      "theorem": 1
+    },
+    "definition_lines": 109,
+    "definition_to_proof_line_ratio": 13.625,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.WordCasts",
+      "Solidity.Lowering.V07.MixedAssignmentControls"
+    ],
+    "imports_in": 19,
+    "lines": 174,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/WordCastControls.lean",
+    "proof_lines": 8,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 181,
+    "declarations": {
+      "def": 3,
+      "theorem": 13
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.041176470588235294,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.DoubleAssignment",
+      "Solidity.Lowering.V07.Conversions"
+    ],
+    "imports_in": 7,
+    "lines": 208,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/WordCasts.lean",
+    "proof_lines": 170,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 157,
+    "declarations": {
+      "def": 2,
+      "theorem": 4
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.06428571428571428,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UnsignedAddition",
+      "Solidity.Lowering.V07.WrappedAssignmentPair",
+      "Solidity.Lowering.V07.AllAliasPair"
+    ],
+    "imports_in": 1,
+    "lines": 171,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/WrappedAdditionPair.lean",
+    "proof_lines": 140,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 186,
+    "declarations": {
+      "def": 4,
+      "theorem": 6
+    },
+    "definition_lines": 27,
+    "definition_to_proof_line_ratio": 0.17532467532467533,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UnsignedNarrowing",
+      "Solidity.Lowering.V07.AllAliasPair"
+    ],
+    "imports_in": 5,
+    "lines": 204,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/WrappedAssignmentPair.lean",
+    "proof_lines": 154,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 228,
+    "declarations": {
+      "abbrev": 1,
+      "def": 26,
+      "theorem": 1
+    },
+    "definition_lines": 167,
+    "definition_to_proof_line_ratio": 33.4,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.WrappedMultiplicationPair",
+      "Solidity.Lowering.V07.WrappedPairControls",
+      "Solidity.Lowering.V07.UnsignedNarrowingControls"
+    ],
+    "imports_in": 1,
+    "lines": 263,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/WrappedMultiplicationControls.lean",
+    "proof_lines": 5,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 157,
+    "declarations": {
+      "def": 2,
+      "theorem": 4
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.06428571428571428,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.UnsignedMultiplication",
+      "Solidity.Lowering.V07.WrappedAssignmentPair",
+      "Solidity.Lowering.V07.AllAliasPair"
+    ],
+    "imports_in": 3,
+    "lines": 171,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/WrappedMultiplicationPair.lean",
+    "proof_lines": 140,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 202,
+    "declarations": {
+      "abbrev": 7,
+      "def": 13,
+      "theorem": 19
+    },
+    "definition_lines": 38,
+    "definition_to_proof_line_ratio": 0.24203821656050956,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V07.WrappedAssignmentPair",
+      "Solidity.Lowering.V07.UnsignedNarrowingControls"
+    ],
+    "imports_in": 2,
+    "lines": 230,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V07/WrappedPairControls.lean",
+    "proof_lines": 157,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 24,
+    "declarations": {
+      "theorem": 8
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.AbiObservations"
+    ],
+    "imports_in": 2,
+    "lines": 44,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/AbiControls.lean",
+    "proof_lines": 17,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 75,
+    "declarations": {
+      "theorem": 12
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Source.Observe",
+      "Solidity.Semantics.RevertData"
+    ],
+    "imports_in": 10,
+    "lines": 112,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/AbiObservations.lean",
+    "proof_lines": 71,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 66,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.SourceTransientBytesEmitControls",
+      "Solidity.Lowering.V08.SourceTransientEmitPanicControls",
+      "Solidity.Lowering.V08.SourceTransientEmitControls",
+      "Solidity.Lowering.V08.SourceTransientMixedRethrowControls",
+      "Solidity.Lowering.V08.SourceTransientRethrowControls",
+      "Solidity.Lowering.V08.SourcePrefixedRethrowControls",
+      "Solidity.Lowering.V08.SourceStandardRethrowControls",
+      "Solidity.Lowering.V08.SourceRethrowControls",
+      "Solidity.Lowering.V08.SourceAbiEntryControls",
+      "Solidity.Lowering.V08.SourceAbiControls",
+      "Solidity.Lowering.V08.SourceCustomErrorFailureControls",
+      "Solidity.Lowering.V08.SourceCustomErrorControls",
+      "Solidity.Lowering.V08.SourceDispatchControls",
+      "Solidity.Lowering.V08.SourceCallableControls",
+      "Solidity.Lowering.V08.SourceEmitControls",
+      "Solidity.Lowering.V08.SourceKeccakControls",
+      "Solidity.Lowering.V08.SourceFailureControls",
+      "Solidity.Lowering.V08.SourceEnvironmentControls",
+      "Solidity.Lowering.V08.CreationSuccessControls",
+      "Solidity.Lowering.V08.LibraryHandlerControls",
+      "Solidity.Lowering.V08.HandlerControls",
+      "Solidity.Lowering.V08.NestedControls",
+      "Solidity.Lowering.V08.InheritedControls",
+      "Solidity.Lowering.V08.PayableControls",
+      "Solidity.Lowering.V08.RoleControls",
+      "Solidity.Lowering.V08.CryptoControls",
+      "Solidity.Lowering.V08.EmitControls",
+      "Solidity.Lowering.V08.SelectorControls",
+      "Solidity.Lowering.V08.ProjectionControls",
+      "Solidity.Lowering.V08.MetadataControls",
+      "Solidity.Lowering.V08.Controls",
+      "Solidity.Lowering.V08.AbiControls",
+      "Solidity.Lowering.V08.LibraryCreation",
+      "Solidity.Lowering.V08.LibraryControls",
+      "Solidity.Lowering.V08.CallbackControls"
+    ],
+    "imports_in": 3,
+    "lines": 71,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/Audit.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 69,
+    "declarations": {
+      "def": 3,
+      "theorem": 6
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.14285714285714285,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.BoolErrorCompleteness",
+      "Solidity.Semantics.AbiEntry"
+    ],
+    "imports_in": 3,
+    "lines": 82,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/BoolErrorAbi.lean",
+    "proof_lines": 56,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 34,
+    "declarations": {
+      "def": 4,
+      "theorem": 5
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 1.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.BoolErrorAbi",
+      "Solidity.Lowering.V08.BoolErrorControls"
+    ],
+    "imports_in": 1,
+    "lines": 46,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/BoolErrorAbiControls.lean",
+    "proof_lines": 8,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 37,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.BoolErrorStatement"
+    ],
+    "imports_in": 5,
+    "lines": 45,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/BoolErrorCompleteness.lean",
+    "proof_lines": 33,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 42,
+    "declarations": {
+      "def": 2,
+      "theorem": 3
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.11538461538461539,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.BoolErrorCompleteness",
+      "Solidity.Lowering.V08.BoolErrorControls"
+    ],
+    "imports_in": 1,
+    "lines": 49,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/BoolErrorCompletenessControls.lean",
+    "proof_lines": 26,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 87,
+    "declarations": {
+      "def": 6,
+      "theorem": 17
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.1388888888888889,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.BoolErrorLowering",
+      "Solidity.Lowering.V08.SourceExternalPhaseControls"
+    ],
+    "imports_in": 7,
+    "lines": 108,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/BoolErrorControls.lean",
+    "proof_lines": 72,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 142,
+    "declarations": {
+      "def": 8,
+      "theorem": 14
+    },
+    "definition_lines": 19,
+    "definition_to_proof_line_ratio": 0.16101694915254236,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.SourceCustomErrors",
+      "Solidity.Backend.Failure.Correct"
+    ],
+    "imports_in": 3,
+    "lines": 174,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/BoolErrorLowering.lean",
+    "proof_lines": 118,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 85,
+    "declarations": {
+      "def": 3,
+      "structure": 2,
+      "theorem": 2
+    },
+    "definition_lines": 41,
+    "definition_to_proof_line_ratio": 1.0512820512820513,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.BoolErrorLowering",
+      "Solidity.Lowering.V08.LiteralFailureLowering"
+    ],
+    "imports_in": 4,
+    "lines": 100,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/BoolErrorStatement.lean",
+    "proof_lines": 39,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 40,
+    "declarations": {
+      "def": 3,
+      "theorem": 5
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.5,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.BoolErrorStatement",
+      "Solidity.Lowering.V08.BoolErrorControls"
+    ],
+    "imports_in": 1,
+    "lines": 54,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/BoolErrorStatementControls.lean",
+    "proof_lines": 18,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 40,
+    "declarations": {
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.09375,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Semantics.ContractWorld"
+    ],
+    "imports_in": 3,
+    "lines": 59,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/Callable.lean",
+    "proof_lines": 32,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 53,
+    "declarations": {
+      "structure": 1,
+      "theorem": 1
+    },
+    "definition_lines": 24,
+    "definition_to_proof_line_ratio": 1.2,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.SourceCallable",
+      "Solidity.Semantics.ContractWorld"
+    ],
+    "imports_in": 2,
+    "lines": 72,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/CallableBodyPremises.lean",
+    "proof_lines": 20,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 80,
+    "declarations": {
+      "def": 5,
+      "theorem": 7
+    },
+    "definition_lines": 19,
+    "definition_to_proof_line_ratio": 0.3958333333333333,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Source.Resolved",
+      "Solidity.Semantics.ContractWorld"
+    ],
+    "imports_in": 3,
+    "lines": 119,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/CallableMetadata.lean",
+    "proof_lines": 48,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 67,
+    "declarations": {
+      "def": 5,
+      "theorem": 8
+    },
+    "definition_lines": 17,
+    "definition_to_proof_line_ratio": 0.4594594594594595,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.Controls"
+    ],
+    "imports_in": 3,
+    "lines": 88,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/CallableReflection.lean",
+    "proof_lines": 37,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 60,
+    "declarations": {
+      "def": 11,
+      "theorem": 5
+    },
+    "definition_lines": 19,
+    "definition_to_proof_line_ratio": 0.6333333333333333,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.Controls",
+      "Solidity.Semantics.Callback"
+    ],
+    "imports_in": 2,
+    "lines": 86,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/CallbackControls.lean",
+    "proof_lines": 30,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 269,
+    "declarations": {
+      "abbrev": 2,
+      "def": 15,
+      "theorem": 17
+    },
+    "definition_lines": 39,
+    "definition_to_proof_line_ratio": 0.20967741935483872,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LocalCallableTransport",
+      "Solidity.Lowering.V07.ConditionalAssignments"
+    ],
+    "imports_in": 2,
+    "lines": 367,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/ConditionalCallable.lean",
+    "proof_lines": 186,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 118,
+    "declarations": {
+      "def": 7,
+      "theorem": 14
+    },
+    "definition_lines": 20,
+    "definition_to_proof_line_ratio": 0.3125,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.ConstructorScalarTransport",
+      "Solidity.Lowering.V08.LibraryCreation"
+    ],
+    "imports_in": 2,
+    "lines": 200,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/ConstructorContinuations.lean",
+    "proof_lines": 64,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 249,
+    "declarations": {
+      "abbrev": 1,
+      "def": 28,
+      "structure": 3,
+      "theorem": 19
+    },
+    "definition_lines": 105,
+    "definition_to_proof_line_ratio": 1.05,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.EnvironmentProjection",
+      "Solidity.Lowering.V07.SourceReads",
+      "Solidity.Lowering.V08.SourcePayableDeploymentControls"
+    ],
+    "imports_in": 4,
+    "lines": 338,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/ConstructorScalarTransport.lean",
+    "proof_lines": 100,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 92,
+    "declarations": {
+      "def": 17,
+      "theorem": 10
+    },
+    "definition_lines": 56,
+    "definition_to_proof_line_ratio": 3.2941176470588234,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.Callable",
+      "Solidity.Lowering.V08.Transactions",
+      "Solidity.Syntax.Splice"
+    ],
+    "imports_in": 13,
+    "lines": 125,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/Controls.lean",
+    "proof_lines": 17,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 232,
+    "declarations": {
+      "abbrev": 3,
+      "def": 4,
+      "structure": 2,
+      "theorem": 14
+    },
+    "definition_lines": 75,
+    "definition_to_proof_line_ratio": 0.6048387096774194,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.P8.DeclarationGraphAdmission",
+      "Solidity.Lowering.V08.ConstructorContinuations",
+      "Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV1"
+    ],
+    "imports_in": 3,
+    "lines": 330,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/CreationPremises.lean",
+    "proof_lines": 124,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 246,
+    "declarations": {
+      "def": 17,
+      "instance": 1,
+      "theorem": 38
+    },
+    "definition_lines": 47,
+    "definition_to_proof_line_ratio": 0.2919254658385093,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LibraryHandlerControls"
+    ],
+    "imports_in": 3,
+    "lines": 297,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/CreationSuccessControls.lean",
+    "proof_lines": 161,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 24,
+    "declarations": {
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.07692307692307693,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.CryptoObservations",
+      "Solidity.Roadmap.Controls"
+    ],
+    "imports_in": 5,
+    "lines": 37,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/CryptoControls.lean",
+    "proof_lines": 13,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 81,
+    "declarations": {
+      "theorem": 8
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.EnvironmentProjection",
+      "Solidity.Lowering.V08.AbiObservations"
+    ],
+    "imports_in": 3,
+    "lines": 110,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/CryptoObservations.lean",
+    "proof_lines": 68,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 62,
+    "declarations": {
+      "def": 3,
+      "theorem": 7
+    },
+    "definition_lines": 11,
+    "definition_to_proof_line_ratio": 0.2894736842105263,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Source.Decls",
+      "Solidity.Semantics.ContractWorld"
+    ],
+    "imports_in": 3,
+    "lines": 89,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/DeclarationRoles.lean",
+    "proof_lines": 38,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 101,
+    "declarations": {
+      "def": 22,
+      "theorem": 10
+    },
+    "definition_lines": 60,
+    "definition_to_proof_line_ratio": 2.5,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.Controls",
+      "Solidity.Lowering.V08.CallableMetadata",
+      "Solidity.Lowering.V08.SelectorObservations"
+    ],
+    "imports_in": 2,
+    "lines": 137,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/EmitControls.lean",
+    "proof_lines": 24,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 227,
+    "declarations": {
+      "def": 11,
+      "structure": 1,
+      "theorem": 22
+    },
+    "definition_lines": 60,
+    "definition_to_proof_line_ratio": 0.4166666666666667,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Source.World",
+      "Solidity.Source.Machine",
+      "Solidity.Semantics.ContractWorld",
+      "Solidity.Semantics.TransientWorld"
+    ],
+    "imports_in": 8,
+    "lines": 324,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/EnvironmentProjection.lean",
+    "proof_lines": 144,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 52,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.15151515151515152,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.IntegerCallable",
+      "Solidity.Lowering.V07.FixedBytesAssignment"
+    ],
+    "imports_in": 2,
+    "lines": 70,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/FixedBytesCallableArgument.lean",
+    "proof_lines": 33,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 68,
+    "declarations": {
+      "abbrev": 2,
+      "def": 3,
+      "theorem": 5
+    },
+    "definition_lines": 13,
+    "definition_to_proof_line_ratio": 0.43333333333333335,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.FixedBytesCallableArgument",
+      "Solidity.Lowering.V07.FixedBytesAssignmentControls"
+    ],
+    "imports_in": 3,
+    "lines": 108,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/FixedBytesCallableArgumentControls.lean",
+    "proof_lines": 30,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "import_root",
+    "code_lines": 4,
+    "declarations": {},
+    "definition_to_proof_line_ratio": null,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.Audit",
+      "Solidity.Lowering.V08.CallableReflection",
+      "Solidity.Lowering.V08.PrefixControls",
+      "Solidity.Lowering.V08.SourceTransientZeroPayment"
+    ],
+    "imports_in": 1,
+    "lines": 6,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/H1Audit.lean",
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 362,
+    "declarations": {
+      "abbrev": 1,
+      "def": 40,
+      "instance": 5,
+      "theorem": 54
+    },
+    "definition_lines": 102,
+    "definition_to_proof_line_ratio": 0.5,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.NestedControls",
+      "Solidity.Lowering.V08.AbiObservations"
+    ],
+    "imports_in": 3,
+    "lines": 439,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/HandlerControls.lean",
+    "proof_lines": 204,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 92,
+    "declarations": {
+      "def": 5,
+      "theorem": 9
+    },
+    "definition_lines": 18,
+    "definition_to_proof_line_ratio": 0.3103448275862069,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.InheritedMetadata",
+      "Solidity.Lowering.V08.Controls"
+    ],
+    "imports_in": 3,
+    "lines": 104,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/InheritedControls.lean",
+    "proof_lines": 58,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 46,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Source.Inheritance",
+      "Solidity.Lowering.V08.PayableMetadata"
+    ],
+    "imports_in": 2,
+    "lines": 64,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/InheritedMetadata.lean",
+    "proof_lines": 36,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 129,
+    "declarations": {
+      "def": 3,
+      "structure": 1,
+      "theorem": 12
+    },
+    "definition_lines": 20,
+    "definition_to_proof_line_ratio": 0.25,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.ScalarCallableTransport"
+    ],
+    "imports_in": 5,
+    "lines": 176,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/IntegerCallable.lean",
+    "proof_lines": 80,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 54,
+    "declarations": {
+      "def": 10,
+      "theorem": 4
+    },
+    "definition_lines": 36,
+    "definition_to_proof_line_ratio": 4.5,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.Controls",
+      "Solidity.Lowering.V08.LibraryCreation"
+    ],
+    "imports_in": 5,
+    "lines": 74,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LibraryControls.lean",
+    "proof_lines": 8,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 299,
+    "declarations": {
+      "def": 1,
+      "theorem": 14
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.010869565217391304,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.Callable",
+      "Solidity.Lowering.V08.Transactions",
+      "Solidity.Semantics.ContractWorldCertificates"
+    ],
+    "imports_in": 4,
+    "lines": 359,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LibraryCreation.lean",
+    "proof_lines": 276,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 230,
+    "declarations": {
+      "abbrev": 1,
+      "def": 6,
+      "structure": 2,
+      "theorem": 15
+    },
+    "definition_lines": 34,
+    "definition_to_proof_line_ratio": 0.22077922077922077,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.EnvironmentProjection",
+      "Solidity.Lowering.V07.SourceReads",
+      "Solidity.Lowering.V08.SourceEnvironmentControls",
+      "Solidity.Lowering.V08.LibraryHandlerControls"
+    ],
+    "imports_in": 6,
+    "lines": 293,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LibraryFrameTransport.lean",
+    "proof_lines": 154,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 310,
+    "declarations": {
+      "abbrev": 3,
+      "def": 45,
+      "instance": 2,
+      "theorem": 48
+    },
+    "definition_lines": 100,
+    "definition_to_proof_line_ratio": 0.6172839506172839,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.HandlerControls",
+      "Solidity.Lowering.V08.LibraryControls"
+    ],
+    "imports_in": 4,
+    "lines": 369,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LibraryHandlerControls.lean",
+    "proof_lines": 162,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 137,
+    "declarations": {
+      "def": 1,
+      "theorem": 9
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.037037037037037035,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.SignedCallableControls",
+      "Solidity.Lowering.V08.LibraryFrameTransport"
+    ],
+    "imports_in": 1,
+    "lines": 185,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LibraryIntegerTransport.lean",
+    "proof_lines": 108,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 299,
+    "declarations": {
+      "abbrev": 1,
+      "def": 10,
+      "structure": 1,
+      "theorem": 17
+    },
+    "definition_lines": 113,
+    "definition_to_proof_line_ratio": 0.795774647887324,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.CreationPremises",
+      "Solidity.Lowering.V08.LibraryFrameTransport"
+    ],
+    "imports_in": 3,
+    "lines": 409,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LibraryPremises.lean",
+    "proof_lines": 142,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 32,
+    "declarations": {
+      "def": 5,
+      "theorem": 2
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.42105263157894735,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureLowering",
+      "Solidity.Source.ValueProgress"
+    ],
+    "imports_in": 2,
+    "lines": 46,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureArithmeticReason.lean",
+    "proof_lines": 19,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 50,
+    "declarations": {
+      "def": 1,
+      "theorem": 6
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.06666666666666667,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureArithmeticReason",
+      "Solidity.Lowering.V08.LiteralFailureMemoryReasonControls",
+      "Solidity.Backend.AbiWorld.ErrorReadWindowControls"
+    ],
+    "imports_in": 1,
+    "lines": 57,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureArithmeticReasonControls.lean",
+    "proof_lines": 30,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 69,
+    "declarations": {
+      "def": 1,
+      "theorem": 7
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.015873015873015872,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureStringInterleaving",
+      "Solidity.Lowering.V08.BoolErrorAbi"
+    ],
+    "imports_in": 3,
+    "lines": 83,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureBoolPrefix.lean",
+    "proof_lines": 63,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 221,
+    "declarations": {
+      "def": 26,
+      "theorem": 21
+    },
+    "definition_lines": 95,
+    "definition_to_proof_line_ratio": 1.1046511627906976,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureBoolPrefix",
+      "Solidity.Lowering.V08.SourceCustomErrorControls"
+    ],
+    "imports_in": 1,
+    "lines": 235,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureBoolPrefixControls.lean",
+    "proof_lines": 86,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 56,
+    "declarations": {
+      "theorem": 5
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.BoolErrorCompleteness"
+    ],
+    "imports_in": 2,
+    "lines": 65,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureBoolStatement.lean",
+    "proof_lines": 52,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 126,
+    "declarations": {
+      "def": 20,
+      "theorem": 14
+    },
+    "definition_lines": 34,
+    "definition_to_proof_line_ratio": 0.5964912280701754,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureBoolStatement",
+      "Solidity.Lowering.V08.BoolErrorControls"
+    ],
+    "imports_in": 1,
+    "lines": 142,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureBoolStatementControls.lean",
+    "proof_lines": 57,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 51,
+    "declarations": {
+      "def": 1,
+      "theorem": 3
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.02564102564102564,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureLowering",
+      "Solidity.Lowering.V08.SourceAbi",
+      "Solidity.Semantics.AbiEntry",
+      "Solidity.Backend.AbiWorld.ErrorRoundtrip"
+    ],
+    "imports_in": 3,
+    "lines": 67,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureBytesReadback.lean",
+    "proof_lines": 39,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 76,
+    "declarations": {
+      "def": 4,
+      "theorem": 12
+    },
+    "definition_lines": 10,
+    "definition_to_proof_line_ratio": 0.21739130434782608,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureBytesReadback",
+      "Solidity.Lowering.V08.SourceCustomErrorControls"
+    ],
+    "imports_in": 1,
+    "lines": 98,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureBytesReadbackControls.lean",
+    "proof_lines": 46,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 73,
+    "declarations": {
+      "def": 3,
+      "theorem": 6
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.0967741935483871,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureTypedFields",
+      "Solidity.Source.Calldata"
+    ],
+    "imports_in": 3,
+    "lines": 87,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureCalldataCopy.lean",
+    "proof_lines": 62,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 142,
+    "declarations": {
+      "def": 19,
+      "theorem": 13
+    },
+    "definition_lines": 62,
+    "definition_to_proof_line_ratio": 1.169811320754717,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureCalldataCopy",
+      "Solidity.Lowering.V08.SourceCustomErrorControls"
+    ],
+    "imports_in": 3,
+    "lines": 149,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureCalldataCopyControls.lean",
+    "proof_lines": 53,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 41,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Source.Calldata"
+    ],
+    "imports_in": 4,
+    "lines": 58,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureCalldataDecode.lean",
+    "proof_lines": 37,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 77,
+    "declarations": {
+      "def": 11,
+      "theorem": 12
+    },
+    "definition_lines": 14,
+    "definition_to_proof_line_ratio": 0.35,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureCalldataDecode",
+      "Solidity.Lowering.V08.SourceExternalPhaseControls"
+    ],
+    "imports_in": 3,
+    "lines": 100,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureCalldataDecodeControls.lean",
+    "proof_lines": 40,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 81,
+    "declarations": {
+      "inductive": 1,
+      "theorem": 6
+    },
+    "definition_lines": 14,
+    "definition_to_proof_line_ratio": 0.2222222222222222,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureCalldataCopy"
+    ],
+    "imports_in": 4,
+    "lines": 94,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureCalldataPrefix.lean",
+    "proof_lines": 63,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 101,
+    "declarations": {
+      "abbrev": 4,
+      "def": 10,
+      "theorem": 11
+    },
+    "definition_lines": 35,
+    "definition_to_proof_line_ratio": 0.8536585365853658,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureCalldataPrefix",
+      "Solidity.Lowering.V08.LiteralFailureCalldataCopyControls"
+    ],
+    "imports_in": 2,
+    "lines": 112,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureCalldataPrefixControls.lean",
+    "proof_lines": 41,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 48,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureStorageDecode"
+    ],
+    "imports_in": 3,
+    "lines": 56,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureChoiceDecode.lean",
+    "proof_lines": 44,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 75,
+    "declarations": {
+      "def": 11,
+      "theorem": 8
+    },
+    "definition_lines": 22,
+    "definition_to_proof_line_ratio": 0.8461538461538461,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureChoiceDecode",
+      "Solidity.Lowering.V08.LiteralFailureCalldataDecodeControls",
+      "Solidity.Lowering.V08.LiteralFailureStorageDecodeControls"
+    ],
+    "imports_in": 2,
+    "lines": 94,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureChoiceDecodeControls.lean",
+    "proof_lines": 26,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 75,
+    "declarations": {
+      "def": 4,
+      "theorem": 18
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.09523809523809523,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureLowering",
+      "Solidity.Lowering.V08.SourceCustomErrorControls"
+    ],
+    "imports_in": 2,
+    "lines": 102,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureControls.lean",
+    "proof_lines": 63,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 109,
+    "declarations": {
+      "def": 1,
+      "inductive": 1,
+      "theorem": 4
+    },
+    "definition_lines": 17,
+    "definition_to_proof_line_ratio": 0.19540229885057472,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureLocatedFields"
+    ],
+    "imports_in": 3,
+    "lines": 120,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureConvertedFields.lean",
+    "proof_lines": 87,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 127,
+    "declarations": {
+      "abbrev": 6,
+      "def": 12,
+      "theorem": 12
+    },
+    "definition_lines": 39,
+    "definition_to_proof_line_ratio": 0.609375,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureConvertedFields",
+      "Solidity.Lowering.V08.LiteralFailureMixedCustomErrorControls"
+    ],
+    "imports_in": 1,
+    "lines": 142,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureConvertedFieldsControls.lean",
+    "proof_lines": 64,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 57,
+    "declarations": {
+      "def": 5,
+      "theorem": 5
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.18181818181818182,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureStringConversion",
+      "Solidity.Lowering.V08.LiteralFailureStatementReason"
+    ],
+    "imports_in": 2,
+    "lines": 70,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureCopiedReason.lean",
+    "proof_lines": 44,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 83,
+    "declarations": {
+      "abbrev": 4,
+      "def": 5,
+      "theorem": 9
+    },
+    "definition_lines": 28,
+    "definition_to_proof_line_ratio": 0.8484848484848485,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureCopiedReason",
+      "Solidity.Lowering.V08.LiteralFailureCopySelectorControls"
+    ],
+    "imports_in": 1,
+    "lines": 93,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureCopiedReasonControls.lean",
+    "proof_lines": 33,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 72,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.04838709677419355,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureCopySequence"
+    ],
+    "imports_in": 4,
+    "lines": 83,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureCopyEncoding.lean",
+    "proof_lines": 62,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 79,
+    "declarations": {
+      "def": 4,
+      "theorem": 7
+    },
+    "definition_lines": 18,
+    "definition_to_proof_line_ratio": 0.4090909090909091,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureCopyEncoding",
+      "Solidity.Lowering.V08.LiteralFailureCopySequenceControls"
+    ],
+    "imports_in": 2,
+    "lines": 89,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureCopyEncodingControls.lean",
+    "proof_lines": 44,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 26,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureCopySequence",
+      "Solidity.Lowering.V08.LiteralFailureReturnSlots"
+    ],
+    "imports_in": 2,
+    "lines": 32,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureCopyReturn.lean",
+    "proof_lines": 20,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 123,
+    "declarations": {
+      "abbrev": 13,
+      "def": 6,
+      "theorem": 10
+    },
+    "definition_lines": 43,
+    "definition_to_proof_line_ratio": 0.7049180327868853,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureCopyReturn",
+      "Solidity.Lowering.V08.LiteralFailureCopySelectorControls"
+    ],
+    "imports_in": 1,
+    "lines": 135,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureCopyReturnControls.lean",
+    "proof_lines": 61,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 65,
+    "declarations": {
+      "abbrev": 1,
+      "theorem": 3
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.017857142857142856,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureCopyEncoding",
+      "Solidity.Lowering.V08.LiteralFailureSelectorBytes"
+    ],
+    "imports_in": 3,
+    "lines": 73,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureCopySelector.lean",
+    "proof_lines": 56,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 125,
+    "declarations": {
+      "abbrev": 6,
+      "def": 11,
+      "theorem": 9
+    },
+    "definition_lines": 41,
+    "definition_to_proof_line_ratio": 0.640625,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureCopySelector",
+      "Solidity.Lowering.V08.LiteralFailureCopySequenceControls"
+    ],
+    "imports_in": 4,
+    "lines": 135,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureCopySelectorControls.lean",
+    "proof_lines": 64,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 135,
+    "declarations": {
+      "inductive": 2,
+      "theorem": 6
+    },
+    "definition_lines": 23,
+    "definition_to_proof_line_ratio": 0.2169811320754717,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureStringConversion"
+    ],
+    "imports_in": 4,
+    "lines": 148,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureCopySequence.lean",
+    "proof_lines": 106,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 145,
+    "declarations": {
+      "abbrev": 6,
+      "def": 12,
+      "theorem": 14
+    },
+    "definition_lines": 41,
+    "definition_to_proof_line_ratio": 0.5394736842105263,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureCopySequence",
+      "Solidity.Lowering.V08.LiteralFailureTypedFieldsControls"
+    ],
+    "imports_in": 3,
+    "lines": 162,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureCopySequenceControls.lean",
+    "proof_lines": 76,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 71,
+    "declarations": {
+      "theorem": 3
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureCopySelector",
+      "Solidity.Lowering.V08.LiteralFailureSignatureBytes"
+    ],
+    "imports_in": 2,
+    "lines": 80,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureCopySignature.lean",
+    "proof_lines": 63,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 132,
+    "declarations": {
+      "abbrev": 9,
+      "def": 8,
+      "theorem": 10
+    },
+    "definition_lines": 36,
+    "definition_to_proof_line_ratio": 0.48,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureCopySignature",
+      "Solidity.Lowering.V08.LiteralFailureCopySelectorControls"
+    ],
+    "imports_in": 1,
+    "lines": 143,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureCopySignatureControls.lean",
+    "proof_lines": 75,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 97,
+    "declarations": {
+      "def": 8,
+      "theorem": 7
+    },
+    "definition_lines": 18,
+    "definition_to_proof_line_ratio": 0.25,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.SourceCustomErrors",
+      "Solidity.Lowering.V08.SourceEnvironment",
+      "Solidity.Lowering.V08.SourceAbi",
+      "Solidity.Semantics.AbiEntry"
+    ],
+    "imports_in": 3,
+    "lines": 119,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureDynamicError.lean",
+    "proof_lines": 72,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 78,
+    "declarations": {
+      "def": 13,
+      "theorem": 8
+    },
+    "definition_lines": 29,
+    "definition_to_proof_line_ratio": 1.0740740740740742,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureDynamicError",
+      "Solidity.Lowering.V08.SourceCustomErrorControls"
+    ],
+    "imports_in": 1,
+    "lines": 95,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureDynamicErrorControls.lean",
+    "proof_lines": 27,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 191,
+    "declarations": {
+      "def": 7,
+      "theorem": 15
+    },
+    "definition_lines": 28,
+    "definition_to_proof_line_ratio": 0.1761006289308176,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureDynamicError"
+    ],
+    "imports_in": 4,
+    "lines": 220,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureDynamicListError.lean",
+    "proof_lines": 159,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 114,
+    "declarations": {
+      "def": 14,
+      "theorem": 11
+    },
+    "definition_lines": 33,
+    "definition_to_proof_line_ratio": 0.6470588235294118,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureDynamicListError",
+      "Solidity.Lowering.V08.SourceCustomErrorControls"
+    ],
+    "imports_in": 4,
+    "lines": 131,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureDynamicListErrorControls.lean",
+    "proof_lines": 51,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 28,
+    "declarations": {
+      "def": 1,
+      "theorem": 2
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.09523809523809523,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureDynamicListError",
+      "Solidity.Backend.FailurePaths.Returns"
+    ],
+    "imports_in": 4,
+    "lines": 38,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureDynamicReturn.lean",
+    "proof_lines": 21,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 87,
+    "declarations": {
+      "def": 10,
+      "theorem": 8
+    },
+    "definition_lines": 20,
+    "definition_to_proof_line_ratio": 0.40816326530612246,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureDynamicReturn",
+      "Solidity.Lowering.V08.SourceCustomErrorControls"
+    ],
+    "imports_in": 3,
+    "lines": 98,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureDynamicReturnControls.lean",
+    "proof_lines": 49,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 74,
+    "declarations": {
+      "theorem": 7
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureChoiceDecode"
+    ],
+    "imports_in": 2,
+    "lines": 87,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureEffectDecode.lean",
+    "proof_lines": 70,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 92,
+    "declarations": {
+      "abbrev": 9,
+      "def": 6,
+      "theorem": 7
+    },
+    "definition_lines": 35,
+    "definition_to_proof_line_ratio": 1.1290322580645162,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureEffectDecode",
+      "Solidity.Lowering.V08.LiteralFailureChoiceDecodeControls"
+    ],
+    "imports_in": 1,
+    "lines": 109,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureEffectDecodeControls.lean",
+    "proof_lines": 31,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 71,
+    "declarations": {
+      "theorem": 5
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureSelectorBytes",
+      "Solidity.Lowering.V08.SourceRethrow"
+    ],
+    "imports_in": 2,
+    "lines": 78,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureEncodedRethrow.lean",
+    "proof_lines": 66,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 115,
+    "declarations": {
+      "def": 7,
+      "theorem": 5
+    },
+    "definition_lines": 30,
+    "definition_to_proof_line_ratio": 0.6,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureEncodedRethrow",
+      "Solidity.Lowering.V08.LiteralFailureSelectorBytesControls",
+      "Solidity.Lowering.V08.LiteralFailureSignatureBytesControls"
+    ],
+    "imports_in": 1,
+    "lines": 124,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureEncodedRethrowControls.lean",
+    "proof_lines": 50,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 157,
+    "declarations": {
+      "inductive": 4,
+      "theorem": 10
+    },
+    "definition_lines": 25,
+    "definition_to_proof_line_ratio": 0.1953125,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureCalldataPrefix"
+    ],
+    "imports_in": 3,
+    "lines": 177,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureLocatedFields.lean",
+    "proof_lines": 128,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 99,
+    "declarations": {
+      "abbrev": 4,
+      "def": 11,
+      "theorem": 9
+    },
+    "definition_lines": 35,
+    "definition_to_proof_line_ratio": 0.9459459459459459,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureLocatedFields",
+      "Solidity.Lowering.V08.LiteralFailureCalldataCopyControls"
+    ],
+    "imports_in": 1,
+    "lines": 109,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureLocatedFieldsControls.lean",
+    "proof_lines": 37,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 263,
+    "declarations": {
+      "def": 13,
+      "theorem": 24
+    },
+    "definition_lines": 42,
+    "definition_to_proof_line_ratio": 0.19444444444444445,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.SourceFailures",
+      "Solidity.Backend.Failure.Correct"
+    ],
+    "imports_in": 8,
+    "lines": 325,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureLowering.lean",
+    "proof_lines": 216,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 32,
+    "declarations": {
+      "def": 4,
+      "theorem": 3
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.4,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureBytesReadback"
+    ],
+    "imports_in": 3,
+    "lines": 43,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureMemoryReason.lean",
+    "proof_lines": 20,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 48,
+    "declarations": {
+      "def": 4,
+      "theorem": 5
+    },
+    "definition_lines": 9,
+    "definition_to_proof_line_ratio": 0.391304347826087,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureMemoryReason",
+      "Solidity.Lowering.V08.SourceCustomErrorControls"
+    ],
+    "imports_in": 7,
+    "lines": 56,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureMemoryReasonControls.lean",
+    "proof_lines": 23,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 20,
+    "declarations": {
+      "def": 1,
+      "theorem": 1
+    },
+    "definition_lines": 2,
+    "definition_to_proof_line_ratio": 0.15384615384615385,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureMemoryReason"
+    ],
+    "imports_in": 3,
+    "lines": 26,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureMemoryRevert.lean",
+    "proof_lines": 13,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 37,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureMemoryRevert",
+      "Solidity.Lowering.V08.LiteralFailureMemoryReasonControls"
+    ],
+    "imports_in": 1,
+    "lines": 43,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureMemoryRevertControls.lean",
+    "proof_lines": 23,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 43,
+    "declarations": {
+      "inductive": 1,
+      "theorem": 2
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.21875,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureMixedEncoding"
+    ],
+    "imports_in": 4,
+    "lines": 50,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureMixedCustomError.lean",
+    "proof_lines": 32,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 134,
+    "declarations": {
+      "def": 20,
+      "theorem": 13
+    },
+    "definition_lines": 62,
+    "definition_to_proof_line_ratio": 1.2653061224489797,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureMixedCustomError",
+      "Solidity.Lowering.V08.SourceCustomErrorControls"
+    ],
+    "imports_in": 2,
+    "lines": 145,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureMixedCustomErrorControls.lean",
+    "proof_lines": 49,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 96,
+    "declarations": {
+      "inductive": 1,
+      "theorem": 6
+    },
+    "definition_lines": 14,
+    "definition_to_proof_line_ratio": 0.18181818181818182,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureReturnSlots"
+    ],
+    "imports_in": 4,
+    "lines": 107,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureMixedEncoding.lean",
+    "proof_lines": 77,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 121,
+    "declarations": {
+      "def": 15,
+      "theorem": 15
+    },
+    "definition_lines": 33,
+    "definition_to_proof_line_ratio": 0.5689655172413793,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureMixedEncoding",
+      "Solidity.Lowering.V08.LiteralFailureReturnSlotsControls"
+    ],
+    "imports_in": 3,
+    "lines": 140,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureMixedEncodingControls.lean",
+    "proof_lines": 58,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 100,
+    "declarations": {
+      "inductive": 1,
+      "theorem": 7
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.06741573033707865,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureMixedEncoding",
+      "Solidity.Lowering.V08.SourceRethrow"
+    ],
+    "imports_in": 5,
+    "lines": 113,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureMixedExpression.lean",
+    "proof_lines": 89,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 112,
+    "declarations": {
+      "def": 6,
+      "theorem": 11
+    },
+    "definition_lines": 32,
+    "definition_to_proof_line_ratio": 0.6530612244897959,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureMixedExpression",
+      "Solidity.Lowering.V08.LiteralFailureMixedEncodingControls"
+    ],
+    "imports_in": 2,
+    "lines": 125,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureMixedExpressionControls.lean",
+    "proof_lines": 49,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 68,
+    "declarations": {
+      "abbrev": 1,
+      "theorem": 4
+    },
+    "definition_lines": 1,
+    "definition_to_proof_line_ratio": 0.01639344262295082,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureMixedExpression",
+      "Solidity.Lowering.V08.LiteralFailureSelectorBytes"
+    ],
+    "imports_in": 2,
+    "lines": 76,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureMixedSelector.lean",
+    "proof_lines": 61,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 110,
+    "declarations": {
+      "def": 7,
+      "theorem": 12
+    },
+    "definition_lines": 34,
+    "definition_to_proof_line_ratio": 0.723404255319149,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureMixedSelector",
+      "Solidity.Lowering.V08.LiteralFailureMixedEncodingControls"
+    ],
+    "imports_in": 1,
+    "lines": 127,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureMixedSelectorControls.lean",
+    "proof_lines": 47,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 73,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureMixedExpression",
+      "Solidity.Lowering.V08.LiteralFailureSignatureBytes"
+    ],
+    "imports_in": 2,
+    "lines": 81,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureMixedSignature.lean",
+    "proof_lines": 67,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 113,
+    "declarations": {
+      "def": 7,
+      "theorem": 12
+    },
+    "definition_lines": 27,
+    "definition_to_proof_line_ratio": 0.47368421052631576,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureMixedSignature",
+      "Solidity.Lowering.V08.LiteralFailureMixedExpressionControls"
+    ],
+    "imports_in": 1,
+    "lines": 128,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureMixedSignatureControls.lean",
+    "proof_lines": 57,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 131,
+    "declarations": {
+      "abbrev": 2,
+      "def": 2,
+      "theorem": 8
+    },
+    "definition_lines": 12,
+    "definition_to_proof_line_ratio": 0.10434782608695652,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureSliceEncoding"
+    ],
+    "imports_in": 3,
+    "lines": 147,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureNestedSlice.lean",
+    "proof_lines": 115,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 90,
+    "declarations": {
+      "abbrev": 9,
+      "def": 7,
+      "theorem": 6
+    },
+    "definition_lines": 37,
+    "definition_to_proof_line_ratio": 1.1935483870967742,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureNestedSlice",
+      "Solidity.Lowering.V08.LiteralFailureSliceEncodingControls"
+    ],
+    "imports_in": 2,
+    "lines": 97,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureNestedSliceControls.lean",
+    "proof_lines": 31,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 49,
+    "declarations": {
+      "def": 3,
+      "theorem": 4
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.15384615384615385,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureLowering"
+    ],
+    "imports_in": 3,
+    "lines": 59,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureOverflowReason.lean",
+    "proof_lines": 39,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 58,
+    "declarations": {
+      "def": 2,
+      "theorem": 6
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.08333333333333333,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureOverflowReason",
+      "Solidity.Lowering.V08.LiteralFailureMemoryReasonControls"
+    ],
+    "imports_in": 1,
+    "lines": 66,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureOverflowReasonControls.lean",
+    "proof_lines": 36,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 98,
+    "declarations": {
+      "def": 1,
+      "theorem": 6
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.044444444444444446,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureDynamicListError"
+    ],
+    "imports_in": 3,
+    "lines": 110,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailurePackedBytes.lean",
+    "proof_lines": 90,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 42,
+    "declarations": {
+      "def": 1,
+      "theorem": 5
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.14285714285714285,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailurePackedBytes",
+      "Solidity.Lowering.V08.LiteralFailureDynamicListErrorControls"
+    ],
+    "imports_in": 1,
+    "lines": 50,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailurePackedBytesControls.lean",
+    "proof_lines": 21,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 122,
+    "declarations": {
+      "inductive": 2,
+      "theorem": 6
+    },
+    "definition_lines": 8,
+    "definition_to_proof_line_ratio": 0.07476635514018691,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureCopyEncoding"
+    ],
+    "imports_in": 2,
+    "lines": 136,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailurePackedFields.lean",
+    "proof_lines": 107,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 97,
+    "declarations": {
+      "def": 6,
+      "theorem": 10
+    },
+    "definition_lines": 23,
+    "definition_to_proof_line_ratio": 0.46938775510204084,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailurePackedFields",
+      "Solidity.Lowering.V08.LiteralFailureCopyEncodingControls"
+    ],
+    "imports_in": 1,
+    "lines": 113,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailurePackedFieldsControls.lean",
+    "proof_lines": 49,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 54,
+    "declarations": {
+      "def": 2,
+      "theorem": 4
+    },
+    "definition_lines": 5,
+    "definition_to_proof_line_ratio": 0.11363636363636363,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureStatementReason"
+    ],
+    "imports_in": 2,
+    "lines": 66,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureReasonSequence.lean",
+    "proof_lines": 44,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 51,
+    "declarations": {
+      "def": 1,
+      "theorem": 7
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.10714285714285714,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureReasonSequence",
+      "Solidity.Lowering.V08.LiteralFailureMemoryReasonControls"
+    ],
+    "imports_in": 1,
+    "lines": 60,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureReasonSequenceControls.lean",
+    "proof_lines": 28,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 54,
+    "declarations": {
+      "def": 5,
+      "theorem": 3
+    },
+    "definition_lines": 12,
+    "definition_to_proof_line_ratio": 0.3157894736842105,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureDynamicReturn"
+    ],
+    "imports_in": 2,
+    "lines": 69,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureReferenceReturn.lean",
+    "proof_lines": 38,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 85,
+    "declarations": {
+      "def": 6,
+      "theorem": 12
+    },
+    "definition_lines": 12,
+    "definition_to_proof_line_ratio": 0.23076923076923078,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureReferenceReturn",
+      "Solidity.Lowering.V08.LiteralFailureDynamicReturnControls"
+    ],
+    "imports_in": 1,
+    "lines": 101,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureReferenceReturnControls.lean",
+    "proof_lines": 52,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 68,
+    "declarations": {
+      "theorem": 5
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureDynamicReturn"
+    ],
+    "imports_in": 5,
+    "lines": 80,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureReturnSlots.lean",
+    "proof_lines": 64,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 120,
+    "declarations": {
+      "def": 13,
+      "theorem": 13
+    },
+    "definition_lines": 27,
+    "definition_to_proof_line_ratio": 0.40298507462686567,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureReturnSlots",
+      "Solidity.Lowering.V08.LiteralFailureDynamicReturnControls"
+    ],
+    "imports_in": 3,
+    "lines": 139,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureReturnSlotsControls.lean",
+    "proof_lines": 67,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 52,
+    "declarations": {
+      "theorem": 7
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureOverflowReason",
+      "Solidity.Backend.Scalar.Checked"
+    ],
+    "imports_in": 2,
+    "lines": 67,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureScalarOverflow.lean",
+    "proof_lines": 47,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 63,
+    "declarations": {
+      "def": 5,
+      "theorem": 6
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.22580645161290322,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureScalarOverflow",
+      "Solidity.Lowering.V08.LiteralFailureMemoryReasonControls"
+    ],
+    "imports_in": 1,
+    "lines": 83,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureScalarOverflowControls.lean",
+    "proof_lines": 31,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 57,
+    "declarations": {
+      "abbrev": 1,
+      "def": 1,
+      "theorem": 6
+    },
+    "definition_lines": 4,
+    "definition_to_proof_line_ratio": 0.08163265306122448,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureSignatureBytes"
+    ],
+    "imports_in": 5,
+    "lines": 67,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureSelectorBytes.lean",
+    "proof_lines": 49,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 78,
+    "declarations": {
+      "def": 4,
+      "theorem": 10
+    },
+    "definition_lines": 12,
+    "definition_to_proof_line_ratio": 0.2857142857142857,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureSelectorBytes",
+      "Solidity.Lowering.V08.LiteralFailureDynamicListErrorControls"
+    ],
+    "imports_in": 2,
+    "lines": 91,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureSelectorBytesControls.lean",
+    "proof_lines": 42,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 61,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailurePackedBytes"
+    ],
+    "imports_in": 5,
+    "lines": 67,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureSignatureBytes.lean",
+    "proof_lines": 57,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 74,
+    "declarations": {
+      "def": 2,
+      "theorem": 9
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.15217391304347827,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureSignatureBytes",
+      "Solidity.Lowering.V08.LiteralFailureDynamicListErrorControls"
+    ],
+    "imports_in": 2,
+    "lines": 86,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureSignatureBytesControls.lean",
+    "proof_lines": 46,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 192,
+    "declarations": {
+      "inductive": 1,
+      "theorem": 9
+    },
+    "definition_lines": 17,
+    "definition_to_proof_line_ratio": 0.09941520467836257,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureNestedSlice"
+    ],
+    "imports_in": 2,
+    "lines": 207,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureSliceChain.lean",
+    "proof_lines": 171,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 107,
+    "declarations": {
+      "abbrev": 7,
+      "def": 14,
+      "theorem": 7
+    },
+    "definition_lines": 41,
+    "definition_to_proof_line_ratio": 0.9761904761904762,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureSliceChain",
+      "Solidity.Lowering.V08.LiteralFailureNestedSliceControls"
+    ],
+    "imports_in": 1,
+    "lines": 111,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureSliceChainControls.lean",
+    "proof_lines": 42,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 17,
+    "declarations": {
+      "theorem": 1
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureCalldataDecode"
+    ],
+    "imports_in": 2,
+    "lines": 24,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureSliceDecode.lean",
+    "proof_lines": 13,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 68,
+    "declarations": {
+      "def": 8,
+      "theorem": 8
+    },
+    "definition_lines": 16,
+    "definition_to_proof_line_ratio": 0.47058823529411764,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureSliceDecode",
+      "Solidity.Lowering.V08.LiteralFailureCalldataDecodeControls"
+    ],
+    "imports_in": 1,
+    "lines": 86,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureSliceDecodeControls.lean",
+    "proof_lines": 34,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 75,
+    "declarations": {
+      "abbrev": 2,
+      "def": 1,
+      "theorem": 4
+    },
+    "definition_lines": 7,
+    "definition_to_proof_line_ratio": 0.1111111111111111,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureCalldataPrefix",
+      "Solidity.Lowering.V08.SliceFailureLowering"
+    ],
+    "imports_in": 3,
+    "lines": 85,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureSliceEncoding.lean",
+    "proof_lines": 63,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 98,
+    "declarations": {
+      "abbrev": 4,
+      "def": 12,
+      "theorem": 8
+    },
+    "definition_lines": 38,
+    "definition_to_proof_line_ratio": 0.95,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureSliceEncoding",
+      "Solidity.Lowering.V08.LiteralFailureCalldataPrefixControls"
+    ],
+    "imports_in": 2,
+    "lines": 106,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureSliceEncodingControls.lean",
+    "proof_lines": 40,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 41,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureMemoryRevert"
+    ],
+    "imports_in": 4,
+    "lines": 48,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureStatementReason.lean",
+    "proof_lines": 36,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 36,
+    "declarations": {
+      "theorem": 4
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureStatementReason",
+      "Solidity.Lowering.V08.LiteralFailureMemoryReasonControls"
+    ],
+    "imports_in": 1,
+    "lines": 41,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureStatementReasonControls.lean",
+    "proof_lines": 19,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 120,
+    "declarations": {
+      "theorem": 12
+    },
+    "definition_to_proof_line_ratio": 0.0,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureCalldataDecode",
+      "Solidity.Source.ExprProgress"
+    ],
+    "imports_in": 3,
+    "lines": 142,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureStorageDecode.lean",
+    "proof_lines": 115,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 100,
+    "declarations": {
+      "def": 17,
+      "theorem": 12
+    },
+    "definition_lines": 40,
+    "definition_to_proof_line_ratio": 1.6666666666666667,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureStorageDecode",
+      "Solidity.Lowering.V08.SourceCustomErrorControls"
+    ],
+    "imports_in": 3,
+    "lines": 129,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureStorageDecodeControls.lean",
+    "proof_lines": 24,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 86,
+    "declarations": {
+      "def": 2,
+      "theorem": 10
+    },
+    "definition_lines": 3,
+    "definition_to_proof_line_ratio": 0.043478260869565216,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureStorageDecodeControls"
+    ],
+    "imports_in": 1,
+    "lines": 102,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureStorageSuccessControls.lean",
+    "proof_lines": 69,
+    "roadmap_commands": 0,
+    "sorry": 0
+  },
+  {
+    "area": "Lowering",
+    "category": "unmarked",
+    "code_lines": 114,
+    "declarations": {
+      "def": 3,
+      "theorem": 9
+    },
+    "definition_lines": 6,
+    "definition_to_proof_line_ratio": 0.058823529411764705,
+    "implemented_by": 0,
+    "imports": [
+      "Solidity.Lowering.V08.LiteralFailureConvertedFields"
+    ],
+    "imports_in": 4,
+    "lines": 132,
+    "maxHeartbeats": [],
+    "native_decide": 0,
+    "path": "Solidity/Lowering/V08/LiteralFailureStringConversion.lean",
+    "proof_lines": 102,
+    "roadmap_commands": 0,
+    "sorry": 0
+  }
+]
