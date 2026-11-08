@@ -58,23 +58,27 @@ existential output context (Context.lean:1420,1473-1478). Hence `Output` retains
 that context and the exact intrinsic program rather than requiring equal
 input/output contexts. `IntrinsicProbe.actual_context` confirms one retained
 Boolean flag for the concrete sample, and `actual_has_loop` confirms the loop.
-`WhileBreak.prototype_sound` now connects the concrete actual target's two
-caller-local observations to Source execution through G19.correct, for both
-Boolean RHS paths and arbitrary Source state/pipeline. It does not prove
+`WhileBreak.prototype_sound` connects the bare G19 source experiment;
+`WhileBreak.prototype_mapped_sound` uses actual Source typed-to-resolved
+output through explicit conversion/horizon transport. It proves actual target
+execution, the mapped relation for every caller binding, and unchanged target
+globals, for both Boolean RHS paths and arbitrary Source state/pipeline. It does not prove
 checker-wide soundness, complete state agreement or association for other names.
 
 ## Acceptance and refusals
 
 No semantic constructor or combination is currently accepted by a general
 triple checker: `Checker` remains a function type. `RawProbe.checkRaw` is an
-implemented total raw-only matcher, and `WhileBreak.prototype_sound` is a
-semantic theorem for its one concrete materialized sample, not a theorem for
-all raw outputs the matcher accepts. Its raw family is: a single empty-spec while with
+implemented total raw-only matcher. `WhileBreak.actual_gate` is a theorem
+for its one concrete materialized sample and actual resolved Source input,
+not a theorem for all raw outputs the matcher accepts. Its raw family is: a single empty-spec while with
 name-assignment condition and immediate break, with no user suffix. The
 raw matcher checks no types or resolved indices; only the concrete sample
 is independently elaborated as Boolean. It does not validate surrounding
 live bindings, full returned counter/memo, or arbitrary raw/intrinsic
-association.
+association. The concrete resolved input is Source's unbraced
+`while (i = a) break;`, retaining the RHS identity conversion. A resolved
+block body has a different horizon obligation and is not this sample.
 Beyond the concrete sample, this family still needs raw/resolved association,
 full fresh allocation and memo/context checks, intrinsic-output validation,
 and a generic target bridge. This distinction is not whole-family coverage
@@ -92,7 +96,11 @@ kernel reduction. The producer remains outside the trust boundary.
 
 ## Measurable success gate
 
-Run actual `lowerLoops` and intrinsic elaboration at elaboration time; quote
+The concrete `WhileBreak.actual_gate` passes raw acceptance together with
+`MappedEndpoint`, using SourceAssociation's actual typing/toR equation,
+explicit horizon transport and the actual captured intrinsic program.
+The implementation success gate for the future general checker is stronger:
+run actual `lowerLoops` and intrinsic elaboration at elaboration time; quote
 both exact outputs with their complete states into closed terms. Prove
 `check input output cert = true` in the kernel by `decide`/`rfl` on those terms;
 reject a corrupted output. Prove the generic soundness statement, execute that
@@ -111,12 +119,18 @@ endpoint has been demonstrated, so LOW-2 does not justify choosing P2.
 Budget 120-240 hours for the bounded control/sequence/block checker and generic
 soundness, with a review point after 24-48 hours on actual-output context
 transport and unbounded-loop simulation. This remains an engineering estimate,
-not measured completion evidence or permission to freeze E1. The full accepted
-association/state contract and generic soundness theorem remain open.
+not measured completion evidence or permission to freeze E1. The concrete desired association/semantic/state contract is stated in
+`WhileBreak.ConcreteSoundnessStatement`. Its checker/proof and the general
+compositional checker interface remain open; no interface is frozen.
 
 This candidate specifies the terminating normal Boolean observation only.
-The horizon offset is the existing G19 leaf's offset, not a fuel/gas equation,
-termination theorem or whole-language Horizon interface. Source journal and
+The Source offset must be checked certificate data, not an adequacy premise.
+Actual typed-to-resolved assignment retains an identity conversion
+(Source/Resolved.lean:333): SourceAssociation derives offset four for that
+leaf by transport to G19's bare offset three. It also proves a real timeout
+at horizon three for the converted term. These are constructor-derived
+observations, not fuel/gas equations, general termination theorems or a
+whole-language Horizon interface. Source journal and
 model globals remain distinct; no physical storage/hash/gas claim is made.
 `G` carries the pipeline. Return/error/timeout observations need the later
 compositional interface; this contract does not silently identify them.
@@ -160,6 +174,9 @@ structure Certificate where
   rhs : String
   breakFlag : String
   counter : Nat
+  /-- Source observation offset, to be validated against resolved constructors;
+  never assumed to equal target replay steps or physical gas. -/
+  sourceOffset : Nat
   destinationPosition : Nat
   rhsPosition : Nat
   deriving Repr, DecidableEq
@@ -199,7 +216,8 @@ weakened along `embedding`; a certificate cannot choose an unrelated map. An eve
 should compute that embedding; the candidate signature will need this finite
 context evidence added after actual-output experiments.
 
-This is only the semantic component. Accepted raw/resolved and intrinsic
+The source offset must be validated by accepted association, not selected
+as an unchecked assumption. This is only the semantic component. Accepted raw/resolved and intrinsic
 association, snapshot consistency and phase threading remain obligations;
 semantic validity alone does not constrain unused provenance fields.
 No inhabitant is supplied here; this is a statement, not an admitted theorem.
@@ -222,7 +240,7 @@ def SemanticSoundnessStatement {E : Source.Env} {returns : List Source.STy} {mod
     (∀ (H : HTy) (v : Source.Val E.layout .bool) (b : Bool),
       R H .bool (.val .bool) v b → v = .bool b) →
     ∃ (ls : Source.Locals E.layout srcΓ) (out : Out C target.H output.program.1),
-      (Source.execS G F (fuel + 3) nps ph input.resolved source.1).run (.nil, source.2) =
+      (Source.execS G F (fuel + cert.sourceOffset) nps ph input.resolved source.1).run (.nil, source.2) =
         (.ok (Source.Out.normal ls), (.nil, source.2)) ∧
       output.program.2.run target = .ok out ∧
       (m.wk embedding).Related (R out.st.H) ls out.st.env ∧

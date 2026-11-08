@@ -1,5 +1,6 @@
 import Solidity.Correctness.Lowering.Checker.IntrinsicProbe
 import Solidity.Semantics.RunFuel
+import Solidity.Correctness.Lowering.Checker.SourceAssociation
 
 /-! Semantic experiment on the actual intrinsic output. A successful bounded
 replay is lifted to the unbounded model using the existing approximation
@@ -90,7 +91,7 @@ theorem initial {E : Source.Env} (choice : Bool) :
     | here => rfl
     | there i => nomatch i
 
-/-- Concrete end-to-end semantic observation, reusing G19.correct rather
+/-- Bare-G19-source semantic observation, reusing G19.correct rather
 than copying its source proof. `G` ranges over both pipelines; the target is
 exactly the actual quoted intrinsic output. This is a first-leaf experiment,
 not the soundness theorem for arbitrary accepted triples, state association,
@@ -109,7 +110,7 @@ theorem prototype_sound {E : Source.Env} (G : Source.Glob E) (F : Source.Fr)
     (fun _ _ h => h) .here (.there .here) rfl rfl rfl rfl
   exact ⟨result.1, actual_observation choice⟩
 
-/-- Measurable concrete gate: kernel raw acceptance and the actual intrinsic
+/-- Bare-source gate: kernel raw acceptance and the actual intrinsic
 semantic observation are required together. This is not universal soundness
 for the larger syntactic family recognized by `checkRaw`. -/
 theorem prototype_gate {E : Source.Env} (G : Source.Glob E) (F : Source.Fr)
@@ -122,6 +123,160 @@ theorem prototype_gate {E : Source.Env} (G : Source.Glob E) (F : Source.Fr)
       (.ok (Source.Out.normal ((sourceLocals choice).set .here (.bool choice))), (.nil, st)) ∧
     successValue observe (actual.program.2.run (start choice)) = some (choice, choice) := by
   exact ⟨RawProbe.accepts_actual, prototype_sound G F fuel nps ph st choice⟩
+
+/-- The resolved input paired with RawProbe.input by the concrete leaf
+association below. The pairing is a syntactic obligation, not an assumed
+execution or preservation fact. -/
+def resolvedInput (E : Source.Env) :
+    Source.RStmt E [] false .body [.bool, .bool] [.bool, .bool] := SourceAssociation.resolved E
+
+/-- Exact unfrozen association specification for the one concrete leaf.
+All equalities are obligations on an accepted triple, not certificate fields
+or semantic premises. The program is the actual captured intrinsic output;
+placement of the supplied scoped statements is checked separately. No claim
+is made that a checker implementing this relation is supplied here. -/
+def ConcreteAssociation {E : Source.Env} (m : ContextMap [.bool, .bool] Γ)
+    (input : Input E [] false .body [.bool, .bool]) (output : Output C Γ)
+    (cert : Certificate) : Prop :=
+  m = mapping ∧
+  input.raw = RawProbe.input ∧ input.resolved = resolvedInput E ∧
+  input.returnSlots = none ∧ input.scope = RawProbe.scope ∧
+  input.before.locals = (RawProbe.inputLocals, 1) ∧ input.before.memo = ({} : CallMemo) ∧
+  output.raw = RawProbe.actual.raw ∧
+  output.afterLower.locals = (RawProbe.actual.locals, RawProbe.actual.counter) ∧
+  output.afterLower.memo = RawProbe.actual.memo ∧
+  output.elabScope = RawProbe.scope ∧ output.beforeElab = output.afterLower ∧
+  output.afterElab.locals = (IntrinsicProbe.actual.locals, IntrinsicProbe.actual.counter) ∧
+  output.afterElab.memo = IntrinsicProbe.actual.memo ∧
+  output.names = (ECtx.toNCtx RawProbe.inputLocals).names ∧
+  output.program = IntrinsicProbe.actual.program ∧
+  SProg.chain output.names Γ output.elaborated = .ok output.program ∧
+  cert.destination = "i" ∧ cert.rhs = "a" ∧ cert.breakFlag = "brk1" ∧
+  cert.counter = 1 ∧ cert.sourceOffset = 4 ∧ cert.destinationPosition = 0 ∧ cert.rhsPosition = 1
+
+/-- Full desired association/semantic/state contract for the concrete first
+leaf. This is a proposition to prove of a total syntax-directed checker,
+not a proof, implemented checker, interface freeze or whole-language claim.
+Unlike the generic semantic component alone, this also ties both states,
+raw input, resolved input, certificate and actual intrinsic output together.
+The supplied intermediate statements must place into that actual program;
+identity with the unquoted actual intermediate SProg is not claimed.
+Unsupported triples remain coverage gaps. Producer execution itself stays outside the kernel trust
+boundary: the quoted outputs are what the checker must validate. -/
+def ConcreteSoundnessStatement {E : Source.Env}
+    (check : Solidity.Correctness.Lowering.Checker.Checker E [] false .body
+      [.bool, .bool] C Γ) : Prop :=
+  (∀ (m : ContextMap [.bool, .bool] Γ) (input : Input E [] false .body [.bool, .bool])
+    (output : Output C Γ) (cert : Certificate),
+    check m input output cert = true → ConcreteAssociation m input output cert) ∧
+  Solidity.Correctness.Lowering.Checker.SoundnessStatement check
+
+/-- A view frame preserves the complete model global part. This is a
+model-state fact, not an identification with the independent Source journal. -/
+theorem view_frame_globals {C : Contract} {Γ Δ : Ctx} (source : State C Γ)
+    (target : State C Δ) (frame : TGFrame .view source target) :
+    target.glob = source.glob := by
+  rcases source with ⟨ss, sh, sp, se, sn, sb, st⟩
+  rcases target with ⟨ts, th, tp, te, tn, tb, tt⟩
+  rcases frame with ⟨hh, hp, hb, ht, hk⟩
+  cases hh
+  have heapEq : tp = sp := eq_of_heq hp
+  have balanceEq : tb = sb := hb (by decide)
+  have stateEq : ts = ss ∧ tn = sn := hk (by decide)
+  rcases stateEq with ⟨storageEq, netEq⟩
+  cases heapEq
+  cases balanceEq
+  cases storageEq
+  cases netEq
+  cases ht
+  rfl
+
+/-- The actual quoted program satisfies the existing view-frame checker. -/
+theorem actual_within : Prog.within .view actual.program.2 = true := by
+  decide +kernel
+
+/-- Existing generic framing supplies unchanged target globals. -/
+theorem actual_globals (target : State C Γ) (out : Out C target.H actual.program.1)
+    (run : actual.program.2.run target = .ok out) : out.st.glob = target.glob := by
+  have frame : TGFrame .view target out.st :=
+    (Prog.run_frame actual.program.2 actual_within 0 run).1
+  exact view_frame_globals target out.st frame
+
+/-- Caller bindings are embedded past the retained break flag. -/
+def embedding : Thin Γ actual.program.1 := .drop .refl
+
+/-- The actual execution yields the existing G19 mapped post-local relation. -/
+theorem actual_related {E : Source.Env} (choice : Bool) :
+    ∃ out : Out C [] actual.program.1,
+      actual.program.2.run (start choice) = .ok out ∧
+      (mapping.wk embedding).Related (BoolRel (E := E) (H := out.st.H))
+        ((sourceLocals choice).set .here (.bool choice)) out.st.env := by
+  have observation := actual_observation choice
+  cases run : actual.program.2.run (start choice) with
+  | error err =>
+    rw [run] at observation
+    cases observation
+  | ok out =>
+    refine ⟨out, rfl, ?_⟩
+    rw [run] at observation
+    have pair : observe out = (choice, choice) := Option.some.inj observation
+    have left : TEnv.get (.there .here) out.st.env = choice := congrArg Prod.fst pair
+    have right : TEnv.get (.there (.there .here)) out.st.env = choice := congrArg Prod.snd pair
+    intro τ i
+    cases i with
+    | here =>
+      change (Source.Val.bool choice : Source.Val E.layout .bool) = .bool (TEnv.get (.there .here) out.st.env)
+      rw [left]
+    | there i => cases i with
+      | here =>
+        change (Source.Val.bool choice : Source.Val E.layout .bool) = .bool (TEnv.get (.there (.there .here)) out.st.env)
+        rw [right]
+      | there i => nomatch i
+
+/-- G19-style mapped endpoint for the concrete actual-output prototype.
+The Source half is reused; all actual target caller bindings and target
+globals are accounted for. Initial target states remain the two `start`
+samples; this is not generic checker soundness or a whole-world relation. -/
+def MappedEndpoint {E : Source.Env} (G : Source.Glob E) (F : Source.Fr)
+    (fuel nps : Nat) (ph : Option (Source.Ph E)) (st : Source.St E) (choice : Bool) : Prop :=
+    ∃ out : Out C [] actual.program.1,
+      (Source.execS G F (fuel + 4) nps ph (resolvedInput E) (sourceLocals choice)).run
+        (.nil, st) =
+        (.ok (Source.Out.normal ((sourceLocals choice).set .here (.bool choice))), (.nil, st)) ∧
+      actual.program.2.run (start choice) = .ok out ∧
+      (mapping.wk embedding).Related (BoolRel (E := E) (H := out.st.H))
+        ((sourceLocals choice).set .here (.bool choice)) out.st.env ∧
+      out.st.glob = (start choice).glob
+
+/-- Actual resolved Source and actual intrinsic target reach the mapped
+endpoint; no G19 source correctness proof is copied. -/
+theorem prototype_mapped_sound {E : Source.Env} (G : Source.Glob E) (F : Source.Fr)
+    (fuel nps : Nat) (ph : Option (Source.Ph E)) (st : Source.St E) (choice : Bool) : MappedEndpoint G F fuel nps ph st choice := by
+  obtain ⟨out, run, related⟩ := actual_related (E := E) choice
+  have sourceRun : (Source.execS G F (fuel + 4) nps ph (resolvedInput E)
+      (sourceLocals choice)).run (.nil, st) =
+      (.ok (Source.Out.normal ((sourceLocals choice).set .here (.bool choice))), (.nil, st)) := by
+    change (Source.execS G F (fuel + 4) nps ph (SourceAssociation.resolved E)
+      (sourceLocals choice)).run (.nil, st) = _
+    rw [SourceAssociation.resolved_run_eq_bare]
+    exact (prototype_sound G F fuel nps ph st choice).1
+  exact ⟨out, sourceRun, run, related, actual_globals (start choice) out run⟩
+
+/-- Measurable actual-resolved-source gate. Raw acceptance, actual Source
+typing/elaboration, explicit horizon transport, mapped caller locals and
+unchanged target globals are checked together for the concrete sample. -/
+theorem actual_gate {E : Source.Env} (G : Source.Glob E) (F : Source.Fr)
+    (fuel nps : Nat) (ph : Option (Source.Ph E)) (st : Source.St E) (choice : Bool) :
+    RawProbe.checkRaw RawProbe.input RawProbe.actual.raw 1 = true ∧
+      MappedEndpoint G F fuel nps ph st choice := by
+  exact ⟨RawProbe.accepts_actual, prototype_mapped_sound G F fuel nps ph st choice⟩
+
+#print axioms actual_gate
+#print axioms view_frame_globals
+#print axioms actual_within
+#print axioms actual_globals
+#print axioms actual_related
+#print axioms prototype_mapped_sound
 
 #print axioms prototype_gate
 #print axioms replay_sound
