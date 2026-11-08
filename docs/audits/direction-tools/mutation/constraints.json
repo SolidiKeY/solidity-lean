@@ -6,15 +6,18 @@
   "semantic_kills": null,
   "semantic_survivors": null,
   "strong_candidates_updated": [
+    "M06",
     "M17",
     "M18",
     "M19",
     "M20",
     "M21",
     "M22",
+    "M26",
     "M27",
     "M29",
-    "M30"
+    "M30",
+    "M31"
   ],
   "with_explicit_code_mentions": 30
 }

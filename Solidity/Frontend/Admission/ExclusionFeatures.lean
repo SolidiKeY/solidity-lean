@@ -117,4 +117,24 @@ theorem sourceFeaturesWithExclusions_excluded (unit : Syn .unit) (site : SyntaxO
 /-- info: 'Solidity.Frontend.Admission.sourceFeaturesWithExclusions_excluded' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms sourceFeaturesWithExclusions_excluded
 
+
+/-- Combined partial inventory; raw intrinsic refusals remain independent, and no canonical profile is selected. -/
+def syntaxSubsetFeaturesAt {c : Cat} (s : Syn c) : List Feature :=
+  featuresWithExclusionsAt s ++ literalFeaturesAt s
+
+def sourceSubsetRefusals (unit : Syn .unit) (accepts : Feature → Bool) :
+    List (SyntaxOccurrence × Feature) := syntaxFieldRefusals unit syntaxSubsetFeaturesAt accepts
+
+def sourceSubsetRefusal? (unit : Syn .unit) (accepts : Feature → Bool) :
+    Option (SyntaxOccurrence × Feature) := syntaxFieldRefusal? unit syntaxSubsetFeaturesAt accepts
+
+theorem sourceSubsetRefusal?_none_iff (unit : Syn .unit) (accepts : Feature → Bool) :
+    sourceSubsetRefusal? unit accepts = none ↔
+      ∀ (site : SyntaxOccurrence) (feature : Feature),
+        Syn.Sub site ⟨.unit,unit⟩ → feature ∈ syntaxSubsetFeaturesAt site.2 →
+          accepts feature = true := syntaxFieldRefusal?_none_iff unit syntaxSubsetFeaturesAt accepts
+
+/-- info: 'Solidity.Frontend.Admission.sourceSubsetRefusal?_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms sourceSubsetRefusal?_none_iff
+
 end Solidity.Frontend.Admission
