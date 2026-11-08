@@ -15,7 +15,7 @@ checkout's build caches, COORD_CACHE_DIRS), then `bash scripts/coord-tools/gate.
 merge pre-gate runs. On a failure or a conflict it prints the first errors and does not
 report done: fix it and push, or pass `--no-check REASON` when the failure is not yours. Only a pass, or an explicit
 `--no-check REASON`, reports: a failed fetch, a missing tool (lake, node) or a broken worktree also refuses, with what
-is missing. Results are cached per (head, master, check). `prepush:` is recorded in the push.
+is missing. No verdict is cached: every --done runs the check (Lake's own cache keeps an unchanged re-run quick). `prepush:` is recorded in the push.
 --done also checks the head against the fetched master: when it lacks master commits older than COORD_STALE_HOURS
 (6), it warns (the merge pre-gate builds the head merged onto current master) and records `behind:` in the push; it
 never refuses.
@@ -63,15 +63,8 @@ def prepush(no_check):
         return {'state': 'unavailable', 'detail': 'git fetch origin master failed (network?)'}
     rp = lambda *x: subprocess.run(['git', *x], capture_output=True, text=True).stdout.strip()
     master, head, top = rp('rev-parse', 'FETCH_HEAD'), rp('rev-parse', 'HEAD'), rp('rev-parse', '--show-toplevel')
-    common = os.path.abspath(rp('rev-parse', '--git-common-dir'))
-    cache_f = os.path.join(common, 'coord-prepush.json')
-    try: cache = json.load(open(cache_f))
-    except (OSError, ValueError): cache = {}
     cmd = CHECK_CMD   # this project's merge gate, never overridden here: --no-check REASON is the only bypass
-    # a cached verdict holds only for the same head, master, command and gate options (GATE_EXAMPLES widens it)
-    key = f'{head}:{master}:' + json.dumps([cmd, os.environ.get('GATE_EXAMPLES', ''), os.environ.get('COORD_CACHE_DIRS', '')])
     base = {'master': master, 'head': head, 'cmd': cmd}
-    if key in cache: return dict(cache[key], **base, cached=True)
     if subprocess.run(['git', 'merge-base', '--is-ancestor', head, master]).returncode == 0:
         return dict(base, state='pass', detail='head already on master (master passed the merge gate)')
     print(f'coord-ask: pre-push check: your head merged onto master {master[:12]}, then the gate (can take minutes)...',
@@ -105,10 +98,6 @@ def prepush(no_check):
     finally:
         subprocess.run(['git', 'worktree', 'remove', '--force', w], capture_output=True)
         shutil.rmtree(tmp, ignore_errors=True); subprocess.run(['git', 'worktree', 'prune'], capture_output=True)
-    if res['state'] in ('pass', 'fail', 'conflict'):
-        cache[key] = {k: v for k, v in res.items() if k in ('state', 'detail')}
-        try: json.dump(dict(list(cache.items())[-50:]), open(cache_f, 'w'))
-        except OSError: pass
     return res
 
 
