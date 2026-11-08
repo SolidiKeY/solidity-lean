@@ -295,3 +295,9 @@ enforces its16GiB/no-swap merge cap. Local checks retain one Lean process,
 12GiB address-space and sampled aggregate-RSS bounds, no swap, the existing
 host reserve and deadline. Local success does not certify the host pre-gate.
 The separate strict scope verifier remains regression-tested and is the default admission route. Frozen v1 defaults remain unchanged.
+
+Lifecycle regressions also default to strict host admission, including under
+unittest discovery. On the authorized cloud VM run
+`python3 -B tests/h62/item4/generic-v08/test_width_v2_lifecycle.py --cloud-vm-h232`.
+Only this explicit test-runner option selects cloud admission and passes the
+same option to its monitor fixtures; no environment fallback enables it.
