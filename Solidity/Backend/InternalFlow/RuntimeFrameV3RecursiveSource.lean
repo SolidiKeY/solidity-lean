@@ -58,7 +58,7 @@ theorem all_horizons {C : Contract} {R : RefTy} (hm : (Ty.ref R).mapFree=true)
  induction depth generalizing σ count with
  | zero =>
    change (.error .exhausted : TRes (Solidity.Out C σ.H (Parameters R))) = _
-   simp only [Nat.not_lt_zero,if_false]
+   simp only [Nat.not_lt_zero,ite_false]
  | succ depth ih =>
    have evaluated := guard_eval σ count (congrArg (fun v : PrimTy.uint.Denote => v.val) counter)
    change TRun.seq
@@ -68,7 +68,7 @@ theorem all_horizons {C : Contract} {R : RefTy} (hm : (Ty.ref R).mapFree=true)
    cases count with
    | zero =>
      simp only [TRun.seq,TRun.ite,evaluated,show decide (0<(0:Nat))=false from rfl,
-       boolT,TRun.nil,ok_bind,Except.map,Nat.zero_lt_succ,ite_true]
+       boolT,TRun.nil,Except.map,Nat.zero_lt_succ,ite_true]
      rfl
    | succ count =>
      have args := next_eval hm σ count bound ref counter alias
@@ -78,7 +78,7 @@ theorem all_horizons {C : Contract} {R : RefTy} (hm : (Ty.ref R).mapFree=true)
      have recursive : TRun.call (nextArgs R hm) .none .refl (body R hm depth).runR σ =
        if count<depth then .ok ⟨σ,List.prefix_refl _⟩ else .error .exhausted := by
        unfold TRun.call
-       simp only [args,ok_bind,CallRet.enterT]
+       simp only [args,CallRet.enterT]
        change (do
          let out ← (body R hm depth).run child
          pure (⟨out.st.withEnv (TEnv.wk ((List.prefix_refl σ.H).trans out.ext) (Parameters R) σ.env),
@@ -94,7 +94,7 @@ theorem all_horizons {C : Contract} {R : RefTy} (hm : (Ty.ref R).mapFree=true)
      simp only [TRun.seq,TRun.ite,evaluated,show decide (0<count+1)=true from decide_eq_true (by omega),
        boolT,recursive,enough]
      by_cases done : count<depth
-     · simp only [ite_eq_left done,ok_bind,TRun.nil,Except.map]
+     · simp only [ite_eq_left done,TRun.nil,Except.map]
        rfl
      · simp only [ite_eq_right done]
        rfl
@@ -115,7 +115,7 @@ theorem call_all_horizons {C : Contract} {Γ : Ctx} {R : RefTy}
  have inner := all_horizons hm depth child count bound ref rfl rfl
  change TRun.call args .none .refl (body R hm depth).runR caller = _
  unfold TRun.call
- simp only [evaluated,ok_bind,CallRet.enterT]
+ simp only [evaluated,CallRet.enterT]
  change (do
    let out ← (body R hm depth).run child
    pure (⟨out.st.withEnv (TEnv.wk ((List.prefix_refl caller.H).trans out.ext) Γ caller.env),
