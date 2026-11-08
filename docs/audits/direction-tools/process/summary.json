@@ -22,7 +22,23 @@
     "status": "historical closure confirmed by reused archived validation",
     "toolchain_blob_identical": true
   },
-  "conclusion": "Registries/documentation dominate churn hotspots. The sole theorem-bearing hotspot has historical closure evidence reused with an identical source/import graph. The process-overhead reference outlier remains unmatched and unclassified; source volume is not labor.",
+  "conclusion": "Registries/documentation dominate churn hotspots. The sole theorem-bearing hotspot has historical closure evidence reused with an identical source/import graph. The matched process-overhead ratio and categorical verdict remain unproven/inconclusive with an UNVERIFIABLE evidence gap under H151; no full audit completion is authorized. Source volume is not labor.",
+  "evidence_gaps": [
+    {
+      "authority": "H151 disposition of H241 existing-data lookup",
+      "categorical_verdict": null,
+      "claim_status": "unproven/inconclusive",
+      "coordinator_state_receipt": "coordinator-20261108T165207Z/receipt.json",
+      "fresh_measurement_authorized": false,
+      "full_audit_completion_authorized": false,
+      "lookup_boundary": "No matching artifact located in relevant process/reference handoffs, recorded reference reuse or bounded archive filename search. This does not prove no artifact exists elsewhere.",
+      "matched_ratio": null,
+      "new_task_or_producer_interface_authorized": false,
+      "receipt_boundary": "Coordinator supplied this pointer and disposition; receipt bytes/hash were not supplied in this VM.",
+      "status": "UNVERIFIABLE",
+      "subject": "matched process-overhead calibration"
+    }
+  ],
   "inventory": {
     "docs/audits/architecture-tools/": [
       "docs/audits/architecture-tools/core_closure.py",
@@ -65,6 +81,8 @@
     "Git path churn is not person-hours; merges excluded by default, first-parent sensitivity supplied.",
     "CompCert is one approximate source reference, not a matched theorem or labor reference. No numeric claim copied from prose."
   ],
+  "matched_process_overhead_ratio": null,
+  "matched_process_overhead_verdict": null,
   "methods": {
     "closure": "Non-goal hotspots N/A. Decide historical closure supported by exact archived successful full-gate bytes, explicit replay line, root inclusion, identical local source-import graph and toolchain pin. No fresh Lean check.",
     "generated": "Named roots, Corpus/, AxiomPins files, and explicit generated headers in first 2500 chars; explicit BEGIN/END regions subtracted from header-unmarked source stock and emitted separately. Historical churn uses file categories and does not separate mixed-file regions. Union of monthly snapshots classifies history; unknown deleted generated files may remain handwritten.",
@@ -117,6 +135,20 @@
       "timing_status": "not measured; published timing not yet located"
     },
     "decision": "H241 option A: existing archived receipts and matched calibration only; no new measurement",
+    "evidence_gap": {
+      "authority": "H151 disposition of H241 existing-data lookup",
+      "categorical_verdict": null,
+      "claim_status": "unproven/inconclusive",
+      "coordinator_state_receipt": "coordinator-20261108T165207Z/receipt.json",
+      "fresh_measurement_authorized": false,
+      "full_audit_completion_authorized": false,
+      "lookup_boundary": "No matching artifact located in relevant process/reference handoffs, recorded reference reuse or bounded archive filename search. This does not prove no artifact exists elsewhere.",
+      "matched_ratio": null,
+      "new_task_or_producer_interface_authorized": false,
+      "receipt_boundary": "Coordinator supplied this pointer and disposition; receipt bytes/hash were not supplied in this VM.",
+      "status": "UNVERIFIABLE",
+      "subject": "matched process-overhead calibration"
+    },
     "missing_counterparts_reused": [
       {
         "reason": "solc implements the compiler; selected production implementation files supply no correctness theorem counterpart.",
@@ -142,7 +174,7 @@
         "unit": "WP facade"
       }
     ],
-    "process_overhead_calibration": "not supplied by these merged artifacts; no overhead numerator in reference inventory",
+    "process_overhead_calibration": "UNVERIFIABLE evidence gap under H151; no matched overhead numerator located in the bounded existing-data lookup",
     "reference_waits_reused": [],
     "source_inputs": {
       "boundaries.json": {
@@ -167,11 +199,12 @@
       }
     },
     "source_status": "done",
-    "status": "blocked pending matched process-overhead calibration only"
+    "status": "UNVERIFIABLE calibration evidence; audit incomplete, not waiting for an unchanged artifact"
   },
   "reproduce": "python3 docs/audits/direction-tools/process/history.py --out /tmp/process-results --compcert /tmp/process-compcert",
   "reproduce_continuation": "Run recorded history.py command, then reuse.py --out RESULT_DIR, then closure.py --archive-git ARCHIVE.git --out RESULT_DIR",
   "schema": "direction-process-v1",
+  "status": "partial",
   "timing_reuse": {
     "interpretation": "reuse only; source audit timing sample is not a whole-project or matched-reference check time",
     "passing_rows": 60,
@@ -202,7 +235,8 @@
       "verdict": null
     },
     {
-      "assessment": "inconclusive: unmatched inventory boundaries; no justified/redundant/wrong-direction claim",
+      "assessment": "UNVERIFIABLE under H151; matched ratio and justified/redundant/wrong-direction claim remain unproven/inconclusive. Existing exploratory ratios are not matched calibration.",
+      "matched_ratio": null,
       "outlier": true,
       "ratio_of_ratios": 18.705283972692115,
       "ratio_of_ratios_excluding_reference_vendor": 15.593328616281733,
@@ -370,14 +404,5 @@
       "verdict": null
     }
   ],
-  "waits": [
-    {
-      "item": "da-references",
-      "status": "absent on pinned base; own shallow CompCert measurement used when supplied"
-    },
-    {
-      "item": "va3/vu1",
-      "status": "scripts/differential/** and scripts/bench/** absent on pinned base; no output invented"
-    }
-  ]
+  "waits": []
 }

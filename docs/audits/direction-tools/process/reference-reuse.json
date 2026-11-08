@@ -25,6 +25,20 @@
     "timing_status": "not measured; published timing not yet located"
   },
   "decision": "H241 option A: existing archived receipts and matched calibration only; no new measurement",
+  "evidence_gap": {
+    "authority": "H151 disposition of H241 existing-data lookup",
+    "categorical_verdict": null,
+    "claim_status": "unproven/inconclusive",
+    "coordinator_state_receipt": "coordinator-20261108T165207Z/receipt.json",
+    "fresh_measurement_authorized": false,
+    "full_audit_completion_authorized": false,
+    "lookup_boundary": "No matching artifact located in relevant process/reference handoffs, recorded reference reuse or bounded archive filename search. This does not prove no artifact exists elsewhere.",
+    "matched_ratio": null,
+    "new_task_or_producer_interface_authorized": false,
+    "receipt_boundary": "Coordinator supplied this pointer and disposition; receipt bytes/hash were not supplied in this VM.",
+    "status": "UNVERIFIABLE",
+    "subject": "matched process-overhead calibration"
+  },
   "missing_counterparts_reused": [
     {
       "reason": "solc implements the compiler; selected production implementation files supply no correctness theorem counterpart.",
@@ -50,7 +64,7 @@
       "unit": "WP facade"
     }
   ],
-  "process_overhead_calibration": "not supplied by these merged artifacts; no overhead numerator in reference inventory",
+  "process_overhead_calibration": "UNVERIFIABLE evidence gap under H151; no matched overhead numerator located in the bounded existing-data lookup",
   "reference_waits_reused": [],
   "source_inputs": {
     "boundaries.json": {
@@ -75,5 +89,5 @@
     }
   },
   "source_status": "done",
-  "status": "blocked pending matched process-overhead calibration only"
+  "status": "UNVERIFIABLE calibration evidence; audit incomplete, not waiting for an unchanged artifact"
 }

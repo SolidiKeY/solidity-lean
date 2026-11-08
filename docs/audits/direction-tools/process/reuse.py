@@ -13,6 +13,35 @@ import subprocess
 REFERENCE_REVISION = '645f10caf083550552616229654e29fddd1ad767'
 REFERENCE_DIRECTORY = 'docs/audits/direction-tools/references/'
 
+def apply_gap(summary):
+    """H151 disposition supplied by coordinator; not a new artifact search."""
+    gap={
+      'status':'UNVERIFIABLE',
+      'subject':'matched process-overhead calibration',
+      'authority':'H151 disposition of H241 existing-data lookup',
+      'coordinator_state_receipt':'coordinator-20261108T165207Z/receipt.json',
+      'receipt_boundary':'Coordinator supplied this pointer and disposition; receipt bytes/hash were not supplied in this VM.',
+      'lookup_boundary':'No matching artifact located in relevant process/reference handoffs, recorded reference reuse or bounded archive filename search. This does not prove no artifact exists elsewhere.',
+      'matched_ratio':None,'categorical_verdict':None,
+      'claim_status':'unproven/inconclusive',
+      'fresh_measurement_authorized':False,'full_audit_completion_authorized':False,
+      'new_task_or_producer_interface_authorized':False
+    }
+    summary['evidence_gaps']=[gap]
+    summary['status']='partial'
+    summary['waits']=[]
+    summary['matched_process_overhead_ratio']=None
+    summary['matched_process_overhead_verdict']=None
+    summary['reference_reuse']['process_overhead_calibration']='UNVERIFIABLE evidence gap under H151; no matched overhead numerator located in the bounded existing-data lookup'
+    summary['reference_reuse']['status']='UNVERIFIABLE calibration evidence; audit incomplete, not waiting for an unchanged artifact'
+    summary['reference_reuse']['evidence_gap']=gap
+    for trend in summary['trends']:
+        if trend['signal']=='CompCert infrastructure/source calibration':
+            trend['matched_ratio']=None
+            trend['verdict']=None
+            trend['assessment']='UNVERIFIABLE under H151; matched ratio and justified/redundant/wrong-direction claim remain unproven/inconclusive. Existing exploratory ratios are not matched calibration.'
+
+
 def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--out',type=pathlib.Path,required=True)
@@ -41,6 +70,7 @@ def main():
       'status':'blocked pending exact archived successful closure receipt and matched process calibration'
     }
     summary['reference_reuse']=result
+    apply_gap(summary)
     summary['reproduce_continuation']='Run recorded history.py command, then python3 docs/audits/direction-tools/process/reuse.py --out RESULT_DIR'
     for name,data in [('reference-reuse.json',result),('summary.json',summary)]:
         raw=json.dumps(data,indent=2,sort_keys=True)+'\n'
