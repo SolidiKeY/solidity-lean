@@ -1,6 +1,5 @@
 <!-- Generated from docs/module-map/frontend.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # The solc front end
-
 `SolkeyTestSuite` (`lake build SolkeyTestSuite`): solkey's `TestSuite.sol` from
 the AST the pinned soljson writes (`scripts/solc-ast.mjs` makes
 `tests/solc/TestSuite.ast.json`; `./scripts/check-solc-ast.sh` re-derives and
@@ -300,7 +299,6 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/LiteralGrammarH28/WordTable.lean` | Exhaustive word-table return classes, proved by a checked proof-producing tactic. |
 
 ### SOL-QN final target, C3 and normalization adequacy
-
 | Module | Purpose |
 |---|---|
 | `Frontend/QualifiedUnits/Linearization.lean` | Independent C3 hierarchy judgment on original declaration identities; `order_iff` (the `idUniverse` bound never refuses a hierarchy), precedence and acyclicity. |
