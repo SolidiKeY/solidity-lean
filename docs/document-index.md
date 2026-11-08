@@ -328,6 +328,7 @@ and open obligations. Test proposals remain proposals until applied.
 - [tests/h62/item2/audit-calculus/BYTE-CAPTURE-CLASSIFICATION.md](../tests/h62/item2/audit-calculus/BYTE-CAPTURE-CLASSIFICATION.md)
 - [tests/h62/item2/audit-calculus/BYTE-IMAGE-CLASSIFICATION.md](../tests/h62/item2/audit-calculus/BYTE-IMAGE-CLASSIFICATION.md)
 - [tests/h62/item2/audit-calculus/PACKET-VERIFICATION.md](../tests/h62/item2/audit-calculus/PACKET-VERIFICATION.md)
+- [tests/h62/item2/audit-calculus/PANIC-CARRIER-CLASSIFICATION.md](../tests/h62/item2/audit-calculus/PANIC-CARRIER-CLASSIFICATION.md)
 - [tests/h62/item2/audit-language/registration-fragment.md](../tests/h62/item2/audit-language/registration-fragment.md)
 - [tests/h62/item6/migrate-hash/README.md](../tests/h62/item6/migrate-hash/README.md)
 - [tests/source-immutables/README.md](../tests/source-immutables/README.md)
