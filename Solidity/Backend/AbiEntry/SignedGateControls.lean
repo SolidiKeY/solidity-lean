@@ -91,7 +91,7 @@ theorem protected_and_saved (word : Fin W) :
 #guard_msgs (whitespace := lax) in #print axioms wide_bound_not_truncated
 /-- info: 'Solidity.Backend.AbiEntry.SignedGateControls.raw_dirty_failure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms raw_dirty_failure
-/-- info: 'Solidity.Backend.AbiEntry.SignedGateControls.raw_negative_value' depends on axioms: [Quot.sound] -/
+/-- info: 'Solidity.Backend.AbiEntry.SignedGateControls.raw_negative_value' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms raw_negative_value
 /-- info: 'Solidity.Backend.AbiEntry.SignedGateControls.malformed_word_fault' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms malformed_word_fault
