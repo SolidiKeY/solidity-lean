@@ -2,16 +2,17 @@
 // Public TabInputText ownership joins the observed full-path tab accessibility label.
 // File-only endpoints; no filename inference, raster or mutation-ABA guarantee.
 'use strict';
-const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),{fileURLToPath}=require('node:url'),{createHash,randomUUID}=require('node:crypto');
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),{fileURLToPath,pathToFileURL}=require('node:url'),{createHash,randomUUID}=require('node:crypto');
 const filename='menu-tab-owner.json';
+function canonicalResourcePath(uri){const url=new URL(uri);assert.ok(url.protocol==='file:'&&!url.hostname&&!url.search&&!url.hash,'Unsupported public tab URI');const file=fileURLToPath(uri);assert.equal(pathToFileURL(file).href,uri,'Noncanonical public tab URI');return file;}
 function snapshot(vscode,doc,identity,epoch){
  const groups=vscode.window.tabGroups,group=groups?.activeTabGroup,tab=group?.activeTab,editor=vscode.window.activeTextEditor;
  assert.ok(groups?.all.includes(group)&&groups.all.filter(g=>g.isActive).length===1&&group.isActive&&tab?.isActive&&group.tabs.includes(tab)&&group.tabs.filter(t=>t.isActive).length===1,'Public active tab/group unavailable');
  assert.ok(typeof vscode.TabInputText==='function'&&tab.input instanceof vscode.TabInputText,'Public tab is not a text resource');
- const uri=tab.input.uri.toString(),url=new URL(uri);
- assert.ok(url.protocol==='file:'&&!url.hostname&&doc.uri.scheme==='file'&&!doc.isClosed&&editor?.document===doc&&uri===doc.uri.toString(),'Public tab/document resource mismatch');
+ const uri=tab.input.uri.toString(),resourcePath=canonicalResourcePath(uri);
+ assert.ok(doc.uri.scheme==='file'&&!doc.isClosed&&editor?.document===doc&&uri===doc.uri.toString(),'Public tab/document resource mismatch');
  assert.ok(Number.isSafeInteger(group.viewColumn)&&group.viewColumn>0&&editor.viewColumn===group.viewColumn&&typeof tab.isDirty==='boolean'&&tab.isDirty===doc.isDirty,'Public tab column/dirty state mismatch');
- return{origin:'vscode.window.tabGroups',...identity,epoch,uri,resourcePath:fileURLToPath(uri),viewColumn:group.viewColumn,activeTabIndex:group.tabs.indexOf(tab),tabCount:group.tabs.length,dirty:tab.isDirty,source:{uri:doc.uri.toString(),version:doc.version,session:identity.documentSession,sourceHash:createHash('sha256').update(doc.getText()).digest('hex'),dirty:doc.isDirty}};
+ return{origin:'vscode.window.tabGroups',...identity,epoch,uri,resourcePath,viewColumn:group.viewColumn,activeTabIndex:group.tabs.indexOf(tab),tabCount:group.tabs.length,dirty:tab.isDirty,source:{uri:doc.uri.toString(),version:doc.version,session:identity.documentSession,sourceHash:createHash('sha256').update(doc.getText()).digest('hex'),dirty:doc.isDirty}};
 }
 function monitor(vscode,doc,config,documentSession){
  const identity={runId:config.runId,sourceHead:config.sourceHead,hostSession:config.menuHost?.hostSession,documentSession,nonce:randomUUID()},file=path.join(config.dir,filename),journal=path.join(config.dir,'menu-tab-ownership.jsonl'),subscriptions=[];let epoch=0,initial,disposed=false,count=0,bytes=0;
@@ -28,7 +29,7 @@ function assertObservation(o,binding,context){
  for(const key of ['hostSession','documentSession','nonce'])assert.ok(typeof o[key]==='string'&&o[key],'Missing public tab '+key);
  assert.equal(o.epoch,0);assert.equal(o.documentSession,binding.session);assert.equal(o.uri,binding.uri);assert.equal(o.source.uri,binding.uri);assert.equal(o.source.version,binding.version);assert.equal(o.source.session,binding.session);assert.equal(o.source.sourceHash,binding.sourceHash);assert.equal(typeof o.dirty,'boolean');assert.equal(o.source.dirty,o.dirty);
  assert.ok(Number.isSafeInteger(o.viewColumn)&&o.viewColumn>0&&Number.isSafeInteger(o.tabCount)&&o.tabCount>0&&Number.isSafeInteger(o.activeTabIndex)&&o.activeTabIndex>=0&&o.activeTabIndex<o.tabCount,'Invalid public tab group');
- const url=new URL(o.uri);assert.ok(url.protocol==='file:'&&!url.hostname);assert.equal(o.resourcePath,fileURLToPath(o.uri));
+ assert.equal(o.resourcePath,canonicalResourcePath(o.uri));
 }
 function readCurrent(root,expected,binding,context){
  const file=path.join(root,filename),stat=fs.lstatSync(file);assert.ok(stat.isFile()&&!stat.isSymbolicLink()&&stat.size<=1024*1024,'Invalid public tab record');
