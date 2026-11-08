@@ -25,7 +25,7 @@ function install(vscode,context,servers,reportError){
   const providers=[
     vscode.languages.registerDocumentFormattingEditProvider(selector,{async provideDocumentFormattingEdits(doc,options,token){return (await query('textDocument/formatting',doc,{options},token)||[]).map(e=>new vscode.TextEdit(range(e.range),e.newText));}}),
     vscode.languages.registerCodeActionsProvider(selector,{async provideCodeActions(doc,selection,options,token){
-      const diagnostics=options.diagnostics.map(d=>({range:{start:d.range.start,end:d.range.end},message:d.message,code:typeof d.code==='object'?d.code.value:d.code,severity:d.severity+1}));
+      const diagnostics=options.diagnostics.map(d=>({range:{start:d.range.start,end:d.range.end},message:d.message,source:d.source,code:typeof d.code==='object'?d.code.value:d.code,severity:d.severity+1}));
       const actions=await query('textDocument/codeAction',doc,{range:{start:selection.start,end:selection.end},context:{diagnostics,only:options.only?[options.only.value]:undefined}},token)||[];
       return actions.map(row=>{const action=new vscode.CodeAction(row.title,vscode.CodeActionKind.QuickFix);action.edit=workspaceEdit(row.edit);return action;});
     }},{providedCodeActionKinds:[vscode.CodeActionKind.QuickFix]}),

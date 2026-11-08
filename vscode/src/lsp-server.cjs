@@ -49,7 +49,10 @@ class SolidityService {
     const functions=doc.index?.nodes.filter(n=>n.nodeType==='FunctionDefinition').map(node=>{let parent=doc.index.parents.get(node);while(parent&&parent.nodeType!=='ContractDefinition')parent=doc.index.parents.get(parent);return{range:doc.index.nameRange(node),name:(parent?.name?parent.name+'.':'')+(node.name||node.kind||'constructor'),status:'ready'};}).filter(row=>row.range);
     this.notify('solidityLean/status',{uri:doc.uri,version:doc.version,sourceHash:hash(doc.text),synchronizationId:doc.synchronizationId,state,progressScope:'document',functions:state==='cancelled'?[]:functions,...extra});
   }
-  diagnostics(doc,diagnostics){this.notify('textDocument/publishDiagnostics',{uri:doc.uri,version:doc.version,sourceHash:hash(doc.text),synchronizationId:doc.synchronizationId,diagnostics});}
+  diagnostics(doc,diagnostics){
+    const sourceHash=hash(doc.text);doc.publishedDiagnostics={uri:doc.uri,version:doc.version,sourceHash,synchronizationId:doc.synchronizationId,generation:this.generation,values:structuredClone(diagnostics)};
+    this.notify('textDocument/publishDiagnostics',{uri:doc.uri,version:doc.version,sourceHash,synchronizationId:doc.synchronizationId,diagnostics});
+  }
   cancel(doc){
     if(!doc)return;clearTimeout(doc.timer);doc.analysisAbort?.abort();doc.verifyAbort?.abort();
     // A new verification must never join the compiler promise just cancelled
@@ -417,7 +420,15 @@ class SolidityService {
   codeActions(doc,params){
     const actions=[],add=(title,diagnostic,range,newText)=>actions.push({title,kind:'quickfix',diagnostics:[diagnostic],edit:{documentChanges:[{textDocument:{uri:doc.uri,version:doc.version},edits:[{range,newText}]}]}});
     if(params.context?.only&&!params.context.only.some(k=>'quickfix'.startsWith(k)))return [];
-    for(const diagnostic of params.context?.diagnostics||[]){
+    // Client diagnostics select current compiler facts; they do not authorize edits.
+    const batch=doc.publishedDiagnostics;
+    if(!this.current(doc,doc.version)||!batch||batch.uri!==doc.uri||batch.version!==doc.version||batch.sourceHash!==hash(doc.text)||batch.generation!==this.generation||batch.synchronizationId!==doc.synchronizationId)return actions;
+    const diagnosticKey=d=>{const r=d?.range;if(d?.code===undefined||!r||!['start','end'].every(k=>['line','character'].every(n=>Number.isSafeInteger(r[k]?.[n])&&r[k][n]>=0)))return null;return JSON.stringify([String(d.code),r.start.line,r.start.character,r.end.line,r.end.character]);};
+    const compiler=new Map();for(const d of batch.values){const key=diagnosticKey(d);if(d.source==='solc'&&key!==null&&!compiler.has(key))compiler.set(key,d);}
+    for(const requested of params.context?.diagnostics||[]){
+      if(!requested||requested.source!==undefined&&requested.source!=='solc')continue;
+      const key=diagnosticKey(requested),owned=key===null?null:compiler.get(key);if(!owned)continue;
+      const diagnostic=structuredClone(owned);
       if(String(diagnostic.code)==='1878')for(const license of ['UNLICENSED','MIT','Apache-2.0'])add('Add SPDX license identifier: '+license,diagnostic,{start:{line:0,character:0},end:{line:0,character:0}},'// SPDX-License-Identifier: '+license+'\n');
       if(!['5667','2072'].includes(String(diagnostic.code))||!doc.index)continue;
       const variable=doc.index.nodes.find(n=>n.nodeType==='VariableDeclaration'&&n.name&&language.contains(doc.index.nodeRange(n),diagnostic.range.start));if(!variable)continue;
