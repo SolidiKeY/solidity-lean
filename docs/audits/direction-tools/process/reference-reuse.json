@@ -1,0 +1,82 @@
+{
+  "closure_receipt": "not supplied by merged reference artifacts; no kernel claim inferred from source metrics or integration acknowledgement",
+  "comparison_boundary": "Reference inventory includes multiple source languages and uses a different lexical proof-region classifier. Its line total must not replace the process audit .v denominator or turn a partial size calibration into a matched process-overhead verdict.",
+  "compcert_inventory_reused": {
+    "check_seconds": null,
+    "commit": "2685140bf72c959446981fb99b5e44a8975021bc",
+    "metrics": {
+      "declarations": 11970,
+      "declarations_status": "lexical markers only; not native declarations",
+      "definition_region_lines_estimate": 60488,
+      "files": 406,
+      "generated_lines": 2362,
+      "handwritten_candidate_lines": 242026,
+      "lines": 244388,
+      "native_declarations": null,
+      "other_lines_estimate": 63168,
+      "proof_marker_lines": 19183,
+      "proof_region_lines_estimate": 120732,
+      "theorems": 7144,
+      "unclassified_lines": 242026,
+      "unsupported_native_files": 153
+    },
+    "project": "CompCert",
+    "source_url": "https://github.com/AbsInt/CompCert/tree/2685140bf72c959446981fb99b5e44a8975021bc",
+    "timing_status": "not measured; published timing not yet located"
+  },
+  "decision": "H241 option A: existing archived receipts and matched calibration only; no new measurement",
+  "missing_counterparts_reused": [
+    {
+      "reason": "solc implements the compiler; selected production implementation files supply no correctness theorem counterpart.",
+      "searched": [
+        "libsolidity",
+        "libyul"
+      ],
+      "unit": "general solc compiler/lowering correctness proof"
+    },
+    {
+      "reason": "Implementation compiler has no dynamic-logic soundness counterpart.",
+      "searched": [
+        "libsolidity"
+      ],
+      "unit": "Solidity dynamic-logic soundness versus solc"
+    },
+    {
+      "reason": "No like-for-like local WP component established; removed Sound.lean/WP.thy comparison.",
+      "searched": [
+        "Solidity/Calculus/Sound.lean",
+        "thys/Isabelle-Solidity/WP.thy"
+      ],
+      "unit": "WP facade"
+    }
+  ],
+  "process_overhead_calibration": "not supplied by these merged artifacts; no overhead numerator in reference inventory",
+  "reference_waits_reused": [
+    "Numeric reference check times not established; published-times.json records bounded source search",
+    "Native declaration metrics and exact proof/definition separation remain unsupported for mixed implementation languages; lexical estimates only"
+  ],
+  "source_inputs": {
+    "boundaries.json": {
+      "path": "docs/audits/direction-tools/references/boundaries.json",
+      "revision": "4d7cc2f0d3b28f5c5c3ae0ca6d21dcc652ee7678",
+      "sha256": "13a43ff8e92a6c8f93be6d876384ed825d7d756e6e4350806cb30086974f6f88"
+    },
+    "inventory.json": {
+      "path": "docs/audits/direction-tools/references/inventory.json",
+      "revision": "4d7cc2f0d3b28f5c5c3ae0ca6d21dcc652ee7678",
+      "sha256": "2daf1c939a72534f91de42cef59c5925e1ec25e5a0445fd2f49112ee1c753a34"
+    },
+    "pins.json": {
+      "path": "docs/audits/direction-tools/references/pins.json",
+      "revision": "4d7cc2f0d3b28f5c5c3ae0ca6d21dcc652ee7678",
+      "sha256": "5fdb343a3f15a008fb3cc6b813f21be71230d7fc49ca39c6540015bee27a1af8"
+    },
+    "summary.json": {
+      "path": "docs/audits/direction-tools/references/summary.json",
+      "revision": "4d7cc2f0d3b28f5c5c3ae0ca6d21dcc652ee7678",
+      "sha256": "432972b6c7851a62d44b8fe9f637915d3f58d88496f4b5b0664ca118d206ac81"
+    }
+  },
+  "source_status": "partial",
+  "status": "blocked pending exact archived successful closure receipt and matched process calibration"
+}
