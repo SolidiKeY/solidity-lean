@@ -1,6 +1,6 @@
 """Guard missing/duplicated law associations and changed premise acceptance."""
 import unittest
-from family_coverage import check
+from family_coverage import check, check_families
 
 
 class FamilyCoverage(unittest.TestCase):
@@ -42,9 +42,40 @@ class FamilyCoverage(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "duplicate source theorem"):
             self.run_check(source=self.source + self.source)
 
+    def test_short_and_qualified_witness_are_one_identity(self):
+        source = self.source.replace(b"end N", b"theorem u (h : False) : True := by trivial\nend N")
+        witness = "namespace N\ntheorem w : True := by trivial\nend N\n#verify_hypotheses w for N.t\n#verify_hypotheses N.w for N.u\n"
+        with self.assertRaisesRegex(ValueError, "duplicate resolved witness"):
+            check("fixture", source, source, witness)
+
     def test_changed_premise(self):
         with self.assertRaisesRegex(ValueError, "header/context"):
             self.run_check(source=self.source.replace(b"(h : False)", b"(h : True)"))
+
+
+class CombinedFamilies(unittest.TestCase):
+    def families(self, duplicate_target=False, duplicate_witness=False):
+        source_a = FamilyCoverage.source
+        witness_a = FamilyCoverage.witness
+        source_b = source_a if duplicate_target else source_a.replace(b"theorem t", b"theorem u")
+        witness_b = witness_a if duplicate_target else witness_a.replace("N.t", "N.u")
+        if not duplicate_witness and not duplicate_target:
+            witness_b = witness_b.replace("witness_t", "witness_u")
+        return [("a", source_a, source_a, witness_a), ("b", source_b, source_b, witness_b)]
+
+    def test_distinct(self):
+        report = check_families(self.families())
+        self.assertEqual(report["unique_targets"], 2)
+        self.assertEqual(report["unique_witnesses"], 2)
+        self.assertFalse(report["kernel_checked_by_this_command"])
+
+    def test_duplicate_target_refused(self):
+        with self.assertRaisesRegex(ValueError, "target counted"):
+            check_families(self.families(duplicate_target=True))
+
+    def test_duplicate_witness_refused(self):
+        with self.assertRaisesRegex(ValueError, "witness declaration counted"):
+            check_families(self.families(duplicate_witness=True))
 
 
 if __name__ == "__main__":

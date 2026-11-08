@@ -22,3 +22,8 @@ For a named law family, run
 and separately kernel-check the witness module. Source accounting cannot certify
 Lean telescope compatibility. Imported telescope witnesses establish only local
 joint feasibility, not compiler totality, historical replay or full audit coverage.
+
+Repeat `--family SOURCE WITNESS` to check several complete named families
+together; duplicate target and resolved witness identities are refused. This
+remains source accounting. Freshly compile the witness objects before checking
+`tests/h62/item2/audit-language/FixedPointWitnessSuite.lean` for import composition.

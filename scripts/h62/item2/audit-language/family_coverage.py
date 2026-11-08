@@ -32,21 +32,54 @@ def check(source_path, frozen, current, witness):
     if len({name for name, _ in pairs}) != len(pairs):
         raise ValueError("duplicate witness association")
     declarations = [r["name_candidate"] for r in scan("witness", witness.encode(), {"language"})]
+    witnesses = []
     for name, _ in pairs:
         hits = [d for d in declarations if d == name or d.endswith("." + name)]
         if len(hits) != 1:
             raise ValueError("missing or ambiguous witness declaration: " + name)
+        witnesses.append(hits[0])
+    if len(set(witnesses)) != len(witnesses):
+        raise ValueError("duplicate resolved witness declaration")
     return {"named_targets": len(before), "associations": len(pairs),
-            "source_headers_match_frozen": True, "kernel_checked_by_this_command": False}
+            "source_headers_match_frozen": True, "kernel_checked_by_this_command": False,
+            "target_names": sorted(counts), "witness_names": sorted(witnesses)}
+
+
+def check_families(families):
+    reports, targets, witnesses = [], set(), set()
+    if not families:
+        raise ValueError("no families supplied")
+    for path, frozen, current, witness in families:
+        report = check(path, frozen, current, witness)
+        if targets.intersection(report["target_names"]):
+            raise ValueError("target counted in more than one family")
+        if witnesses.intersection(report["witness_names"]):
+            raise ValueError("witness declaration counted in more than one family")
+        targets.update(report["target_names"])
+        witnesses.update(report["witness_names"])
+        reports.append({"source": path, **report})
+    return {"families": reports, "family_count": len(reports),
+            "unique_targets": len(targets), "unique_witnesses": len(witnesses),
+            "kernel_checked_by_this_command": False}
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--source", required=True)
-    parser.add_argument("--witness", type=Path, required=True)
+    parser.add_argument("--source")
+    parser.add_argument("--witness", type=Path)
+    parser.add_argument("--family", nargs=2, action="append", metavar=("SOURCE", "WITNESS"))
     args = parser.parse_args()
-    result = check(args.source, git("show", f"{BASE}:{args.source}"),
-                   Path(args.source).read_bytes(), args.witness.read_text())
+    if args.family:
+        if args.source or args.witness:
+            parser.error("use --family or --source/--witness, not both")
+        families = [(path, git("show", f"{BASE}:{path}"), Path(path).read_bytes(),
+                     Path(witness).read_text()) for path, witness in args.family]
+        result = check_families(families)
+    else:
+        if not args.source or not args.witness:
+            parser.error("supply --source and --witness, or at least one --family")
+        result = check(args.source, git("show", f"{BASE}:{args.source}"),
+                       Path(args.source).read_bytes(), args.witness.read_text())
     print(json.dumps(result, sort_keys=True))
 
 
