@@ -67,6 +67,8 @@
 | `Source/Infer.lean` | S02 item 1b: type inference computing derivations (`Typed.infer`, `StmtD.infer`, `ItemsD.infer`), sound by construction. |
 | `Source/Elaborate.lean` | S02 item 1b: the elaborator `elaborate : Resolution → Option Elaborated` (bodies, modifiers, initializers, constants, base arguments), coherent by construction. |
 | `Source/ElaborateExamples.lean` | Controls of the elaborator: a unit with inheritance, a base argument, a modifier and an initializer elaborated from syntax and run. |
+| `Source/HorizonApproxExpressions.lean` | Event-prefix helper and expression proofs, split to keep each kernel check bounded; preserves qualified names exported by `Source/Horizon`. |
+| `Source/HorizonApproxStatements.lean` | Statement event-prefix proofs and the shared known-mode induction; re-exported through the unchanged public facade. |
 | `Source/Horizon.lean` | S05 item 2, last part of the `Horizon` split (imports `HorizonFuel`, `HorizonGrow`, `HorizonConst`): both calldata modes share the ordinary-plan event-prefix induction (`approxAtKnown`); the frozen `ApproxAt` specialization and transaction prefix law remain (`approxAt`, `runTx_events_mono`). |
 | `Source/HorizonDeploy.lean` | S05 item 2: a deployment not completed at a horizon shows a prefix of its events at every larger one (`deploy_events_mono`). |
 | `Source/Session.lean`, `Source/SessionExamples.lean` | Sessions showing the events of unfinished transactions (`sessionAtEvents`, `sourceLangEvents`), consistent, and their controls. |

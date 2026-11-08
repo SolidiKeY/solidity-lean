@@ -3374,6 +3374,7 @@ import Solidity.Lowering.Readonly.HistoryRollbackControls
 import Solidity.Lowering.Readonly.InvocationFrame
 import Solidity.Lowering.Readonly.JournalLeaves
 import Solidity.Lowering.Readonly.KeyStepEffects
+import Solidity.Lowering.Readonly.LibraryFrameEffects
 import Solidity.Lowering.Readonly.LoadEffects
 import Solidity.Lowering.Readonly.LocalInitializationControls
 import Solidity.Lowering.Readonly.LocalInitializationEffects
@@ -3419,6 +3420,12 @@ import Solidity.Lowering.Readonly.SourceExpressionParts.Part5
 import Solidity.Lowering.Readonly.SourceExpressionParts.Part6
 import Solidity.Lowering.Readonly.SourceHistory
 import Solidity.Lowering.Readonly.SourceHistoryBase
+import Solidity.Lowering.Readonly.SourceKnownAllHistories
+import Solidity.Lowering.Readonly.SourceKnownExpressionEffects
+import Solidity.Lowering.Readonly.SourceKnownHistory
+import Solidity.Lowering.Readonly.SourceKnownLibraryEffects
+import Solidity.Lowering.Readonly.SourceKnownStatementEffects
+import Solidity.Lowering.Readonly.SourceKnownTryEffects
 import Solidity.Lowering.Readonly.SourceLoopControls
 import Solidity.Lowering.Readonly.SourceLoopEffects
 import Solidity.Lowering.Readonly.SourceLvalueCallControls
@@ -4195,6 +4202,8 @@ import Solidity.Source.Funds
 import Solidity.Source.FundsControls
 import Solidity.Source.Hoare
 import Solidity.Source.Horizon
+import Solidity.Source.HorizonApproxExpressions
+import Solidity.Source.HorizonApproxStatements
 import Solidity.Source.HorizonConst
 import Solidity.Source.HorizonDeploy
 import Solidity.Source.HorizonFuel
