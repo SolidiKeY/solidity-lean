@@ -81,7 +81,7 @@ def measure(eest):
             ps=re.findall(r"Solidity/[^` )]+\.lean",r["evidence"])
             if r["status"]=="proved" and r["group"]=="net":
                 ps=["Solidity/"+re.search(r"`([^`]+\.lean)`",r["evidence"]).group(1)]
-                r["theorem"]=re.findall(r"`([^`]+)`",r["evidence"])[1]
+                r["theorem"]="Solidity.Examples.Tactics."+re.findall(r"`([^`]+)`",r["evidence"])[1]
                 assert "theorem "+r["theorem"].split(".")[-1] in read(ps[0]),r
             elif r["status"]=="proved":
                 ps=["Solidity/Corpus/"+r["suite"]+".lean"]
@@ -100,9 +100,32 @@ def measure(eest):
     snapshot=load("tests/upstream/snapshot.json")
     sem={r["path"]:r for r in snapshot["files"] if "/semanticTests/" in r["path"] and r["path"].endswith(".sol")}
     upstream=load("tests/upstream/results/results.json")
-    results={r["path"]:r for r in upstream["results"] if r["path"] in sem}
+    report_inventory=[]
+    for report in paths:
+        if report.startswith("tests/upstream/") and report.endswith("/summary.json"):
+            v=load(report)
+            report_inventory.append({"path":report,"sha256":digest(read(report).encode()),"complete":v.get("complete"),"filter":v.get("filter"),"counts":v.get("counts"),"runnerSha256":v.get("runnerSha256"),"modelSha256":v.get("modelSha256"),"solc_commit":v.get("commit")})
+    old_results={r["path"]:r for r in upstream["results"] if r["path"] in sem}
+    selected_report="tests/upstream/baseline-20261028/summary.json"
+    selected_metadata=load(selected_report)
+    assert selected_metadata["complete"] and selected_metadata["commit"]==snapshot["commit"]
+    results={}
+    for status in ("working","broken","blocked"):
+        for line in read("tests/upstream/baseline-20261028/"+status+".txt").splitlines():
+            path,stage,reason=line.split("\t",2)
+            if path in sem:
+                assert path not in results,path
+                results[path]=dict(path=path,stage=stage,status=status,reason=reason)
+    partial_comparison=[]
+    for report in report_inventory:
+        if report["filter"]:
+            file=report["path"].replace("summary.json","results.json")
+            if file in paths:
+                for row in load(file)["results"]:
+                    if row["path"] in sem:
+                        partial_comparison.append({"report":report["path"],"path":row["path"],"reported_status":row["status"],"selected_full_report_status":results[row["path"]]["status"]})
     assert set(results)==set(sem)
-    semantic_rows=[dict(path=p,sha256=sem[p]["sha256"],stage=results[p]["stage"],status=results[p]["status"],
+    semantic_rows=[dict(path=p,sha256=sem[p]["sha256"],stage=results[p]["stage"],status=results[p]["status"],old_report_status=old_results[p]["status"],
         kernel_source_to_bytes=False) for p in sorted(sem)]
     stagecounts=collections.Counter(r["stage"]+":"+r["status"] for r in results.values())
     ntemplates=sum(len(f["templates"]) for f in eest["files"])
@@ -128,6 +151,29 @@ def measure(eest):
       ("types","def simpleIn","mutual", "Simple values and operation-specific primitive type restrictions; retain exact predicate below rather than claiming all Solidity scalar types.")]:
         a=frag.index(start); b=frag.index(stop,a)
         features.append(dict(category=label,description=description,citation=at("Solidity/Evm/Compile.lean",start),predicate=frag[a:b].strip()))
+    memory_features=[]
+    branch_specs=[
+      ("memory","MemoryCompile.lean","Primitive arrays/primitive-member structs; memory declarations/allocation, pointer aliases, path reads/writes, numeric updates, require/assert/revert, blocks/branches. Source/destination/layout guards and capacity remain required; arbitrary reference arrays and calls need another branch."),
+      ("referenceArrays","MemoryRefArrayCompile.lean","Memory pointer rebinding and dynamic-array indexed primitive/reference assignment only; checked reference pointers, core valIn index/value guards. No general declarations or calls in this branch."),
+      ("objects","MemoryObjectCompile.lean","Typed memory alias declaration/rebind, array/struct field writes, local scalar assignment/initialized declaration, checked object pointer/source/value compilers; other statements refused."),
+      ("construction","MemoryObjectConstructionCompile.lean","Objects branch plus default map-free references and dynamic primitive/nested/reference array construction/rebind, simple length expressions, positive base, and compiled reference-default builders. New-array shape and mapFree evidence restrict types."),
+      ("memoryLoops","MemoryLoopCompile.lean","Finite Memory statements plus loop with Memory-compiled condition/body and stable output fragment restricted to the entry context; finite body certificate and room bounds retained."),
+      ("memoryLoopScopes","MemoryLoopScopeCompile.lean","MemoryLoops inside recursively compiled blocks/conditionals; loop bodies retain finite Memory compiler, so this is not arbitrary nested-loop acceptance."),
+      ("memoryCalls","MemoryCalls.lean","Direct internal signatures expanded by call-height recursion over finite Memory programs; supported scalar/memory argument/return shapes checked by expandCall; storage/multiple-return shapes refused by explicit cases; public dispatch additionally requires zero storage pushes. No external call or source-world guarantee."),
+      ("memoryCopy","MemoryStorageCopyCompile.lean","Checked memory-to-storage copying plus restricted scalar operations, blocks/branches and selected memory allocation/path operations; compileCopy/compileStmt retain primitive/array/struct shape and core-location guards."),
+      ("fixedMemory","MemoryFixedCompile.lean","Fixed-shape memory/storage copy and assignment through compileCopy/compileCopyMem/compileShape/compileAssign, require/revert, block/conditional recursion; most intrinsic constructors explicitly return none, including calls/loops."),
+      ("copyConstruction","MemoryStorageConstructionCompile.lean","Statement-wise Construction or Fixed compiler with recursive program sequencing; this combination is explicitly implemented, unlike an arbitrary union of every branch.")]
+    for branch,file,description in branch_specs:
+        path="Solidity/Evm/"+file; text=read(path); declarations=[]
+        matches=list(re.finditer(r"(?m)^(?:private )?def ([A-Za-z_][A-Za-z_0-9]*)",text))
+        for match in matches:
+            name=match.group(1)
+            if name.startswith("compile") or name in ("expandCall","atHeight"):
+                tail=text[match.start():]
+                end=re.search(r"\n(?:(?:private )?(?:def|theorem|structure|inductive) |end\b|namespace\b|mutual\b)",tail)
+                definition=tail[:end.start()] if end else tail
+                declarations.append({"name":name,"citation":at(path,match.group(0)),"definition":definition.strip()})
+        memory_features.append({"branch":branch,"feature_list":description,"acceptors":declarations})
     compilation=read("Solidity/Evm/Compiler.lean")
     branchtext=compilation.split("inductive Compilation")[1].split("private def compileCopies")[0]
     branches=re.findall(r"^  \| (\w+)",branchtext,re.M)
@@ -143,30 +189,35 @@ def measure(eest):
           "numerators":{"TestSuite_derived":derived,"TestSuite_refuted_negative_controls":refuted,"claimed_taclets":len(claimed),"additional_proved_model_examples":proved},
           "percent_TestSuite_derived":pct(derived,len(suite)),"percent_taclets_claimed":pct(len(claimed),len(taclets)),
           "other_statuses":{"TestSuite":statuses(suite),"additional_corpus":statuses(others)},
-          "theorems":["Solkey.TestSuite.<function>.proved (exact row names in solkey.json)","Solidity.Proves.fmlValid","Solidity.Stmt.sound","Solidity.taclets_partitioned"],
+          "theorems":["Solkey.TestSuite.<function>.proved (exact row names in solkey.json)","Solidity.Proves.fmlValid","Solidity.Stmt.sound","Solidity.RuleShapes.taclets_partitioned"],
           "verdict":"justified","reason":"Substantial checked intrinsic proof endpoint already exists. Claimed taclets and model proofs measure the core, not Java parser equivalence or production semantics. Unclaimed architectural rules remain denominator members; refutations do not count as positive coverage."},
         "b": {"product":"verified accepted-fragment compiler","denominator_definition":"Tagged solc semantic fixture files and SolKey corpus obligations restricted by a concrete source-to-deployed-byte theorem's acceptance predicate. No non-toy source predicate is established at this base.",
-          "denominator":{"certified_source_fragment_solc_files":0,"certified_source_fragment_SolKey_rows":0,"unrestricted_solc_files":len(sem),"unrestricted_SolKey_rows":len(rows)},
+          "denominator":{"certified_source_fragment_solc_files":None,"certified_source_fragment_SolKey_rows":None,"unrestricted_solc_files":len(sem),"unrestricted_SolKey_rows":len(rows)},
           "numerator":{"kernel_source_to_deployed_bytes_solc_files":0,"kernel_source_to_deployed_bytes_SolKey_rows":0},
-          "restricted_fraction":None,"percent_all_semanticTests_with_certified_acceptance":0,
-          "fraction_explanation":"0/0 restricted fraction is undefined, not 100%. Zero percent is certified source acceptance among all pinned semanticTests; it is NOT an estimate of intrinsic compiler syntactic acceptance. That latter percentage requires a source-to-intrinsic producer and successful fragment witnesses per file.",
+          "restricted_fraction":None,"percent_all_semanticTests_with_identified_certified_acceptance_witness":0,
+          "fraction_explanation":"Restricted fraction and denominator are unavailable because no concrete accepted-source predicate is identified, not proven empty. Zero percent counts identified certified source-acceptance witnesses among all pinned semanticTests; it is NOT intrinsic compiler syntactic acceptance. The settling measurement is a per-fixture kernel witness of the concrete source producer followed by successful Compiler.compile and deployed-byte composition.",
           "intrinsic_theorem":"Solidity.Main.compiler_checked","intrinsic_compilation_branches":branches,
-          "features":features,"chain":chain,
+          "features":features,"intrinsic_memory_branch_features":memory_features,"branch_composition_rule":"Compiler.compile selects a whole-program branch in order. Arbitrary statement-wise unions of separately accepted branches are NOT accepted unless one branch compiles that whole program. Every branch still requires Compilation.Input (state representation, capacity and allocation premises) to apply compiler_checked.","chain":chain,
           "residual_PublicBoundary_fields":re.findall(r"^  (\w+) :",read("Solidity/Yul/Composition/CorrectnessPublic.lean").split("structure PublicBoundary")[1].split("/-- Construct")[0],re.M),
           "verdict":"wrong-direction","reason":"Further transport expansion without producing source acceptance, deployed bytes and boundary evidence does not increase the product's certified fixture numerator. Existing intrinsic and conditional composition proofs remain useful; zero certified fixtures is not zero theorem value."},
         "c": {"product":"production Solidity/EVM conformance","denominators":{"solc_semantic_fixture_files":len(sem),"Ethereum_execution_spec_function_templates":ntemplates},
           "pins":{"solc":snapshot["commit"],"Ethereum_execution_spec_tests":eest["commit"]},
-          "numerators":{"kernel_source_to_deployed_bytes_solc_files":0,"kernel_EEST_templates":0,"reported_working_scalar_interpreter_solc_files":stagecounts["lean-runtime:working"],"reported_broken_scalar_interpreter_solc_files":stagecounts["lean-runtime:broken"],"reported_blocked_solc_files":sum(v for k,v in stagecounts.items() if k.endswith(":blocked")),"EEST_templates_with_identified_adapter":0},
-          "solc_stage_counts":dict(stagecounts),"working_scalar_interpreter_percent":pct(stagecounts["lean-runtime:working"],len(sem)),
+          "numerators":{"kernel_source_to_deployed_bytes_solc_files":0,"kernel_EEST_templates":0,"reported_working_interpreter_solc_files":stagecounts["lean-runtime:working"],"reported_broken_interpreter_solc_files":stagecounts["lean-runtime:broken"],"reported_blocked_solc_files":sum(v for k,v in stagecounts.items() if k.endswith(":blocked")),"EEST_templates_with_identified_adapter":0},
+          "solc_stage_counts":dict(stagecounts),"historical_working_interpreter_percent":pct(stagecounts["lean-runtime:working"],len(sem)),
           "nothing_category":"Blocked solc files have no successful adapted runtime check in this report; broken files have attempted checks. No EEST adapter or linked proof identified. This is not a claim that no isolated hand-written examples share their features.",
           "verdict":"wrong-direction","reason":"Interpreter vectors do not measure deployed bytecode, fork/gas/log/precompile or transaction conformance. This product needs executable test adapters plus a concrete approved EVM instance; more model-only examples cannot supply that coverage.",
-          "external_test_boundary":upstream["metadata"]["scope"]}},
+          "external_test_boundary":selected_metadata["scope"],
+          "selected_historical_report":selected_report,
+          "current_base_runtime_validation":"Not rerun; historical statuses are retained evidence with older model/runner hashes, not proof they pass current source. Current executable numerator is unknown until the corpus runner is rerun.",
+          "report_inventory":report_inventory,"filtered_report_comparison":partial_comparison,
+          "selected_report_metadata":{k:selected_metadata[k] for k in ("commit","runnerSha256","modelSha256","scope")},
+          "base_runner_sha256":digest(read("scripts/solidity-upstream.mjs").encode())}},
       "remaining_work_estimates":{
         "method":"Planning scenarios in additional handwritten-equivalent lines, NOT measured missing LOC, deletion budgets, person-time or statistical forecasts. Calibrated to existing reference scopes; generated fixtures excluded. Reuse could reduce them; full production proof effort can exceed them.",
         "reference_pass_pair":{"paths":["cfrontend/Cshmgen.v","cfrontend/Cshmgenproof.v","cfrontend/Cminorgen.v","cfrontend/Cminorgenproof.v"],"lines":pass_size,"generated_lines":refs["subsystems"]["lowering"]["metrics"]["generated_lines"],"source":"docs/audits/direction-tools/README-results.json#subsystems.lowering","commit":load("docs/audits/direction-tools/references/pins.json")["CompCert"]},
         "a":{"additional_lines_range":[pass_size,3*pass_size],"basis":"1-3 CompCert pass-pair units for correspondence closure, exact outstanding obligation ports and frontend/strategy parity. Not 35 independent soundness proofs: many unclaimed taclets are architectural normalization differences.","deliverable":"Close or explicitly distinguish every remaining corpus obligation and taclet; retain negative controls and current soundness."},
         "b":{"additional_lines_range":[3*pass_size,8*pass_size],"basis":"3-8 pass-pair units for certified admission/lowering, executable assembly linkage, and deployment/hash/state-export producers on a deliberately small fragment.","deliverable":"Non-toy source acceptance predicate, emitted bytes, complete boundary evidence and per-fixture acceptance witnesses."},
-        "c":{"additional_lines_range":[refs["subsystems"]["backend"]["metrics"]["lines"],3*refs["subsystems"]["backend"]["metrics"]["lines"]],"basis":"1-3 complete multi-target CompCert backend portfolios as a broad integration/proof planning scale; production Solidity includes frontend, ABI, storage, calls, forks and harness work absent from a single pass. This is a scenario, not a comparable subsystem efficiency ratio.","deliverable":"All pinned semantic fixtures plus all EEST templates adapted with fork/gas/log/precompile checks and approved byte semantics; refresh to maintained pins before claiming current production support."}},
+        "c":{"reference_total_lines":refs["subsystems"]["backend"]["metrics"]["lines"],"reference_generated_lines":refs["subsystems"]["backend"]["metrics"]["generated_lines"],"reference_pin":load("docs/audits/direction-tools/references/pins.json")["CompCert"],"additional_lines_range":[refs["subsystems"]["backend"]["metrics"]["unclassified_lines"],3*refs["subsystems"]["backend"]["metrics"]["unclassified_lines"]],"basis":"1-3 complete multi-target CompCert backend portfolios as a broad integration/proof planning scale; production Solidity includes frontend, ABI, storage, calls, forks and harness work absent from a single pass. This is a scenario, not a comparable subsystem efficiency ratio.","deliverable":"All pinned semantic fixtures plus all EEST templates adapted with fork/gas/log/precompile checks and approved byte semantics; refresh to maintained pins before claiming current production support."}},
       "generated_split":dict(counts),
       "generated_method":"Reused census marker classifier, correcting Corpus/Imported.lean to handwritten per check-corpus.sh. Unmarked is not proven handwritten. Chain/agreement names grouped as candidates without treating names as generator evidence.",
       "inventory_reuse":{p:{"exists":p in paths,"sha256":digest(read(p).encode()) if p in paths else None} for p in ["docs/audits/direction.md","docs/audits/architecture-tools/timing-sample.tsv","docs/audits/proof-coverage-tools/theorem_census.py","docs/audits/build-speed.md","scripts/build-measure.py","scripts/differential/README.md","scripts/bench/README.md","scripts/check-corpus.sh","tests/upstream/results/summary.json"]},

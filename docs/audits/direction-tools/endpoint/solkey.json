@@ -7714,7 +7714,7 @@
       ],
       "status": "proved",
       "suite": "Net",
-      "theorem": "Net.netSendSimple"
+      "theorem": "Solidity.Examples.Tactics.Net.netSendSimple"
     },
     {
       "evidence": "`Examples/Tactics/Net.lean` `Net.netTransferCapturedAmount`",
@@ -7726,7 +7726,7 @@
       ],
       "status": "proved",
       "suite": "Net",
-      "theorem": "Net.netTransferCapturedAmount"
+      "theorem": "Solidity.Examples.Tactics.Net.netTransferCapturedAmount"
     },
     {
       "evidence": "`Examples/Tactics/Net.lean` `Net.netTransferStorageReceiver`",
@@ -7738,7 +7738,7 @@
       ],
       "status": "proved",
       "suite": "Net",
-      "theorem": "Net.netTransferStorageReceiver"
+      "theorem": "Solidity.Examples.Tactics.Net.netTransferStorageReceiver"
     },
     {
       "evidence": "assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*",
@@ -7766,7 +7766,7 @@
       ],
       "status": "proved",
       "suite": "Net",
-      "theorem": "Net.netTransferSimple"
+      "theorem": "Solidity.Examples.Tactics.Net.netTransferSimple"
     },
     {
       "evidence": "assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*",
