@@ -7,6 +7,7 @@ address injectivity are assumed. Alias writes are supported, including an empty
 aliased transfer; nonempty aliased mutation need not preserve correspondence. -/
 namespace Solidity.Backend.MemoryOps
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Distinct object or empty interval is sufficient for actual object framing. -/
 theorem boolTransfer_frame_or_empty {D : Source.Layout} {H : HTy} {R Q : RefTy}
     (c : Source.Calldata D) (off : Nat) (hp : Heap H) (r : HRef H R)
@@ -19,6 +20,7 @@ theorem boolTransfer_frame_or_empty {D : Source.Layout} {H : HTy} {R Q : RefTy}
   · cases he
     simp only [Nat.sub_self,List.take_zero,overwriteSlice_empty]
 
+set_option backward.isDefEq.respectTransparency false in
 theorem uintTransfer_frame_or_empty {D : Source.Layout} {H : HTy} {R Q : RefTy}
     (c : Source.Calldata D) (off : Nat) (hp : Heap H) (r : HRef H R)
     (a : ArrTy R (.prim .uint)) (s t d : Nat) (out : Heap H)
