@@ -16,7 +16,7 @@ def catalogue():
     ms=[]
     for m in json.loads(source('docs/audits/direction-tools/mutation/mutants.json')):
         m={k:m[k] for k in ('id','path','line','old','new','definition')}
-        m['targets']=['Solidity/Evm/SimLemmas.lean','Solidity/Optimizer/Simplify.lean','Solidity/Examples/Tactics/Operators.lean','Solidity/Examples/Tactics/Values.lean','Solidity/Examples/Tactics/SignedCasts.lean','Solidity/Examples/Tactics/ModularArithmetic.lean'] if m['path'].endswith('Ops.lean') else [m['path']]
+        m['targets']=['Solidity/Evm/SimLemmas.lean','Solidity/Optimizer/Simplify.lean','Solidity/Examples/Tactics/Operators.lean','Solidity/Examples/Tactics/Values.lean','Solidity/Examples/Tactics/SignedCasts.lean','Solidity/Examples/Tactics/ModularArithmetic.lean'] if m['path'].endswith('Ops.lean') else [m['path'],'Solidity/Examples/Tactics/CheckedBlock.lean']
         # Expensive dependent slices are explicit, never inferred from lexical mentions.
         ms.append(m)
     def add(p,old,new,targets,desc):
@@ -55,7 +55,7 @@ def failure_names(mod,out):
     return sorted(set(names))
 
 def main():
-    a=argparse.ArgumentParser(); a.add_argument('--work',type=pathlib.Path); a.add_argument('--check',action='store_true'); a.add_argument('--refresh',action='store_true'); a.add_argument('--seconds',type=int,default=3600); a.add_argument('--timeout',type=int,default=240); args=a.parse_args()
+    a=argparse.ArgumentParser(); a.add_argument('--work',type=pathlib.Path); a.add_argument('--check',action='store_true'); a.add_argument('--refresh',action='store_true'); a.add_argument('--only',help='rerun comma-separated IDs, preserving other executed records'); a.add_argument('--seconds',type=int,default=3600); a.add_argument('--timeout',type=int,default=240); args=a.parse_args()
     ms=catalogue()
     if args.refresh:
         rs=json.loads((HERE/'results.json').read_text())
@@ -147,9 +147,12 @@ def main():
         for mod,artifact in artifact_map.items():
             link=pristine_overlay/(mod.replace('.','/')+'.olean');link.parent.mkdir(parents=True,exist_ok=True);link.symlink_to(artifact)
         pristine_env=dict(env,LEAN_PATH=str(pristine_overlay)); pristine_pass={}
-        rs=[]; start=time.monotonic()
+        selected=set(args.only.split(',')) if args.only else {m['id'] for m in ms}
+        assert selected <= {m['id'] for m in ms}
+        rs=[r for r in json.loads((HERE/'results.json').read_text()) if r['id'] not in selected] if args.only else []
+        start=time.monotonic()
         dump(HERE/'results.json',rs); dump(HERE/'summary.json',summarize(ms,rs))
-        for m in sorted(ms,key=lambda m:(m['area']=='Semantics',m['id'])):
+        for m in sorted([m for m in ms if m['id'] in selected],key=lambda m:(m['area']=='Semantics',m['id'])):
             if time.monotonic()-start>args.seconds:break
             p=tree/m['path']; original=source(m['path']); lines=original.splitlines(keepends=True)
             # All edits are exact at the pinned line, not global replacement.
