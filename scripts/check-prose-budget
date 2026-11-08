@@ -11,6 +11,19 @@ CHAR = re.compile(r"'(?:[^'\\\n]|\\(?:u\{[0-9a-fA-F]+\}|.))'")
 PLAIN = re.compile(r"[^/\\\"'«rsmf{}-]+")
 METRICS = ("docs_lines", "comment_lines", "docstring_lines", "process_ids")
 
+# Lean 4.24 Init.Meta.Defs.isIdRest: interpolation keywords need token boundaries.
+_ID_RANGES = ((0x3B1, 0x3C9), (0x391, 0x3A9), (0x3CA, 0x3FB),
+              (0x1F00, 0x1FFE), (0x2100, 0x214F), (0x1D49C, 0x1D59F),
+              (0xC0, 0xFF), (0x100, 0x17F), (0x2080, 0x2089),
+              (0x2090, 0x209C), (0x1D62, 0x1D6A), (0x2C7C, 0x2C7C))
+
+
+def _identifier_rest(char):
+    n = ord(char)
+    return (char.isascii() and (char.isalnum() or char in "_'!?")) or (
+        n not in {0x3BB, 0x3A0, 0x3A3, 0xD7, 0xF7}
+        and any(low <= n <= high for low, high in _ID_RANGES))
+
 
 def comment_lines(source):
     """Return unique physical comment lines and their docstring subset.
@@ -21,6 +34,7 @@ def comment_lines(source):
     comments, docs = set(), set()
     stack = []
     contexts = []  # interpolated string text or brace depth of an expression
+    pending_interpolation = False
     i, line = 0, 1
     while i < len(source):
         if stack:
@@ -39,8 +53,6 @@ def comment_lines(source):
         elif contexts and contexts[-1] == "text":
             if source[i] == "\\":
                 end = min(i + 2, len(source))
-            elif source.startswith(("{{", "}}"), i):
-                end = i + 2
             elif source[i] == '"':
                 contexts.pop()
                 end = i + 1
@@ -51,10 +63,17 @@ def comment_lines(source):
                 end = i + 1
             line += source[i:end].count("\n")
             i = end
-        elif source.startswith(('s!"', 'm!"', 'f!"'), i):
-            contexts.append("text")
-            i += 3
+        elif pending_interpolation and source[i].isspace():
+            line += source[i] == "\n"
+            i += 1
+        elif (source.startswith(("s!", "m!", "f!"), i)
+              and (i == 0 or not (_identifier_rest(source[i - 1]) or source[i - 1] == "."))
+              and (i + 2 == len(source) or not (_identifier_rest(source[i + 2]) or source[i + 2] == "."))):
+            # Trivia is scanned normally so separating comments still count.
+            pending_interpolation = True
+            i += 2
         elif contexts and source[i] in "{}":
+            pending_interpolation = False
             contexts[-1] += 1 if source[i] == "{" else -1
             if contexts[-1] == 0:
                 contexts.pop()
@@ -70,8 +89,18 @@ def comment_lines(source):
                 docs.add(line)
             i += 2
         else:
+            if pending_interpolation and source[i] == '"':
+                pending_interpolation = False
+                contexts.append("text")
+                i += 1
+                continue
+            pending_interpolation = False
             raw = RAW.match(source, i) if source[i] == "r" else None
             char = CHAR.match(source, i) if source[i] == "'" else None
+            if i and (raw or char) and _identifier_rest(source[i - 1]):
+                raw = char = None
+            if raw and i and source[i - 1] == ".":
+                raw = None
             if raw:
                 close = '"' + (raw[1] or "")
                 end = source.find(close, raw.end())

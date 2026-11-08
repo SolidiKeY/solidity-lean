@@ -31,7 +31,39 @@ class ScannerTests(unittest.TestCase):
             self.assertEqual(MODULE['comment_lines'](prefix + '!"{ /- real -/ 1 }"'), (1, 0))
         self.assertEqual(MODULE['comment_lines']('def x := s!"{ /- real -/ 1 }"'), (1, 0))
         self.assertEqual(MODULE['comment_lines']('s!"{s!"{ /-- nested -/ 1 }"}"'), (1, 1))
-        self.assertEqual(MODULE['comment_lines']('s!"{{ /- literal -/ }}"'), (0, 0))
+        self.assertEqual(MODULE['comment_lines'](r's!"\{ /- literal -/ }"'), (0, 0))
+
+    def test_interpolation_trivia(self):
+        for prefix in ('s', 'm', 'f'):
+            for trivia, count in [('', 1), (' ', 1), ('\t', 1), ('\n', 1),
+                                  ('\r\n', 1), ('/- gap -/', 1),
+                                  ('/- outer /- inner -/ -/ ', 1),
+                                  ('-- gap\n', 2), ('/- gap\n\n-/ ', 3),
+                                  ('/- gap -/-- gap\n ', 2)]:
+                with self.subTest(prefix=prefix, trivia=trivia):
+                    source = 'def x := ' + prefix + '!' + trivia + '"{ /-- real -/ 1 }"'
+                    self.assertEqual(MODULE['comment_lines'](source), (count, 1))
+            self.assertEqual(MODULE['comment_lines'](prefix + '! "{"--"}"'), (0, 0))
+            self.assertEqual(MODULE['comment_lines'](prefix + r'! "\{ /-- literal -/ }"'), (0, 0))
+
+    def test_nested_interpolated_terms(self):
+        self.assertEqual(MODULE['comment_lines']('s! "{{ /-- real -/ x := 1 : S }}"'), (1, 1))
+        self.assertEqual(MODULE['comment_lines']('s! "{m! /- gap -/ "{ /-- real -/ 1 }"}"'), (1, 1))
+
+    def test_interpolation_keyword_boundaries(self):
+        for name in ('names!', 'Names.s!', '℘s!', 's!suffix', 's!.field'):
+            with self.subTest(name=name):
+                self.assertEqual(MODULE['comment_lines'](name + ' "{ /-- literal -/ 1 }"'), (0, 0))
+
+    def test_literal_prefix_boundaries(self):
+        for identifier in ("x'", "x₁'", "℘'", "Ns.x'"):
+            with self.subTest(identifier=identifier):
+                source = "#check f " + identifier + "\x20'\"' -- real"
+                self.assertEqual(MODULE['comment_lines'](source), (1, 0))
+        for name in ('bar', 'Ns.r'):
+            with self.subTest(name=name):
+                source = name + r'"escaped \" /- literal -/"'
+                self.assertEqual(MODULE['comment_lines'](source), (0, 0))
 
     def test_docstrings(self):
         self.assertEqual(MODULE['comment_lines']('/-- docs\n/- nested -/\n-/\n/-! module -/'), (4, 4))
@@ -61,6 +93,31 @@ class AcceptanceTests(unittest.TestCase):
         self.assertEqual(self.initial['docs/guide']['docs_lines'], 2)
         self.assertEqual(self.initial['Solidity/Area'], dict(docs_lines=0, comment_lines=2, docstring_lines=1, process_ids=4))
         self.assertEqual(self.run_script().returncode, 0)
+
+    def test_interpolated_comment_growth(self):
+        lean = self.root / 'Solidity/Area/A.lean'
+        for prefix in ('s', 'm', 'f'):
+            for trivia in (' ', '/- gap -/ ', '-- gap\n'):
+                with self.subTest(prefix=prefix, trivia=trivia):
+                    start = 'def x := ' + prefix + '!' + trivia + '"{1}"\n'
+                    lean.write_text(start)
+                    self.baseline.write_text(json.dumps(MODULE['counts'](self.root)))
+                    before = self.baseline.read_bytes()
+                    lean.write_text(start.replace('{1}', '{ /-- new\nsecond\n-/ 1 }'))
+                    for args in ((), ('--update',)):
+                        self.assertEqual(self.run_script(*args).returncode, 1)
+                        self.assertEqual(self.baseline.read_bytes(), before)
+
+    def test_primed_identifier_comment_growth(self):
+        lean = self.root / 'Solidity/Area/A.lean'
+        start = "#check f x' '\"'\n"
+        lean.write_text(start)
+        self.baseline.write_text(json.dumps(MODULE['counts'](self.root)))
+        before = self.baseline.read_bytes()
+        lean.write_text(start.rstrip('\n') + ' -- real\n')
+        for args in ((), ('--update',)):
+            self.assertEqual(self.run_script(*args).returncode, 1)
+            self.assertEqual(self.baseline.read_bytes(), before)
 
     def test_never_raise_and_no_partial_write(self):
         for update in ((), ('--update',)):
