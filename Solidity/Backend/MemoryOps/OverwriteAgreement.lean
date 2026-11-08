@@ -55,6 +55,7 @@ def BoolTransferAgrees {D : Source.Layout} {H : HTy} {R : RefTy}
   | none => False
   | some bs => ∀ i, i < t-s → ((bs.drop s).take (t-s))[i]? = (MObj.elems a (hp.get r))[d+i]?
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The existing operation supplies its real payload, bounds and capacity;
 initial agreement then proves heap equality rather than assuming it. -/
 theorem boolTransfer_eq_self_of_agrees {D : Source.Layout} {H : HTy} {R : RefTy}
@@ -70,6 +71,7 @@ theorem boolTransfer_eq_self_of_agrees {D : Source.Layout} {H : HTy} {R : RefTy}
   rw [hs.length] at hi
   exact ha i hi
 
+set_option backward.isDefEq.respectTransparency false in
 /-- An existing child's own immutable decoded interval agrees with its initial
 memory interval at the SAME offset, with no supplied conversion hypothesis. -/
 theorem BoolChildRepr.self_agrees {D : Source.Layout} {H : HTy}
@@ -98,6 +100,7 @@ theorem BoolChildRepr.self_agrees {D : Source.Layout} {H : HTy}
 #guard_msgs in #print axioms boolTransfer_eq_self_of_agrees
 /-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.self_agrees' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms BoolChildRepr.self_agrees
+set_option backward.isDefEq.respectTransparency false in
 /-- Actual computed-source agreement is invariant under an initial preserving
 prefix extension, with primitive weakening reduced to identity. -/
 theorem BoolTransferAgrees.keeps_iff {D : Source.Layout} {H H' : HTy} {R : RefTy}
