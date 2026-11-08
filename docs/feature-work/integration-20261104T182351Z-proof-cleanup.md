@@ -1,3 +1,0 @@
-# proof-cleanup bounded tooling checkpoint
-
-Producer `fb0defdca5c5fe9baa7fd8c1e1271a91d255e1c9`. Exact frozen acceptance SHA256 `e8661890808e04da5bc7c0777aea29ed0bf39b99c5684e41d6df437975a12e1b` passed for items 1–3 on its original producer tree, including the complete pinned BASE corpus. Independent read-only finder and skeptic passed. Combined focused controls also passed. These are advisory mechanical tools and frozen historical inventories; they do not establish Lean proofs, current-source feature status, or whole-lane completion. Existing source policies, protected files, and trust boundaries are unchanged. Final combined repository gates remain required before publication.

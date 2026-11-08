@@ -1,0 +1,37 @@
+{
+ "Solidity/Lowering/P8/SourceAstResolvedGraphs.lean:Solidity.Lowering.P8.SourceAstResolvedGraphs.certificate_exists": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstResolvedGraphs.lean:Solidity.Lowering.P8.SourceAstResolvedGraphs.certified_output": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstResolvedGraphs.lean:Solidity.Lowering.P8.SourceAstResolvedGraphs.conversion_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstResolvedGraphs.lean:Solidity.Lowering.P8.SourceAstResolvedGraphs.conversion_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstResolvedGraphs.lean:Solidity.Lowering.P8.SourceAstResolvedGraphs.output_resolution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstResolvedGraphs.lean:Solidity.Lowering.P8.SourceAstResolvedGraphs.resolution_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstResolvedGraphs.lean:Solidity.Lowering.P8.SourceAstResolvedGraphs.resolves": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

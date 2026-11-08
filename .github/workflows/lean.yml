@@ -35,6 +35,8 @@ jobs:
         run: |
           node --test scripts/check-trust.test.mjs
           bash scripts/check-trust.sh
+          bash scripts/check-private-paths.sh
+          bash scripts/check-evidence-files.sh
       # The examples site's recorder, against a stand-in language server
       # (`docs/site.md`; `pages.yml` runs it against Lean's).
       - name: Test the site exporter
@@ -46,6 +48,7 @@ jobs:
           node --test scripts/check-axiom-pins.test.mjs tests/h62/item5/statement-graph/h112-tooling.test.mjs
           python3 -B tests/h62/item5/statement-graph/test_w0_tooling.py -v
           bash scripts/check-doc-paths.sh
+          python3 scripts/check-doc-navigation.py
           node scripts/check-axiom-pins.mjs
       # The core (`docs/parallelism.md`) imports no module of the elaborator,
       # the printers or the tactic front ends, even transitively.
@@ -102,7 +105,13 @@ jobs:
       - name: Seed Lake cache from master
         run: bash scripts/ci/fetch-lake-cache.sh
       - name: Build
-        run: lake build Solidity SolidityExamples SoliditySlowExamples
+        run: lake build Solidity SolidityExamples
+      # H109/newest H: the slow library stays out of default checkpoints and
+      # retains a separate 600 s CI budget; regular/default budgets are unchanged.
+      - name: Build H109 slow examples
+        env:
+          LEAN_NUM_THREADS: '1'
+        run: timeout --kill-after=10s 600s lake build SoliditySlowExamples
       # Fetched modules stay in Lake's cache; tools that run Lean themselves
       # need them in .lake/build (scripts/ci/restore-lake-artifacts.py).
       - name: Restore fetched artifacts

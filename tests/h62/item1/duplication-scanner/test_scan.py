@@ -4,6 +4,7 @@ import hashlib
 import importlib.util
 import io
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -586,6 +587,45 @@ class ScannerControls(unittest.TestCase):
         clean = b'def a : String := "set_option x in theorem fake"\ndef b : Nat := 0\n'
         self.assertEqual(len(scanner.scan(root / "E.lean", root, clean)), 2)
 
+    def test_outer_scoped_guard_declarations_fail_closed(self):
+        root = Path("/virtual")
+        for source in (b'open Nat in #guard_msgs in theorem hidden : True := by trivial\n', b'set_option autoImplicit false in #guard_msgs in theorem hidden : True := by trivial\n'):
+            with self.subTest(source=source), self.assertRaisesRegex(ValueError, "unsupported same-line scoped"):
+                scanner.scan(root / "A.lean", root, source)
+
+    def test_guard_msgs_inline_declarations_fail_closed(self):
+        root = Path("/virtual")
+        cases = (
+            b'#guard_msgs in@[simp] theorem hidden : True := by trivial\n',
+            b'#guard_msgs in@[simp]\n theorem hidden : True := by trivial\n',
+
+            b"#guard_msgs in theorem hidden : True := by trivial\ndef visible : Nat := 0\n",
+            b"#guard_msgs in #guard_msgs in theorem hidden : True := by trivial\n",
+            b"#guard_msgs in open Nat in theorem hidden : True := by trivial\n",
+            b"#guard_msgs in set_option autoImplicit false in\n theorem hidden : True := by trivial\n",
+            b"#guard_msgs (whitespace := lax) in private\n theorem hidden : True := by trivial\n",
+            b"#guard_msgs in @[simp]\n theorem hidden : True := by trivial\n",
+            b"#guard_msgs (whitespace :=\n lax) in theorem hidden : True := by trivial\n",
+            b"#guard_msgs (whitespace :=\n lax) in private\n theorem hidden : True := by trivial\n",
+        )
+        for source in cases:
+            with self.subTest(source=source), self.assertRaisesRegex(ValueError, "unsupported same-line guard_msgs declaration"):
+                scanner.scan(root / "A.lean", root, source)
+        for source in (b"#guard_msgs in\ntheorem visible : True := by trivial\n",
+                       b"#guard_msgs in #eval 1\ndef visible : Nat := 0\n",
+                       b"#guard_msgs (whitespace :=\n lax) in #eval 1\ndef visible : Nat := 0\n",
+                       b'-- #guard_msgs in theorem hidden\ndef visible : String := "#guard_msgs in theorem fake"\n'):
+            self.assertEqual(scanner.scan(root / "A.lean", root, source)[0]["name"], "visible")
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            (temp / "A.lean").write_bytes(cases[0])
+            (temp / "B.lean").write_text("def visible : Nat := 0\n")
+            report = subprocess.run([sys.executable, "-B", str(SCRIPT), str(temp), "*.lean"], capture_output=True, text=True)
+            self.assertNotEqual(report.returncode, 0)
+            value = json.loads(report.stdout)
+            self.assertEqual(value["incremental"]["comparison_status"], "current-incomplete")
+            self.assertIsNone(value["incremental"]["removed"])
+
     def test_scoped_open_inline_declarations_fail_closed(self):
         root = Path("/virtual")
         cases = (
@@ -663,12 +703,12 @@ class ScannerControls(unittest.TestCase):
             root = Path(directory)
             source = root / "A.lean"
             source.write_text("def a : Nat := 0\n")
-            original = Path.read_bytes
-            def checked_read(path):
+            original = Path.open
+            def checked_open(path, *args, **kwargs):
                 if path == source: raise OSError("simulated read failure")
-                return original(path)
+                return original(path, *args, **kwargs)
             output = io.StringIO()
-            with mock.patch.object(Path, "read_bytes", checked_read), mock.patch.object(sys, "argv", [str(SCRIPT), str(root), "*.lean"]), contextlib.redirect_stdout(output):
+            with mock.patch.object(Path, "open", checked_open), mock.patch.object(sys, "argv", [str(SCRIPT), str(root), "*.lean"]), contextlib.redirect_stdout(output):
                 result = scanner.main()
             data = json.loads(output.getvalue())
             self.assertTrue(result)
@@ -715,6 +755,24 @@ class ScannerControls(unittest.TestCase):
             self.assertIn("shared-resolved-source", report["candidates"][0]["reject_reasons"])
             self.assertIn("shared-resolved-source", report["body_candidates"][0]["reject_reasons"])
             self.assertEqual(subprocess.check_output(cmd), subprocess.check_output(cmd))
+
+    def test_hard_links_are_flagged_without_losing_paths(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "A.lean").write_text("theorem same : True := by trivial\n")
+            os.link(root / "A.lean", root / "B.lean")
+            (root / "C.lean").write_text("theorem same : True := by trivial\n")
+            cmd = [sys.executable, "-B", str(SCRIPT), str(root), "*.lean"]
+            report = json.loads(subprocess.check_output(cmd))
+            self.assertEqual([row["path"] for row in report["inputs"]], ["A.lean", "B.lean", "C.lean"])
+            self.assertIn("shared-file-identity", report["candidates"][0]["reject_reasons"])
+            self.assertIn("shared-file-identity", report["body_candidates"][0]["reject_reasons"])
+            self.assertNotIn("shared-resolved-source", report["candidates"][0]["reject_reasons"])
+            self.assertEqual(subprocess.check_output(cmd), subprocess.check_output(cmd))
+            (root / "B.lean").unlink()
+            (root / "B.lean").write_text("theorem same : True := by trivial\n")
+            separate = json.loads(subprocess.check_output(cmd))
+            self.assertNotIn("shared-file-identity", separate["candidates"][0]["reject_reasons"])
 
     def test_alias_selection_uses_alias_extension(self):
         with tempfile.TemporaryDirectory() as directory:

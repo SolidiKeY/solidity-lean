@@ -14,9 +14,10 @@ between them where those writes provably land (`copyRes`,
 the allocations, not of the history.
 
 `binomialRowsNine` unrolls about two thousand steps of nested loops: its walk
-is checked in chunks of 128 steps (`sol_prove (chunk := n)`,
+is checked in chunks of 64 steps (`sol_prove (chunk := n)`,
 `Calculus/ProveChunked.lean`), each chunk and its leaf under the ordinary
-heartbeat budget.  It is the slowest proof here, about four minutes.
+heartbeat budget.  It is the slowest proof here, so it is a module of its own
+(`Examples/Tactics/OpenLoops/RowsNine.lean`).
 -/
 
 solc_import "../../../tests/solc/OpenLoops.ast.json" hash 0xd0e67a270c5e5bbf as Solc.SolcLoopsOpen
@@ -30,9 +31,5 @@ open scoped Solidity.Scoped
 /-- The actual nested-array binomial source, with chained assignment and its loops. -/
 theorem binomialFaithfulRowsSmall : ⊢ Solc.SolcLoopsOpen.binomialFaithfulRowsSmall.problem := by
   sol_prove
-
-/-- `binomial(9, 5) == 70` over nine rows of memory arrays. -/
-theorem binomialRowsNine : ⊢ Solc.SolcLoopsOpen.binomialRowsNine.problem := by
-  sol_prove (chunk := 128)
 
 end Solidity.Examples.Tactics.OpenLoops

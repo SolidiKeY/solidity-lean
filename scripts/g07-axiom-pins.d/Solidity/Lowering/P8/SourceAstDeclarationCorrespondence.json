@@ -26,6 +26,21 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/P8/SourceAstDeclarationCorrespondence.lean:Solidity.Lowering.P8.SourceAstDeclarationCorrespondence.unit_children_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstDeclarationCorrespondence.lean:Solidity.Lowering.P8.SourceAstDeclarationCorrespondence.unit_first_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstDeclarationCorrespondence.lean:Solidity.Lowering.P8.SourceAstDeclarationCorrespondence.unit_head_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/P8/SourceAstDeclarationCorrespondence.lean:Solidity.Lowering.P8.SourceAstDeclarationCorrespondence.using_path_exact": [
   "Classical.choice",
   "Quot.sound",

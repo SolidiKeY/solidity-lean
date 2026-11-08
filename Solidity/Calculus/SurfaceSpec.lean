@@ -249,10 +249,15 @@ section Compile
 
 variable (C)
 
+/-- Every source expression has positive structural size; compiler recursion
+uses this measure, never an execution fuel or a new admission bound. -/
+private theorem specExprSize_positiveV1 (e : SpecExpr) : 0 < sizeOf e := by
+  cases e <;> simp only [SpecExpr.num.sizeOf_spec, SpecExpr.uintLit.sizeOf_spec, SpecExpr.bool.sizeOf_spec, SpecExpr.name.sizeOf_spec, SpecExpr.result.sizeOf_spec, SpecExpr.old.sizeOf_spec, SpecExpr.net.sizeOf_spec, SpecExpr.field.sizeOf_spec, SpecExpr.index.sizeOf_spec, SpecExpr.unop.sizeOf_spec, SpecExpr.binop.sizeOf_spec, SpecExpr.imp.sizeOf_spec, SpecExpr.iff.sizeOf_spec, SpecExpr.all.sizeOf_spec, SpecExpr.ex.sizeOf_spec, SpecExpr.member.sizeOf_spec, SpecExpr.memberFilter.sizeOf_spec] <;> omega
+
 mutual
 
 /-- A memory parameter followed through its members and entries. -/
-partial def SpecExpr.memPath (ctx : SpecCtx C) :
+def SpecExpr.memPath (ctx : SpecCtx C) :
     SpecExpr → Except String (Option (Ty × (NITerm C ⊕ NMAddr C)))
   | .name x => do
     if (lookupBy x ctx.locals).isSome then
@@ -284,9 +289,11 @@ partial def SpecExpr.memPath (ctx : SpecCtx C) :
       | .ref _ => .inl (.read (ctx.memory.getD .memory) a)))
   | _ => pure none
 
+termination_by e => (sizeOf e, 0)
+
 /-- A path of state variables, members and entries, and the type it names:
 `balances[a]` is `balances[a]` at `uint`. -/
-partial def SpecExpr.path (ctx : SpecCtx C) : SpecExpr → Except String (Ty × NPTerm C)
+def SpecExpr.path (ctx : SpecCtx C) : SpecExpr → Except String (Ty × NPTerm C)
   | .name x => do
     if (lookupBy x ctx.locals).isSome then
       throw s!"{x} is a primitive local, not a storage path"
@@ -315,12 +322,14 @@ partial def SpecExpr.path (ctx : SpecCtx C) : SpecExpr → Except String (Ty × 
     | _ => throw "indexing something that is not a mapping or an array"
   | _ => throw "not a storage path: a state variable, `e.f` or `e[k]`"
 
+termination_by e => (sizeOf e, 0)
+
 /-- A value, and its sort: a state variable is read from the context's
 storage, `find(storage, count)`, or `find(old, count)` under `\old`; a
 ledger entry is a KeY `int` (`VSort.kint`), and so is arithmetic over one.
 `expectK` permits an unsigned negand to widen in a ledger expression;
 primitive arithmetic inside it keeps its own checked type. -/
-partial def SpecExpr.term (ctx : SpecCtx C) (e : SpecExpr) (expectK : Bool := false) :
+def SpecExpr.term (ctx : SpecCtx C) (e : SpecExpr) (expectK : Bool := false) :
     Except String (NTm.VSort × NTerm C) := match e with
   | .num n => pure (.prim .uint, .num n)
   | .uintLit n => do
@@ -391,18 +400,29 @@ partial def SpecExpr.term (ctx : SpecCtx C) (e : SpecExpr) (expectK : Bool := fa
   | .imp .. | .iff .. | .all .. | .ex .. | .member .. | .memberFilter .. =>
     throw "a formula where a value is expected"
 
+termination_by (sizeOf e, 2)
+decreasing_by
+  all_goals subst_vars
+  all_goals decreasing_tactic
+
 /-- Select the ledger context from the operands' result shapes, then compile
 each operand once. A ledger read resets its address operand's context without
 causing retries of malformed nested expressions. -/
-partial def SpecExpr.termPair (ctx : SpecCtx C) (a b : SpecExpr) (expectK : Bool := false) :
+def SpecExpr.termPair (ctx : SpecCtx C) (a b : SpecExpr) (expectK : Bool := false) :
     Except String ((NTm.VSort × NTerm C) × (NTm.VSort × NTerm C)) := do
   let ledger := expectK || a.hasLedgerInt || b.hasLedgerInt
   let left ← a.term ctx ledger
   let right ← b.term ctx ledger
   pure (left, right)
 
+termination_by (sizeOf a + sizeOf b, 3)
+decreasing_by
+  all_goals have ha := specExprSize_positiveV1 a
+  all_goals have hb := specExprSize_positiveV1 b
+  all_goals decreasing_tactic
+
 /-- A read: `.length` of an array, or the word at a path. -/
-partial def SpecExpr.read (ctx : SpecCtx C) : SpecExpr → Except String (PrimTy × NTerm C)
+def SpecExpr.read (ctx : SpecCtx C) : SpecExpr → Except String (PrimTy × NTerm C)
   | .field e "length" => do
     if let some (T, p) ← e.memPath ctx then
       match T, p with
@@ -423,12 +443,14 @@ partial def SpecExpr.read (ctx : SpecCtx C) : SpecExpr → Except String (PrimTy
     let .prim q := T | throw "a storage reference where a value is expected"
     pure (q, .find ctx.storage p)
 
+termination_by e => (sizeOf e, 1)
+
 end
 
 /-- A clause as a formula: the connectives are the logic's, `\forall` is
 `Fml.all`, a comparison is `a ⊕ b = true`, and `==` between conditions is
 `<->`, as solkey writes it. -/
-partial def SpecExpr.fml (ctx : SpecCtx C) : SpecExpr → Except String (NRead C)
+def SpecExpr.fml (ctx : SpecCtx C) : SpecExpr → Except String (NRead C)
   | .bool true => pure .tt
   | .bool false => pure .ff
   | .unop .not a => do pure (.not (← a.fml ctx))
@@ -473,17 +495,29 @@ partial def SpecExpr.fml (ctx : SpecCtx C) : SpecExpr → Except String (NRead C
       return if op = .eqB then eq else .not eq
     cond (.binop op a b)
   | e => cond e
+termination_by e => (sizeOf e, 0)
 where
   /-- `a <-> b`, and `==` between conditions. -/
   iff (a b : SpecExpr) : Except String (NRead C) := do
     let φ ← a.fml ctx
     let ψ ← b.fml ctx
     pure (.and (.imp φ ψ) (.imp ψ φ))
+  termination_by (sizeOf a + sizeOf b, 1)
+  decreasing_by
+    all_goals have ha := specExprSize_positiveV1 a
+    all_goals have hb := specExprSize_positiveV1 b
+    all_goals decreasing_tactic
   /-- A `bool` value as a condition, `t = true`. -/
   cond (e : SpecExpr) : Except String (NRead C) := do
     let (p, t) ← e.term C ctx
     unless p = .prim .bool do throw s!"a {p.toStr} where a condition is expected"
     pure (NRead.bool t)
+
+/-- The existing literal-clause interpretation is now kernel-reducible;
+this adds no alternate evaluator and is independent of the named context. -/
+theorem SpecExpr.fml_boolV1 (ctx : SpecCtx C) (value : Bool) :
+    (SpecExpr.bool value).fml C ctx = .ok (if value then NRead.tt else NRead.ff) := by
+  cases value <;> simp only [SpecExpr.fml] <;> rfl
 
 /-! ### `assignable`: the words a function may change -/
 
@@ -591,24 +625,42 @@ def assignableFml (ctx : SpecCtx C) (locs : List SpecLoc) : Except String (List 
 
 variable [FreshNames]
 
-/-- **The pieces of the obligation of `f`**, solkey's `specifiedProblemText`:
-the premises every run meets by construction (`R`, `L` and what `msg.value`
-is, `M`), the premises the specification states (`I ∧ requires`), the
-update `{old := storage ‖ oldNet := net ‖ B}` (`B` the booking of
-`msg.value`), the call
-`T result; result = f(x₁, …, xₙ);`, and what is owed after it, `I`, `ensures` and
-`A` one by one (a counterexample search names the one that fails).  For
-`constructor`, the deployment's (the module docstring).  The call is
-elaborated scoped, from the parameters in scope (newest first), each
-statement typed where it is read (`SProg`): the scoped obligation places it
-past the locals the update declares (`SProg.chain`, `Calculus/Spec.lean`). -/
-def specPieces (f : String) :
-    Except String (List (NRead C) × List (NRead C) × List (NUpdElem C) × SProg C × List (NRead C)) := do
+/-- Keep successful metadata from the SAME typed computation; proof fields
+are erased and no second compiler traversal is performed. -/
+def rememberSpecResultV1 {α : Type} (result : Except String α) :
+    Except String { value : α // result = .ok value } :=
+  match _h : result with
+  | .error reason => .error reason
+  | .ok value => .ok ⟨value, rfl⟩
+
+omit [FreshNames] in
+theorem rememberSpecResultV1_forget {α : Type} (result : Except String α) :
+    (rememberSpecResultV1 result).map Subtype.val = result := by
+  cases result <;> rfl
+
+/-- Actual typed post-compilation provenance, captured before its contexts and
+clause boundaries would be discarded. No source text or candidate is accepted. -/
+structure SpecPiecesContextV1 (C : Contract) (name : String) where
+  legacy : List (NRead C) × List (NRead C) × List (NUpdElem C) × SProg C × List (NRead C)
+  declaration : FunDecl
+  declarationEquation : (if name == "constructor" then C.ctor else lookupBy name C.funs) = some declaration
+  postContext : SpecCtx C
+  invariants : List (NRead C)
+  ensures : List (NRead C)
+  frame : List (NRead C)
+  ensuresEquation : declaration.spec.ensures.mapM (SpecExpr.fml C postContext) = .ok ensures
+  postsEquation : legacy.2.2.2.2 = invariants ++ ensures ++ frame
+
+def specPiecesWithContextV1 (f : String) :
+    Except String (SpecPiecesContextV1 C f) := do
   -- `constructor` names the contract's constructor (`Contract.ctor`)
   let ctor := f == "constructor"
-  let some d := if ctor then C.ctor else lookupBy f C.funs
-    | throw (if ctor then "the contract declares no constructor: an implicit one has no obligation"
-      else s!"{f} is not a function of the contract")
+  let chosen ← match h : (if ctor then C.ctor else lookupBy f C.funs) with
+    | none => throw (if ctor then "the contract declares no constructor: an implicit one has no obligation"
+        else s!"{f} is not a function of the contract")
+    | some declaration => pure (⟨declaration, h⟩ : { value : FunDecl //
+        (if ctor then C.ctor else lookupBy f C.funs) = some value })
+  let d := chosen.val
   if d.spec.skip then throw s!"{f} is marked `skip`: it has no obligation"
   let Γ ← d.paramCtx
   let ps := d.params.filterMap fun (n, T) => match T with
@@ -644,7 +696,8 @@ def specPieces (f : String) :
   let post : SpecCtx C := { pre with ensures := true, result := res, rets := rets }
   let inv ← C.inv.mapM (SpecExpr.fml C { pre with locals := [], refs := [] })
   let reqs ← d.spec.requires.mapM (SpecExpr.fml C pre)
-  let enss ← d.spec.ensures.mapM (SpecExpr.fml C post)
+  let ensured ← rememberSpecResultV1 (d.spec.ensures.mapM (SpecExpr.fml C post))
+  let enss := ensured.val
   let frame ← match d.spec.assignable with
     | some locs =>
       assignableFml C { post with storage := .pv oldVar, ledger := some oldNetVar, result := none } locs
@@ -688,11 +741,34 @@ def specPieces (f : String) :
     (d.spec.assignable.getD []).flatMap SpecLoc.names
   -- a deployment assumes no invariant and no layout: both are of the
   -- storage it discards (solkey's has no `CInv(storage, net)` premise)
-  pure ((if Γ.any (fun (_, t) => t matches .alias _ | .mem _) then
+  let legacy := ((if Γ.any (fun (_, t) => t matches .alias _ | .mem _) then
         [NRead.refInputs (ECtx.toNCtx Γ)] else []) ++
       ps.map (fun (n, p) => rangeFml (.pv (.ofName n)) p) ++
       (if ctor then [] else layoutFmls C read) ++ [msgValue],
     (if ctor then [] else inv) ++ reqs, U, P, inv ++ enss ++ frame)
+  pure {
+    legacy, declaration := d, declarationEquation := chosen.property,
+    postContext := post, invariants := inv, ensures := enss, frame,
+    ensuresEquation := ensured.property, postsEquation := rfl }
+
+/-- **The pieces of the obligation of `f`**, solkey's `specifiedProblemText`:
+the premises every run meets by construction (`R`, `L` and what `msg.value`
+is, `M`), the premises the specification states (`I ∧ requires`), the
+update `{old := storage ‖ oldNet := net ‖ B}` (`B` the booking of
+`msg.value`), the call
+`T result; result = f(x₁, …, xₙ);`, and what is owed after it, `I`, `ensures` and
+`A` one by one (a counterexample search names the one that fails).  For
+`constructor`, the deployment's (the module docstring).  The call is
+elaborated scoped, from the parameters in scope (newest first), each
+statement typed where it is read (`SProg`): the scoped obligation places it
+past the locals the update declares (`SProg.chain`, `Calculus/Spec.lean`). -/
+def specPieces (f : String) :
+    Except String (List (NRead C) × List (NRead C) × List (NUpdElem C) × SProg C × List (NRead C)) :=
+  (specPiecesWithContextV1 C f).map (·.legacy)
+
+/-- The legacy result drops only the new provenance. -/
+theorem specPiecesWithContextV1_forget (f : String) :
+    (specPiecesWithContextV1 C f).map (·.legacy) = specPieces C f := rfl
 
 end Compile
 

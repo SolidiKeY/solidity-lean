@@ -1,0 +1,34 @@
+{
+  "support_modules": [
+    "Solidity.Backend.AbiEntry.ValueCheckedBodies"
+  ],
+  "support_sources": [
+    "tests/h62/item2/audit-bytecode-selection/value-checked-body-support.lean.txt"
+  ],
+  "witnesses": {
+    "uint_selected_joint_domain": {
+      "target": "Solidity.Backend.AbiEntry.Interface.ValueCheckedUIntBodyCertificate.selected",
+      "proof": "⟨ValueCheckedBodies.UInt.program,ValueCheckedBodies.UInt.certificate,checkedContract,UIntBoundCtx,7,8,false,wmod 13,uintNil,Frag.init UIntBoundCtx,rfl,True.intro⟩"
+    },
+    "uint_executed_joint_domain": {
+      "target": "Solidity.Backend.AbiEntry.Interface.ValueCheckedUIntBodyCertificate.executed",
+      "proof": "⟨ValueCheckedBodies.UInt.program,ValueCheckedBodies.UInt.certificate,checkedContract,UIntBoundCtx,7,8,false,wmod 13,uintNil,Frag.init UIntBoundCtx,rfl,ValueCheckedBodies.UInt.compiled 7 8 false (wmod 13) uintNil (Frag.init UIntBoundCtx) rfl,UIntBindingBody.selectedBody 7 uintNil (Frag.init UIntBoundCtx) rfl,ValueCheckedBodies.UInt.selected 7 8 false (wmod 13) uintNil (Frag.init UIntBoundCtx) rfl,UIntBindingBody.body_selected 7 uintNil (Frag.init UIntBoundCtx) rfl,checkedMachine,wmod 0,wmod 0,rfl,rfl,True.intro⟩"
+    },
+    "uint_early_rejection_joint_domain": {
+      "target": "Solidity.Backend.AbiEntry.Interface.ValueCheckedUIntBodyCertificate.early_rejection",
+      "proof": "⟨ValueCheckedBodies.UInt.program,ValueCheckedBodies.UInt.certificate,checkedContract,UIntBoundCtx,7,8,false,wmod 13,uintNil,Frag.init UIntBoundCtx,rfl,ValueCheckedBodies.UInt.compiled 7 8 false (wmod 13) uintNil (Frag.init UIntBoundCtx) rfl,ValueCheckedBodies.UInt.selected 7 8 false (wmod 13) uintNil (Frag.init UIntBoundCtx) rfl,payingMachine,by decide,True.intro⟩"
+    },
+    "bool_selected_joint_domain": {
+      "target": "Solidity.Backend.AbiEntry.Interface.ValueCheckedBoolBodyCertificate.selected",
+      "proof": "⟨ValueCheckedBodies.Bool.program,ValueCheckedBodies.Bool.certificate,checkedContract,BoolBoundCtx,7,false,wmod 13,boolNil,Frag.init BoolBoundCtx,rfl,True.intro⟩"
+    },
+    "bool_executed_joint_domain": {
+      "target": "Solidity.Backend.AbiEntry.Interface.ValueCheckedBoolBodyCertificate.executed",
+      "proof": "⟨ValueCheckedBodies.Bool.program,ValueCheckedBodies.Bool.certificate,checkedContract,BoolBoundCtx,7,false,wmod 13,boolNil,Frag.init BoolBoundCtx,rfl,ValueCheckedBodies.Bool.compiled 7 false (wmod 13) boolNil (Frag.init BoolBoundCtx) rfl,BoolBindingBody.selectedBody 7 boolNil (Frag.init BoolBoundCtx) rfl,ValueCheckedBodies.Bool.selected 7 false (wmod 13) boolNil (Frag.init BoolBoundCtx) rfl,BoolBindingBody.body_selected 7 boolNil (Frag.init BoolBoundCtx) rfl,checkedMachine,wmod 0,wmod 0,rfl,rfl,True.intro⟩"
+    },
+    "bool_early_rejection_joint_domain": {
+      "target": "Solidity.Backend.AbiEntry.Interface.ValueCheckedBoolBodyCertificate.early_rejection",
+      "proof": "⟨ValueCheckedBodies.Bool.program,ValueCheckedBodies.Bool.certificate,checkedContract,BoolBoundCtx,7,false,wmod 13,boolNil,Frag.init BoolBoundCtx,rfl,ValueCheckedBodies.Bool.compiled 7 false (wmod 13) boolNil (Frag.init BoolBoundCtx) rfl,ValueCheckedBodies.Bool.selected 7 false (wmod 13) boolNil (Frag.init BoolBoundCtx) rfl,payingMachine,by decide,True.intro⟩"
+    }
+  }
+}

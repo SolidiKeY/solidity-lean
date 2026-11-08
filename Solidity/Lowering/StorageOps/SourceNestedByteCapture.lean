@@ -61,4 +61,22 @@ theorem timeout_prefix : ∀ {E : Solidity.Source.Env} {Γ : Solidity.Source.RCt
 
 /-- info: 'Solidity.Lowering.StorageOps.SourceNestedByteCapture.timeout_prefix' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms timeout_prefix
+/-- Guard against erasing the heap-allocation prefix of an actual storage-copy timeout. -/
+theorem copy_timeout_prefix :
+∀ {E : Solidity.Source.Env} {Γ : Solidity.Source.RCtx}
+ (frame : Solidity.Source.Fr) (src dst : Solidity.Source.SPath) (_different : src≠dst)
+ (count : Nat) (locals : Solidity.Source.Locals E.layout Γ) (state : Solidity.Source.St E)
+ (_outerHeader : (Solidity.Source.readLen (E:=E) (Γ:=Γ) frame src).run (locals,state)=(.ok (count+1),(locals,state)))
+ (_headers : ∀ j<count+1,(Solidity.Source.readLen (E:=E) (Γ:=Γ) frame (src.go (.index j))).run (locals,state)=(.ok 0,(locals,state))),
+ (Solidity.Source.storeVal (E:=E) (Γ:=Γ) frame (count+5) (.array .storage (.bytes .storage) none) dst
+   (Solidity.Source.Val.storRef (τ:=.array .storage (.bytes .storage) none) rfl src)).run (locals,state)=
+ (.error .timeout,(locals,Nat.repeatTR Solidity.Lowering.StorageOps.SourceNestedByteCapture.captureStep count state)) := by
+ intro E Γ frame src dst different count locals state outerHeader headers
+ simp only [Source.storeVal,if_neg different,Source.STy.withLoc,
+   Source.loadMem,Source.Hoare.run_bind,outerHeader]
+ rw [timeout_prefix frame src 0 count locals state (by
+   simpa only [Nat.zero_add] using headers)]
+
+/-- info: 'Solidity.Lowering.StorageOps.SourceNestedByteCapture.copy_timeout_prefix' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms copy_timeout_prefix
 end Solidity.Lowering.StorageOps.SourceNestedByteCapture

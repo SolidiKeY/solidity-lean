@@ -1,4 +1,5 @@
 import Solidity.Yul.Compilation.SourceLoop
+import Solidity.Yul.Compilation.CompletionControls
 /-! Inversion of ACTUAL original source completions for the existing normal
 loop compiler slice. Finite guards/count are derived, not assumed. Component
 certificates retain their real total-normal source laws. No new source evaluator
@@ -113,12 +114,7 @@ theorem source_to_model (condition : Compiled fc test)
 
 /-- The existing full-word local representation is injective. -/
 theorem sourceLocals_injective {n : Nat} : Function.Injective (@sourceLocals n) := by
- intro a b same
- apply Vector.ext
- intro i hi
- have words := congrFun same (⟨i,hi⟩ : Fin n)
- apply BitVec.eq_of_toNat_eq
- exact congrArg Fin.val words
+ exact CompletionControls.sourceLocals_injective
 
 /-- info: 'Solidity.Yul.Compilation.SourceLoopCompletion.repeat_shift' does not depend on any axioms -/
 #guard_msgs in

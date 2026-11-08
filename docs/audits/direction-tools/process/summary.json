@@ -1,0 +1,427 @@
+{
+  "base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+  "closure_reuse": {
+    "archive_prefix": "evidence/plan-e3-feature-citations-1107/e3-feature-citations/e3-feature-citations-evidence/completed-final-retry/full/",
+    "archive_repository": "https://github.com/SolidiKeY/solidity-lean-coord",
+    "archive_revision": "a2d55ac49baddb40486aabc66b26957deb2787e4",
+    "audited_revision": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+    "boundary": "Successful archived Lake full-gate replay, not a fresh kernel check. Entire local source import graph and toolchain pin match audited base; cached build provenance is inherited from the archived gate. No timing is extrapolated.",
+    "build_configuration_blobs_identical": true,
+    "external_imports": [
+      "Lean.Elab.Attributes",
+      "Lean.Elab.Deriving",
+      "Lean.Elab.Tactic",
+      "Lean.Meta.Eqns",
+      "Lean.Util.ShareCommon",
+      "Std.Data.HashMap"
+    ],
+    "local_import_modules_verified": 63,
+    "local_import_source_blobs_identical": true,
+    "module": "Solidity.Calculus.Decide",
+    "source_revision": "b2968a3b994fa7dd4b62600e48cbb00299d1eab6",
+    "status": "historical closure confirmed by reused archived validation",
+    "toolchain_blob_identical": true
+  },
+  "conclusion": "Registries/documentation dominate churn hotspots. The sole theorem-bearing hotspot has historical closure evidence reused with an identical source/import graph. The matched process-overhead ratio and categorical verdict remain unproven/inconclusive with an UNVERIFIABLE evidence gap under H151; no full audit completion is authorized. Source volume is not labor.",
+  "evidence_gaps": [
+    {
+      "resolution": "Pinned committed reference inputs read; see reference_reuse.source_inputs. This does not establish matched process calibration.",
+      "source_wait": {
+        "item": "da-references",
+        "status": "absent on pinned base; own shallow CompCert measurement used when supplied"
+      },
+      "status": "RESOLVED_BY_REUSE",
+      "subject": "reference artifact availability"
+    },
+    {
+      "scope": "Pinned-base inventory availability only; not a claim of global absence.",
+      "source_wait": {
+        "item": "va3/vu1",
+        "status": "scripts/differential/** and scripts/bench/** absent on pinned base; no output invented"
+      },
+      "status": "UNVERIFIABLE",
+      "subject": "differential/benchmark reuse evidence",
+      "task_boundary": "Missing reuse evidence retained; no new producer request or measurement authorization."
+    },
+    {
+      "authority": "H151 disposition of H241 existing-data lookup",
+      "categorical_verdict": null,
+      "claim_status": "unproven/inconclusive",
+      "coordinator_state_receipt": "coordinator-20261108T165207Z/receipt.json",
+      "fresh_measurement_authorized": false,
+      "full_audit_completion_authorized": false,
+      "lookup_boundary": "No matching artifact located in relevant process/reference handoffs, recorded reference reuse or bounded archive filename search. This does not prove no artifact exists elsewhere.",
+      "matched_ratio": null,
+      "new_task_or_producer_interface_authorized": false,
+      "receipt_boundary": "Coordinator supplied this pointer and disposition; receipt bytes/hash were not supplied in this VM.",
+      "status": "UNVERIFIABLE",
+      "subject": "matched process-overhead calibration"
+    }
+  ],
+  "inventory": {
+    "docs/audits/architecture-tools/": [
+      "docs/audits/architecture-tools/core_closure.py",
+      "docs/audits/architecture-tools/doc_names.py",
+      "docs/audits/architecture-tools/dup_decls.py",
+      "docs/audits/architecture-tools/dup_general.py",
+      "docs/audits/architecture-tools/imports.py",
+      "docs/audits/architecture-tools/near_files.py",
+      "docs/audits/architecture-tools/olean_sizes.py",
+      "docs/audits/architecture-tools/timing-sample.tsv",
+      "docs/audits/architecture-tools/unreferenced.py"
+    ],
+    "docs/audits/build-speed-tools/": [
+      "docs/audits/build-speed-tools/churn.py",
+      "docs/audits/build-speed-tools/import_graph.py",
+      "docs/audits/build-speed-tools/measure.sh",
+      "docs/audits/build-speed-tools/pins.py",
+      "docs/audits/build-speed-tools/profile.sh",
+      "docs/audits/build-speed-tools/scan.py"
+    ],
+    "docs/audits/build-speed.md": [
+      "docs/audits/build-speed.md"
+    ],
+    "docs/audits/direction-tools/references/": [],
+    "docs/audits/proof-coverage-tools/": [
+      "docs/audits/proof-coverage-tools/statement-sample.txt",
+      "docs/audits/proof-coverage-tools/theorem_census.py"
+    ],
+    "scripts/bench/": [],
+    "scripts/build-measure": [
+      "scripts/build-measure-report.py",
+      "scripts/build-measure.py"
+    ],
+    "scripts/differential/": []
+  },
+  "limits": [
+    "No fresh Lean builds or proof timing measurements. Historical closure is reused only with exact archived receipt and source/import identity checks.",
+    "Physical source lines include comments/blanks; Solidity denominator is not all product code (Bridge/ and other Lean reported separately).",
+    "Generator implementation is infrastructure; output is separate. Chain/agreement elaborator command sites are counted, not their in-memory generated declarations. Headers cannot identify all generated or hand-expanded chain/agreement code.",
+    "Git path churn is not person-hours; merges excluded by default, first-parent sensitivity supplied.",
+    "CompCert is one approximate source reference, not a matched theorem or labor reference. No numeric claim copied from prose."
+  ],
+  "matched_process_overhead_ratio": null,
+  "matched_process_overhead_verdict": null,
+  "methods": {
+    "closure": "Non-goal hotspots N/A. Decide historical closure supported by exact archived successful full-gate bytes, explicit replay line, root inclusion, identical local source-import graph and toolchain pin. No fresh Lean check.",
+    "generated": "Named roots, Corpus/, AxiomPins files, and explicit generated headers in first 2500 chars; explicit BEGIN/END regions subtracted from header-unmarked source stock and emitted separately. Historical churn uses file categories and does not separate mixed-file regions. Union of monthly snapshots classifies history; unknown deleted generated files may remain handwritten.",
+    "history": "Read-only process census. Python stdlib; no checkouts, builds or dependencies.\n\nRun at repository root:\n python3 docs/audits/direction-tools/process/history.py --out /tmp/process-results\nOptional reference reproduction:\n git clone --depth 1 https://github.com/AbsInt/CompCert.git /tmp/process-compcert\n git -C /tmp/process-compcert fetch --depth 1 origin 2685140bf72c959446981fb99b5e44a8975021bc\n python3 docs/audits/direction-tools/process/history.py --out /tmp/process-results --compcert /tmp/process-compcert\n\nAll source counts are physical lines (blank/comments included), not proof terms,\nsemantic work, or person-hours. Snapshot trust tokens are lexical indicators.\nHistory uses all reachable NON-MERGE commits, no rename detection (moves become\ncreation/deletion), committer UTC month; first-parent sensitivity is also emitted.\nA rewrite means a non-creation edit, NOT a complete rewrite of a file.\n",
+    "months": "Final first-parent revision per committer month; November partial through pinned base; history month uses UTC committer timestamp, snapshot month also uses UTC committer timestamp.",
+    "proof_lines": "Heuristic nonblank code lines in theorem/lemma/example command blocks versus definition blocks; statements/bodies inseparable here; macro quotations/local defs may confuse boundaries. Primary ratio uses physical file source, not this heuristic. Never compared as proof efficiency.",
+    "trust": "Solidity+roots and Bridge shown separately. Comment/string-stripped lexical tokens, not elaborated declarations; pins include command and expected-output line counts separately plus their sum as a lower bound (continuation guard lines not counted). .admit recovery APIs separated from unfinished-proof tokens. Native allowlist unknown before explicit current-style policy, not assumed zero."
+  },
+  "reference": {
+    "boundary": "tools/doc/Markdown/Makefiles/configure over all .v; Coq sources include definitions and proofs; non-Coq compiler implementation shown separately; .github CI counted at this revision; not a labor ratio",
+    "citation": "https://github.com/AbsInt/CompCert/tree/2685140bf72c959446981fb99b5e44a8975021bc",
+    "counts": {
+      "coq_source_lines": 205719,
+      "header_marked_generated_coq_lines": 183,
+      "infrastructure_lines": 5811,
+      "other_implementation_lines": 48271,
+      "vendored_coq_lines": 34225
+    },
+    "ratio": 0.02824726933341111,
+    "ratio_excluding_vendored_coq": 0.03388456739011277,
+    "ratio_including_noncoq_implementation": 0.02287885349816922,
+    "repository": "https://github.com/AbsInt/CompCert",
+    "revision": "2685140bf72c959446981fb99b5e44a8975021bc",
+    "status": "measured"
+  },
+  "reference_reuse": {
+    "closure_receipt": "resolved separately by pinned archived full-gate reuse; see closure_reuse",
+    "comparison_boundary": "Reference inventory includes multiple source languages and uses a different lexical proof-region classifier. Its line total must not replace the process audit .v denominator or turn a partial size calibration into a matched process-overhead verdict.",
+    "compcert_inventory_reused": {
+      "check_seconds": null,
+      "commit": "2685140bf72c959446981fb99b5e44a8975021bc",
+      "metrics": {
+        "declarations": 11970,
+        "declarations_status": "lexical markers only; not native declarations",
+        "definition_region_lines_estimate": 60488,
+        "files": 406,
+        "generated_lines": 2362,
+        "handwritten_candidate_lines": 242026,
+        "lines": 244388,
+        "native_declarations": null,
+        "other_lines_estimate": 63168,
+        "proof_marker_lines": 19183,
+        "proof_region_lines_estimate": 120732,
+        "theorems": 7144,
+        "unclassified_lines": 242026,
+        "unsupported_native_files": 153
+      },
+      "project": "CompCert",
+      "source_url": "https://github.com/AbsInt/CompCert/tree/2685140bf72c959446981fb99b5e44a8975021bc",
+      "timing_status": "not measured; published timing not yet located"
+    },
+    "decision": "H241 option A: existing archived receipts and matched calibration only; no new measurement",
+    "evidence_gap": {
+      "authority": "H151 disposition of H241 existing-data lookup",
+      "categorical_verdict": null,
+      "claim_status": "unproven/inconclusive",
+      "coordinator_state_receipt": "coordinator-20261108T165207Z/receipt.json",
+      "fresh_measurement_authorized": false,
+      "full_audit_completion_authorized": false,
+      "lookup_boundary": "No matching artifact located in relevant process/reference handoffs, recorded reference reuse or bounded archive filename search. This does not prove no artifact exists elsewhere.",
+      "matched_ratio": null,
+      "new_task_or_producer_interface_authorized": false,
+      "receipt_boundary": "Coordinator supplied this pointer and disposition; receipt bytes/hash were not supplied in this VM.",
+      "status": "UNVERIFIABLE",
+      "subject": "matched process-overhead calibration"
+    },
+    "missing_counterparts_reused": [
+      {
+        "reason": "solc implements the compiler; selected production implementation files supply no correctness theorem counterpart.",
+        "searched": [
+          "libsolidity",
+          "libyul"
+        ],
+        "unit": "general solc compiler/lowering correctness proof"
+      },
+      {
+        "reason": "Implementation compiler has no dynamic-logic soundness counterpart.",
+        "searched": [
+          "libsolidity"
+        ],
+        "unit": "Solidity dynamic-logic soundness versus solc"
+      },
+      {
+        "reason": "No like-for-like local WP component established; removed Sound.lean/WP.thy comparison.",
+        "searched": [
+          "Solidity/Calculus/Sound.lean",
+          "thys/Isabelle-Solidity/WP.thy"
+        ],
+        "unit": "WP facade"
+      }
+    ],
+    "process_overhead_calibration": "UNVERIFIABLE evidence gap under H151; no matched overhead numerator located in the bounded existing-data lookup",
+    "reference_waits_reused": [],
+    "source_inputs": {
+      "boundaries.json": {
+        "path": "docs/audits/direction-tools/references/boundaries.json",
+        "revision": "645f10caf083550552616229654e29fddd1ad767",
+        "sha256": "13a43ff8e92a6c8f93be6d876384ed825d7d756e6e4350806cb30086974f6f88"
+      },
+      "inventory.json": {
+        "path": "docs/audits/direction-tools/references/inventory.json",
+        "revision": "645f10caf083550552616229654e29fddd1ad767",
+        "sha256": "2daf1c939a72534f91de42cef59c5925e1ec25e5a0445fd2f49112ee1c753a34"
+      },
+      "pins.json": {
+        "path": "docs/audits/direction-tools/references/pins.json",
+        "revision": "645f10caf083550552616229654e29fddd1ad767",
+        "sha256": "5fdb343a3f15a008fb3cc6b813f21be71230d7fc49ca39c6540015bee27a1af8"
+      },
+      "summary.json": {
+        "path": "docs/audits/direction-tools/references/summary.json",
+        "revision": "645f10caf083550552616229654e29fddd1ad767",
+        "sha256": "bc762a51e099fc58ddd0c2abf5a45d488859451d6ebb2c905aa79b06d8131ff8"
+      }
+    },
+    "source_status": "done",
+    "status": "UNVERIFIABLE calibration evidence; audit incomplete, not waiting for an unchanged artifact"
+  },
+  "reproduce": "python3 docs/audits/direction-tools/process/history.py --out /tmp/process-results --compcert /tmp/process-compcert",
+  "reproduce_continuation": "Run recorded history.py command, then reuse.py --out RESULT_DIR, then closure.py --archive-git ARCHIVE.git --out RESULT_DIR",
+  "schema": "direction-process-v1",
+  "status": "partial",
+  "timing_reuse": {
+    "interpretation": "reuse only; source audit timing sample is not a whole-project or matched-reference check time",
+    "passing_rows": 60,
+    "path": "docs/audits/architecture-tools/timing-sample.tsv",
+    "rows": 61,
+    "sha256": "3f8463128ba2f8d99d837ae55b8b73e3ae027be88edea390c0fa68622b96d796"
+  },
+  "trends": [
+    {
+      "first": {
+        "denominator": "header-unmarked Solidity Lean sources: definitions, proofs, comments, tactics and controls; NOT proof-only lines",
+        "header_unmarked_solidity_source_lines": 70040,
+        "infrastructure_lines": 4836,
+        "proof_block_heuristic_ratio": 0.16473634010083119,
+        "ratio": 0.06904625928041119
+      },
+      "first_month": "2026-09",
+      "last": {
+        "denominator": "header-unmarked Solidity Lean sources: definitions, proofs, comments, tactics and controls; NOT proof-only lines",
+        "header_unmarked_solidity_source_lines": 1107348,
+        "infrastructure_lines": 585093,
+        "proof_block_heuristic_ratio": 1.004158443029502,
+        "ratio": 0.5283731943345723
+      },
+      "last_month": "2026-11",
+      "reason": "stock is not time spent; see reference calibration and generated exclusions",
+      "signal": "infrastructure/source stock ratio",
+      "verdict": null
+    },
+    {
+      "assessment": "UNVERIFIABLE under H151; matched ratio and justified/redundant/wrong-direction claim remain unproven/inconclusive. Existing exploratory ratios are not matched calibration.",
+      "matched_ratio": null,
+      "outlier": true,
+      "ratio_of_ratios": 18.705283972692115,
+      "ratio_of_ratios_excluding_reference_vendor": 15.593328616281733,
+      "reason": "Outlier requires product-level investigation; this ratio does not justify the overhead. Approximate source-stock comparison only: Lean has extensive checked fixtures, Coq compiler also has non-Coq implementation; no labor or proof-efficiency inference.",
+      "signal": "CompCert infrastructure/source calibration",
+      "verdict": null
+    },
+    {
+      "infrastructure_added_plus_deleted": 27627,
+      "month": "2026-09",
+      "ratio": 0.07011412865550505,
+      "reason": "No matched historical reference churn denominator; cannot infer wasted work from deletions.",
+      "signal": "monthly infrastructure/header-unmarked Solidity churn",
+      "solidity_added_plus_deleted": 394029,
+      "verdict": null
+    },
+    {
+      "infrastructure_added_plus_deleted": 295408,
+      "month": "2026-10",
+      "ratio": 0.2789515332475916,
+      "reason": "No matched historical reference churn denominator; cannot infer wasted work from deletions.",
+      "signal": "monthly infrastructure/header-unmarked Solidity churn",
+      "solidity_added_plus_deleted": 1058994,
+      "verdict": null
+    },
+    {
+      "infrastructure_added_plus_deleted": 2062510,
+      "month": "2026-11",
+      "ratio": 2.3370476630769788,
+      "reason": "No matched historical reference churn denominator; cannot infer wasted work from deletions.",
+      "signal": "monthly infrastructure/header-unmarked Solidity churn",
+      "solidity_added_plus_deleted": 882528,
+      "verdict": null
+    },
+    {
+      "edits_by_category": {
+        "docs": 2646,
+        "generated_docs": 2082,
+        "generated_registry": 286,
+        "generated_roots": 2015,
+        "other": 172,
+        "scripts_other": 91,
+        "solidity_header_unmarked_proofs_and_definitions": 188
+      },
+      "files_by_category": {
+        "docs": 17,
+        "generated_docs": 6,
+        "generated_registry": 1,
+        "generated_roots": 2,
+        "other": 1,
+        "scripts_other": 1,
+        "solidity_header_unmarked_proofs_and_definitions": 2
+      },
+      "kernel_closure_confirmed": 1,
+      "reason": "Generated registries and documentation dominate the hottest paths; frequent integration regeneration is not repeated proof failure.",
+      "signal": "top30 churn composition",
+      "source_complete_kernel_unverified_files": [],
+      "verdict": null
+    },
+    {
+      "files_created_and_deleted": 7860,
+      "files_edited_more_than_5_times": 885,
+      "reason": "Potential review targets; generated registry regeneration and file moves are not closed-goal failures.",
+      "revert_subject_count": 30,
+      "signal": "repeated edits and disappearing paths",
+      "verdict": null
+    },
+    {
+      "monthly": {
+        "2026-09": {
+          "bridge": {},
+          "solidity_and_roots": {
+            "axiom_declarations": 0,
+            "axiom_pin_lines_lower_bound": 0,
+            "chain_agreement_generator_commands": 0,
+            "definition_block_nonblank_code_lines_heuristic": 16864,
+            "implemented_by": 1,
+            "lean_files": 135,
+            "lines": 74461,
+            "native_decide": 6,
+            "native_decide_allowlist_entries": null,
+            "pin_command_lines": 0,
+            "pin_expected_output_lines": 0,
+            "proof_block_nonblank_code_lines_heuristic": 29356,
+            "recovery_dot_admit_tokens": 0,
+            "sorry_admit_tokens": 0,
+            "theorem_lemma_declarations": 2653
+          }
+        },
+        "2026-10": {
+          "bridge": {
+            "axiom_declarations": 1,
+            "axiom_pin_lines_lower_bound": 507,
+            "chain_agreement_generator_commands": 0,
+            "definition_block_nonblank_code_lines_heuristic": 12499,
+            "implemented_by": 1,
+            "lean_files": 209,
+            "lines": 36814,
+            "native_decide": 0,
+            "pin_command_lines": 343,
+            "pin_expected_output_lines": 164,
+            "proof_block_nonblank_code_lines_heuristic": 11902,
+            "recovery_dot_admit_tokens": 1,
+            "sorry_admit_tokens": 0,
+            "theorem_lemma_declarations": 1345
+          },
+          "solidity_and_roots": {
+            "axiom_declarations": 0,
+            "axiom_pin_lines_lower_bound": 2486,
+            "chain_agreement_generator_commands": 7,
+            "definition_block_nonblank_code_lines_heuristic": 98357,
+            "embedded_generated_region_lines": 626,
+            "implemented_by": 156,
+            "lean_files": 1074,
+            "lines": 374630,
+            "native_decide": 0,
+            "native_decide_allowlist_entries": 0,
+            "pin_command_lines": 1473,
+            "pin_expected_output_lines": 1013,
+            "proof_block_nonblank_code_lines_heuristic": 154888,
+            "recovery_dot_admit_tokens": 3,
+            "sorry_admit_tokens": 0,
+            "theorem_lemma_declarations": 15152
+          }
+        },
+        "2026-11": {
+          "bridge": {
+            "axiom_declarations": 1,
+            "axiom_pin_lines_lower_bound": 3554,
+            "chain_agreement_generator_commands": 0,
+            "definition_block_nonblank_code_lines_heuristic": 18713,
+            "implemented_by": 1,
+            "lean_files": 636,
+            "lines": 85057,
+            "native_decide": 0,
+            "pin_command_lines": 2513,
+            "pin_expected_output_lines": 1041,
+            "proof_block_nonblank_code_lines_heuristic": 38430,
+            "recovery_dot_admit_tokens": 1,
+            "sorry_admit_tokens": 0,
+            "theorem_lemma_declarations": 3807
+          },
+          "solidity_and_roots": {
+            "axiom_declarations": 0,
+            "axiom_pin_lines_lower_bound": 38177,
+            "chain_agreement_generator_commands": 7,
+            "definition_block_nonblank_code_lines_heuristic": 211103,
+            "embedded_generated_region_lines": 626,
+            "implemented_by": 176,
+            "lean_files": 6722,
+            "lines": 1127798,
+            "native_decide": 0,
+            "native_decide_allowlist_entries": 0,
+            "pin_command_lines": 24025,
+            "pin_expected_output_lines": 14152,
+            "proof_block_nonblank_code_lines_heuristic": 582670,
+            "recovery_dot_admit_tokens": 3,
+            "sorry_admit_tokens": 0,
+            "theorem_lemma_declarations": 65791
+          }
+        }
+      },
+      "reason": "Pins measure checking machinery, implemented_by measures executable override sites; neither count alone proves a larger logical axiom set.",
+      "signal": "trust/pin growth",
+      "verdict": null
+    }
+  ],
+  "waits": []
+}

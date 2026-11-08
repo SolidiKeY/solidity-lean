@@ -42,7 +42,7 @@ class Allocations(unittest.TestCase):
   return raw,{"pre":ref}
  def test_each_nonstate_format_is_preserved_and_not_executed(self):
   for kind in m.FORMATS:
-   if kind=="state_test":continue
+   if kind in ("state_test","transaction_test"):continue
    fixture={"network":"Osaka","_info":{"fixture-format":kind},"payload":"preserved"}
    self.assertEqual(m.blockchain_record(0,{"path":"p","case":"c"},fixture,"sha",kind)["fixture"],fixture)
    self.assertEqual(m.blockchain_record(0,{"path":"p","case":"c"},fixture,"sha",kind)["status"],"input-only-not-executed")
@@ -77,5 +77,14 @@ class Allocations(unittest.TestCase):
    with patch.object(m,"file_sha",side_effect=lambda path:m.EEST_SHA if path==archive else real_sha(path)):
     with self.assertRaisesRegex(ValueError,"membership"):m.export(root,"blockchain_test_engine_x")
    for path in published:self.assertEqual(path.read_bytes(),b"prior completed artifact")
+
+class Transactions(unittest.TestCase):
+ def test_selects_only_actual_osaka_expectation_without_execution(self):
+  f={"_info":{"fixture-format":"transaction_test"},"txbytes":"0x04","result":{"Osaka":{"exception":"x"},"Prague":{"exception":"different"}}}
+  r=m.transaction_record(3,{"path":"p","case":"c"},f,"sha")
+  self.assertEqual(r["expected"],{"exception":"x"});self.assertEqual(r["fixture"],f);self.assertEqual(r["selected_fork"],"Osaka");self.assertEqual(r["status"],"input-only-not-executed")
+ def test_missing_fork_or_wrong_format_cannot_supply_an_expectation(self):
+  for fmt,result in [("state_test",{"Osaka":{}}),("transaction_test",{"Prague":{}}),("transaction_test",{"OsakaToBPO1AtTime15k":{}}),("transaction_test",{"Osaka":None})]:
+   with self.assertRaisesRegex(ValueError,"format/fork"):m.transaction_record(0,{"path":"p","case":"c"},{"_info":{"fixture-format":fmt},"txbytes":"0x04","result":result},"sha")
 
 if __name__=="__main__":unittest.main()

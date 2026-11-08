@@ -1,0 +1,27 @@
+{
+ "Solidity/Lowering/Readonly/SourceKnownStatementEffects.lean:Solidity.Lowering.Readonly.SourceHistory.callInternal_succ_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownStatementEffects.lean:Solidity.Lowering.Readonly.SourceHistory.execItems_succ_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownStatementEffects.lean:Solidity.Lowering.Readonly.SourceHistory.execS_succ_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownStatementEffects.lean:Solidity.Lowering.Readonly.SourceHistory.forIter_succ_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceKnownStatementEffects.lean:Solidity.Lowering.Readonly.SourceHistory.runMods_succ_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

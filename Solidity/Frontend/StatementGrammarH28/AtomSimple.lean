@@ -40,12 +40,9 @@ theorem stmt_simple_dispatch (m : Nat) (k : SCtx) (t : Tok) (rest : List Tok) (s
   case punct p => cases p <;> first | rfl | cases ht
   case ident x =>
     simp only [simpleHead, bne_iff_ne, ne_eq] at ht
-    unfold stmt
-    dsimp only [bind, StateT.bind, peek, peekN, locatedInput, List.drop_zero, List.map_cons,
-      List.cons_append, List.head?_cons, Option.map_some, atToken, Except.bind]
-    delta stmt.match_7
-    dsimp only
-    split <;> first | rfl | (rename_i h; exact absurd h ht)
+    rcases k with ⟨l, u⟩
+    cases l <;> cases u <;>
+      simp! only [stmt, bind, peek, beq_iff_eq, locatedInput, List.map, atToken, List.cons_append, StateT.bind, peekN, List.drop, List.head?_cons, Option.map_some, Except.bind, Option.some.injEq, Tok.ident.injEq, ht, imp_self]
 
 /-- A token list whose first token is a `simpleHead` token. -/
 def simpleHeadList : List Tok → Bool

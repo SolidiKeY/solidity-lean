@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "regression": "Full converted-unit environment retained;graph None is component failure,never Source rejection",
+  "source_hashes": {
+    "Solidity/Lowering/P8/SourceAstUnit.lean": "4e0577237cecaf3061059822d8ecfbca872e18fc390e607ec4ca5db882043af7",
+    "Solidity/Source/WellFormed.lean": "856023add47dc011af8fb6f04333c1c375d58926fef9d0a73d4572eaec2e297e",
+    "Solidity/Lowering/V07/LocationGraphProducer.lean": "d03a8786c517ea89e09a71b54210ad3e712db63dab3042cdd11d5668539bb200",
+    "Solidity/Lowering/P8/SourceAstResolvedGraphs.lean": "a338b74bff5f44289646794c75495021e65790a7df795e912b1d87a6ce387ebf"
+  },
+  "fixtures": [
+    {
+      "path": "tests/solc/LibraryTry.ast.json",
+      "sha256": "7ce034177434e147b9768a6eb10b7be384864cb060161fc0b2546be0a9377784",
+      "pipeline_argument": "legacy",
+      "compiler_ast_struct_id": 3,
+      "observed_source_decl_id_by_location": {
+        "storage": 1,
+        "memory": 1,
+        "calldata": 1
+      },
+      "observed_full_resolution_decl_count": 8,
+      "observed_graph_struct_count": 1,
+      "observed_field": [
+        "x",
+        "prim.uint"
+      ],
+      "evidence_kind": "Runtime fixture checks;not a closed kernel witness of this JSON blob or compiler adequacy."
+    },
+    {
+      "path": "tests/solc/LibraryTryIR.ast.json",
+      "sha256": "205b02e0fd5a46728191a1b4da3e841bb6652f204ae5cfbb087817a793bd06b1",
+      "pipeline_argument": "viaIR",
+      "compiler_ast_struct_id": 3,
+      "observed_source_decl_id_by_location": {
+        "storage": 1,
+        "memory": 1,
+        "calldata": 1
+      },
+      "observed_full_resolution_decl_count": 8,
+      "observed_graph_struct_count": 1,
+      "observed_field": [
+        "x",
+        "prim.uint"
+      ],
+      "evidence_kind": "Runtime fixture checks;not a closed kernel witness of this JSON blob or compiler adequacy."
+    }
+  ],
+  "generic_kernel_joint_law": "Solidity.Lowering.P8.SourceAstResolvedGraphs.certified_output",
+  "original_resolution_premise": "settings.links=[] is required only for existing Source.Resolves';not a new filter on the candidate function.",
+  "graph_label_is_SourceOrigins": false,
+  "actual_Source_program_or_admission_supplied": false,
+  "failure_boundary": "Existing GraphAdmissionBoundary.directUnit remains coherently resolved and WellFormed when graph production is None."
+}

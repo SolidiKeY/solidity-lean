@@ -537,3 +537,23 @@ frozen assignment/scope bytes and explicit stopped acknowledgement are still
 required; no retiring scope edit/integration/stop request occurs. C3 H70 and
 original queue/backfill remain open without scope guessing. Both read-only
 reviews found no archive/provenance issue. Details: tests/sol-override-validation/H82-HANDOFF.md.
+
+
+## H151 current status and historical gaps
+
+The unavailable old C3 retirement runtime/seal export and historical H41 cache
+payload are **UNVERIFIABLE** documented gaps, not active waits. Their original
+claims remain unproven; authenticated report metadata alone is not their result.
+Do not recreate a retired VM or require lost exports before continuing. Available
+local/private-archive records and verified member Git/scope/stopped metadata
+remain distinct from these gaps. See the H151 ledger in c3-exactness.md.
+
+Fresh C3 per-file diagnostics and nine compiler fixtures have been regenerated
+as new limited observations. They do not validate the missing historical run,
+seal, timing or cache, and do not waive original acceptance requirements.
+The earlier shared-pin wait was cleared by the actual zero-drift inventory check
+at 77dbfca8. Current gate/source-pin owner decisions and present-day host-managed
+full-runtime readiness remain open. No historical-artifact retrieval wait is
+retained, no full completion/RUNTIME_GATE_PASS is claimed, and no theorem,
+source, gate, premise, exclusion or proof budget changes. H145 receipts remain
+private; H146/H147 shared warming remains a host responsibility.

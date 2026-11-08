@@ -290,6 +290,25 @@ def scan(path, root, source=None):
     if source is None: source = path.read_bytes()
     text = mask(source.decode("utf-8"))
     skeleton, attribute_spans = hide_attributes(hide_strings(text))
+    # Guard command options can span lines. Conservatively refuse ambiguous
+    # headers and inline declaration prefixes that the line matcher misses.
+    for guard in re.finditer(r"(?m)^[ \t]*#guard_msgs\b", skeleton):
+        pos = guard.end()
+        while pos < len(skeleton) and skeleton[pos].isspace(): pos += 1
+        if pos < len(skeleton) and skeleton[pos] == "(":
+            depth = 1
+            pos += 1
+            while pos < len(skeleton) and depth:
+                if skeleton[pos] == "(": depth += 1
+                elif skeleton[pos] == ")": depth -= 1
+                pos += 1
+            if depth: raise ValueError("unsupported guard_msgs header")
+            while pos < len(skeleton) and skeleton[pos].isspace(): pos += 1
+        keyword = re.match(r"in\b", skeleton[pos:])
+        if not keyword: raise ValueError("unsupported guard_msgs header")
+        pos += keyword.end()
+        if re.match(r"[ \t]*(?:@\[|#guard_msgs\b|(?:open|set_option|include|omit|private|public|protected|meta|noncomputable|local|scoped|partial|nonrec|unsafe|theorem|lemma|def|abbrev|opaque|example|instance|builtin_initialize|initialize|structure|inductive|class|axiom|constant)\b)", skeleton[pos:]):
+            raise ValueError("unsupported same-line guard_msgs declaration")
     matches = list(DECL.finditer(skeleton))
     attribute_ends = [end for _, end in attribute_spans]
     declaration_starts = []
@@ -314,7 +333,7 @@ def scan(path, root, source=None):
         # inline declaration prefixes that the line recognizer would miss.
         scoped = re.match(r"[ \t]*(set_option|open|include|omit)\b", command.group())
         if (scoped and
-            re.search(r"\bin[ \t]+(?:@\[|(?:private|public|protected|meta|noncomputable|local|scoped|partial|nonrec|unsafe|theorem|lemma|def|abbrev|opaque|example|instance|builtin_initialize|initialize|structure|inductive|class|axiom|constant)\b)", skeleton[command.start():stop])):
+            re.search(r"\bin[ \t]*(?:@\[|#guard_msgs\b|(?:private|public|protected|meta|noncomputable|local|scoped|partial|nonrec|unsafe|theorem|lemma|def|abbrev|opaque|example|instance|builtin_initialize|initialize|structure|inductive|class|axiom|constant)\b)", skeleton[command.start():stop])):
             raise ValueError("unsupported same-line scoped " + scoped.group(1) + " declaration")
         context_spans.append((command.start(), text[command.start():stop].strip()))
     rows = []
@@ -667,6 +686,7 @@ def main():
     files = sorted({f for paths in matched.values() for f in paths})
     rows, errors, inputs, aliases = [], selection_errors, [], []
     resolved_inputs = {}
+    file_identities = {}
     owners = json.loads(args.owners.read_text()) if args.owners else {}
     if not isinstance(owners, dict) or not all(isinstance(k, str) and isinstance(v, str) and v for k, v in owners.items()):
         parser.error("owners must be a path-to-owner JSON object")
@@ -695,9 +715,18 @@ def main():
                 raise ValueError("selected Lean path resolves outside root")
             if not resolved.is_file():
                 raise ValueError("selected Lean path is not a regular file")
-            source = path.read_bytes()
+            with path.open("rb") as stream:
+                before = os.fstat(stream.fileno())
+                source = stream.read()
+                after = os.fstat(stream.fileno())
+            fields = lambda info: (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
+            if (not stat.S_ISREG(before.st_mode) or fields(before) != fields(after) or
+                len(source) != before.st_size or path.resolve(strict=True) != resolved or
+                fields(resolved.stat()) != fields(after)):
+                raise ValueError("selected Lean file changed during read")
             target = resolved.relative_to(root).as_posix()
             resolved_inputs[rel] = target
+            file_identities[rel] = (after.st_dev, after.st_ino)
             if target != rel:
                 aliases.append(dict(path=rel, resolved_path=target))
             inputs.append(dict(path=rel, sha256=hashlib.sha256(source).hexdigest()))
@@ -800,8 +829,12 @@ def main():
             parser.error("live project binding: "+str(exc))
     def alias_reasons(group):
         paths = {row["path"] for row in group}
-        return (["shared-resolved-source"]
-                if len({resolved_inputs[path] for path in paths}) < len(paths) else [])
+        reasons = []
+        if len({resolved_inputs[path] for path in paths}) < len(paths):
+            reasons.append("shared-resolved-source")
+        if len({file_identities[path] for path in paths}) < len(paths):
+            reasons.append("shared-file-identity")
+        return reasons
     groups = {}
     for row in rows:
         if row["statement"] is not None:

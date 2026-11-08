@@ -2307,6 +2307,8 @@ import Solidity.Calculus.QueryReduction
 import Solidity.Calculus.Quote
 import Solidity.Calculus.QuotientCut
 import Solidity.Calculus.ReadBounds
+import Solidity.Calculus.ReadBoundsStack
+import Solidity.Calculus.ReadBoundsStackCorrect
 import Solidity.Calculus.ReadFlattening
 import Solidity.Calculus.ReadFree
 import Solidity.Calculus.ReadLayout
@@ -2695,6 +2697,10 @@ import Solidity.Evm.TryPanicSourceFrame
 import Solidity.Evm.TryPanicSourcePlan
 import Solidity.FreshNames
 import Solidity.Frontend.Admission.Controls
+import Solidity.Frontend.Admission.DeclarationOccurrences
+import Solidity.Frontend.Admission.ElementaryFeatures
+import Solidity.Frontend.Admission.ExclusionFeatures
+import Solidity.Frontend.Admission.LocationFeatures
 import Solidity.Frontend.Admission.ModifierRootControls
 import Solidity.Frontend.Admission.ModifierRoots
 import Solidity.Frontend.Admission.NameResolutionControls
@@ -2705,6 +2711,7 @@ import Solidity.Frontend.Admission.ProgramObservations
 import Solidity.Frontend.Admission.ProgramRootControls
 import Solidity.Frontend.Admission.ProgramRoots
 import Solidity.Frontend.Admission.RootObservations
+import Solidity.Frontend.Admission.StructuralFeatures
 import Solidity.Frontend.Admission.SyntaxOccurrenceControls
 import Solidity.Frontend.Admission.SyntaxOccurrenceLaws
 import Solidity.Frontend.Admission.SyntaxOccurrences
@@ -3203,7 +3210,11 @@ import Solidity.Frontend.Yul.Parsing
 import Solidity.Frontend.Yul.ScopedParse
 import Solidity.Frontend.Yul.WordParse
 import Solidity.Hash.Adaptive
+import Solidity.Hash.Bridge
 import Solidity.Hash.CollisionBound
+import Solidity.Hash.CollisionBridge
+import Solidity.Hash.CollisionBridgeCompiler
+import Solidity.Hash.CollisionBridgeControls
 import Solidity.Hashes
 import Solidity.Keccak
 import Solidity.KeySort
@@ -3215,6 +3226,16 @@ import Solidity.Language.FixedPoint.Conformance
 import Solidity.Language.FixedPoint.Laws
 import Solidity.Language.FixedPoint.Literals
 import Solidity.Language.FixedPoint.Storage
+import Solidity.Lowering.G17.Conditional
+import Solidity.Lowering.G17.ConditionalControls
+import Solidity.Lowering.G17.IndexBounds
+import Solidity.Lowering.G17.IndexCapture
+import Solidity.Lowering.G17.IndexCaptureControls
+import Solidity.Lowering.G17.OperandStore
+import Solidity.Lowering.G17.ShortCircuit
+import Solidity.Lowering.G17.ShortCircuitControls
+import Solidity.Lowering.G17.ShortCircuitRevertControls
+import Solidity.Lowering.G17.ShortCircuitSource
 import Solidity.Lowering.G19.AssignmentBlocks
 import Solidity.Lowering.G19.AssignmentBlocksControls
 import Solidity.Lowering.G19.AssignmentDoWhileBreak
@@ -3273,6 +3294,7 @@ import Solidity.Lowering.P8.GraphSchemaControls
 import Solidity.Lowering.P8.PlanGraphAdmission
 import Solidity.Lowering.P8.PlanWitness
 import Solidity.Lowering.P8.ProducerAssembly
+import Solidity.Lowering.P8.ResolvedGraphAdmissionV2
 import Solidity.Lowering.P8.ResourceBoundary
 import Solidity.Lowering.P8.ResourceContractLaw1
 import Solidity.Lowering.P8.ScalarSchema
@@ -3289,6 +3311,7 @@ import Solidity.Lowering.P8.SourceAstExpressions
 import Solidity.Lowering.P8.SourceAstLiteralCorrespondence
 import Solidity.Lowering.P8.SourceAstParameterCorrespondence
 import Solidity.Lowering.P8.SourceAstParameters
+import Solidity.Lowering.P8.SourceAstResolvedGraphs
 import Solidity.Lowering.P8.SourceAstStatementCorrespondence
 import Solidity.Lowering.P8.SourceAstStatements
 import Solidity.Lowering.P8.SourceAstTryCorrespondence
@@ -3366,6 +3389,7 @@ import Solidity.Lowering.Readonly.HistoryRollbackControls
 import Solidity.Lowering.Readonly.InvocationFrame
 import Solidity.Lowering.Readonly.JournalLeaves
 import Solidity.Lowering.Readonly.KeyStepEffects
+import Solidity.Lowering.Readonly.LibraryFrameEffects
 import Solidity.Lowering.Readonly.LoadEffects
 import Solidity.Lowering.Readonly.LocalInitializationControls
 import Solidity.Lowering.Readonly.LocalInitializationEffects
@@ -3411,6 +3435,12 @@ import Solidity.Lowering.Readonly.SourceExpressionParts.Part5
 import Solidity.Lowering.Readonly.SourceExpressionParts.Part6
 import Solidity.Lowering.Readonly.SourceHistory
 import Solidity.Lowering.Readonly.SourceHistoryBase
+import Solidity.Lowering.Readonly.SourceKnownAllHistories
+import Solidity.Lowering.Readonly.SourceKnownExpressionEffects
+import Solidity.Lowering.Readonly.SourceKnownHistory
+import Solidity.Lowering.Readonly.SourceKnownLibraryEffects
+import Solidity.Lowering.Readonly.SourceKnownStatementEffects
+import Solidity.Lowering.Readonly.SourceKnownTryEffects
 import Solidity.Lowering.Readonly.SourceLoopControls
 import Solidity.Lowering.Readonly.SourceLoopEffects
 import Solidity.Lowering.Readonly.SourceLvalueCallControls
@@ -4155,6 +4185,7 @@ import Solidity.Source.Elaborated
 import Solidity.Source.Eval
 import Solidity.Source.Examples
 import Solidity.Source.ExprProgress
+import Solidity.Source.ExpressionTyping
 import Solidity.Source.FailureApproxControls
 import Solidity.Source.FailureConstructorControls
 import Solidity.Source.FailureCursor
@@ -4194,6 +4225,8 @@ import Solidity.Source.Funds
 import Solidity.Source.FundsControls
 import Solidity.Source.Hoare
 import Solidity.Source.Horizon
+import Solidity.Source.HorizonApproxExpressions
+import Solidity.Source.HorizonApproxStatements
 import Solidity.Source.HorizonConst
 import Solidity.Source.HorizonDeploy
 import Solidity.Source.HorizonFuel
@@ -4203,6 +4236,8 @@ import Solidity.Source.InferHelpers
 import Solidity.Source.Inheritance
 import Solidity.Source.InlineExamples
 import Solidity.Source.Ledger
+import Solidity.Source.LibrarySemantics
+import Solidity.Source.LibraryTyping
 import Solidity.Source.Machine
 import Solidity.Source.MemoryLocalDelete
 import Solidity.Source.Monetary
@@ -5555,6 +5590,9 @@ import Solidity.Yul.Views.FrameCalldata
 import Solidity.Yul.Views.FrameCalldataControls
 import Solidity.Yul.Views.FullWordLayout
 import Solidity.Yul.Views.GeneratedRetainedControls
+import Solidity.Yul.Views.Generic.Plan
+import Solidity.Yul.Views.GenericFlow.Following
+import Solidity.Yul.Views.GenericFlow.FollowingLaws
 import Solidity.Yul.Views.HeapAllocationCommute
 import Solidity.Yul.Views.HeapAllocationControls
 import Solidity.Yul.Views.HeapAllocationFreshnessControls

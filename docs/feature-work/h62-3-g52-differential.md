@@ -904,3 +904,797 @@ InstrV2 macro correspondence and complete map/resource/prefix bridge remain open
 owned work. No complete producing files/head or new acceptance is available.
 See roadmap-v15-p10.md H121c section and bridge-requests.json P10 ownership record.
 Source adoption does not discharge the15public obligations or six native FAILs.
+
+
+## H82 continuation: remaining transaction inputs and native admission
+
+H82 explicitly authorized independent work after the blocked pause; the existing
+goal was not created or reset. Clean assigned checkout9fdb074cfa1f5ca4a6e435bc7b78fd10fd9cb30c
+was preserved, fetched master merged without new local source changes, and
+original c6f550e/H121c759da340c ancestry passes. No push/default-branch publication.
+
+The existing exporter now handles transaction_test using the actual result.Osaka
+object, preserving every original fixture field and its exact selected expected
+result. It rejects wrong format, absent Osaka or transition-only selectors. All53
+unique inputs reproduce byte-identical streams/receipts under the existing serial
+12GiB cap/4GiB reserve/no-swap/300s guard. Export/replay exit0,25.085/25.077s;
+peak observed RSS76,128,256bytes. Stream SHA256:
+23e3e680d3e361c528bb3ae025f5015c51d7b794964fb7eb5b56e7d00df7f892.
+All82,508inventoried exact-Osaka representations now have prepared input streams.
+Related formats overlap semantic cases; preparation is neither execution nor
+source agreement. Transition/other-fork inventory remains separately accounted.
+
+New transaction_admission.mjs uses the pinned native @ethereumjs/tx,common,util
+10.1.3 packages, explicit Mainnet/Osaka configuration, installed/committed lock
+identity, export/archive/inventory hash bindings and exhaustive case identities.
+It executes serialized decoding/basic validation only. These fixtures have no
+account world, so no balance/nonce/basefee admission context, storage, logs,
+rollback or execution-gas comparison is claimed. A valid-fixture profile remains
+unsupported until its sender/hash/intrinsic expectations are implemented.
+
+All53cases are invalid type4transactions and all53are rejected during native
+decoding. Exact diagnostic/stage/type bindings classify49matches:40authorization
+format,8authority-field/signature bounds,1empty authorization list. The8matches
+use actual r/s/yParity overflow diagnostics, not the outer signature verifier as
+a substitute for authority validation. Ambiguous leading-zero fields require the
+native verifyAuthorizationList stack provenance. Generic host errors stay
+unsupported; no expected fixture label supplies the observed rejection category.
+
+Four RLP cases, indices6–9, remain unsupported. Native diagnostics are
+“remainder must be zero” or “total length is larger than the data”; they do not
+independently locate the expected authorization-format fault. No blanket RLP-to-
+authorization mapping is introduced. This is an owned classification gap, not
+an excluded case or a source/compiler mismatch. All53expected intrinsicGas0
+values are rejection sentinels and are not compared to measured gas.
+
+Both bounded native runs exit2 (incomplete),1.005/1.004s, no resource stops;
+peak observed RSS66,867,200bytes. Results and summaries reproduce identical bytes.
+Result SHA256:4c396db7cdf5351f37ca0f76dada6bd8e6bc5a5bfd81ed14ded60f3c0043e89c.
+fixture_admission_complete, execution_complete and differential_complete remain
+false; all53source adapters remain unsupported.49serialized-admission matches
+add0transaction execution matches and0source matches. Initial53unsupported probe
+and its source snapshot remain separate historical evidence, never padded into
+final coverage. Output/summary publication is receipt-last, not a multi-file
+transaction; consumers must check the result hash.
+
+Reproduce under the writer lock and existing resource guard:
+
+```sh
+python3 scripts/h62/item3/g52-differential/eest_export.py --bulk "$BULK" --format transaction_test
+node --max-old-space-size=4096 scripts/h62/item3/g52-differential/transaction_admission.mjs "$BULK"
+python3 -W error::ResourceWarning tests/h62/item3/g52-differential/test_blockchain_export.py
+node --test tests/h62/item3/g52-differential/transaction_admission.test.mjs
+python3 tests/h62/item3/g52-differential/test_pipeline.py
+```
+
+All23controls pass (10export,3admission,10accounting), no skips. Independent
+read-only finder and skeptic verify exact coverage, observed error mappings,
+validator provenance, source hashes, rejection sentinel boundary and replay.
+No reviewer used Lean/server, native execution or archive generation. Evidence:
+transaction-export-runs.json,transaction-admission-runs.json,
+transaction-admission-acceptance.json,transaction-final-checks.json and
+transaction-reviews.json. Bulk stays off Git; generator/adapter/controls and
+updated sha256 manifest are committed.
+
+All3,079prior sealed H44entries were rehashed unchanged before augmentation.
+Existing state/block adapters and their rejection module were not edited. Strict
+block-acceptance still exits1 for the same6reference mismatches; no new ticket is
+fabricated from four unsupported category bindings. The H121b composed producer,
+arbitrary-contract/EEST source binding, owned H121c P10 bridge and all15public
+obligations remain open. V17 is downstream; frozen V15 is not a provider wait.
+Required real inputs remain MRS/full frame, V08world-phase, original compiler
+factories, VY1/VY4/VY2/VY3, V13callee/world, executable-bytecode body/signature/site
+application and original V14/V11/PAR facts. Core/reference CALL representation
+remains owned integration; bare-prefix owner is unresolved and not guessed.
+
+Own Lean delta0files/lines/declarations; frozen statements touched0; new axioms,
+sorry/native_decide0; budgets unchanged. No Lean run/refactor/timing comparison,
+performance STOP release or RUNTIME_GATE_PASS. Historical toolchain/KeySort
+records remain historical evidence only. Next independent work includes exact
+RLP category binding and real Engine payload execution; canonical producer
+endpoint/premise integration remains owned unfinished work. The full assignment
+is not complete or blocked merely because one producer is missing. H110 permits
+continuation on this same original thread; no competing goal/thread is created.
+
+Coordinator merge receipt during this checkpoint: published master
+65e69b6426a9a4fc3fb5541f41726a4bfefda5d0 was fetched, verified against origin,
+and fast-forwarded before committing. Reviewed transaction edits were preserved;
+no reset, discard or push. Evidence:transaction-latest-rebaseline.json.
+
+
+## RLP envelope binding: supersedes the four unsupported classifications
+
+Before this item, origin/master was fetched and its log/code inspected. Published
+master65e69b642 had no transaction_admission.mjs; existing owned checkpoint3927e347
+was reused. No duplicate upstream implementation was created.
+
+The immutable fixture-pinned EEST test at commit6824474c2ae99e6a67be6093e9a1edc1c82091ea
+explicitly assigns TYPE_4_INVALID_AUTHORIZATION_FORMAT to two whole-type4-envelope
+mutations: rlp()+0x00 and rlp()[:-1] (test_invalid_tx_invalid_rlp_encoding,
+lines601–633). Exact source SHA256:
+838423a917650eb9282911b6a66c034f2d96e76572cd4b92cb8b216010683770.
+This is a versioned upstream category binding, not a claim that a generic RLP
+message identifies an authorization-list location. Pinned client mappings were
+also inspected; no broader authorization/RLP mapping is inferred.
+
+The adapter recognizes only those exact diagnostics and byte transformations.
+Removing one trailing zero or appending one zero must produce a transaction
+accepted by native createTx/basic validation/outer sender recovery, and native
+serialization must reproduce the repaired bytes exactly. No expected fixture
+label or case ID is consulted to construct the witness. All other RLP failures
+remain unsupported. The append-zero witness establishes existence of a canonical
+one-byte repair; it does not recover the original missing byte, original signer,
+or validate authority signatures generally. These remain context-free checks.
+
+All53native rejections now have category matches; only indices6–9 require these
+repair witnesses. Two bounded runs exit0 with identical results/summary,1.007s
+first run (see transaction-rlp-admission-runs.json for both actual measurements).
+fixture_admission_complete is true for this pinned53invalid-case set only.
+execution_complete and differential_complete remain false; all53source adapters
+unsupported. No EVM/world, storage/log/rollback/executiongas or source match added.
+New result SHA256:
+7524b84caa4881147f7d322821fba30feb12e12b9375eb80ee8c87b6847bf2d2.
+The previous49+4result/summary and source are preserved as before-rlp snapshots;
+old digest4c396db7 remains historical, not the current result. No old witness is
+padded into a new fixture count.
+
+Five classifier/envelope controls pass, including wrong type/tail/diagnostic,
+failed/thrown native validator and mismatched witness/category negatives.
+Read-only finder/skeptic cleared code and exact upstream binding; their limits
+above are preserved. Neither reran native/archive/Lean jobs. Evidence:
+transaction-rlp-controls.log,transaction-rlp-checks.json,transaction-rlp-reviews.json.
+Only the two canonical result paths changed among prior sealed H44entries; exact
+prior hashes are retained in snapshots. Strict block acceptance still exits1
+for the original six reference mismatches. No new owner ticket or exclusion.
+
+Reproduction requires the pinned source at
+$BULK/evidence/transaction-category-sources/test_invalid_tx.py, retrievable from
+https://raw.githubusercontent.com/ethereum/execution-spec-tests/6824474c2ae99e6a67be6093e9a1edc1c82091ea/tests/prague/eip7702_set_code_tx/test_invalid_tx.py
+and verified by the adapter's fixed SHA before classification. Then run the
+same node transaction_admission.mjs command from the prior checkpoint.
+No Lean statement, dependent definition, interface, budget, axiom or exclusion
+changed. Full H121b/H121c producer/world/source obligations remain open. Next
+independent item is real native Engine payload/history support, after fetching
+and inspecting master again. No RUNTIME_GATE_PASS or full-assignment completion.
+
+
+## Engine payload execution and real history, with full byte replay
+
+Before this item, origin/master was fetched and its log/code inspected; no
+existing Engine payload runner was found. Before the next checkpoint commit,
+origin/master advanced to1b3ab0676e24620af56e1408c1aabde9cb4bbdb7 and was merged
+cleanly asac34aa548add7acae7d0df5cbc51ae9dddd1950f. Owned additions were preserved;
+the five execution/guard/adapter source hashes stayed unchanged. Received
+central registration/pin updates are upstream merge contents, not own pin edits.
+No reset, discard, push or default-branch publication.
+
+The additive engine_payload_reference.mjs reads every pinned exact-Osaka
+blockchain_test_engine fixture in inventory order. It verifies export, compressed
+input, inventory and installed/committed dependency-lock identity. Genuine native
+Osaka block constructors with the pinned KZG setup recompute genesis and payload
+hashes, transaction/withdrawal roots, blob-versioned hashes and EIP7685 request
+commitments from exact parameter bytes. Converted blocks retain original
+pre/post worlds and history, then run through the unchanged strict native block
+worker/provider. Header, complete block-size, state, receipt, log/gas and final
+fixture-declared account/storage checks remain enabled. No synthetic case is
+counted as an original fixture; the original Engine input stream is unchanged.
+
+This is payload execution/history support only. Negative API profiles, unknown
+versions and unimplemented protocol behavior remain unsupported. Fork-choice
+RPCs are not executed, and Engine-X allocation joins and sync protocol behavior
+remain pending. The original full assignment is not restricted to this positive
+profile: engine_fixture_conformance_complete, engine_rpc_complete and
+ differential_complete remain false. Every source adapter remains unsupported.
+Native payload matches do not establish Engine RPC or source/compiler agreement.
+
+Both complete runs selected21124unique contiguous records:19479
+payload_reference_match,1645unsupported (all engine-rpc-negative-or-version-profile-pending),
+zero payload mismatches or engine errors. Actual exit2 correctly preserves
+incomplete conformance. The19479matches contain21183executed blocks,261multiblock
+fixtures (maximum68blocks),22849transaction observations (20383returns,
+265reverts,2201faults) and1858raw log entries. Counts overlap other fixture formats;
+they are not added as unique semantic witnesses. Native return/revert bytes and
+gas are retained observations: these fixtures have no direct expected return
+bytes, and no isolated per-transaction storage snapshot or source rollback claim
+is added. Receipts/state commitments and final fixture-declared storage are checked.
+
+Full result streams are byte-identical, SHA256
+b96194ec9e143a544f616e45d7c95c83147f0f8a8482a9062291d1af59736093.
+Only sampled peak RSS differs between summary files. First run693.873s,
+external peak1390759936bytes; replay696.108s,external peak1422544896bytes.
+The first internal sampled peak1391923200bytes is a separate measurement.
+No resource stop. Native replay delta+0.322percent measures unchanged runtime
+code, not a Lean refactor or checking-speed claim. All3122previously sealed H44
+entries were rehashed unchanged before adding this evidence.
+
+Commands, under writerlock and serial_semantics.run process-group guard:
+
+    node --max-old-space-size=4096 scripts/h62/item3/g52-differential/engine_payload_reference.mjs /workspace/h44/g52-differential 21124 engine-payload-full
+    node --max-old-space-size=4096 scripts/h62/item3/g52-differential/engine_payload_reference.mjs /workspace/h44/g52-differential 21124 engine-payload-replay
+    G52_BULK=/workspace/h44/g52-differential node --max-old-space-size=4096 --test tests/h62/item3/g52-differential/engine_payload_reference.test.mjs
+
+Three controls pass with no skips: wrong domain/profile refusal, native bad
+payload hash/blob parameter rejection plus real wrong-post-state detection, and
+oversized parent-heap refusal. Native worker60s/5million-step limits are unchanged.
+The external full-job timeout is1200s, with12GiB aggregate RSS/address-space
+limits,4GiB available reserve and no swap. Streaming output, process-tree polling,
+worker-close-before-replacement and final publication checks preserve refusals.
+The first pre-execution launch refused because Node24 adds192MiB of young-gen
+heap to4096MiB old-space; the detector allowance was corrected to256MiB. That
+refusal is preserved separately and adds no fixture observation. Node24.19.0;
+no dependency/compiler installation or systemd-run.
+
+Finder and skeptic independently verified source, all21124case identities,
+hashes, native block/transaction/log counts and incomplete claim boundaries.
+Neither used Lean/server or reran native jobs. Their initial resource/cleanup
+findings were fixed before the full run; summary publication now rechecks the
+guard after hashing. Evidence under$BULK/evidence:engine-payload-accounting.json,
+engine-payload-reproducibility.json,engine-payload-checks.json,command receipts,
+controls.log and engine-payload-reviews.json. Strict block-acceptance still exits1
+for the same six existing reference failures. No new mismatch/owner ticket.
+
+Received producer inspection is recorded separately with exact source hashes:
+P1V2ReadAtBridge is a constant ordinary-call family retaining external approved
+profile agreement; P1V2ValueBridge retains its physical/profile duties; V13's
+P1RevertBridge states a core totality domain excluding assert. These useful
+results do not supply the complete independently approved P1 production factory.
+No owner is inferred for bare_prefix_bridge. This is textual inspection, not a
+new Lean check or a proof that no differently named producer exists.
+
+Own Lean delta0files/lines/declarations; frozen statements/dependent definitions,
+interfaces, budgets, exclusions and axiom set unchanged. No new axiom, sorry,
+native_decide or trust shortcut. Historical Lean4.24.0/Lake5.0.0-src+797c613 and
+bounded KeySort evidence remain historical; no fresh Lean/full-build or
+RUNTIME_GATE_PASS is claimed. Full H121b composed source/runtime producer,
+H121c p10_execution_bridge, canonical source/session/emitted-code identities,
+full Approved_i coverage and all15PublicObligations remain open. Real external
+factory/session/world/physical/body inputs remain listed in the handoff; V17 is
+downstream and frozen Claude V15 is not a producer wait.
+
+Next independent queue: reuse strict native payload machinery for Engine-X
+allocation-bound inputs, account actual sync/history and negative RPC support,
+and construct the owned canonical production endpoints and premise integration
+when their original inputs permit. Do not repeat completed53case rejection
+classification, count unsupported rows as passes, or accept a conditional wrapper
+as the full producer. Original persistent goal stays unfinished; H110 permits
+this same thread when fresh-thread handoff machinery is unavailable.
+
+
+## Engine-X exact allocation binding and bounded native execution
+
+This item fetched origin/master and inspected its log and actual code first.
+Masterf5038bc02bc52ea08f5a3cec7de292aef424e7c8 was merged cleanly as
+32bef0894c25137105c33377de95c4f2ea68e042, preserving the assigned branch and
+prior60f596b35checkpoint. Received P9 recognizer/default-fuel proofs do not
+supply the full canonical source/runtime or P10 factories. No reset/discard/push.
+A fresh textual producer inspection still finds the three limited P1 named
+candidates; it is not a Lean check or proof of absence under renamed APIs.
+PlanWitness.planSource explicitly runs G07 toy programs/model reference and
+not Source.sessionAt, so no canonical Source adequacy is inferred from it.
+
+The shared runner now accepts blockchain_test_engine_x as an explicit format.
+The new generic EngineXAllocations reader verifies the pinned complete stream
+and index before seeking, then checks exact descriptor, record bytes/length/hash,
+source path/hash, fork, case membership, allocation counts and genesis/environment
+field agreement. The short preHash is an opaque index key, not an assumed
+cryptographic pre-state identity. Native execute mode still checks the actual
+pre-state root with the unchanged worker and all existing block validators.
+Unknown/corrupt binding data aborts; it is not counted as a match or a skip.
+
+All11568groups have the same environment shape, empty prior blockHashes,
+ommers and withdrawals, with all numeric genesis/environment fields equal.
+All21124fixture memberships bind across11568groups, repeated byte-identically.
+Binding-only output SHA256:
+b2c481b3517f558ed4b46507370222bebfa1a41cf1e462cec702115e25e1442b.
+Both complete runs exit2/incomplete,113.045/111.997s, no resource stops;
+external peak395018240/536797184bytes. These are allocation_bound_input rows,
+execution_attempted:false: ZERO payload executions or source matches are added
+by the full binding census. Binding-only mode branches before conversion or
+native execution. It validates metadata/bytes, not the actual Merkle pre-state
+root or post-execution state commitments.
+
+Engine-X has no final account/storage map. The internal normalized record uses
+an empty map only for the existing adapter shape. Each X result and summary
+explicitly declares final_account_map_present:false; successful native results
+claim payload-header commitments only. Unsupported/binding-only rows make no
+complete payload-validation claim. This adds no account-map comparison and
+weakens no existing Engine validation or approved theorem/profile. RPC,
+forkchoice, source and full fixture conformance remain incomplete. Original
+Engine-X bytes are retained unchanged and normalized records are not original
+fixture conformance evidence.
+
+The first20actual Engine-X cases execute through the real native validator:
+20payload matches,0mismatches,0unsupported in this pilot. Replay is byte-identical,
+SHA256 b5503e70b9ef9e40b46063909466eb7d10b32e35b2141cc9ff8aba75cdaac89c.
+Actual exit2 both runs,13.580/14.074s,external peak1029218304/1042878464bytes,
+no stops. The other21104native cases are UNATTEMPTED, not unsupported/pass rows.
+Shared allocations include30743accounts and a5.45MBrecord; no full native runtime
+estimate or completion is inferred from this pilot. Cross-format representations
+are not added as distinct source/proof witnesses. All21124source bindings remain
+unsupported; full G52source/runtime agreement remains open.
+
+Before reusing the runner, a possible slowdown was announced and git history
+inspected. Same1000-case Engine prefix, resources and relevant worker/cache
+configuration:43.720s before,44.240s after (+1.189percent,below10percent STOP).
+All1000result rows byte-identical, SHA256
+388dcfdfc62d5f1c6f1f2c0612d1ab500d678d90e4fd47934916f6c94fe73857.
+Earlier provisional after/source-mode probes are preserved separately. The
+prior full Engine runs still refer to the exact old wrapper at60f596b35; its
+source snapshot is retained with matching hash. This prefix check is not a full
+new-wrapper rerun. Native worker, block adapter and resource guard are byte-unchanged.
+No Lean refactor or checking-speed measurement occurred.
+
+Seven controls pass with --test-concurrency=1 and no skips: inherited Engine
+refusals/native wrong-post-state detection plus exact allocation binding/cache,
+wrong descriptor/case/fork/schema/bytes/bounds, internally consistent descriptor
+with wrong environment/history/count, and actual native wrong-pre-root rejection.
+The mutated controls add zero fixture matches. Same12GiBaggregateRSS/per-process
+AS bounds,4GiBavailable reserve,no swap and300s external job cap; worker60s/5Msteps
+and parent4096MiB old-space unchanged. Single raw-record cache; no reference
+opcode/state-manager implementation change, systemd-run or dependency install.
+
+Reproduction, using the same pinned H44inputs and installed lock:
+
+    G52_BULK=/workspace/h44/g52-differential node --max-old-space-size=4096 --test-concurrency=1 --test tests/h62/item3/g52-differential/engine_x_allocation.test.mjs tests/h62/item3/g52-differential/engine_payload_reference.test.mjs
+    node --max-old-space-size=4096 scripts/h62/item3/g52-differential/engine_payload_reference.mjs /workspace/h44/g52-differential 21124 engine-x-bindings blockchain_test_engine_x bind-only
+    node --max-old-space-size=4096 scripts/h62/item3/g52-differential/engine_payload_reference.mjs /workspace/h44/g52-differential 20 engine-x-pilot blockchain_test_engine_x
+
+Repeat with distinct replay labels. All commands are under writerlock and
+serial_semantics.run guard. Their actual receipts and stdout, accounting,
+reproducibility, timing, source inspection and reviews are under$BULK/evidence/
+engine-x-*. All3152prior sealed entries rehashed unchanged before augmentation.
+Strict block-acceptance still exits1 for the original six reference failures;
+no new mismatch/owner ticket. Finder/skeptic read-only review covers source,
+accounting and final claim boundaries without native/Lean/server reruns.
+
+Actual version inspection: Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b,
+Lake5.0.0-src+797c613,Node24.19.0. No Lean proof/build or fresh KeySort run here;
+prior bounded KeySort pass remains historical. RUNTIME_GATE_PASS remains false.
+Own Lean delta0; frozen statements/dependent definitions/interfaces, budgets,
+axioms and exclusions unchanged; no sorry/newaxiom/native_decide/trust shortcut.
+All15public obligations and full Approved_i remain open. H121b full producer/
+arbitrary-contract binding and H121c full p10_execution_bridge remain OWNED
+unfinished work; V17 is downstream, frozen Claude V15 is not a producer wait.
+Original frame/world/compiler/bare-prefix/session/event/physical/body inputs
+remain exact external dependencies. No goal create/reset/complete/stop.
+
+Next independent queue: extend bounded Engine-X native coverage without counting
+unattempted cases, implement real sync/history and negative Engine RPC support,
+and construct canonical production endpoints/premise integration as original
+inputs permit. Do not repeat completed53serialized rejection classifications or
+accept a toy/conditional wrapper as the complete producer. This is a partial
+checkpoint handoff on the original goal, not completion of its work queue.
+
+
+## Resumable Engine-X native execution and strict coverage accounting
+
+Origin/master was fetched and its log/code inspected before this item. The
+published5414256fdf7b78e8debe5e571c7af06ee55a5563 was merged cleanly, preserving
+13c4280d23c06b52215ae915143f7b3e4f3fe06a and the original assigned branch/base.
+New upstream P9 catalogue/body recognizers do not supply full runtime factories.
+No reset, discard, push, default publication or competing goal/continuation.
+
+The existing runner now accepts a final START argument (default0). selectionRange
+requires safe integers and a finite nonempty range; the end clamps to the actual
+corpus size. Scanned prefix identities are still checked before skipping them.
+Rows retain original global indices; each summary publishes range_start/end and
+selected count. Existing final/partial output labels are refused, preserving
+sealed evidence. No native worker, block adapter, instruction, state-manager,
+reference package, allocation semantics or proof budget changed.
+
+The new generic engine_execution_coverage.py accepts complete captured native
+Engine-X runs only. It checks input/export/inventory/allocation/installed-lock
+and unchanged validator hashes, exact range/command/exit/no-stop receipts,
+contiguous original identities, payload/executed-block hashes and transaction
+output/status/gas/log consistency. Historical pilot wrapper acceptance is bound
+to the exact committed13c4280source, not an arbitrary supplied program; the current
+wrapper is pinned separately. Duplicate labels and any overlapping case reject.
+Binding-only rows, altered provenance, truncated ranges and absent/non-null stop
+fields cannot become native matches. Explicit complement ranges remain open.
+This is an external-artifact checker, not a Source/runtime theorem or attestation.
+
+Actual accepted union is[0,500):500payload matches,0mismatches,0unsupported,500blocks,
+500transaction observations,0raw logs. This adds480unique format cases beyond
+prior20, in24disjoint20case runs. All new exits2/incomplete, no resource stops;
+summed new-run time2408.019s,largest single run117.118s,maximum sampled external
+peak1212420096bytes. Native execution still has20624UNPROCESSED cases in[500,21124).
+Unprocessed/bind-only/replay rows add zero matches; cross-format overlap is not
+counted as unique source/proof coverage. Full payload/RPC/forkchoice/source and
+final-account-map conformance remain false. All15public obligations remain open.
+
+Coverage output reruns byte-identically, SHA256
+1ec7ad2da5ec5042b98d940c604c870d74cf6ccdf8ab94a5f3aca0562ed30113.
+A real resumed native[20,40) replay also matches byte-for-byte, SHA256
+409fd947e171ad7beb86c7993a89052a233f2c1b4c370773e31051d1c105a045
+(8.046s original,7.544s replay; neither stopped). A full480case native replay was
+NOT performed. Replay is excluded from the union. Some cases exercise Osaka CLZ;
+these reference observations do not resolve the known vendored Lean CLZ gap or
+supply the owned P10 bridge/source binding.
+
+The possible runner slowdown was announced before editing. Same1000-case Engine
+prefix and resource/cache configuration:44.237s before,43.726s after(-1.155percent),
+with byte-identical rows SHA256
+388dcfdfc62d5f1c6f1f2c0612d1ab500d678d90e4fd47934916f6c94fe73857.
+No10percent STOP triggered; existing performance holds are not released. Eight
+serial Node controls pass/no skips, including nonwrapping/clipped/invalid ranges.
+Three Python test methods pass, covering actual disjoint80case receipts, three
+real duplicate/overlap/bind-only refusals and ten corrupted-artifact controls.
+Mutated row hashes are recomputed so substantive guards are exercised. Temporary
+negative artifacts add zero conformance cases. Finder identified that a missing
+stopped field was initially accepted as null; this was fixed and directly tested.
+Actual old-label reuse exits1 before overwriting any prior evidence.
+
+Commands under writerlock and serial_semantics.run, with unchanged12GiBaggregate
+RSS/per-process AS,4GiBavailable reserve,no swap,300sjobcap,Node4096MiBold-space,
+native60s/5Mstep limits:
+
+    G52_BULK=/workspace/h44/g52-differential node --max-old-space-size=4096 --test-concurrency=1 --test tests/h62/item3/g52-differential/engine_x_allocation.test.mjs tests/h62/item3/g52-differential/engine_payload_reference.test.mjs
+    G52_BULK=/workspace/h44/g52-differential python3 -W error::ResourceWarning tests/h62/item3/g52-differential/test_engine_execution_coverage.py
+    node --max-old-space-size=4096 scripts/h62/item3/g52-differential/engine_payload_reference.mjs /workspace/h44/g52-differential 20 engine-x-native-500-520 blockchain_test_engine_x execute 500
+
+The last command is the NEXT UNEXECUTED range, not a passing gate. Actual captured
+commands/ranges/exits/resources are engine-x-native-*-command.json. Reproduce
+coverage using the exact label list in engine-range-coverage-500-command.json;
+new labels are required for runtime replay. Accounting/checker replay, source
+snapshot, default regression, refusal controls, actual versions and reviews are
+under$BULK/evidence/engine-range-*. All3198prior sealed entries rehashed unchanged.
+Strict block-acceptance again exits1 for the same six reference failures. No new
+source/compiler mismatch or owner ticket was fabricated; prior ticket stays open.
+
+Finder/skeptic independently review source, retained receipts, aggregate counts,
+hashes and final documentation without native/Lean/server reruns. Actual version
+inspection remains Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b,
+Lake5.0.0-src+797c613,Node24.19.0; no Lean proof/build or fresh KeySort run here.
+Historical bounded KeySort pass is not a fresh gate; RUNTIME_GATE_PASS is false.
+Own Lean delta0; frozen statements/dependent definitions/interfaces, axiom set,
+budgets and exclusions unchanged; no sorry/newaxiom/native_decide/trust shortcut.
+
+Latest H70V17 notice confirms H125SourceDispatch is instruction emission only.
+V17 remains downstream. No complete H121b producing files/head are available;
+H121bfullcomposed producer/arbitrary-contract EEST binding and H121cfullP10 remain
+OWNED unfinished implementation, not waits on frozen Claude lanes. Original five
+factory/canonical source/runtime/artifact/session/resource/coverage obligations
+are unchanged. External inputs remain full P1/actualWorldCalls(memory-reference-
+structs and original frame producers), V08world-phase, VY1admitted assembly
+SourceSpec/frontend/rawsessions,VY4event/worldcoupling, executable-bytecodeP10
+body/signature/site-origin, original physical/pass/compiler/frame dependencies;
+composite/bare-prefix ownership is not guessed. No repeated producer ping.
+
+Next original-goal item is bounded native coverage from500 with the same limits,
+then real sync/negativeRPC support and canonical owned producer/P10 work as inputs
+permit. This committed checkpoint/handoff does not complete the original queue.
+Original persistent goal is neither created/reset/stopped/completed; H110same-thread
+continuation applies when fresh-thread handoff machinery is unavailable.
+
+
+## Coordinator audit fix: bind execution evidence to pinned inputs
+
+The coordinator blocked59725f4761335b6f041c70b3bbfffa18bb70c168 after finding that
+emptying both a matched row's blocks and binding.payload_block_hashes, then
+recomputing its result hash, still counted a payload match. That finding was
+correct. The previous checker integrity gate is superseded by this fix and its
+fresh receipts; historical native executions and files are retained unchanged.
+Six new input-evidence mutations failed before the fix (actual exit1), including
+the exact empty-both-lists reproducer, confirming the defect rather than assuming
+it from source inspection. This is a checker trust-boundary defect, not a newly
+found source/compiler or reference-EVM mismatch.
+
+Before editing, origin/master was fetched and its code/log inspected. No existing
+fix was present; current8a4bc25b3eb0f8c4c364471666a8d3fb253de053 was merged cleanly,
+preserving the assigned branch, original base and all unmerged owned checkpoints.
+No reset/discard/push or default-branch publication. Review requested a concrete
+fix and commit; neither routing nor successful local checks certify integration.
+
+Coverage now reads the actual pinned Engine-X input stream and verifies each
+original index/path/case/profile. Each claimed match must have the exact nonempty
+input payload count, ordered block hashes, genesis/first-parent identity, state
+roots, block numbers, gas-used values and transaction counts. Expected values are
+derived from source inputs, not mutually agreeing result lists. All21124pinned
+inputs contain at least one payload; no empty original input is filtered away.
+Unsupported profiles cannot be relabeled as matching payload execution.
+
+Fresh independent review identified two adjacent holes: another valid allocation
+entry could substitute for the selected input's allocation, and reported transaction
+identities were not tied to the input transaction bytes. Both are fixed. The
+checker validates canonical allocation bytes/offsets/lengths/hashes/source/group
+membership/genesis, requires each input's preHash and allocation_ref to select
+that exact group, then requires the result binding to match that input reference.
+The new engine_input_transactions.mjs uses the installed pinned native transaction
+constructor and the same Osaka/KZG/trusted setup as the reference worker. It
+requires a canonical serialization roundtrip and derives transaction hash/type/
+gas-limit from the exact input bytes. This decodes/hashes only: no EVM execution,
+fixture pass or source agreement is added. Gas spending is bounded between zero
+and the pinned transaction gas limit before cumulative accounting, making that
+accumulation monotone. Existing native workers/validators/reference packages,
+profiles, per-case limits and proof interfaces are byte-unchanged.
+
+Three Python test methods pass with ResourceWarnings treated as errors. The
+controls include25negative scenarios: three real duplicate/overlap/bind-only
+refusals and22corrupted-artifact mutations. New controls cover empty payload
+proof, consistent wrong hashes, duplicated blocks, zeroed transaction/gas evidence,
+wrong state-root/number, a different valid allocation, transaction identity/type/
+gas-limit substitutions, negative and excessive gas. Row hashes are recomputed
+to exercise the substantive input guards. Mutated temporary records add zero
+fixture coverage. The initial decoder probe failed closed because KZG was missing,
+and the initial temporary tests lacked native module links; both setup failures
+are preserved separately and are not passing gates. No compiler/npm/dependency
+installation or reference implementation patch was used.
+
+Actual final controls: exit0,90.979s,peak346722304bytes,no stop. Corrected complete
+coverage revalidation and replay: exit2/incomplete,8.044/8.050s,peaks339513344/
+338997248bytes,no stops, byte-identical SHA256
+25d2993ed166440606d6d0a40a3de98aa8c7152aaf42ed269437f996b07af1dd.
+The accepted real union is now[0,520):520payload matches/blocks/transactions,0logs,
+0mismatches/unsupported;20604cases remain UNPROCESSED in[520,21124). The requested
+new legacy[500,520) run completed113.138s,peak1190178816bytes,actualexit2/no stop.
+No old native case was re-executed to repair artifact accounting. This replay is
+checker/artifact revalidation, not a full520case native replay.
+
+The prior[0,500) native records remain real captured observations; the formerly
+unsafe checker alone was insufficient evidence for their artifact integrity.
+Fresh input-bound revalidation supersedes that claim. The checker still trusts
+captured native execution observations: it does not independently recompute
+return/revert bytes, logs or per-transaction execution gas. It checks available
+input commitments/identities and observation consistency, not runtime attestation,
+Source execution, final account-map comparison, RPC/forkchoice or a Lean theorem.
+All source/full-conformance flags remain false; full_payload_match remains false.
+Six existing reference failures remain FAIL under fresh strict block-acceptance,
+actualexit1/no stop. No new owner ticket or source/compiler mismatch fabricated.
+
+The cache experiment was isolated before this fix: its source and failed probes
+are preserved with hashes under$BULK/experimental-cache-20261107/, outside the
+accepted evidence manifest. Zero cached cases were accepted. The committed
+runner was restored from its exact own59725f476bytes after preserving every
+experimental edit; the cache code is not part of this review-fix commit. This
+preserves work without mixing unverified optimization into the requested fix.
+
+Actual command arrays/outcomes/resources and control/revalidation receipts live
+under$BULK/evidence/engine-input-*. The final accepted ones are
+engine-input-bound-controls-command.json,engine-input-bound-coverage-520-command.json,
+its replay,engine-input-bound-accounting.json and the preserved-block-fail receipt.
+The earlier audit-only probes are historical, not the final binding gate.
+New transaction parser SHA256:
+56bd73044a30dc8452f4108937cd2521b6ad95a286b24d82f16ffe5d01b842b0.
+All3326previous sealed evidence entries were rehashed unchanged before augmentation.
+Native[500,520) used the existing serial runner and unchanged300s external job,
+60s/5Mstep worker,12GiBaggregateRSS/per-processAS,4GiBreserve,no swap bounds.
+The added artifact-input validation has a different workload from the old unsafe
+checker; no equivalent-check or Lean-refactor performance claim is made.
+
+Independent finder/skeptic reviews cover the audit reproducer, input-derived
+payload/allocation/transaction guards, gas bounds, final control results and
+520case revalidation/docs without native/Lean/server reruns. Actual version
+inspection: Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b,
+Lake5.0.0-src+797c613,Node24.19.0; no proof/build or freshKeySort run here.
+HistoricalKeySort pass remains historical; RUNTIME_GATE_PASS is false. OwnLean
+delta0; frozen statements/dependent definitions/interfaces, axioms, budgets and
+exclusions unchanged; no sorry/newaxiom/native_decide/trust shortcut.
+
+Full H121b/H121c/canonical producer/source-runtime binding, fullApproved_i and all
+15public obligations remain OWNED unfinished work with the same typed external
+prerequisites. No complete producer implementation file/head is available. Next
+native interval is[520,540), not an accepted gate. The original persistent goal
+is neither created/reset/stopped/completed; this audit-fix handoff is partial.
+
+
+## Engine-X native continuation through index 999 (2026-11-07)
+
+Fetched origin/master and inspected its log and new SourceDispatch sources before
+continuing. Merged baseline 6fbbf971caeb4c9946fbd20aaa0b25b3f1fb1f9f cleanly at
+22bf832484857fd2a382f941377b380bab3383f7. SourceDispatchCorrect preserves existing
+per-construct theorem signatures and their remaining premises; it supplies no
+complete canonical Source/session/artifact/resource producer. The G49 and P10
+owned obligations and exact external prerequisites above remain open. V17 is a
+downstream consumer, not our missing full producer. No complete producer file/head
+is available. No original factory owner is inferred from a generic theorem.
+
+Executed the next disjoint 24 ranges, [520,1000), twenty cases per serial job,
+using the existing runner and validators without source changes. All 24 commands
+returned exit2/incomplete with no stop. This processes480 additional cases:
+459 payload_reference_match and21 unsupported negative/version Engine RPC profiles.
+Unsupported cases are not execution passes. Native command elapsed time totals
+2346.272s; maximum aggregate RSS1394933760bytes. Unchanged bounds:300s external
+job,60s/5Mstep worker,12GiB aggregate RSS/per-process address space,4GiB available
+reserve,Node heap4096MiB,LEAN_NUM_THREADS=1,no swap. No cached cases accepted.
+
+The corrected input-bound checker validates the real disjoint union [0,1000):
+979payload matches/validated blocks,1127transaction observations,0raw logs,
+21unsupported and0payload mismatches/engine errors. There are20124 UNPROCESSED
+cases in[1000,21124). All three input payload/allocation/transaction identity
+bindings are true. Full payload match, final account-map presence, Engine RPC,
+forkchoice and differential completeness remain false; source matches added0.
+The checker validates pinned input commitments and captured observation
+consistency, not independently recomputed return/revert bytes/logs/execution gas,
+runtime attestation or a Lean source/runtime theorem.
+
+Aggregate validation and its artifact replay both returned exit2/incomplete,
+17.105/17.114s,peak993460224/994664448bytes,no stops. Outputs are byte-identical,
+SHA2568357c8b70c004c6ab708241291ab495ec59abc475b75fc8a281545b471b5f2ad.
+This is a checker/artifact replay, not a replay of the480 new native cases.
+Fresh strict block-acceptance returned exit1/FAIL,1.009s,no stop, retaining the
+same six reference failures and existing G52-REF-001 ticket. No new owner ticket
+or source/compiler mismatch is fabricated. Exact command arrays, outcomes and
+limits are recorded in $BULK/evidence/engine-x-native-START-END-command.json,
+engine-native-1000-coverage-command.json, its replay command receipt,
+engine-native-1000-block-acceptance-command.json and
+engine-native-1000-accounting.json. All3353 previously sealed files rehashed
+unchanged before manifest augmentation.
+
+Independent read-only finder and skeptic source reviews found no new continuation
+blocker and confirmed the checker/runner/native validators are byte-identical to
+the prior audit fix. Final artifact/document review is recorded with this
+checkpoint's evidence. No Lean/server/native work is delegated to reviewers.
+Actual version inspection only:Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b,
+Lake5.0.0-src+797c613,Node24.19.0. No Lean build, fresh KeySort or migration gate ran;
+historical KeySort remains historical and RUNTIME_GATE_PASS is false. Own Lean
+line/declaration delta0; no axiom/sorry/native_decide, statement, dependent
+definition, interface, budget or exclusion change. No code refactor or comparable
+before/after checking measurement applies to this new fixture workload.
+
+Full H121b/H121c producers, full Approved_i and all15 public obligations remain
+OWNED unfinished with the same typed external prerequisites. Next independent
+native interval:[1000,1020), label engine-x-native-1000-1020, same serial runner
+and limits. Original persistent goal remains unfinished; no goal mutation,
+master publication or full-conformance acceptance is performed.
+
+Final finder and skeptic artifact reviews both cleared with no blocking findings;
+see engine-native-1000-reviews.json. Global documentation-path checking returned
+exit1 because unchanged baseline docs/feature-work/h62-4-generic-v08.md cites the
+absent ExecutionTransport.lean. The citing document is byte-identical to fetched
+master and the target is absent there; no diagnostic names our task document.
+The new section adds no backticked Lean path. This pre-existing global failure
+is retained, not represented as a passing gate; exact baseline evidence is in
+engine-native-1000-doc-path-baseline.json. Whitespace checking is recorded
+separately. No unrelated source or documentation was edited to hide the failure.
+
+
+## H145 evidence storage and continuation
+
+Lane receipts, checksum manifests, ticket records and handoffs now belong in the
+private SolidiKeY/solidity-lean-coord repository under
+`evidence/solidity-h62-3-20261106/g52-differential/`. The prior public test-directory
+manifest and reference ticket report were archived before removal. Historical
+references above describe the original locations; consult that private archive
+for their preserved bytes. Current owner-test fixtures have the immutable packet
+and restoration procedure below; a directory or current VM handoff alone is not
+a retrieval reference.
+The deterministic generators, executable tests and dependency pins remain here.
+New bulk results and their checksum manifest remain outside this code checkout;
+no replacement evidence manifest is registered under tests.
+
+Native Engine-X continuation remains distinct from source/runtime agreement.
+The complete H121b producer and H121c p10_execution_bridge are owned unfinished
+work here; V17 is downstream. Canonical source/session, world/frame, physical/pass
+and original compiler certificates remain prerequisites as inventoried above.
+Full Approved_i, all public obligations and the previously routed reference
+failures remain open. Current observations, exact commands, counts, limits,
+independent reviews and the next disjoint range are in the private evidence
+handoff; these external tests establish no new Lean theorem. The original
+persistent goal remains unfinished.
+
+
+## Coverage admission after the held trust-boundary review
+
+Earlier native milestone counts describe historical captured observations. They
+are not qualification under the current gate. Legacy wrappers and receipts
+without current external guard metadata are refused; metadata is not retrofitted.
+Fresh qualification requires re-execution with the current runner and explicit
+external timeout, address-space, RSS, reserve and no-swap settings.
+
+The verifier reuses the existing census/export algorithms to regenerate Engine-X
+inputs from the SHA-pinned upstream archive. It compares exact input, allocation,
+index, inventory and census bytes and supplies a per-file source audit. Mutually
+consistent mutable receipts cannot replace that archive binding. Process-local
+caches hold only immutable archive-derived expectations; current hashes are
+checked on every call, and native outcomes are never cached. This reuses existing
+interfaces rather than introducing a shared trusted-manifest premise.
+
+Conversion/validation failures fail the runner instead of becoming unsupported
+profiles. Numeric observations and identity/count metadata require canonical
+integer forms. Synthetic refusal controls add no fixture passes. The private
+fresh-checkpoint handoff records the changed gate, failed attempts, actual
+qualified prefix and next requalification range. Full Source/runtime agreement,
+Approved_i and all public obligations remain open; no Lean statement or proof
+budget is changed by these external-test checks.
+
+
+## Transaction archive binding and retryable execution failures
+
+Serialized-transaction admission now uses the same independent archive-derived
+verification as Engine-X qualification. Fixture expectations and complete corpus
+membership come from regenerated pinned inputs, not mutually editable receipts.
+
+Worker timeout, process exit, IPC errors and unclassified provider refusals fail
+execution and retain retryable gaps. Unsupported rows are admitted only for the
+exact RPC profile derived from the pinned request and carry no retained failure
+or execution evidence. Attempted indices remain disjoint: retry by replacing the
+failed ranged label with its freshly executed replacement, rather than combining
+an overlapping single-case retry with the old range. These checks do not provide
+Source/runtime correspondence or discharge production Bridge obligations.
+
+
+## Immutable owner-test fixture retrieval
+
+The current `test_engine_execution_coverage.py` and
+`engine_payload_reference.test.mjs` use packet **engine-coverage-fixtures-v3** in
+private repository **SolidiKeY/solidity-lean-coord**, commit
+**d4e5866fe89bcc71778542fdbd58bb2a15b9cb40**, exact directory
+`evidence/solidity-h62-3-20261106/g52-differential/engine-coverage-fixtures-v3/`.
+Its `artifact-sha256.json` SHA256 is
+`b6aa696cd35840e8e4482ae2549400d7b4bc8f5a23ca9fd79aae87bc0ab3c2a8`.
+These are immutable fixture coordinates, not a directory tip or a runtime claim.
+Version 3 binds the current checker and control sources; its captured fixtures
+and SDK bytes match version 2.
+Earlier `review-final-*` artifacts describe the prior checker and are not the
+current test packet. No public checksum manifest is restored under tests.
+
+From the lane code checkout, retrieve the exact private bytes:
+
+```sh
+g52_store=$(mktemp -d)
+git -C "$g52_store" init -q
+git -C "$g52_store" remote add origin https://github.com/SolidiKeY/solidity-lean-coord.git
+git -C "$g52_store" fetch --depth=1 origin d4e5866fe89bcc71778542fdbd58bb2a15b9cb40
+git -C "$g52_store" checkout FETCH_HEAD -- evidence/solidity-h62-3-20261106/g52-differential/engine-coverage-fixtures-v3
+g52_packet="$g52_store/evidence/solidity-h62-3-20261106/g52-differential/engine-coverage-fixtures-v3"
+(cd "$g52_packet" && sha256sum -c SHA256SUMS)
+```
+
+Follow the pinned packet's `RESTORE.md`: obtain the official EEST v5.3.0 develop
+archive, verify SHA256
+`5dd08fee0fb41bc2a59bc4ab1dc75b19723fc71fe6af2f855454d3283fba09b9`, then run
+`python3 "$g52_packet/restore.py" --repo "$PWD" --archive /absolute/path/to/fixtures_develop-v5.3.0.tar.gz --check`.
+The helper verifies packet membership, source and installed-reference hashes,
+restores exact small fixtures and regenerates oversized inputs with the existing
+committed exporter. Each generator and owner command uses the unchanged serial
+external resource guard. Captured receipts bind the exact bulk path
+`/workspace/h44/g52-differential`; do not relocate or rewrite their metadata.
+Existing differing files, packet additions and generator staging collisions are
+refused. `--verify-only` checks existing bytes and runs no tests. A clean-VM
+restoration has not been executed here; absent private access or bulk bytes is
+UNVERIFIABLE, never a passing skip.
+
+## Archive admission and transitive validator identity
+
+Ordinary Engine execution now uses the same archive-derived verification as the
+Engine-X qualifier and transaction admission. Verification precedes execution
+and derives expectations from the pinned archive rather than mutually supplied
+receipts. The coordinated-substitution control first obtains a real native match
+for a numerically equivalent nonce encoding, then requires archive refusal of its
+changed expectation bytes. This witnesses byte provenance, not acceptance of a
+different semantic state. Bad genesis and payload hashes also remain CLI refusal
+controls at the archive-first boundary.
+
+Run summaries and coverage bind `eest_observation.mjs` alongside the worker,
+block/rejection adapters and resource guard. Changing configuration admission
+therefore invalidates old observations. Early metadata refusals avoid expensive
+archive work for already-invalid receipts; all archive, ancestry and admission
+checks still run for qualifying records. These external checks add no Source
+agreement, full producer, public-obligation proof or runtime-gate claim.
+
+
+## Inventory remaining Engine-X protocol profiles
+
+Run the metadata inventory under the existing writer lock and serial resource
+guard; archive regeneration is heavy:
+
+```sh
+python3 scripts/h62/item3/g52-differential/engine_protocol_inventory.py \
+  --bulk "$BULK" --output "$BULK/evidence/engine-protocol-inventory.json"
+```
+
+The output must be a new file outside the repository. The existing archive
+verifier authenticates inputs before classification, and the input digest is
+checked again afterward. Extra request fields retain their exact JSON values,
+including null and structured expectations; these values are not interpreted as
+observed rejections. Ordered cases, mixed expected-error requests, version
+differences, empty sequences and parameter type gaps remain visible. An
+`outer-envelope-candidate` checks basic envelope/positional types only: payload
+contents are not validated. Every inventory has zero executed cases and zero
+Source matches; it supplies no Engine RPC, fixture or compiler acceptance.
+
+Fixture-independent controls:
+
+```sh
+python3 tests/h62/item3/g52-differential/test_engine_protocol_inventory.py
+```

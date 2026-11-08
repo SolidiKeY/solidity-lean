@@ -261,7 +261,7 @@ controls remain unaccepted, and all post-repair gates must be rerun as applicabl
 The coordinator confirms receipt of the preserved H35 pack and verification
 against SHA-256 `3f2fb9f6a585b6a64f386b6e127b972a84fd7149ca914a29a191afac97d95dbb`.
 The supplied receiver receipt is
-`/home/guilherme/.local/state/cloudvm-coord/receipts/native-browser-cache-received-20261105T025529Z.json`.
+`$XDG_STATE_HOME/cloudvm-coord/receipts/native-browser-cache-received-20261105T025529Z.json`.
 This is coordinator-attested receipt evidence; the remote file was not read
 on this VM. A fresh local hash matches and the 539,036,429-byte archive remains
 intact at its recorded path. Evidence: h41/cache-receipt.json.
@@ -336,8 +336,7 @@ pending. D adds no Lean declaration, axiom, budget or premise change.
 The current versions/KeySort and three per-file MCP checks pass. A new verified
 337-module relative build-cache snapshot remains coordinator-pending under H41;
 it is explicitly not a Lake artifact catalog. The previous H35 pack remains
-coordinator-received. No VM ship-cache.sh invocation occurred. Full evidence and
-queue limits: [published f77 inventory](../benchmarks/directruntime-2026-11-04/published-f77/README.md).
+coordinator-received. No VM ship-cache.sh invocation occurred.
 
 ## Published 9584 producer adoption
 
@@ -358,8 +357,7 @@ acceptance and final full/corpus/post-integration gates remain pending.
 
 The two API modules' verified relative build-cache snapshot remains
 coordinator-pending under H41, not a Lake artifact catalog/full dependency pack.
-No VM shipping was attempted. Evidence, actual commands/resources and boundaries:
-[published9584 adoption](../benchmarks/directruntime-2026-11-04/published-9584/README.md).
+No VM shipping was attempted.
 
 ## Published b86a composition adoption
 
@@ -381,8 +379,7 @@ corpus gates remain pending. No new stack test or83benchmark is claimed.
 The original executed wrapper is archived; review's exact-target guard suggestion
 was applied and validated independently without rewriting prior evidence. The
 one-module verified build-cache snapshot remains coordinator-pending under H41,
-not a Lake catalog/full dependency pack. Evidence and queue boundaries:
-[publishedb86a inventory](../benchmarks/directruntime-2026-11-04/published-b86a/README.md).
+not a Lake catalog/full dependency pack.
 
 ## H44 reviewable split
 
@@ -892,8 +889,8 @@ existing fourteen-module non-default slow library is retained. The
 [pre-use contract](../../tests/directruntime-20261104/native-browser/h109/RUNNER-DESIGN.md)
 requires sealed source/Git/package/toolchain/cache inputs, actual kernel cgroup
 checks, serial execution, whole-container cleanup and precise timing/memory
-provenance. A candidate total 600-second deadline is conservative pending exact
-H116 scope from the requested latest handoff; it is not multiplied by fourteen.
+provenance. The exact H116 intake supersedes the provisional600 plan: only cumulative
+original Derived17 replay gets CI600/local300; H109 module measurements stay300.
 No proof heartbeat, statement, exclusion or other budget changes.
 
 The source-plan preparer validates all committed regular-file bytes against
@@ -905,6 +902,120 @@ checks run without Lean. Full source inventory stays outside Git with a hash.
 Independent read-only finder/skeptic reviews found and resolved regular-file,
 isolated-Git/package and cleanup-contract gaps. No production runner, real
 slow-module checks, matched measurements, CI qualification or pin relocation
-is claimed. The latest module-times result/drafts remain requested; the available
-H82 report is historical. A coordinator quiet window will be requested only
+is claimed. The latest module-times result and both rejected drafts are now delivered in
+the authenticated b3fb intake; the older H82 report is historical. A coordinator quiet window will be requested only
 when an exact reviewed axiom-pin migration is ready.
+
+
+### H127 exact draft intake and full-tree identity primitive
+
+The coordinator delivered the exact b3fb module-times result/waits and both
+rejected drafts. This lane read their source without importing or executing
+either; the draft review is archived in the private coordination repository under
+`evidence/solidity-directruntime-20261104/native-browser/`. It records eight concrete input, serialism, timing/RSS, CPU, cleanup, evidence and
+A/B obligations. The supplemental archive contains a duplicate self-hardlink;
+strict production membership validation rejects that form. Only selected
+regular text/JSON payloads were inspected; both draft hashes also verify in
+the separate twelve-regular-member sealed delivery. No historical gates were
+rerun or reclassified as current proof/measurement results.
+
+The input-inventory primitive observes every source/cache/toolchain/package
+entry, including content, xattrs, modes, ownership and mtime; it separates inode
+identity from cross-copy content comparison. Special files and escaping or
+dangling links reject. Its verification CLI requires the exact inventory pin,
+and observations stay explicitly non-atomic. This is implementation progress
+on complete input binding, not a sealed snapshot or an authenticated runner.
+The exact H116 scope is cumulative original Derived17 CI600/local300 only;
+H109 module measurements retain300 in both contexts. No default checkpoint,
+static-classification owner, shared pin/root or theorem/budget was changed.
+The real serial controller, kernel resource/measurement/cleanup implementation,
+matched A/B, CI/lane-end gates and pin quiet window remain pending.
+
+
+### VX1 RowsNine slow-library classification
+
+At producer ee8eccaf5f9536a44912c7d2ec31329e7b46adaf,
+Solidity.Examples.Tactics.OpenLoops.RowsNine imports the parent and contains the
+existing binomialRowsNine signature. The parent does not import the child.
+The producer regular root directly imports both, while its slow root imports
+only the parent. The current generator's explicit fourteen-member list omits
+the new child; a generated regular root would therefore still select RowsNine.
+
+The [classification packet](../../tests/directruntime-20261104/native-browser/h109/rowsnine-registration.json)
+pins the exact producer files and proposes explicit slow membership (fifteen
+entries), a module-map row and central regeneration. The local script patch is
+a proposal only: no producer Lean source or shared generator/root/map was
+edited. Synthetic tests reproduce the default leak, verify the exact-list fix
+and preserve unrelated descendants. CI, full/lane-end and axiom-audit hooks
+retain the entire slow library. This is static membership, not successful
+Lean/CI/runtime validation. The owned runner inventory must be updated after
+that exact source/root adoption, rather than silently omit the new obligation.
+
+VX1's source reports RowsNine at594seconds with chunk64 (5876MiB), above the
+unchanged300second module maximum. This is producer-reported data, not a fresh
+measurement here. No unchanged STOP rerun or H116600exception is permitted.
+Classification does not repair the proof cost, authorize deletion or certify
+producer source; central registration and real validation remain pending.
+
+
+### Authorized RowsNine integration on this branch
+
+The coordinator explicitly directed this lane to apply the exact generator
+addition, regenerate roots/maps, add the fragment and push, with atomic merge
+pre-gates handling the combined tree. The exact committed ee8 parent/RowsNine
+pair is adopted because this checkout did not yet contain the child. The
+existing theorem statement/name remains; the producer proof uses chunk64.
+No heartbeat or premise changes. The generator and runner inventory now list
+fifteen slow modules. register.sh and fragments.sh generated their outputs;
+the map fragment corrects the old parent description and names the child.
+
+The coordinator also explicitly accepts the reported594second RowsNine member
+in slow CI at600seconds. This scoped instruction supersedes the earlier claim
+that no RowsNine CI allowance existed. It does not raise the VM/default300
+budget or grant other modules a new allowance. The default STOP stays open;
+no unchanged RowsNine VM timing/proof attempt was made. Actual CI/full proof
+and axiom results are still required; policy acceptance is not execution.
+
+Bounded parent diagnostics initially failed because the new shim used a global
+Lake-j1 option unsupported by pinned Lake5.0.0. The failed receipt is retained.
+The supported repository shim recovered zero-error parent MCP diagnostics and
+KeySort377/131/131, within12GiB/no-swap/oneCPU and the reserve. The production
+H127 runner still needs real serial enforcement; invalid flags are not evidence
+of concurrency control. GitHub CLI authentication was unavailable, so remote
+CI dispatch is not claimed from this VM. The requested non-forced lane push
+and all exact artifacts are recorded separately from pending CI validation.
+
+
+Newest human decision: the H109 slow library as a whole now receives600seconds
+in CI, extending H116 beyond Derived17. This supersedes the interim RowsNine-only
+CI exception. All fifteen slow members have that CI planning budget; VM/default
+checkpoint and non-slow module budgets remain300. Reported594seconds is accepted
+in that CI category; fresh proof/axiom/CI execution is still a separate gate.
+
+
+### Exact ReadBounds6513 consumer qualification
+
+Fresh source-bound native/WASM builds and all 83 functional cases pass, as do
+required Identity diamond controls and the original 84-request journal inventory
+(64 proved, 16 refuted, 4 pending on each backend). The selected 207-module C/object
+closure has matching native/WASM compiled bodies and an off-Git raw C archive.
+Browser negatives remain FAIL 13/14: a byte-identical diagnostic symbol map
+identifies repeated frame 2388 as BEnv.set in DecideScoped. No runtime or timing
+STOP is cleared. See tests/directruntime-20261104/native-browser/readbounds/README.md
+for tracked wrappers. Commands, resources and sealed records are in the private
+coordination repository under `evidence/solidity-directruntime-20261104/native-browser/`.
+
+The rebased branch preserves the 15-member slow-library registration. H127 has
+reviewed source-inventory and runtime dependency-order components, not a complete
+authenticated slow runner or five-module A/B result. Pin relocation still awaits
+a ready reviewed mapping and coordinator quiet window.
+
+H127 also has an independent read-only cgroup retirement diagnostic in
+`h109/cgroup-retirement.py`, with renamed/replaced-group and core-file controls.
+It requires a live FD/PID capture; link counts are informational. Observations
+explicitly decline kernel-build authentication, Docker ownership, cleanup
+acceptance and barrier release. The actual populated-group negative check and
+synthetic empty/deactivated fixtures do not establish live-kernel deactivation
+or repair the earlier failed drain. The diagnostic is not wired into gate or
+recovery paths. The authenticated controller/worker, offline verifier and
+five-module A/B measurements remain unfinished.

@@ -6,6 +6,17 @@ This header adds no source or model execution premise to a family theorem. -/
 namespace Solidity.Yul.Compilation.CompletionControls
 open Backend Scalar MachineAdapter Solidity.Yul.Closed ProducerExpressions
 
+/-- Turn an existing additive completion-refinement law into completion at a
+larger horizon. The operational function and its proved refinement law stay
+explicit; this says nothing about noncompletion or target execution. -/
+theorem completed_horizon {α : Type} (run : Nat → Option α)
+    (refineAdd : ∀ fuel extra, Refines (run fuel) (run (fuel + extra)))
+    {lo hi : Nat} (bound : lo ≤ hi) {value : α}
+    (done : run lo = some value) : run hi = some value := by
+  obtain ⟨extra, eq⟩ := Nat.exists_eq_add_of_le bound
+  rw [eq]
+  exact refineAdd lo extra value done
+
 theorem sourceLocals_injective {n : Nat} : Function.Injective (@sourceLocals n) := by
   intro a b same
   apply Vector.ext
@@ -13,6 +24,19 @@ theorem sourceLocals_injective {n : Nat} : Function.Injective (@sourceLocals n) 
   have words := congrFun same (⟨i,hi⟩ : Fin n)
   apply BitVec.eq_of_toNat_eq
   exact congrArg Fin.val words
+
+/-- A reflected normal outcome determines its full-word output. This transports
+an arbitrary target postcondition, so callers keep their complete machine frame
+rather than repeating output extraction or assuming a chosen target result. -/
+theorem normal_output {c : Control} {n : Nat} (out : Vector Scalar.Word n)
+    (target : Vector Scalar.Word n → Prop)
+    (transport : ∃ actual : Vector Scalar.Word n,
+      (⟨sourceLocals out, .normal⟩ : Outcome c n) = ⟨sourceLocals actual, .normal⟩ ∧
+        target actual) : target out := by
+  obtain ⟨actual, same, done⟩ := transport
+  have equal : out = actual := sourceLocals_injective (congrArg Outcome.vars same)
+  cases equal
+  exact done
 
 theorem frame_locals_injective {n depth : Nat} (newer : Vector Scalar.Word depth)
     (out actual : Vector Scalar.Word n) (caller : List Evm.Word)

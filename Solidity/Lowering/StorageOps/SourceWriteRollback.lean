@@ -53,4 +53,21 @@ theorem rollback_once : ∀ {E : Source.Env} {Γ : Source.RCtx}
 #guard_msgs (whitespace := lax) in #print axioms static_write
 /-- info: 'Solidity.Lowering.StorageOps.SourceWriteRollback.rollback_once' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms rollback_once
+/-- Static refusal after a captured ordinary write retains that write without implicit rollback. -/
+theorem run_refused {E : Source.Env} {Γ : Source.RCtx}
+    (writer rejector : Source.Fr) (p : Source.SPath)
+    (v : Source.Val E.layout (E.cellTy p)) (q : Source.SPath)
+    (w : Source.Val E.layout (E.cellTy q))
+    (locals : Source.Locals E.layout Γ) (state : Source.St E)
+    (writable : writer.static=false) (ordinary : E.transientRoot p=false)
+    (static : rejector.static=true) :
+    (refusedAfter writer rejector p v q w : Source.EM E Γ Unit).run (locals,state)=
+      (.error (.revert []),(locals,SourceWordWrite.after writer p v state)) := by
+  unfold refusedAfter
+  rw [Source.Hoare.run_bind,
+    SourceWordWrite.source_write writer p v locals state writable ordinary]
+  exact static_write rejector q w locals (SourceWordWrite.after writer p v state) static
+
+/-- info: 'Solidity.Lowering.StorageOps.SourceWriteRollback.run_refused' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms run_refused
 end Solidity.Lowering.StorageOps.SourceWriteRollback

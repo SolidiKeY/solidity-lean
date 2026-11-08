@@ -1,0 +1,123 @@
+{
+  "axioms_added": 0,
+  "base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+  "cheap_checker_survivors": 32,
+  "conclusion": "Cheap structural checks do not constrain these operator/closer mutations. Whether existing proofs kill them remains unassessed; static references cannot establish coverage gaps.",
+  "differential": {
+    "agreement_including_unsupported": null,
+    "disagreed": 0,
+    "disagreement_boundary": "No mismatches reported for admitted primitive fragment; unsupported rows are not agreements",
+    "disagreement_classes": [],
+    "matched": 320,
+    "matched_subset_agreement": 1.0,
+    "pending_eest": 19093,
+    "per_input_time_ratios": null,
+    "provenance": "cited committed report, not replayed",
+    "reference_only_unsupported": 732,
+    "source": "docs/feature-work/h62-3-g52-differential.md",
+    "source_sha256": "4110f3923608d46d7955dd4fe0a555313ac59f6e168e3afa8f06c5753a607c18",
+    "time_boundary": "Matched per-input repository and solc compile/run timings unavailable; no ratio invented"
+  },
+  "historical_capture": {
+    "archive_sha256": "0389822b7ea06dbe7068896e38aa3abbdfe7c56376d631061efefea0bfd6a881",
+    "audit_base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+    "captured_agreement": 1.0,
+    "captured_comparisons": 320,
+    "captured_halts": {
+      "return": 192,
+      "revert": 128
+    },
+    "counts": {
+      "match": 320
+    },
+    "disagreement_classes": {},
+    "excluded_current_reference_lock_sha256": "39b1ce55d3978f318323dfbcf1c094b734507d1483e92c586d5e58c8d0e304f4",
+    "expected_adapter_boundary": "Halt and return/revert bytes reconstructed from bound producer records; logs/rollback pins checked. Hashed storage trie adapter not independently reconstructed; serialized expected/actual storage compared only",
+    "families": {
+      "0": 32,
+      "1": 32,
+      "2": 32,
+      "3": 32,
+      "4": 32,
+      "5": 32,
+      "6": 32,
+      "7": 32,
+      "8": 32,
+      "9": 32
+    },
+    "historical_reference_lock_sha256": "e42c4cf3acece9d74a08ecbd41171b3c7b7c5494c39a87debcefecda9beff397",
+    "limitations": [
+      "Historical captured comparisons only; not fresh execution or full G52 qualification.",
+      "No matched per-input compile/run timings.",
+      "Historical reference lock not recovered from inspected owner/reproduction/handoff copies; current lock differs and is excluded. Reference-environment reproducibility is UNVERIFIABLE pending exact archived bytes."
+    ],
+    "manifest_files_verified": 644,
+    "modes": {
+      "legacy": 160,
+      "via-ir": 160
+    },
+    "per_input_time_ratios": null,
+    "producer_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+    "producer_manifest_files_checked": 29,
+    "producer_source_drift_boundary": "Only archived producer-manifest files compared to pinned audit BASE Git blobs; not live checkout, all dependencies, or reference environment",
+    "producer_sources_changed_vs_audit_base": [],
+    "reference_environment_reproduction": "UNVERIFIABLE",
+    "report_bindings_verified": 3,
+    "scope": "Historical captured observation analysis only; no fresh execution, theorem validation, source runtime rebuild or full G52 qualification",
+    "source_inputs": 160
+  },
+  "lean_elaborations": 0,
+  "mutants": 32,
+  "mutation_selection": {
+    "basis": "Both selected source files inspected; broad inventory classification remains heuristic",
+    "files": [
+      "Solidity/Calculus/Closers.lean",
+      "Solidity/Semantics/Ops.lean"
+    ],
+    "generated": 0,
+    "handwritten": 32
+  },
+  "reproduce": "python3 docs/audits/direction-tools/mutation/audit.py --scratch ABSOLUTE_BASE_WORKTREE",
+  "semantic_kills": null,
+  "semantic_survivors": null,
+  "sorry_added": 0,
+  "source_revision": {
+    "commit": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+    "read_method": "git archive of pinned commit; no live source reads",
+    "tree": "276a7b4573d6c7a26f4b81317c997365993bd596"
+  },
+  "static_constraints": {
+    "boundary": "Candidate existence and source spelling only; no Lean name resolution or elaboration",
+    "lexical_limitations": "Interpolated strings with nested quoted expressions may leak apparent code references; neither tokenizer nor qualified-name search is Lean name resolution",
+    "method": "heuristic offset-preserving nested-comment/string/character stripping and explicit qualified token search",
+    "mutants": 32,
+    "semantic_kills": null,
+    "semantic_survivors": null,
+    "strong_candidates_updated": [
+      "M17",
+      "M18",
+      "M19",
+      "M20",
+      "M21",
+      "M22",
+      "M27",
+      "M29",
+      "M30"
+    ],
+    "with_explicit_code_mentions": 30
+  },
+  "waits": [
+    {
+      "id": "QDATA-TIMINGS",
+      "reason": "Historical archive verified and analyzed; matched per-input timings absent. Coordinator awaits existing matched archive or separate bounded-run authorization; no rerun authorized"
+    },
+    {
+      "id": "W-LEAN",
+      "reason": "No Lean elaborations performed; systemd resource scope unavailable on this VM (no user bus); highest-value next checks are M32 afterRunTR_diamond_fail, M07 bitwise and M10 shifts. Structural survivors are not semantic survivors"
+    },
+    {
+      "id": "W-REFERENCE-LOCK",
+      "reason": "Exact historical reference lock bytes not delivered; reference-environment reproduction UNVERIFIABLE under H151"
+    }
+  ]
+}

@@ -1483,6 +1483,81 @@ P20 pending producer fields remain explicit obligations; importing them proves
 no concrete Source/compiler adequacy. General P16/full VY1 and final lane gates
 remain open.
 
+### Declaration-field classifiers
+
+Reuse `declarationFieldUses` for direct metadata classifiers over intrinsic
+`Syn` nodes. Its exact membership and original-unit witness lemmas retain the
+actual declaration roster and syntax site; `declarationElementaryUses_iff`
+instantiates this API. A classifier can return an empty or incomplete list, so
+these traversal laws do not establish classifier validity, whole-catalog
+coverage, lexical scope, or admission. Keep the original source unit available:
+its headers cannot be recovered from the declaration environment alone.
+`LocationFeatures.lean` instantiates the collector for every explicit `DataLoc`
+field in `Syn`: parameter and variable-declaration metadata. Its independent
+relation proves exact direct-field accounting, and a generic unused-function
+control retains all three locations while omission yields no location feature.
+These are syntax features; legality and default/inferred locations remain
+separate from this subset and from operational admission.
+
+`declarationFieldRefusals` retains every rejected field and its actual
+intrinsic declaration/site; `declarationFieldRefusal?` selects the first.
+The exactness and source-witness lemmas are relative to the supplied classifier
+and Boolean predicate. The predicate sees field values, not a derived typing
+context. An empty or incomplete classifier can be silent, and an accept-all
+predicate can silence nonempty syntax. Do not equate silence with admission:
+complete extraction, classifier validity and the versioned profile/policy
+linkage must be established separately. Sites do not provide unique character
+offsets or prove lexical scope.
+
+`StructuralFeatures.lean` combines selected constructor markers and the
+existing elementary/location classifiers over the original source unit.
+It reuses the generated `Syn.ctor` and canonical visitor rather than copying
+indexed constructor projectors. Use `sourceStructuralSubset` only as a partial
+inventory: even marked constructors can need further payload/typing features.
+Calls, allocation, tuples, assembly and user/function types are deliberately
+not interpreted from constructor tags alone. In particular, this prevents
+mistaking conversions for function calls or treating canonical rethrow as an
+arbitrary assembly refusal. The import control shows why `Env` alone is
+insufficient; retain the original unit or equivalent header information.
+Membership bridges do not promise equality of old/new ordering or counts.
+
+`ExclusionFeatures.lean` supplements the subset using the existing `Syn.excl`.
+All six exclusion IDs match the catalog exactly; canonical-rethrow syntax keeps
+its existing exception. Retain and check the intrinsic rejection channel
+independently of catalog feature extraction. `syntaxExclusionUses` supplies
+actual typed sites, and reported flags also occur in `Syn.rejections`; no
+converse list/order equality is claimed. `syntaxFieldUses` shares whole-unit
+metadata traversal with the structural collector. The inherited Source syntax
+examples cover general assembly, mixed buffers, removed constructs and malformed
+modifiers; none is presented as operational admission evidence.
+
+### P16 generated-file maintenance
+
+Run `python3 -B scripts/h62/item1/p16-generator/check.py` to verify the generated
+marker, complete P16 bytes, ordered import/documentation census and pinned Git
+baseline. Edit registered fragments rather than the generated interface. The
+baseline commit must exist locally. This integrity check does not certify live
+producer completeness, semantic coverage or Lean elaboration. Extension ordering
+and producer membership require separate reconciliation. Checkpoint and full
+gates run this checker as `p16-generated`; the pinned baseline object must be
+present locally, including in CI checkouts. A missing object fails closed.
+
+### P20 represented-success consumer (V2)
+
+Use `Backend/Selection/P20ConsumerInterface.lean`'s
+`P20RepresentedConsumerV2` and `Backend/Selection/P20Consumer.lean`'s
+`p20RepresentedConsumerV2` when an actual V2 `PendingG24` link is supplied.
+`p20_joint_success_v2` retains its joint domain/Input witness, payment freedom,
+source/Yul success, target execution, unchanged caller stack and full G24 `Rep`.
+The memory-store control reuses the reviewed producer in
+`tests/h62/item2/audit-v09-passes/P20InterfaceV2Controls.lean`.
+
+The V1 assembly consumer and both interface versions remain available unchanged.
+V2 does not provide V1's unrestricted stack-only lowering certificate; the
+existing V1 overlap conversion still requires that certificate independently.
+This migration does not establish general P20 adequacy, admission/origin,
+failures, divergence, physical/dirty views or native/resource/observation closure.
+
 ### Recursive while completed horizons
 
 `LocalWhileHorizon.successor` and `extension` preserve the exact final caller

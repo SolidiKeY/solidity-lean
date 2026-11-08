@@ -12,6 +12,11 @@ const renderer=require('./renderer.cjs');
 const {servePhases,atomicJson}=require('./phase-capture.cjs');
 const repo=resolve(__dirname,'../..');
 
+function validationConfig(config,hostConfig){
+ if(config.suite==='verification-time-limit'&&config.target==='dafny'&&!Array.isArray(hostConfig.timeLimitReferenceImages))throw Error('Missing trusted reference image set');
+ return{...config,timeLimitReferenceImages:hostConfig.timeLimitReferenceImages};
+}
+
 function retireSampledSurvivors(sampler){
  const survivors=sampler.survivors(),refused=[],terminated=[];
  for(const owned of survivors)if(sampler.survivors().some(p=>p.pid===owned.pid&&p.start===owned.start))try{terminateTree({pid:owned.pid,processBirth:owned.start});terminated.push(owned);}catch(error){refused.push({pid:owned.pid,birth:owned.start,error:error.message});}
@@ -33,7 +38,7 @@ function parse(args) {
   const options={trials:5,warmups:1,workers:[1,2,4],obligations:8,timeoutMs:300000,operationTimeoutMs:60000,targets:['dafny','local'],cache:['none','basic'],trace:'on',suite:'full'};
   const keys={'--code':'code','--dafny':'dafny','--dafny-extension':'dafnyExtension','--dotnet':'dotnet','--output':'output',
     '--trials':'trials','--warmups':'warmups','--workers':'workers','--obligations':'obligations','--timeout-ms':'timeoutMs','--operation-timeout-ms':'operationTimeoutMs','--targets':'targets','--cache':'cache','--trace':'trace',
-    '--memory-reserve-mib':'memoryReserveMiB','--memory-max-mib':'memoryMaxMiB','--suite':'suite'};
+    '--memory-reserve-mib':'memoryReserveMiB','--memory-max-mib':'memoryMaxMiB','--suite':'suite','--menu-trust':'menuTrust','--menu-recovery-from':'menuRecoveryFrom'};
   for(let i=0;i<args.length;i++) {
     if(args[i]==='--help') return {help:true};
     const key=keys[args[i]];if(!key||!args[i+1]||args[i+1].startsWith('--')) throw new Error('Invalid option '+args[i]);
@@ -50,7 +55,11 @@ function parse(args) {
   for(const key of ['workers','targets','cache'])if(new Set(options[key]).size!==options[key].length)throw new Error('Duplicate '+key);
   if(options.obligations>1000||options.trials>100||options.warmups>10)throw new Error('Excessive benchmark dimensions');
   if(!['on','off'].includes(options.trace))throw new Error('Invalid trace');
-  if(!['full','benchmark','visual','commands','custom-commands','custom-default-commands','custom-import-actions','compiler-output','dafny-compiler-output','dafny-command-output','output-lifecycle','testing-symbols','trace-unavailable','trace-visibility','trace-light-show','proof-help','proof-hover'].includes(options.suite))throw new Error('Invalid suite');
+  if(!['contribution-menus','verification-time-limit','full','benchmark','visual','commands','custom-commands','custom-default-commands','custom-import-actions','compiler-output','dafny-compiler-output','dafny-command-output','output-lifecycle','testing-symbols','trace-unavailable','trace-visibility','trace-light-show','proof-help','proof-hover'].includes(options.suite))throw new Error('Invalid suite');
+  if(options.menuTrust!==undefined&&(!['transitions','recovery'].includes(options.menuTrust)||options.suite!=='contribution-menus'))throw Error('Native trust transitions require contribution-menus');
+  if((options.menuTrust==='recovery')!==!!options.menuRecoveryFrom)throw Error('Recovery requires explicit predecessor directory and recovery mode');
+  if(options.suite==='contribution-menus'&&(options.workers.some(w=>w!==1)||options.obligations!==1||options.trials!==1||options.warmups!==0||options.trace!=='on'))throw Error('Menu capture requires single serial trial, one worker/obligation and protocol');
+  if(options.suite==='verification-time-limit'&&(options.trace!=='on'||options.workers.some(w=>w!==1)||options.obligations!==1))throw Error('Time-limit probe requires protocol, one worker and one obligation');
   if(options.suite==='testing-symbols'&&options.trace==='off')throw Error('Compiler Testing absence assertions require protocol');
   if(options.suite==='testing-symbols'&&(options.targets.length!==1||options.targets[0]!=='local'))throw Error('Compiler Testing suite requires local');
   if(options.suite==='trace-unavailable'&&options.trace==='off')throw Error('Unavailable trace absence assertions require recorded protocol');
@@ -83,23 +92,28 @@ function shortSummary(report) {
   return lines.join('\n');
 }
 async function launch(config,options) {
-  config={...config,suite:options.suite||'full',runId:randomUUID()};
+  config={...config,suite:options.suite||'full',menuTrust:options.menuTrust,runId:randomUUID()};
   mkdirSync(config.dir,{recursive:true});mkdirSync(config.workspace,{recursive:true});config.filesystemCapability=require('./filesystem.cjs').recursiveCapability(config.dir);
   const cache={'none':'No caching',basic:'Basic caching',advanced:'Advanced caching'}[config.cache];
   const settings= config.target==='dafny' ? {'dafny.version':'custom','dafny.cliPath':resolve(options.dafny),'dafny.dotnetExecutablePath':resolve(options.dotnet),
     'dafny.verificationVirtualCores':config.workers,'dafny.verificationCachingPolicy':cache,'dafny.verificationTimeLimit':20,
     'dafny.automaticVerification':'onchange','dafny.displayGutterStatus':true,'dafny.markGhostStatements':true} : {
     'solidityLean.backendPath':repo,'solidityLean.nodePath':process.execPath,'solidityLean.timeoutMs':options.operationTimeoutMs};
+  require('./verification-limit.cjs').launchSettings(settings,config.target,options.suite);
+  if(options.suite==='contribution-menus'&&config.target==='dafny')settings['dafny.automaticVerification']='never';
+  config.verificationLimitLaunch={suite:options.suite,settings:{...settings},outerOperationTimeoutMs:options.operationTimeoutMs};
   if(config.target==='dafny'&&process.platform==='linux'){const sdk=dirname(resolve(options.dotnet));settings['terminal.integrated.env.linux']={PATH:sdk+':${env:PATH}',DOTNET_ROOT:sdk};}
   settings['files.autoSave']='off';settings['telemetry.telemetryLevel']='off';settings['update.mode']='none';
   settings['git.enabled']=false;settings['workbench.secondarySideBar.defaultVisibility']='hidden';
   if(['proof-help','proof-hover'].includes(options.suite))settings['solidityLean.counterexamples']=true;
   if(config.target==='local'){settings['solidityLean.workers']=config.workers;settings['solidityLean.automaticVerification']=options.suite==='visual'?'onchange':'never';}
   mkdirSync(join(config.workspace,'.vscode'),{recursive:true});
-  writeFileSync(join(config.workspace,'.vscode/settings.json'),JSON.stringify(settings));
+  if(!config.menuRecovery)writeFileSync(join(config.workspace,'.vscode/settings.json'),JSON.stringify(settings));
   const runtimeEnvironment=Object.fromEntries(['PATH','SOLKEY_ROOT','LEAN_NUM_THREADS','XDG_CACHE_HOME'].filter(k=>process.env[k]!==undefined).map(k=>[k,process.env[k]]));
   if(['compiler-output','dafny-compiler-output','dafny-command-output'].includes(options.suite)){config.foreignWorkspace=join(config.dir,'unrelated-resource');mkdirSync(join(config.foreignWorkspace,'.vscode'),{recursive:true});writeFileSync(join(config.foreignWorkspace,'.vscode/settings.json'),'{}');config.workspaceFile=join(config.dir,'output.code-workspace');writeFileSync(config.workspaceFile,JSON.stringify({folders:[{name:'Primary',path:config.workspace},{name:'Unrelated',path:config.foreignWorkspace}],...(['dafny-compiler-output','dafny-command-output'].includes(options.suite)?{settings}: {})}));}
-  const hostConfig={...config,backendPath:config.target==='local'?repo:undefined,dafnyExecutable:config.target==='dafny'?resolve(options.dafny):undefined,dotnetExecutable:config.target==='dafny'?resolve(options.dotnet):undefined,dotnetVersion:config.target==='dafny'?spawnSync(resolve(options.dotnet),['--version'],{encoding:'utf8',timeout:5000}).stdout?.trim():undefined,suite:options.suite||'full',runtimeEnvironment,recordProtocol:options.trace!=='off',obligations:options.obligations,operationTimeoutMs:options.operationTimeoutMs};
+  if(config.menuRecovery){config.workspaceFile=join(config.dir,'recovery.code-workspace');writeFileSync(config.workspaceFile,JSON.stringify({folders:[{path:config.workspace}],settings}));}
+  const hostConfig={...config,observedExtensionPath:config.target==='local'?resolve(repo,'vscode'):resolve(options.dafnyExtension),backendPath:config.target==='local'?repo:undefined,dafnyExecutable:config.target==='dafny'?resolve(options.dafny):undefined,dotnetExecutable:config.target==='dafny'?resolve(options.dotnet):undefined,dotnetVersion:config.target==='dafny'?spawnSync(resolve(options.dotnet),['--version'],{encoding:'utf8',timeout:5000}).stdout?.trim():undefined,suite:options.suite||'full',runtimeEnvironment,recordProtocol:options.trace!=='off',obligations:options.obligations,operationTimeoutMs:options.operationTimeoutMs};
+  if(options.suite==='verification-time-limit'&&config.target==='dafny')hostConfig.timeLimitReferenceImages=require('./verification-limit.cjs').referenceImages(resolve(options.dafny));
   const configPath=join(config.dir,'config.json');writeFileSync(configPath,JSON.stringify(hostConfig));
   const extension=config.target==='local'?resolve(repo,'vscode'):resolve(options.dafnyExtension);
   const resource=require('./resource-state.cjs'),admission=process.platform==='linux'?resource.resourceState():null;
@@ -111,8 +125,9 @@ async function launch(config,options) {
   // arbitrarily deep, so editor state must live under a short temporary root.
   const editorState=mkdtempSync(join(tmpdir(),'slp-'));
   const portable=join(editorState,'p');mkdirSync(portable,{recursive:true});writeFileSync(join(portable,'argv.json'),'{}');
+  if(options.menuTrust){for(const base of [join(editorState,'u'),join(portable,'user-data')]){mkdirSync(join(base,'User'),{recursive:true});writeFileSync(join(base,'User','settings.json'),JSON.stringify({'security.workspace.trust.enabled':true,'security.workspace.trust.startupPrompt':'never'}));}}
   const start=performance.now(),launchedWallTime=Date.now();
-  const child=spawn(resolve(options.code),[config.workspaceFile||config.workspace,'--disable-gpu','--disable-workspace-trust','--skip-welcome','--skip-release-notes','--no-sandbox',
+  const child=spawn(resolve(options.code),[config.workspaceFile||config.workspace,'--disable-gpu',...(options.menuTrust?[]:['--disable-workspace-trust']),'--skip-welcome','--skip-release-notes','--no-sandbox',
     '--disable-updates','--remote-debugging-port='+debugPort,'--user-data-dir',join(editorState,'u'),'--extensions-dir',join(editorState,'e'),
     '--extensionDevelopmentPath='+extension,'--extensionTestsPath='+join(__dirname,'host.cjs')],{
     cwd:repo,detached:process.platform!=='win32',stdio:['ignore',logfile,logfile],
@@ -151,10 +166,10 @@ async function launch(config,options) {
         }catch(error){atomicJson(join(config.dir,'keybinding-reply.json'),{runId:config.runId,requestId:request.requestId,error:error.message});}finally{client?.close();keybindingBusy=false;}})();
       }
     }
-    if((['visual','proof-help','proof-hover','output-lifecycle','testing-symbols','trace-unavailable','compiler-output','dafny-compiler-output','dafny-command-output'].includes(options.suite)||['custom-default-commands','trace-visibility','trace-light-show'].includes(options.suite)&&config.target==='dafny')&&!phaseBusy){
+    if((['contribution-menus','visual','proof-help','proof-hover','output-lifecycle','testing-symbols','trace-unavailable','compiler-output','dafny-compiler-output','dafny-command-output'].includes(options.suite)||['custom-default-commands','trace-visibility','trace-light-show'].includes(options.suite)&&config.target==='dafny')&&!phaseBusy){
       phaseBusy=true;
       phaseTask=servePhases(config.dir,config.runId,async (directory,request)=>{
-        const client=await renderer.connect(debugPort);try{if(request.phase.startsWith('testing-symbols-'))return await renderer.captureTesting(client,directory,request.metadata);if(request.phase.startsWith('dafny-command-'))return await renderer.captureCompilerConfiguration(client,directory,request.metadata);if(request.phase.startsWith('compiler-output-')||request.phase.startsWith('dafny-output-'))return await renderer.captureCompilerConfiguration(client,directory,request.metadata);if(request.phase==='output-channel')return await renderer.captureOutput(client,directory,request.metadata);if(request.phase.startsWith('proof-help-'))return await renderer.captureProofHelp(client,directory,request.metadata);if(request.phase.startsWith('trace-'))return await renderer.captureTrace(client,directory,request.metadata);const rendered=await renderer.capture(client,directory,true);if(options.suite==='custom-default-commands'){const menu=join(directory,'menu');mkdirSync(menu,{recursive:true});rendered.contextMenu=await renderer.contextSubmenu(client,menu,{label:'Dafny',expected:'Build with Custom Arguments'});}return rendered;}finally{client.close();}
+        const diagnostic=request.phase.startsWith('menus-')?renderer.phaseDiagnostic(join(directory,'cdp-timing.jsonl'),{runId:config.runId,target:config.target,phase:request.phase,phaseRequestId:request.requestId,metadataHash:createHash('sha256').update(JSON.stringify(request.metadata??null)).digest('hex'),source:request.metadata?.binding}):undefined;diagnostic?.({event:'phase.start',wallTime:Date.now(),monotonicMs:performance.now()});const client=await renderer.connect(debugPort,{diagnostic});try{if(request.phase.startsWith('menus-trust-control-'))return await renderer.captureTrustControl(client,directory,request.metadata);if(request.phase.startsWith('menus-'))return await renderer.captureContributionMenu(client,directory,request.metadata);if(request.phase.startsWith('testing-symbols-'))return await renderer.captureTesting(client,directory,request.metadata);if(request.phase.startsWith('dafny-command-'))return await renderer.captureCompilerConfiguration(client,directory,request.metadata);if(request.phase.startsWith('compiler-output-')||request.phase.startsWith('dafny-output-'))return await renderer.captureCompilerConfiguration(client,directory,request.metadata);if(request.phase==='output-channel')return await renderer.captureOutput(client,directory,request.metadata);if(request.phase.startsWith('proof-help-'))return await renderer.captureProofHelp(client,directory,request.metadata);if(request.phase.startsWith('trace-'))return await renderer.captureTrace(client,directory,request.metadata);const rendered=await renderer.capture(client,directory,true);if(options.suite==='custom-default-commands'){const menu=join(directory,'menu');mkdirSync(menu,{recursive:true});rendered.contextMenu=await renderer.contextSubmenu(client,menu,{label:'Dafny',expected:'Build with Custom Arguments'});}return rendered;}finally{if(request.phase.startsWith('menus-'))client.finish();else client.close();}
       },seenPhases).catch(error=>{rendererCapture={captured:false,error:error.message};}).finally(()=>{phaseBusy=false;});
     }
     if(!probing&&existsSync(join(config.dir,'renderer-probe.json'))) {
@@ -187,8 +202,8 @@ async function launch(config,options) {
       finally{client?.close();terminateTree(child);}
     })();
   },options.timeoutMs);
-  let exitCode,error;
-  await new Promise(resolvePromise=>{child.on('error',e=>{error=e.message;resolvePromise();});child.on('close',code=>{exitCode=code;resolvePromise();});});
+  let exitCode,exitSignal,error;
+  await new Promise(resolvePromise=>{child.on('error',e=>{error=e.message;resolvePromise();});child.on('close',(code,signal)=>{exitCode=code;exitSignal=signal;resolvePromise();});});
   clearTimeout(timer);clearInterval(renderTimer);clearInterval(resourceTimer);
   if(phaseTask)await phaseTask;
   if(keybindingTask)await keybindingTask;
@@ -210,18 +225,20 @@ async function launch(config,options) {
     probe.observedDuringVerification=probe.started>=begin&&probe.finished<=end;
     if(result?.metrics&&probe.observedDuringVerification&&probe.focusedEditor)result.metrics.rendererKeyRoundTripMs=probe.roundTripMs;
   }
+  if(config.menuRecovery)try{require('./menu-lifecycle.cjs').verifyRecoveryReceipts(config.menuRecovery);}catch(e){error=e.message;}
   let rejectedResult,validationErrors;
-  if(result){const checked=require('./core.cjs').validateHostResult(result,config);if(checked.error){error=checked.error;rejectedResult=checked.rejectedResult;validationErrors=checked.validationErrors;result=undefined;}}
+  if(result){const checked=require('./core.cjs').validateHostResult(result,validationConfig(config,hostConfig));if(checked.error){error=checked.error;rejectedResult=checked.rejectedResult;validationErrors=checked.validationErrors;result=undefined;}}
   if(cleanup.refused.length)error='Owned process identity changed during cleanup; no subsequent trial admitted';
   if(resources.cleanup.remaining.length)error='Owned verifier processes survived cleanup; subsequent trials must not run';
   writeFileSync(join(config.dir,'resource-terminal.json'),JSON.stringify({resourceStop,resourceStopDetails:resourceStopDetails??null}));
   const run={target:config.target,workers:config.workers,cache:config.cache,suite:options.suite||'full',trial:config.trial,warmup:config.warmup,
     status:interrupted?'interrupted':resourceStop?'resource-stop':timedOut||result?.status==='timeout'?'timeout':
-      !error&&exitCode===0&&['passed','passed-with-gaps'].includes(result?.status)?result.status:'broken',exitCode,error,
+      !error&&exitCode===0&&['passed','passed-with-gaps'].includes(result?.status)?result.status:'broken',exitCode,exitSignal,error,
     wallMs:performance.now()-start,result,rejectedResult,validationErrors,resources:{...resources,samples:undefined},artifacts:config.dir,
     renderer:{...(rendererCapture||{captured:false,reason:'Host did not reach renderer capture'}),inputProbe:probe||{status:'unexamined'}},
     protocol:protocol(options.trace==='off'?null:config.trace),
     applied:config.target==='local'?{workers:config.workers,cache:'exact snapshot and persistent Lean document',reason:'The local cache does not implement Dafny caching-policy levels'}:{workers:config.workers,cache:config.cache}};
+  if(options.suite==='contribution-menus'&&!result)run.partialMenuEvidence=require('./menu-lifecycle.cjs').partialEvidence(config.dir,config.runId,config.target);
   if(result?.initialCompletedSinceHostMs!==undefined)run.result.metrics.processLaunchThroughVerificationMs=result.startedWallTime-launchedWallTime+result.initialCompletedSinceHostMs;
   if(result?.metrics?.activationMs!==undefined)run.result.metrics.processLaunchThroughActivationMs=result.startedWallTime-launchedWallTime+result.metrics.activationMs;
   const logs=join(portable,'user-data/logs');
@@ -249,7 +266,7 @@ async function main(args=process.argv.slice(2)) {
     dotnetVersion:options.dotnet?spawnSync(resolve(options.dotnet),['--list-runtimes'],{encoding:'utf8',timeout:10000}).stdout?.trim():null,
     leanVersion:spawnSync('lean',['--version'],{encoding:'utf8',timeout:10000}).stdout?.trim()||null,
     cpuQuota:process.platform==='linux'&&existsSync('/sys/fs/cgroup/cpu.max')?readFileSync('/sys/fs/cgroup/cpu.max','utf8').trim():null,
-    sourceFiles:Object.fromEntries(['vscode/src/extension.cjs','vscode/src/backend.cjs','vscode/src/rpc.cjs','vscode/src/lsp-client.cjs','vscode/src/lsp-server.cjs','vscode/src/lsp-worker.cjs','vscode/src/lean-session.cjs','vscode/src/worker-pool.cjs','vscode/src/language-services.cjs','vscode/src/editor-services.cjs','vscode/src/project.cjs','vscode/src/solidity-text.cjs','scripts/source-locations.mjs','scripts/test-solidity.mjs','scripts/solc-ast.mjs','vscode/parity/run.cjs','vscode/parity/host.cjs','vscode/parity/core.cjs','vscode/parity/observe.cjs','vscode/parity/renderer.cjs','vscode/parity/workloads.cjs'].map(path=>[path,createHash('sha256').update(readFileSync(join(repo,path))).digest('hex')])),
+    sourceFiles:Object.fromEntries(['vscode/src/extension.cjs','vscode/src/backend.cjs','vscode/src/rpc.cjs','vscode/src/lsp-client.cjs','vscode/src/lsp-server.cjs','vscode/src/lsp-worker.cjs','vscode/src/lean-session.cjs','vscode/src/worker-pool.cjs','vscode/src/language-services.cjs','vscode/src/editor-services.cjs','vscode/src/project.cjs','vscode/src/solidity-text.cjs','scripts/source-locations.mjs','scripts/test-solidity.mjs','scripts/solc-ast.mjs','vscode/parity/run.cjs','vscode/parity/host.cjs','vscode/parity/observe.cjs','vscode/parity/verification-limit.cjs','vscode/parity/core.cjs','vscode/parity/observe.cjs','vscode/parity/renderer.cjs','vscode/parity/menu-lifecycle.cjs','vscode/parity/workloads.cjs'].map(path=>[path,createHash('sha256').update(readFileSync(join(repo,path))).digest('hex')])),
     memoryLimit:process.platform==='linux'&&existsSync('/sys/fs/cgroup/memory.max')?readFileSync('/sys/fs/cgroup/memory.max','utf8').trim():null},runs,summary:[],comparisons:[],
     limitations:['Equivalent constant-return obligations cover a shared semantic fragment, not general theorem-prover equivalence.',
       'No OS page-cache eviction is attempted. Process-cold and live-server warm timings are separate.',
@@ -274,6 +291,7 @@ async function main(args=process.argv.slice(2)) {
       const dir=join(output,`${target}-w${workers}-${cache}-${trial<0?'warmup'+(-trial):trial}`);
       mkdirSync(dir,{recursive:true});
       const config={dir,target,workers,cache,trial,warmup:trial<0,workspace:join(dir,'workspace'),result:join(dir,'result.json'),events:join(dir,'events.jsonl'),trace:join(dir,'lsp.jsonl')};
+      if(options.menuTrust==='recovery'){config.menuRecovery=require('./menu-lifecycle.cjs').recoveryPredecessor(resolve(options.menuRecoveryFrom),target);config.workspace=config.menuRecovery.workspace;}
       process.stdout.write(`Running ${target}, workers=${workers}, cache=${cache}, trial=${trial}\n`);
       runs.push(await launch(config,options));save();
       if(['interrupted','resource-stop'].includes(runs.at(-1).status))throw new Error('Run stopped: '+runs.at(-1).status);
@@ -297,5 +315,5 @@ async function main(args=process.argv.slice(2)) {
   return report;
   } finally {rmSync(lock,{recursive:true,force:true});}
 }
-module.exports={readKeybindingRequest,parse,main,launch,shortSummary,retireSampledSurvivors,assertRetirementComplete};
+module.exports={validationConfig,readKeybindingRequest,parse,main,launch,shortSummary,retireSampledSurvivors,assertRetirementComplete};
 if(require.main===module)main().catch(error=>{process.stderr.write(error.stack+'\n');process.exitCode=1;});

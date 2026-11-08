@@ -95,6 +95,8 @@ if [ "$mode" = per-file ]; then
 else
   # Merge pre-gates use touched mode: reject the prospective tree before builds.
   run_gate layers node scripts/check-layers.mjs
+  run_gate private-paths bash scripts/check-private-paths.sh
+  run_gate evidence-files bash scripts/check-evidence-files.sh
   [ "$failed" -eq 0 ] || exit "$failed"
   run_gate build-touched build_touched
   if [ "$mode" != touched ]; then
@@ -111,6 +113,7 @@ else
     run_gate trust bash scripts/check-trust.sh
     run_gate orphans node scripts/check-orphans.mjs
     run_gate roots bash scripts/coord-tools/register.sh --check
+    run_gate p16-generated python3 -B scripts/h62/item1/p16-generator/check.py
     run_gate fragments bash scripts/coord-tools/fragments.sh --check
     run_gate doc-paths bash scripts/check-doc-paths.sh
     run_gate axiom-pins node scripts/check-axiom-pins.mjs
