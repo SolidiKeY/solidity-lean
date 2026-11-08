@@ -26,7 +26,9 @@ class ScannerTests(unittest.TestCase):
         self.assertEqual(MODULE['comment_lines'](source), (5, 0))
 
     def test_interpolation(self):
-        self.assertEqual(MODULE['comment_lines']('def x := s!"{"--"}"'), (0, 0))
+        for prefix in ('s', 'm', 'f'):
+            self.assertEqual(MODULE['comment_lines'](prefix + '!"{"--"}"'), (0, 0))
+            self.assertEqual(MODULE['comment_lines'](prefix + '!"{ /- real -/ 1 }"'), (1, 0))
         self.assertEqual(MODULE['comment_lines']('def x := s!"{ /- real -/ 1 }"'), (1, 0))
         self.assertEqual(MODULE['comment_lines']('s!"{s!"{ /-- nested -/ 1 }"}"'), (1, 1))
         self.assertEqual(MODULE['comment_lines']('s!"{{ /- literal -/ }}"'), (0, 0))

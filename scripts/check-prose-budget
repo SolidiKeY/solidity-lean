@@ -8,7 +8,7 @@ import sys
 
 RAW = re.compile(r'r(#+)?"')
 CHAR = re.compile(r"'(?:[^'\\\n]|\\(?:u\{[0-9a-fA-F]+\}|.))'")
-PLAIN = re.compile(r"[^/\\\"'«rs{}-]+")
+PLAIN = re.compile(r"[^/\\\"'«rsmf{}-]+")
 METRICS = ("docs_lines", "comment_lines", "docstring_lines", "process_ids")
 
 
@@ -51,7 +51,7 @@ def comment_lines(source):
                 end = i + 1
             line += source[i:end].count("\n")
             i = end
-        elif source.startswith('s!"', i):
+        elif source.startswith(('s!"', 'm!"', 'f!"'), i):
             contexts.append("text")
             i += 3
         elif contexts and source[i] in "{}":
