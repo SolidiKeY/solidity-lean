@@ -1,0 +1,676 @@
+[
+  {
+    "base_metrics": {
+      "axiom_declarations": 0,
+      "axiom_pin_lines_lower_bound": 0,
+      "category": "generated_roots",
+      "chain_agreement_generator_commands": 0,
+      "implemented_by": 0,
+      "lines": 6307,
+      "native_decide": 0,
+      "pin_command_lines": 0,
+      "pin_expected_output_lines": 0,
+      "recovery_dot_admit_tokens": 0,
+      "sorry_admit_tokens": 0,
+      "theorem_lemma_declarations": 0
+    },
+    "category": "generated_roots",
+    "closed_goal": "not_applicable: registry/docs/checker or syntax module has no theorem goal",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:Solidity.lean",
+      "historical_timing_matches": [],
+      "source_metrics": {
+        "axiom_declarations": 0,
+        "axiom_pin_lines_lower_bound": 0,
+        "category": "generated_roots",
+        "chain_agreement_generator_commands": 0,
+        "implemented_by": 0,
+        "lines": 6307,
+        "native_decide": 0,
+        "pin_command_lines": 0,
+        "pin_expected_output_lines": 0,
+        "recovery_dot_admit_tokens": 0,
+        "sorry_admit_tokens": 0,
+        "theorem_lemma_declarations": 0
+      }
+    },
+    "creations": 1,
+    "deletions": 0,
+    "edit_count": 1865,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "Collect elementary features from carried Source declaration fields",
+    "last_nonmerge_change": "24c75616a076554e8eacd01b593f81578e82bf8a",
+    "path": "Solidity.lean",
+    "touch_count": 1866
+  },
+  {
+    "base_metrics": null,
+    "category": "generated_docs",
+    "closed_goal": "not_applicable: registry/docs/checker or syntax module has no theorem goal",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:docs/module-map.md",
+      "historical_timing_matches": [],
+      "source_metrics": null
+    },
+    "creations": 1,
+    "deletions": 0,
+    "edit_count": 830,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "Document bookkeeping fragments",
+    "last_nonmerge_change": "e48bad8761955faf6164f878a9c65ba742496f7a",
+    "path": "docs/module-map.md",
+    "touch_count": 831
+  },
+  {
+    "base_metrics": null,
+    "category": "generated_docs",
+    "closed_goal": "not_applicable: registry/docs/checker or syntax module has no theorem goal",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:docs/module-map/memory-operations.md",
+      "historical_timing_matches": [],
+      "source_metrics": null
+    },
+    "creations": 1,
+    "deletions": 0,
+    "edit_count": 316,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "feat(memory-copies): prove fixed memory child traversal",
+    "last_nonmerge_change": "11b1e47dc888366d27e809bbb1b41f810a71d15d",
+    "path": "docs/module-map/memory-operations.md",
+    "touch_count": 317
+  },
+  {
+    "base_metrics": null,
+    "category": "docs",
+    "closed_goal": "not_applicable: registry/docs/checker or syntax module has no theorem goal",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:docs/intrinsic.md",
+      "historical_timing_matches": [],
+      "source_metrics": null
+    },
+    "creations": 1,
+    "deletions": 0,
+    "edit_count": 312,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "Trim docs",
+    "last_nonmerge_change": "db525b4aac99bbd4449fb21bd232b5039f78606f",
+    "path": "docs/intrinsic.md",
+    "touch_count": 313
+  },
+  {
+    "base_metrics": null,
+    "category": "docs",
+    "closed_goal": "not_applicable: registry/docs/checker or syntax module has no theorem goal",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:docs/feature-work/memory-copies.md",
+      "historical_timing_matches": [],
+      "source_metrics": null
+    },
+    "creations": 1,
+    "deletions": 0,
+    "edit_count": 294,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "Trim docs",
+    "last_nonmerge_change": "db525b4aac99bbd4449fb21bd232b5039f78606f",
+    "path": "docs/feature-work/memory-copies.md",
+    "touch_count": 295
+  },
+  {
+    "base_metrics": null,
+    "category": "generated_docs",
+    "closed_goal": "not_applicable: registry/docs/checker or syntax module has no theorem goal",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:docs/README.md",
+      "historical_timing_matches": [],
+      "source_metrics": null
+    },
+    "creations": 1,
+    "deletions": 0,
+    "edit_count": 289,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "docs: match current published README fragments",
+    "last_nonmerge_change": "b2792f6847955307ef6456c80c2f9f76bb79c6a9",
+    "path": "docs/README.md",
+    "touch_count": 290
+  },
+  {
+    "base_metrics": null,
+    "category": "generated_registry",
+    "closed_goal": "not_applicable: registry/docs/checker or syntax module has no theorem goal",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:scripts/g07-axiom-pins.json",
+      "historical_timing_matches": [],
+      "source_metrics": null
+    },
+    "creations": 1,
+    "deletions": 0,
+    "edit_count": 286,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "Share declaration metadata provenance across intrinsic classifiers",
+    "last_nonmerge_change": "a5bf088f1b1869fc72ed511c50e9c2d8b31c643d",
+    "path": "scripts/g07-axiom-pins.json",
+    "touch_count": 287
+  },
+  {
+    "base_metrics": null,
+    "category": "generated_docs",
+    "closed_goal": "not_applicable: registry/docs/checker or syntax module has no theorem goal",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:docs/module-map/v08-adapters.md",
+      "historical_timing_matches": [],
+      "source_metrics": null
+    },
+    "creations": 1,
+    "deletions": 0,
+    "edit_count": 278,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "Restore dependent proofs for delegated library syntax",
+    "last_nonmerge_change": "015bdff59bd12fdad69092171708b27c9f72676a",
+    "path": "docs/module-map/v08-adapters.md",
+    "touch_count": 279
+  },
+  {
+    "base_metrics": null,
+    "category": "generated_docs",
+    "closed_goal": "not_applicable: registry/docs/checker or syntax module has no theorem goal",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:docs/module-map/yul.md",
+      "historical_timing_matches": [],
+      "source_metrics": null
+    },
+    "creations": 1,
+    "deletions": 0,
+    "edit_count": 263,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "Delegate ownership Following to the shared runner",
+    "last_nonmerge_change": "19e8363cbffa0c85d8d6f9f5da2eff6a09ec65f4",
+    "path": "docs/module-map/yul.md",
+    "touch_count": 264
+  },
+  {
+    "base_metrics": null,
+    "category": "docs",
+    "closed_goal": "not_applicable: registry/docs/checker or syntax module has no theorem goal",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:docs/lean-key-rule-map.md",
+      "historical_timing_matches": [],
+      "source_metrics": null
+    },
+    "creations": 1,
+    "deletions": 0,
+    "edit_count": 240,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "Integrate VY4 intrinsic world bindings and transient ports",
+    "last_nonmerge_change": "efe9cff3e4992f3f91549c6e9570a5ebdf887b59",
+    "path": "docs/lean-key-rule-map.md",
+    "touch_count": 241
+  },
+  {
+    "base_metrics": null,
+    "category": "docs",
+    "closed_goal": "not_applicable: registry/docs/checker or syntax module has no theorem goal",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:docs/feature-work/inline-assembly.md",
+      "historical_timing_matches": [],
+      "source_metrics": null
+    },
+    "creations": 1,
+    "deletions": 0,
+    "edit_count": 219,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "Trim docs",
+    "last_nonmerge_change": "db525b4aac99bbd4449fb21bd232b5039f78606f",
+    "path": "docs/feature-work/inline-assembly.md",
+    "touch_count": 220
+  },
+  {
+    "base_metrics": null,
+    "category": "docs",
+    "closed_goal": "not_applicable: registry/docs/checker or syntax module has no theorem goal",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:docs/feature-work/h62-2-audit-calculus.md",
+      "historical_timing_matches": [],
+      "source_metrics": null
+    },
+    "creations": 1,
+    "deletions": 0,
+    "edit_count": 187,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "audit: record authoritative semantics ownership lookup",
+    "last_nonmerge_change": "80bb917ba2f26e45dc12b8d8d15528e34cba2e05",
+    "path": "docs/feature-work/h62-2-audit-calculus.md",
+    "touch_count": 188
+  },
+  {
+    "base_metrics": null,
+    "category": "other",
+    "closed_goal": "not_applicable: registry/docs/checker or syntax module has no theorem goal",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:tests/h62/item2/audit-calculus/bulk-inputs-manifest.json",
+      "historical_timing_matches": [],
+      "source_metrics": null
+    },
+    "creations": 2,
+    "deletions": 1,
+    "edit_count": 172,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "audit: load census inputs from pinned private archive",
+    "last_nonmerge_change": "14f676e7a929db2b9236b469eee67746684aa6d9",
+    "path": "tests/h62/item2/audit-calculus/bulk-inputs-manifest.json",
+    "touch_count": 175
+  },
+  {
+    "base_metrics": null,
+    "category": "docs",
+    "closed_goal": "not_applicable: registry/docs/checker or syntax module has no theorem goal",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:docs/feature-work/h55-module-times.md",
+      "historical_timing_matches": [],
+      "source_metrics": null
+    },
+    "creations": 1,
+    "deletions": 1,
+    "edit_count": 171,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "Trim docs",
+    "last_nonmerge_change": "db525b4aac99bbd4449fb21bd232b5039f78606f",
+    "path": "docs/feature-work/h55-module-times.md",
+    "touch_count": 173
+  },
+  {
+    "base_metrics": {
+      "axiom_declarations": 0,
+      "axiom_pin_lines_lower_bound": 0,
+      "category": "generated_roots",
+      "chain_agreement_generator_commands": 0,
+      "implemented_by": 0,
+      "lines": 526,
+      "native_decide": 0,
+      "pin_command_lines": 0,
+      "pin_expected_output_lines": 0,
+      "recovery_dot_admit_tokens": 0,
+      "sorry_admit_tokens": 0,
+      "theorem_lemma_declarations": 0
+    },
+    "category": "generated_roots",
+    "closed_goal": "not_applicable: registry/docs/checker or syntax module has no theorem goal",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:Bridge/SolidityBridge.lean",
+      "historical_timing_matches": [],
+      "source_metrics": {
+        "axiom_declarations": 0,
+        "axiom_pin_lines_lower_bound": 0,
+        "category": "generated_roots",
+        "chain_agreement_generator_commands": 0,
+        "implemented_by": 0,
+        "lines": 526,
+        "native_decide": 0,
+        "pin_command_lines": 0,
+        "pin_expected_output_lines": 0,
+        "recovery_dot_admit_tokens": 0,
+        "sorry_admit_tokens": 0,
+        "theorem_lemma_declarations": 0
+      }
+    },
+    "creations": 1,
+    "deletions": 0,
+    "edit_count": 150,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "Prove charged persistent and transient opcode execution",
+    "last_nonmerge_change": "7fdf3393804d744744b4cd00b539eefc65ec53ab",
+    "path": "Bridge/SolidityBridge.lean",
+    "touch_count": 151
+  },
+  {
+    "base_metrics": null,
+    "category": "docs",
+    "closed_goal": "not_applicable: registry/docs/checker or syntax module has no theorem goal",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:docs/solc-alignment.md",
+      "historical_timing_matches": [],
+      "source_metrics": null
+    },
+    "creations": 1,
+    "deletions": 0,
+    "edit_count": 142,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "Trim docs",
+    "last_nonmerge_change": "db525b4aac99bbd4449fb21bd232b5039f78606f",
+    "path": "docs/solc-alignment.md",
+    "touch_count": 143
+  },
+  {
+    "base_metrics": null,
+    "category": "docs",
+    "closed_goal": "not_applicable: registry/docs/checker or syntax module has no theorem goal",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:docs/automation.md",
+      "historical_timing_matches": [],
+      "source_metrics": null
+    },
+    "creations": 2,
+    "deletions": 0,
+    "edit_count": 134,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "Trim docs",
+    "last_nonmerge_change": "db525b4aac99bbd4449fb21bd232b5039f78606f",
+    "path": "docs/automation.md",
+    "touch_count": 136
+  },
+  {
+    "base_metrics": null,
+    "category": "docs",
+    "closed_goal": "not_applicable: registry/docs/checker or syntax module has no theorem goal",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:docs/kernel-port.md",
+      "historical_timing_matches": [],
+      "source_metrics": null
+    },
+    "creations": 1,
+    "deletions": 0,
+    "edit_count": 129,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "Trim docs",
+    "last_nonmerge_change": "db525b4aac99bbd4449fb21bd232b5039f78606f",
+    "path": "docs/kernel-port.md",
+    "touch_count": 130
+  },
+  {
+    "base_metrics": null,
+    "category": "docs",
+    "closed_goal": "not_applicable: registry/docs/checker or syntax module has no theorem goal",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:AGENTS.md",
+      "historical_timing_matches": [],
+      "source_metrics": null
+    },
+    "creations": 1,
+    "deletions": 0,
+    "edit_count": 107,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "Trim docs",
+    "last_nonmerge_change": "db525b4aac99bbd4449fb21bd232b5039f78606f",
+    "path": "AGENTS.md",
+    "touch_count": 108
+  },
+  {
+    "base_metrics": null,
+    "category": "docs",
+    "closed_goal": "not_applicable: registry/docs/checker or syntax module has no theorem goal",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:docs/feature-work/yul-physical-memory.md",
+      "historical_timing_matches": [],
+      "source_metrics": null
+    },
+    "creations": 1,
+    "deletions": 0,
+    "edit_count": 107,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "Trim docs",
+    "last_nonmerge_change": "db525b4aac99bbd4449fb21bd232b5039f78606f",
+    "path": "docs/feature-work/yul-physical-memory.md",
+    "touch_count": 108
+  },
+  {
+    "base_metrics": null,
+    "category": "generated_docs",
+    "closed_goal": "not_applicable: registry/docs/checker or syntax module has no theorem goal",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:docs/module-map/bytecode-selection.md",
+      "historical_timing_matches": [],
+      "source_metrics": null
+    },
+    "creations": 1,
+    "deletions": 0,
+    "edit_count": 106,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "Consume bounded P20 V2 represented success while preserving V1",
+    "last_nonmerge_change": "c7dfc1784b23fe52e6029662b3e32a664f0e01cf",
+    "path": "docs/module-map/bytecode-selection.md",
+    "touch_count": 107
+  },
+  {
+    "base_metrics": null,
+    "category": "docs",
+    "closed_goal": "not_applicable: registry/docs/checker or syntax module has no theorem goal",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:docs/testsuite-proofs.md",
+      "historical_timing_matches": [],
+      "source_metrics": null
+    },
+    "creations": 1,
+    "deletions": 0,
+    "edit_count": 106,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "Trim docs",
+    "last_nonmerge_change": "db525b4aac99bbd4449fb21bd232b5039f78606f",
+    "path": "docs/testsuite-proofs.md",
+    "touch_count": 107
+  },
+  {
+    "base_metrics": null,
+    "category": "docs",
+    "closed_goal": "not_applicable: registry/docs/checker or syntax module has no theorem goal",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:docs/coverage-plan.md",
+      "historical_timing_matches": [],
+      "source_metrics": null
+    },
+    "creations": 1,
+    "deletions": 0,
+    "edit_count": 105,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "Plan trust and usability",
+    "last_nonmerge_change": "513b4815e3a97e87a748b45d4f4071409d0a7be8",
+    "path": "docs/coverage-plan.md",
+    "touch_count": 106
+  },
+  {
+    "base_metrics": null,
+    "category": "docs",
+    "closed_goal": "not_applicable: registry/docs/checker or syntax module has no theorem goal",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:docs/feature-work/abi-entry.md",
+      "historical_timing_matches": [],
+      "source_metrics": null
+    },
+    "creations": 1,
+    "deletions": 0,
+    "edit_count": 105,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "Trim docs",
+    "last_nonmerge_change": "db525b4aac99bbd4449fb21bd232b5039f78606f",
+    "path": "docs/feature-work/abi-entry.md",
+    "touch_count": 106
+  },
+  {
+    "base_metrics": null,
+    "category": "docs",
+    "closed_goal": "not_applicable: registry/docs/checker or syntax module has no theorem goal",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:docs/dafny-editor-parity.md",
+      "historical_timing_matches": [],
+      "source_metrics": null
+    },
+    "creations": 1,
+    "deletions": 0,
+    "edit_count": 100,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "Retain strict recovery admission",
+    "last_nonmerge_change": "f72aec1bcd7488e2550278b2c257c37ea628d9f4",
+    "path": "docs/dafny-editor-parity.md",
+    "touch_count": 101
+  },
+  {
+    "base_metrics": {
+      "axiom_declarations": 0,
+      "axiom_pin_lines_lower_bound": 0,
+      "category": "solidity_header_unmarked_proofs_and_definitions",
+      "chain_agreement_generator_commands": 0,
+      "implemented_by": 0,
+      "lines": 93,
+      "native_decide": 0,
+      "pin_command_lines": 0,
+      "pin_expected_output_lines": 0,
+      "recovery_dot_admit_tokens": 0,
+      "sorry_admit_tokens": 0,
+      "theorem_lemma_declarations": 0
+    },
+    "category": "solidity_header_unmarked_proofs_and_definitions",
+    "closed_goal": "not_applicable: registry/docs/checker or syntax module has no theorem goal",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:Solidity/Calculus/RuleSyntax.lean",
+      "historical_timing_matches": [],
+      "source_metrics": {
+        "axiom_declarations": 0,
+        "axiom_pin_lines_lower_bound": 0,
+        "category": "solidity_header_unmarked_proofs_and_definitions",
+        "chain_agreement_generator_commands": 0,
+        "implemented_by": 0,
+        "lines": 93,
+        "native_decide": 0,
+        "pin_command_lines": 0,
+        "pin_expected_output_lines": 0,
+        "recovery_dot_admit_tokens": 0,
+        "sorry_admit_tokens": 0,
+        "theorem_lemma_declarations": 0
+      }
+    },
+    "creations": 1,
+    "deletions": 0,
+    "edit_count": 99,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "Review: docs",
+    "last_nonmerge_change": "acf6e54a4d4957321a7132aa46bafe5ca4f6c1aa",
+    "path": "Solidity/Calculus/RuleSyntax.lean",
+    "touch_count": 100
+  },
+  {
+    "base_metrics": null,
+    "category": "docs",
+    "closed_goal": "not_applicable: registry/docs/checker or syntax module has no theorem goal",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:docs/feature-work/roadmap-v15-p10.md",
+      "historical_timing_matches": [],
+      "source_metrics": null
+    },
+    "creations": 1,
+    "deletions": 0,
+    "edit_count": 95,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "Trim docs",
+    "last_nonmerge_change": "db525b4aac99bbd4449fb21bd232b5039f78606f",
+    "path": "docs/feature-work/roadmap-v15-p10.md",
+    "touch_count": 96
+  },
+  {
+    "base_metrics": null,
+    "category": "docs",
+    "closed_goal": "not_applicable: registry/docs/checker or syntax module has no theorem goal",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:docs/feature-work/roadmap-v10-storage-operations.md",
+      "historical_timing_matches": [],
+      "source_metrics": null
+    },
+    "creations": 1,
+    "deletions": 0,
+    "edit_count": 93,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "Trim docs",
+    "last_nonmerge_change": "db525b4aac99bbd4449fb21bd232b5039f78606f",
+    "path": "docs/feature-work/roadmap-v10-storage-operations.md",
+    "touch_count": 94
+  },
+  {
+    "base_metrics": null,
+    "category": "scripts_other",
+    "closed_goal": "not_applicable: registry/docs/checker or syntax module has no theorem goal",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:scripts/check-layers.mjs",
+      "historical_timing_matches": [],
+      "source_metrics": null
+    },
+    "creations": 1,
+    "deletions": 0,
+    "edit_count": 91,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "chore: register E4 hash bridge under H82 authorization",
+    "last_nonmerge_change": "dfb41cdbcc55ddde68ea2e395bb77b646ba5037b",
+    "path": "scripts/check-layers.mjs",
+    "touch_count": 92
+  },
+  {
+    "base_metrics": {
+      "axiom_declarations": 0,
+      "axiom_pin_lines_lower_bound": 0,
+      "category": "solidity_header_unmarked_proofs_and_definitions",
+      "chain_agreement_generator_commands": 0,
+      "implemented_by": 15,
+      "lines": 1503,
+      "native_decide": 0,
+      "pin_command_lines": 0,
+      "pin_expected_output_lines": 0,
+      "recovery_dot_admit_tokens": 0,
+      "sorry_admit_tokens": 0,
+      "theorem_lemma_declarations": 33
+    },
+    "category": "solidity_header_unmarked_proofs_and_definitions",
+    "closed_goal": "source_complete_kernel_unverified: theorem declarations present, no sorry/admit/axiom tokens",
+    "closure_evidence": {
+      "base_path": "d4ad633a9624263a59b14fd2c520b9bc602f88f3:Solidity/Calculus/Decide.lean",
+      "historical_timing_matches": [],
+      "source_metrics": {
+        "axiom_declarations": 0,
+        "axiom_pin_lines_lower_bound": 0,
+        "category": "solidity_header_unmarked_proofs_and_definitions",
+        "chain_agreement_generator_commands": 0,
+        "implemented_by": 15,
+        "lines": 1503,
+        "native_decide": 0,
+        "pin_command_lines": 0,
+        "pin_expected_output_lines": 0,
+        "recovery_dot_admit_tokens": 0,
+        "sorry_admit_tokens": 0,
+        "theorem_lemma_declarations": 33
+      }
+    },
+    "creations": 1,
+    "deletions": 0,
+    "edit_count": 89,
+    "interpretation": "no verdict from churn alone; deletion, formatting and productive fixes all count",
+    "kernel_closure_confirmed": null,
+    "last_change_subject": "Modifies sets: frame loop bodies by the roots they write",
+    "last_nonmerge_change": "2c1ce2e7415ea588ce5bd177e13a96154d09993f",
+    "path": "Solidity/Calculus/Decide.lean",
+    "touch_count": 90
+  }
+]
