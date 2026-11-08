@@ -17,6 +17,8 @@ Keep heavy checks sequential.
   record "no systemd scope on the cloud VM (H232)" under limitations, and do
   not ask for or wait on a scope. The host pre-gate (16 GiB, no swap) enforces
   the memory cap on every head before it can merge.
+- Implement any exception to these bounds as an explicit opt-in (a flag or an
+  environment variable that is off by default); never change a check's default.
 
 Keep at most four LSP files open. Use `LEAN_NUM_THREADS=1` and explicit `-j1` for large fresh proof checks.
 Do not change committed proof budgets to fit a machine.
