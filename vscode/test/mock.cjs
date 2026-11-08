@@ -57,6 +57,7 @@ function mock() {
       onDidSaveTextDocument(fn) { return subscribe('save',fn); },
       onDidChangeTextDocument(fn) { return subscribe('change',fn); },
       onDidChangeConfiguration(fn) {return subscribe('configuration',fn);},
+      onDidOpenTextDocument(fn) { return subscribe('open',fn); },
       onDidCloseTextDocument(fn) { return subscribe('close',fn); }
     }
   };

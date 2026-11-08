@@ -7,10 +7,10 @@ const model=require('./model.cjs');
 
 function install(vscode,context,servers,reportError){
   const {selector,isSolidityFile}=require('./editor-document.cjs');
-  const codeActions=new WeakMap();
-  const actionSnapshot=doc=>({doc,uri:doc.uri.toString(),version:doc.version,sourceHash:createHash('sha256').update(doc.getText()).digest('hex'),epoch:pickerEpochs.get(doc.uri.toString())||0});
+  const codeActions=new WeakMap(),documentEpochs=new WeakMap();
+  const actionSnapshot=doc=>({doc,uri:doc.uri.toString(),version:doc.version,sourceHash:createHash('sha256').update(doc.getText()).digest('hex'),epoch:pickerEpochs.get(doc.uri.toString())||0,documentEpoch:documentEpochs.get(doc)||0});
   const actionFailure=(message,code=-32801)=>Object.assign(new Error(message),{code});
-  const assertActionCurrent=(owner,token)=>{if(token?.isCancellationRequested)throw actionFailure('Request cancelled',-32800);if(disposed||!isSolidityFile(owner.doc)||!vscode.workspace.textDocuments.includes(owner.doc)||owner.doc.uri.toString()!==owner.uri||owner.doc.version!==owner.version||createHash('sha256').update(owner.doc.getText()).digest('hex')!==owner.sourceHash||(pickerEpochs.get(owner.uri)||0)!==owner.epoch)throw actionFailure('Code action document or service changed');};
+  const assertActionCurrent=(owner,token)=>{if(token?.isCancellationRequested)throw actionFailure('Request cancelled',-32800);if(disposed||(documentEpochs.get(owner.doc)||0)!==owner.documentEpoch||!isSolidityFile(owner.doc)||!vscode.workspace.textDocuments.includes(owner.doc)||owner.doc.uri.toString()!==owner.uri||owner.doc.version!==owner.version||createHash('sha256').update(owner.doc.getText()).digest('hex')!==owner.sourceHash||(pickerEpochs.get(owner.uri)||0)!==owner.epoch)throw actionFailure('Code action document or service changed');};
   const materializeAction=(row,owner,deferred)=>{const action=new vscode.CodeAction(row.title,vscode.CodeActionKind.QuickFix);if(!deferred&&row.edit)action.edit=workspaceEdit(row.edit);codeActions.set(action,{owner,wire:structuredClone(row)});return action;};
 
   const range=r=>new vscode.Range(r.start.line,r.start.character,r.end.line,r.end.character);
@@ -118,7 +118,7 @@ function install(vscode,context,servers,reportError){
   servers.on('status',status);servers.on('identity',identity);servers.on('serverError',failed);
   providers.push(statusBar,versionBar,...icons.values(),
     vscode.commands.registerCommand('solidityLean.openStatusBarMenu',async()=>{
-      const owner=vscode.window.activeTextEditor?.document,version=owner?.version,text=owner?.getText(),epoch=owner?pickerEpochs.get(owner.uri.toString()):lifecycleRevision,active=activeRevision,identitySnapshot=owner&&identities.get(owner.uri.toString());
+      const owner=vscode.window.activeTextEditor?.document,version=owner?.version,text=owner?.getText(),epoch=owner?pickerEpochs.get(owner.uri.toString()):lifecycleRevision,active=activeRevision,documentEpoch=owner?(documentEpochs.get(owner)||0):0,identitySnapshot=owner&&identities.get(owner.uri.toString());
       const actions=[{label:'Restart Solidity Lean',description:'Restart the language servers',command:'solidityLean.restartServer'},
         {label:'Show verification output',description:'Open the Solidity Lean output channel',command:'solidityLean.showOutput'}];
       if(owner&&current(owner)&&summarize(current(owner),owner).help)actions.unshift({label:'Help with a proof',description:'Open project proof guide: docs/calculus.md',proofHelp:'guide'},{label:'Proof documentation index',description:'Open project documentation: docs/README.md',proofHelp:'index'});
@@ -126,7 +126,7 @@ function install(vscode,context,servers,reportError){
       const selected=await vscode.window.showQuickPick(actions,{matchOnDescription:true,placeHolder:'Pick an action'});
       if(disposed||!actions.includes(selected)||!vscode.workspace.isTrusted)return;
       if(vscode.window.activeTextEditor?.document!==owner||activeRevision!==active)return;
-      if(owner?(owner.isClosed||owner.version!==version||owner.getText()!==text||pickerEpochs.get(owner.uri.toString())!==epoch):lifecycleRevision!==epoch)return;
+      if(owner?((documentEpochs.get(owner)||0)!==documentEpoch||owner.isClosed||owner.version!==version||owner.getText()!==text||pickerEpochs.get(owner.uri.toString())!==epoch):lifecycleRevision!==epoch)return;
       if(selected.proofHelp){
         const state=owner&&current(owner);if(!state||!summarize(state,owner).help)return;
         const cfg=vscode.workspace.getConfiguration('solidityLean',owner.uri),folder=vscode.workspace.getWorkspaceFolder(owner.uri)?.uri.fsPath,configured=cfg.get('backendPath','');let destination;
@@ -140,7 +140,7 @@ function install(vscode,context,servers,reportError){
     vscode.window.onDidChangeVisibleTextEditors(render),vscode.window.onDidChangeActiveTextEditor(()=>{activeRevision++;render();}),
     vscode.workspace.onDidChangeConfiguration(event=>{if(event.affectsConfiguration('solidityLean.displayGutterStatus'))render();}),
     vscode.workspace.onDidChangeTextDocument(event=>{if(event.contentChanges.length)clear(event.document.uri);}),
-    vscode.workspace.onDidCloseTextDocument(doc=>{clear(doc.uri);clearIdentity(doc.uri);pickerEpochs.delete(doc.uri.toString());}),
+    vscode.workspace.onDidCloseTextDocument(doc=>{documentEpochs.set(doc,(documentEpochs.get(doc)||0)+1);clear(doc.uri);clearIdentity(doc.uri);pickerEpochs.delete(doc.uri.toString());}),
     {dispose(){disposed=true;servers.removeListener('status',status);servers.removeListener('identity',identity);servers.removeListener('serverError',failed);states.clear();identities.clear();pickerEpochs.clear();}});
   context.subscriptions.push(...providers);
   return {clear,clearIdentity};
