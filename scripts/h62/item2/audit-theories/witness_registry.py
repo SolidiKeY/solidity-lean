@@ -122,6 +122,27 @@ WITNESSES.update({
  "Solidity.Theory.Mutability.TLoop.run_map": ("PureBoundaryWitnesses", "pure_loop_run_joint_witness"),
  "Solidity.Theory.Mutability.Simple.evalT_withOutside": ("PureBoundaryWitnesses", "pure_simple_joint_witness"),
 })
+WITNESSES.update({
+ "Solidity.SFields.all_anon":("CleanTailWitnesses","tail_anon_inputs_joint"),
+ "Solidity.Storage.resetTransient_cleanTail":("CleanTailWitnesses","tail_reset_inputs_joint"),
+ "Solidity.Reachable.ofState_clean":("CleanTailWitnesses","tail_ofState_inputs_joint"),
+ "Solidity.Reachable.cleanTail_invariant":("CleanTailWitnesses","tail_invariant_inputs_joint"),
+ "Solidity.Reachable.EntryState.cleanTail":("CleanTailWitnesses","tail_entry_inputs_joint"),
+ "Solidity.ValidTail.validStart_reachable":("CleanTailWitnesses","tail_validStart_inputs_joint"),
+})
+WITNESSES.update({
+ 'Solidity.Reachable.validStart_any':("ReachableModeWitnesses",'mode_any_inputs_joint'),
+ 'Solidity.Reachable.validStart_reachable':("ReachableModeWitnesses",'mode_reachable_inputs_joint'),
+ 'Solidity.Reachable.ValidStart.reachable_of_any':("ReachableModeWitnesses",'mode_any_transfer_inputs_joint'),
+ 'Solidity.Reachable.ValidStart.of_invariant':("ReachableModeWitnesses",'mode_invariant_inputs_joint'),
+ 'Solidity.Reachable.EntryState.invariant':("ReachableModeWitnesses",'mode_entry_invariant_inputs_joint'),
+ 'Solidity.Reachable.EntryState.storage':("ReachableModeWitnesses",'mode_entry_storage_inputs_joint'),
+ 'Solidity.Reachable.reset_ofState':("ReachableModeWitnesses",'mode_private_reset_inputs_joint'),
+ 'Solidity.Reachable.PersistentFml.at_ofState':("ReachableModeWitnesses",'mode_persistent_state_inputs_joint'),
+ 'Solidity.Reachable.PersistentFml.at_enter':("ReachableModeWitnesses",'mode_persistent_enter_inputs_joint'),
+ 'Solidity.Reachable.PersistentFml.invariant':("ReachableModeWitnesses",'mode_persistent_invariant_inputs_joint'),
+ 'Solidity.Reachable.ValidStart.of_persistent':("ReachableModeWitnesses",'mode_persistent_transfer_inputs_joint'),
+})
 IMPOSSIBLE={
  "Solidity.Theory.Progress.Val.not_tuple":("ProgressWitnesses","no_plain_tuple_input"),
  "Solidity.Theory.Progress.Controls.no_tuple_local":("ProgressWitnesses","no_tuple_locals_input"),
