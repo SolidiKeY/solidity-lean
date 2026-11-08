@@ -3,31 +3,39 @@
   "method": {
     "command": "python3 -I docs/audits/direction-tools/statements/scan.py --check",
     "selection": "All @[goal] in tracked Lean; all theorem/lemma/abbrev/def in Solidity/Theorems.lean; top 30 public theorems by distinct direct importers of their defining module, ties path then line. This is module exposure, not declaration usage. Includes examples explicitly.",
-    "generated": "Roots, Corpus, AxiomPins, and first-1600-character generation markers separated; unmarked is not a handwriting guarantee. Chain/agreement generators may lack markers; no scale verdict uses this approximation.",
+    "generated": "Roots, Corpus, AxiomPins, marked chain/agreement and other marked generation separated. Chain/agreement without markers is an explicit unresolved bucket, never called handwritten. Selected declaration files have no generation marker; no theorem strength verdict depends on generated counts. True handwriting cannot be certified from source markers; no scale/effort verdict uses these buckets.",
     "parsing": "Source-level, not elaborated. Premises column is explicit binders; arrows remain in conclusion. Context preserves open/variable commands, including commands from earlier ended sections; consult source for exact scope. No proof rechecked.",
-    "ratios": "Reference theorem statement logical-obligation ratios only; no unjustified LOC/check-time comparison of compiler vs calculus. Source citations are cited, not measured. Compiler header nonblank physical line ratios are descriptive typography only; outliers justified by abbreviation/scope, never treated as effort or strength. Other rows have no like-for-like compiler-pass counterpart."
+    "ratios": "Reference theorem statement header physical-line ratios only; no unjustified LOC/check-time comparison of compiler vs calculus. Source citations are cited, not measured. Compiler header nonblank physical line ratios are descriptive typography only; outliers justified by abbreviation/scope, never treated as effort or strength. Other rows have no like-for-like compiler-pass counterpart."
   },
   "counts": {
-    "unmarked_files": 8214,
-    "unmarked_lines": 1278222,
-    "generated_files": 63,
-    "generated_lines": 30549,
+    "unmarked_other_files": 8057,
+    "unmarked_other_lines": 1252802,
+    "generated_roots_files": 3,
+    "generated_roots_lines": 7176,
+    "unresolved_chain_agreement_files": 157,
+    "unresolved_chain_agreement_lines": 25420,
+    "generated_marked_other_files": 49,
+    "generated_marked_other_lines": 15115,
+    "generated_axiom_pins_files": 2,
+    "generated_axiom_pins_lines": 4054,
+    "generated_corpus_files": 9,
+    "generated_corpus_lines": 4204,
     "tracked_lean_files": 8277,
     "goal_attributes": 0,
-    "public_theorems": 61507,
+    "public_theorems": 62557,
     "top_imported": 30,
-    "selected": 62,
+    "selected": 63,
     "headline_theorems": 21,
     "classifications": {
       "strong": 49,
-      "trivial": 11,
+      "trivial": 12,
       "weaker than named": 2
     },
     "witnesses": {
       "intentional incompatible hypotheses": 2,
       "existing concrete source instance": 27,
       "existing source witness": 22,
-      "not applicable (definition)": 11
+      "not applicable (definition)": 12
     }
   },
   "goals": [],

@@ -735,5 +735,16 @@
     "reference": "cakeml;compcert",
     "comparison": "A concrete evaluator regression is narrower than CakeML pass semantic equality or CompCert backward simulation, but matches its own test claim. No compiler-correctness verdict follows.",
     "priority": "none"
+  },
+  "Solidity/Theorems.lean#unexpandValid": {
+    "english_claim": "Printer definition displays Fml.Valid in the scoped notation; not a theorem.",
+    "strength": "trivial",
+    "reason": "Definition or printer, not an independent proof obligation.",
+    "witness_status": "not applicable (definition)",
+    "witness": "",
+    "witness_needed": "Not a theorem; its inhabited domains are audited in the corresponding theorem.",
+    "reference": "compcert;cakeml",
+    "comparison": "Presentation machinery has no semantic-preservation counterpart; no strength or scale inference.",
+    "priority": "none"
   }
 }
