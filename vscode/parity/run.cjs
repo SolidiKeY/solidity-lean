@@ -38,7 +38,7 @@ function parse(args) {
   const options={trials:5,warmups:1,workers:[1,2,4],obligations:8,timeoutMs:300000,operationTimeoutMs:60000,targets:['dafny','local'],cache:['none','basic'],trace:'on',suite:'full'};
   const keys={'--code':'code','--dafny':'dafny','--dafny-extension':'dafnyExtension','--dotnet':'dotnet','--output':'output',
     '--trials':'trials','--warmups':'warmups','--workers':'workers','--obligations':'obligations','--timeout-ms':'timeoutMs','--operation-timeout-ms':'operationTimeoutMs','--targets':'targets','--cache':'cache','--trace':'trace',
-    '--memory-reserve-mib':'memoryReserveMiB','--memory-max-mib':'memoryMaxMiB','--suite':'suite'};
+    '--memory-reserve-mib':'memoryReserveMiB','--memory-max-mib':'memoryMaxMiB','--suite':'suite','--menu-trust':'menuTrust'};
   for(let i=0;i<args.length;i++) {
     if(args[i]==='--help') return {help:true};
     const key=keys[args[i]];if(!key||!args[i+1]||args[i+1].startsWith('--')) throw new Error('Invalid option '+args[i]);
@@ -56,6 +56,7 @@ function parse(args) {
   if(options.obligations>1000||options.trials>100||options.warmups>10)throw new Error('Excessive benchmark dimensions');
   if(!['on','off'].includes(options.trace))throw new Error('Invalid trace');
   if(!['contribution-menus','verification-time-limit','full','benchmark','visual','commands','custom-commands','custom-default-commands','custom-import-actions','compiler-output','dafny-compiler-output','dafny-command-output','output-lifecycle','testing-symbols','trace-unavailable','trace-visibility','trace-light-show','proof-help','proof-hover'].includes(options.suite))throw new Error('Invalid suite');
+  if(options.menuTrust!==undefined&&(options.menuTrust!=='transitions'||options.suite!=='contribution-menus'))throw Error('Native trust transitions require contribution-menus');
   if(options.suite==='contribution-menus'&&(options.workers.some(w=>w!==1)||options.obligations!==1||options.trials!==1||options.warmups!==0||options.trace!=='on'))throw Error('Menu capture requires single serial trial, one worker/obligation and protocol');
   if(options.suite==='verification-time-limit'&&(options.trace!=='on'||options.workers.some(w=>w!==1)||options.obligations!==1))throw Error('Time-limit probe requires protocol, one worker and one obligation');
   if(options.suite==='testing-symbols'&&options.trace==='off')throw Error('Compiler Testing absence assertions require protocol');
@@ -90,7 +91,7 @@ function shortSummary(report) {
   return lines.join('\n');
 }
 async function launch(config,options) {
-  config={...config,suite:options.suite||'full',runId:randomUUID()};
+  config={...config,suite:options.suite||'full',menuTrust:options.menuTrust,runId:randomUUID()};
   mkdirSync(config.dir,{recursive:true});mkdirSync(config.workspace,{recursive:true});config.filesystemCapability=require('./filesystem.cjs').recursiveCapability(config.dir);
   const cache={'none':'No caching',basic:'Basic caching',advanced:'Advanced caching'}[config.cache];
   const settings= config.target==='dafny' ? {'dafny.version':'custom','dafny.cliPath':resolve(options.dafny),'dafny.dotnetExecutablePath':resolve(options.dotnet),
@@ -109,7 +110,7 @@ async function launch(config,options) {
   writeFileSync(join(config.workspace,'.vscode/settings.json'),JSON.stringify(settings));
   const runtimeEnvironment=Object.fromEntries(['PATH','SOLKEY_ROOT','LEAN_NUM_THREADS','XDG_CACHE_HOME'].filter(k=>process.env[k]!==undefined).map(k=>[k,process.env[k]]));
   if(['compiler-output','dafny-compiler-output','dafny-command-output'].includes(options.suite)){config.foreignWorkspace=join(config.dir,'unrelated-resource');mkdirSync(join(config.foreignWorkspace,'.vscode'),{recursive:true});writeFileSync(join(config.foreignWorkspace,'.vscode/settings.json'),'{}');config.workspaceFile=join(config.dir,'output.code-workspace');writeFileSync(config.workspaceFile,JSON.stringify({folders:[{name:'Primary',path:config.workspace},{name:'Unrelated',path:config.foreignWorkspace}],...(['dafny-compiler-output','dafny-command-output'].includes(options.suite)?{settings}: {})}));}
-  const hostConfig={...config,backendPath:config.target==='local'?repo:undefined,dafnyExecutable:config.target==='dafny'?resolve(options.dafny):undefined,dotnetExecutable:config.target==='dafny'?resolve(options.dotnet):undefined,dotnetVersion:config.target==='dafny'?spawnSync(resolve(options.dotnet),['--version'],{encoding:'utf8',timeout:5000}).stdout?.trim():undefined,suite:options.suite||'full',runtimeEnvironment,recordProtocol:options.trace!=='off',obligations:options.obligations,operationTimeoutMs:options.operationTimeoutMs};
+  const hostConfig={...config,observedExtensionPath:config.target==='local'?resolve(repo,'vscode'):resolve(options.dafnyExtension),backendPath:config.target==='local'?repo:undefined,dafnyExecutable:config.target==='dafny'?resolve(options.dafny):undefined,dotnetExecutable:config.target==='dafny'?resolve(options.dotnet):undefined,dotnetVersion:config.target==='dafny'?spawnSync(resolve(options.dotnet),['--version'],{encoding:'utf8',timeout:5000}).stdout?.trim():undefined,suite:options.suite||'full',runtimeEnvironment,recordProtocol:options.trace!=='off',obligations:options.obligations,operationTimeoutMs:options.operationTimeoutMs};
   if(options.suite==='verification-time-limit'&&config.target==='dafny')hostConfig.timeLimitReferenceImages=require('./verification-limit.cjs').referenceImages(resolve(options.dafny));
   const configPath=join(config.dir,'config.json');writeFileSync(configPath,JSON.stringify(hostConfig));
   const extension=config.target==='local'?resolve(repo,'vscode'):resolve(options.dafnyExtension);
@@ -122,8 +123,9 @@ async function launch(config,options) {
   // arbitrarily deep, so editor state must live under a short temporary root.
   const editorState=mkdtempSync(join(tmpdir(),'slp-'));
   const portable=join(editorState,'p');mkdirSync(portable,{recursive:true});writeFileSync(join(portable,'argv.json'),'{}');
+  if(options.menuTrust){for(const base of [join(editorState,'u'),join(portable,'user-data')]){mkdirSync(join(base,'User'),{recursive:true});writeFileSync(join(base,'User','settings.json'),JSON.stringify({'security.workspace.trust.enabled':true,'security.workspace.trust.startupPrompt':'never'}));}}
   const start=performance.now(),launchedWallTime=Date.now();
-  const child=spawn(resolve(options.code),[config.workspaceFile||config.workspace,'--disable-gpu','--disable-workspace-trust','--skip-welcome','--skip-release-notes','--no-sandbox',
+  const child=spawn(resolve(options.code),[config.workspaceFile||config.workspace,'--disable-gpu',...(options.menuTrust?[]:['--disable-workspace-trust']),'--skip-welcome','--skip-release-notes','--no-sandbox',
     '--disable-updates','--remote-debugging-port='+debugPort,'--user-data-dir',join(editorState,'u'),'--extensions-dir',join(editorState,'e'),
     '--extensionDevelopmentPath='+extension,'--extensionTestsPath='+join(__dirname,'host.cjs')],{
     cwd:repo,detached:process.platform!=='win32',stdio:['ignore',logfile,logfile],
@@ -165,7 +167,7 @@ async function launch(config,options) {
     if((['contribution-menus','visual','proof-help','proof-hover','output-lifecycle','testing-symbols','trace-unavailable','compiler-output','dafny-compiler-output','dafny-command-output'].includes(options.suite)||['custom-default-commands','trace-visibility','trace-light-show'].includes(options.suite)&&config.target==='dafny')&&!phaseBusy){
       phaseBusy=true;
       phaseTask=servePhases(config.dir,config.runId,async (directory,request)=>{
-        const client=await renderer.connect(debugPort);try{if(request.phase.startsWith('menus-'))return await renderer.captureContributionMenu(client,directory,request.metadata);if(request.phase.startsWith('testing-symbols-'))return await renderer.captureTesting(client,directory,request.metadata);if(request.phase.startsWith('dafny-command-'))return await renderer.captureCompilerConfiguration(client,directory,request.metadata);if(request.phase.startsWith('compiler-output-')||request.phase.startsWith('dafny-output-'))return await renderer.captureCompilerConfiguration(client,directory,request.metadata);if(request.phase==='output-channel')return await renderer.captureOutput(client,directory,request.metadata);if(request.phase.startsWith('proof-help-'))return await renderer.captureProofHelp(client,directory,request.metadata);if(request.phase.startsWith('trace-'))return await renderer.captureTrace(client,directory,request.metadata);const rendered=await renderer.capture(client,directory,true);if(options.suite==='custom-default-commands'){const menu=join(directory,'menu');mkdirSync(menu,{recursive:true});rendered.contextMenu=await renderer.contextSubmenu(client,menu,{label:'Dafny',expected:'Build with Custom Arguments'});}return rendered;}finally{client.close();}
+        const client=await renderer.connect(debugPort);try{if(request.phase.startsWith('menus-trust-control-'))return await renderer.captureTrustControl(client,directory,request.metadata);if(request.phase.startsWith('menus-'))return await renderer.captureContributionMenu(client,directory,request.metadata);if(request.phase.startsWith('testing-symbols-'))return await renderer.captureTesting(client,directory,request.metadata);if(request.phase.startsWith('dafny-command-'))return await renderer.captureCompilerConfiguration(client,directory,request.metadata);if(request.phase.startsWith('compiler-output-')||request.phase.startsWith('dafny-output-'))return await renderer.captureCompilerConfiguration(client,directory,request.metadata);if(request.phase==='output-channel')return await renderer.captureOutput(client,directory,request.metadata);if(request.phase.startsWith('proof-help-'))return await renderer.captureProofHelp(client,directory,request.metadata);if(request.phase.startsWith('trace-'))return await renderer.captureTrace(client,directory,request.metadata);const rendered=await renderer.capture(client,directory,true);if(options.suite==='custom-default-commands'){const menu=join(directory,'menu');mkdirSync(menu,{recursive:true});rendered.contextMenu=await renderer.contextSubmenu(client,menu,{label:'Dafny',expected:'Build with Custom Arguments'});}return rendered;}finally{client.close();}
       },seenPhases).catch(error=>{rendererCapture={captured:false,error:error.message};}).finally(()=>{phaseBusy=false;});
     }
     if(!probing&&existsSync(join(config.dir,'renderer-probe.json'))) {

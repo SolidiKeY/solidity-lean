@@ -26,12 +26,37 @@ function menuErrors(value,runId,target,workspace){
  if(!Array.isArray(value?.events)||!Array.isArray(value?.forbiddenActions)||value.forbiddenActions.length||forbidden(value?.events||[]).length||JSON.stringify(value.forbiddenActions)!==JSON.stringify(forbidden(value.events||[])))errors.push('command side effects or missing audit');
  return errors;
 }
-function validate(value,runId,target,workspace){try{return menuErrors(value,runId,target,workspace);}catch(error){return ['Malformed native menu observation: '+error.message];}}
+function trustErrors(value,runId,target){
+ const errors=[],t=value?.trust,steps=t?.steps,expected=['initial','grant','deny','lost','restore','restored'];
+ if(t?.mode!=='native-workspace-trust'||t.settings?.enabled!==true||t.settings?.startupPrompt!=='never'||t.settings?.enabledUserValue!==true||JSON.stringify(steps?.map(s=>s.phase))!==JSON.stringify(expected))return ['missing native trust launch/transitions'];
+ let identity;
+ for(const row of steps){
+  const b=row.binding,{trusted,...source}=b||{},isMenu=['initial','lost','restored'].includes(row.phase),desired=['grant','restore','restored'].includes(row.phase);
+  if(!b||trusted!==(isMenu?desired:!desired)||!b.session||!Number.isSafeInteger(b.version)||!/^file:/.test(b.uri||'')||b.sourceHash!==createHash('sha256').update(require('./workloads.cjs').workload(target,1)).digest('hex')||b.language!==(target==='local'?'solidity':'dafny')||b.scheme!=='file')errors.push('wrong trust/source binding');
+  if(!identity)identity=source;else if(JSON.stringify(source)!==JSON.stringify(identity))errors.push('trust source lifetime changed');
+  const expectedAfter={...b,trusted:isMenu?trusted:desired};if(JSON.stringify(row.after)!==JSON.stringify(expectedAfter))errors.push('unconfirmed public trust transition');
+  const phase=isMenu?'menus-trust-'+row.phase:'menus-trust-control-'+row.phase,metadata=isMenu?{binding:b,target,kind:'editor',trustObservation:true}:{binding:b,desired};
+  if(row.error||row.capture?.status!=='captured'||row.capture.runId!==runId||row.capture.phase!==phase||row.capture.metadataHash!==createHash('sha256').update(JSON.stringify(metadata)).digest('hex')||!row.capture.capture?.captured||!row.capture.capture.screenshot)errors.push('failed/foreign trust capture');
+  if(!Array.isArray(row.events)||!Number.isSafeInteger(row.eventStart)||!Number.isSafeInteger(row.eventEnd)||row.eventStart<0||row.eventEnd<row.eventStart||row.eventEnd>value.events?.length||JSON.stringify(row.events)!==JSON.stringify(value.events?.slice(row.eventStart,row.eventEnd))||forbidden(row.events||[]).length)errors.push('missing/forbidden trust events');
+  if(isMenu){const m=row.capture?.capture?.contributionMenu;
+   if(JSON.stringify(m?.binding)!==JSON.stringify(b)||m?.before?.activeUri!==b.uri||JSON.stringify(m?.before)!==JSON.stringify(m?.after)||!m?.before?.items?.length||m.submenuVisible!==m.before.items.some(i=>i.label===(target==='local'?'Solidity Lean':'Dafny'))||m.kind!=='editor')errors.push('wrong trust menu endpoint');
+   if(target==='local'&&m?.submenuVisible!==trusted)errors.push('local trust predicate violated');
+   if(m?.submenuVisible&&!m.before.items.some(i=>i.label.includes(target==='local'?'Build Compiler Artifact with Import Options':'Build with Custom Arguments')))errors.push('trust submenu action missing');
+   if(!m?.before?.items?.every(i=>typeof i.label==='string'&&Object.hasOwn(i,'ariaDisabled')&&[null,'true','false'].includes(i.ariaDisabled)&&typeof i.className==='string'&&i.withinViewport===true&&['left','top','right','bottom'].every(k=>Number.isFinite(i.bounds?.[k]))&&i.bounds.right>i.bounds.left&&i.bounds.bottom>i.bounds.top))errors.push('incomplete trust menu attributes');
+  }else{const c=row.capture?.capture?.trustControl,label=desired?'Trust':"Don't Trust",opposite=desired?"Don't Trust":'Trust';
+   if(c?.nativeMouse!==true||c.desired!==desired||JSON.stringify(c.binding)!==JSON.stringify(b)||!c.before?.visible||!c.after?.visible||JSON.stringify(c.beforeCaptured)!==JSON.stringify(c.before)||JSON.stringify(c.afterCaptured)!==JSON.stringify(c.after)||c.before.buttons.filter(x=>x.label===label&&x.disabled!=='true').length!==1||!c.after.buttons.some(x=>x.label===opposite))errors.push('missing real trust button transition');
+  }
+ }
+ const main=value.phases?.[0]?.binding,{trusted:mainTrust,...mainSource}=main||{};if(main&&JSON.stringify(mainSource)!==JSON.stringify(identity))errors.push('legacy/trust source mismatch');
+ return errors;
+}
+function validate(value,runId,target,workspace,trustMode){try{return [...menuErrors(value,runId,target,workspace),...(trustMode?trustErrors(value,runId,target):[])];}catch(error){return ['Malformed native menu observation: '+error.message];}}
 async function run({vscode,config,events,sessionFor,requestPhase=require('./phase-capture.cjs').requestPhase}){
  const begin=events.length,target=config.target,language=target==='local'?'solidity':'dafny',source=require('./workloads.cjs').workload(target,1),file=path.join(config.workspace,'menus.'+(target==='local'?'sol':'dfy'));
  fs.writeFileSync(file,source);const doc=await vscode.workspace.openTextDocument(file),rows=[];
  const binding=d=>({uri:d.uri.toString(),version:d.version,sourceHash:createHash('sha256').update(d.getText()).digest('hex'),session:sessionFor(d),language:d.languageId,scheme:d.uri.scheme,trusted:vscode.workspace.isTrusted});
  const result={status:'partial',runId:config.runId,target,phases:rows,untrusted:{status:'missing',reason:'Existing pinned runner disables workspace trust UI; this launch cannot evidence an untrusted window.'},scope:'Actual Linux menu endpoint/AX/PNG observations only; no command, proof, raster/ABA or macOS equivalence.'};
+ if(config.menuTrust)result.trust={mode:'native-workspace-trust',settings:{enabled:vscode.workspace.getConfiguration('security.workspace.trust').get('enabled'),startupPrompt:vscode.workspace.getConfiguration('security.workspace.trust').get('startupPrompt'),enabledUserValue:vscode.workspace.getConfiguration('security.workspace.trust').inspect('enabled')?.globalValue},steps:[]};
  const save=()=>fs.writeFileSync(path.join(config.dir,'menu-observations.json'),JSON.stringify(result,null,2));
  async function capture(phase,d,kind='editor'){
   await vscode.window.showTextDocument(d,{preview:false});await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
@@ -41,10 +66,24 @@ async function run({vscode,config,events,sessionFor,requestPhase=require('./phas
   catch(error){row.error=error.message;error.observation=result;throw error;}
   finally{row.eventEnd=events.length-begin;row.events=events.slice(start);save();}
  }
- try{await capture('source',doc);const textFile=path.join(config.workspace,'unrelated.txt');fs.writeFileSync(textFile,'Menu language isolation.\n');const unrelated=await vscode.workspace.openTextDocument(textFile);await capture('unrelated',unrelated);
+ async function trustStep(phase,desired){
+  const isMenu=desired===undefined,before=binding(doc),start=events.length,row={phase,binding:before,eventStart:start-begin};result.trust.steps.push(row);save();
+  try{
+   if(isMenu){await vscode.window.showTextDocument(doc,{preview:false});await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');}
+   else await vscode.commands.executeCommand('workbench.trust.manage');
+   const metadata=isMenu?{binding:before,target,kind:'editor',trustObservation:true}:{binding:before,desired};
+   row.capture=await requestPhase(config.dir,config.runId,isMenu?'menus-trust-'+phase:'menus-trust-control-'+phase,metadata,config.operationTimeoutMs);
+   if(!isMenu){const until=Date.now()+config.operationTimeoutMs;while(vscode.workspace.isTrusted!==desired&&Date.now()<until)await new Promise(r=>setTimeout(r,20));assert.equal(vscode.workspace.isTrusted,desired,'public workspace trust did not confirm');}
+   row.after=binding(doc);assert.equal(doc.getText(),source);assert.equal(fs.readFileSync(file,'utf8'),source);
+  }catch(error){row.error=error.message;error.observation=result;throw error;}
+  finally{row.eventEnd=events.length-begin;row.events=events.slice(start);save();}
+ }
+ try{if(config.menuTrust){assert.equal(vscode.workspace.isTrusted,false,'native initial workspace must be untrusted');await trustStep('initial');await trustStep('grant',true);}
+  await capture('source',doc);const textFile=path.join(config.workspace,'unrelated.txt');fs.writeFileSync(textFile,'Menu language isolation.\n');const unrelated=await vscode.workspace.openTextDocument(textFile);await capture('unrelated',unrelated);
   const untitled=await vscode.workspace.openTextDocument({language,content:source});await capture('untitled',untitled);await capture('tab',doc,'tab');await capture('restored',doc);
-  assert.equal(doc.getText(),source);assert.equal(fs.readFileSync(file,'utf8'),source);result.events=events.slice(begin);result.forbiddenActions=forbidden(result.events);assert.deepEqual(validate(result,config.runId,target,config.workspace),[]);save();return result;
+  if(config.menuTrust){await trustStep('deny',false);await trustStep('lost');await trustStep('restore',true);await trustStep('restored');result.untrusted={status:'partial',reason:'Native trust UI/API/menu endpoints only; full parity and reload/matrix coverage remain open.'};}
+  assert.equal(doc.getText(),source);assert.equal(fs.readFileSync(file,'utf8'),source);result.events=events.slice(begin);result.forbiddenActions=forbidden(result.events);assert.deepEqual(validate(result,config.runId,target,config.workspace,config.menuTrust),[]);save();return result;
  }catch(error){error.observation=result;throw error;}
  finally{result.events=events.slice(begin);result.forbiddenActions=forbidden(result.events);save();}
 }
-module.exports={phases,validate,run,preparation};
+module.exports={phases,validate,run,preparation,trustErrors};

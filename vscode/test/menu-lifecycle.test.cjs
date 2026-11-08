@@ -24,3 +24,26 @@ test('failed native phase retains exact event interval and original failure (inj
 test('native menu runner refuses implicit multi-worker/multi-trial dimensions',()=>{const{parse}=require('../parity/run.cjs');assert.throws(()=>parse(['--suite','contribution-menus']),/single serial/);assert.equal(parse(['--suite','contribution-menus','--workers','1','--obligations','1','--trials','1','--warmups','0']).suite,'contribution-menus');});
 
 test('malformed menu structures return rejection records rather than losing the host result',()=>{for(const change of [v=>v.phases=null,v=>v.phases[0]=null,v=>v.phases[0].capture.capture.contributionMenu.before.items={},v=>v.phases[0].events={}]){const v=fixture();change(v);let errors;assert.doesNotThrow(()=>{errors=validate(v,'run','local','/');});assert.ok(errors.length);}});
+
+function trustedFixture(target='local'){
+ const v=fixture(target),base=v.phases[0].binding;v.trust={mode:'native-workspace-trust',settings:{enabled:true,startupPrompt:'never',enabledUserValue:true},steps:[]};
+ for(const phase of ['initial','grant','deny','lost','restore','restored']){
+  const menu=['initial','lost','restored'].includes(phase),desired=['grant','restore','restored'].includes(phase),binding={...base,trusted:menu?desired:!desired};
+  let metadata,captured;
+  if(menu){metadata={binding,target,kind:'editor',trustObservation:true};const item=structuredClone(v.phases[0].capture.capture.contributionMenu),visible=binding.trusted;item.binding=binding;item.submenuVisible=visible;if(!visible)item.before.items=[{...item.before.items[0],label:'Copy'}];item.after=structuredClone(item.before);captured={captured:true,screenshot:true,contributionMenu:item};}
+  else{metadata={binding,desired};const before={visible:true,buttons:[{label:desired?'Trust':"Don't Trust",disabled:null}]},after={visible:true,buttons:[{label:desired?"Don't Trust":'Trust',disabled:null}]};captured={captured:true,screenshot:true,trustControl:{binding,desired,before,after,beforeCaptured:structuredClone(before),afterCaptured:structuredClone(after),nativeMouse:true}};}
+  v.trust.steps.push({phase,binding,after:{...binding,trusted:menu?binding.trusted:desired},events:[],eventStart:0,eventEnd:0,capture:{runId:'run',status:'captured',phase:menu?'menus-trust-'+phase:'menus-trust-control-'+phase,metadataHash:createHash('sha256').update(JSON.stringify(metadata)).digest('hex'),capture:captured}});
+ }return v;
+}
+test('native trust envelopes require real UI/publicAPI/source bindings and unchanged legacy phases (injected)',()=>{for(const target of ['local','dafny'])assert.deepEqual(validate(trustedFixture(target),'run',target,'/','transitions'),[]);});
+test('native trust envelopes refuse missing, stale, mutated and false-restoration evidence (injected)',()=>{
+ const changes=[v=>delete v.trust,v=>v.trust.steps.reverse(),v=>v.trust.settings.enabledUserValue=false,v=>v.trust.steps[1].after.trusted=false,v=>v.trust.steps[0].binding.session='foreign',v=>v.trust.steps[0].capture.runId='foreign',v=>v.trust.steps[1].capture.capture.trustControl.nativeMouse=false,v=>v.trust.steps[1].capture.capture.trustControl.beforeCaptured.visible=false,v=>v.trust.steps[1].capture.capture.trustControl.afterCaptured.buttons=[],v=>v.trust.steps[0].events.push({kind:'clipboard.write'}),v=>{const m=v.trust.steps[5].capture.capture.contributionMenu;m.submenuVisible=false;m.before.items=[{...m.before.items[0],label:'Copy'}];m.after=structuredClone(m.before);},v=>{const m=v.trust.steps[5].capture.capture.contributionMenu;m.before.items.pop();m.after=structuredClone(m.before);},v=>v.trust.steps[0].capture.capture.contributionMenu.before.items[0].withinViewport=false,v=>v.trust.steps[2].capture.status='failed'];
+ for(const change of changes){const v=trustedFixture();change(v);assert.ok(validate(v,'run','local','/','transitions').length);}
+});
+test('trust renderer rejects UI replacement inside either capture bracket (injected CDP)',async()=>{
+ const fs=require('node:fs'),os=require('node:os'),path=require('node:path'),{captureTrustControl}=require('../parity/renderer.cjs');
+ for(const mutate of [1,2]){const dir=fs.mkdtempSync(path.join(os.tmpdir(),'trust-bracket-'));let granted=false,captures=0,changed=false;const client={async request(method,params){if(method==='Input.dispatchMouseEvent'){if(params.type==='mouseReleased')granted=true;return{};}return{result:{value:{visible:!changed,buttons:[{label:granted?"Don't Trust":'Trust',disabled:null,bounds:{left:1,top:1,right:10,bottom:10}}]}}};}};
+  try{await assert.rejects(captureTrustControl(client,dir,{desired:true,binding:{trusted:false}},async()=>{if(++captures===mutate)changed=true;return{captured:true,screenshot:true};}),/Trust UI changed/);assert.ok(fs.existsSync(path.join(dir,'trust-attempt.json')));}finally{fs.rmSync(dir,{recursive:true,force:true});}
+ }
+});
+test('trust runner accepts only explicit opt-in on bounded contribution suite',()=>{const{parse}=require('../parity/run.cjs');assert.throws(()=>parse(['--menu-trust','transitions']),/require contribution/);assert.throws(()=>parse(['--suite','contribution-menus','--menu-trust','fake']),/require contribution/);assert.equal(parse(['--suite','contribution-menus','--menu-trust','transitions','--workers','1','--obligations','1','--trials','1','--warmups','0']).menuTrust,'transitions');});
