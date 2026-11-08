@@ -19,10 +19,10 @@ private theorem actual (kind : Solidity.AbiEntry.Kind) (word : Fin W) :
   WordGate.executed C 7 kind label (compiled kind) (WordGate.selected C 7 kind label) (machine word) word rfl
 private theorem accept (kind : Solidity.AbiEntry.Kind) (word : Fin W) (valid : kind.valid word.val=true) :
     run (compiled kind).code (machine word)=.ok (written word) 0 := by
-  simpa only [wordGateOutcome,valid,if_true] using actual kind word
+  simpa only [wordGateOutcome,valid,ite_true,written] using actual kind word
 private theorem reject (kind : Solidity.AbiEntry.Kind) (word : Fin W) (invalid : kind.valid word.val=false) :
     run (compiled kind).code (machine word)=.revert := by
-  simpa only [wordGateOutcome,invalid,Bool.false_eq_true,if_false] using actual kind word
+  simpa only [wordGateOutcome,invalid,Bool.false_eq_true,ite_false] using actual kind word
 
 private def leftByte : Fin W := wmod (0xab*2^248)
 private def dirtyByte : Fin W := wmod (0xab*2^248+1)
