@@ -1,33 +1,39 @@
 #!/usr/bin/env bash
-# coord-ask [-t TITLE] "question"   (or question on stdin)
-# Pushes the question to refs/heads/coord-q/<lane>/<ts> of the private coordination repo
-# ($COORD_Q_REPO, default SolidiKeY/solidity-lean-coord); a GitHub Action there turns it into an issue.
-# Needs only clone/push access to that repo; does not touch the lane's repository at all.
+# coord-ask [-t TITLE] [-q QID] "question"   (or question on stdin)
+# coord-ask --ack QID ["note"]               acknowledge the coordinator's answer to QID (closes the question)
+# Pushes refs/heads/coord-q/<lane>/<ts> (question) or coord-ack/<lane>/<ts> (ack) to the private coordination
+# repo ($COORD_Q_REPO, default SolidiKeY/solidity-lean-coord); the coordinator's inbox gets the push at once
+# (GitHub webhook) and opens, follows up or closes the issue. One issue per (lane, QID): asking the same QID
+# again comments on it. Needs only clone/push access to that repo; does not touch the lane's repository.
 set -euo pipefail
-title=""
-while getopts t: o; do case $o in t) title=$OPTARG;; *) echo "usage: coord-ask [-t TITLE] TEXT" >&2; exit 2;; esac; done
+title=""; qid=""; ack=""
+if [ "${1:-}" = --ack ]; then ack=1; qid=${2:?usage: coord-ask --ack QID [NOTE]}; shift 2; fi
+while getopts t:q: o; do case $o in t) title=$OPTARG;; q) qid=$OPTARG;; *) echo "usage: coord-ask [-t TITLE] [-q QID] TEXT | --ack QID [NOTE]" >&2; exit 2;; esac; done
 shift $((OPTIND-1))
-body=${1:-$(cat)}
+if [ -n "$ack" ]; then body=${1:-acknowledged}; else body=${1:-$(cat)}; fi
 [ -n "$body" ] || { echo "coord-ask: empty question" >&2; exit 2; }
 [ -n "$title" ] || title=$(printf '%s' "$body" | head -1 | cut -c1-80)
+# The QID leads the title ("QID: ..."), which is how the coordinator matches a re-ask to its issue.
+if [ -z "$ack" ] && [ -n "$qid" ] && [ "${title#"$qid:"}" = "$title" ]; then title="$qid: $title"; fi
 repo=${COORD_Q_REPO:-https://github.com/SolidiKeY/solidity-lean-coord.git}
 lane=$(git rev-parse --abbrev-ref HEAD); head=$(git rev-parse HEAD)
 IFS=/ read -r _ b_batch b_slug _ <<<"$lane/" || true
 ts=$(date -u +%Y%m%dT%H%M%SZ)
-blob=$(printf 'title: %s\nlane: %s\nhead: %s\nbatch: %s\nslug: %s\n---\n%s\n' \
-  "$title" "$lane" "$head" "${CLOUDVM_BATCH:-$b_batch}" "${CLOUDVM_SLUG:-$b_slug}" "$body")
-# The question commit sits on the coord repo's
-# main. A tree-less shallow clone keeps this to a few kB; only main's root tree is fetched (lazily).
+if [ -n "$ack" ]; then kind=acks; prefix=coord-ack; first="qid: $qid"; msg="ack: $qid"; done=acked
+else kind=questions; prefix=coord-q; first="title: $title"; msg="question: $title"; done=asked; fi
+blob=$(printf '%s\nlane: %s\nhead: %s\nbatch: %s\nslug: %s\n---\n%s\n' \
+  "$first" "$lane" "$head" "${CLOUDVM_BATCH:-$b_batch}" "${CLOUDVM_SLUG:-$b_slug}" "$body")
+# The commit sits on the coord repo's main. A tree-less shallow clone keeps this to a few kB.
 tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
 GIT_TERMINAL_PROMPT=0 git clone -q --bare --depth 1 --filter=tree:0 "$repo" "$tmp/q"
 export GIT_DIR=$tmp/q
 basec=$(git rev-parse HEAD)
 b=$(printf '%s' "$blob" | git hash-object -w --stdin)
 qt=$(printf '100644 blob %s\t%s.md\n' "$b" "$ts" | git mktree)
-ct=$(printf '040000 tree %s\tquestions\n' "$qt" | git mktree)
+ct=$(printf '040000 tree %s\t%s\n' "$qt" "$kind" | git mktree)
 tree=$({ git ls-tree "$basec^{tree}" | grep -v $'\tcoord$'; printf '040000 tree %s\tcoord\n' "$ct"; } | git mktree --missing)
 c=$(git -c user.name="${GIT_AUTHOR_NAME:-coord-ask}" -c user.email="${GIT_AUTHOR_EMAIL:-coord-ask@localhost}" \
-  commit-tree "$tree" -p "$basec" -m "question: $title")
-ref="coord-q/$(printf '%s' "$lane" | tr -c 'A-Za-z0-9._/-' '-')/$ts"
+  commit-tree "$tree" -p "$basec" -m "$msg")
+ref="$prefix/$(printf '%s' "$lane" | tr -c 'A-Za-z0-9._/-' '-')/$ts"
 GIT_TERMINAL_PROMPT=0 git push -q "$repo" "$c:refs/heads/$ref"
-echo "asked: $ref"
+echo "$done: $ref"
