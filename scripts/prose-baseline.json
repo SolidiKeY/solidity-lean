@@ -60,10 +60,10 @@
     "process_ids": 8
   },
   "Solidity/Lowering": {
-    "comment_lines": 10137,
+    "comment_lines": 10192,
     "docs_lines": 0,
-    "docstring_lines": 9975,
-    "process_ids": 403
+    "docstring_lines": 10030,
+    "process_ids": 420
   },
   "Solidity/Optimizer": {
     "comment_lines": 709,
@@ -156,9 +156,9 @@
     "process_ids": 0
   },
   "Solidity/Yul": {
-    "comment_lines": 12742,
+    "comment_lines": 12744,
     "docs_lines": 0,
-    "docstring_lines": 12593,
+    "docstring_lines": 12595,
     "process_ids": 294
   },
   "Solidity/_root": {
@@ -181,7 +181,7 @@
   },
   "docs/audits": {
     "comment_lines": 0,
-    "docs_lines": 218502,
+    "docs_lines": 231740,
     "docstring_lines": 0,
     "process_ids": 0
   },
@@ -199,7 +199,7 @@
   },
   "docs/module-map": {
     "comment_lines": 0,
-    "docs_lines": 9580,
+    "docs_lines": 9582,
     "docstring_lines": 0,
     "process_ids": 0
   },
