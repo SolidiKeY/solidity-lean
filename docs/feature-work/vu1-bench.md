@@ -48,14 +48,11 @@ list is available until the actual suite has run.
 
 ## Waits and owner requests
 
-- `VU1-R1` (resource-policy owner): required systemd hard scope cannot start on
-  this container (PID 1 is `tail`; neither system nor user bus exists). Gates
-  and heavy benchmarks await provisioning under user decision H186, option A:
-  systemd or a delegated cgroup, then the unchanged bounded gates. No alternative
-  limiter was selected. A fresh capability check still finds no systemd bus
-  or writable delegated cgroup; no environment-provisioning tool is exposed.
-  This is a provisioning wait, not an unresolved policy choice. The
-  16 GiB container limit alone is not the required 12 GiB job bound.
+- `VU1-R1` is resolved by standing user decision H232, which supersedes
+  systemd/delegated-cgroup provisioning. Run unchanged heavy gates serially
+  with `LEAN_NUM_THREADS=1`; do not wait for a systemd scope. The enforced
+  host pre-gate remains 16 GiB with no swap before any merge. Operational
+  limitation: no systemd scope on the cloud VM (H232).
 - `VU1-D1` (documentation catalog owner): adding this requested document makes
   the generated catalog stale, but its output is outside this lane's lease.
   The coordinator selected option A: it will add the topic-guide link and
@@ -132,7 +129,8 @@ The H185/H186 decision update received independent read-only finder and skeptic
 reviews with no Lean server and no findings. Both confirmed the owner-input
 wait and provisioning requirement remain intact, with no gate waiver or
 completion claim. Both coordination questions were acknowledged after recording
-the selected option A decisions; their dependencies remain pending.
+the selected option A decisions. H232 subsequently removes the memory-scope
+provisioning dependency; the H185 owner-input dependency remains pending.
 
 ## Checkpoint handoff
 
