@@ -346,4 +346,88 @@ theorem memory_bytes_panic_bound_iff (I : Input) (fuel pos a : Nat) :
 
 #print axioms memory_bytes_panic_iff
 #print axioms memory_bytes_panic_bound_iff
+
+/-! Guarded regression: allocator panic must not be reclassified as revert or
+fuel exhaustion. Revert and fuel characterizations retain all earlier checks;
+positive bytes fuel is sufficient because this branch has no nested elements. -/
+theorem allocation_error_is_panic (I : Input) (a size : Nat) (failure : Fail)
+    (failed : alloc I a size = .error failure) : failure = .panic := by
+  unfold alloc at failed
+  split at failed
+  · cases failed
+  · exact (Except.error.inj failed).symm
+
+theorem memory_bytes_revert_iff (I : Input) (fuel pos a : Nat) :
+    mdec I (fuel + 1) .bytes pos a = .error .revert ↔
+    (¬ pos + 31 < I.size) ∨
+      (pos + 31 < I.size ∧ load I.data pos ≤ lim ∧
+        ∃ next, alloc I a (roundUp (load I.data pos) + 32) = .ok next ∧
+          I.size < pos + 32 + load I.data pos) := by
+  constructor
+  · intro reverted
+    by_cases head : pos + 31 < I.size
+    · by_cases length : load I.data pos ≤ lim
+      · cases allocation : alloc I a (roundUp (load I.data pos) + 32) with
+        | error failure =>
+          have propagated := memory_bytes_allocation_failure I fuel pos a failure head length allocation
+          have same : failure = .revert := Except.error.inj (propagated.symm.trans reverted)
+          have panic := allocation_error_is_panic I a _ failure allocation
+          have impossible : Fail.panic = Fail.revert := panic.symm.trans same
+          cases impossible
+        | ok next =>
+          by_cases payload : pos + 32 + load I.data pos ≤ I.size
+          · rw [memory_bytes_success_of_bounds I fuel pos a next head length allocation payload] at reverted
+            cases reverted
+          · exact Or.inr ⟨head, length, next, rfl, Nat.lt_of_not_ge payload⟩
+      · rw [memory_bytes_oversized_length I fuel pos a head (Nat.lt_of_not_ge length)] at reverted
+        cases reverted
+    · exact Or.inl head
+  · rintro (missing | ⟨head, length, next, allocation, truncated⟩)
+    · exact memory_bytes_missing_length I fuel pos a missing
+    · exact memory_bytes_truncated_payload I fuel pos a next head length allocation truncated
+
+theorem memory_bytes_positive_ne_fuel (I : Input) (fuel pos a : Nat) :
+    mdec I (fuel + 1) .bytes pos a ≠ .error .fuel := by
+  intro exhausted
+  by_cases head : pos + 31 < I.size
+  · by_cases length : load I.data pos ≤ lim
+    · cases allocation : alloc I a (roundUp (load I.data pos) + 32) with
+      | error failure =>
+        have propagated := memory_bytes_allocation_failure I fuel pos a failure head length allocation
+        have same : failure = .fuel := Except.error.inj (propagated.symm.trans exhausted)
+        have panic := allocation_error_is_panic I a _ failure allocation
+        have impossible : Fail.panic = Fail.fuel := panic.symm.trans same
+        cases impossible
+      | ok next =>
+        by_cases payload : pos + 32 + load I.data pos ≤ I.size
+        · rw [memory_bytes_success_of_bounds I fuel pos a next head length allocation payload] at exhausted
+          cases exhausted
+        · rw [memory_bytes_truncated_payload I fuel pos a next head length allocation
+            (Nat.lt_of_not_ge payload)] at exhausted
+          cases exhausted
+    · rw [memory_bytes_oversized_length I fuel pos a head (Nat.lt_of_not_ge length)] at exhausted
+      cases exhausted
+  · rw [memory_bytes_missing_length I fuel pos a head] at exhausted
+    cases exhausted
+
+theorem memory_bytes_fuel_iff (I : Input) (fuel pos a : Nat) :
+    mdec I fuel .bytes pos a = .error .fuel ↔ fuel = 0 := by
+  cases fuel with
+  | zero =>
+    constructor
+    · intro _
+      rfl
+    · intro _
+      rfl
+  | succ fuel =>
+    constructor
+    · intro exhausted
+      exact False.elim (memory_bytes_positive_ne_fuel I fuel pos a exhausted)
+    · intro impossible
+      cases impossible
+
+#print axioms allocation_error_is_panic
+#print axioms memory_bytes_revert_iff
+#print axioms memory_bytes_positive_ne_fuel
+#print axioms memory_bytes_fuel_iff
 end Solidity.H62.AuditLanguage.AbiDynamicWitness
