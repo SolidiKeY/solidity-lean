@@ -89,18 +89,18 @@ theorem runCaptures_end_replicate {H : HTy} {R : RefTy} {E : Ty}
       checkedCaptureOverwrite_empty hp r a r a k k (by rw [hk]; exact Nat.le_refl _) (by rw [hk]; exact Nat.le_refl _),Option.bind_some]
     exact ih
 
-/-- info: 'Solidity.Backend.MemoryOps.runCaptures_mirrors' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.runCaptures_mirrors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms runCaptures_mirrors
-/-- info: 'Solidity.Backend.MemoryOps.copy_schedule_mirrors' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.copy_schedule_mirrors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms copy_schedule_mirrors
-/-- info: 'Solidity.Backend.MemoryOps.default_schedule_mirrors' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.default_schedule_mirrors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms default_schedule_mirrors
-/-- info: 'Solidity.Backend.MemoryOps.copy_schedule_transport' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.copy_schedule_transport' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms copy_schedule_transport
-/-- info: 'Solidity.Backend.MemoryOps.copy_schedule_none_first' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.copy_schedule_none_first' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms copy_schedule_none_first
-/-- info: 'Solidity.Backend.MemoryOps.two_builder_schedules_mirrors' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.two_builder_schedules_mirrors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms two_builder_schedules_mirrors
-/-- info: 'Solidity.Backend.MemoryOps.runCaptures_end_replicate' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.runCaptures_end_replicate' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms runCaptures_end_replicate
 end Solidity.Backend.MemoryOps
