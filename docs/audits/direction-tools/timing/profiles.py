@@ -30,7 +30,7 @@ def main():
         if not profile or profile['exit_code']!=0: continue
         paths=[a.split('=',1)[1] for a in profile['command'] if a.startswith('-Dtrace.profiler.output=')]
         if not paths or not pathlib.Path(paths[0]).exists(): continue
-        data=json.loads(pathlib.Path(paths[0]).read_text()); intervals=collections.defaultdict(list); categories=collections.defaultdict(lambda:collections.defaultdict(list))
+        data=json.loads(pathlib.Path(paths[0]).read_text()); intervals=collections.defaultdict(list); categories=collections.defaultdict(lambda:collections.defaultdict(list)); module_categories=collections.defaultdict(list)
         known={target for thread in data['threads'] for name in thread['stringArray'] if (target:=explicit_target(name)) and not target.startswith('declaration_group:')}
         unmapped=0
         for thread in data['threads']:
@@ -47,7 +47,13 @@ def main():
                 return ancestry[stack]
             for stack,end,weight in zip(samples['stack'],samples['time'],samples['weight']):
                 if weight<=0: continue
-                names=labels(stack); target=next((x for name in reversed(names) if (x:=explicit_target(name))),None)
+                names=labels(stack); interval=(end-weight,end)
+                for family in ('Kernel','Meta.Tactic.simp','Meta.Tactic.bvDecide','Meta.Tactic.decide','Meta.synthInstance','Elab.async'):
+                    if any(name.startswith(family+':') or name.startswith(family+'.') for name in names): module_categories[family].append(interval)
+                command_texts=[strip_comments(name) for name in names if name.startswith('Elab.command:')]
+                if any('#eval' in name for name in command_texts): module_categories['eval_commands'].append(interval)
+                if any('#print axioms' in name for name in command_texts): module_categories['axiom_pin_commands'].append(interval)
+                target=next((x for name in reversed(names) if (x:=explicit_target(name))),None)
                 if target is None:
                     for name in names:
                         if not name.startswith('Elab.command:'): continue
@@ -62,7 +68,7 @@ def main():
                     if any(name.startswith(family+':') or name.startswith(family+'.') for name in names): categories[target][family].append(interval)
         for target,spans in intervals.items():
             declarations.append({'path':row['path'],'declaration':target,'attributed_wall_seconds':union_seconds(spans),'profile_categories_seconds':{k:union_seconds(v) for k,v in categories[target].items()},'auxiliary_lean_declaration':bool(re.search(r'\._(?:proof|match|lambda)_',target)),'name_resolution':'source-command name only' if '::' in target else 'qualified trace name'})
-        profiles.append({'path':row['path'],'threshold_options':[a for a in profile['command'] if 'threshold=' in a],'unattributed_slices':unmapped})
+        profiles.append({'path':row['path'],'profile_wall_seconds':profile['wall_seconds'],'source_classification':row['classification'],'module_category_wall_seconds_lower_bounds':{name:union_seconds(spans) for name,spans in module_categories.items()},'threshold_options':[a for a in profile['command'] if 'threshold=' in a],'unattributed_slices':unmapped})
     declarations.sort(key=lambda r:-r['attributed_wall_seconds'])
     result={'base':sample['base'],'method':'union of time-weight slices attributed by qualified async-proof/kernel trace names or matching command-source names; nested and cross-thread overlaps for a declaration merged; inclusive wall spans can overlap across declarations and MUST NOT be summed as module or CPU time; grouped mutual declarations remain groups; only sampled profiled modules ranked; below-threshold detail unknown','profiles':profiles,'declarations_profiled':len(declarations),'slowest_sampled_declarations':declarations[:20]}
     args.out.mkdir(parents=True,exist_ok=True); (args.out/'profiles.json').write_text(json.dumps(result,indent=2)+'\n'); print('profiled declarations',len(declarations))
