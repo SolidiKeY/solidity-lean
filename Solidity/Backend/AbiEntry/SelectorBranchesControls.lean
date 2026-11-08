@@ -79,14 +79,13 @@ private theorem entry_run (input : Solidity.AbiEntry.Input) (value : Fin W) :
 private theorem fallback_run (initial : Machine) :
     run right.code initial=if false || decide (initial.callvalue.val=0) then
       .ok {initial with mem := upd initial.mem 9 (.val (wmod 77))} 0 else .revert := by
-  rw [ValueGateBody.executed 7 (Frag.init InputCtx) write false _ writeCore right writeCompiled
+  exact ValueGateBody.executed 7 (Frag.init InputCtx) write false _ writeCore right writeCompiled
     (SelectorBranches.branch_selected 7 (Frag.init InputCtx) fallback _ fallbackCore)
-    (ValueGateBody.body_selected 7 (Frag.init InputCtx) write _ writeCore) initial]
-  rfl
+    (ValueGateBody.body_selected 7 (Frag.init InputCtx) write _ writeCore) initial
 private theorem good_entry : run left.code (machine good (wmod 0))=.ok (finished good (wmod 0)) 0 := by
   have full : ¬(wmod good.size).val<36 := by decide
   have valid : (Solidity.AbiEntry.Kind.enumBelow 3).valid (rawArgumentWord good).val=true := by decide
-  rw [entry_run,if_neg full,if_pos valid]
+  rw [entry_run,ite_eq_right full,ite_eq_left valid]
   rfl
 
 theorem public_selections :
@@ -100,13 +99,13 @@ theorem public_selections :
 theorem matched_executes_and_skips_miss :
     run whole.code (machine good (wmod 0))=.ok (finished good (wmod 0)) 0 := by
   rw [actual _ (rawSelectorWord (frame good)) rfl,
-    if_pos (by decide : tag.val=(rawSelectorWord (frame good)).val),List.append_assoc,run_append_ok good_entry]
-  simp only [List.cons_append,List.nil_append,run,exec_cons_zero,Instr.step,Machine.next,Out.bind,exec_length]
+    ite_eq_left (by decide : tag.val=(rawSelectorWord (frame good)).val),List.append_assoc,run_append_ok good_entry]
+  simp only [List.cons_append,List.nil_append,run,exec_cons_zero,Instr.step,Out.bind,exec_length]
 
 theorem miss_executes_other_branch :
     run whole.code (machine miss (wmod 0))=.ok (fallbackFinished miss (wmod 0)) 0 := by
   rw [actual _ (rawSelectorWord (frame miss)) rfl,
-    if_neg (by decide : tag.val≠(rawSelectorWord (frame miss)).val),fallback_run]
+    ite_eq_right (by decide : tag.val≠(rawSelectorWord (frame miss)).val),fallback_run]
   rfl
 
 /-- Matching validation failure cannot fall through to an otherwise successful miss branch. -/
@@ -116,11 +115,11 @@ theorem dirty_match_terminal :
   have rejected : run left.code (machine dirty (wmod 0))=.revert := by
     have full : ¬(wmod dirty.size).val<36 := by decide
     have invalid : ¬(Solidity.AbiEntry.Kind.enumBelow 3).valid (rawArgumentWord dirty).val=true := by decide
-    rw [entry_run,if_neg full,if_neg invalid]
+    rw [entry_run,ite_eq_right full,ite_eq_right invalid]
     rfl
   constructor
   · rw [actual _ (rawSelectorWord (frame dirty)) rfl,
-      if_pos (by decide : tag.val=(rawSelectorWord (frame dirty)).val),List.append_assoc,run_append_revert rejected]
+      ite_eq_left (by decide : tag.val=(rawSelectorWord (frame dirty)).val),List.append_assoc,run_append_revert rejected]
   · rw [fallback_run]
     rfl
 
@@ -128,16 +127,16 @@ theorem miss_nonpayable (value : Fin W) (nonzero : value.val≠0) :
     run whole.code (machine miss value)=.revert := by
   have blocked : (false || decide (value.val=0))=false := by simp only [Bool.false_or,decide_eq_false nonzero]
   rw [actual _ (rawSelectorWord (frame miss)) rfl,
-    if_neg (by decide : tag.val≠(rawSelectorWord (frame miss)).val),fallback_run]
+    ite_eq_right (by decide : tag.val≠(rawSelectorWord (frame miss)).val),fallback_run]
   change (if false || decide (value.val=0) then _ else Out.revert)=Out.revert
-  simp only [blocked,Bool.false_eq_true,if_false]
+  simp only [blocked,Bool.false_eq_true,ite_false]
 
 /-- On a miss only the selector and value are read; malformed decoder locals are irrelevant. -/
 theorem miss_ignores_entry_locals (initial : Machine)
     (selectorCell : initial.mem 7=.val (wmod 1)) (zeroValue : initial.callvalue.val=0) :
     run whole.code initial=.ok {initial with mem := upd initial.mem 9 (.val (wmod 77))} 0 := by
-  rw [actual initial (wmod 1) selectorCell,if_neg (by decide : tag.val≠(wmod 1).val),fallback_run]
-  simp only [zeroValue,decide_true,Bool.false_or,if_true]
+  rw [actual initial (wmod 1) selectorCell,ite_eq_right (by decide : tag.val≠(wmod 1).val),fallback_run]
+  simp only [zeroValue,decide_true,Bool.false_or,ite_true]
 
 theorem decoded_argument (fuel : Nat) :
     ∃ value : Solidity.AbiEntry.Word (.enumBelow 3),
