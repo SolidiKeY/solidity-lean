@@ -25,6 +25,25 @@
   "conclusion": "Registries/documentation dominate churn hotspots. The sole theorem-bearing hotspot has historical closure evidence reused with an identical source/import graph. The matched process-overhead ratio and categorical verdict remain unproven/inconclusive with an UNVERIFIABLE evidence gap under H151; no full audit completion is authorized. Source volume is not labor.",
   "evidence_gaps": [
     {
+      "resolution": "Pinned committed reference inputs read; see reference_reuse.source_inputs. This does not establish matched process calibration.",
+      "source_wait": {
+        "item": "da-references",
+        "status": "absent on pinned base; own shallow CompCert measurement used when supplied"
+      },
+      "status": "RESOLVED_BY_REUSE",
+      "subject": "reference artifact availability"
+    },
+    {
+      "scope": "Pinned-base inventory availability only; not a claim of global absence.",
+      "source_wait": {
+        "item": "va3/vu1",
+        "status": "scripts/differential/** and scripts/bench/** absent on pinned base; no output invented"
+      },
+      "status": "UNVERIFIABLE",
+      "subject": "differential/benchmark reuse evidence",
+      "task_boundary": "Missing reuse evidence retained; no new producer request or measurement authorization."
+    },
+    {
       "authority": "H151 disposition of H241 existing-data lookup",
       "categorical_verdict": null,
       "claim_status": "unproven/inconclusive",

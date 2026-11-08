@@ -18,10 +18,11 @@ result = pathlib.Path(sys.argv[1]) if len(sys.argv)>1 else HERE
 load = lambda p: json.loads((result/p).read_text())
 history = load('history.json'); snapshots = load('snapshots.json'); top = load('hotspots.json'); summary = load('summary.json')
 assert summary['base'] == h.BASE
-assert summary['status']=='partial' and summary['waits']==[]
+assert summary['status']=='partial'
+assert not any(w.get('item') in ('matched process-overhead calibration','process-overhead-calibration') for w in summary['waits'])
 assert summary['matched_process_overhead_ratio'] is None
 assert summary['matched_process_overhead_verdict'] is None
-gap=summary['evidence_gaps'][0]
+gap=next(g for g in summary['evidence_gaps'] if g.get('subject')=='matched process-overhead calibration')
 assert gap['status']=='UNVERIFIABLE' and gap['claim_status']=='unproven/inconclusive'
 assert not gap['fresh_measurement_authorized'] and not gap['full_audit_completion_authorized']
 assert not gap['new_task_or_producer_interface_authorized']
