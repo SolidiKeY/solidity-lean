@@ -430,4 +430,51 @@ theorem memory_bytes_fuel_iff (I : Input) (fuel pos a : Nat) :
 #print axioms memory_bytes_revert_iff
 #print axioms memory_bytes_positive_ne_fuel
 #print axioms memory_bytes_fuel_iff
+
+/-! Guarded regression: a supported-success contract must not assume a successful
+allocator or admit a fixed-result replacement. Pure numeric bounds describe the
+supported inputs; this success-only specification leaves failure kinds to the
+separate panic/revert/fuel characterizations above. -/
+def MemoryBytesBounds (I : Input) (pos a next : Nat) : Prop :=
+  pos + 31 < I.size ∧ load I.data pos ≤ lim ∧
+    (next = a + roundUp (roundUp (load I.data pos) + 32) ∧ I.free + next ≤ lim) ∧
+    pos + 32 + load I.data pos ≤ I.size
+
+theorem memory_bytes_success_numeric_iff (I : Input) (fuel pos a next : Nat) :
+    mdec I (fuel + 1) .bytes pos a =
+      .ok (.bytes (bytesAt I.data (pos + 32) (load I.data pos)), next) ↔
+    MemoryBytesBounds I pos a next := by
+  unfold MemoryBytesBounds
+  rw [memory_bytes_success_iff, allocation_success_iff]
+
+/-- Uniform exact success on inputs described without any decoder-success premise. -/
+def MemoryBytesSuccessSpec
+    (decode : Input → Nat → Nat → Nat → Except Fail (Val .bytes × Nat)) : Prop :=
+  ∀ I fuel pos a next,
+    decode I (fuel + 1) pos a =
+      .ok (.bytes (bytesAt I.data (pos + 32) (load I.data pos)), next) ↔
+    MemoryBytesBounds I pos a next
+
+theorem actual_memory_bytes_success_spec :
+    MemoryBytesSuccessSpec (fun I fuel pos a => mdec I fuel .bytes pos a) := by
+  intro I fuel pos a next
+  exact memory_bytes_success_numeric_iff I fuel pos a next
+
+theorem fixed_result_success_spec_refused (result : Except Fail (Val .bytes × Nat)) :
+    ¬ MemoryBytesSuccessSpec (fun _ _ _ _ => result) := by
+  intro contract
+  have supported : MemoryBytesBounds (input 128) 36 0 64 := by
+    unfold MemoryBytesBounds
+    decide
+  have success := (contract (input 128) 0 36 0 64).mpr supported
+  have impossibleBounds : MemoryBytesBounds (input lim) 36 0 64 :=
+    (contract (input lim) 0 36 0 64).mp success
+  have refused : ¬ MemoryBytesBounds (input lim) 36 0 64 := by
+    unfold MemoryBytesBounds
+    decide
+  exact refused impossibleBounds
+
+#print axioms memory_bytes_success_numeric_iff
+#print axioms actual_memory_bytes_success_spec
+#print axioms fixed_result_success_spec_refused
 end Solidity.H62.AuditLanguage.AbiDynamicWitness
