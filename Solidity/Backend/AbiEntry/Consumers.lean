@@ -357,7 +357,7 @@ theorem semantic_uint_container_boundary (input : Solidity.AbiEntry.Input)
 
 /-- info: 'Solidity.Backend.AbiEntry.Consumers.UIntViews.semantic_uint_containers' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms semantic_uint_containers
-/-- info: 'Solidity.Backend.AbiEntry.Consumers.UIntViews.semantic_uint_container_empty' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.AbiEntry.Consumers.UIntViews.semantic_uint_container_empty' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms semantic_uint_container_empty
 /-- info: 'Solidity.Backend.AbiEntry.Consumers.UIntViews.semantic_uint_container_boundary' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms semantic_uint_container_boundary
