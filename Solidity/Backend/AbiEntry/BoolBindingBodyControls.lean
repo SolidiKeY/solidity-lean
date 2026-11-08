@@ -133,6 +133,6 @@ theorem protected_and_saved :
 #guard_msgs (whitespace := lax) in #print axioms fuel_boundary
 /-- info: 'Solidity.Backend.AbiEntry.BoolBindingBodyControls.false_argument_body' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms false_argument_body
-/-- info: 'Solidity.Backend.AbiEntry.BoolBindingBodyControls.protected_and_saved' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.AbiEntry.BoolBindingBodyControls.protected_and_saved' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms protected_and_saved
 end Solidity.Backend.AbiEntry.BoolBindingBodyControls
