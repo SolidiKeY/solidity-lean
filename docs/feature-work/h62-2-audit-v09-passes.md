@@ -1,5 +1,24 @@
 # H62 item 2: V09 empty-statement audit
 
+## H151 historical evidence disposition
+
+**UNVERIFIABLE:** the historical `/workspace/vy3-evidence` workspace and its
+unrecovered logs, bulk fixtures and exports were lost during executor replacement.
+Their original validation and witness claims remain unproven; the recorded
+538 selected / 1259 accounting is historical accounting, not a new acceptance
+result. Missing historical results must not be inferred from authenticated
+assignment delivery, Git ancestry, later master builds or fresh helper checks.
+
+Under user decision H151, recovery of that workspace is a documented gap,
+not a producer wait. Earlier chronological references below to missing-history
+waits are superseded by this disposition. Fresh checks are separately identified
+and archived under H145; they establish only their stated scope and do not
+reconstruct the lost captures. Regenerate original evidence where feasible
+before claiming the corresponding result. PhysicalByteWorld realization and
+matching program/emission provenance, and Raw compatibility/separate trust
+adjudication, remain producer obligations. All timing STOPs remain binding.
+
+
 H145 evidence location: lane receipts, transition records, checksum/resource
 records and validation reports formerly stored below the audit test directory
 are preserved in the private coordination repository, commit

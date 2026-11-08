@@ -277,7 +277,7 @@ def validate(data, ledger, upstream=None):
     rows = data['features']
     ids = [r['id'] for r in rows]
     assert len(ids) == len(set(ids)), 'duplicate feature IDs'
-    assert data['schemaVersion'] == 1
+    assert data['schemaVersion'] in (1, 2)
     assert re.fullmatch(r'[0-9a-f]{40}', data['upstream']['commit'])
     for r in rows:
         assert re.fullmatch(r'[a-z][A-Za-z0-9]*', r['id']), r['id']

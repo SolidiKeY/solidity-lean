@@ -1,7 +1,0 @@
-# Archive-backed working-report cleanup V94
-
-Guarded regression: resource cleanup must retain the original exact evidence bytes, not replace them with regenerated results. Eight working classification reports were removed only after exact comparison with unique regular members of four retained, committed-hash-bound archives and independent finder/skeptic review.
-
-The receipt records every original working path, byte count, SHA256, exact archive-member name and retained archive binding. Logical bytes reclaimed58433660. Post-deletion rechecks confirm every original byte sequence remains exactly restorable. Restore members to their original paths before historical working-path checks; these intentional duplicate evictions are not UNVERIFIABLE-byte gaps. Unique evidence, source, logs, datasets and caches remain intact. The setup's incorrect older-member prefix was refused before mutation and is recorded.
-
-Census unchanged1134 reviewed/4149 pending of5283;1537 unresolved owners; zero fresh witnesses. Accounting passes, complete acceptance remains FAIL. This maintenance supplies no semantic/Lean/kernel/axiom/replay/runtime or performance acceptance. Coordinator retrieval remains pending. Whole original queues remain unfinished; H28 actualCallerFields/extractionActuallyChanges/replay pause, Raw/Context waits and all STOPs retained. No statement/definition/budget/exclusion changes or push.

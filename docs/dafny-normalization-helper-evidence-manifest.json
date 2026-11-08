@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "status": "partial",
+  "sourceHead": "e8c512eb88e129442d6ed7ed63149d885bcae1f7",
+  "fileCount": 53,
+  "uncompressedBytes": 2336844,
+  "archive": {
+    "path": "/workspace/dafny-normalization-helper-20261107/bulk.tar.gz",
+    "bytes": 424108,
+    "sha256": "27ffcc5dd12e45e3aebcf092c2fb2a235ad0144c1ea39306b388ec052ffd8923"
+  },
+  "index": {
+    "path": "/workspace/dafny-normalization-helper-20261107/files.json",
+    "bytes": 13336,
+    "sha256": "f078db440967aa509781af3e8c0b95861c9d1b02c43166de5826e81b0e20fdb1"
+  },
+  "boundaries": [
+    "One shared normalizer used by legacy reader; resolved/results rfl equalities preserve old expressions, indexed forget and length preserve errors and full-clause order. Legacy signature byte-identical; no budget change.",
+    "Three real legacy/rebuilt reader computational outputs byte-identical; generic callback ordinal controls, genuine retained candidate/constructor/shadowing/module-boundary regressions pass. No selected typed-failure/span attribution.",
+    "First control serializer failure and ambiguous Except-pattern failure retained; no forced evaluation or admitted proof. Final supervised runs no resource stop/survivor.",
+    "Q-REL-CANONICAL-LEDGER-01 answered and implemented for shared helper/ordinal companion; separate private Import transport factoring question pending. No protected Import edit. All490 rows/frozen270 unchanged."
+  ]
+}

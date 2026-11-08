@@ -1,7 +1,0 @@
-# Adopt e6849d3b
-
-The assigned help branch was rebased with --rebase-merges onto e6849d3bdf516099d20c33d3581d523449764018. Original head 149d6778bda5b9750715f1679462b3e1478665ff remains protected by refs/heads/codex/v11-preserve-pre-e684-149d6778 and all earlier seals remain intact. All Backend/MemoryOps source files are byte-identical to that preserved head. Only module-map conflicts were resolved, retaining both sides. Generated roots were regenerated and register.sh --check passed. No proof/source semantic edit or new Lean check was performed; previous exact-source checks retain their limits.
-
-The first rebase stopped at a module-map conflict. First continuation failed with threaded-lstat resource exhaustion (exit128); subsequent continuations explicitly disabled Git preload/index/checkout/pack threading and succeeded after the second map conflict was resolved. Raw receipts adopt-e684-rebase01.log and adopt-e684-rebase-continue01/02/03.log are preserved under /workspace/v11-memory-operations-evidence.
-
-The four-file coherent fixed-child packet remains required, including PhysicalReferenceChild.set_fixed_primitive. Combined master validation and full original gates remain open. G32/P6b, G34, G35.02 reference/struct/recursive remainder, G35.03 and Backfills A/B remain partial; G33 and G35.01/.04/.05/.06 remain delegated/open. Concrete byte-load/emission/World, general graph/all-profile/allocation-failure, ABI/storage/copy and final Source/V10/target/compiler obligations remain open. Persistent goal unchanged BLOCKED. No publication. questions=[].

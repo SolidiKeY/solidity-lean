@@ -1,0 +1,10 @@
+{
+  "support_module": "Solidity.Backend.Selection.LiteralSelection",
+  "support_source": "tests/h62/item2/audit-bytecode-selection/runtime-control-support.lean.txt",
+  "witnesses": {
+    "runtime_control_joint_domain": {
+      "target": "Solidity.Backend.Selection.V2.Controls.reject_false_runtime",
+      "proof": "\u27e8Unit,(fun _ => ()),[],.code [],0,0,emptyComposition,(fun _ => none),(fun _ _ => none),(fun _ => False),True.intro\u27e9"
+    }
+  }
+}
