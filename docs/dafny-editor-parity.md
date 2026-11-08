@@ -2181,3 +2181,33 @@ failures with unproved causes, not reclassified by this run. Source/target/host
 identities, ordered request timing, endpoint files and owned cleanup remain raw
 failed evidence. A separate new-host recovery scenario requires a human scope
 choice; original same-session predicates stay unchanged while it is pending.
+
+
+### Automatic-verification configuration observation
+
+The existing lifecycle entry point has an opt-in `--configuration` sequence,
+using the existing stdio launcher, process/resource guards and shutdown. It
+records default, Never, Save and restored-default process epochs against one
+owned workspace/source URI. The original Check fixture and ordered edit/error/
+fix sequence are retained. Only open/change/save/configuration notifications and
+symbol barriers drive behavior; explicit verification requests are refused.
+
+Pinned `dafny.automaticVerification` defaults to `onchange`, permits `never`,
+`onchange`, `onsave`, and requires restart. The pinned client maps it to launch
+arguments and reads global configuration without a resource. The headless
+responder records actual requests/replies if requested; absent requests stay
+missing evidence. Configured client values and launch modes are separate,
+including the local UI `onchange` versus raw server/headless `never` boundary.
+Local native observation remains compiler-only. Local automatic scheduling and
+cancellation controls use the production service with injected compiler/verifier
+outcomes, not actual proof or rendered evidence.
+
+Source URI/version/hash and client session snapshots bind observations without
+inventing Dafny-native hashes/session tokens. Never and pre-save observations
+require owned Stale states through their barriers, and the final wire audit
+refuses unexpected scheduling through shutdown. This is bounded evidence, not
+unlimited silence or full lifecycle equivalence. Schema preflight occurs before
+spawn; restoration errors remain failures. All four setting/lifecycle rows stay
+incomplete until native client/rendered/full matrices and both original row
+judgments pass. No product settings, predicates, proof budgets or producer
+interfaces change.
