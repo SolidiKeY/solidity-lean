@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """Validate frozen measurements, removal scope, manifests and audit-only handoff."""
-import json, pathlib, subprocess
+import argparse, json, os, pathlib, subprocess
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--scope-base", default=os.environ.get("GATE_BASE", "origin/master"),
+                    help="integration reference; scope is checked from its merge base with HEAD")
+args = parser.parse_args()
 here = pathlib.Path(__file__).resolve().parent
 summary = json.loads((here / "summary.json").read_text())
 family = json.loads((here / "family.json").read_text())
@@ -26,6 +30,10 @@ assert summary["kernel_check"]["negative_control_rejected"] is True
 assert summary["theorem_preservation"]["all_family_exports_preserved"] is False
 assert not git("diff", base, prototype, "--", "Solidity/Theorems.lean")
 assert summary["verdict"] == "GO" and summary["after"]["physical_lines"] * 3 <= summary["before"]["physical_lines"]
-changed = git("diff", "--name-only", base, "HEAD").splitlines()
-assert changed and all(path.startswith("docs/audits/shrink/tv-backend/") for path in changed)
-print("TV_BACKEND_AUDIT_PASS", len(family), "files; removal prototype valid; final diff audit-only")
+# Measurements above always use the frozen base. Handoff scope instead uses
+# the integration reference, so unrelated master changes are not charged here.
+# After integration origin/master may equal HEAD; an empty diff is valid.
+integration_base = git("merge-base", args.scope_base, "HEAD")
+changed = git("diff", "--name-only", integration_base, "HEAD").splitlines()
+assert all(path.startswith("docs/audits/shrink/tv-backend/") for path in changed)
+print("TV_BACKEND_AUDIT_PASS", len(family), "files; frozen prototype valid; integration scope", integration_base, len(changed), "audit paths")
