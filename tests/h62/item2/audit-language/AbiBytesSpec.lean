@@ -100,4 +100,62 @@ theorem swapped_failures_behavior_refused : ¬ MemoryBytesBehaviorSpec swappedFa
 #print axioms actual_memory_bytes_behavior_spec
 #print axioms swapped_failures_preserve_success
 #print axioms swapped_failures_behavior_refused
+
+/-! Guarded regression: a combined contract must not leave room for wrong output
+bytes or an unclassified failure. Completeness is pointwise over every input,
+fuel, position and allocation start, restricted only to the bytes branch. -/
+theorem behavior_spec_pointwise
+    (decode : Input → Nat → Nat → Nat → Except Fail (Val .bytes × Nat))
+    (contract : MemoryBytesBehaviorSpec decode) (I : Input) (fuel pos a : Nat) :
+    decode I fuel pos a = mdec I fuel .bytes pos a := by
+  cases fuel with
+  | zero =>
+    exact (contract.2.2.2 I 0 pos a).mpr rfl
+  | succ fuel =>
+    have panicAgreement (bounds : MemoryBytesPanicBounds I pos a) :
+        decode I (fuel + 1) pos a = mdec I (fuel + 1) .bytes pos a :=
+      ((contract.2.1 I fuel pos a).mpr bounds).trans
+        (((actual_memory_bytes_behavior_spec.2.1 I fuel pos a).mpr bounds).symm)
+    have revertAgreement (bounds : MemoryBytesRevertBounds I pos a) :
+        decode I (fuel + 1) pos a = mdec I (fuel + 1) .bytes pos a :=
+      ((contract.2.2.1 I fuel pos a).mpr bounds).trans
+        (((actual_memory_bytes_behavior_spec.2.2.1 I fuel pos a).mpr bounds).symm)
+    by_cases head : pos + 31 < I.size
+    · by_cases length : load I.data pos ≤ lim
+      · let next := a + roundUp (roundUp (load I.data pos) + 32)
+        by_cases capacity : I.free + next ≤ lim
+        · by_cases payload : pos + 32 + load I.data pos ≤ I.size
+          · have bounds : MemoryBytesBounds I pos a next :=
+              ⟨head, length, ⟨rfl, capacity⟩, payload⟩
+            exact ((contract.1 I fuel pos a next).mpr bounds).trans
+              (((actual_memory_bytes_success_spec I fuel pos a next).mpr bounds).symm)
+          · exact revertAgreement (Or.inr ⟨head, length, capacity, Nat.lt_of_not_ge payload⟩)
+        · exact panicAgreement ⟨head, Or.inr ⟨length, Nat.lt_of_not_ge capacity⟩⟩
+      · exact panicAgreement ⟨head, Or.inl (Nat.lt_of_not_ge length)⟩
+    · exact revertAgreement (Or.inl head)
+
+theorem behavior_spec_iff_pointwise
+    (decode : Input → Nat → Nat → Nat → Except Fail (Val .bytes × Nat)) :
+    MemoryBytesBehaviorSpec decode ↔
+      ∀ I fuel pos a, decode I fuel pos a = mdec I fuel .bytes pos a := by
+  constructor
+  · intro contract I fuel pos a
+    exact behavior_spec_pointwise decode contract I fuel pos a
+  · intro agreement
+    refine ⟨?_, ?_, ?_, ?_⟩
+    · intro I fuel pos a next
+      rw [agreement I (fuel + 1) pos a]
+      exact memory_bytes_success_numeric_iff I fuel pos a next
+    · intro I fuel pos a
+      rw [agreement I (fuel + 1) pos a]
+      exact memory_bytes_panic_bound_iff I fuel pos a
+    · intro I fuel pos a
+      rw [agreement I (fuel + 1) pos a]
+      exact memory_bytes_revert_numeric_iff I fuel pos a
+    · intro I fuel pos a
+      rw [agreement I fuel pos a]
+      exact memory_bytes_fuel_iff I fuel pos a
+
+#print axioms behavior_spec_pointwise
+#print axioms behavior_spec_iff_pointwise
 end Solidity.H62.AuditLanguage.AbiBytesSpec
