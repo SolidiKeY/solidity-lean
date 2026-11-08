@@ -49,7 +49,24 @@ def main():
         assert json.loads((HERE/'mutants.json').read_text())==ms
         rs=json.loads((HERE/'results.json').read_text()); assert len({r['id'] for r in rs})==len(rs)
         assert all(r['id'] in {m['id'] for m in ms} for r in rs)
-        assert all(r['baseline_pass'] for r in rs)
+        assert rs, 'no executed mutants'
+        index={m['id']:m for m in ms}
+        for r in rs:
+            m=index[r['id']]
+            assert all(r[k]==m[v] for k,v in [('file','path'),('line','line'),('area','area'),('description','description')])
+            assert r['baseline_pass'] and r['checks']
+            assert r['seconds']==round(sum(c['seconds'] for c in r['checks']),3)
+            assert r['checks'][0]['module']==module(m['path'])
+            assert r['verdict'] in ['KILLED','SURVIVOR','BLOCKED']
+            if r['verdict']=='SURVIVOR':
+                assert all(c['returncode']==0 for c in r['checks'])
+                assert set(map(module,m['targets'])) <= {c['module'] for c in r['checks']}
+                assert not r['killed_by']
+            elif r['verdict']=='KILLED':
+                assert r['checks'][-1]['returncode']>0 and r['checks'][-1]['returncode']!=124
+                assert r['killed_by'] and 'decisive_output' in r['checks'][-1]
+            else: assert r['checks'][-1]['returncode']!=0
+        assert (HERE/'results.json').stat().st_size<1000000
         assert json.loads((HERE/'summary.json').read_text())==summarize(ms,rs)
         print('PASS pinned catalogue, unique results, baseline guards, summary arithmetic'); return
     assert args.work and args.work.resolve()!=ROOT and not str(args.work.resolve()).startswith(str(ROOT)+'/')
@@ -158,5 +175,5 @@ def summarize(ms,rs):
     for area in sorted({m['area'] for m in ms}):
         rows=[r for r in rs if r['area']==area]; killed=sum(r['verdict']=='KILLED' for r in rows); survivors=sum(r['verdict']=='SURVIVOR' for r in rows)
         areas[area]=dict(candidates=sum(m['area']==area for m in ms),ran=len(rows),killed=killed,survivors=survivors,blocked=len(rows)-killed-survivors,score=killed/(killed+survivors) if killed+survivors else None)
-    return dict(base=BASE,candidates=len(ms),ran=len(rs),areas=areas,generated_candidates=0,unmarked_candidates=len(ms),survivors=[dict(id=r['id'],importance=1 if r['area'] in ['Semantics','Calculus'] else 2,meaning='No check in the recorded affected selected-dependent slice constrains this change; no whole-repository absence-of-proof claim.',description=r['description']) for r in rs if r['verdict']=='SURVIVOR'],boundary='Kernel elaboration of pinned source and selected dependent paths; first failure stops each mutant. Not external EVM/solc conformance, exhaustive dependency coverage, or a reference-class ratio.',limitations=['no systemd scope on the cloud VM (H232)','No full rebuild from scratch; published cache and baseline selected builds required.','Unmarked is not proven handwritten.','M31 strengthens/restricts a recognizer; survival can be vacuity rather than missing proof.'])
+    return dict(base=BASE,score_label='sampled selected-dependent-slice mutation score, not area-wide assurance',complete_catalogue_executed=len(ms)==len(rs),candidates=len(ms),ran=len(rs),areas=areas,generated_candidates=0,unmarked_candidates=len(ms),survivors=[dict(id=r['id'],importance=1 if r['area'] in ['Semantics','Calculus'] else 2,meaning='No check in the recorded affected selected-dependent slice constrains this change; no whole-repository absence-of-proof claim.',description=r['description']) for r in rs if r['verdict']=='SURVIVOR'],boundary='Kernel elaboration of pinned source and selected dependent paths; first failure stops each mutant. Not external EVM/solc conformance, exhaustive dependency coverage, or a reference-class ratio.',limitations=['no systemd scope on the cloud VM (H232)','No full rebuild from scratch; published cache and baseline selected builds required.','Unmarked is not proven handwritten.','M31 strengthens/restricts a recognizer; survival can be vacuity rather than missing proof.'])
 if __name__=='__main__':main()
