@@ -111,6 +111,7 @@ theorem source_bool_alloc_memOK {E : Source.Env} {Γ : Source.RCtx}
     exact ⟨hy,.array (fun i => .val trivial)⟩
   · intro v y h; exact h
   · intro h y hy; exact hy
+set_option backward.isDefEq.respectTransparency false in
 /-- Compose independent Source location execution with the ACTUAL published
 recursive builder and reached intrinsic recaptures. Representation is INITIAL;
 complete recursive target mirror and final reads are conclusions. -/
