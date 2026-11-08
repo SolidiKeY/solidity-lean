@@ -1483,6 +1483,16 @@ P20 pending producer fields remain explicit obligations; importing them proves
 no concrete Source/compiler adequacy. General P16/full VY1 and final lane gates
 remain open.
 
+### Declaration-field classifiers
+
+Reuse `declarationFieldUses` for direct metadata classifiers over intrinsic
+`Syn` nodes. Its exact membership and original-unit witness lemmas retain the
+actual declaration roster and syntax site; `declarationElementaryUses_iff`
+instantiates this API. A classifier can return an empty or incomplete list, so
+these traversal laws do not establish classifier validity, whole-catalog
+coverage, lexical scope, or admission. Keep the original source unit available:
+its headers cannot be recovered from the declaration environment alone.
+
 ### P16 generated-file maintenance
 
 Run `python3 -B scripts/h62/item1/p16-generator/check.py` to verify the generated
