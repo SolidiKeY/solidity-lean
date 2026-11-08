@@ -6,7 +6,7 @@ How do CompCert, CakeML, KEVM and Yul/EVM semantics justify loop lowering with b
 
 ## Our current state
 
-All repository references below refer to base **a0a9ca15ba35fd6e8d9a9be10e4b6b45dbf45d3e**. Source is read only; sole changed file is this report.
+All repository references below refer to base **a0a9ca15ba35fd6e8d9a9be10e4b6b45dbf45d3e**. Source is read only. The original study changed only this report; the coordinator-requested navigation repair also updates the topic-guide fragment, its generated guide, and the generated documentation catalog.
 
 - Solidity/Syntax/Elab/Lower.lean:543: `lowerLoops (rs : Option (List String)) (ss : List RawStmt) : ElabM (List RawStmt)`. Both sides are raw syntax, not the resolved intrinsic Source statements or G19 target `Prog`. It projects `lowerList`'s result after initializing loop flags.
 - Solidity/Syntax/Elab/Values.lean:651: `ElabM` is ReaderT over two StateT layers ending in `Except String`: scope, local context/fresh counter and call memo matter. `freshCapture` at :728 increments that counter. Success must be associated with the exact incoming scope/state and output; freshness is an obligation, not alpha equality by wish.
@@ -129,6 +129,12 @@ Independent Codex agents ran in read-only mode, without the Lean server. They in
 
 The five ordered work items have separate commits: inventory, prior art, reuse mapping, skeptic pass, proposals. This report changes no Lean source, axioms or sorry declarations (added counts: **0 / 0**). No Lean build or runtime gate is claimed or required for this documentation-only lane. External proof scripts were inspected, not rebuilt. The unresolved F3 theorem is the subject of the study, not unfinished implementation assigned to this lane.
 
-The final handoff retains the original patch, Git bundle, this report, pinned external source bytes/manifest, review findings and exact gate commands/results under `/workspace/pa-lowering-evidence/handoff/`. SHA256 manifest authenticates the exported artifacts. Coordinator-only proposed links are supplied in the final result; neither AGENTS.md nor area docs are edited. No merge, push or PR is performed. The prospective LOW-1/2/3 questions above are for the coordinator's later decision round; no scope choice was needed to finish this study.
+The final handoff retains the original patch, Git bundle, this report, pinned external source bytes/manifest, review findings and exact gate commands/results under `/workspace/pa-lowering-evidence/handoff/`. SHA256 manifest authenticates the exported artifacts. The coordinator-requested navigation repair links this study from the topic guide and regenerates the documentation catalog. AGENTS.md and area docs remain unchanged. No merge, push or PR is performed. The prospective LOW-1/2/3 questions above are for the coordinator's later decision round; no scope choice was needed to finish this study.
 
 Validation results: `bash scripts/check-doc-paths.sh` exited 0: “OK: every backticked *.lean reference resolves.” It also reported 143 pre-existing ambiguous references, with none missing; the normal non-strict gate passes. `git diff --check <base> HEAD` passed, and `git diff --name-only <base> HEAD` listed exactly this report. Runtime discovery found no `lean` or `lake` executable; the repository pins Lean v4.24.0. No actual runtime versions, KeySort result or RUNTIME_GATE_PASS are claimed. VM resources observed: 17 GiB RAM, 16 GiB available, no swap; 30 GiB free disk. No heavy job was launched.
+
+### Scheduled-merge navigation review repair
+
+The coordinator's independent P1/P2 reviews found no incoming topic link and a missing generated catalog row. The repair adds a topic-guide fragment linking this study and the catalog, regenerates the topic guide through `fragments.sh`, and regenerates the catalog with the published navigation checker. The scientific conclusions, cited base, proposals, Lean interfaces and proof budgets are unchanged. Navigation checks use the checker retrieved from published master because the pinned study base predates that script. The catalog must be regenerated for the final merged document set. Validation and review receipts remain in the private coordination evidence repository under H145.
+
+Independent read-only Codex finder and skeptic rechecks of the four-file navigation repair both PASS: topic link and catalog entry resolve; the published navigation checker reports 1,177 documents reachable from both agent entry points; fragment and whitespace checks pass. Neither review used the Lean server or changed files.

@@ -187,6 +187,11 @@ V17 validation and evidence preparation: [roadmap-v17-validation.md](feature-wor
 - [Core EVM revert/return data (machine V2)](feature-work/evm-machine-v2.md): versioned `OutV2`/`MachineV2` with revert/return data, return buffer and CALL input bytes; migration to the frozen machine.
 - [Canonical P1 languages V2](feature-work/p1-lang-v2.md): `P1LangV2` with revert data, call events and frame classes over the V2 machine; `p1_frame_bridge` for a guarded revert-with-data family.
 | V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
+
+**Lowering correctness prior art**
+
+- [Lowering correctness study (F3 / E1)](audits/prior-art-lowering.md): CompCert, CakeML, KEVM and Yul mechanisms, existing G19 reuse, and deferred interface proposals.
+- [Documentation catalog](document-index.md): generated navigation for retained Markdown documents.
 | V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
 - [V14 H10 aggregate helper](feature-work/v14-help-g18.md): published raw calldata byte parameter/frame consumer and remaining G18 obligations.
 - V14 typed constructor argument consumers: [executable consumers](feature-work/roadmap-v14-executable.md).
