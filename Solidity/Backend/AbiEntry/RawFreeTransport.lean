@@ -92,16 +92,16 @@ theorem entry_free (data : List UInt8) (free free' f : Nat) (ps : List Param)
   simp only [entry,Input.size,enter_free data free free' f ps 0 0 classes]
   rfl
 
-/-- info: 'Solidity.Backend.AbiEntry.RawFreeTransport.word_free' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.AbiEntry.RawFreeTransport.word_free' depends on axioms: [propext] -/
 #guard_msgs in #print axioms word_free
-/-- info: 'Solidity.Backend.AbiEntry.RawFreeTransport.cref_free' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.AbiEntry.RawFreeTransport.cref_free' depends on axioms: [propext] -/
 #guard_msgs in #print axioms cref_free
 /-- info: 'Solidity.Backend.AbiEntry.RawFreeTransport.calldata_step' depends on axioms: [propext] -/
 #guard_msgs in #print axioms calldata_step
 /-- info: 'Solidity.Backend.AbiEntry.RawFreeTransport.word_step' depends on axioms: [propext] -/
 #guard_msgs in #print axioms word_step
-/-- info: 'Solidity.Backend.AbiEntry.RawFreeTransport.enter_free' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.AbiEntry.RawFreeTransport.enter_free' depends on axioms: [propext] -/
 #guard_msgs in #print axioms enter_free
-/-- info: 'Solidity.Backend.AbiEntry.RawFreeTransport.entry_free' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.AbiEntry.RawFreeTransport.entry_free' depends on axioms: [propext] -/
 #guard_msgs in #print axioms entry_free
 end Solidity.Backend.AbiEntry.RawFreeTransport
