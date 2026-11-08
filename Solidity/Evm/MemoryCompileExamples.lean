@@ -26,6 +26,7 @@ def machine : Machine :=
     else if a = 16 then w[2] else if a = 17 then w[7] else if a = 18 then w[9]
     else if a = 20 then w[1] else if a = 21 then w[4] else w[0] }
 
+set_option backward.isDefEq.respectTransparency false in
 theorem array0_repr : ArrayRepr hp r0 (base 0) machine := by
   constructor
   · change 16 + 1 + hp.len r0 .dyn ≤ W
@@ -45,6 +46,7 @@ theorem array0_repr : ArrayRepr hp r0 (base 0) machine := by
       | zero => cases hv; exact ⟨⟨9, by decide⟩, rfl, rfl⟩
       | succ i => cases hv
 
+set_option backward.isDefEq.respectTransparency false in
 theorem array1_repr : ArrayRepr hp r1 (base 1) machine := by
   constructor
   · change 20 + 1 + hp.len r1 .dyn ≤ W
