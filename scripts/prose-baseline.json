@@ -42,9 +42,9 @@
     "process_ids": 18
   },
   "Solidity/Frontend": {
-    "comment_lines": 9093,
+    "comment_lines": 9331,
     "docs_lines": 0,
-    "docstring_lines": 8327,
+    "docstring_lines": 8453,
     "process_ids": 171
   },
   "Solidity/Hash": {
@@ -159,7 +159,7 @@
     "comment_lines": 12742,
     "docs_lines": 0,
     "docstring_lines": 12593,
-    "process_ids": 291
+    "process_ids": 294
   },
   "Solidity/_root": {
     "comment_lines": 1217,
@@ -175,13 +175,13 @@
   },
   "docs/_root": {
     "comment_lines": 0,
-    "docs_lines": 30218,
+    "docs_lines": 30253,
     "docstring_lines": 0,
     "process_ids": 0
   },
   "docs/audits": {
     "comment_lines": 0,
-    "docs_lines": 2509,
+    "docs_lines": 218502,
     "docstring_lines": 0,
     "process_ids": 0
   },
@@ -193,13 +193,13 @@
   },
   "docs/feature-work": {
     "comment_lines": 0,
-    "docs_lines": 114532,
+    "docs_lines": 114566,
     "docstring_lines": 0,
     "process_ids": 0
   },
   "docs/module-map": {
     "comment_lines": 0,
-    "docs_lines": 9556,
+    "docs_lines": 9580,
     "docstring_lines": 0,
     "process_ids": 0
   },
