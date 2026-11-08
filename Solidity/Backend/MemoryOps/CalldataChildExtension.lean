@@ -58,10 +58,10 @@ theorem RefChildRepr.grow {D : Source.Layout} {H H' : HTy}
     obtain ⟨p, hp, rfl⟩ := List.mem_map.mp hq
     exact (hr.2.2 p hp).grow e hk
 
-/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.grow' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.grow' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms BoolChildRepr.grow
 /-- info: 'Solidity.Backend.MemoryOps.decodedChildRefs_wk' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms decodedChildRefs_wk
-/-- info: 'Solidity.Backend.MemoryOps.RefChildRepr.grow' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.RefChildRepr.grow' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms RefChildRepr.grow
 end Solidity.Backend.MemoryOps
