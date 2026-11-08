@@ -246,4 +246,60 @@ theorem memory_bytes_positive_fuel_independent (I : Input) (first second pos a :
 #print axioms memory_bytes_allocation_failure
 #print axioms memory_bytes_truncated_payload
 #print axioms memory_bytes_positive_fuel_independent
+
+/-! Guarded regression: constructive success alone must not hide missing guard
+premises. The converse recovers every check from an actual successful bytes
+result, with no restriction on the input calldata or allocation start. -/
+theorem memory_bytes_success_iff (I : Input) (fuel pos a next : Nat) :
+    mdec I (fuel + 1) .bytes pos a =
+      .ok (.bytes (bytesAt I.data (pos + 32) (load I.data pos)), next) ↔
+    pos + 31 < I.size ∧ load I.data pos ≤ lim ∧
+      alloc I a (roundUp (load I.data pos) + 32) = .ok next ∧
+      pos + 32 + load I.data pos ≤ I.size := by
+  constructor
+  · intro success
+    by_cases head : pos + 31 < I.size
+    · by_cases length : load I.data pos ≤ lim
+      · cases allocation : alloc I a (roundUp (load I.data pos) + 32) with
+        | error failure =>
+          rw [memory_bytes_allocation_failure I fuel pos a failure head length allocation] at success
+          cases success
+        | ok actual =>
+          by_cases payload : pos + 32 + load I.data pos ≤ I.size
+          · have expected := memory_bytes_success_of_bounds I fuel pos a actual head length allocation payload
+            have same : actual = next :=
+              congrArg Prod.snd (Except.ok.inj (expected.symm.trans success))
+            exact ⟨head, length, congrArg (fun n => (Except.ok n : Except Fail Nat)) same, payload⟩
+          · rw [memory_bytes_truncated_payload I fuel pos a actual head length allocation
+              (Nat.lt_of_not_ge payload)] at success
+            cases success
+      · rw [memory_bytes_oversized_length I fuel pos a head (Nat.lt_of_not_ge length)] at success
+        cases success
+    · rw [memory_bytes_missing_length I fuel pos a head] at success
+      cases success
+  · rintro ⟨head, length, allocation, payload⟩
+    exact memory_bytes_success_of_bounds I fuel pos a next head length allocation payload
+
+theorem memory_bytes_lower_free {I J : Input} (fuel pos a next : Nat)
+    (data : J.data = I.data) (lower : J.free ≤ I.free)
+    (success : mdec I (fuel + 1) .bytes pos a =
+      .ok (.bytes (bytesAt I.data (pos + 32) (load I.data pos)), next)) :
+    mdec J (fuel + 1) .bytes pos a =
+      .ok (.bytes (bytesAt J.data (pos + 32) (load J.data pos)), next) := by
+  have bounds := (memory_bytes_success_iff I fuel pos a next).mp success
+  have size : J.size = I.size := congrArg List.length data
+  have length : load J.data pos = load I.data pos := congrArg (fun bytes => load bytes pos) data
+  apply (memory_bytes_success_iff J fuel pos a next).mpr
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · rw [size]
+    exact bounds.1
+  · rw [length]
+    exact bounds.2.1
+  · rw [length]
+    exact allocation_lower_free lower bounds.2.2.1
+  · rw [size, length]
+    exact bounds.2.2.2
+
+#print axioms memory_bytes_success_iff
+#print axioms memory_bytes_lower_free
 end Solidity.H62.AuditLanguage.AbiDynamicWitness
