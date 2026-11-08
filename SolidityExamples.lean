@@ -120,6 +120,7 @@ import Solidity.Examples.ExactUpdates
 import Solidity.Examples.ExampleNames
 import Solidity.Examples.FixedArrayFloor
 import Solidity.Examples.FixedArrayRoot
+import Solidity.Examples.Goals
 import Solidity.Examples.InputReduction
 import Solidity.Examples.LexDiamond
 import Solidity.Examples.LexMetrics
