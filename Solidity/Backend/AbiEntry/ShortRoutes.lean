@@ -42,10 +42,10 @@ private theorem branch (base : Nat) (short size : Fin W) (rest : List Evm.Instr)
       else run rest machine := by
   by_cases small : size.val<4
   · simp only [run,List.cons_append,List.nil_append,exec_cons_zero,Instr.step,Machine.next,Out.bind,
-      initial,wmod,Nat.mod_eq_of_lt (by decide : (4 : Nat)<W),small,decide_true,bword,if_true,if_false,Nat.one_ne_zero,decide_false,
+      initial,wmod,Nat.mod_eq_of_lt (by decide : (4 : Nat)<W),small,decide_true,bword,ite_true,ite_false,Nat.one_ne_zero,decide_false,
       Bool.false_eq_true,exec_length]
   · simp only [run,List.cons_append,List.nil_append,exec_cons_zero,exec_cons_succ,Instr.step,Machine.next,
-      Out.bind,initial,wmod,Nat.mod_eq_of_lt (by decide : (4 : Nat)<W),small,decide_false,decide_true,bword,if_true,if_false,Nat.one_ne_zero,
+      Out.bind,initial,wmod,Nat.mod_eq_of_lt (by decide : (4 : Nat)<W),small,decide_false,decide_true,bword,ite_true,ite_false,Nat.one_ne_zero,
       Bool.false_eq_true]
 
 theorem run_route (C : Contract) (base : Nat) (table : PayableRouteTable) (fallback short : Fin W)
@@ -55,8 +55,8 @@ theorem run_route (C : Contract) (base : Nat) (table : PayableRouteTable) (fallb
       shortRouteOutcome base table fallback short selector size machine := by
   rw [code,branch base short size _ machine length]
   by_cases small : size.val<4
-  · simp only [shortRouteOutcome,if_pos small]
-  · simp only [shortRouteOutcome,if_neg small]
+  · simp only [shortRouteOutcome,ite_eq_left small]
+  · simp only [shortRouteOutcome,ite_eq_right small]
     exact PayableRoutes.run_route C base table fallback machine selector initial
 
 theorem executed (C : Contract) (base : Nat) (table : PayableRouteTable) (fallback short : Fin W)
@@ -83,9 +83,9 @@ theorem source_executed {E : Source.Env} (global : Source.Glob E) (frame : Sourc
       else sourcePayableOutcome global frame labels fallback base machine := by
   have reached := executed C base _ fallback short result found machine (rawSelectorWord frame) size initial length
   by_cases small : frame.cd.length<4
-  · simpa only [shortRouteOutcome,bytes,if_pos small] using reached
+  · simpa only [shortRouteOutcome,bytes,ite_eq_left small] using reached
   · have full : 4≤frame.cd.length := Nat.le_of_not_gt small
-    simpa only [shortRouteOutcome,bytes,if_neg small,Interface.payableRouteOutcome,
+    simpa only [shortRouteOutcome,bytes,ite_eq_right small,Interface.payableRouteOutcome,
       SourcePayable.lookup global frame labels fallback full,value,sourcePayableOutcome] using reached
 
 theorem source_short {E : Source.Env} (global : Source.Glob E) (frame : Source.Fr)
