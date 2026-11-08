@@ -16,7 +16,7 @@ theorem admitted (frag : Frag Γ) (index : Idx Γ (.val .uint)) (tag : Fin W)
     (yes : Prog C Γ ΔT) (no : Prog C Γ ΔF) (yesFrag : Frag ΔT) (noFrag : Frag ΔF)
     (yesCore : inFragP frag yes=some yesFrag) (noCore : inFragP frag no=some noFrag) :
     inFragP frag (program index tag yes no)=some ((yesFrag.restrict Γ).meet (noFrag.restrict Γ)) := by
-  simp only [program,inFragP,inFrag,SelectorGateBody.condition,valIn,simpleIn,binInFrag,Bool.true_and,if_true,yesCore,noCore]
+  simp only [program,inFragP,inFrag,SelectorGateBody.condition,valIn,simpleIn,binInFrag,Bool.true_and,ite_true,yesCore,noCore]
 
 def selectedWhole (base : Nat) (frag : Frag Γ) (index : Idx Γ (.val .uint)) (tag : Fin W)
     (yes : Prog C Γ ΔT) (no : Prog C Γ ΔF) (yesFrag : Frag ΔT) (noFrag : Frag ΔF)
