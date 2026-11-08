@@ -38,6 +38,15 @@ From the repository root:
 node --test vscode/test/*.test.cjs scripts/source-locations.test.mjs
 ```
 
+Compiler source-range integration checks require the existing pinned solc setup:
+
+```sh
+SOLKEY_ROOT=/path/to/solkey npm --prefix vscode run test:compiler-ranges
+```
+
+This command fails if the compiler or its checksum pin is missing; it does not build Lean.
+The ordinary unit-test command above needs no compiler for its source-range refusal controls.
+
 Real-backend tests additionally need the built `Solidity.Frontend.Testing` API
 and compiler setup. Follow the guarded build workflow in
 [contributing.md](../docs/contributing.md). Optional comparison tooling is in
