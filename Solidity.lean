@@ -2710,6 +2710,7 @@ import Solidity.Frontend.Admission.ProgramObservations
 import Solidity.Frontend.Admission.ProgramRootControls
 import Solidity.Frontend.Admission.ProgramRoots
 import Solidity.Frontend.Admission.RootObservations
+import Solidity.Frontend.Admission.StructuralFeatures
 import Solidity.Frontend.Admission.SyntaxOccurrenceControls
 import Solidity.Frontend.Admission.SyntaxOccurrenceLaws
 import Solidity.Frontend.Admission.SyntaxOccurrences
