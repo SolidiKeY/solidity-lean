@@ -1,0 +1,9 @@
+# Frozen evidence reconstruction
+
+Original base c6f550e281a7e5affa9a99bc2cdaed556dec00e4. Bounded cold rebuild used committed audit overlay 040678df1 and exact frozen dependencies at /workspace/h62-audit-frozen-c6-rebuilt-20261108; source HEAD is c6 and tracked sources remain unchanged. Evidence: /workspace/h62-audit-frozen-rebuilt-20261108-evidence, with command/exit/log gates.json and SHA256SUMS.
+
+All 148 existing helper theorems, 37 fixture definitions and 7 private abbreviations passed receipt/axiom checks. Exact original census: 500 explicit declarations, 103 joint certificates, 4 intentional H69 refutations, 18 empty input telescopes, 372 public and 3 private witness obligations pending; all 986 generated candidates remain pending. All 26 existing compiler audit theorems pass. Census output was independently executed twice and compared byte-for-byte. These are reconstructed historical proofs, not new coverage or dependent-definition equivalence for current master.
+
+KeySort prerequisite passed. Lean 4.24.0 is the exact original tree pin; Lake 5.0.0-src+797c613 is installed. No swap, serial -j1, 12 GiB child address-space limit, 4 GiB reserve and 300-second module budget are unchanged. No RUNTIME_GATE_PASS or full ./run-lean.sh acceptance is claimed.
+
+Independent read-only finder and skeptic reviewed the driver without Lean/Lake/network/writes: no blocking provenance findings. Skeptic target-recursion suggestion fixed: rglob now matches verify_helpers. On this tree, glob and rglob select the exact same target list, so the completed run covers all current modules; the correction also covers future nested helpers. Original assignment, scope and full work/backfill queue remain beside this file. Four original checkpoints remain partial; 1361 ordinary/generated records, 456 role reviews, live-owner routing, broader compiler/physical ABI/target gas/fork and final integration gates remain open. No blocking producer wait is asserted.
