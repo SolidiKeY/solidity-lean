@@ -22,8 +22,8 @@ is.
 
 ## Cloud tasks 01–10
 
-[The 01–09 integration record](cloud-integration-01-09.md) covers the first nine
-committed snapshots and their cross-lane fixes. [Task 10's integration record](cloud-integration-10.md)
+[The 01–09 integration record](../module-map.md) covers the first nine
+committed snapshots and their cross-lane fixes. [Task 10's integration record](../module-map.md)
 adds raw ABI vector adaptation, exact failure observations, named error operands
 and typed aggregate custom errors, with its own bounded validation and remaining
 exclusions. The uncommitted recursive-storage migration is not included.

@@ -13,13 +13,13 @@ methodology and limitations. The checked-in baseline summarizes completed runs;
 it is descriptive evidence on the recorded machine, not a universal performance
 threshold or claim of full parity.
 
-[baseline.md](baseline.md) is the human summary;
+[baseline.md](.) is the human summary;
 [baseline.json](baseline.json) retains the machine-readable measurements and
 per-feature evidence. [audit.json](audit.json) records independent rediscovery,
 review findings, repairs and remaining work. Failed pre-fix launcher attempts are
 listed separately in the baseline instead of contributing timing estimates.
 
-[stdio-baseline.md](stdio-baseline.md) and [stdio-baseline.json](stdio-baseline.json)
+[stdio-baseline.md](.) and [stdio-baseline.json](stdio-baseline.json)
 retain the fresh server-only measurements and their blocked editor/build scope.
 `services.dfy` and `services.sol` preserve the reduced call-site fixture used for
 navigation, rename, signature-help and incremental/full-replacement completion

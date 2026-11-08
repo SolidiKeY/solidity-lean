@@ -1,9 +1,0 @@
-# Source uint copy and checked transfer agreement
-
-`Solidity/Backend/MemoryOps/SourceCalldataUintTransfer.lean` projects the actual numeric decoder traversal at one observed offset into the existing typed calldata table. It retains the frame input, derives extraction of the computed payload and leaves every other table key absent. This is not an all-offset ABI consistency theorem.
-
-The existing checked uint transfer executes on a genuinely reached fresh zero object. A full overwrite is proved equal to allocation of the computed payload using the existing heap allocation/update laws. The combined theorem matches the actual Source decoder, derives both the Source copy and checked operation on the same payload heap, and retains old typed objects, occupied Source cells, the fresh numeric observer, MemOK and local/world frames. Intrinsic capacity is not an added Source admission restriction. Conditional decoder-error handling does not claim an inhabited malformed uint256-word failure case.
-
-Additive clients in `Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean` preserve the previous full observations and guards. Both pipelines execute the real expression and statement; the native checked write returns the same heap. Ordered initial/zero-stage/final payloads and IDs, actual bytes, old aliases and neighbors are retained. Omitting the transfer changes the zero object; independently too-small destinations return Except.ok None. The combined law is also applied directly at arbitrary valid runtime zero-padding counts, including0 and33. None is an adapter rejection, not a Source halt or rollback.
-
-No target allocator/copy program, byte representation, Objects.StateRepr, intrinsic-local Prog, fresh local binding, general reference graph or compiler/EVM closure is asserted. Those original applications and final gates remain open.

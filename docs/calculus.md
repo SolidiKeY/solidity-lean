@@ -104,6 +104,6 @@ A `contract!{ … }` function can call functions declared before it.
 `internalCallExpand` inlines it (`functionBodyExpand` for `CallRet.rets`).
 Repeated calls share the same body term and its first call's local names
 (`CallMemo`); calls that only compute values may use `internalCallSummary`.
-See [automation.md, M6](automation.md#m6--the-automation-gate-2026-10-24).
+See [automation.md, M6](automation.md).
 Callbacks use a separate reading of modalities (`holdsC`, `ProvesC`) while
 `Stmt.run` keeps its execution meaning; see [options.md](options.md).
