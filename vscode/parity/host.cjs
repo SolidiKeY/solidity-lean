@@ -7,9 +7,20 @@ const {createHash}=require('node:crypto');
 const {observe} = require('./observe.cjs');
 const {workload,symbolPosition,verificationOutcomes,servicesWorkload,assertServiceResponse} = require('./workloads.cjs');
 
+// A restarted host may be recorded, but must not overwrite the original source session.
+function beginHostLifecycle(config,trusted){
+ const file=join(config.dir,'host-lifecycle.jsonl'),previous=existsSync(file),stat=process.platform==='linux'?readFileSync('/proc/self/stat','utf8'):null;
+ const identity={runId:config.runId,target:config.target,hostSession:require('node:crypto').randomUUID(),pid:process.pid,birth:stat?.slice(stat.lastIndexOf(')')+2).split(/\s+/)[19]??null};
+ const lifecycle=(event,data={})=>appendFileSync(file,JSON.stringify({...identity,event,wallTime:Date.now(),monotonicMs:performance.now(),...data})+'\n');
+ lifecycle('host.start',{previousHostRecorded:previous,trusted});
+ if(previous)throw Error('Native trust host restarted; refuse replacing original source session/evidence');
+ lifecycle.identity={...identity,event:'host.start',wallTime:Date.now(),previousHostRecorded:previous,trusted};return lifecycle;
+}
+
 async function run() {
   const vscode = require('vscode');
   const config = JSON.parse(readFileSync(process.env.PARITY_HOST_CONFIG,'utf8'));
+  if(config.menuTrust){const lifecycle=beginHostLifecycle(config,vscode.workspace.isTrusted);if(config.menuTrust==='recovery')config.menuRecoveryHost=lifecycle.identity;process.once('exit',code=>lifecycle('host.exit',{code}));process.on('uncaughtExceptionMonitor',error=>lifecycle('host.uncaught',{message:error.message}));}
   config.hostFilesystemCapability=require('./filesystem.cjs').recursiveCapability(config.dir);writeFileSync(join(config.dir,'host-filesystem-capability.json'),JSON.stringify(config.hostFilesystemCapability));
   // Desktop VS Code may resolve a login-shell PATH. Preserve the explicitly
   // selected backend toolchain rather than silently switching installations.
@@ -21,8 +32,9 @@ async function run() {
     appendFileSync(config.events,JSON.stringify(event)+'\n');
   };
   const extension=vscode.extensions.getExtension(target==='dafny'?'dafny-lang.ide-vscode':'SolidiKeY.solidity-lean');
-  assert.ok(extension,'target extension is installed');
-  const observation = observe(vscode,record,extension.extensionPath,config.recordProtocol?config.trace:null,config.workspace);
+  if(!config.menuTrust)assert.ok(extension,'target extension is installed');
+  const observedExtensionPath=extension?.extensionPath||config.observedExtensionPath;assert.ok(observedExtensionPath,'missing target extension source path');
+  const observation = observe(vscode,record,observedExtensionPath,config.recordProtocol?config.trace:null,config.workspace,{captureServerArtifacts:config.suite==='verification-time-limit',artifactReferenceDirectory:target==='dafny'?require('node:path').dirname(config.dafnyExecutable):undefined});
   const heartbeat = [];
   let last = performance.now();
   const timer = setInterval(()=>{const now=performance.now();heartbeat.push(Math.max(0,now-last-25));last=now;},25);
@@ -95,7 +107,7 @@ async function run() {
     return {elapsedMs:performance.now()-start,value};
   }
   try {
-    const activation=performance.now(); api=await bounded(extension.activate(),'extension activation');
+    if(!config.menuTrust){const activation=performance.now(); api=await bounded(extension.activate(),'extension activation');
     metrics.activationMs=performance.now()-activation;
     assert.ok(api,'activation returned no runtime');
     if (target==='dafny') {
@@ -105,7 +117,12 @@ async function run() {
       // multicast event so observation cannot replace its UI handlers.
       client.OnVerificationSymbolStatus(params=>{states.set(params.uri,params);record('symbolStatus',params);});
     }
-    if(config.suite==='testing-symbols'){
+    }
+    if(config.suite==='contribution-menus'){
+      await scenario(config.menuTrust==='recovery'?'native-contribution-menu-recovery':'native-contribution-menus',()=>require('./menu-lifecycle.cjs').run({vscode,config,events,sessionFor}));
+    }else if(config.suite==='verification-time-limit'){
+      await scenario('native-verification-time-limit',()=>require('./verification-limit.cjs').run({vscode,config,api,events,until}));
+    }else if(config.suite==='testing-symbols'){
       await scenario('native-compiler-testing',()=>require('./hierarchy-lifecycle.cjs').runRendered({vscode,config,api,events,until}));
     }else if(config.suite==='trace-unavailable'){
       await scenario('native-trace-unavailable',()=>require('./trace-presentation.cjs').runUnavailable({vscode,config,events,record,api,sessionFor,until}));
@@ -557,4 +574,4 @@ async function run() {
   }
   // The launcher validates fresh structured evidence and retains failed scenarios.
 }
-module.exports = {run};
+module.exports = {run,beginHostLifecycle};

@@ -1,0 +1,67 @@
+{
+ "Bridge/SolidityBridge/AccessBridge/StorageControls.lean:SolidityBridge.AccessBridge.StorageControls.inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/StorageControls.lean:SolidityBridge.AccessBridge.StorageControls.read_persistent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/StorageControls.lean:SolidityBridge.AccessBridge.StorageControls.read_transient": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/StorageControls.lean:SolidityBridge.AccessBridge.StorageControls.write_persistent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/StorageControls.lean:SolidityBridge.AccessBridge.StorageControls.write_transient": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/StorageControls.lean:SolidityBridge.AccessBridge.StorageControls.absent_account_preserved": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/StorageControls.lean:SolidityBridge.AccessBridge.StorageControls.static_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/StorageControls.lean:SolidityBridge.AccessBridge.StorageControls.gas_before_stack": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/StorageControls.lean:SolidityBridge.AccessBridge.StorageControls.stack_before_static": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/StorageControls.lean:SolidityBridge.AccessBridge.StorageControls.stipend_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/StorageControls.lean:SolidityBridge.AccessBridge.StorageControls.cold_read_charge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/StorageControls.lean:SolidityBridge.AccessBridge.StorageControls.transient_read_charge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/StorageControls.lean:SolidityBridge.AccessBridge.StorageControls.low_fuel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

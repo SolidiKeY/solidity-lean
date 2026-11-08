@@ -1,4 +1,5 @@
 import Solidity.Backend.StructuredFlow.MappedCondition
+import Solidity.Backend.StructuredFlow.MappedConditionControls
 
 /-! Additive proposal: one intrinsic mapped Boolean-copy execution law and two
 structurally different typed fixtures. No source outcome is reclassified here.
@@ -43,7 +44,8 @@ abbrev BooleanFixture := Fixture [.bool,.bool] [.val .bool,.val .bool]
 def booleanMap : ContextMap [.bool,.bool] [.val .bool,.val .bool] :=
   (ContextMap.empty.cons .bool (.val .bool)).cons .bool (.val .bool)
 
-/-- The distinct donor and same-slot alias cases from the original controls. -/
+/-- Distinct-donor fixture used by the proposed controls, plus a same-slot alias
+fixture. Original same-slot control correspondence is not asserted. -/
 def copyFixture : BooleanFixture := ⟨booleanMap,.here,.there .here,rfl,rfl⟩
 def selfFixture : BooleanFixture := ⟨booleanMap,.here,.here,rfl,rfl⟩
 def fixtures : List BooleanFixture := [copyFixture,selfFixture]
@@ -56,6 +58,40 @@ theorem fixtures_execute (C : Contract) (base : Nat) (machine : Machine) :
         f.destinationBool f.donorBool machine) 0 := by
   intro f _
   exact compiled_execution C f base machine
+
+/-- Guard the original observed/nonzero-frame regression using the generic
+compiler theorem; retain the entire snapshot, including protected words. -/
+theorem copy_snapshot (base : Nat) (flag : Bool) :
+    MappedCondition.Controls.snapshot base
+      (run (compileProg base (program MappedCondition.Controls.C copyFixture))
+        (MappedCondition.Controls.frame base flag)) =
+      some [.val (bword flag),.val (bword flag),.val (bword flag),w[99],w[77]] := by
+  rw [compiled_execution]
+  let start := MappedCondition.Controls.frame base flag
+  let v := start.mem base
+  change MappedCondition.Controls.snapshot base
+    (.ok {start with mem := (upd (upd start.mem (base+1) v) (base+2) v)} 0) = _
+  dsimp only [v, start]
+  simp only [MappedCondition.Controls.snapshot,
+    MappedCondition.Controls.frame,
+    upd, if_pos rfl, List.append_cons, List.nil_append]
+  repeat first | contradiction | split <;> (try omega) | rfl
+
+/-- Exact original emitter expression: both zero and nonzero frame controls
+are instances of this general law, with their original full snapshot. -/
+theorem emitted_snapshot (base : Nat) (flag : Bool) :
+    MappedCondition.Controls.snapshot base
+      (run (MappedCondition.emit base
+        MappedCondition.Controls.mapping .here (.there .here) rfl rfl)
+        (MappedCondition.Controls.frame base flag)) =
+      some [.val (bword flag),.val (bword flag),.val (bword flag),w[99],w[77]] := by
+  change MappedCondition.Controls.snapshot base
+    (run (compileProg base (program MappedCondition.Controls.C copyFixture))
+      (MappedCondition.Controls.frame base flag)) = _
+  exact copy_snapshot base flag
+
+#print axioms copy_snapshot
+#print axioms emitted_snapshot
 
 #print axioms compiled_execution
 #print axioms fixtures_execute

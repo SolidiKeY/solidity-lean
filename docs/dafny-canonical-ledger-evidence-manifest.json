@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "status": "partial",
+  "sourceHead": "ee6681e6247c6f31e59e6eeb19233648739a5544",
+  "fileCount": 31,
+  "uncompressedBytes": 234495,
+  "archive": {
+    "path": "/workspace/dafny-canonical-ledger-20261107/bulk.tar.gz",
+    "bytes": 24824,
+    "sha256": "e6daec3538cd5075a5bf58953f761f4ee9ea7d8b0cf9667d5d78d96183aa44f9"
+  },
+  "index": {
+    "path": "/workspace/dafny-canonical-ledger-20261107/files.json",
+    "bytes": 7805,
+    "sha256": "7395346b9a3d97128303469ddd433f847d19e567261715827ffd6fb77e1a145e"
+  },
+  "boundaries": [
+    "Exact admitted-reader indexed clause ledger only; no authenticated arbitrary importer context, source span or failed-obligation identity emitted.",
+    "Targeted module build and real imported-row controls pass under existing guard. Initial wrong-name and quoted-name control failures retained. MCP0errors but helper retirement supervisor1 retained.",
+    "Existing490 obligations and frozen270 unchanged; no row completed; full proof/rendered/performance/paired-judge queues remain."
+  ]
+}

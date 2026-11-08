@@ -1,7 +1,0 @@
-{
-  "finding": "A. x; can parse A.x as the type and then fail for a missing declaration name; that wrapper did not isolate the trailing-period type failure",
-  "prior_error": "Expected identifier but got ';'",
-  "repair": "Use function bad(A. ) external {} so the period is followed by the type boundary closing parenthesis",
-  "negative_type_fragment_unchanged": "A.",
-  "scope": "test wrapper only; no grammar profile, producer, theorem premise or expected polarity changes"
-}

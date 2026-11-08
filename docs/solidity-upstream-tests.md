@@ -75,7 +75,7 @@ in entrypoint testing. It refuses constructors/effectful initializers and other
 host observations. This is bounded runtime evidence, not a stronger global
 source profile. The optional bytecode runner has a distinct reference-only
 memory-Yul admission; that context cannot enter native replay. The
-[try/catch conditional account](feature-work/diamond-try.md#human-approved-conditional-account-and-native-adapter-repair)
+[try/catch conditional account](feature-work/diamond-try.md)
 records exact guards, original fixture before/after results, native versus EVM
 limits and retained strict failures. Existing broad baseline descriptions above
 are historical; these narrow adapter results do not imply whole-corpus support.
@@ -85,7 +85,7 @@ primitive tuple ending in bytes/string memory, and a separate return-only tuple
 containing one nullary external-void function value. It reuses existing typed
 CallRet capture, exact source declaration/prefix scope and actual ABI encoding.
 Function/reference inputs, general function dispatch, physical Yul memory and
-world composition remain refused. The [current return bridge account](feature-work/diamond-try.md#native-entry-return-bridge-after-checkpoint-99d0049a)
+world composition remain refused. The [current return bridge account](feature-work/diamond-try.md)
 records kernel controls, conditional correspondence, all ordered replay bytes
 and the native family’s retained strict failure (10 working, 10 blocked).
 
@@ -642,10 +642,10 @@ import/profile/host/configuration/resource cases against a changed model.
 
 
 The narrow creation-try continuation and its source/kernel/reference evidence are
-recorded in [the owning feature account](feature-work/diamond-try.md#creation-try-source-continuation-after-e7921de5). It admits the complete original create.sol only through the checked unpaid, stateless shape; unsupported creation, linking and callback judgments are unchanged.
+recorded in [the owning feature account](feature-work/diamond-try.md). It admits the complete original create.sol only through the checked unpaid, stateless shape; unsupported creation, linking and callback judgments are unchanged.
 
 
-The exact linked-library try source continuation is recorded in [the owning account](feature-work/diamond-try.md#linked-library-try-source-continuation-after-ca314a5b). It executes installed caller-typed scalar/storage library entries and real Error tails; general library/world/ABI source support remains partial.
+The exact linked-library try source continuation is recorded in [the owning account](feature-work/diamond-try.md). It executes installed caller-typed scalar/storage library entries and real Error tails; general library/world/ABI source support remains partial.
 ## Coverage step 2: source-unit replay (2026-10-28)
 
 The current-master reproduction and compilation-unit increment are recorded in

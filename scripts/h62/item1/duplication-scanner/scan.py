@@ -290,6 +290,25 @@ def scan(path, root, source=None):
     if source is None: source = path.read_bytes()
     text = mask(source.decode("utf-8"))
     skeleton, attribute_spans = hide_attributes(hide_strings(text))
+    # Guard command options can span lines. Conservatively refuse ambiguous
+    # headers and inline declaration prefixes that the line matcher misses.
+    for guard in re.finditer(r"(?m)^[ \t]*#guard_msgs\b", skeleton):
+        pos = guard.end()
+        while pos < len(skeleton) and skeleton[pos].isspace(): pos += 1
+        if pos < len(skeleton) and skeleton[pos] == "(":
+            depth = 1
+            pos += 1
+            while pos < len(skeleton) and depth:
+                if skeleton[pos] == "(": depth += 1
+                elif skeleton[pos] == ")": depth -= 1
+                pos += 1
+            if depth: raise ValueError("unsupported guard_msgs header")
+            while pos < len(skeleton) and skeleton[pos].isspace(): pos += 1
+        keyword = re.match(r"in\b", skeleton[pos:])
+        if not keyword: raise ValueError("unsupported guard_msgs header")
+        pos += keyword.end()
+        if re.match(r"[ \t]*(?:@\[|#guard_msgs\b|(?:open|set_option|include|omit|private|public|protected|meta|noncomputable|local|scoped|partial|nonrec|unsafe|theorem|lemma|def|abbrev|opaque|example|instance|builtin_initialize|initialize|structure|inductive|class|axiom|constant)\b)", skeleton[pos:]):
+            raise ValueError("unsupported same-line guard_msgs declaration")
     matches = list(DECL.finditer(skeleton))
     attribute_ends = [end for _, end in attribute_spans]
     declaration_starts = []
@@ -302,7 +321,7 @@ def scan(path, root, source=None):
             if re.fullmatch(r"\s*(?:(?:private|public|protected|meta|noncomputable|local|scoped|partial|nonrec|unsafe)\s+)*", between):
                 start = min(start, prefix_start)
         declaration_starts.append(start)
-    context_commands = list(re.finditer(r"(?m)^[ \t]*(?:(?:import|namespace|section|end|open|variable|universe|set_option)|(?:(?:local|scoped)[ \t]+)*(?:notation|infixl|infixr|infix|prefix|postfix))\b[^\n]*", skeleton))
+    context_commands = list(re.finditer(r"(?m)^[ \t]*(?:(?:import|namespace|section|end|open|variable|universe|set_option|include|omit)|(?:(?:local|scoped)[ \t]+)*(?:notation|infixl|infixr|infix|prefix|postfix))\b[^\n]*", skeleton))
     # Preserve literal bytes and continuation lines until the next recognized
     # boundary. This remains a lexical approximation of the Lean environment.
     boundaries = sorted([m.start() for m in context_commands] + declaration_starts)
@@ -312,9 +331,9 @@ def scan(path, root, source=None):
         stop = boundaries[index] if index < len(boundaries) else len(text)
         # Scoped option/open headers may place `in` on a later line. Refuse
         # inline declaration prefixes that the line recognizer would miss.
-        scoped = re.match(r"[ \t]*(set_option|open)\b", command.group())
+        scoped = re.match(r"[ \t]*(set_option|open|include|omit)\b", command.group())
         if (scoped and
-            re.search(r"\bin[ \t]+(?:@\[|(?:private|public|protected|meta|noncomputable|local|scoped|partial|nonrec|unsafe|theorem|lemma|def|abbrev|opaque|example|instance|builtin_initialize|initialize|structure|inductive|class|axiom|constant)\b)", skeleton[command.start():stop])):
+            re.search(r"\bin[ \t]*(?:@\[|#guard_msgs\b|(?:private|public|protected|meta|noncomputable|local|scoped|partial|nonrec|unsafe|theorem|lemma|def|abbrev|opaque|example|instance|builtin_initialize|initialize|structure|inductive|class|axiom|constant)\b)", skeleton[command.start():stop])):
             raise ValueError("unsupported same-line scoped " + scoped.group(1) + " declaration")
         context_spans.append((command.start(), text[command.start():stop].strip()))
     rows = []
@@ -327,9 +346,13 @@ def scan(path, root, source=None):
         return len(prefix.expandtabs(8))
     for i, match in enumerate(matches):
         end = declaration_starts[i+1] if i+1 < len(matches) else len(text)
-        content = text[match.end():end]
-        content_skeleton = skeleton[match.end():end]
-        command = re.search(r"(?m)^[ \t]*(?:(?:import|end|namespace|section|open|variable|universe|set_option|attribute|#\w+)|(?:(?:local|scoped)[ \t]+)*(?:notation|infixl|infixr|infix|prefix|postfix))\b", content_skeleton)
+        kind = " ".join(match.group(1).split())
+        # `example` has no declaration name; any following identifier belongs
+        # to its signature and must not be consumed as a name.
+        content_start = match.end(1) if kind == "example" else match.end()
+        content = text[content_start:end]
+        content_skeleton = skeleton[content_start:end]
+        command = re.search(r"(?m)^[ \t]*(?:(?:import|end|namespace|section|open|variable|universe|set_option|include|omit|attribute|#\w+)|(?:(?:local|scoped)[ \t]+)*(?:notation|infixl|infixr|infix|prefix|postfix))\b", content_skeleton)
         command_inside = False
         if command:
             prefix = re.match(r"[ \t]*", command.group()).group()
@@ -338,8 +361,7 @@ def scan(path, root, source=None):
             content_skeleton = content_skeleton[:command.start()]
         qualifiers = sorted(re.findall(r"\b(?:private|public|protected|meta|noncomputable|local|scoped|partial|nonrec|unsafe)\b", skeleton[match.start():match.start(1)]))
         context = digest([span for start, span in context_spans if start < match.start()])
-        kind = " ".join(match.group(1).split())
-        name = match.group(2) or "<anonymous>"
+        name = "<anonymous>" if kind == "example" else match.group(2) or "<anonymous>"
         escaped_name = False
         if kind not in {"example", "initialize", "builtin_initialize"}:
             raw_name = SOURCE_NAME.match(text, match.end(1))
@@ -414,7 +436,7 @@ def scan(path, root, source=None):
         body_skeleton = content_skeleton[len(header) + (2 if body_form == "assignment" else 0):]
         if re.search(r"\bwhere\b", body_skeleton):
             body_reject_reason = "body-may-have-local-helpers"
-        boundary = re.search(r"(?m)^[ \t]*(?:(?:import|end|namespace|section|open|variable|universe|set_option|attribute|#\w+)|(?:(?:local|scoped)[ \t]+)*(?:notation|infixl|infixr|infix|prefix|postfix))\b", body_skeleton)
+        boundary = re.search(r"(?m)^[ \t]*(?:(?:import|end|namespace|section|open|variable|universe|set_option|include|omit|attribute|#\w+)|(?:(?:local|scoped)[ \t]+)*(?:notation|infixl|infixr|infix|prefix|postfix))\b", body_skeleton)
         if boundary:
             prefix = re.match(r"[ \t]*", boundary.group()).group()
             if len(prefix.expandtabs(8)) > indent(match):
@@ -424,13 +446,22 @@ def scan(path, root, source=None):
             body_reject_reason = "escaped-identifier-boundary"
         if priority:
             body_reject_reason = "unsupported-instance-priority"
-        normalized = None if escaped_name or priority else normalize(header.strip())
+        example_header = header.strip()
+        example_pos = 0
+        if kind == "example":
+            while binder := BINDER.match(example_header, example_pos):
+                example_pos = binder.end()
+        bare_example = kind == "example" and not example_header[example_pos:].lstrip().startswith(":")
+        if bare_example:
+            body_reject_reason = "unsupported-example-binder"
+        normalized = None if escaped_name or priority or bare_example else normalize(header.strip())
         rows.append(dict(path=relative_path,
                          line=text.count("\n", 0, match.start(1))+1,
                          kind=kind, name=name,
                          statement=normalized, body=tokenize(body), body_form=body_form,
                          body_reject_reason=body_reject_reason, owner="unknown", context_hash=context, qualifiers=qualifiers,
                          reject_reason=("unsupported-instance-priority" if priority else
+                                        "unsupported-example-binder" if bare_example else
                                         "unsupported-binder-syntax" if normalized is None else None)))
     return rows
 
@@ -655,6 +686,7 @@ def main():
     files = sorted({f for paths in matched.values() for f in paths})
     rows, errors, inputs, aliases = [], selection_errors, [], []
     resolved_inputs = {}
+    file_identities = {}
     owners = json.loads(args.owners.read_text()) if args.owners else {}
     if not isinstance(owners, dict) or not all(isinstance(k, str) and isinstance(v, str) and v for k, v in owners.items()):
         parser.error("owners must be a path-to-owner JSON object")
@@ -683,9 +715,18 @@ def main():
                 raise ValueError("selected Lean path resolves outside root")
             if not resolved.is_file():
                 raise ValueError("selected Lean path is not a regular file")
-            source = path.read_bytes()
+            with path.open("rb") as stream:
+                before = os.fstat(stream.fileno())
+                source = stream.read()
+                after = os.fstat(stream.fileno())
+            fields = lambda info: (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
+            if (not stat.S_ISREG(before.st_mode) or fields(before) != fields(after) or
+                len(source) != before.st_size or path.resolve(strict=True) != resolved or
+                fields(resolved.stat()) != fields(after)):
+                raise ValueError("selected Lean file changed during read")
             target = resolved.relative_to(root).as_posix()
             resolved_inputs[rel] = target
+            file_identities[rel] = (after.st_dev, after.st_ino)
             if target != rel:
                 aliases.append(dict(path=rel, resolved_path=target))
             inputs.append(dict(path=rel, sha256=hashlib.sha256(source).hexdigest()))
@@ -788,8 +829,12 @@ def main():
             parser.error("live project binding: "+str(exc))
     def alias_reasons(group):
         paths = {row["path"] for row in group}
-        return (["shared-resolved-source"]
-                if len({resolved_inputs[path] for path in paths}) < len(paths) else [])
+        reasons = []
+        if len({resolved_inputs[path] for path in paths}) < len(paths):
+            reasons.append("shared-resolved-source")
+        if len({file_identities[path] for path in paths}) < len(paths):
+            reasons.append("shared-file-identity")
+        return reasons
     groups = {}
     for row in rows:
         if row["statement"] is not None:

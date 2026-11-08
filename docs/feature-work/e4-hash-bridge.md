@@ -280,9 +280,12 @@ per-file diagnostics and checked axiom pins. No new sorry, axiom,
 native_decide, implemented_by or raised maxHeartbeats is introduced.
 Existing frozen theorem statements and semantic definitions are untouched.
 All four Lean modules remain byte-identical to that reviewed source. On the
-authorized clean base `797923f0808b2dff670ba2dcbba08b46c6d9ce17`, both H145
-whole-tree checks and generated documentation navigation pass with E4 applied.
-Clean-base full validation is still in progress; acceptance is not claimed.
+earlier authorized clean base `797923f0808b2dff670ba2dcbba08b46c6d9ce17`, both
+H145 whole-tree checks and generated documentation navigation pass with E4
+applied. Current-master conflict resolution uses the fetched descendant
+`61fa6f861c712a336419c52d4e4ef5ed8fb5d06f` of the reported target
+`445a5e7c064056b403dad56db99d048846436a72`. Full validation remains pending;
+acceptance is not claimed.
 
 Checking-time comparison uses balanced paired fresh Lean checks of the
 pinned-base root and generated root with the same already-built imports.
@@ -324,7 +327,8 @@ E4-Q1 is resolved as option A. H174 resolves E4-Q2 as option A: validate on
 a clean descendant base and rerun every H145 whole-tree check before
 completion, with no acceptance-policy change. The answer was acknowledged
 through `coord-ask --ack E4-Q2`; the pinned-tree failures remain preserved. Registration and backfill preserve the original combined bound,
-its premises, exclusions and observations. The pinned branch is preserved and clean-base validation uses isolated
-commits; no code push, merge or PR is authorized. The only
+its premises, exclusions and observations. The original pinned-base handoff is preserved. The requested current-master
+conflict resolution is a local integration on the assigned lane; no
+default-branch merge, code push or PR is authorized. The only
 remote writes are the explicitly requested question relay and private
 H145 evidence archive.

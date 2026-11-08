@@ -1,4 +1,0 @@
-⚠ [3/19] Replayed Solidity.AST
-warning: Solidity/AST.lean:355:4: unused variable `k`
-
-Note: This linter can be disabled with `set_option linter.unusedVariables false`

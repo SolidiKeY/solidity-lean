@@ -1,1 +1,0 @@
-Committed evidence text copies trim trailing whitespace for repository checks. Original raw logs remain in ../../artifacts/evidence/. No decisive values or output lines were changed. These are development/touched/per-file checks; final full/runtime gates remain pending.

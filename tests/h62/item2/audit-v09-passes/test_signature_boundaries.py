@@ -47,6 +47,25 @@ class HeaderBoundaries(unittest.TestCase):
         self.assertEqual(first['status'],'unresolved')
         self.assertEqual(second['status'],'recognized-source-header')
 
+    def test_malformed_header_cannot_borrow_following_body(self):
+        for broken in ['theorem broken : (True]',
+                       'theorem broken : (True',
+                       'theorem broken : let value : Nat']:
+            with self.subTest(header=broken):
+                first, second = extract(broken+'\ntheorem valid : True := by trivial\n')
+                self.assertEqual(first['status'], 'unresolved')
+                self.assertNotIn('header_sha256', first)
+                self.assertEqual(second['header'], 'theorem valid : True')
+                self.assertEqual(second['body_kind'], 'assignment')
+
+    def test_equation_header_preserves_dependent_binders(self):
+        statement = 'theorem indexed {n : Nat} (xs : Vector Nat n) : (i : Fin n) → xs[i] = xs[i]'
+        first, second = extract(statement+'\n  | i => rfl\ntheorem following : True := by trivial\n')
+        self.assertEqual(first['header'], statement)
+        self.assertEqual(first['body_kind'], 'equations')
+        self.assertNotIn('following', first['header'])
+        self.assertEqual(second['header'], 'theorem following : True')
+
     def test_frozen_equation_oracle_and_membership(self):
         report = sb.frozen_report(ROOT)
         self.assertEqual((report['files'],report['summary']['rows']),(179,1259))
@@ -156,7 +175,18 @@ class HeaderBoundaries(unittest.TestCase):
                     ('preserved-allocator',10,1,'Solidity.Backend.Passes.AuditPreservedAllocator.joint'),
                     ('heap-boundary',14,3,'Solidity.Backend.Passes.AuditHeapBoundary.joint'),
                     ('reframed',11,0,'Solidity.Backend.Passes.AuditReframed.joint'),
-                    ('reframed-triple',7,0,'Solidity.Backend.Passes.AuditReframedTriple.joint')]
+                    ('reframed-triple',7,0,'Solidity.Backend.Passes.AuditReframedTriple.joint'),
+                    ('loop-scope',18,1,'Solidity.Backend.Passes.AuditLoopScope.joint'),
+                    ('loop-prefix',18,0,'Solidity.Backend.Passes.AuditLoopPrefix.joint'),
+                    ('loop-call',9,0,'Solidity.Backend.Passes.AuditLoopCall.joint'),
+                    ('loop-reframed-failure',17,2,'Solidity.Backend.Passes.AuditLoopReframedFailure.joint'),
+                    ('compiler-call-scope',4,0,'Solidity.Backend.Passes.AuditCompilerCallScope.joint'),
+                    ('reference-call-readback',10,0,'Solidity.Backend.Passes.AuditReferenceCallReadback.joint'),
+                    ('reference-call-capture-failure',6,0,'Solidity.Backend.Passes.AuditReferenceCallCaptureFailure.joint'),
+                    ('runtime-return-capture',10,0,'Solidity.Backend.Passes.AuditRuntimeReturnCapture.joint'),
+                    ('runtime-void-capture',11,0,'Solidity.Backend.Passes.AuditRuntimeVoidCapture.joint'),
+                    ('stateful-capture',6,0,'Solidity.Backend.Passes.AuditStatefulCapture.joint'),
+                    ('shift-capture',16,0,'Solidity.Backend.Passes.AuditShiftCapture.SourceCase.joint')]
         for stem, total, private_count, joint in families:
             mapping = load(stem)
             source = subprocess.check_output(['git','show',sb.BASE+':'+mapping['interface']],cwd=ROOT)
@@ -172,7 +202,7 @@ class HeaderBoundaries(unittest.TestCase):
                 self.assertEqual(row['signature_sha256'],selected[key]['legacy_signature_sha256'])
                 self.assertEqual(row['kind'],'private-exact-kernel-signature' if visibility[row['name']]=='private' else 'public-original-proof-reuse')
                 keys.add(key)
-            uncovered = {(mapping['interface'],name) for name in mapping.get('uncovered_private_names',[])}
+            uncovered = {(mapping['interface'],name) for name in mapping.get('uncovered_private_names',[])+mapping.get('uncovered_public_names',[])}
             self.assertFalse(keys & uncovered)
             self.assertEqual(keys|uncovered,{key for key in selected if key[0]==mapping['interface']})
             if stem == 'triple-admission':
@@ -180,6 +210,7 @@ class HeaderBoundaries(unittest.TestCase):
                 self.assertEqual({r['name'].rsplit('.',1)[-1] for r in mapping['rows'] if r['kind']=='private-exact-kernel-signature'},{'cell'+str(i) for i in range(17)})
                 self.assertEqual(mapping['private_axioms'],['propext','Quot.sound','Classical.choice'])
             if stem == 'memory-call':
+                self.assertEqual(len(mapping['intentional_refutations']),1)
                 self.assertEqual({name.rsplit('.',1)[-1] for _,name in uncovered},{'noRefs'})
                 self.assertEqual(set(mapping['checked_private_names']),{'first_some','second_some','final_some','source_get'})
                 self.assertEqual(mapping['private_axioms'],['propext','Classical.choice','Quot.sound'])
@@ -190,12 +221,13 @@ class HeaderBoundaries(unittest.TestCase):
                 ref_key = (mapping['interface'],refutation['name'])
                 self.assertIn(ref_key,uncovered)
                 self.assertEqual(refutation['signature_sha256'],selected[ref_key]['legacy_signature_sha256'])
-                self.assertEqual(refutation['classification'],'checked-intentional-empty-heap-refutation')
+                stale = stem == 'loop-reframed-failure'
+                self.assertEqual(refutation['classification'],'checked-intentional-stale-pointer-refutation' if stale else 'checked-intentional-empty-heap-refutation')
                 self.assertEqual(refutation['kernel_name'],mapping['private_kernel_prefix']+refutation['name'])
-                self.assertEqual(refutation['premise_impossibility'],mapping['exercised_public_namespace']+'.noRefs_premises_impossible')
+                self.assertEqual(refutation['premise_impossibility'],mapping['exercised_public_namespace']+('.stale_pointer_premises_impossible' if stale else '.noRefs_premises_impossible'))
                 self.assertIsNone(refutation['joint_witness'])
                 self.assertEqual(refutation['selected_witness_credit'],0)
-                self.assertEqual(refutation['axioms'],['propext'])
+                self.assertEqual(refutation['axioms'],['propext','Classical.choice','Quot.sound'] if stale else ['propext'])
             if stem == 'memory-call-scope':
                 self.assertFalse(uncovered)
                 self.assertEqual(mapping['checked_private_names'],['final_some'])
@@ -224,12 +256,34 @@ class HeaderBoundaries(unittest.TestCase):
                 self.assertEqual(mapping['joint_contract'],'actual-preparation-input-source-and-reached-middle-three-word-capacity')
                 self.assertEqual(mapping['auxiliary_definition_credit'],0)
                 self.assertFalse({'observed','observedRun'} & {r['name'].rsplit('.',1)[-1] for r in mapping['rows']})
+            if stem == 'loop-scope':
+                self.assertEqual(mapping['joint_contract'],'actual-input-public-loop-recognition-source-body-and-positive-cost-with-distinct-zero-legacy-metric')
+                self.assertEqual(mapping['checked_private_names'],['source_get'])
+                self.assertEqual(mapping['private_axioms'],['propext','Classical.choice','Quot.sound'])
+                row, = [r for r in mapping['rows'] if r['kind']=='private-exact-kernel-signature']
+                self.assertEqual(row['simultaneous_witness'],'Solidity.Backend.Passes.AuditLoopScope.extraction_premise')
+            if stem == 'loop-reframed-failure':
+                self.assertEqual(len(mapping['intentional_refutations']),1)
+                self.assertEqual(mapping['checked_refutation_names'],['stale_pointer'])
+                self.assertEqual({name.rsplit('.',1)[-1] for _,name in uncovered},{'stale_pointer'})
+                self.assertEqual(mapping['checked_private_names'],['guard_code','before_value'])
+                self.assertEqual(mapping['private_axioms_by_name'],{'guard_code':['propext','Quot.sound','Classical.choice'],'before_value':['propext','Classical.choice','Quot.sound']})
+                for row in mapping['rows']:
+                    if row['kind']=='private-exact-kernel-signature':
+                        self.assertEqual(row['simultaneous_witness'],mapping['joint_witness'])
+            if stem == 'shift-capture':
+                self.assertFalse(uncovered)
+                self.assertEqual(mapping['uncovered_public_names'],[])
+                self.assertEqual(mapping['source_evaluation_mode'],'unchecked-as-required-by-frozen-source-expression')
+                self.assertEqual(mapping['source_fuel'],{'timeout':2,'success':'extra+3'})
+                self.assertEqual(mapping['auxiliary_source_row_credit'],0)
+                self.assertEqual(mapping['auxiliary_definition_credit'],0)
             self.assertEqual(len(keys),total)
             self.assertEqual(sum(r['kind']=='private-exact-kernel-signature' for r in mapping['rows']),private_count)
             if private_count:
                 self.assertEqual(mapping['private_kernel_prefix'],'_private.Solidity.Backend.Passes.'+Path(mapping['interface']).stem+'.0.')
             seen.update(keys)
-        self.assertEqual((len(seen),1259-len(seen)),(413,846))
+        self.assertEqual((len(seen),1259-len(seen)),(538,721))
 
 
 

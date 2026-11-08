@@ -61,6 +61,66 @@ theorem mapM_ok_iff_each {α β ε : Type} (read : α → Except ε β)
     xs.mapM read = .ok ys ↔ Each (fun x y => read x = .ok y) xs ys :=
   ⟨each_of_mapM_ok, Each.mapM_ok⟩
 
+/-- A head conversion error precedes every unexamined tail, for any container reader. -/
+theorem mapM_head_failure {α β ε : Type} (read : α → Except ε β)
+    (head : α) (tail : List α) (message : ε) (failed : read head = .error message) :
+    (head :: tail).mapM read = .error message := by
+  rw [List.mapM_cons, failed]
+  rfl
+
+/-- A successfully converted before cannot hide the next child's exact error. -/
+theorem Each.prefix_failure {α β ε : Type} {read : α → Except ε β}
+    {before : List α} {values : List β}
+    (converted : Each (fun x y => read x = .ok y) before values)
+    (child : α) (tail : List α) (message : ε) (failed : read child = .error message) :
+    (before ++ child :: tail).mapM read = .error message := by
+  induction converted with
+  | nil => exact mapM_head_failure read child tail message failed
+  | cons head rest ih =>
+    rw [List.cons_append, List.mapM_cons, head, ih]
+    rfl
+
+/-- Every traversal error identifies its first failed child after an exact successful before. -/
+theorem first_failure_of_mapM_error {α β ε : Type} (read : α → Except ε β)
+    (xs : List α) (message : ε) (failed : xs.mapM read = .error message) :
+    ∃ before values child tail, xs = before ++ child :: tail ∧
+      Each (fun x y => read x = .ok y) before values ∧ read child = .error message := by
+  induction xs with
+  | nil => cases failed
+  | cons x xs ih =>
+    rw [List.mapM_cons] at failed
+    cases hx : read x with
+    | error error =>
+      rw [hx] at failed
+      change Except.error error = Except.error message at failed
+      cases failed
+      exact ⟨[], [], x, xs, rfl, .nil, hx⟩
+    | ok y =>
+      rw [hx] at failed
+      cases ht : xs.mapM read with
+      | error error =>
+        rw [ht] at failed
+        change Except.error error = Except.error message at failed
+        cases failed
+        obtain ⟨before, values, child, tail, order, converted, bad⟩ := ih ht
+        exact ⟨x :: before, y :: values, child, tail,
+          by rw [order]; rfl, .cons hx converted, bad⟩
+      | ok values =>
+        rw [ht] at failed
+        cases failed
+
+/-- Exact error accounting: successful ordered children precede the failed child. -/
+theorem mapM_error_iff_first {α β ε : Type} (read : α → Except ε β)
+    (xs : List α) (message : ε) :
+    xs.mapM read = .error message ↔
+      ∃ before values child tail, xs = before ++ child :: tail ∧
+        Each (fun x y => read x = .ok y) before values ∧ read child = .error message := by
+  constructor
+  · exact first_failure_of_mapM_error read xs message
+  · intro ⟨before, values, child, tail, order, converted, failed⟩
+    rw [order]
+    exact converted.prefix_failure child tail message failed
+
 /-- A fallible container finish cannot discard child conversion obligations. -/
 theorem bind_ok_iff_each {α β γ ε : Type} (read : α → Except ε β)
     (finish : List β → Except ε γ) (xs : List α) (out : γ) :
@@ -197,4 +257,12 @@ theorem unit_ok_iff_each (fuel : Nat) (node : Json) (children : Array Json)
 #guard_msgs (whitespace := lax) in #print axioms nonempty_build_ok_iff_each
 /-- info: 'Solidity.Lowering.P8.SourceAstCorrespondence.bind_ok_iff_each' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms bind_ok_iff_each
+/-- info: 'Solidity.Lowering.P8.SourceAstCorrespondence.mapM_head_failure' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms mapM_head_failure
+/-- info: 'Solidity.Lowering.P8.SourceAstCorrespondence.Each.prefix_failure' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Each.prefix_failure
+/-- info: 'Solidity.Lowering.P8.SourceAstCorrespondence.first_failure_of_mapM_error' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms first_failure_of_mapM_error
+/-- info: 'Solidity.Lowering.P8.SourceAstCorrespondence.mapM_error_iff_first' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms mapM_error_iff_first
 end Solidity.Lowering.P8.SourceAstCorrespondence

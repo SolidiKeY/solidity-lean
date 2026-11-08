@@ -301,3 +301,96 @@ Inputs now proves that any in-range blob index returns the exact supplied list e
 The existing nonzero blob/environment and emTx fixtures are reused to check the last valid and first invalid indices before and after transaction binding. Existing MemoryControls and SourceEnvironmentControls both pass, and all four new laws use only propext. Matched serial Lean4.24 medians are Inputs0.40→0.43 seconds (+7.5%) and SourceEnvironmentInputs0.25→0.27 seconds (+8.0%), below the stop. Exact preservation, boundary reuse, axiom outputs and raw timings are retained at /workspace/vy2-evidence/source-blob-boundaries/.
 
 These are supplied-input/data-binding laws, not Source program admission, native/emission behavior, compiler dispatch, physical adequacy or a reached-state bridge. Global census/pin acceptance, the separate documentation-reference wait, original producer dependencies and all prior STOPs remain open.
+
+
+### H151: historical census gap and fresh lexical inventory
+
+The historical h69 census with SHA256
+1a6f4f9352a0004aa3cfcc67e8e3abd313e5c83864dfe436880aeeb0cb2adcde is
+UNVERIFIABLE: no authenticated artifact was recovered. Claims that depend on
+that capture remain unproven; it is no longer an indefinite delivery wait.
+Neither a new inventory nor old summary counts reconstruct its proof credit.
+
+Fresh evidence binds source head 88802c0bba963d42ace559fec7a46a376b8fa8b9,
+the current yul module map, and the exact existing census collector/driver
+hashes. It uses the collector's files/declarations APIs, without changing its
+frozen-base acceptance mode or supplying historical parser/kernel/witness data.
+Every selected file, module map and collector byte sequence was verified against
+that Git tree before and after collection. Two runs produced identical bytes:
+SHA256 b94f34e090e5f89be5c74e37c8587d042fab1095b18d67f50d773da9bedc3840.
+
+The current-map/local-Yul-import scope selects 2,010 files and yields 22,061
+lexical declarations: 19,864 theorem candidates, 1,921 examples and 276
+structures. No scanner failures or unmatched patterns occurred; declaration IDs
+are unique. These are lexical results only: owner labels remain heuristic,
+section/type/elaboration reconciliation is pending, and all candidates remain
+uncovered. Zero kernel records, joint witnesses or intentional refutations are
+credited. This does not replace the original frozen scope or establish semantic
+hypothesis coverage, nonvacuity, totality or full assignment acceptance.
+
+The fresh census, reproduction driver and checks are private H145 evidence;
+no census payload or receipt is committed here. Original measured timing/import
+STOPs, budgets, physical producer obligations and final gates remain unchanged.
+
+
+### H151: reconstruct frozen source scope without historical proof credit
+
+A separate fresh reconstruction reads the actual Git source tree at frozen base
+c6f550e281a7e5affa9a99bc2cdaed556dec00e4. The existing collector's lexical APIs
+scan its module map and local-Yul import closure in an isolated source snapshot;
+all selected file/map bytes are checked against that tree before and after.
+This does not run or weaken the collector's frozen parser/kernel acceptance,
+and does not recreate the missing historical h69 artifact.
+
+The reconstruction selects 1,960 files and records 21,385 lexical declarations:
+19,230 theorem candidates, 1,887 examples and 268 structures. There are no
+scanner failures or unmatched map patterns. Every original declaration ID is
+accounted for once. Two runs produce byte-identical compressed results;
+uncompressed SHA256 is
+5e78264fd1d24cf7b1b7e83775634c46e2d61035513c271db6b51eb9c8bb872b.
+
+Navigation joins to the preceding fresh inventory at source head
+88802c0bba963d42ace559fec7a46a376b8fa8b9 require equal declaration kind,
+source name, exact lexical signature hash and recorded section-variable text.
+There are 21,295 unique same-file candidates, 56 unique other-file candidates
+and 34 unmatched declarations. A same-file candidate is preferred when unique;
+these are navigation hints, not kernel-name reconciliation or semantic identity.
+Unmatched records require investigation and are not evidence of vacuity,
+statement weakening or authorized migration by themselves. Definition and
+import changes can invalidate semantics even when lexical headers match.
+
+All reconstructed records remain uncovered; every join explicitly grants no
+proof credit. Kernel records, credited witnesses and credited refutations are
+zero. Historical h69 remains UNVERIFIABLE. The driver, complete reconstruction,
+source identities and reproduction checks are private H145 evidence, not code
+branch data. Original proof/resource limits and timing/import STOPs remain.
+
+
+### H151: investigate the 34 unmatched lexical records
+
+All 34 unmatched reconstructed records now have explicit investigation
+annotations. Eleven are unnamed examples in LocalBlock: ignoring only their
+synthetic line-number names finds one same-file candidate with exactly the same
+header and section-variable text. Twelve named declarations have the visible
+addition of a mapFree argument after isBase in conversion/admission expressions.
+The remaining eleven have monetary surface differences: natural balance values,
+wordView projections, or corresponding literal/projection changes. Their exact
+before/after headers are retained; monetary classification is manual family
+triage, not a normalization or equivalence rule.
+
+The original 34 unmatched dispositions are unchanged. Even identical example
+headers do not establish elaborated type or dependency preservation. The 23
+named changes require type/owner reconciliation before any frozen-statement
+acceptance. Git text history locates the mapFree changes at
+7256a1ad97227e488b1b8fa1fcd4263077f47e53, balance projection at
+3ea8e72aba5f320fee3c87a0446722546cfe4fc7, and natural-balance changes at
+9572b8d3edd01e1dc11689a85f016d9d25f92af7; history alone supplies no approval
+or proof equivalence. No statement is edited, accepted, weakened, or declared
+vacuous by this investigation.
+
+The input inventories retain their existing hash identities and source bases.
+Every investigated original ID occurs once, repeated classification bytes are
+identical, and every proof-credit flag remains false. Historical h69 remains
+UNVERIFIABLE. Detailed headers, exact-match criteria, provenance and reproduction
+checks are private H145 evidence. Kernel/witness recovery, original semantic
+coverage, physical adequacy and full validation remain open under existing STOPs.

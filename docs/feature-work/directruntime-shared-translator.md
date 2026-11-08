@@ -336,7 +336,7 @@ final reviews found no further defect; no delivery/installability claim follows.
 H41 amends H35: retain verified packs on this VM with their path/SHA; the
 coordinator pulls them; never run ship-cache.sh on this VM; future delivery is
 coordinator-pending. The coordinator reports receipt at
-/home/guilherme/.local/state/cloudvm-coord/receipts/shared-translator-cache-received-20261105T025521Z.json
+$XDG_STATE_HOME/cloudvm-coord/receipts/shared-translator-cache-received-20261105T025521Z.json
 and verification of SHA cac02c95edef9190666bd7e11333438c348039e09251ed9415645fc14ddeb6f2.
 The600359272-byte pack remains in its original artifacts/h35/cache-ship path;
 its SHA was rechecked locally. The host receipt itself was not read here.
@@ -504,7 +504,7 @@ proof budget,trust policy,premise or theorem was changed to obtain these results
 
 Coordinator reports byte delivery of the prior965584-byte cache delta with SHA
 047cfd99894d0943e9cdd728122ac48db0b2103652a97444944efbcc2325f167 and host receipt
-/home/guilherme/.local/state/cloudvm-coord/receipts/sched-20261105T1200Z/shared-cache-received.json.
+$XDG_STATE_HOME/cloudvm-coord/receipts/sched-20261105T1200Z/shared-cache-received.json.
 Host receipt is unread locally; installation/entrypoint migration/parity/native
 closure do not follow. H41 remains in force for refreshed packs. CR migration,
 DR-A-META,exhaustive form parity,source preservation,native/WASM closure,before/after
@@ -1390,3 +1390,9 @@ remains at SHA256 f7501b31521131172ae774afb006adcee546a90ea503b592ddfb0dfaa55b12
 No candidate was installed and no production, proof, validation contract or
 resource budget changed. The test-standing-owner and static-handoff script notes
 belong to the audit-calculus scope and were left unchanged in this lane.
+
+### H126 ReadBounds compiled traversal repair
+
+The typed tail worklist preserves every tree occurrence and existing fuel limit. Generic equalities prove exactly the old counters’ remaining-fuel results; the original ReadBounds definitions and statements are unchanged apart from selecting their compiled implementations. The correctness module stays outside the ordinary runtime import path.
+
+The affected DirectRuntime build and 27 per-file checks pass. Matched checking of the existing module has median ratio 0.9265; this is not total cold-build or native performance acceptance. Earlier checking failures remain in the off-Git H44 evidence archive indexed by `read-bounds-stack-manifest.json`. Emitted C has a worklist back edge and no direct recursive worker call. Fresh native/WASM validation and all historical global performance STOPs remain open.

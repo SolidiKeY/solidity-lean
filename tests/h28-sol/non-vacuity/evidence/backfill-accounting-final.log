@@ -1,9 +1,0 @@
-.............................................
-----------------------------------------------------------------------
-Ran 45 tests in 20.943s
-
-OK
-PASS: structural inventory only
-malformed or missing required evidence: [Errno 2] No such file or directory: '/workspace/solidity-lean/tests/h28-sol/non-vacuity/final-gates.json'
-FAIL: acceptance
-ACCOUNTING_CHECKPOINT_PASS: structural checks and negative acceptance control only

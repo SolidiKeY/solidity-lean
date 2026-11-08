@@ -1,3 +1,0 @@
-FAIL unfold digitsTail; simp only [hd, Bool.true_eq, ↓reduceIte, ih]
-FAIL rename_i b r ds rest h; cases r <;> simp only [digitsTail, hd, Bool.true_eq, ↓reduceIte, ih]
-FAIL rw [digitsTail.eq_def]; simp only [hd, Bool.true_eq, ↓reduceIte, ih]

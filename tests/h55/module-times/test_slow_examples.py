@@ -89,6 +89,7 @@ class SlowExamples(unittest.TestCase):
             gate.parent.mkdir(parents=True)
             gate.write_bytes((ROOT / "scripts/coord-tools/gate.sh").read_bytes())
             for name in ("scripts/check-trust.sh", "scripts/check-doc-paths.sh",
+                         "scripts/check-private-paths.sh", "scripts/check-evidence-files.sh",
                          "scripts/coord-tools/register.sh", "scripts/coord-tools/fragments.sh"):
                 file = root / name
                 file.parent.mkdir(parents=True, exist_ok=True)
@@ -149,7 +150,7 @@ class SlowExamples(unittest.TestCase):
     def test_slow_partition_and_reverse_imports(self):
         slow = set(imports(ROOT / "SoliditySlowExamples.lean"))
         regular = set(imports(ROOT / "SolidityExamples.lean"))
-        self.assertEqual(14, len(slow))
+        self.assertEqual(15, len(slow))
         self.assertFalse(slow & regular)
         with (ROOT / "lakefile.toml").open("rb") as file:
             roots = default_roots(tomllib.load(file))
@@ -168,7 +169,8 @@ class SlowExamples(unittest.TestCase):
             return []
         self.assertFalse(reachable_slow(roots, slow, load))
         self.assertTrue({"Solidity.Examples.Tactics.OpenLoops", "Solidity.Examples.DecisionGaps",
-                         "Solidity.Examples.Tactics.RevertData"} <= slow)
+                         "Solidity.Examples.Tactics.RevertData",
+                         "Solidity.Examples.Tactics.OpenLoops.RowsNine"} <= slow)
         for file in (ROOT / "Solidity").rglob("*.lean"):
             module = file.relative_to(ROOT).with_suffix("").as_posix().replace("/", ".")
             if module not in slow:
