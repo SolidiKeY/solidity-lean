@@ -12,7 +12,7 @@ import sys
 import tempfile
 import time
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 sys.dont_write_bytecode = True
 ROOT = Path(__file__).resolve().parents[4]
 SCRIPTS = ROOT/'scripts/h62/item4/generic-v08'
@@ -83,15 +83,22 @@ class Measurement(unittest.TestCase):
                     process_usage(321, root, lambda _: True)
 
     def test_missing_cgroup_reports_unvalidated_lifecycle(self):
-        original = Path.read_text
-        def read(path, *args, **kwargs):
-            if path == Path('/sys/fs/cgroup/memory.max'):
-                raise FileNotFoundError('sandbox cgroup observation absent')
-            return original(path, *args, **kwargs)
         fixture = Ownership('test_monitor_sigkill_cannot_orphan_worker')
-        with patch.object(Path, 'read_text', read):
+        # Admission may read /review.scope/memory.max, not the cgroup root.
+        failure = Mock(side_effect=ScopeError('scope observation unavailable'))
+        with patch.dict(Ownership.setUp.__globals__, require_scope=failure):
             with self.assertRaisesRegex(unittest.SkipTest, 'NOT VALIDATED'):
                 fixture.setUp()
+        failure.assert_called_once_with()
+
+    def test_valid_nested_scope_admission_is_not_skipped(self):
+        fixture = Ownership('test_monitor_sigkill_cannot_orphan_worker')
+        observation = dict(membership='/review.scope', memory_max_bytes=12*1024**3,
+                           memory_swap_max_bytes=0, host_reserve_bytes=12*1024**3)
+        admitted = Mock(return_value=observation)
+        with patch.dict(Ownership.setUp.__globals__, require_scope=admitted):
+            self.assertIsNone(fixture.setUp())
+        admitted.assert_called_once_with()
 
 
 def running(pid):
