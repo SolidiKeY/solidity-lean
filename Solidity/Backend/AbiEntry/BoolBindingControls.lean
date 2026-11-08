@@ -28,7 +28,7 @@ private theorem actual (input : Solidity.AbiEntry.Input) :
 private theorem accept (input : Solidity.AbiEntry.Input) (full : ¬(wmod input.size).val<36)
     (valid : Solidity.AbiEntry.Kind.bool.valid (rawArgumentWord input).val=true) :
     run compiled.code (machine input)=.ok (bound input) 0 := by
-  simpa only [boolBindingOutcome,if_neg full,if_pos valid] using actual input
+  simpa only [bound,boolBindingOutcome,if_neg full,if_pos valid] using actual input
 
 theorem both_bits :
     run compiled.code (machine yes)=.ok (bound yes) 0 ∧ (bound yes).mem 9=.val (bword true) ∧
