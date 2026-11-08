@@ -5,12 +5,7 @@ import Solidity.Lowering.V07.UnsignedQuotRem
 import Solidity.Lowering.V08.AbiObservations
 import Solidity.Backend.Failure.Observe
 
-/-! A concrete Source RHS-revert producer for the generic lazy condition
-constructor. Reuse the published division-by-zero expression; no Source
-semantics, value/world relation or admission contract is introduced here.
-Only the existing Condition success/revert clauses are exercised: the native
-panic at smaller Source horizons does not simulate Source timeout and supplies
-no adequacy or backward result. -/
+/-! A concrete Source RHS-revert producer for the generic lazy condition constructor. Reuse the published division-by-zero expression; no Source semantics, value/world relation or admission contract is introduced here. Only the existing Condition success/revert clauses are exercised: the native panic at smaller Source horizons does not simulate Source timeout and supplies no adequacy or backward result. -/
 namespace Solidity.Lowering.G17.RevertControls
 open V07 V07.P12NextInterface Source.SemanticsExamples
 open V07.P12Controls (C E SrcCtx TgtCtx source target mapping)
@@ -92,8 +87,7 @@ private def producer (p : Roadmap.Pipeline) (checked conj left : Bool) :=
       left ⟨source,target,initial⟩)
     (divisionCondition (globals p) {F0 with checked := checked})
 
-/-- A genuine Source RHS panic reaches the generic condition's revert
-clause, with exact data, for both operators, pipelines and checking modes. -/
+/-- A genuine Source RHS panic reaches the generic condition's revert clause, with exact data, for both operators, pipelines and checking modes. -/
 theorem taken_source_revert_witness (p : Roadmap.Pipeline) (checked conj : Bool) (fuel : Nat) :
     (Source.evalE (globals p) {F0 with checked := checked} (fuel+7)
       (.binary (if conj then .and else .or) (.bool conj) V07.ShortCircuitControls.failure)).run source =
@@ -110,8 +104,7 @@ theorem taken_source_revert_witness (p : Roadmap.Pipeline) (checked conj : Bool)
   exact ⟨run,(producer p checked conj conj).revert (fuel+7) source source target
     (Source.panicData .divZero) initial run⟩
 
-/-- The same panic-producing RHS is skipped, including at horizons too
-small to evaluate it, and cannot turn the successful branch into a failure. -/
+/-- The same panic-producing RHS is skipped, including at horizons too small to evaluate it, and cannot turn the successful branch into a failure. -/
 theorem skipped_source_revert_witness (p : Roadmap.Pipeline) (checked conj : Bool) (fuel : Nat) :
     (Source.evalE (globals p) {F0 with checked := checked} (fuel+2)
       (.binary (if conj then .and else .or) (.bool (!conj)) V07.ShortCircuitControls.failure)).run source =

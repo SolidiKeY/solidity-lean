@@ -2,9 +2,7 @@ import Solidity.Lowering.G17.Conditional
 import Solidity.Lowering.G17.ShortCircuitControls
 import Solidity.Lowering.G17.ShortCircuitRevertControls
 
-/-! Concrete conditional controls reject eager evaluation, branch reversal,
-condition-effect loss and ignored failures. Existing heterogeneous P12 worlds
-are reused; no heap/address relation is invented. -/
+/-! Concrete conditional controls reject eager evaluation, branch reversal, condition-effect loss and ignored failures. Existing heterogeneous P12 worlds are reused; no heap/address relation is invented. -/
 namespace Solidity.Lowering.G17.ConditionalControls
 open V07 V07.P12NextInterface Source.SemanticsExamples
 open V07.P12Controls (C E SrcCtx TgtCtx source target mapping)
@@ -27,8 +25,7 @@ def producer (p : Roadmap.Pipeline) (checked choice : Bool) :=
     (P12AssignedCondition.assignment (globals p) {F0 with checked := checked} mapping values worlds
       bool_reflect ⟨source,target,initial⟩ (.there .here) .here (.there .here) .here rfl rfl)
 
-/-- Both branch choices execute real Source assignments, with distinct reached
-locals and transported target alignment, for both pipelines/check modes. -/
+/-- Both branch choices execute real Source assignments, with distinct reached locals and transported target alignment, for both pipelines/check modes. -/
 theorem source_witness (p : Roadmap.Pipeline) (checked choice : Bool) (fuel : Nat) :
     let after : Source.EMState E SrcCtx :=
       if choice then (source.1.set .here (.bool true),source.2)
@@ -52,8 +49,7 @@ theorem source_witness (p : Roadmap.Pipeline) (checked choice : Bool) (fuel : Na
         .here (.there .here) _ rfl
   exact ⟨run,(producer p checked choice).success (fuel+3) source _ target choice initial run⟩
 
-/-- A live condition write must be visible to the selected branch. Reading
-that branch from the initial state would return false instead of true. -/
+/-- A live condition write must be visible to the selected branch. Reading that branch from the initial state would return false instead of true. -/
 theorem reached_effect_witness :
     (conditionalOperand (assignLocalOperand .here (.there .here))
       (assignLocalOperand (.there .here) .here) failing).run target =
@@ -61,8 +57,7 @@ theorem reached_effect_witness :
   rw [conditionalOperand_run,assigned_condition_operand_run]
   rfl
 
-/-- Each choice skips a failing unselected branch. Selecting that same branch,
-or failing the condition before selection, must propagate its halt. -/
+/-- Each choice skips a failing unselected branch. Selecting that same branch, or failing the condition before selection, must propagate its halt. -/
 theorem halt_selection (choice : Bool) :
     (conditionalOperand (P12AtomicConditions.literalOperand choice)
       (if choice then P12AtomicConditions.literalOperand true else failing)
@@ -96,9 +91,7 @@ private def branchPanic (p : Roadmap.Pipeline) (checked side choose : Bool) :
       (.bool choose) V07.ShortCircuitControls.failure (.bool false)
       (literal _ _ choose) (RevertControls.divisionCondition _ _) (literal _ _ false)
 
-/-- The selected arm genuinely panics in Source, with exact transported native
-payload, for either arm and both pipelines/check modes. Rejects swallowed or
-reversed-arm panics; the existing producer's revert clause is exercised. -/
+/-- The selected arm genuinely panics in Source, with exact transported native payload, for either arm and both pipelines/check modes. Rejects swallowed or reversed-arm panics; the existing producer's revert clause is exercised. -/
 theorem taken_source_panic (p : Roadmap.Pipeline) (checked side : Bool) (fuel : Nat) :
     let expr : Source.RExpr E SrcCtx .bool :=
       .cond (.bool side) (if side then V07.ShortCircuitControls.failure else .bool false)
@@ -126,9 +119,7 @@ theorem taken_source_panic (p : Roadmap.Pipeline) (checked side : Bool) (fuel : 
     exact (branchPanic p checked _ _).revert (fuel+7) source source target
       (Source.panicData .divZero) initial run
 
-/-- The same Source-panic arm is skipped even when its available horizon is
-insufficient. Guards against evaluating the unselected arm or returning panic
-unconditionally; both Source execution and native alignment are witnessed. -/
+/-- The same Source-panic arm is skipped even when its available horizon is insufficient. Guards against evaluating the unselected arm or returning panic unconditionally; both Source execution and native alignment are witnessed. -/
 theorem skipped_source_panic (p : Roadmap.Pipeline) (checked side : Bool) (fuel : Nat) :
     let expr : Source.RExpr E SrcCtx .bool :=
       .cond (.bool (!side)) (if side then V07.ShortCircuitControls.failure else .bool false)
@@ -158,8 +149,7 @@ private def conditionPanic (p : Roadmap.Pipeline) (checked : Bool) :
     (.bool true) (.bool false) (RevertControls.divisionCondition G F)
     (literal G F true) (literal G F false)
 
-/-- A Source condition panic must propagate before either successful arm can
-run. Guards against treating condition failure as false or ignoring its data. -/
+/-- A Source condition panic must propagate before either successful arm can run. Guards against treating condition failure as false or ignoring its data. -/
 theorem condition_source_panic (p : Roadmap.Pipeline) (checked : Bool) (fuel : Nat) :
     (Source.evalE (globals p) {F0 with checked := checked} (fuel+7)
       (.cond V07.ShortCircuitControls.failure (.bool true) (.bool false))).run source =

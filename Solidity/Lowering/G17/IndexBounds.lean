@@ -4,9 +4,7 @@ import Solidity.Lowering.V08.AbiObservations
 import Solidity.Backend.Failure.Observe
 import Solidity.Theory.Typed.Mem
 
-/-! Bounds checks from the existing checked-program metadata. The guard
-reads captured simple indices and a live reference; it introduces no Source
-heap relation and makes no claim about admission or a whole lowering pass. -/
+/-! Bounds checks from the existing checked-program metadata. The guard reads captured simple indices and a live reference; it introduces no Source heap relation and makes no claim about admission or a whole lowering pass. -/
 namespace Solidity.Lowering.G17.IndexBounds
 variable {C : Contract} {Γ : Ctx} {R : RefTy} {p : PrimTy}
 
@@ -96,8 +94,7 @@ private theorem bounds_run (target : State C Γ) (array : ArrTy R (.prim p))
       rw [if_pos inside]
       rfl
 
-/-- Guard metadata is run after the base identity and index input have been
-captured, before the final memory read. -/
+/-- Guard metadata is run after the base identity and index input have been captured, before the final memory read. -/
 def readOperand (i a : Idx Γ (.mem R)) (hm : (Ty.ref R).mapFree = true)
     (array : ArrTy R (.prim p)) (index : Simple C Γ .uint) :
     DeferredSource.Operand C Γ (.prim p) :=
@@ -105,8 +102,7 @@ def readOperand (i a : Idx Γ (.mem R)) (hm : (Ty.ref R).mapFree = true)
       (code array .here hm (index.wk (.drop .refl))),
     .val (.readMem (.index array (.var .here hm) (.simple (index.wk (.drop .refl)))))⟩
 
-/-- Reuse the repository's checked-program transformation for stores whose
-index and assigned scalar have already been captured. -/
+/-- Reuse the repository's checked-program transformation for stores whose index and assigned scalar have already been captured. -/
 def writeCode (i a : Idx Γ (.mem R)) (hm : (Ty.ref R).mapFree = true)
     (array : ArrTy R (.prim p)) (index : Simple C Γ .uint) (value : Simple C Γ p) :
     Prog C Γ (.mem R :: Γ) :=
@@ -166,9 +162,7 @@ private theorem prefix_run (target : State C Γ) (i a : Idx Γ (.mem R))
   rw [heap]
   split <;> rfl
 
-/-- In bounds the guarded read is the original captured read. Out of bounds
-it emits the exact Source panic payload, rather than an empty native revert.
-No access-success result is assumed. -/
+/-- In bounds the guarded read is the original captured read. Out of bounds it emits the exact Source panic payload, rather than an empty native revert. No access-success result is assumed. -/
 theorem read_run (target : State C Γ) (i a : Idx Γ (.mem R))
     (hm : (Ty.ref R).mapFree = true) (old assigned : HRef target.H R)
     (readI : TEnv.get i target.env = some old) (readA : TEnv.get a target.env = some assigned)
@@ -189,8 +183,7 @@ theorem read_run (target : State C Γ) (i a : Idx Γ (.mem R))
     rfl
   · simp only [inside,if_false,bind,Except.bind]
 
-/-- The actual checked-program store preserves the original successful
-captured store and gives a bounds failure its exact 0x32 payload. -/
+/-- The actual checked-program store preserves the original successful captured store and gives a bounds failure its exact 0x32 payload. -/
 theorem write_run (target : State C Γ) (i a : Idx Γ (.mem R))
     (hm : (Ty.ref R).mapFree = true) (old assigned : HRef target.H R)
     (readI : TEnv.get i target.env = some old) (readA : TEnv.get a target.env = some assigned)
