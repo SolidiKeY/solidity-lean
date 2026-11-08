@@ -86,6 +86,7 @@ theorem executed (base : Nat) (label : Fin W) (body : Prog C BoolBoundCtx Δ)
   rw [sameWhole,sameBody,code]
   exact composed C base label _ machine word size initialWord initialSize
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Raw semantic success identifies the actual local subsequently read by the body. -/
 theorem decoded_body (base : Nat) (label : Fin W) (body : Prog C BoolBoundCtx Δ)
     (outFrag : Frag Δ) (bodyCore : inFragP (Frag.init BoolBoundCtx) body=some outFrag)
