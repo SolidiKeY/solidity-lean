@@ -55,7 +55,11 @@ list is available until the actual suite has run.
   16 GiB container limit alone is not the required 12 GiB job bound.
 - `VU1-D1` (documentation catalog owner): adding this requested document makes
   the generated catalog stale, but its output is outside this lane's lease.
-  The exact required owner diff is below; do not hand-edit generated output.
+  The coordinator selected option A: it will add the topic-guide link and
+  regenerate the catalog during integration, then run unchanged checks.
+  This is resolved ownership, not a gate waiver. The lane acknowledged
+  `VU1-D1`; navigation remains pending until the combined tree passes.
+  The exact required owner diffs are below; do not hand-edit generated output.
 - Representative contracts: the frozen SolKeY snapshot contains benchmark
   ERC20 and wallet sources, but their presence is not evidence of frontend
   admission. No vault/multisig Solidity file was found in that snapshot.
@@ -84,6 +88,18 @@ No catalog write is authorized in this lane.
  - [docs/feature-work/vy5-composition.md](feature-work/vy5-composition.md)
  - [docs/feature-work/vy5-natural-account.md](feature-work/vy5-natural-account.md)
  - [docs/feature-work/vy5-source-release.md](feature-work/vy5-source-release.md)
+```
+
+The topic-guide addition belongs in the existing trust/usability guide:
+
+```diff
+--- a/docs/feature-work/trust-usability.md
++++ b/docs/feature-work/trust-usability.md
+@@
+-## Lanes
++U01 measurement inventory and prerequisites: [benchmark lane](vu1-bench.md).
++
++## Lanes
 ```
 
 ## Budget decision
