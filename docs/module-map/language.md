@@ -269,3 +269,12 @@ is released. It never substitutes a new parent in resource measurements.
 Kernel parent-ID discovery and live-owned status reads fail closed; missing
 data is ignored only when process exit is confirmed. The guard regressions
 use lightweight process fixtures and do not establish any Lean theorem.
+
+Handled interruption is deferred across process creation until the child handle
+is owned. Aggregate-mode workers inherit the writer lease and use a Linux
+parent-death SIGKILL guard, including the parent-loss-before-registration race;
+monitor SIGKILL therefore cannot leave an unowned worker running. Lifecycle
+regressions separately cover the fork-to-assignment window and monitor death.
+If sandbox cgroup observations are unavailable, those lifecycle tests report
+NOT VALIDATED/skipped; that is not successful cleanup evidence. The public
+checker itself still refuses unavailable resource observations.

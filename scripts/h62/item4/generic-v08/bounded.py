@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """One bounded process group; report actual resource/time data, never a fake pass."""
-import argparse,json,os,pathlib,resource,signal,subprocess,time
+import argparse,ctypes,json,os,pathlib,resource,signal,stat,subprocess,time
 from width_resources import process_usage
 p=argparse.ArgumentParser(__doc__)
 p.add_argument('--record',type=pathlib.Path,required=True)
@@ -8,6 +8,7 @@ p.add_argument('--seconds',type=int,default=300)
 p.add_argument('--aggregate',action='store_true',help='Also enforce aggregate12GiB RSS and one Lean process')
 p.add_argument('--aggregate-parent',action='store_true',help='Include the serial v2 driver RSS')
 p.add_argument('--parent-pid',type=int,help='Original v2 driver; never follow reparenting')
+p.add_argument('--lease-fd',type=int,help='Inherited writer lease, retained by the worker')
 p.add_argument('command',nargs=argparse.REMAINDER)
 a=p.parse_args()
 cmd=a.command[1:] if a.command[:1]==['--'] else a.command
@@ -15,12 +16,31 @@ if not cmd: p.error('command required')
 if a.aggregate_parent and not a.aggregate: p.error('--aggregate-parent requires --aggregate')
 if a.aggregate_parent and (a.parent_pid is None or a.parent_pid <= 1):
     p.error('--aggregate-parent requires the original --parent-pid')
+if a.aggregate_parent and a.lease_fd is None:
+    p.error('--aggregate-parent requires an inherited --lease-fd')
+if a.lease_fd is not None:
+    if not a.aggregate or not stat.S_ISREG(os.fstat(a.lease_fd).st_mode):
+        p.error('--lease-fd requires aggregate mode and an open regular file')
+monitor_pid=os.getpid()
+libc=ctypes.CDLL(None,use_errno=True) if a.aggregate else None
+spawn_mask=None
+
 if pathlib.Path(cmd[0]).name != 'lean' or '-j1' not in cmd:
     p.error('only a direct Lean command with explicit -j1 is supported')
 
 def preexec():
     os.setsid()
     resource.setrlimit(resource.RLIMIT_AS,(12*1024**3,12*1024**3))
+    if a.aggregate:
+        # Independent kernel lifetime guard: monitor SIGKILL cannot orphan work.
+        if libc.prctl(1, signal.SIGKILL, 0, 0, 0) != 0:
+            error=ctypes.get_errno()
+            raise OSError(error,os.strerror(error))
+        if os.getppid()!=monitor_pid:
+            os.kill(os.getpid(),signal.SIGKILL)
+        for signum in (signal.SIGTERM, signal.SIGINT):
+            signal.signal(signum,signal.SIG_DFL)
+        signal.pthread_sigmask(signal.SIG_SETMASK,spawn_mask)
 
 def available():
     fields=dict(line.split(':',1) for line in pathlib.Path('/proc/meminfo').read_text().splitlines())
@@ -49,7 +69,16 @@ if a.aggregate:
     for signum in (signal.SIGTERM, signal.SIGINT):
         handlers[signum]=signal.signal(signum, interrupted)
 try:
-    proc=subprocess.Popen(cmd,env=env,preexec_fn=preexec)
+    if a.aggregate:
+        signal.pthread_sigmask(signal.SIG_UNBLOCK,{signal.SIGTERM,signal.SIGINT})
+        spawn_mask=signal.pthread_sigmask(signal.SIG_BLOCK,{signal.SIGTERM,signal.SIGINT})
+    try:
+        proc=subprocess.Popen(cmd,env=env,preexec_fn=preexec,
+            pass_fds=(a.lease_fd,) if a.lease_fd is not None else ())
+    finally:
+        # A pending interruption is delivered only after proc is assigned.
+        if a.aggregate:
+            signal.pthread_sigmask(signal.SIG_SETMASK,spawn_mask)
     while proc.poll() is None:
         if original_parent is not None and os.getppid()!=original_parent:
             stop='parent-lost'
@@ -127,6 +156,7 @@ if a.aggregate:
                   aggregate_rss_limit_bytes=12*1024**3, no_swap_required=True,
                   requested_seconds=a.seconds, polling_seconds=.25, termination_grace_seconds=5,
                   monitor_error=monitor_error, original_parent_pid=original_parent,
+                  worker_parent_death_signal='SIGKILL', worker_lease_fd=a.lease_fd,
                   aggregate_scope='Lean tree + monitor' + (' + serial v2 driver' if a.aggregate_parent else ''))
 a.record.write_text(json.dumps(record,indent=2)+'\n')
 print(json.dumps(record),flush=True)

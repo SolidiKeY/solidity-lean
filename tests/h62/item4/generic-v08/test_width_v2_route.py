@@ -49,13 +49,13 @@ class Route(unittest.TestCase):
                 v2.dependency_order(repo, 'Solidity.A')
 
     def test_commands_enforce_existing_bounds(self):
-        cmd = v2.bounded_command(Path('/pin/bin/lean'), Path('/offgit/record'), 17, ['x.lean'])
+        cmd = v2.bounded_command(Path('/pin/bin/lean'), Path('/offgit/record'), 17, ['x.lean'], lease_fd=3)
         self.assertIn('--aggregate', cmd)
         self.assertEqual(cmd[-3:], ['-j1', '--tstack=131072', 'x.lean'])
         self.assertIn('/pin/bin/lean', cmd)
         for seconds in (0, 301):
             with self.assertRaises(ValueError):
-                v2.bounded_command(Path('/pin/bin/lean'), Path('/offgit/record'), seconds, [])
+                v2.bounded_command(Path('/pin/bin/lean'), Path('/offgit/record'), seconds, [], lease_fd=3)
 
     def test_shared_deadline_blocks_late_success(self):
         with tempfile.TemporaryDirectory() as folder:

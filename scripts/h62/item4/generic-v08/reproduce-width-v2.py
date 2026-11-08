@@ -57,11 +57,11 @@ def version_matches(text):
     return ('version ' + VERSION + ',') in text and ('commit ' + COMMIT + ',') in text
 
 
-def bounded_command(lean, record, seconds, args):
+def bounded_command(lean, record, seconds, args, *, lease_fd):
     if not 1 <= seconds <= SECONDS:
         raise ValueError('remaining budget must be between1 and300 seconds')
     return [sys.executable, '-B', str(ROOT/'scripts/h62/item4/generic-v08/bounded.py'),
-            '--record', str(record), '--seconds', str(seconds), '--aggregate', '--aggregate-parent', '--parent-pid', str(os.getpid()), '--',
+            '--record', str(record), '--seconds', str(seconds), '--aggregate', '--aggregate-parent', '--parent-pid', str(os.getpid()), '--lease-fd', str(lease_fd), '--',
             str(lean), '-j1', '--tstack=131072', *args]
 
 
@@ -84,7 +84,11 @@ def run_monitor(command, **kwargs):
     for signum in (signal.SIGTERM, signal.SIGINT):
         previous[signum] = signal.signal(signum, interrupted)
     try:
-        child = subprocess.Popen(command, **kwargs)
+        mask = signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGTERM, signal.SIGINT})
+        try:
+            child = subprocess.Popen(command, **kwargs)
+        finally:
+            signal.pthread_sigmask(signal.SIG_SETMASK, mask)
         return subprocess.CompletedProcess(command, child.wait())
     except BaseException:
         for signum in previous:
@@ -143,7 +147,7 @@ def main(argv=None):
             if remaining < 1:
                 (output/'STOP.txt').write_text('overall300second deadline exhausted\n')
                 return 1
-            run = bounded_command(lean, output/(name+'.json'), remaining, command)
+            run = bounded_command(lean, output/(name+'.json'), remaining, command, lease_fd=lock.fileno())
             try:
                 with (output/(name+'.log')).open('w') as log:
                     result = run_monitor(run, cwd=ROOT, env=env, stdout=log, stderr=subprocess.STDOUT,
