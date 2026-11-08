@@ -29,7 +29,7 @@ def main():
     statefile=args.work/'reference-results.json'
     state=json.loads(statefile.read_text()) if statefile.exists() else {'project':args.project,'pin':PINS[args.project],'source':str(root),'preparation':[],'build_attempts':[],'modules':[]}
     assert state['pin']==PINS[args.project] and state['source']==str(root)
-    def save(): statefile.write_text(json.dumps(state,indent=2)+'\n')
+    def save(): meter.atomic_write_json(statefile,state)
     for tool in ['lean','lake']:
         r=run([tool,'--version'],tool+'-version',60); observed=(args.work/(tool+'-version.log')).read_text().strip(); assert r['exit_code']==0
         if tool+'_version' in state: assert state[tool+'_version']==observed, 'resume toolchain mismatch'

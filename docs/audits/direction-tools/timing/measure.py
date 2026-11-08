@@ -7,9 +7,27 @@ use the repository host scope/12 GiB reserve policy there. No relaxed defaults.
 External logs contain full profiler output; small result JSON is in --work.
 The caller MUST hold the shared writer lock. No Lean sources are written.
 """
-import argparse,json,os,pathlib,re,signal,shutil,subprocess,time
+import argparse,json,os,pathlib,re,signal,shutil,subprocess,tempfile,time
 CLOUD_VM_OPT_IN=False
 HERE=pathlib.Path(__file__).resolve().parent; ROOT=HERE.parents[3]
+def atomic_write_json(path,data):
+    path=pathlib.Path(path)
+    fd,name=tempfile.mkstemp(prefix='.'+path.name+'.',suffix='.tmp',dir=path.parent)
+    try:
+        with os.fdopen(fd,'w',encoding='utf-8') as handle:
+            json.dump(data,handle,indent=2); handle.write('\n'); handle.flush(); os.fsync(handle.fileno())
+        os.replace(name,path)
+        directory=os.open(path.parent,os.O_RDONLY|os.O_DIRECTORY)
+        try: os.fsync(directory)
+        finally: os.close(directory)
+    finally:
+        try: os.unlink(name)
+        except FileNotFoundError: pass
+
+def capture_environment(repo):
+    meminfo=pathlib.Path('/proc/meminfo').read_text()
+    return {'metadata_scope':'latest runner invocation only; resumed rows retain original per-observation metadata or null','cloud_vm_opt_in':CLOUD_VM_OPT_IN,'isolation':'H232 cloud VM; no systemd scope' if CLOUD_VM_OPT_IN else 'unasserted','swap_total_kib':int(re.search(r'^SwapTotal:\s+(\d+)',meminfo,re.M)[1]),'lean_num_threads':1,'rss_stop_kib':12*1024**2,'available_memory_stop_kib':3*1024**2,'measurement_checkout':str(repo),'tracked_source_clean':not subprocess.check_output(['git','-C',str(repo),'status','--porcelain','--untracked-files=no'],text=True).strip()}
+
 def command(args,cwd,log,timeout=600):
     if not CLOUD_VM_OPT_IN: raise RuntimeError('cloud-only runner requires explicit --cloud-vm; host resource policy is not implemented')
     if int(re.search(r'^SwapTotal:\s+(\d+)',pathlib.Path('/proc/meminfo').read_text(),re.M)[1])!=0: raise RuntimeError('cloud runner requires swap disabled')
@@ -51,14 +69,17 @@ def main():
     if not args.cloud_vm: ap.error('execution requires explicit --cloud-vm under H232; host execution unsupported')
     CLOUD_VM_OPT_IN=True
     args.work.mkdir(parents=True,exist_ok=True)
-    meminfo=pathlib.Path('/proc/meminfo').read_text()
-    environment={'metadata_scope':'latest runner invocation only; resumed rows retain original per-observation metadata or null','cloud_vm_opt_in':True,'isolation':'H232 cloud VM; no systemd scope','swap_total_kib':int(re.search(r'^SwapTotal:\s+(\d+)',meminfo,re.M)[1]),'lean_num_threads':1,'rss_stop_kib':12*1024**2,'available_memory_stop_kib':3*1024**2,'measurement_checkout':str(ROOT),'tracked_source_clean':not subprocess.check_output(['git','-C',str(ROOT),'status','--porcelain','--untracked-files=no'],text=True).strip()}
+    environment=capture_environment(ROOT)
     if environment['swap_total_kib']!=0: ap.error('cloud timing runner requires swap disabled before execution')
     assert subprocess.check_output(['git','-C',str(ROOT),'rev-parse','HEAD'],text=True).strip()=='d6fd95f0886775d7c286813fa9b993a40ba7a777'
     assert not subprocess.check_output(['git','-C',str(ROOT),'status','--porcelain','--untracked-files=no'],text=True).strip(), 'dirty measured source'
-    data=json.loads((HERE/'inventory.json').read_text()); results=[]
+    data=json.loads((HERE/'inventory.json').read_text())
+    assert len({r['path'] for r in data['sample_plan']})==len(data['sample_plan']), 'duplicate plan paths'
     saved=args.work/'sample-results.json'
-    previous={r['path']:r for r in json.loads(saved.read_text())['samples']} if saved.exists() else {}
+    saved_rows=json.loads(saved.read_text())['samples'] if saved.exists() else []
+    previous={r['path']:r for r in saved_rows}
+    assert len(previous)==len(saved_rows), 'duplicate saved observation paths'
+    results=dict(previous)
     versions={}
     for name in ('lean','lake'):
         versions[name]=subprocess.check_output([name,'--version'],text=True).strip()
@@ -86,7 +107,9 @@ def main():
             if item['status']=='pass':
                 item['seconds_per_kloc']=1000*item['plain']['wall_seconds']/row['lines']
                 if args.profiles and (not item.get('profile',{}).get('exit_code')==0 or not (args.work/f'{i:02}-trace.json').exists()): item['profile']=command(['lake','env','lean','-j1','--tstack=131072','-Dprofiler=true','-Dprofiler.threshold=100000000','-Dtrace.profiler=true','-Dtrace.profiler.threshold=100','-Dtrace.profiler.output='+str(args.work/f'{i:02}-trace.json'),'-Dtrace.profiler.output.pp=true',file],cwd,args.work/f'{i:02}-profiler.log')
-        results.append(item)
-        (args.work/'sample-results.json').write_text(json.dumps({'base':data['base'],'versions':versions,'environment':environment,'KeySort':key,'conditions':'one worker, -j1, LEAN_NUM_THREADS=1, cache-only dependencies, no systemd scope on the cloud VM (H232); plain run before profiled run; one observation, OS page cache uncontrolled','samples':results},indent=2)+'\n')
+        results[p]=item
+        planned=[r['path'] for r in data['sample_plan']]
+        checkpoint_rows=[results[path] for path in planned if path in results]+[value for path,value in results.items() if path not in set(planned)]
+        atomic_write_json(args.work/'sample-results.json',{'base':data['base'],'versions':versions,'environment':environment,'KeySort':key,'conditions':'one worker, -j1, LEAN_NUM_THREADS=1, cache-only dependencies, no systemd scope on the cloud VM (H232); plain run before profiled run; one observation, OS page cache uncontrolled','samples':checkpoint_rows})
         print(i,p,item['status'],flush=True)
 if __name__=='__main__': main()
