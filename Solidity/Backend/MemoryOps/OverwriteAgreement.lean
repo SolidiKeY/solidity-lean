@@ -94,11 +94,11 @@ theorem BoolChildRepr.self_agrees {D : Source.Layout} {H : HTy}
 #guard_msgs in #print axioms replaceSlice_eq_self_of_agrees
 /-- info: 'Solidity.Backend.MemoryOps.overwriteSlice_eq_self_of_agrees' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms overwriteSlice_eq_self_of_agrees
-/-- info: 'Solidity.Backend.MemoryOps.overwriteSlice_ne_of_disagrees' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.overwriteSlice_ne_of_disagrees' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms overwriteSlice_ne_of_disagrees
 /-- info: 'Solidity.Backend.MemoryOps.boolTransfer_eq_self_of_agrees' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms boolTransfer_eq_self_of_agrees
-/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.self_agrees' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.self_agrees' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms BoolChildRepr.self_agrees
 set_option backward.isDefEq.respectTransparency false in
 /-- Actual computed-source agreement is invariant under an initial preserving
@@ -111,6 +111,6 @@ theorem BoolTransferAgrees.keeps_iff {D : Source.Layout} {H H' : HTy} {R : RefTy
   unfold BoolTransferAgrees
   rw [hk r,MObj.elems_wk,List.map_id'' (f := MVal.wk e (.prim .bool)) (fun _ => rfl)]
   cases calldataBools c off <;> rfl
-/-- info: 'Solidity.Backend.MemoryOps.BoolTransferAgrees.keeps_iff' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.BoolTransferAgrees.keeps_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms BoolTransferAgrees.keeps_iff
 end Solidity.Backend.MemoryOps
