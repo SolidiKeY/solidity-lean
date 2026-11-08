@@ -91,4 +91,63 @@ theorem memory_entry_zero_fuel (I : Input) :
 #print axioms eager_bytes_with_contract
 #print axioms memory_entry_with_contract
 #print axioms memory_entry_zero_fuel
+
+/-! Guarded regression: entry progress must follow from numeric input bounds,
+not a premise asserting successful decoding. Its output must contain the actual
+bytes; an always-error or empty-success substitute must fail the contract. -/
+theorem memory_entry_supported_of_contract
+    (decode : Input → Nat → Nat → Nat → Except Fail (Val .bytes × Nat))
+    (contract : MemoryBytesBehaviorSpec decode) (I : Input) (fuel next : Nat)
+    (head : 4 + headsOf memoryParams ≤ I.size) (offset : load I.data 4 ≤ lim)
+    (bounds : MemoryBytesBounds I (4 + load I.data 4) 0 next) :
+    entry I (fuel + 2) memoryParams =
+      .ok (.cons (.val (.bytes (bytesAt I.data (4 + load I.data 4 + 32)
+        (load I.data (4 + load I.data 4))))) .nil) := by
+  have decoded := (contract.1 I fuel (4 + load I.data 4) 0 next).mpr bounds
+  rw [memory_entry_with_contract decode contract I (fuel + 1),
+    if_neg (Nat.not_lt.mpr head), if_neg (Nat.not_lt.mpr offset), decoded]
+
+/-- Exact supported success using only numeric head/offset/capacity/payload conditions. -/
+def MemoryEntrySuccessSpec (decode : Input → Nat → Except Fail (Entries memoryParams)) : Prop :=
+  ∀ I fuel next, 4 + headsOf memoryParams ≤ I.size → load I.data 4 ≤ lim →
+    MemoryBytesBounds I (4 + load I.data 4) 0 next →
+    decode I (fuel + 2) =
+      .ok (.cons (.val (.bytes (bytesAt I.data (4 + load I.data 4 + 32)
+        (load I.data (4 + load I.data 4))))) .nil)
+
+theorem actual_memory_entry_success_spec :
+    MemoryEntrySuccessSpec (fun I fuel => entry I fuel memoryParams) := by
+  intro I fuel next head offset bounds
+  exact memory_entry_supported_of_contract _ actual_memory_bytes_behavior_spec I fuel next head offset bounds
+
+theorem error_only_memory_entry_refused (failure : Fail) :
+    ¬ MemoryEntrySuccessSpec (fun _ _ => .error failure) := by
+  intro contract
+  have run := contract (input 128) 0 64 (by decide) (by decide)
+    (by unfold MemoryBytesBounds; decide)
+  cases run
+
+def emptyMemoryEntry (_ : Input) (_ : Nat) : Except Fail (Entries memoryParams) :=
+  .ok (.cons (.val (.bytes [])) .nil)
+
+theorem empty_memory_entry_refused : ¬ MemoryEntrySuccessSpec emptyMemoryEntry := by
+  intro contract
+  have run := contract (input 128) 0 64 (by decide) (by decide)
+    (by unfold MemoryBytesBounds; decide)
+  have offset : load (input 128).data 4 = 32 := by decide
+  have length : load (input 128).data 36 = 2 := by decide
+  have copied : bytesAt (input 128).data 68 2 = payload := by decide
+  rw [offset, length, copied] at run
+  let observe : Except Fail (Entries memoryParams) → Nat := fun result =>
+    match result with
+    | .ok (.cons (.val (.bytes bytes)) .nil) => bytes.length
+    | _ => 0
+  have impossible := congrArg observe run
+  change (0 : Nat) = 2 at impossible
+  cases impossible
+
+#print axioms memory_entry_supported_of_contract
+#print axioms actual_memory_entry_success_spec
+#print axioms error_only_memory_entry_refused
+#print axioms empty_memory_entry_refused
 end Solidity.H62.AuditLanguage.AbiBytesEntry
