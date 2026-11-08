@@ -1,0 +1,20 @@
+{
+  "boundary": "Candidate existence and source spelling only; no Lean name resolution or elaboration",
+  "lexical_limitations": "Interpolated strings with nested quoted expressions may leak apparent code references; neither tokenizer nor qualified-name search is Lean name resolution",
+  "method": "heuristic offset-preserving nested-comment/string/character stripping and explicit qualified token search",
+  "mutants": 32,
+  "semantic_kills": null,
+  "semantic_survivors": null,
+  "strong_candidates_updated": [
+    "M17",
+    "M18",
+    "M19",
+    "M20",
+    "M21",
+    "M22",
+    "M27",
+    "M29",
+    "M30"
+  ],
+  "with_explicit_code_mentions": 30
+}
