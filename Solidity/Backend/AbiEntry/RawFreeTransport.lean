@@ -15,6 +15,7 @@ theorem word_free (data : List UInt8) (free free' f : Nat) (k : Kind) (base src 
 theorem cref_free (data : List UInt8) (free free' : Nat) (s : Solidity.AbiEntry.Shape) (head pos : Nat) :
     cref ⟨data,free⟩ s head pos = cref ⟨data,free'⟩ s head pos := by
   simp only [cref,Input.size]
+  rfl
 
 /-- One actual calldata constructor, with the tail kept opaque. -/
 theorem calldata_step (I : Input) (f : Nat) (shape : Solidity.AbiEntry.Shape) (ro : Bool)
@@ -89,6 +90,7 @@ theorem entry_free (data : List UInt8) (free free' f : Nat) (ps : List Param)
     (classes : ∀ p ∈ ps, p.loc = .calldata ∨ ∃ k, p.shape = .word k) :
     entry ⟨data,free⟩ f ps = entry ⟨data,free'⟩ f ps := by
   simp only [entry,Input.size,enter_free data free free' f ps 0 0 classes]
+  rfl
 
 /-- info: 'Solidity.Backend.AbiEntry.RawFreeTransport.word_free' does not depend on any axioms -/
 #guard_msgs in #print axioms word_free
