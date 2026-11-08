@@ -5,6 +5,7 @@ commutation. Payloads are extracted from immutable Source tables by the existing
 operations. Overlap remains supported; interval separation is a theorem case. -/
 namespace Solidity.Backend.MemoryOps
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Both actual checked transfers produce the two existing overwrites; second
 capacity follows from the first write's proved unchanged runtime length. -/
 theorem checkedBoolSequence_same_checked {D : Source.Layout} {n n' : Option Nat}
@@ -71,6 +72,7 @@ theorem checkedBoolSequence_first_exterior {D : Source.Layout} {n n' : Option Na
   obtain ⟨z, hm, hz⟩ := checkedCalldataBools_read hc hp r a s t d mid hfirst i hi
   exact ⟨z, (checkedCalldataBools_outside hc' mid r a u v f out hsecond (d+i) hx).trans hm, hz⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Disjoint immutable-source transfers commute as actual heaps. No
 cross-source noninterference premise is needed for immutable decoded tables. -/
 theorem checkedBoolSequence_same_comm {D : Source.Layout} {n n' : Option Nat}
@@ -137,6 +139,7 @@ theorem checkedBoolSequence_keeps {D : Source.Layout} {n n' : Option Nat}
 /-- info: 'Solidity.Backend.MemoryOps.checkedBoolSequence_keeps' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms checkedBoolSequence_keeps
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Both actual checked transfers produce the two existing overwrites; second
 capacity follows from the first write's proved unchanged runtime length. -/
 theorem checkedUintSequence_same_checked {D : Source.Layout} {n n' : Option Nat}
@@ -203,6 +206,7 @@ theorem checkedUintSequence_first_exterior {D : Source.Layout} {n n' : Option Na
   obtain ⟨z, hm, hz⟩ := checkedCalldataUints_read hc hp r a s t d mid hfirst i hi
   exact ⟨z, (checkedCalldataUints_outside hc' mid r a u v f out hsecond (d+i) hx).trans hm, hz⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Disjoint immutable-source transfers commute as actual heaps. No
 cross-source noninterference premise is needed for immutable decoded tables. -/
 theorem checkedUintSequence_same_comm {D : Source.Layout} {n n' : Option Nat}
@@ -269,6 +273,7 @@ theorem checkedUintSequence_keeps {D : Source.Layout} {n n' : Option Nat}
 /-- info: 'Solidity.Backend.MemoryOps.checkedUintSequence_keeps' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms checkedUintSequence_keeps
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Distinct same-family targets use the existing whole-heap overwrite law. -/
 theorem checkedBoolSequence_other_checked {D : Source.Layout} {n n' : Option Nat} {c c' : Source.Calldata D}
     {off off' L L' : Nat} {hn : ∀ m, n = some m → m = L} {hn' : ∀ m, n' = some m → m = L'}
@@ -308,6 +313,7 @@ theorem checkedBoolSequence_other_comm {D : Source.Layout} {n n' : Option Nat} {
 /-- info: 'Solidity.Backend.MemoryOps.checkedBoolSequence_other_comm' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms checkedBoolSequence_other_comm
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Distinct same-family targets use the existing whole-heap overwrite law. -/
 theorem checkedUintSequence_other_checked {D : Source.Layout} {n n' : Option Nat} {c c' : Source.Calldata D}
     {off off' L L' : Nat} {hn : ∀ m, n = some m → m = L} {hn' : ∀ m, n' = some m → m = L'}
