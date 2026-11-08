@@ -93,12 +93,12 @@ async function captureContributionMenu(client,directory,metadata,context={}){
  writeFileSync(join(directory,'menu-anchor.json'),JSON.stringify({status:'admitted',binding:metadata.binding,kind:metadata.kind,anchor,point,tabRecord},null,2));
  const attempts=[],deadline=Date.now()+3000,prep=task=>require('./menu-lifecycle.cjs').preparation(task,deadline);let before,primary;
  client.note?.('menu.readiness.start',{deadlineWall:deadline,budgetMs:3000});
- try{for(const type of ['mousePressed','mouseReleased']){attempts.push({stage:'native-input',type,wallTime:Date.now(),deadlineWall:deadline});await prep(()=>{tabGuard();return client.request('Input.dispatchMouseEvent',{type,...point,button:'right',clickCount:1});});}
+ try{for(const type of ['mousePressed','mouseReleased']){attempts.push({stage:'native-input',type,wallTime:Date.now(),deadlineWall:deadline});await require('./menu-lifecycle.cjs').menuMouse(client,{type,...point,button:'right',clickCount:1},tabGuard,deadline);}
   while(Date.now()<deadline){before=await prep(read);attempts.push(before);if(before?.items?.length)break;await new Promise(r=>setTimeout(r,20));}
   if(!before?.items?.length)throw Error('No native context menu opened');
   const submenu=before.items.find(i=>i.label===label);
   if(metadata.trustObservation!==true&&!!submenu!==metadata.visible)throw Error('Native submenu visibility differs from declared predicate');
-  if(submenu){await prep(()=>{tabGuard();return client.request('Input.dispatchMouseEvent',{type:'mouseMoved',x:submenu.bounds.right-5,y:(submenu.bounds.top+submenu.bounds.bottom)/2});});
+  if(submenu){await require('./menu-lifecycle.cjs').menuMouse(client,{type:'mouseMoved',x:submenu.bounds.right-5,y:(submenu.bounds.top+submenu.bounds.bottom)/2},tabGuard,deadline);
    while(Date.now()<deadline){before=await prep(read);attempts.push(before);if(before.items.some(i=>i.label.includes(expected)))break;await new Promise(r=>setTimeout(r,20));}
    if(!before.items.some(i=>i.label.includes(expected)))throw Error('Native submenu actions missing');}
   if(before.activeUri!==metadata.binding.uri)throw Error('Foreign active source in menu renderer');

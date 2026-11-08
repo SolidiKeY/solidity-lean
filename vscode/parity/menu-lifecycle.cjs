@@ -5,6 +5,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('n
 const phases=['source','unrelated','untitled','tab','restored'];
 function forbidden(events){return events.filter(e=>e.kind==='terminal.start'||e.kind==='clipboard.write'||e.kind==='command.start'&&/^(dafny|solidityLean)\.(build|buildCustomArgs|run|test|verify|showVerificationTrace|hideVerificationTrace|copyVerificationTrace)$/.test(e.data?.id));}
 async function preparation(task,deadline,now=Date.now){const remaining=deadline-now();if(remaining<=0)throw Error('Original3s menu readiness exhausted');let timer;try{const value=await Promise.race([task(),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Original3s menu readiness exhausted')),remaining);})]);if(now()>=deadline)throw Error('Late menu readiness response refused');return value;}finally{clearTimeout(timer);}}
+function menuMouse(client,params,check,deadline,now=Date.now){return preparation(()=>{check();if(now()>=deadline)throw Error('Original3s menu readiness exhausted');return client.request('Input.dispatchMouseEvent',params);},deadline,now);}
 // Refuse an unusable/foreign native mouse target before dispatch; no hit/raster claim.
 function menuAnchorPoint(sample,uri){
  const r=sample?.rect,v=sample?.viewport;
@@ -160,4 +161,4 @@ function partialEvidence(directory,runId,target){
  try{bytes=fs.readFileSync(file);const observation=JSON.parse(bytes);if(observation.runId!==runId||observation.target!==target)throw Error('Foreign partial menu identity');return{status:'failed-partial',file,diagnostics,diagnosticError,sha256:createHash('sha256').update(bytes).digest('hex'),observation};}
  catch(error){return{status:'unavailable',file,diagnostics,diagnosticError,...(bytes?{sha256:createHash('sha256').update(bytes).digest('hex')}:{}),error:error.message};}
 }
-module.exports={menuAnchorPoint,phases,validate,validateCurrent,run,preparation,trustErrors,partialEvidence,recoveryPredecessor,recoveryErrors,verifyRecoveryReceipts,recoveryPrefixErrors};
+module.exports={menuMouse,menuAnchorPoint,phases,validate,validateCurrent,run,preparation,trustErrors,partialEvidence,recoveryPredecessor,recoveryErrors,verifyRecoveryReceipts,recoveryPrefixErrors};
