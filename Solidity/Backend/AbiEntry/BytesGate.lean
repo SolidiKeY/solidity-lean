@@ -81,7 +81,7 @@ theorem executed (C : Contract) (base size : Nat) (label : Fin W)
 def certificate : Interface.BytesGateCertificate program where
   selected := fun C base size label => ⟨compiled C base size label,selected C base size label⟩
   executed := executed
-/-- info: 'Solidity.Backend.AbiEntry.BytesGate.admitted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Solidity.Backend.AbiEntry.BytesGate.admitted' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms admitted
 /-- info: 'Solidity.Backend.AbiEntry.BytesGate.selected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms selected
