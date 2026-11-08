@@ -129,9 +129,9 @@ theorem overwriteTwo_path {C : Contract} {Γ : Ctx} {R Q : RefTy} {E F T : Ty}
       path.mvalT {σ with heap := overwriteTwo σ.heap q b offset' payload' h' r a offset payload h hne.symm} := by
   rw [overwriteTwo_comm]
 
-/-- info: 'Solidity.Backend.MemoryOps.overwriteSlice_empty' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.overwriteSlice_empty' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms overwriteSlice_empty
-/-- info: 'Solidity.Backend.MemoryOps.overwriteTwo_comm' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.overwriteTwo_comm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms overwriteTwo_comm
 /-- info: 'Solidity.Backend.MemoryOps.overwriteTwo_path' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms overwriteTwo_path

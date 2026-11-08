@@ -44,9 +44,9 @@ theorem overwriteSlice_keeps {H H' : HTy} {R : RefTy} {E : Ty}
     rw [Heap.get_set_ne hp' (r.wk e) (q.wk e) he, Heap.get_set_ne hp r q he]
     exact hk q
 
-/-- info: 'Solidity.Backend.MemoryOps.overwriteSlice_keeps' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.overwriteSlice_keeps' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms overwriteSlice_keeps
-/-- info: 'Solidity.Backend.MemoryOps.withElems_wk' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.MemoryOps.withElems_wk' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms withElems_wk
 
 end Solidity.Backend.MemoryOps

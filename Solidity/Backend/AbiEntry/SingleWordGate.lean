@@ -127,7 +127,7 @@ def certificate : Interface.SingleWordGateCertificate program where
   selected := fun C base kind label => ⟨compiled C base kind label,selected C base kind label⟩
   executed := executed
   entry_rejection := entry_rejection
-/-- info: 'Solidity.Backend.AbiEntry.SingleWordGate.admitted' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiEntry.SingleWordGate.admitted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms admitted
 /-- info: 'Solidity.Backend.AbiEntry.SingleWordGate.selected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms selected
