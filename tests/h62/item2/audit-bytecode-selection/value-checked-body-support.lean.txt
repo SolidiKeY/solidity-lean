@@ -1,0 +1,29 @@
+/-! Guards treating value-checked body fields as separately feasible without
+one actual certificate, compiler pair, fragment and machine. Nonpayable rejection
+also guards dropping the callvalue gate. No Source/native/gas correspondence. -/
+open Solidity Solidity.Evm Solidity.Backend.AbiEntry
+open Solidity.Backend.AbiEntry.Interface
+
+def checkedContract : Contract := { vars := [] }
+def uintNil : Prog checkedContract UIntBoundCtx UIntBoundCtx := .nil
+def boolNil : Prog checkedContract BoolBoundCtx BoolBoundCtx := .nil
+def checkedMachine : Machine := { Machine.init with mem := fun _ => .val (wmod 0) }
+def payingMachine : Machine := { Machine.init with callvalue := wmod 1 }
+
+theorem nonpayable_uint_nil_reverts :
+    run (ValueCheckedBodies.UInt.compiled 7 8 false (wmod 13) uintNil
+      (Frag.init UIntBoundCtx) rfl).code payingMachine = .revert :=
+  ValueCheckedBodies.UInt.early_rejection 7 8 false (wmod 13) uintNil
+    (Frag.init UIntBoundCtx) rfl _
+    (ValueCheckedBodies.UInt.selected 7 8 false (wmod 13) uintNil
+      (Frag.init UIntBoundCtx) rfl) payingMachine (by decide)
+
+theorem ignore_callvalue_rejected :
+    run (ValueCheckedBodies.UInt.compiled 7 8 false (wmod 13) uintNil
+      (Frag.init UIntBoundCtx) rfl).code payingMachine ≠ .ok payingMachine 0 := by
+  rw [nonpayable_uint_nil_reverts]
+  intro impossible
+  cases impossible
+
+#print axioms nonpayable_uint_nil_reverts
+#print axioms ignore_callvalue_rejected

@@ -2120,3 +2120,57 @@ The forall Pipeline theorem carries a label unused by the execution term; it is 
 Raw catch-data transport retains the exact supplied Ext and body, reuses actual bytes allocation/drop semantics, composes the scoped drop and preserves the body outcome's heap extension. The body may halt; successful completion is not assumed. Arbitrary caller heaps remain allowed.
 
 No source/statements/definitions/interfaces/budgets/axioms/exclusions/toolchain changes; no fresh Lean/kernel/replay acceptance. H28 pauses and all STOPs remain. At checkpoint V132 the exact H145 input publication is evidence: d13a6771c3ef25f596fa7b25e03230c08782f845 evidence/solidity-h28-sol-20261104/automation-benchmark/, directory panic-carrier-inputs-v132. The current loader pin is identified in tests/h62/item2/audit-calculus/BULK-INPUTS.md; actual old-to-new packet verification and a portable Git proof pack accompany the private validation handoff. Historical unavailable bytes remain UNVERIFIABLE; exact archive-backed duplicate evictions remain restorable.
+
+## Finite-entry and source-determinism roles (V133)
+
+Guarded regression: finite-entry equality and completed-branch inversion must not supply compiled/source initialization, operational OOG/revert classification or global equality with a constant carrier. Two completed derivations imply uniqueness, not completion for arbitrary inputs.
+
+Complete frozen-selected Solidity/Evm/TryPanicSourceFrame.lean and Solidity/Evm/TryPanicSourceDeterminism.lean:22 named signatures match frozen/adopted master. Prior1650 rows and owner map unchanged;1672 reviewed/3611 pending of5283;3806 confirmed owners/1477 unresolved. No owner guessed; zero fresh joint witnesses.
+
+FiniteEntry is equality of the whole supplied image with entryK: an explicit zero-filled scalar frame plus the modeled freeWord store at64. Capacity K is aligned and at least96; it is a representation witness, not a source domain, gas meter or compiled-entry theorem. The carried key remains a label without new invocation coherence. completed_generic separately requires the actual local length to fit K. Data length/index/bound laws derive from that local and actual image, retaining strict read indices and intrinsic uint bounds; no upper bound K<2^256 is invented.
+
+image_frame preserves the whole state/key/capacity and records three resident words. initialized_word reads the modeled prologue byte95=128. data36_computed requires this invocation's local=size36 plus its range proof. materialized_and_carrier36 proves two typed error results in their real contexts, not normal Out/context equality or source-to-TRun realization. finite_entry36 consumes whole initialization and local36; literal_entry36 and evaluated_literal36 provide existing mechanical finite clients with actual literal Args evaluation and arbitrary retained caller heap/global data.
+
+completed_exact inverts an actual derivation to obtain the store/range bounds, exact whole final image and exact snapshot. completion_iff characterizes only that finite completion. completion_unique needs two actual completions of the same input and equates their whole images and bytes, including retained frame data; it does not construct completion for arbitrary inputs. Capacity/range refusal proves absence of finite derivations, never an alternative EVM/resource/host outcome.
+
+Completed bytes bounds follow the actual terminal local evaluation. Initialized inversion requires initialization and completion at the same frame. The local36 specialization and materialization use bytes from that derivation, not independent return-buffer or desired-halt equations. evaluated_literal_unique constructs the existing finite literal client and quantifies every other completion at that same entry. Source-call/deployment/resource association remains separate.
+
+No source/statements/definitions/interfaces/budgets/axioms/exclusions/toolchain changes; no fresh Lean/kernel/replay acceptance. H28 pauses and all STOPs remain. At checkpoint V133 the corrected exact H145 input publication is evidence: 115158f9d7021f36c68ac85b75665749762c079c evidence/solidity-h28-sol-20261104/automation-benchmark/, directory source-determinism-inputs-v133. The current loader pin is identified in tests/h62/item2/audit-calculus/BULK-INPUTS.md; actual packet comparison and portable Git proof accompany the private validation handoff. Historical unavailable bytes remain UNVERIFIABLE; exact archive-backed duplicate evictions remain restorable.
+
+## Frozen EVM try owner confirmation (V135)
+
+Q-SEM-OWNER-04 authoritatively assigns these seven frozen files to master (coordinator), with no live semantic producer:
+
+- Solidity/Evm/TryByteCapture.lean
+- Solidity/Evm/TryByteImage.lean
+- Solidity/Evm/TryPanicCarrier.lean
+- Solidity/Evm/TryPanicProducer.lean
+- Solidity/Evm/TryPanicSourceDeterminism.lean
+- Solidity/Evm/TryPanicSourceFrame.lean
+- Solidity/Evm/TryPanicSourcePlan.lean
+
+The lookup found only isolated H62 migration overlays; those grant no live semantic ownership, and no current lease names these files. The mapping follows the explicit master-ownership answer, not an inference from migration scope or an invented producer. The later routing reminder retains that distinction.
+
+78 frozen census declarations gain confirmed ownership:3884 confirmed/1399 unresolved of5283. Only58 existing classified owner fields and seven owner-map entries change. All1672 prior premise/conclusion classifications, exact signatures, reviewed-file roster and prior confirmed owners are preserved. Role coverage stays1672 reviewed/3611 pending; all20 TryPanicProducer classifications remain pending.
+
+This confirms ownership only. It grants no changes to statements, dependent definitions, interfaces, axioms, budgets or exclusions, and supplies no witness or semantic acceptance. H82 statement-preserving permissions and existing H28 pauses/STOPs remain. Exact H145 input publication: evidence: 74956e3ca554128d499fcd4b921ea67c7634ad17 evidence/solidity-h28-sol-20261104/automation-benchmark/, directory evm-try-owner-inputs-v135. Actual owner-only packet comparison and a portable Git proof accompany the private validation handoff; the generic append-only transition checker remains unchanged and continues to reject unapproved ownership changes.
+
+
+# Computed panic-producer classification
+
+Guarded regression: operation-derived bytes and whole-plan provenance certificates must not imply original-source carried-body construction, compiler correctness, bytecode execution or source admission. Local size36 and finite capacity96 are conditional model witnesses, not source-domain restrictions.
+
+Complete frozen-selected Solidity/Evm/TryPanicProducer.lean:20 named signatures, including one private helper, match frozen/adopted master. Prior1672 rows and owner map unchanged;1692 reviewed/3591 pending of5283;3884 confirmed owners/1399 unresolved. Zero fresh joint witnesses. This completes static role/owner accounting for all78 declarations in the seven frozen EVM Try files, not their semantic/witness/compiled adequacy or the whole audit.
+
+BundleKey retains exact source/artifact strings; SourceLink retains AST declaration7, parameter2, caller105 and original.sol identities. Their external provenance remains separate; no hash injectivity or compiler/bytecode correctness is assumed. frameKey copies actual logical transaction self/sender/value plus pipeline/invocation/depth labels. Scalar Input excludes memory locals without requiring the retained caller heap to be empty.
+
+Fresh finite96-byte images are zero-filled, then receive the prologue store64/128 and ordered stores0/selector and4/code0x43. The overlapping interval uses the last writer. produced_computed requires the actual local=size36 and derives operation-defined computed36, not a reference observation vector. Existing kernel-computation lemmas connect those bytes to encodePanic67, length36 and decoder codeWord; they are not freshly replayed here. Image state/key preservation, three resident words and prologue byte95=128 remain finite-model facts, not gas/physical allocation results.
+
+producer36 is a ghost bytes-capture/raw-halt step, not the original carried callee or an installed source-automation/external-oracle implementation. entry_exists constructs the existing finite witness for both pipeline labels over arbitrary retained caller globals/heap, using actual pushed size36 and frameKey; it supplies no original source/compiler association.
+
+StoreShapeCert requires whole plan=originalPlan, including typed store operands and source metadata, rather than desired bytes/halt. certified_data retains that certificate and actual local36. certified_producer_halt also retains its explicit plan-data length bound; certified_bound later derives the bound for clients. Both pipeline certificates are constructive while pipeline_preserved keeps distinct artifact labels, without code/runtime equivalence. InitialFor is fresh-image/prologue identity only. certifiedProducer_exact uses derived length and logical transaction labels to establish its ghost halt; normal Out/source-context equality is not asserted.
+
+No source/statements/definitions/interfaces/budgets/axioms/exclusions/toolchain changes; no fresh Lean/kernel/replay acceptance. H28 pauses and all STOPs remain. The exact input packet is published at private commit 80f1749dc1a89fd3381c4d78c4eeb93b4fc553f2, directory evidence/solidity-h28-sol-20261104/automation-benchmark/panic-producer-inputs-v136. The pinned reader checks manifest sizes and hashes offline; the portable packet transition compares all previous rows and owners without witness credit. Historical unavailable bytes remain UNVERIFIABLE; exact archive-backed duplicate evictions remain restorable.
+
+
+The remaining callback-frame premise interpretation is recorded in [CALLBACK-FRAME-CLASSIFICATION.md](../../tests/h62/item2/audit-calculus/CALLBACK-FRAME-CLASSIFICATION.md). Its three declarations remain pending in the pinned ledger until authenticated ledger publication; no census or witness credit is taken.
