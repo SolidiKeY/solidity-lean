@@ -354,6 +354,6 @@ theorem packedViews_transfer {D : Source.Layout} {H : HTy} {R : RefTy}
 #guard_msgs in #print axioms eval_copy
 /-- info: 'Solidity.Backend.CalldataPackets.RawUint.table_uints' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms table_uints
-/-- info: 'Solidity.Backend.CalldataPackets.RawUint.transfer' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.CalldataPackets.RawUint.transfer' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms transfer
 end Solidity.Backend.CalldataPackets.RawUint
