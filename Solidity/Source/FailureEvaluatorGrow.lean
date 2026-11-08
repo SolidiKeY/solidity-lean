@@ -450,8 +450,12 @@ theorem dispatch_grow_step {G : Glob E} {n : Nat} (ih : GrowAt G points n) (F : 
 theorem growAt (G : Glob E) : ∀ n, GrowAt G points n
   | 0 => growAt_zero G
   | n + 1 =>
-    have ih := growAt G n
-    ⟨evalE_grow_step ih, evalPair_grow_step ih, evalArgs_grow_step ih, evalConvArgs_grow_step ih, evalLoc_grow_step ih, evalBuiltin_grow_step ih, evalArgsRev_grow_step ih, pay_grow_step ih, execS_grow_step ih, forIter_grow_step ih, execItems_grow_step ih, runMods_grow_step ih, callInternal_grow_step ih, callAddr_grow_step ih, enterInstance_grow_step ih, envLoop_grow_step ih, dispatch_grow_step ih⟩
+    have h : GrowAtKnown G points (n + 1) := growAtKnown G (points := points) (n + 1)
+    ⟨h.evalE true, h.evalPair true, h.evalArgs true, h.evalConvArgs true,
+      h.evalLoc true, h.evalBuiltin true, h.evalArgsRev true, h.pay true,
+      h.execS true, h.forIter true, h.execItems true, h.runMods true,
+      h.callInternal true, h.callAddr, h.enterInstance, h.envLoop,
+      h.dispatch⟩
 
 
 end Solidity.Source.FailureExecution.PlannedGrow

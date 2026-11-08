@@ -753,10 +753,11 @@ theorem dispatch_astep (ih : ApproxAt G points n) (F : Fr) (input : Solidity.Roa
 theorem approxAt (G : Glob E) : ∀ n, ApproxAt G points n
   | 0 => approxAt_zero G
   | n + 1 =>
-    have ih := approxAt G n
-    ⟨evalE_astep ih, evalPair_astep ih, evalArgs_astep ih, evalConvArgs_astep ih, evalLoc_astep ih,
-      evalBuiltin_astep ih, evalArgsRev_astep ih, pay_astep ih, execS_astep ih, forIter_astep ih,
-      execItems_astep ih, runMods_astep ih, callInternal_astep ih, callAddr_astep ih, enterInstance_astep ih,
-      envLoop_astep ih, dispatch_astep ih⟩
+    have h : ApproxAtKnown G points (n + 1) := approxAtKnown G (points := points) (n + 1)
+    ⟨h.evalE true, h.evalPair true, h.evalArgs true, h.evalConvArgs true,
+      h.evalLoc true, h.evalBuiltin true, h.evalArgsRev true, h.pay true,
+      h.execS true, h.forIter true, h.execItems true, h.runMods true,
+      h.callInternal true, h.callAddr, h.enterInstance, h.envLoop,
+      h.dispatch⟩
 
 end Solidity.Source.FailureExecution.PlannedApprox

@@ -746,11 +746,12 @@ theorem dispatch_step (ih : BelowAt G n) (F : Fr) (input : Solidity.Roadmap.Byte
 theorem belowAt (G : Glob E) : ∀ n, BelowAt G n
   | 0 => belowAt_zero G
   | n + 1 =>
-    have ih := belowAt G n
-    ⟨evalE_step ih, evalPair_step ih, evalArgs_step ih, evalConvArgs_step ih, evalLoc_step ih,
-      evalBuiltin_step ih, evalArgsRev_step ih, pay_step ih, execS_step ih, forIter_step ih,
-      execItems_step ih, runMods_step ih, callInternal_step ih, callAddr_step ih, enterInstance_step ih,
-      envLoop_step ih, dispatch_step ih⟩
+    have h : BelowAtKnown G (n + 1) := belowAtKnown G (n + 1)
+    ⟨h.evalE true, h.evalPair true, h.evalArgs true, h.evalConvArgs true,
+      h.evalLoc true, h.evalBuiltin true, h.evalArgsRev true, h.pay true,
+      h.execS true, h.forIter true, h.execItems true, h.runMods true,
+      h.callInternal true, h.callAddr, h.enterInstance, h.envLoop,
+      h.dispatch⟩
 
 end
 
