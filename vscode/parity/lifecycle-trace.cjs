@@ -5,6 +5,8 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),{pathToFileURL}=require('node:url'),{spawn}=require('node:child_process');
 const {RpcPeer}=require('../src/rpc.cjs');
 async function main(){
+  if(process.argv[4]==='--configuration'){if(!process.argv[3])throw Error('Configuration needs a fresh output root');const out=path.resolve(process.argv[3]);if(fs.existsSync(out))throw Error('Choose a fresh configuration output');fs.mkdirSync(out,{recursive:true});const shared=path.join(out,'workspace');fs.mkdirSync(shared);fs.writeFileSync(path.join(shared,'configuration-owner.json'),JSON.stringify({root:out,cycle:require('node:crypto').randomUUID()}));for(const mode of require('./configuration-lifecycle.cjs').modes)await require('./stdio.cjs').main(['--scope','configuration','--configuration-mode',mode,'--configuration-workspace',shared,'--targets',mode==='default'?'dafny,local':'dafny','--workers','1','--obligations','1','--trials','1','--warmups','0','--dafny',path.resolve(process.argv[2]),'--output',path.join(out,mode)]);return;}
+
   if(process.argv[4]&&process.argv[4]!=='--migration')throw Error('Unknown lifecycle option');
   if(process.argv[4]==='--migration'&&!process.argv[3])throw Error('Migration run needs a separate output directory');
   const root=path.resolve(__dirname,'../..'),exe=path.resolve(process.argv[2]||path.join(root,'.cache/dafny-runtime/dafny/dafny'));
@@ -27,7 +29,7 @@ async function main(){
   peer.onNotification('dafny/textDocument/symbolStatus',p=>states.push(p));
   peer.onNotification('textDocument/publishDiagnostics',p=>diagnostics.push(p));
   const uri=pathToFileURL(path.join(workspace,'lifecycle.dfy')).href;
-  const initial='method Check() returns (r: int)\n  ensures r == 1\n{ r := 1; }\n';
+  const initial=require('./configuration-lifecycle.cjs').initial;
   const texts=[initial,initial+'\n// edit\n',initial.replace('r := 1','r := 2'),initial+'\n// fixed\n'];
   const phases=[];let migrationResult;
   async function waitFor(version,status){

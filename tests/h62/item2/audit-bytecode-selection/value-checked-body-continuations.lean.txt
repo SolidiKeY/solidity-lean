@@ -1,0 +1,107 @@
+import ValueCheckedBodySuccess
+
+/-! Guards treating successful ABI validation as nil execution or unconditional
+body success. Instantiate existing value-checked certificates with an actual
+local assignment and an intentional revert. Reuse prior seeded-input helpers;
+these gasless intrinsic IR controls do not assert Source/native/physical or gas
+adequacy, and intentional body revert is not an infeasible admission premise. -/
+namespace Solidity.H62.BytecodeSelection.ValueCheckedBodyContinuations
+open Solidity Solidity.Evm Solidity.Backend.AbiEntry
+open Solidity.Backend.AbiEntry.Interface
+open Solidity.H62.BytecodeSelection.ValueCheckedBodySuccess
+variable {C : Contract}
+
+def assign77 : Prog C UIntBoundCtx UIntBoundCtx :=
+  .cons (.assignLocal .here (.simple (.lit 77 (by decide)))) .nil
+
+def intentionalRevert : Prog C BoolBoundCtx BoolBoundCtx := .cons .revert .nil
+
+def assigned (base : Nat) (label word : Fin W) (machine : Machine) : Machine :=
+  let bound := uintBoundMachine base label word machine
+  { bound with mem := upd bound.mem (cellOf base (.here : Idx UIntBoundCtx (.val .uint))) (.val (wmod 77)) }
+
+/-- The selected continuation changes the validated local, preserving its caller frame. -/
+theorem uint_assignment_success (base bits : Nat) (payable : Bool) (label word : Fin W)
+    (machine : Machine) (initialWord : machine.mem base = .val word)
+    (initialSize : machine.mem (base+1) = .val (wmod 36))
+    (allowed : (payable || decide (machine.callvalue.val=0))=true)
+    (valid : (Solidity.AbiEntry.Kind.uint bits).valid word.val=true) :
+    run (ValueCheckedBodies.UInt.compiled (C:=C) base bits payable label assign77
+      (Frag.init UIntBoundCtx) rfl).code machine = .ok (assigned base label word machine) 0 := by
+  rw [ValueCheckedBodies.UInt.executed base bits payable label assign77 (Frag.init UIntBoundCtx) rfl
+    _ (UIntBindingBody.selectedBody base assign77 (Frag.init UIntBoundCtx) rfl)
+    (ValueCheckedBodies.UInt.selected base bits payable label assign77 (Frag.init UIntBoundCtx) rfl)
+    (UIntBindingBody.body_selected base assign77 (Frag.init UIntBoundCtx) rfl)
+    machine word (wmod 36) initialWord initialSize]
+  have full : ¬ (wmod 36).val < 36 := by decide
+  simp only [allowed, if_true, if_neg full, if_pos valid]
+  rfl
+
+/-- A valid admitted Boolean input can execute an intentional reverting body. -/
+theorem bool_body_revert (base : Nat) (label word : Fin W)
+    (machine : Machine) (initialWord : machine.mem base = .val word)
+    (initialSize : machine.mem (base+1) = .val (wmod 36))
+    (valid : Solidity.AbiEntry.Kind.bool.valid word.val=true) :
+    run (ValueCheckedBodies.Bool.compiled (C:=C) base true label intentionalRevert
+      (Frag.init BoolBoundCtx) rfl).code machine = .revert := by
+  rw [ValueCheckedBodies.Bool.executed base true label intentionalRevert (Frag.init BoolBoundCtx) rfl
+    _ (BoolBindingBody.selectedBody base intentionalRevert (Frag.init BoolBoundCtx) rfl)
+    (ValueCheckedBodies.Bool.selected base true label intentionalRevert (Frag.init BoolBoundCtx) rfl)
+    (BoolBindingBody.body_selected base intentionalRevert (Frag.init BoolBoundCtx) rfl)
+    machine word (wmod 36) initialWord initialSize]
+  have full : ¬ (wmod 36).val < 36 := by decide
+  simp only [Bool.true_or, if_true, if_neg full, if_pos valid]
+  rfl
+
+private def fixtureMachine : Machine :=
+  seeded 7 (wmod 7) (wmod 36) { Machine.init with stack := [.val (wmod 11),.val (wmod 99)] }
+
+/-- Certificate, selected artifact, represented nonempty caller and changed local coexist. -/
+theorem assignment_joint_success :
+    ∃ (_certificate : ValueCheckedUIntBodyCertificate ValueCheckedBodies.UInt.program)
+      (whole : Compiler.Compilation 7 (Frag.init RouteCtx)
+        (ValueCheckedBodies.UInt.program (C:={vars:=[]}) 8 true (wmod 13) assign77)),
+      Compiler.compile 7 (Frag.init RouteCtx)
+        (ValueCheckedBodies.UInt.program (C:={vars:=[]}) 8 true (wmod 13) assign77)=some whole ∧
+      fixtureMachine.mem 7=.val (wmod 7) ∧ fixtureMachine.mem 8=.val (wmod 36) ∧
+      run whole.code fixtureMachine=.ok (assigned 7 (wmod 13) (wmod 7) fixtureMachine) 0 ∧
+      (assigned 7 (wmod 13) (wmod 7) fixtureMachine).mem 9=.val (wmod 77) ∧
+      (assigned 7 (wmod 13) (wmod 7) fixtureMachine).stack=[.val (wmod 11),.val (wmod 99)] := by
+  refine ⟨ValueCheckedBodies.UInt.certificate,
+    ValueCheckedBodies.UInt.compiled 7 8 true (wmod 13) assign77 (Frag.init UIntBoundCtx) rfl,
+    ValueCheckedBodies.UInt.selected 7 8 true (wmod 13) assign77 (Frag.init UIntBoundCtx) rfl,
+    rfl,rfl,?_,?_,rfl⟩
+  · exact uint_assignment_success 7 8 true (wmod 13) (wmod 7) fixtureMachine rfl rfl rfl (by decide)
+  · change upd (uintBoundMachine 7 (wmod 13) (wmod 7) fixtureMachine).mem 9 (.val (wmod 77)) 9 = .val (wmod 77)
+    exact upd_same (uintBoundMachine 7 (wmod 13) (wmod 7) fixtureMachine).mem 9 (.val (wmod 77))
+
+/-- Valid entry alone does not imply success of a chosen body. -/
+theorem valid_entry_need_not_succeed (final : Machine) (skip : Nat) :
+    run (ValueCheckedBodies.Bool.compiled (C:={vars:=[]}) 7 true (wmod 13) intentionalRevert
+      (Frag.init BoolBoundCtx) rfl).code (seeded 7 (wmod 1) (wmod 36) Machine.init) ≠ .ok final skip := by
+  rw [bool_body_revert 7 (wmod 13) (wmod 1) _ rfl rfl (by decide)]
+  intro impossible
+  cases impossible
+
+/-- The selected mutating uint program reverts on dirty uint8 input. -/
+theorem dirty_uint8_assignment_refused (base : Nat) (label : Fin W) (machine : Machine) :
+    run (ValueCheckedBodies.UInt.compiled (C:=C) base 8 true label assign77
+      (Frag.init UIntBoundCtx) rfl).code (seeded base (wmod 256) (wmod 36) machine) = .revert := by
+  rw [ValueCheckedBodies.UInt.executed base 8 true label assign77 (Frag.init UIntBoundCtx) rfl
+    _ (UIntBindingBody.selectedBody base assign77 (Frag.init UIntBoundCtx) rfl)
+    (ValueCheckedBodies.UInt.selected base 8 true label assign77 (Frag.init UIntBoundCtx) rfl)
+    (UIntBindingBody.body_selected base assign77 (Frag.init UIntBoundCtx) rfl)
+    _ (wmod 256) (wmod 36) ?_ ?_]
+  · have full : ¬ (wmod 36).val < 36 := by decide
+    have dirty : ¬ (Solidity.AbiEntry.Kind.uint 8).valid (wmod 256).val=true := by decide
+    simp only [Bool.true_or, if_true, if_neg full, if_neg dirty]
+  · have distinct : base ≠ base+1 := Nat.ne_of_lt (Nat.lt_succ_self base)
+    simp only [seeded, if_neg distinct, ite_true]
+  · simp only [seeded, ite_true]
+
+#print axioms uint_assignment_success
+#print axioms bool_body_revert
+#print axioms assignment_joint_success
+#print axioms valid_entry_need_not_succeed
+#print axioms dirty_uint8_assignment_refused
+end Solidity.H62.BytecodeSelection.ValueCheckedBodyContinuations

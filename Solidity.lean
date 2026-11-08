@@ -3205,7 +3205,11 @@ import Solidity.Frontend.Yul.Parsing
 import Solidity.Frontend.Yul.ScopedParse
 import Solidity.Frontend.Yul.WordParse
 import Solidity.Hash.Adaptive
+import Solidity.Hash.Bridge
 import Solidity.Hash.CollisionBound
+import Solidity.Hash.CollisionBridge
+import Solidity.Hash.CollisionBridgeCompiler
+import Solidity.Hash.CollisionBridgeControls
 import Solidity.Hashes
 import Solidity.Keccak
 import Solidity.KeySort
@@ -5551,6 +5555,8 @@ import Solidity.Yul.Views.FrameCalldata
 import Solidity.Yul.Views.FrameCalldataControls
 import Solidity.Yul.Views.FullWordLayout
 import Solidity.Yul.Views.GeneratedRetainedControls
+import Solidity.Yul.Views.GenericFlow.Following
+import Solidity.Yul.Views.GenericFlow.FollowingLaws
 import Solidity.Yul.Views.HeapAllocationCommute
 import Solidity.Yul.Views.HeapAllocationControls
 import Solidity.Yul.Views.HeapAllocationFreshnessControls
