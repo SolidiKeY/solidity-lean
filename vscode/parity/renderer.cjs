@@ -43,15 +43,15 @@ async function connect(port) {
   if(!page)throw new Error('VS Code renderer not ready');
   return new DevTools(page.webSocketDebuggerUrl);
 }
-async function capture(client,directory,screenshot=false) {
+async function capture(client,directory,screenshot=false,surface='editor') {
   const start=performance.now();
   const accessibility=await client.request('Accessibility.getFullAXTree');
   writeFileSync(join(directory,'accessibility.json'),JSON.stringify(accessibility));
   const dom=await client.request('DOMSnapshot.captureSnapshot',{computedStyles:[]});
   writeFileSync(join(directory,'dom.json'),JSON.stringify(dom));
-  const inspection=await client.request('Runtime.evaluate',{expression:`JSON.stringify({title:document.title,editorCount:document.querySelectorAll('.monaco-editor').length,notifications:[...document.querySelectorAll('.notification-list-item')].map(e=>e.textContent),visibleHovers:[...document.querySelectorAll('.monaco-hover')].filter(e=>e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden').map(e=>e.innerText),bodyText:document.body.innerText.slice(0,24000)})`,returnByValue:true});
+  const inspection=await client.request('Runtime.evaluate',{expression:`JSON.stringify({title:document.title,trustEditorCount:document.querySelectorAll('.workspace-trust-editor').length,editorCount:document.querySelectorAll('.monaco-editor').length,notifications:[...document.querySelectorAll('.notification-list-item')].map(e=>e.textContent),visibleHovers:[...document.querySelectorAll('.monaco-hover')].filter(e=>e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden').map(e=>e.innerText),bodyText:document.body.innerText.slice(0,24000)})`,returnByValue:true});
   const visible=JSON.parse(inspection.result.value);
-  if(!visible.editorCount||!accessibility.nodes?.length||!dom.documents?.length)throw new Error('Renderer has no inspectable editor, DOM or accessibility tree');
+  if(!(surface==='workspace-trust'?visible.trustEditorCount:visible.editorCount)||!accessibility.nodes?.length||!dom.documents?.length)throw new Error('Renderer has no inspectable editor, DOM or accessibility tree');
   writeFileSync(join(directory,'visible-state.json'),inspection.result.value);
   if(screenshot) {const result=await client.request('Page.captureScreenshot',{format:'png'});writeFileSync(join(directory,'screenshot.png'),Buffer.from(result.data,'base64'));}
   return {captured:true,elapsedMs:performance.now()-start,screenshot,hoverCount:visible.visibleHovers.length,editorCount:visible.editorCount,accessibilityNodes:accessibility.nodes.length};
@@ -77,7 +77,7 @@ async function captureContributionMenu(client,directory,metadata){
   while(Date.now()<deadline){before=await prep(read);attempts.push(before);if(before?.items?.length)break;await new Promise(r=>setTimeout(r,20));}
   if(!before?.items?.length)throw Error('No native context menu opened');
   const submenu=before.items.find(i=>i.label===label);
-  if(!!submenu!==metadata.visible)throw Error('Native submenu visibility differs from declared predicate');
+  if(metadata.trustObservation!==true&&!!submenu!==metadata.visible)throw Error('Native submenu visibility differs from declared predicate');
   if(submenu){await prep(()=>client.request('Input.dispatchMouseEvent',{type:'mouseMoved',x:submenu.bounds.right-5,y:(submenu.bounds.top+submenu.bounds.bottom)/2}));
    while(Date.now()<deadline){before=await prep(read);attempts.push(before);if(before.items.some(i=>i.label.includes(expected)))break;await new Promise(r=>setTimeout(r,20));}
    if(!before.items.some(i=>i.label.includes(expected)))throw Error('Native submenu actions missing');}
@@ -86,6 +86,23 @@ async function captureContributionMenu(client,directory,metadata){
   return{...rendered,contributionMenu:{binding:metadata.binding,before,after,submenuVisible:!!submenu,kind:metadata.kind,scope:'Native mouse-opened menu endpoints; raw labels/attributes/bounds retained. No raster glyph or mutation-ABA claim.'}};
  }catch(error){primary=error;try{await capture(client,directory,true);}catch{}throw error;}
  finally{writeFileSync(join(directory,'menu-attempts.json'),JSON.stringify(attempts,null,2));const cleanupDeadline=Date.now()+3000;try{for(let i=0;i<2;i++)for(const type of ['keyDown','keyUp'])await require('./menu-lifecycle.cjs').preparation(()=>client.request('Input.dispatchKeyEvent',{type,key:'Escape',code:'Escape',windowsVirtualKeyCode:27}),cleanupDeadline);}catch(error){writeFileSync(join(directory,'menu-cleanup-error.json'),JSON.stringify({error:error.message,primary:primary?.message??null}));if(!primary)throw error;}}
+}
+// Only built-in Workspace Trust UI is operated; no context-key or service injection.
+async function captureTrustControl(client,directory,metadata,captureSurface=capture){
+ const desired=metadata.desired,label=desired?'Trust':"Don't Trust",opposite=desired?"Don't Trust":'Trust';
+ if(typeof desired!=='boolean'||metadata.binding?.trusted===desired)throw Error('Invalid native trust transition');
+ const read=async()=> (await client.request('Runtime.evaluate',{expression:`(()=>{const root=document.querySelector('.workspace-trust-editor');return{visible:!!root?.getClientRects().length,buttons:[...(root?.querySelectorAll('.monaco-button')||[])].filter(e=>e.getClientRects().length).map(e=>{const r=e.getBoundingClientRect();return{label:e.textContent,disabled:e.getAttribute('aria-disabled'),bounds:{left:r.left,top:r.top,right:r.right,bottom:r.bottom}};})};})()`,returnByValue:true})).result.value;
+ const deadline=Date.now()+3000,prep=task=>require('./menu-lifecycle.cjs').preparation(task,deadline);let before,after,beforeCaptured,afterCaptured;
+ try{
+  while(Date.now()<deadline){before=await prep(read);if(before?.visible&&before.buttons.some(b=>b.label===label))break;await new Promise(r=>setTimeout(r,20));}
+  const button=before?.buttons.filter(b=>b.label===label);if(button?.length!==1||button[0].disabled==='true')throw Error('Native trust button unavailable');
+  writeFileSync(join(directory,'trust-before.json'),JSON.stringify(before));await captureSurface(client,directory,true,'workspace-trust');beforeCaptured=await prep(read);require('node:assert/strict').deepEqual(beforeCaptured,before,'Trust UI changed during before capture');
+  const b=button[0].bounds;for(const type of ['mousePressed','mouseReleased'])await prep(()=>client.request('Input.dispatchMouseEvent',{type,x:(b.left+b.right)/2,y:(b.top+b.bottom)/2,button:'left',clickCount:1}));
+  while(Date.now()<deadline){after=await prep(read);if(after?.visible&&after.buttons.some(b=>b.label===opposite))break;await new Promise(r=>setTimeout(r,20));}
+  if(!after?.visible||!after.buttons.some(b=>b.label===opposite))throw Error('Native trust UI did not transition within original3s');
+  const sub=join(directory,'after');mkdirSync(sub,{recursive:true});const captured=await captureSurface(client,sub,true,'workspace-trust');afterCaptured=await read();require('node:assert/strict').deepEqual(afterCaptured,after,'Trust UI changed during after capture');
+  return{...captured,trustControl:{desired,binding:metadata.binding,before,after,beforeCaptured,afterCaptured,nativeMouse:true}};
+ }finally{writeFileSync(join(directory,'trust-attempt.json'),JSON.stringify({binding:metadata.binding,desired,before,after,beforeCaptured,afterCaptured}));}
 }
 async function contextSubmenu(client,directory,{label='Solidity Lean',expected='Build Compiler Artifact with Import Options'}={}) {
   const point=await client.request('Runtime.evaluate',{expression:'(()=>{const e=document.querySelector(".monaco-editor.focused .view-lines")||document.querySelector(".monaco-editor .view-lines");if(!e)return null;const r=e.getBoundingClientRect();return{x:r.left+80,y:r.top+12};})()',returnByValue:true});
@@ -227,4 +244,4 @@ async function captureCompilerConfiguration(client,directory,metadata){
  const deadline=Date.now()+15000;let before;do{before=await read();if(valid(before))break;await new Promise(resolve=>setTimeout(resolve,50));}while(Date.now()<deadline);writeFileSync(join(directory,'configuration-before.json'),JSON.stringify(before,null,2));const rendered=await capture(client,directory,true),after=await read();writeFileSync(join(directory,'configuration-after.json'),JSON.stringify(after,null,2));
  if(!valid(before)||!valid(after)||JSON.stringify(before)!==JSON.stringify(after))throw Error('Rendered output directory configuration/source changed or missing');return{...rendered,configuration:{before,after,metadata,scope:'Actual Settings UI default or resource JSON DOM/AX/PNG; not full glyph/raster equivalence.'}};
 }
-module.exports={captureContributionMenu,testingLabel,captureTesting,availablePort,DevTools,connect,capture,inputProbe,buildKeybinding,contextSubmenu,captureTrace,captureProofHelp,captureProofHover,captureOutput,captureCompilerConfiguration};
+module.exports={captureTrustControl,captureContributionMenu,testingLabel,captureTesting,availablePort,DevTools,connect,capture,inputProbe,buildKeybinding,contextSubmenu,captureTrace,captureProofHelp,captureProofHover,captureOutput,captureCompilerConfiguration};
