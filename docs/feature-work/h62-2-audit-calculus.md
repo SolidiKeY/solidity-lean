@@ -2177,3 +2177,6 @@ The remaining callback-frame premise interpretation is recorded in [CALLBACK-FRA
 
 
 The complete frozen primitive-return projection interpretation is recorded in [PRIMITIVE-PROJECTION-CLASSIFICATION.md](../../tests/h62/item2/audit-calculus/PRIMITIVE-PROJECTION-CLASSIFICATION.md). At checkpoint V139 six exact private ledger bindings give1701 reviewed/3582 pending; semantic ownership remains unresolved and no joint-witness credit follows.
+
+
+The complete frozen external-return byte decoder interpretation is recorded in [EXTERNAL-RETURN-CLASSIFICATION.md](../../tests/h62/item2/audit-calculus/EXTERNAL-RETURN-CLASSIFICATION.md). At checkpoint V140 eight exact private ledger bindings give1709 reviewed/3574 pending, preserving the failure-witness versus actual-byte-read distinction. Q-SEM-OWNER-05 remains pending; no fresh joint-witness credit follows.
