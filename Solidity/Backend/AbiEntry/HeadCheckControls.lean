@@ -65,7 +65,7 @@ theorem inhabited_frame :
 #guard_msgs (whitespace := lax) in #print axioms huge_is_short
 /-- info: 'Solidity.Backend.AbiEntry.HeadCheckControls.short_before_fuel' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms short_before_fuel
-/-- info: 'Solidity.Backend.AbiEntry.HeadCheckControls.empty_head_no_fuel' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.AbiEntry.HeadCheckControls.empty_head_no_fuel' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms empty_head_no_fuel
 /-- info: 'Solidity.Backend.AbiEntry.HeadCheckControls.passed_head_not_entry' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms passed_head_not_entry

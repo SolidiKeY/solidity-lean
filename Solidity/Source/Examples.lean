@@ -173,13 +173,13 @@ end Solidity.Source.Examples
 #guard_msgs in #print axioms Solidity.Source.Syn.rejections_of_sub
 /-- info: 'Solidity.Source.Ctor.mem_all' depends on axioms: [propext] -/
 #guard_msgs in #print axioms Solidity.Source.Ctor.mem_all
-/-- info: 'Solidity.Source.Ctor.grammar_covers' does not depend on any axioms -/
+/-- info: 'Solidity.Source.Ctor.grammar_covers' depends on axioms: [propext] -/
 #guard_msgs in #print axioms Solidity.Source.Ctor.grammar_covers
 /-- info: 'Solidity.Source.Syn.decls_ctor' depends on axioms: [propext] -/
 #guard_msgs in #print axioms Solidity.Source.Syn.decls_ctor
 /-- info: 'Solidity.Source.Syn.nodes_eq' depends on axioms: [propext] -/
 #guard_msgs in #print axioms Solidity.Source.Syn.nodes_eq
-/-- info: 'Solidity.Source.Examples.withAssembly_rejected' does not depend on any axioms -/
+/-- info: 'Solidity.Source.Examples.withAssembly_rejected' depends on axioms: [propext] -/
 #guard_msgs in #print axioms Solidity.Source.Examples.withAssembly_rejected
 /-- info: 'Solidity.Source.Syn.excl_ctor' depends on axioms: [propext] -/
 #guard_msgs in #print axioms Solidity.Source.Syn.excl_ctor

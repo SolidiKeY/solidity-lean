@@ -126,7 +126,7 @@ theorem branchBody_run (base : Nat) (label : Fin W) (payable : Bool) (rest : Lis
         .ok {machine with mem := upd machine.mem (base+1) (.val label)} 0 else .revert :=
   body_run base label payable rest machine
 
-/-- info: 'Solidity.Backend.AbiEntry.PayableRoutes.admitted' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiEntry.PayableRoutes.admitted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms admitted
 /-- info: 'Solidity.Backend.AbiEntry.PayableRoutes.selected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms selected
@@ -136,7 +136,7 @@ theorem branchBody_run (base : Nat) (label : Fin W) (payable : Bool) (rest : Lis
 #guard_msgs (whitespace := lax) in #print axioms executed
 /-- info: 'Solidity.Backend.AbiEntry.PayableRoutes.certificate' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms certificate
-/-- info: 'Solidity.Backend.AbiEntry.PayableRoutes.branchBody_code' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.AbiEntry.PayableRoutes.branchBody_code' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms branchBody_code
 /-- info: 'Solidity.Backend.AbiEntry.PayableRoutes.test_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms test_run
