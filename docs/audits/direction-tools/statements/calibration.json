@@ -1,6 +1,6 @@
 {
   "base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
-  "scope": "Matched public compiler facades and matched finite arithmetic/control scenarios only; unmatched rows retain null rather than an unlike denominator.",
+  "scope": "Similar external theorem declarations (with semantic differences stated), public compiler facades and matched finite operation scenarios. Nulls follow recorded nearest-theorem searches.",
   "metric_boundary": "No check-time or transitive lemma-count measurement. Facade LOC is statement plus proof code, unlike the superseded header-only ratios. Finite-case counts compare selected operation scenarios, not language coverage or proof strength.",
   "comparisons": [
     {
@@ -82,6 +82,303 @@
       "outlier": false,
       "verdict": null,
       "reason": "Short-circuit conjunction with a state-changing right operand; local false-left input versus upstream true/false-left inputs. This compares finite scenario coverage, not kernel proofs with runtime tests or whole suites. No solc run is claimed."
+    },
+    {
+      "unit": "Solidity/Source/SemanticsExamples.lean#add_overflow_checked",
+      "reference": "afp-wp#kdplus_safe_dest",
+      "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+      "local": 2,
+      "reference_value": 4,
+      "ratio": 0.5,
+      "outlier": false,
+      "verdict": null,
+      "reason": "Checked unsigned addition can succeed only within its representable range. Differences: Local closed uint8 evaluation proves a particular overflow panic payload; Isabelle's generic uint256 success inversion implies rejection out of range but does not prove that payload or exact evaluator outcome. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+    },
+    {
+      "unit": "Solidity/Source/SemanticsExamples.lean#add_overflow_unchecked",
+      "reference": "cc-ints#add_unsigned",
+      "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+      "local": 2,
+      "reference_value": 3,
+      "ratio": 0.666667,
+      "outlier": false,
+      "verdict": null,
+      "reason": "Unsigned unchecked addition wraps modulo the word width. Differences: Local uint8 fixed input result versus a generic word arithmetic identity; CompCert is not a Solidity expression evaluator. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+    },
+    {
+      "unit": "Solidity/Source/SemanticsExamples.lean#short_circuit",
+      "reference": "afp-solidity#execute_cond_monad_simp2",
+      "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+      "local": 1,
+      "reference_value": 4,
+      "ratio": 0.25,
+      "outlier": true,
+      "verdict": "justified",
+      "reason": "A false condition selects one branch without executing the other branch's effects. Differences: Local conjunction with a state-changing right operand versus a generic false conditional in Isabelle's monadic evaluator; not a theorem equating complete evaluators. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+    },
+    {
+      "unit": "Solidity/Source/SemanticsExamples.lean#dX_ty",
+      "reference": "cc-typing#evar_sound",
+      "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+      "local": 1,
+      "reference_value": 5,
+      "ratio": 0.2,
+      "outlier": true,
+      "verdict": "justified",
+      "reason": "Variable metadata/lookup supplies the variable's typing evidence. Differences: Local fixed declaration lookup returns a uint type; CompCert generically converts successful variable lookup into wt_expr. These are analogous lookup/typing interfaces, not equal algorithms. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+    },
+    {
+      "unit": "Solidity/Source/SemanticsExamples.lean#dT_ty",
+      "reference": "cc-typing#evar_sound",
+      "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+      "local": 1,
+      "reference_value": 5,
+      "ratio": 0.2,
+      "outlier": true,
+      "verdict": "justified",
+      "reason": "Variable metadata/lookup supplies the variable's typing evidence. Differences: Local fixed declaration lookup returns a uint type; CompCert generically converts successful variable lookup into wt_expr. These are analogous lookup/typing interfaces, not equal algorithms. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+    },
+    {
+      "unit": "Solidity/Source/SemanticsExamples.lean#dPing_sig",
+      "reference": "cc-typing#ecall_sound",
+      "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+      "local": 1,
+      "reference_value": 7,
+      "ratio": 0.142857,
+      "outlier": true,
+      "verdict": "justified",
+      "reason": "Call-signature typing evidence supports an accepted function application. Differences: Local fixed zero-argument/zero-result signature lookup versus CompCert generic call well-typedness, with additional well-typed function/argument premises. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+    },
+    {
+      "unit": "Solidity/Source/SemanticsExamples.lean#lit_ok",
+      "reference": "cc-typing#econst_int_sound",
+      "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+      "local": 3,
+      "reference_value": 5,
+      "ratio": 0.6,
+      "outlier": false,
+      "verdict": null,
+      "reason": "An integer literal is accepted at an appropriate integer type. Differences: Local rational-to-uint implicit conversion requires FitsInt and fixed uint metadata; CompCert starts from a bounded integer representation and proves expression well-typedness. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+    },
+    {
+      "unit": "Solidity/Source/SemanticsExamples.lean#revert_rolls_back",
+      "reference": "afp-solidity#post_true",
+      "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+      "local": 3,
+      "reference_value": 9,
+      "ratio": 0.333333,
+      "outlier": false,
+      "verdict": null,
+      "reason": "An exceptional execution preserves predicates of the pre-call state by restoring it. Differences: Local closed transactions include storage, logs or transient-storage observations; Isabelle's exc wrapper restores its entire modeled state but has no EVM transient-storage feature or matching event/panic payload claim. Only the rollback principle is shared. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+    },
+    {
+      "unit": "Solidity/Source/SemanticsExamples.lean#revert_rolls_back_transient",
+      "reference": "afp-solidity#post_true",
+      "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+      "local": 6,
+      "reference_value": 9,
+      "ratio": 0.666667,
+      "outlier": false,
+      "verdict": null,
+      "reason": "An exceptional execution preserves predicates of the pre-call state by restoring it. Differences: Local closed transactions include storage, logs or transient-storage observations; Isabelle's exc wrapper restores its entire modeled state but has no EVM transient-storage feature or matching event/panic payload claim. Only the rollback principle is shared. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+    },
+    {
+      "unit": "Solidity/Source/SemanticsExamples.lean#commit_keeps_storage",
+      "reference": "afp-wp#storage_update_eq",
+      "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+      "local": 3,
+      "reference_value": 3,
+      "ratio": 1.0,
+      "outlier": false,
+      "verdict": null,
+      "reason": "A successful storage write is observed when that location is read. Differences: Local full transaction also checks a return value and committed storage; Isabelle proves one generic storage update/read identity in the Contract locale. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+    },
+    {
+      "unit": "Solidity/Source/SemanticsExamples.lean#outside_revert_rolls_back",
+      "reference": "afp-solidity#post_true",
+      "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+      "local": 4,
+      "reference_value": 9,
+      "ratio": 0.444444,
+      "outlier": false,
+      "verdict": null,
+      "reason": "An exceptional execution preserves predicates of the pre-call state by restoring it. Differences: Local closed transactions include storage, logs or transient-storage observations; Isabelle's exc wrapper restores its entire modeled state but has no EVM transient-storage feature or matching event/panic payload claim. Only the rollback principle is shared. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+    },
+    {
+      "unit": "Solidity/Source/SemanticsExamples.lean#dA_ty",
+      "reference": "cc-typing#evar_sound",
+      "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+      "local": 1,
+      "reference_value": 5,
+      "ratio": 0.2,
+      "outlier": true,
+      "verdict": "justified",
+      "reason": "Variable metadata/lookup supplies the variable's typing evidence. Differences: Local fixed declaration lookup returns a uint type; CompCert generically converts successful variable lookup into wt_expr. These are analogous lookup/typing interfaces, not equal algorithms. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+    },
+    {
+      "unit": "Solidity/Source/SemanticsExamples.lean#dB_ty",
+      "reference": "cc-typing#evar_sound",
+      "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+      "local": 1,
+      "reference_value": 5,
+      "ratio": 0.2,
+      "outlier": true,
+      "verdict": "justified",
+      "reason": "Variable metadata/lookup supplies the variable's typing evidence. Differences: Local fixed declaration lookup returns a uint type; CompCert generically converts successful variable lookup into wt_expr. These are analogous lookup/typing interfaces, not equal algorithms. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+    },
+    {
+      "unit": "Solidity/Theorems.lean#rule_sound",
+      "reference": "cc-exec#do_step_sound",
+      "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+      "local": 2,
+      "reference_value": 34,
+      "ratio": 0.058824,
+      "outlier": true,
+      "verdict": "justified",
+      "reason": "Executable one-step computation agrees with the relational semantics. Differences: Local deterministic statement rewriting versus nondeterministic C transitions, external-world crash alternative, and expression side effects; local theorem delegates to rule library. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+    },
+    {
+      "unit": "Solidity/Theorems.lean#rule_unique",
+      "reference": "cc-smallstep#sd_determ_2",
+      "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+      "local": 2,
+      "reference_value": 6,
+      "ratio": 0.333333,
+      "outlier": false,
+      "verdict": null,
+      "reason": "Two one-step derivations with the same starting configuration yield the same result. Differences: CompCert fixes the trace and assumes determinate L; local intrinsic rewriting uniqueness has no external trace. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+    },
+    {
+      "unit": "Solidity/Theorems.lean#rule_is_step",
+      "reference": "cc-exec#do_step_complete",
+      "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+      "local": 2,
+      "reference_value": 61,
+      "ratio": 0.032787,
+      "outlier": true,
+      "verdict": "justified",
+      "reason": "Relational one-step result is covered by the executable step mechanism. Differences: CompCert returns a list of transitions and requires a possible external-world trace; local rule conclusion is equality to one deterministic step. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+    },
+    {
+      "unit": "Solidity/Theorems.lean#rule_exists",
+      "reference": "cc-strategy#progress",
+      "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+      "local": 2,
+      "reference_value": 18,
+      "ratio": 0.111111,
+      "outlier": true,
+      "verdict": "justified",
+      "reason": "A suitable starting state admits a next semantic step (or has finished). Differences: CompCert assumes safe execution and permits final states; local rewriting always produces a residual proposition, with additional SolKey rule-availability premises. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+    },
+    {
+      "unit": "Solidity/Theorems.lean#rule_of_step",
+      "reference": "cc-exec#do_step_sound",
+      "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+      "local": 2,
+      "reference_value": 34,
+      "ratio": 0.058824,
+      "outlier": true,
+      "verdict": "justified",
+      "reason": "Executable one-step computation agrees with the relational semantics. Differences: Local deterministic statement rewriting versus nondeterministic C transitions, external-world crash alternative, and expression side effects; local theorem delegates to rule library. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+    },
+    {
+      "unit": "Solidity/Theorems.lean#solkey_rule_exists",
+      "reference": "cc-strategy#progress",
+      "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+      "local": 2,
+      "reference_value": 18,
+      "ratio": 0.111111,
+      "outlier": true,
+      "verdict": "justified",
+      "reason": "A suitable starting state admits a next semantic step (or has finished). Differences: CompCert assumes safe execution and permits final states; local rewriting always produces a residual proposition, with additional SolKey rule-availability premises. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+    },
+    {
+      "unit": "Solidity/Theorems.lean#solkey_step_taclet",
+      "reference": "cc-strategy#step_simulation",
+      "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+      "local": 3,
+      "reference_value": 8,
+      "ratio": 0.375,
+      "outlier": false,
+      "verdict": null,
+      "reason": "A restricted stepping discipline embeds into the general semantic relation. Differences: CompCert relates strategy transitions to positive sequences of C steps; local theorem relates SolKey taclet rewriting to the calculus under its shape premise. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+    },
+    {
+      "unit": "Solidity/Theorems.lean#soundness",
+      "reference": "afp-wp#post_wp",
+      "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+      "local": 2,
+      "reference_value": 5,
+      "ratio": 0.4,
+      "outlier": false,
+      "verdict": null,
+      "reason": "Verification evidence implies the semantic postcondition for an execution. Differences: The closest compiler candidate preserves specifications across compilation; the closer Solidity candidate assumes WP and an effect, whereas local theorems assume calculus derivability and quantify validity. Isabelle WP is partial correctness (NT allowed). Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+    },
+    {
+      "unit": "Solidity/Theorems.lean#soundness'",
+      "reference": "afp-wp#post_wp",
+      "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+      "local": 2,
+      "reference_value": 5,
+      "ratio": 0.4,
+      "outlier": false,
+      "verdict": null,
+      "reason": "Verification evidence implies the semantic postcondition for an execution. Differences: The closest compiler candidate preserves specifications across compilation; the closer Solidity candidate assumes WP and an effect, whereas local theorems assume calculus derivability and quantify validity. Isabelle WP is partial correctness (NT allowed). Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+    },
+    {
+      "unit": "Solidity/Theorems.lean#solkey_soundness",
+      "reference": "afp-wp#post_wp",
+      "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+      "local": 2,
+      "reference_value": 5,
+      "ratio": 0.4,
+      "outlier": false,
+      "verdict": null,
+      "reason": "Verification evidence implies the semantic postcondition for an execution. Differences: The closest compiler candidate preserves specifications across compilation; the closer Solidity candidate assumes WP and an effect, whereas local theorems assume calculus derivability and quantify validity. Isabelle WP is partial correctness (NT allowed). Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+    },
+    {
+      "unit": "Solidity/Theorems.lean#callback_soundness",
+      "reference": "afp-wp#inv_wp",
+      "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+      "local": 3,
+      "reference_value": 5,
+      "ratio": 0.6,
+      "outlier": false,
+      "verdict": null,
+      "reason": "Verification obligations imply invariant properties of semantic outcomes. Differences: Local derivability includes callback/no-callback invariant regimes; Isabelle assumes a WP over an effect and does not encode those same callback policies. This compares the invariant-soundness layer, not callback feature coverage. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+    },
+    {
+      "unit": "Solidity/Theorems.lean#noCallback_soundness",
+      "reference": "afp-wp#inv_wp",
+      "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+      "local": 3,
+      "reference_value": 5,
+      "ratio": 0.6,
+      "outlier": false,
+      "verdict": null,
+      "reason": "Verification obligations imply invariant properties of semantic outcomes. Differences: Local derivability includes callback/no-callback invariant regimes; Isabelle assumes a WP over an effect and does not encode those same callback policies. This compares the invariant-soundness layer, not callback feature coverage. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+    },
+    {
+      "unit": "Solidity/Theorems.lean#symex_sound",
+      "reference": "afp-wp#wpbind",
+      "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+      "local": 2,
+      "reference_value": 32,
+      "ratio": 0.0625,
+      "outlier": true,
+      "verdict": "justified",
+      "reason": "A backwards verification condition is sufficient for the composed program's postcondition. Differences: Local theorem is fuel-indexed symbolic formula transformation; Isabelle's rule handles one monadic bind and separate exception postconditions. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
+    },
+    {
+      "unit": "Solidity/Theorems.lean#compiler_net",
+      "reference": "cc-complements#transf_c_program_preservation",
+      "metric": "nonblank public theorem declaration code lines including proof; comments and enclosing contexts excluded",
+      "local": 8,
+      "reference_value": 9,
+      "ratio": 0.888889,
+      "outlier": false,
+      "verdict": null,
+      "reason": "A target execution has a corresponding source execution and a preserved observable. Differences: Local result is success-conditional and compares net account balances only; CompCert covers whole program behaviours with behavior_improves, including source undefined behaviour. Declaration size only: local facade delegation or fixed-case computation and the reference proof's inversions/automation differ; this is not transitive proof effort, semantic coverage or correctness equivalence."
     }
   ],
   "solc_snapshot": {
@@ -126,9 +423,9 @@
     ]
   },
   "counts": {
-    "comparisons": 7,
-    "matched_units": 5,
-    "outliers": 1
+    "comparisons": 34,
+    "matched_units": 30,
+    "outliers": 13
   },
-  "conclusion": "The small checked compiler facade is an outlier against the CakeML facade because compact Input/Agrees contracts hide detail that the reference facade exposes; both sides delegate. Other measured facade and finite-case ratios are within 3x. Semantic compiler weaknesses are assessed from permitted behaviours, not inferred from these sizes."
+  "conclusion": "The small checked compiler facade is an outlier against the CakeML facade because compact Input/Agrees contracts hide detail that the reference facade exposes; both sides delegate. Other measured facade and finite-case ratios are within 3x. Additional similar-theorem ratios include small fixed local computations and delegating calculus facades versus general external theorems. Their recorded outliers reflect different generality or proof packaging, not measured transitive proof effort. Semantic compiler weaknesses are assessed from permitted behaviours, not inferred from these sizes."
 }

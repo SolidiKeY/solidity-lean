@@ -1,0 +1,1023 @@
+{
+  "Solidity/Theorems.lean#rule_sound": {
+    "queries": [
+      "step.*sound|sound.*step",
+      "simulation"
+    ],
+    "reviewed": [
+      "cc-exec#do_step_sound"
+    ],
+    "selected": "cc-exec#do_step_sound",
+    "shared": "Executable one-step computation agrees with the relational semantics.",
+    "differences": "Local deterministic statement rewriting versus nondeterministic C transitions, external-world crash alternative, and expression side effects; local theorem delegates to rule library.",
+    "reason": null,
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#rule_of_step": {
+    "queries": [
+      "step.*sound|sound.*step",
+      "simulation"
+    ],
+    "reviewed": [
+      "cc-exec#do_step_sound"
+    ],
+    "selected": "cc-exec#do_step_sound",
+    "shared": "Executable one-step computation agrees with the relational semantics.",
+    "differences": "Local deterministic statement rewriting versus nondeterministic C transitions, external-world crash alternative, and expression side effects; local theorem delegates to rule library.",
+    "reason": null,
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#rule_is_step": {
+    "queries": [
+      "step.*complete|complete.*step"
+    ],
+    "reviewed": [
+      "cc-exec#do_step_complete"
+    ],
+    "selected": "cc-exec#do_step_complete",
+    "shared": "Relational one-step result is covered by the executable step mechanism.",
+    "differences": "CompCert returns a list of transitions and requires a possible external-world trace; local rule conclusion is equality to one deterministic step.",
+    "reason": null,
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#rule_unique": {
+    "queries": [
+      "determ|unique"
+    ],
+    "reviewed": [
+      "cc-smallstep#sd_determ_2"
+    ],
+    "selected": "cc-smallstep#sd_determ_2",
+    "shared": "Two one-step derivations with the same starting configuration yield the same result.",
+    "differences": "CompCert fixes the trace and assumes determinate L; local intrinsic rewriting uniqueness has no external trace.",
+    "reason": null,
+    "context": {
+      "cc-smallstep#sd_determ_2": "Section DETERMINACY: Variable L: semantics; Hypothesis DET: determinate L. Implicit section parameters are essential."
+    },
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#rule_exists": {
+    "queries": [
+      "progress|can_estep"
+    ],
+    "reviewed": [
+      "cc-strategy#progress",
+      "cc-strategy#can_estep"
+    ],
+    "selected": "cc-strategy#progress",
+    "shared": "A suitable starting state admits a next semantic step (or has finished).",
+    "differences": "CompCert assumes safe execution and permits final states; local rewriting always produces a residual proposition, with additional SolKey rule-availability premises.",
+    "reason": null,
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#solkey_rule_exists": {
+    "queries": [
+      "progress|can_estep"
+    ],
+    "reviewed": [
+      "cc-strategy#progress",
+      "cc-strategy#can_estep"
+    ],
+    "selected": "cc-strategy#progress",
+    "shared": "A suitable starting state admits a next semantic step (or has finished).",
+    "differences": "CompCert assumes safe execution and permits final states; local rewriting always produces a residual proposition, with additional SolKey rule-availability premises.",
+    "reason": null,
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#solkey_step_taclet": {
+    "queries": [
+      "step_simulation|strategy_simulation"
+    ],
+    "reviewed": [
+      "cc-strategy#step_simulation"
+    ],
+    "selected": "cc-strategy#step_simulation",
+    "shared": "A restricted stepping discipline embeds into the general semantic relation.",
+    "differences": "CompCert relates strategy transitions to positive sequences of C steps; local theorem relates SolKey taclet rewriting to the calculus under its shape premise.",
+    "reason": null,
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#soundness": {
+    "queries": [
+      "preserves_spec|semantic_preservation",
+      "post_wp|wp_post"
+    ],
+    "reviewed": [
+      "cc-complements#transf_c_program_preserves_spec",
+      "afp-wp#post_wp"
+    ],
+    "selected": "afp-wp#post_wp",
+    "shared": "Verification evidence implies the semantic postcondition for an execution.",
+    "differences": "The closest compiler candidate preserves specifications across compilation; the closer Solidity candidate assumes WP and an effect, whereas local theorems assume calculus derivability and quantify validity. Isabelle WP is partial correctness (NT allowed).",
+    "reason": null,
+    "context": {
+      "afp-wp#post_wp": "Contract locale, including this address and contract-state operations; WP admits NT nontermination."
+    },
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#soundness'": {
+    "queries": [
+      "preserves_spec|semantic_preservation",
+      "post_wp|wp_post"
+    ],
+    "reviewed": [
+      "cc-complements#transf_c_program_preserves_spec",
+      "afp-wp#post_wp"
+    ],
+    "selected": "afp-wp#post_wp",
+    "shared": "Verification evidence implies the semantic postcondition for an execution.",
+    "differences": "The closest compiler candidate preserves specifications across compilation; the closer Solidity candidate assumes WP and an effect, whereas local theorems assume calculus derivability and quantify validity. Isabelle WP is partial correctness (NT allowed).",
+    "reason": null,
+    "context": {
+      "afp-wp#post_wp": "Contract locale, including this address and contract-state operations; WP admits NT nontermination."
+    },
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#solkey_soundness": {
+    "queries": [
+      "preserves_spec|semantic_preservation",
+      "post_wp|wp_post"
+    ],
+    "reviewed": [
+      "cc-complements#transf_c_program_preserves_spec",
+      "afp-wp#post_wp"
+    ],
+    "selected": "afp-wp#post_wp",
+    "shared": "Verification evidence implies the semantic postcondition for an execution.",
+    "differences": "The closest compiler candidate preserves specifications across compilation; the closer Solidity candidate assumes WP and an effect, whereas local theorems assume calculus derivability and quantify validity. Isabelle WP is partial correctness (NT allowed).",
+    "reason": null,
+    "context": {
+      "afp-wp#post_wp": "Contract locale, including this address and contract-state operations; WP admits NT nontermination."
+    },
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#callback_soundness": {
+    "queries": [
+      "preserves_spec|semantic_preservation",
+      "inv_wp|wp_transfer"
+    ],
+    "reviewed": [
+      "cc-complements#transf_c_program_preserves_spec",
+      "afp-wp#inv_wp",
+      "afp-wp#wp_transfer_monad"
+    ],
+    "selected": "afp-wp#inv_wp",
+    "shared": "Verification obligations imply invariant properties of semantic outcomes.",
+    "differences": "Local derivability includes callback/no-callback invariant regimes; Isabelle assumes a WP over an effect and does not encode those same callback policies. This compares the invariant-soundness layer, not callback feature coverage.",
+    "reason": null,
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#noCallback_soundness": {
+    "queries": [
+      "preserves_spec|semantic_preservation",
+      "inv_wp|wp_transfer"
+    ],
+    "reviewed": [
+      "cc-complements#transf_c_program_preserves_spec",
+      "afp-wp#inv_wp",
+      "afp-wp#wp_transfer_monad"
+    ],
+    "selected": "afp-wp#inv_wp",
+    "shared": "Verification obligations imply invariant properties of semantic outcomes.",
+    "differences": "Local derivability includes callback/no-callback invariant regimes; Isabelle assumes a WP over an effect and does not encode those same callback policies. This compares the invariant-soundness layer, not callback feature coverage.",
+    "reason": null,
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#symex_sound": {
+    "queries": [
+      "preserves_spec|simulation",
+      "wpbind"
+    ],
+    "reviewed": [
+      "cc-complements#transf_c_program_preserves_spec",
+      "afp-wp#wpbind"
+    ],
+    "selected": "afp-wp#wpbind",
+    "shared": "A backwards verification condition is sufficient for the composed program's postcondition.",
+    "differences": "Local theorem is fuel-indexed symbolic formula transformation; Isabelle's rule handles one monadic bind and separate exception postconditions.",
+    "reason": null,
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#compiler_correct": {
+    "queries": [
+      "transf_c_program_correct|compile_semantics"
+    ],
+    "reviewed": [
+      "cc-compiler#transf_c_program_correct"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "A similar public compiler correctness theorem is already measured against CompCert and CakeML in calibration.json; no second null measurement is emitted.",
+    "context": {},
+    "existing_measurement": "public compiler facade comparisons"
+  },
+  "Solidity/Theorems.lean#compiler_checked": {
+    "queries": [
+      "transf_c_program_correct|compile_semantics"
+    ],
+    "reviewed": [
+      "cc-compiler#transf_c_program_correct"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "A similar public compiler correctness theorem is already measured against CompCert and CakeML in calibration.json; no second null measurement is emitted.",
+    "context": {},
+    "existing_measurement": "public compiler facade comparisons"
+  },
+  "Solidity/Theorems.lean#compiler_net": {
+    "queries": [
+      "preservation|refinement"
+    ],
+    "reviewed": [
+      "cc-complements#transf_c_program_preservation"
+    ],
+    "selected": "cc-complements#transf_c_program_preservation",
+    "shared": "A target execution has a corresponding source execution and a preserved observable.",
+    "differences": "Local result is success-conditional and compares net account balances only; CompCert covers whole program behaviours with behavior_improves, including source undefined behaviour.",
+    "reason": null,
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#solkey_rule_lt_calculus": {
+    "queries": [
+      "strict|separat|not.*simulation|simulation",
+      "step_simulation"
+    ],
+    "reviewed": [
+      "cc-strategy#strategy_simulation",
+      "cc-strategy#step_simulation"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "The closest inspected compiler results embed one execution strategy into general C semantics. Neither exhibits a formula or rule derivable in one proof system and underivable in another; thus neither is a similar strict-separation witness. No such theorem was found in the bounded compiler/Solidity theorem catalog.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#solkey_lt_calculus": {
+    "queries": [
+      "strict|separat|not.*simulation|simulation",
+      "step_simulation"
+    ],
+    "reviewed": [
+      "cc-strategy#strategy_simulation",
+      "cc-strategy#step_simulation"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "The closest inspected compiler results embed one execution strategy into general C semantics. Neither exhibits a formula or rule derivable in one proof system and underivable in another; thus neither is a similar strict-separation witness. No such theorem was found in the bounded compiler/Solidity theorem catalog.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#solkey_eq_calculus": {
+    "queries": [
+      "equiv|simulation|refinement",
+      "wp_post|post_wp"
+    ],
+    "reviewed": [
+      "cc-strategy#strategy_simulation",
+      "afp-wp#wp_post",
+      "afp-wp#post_wp"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "The inspected strategy simulation relates program behaviours in one direction; the WP/postcondition pair relates semantic predicates to verification conditions. None establishes equivalence of derivability in two proof calculi under a formula-fragment premise, so these are not a similar proof-system equivalence theorem in this bounded search.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#noCallback_iff": {
+    "queries": [
+      "callback|external|simulation",
+      "wp_transfer_monad|inv_wp"
+    ],
+    "reviewed": [
+      "cc-strategy#strategy_simulation",
+      "afp-wp#wp_transfer_monad",
+      "afp-wp#inv_wp"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "The nearest inspected strategy and external-call verification theorems do not state that restricting callbacks leaves validity of a callback-free formula unchanged. Transfer WP handles an external operation, and inv_wp proves an outcome invariant; neither is the required validity equivalence. No similar proposition was found in the searched files.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#cleanTail_holds": {
+    "queries": [
+      "array|storage|memory",
+      "write_array_typing_value"
+    ],
+    "reviewed": [
+      "cc-memdata#decode_encode_val_general",
+      "afp-solidity#write_array_typing_value"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "The inspected CompCert memory encoding and Solidity array-update typing theorems establish value encoding or well-typed writes, not validity of a universally quantified clean/zero array-tail formula under its heap-layout premises. No similar tail-invariant theorem was found in this bounded catalog.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Calculus/Closers.lean#_root_.Solidity.Modality.afterRunTR_not_panic": {
+    "queries": [
+      "stuck|wrong|crash",
+      "do_step_sound|progress"
+    ],
+    "reviewed": [
+      "cc-exec#do_step_sound",
+      "cc-strategy#progress"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "The closest compiler step-soundness/progress results admit stuck/crash alternatives or assume safety. They do not eliminate a contradictory symbolic modality premise by deriving False as these closers do. No similar contradiction-elimination theorem was found in the searched catalog; a general progress theorem is not this proof unit.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Calculus/Closers.lean#_root_.Solidity.Modality.afterRunTR_diamond_fail": {
+    "queries": [
+      "stuck|wrong|crash",
+      "do_step_sound|progress"
+    ],
+    "reviewed": [
+      "cc-exec#do_step_sound",
+      "cc-strategy#progress"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "The closest compiler step-soundness/progress results admit stuck/crash alternatives or assume safety. They do not eliminate a contradictory symbolic modality premise by deriving False as these closers do. No similar contradiction-elimination theorem was found in the searched catalog; a general progress theorem is not this proof unit.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Source/SemanticsExamples.lean#add_overflow_checked": {
+    "queries": [
+      "add|overflow",
+      "kdplus_safe_dest"
+    ],
+    "reviewed": [
+      "cc-ints#add_unsigned",
+      "afp-wp#kdplus_safe_dest"
+    ],
+    "selected": "afp-wp#kdplus_safe_dest",
+    "shared": "Checked unsigned addition can succeed only within its representable range.",
+    "differences": "Local closed uint8 evaluation proves a particular overflow panic payload; Isabelle's generic uint256 success inversion implies rejection out of range but does not prove that payload or exact evaluator outcome.",
+    "reason": null,
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Source/SemanticsExamples.lean#add_overflow_unchecked": {
+    "queries": [
+      "add_unsigned|kdplus"
+    ],
+    "reviewed": [
+      "cc-ints#add_unsigned",
+      "afp-wp#kdplus"
+    ],
+    "selected": "cc-ints#add_unsigned",
+    "shared": "Unsigned unchecked addition wraps modulo the word width.",
+    "differences": "Local uint8 fixed input result versus a generic word arithmetic identity; CompCert is not a Solidity expression evaluator.",
+    "reason": null,
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Source/SemanticsExamples.lean#div_by_zero": {
+    "queries": [
+      "div.*zero|zero.*div|divu",
+      "throw|assert"
+    ],
+    "reviewed": [
+      "cc-ints#divu_one",
+      "afp-monad#execute_assert"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "The closest inspected word-division identity and generic assertion/exception execution theorem do not specify Solidity's unchecked zero-divisor panic. A same-operation solc finite input/output comparison already exists in calibration.json; no similar compiler theorem for the panic payload was found in this bounded catalog.",
+    "context": {},
+    "existing_measurement": "pinned solc unsigned division vectors"
+  },
+  "Solidity/Source/SemanticsExamples.lean#short_circuit": {
+    "queries": [
+      "condition|cond_monad|short",
+      "execute_cond_monad_simp2"
+    ],
+    "reviewed": [
+      "cc-exec#step_expr_sound",
+      "afp-solidity#execute_cond_monad_simp2"
+    ],
+    "selected": "afp-solidity#execute_cond_monad_simp2",
+    "shared": "A false condition selects one branch without executing the other branch's effects.",
+    "differences": "Local conjunction with a state-changing right operand versus a generic false conditional in Isabelle's monadic evaluator; not a theorem equating complete evaluators.",
+    "reason": null,
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Source/SemanticsExamples.lean#lit_ok": {
+    "queries": [
+      "econst_int_sound|unsigned_repr"
+    ],
+    "reviewed": [
+      "cc-typing#econst_int_sound",
+      "cc-ints#unsigned_repr"
+    ],
+    "selected": "cc-typing#econst_int_sound",
+    "shared": "An integer literal is accepted at an appropriate integer type.",
+    "differences": "Local rational-to-uint implicit conversion requires FitsInt and fixed uint metadata; CompCert starts from a bounded integer representation and proves expression well-typedness.",
+    "reason": null,
+    "context": {
+      "cc-typing#econst_int_sound": "Ctyping typing section has composite environment ce and local environment e; these are implicit in wt_expr ce e."
+    },
+    "existing_measurement": null
+  },
+  "Solidity/Source/SemanticsExamples.lean#dX_ty": {
+    "queries": [
+      "evar_sound|typecheck_program_sound"
+    ],
+    "reviewed": [
+      "cc-typing#evar_sound"
+    ],
+    "selected": "cc-typing#evar_sound",
+    "shared": "Variable metadata/lookup supplies the variable's typing evidence.",
+    "differences": "Local fixed declaration lookup returns a uint type; CompCert generically converts successful variable lookup into wt_expr. These are analogous lookup/typing interfaces, not equal algorithms.",
+    "reason": null,
+    "context": {
+      "cc-typing#evar_sound": "Typing section has environments ce and e; successful evar e x produces a well-typed expression in those environments."
+    },
+    "existing_measurement": null
+  },
+  "Solidity/Source/SemanticsExamples.lean#dT_ty": {
+    "queries": [
+      "evar_sound|typecheck_program_sound"
+    ],
+    "reviewed": [
+      "cc-typing#evar_sound"
+    ],
+    "selected": "cc-typing#evar_sound",
+    "shared": "Variable metadata/lookup supplies the variable's typing evidence.",
+    "differences": "Local fixed declaration lookup returns a uint type; CompCert generically converts successful variable lookup into wt_expr. These are analogous lookup/typing interfaces, not equal algorithms.",
+    "reason": null,
+    "context": {
+      "cc-typing#evar_sound": "Typing section has environments ce and e; successful evar e x produces a well-typed expression in those environments."
+    },
+    "existing_measurement": null
+  },
+  "Solidity/Source/SemanticsExamples.lean#dA_ty": {
+    "queries": [
+      "evar_sound|typecheck_program_sound"
+    ],
+    "reviewed": [
+      "cc-typing#evar_sound"
+    ],
+    "selected": "cc-typing#evar_sound",
+    "shared": "Variable metadata/lookup supplies the variable's typing evidence.",
+    "differences": "Local fixed declaration lookup returns a uint type; CompCert generically converts successful variable lookup into wt_expr. These are analogous lookup/typing interfaces, not equal algorithms.",
+    "reason": null,
+    "context": {
+      "cc-typing#evar_sound": "Typing section has environments ce and e; successful evar e x produces a well-typed expression in those environments."
+    },
+    "existing_measurement": null
+  },
+  "Solidity/Source/SemanticsExamples.lean#dB_ty": {
+    "queries": [
+      "evar_sound|typecheck_program_sound"
+    ],
+    "reviewed": [
+      "cc-typing#evar_sound"
+    ],
+    "selected": "cc-typing#evar_sound",
+    "shared": "Variable metadata/lookup supplies the variable's typing evidence.",
+    "differences": "Local fixed declaration lookup returns a uint type; CompCert generically converts successful variable lookup into wt_expr. These are analogous lookup/typing interfaces, not equal algorithms.",
+    "reason": null,
+    "context": {
+      "cc-typing#evar_sound": "Typing section has environments ce and e; successful evar e x produces a well-typed expression in those environments."
+    },
+    "existing_measurement": null
+  },
+  "Solidity/Source/SemanticsExamples.lean#dPing_sig": {
+    "queries": [
+      "ecall_sound|typecheck_program_sound"
+    ],
+    "reviewed": [
+      "cc-typing#ecall_sound"
+    ],
+    "selected": "cc-typing#ecall_sound",
+    "shared": "Call-signature typing evidence supports an accepted function application.",
+    "differences": "Local fixed zero-argument/zero-result signature lookup versus CompCert generic call well-typedness, with additional well-typed function/argument premises.",
+    "reason": null,
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Source/SemanticsExamples.lean#revert_rolls_back": {
+    "queries": [
+      "exception|rollback|revert",
+      "post_true|post_exc"
+    ],
+    "reviewed": [
+      "cc-exec#do_step_sound",
+      "afp-solidity#post_true"
+    ],
+    "selected": "afp-solidity#post_true",
+    "shared": "An exceptional execution preserves predicates of the pre-call state by restoring it.",
+    "differences": "Local closed transactions include storage, logs or transient-storage observations; Isabelle's exc wrapper restores its entire modeled state but has no EVM transient-storage feature or matching event/panic payload claim. Only the rollback principle is shared.",
+    "reason": null,
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Source/SemanticsExamples.lean#outside_revert_rolls_back": {
+    "queries": [
+      "exception|rollback|revert",
+      "post_true|post_exc"
+    ],
+    "reviewed": [
+      "cc-exec#do_step_sound",
+      "afp-solidity#post_true"
+    ],
+    "selected": "afp-solidity#post_true",
+    "shared": "An exceptional execution preserves predicates of the pre-call state by restoring it.",
+    "differences": "Local closed transactions include storage, logs or transient-storage observations; Isabelle's exc wrapper restores its entire modeled state but has no EVM transient-storage feature or matching event/panic payload claim. Only the rollback principle is shared.",
+    "reason": null,
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Source/SemanticsExamples.lean#revert_rolls_back_transient": {
+    "queries": [
+      "exception|rollback|revert",
+      "post_true|post_exc"
+    ],
+    "reviewed": [
+      "cc-exec#do_step_sound",
+      "afp-solidity#post_true"
+    ],
+    "selected": "afp-solidity#post_true",
+    "shared": "An exceptional execution preserves predicates of the pre-call state by restoring it.",
+    "differences": "Local closed transactions include storage, logs or transient-storage observations; Isabelle's exc wrapper restores its entire modeled state but has no EVM transient-storage feature or matching event/panic payload claim. Only the rollback principle is shared.",
+    "reason": null,
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Source/SemanticsExamples.lean#commit_keeps_storage": {
+    "queries": [
+      "store|storage_update_eq"
+    ],
+    "reviewed": [
+      "cc-memdata#decode_encode_val_general",
+      "afp-wp#storage_update_eq"
+    ],
+    "selected": "afp-wp#storage_update_eq",
+    "shared": "A successful storage write is observed when that location is read.",
+    "differences": "Local full transaction also checks a return value and committed storage; Isabelle proves one generic storage update/read identity in the Contract locale.",
+    "reason": null,
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Source/SemanticsExamples.lean#hex_literal_bytes": {
+    "queries": [
+      "bytes|encode|decode"
+    ],
+    "reviewed": [
+      "cc-memdata#decode_encode_int",
+      "cc-memdata#decode_encode_val_general"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "The inspected compiler byte encoding/decoding round-trip theorems map integer or machine-value representations to memory chunks. This row instead evaluates a Solidity hex-string literal to a fixedBytes value without an integer-memory round trip. No similar literal-construction theorem was found in the bounded catalog.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Source/SemanticsExamples.lean#order_legacy": {
+    "queries": [
+      "strategy|order|simulation",
+      "execute_bind"
+    ],
+    "reviewed": [
+      "cc-strategy#step_simulation",
+      "cc-strategy#strategy_simulation",
+      "afp-monad#execute_bind"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "The closest compiler strategy simulations and monadic sequencing theorem specify or relate one evaluation discipline. They do not compare two Solidity compiler profiles on the same side-effecting expression or constructor-order fixture, and do not derive this differing numeric result. No similar profile-difference proposition was found in the searched catalog.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Source/SemanticsExamples.lean#order_viaIR": {
+    "queries": [
+      "strategy|order|simulation",
+      "execute_bind"
+    ],
+    "reviewed": [
+      "cc-strategy#step_simulation",
+      "cc-strategy#strategy_simulation",
+      "afp-monad#execute_bind"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "The closest compiler strategy simulations and monadic sequencing theorem specify or relate one evaluation discipline. They do not compare two Solidity compiler profiles on the same side-effecting expression or constructor-order fixture, and do not derive this differing numeric result. No similar profile-difference proposition was found in the searched catalog.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Source/SemanticsExamples.lean#order_differs": {
+    "queries": [
+      "strategy|order|simulation",
+      "execute_bind"
+    ],
+    "reviewed": [
+      "cc-strategy#step_simulation",
+      "cc-strategy#strategy_simulation",
+      "afp-monad#execute_bind"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "The closest compiler strategy simulations and monadic sequencing theorem specify or relate one evaluation discipline. They do not compare two Solidity compiler profiles on the same side-effecting expression or constructor-order fixture, and do not derive this differing numeric result. No similar profile-difference proposition was found in the searched catalog.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Source/SemanticsExamples.lean#ctor_order_legacy": {
+    "queries": [
+      "strategy|order|simulation",
+      "execute_bind"
+    ],
+    "reviewed": [
+      "cc-strategy#step_simulation",
+      "cc-strategy#strategy_simulation",
+      "afp-monad#execute_bind"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "The closest compiler strategy simulations and monadic sequencing theorem specify or relate one evaluation discipline. They do not compare two Solidity compiler profiles on the same side-effecting expression or constructor-order fixture, and do not derive this differing numeric result. No similar profile-difference proposition was found in the searched catalog.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Source/SemanticsExamples.lean#ctor_order_viaIR": {
+    "queries": [
+      "strategy|order|simulation",
+      "execute_bind"
+    ],
+    "reviewed": [
+      "cc-strategy#step_simulation",
+      "cc-strategy#strategy_simulation",
+      "afp-monad#execute_bind"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "The closest compiler strategy simulations and monadic sequencing theorem specify or relate one evaluation discipline. They do not compare two Solidity compiler profiles on the same side-effecting expression or constructor-order fixture, and do not derive this differing numeric result. No similar profile-difference proposition was found in the searched catalog.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Source/SemanticsExamples.lean#modifier_twice_legacy": {
+    "queries": [
+      "modifier|placeholder|continuation",
+      "execute_bind"
+    ],
+    "reviewed": [
+      "cc-strategy#step_simulation",
+      "afp-monad#execute_bind"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "The closest inspected sequencing/strategy theorems do not describe a Solidity modifier placeholder used once or twice, nor legacy/viaIR continuation handling. Generic bind execution alone cannot state whether that placeholder reruns the body. No similar modifier-semantics theorem was found in the bounded compiler/Solidity catalog.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Source/SemanticsExamples.lean#modifier_twice_viaIR": {
+    "queries": [
+      "modifier|placeholder|continuation",
+      "execute_bind"
+    ],
+    "reviewed": [
+      "cc-strategy#step_simulation",
+      "afp-monad#execute_bind"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "The closest inspected sequencing/strategy theorems do not describe a Solidity modifier placeholder used once or twice, nor legacy/viaIR continuation handling. Generic bind execution alone cannot state whether that placeholder reruns the body. No similar modifier-semantics theorem was found in the bounded compiler/Solidity catalog.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Source/SemanticsExamples.lean#modifier_once": {
+    "queries": [
+      "modifier|placeholder|continuation",
+      "execute_bind"
+    ],
+    "reviewed": [
+      "cc-strategy#step_simulation",
+      "afp-monad#execute_bind"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "The closest inspected sequencing/strategy theorems do not describe a Solidity modifier placeholder used once or twice, nor legacy/viaIR continuation handling. Generic bind execution alone cannot state whether that placeholder reruns the body. No similar modifier-semantics theorem was found in the bounded compiler/Solidity catalog.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Source/SemanticsExamples.lean#transient_cleared": {
+    "queries": [
+      "transient|clear|transaction",
+      "post_true"
+    ],
+    "reviewed": [
+      "cc-memdata#decode_encode_val_general",
+      "afp-solidity#post_true"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "The closest memory and rollback theorems describe encoding or restoration after an exception. Neither states that EVM transient storage is cleared at successful transaction end; the searched Isabelle Solidity state does not model that transient-storage domain. No similar lifecycle theorem was found in this bounded search.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Source/SemanticsExamples.lean#reentrant_callback": {
+    "queries": [
+      "callback|reentran|static|external",
+      "wp_transfer_monad|do_step_sound"
+    ],
+    "reviewed": [
+      "cc-exec#do_step_sound",
+      "afp-wp#wp_transfer_monad",
+      "afp-wp#inv_wp"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "The closest inspected compiler external-step and Solidity transfer/invariant WP theorems permit generic external effects. They do not specify this callback trace or static-call refusal of a state write/value transfer, nor its exact result. No similar EVM callback/static-policy proposition was found in the searched theorem catalog.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Source/SemanticsExamples.lean#no_callback": {
+    "queries": [
+      "callback|reentran|static|external",
+      "wp_transfer_monad|do_step_sound"
+    ],
+    "reviewed": [
+      "cc-exec#do_step_sound",
+      "afp-wp#wp_transfer_monad",
+      "afp-wp#inv_wp"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "The closest inspected compiler external-step and Solidity transfer/invariant WP theorems permit generic external effects. They do not specify this callback trace or static-call refusal of a state write/value transfer, nor its exact result. No similar EVM callback/static-policy proposition was found in the searched theorem catalog.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Source/SemanticsExamples.lean#static_callback_refused": {
+    "queries": [
+      "callback|reentran|static|external",
+      "wp_transfer_monad|do_step_sound"
+    ],
+    "reviewed": [
+      "cc-exec#do_step_sound",
+      "afp-wp#wp_transfer_monad",
+      "afp-wp#inv_wp"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "The closest inspected compiler external-step and Solidity transfer/invariant WP theorems permit generic external effects. They do not specify this callback trace or static-call refusal of a state write/value transfer, nor its exact result. No similar EVM callback/static-policy proposition was found in the searched theorem catalog.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Source/SemanticsExamples.lean#static_value_call_halts": {
+    "queries": [
+      "callback|reentran|static|external",
+      "wp_transfer_monad|do_step_sound"
+    ],
+    "reviewed": [
+      "cc-exec#do_step_sound",
+      "afp-wp#wp_transfer_monad",
+      "afp-wp#inv_wp"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "The closest inspected compiler external-step and Solidity transfer/invariant WP theorems permit generic external effects. They do not specify this callback trace or static-call refusal of a state write/value transfer, nor its exact result. No similar EVM callback/static-policy proposition was found in the searched theorem catalog.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#ValidUnder": {
+    "queries": [
+      "print_identity|simulation|preserves_spec",
+      "post_wp"
+    ],
+    "reviewed": [
+      "cc-compiler#print_identity",
+      "cc-complements#transf_c_program_preserves_spec",
+      "afp-wp#post_wp"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#Derives": {
+    "queries": [
+      "print_identity|simulation|preserves_spec",
+      "post_wp"
+    ],
+    "reviewed": [
+      "cc-compiler#print_identity",
+      "cc-complements#transf_c_program_preserves_spec",
+      "afp-wp#post_wp"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#DerivesK": {
+    "queries": [
+      "print_identity|simulation|preserves_spec",
+      "post_wp"
+    ],
+    "reviewed": [
+      "cc-compiler#print_identity",
+      "cc-complements#transf_c_program_preserves_spec",
+      "afp-wp#post_wp"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#Rewrites": {
+    "queries": [
+      "print_identity|simulation|preserves_spec",
+      "post_wp"
+    ],
+    "reviewed": [
+      "cc-compiler#print_identity",
+      "cc-complements#transf_c_program_preserves_spec",
+      "afp-wp#post_wp"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#RewritesK": {
+    "queries": [
+      "print_identity|simulation|preserves_spec",
+      "post_wp"
+    ],
+    "reviewed": [
+      "cc-compiler#print_identity",
+      "cc-complements#transf_c_program_preserves_spec",
+      "afp-wp#post_wp"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#DoesAs": {
+    "queries": [
+      "print_identity|simulation|preserves_spec",
+      "post_wp"
+    ],
+    "reviewed": [
+      "cc-compiler#print_identity",
+      "cc-complements#transf_c_program_preserves_spec",
+      "afp-wp#post_wp"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#Runs": {
+    "queries": [
+      "print_identity|simulation|preserves_spec",
+      "post_wp"
+    ],
+    "reviewed": [
+      "cc-compiler#print_identity",
+      "cc-complements#transf_c_program_preserves_spec",
+      "afp-wp#post_wp"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#MRuns": {
+    "queries": [
+      "print_identity|simulation|preserves_spec",
+      "post_wp"
+    ],
+    "reviewed": [
+      "cc-compiler#print_identity",
+      "cc-complements#transf_c_program_preserves_spec",
+      "afp-wp#post_wp"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#MReverts": {
+    "queries": [
+      "print_identity|simulation|preserves_spec",
+      "post_wp"
+    ],
+    "reviewed": [
+      "cc-compiler#print_identity",
+      "cc-complements#transf_c_program_preserves_spec",
+      "afp-wp#post_wp"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#Compiles": {
+    "queries": [
+      "print_identity|simulation|preserves_spec",
+      "post_wp"
+    ],
+    "reviewed": [
+      "cc-compiler#print_identity",
+      "cc-complements#transf_c_program_preserves_spec",
+      "afp-wp#post_wp"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#Represents": {
+    "queries": [
+      "print_identity|simulation|preserves_spec",
+      "post_wp"
+    ],
+    "reviewed": [
+      "cc-compiler#print_identity",
+      "cc-complements#transf_c_program_preserves_spec",
+      "afp-wp#post_wp"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row.",
+    "context": {},
+    "existing_measurement": null
+  },
+  "Solidity/Theorems.lean#unexpandValid": {
+    "queries": [
+      "print_identity|simulation|preserves_spec",
+      "post_wp"
+    ],
+    "reviewed": [
+      "cc-compiler#print_identity",
+      "cc-complements#transf_c_program_preserves_spec",
+      "afp-wp#post_wp"
+    ],
+    "selected": null,
+    "shared": null,
+    "differences": null,
+    "reason": "This inventory row is an abbreviation/definition or pretty-printer helper, not a proposition proved about compilation or verification. The nearest inspected print_identity and specification/WP soundness theorems assert semantic properties; none is a corresponding correctness theorem for this alias or Lean unexpander. No theorem-size denominator is meaningful for this non-theorem row.",
+    "context": {},
+    "existing_measurement": null
+  }
+}

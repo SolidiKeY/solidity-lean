@@ -29,6 +29,7 @@ def equation_case : Nat → Nat
     assert [d["name"] for d in parsed]==["record_case","equation_case","ordinary"]
     assert parsed[0]["conclusion"].endswith("= some 0")
     assert parsed[1]["conclusion"]=="Nat → Nat"
+    subprocess.run([sys.executable,"-I",str(HERE/"similarity.py"),"--check"],cwd=ROOT,check=True)
     subprocess.run([sys.executable,"-I",str(HERE/"calibrate.py"),"--check"],cwd=ROOT,check=True)
     subprocess.run([sys.executable,"-I",str(HERE/"provenance.py"),"--check"],cwd=ROOT,check=True)
     subprocess.run([sys.executable,"-I",str(HERE/"reuse.py"),"--check"],cwd=ROOT,check=True)
@@ -51,6 +52,15 @@ def equation_case : Nat → Nat
                 assert comparison["unit"]==r["path"]+"#"+r["name"]
                 assert comparison["authorization"]=="H243" and comparison["reason"]==r["non_comparability_reason"]
                 assert len(comparison["reason"])>80 and "pending" not in comparison["reason"]
+    searches=json.loads((HERE/"similarity-search.json").read_text())
+    assert len(searches["rows"])==len(rows)
+    for r in rows:
+        search=json.loads(r["external_theorem_search"])
+        assert search["unit"]==r["path"]+"#"+r["name"]
+        assert search["queries"] and search["reviewed_candidates"]
+        if all(x.get("ratio") is None for x in json.loads(r["reference_calibration"])):
+            assert not search["selected"] and not search["existing_measurement"]
+            assert search["non_comparability_reason"]==r["non_comparability_reason"]
     judgements=json.loads((HERE/"judgements.json").read_text())
     session_eq=judgements["Solidity/Source/SemanticsExamples.lean#sessionAt_eq"]
     session_consistent=judgements["Solidity/Source/SemanticsExamples.lean#session_consistent"]
@@ -72,6 +82,7 @@ def equation_case : Nat → Nat
     for p in HERE.iterdir():
         if p.is_file():assert p.stat().st_size<1000000,p
     if "--remote" in sys.argv:
+        subprocess.run([sys.executable,"-I",str(HERE/"similarity.py"),"--refresh","--check"],cwd=ROOT,check=True)
         for r in refs:
             raw=urllib.request.urlopen(r["url"],timeout=30).read();text=raw.decode()
             assert hashlib.sha256(raw).hexdigest()==r["source_sha256"]
