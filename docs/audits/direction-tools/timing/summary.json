@@ -15,6 +15,11 @@
   },
   "tracked_lean_modules": 8291,
   "tracked_lean_lines": 1311130,
+  "measurement_versions": {
+    "lean": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)",
+    "lake": "Lake version 5.0.0-src+797c613 (Lean version 4.24.0)"
+  },
+  "measurement_environment": null,
   "areas": [
     {
       "area": "Backend",
@@ -38,10 +43,10 @@
       "modules": 1827,
       "unmarked_not_proven_handwritten_lines": 188247,
       "unresolved_chain_agreement_lines": 1876,
-      "passing_samples": 1,
-      "sample_lines": 50,
-      "sample_wall_seconds": 0.7044707620000281,
-      "sample_seconds_per_kloc": 14.089415240000562,
+      "passing_samples": 4,
+      "sample_lines": 396,
+      "sample_wall_seconds": 83.96290114899989,
+      "sample_seconds_per_kloc": 212.02752815404014,
       "reference_ratios": null,
       "verdict": "pending matched reference checks"
     },
@@ -52,10 +57,10 @@
       "modules": 388,
       "unmarked_not_proven_handwritten_lines": 163247,
       "unresolved_chain_agreement_lines": 4533,
-      "passing_samples": 0,
-      "sample_lines": 0,
-      "sample_wall_seconds": 0,
-      "sample_seconds_per_kloc": null,
+      "passing_samples": 1,
+      "sample_lines": 64,
+      "sample_wall_seconds": 0.8063508310001453,
+      "sample_seconds_per_kloc": 12.59923173437727,
       "reference_ratios": null,
       "verdict": "pending matched reference checks"
     },
@@ -252,11 +257,16 @@
     "source_base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
     "use": "inventory only; not pooled with fresh timings"
   },
-  "fresh_passing_samples": 5,
-  "fresh_attempted_samples": 5,
+  "fresh_passing_samples": 9,
+  "fresh_attempted_samples": 9,
   "sample_plan_modules": 40,
   "sample_method": "four deterministic physical-size quantile midpoint modules per largest area; targeted slow/generated strata still pending; no statistical representativeness asserted",
   "slowest_sampled_modules": [
+    {
+      "path": "Solidity/Yul/RawIntegerInitialization.lean",
+      "lines": 75,
+      "wall_seconds": 79.19439813300005
+    },
     {
       "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/SourceOrigin.lean",
       "lines": 46,
@@ -273,9 +283,24 @@
       "wall_seconds": 4.426636051999992
     },
     {
+      "path": "Solidity/Yul/Views/FixedDeclarationControls.lean",
+      "lines": 168,
+      "wall_seconds": 3.3392771869998796
+    },
+    {
       "path": "Solidity/Backend/MemoryOps/SourceUintFixedCompound.lean",
       "lines": 130,
       "wall_seconds": 1.911164087999964
+    },
+    {
+      "path": "Solidity/Calculus/CallbackRules.lean",
+      "lines": 64,
+      "wall_seconds": 0.8063508310001453
+    },
+    {
+      "path": "Solidity/Yul/CoordinateUpdates.lean",
+      "lines": 103,
+      "wall_seconds": 0.7247550669999328
     },
     {
       "path": "Solidity/Yul/Adapters/HeapCallOutput.lean",
@@ -317,24 +342,18 @@
     }
   ],
   "limitations": [
-    "no systemd scope on the cloud VM (H232); 12 GiB conservative process-group RSS stop, 3 GiB available-memory reserve; no swap",
-    "Toolchain is Lean 4.24.0 / Lake 5.0.0-src+797c613; reference pins use different versions",
-    "First mixed-artifact-cache attempt discarded; only clean detached-worktree observations retained",
-    "Basic profiler threshold suppressed to avoid guard_msgs contamination; structured traces provide command attribution at 100 ms threshold",
+    "Environment conditions are reported only when present in the supplied measurement metadata",
+    "Reference pins use different Lean versions; consult recorded measurement versions",
+    "The summary does not infer measurement provenance or discarded-run history from timing values",
+    "Structured profile thresholds and instrumentation must be read from individual recorded profile commands",
     "All-tracked reverse closure is potential invalidation; named workload closures model requested build targets, not measured rebuild execution",
     "Generated paths and bounded spans separated from ambiguous markers and unmarked source; unmarked does not mean handwritten",
     "No matched ratios or full-build estimates until required sampling and reference checks finish"
   ],
   "waits": [
     {
-      "id": "compcert-published-time",
-      "reason": "manual host returned proxy 403; pinned source README contains no numeric proof-build time",
-      "next": "seek a public cited mirror or paper; continue other items"
-    },
-    {
-      "id": "clear-toolchain",
-      "reason": "official v4.9.1 Linux release archive returned 404; tag exists",
-      "next": "inspect official release metadata or source-supported installation route; do not substitute toolchain"
+      "lane": "da-timing",
+      "item": "CompCert: <urlopen error Tunnel connection failed: 403 Forbidden>"
     }
   ]
 }
