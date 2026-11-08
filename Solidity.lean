@@ -2699,6 +2699,7 @@ import Solidity.FreshNames
 import Solidity.Frontend.Admission.Controls
 import Solidity.Frontend.Admission.DeclarationOccurrences
 import Solidity.Frontend.Admission.ElementaryFeatures
+import Solidity.Frontend.Admission.ExclusionFeatures
 import Solidity.Frontend.Admission.LocationFeatures
 import Solidity.Frontend.Admission.ModifierRootControls
 import Solidity.Frontend.Admission.ModifierRoots
