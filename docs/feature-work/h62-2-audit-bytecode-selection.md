@@ -2917,3 +2917,39 @@ No premise is classified as impossible here. No inherited-field, source-owner,
 Source/runtime/G01, physical, gas/fork, global-census or domain-closure credit
 follows from this classification. Exact simultaneous instances and meaningful
 supported-body success controls remain open.
+
+
+### Operational correspondence inventory: selection-to-Bridge boundary
+
+The following is a source inventory of existing contracts and transports, not
+fresh kernel validation or a producer-completion claim. Fully qualified names
+in the first four rows use the `Solidity.Backend.Selection` namespace.
+
+| Existing declaration and file | Supplied connection | Obligation retained |
+|---|---|---|
+| `LoweringCertificate.success`, `Backend/Selection/Interface.lean` | IR success with zero pending skip and the exact caller's nonstack frame is equivalent to `StructuredExec` for a supplied numeric output. | A concrete lowering certificate; arbitrary successful IR outcomes are not automatically known to have this shape. |
+| `FramedLoweringCertificate.reflect`, `Backend/Selection/FramedLoweringInterface.lean` | Every actual successful IR result from a supplied numerically represented initial stack is reflected to a numeric output, zero skip, the unchanged nonstack frame and structured execution. | A concrete strengthened certificate for the selected IR/block; the interface alone is not a producer. |
+| `CompositionCertificate.execute`, `Backend/Selection/Composition.lean` | A supplied actual IR success and matching entry height produce a safe finite fetched-byte run of the exact composed artifact. | The composition certificate, numeric input/caller alignment and actual success equation; neither Source observations nor byte-memory refinement follows. |
+| `decoder_advance` and `CompositionCertificate.execute_bridge`, `Backend/Selection/Composition.lean` | The named decoder premise transports finite byte runs and every checked prefix to the supplied Bridge runner. | Entry reachability, closure under actual byte steps, one-step agreement and the zero/successor iteration equations for that adapter. |
+| `Solidity.Backend.Selection.V2.CompilerPremise`, `Backend/Selection/PremisesV2.lean` | The chosen observation relation is nonempty, and every related machine pair has the stipulated IR success. | Relation coverage/authenticity for actual Source evaluations and budgets; one admitted pair does not establish either. |
+| `Solidity.Backend.Selection.V2.RuntimeConsumer`, `Backend/Selection/PremisesV2.lean` | Its independent admitted case fixes entry height, numeric stack, unchanged nonstack frame and actual IR success; `consume` states conditional Bridge execution. | A concrete consumer and the compiler/decoder premises; the structure declaration is not an implementation. |
+
+`DecoderPremise` in `Backend/Selection/Premises.lean` is shared by both versions.
+Its `zero` and `succ` fields constrain iteration independently of reachability;
+`entry`, `closed` and `agrees` constrain the supported state set. They must be
+supplied for the same encoded composition artifact, rather than for unrelated
+bytes or a substitute runner. The legacy compiler/consumer declarations in
+that file have no nonemptiness field; V2's admitted case must not be credited
+retroactively to them.
+
+The `budget` parameter indexes `source : Nat → SourceObservation`. None of
+these declarations equates it to Osaka gas or gives a gas-consumption bound.
+The existential finite byte-step count is likewise not a gas accounting result.
+Fault, revert, divergence, external-call behavior and physical memory adequacy
+remain distinct obligations rather than being covered by the finite-success
+transport. In particular,
+`Solidity.Backend.MemoryOps.Physical.ByteWorld.Producer.load_at` in
+`Backend/MemoryOps/PhysicalByteWorldInterface.lean` consumes a pending `Producer`
+and initial `WordFrame` facts; it does not construct that producer or establish
+emission provenance. These boundaries remain open for G01 and the original
+Source/runtime correspondence audit.
