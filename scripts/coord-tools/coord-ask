@@ -67,7 +67,9 @@ def prepush(no_check):
     cache_f = os.path.join(common, 'coord-prepush.json')
     try: cache = json.load(open(cache_f))
     except (OSError, ValueError): cache = {}
-    key = f'{head}:{master}'
+    cmd = os.environ.get('COORD_PREPUSH_CMD') or CHECK_CMD
+    # a cached verdict holds only for the same head, master, command and gate options (GATE_EXAMPLES widens it)
+    key = f'{head}:{master}:' + json.dumps([cmd, os.environ.get('GATE_EXAMPLES', ''), os.environ.get('COORD_CACHE_DIRS', '')])
     if key in cache: return dict(cache[key], cached=True)
     if subprocess.run(['git', 'merge-base', '--is-ancestor', head, master]).returncode == 0:
         return {'state': 'pass', 'detail': 'head already on master', 'master': master}
@@ -89,7 +91,7 @@ def prepush(no_check):
                 if os.path.isdir(src) and not os.path.lexists(dst):
                     os.makedirs(os.path.dirname(dst), exist_ok=True); os.symlink(src, dst)
             logs = os.path.join(tmp, 'logs'); os.makedirs(logs)
-            r = subprocess.run(os.environ.get('COORD_PREPUSH_CMD') or CHECK_CMD, shell=True, cwd=w, capture_output=True,
+            r = subprocess.run(cmd, shell=True, cwd=w, capture_output=True,
                                text=True, env=dict(os.environ, GATE_BASE=master, GATE_LOGS=logs))
             text = r.stdout + r.stderr + ''.join(open(os.path.join(logs, f), errors='replace').read()
                                                 for f in sorted(os.listdir(logs)) if f.endswith('.log'))
@@ -154,7 +156,7 @@ def main():
         if not 0 <= hours < float('inf'): hours = 6.0   # nan, inf and negatives fall back too
         b = behind_master(hours)
         if b:
-            extra = f'behind: {b[0]} commits, oldest {b[1]:.0f}h\n'
+            extra += f'behind: {b[0]} commits, oldest {b[1]:.0f}h\n'
             print(f'coord-ask: WARNING: your head lacks {b[0]} commits of origin/master (the oldest is {b[1]:.0f} h old). '
                   'The merge pre-gate builds your head merged onto current master: merge origin/master and run '
                   '`bash scripts/coord-tools/gate.sh touched` before your next push (docs/contributing.md#before-pushing).',
