@@ -53,7 +53,7 @@ theorem SourceUintMemoryAt.read_nat_iff {E : Source.Env} {Γ : Source.RCtx} {H :
       have hv := congrArg (fun v : Source.Val E.layout (.int .u256) => calldataUint (.val v))
         (Except.ok.inj (congrArg Prod.fst he))
       have hv' : (MObj.elems a (hp.get r))[i]=value := by
-        simpa only [calldataUint_sourceUint] using hv
+        simpa only [calldataUint_sourceUint,MVal] using hv
       exact congrArg some hv'
     · intro he
       exact congrArg (fun v : PrimTy.uint.Denote => ((Except.ok (sourceUint (D := E.layout) v) : Except Source.Halt (Source.Val E.layout (.int .u256))),y)) (Option.some.inj he)
@@ -79,6 +79,7 @@ theorem SourceUintMemoryAt.schedule_read_iff {E : Source.Env} {Γ : Source.RCtx}
   rw [runCaptures_read hp out r a xs ho k]
   exact hr.read_nat_iff F (captureOrigin xs k) value
 
+set_option backward.isDefEq.respectTransparency false in
 theorem SourceUintMemoryAt.keeps {E : Source.Env} {Γ : Source.RCtx} {H K : HTy} {R : RefTy}
     {y : Source.EMState E Γ} {address : Nat} {hp : Heap H} {hq : Heap K} {r : HRef H R}
     {a : ArrTy R (.prim .uint)} (hr : SourceUintMemoryAt y address hp r a)
@@ -140,7 +141,7 @@ theorem SourceUintMemoryAt.indexLoc_run {E : Source.Env} {Γ : Source.RCtx} {H :
     (F : Source.Fr) (k : Nat) (hk : k<hp.len r a) :
     (Source.indexLoc (E := E) (Γ := Γ) F
       (.memRef rfl address : Source.Val E.layout (.array .memory (.int .u256) none)) k).run y=(.ok (.mem address k),y) := by
-  rw [Source.indexLoc,Source.Hoare.run_bind,hr.length_run F]
+  rw [Source.indexLoc.eq_def,Source.Hoare.run_bind,hr.length_run F]
   simp only [hk,↓reduceIte]
   rfl
 
@@ -151,7 +152,7 @@ theorem SourceUintMemoryAt.indexLoc_bounds {E : Source.Env} {Γ : Source.RCtx} {
     (Source.indexLoc (E := E) (Γ := Γ) F
       (.memRef rfl address : Source.Val E.layout (.array .memory (.int .u256) none)) k).run y=
       (.error (.revert (Source.panicData .index)),y) := by
-  rw [Source.indexLoc,Source.Hoare.run_bind,hr.length_run F]
+  rw [Source.indexLoc.eq_def,Source.Hoare.run_bind,hr.length_run F]
   simp only [show ¬k<hp.len r a from Nat.not_lt.mpr hk,↓reduceIte]
   rfl
 
@@ -166,7 +167,7 @@ theorem SourceUintMemoryAt.eval_index {E : Source.Env} {Γ : Source.RCtx} {H : H
     (hi : y.1.get i=sourceUint k) (hk : k.1.toNat<hp.len r a) :
     (Source.evalE G F (n+2) (.indexArray (.local root) (.local i) rfl)).run y=
       (.ok (.val (sourceUint ((MObj.elems a (hp.get r))[k.1.toNat]'hk))),y) := by
-  rw [Source.evalE,Source.Hoare.run_bind,source_local_value_run G F n y root _ hroot]
+  rw [Source.evalE.eq_def,Source.Hoare.run_bind,source_local_value_run G F n y root _ hroot]
   change ((Source.evalE G F (n+1) (.local i)) >>= fun v => Source.indexNat v >>= fun k =>
     Source.indexLoc F (.memRef rfl address : Source.Val E.layout (.array .memory (.int .u256) none)) k >>=
       fun loc => Source.readLoc F loc >>= fun v => pure (Source.RVal.val v)).run y=_
