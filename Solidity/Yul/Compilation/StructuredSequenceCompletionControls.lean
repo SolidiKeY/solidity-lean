@@ -34,8 +34,7 @@ theorem final_height (locals : Vector Scalar.Word 1) (m final : Evm.Machine) (ca
  skip = 0 ∧ final.stack.length = 1+caller.length := by
  obtain ⟨_,out,_,done,frame⟩ := artifact_reflected innerArtifact locals m final caller skip ran
  refine ⟨done,?_⟩
- rw [frame]
- simp only [List.length_append,List.length_map,Vector.length_toList]
+ exact CompletionControls.frame_height #v[] out m final caller frame
 
 /-- Completed actual selected code cannot leave a forward jump into caller
 code; this concerns the model's relative skip, not a native byte PC. -/

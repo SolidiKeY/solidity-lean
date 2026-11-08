@@ -3,7 +3,7 @@
   "scope": "Frozen 57-input H55 family queue; proof-entrypoint reuse is partial family migration, not definition or full-family completion.",
   "frozen_input_count": 57,
   "fully_migrated_families": 0,
-  "partially_migrated_input_files": 32,
+  "partially_migrated_input_files": 37,
   "entries": [
     {
       "path": "Solidity/Yul/Compilation/CaseCompletion.lean",
@@ -181,8 +181,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/MultiSwitchCompletionControls.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.MultiSwitchCompletion.Controls.final_height"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -260,8 +262,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/SequenceCompletionControls.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.SequenceCompletion.Controls.final_height"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -310,8 +314,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/StructuredSequenceCompletionControls.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.StructuredSequenceCompletion.Controls.final_height"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -338,8 +344,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/SwitchCompletionControls.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.SwitchCompletion.Controls.final_height"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -360,8 +368,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/SwitchSequenceCompletionControls.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.SwitchSequenceCompletion.Controls.final_height"
+      ],
       "existing_definitions_changed": false
     },
     {
