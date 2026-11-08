@@ -70,3 +70,9 @@ Create the execution binding with
 `scripts/h62/item2/audit-language/run_witness_results.py --plan EXTERNAL_JSON --generated EXTERNAL_LEAN --binding NEW_EXTERNAL_BINDING --label UNIQUE_LABEL`.
 It uses the existing bounded runtime and requires unchanged before/after inputs.
 An older unbound receipt cannot pass the result checker.
+
+For the source-value family, check
+`tests/h62/item2/audit-language/SourceValueWitness.lean` and reconcile
+`Solidity/Source/Value.lean` using the family checker before imported accounting.
+Keep the general supported-success and overflow refusal clients: feasibility
+tuples alone do not certify the operations' outcome behavior.
