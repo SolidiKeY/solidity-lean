@@ -36,6 +36,9 @@ def equation_case : Nat → Nat
     rows=list(csv.DictReader((HERE/"statements.csv").open()))
     summary=json.loads((HERE/"summary.json").read_text())
     refs=json.loads((HERE/"references.json").read_text())
+    assert summary["completion_authorization"]==api["COMPLETION_AUTHORIZATION"]
+    baseline=csv.DictReader(__import__("io").StringIO(git("show","cf3baafd2202adf0107c5ae4d2879cd04ff0aec5:docs/audits/direction-tools/statements/statements.csv")))
+    assert {(r["path"],r["line"],r["name"]) for r in rows}=={(r["path"],r["line"],r["name"]) for r in baseline}, "H243 retains every inventory row"
     assert len({(r["path"],r["line"]) for r in rows})==len(rows)
     assert sum("top30_imported_module" in r["selection"] for r in rows)==30
     for r in rows:
@@ -43,6 +46,11 @@ def equation_case : Nat → Nat
         if r["witness"]:cite(r["witness"])
         assert r["strength"] in ("strong","weaker than named","trivial","unclear")
         assert r["english_claim"] and r["comparison"] and r["witness_needed"]
+        for comparison in json.loads(r["reference_calibration"]):
+            if comparison.get("ratio") is None:
+                assert comparison["unit"]==r["path"]+"#"+r["name"]
+                assert comparison["authorization"]=="H243" and comparison["reason"]==r["non_comparability_reason"]
+                assert len(comparison["reason"])>80 and "pending" not in comparison["reason"]
     judgements=json.loads((HERE/"judgements.json").read_text())
     session_eq=judgements["Solidity/Source/SemanticsExamples.lean#sessionAt_eq"]
     session_consistent=judgements["Solidity/Source/SemanticsExamples.lean#session_consistent"]
@@ -51,6 +59,10 @@ def equation_case : Nat → Nat
     assert "FitsInt" not in session_eq["witness_needed"]
     assert "FitsInt" not in session_consistent["witness_needed"]
     assert "Generic conversion-acceptance" in judgements["Solidity/Source/SemanticsExamples.lean#lit_ok"]["reason"]
+    provenance=json.loads((HERE/"provenance.json").read_text())
+    assert provenance["completion_authorization"]==api["COMPLETION_AUTHORIZATION"]["H244"]
+    assert sum(v["files"] for v in provenance["category_summary"].values())==summary["counts"]["tracked_lean_files"]
+    assert not summary["waits"]
     for p in summary["top_problems"]:cite(p["source"])
     # Frozen inputs are Git blobs, so unrelated later master changes are valid.
     git("cat-file","-e",BASE+"^{commit}")

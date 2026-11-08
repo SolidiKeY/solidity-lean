@@ -12,6 +12,7 @@ import subprocess
 import sys
 sys.dont_write_bytecode=True
 from history import BASE, blank_lean
+from reuse import apply_gap
 
 ARCHIVE_REVISION='a2d55ac49baddb40486aabc66b26957deb2787e4'
 ARCHIVE_PREFIX='evidence/plan-e3-feature-citations-1107/e3-feature-citations/e3-feature-citations-evidence/completed-final-retry/full/'
@@ -71,13 +72,13 @@ def main():
     summary['methods']['closure']='Non-goal hotspots N/A. Decide historical closure supported by exact archived successful full-gate bytes, explicit replay line, root inclusion, identical local source-import graph and toolchain pin. No fresh Lean check.'
     summary['waits']=[w for w in summary['waits'] if w['item'] not in ('closed goal evidence','CI logs')]
     summary['limits']=[('No fresh Lean builds or proof timing measurements. Historical closure is reused only with exact archived receipt and source/import identity checks.' if x=='No Lean builds, no proof timings measured, no proof closure claimed.' else x) for x in summary['limits']]
-    summary['conclusion']='Registries/documentation dominate churn hotspots. The sole theorem-bearing hotspot has historical closure evidence reused with an identical source/import graph. The process-overhead reference outlier remains unmatched and unclassified; source volume is not labor.'
+    summary['conclusion']='Registries/documentation dominate churn hotspots. The sole theorem-bearing hotspot has historical closure evidence reused with an identical source/import graph. The matched process-overhead ratio and categorical verdict remain unproven/inconclusive with an UNVERIFIABLE evidence gap under H151; no full audit completion is authorized. Source volume is not labor.'
     for trend in summary['trends']:
         if trend['signal']=='top30 churn composition':
             trend['kernel_closure_confirmed']=1
             trend['source_complete_kernel_unverified_files']=[]
     summary['reference_reuse']['closure_receipt']='resolved separately by pinned archived full-gate reuse; see closure_reuse'
-    summary['reference_reuse']['status']='blocked pending matched process-overhead calibration only'
+    apply_gap(summary)
     summary['reproduce_continuation']='Run recorded history.py command, then reuse.py --out RESULT_DIR, then closure.py --archive-git ARCHIVE.git --out RESULT_DIR'
     for name,obj in [('summary.json',summary),('hotspots.json',hotspots),('reference-reuse.json',summary['reference_reuse'])]:
         data=json.dumps(obj,indent=2,sort_keys=True)+'\n';assert len(data.encode())<1_000_000

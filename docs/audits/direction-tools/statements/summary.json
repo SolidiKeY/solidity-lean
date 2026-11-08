@@ -1,12 +1,22 @@
 {
   "base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+  "completion_authorization": {
+    "H243": {
+      "question": "Q-STMT-REF-01",
+      "decision": "A: keep all rows, ratio=null with the exact non-comparability reason; size ratios only for genuine matches."
+    },
+    "H244": {
+      "question": "Q-STMT-PROV-01",
+      "decision": "A: accept the frozen inventory; report confirmed-generated, explicitly-handwritten and untraced separately; no claim about historical handwriting totals."
+    }
+  },
   "method": {
     "command": "python3 -I docs/audits/direction-tools/statements/scan.py --check",
     "source": "All source blobs, paths, inventory availability and timing sample read from Git objects at BASE, independent of current checkout or merged HEAD.",
     "selection": "All @[goal] in tracked Lean; all theorem/lemma/abbrev/def in Solidity/Theorems.lean; top 30 public theorems by distinct direct importers of their defining module, ties path then line. This is module exposure, not declaration usage. Includes examples explicitly.",
     "generated": "Roots, Corpus, AxiomPins, marked chain/agreement and other marked generation separated. Chain/agreement without markers is an explicit unresolved bucket, never called handwritten. Selected declaration files have no generation marker; no theorem strength verdict depends on generated counts. provenance.py traces known root/corpus/vector producers, including the explicit handwritten Basic/Imported corpus exceptions, and distinguishes chain-generator source uses from expanded proof terms. Historical authorship of untraced files remains unknown; no scale/effort verdict uses that unknown bucket.",
     "parsing": "Source-level, not elaborated. Premises column is explicit binders; arrows remain in conclusion. Context preserves open/variable commands, including commands from earlier ended sections; consult source for exact scope. No proof rechecked.",
-    "ratios": "calibrate.py compares complete public compiler endpoint declaration code (statement plus proof) and matched finite scenario input counts in the pinned solc snapshot; it never measures headers alone or treats source size as transitive proof effort. Unmatched units have null ratios with explicit reasons; scope question Q-STMT-REF-01 pending."
+    "ratios": "calibrate.py compares complete public compiler endpoint declaration code (statement plus proof) and matched finite scenario input counts in the pinned solc snapshot; it never measures headers alone or treats source size as transitive proof effort. H243 retains every row and permits null ratios with a specific non-comparability reason; size ratios are restricted to genuinely matched units."
   },
   "counts": {
     "unmarked_other_files": 8057,
@@ -41,7 +51,9 @@
       "existing concrete source instance": 27,
       "existing source witness": 22,
       "not applicable (definition)": 12
-    }
+    },
+    "matched_units": 5,
+    "unmatched_units": 58
   },
   "goals": [],
   "inventory_reuse": [
@@ -240,10 +252,20 @@
       "matched_units": 5,
       "outliers": 1
     },
-    "conclusion": "The small checked compiler facade is an outlier against the CakeML facade because it delegates to a certificate theorem. Other measured facade and finite-case ratios are within 3x. Semantic compiler weaknesses are assessed from permitted behaviours, not inferred from these sizes."
+    "conclusion": "The small checked compiler facade is an outlier against the CakeML facade because compact Input/Agrees contracts hide detail that the reference facade exposes; both sides delegate. Other measured facade and finite-case ratios are within 3x. Semantic compiler weaknesses are assessed from permitted behaviours, not inferred from these sizes."
   },
   "cross_lane_reuse": {
     "base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+    "completion_authorization": {
+      "H243": {
+        "question": "Q-STMT-REF-01",
+        "decision": "A: keep all rows, ratio=null with the exact non-comparability reason; size ratios only for genuine matches."
+      },
+      "H244": {
+        "question": "Q-STMT-PROV-01",
+        "decision": "A: accept the frozen inventory; report confirmed-generated, explicitly-handwritten and untraced separately; no claim about historical handwriting totals."
+      }
+    },
     "integrated_inputs_commit": "cf3baafd2202adf0107c5ae4d2879cd04ff0aec5",
     "input_sha256": {
       "docs/audits/direction-tools/census/census.json": "aabe0148297b2a00b9544c3c9234073a99fe50f50ca221e4a47637c20ac7b471",
@@ -415,7 +437,7 @@
         "resolution": "Retain the explicit handwritten exception documented by pinned scripts/check-corpus.sh; do not overwrite with a broader directory classification."
       }
     ],
-    "conclusion": "Integrated artifacts corroborate selected-module counts but supply no further direct selected-module pair or historical producer records. Q-STMT-REF-01 and Q-STMT-PROV-01 remain pending; no permission inferred from merging master."
+    "conclusion": "Integrated artifacts corroborate selected-module counts but supply no further direct selected-module pair or historical producer records. H243 authorizes explicit null ratios for unmatched units; H244 accepts separately reported generated, handwritten and untraced categories. Neither implies additional measurement or a historical origin certificate."
   },
   "generation_provenance": {
     "report": "provenance.json",
@@ -437,7 +459,25 @@
       "unresolved_chain_agreement_files": 157,
       "unresolved_chain_agreement_lines": 25420
     },
-    "boundary": "Only explicit check-corpus.sh exceptions are positively labelled handwritten. Unmarked source and filename candidates are not combined with confirmed handwriting; overall historical handwriting count is unknown."
+    "boundary": "Only explicit check-corpus.sh exceptions are positively labelled handwritten. Unmarked source and filename candidates are not combined with confirmed handwriting; overall historical handwriting count is unknown.",
+    "categories": {
+      "confirmed_generated_by_inventory": {
+        "files": 59,
+        "lines": 26230
+      },
+      "explicitly_handwritten": {
+        "files": 2,
+        "lines": 265
+      },
+      "untraced": {
+        "files": 8214,
+        "lines": 1278222
+      },
+      "axiom_pins_separate": {
+        "files": 2,
+        "lines": 4054
+      }
+    }
   },
   "top_problems": [
     {
@@ -561,15 +601,12 @@
       "action": "Report boundary; no premise, exclusion or theorem change authorized."
     }
   ],
-  "waits": [
-    {
-      "id": "W-runtime",
-      "reason": "Lean and Lake absent from PATH; no elaboration requested or performed. Witnesses are source evidence, not fresh validation."
-    },
-    {
-      "id": "W-differential",
-      "reason": "scripts/differential and scripts/bench absent at pinned base; no results inferred."
-    }
+  "waits": [],
+  "limitations": [
+    "Source-level witness audit, not fresh Lean elaboration; no build or timing run performed.",
+    "scripts/differential and scripts/bench are absent at the pinned base; no results inferred.",
+    "H243 null ratios do not establish an absent counterpart; the bounded search established no genuine match for that unit.",
+    "H244 accepts the frozen generated/handwritten/untraced inventory without historical handwriting totals."
   ],
   "axioms_added": 0,
   "sorry_added": 0,
