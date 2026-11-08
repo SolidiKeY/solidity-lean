@@ -137,11 +137,11 @@ def certificate : Interface.BoolBindingCertificate program where
   executed := executed
   entry_rejection := entry_rejection
 
-/-- info: 'Solidity.Backend.AbiEntry.BoolBinding.admitted' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiEntry.BoolBinding.admitted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms admitted
 /-- info: 'Solidity.Backend.AbiEntry.BoolBinding.selected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms selected
-/-- info: 'Solidity.Backend.AbiEntry.BoolBinding.code' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.AbiEntry.BoolBinding.code' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms code
 /-- info: 'Solidity.Backend.AbiEntry.BoolBinding.run_program' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms run_program
