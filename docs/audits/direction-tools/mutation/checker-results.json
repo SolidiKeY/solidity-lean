@@ -7,324 +7,324 @@
   "boundary": "Structural layer/source/trust/generation checker; no execution of changed Lean bodies. No semantic mutation score inferred.",
   "mutants": [
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M01",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M02",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M03",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M04",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M05",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M06",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M07",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M08",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M09",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M10",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M11",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M12",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M13",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M14",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M15",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M16",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M17",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M18",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M19",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M20",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M21",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M22",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M23",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M24",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M25",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M26",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M27",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M28",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M29",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M30",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M31",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     },
     {
+      "assessment": "structural checker only; no Lean inference",
       "checker": {
         "command": "node scripts/check-backend-scalar.mjs",
         "output": "32 widths \u00d7 255 power thresholds: generated constants agree\n37 scalar roots, 0 layer/source/trust/generation findings\n",
         "returncode": 0
       },
       "id": "M32",
-      "semantic_kill_established": false,
-      "status": "cheap-check-survived; Lean-unassessed"
+      "status": "cheap-structural-check-survived"
     }
   ]
 }

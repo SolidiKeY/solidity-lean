@@ -1,13 +1,7 @@
 import Solidity.Frontend.Admission.SyntaxOccurrenceLaws
 import Solidity.Frontend.Admission.NameResolutionRoots
 
-/-! Canonical declaration-aware Source syntax enumeration.
-Regression purpose: unused declarations and their nested syntax must not be
-silently omitted when building the versioned admission feature inventory.
-The existing intrinsic occurrence visitor is reused without fuel or a supplied
-roster. Each site retains its actual root declaration; that root identity is
-not an assertion of the innermost lexical scope. Feature classification,
-profile activation and operational admission remain separate obligations. -/
+/-! Canonical declaration-aware Source syntax enumeration. Regression purpose: unused declarations and their nested syntax must not be silently omitted when building the versioned admission feature inventory. The existing intrinsic occurrence visitor is reused without fuel or a supplied roster. Each site retains its actual root declaration; that root identity is not an assertion of the innermost lexical scope. Feature classification, profile activation and operational admission remain separate obligations. -/
 namespace Solidity.Frontend.Admission
 open Solidity.Source
 
@@ -226,13 +220,9 @@ theorem declarationFieldUses_source_witness {α : Type u} (unit : Syn .unit)
 /-- info: 'Solidity.Frontend.Admission.declarationFieldUses_source_witness' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms declarationFieldUses_source_witness
 
-/-! Intrinsic refusal diagnostics preserve the actual field provenance.
-Regression: selecting a first error must not discard later rejected fields or
-substitute a caller-provided declaration roster. The supplied Boolean predicate
-is not itself a Source admission policy or evidence of classifier adequacy. -/
+/-! Intrinsic refusal diagnostics preserve the actual field provenance. Regression: selecting a first error must not discard later rejected fields or substitute a caller-provided declaration roster. The supplied Boolean predicate is not itself a Source admission policy or evidence of classifier adequacy. -/
 
-/-- All refused fields, in traversal order, retaining declaration and typed
-syntax site. The complete use inventory remains independently available. -/
+/-- All refused fields, in traversal order, retaining declaration and typed syntax site. The complete use inventory remains independently available. -/
 def declarationFieldRefusals {α : Type u} (E : Env)
     (fields : ∀ {c : Cat}, Syn c → List α) (accepts : α → Bool) :
     List (DeclarationOccurrence × α) :=
@@ -268,8 +258,7 @@ theorem declarationFieldRefusals_iff {α : Type u} (E : Env)
     rw [rejected]
     rfl
 
-/-- A reported refusal names an actual declaration/site/classified field that
-fails the supplied predicate. It is not merely a matching feature name. -/
+/-- A reported refusal names an actual declaration/site/classified field that fails the supplied predicate. It is not merely a matching feature name. -/
 theorem declarationFieldRefusal?_sound {α : Type u} (E : Env)
     (fields : ∀ {c : Cat}, Syn c → List α) (accepts : α → Bool)
     (site : DeclarationOccurrence) (value : α)
@@ -278,8 +267,7 @@ theorem declarationFieldRefusal?_sound {α : Type u} (E : Env)
   (declarationFieldRefusals_iff E fields accepts site value).mp
     (List.mem_of_head? reported)
 
-/-- Silence is exact for the supplied classifier and predicate over the actual
-roster. Classifier validity/completeness and policy linkage remain separate. -/
+/-- Silence is exact for the supplied classifier and predicate over the actual roster. Classifier validity/completeness and policy linkage remain separate. -/
 theorem declarationFieldRefusal?_none_iff {α : Type u} (E : Env)
     (fields : ∀ {c : Cat}, Syn c → List α) (accepts : α → Bool) :
     declarationFieldRefusal? E fields accepts = none ↔
@@ -309,8 +297,7 @@ theorem declarationFieldRefusal?_none_iff {α : Type u} (E : Env)
         (allowed site value refused.1 refused.2.1)
       cases impossible
 
-/-- The first diagnostic retains its original source-unit syntax site and
-field/predicate facts. No unique character offset or lexical scope is claimed. -/
+/-- The first diagnostic retains its original source-unit syntax site and field/predicate facts. No unique character offset or lexical scope is claimed. -/
 theorem declarationFieldRefusal?_source_witness {α : Type u} (unit : Syn .unit)
     (fields : ∀ {c : Cat}, Syn c → List α) (accepts : α → Bool)
     (site : DeclarationOccurrence) (value : α)
