@@ -175,7 +175,7 @@ theorem source_rejection {E : Source.Env} (global : Source.Glob E) (frame : Sour
 def certificate : Interface.SpecialRoutesCertificate route where
   selected := fun C base receive fallback => ⟨compiled C base receive fallback,selected C base receive fallback⟩
   executed := executed
-/-- info: 'Solidity.Backend.AbiEntry.SpecialRoutes.admitted' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiEntry.SpecialRoutes.admitted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms admitted
 /-- info: 'Solidity.Backend.AbiEntry.SpecialRoutes.selected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms selected
