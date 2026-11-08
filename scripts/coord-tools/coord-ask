@@ -70,13 +70,14 @@ def prepush(no_check):
     cmd = os.environ.get('COORD_PREPUSH_CMD') or CHECK_CMD
     # a cached verdict holds only for the same head, master, command and gate options (GATE_EXAMPLES widens it)
     key = f'{head}:{master}:' + json.dumps([cmd, os.environ.get('GATE_EXAMPLES', ''), os.environ.get('COORD_CACHE_DIRS', '')])
-    if key in cache: return dict(cache[key], cached=True)
+    base = {'master': master, 'head': head, 'cmd': cmd}
+    if key in cache: return dict(cache[key], **base, cached=True)
     if subprocess.run(['git', 'merge-base', '--is-ancestor', head, master]).returncode == 0:
-        return {'state': 'pass', 'detail': 'head already on master', 'master': master}
+        return dict(base, state='pass', detail='head already on master (master passed the merge gate)')
     print(f'coord-ask: pre-push check: your head merged onto master {master[:12]}, then the gate (can take minutes)...',
           file=sys.stderr, flush=True)
     tmp = tempfile.mkdtemp(prefix='coord-prepush-'); w = os.path.join(tmp, 'tree')
-    res = {'state': 'unavailable', 'detail': 'could not create the temporary worktree', 'master': master}
+    res = dict(base, state='unavailable', detail='could not create the temporary worktree')
     try:
         if subprocess.run(['git', 'worktree', 'add', '-q', '--detach', w, head], capture_output=True).returncode: return res
         m = subprocess.run(['git', '-C', w, '-c', 'user.name=coord-ask', '-c', 'user.email=coord-ask@localhost', 'merge', '-q',
@@ -84,7 +85,7 @@ def prepush(no_check):
         if m.returncode:
             files = subprocess.run(['git', '-C', w, 'diff', '--name-only', '--diff-filter=U'], capture_output=True,
                                    text=True).stdout.split()
-            res = {'state': 'conflict', 'detail': 'merge conflict with master in: ' + ' '.join(files[:20]), 'master': master}
+            res = dict(base, state='conflict', detail='merge conflict with master in: ' + ' '.join(files[:20]))
         else:
             for c in (os.environ.get('COORD_CACHE_DIRS') or '.lake Bridge/.lake').split():
                 src, dst = os.path.join(top, c), os.path.join(w, c)
@@ -95,17 +96,17 @@ def prepush(no_check):
                                text=True, env=dict(os.environ, GATE_BASE=master, GATE_LOGS=logs))
             text = r.stdout + r.stderr + ''.join(open(os.path.join(logs, f), errors='replace').read()
                                                 for f in sorted(os.listdir(logs)) if f.endswith('.log'))
-            if r.returncode == 0: res = {'state': 'pass', 'detail': 'gate passed on the merged tree', 'master': master}
+            if r.returncode == 0: res = dict(base, state='pass', detail='gate passed on the merged tree')
             elif TOOL_MISSING.search(text) and not re.search(r'^(error\b|.*\berror:)', text, re.M):
-                res = {'state': 'unavailable', 'detail': 'a tool the gate needs is missing: ' + TOOL_MISSING.search(text).group(0)[:120]
-                       + '; install it (the pinned lean-toolchain with elan, node) or report with --no-check REASON', 'master': master}
+                res = dict(base, state='unavailable', detail='a tool the gate needs is missing: ' + TOOL_MISSING.search(text).group(0)[:120]
+                           + '; install it (the pinned lean-toolchain with elan, node) or report with --no-check REASON')
             else:
-                res = {'state': 'fail', 'detail': first_errors(text).replace(w + '/', ''), 'master': master}
+                res = dict(base, state='fail', detail=first_errors(text).replace(w + '/', ''))
     finally:
         subprocess.run(['git', 'worktree', 'remove', '--force', w], capture_output=True)
         shutil.rmtree(tmp, ignore_errors=True); subprocess.run(['git', 'worktree', 'prune'], capture_output=True)
     if res['state'] in ('pass', 'fail', 'conflict'):
-        cache[key] = res
+        cache[key] = {k: v for k, v in res.items() if k in ('state', 'detail')}
         try: json.dump(dict(list(cache.items())[-50:]), open(cache_f, 'w'))
         except OSError: pass
     return res
@@ -137,6 +138,9 @@ def main():
                      f"{pre.get('master', '')[:12]}; nothing was reported. {why}\n{pre['detail']}\n"
                      'Fix it (merge origin/master, repair, push a new head) and run --done again; if the failure is not '
                      "yours (e.g. master itself is broken, or a tool cannot be installed), run --done --no-check 'REASON'.")
+        if pre.get('head') and git('rev-parse', 'HEAD') != pre['head']:
+            sys.exit(f"coord-ask: HEAD moved during the pre-push check (checked {pre['head'][:12]}); nothing was reported. "
+                     'Run --done again for the new head.')
         if pre['state'] == 'skipped': print(f"coord-ask: pre-push check skipped: {pre['detail']}", file=sys.stderr)
     else:
         body = a.text if a.text is not None else sys.stdin.read()
@@ -145,12 +149,16 @@ def main():
         if a.qid and not title.startswith(f'{a.qid}:'): title = f'{a.qid}: {title}'
         kind, prefix, first = 'questions', 'coord-q', f'title: {title}'
     lane = git('rev-parse', '--abbrev-ref', 'HEAD'); head = git('rev-parse', 'HEAD')
+    if a.done and pre.get('head'): head = pre['head']   # the report names exactly the head that was checked
     parts = lane.split('/')
     batch = os.environ.get('CLOUDVM_BATCH') or (parts[1] if len(parts) > 2 else '')
     slug = os.environ.get('CLOUDVM_SLUG') or (parts[2] if len(parts) > 2 else '')
     extra = ''
     if a.done:
-        extra += f"prepush: {pre['state']}" + (f" ({pre['detail'].splitlines()[0][:120]})" if pre['state'] == 'skipped' else '') + '\n'
+        note = pre['detail'].splitlines()[0][:120] if pre['state'] in ('pass', 'skipped') else ''
+        if pre.get('cmd') and pre['cmd'] != CHECK_CMD: note += f"; command: {pre['cmd'][:100]}"   # an override is never silent
+        if pre.get('head'): note += f"; checked {pre['head'][:12]} on master {pre.get('master', '')[:12]}"
+        extra += f"prepush: {pre['state']} ({note.lstrip('; ')})\n"
         try: hours = float(os.environ.get('COORD_STALE_HOURS') or 6)
         except ValueError: hours = 6.0
         if not 0 <= hours < float('inf'): hours = 6.0   # nan, inf and negatives fall back too
