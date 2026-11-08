@@ -1,0 +1,90 @@
+[
+  {
+    "id": "afp-monad",
+    "repo": "isabelle-prover/mirror-afp-devel",
+    "ref": "f81741033ad5e782a0e0aba461b292ea1c860b3d",
+    "path": "thys/Isabelle-Solidity/State_Monad.thy",
+    "sha256": "f9bf236246db30f6b0c14e4893e2c6922607caf48e5831fef4d1b5cf9eaf30be",
+    "url": "https://raw.githubusercontent.com/isabelle-prover/mirror-afp-devel/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/State_Monad.thy"
+  },
+  {
+    "id": "afp-solidity",
+    "repo": "isabelle-prover/mirror-afp-devel",
+    "ref": "f81741033ad5e782a0e0aba461b292ea1c860b3d",
+    "path": "thys/Isabelle-Solidity/Solidity.thy",
+    "sha256": "3d65c42e0044fda113322ee69eda5cd4c486e49b37cc74086a7c72acd5618920",
+    "url": "https://raw.githubusercontent.com/isabelle-prover/mirror-afp-devel/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/Solidity.thy"
+  },
+  {
+    "id": "afp-wp",
+    "repo": "isabelle-prover/mirror-afp-devel",
+    "ref": "f81741033ad5e782a0e0aba461b292ea1c860b3d",
+    "path": "thys/Isabelle-Solidity/WP.thy",
+    "sha256": "bd6e0c01025821ec149ff73a769538d66dc31804066fdf88d8f4f2f3ceb8b3bf",
+    "url": "https://raw.githubusercontent.com/isabelle-prover/mirror-afp-devel/f81741033ad5e782a0e0aba461b292ea1c860b3d/thys/Isabelle-Solidity/WP.thy"
+  },
+  {
+    "id": "cc-compiler",
+    "repo": "AbsInt/CompCert",
+    "ref": "2685140bf72c959446981fb99b5e44a8975021bc",
+    "path": "driver/Compiler.v",
+    "sha256": "1782a975c8df642a54d28c891405714145997c1cfe4d227f07a4c4d71ff525fb",
+    "url": "https://raw.githubusercontent.com/AbsInt/CompCert/2685140bf72c959446981fb99b5e44a8975021bc/driver/Compiler.v"
+  },
+  {
+    "id": "cc-complements",
+    "repo": "AbsInt/CompCert",
+    "ref": "2685140bf72c959446981fb99b5e44a8975021bc",
+    "path": "driver/Complements.v",
+    "sha256": "c391479109db38059e6904173e43eaa78a799f8eb7497d62a2d8d8e85c468bc1",
+    "url": "https://raw.githubusercontent.com/AbsInt/CompCert/2685140bf72c959446981fb99b5e44a8975021bc/driver/Complements.v"
+  },
+  {
+    "id": "cc-exec",
+    "repo": "AbsInt/CompCert",
+    "ref": "2685140bf72c959446981fb99b5e44a8975021bc",
+    "path": "cfrontend/Cexec.v",
+    "sha256": "8d4efcc8b2c1b4c18d843251ab3f76adcaca89bf1c17eb3cc0254acc2dcdabcb",
+    "url": "https://raw.githubusercontent.com/AbsInt/CompCert/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cexec.v"
+  },
+  {
+    "id": "cc-ints",
+    "repo": "AbsInt/CompCert",
+    "ref": "2685140bf72c959446981fb99b5e44a8975021bc",
+    "path": "lib/Integers.v",
+    "sha256": "b72dca1b72fc3bb6ef7c199f696ae791336e9824956a5923f4a848b82758ce51",
+    "url": "https://raw.githubusercontent.com/AbsInt/CompCert/2685140bf72c959446981fb99b5e44a8975021bc/lib/Integers.v"
+  },
+  {
+    "id": "cc-memdata",
+    "repo": "AbsInt/CompCert",
+    "ref": "2685140bf72c959446981fb99b5e44a8975021bc",
+    "path": "common/Memdata.v",
+    "sha256": "138921b4cea350422b2cc34be3d32d79b646f4793b8b3b0f16ccfa184870962b",
+    "url": "https://raw.githubusercontent.com/AbsInt/CompCert/2685140bf72c959446981fb99b5e44a8975021bc/common/Memdata.v"
+  },
+  {
+    "id": "cc-smallstep",
+    "repo": "AbsInt/CompCert",
+    "ref": "2685140bf72c959446981fb99b5e44a8975021bc",
+    "path": "common/Smallstep.v",
+    "sha256": "3279079eafb097a919f1e774a44200a59017a7f7edc665cc708b30c026c3e1b3",
+    "url": "https://raw.githubusercontent.com/AbsInt/CompCert/2685140bf72c959446981fb99b5e44a8975021bc/common/Smallstep.v"
+  },
+  {
+    "id": "cc-strategy",
+    "repo": "AbsInt/CompCert",
+    "ref": "2685140bf72c959446981fb99b5e44a8975021bc",
+    "path": "cfrontend/Cstrategy.v",
+    "sha256": "63aaf077cf8878106a13a3baef9ebbe52a51752f0038378cbb404cc2e0e6dde9",
+    "url": "https://raw.githubusercontent.com/AbsInt/CompCert/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Cstrategy.v"
+  },
+  {
+    "id": "cc-typing",
+    "repo": "AbsInt/CompCert",
+    "ref": "2685140bf72c959446981fb99b5e44a8975021bc",
+    "path": "cfrontend/Ctyping.v",
+    "sha256": "24c466856cefeb535dea4a3f3a3845110cd1c4cb441abc9a794e50fed1662431",
+    "url": "https://raw.githubusercontent.com/AbsInt/CompCert/2685140bf72c959446981fb99b5e44a8975021bc/cfrontend/Ctyping.v"
+  }
+]

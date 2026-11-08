@@ -3,7 +3,7 @@
   "completion_authorization": {
     "H243": {
       "question": "Q-STMT-REF-01",
-      "decision": "A: keep all rows, ratio=null with the exact non-comparability reason; size ratios only for genuine matches."
+      "decision": "Find a theorem that looks similar. Before marking a row non-comparable, search for the nearest external compiler theorem. Use ratio=null with the exact reason only when none is similar."
     },
     "H244": {
       "question": "Q-STMT-PROV-01",
