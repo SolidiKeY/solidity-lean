@@ -14,6 +14,35 @@ def git(*args):
     return subprocess.check_output(["git", *args], text=True)
 
 
+
+def body_separator(text, start):
+    pairs = {"(": ")", "[": "]", "{": "}", "⟨": "⟩", "⦃": "⦄"}
+    stack = []
+    for index in range(start, len(text)):
+        char = text[index]
+        if text.startswith(":=", index) and not stack:
+            return index
+        if char in pairs:
+            stack.append(pairs[char])
+        elif char in pairs.values():
+            if not stack or stack.pop() != char:
+                raise ValueError("unbalanced theorem header")
+    raise ValueError("missing declaration-level theorem body separator")
+
+
+def test_separator():
+    # Regression: record updates and binder defaults are not theorem bodies.
+    headers = [
+        "theorem x (m : M) : run {m with stack := []} = .ok {m with stack := []} 0 ",
+        "theorem x (n : Nat := 0) : n = n ",
+        "theorem x : (let z := 0; z) = 0 ",
+        "theorem x : f ⟨{m with stack := #[0]}, h⟩ = y ",
+    ]
+    for header in headers:
+        text = header + ":= by rfl"
+        assert body_separator(text, len("theorem x")) == len(header)
+
+
 def measure():
     paths = git("ls-tree", "-r", "--name-only", BASE, "Solidity/Yul/Compilation").splitlines()
     families = []
@@ -31,9 +60,7 @@ def measure():
             namespace = re.search(r"^namespace\s+(\S+)", clean, re.M).group(1)
             statements = []
             for match in re.finditer(r"^ *(?:private +)?(?:theorem|lemma)\s+([^\s{(:]+)", clean, re.M):
-                end = clean.find(":=", match.end())
-                if end < 0:
-                    raise ValueError("missing theorem body: "+file)
+                end = body_separator(clean, match.end())
                 statements.append({"name": namespace+"."+match.group(1),
                                    "line": clean.count("\n", 0, match.start())+1,
                                    "signature": clean[match.start():end].strip()})
@@ -56,6 +83,7 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true")
     args=parser.parse_args()
+    test_separator()
     text=json.dumps(measure(),indent=2)+"\n"
     path=HERE/"family.json"
     if args.check:

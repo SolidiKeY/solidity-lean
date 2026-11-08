@@ -98,17 +98,17 @@
           {
             "name": "Solidity.Yul.Compilation.ScopedControlCompilation.source_to_model",
             "line": 149,
-            "signature": "theorem source_to_model {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}\n (compiled : Compiled c fuel stmt) (block : Backend.Block) (code : List Evm.Instr)\n (emitted : compiled.emit = some block) (selected : WordControl.blockCode block = some code)\n (horizon : Nat) (locals : Vector Scalar.Word n) (result : Outcome c n)\n (ran : evalStmt horizon .nil True.intro stmt compiled.profile (sourceLocals locals) = some result)\n (m : Evm.Machine) (caller : List Evm.Word) :\n \u2203 out : Vector Scalar.Word n, result = \u27e8sourceLocals out,.normal\u27e9 \u2227\n Evm.run code {m with stack"
+            "signature": "theorem source_to_model {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}\n (compiled : Compiled c fuel stmt) (block : Backend.Block) (code : List Evm.Instr)\n (emitted : compiled.emit = some block) (selected : WordControl.blockCode block = some code)\n (horizon : Nat) (locals : Vector Scalar.Word n) (result : Outcome c n)\n (ran : evalStmt horizon .nil True.intro stmt compiled.profile (sourceLocals locals) = some result)\n (m : Evm.Machine) (caller : List Evm.Word) :\n \u2203 out : Vector Scalar.Word n, result = \u27e8sourceLocals out,.normal\u27e9 \u2227\n Evm.run code {m with stack := locals.toList.map coreWord++caller} =\n .ok {m with stack := out.toList.map coreWord++caller} 0"
           },
           {
             "name": "Solidity.Yul.Compilation.ScopedControlCompilation.Artifact.source_to_model",
             "line": 304,
-            "signature": "theorem Artifact.source_to_model {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}\n (artifact : Artifact fuel stmt) (horizon : Nat) (locals : Vector Scalar.Word n) (result : Outcome c n)\n (ran : evalStmt horizon .nil True.intro stmt artifact.compiled.profile (sourceLocals locals) = some result)\n (m : Evm.Machine) (caller : List Evm.Word) :\n \u2203 out : Vector Scalar.Word n, result = \u27e8sourceLocals out,.normal\u27e9 \u2227\n Evm.run artifact.code {m with stack"
+            "signature": "theorem Artifact.source_to_model {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}\n (artifact : Artifact fuel stmt) (horizon : Nat) (locals : Vector Scalar.Word n) (result : Outcome c n)\n (ran : evalStmt horizon .nil True.intro stmt artifact.compiled.profile (sourceLocals locals) = some result)\n (m : Evm.Machine) (caller : List Evm.Word) :\n \u2203 out : Vector Scalar.Word n, result = \u27e8sourceLocals out,.normal\u27e9 \u2227\n Evm.run artifact.code {m with stack := locals.toList.map coreWord++caller} =\n .ok {m with stack := out.toList.map coreWord++caller} 0"
           },
           {
             "name": "Solidity.Yul.Compilation.ScopedControlCompilation.Artifact.normal_to_model",
             "line": 314,
-            "signature": "theorem Artifact.normal_to_model {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}\n (artifact : Artifact fuel stmt) (horizon : Nat) (locals out : Vector Scalar.Word n)\n (ran : evalStmt horizon .nil True.intro stmt artifact.compiled.profile (sourceLocals locals) =\n   some \u27e8sourceLocals out,.normal\u27e9) (m : Evm.Machine) (caller : List Evm.Word) :\n Evm.run artifact.code {m with stack"
+            "signature": "theorem Artifact.normal_to_model {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}\n (artifact : Artifact fuel stmt) (horizon : Nat) (locals out : Vector Scalar.Word n)\n (ran : evalStmt horizon .nil True.intro stmt artifact.compiled.profile (sourceLocals locals) =\n   some \u27e8sourceLocals out,.normal\u27e9) (m : Evm.Machine) (caller : List Evm.Word) :\n Evm.run artifact.code {m with stack := locals.toList.map coreWord++caller} =\n .ok {m with stack := out.toList.map coreWord++caller} 0"
           }
         ]
       },
@@ -130,17 +130,17 @@
           {
             "name": "Solidity.Yul.Compilation.ScopedControlCompletion.model_to_source",
             "line": 52,
-            "signature": "theorem model_to_source {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}\n (compiled : Compiled c fuel stmt) (block : Backend.Block) (code : List Evm.Instr)\n (emitted : compiled.emit = some block) (selected : WordControl.blockCode block = some code)\n (locals : Vector Scalar.Word n) (m final : Evm.Machine) (caller : List Evm.Word) (skip : Nat)\n (ran : Evm.run code {m with stack"
+            "signature": "theorem model_to_source {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}\n (compiled : Compiled c fuel stmt) (block : Backend.Block) (code : List Evm.Instr)\n (emitted : compiled.emit = some block) (selected : WordControl.blockCode block = some code)\n (locals : Vector Scalar.Word n) (m final : Evm.Machine) (caller : List Evm.Word) (skip : Nat)\n (ran : Evm.run code {m with stack := locals.toList.map coreWord++caller} = .ok final skip) :\n \u2203 (horizon : Nat) (out : Vector Scalar.Word n),\n evalStmt horizon .nil True.intro stmt compiled.profile (sourceLocals locals) =\n some \u27e8sourceLocals out,.normal\u27e9 \u2227 skip = 0 \u2227 final = {m with stack := out.toList.map coreWord++caller}"
           },
           {
             "name": "Solidity.Yul.Compilation.ScopedControlCompletion.artifact_reflected",
             "line": 190,
-            "signature": "theorem artifact_reflected {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}\n (artifact : Artifact fuel stmt) (locals : Vector Scalar.Word n)\n (m final : Evm.Machine) (caller : List Evm.Word) (skip : Nat)\n (ran : Evm.run artifact.code {m with stack"
+            "signature": "theorem artifact_reflected {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}\n (artifact : Artifact fuel stmt) (locals : Vector Scalar.Word n)\n (m final : Evm.Machine) (caller : List Evm.Word) (skip : Nat)\n (ran : Evm.run artifact.code {m with stack := locals.toList.map coreWord++caller} = .ok final skip) :\n \u2203 (horizon : Nat) (out : Vector Scalar.Word n),\n evalStmt horizon .nil True.intro stmt artifact.compiled.profile (sourceLocals locals) =\n some \u27e8sourceLocals out,.normal\u27e9 \u2227 skip = 0 \u2227 final = {m with stack := out.toList.map coreWord++caller}"
           },
           {
             "name": "Solidity.Yul.Compilation.ScopedControlCompletion.completion_iff",
             "line": 199,
-            "signature": "theorem completion_iff {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}\n (artifact : Artifact fuel stmt) (locals out : Vector Scalar.Word n)\n (m : Evm.Machine) (caller : List Evm.Word) :\n (\u2203 horizon, evalStmt horizon .nil True.intro stmt artifact.compiled.profile (sourceLocals locals) =\n   some \u27e8sourceLocals out,.normal\u27e9) \u2194\n Evm.run artifact.code {m with stack"
+            "signature": "theorem completion_iff {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}\n (artifact : Artifact fuel stmt) (locals out : Vector Scalar.Word n)\n (m : Evm.Machine) (caller : List Evm.Word) :\n (\u2203 horizon, evalStmt horizon .nil True.intro stmt artifact.compiled.profile (sourceLocals locals) =\n   some \u27e8sourceLocals out,.normal\u27e9) \u2194\n Evm.run artifact.code {m with stack := locals.toList.map coreWord++caller} =\n .ok {m with stack := out.toList.map coreWord++caller} 0"
           }
         ]
       }
