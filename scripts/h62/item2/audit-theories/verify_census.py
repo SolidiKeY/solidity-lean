@@ -146,7 +146,7 @@ def main():
         row=dict(d,elaborated=t,elaborated_type_sha256=sha(t["type_expr"].encode()),
           hypothesis_classification={"logical_binders":[i for i,b in enumerate(t["binders"]) if b["is_prop"]],
            "note":"Data/typeclass inputs also require joint inhabitance; global/per-input classification needs manual review."})
-        if d["visibility"]=="private": row["status"]="private-witness-pending"
+        if d["visibility"]=="private" and name not in WITNESSES and name not in IMPOSSIBLE: row["status"]="private-witness-pending"
         elif name in WITNESSES:
             row["status"]="joint-witness-checked"
             row["certificate"]=certificate(out/"serial",*WITNESSES[name])
