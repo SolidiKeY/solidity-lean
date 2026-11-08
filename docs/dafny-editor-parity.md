@@ -2211,3 +2211,11 @@ spawn; restoration errors remain failures. All four setting/lifecycle rows stay
 incomplete until native client/rendered/full matrices and both original row
 judgments pass. No product settings, predicates, proof budgets or producer
 interfaces change.
+
+
+The initial configuration capture retains Never/Save failures: documentSymbol
+returned parser symbols before an owned Stale status arrived. Parser response
+is not treated as resolution or no-verification evidence. The observer now
+waits for the positive status event using only the remainder of the same
+per-phase operation budget; proof status, diagnostic and symbol checks share
+that deadline. No missing-status predicate or original budget is relaxed.

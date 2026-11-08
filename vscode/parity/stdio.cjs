@@ -69,11 +69,12 @@ async function trial(target,workers,options,dir,dependencies={}) {
   if(target==='local')peer.onNotification('solidityLean/ownedProcess',params=>{const owned=ownedGroups.get(params.pid);if(params.event==='closed'&&owned?.processBirth===params.birth&&!groupMembers(owned).some(running))ownedGroups.delete(params.pid);});
   peer.onRequest('workspace/configuration',(p,id)=>configuration?configuration.reply(configuration.ticket(p,id)):p.items.map(()=>null));
   peer.onRequest('client/registerCapability',()=>null);peer.onRequest('window/workDoneProgress/create',()=>null);
-  const request=(method,params)=>peer.request(method,params,{timeoutMs:options.timeoutMs});
-  const until=async(predicate,label)=>{
+  const request=(method,params,budget=options.timeoutMs)=>{if(budget<=0)throw Object.assign(Error('Configuration operation timed out'),{code:'TIMEOUT'});if(!(budget<=options.timeoutMs))throw Error('Invalid remaining request budget');return peer.request(method,params,{timeoutMs:budget});};
+  const until=async(predicate,label,deadline)=>{
+    if(deadline!==undefined)return require('./configuration-lifecycle.cjs').waitUntil(predicate,label,{deadline,peer});
     const start=performance.now();while(!predicate()){
       if(peer.closed)throw new Error('Server closed during '+label);
-      if(performance.now()-start>options.timeoutMs)throw Object.assign(new Error('Timed out: '+label),{code:'TIMEOUT'});
+      if(performance.now()-start>options.timeoutMs||deadline!==undefined&&performance.now()>=deadline)throw Object.assign(new Error('Timed out: '+label),{code:'TIMEOUT'});
       await new Promise(r=>setTimeout(r,10));
     }
   };
@@ -119,7 +120,7 @@ async function trial(target,workers,options,dir,dependencies={}) {
         completion:{completionItem:{snippetSupport:true}},codeAction:{codeActionLiteralSupport:{codeActionKind:{valueSet:['quickfix']}}}}},
       initializationOptions:target==='local'?{backendPath:repo,settings:{projectRoot:workspace,workers,automaticVerification:'never',timeoutMs:options.timeoutMs}}:undefined});
     peer.notify('initialized',{});metrics.initializeRequestMs=performance.now()-start;metrics.coldStartupMs=performance.now()-begin;
-    if(options.scope==='configuration'){await scenario('automatic-configuration-lifecycle',()=>require('./configuration-lifecycle.cjs').observe({target,mode:options.configurationMode,peer,request,until,open,change,states,diagnostics,events,exchange:configuration,dir}));}else{
+    if(options.scope==='configuration'){await scenario('automatic-configuration-lifecycle',()=>require('./configuration-lifecycle.cjs').observe({target,mode:options.configurationMode,peer,request,until,open,change,states,diagnostics,events,exchange:configuration,dir,timeoutMs:options.timeoutMs}));}else{
     const fixture=servicesWorkload(target),doc=open('services',fixture.text);
     await scenario('document-symbols',async()=>{
       const value=await request('textDocument/documentSymbol',{textDocument:{uri:doc.uri}});
