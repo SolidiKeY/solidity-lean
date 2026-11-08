@@ -94,15 +94,15 @@ theorem checkedCaptureSequence_none_keeps {H H' : HTy} {R Q R' Q' : RefTy} {E F 
       checkedCaptureSequence hp src sa dst da s t d src' sa' dst' da' u v f = none := by
   simp only [checkedCaptureSequence_none_iff, hk.len]
 
-/-- info: 'Solidity.Backend.MemoryOps.overwriteIntervals_keeps' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.overwriteIntervals_keeps' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms overwriteIntervals_keeps
-/-- info: 'Solidity.Backend.MemoryOps.captureTwice_keeps' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.captureTwice_keeps' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms captureTwice_keeps
-/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.overwriteIntervals' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.overwriteIntervals' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms BoolChildRepr.overwriteIntervals
-/-- info: 'Solidity.Backend.MemoryOps.RefChildRepr.overwriteIntervals' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.RefChildRepr.overwriteIntervals' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms RefChildRepr.overwriteIntervals
-/-- info: 'Solidity.Backend.MemoryOps.checkedCaptureSequence_keeps' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.checkedCaptureSequence_keeps' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms checkedCaptureSequence_keeps
 /-- info: 'Solidity.Backend.MemoryOps.checkedCaptureSequence_none_keeps' depends on axioms: [propext,
  Classical.choice,
