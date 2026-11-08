@@ -13,9 +13,9 @@ through a GitHub webhook and opens, follows up (same lane + QID) or closes the i
 --done first runs the pre-push check: the head merged onto the fetched master in a temporary worktree (sharing the
 checkout's build caches, COORD_CACHE_DIRS), then COORD_PREPUSH_CMD there (default `bash scripts/coord-tools/gate.sh
 touched`), exactly what the merge pre-gate runs. On a failure or a conflict it prints the first errors and does not
-report done: fix it and push, or pass `--no-check REASON` when the failure is not yours. Results are cached per
-(head, master, check); a gate that fails only because a tool (lake, node) is missing is skipped with a note, never a
-gate that fails for another reason. `prepush:` is recorded in the push.
+report done: fix it and push, or pass `--no-check REASON` when the failure is not yours. Only a pass, or an explicit
+`--no-check REASON`, reports: a failed fetch, a missing tool (lake, node) or a broken worktree also refuses, with what
+is missing. Results are cached per (head, master, check). `prepush:` is recorded in the push.
 --done also checks the head against the fetched master: when it lacks master commits older than COORD_STALE_HOURS
 (6), it warns (the merge pre-gate builds the head merged onto current master) and records `behind:` in the push; it
 never refuses.
@@ -60,7 +60,7 @@ def prepush(no_check):
     """The merge pre-gate's own check, run here first. Returns {state: pass|fail|conflict|skipped, detail, master}."""
     if no_check: return {'state': 'skipped', 'detail': f'--no-check: {no_check}'}
     if subprocess.run(['git', 'fetch', '-q', 'origin', 'master'], capture_output=True).returncode:
-        return {'state': 'skipped', 'detail': 'git fetch origin master failed'}
+        return {'state': 'unavailable', 'detail': 'git fetch origin master failed (network?)'}
     rp = lambda *x: subprocess.run(['git', *x], capture_output=True, text=True).stdout.strip()
     master, head, top = rp('rev-parse', 'FETCH_HEAD'), rp('rev-parse', 'HEAD'), rp('rev-parse', '--show-toplevel')
     common = os.path.abspath(rp('rev-parse', '--git-common-dir'))
@@ -76,7 +76,7 @@ def prepush(no_check):
     print(f'coord-ask: pre-push check: your head merged onto master {master[:12]}, then the gate (can take minutes)...',
           file=sys.stderr, flush=True)
     tmp = tempfile.mkdtemp(prefix='coord-prepush-'); w = os.path.join(tmp, 'tree')
-    res = {'state': 'skipped', 'detail': 'worktree failed', 'master': master}
+    res = {'state': 'unavailable', 'detail': 'could not create the temporary worktree', 'master': master}
     try:
         if subprocess.run(['git', 'worktree', 'add', '-q', '--detach', w, head], capture_output=True).returncode: return res
         m = subprocess.run(['git', '-C', w, '-c', 'user.name=coord-ask', '-c', 'user.email=coord-ask@localhost', 'merge', '-q',
@@ -95,19 +95,10 @@ def prepush(no_check):
                                text=True, env=dict(os.environ, GATE_BASE=master, GATE_LOGS=logs))
             text = r.stdout + r.stderr + ''.join(open(os.path.join(logs, f), errors='replace').read()
                                                 for f in sorted(os.listdir(logs)) if f.endswith('.log'))
-            # Judge each failing gate by its own log: a missing tool (lake, node) skips only the gates it broke; any
-            # other failing gate is a real failure, even beside a missing tool.
-            tsv = os.path.join(logs, 'gates.tsv')
-            failed = [l.rstrip('\n').split('\t') for l in open(tsv)] if os.path.exists(tsv) else []
-            failed = [f for f in failed if f and f[0] == 'FAIL']
-            log_of = lambda f: open(f[3], errors='replace').read() if len(f) > 3 and os.path.exists(f[3]) else ''
-            real = [f for f in failed if not TOOL_MISSING.search(log_of(f))]
             if r.returncode == 0: res = {'state': 'pass', 'detail': 'gate passed on the merged tree', 'master': master}
-            elif not failed and not os.path.exists(tsv) and (r.returncode == 127 or TOOL_MISSING.search(text)):
-                res = {'state': 'skipped', 'detail': 'the check cannot run here: ' + (TOOL_MISSING.search(text) or
-                       re.search('.*', text)).group(0)[:120], 'master': master}
-            elif failed and not real:
-                res = {'state': 'skipped', 'detail': 'tools missing for gates ' + ', '.join(f[1] for f in failed), 'master': master}
+            elif TOOL_MISSING.search(text) and not re.search(r'^(error\b|.*\berror:)', text, re.M):
+                res = {'state': 'unavailable', 'detail': 'a tool the gate needs is missing: ' + TOOL_MISSING.search(text).group(0)[:120]
+                       + '; install it (the pinned lean-toolchain with elan, node) or report with --no-check REASON', 'master': master}
             else:
                 res = {'state': 'fail', 'detail': first_errors(text).replace(w + '/', ''), 'master': master}
     finally:
@@ -140,12 +131,12 @@ def main():
             try: json.loads(body)
             except ValueError as e: sys.exit(f'coord-ask: --result is not JSON ({e})')
         pre = prepush(a.no_check)
-        if pre['state'] in ('fail', 'conflict'):
-            sys.exit(f"coord-ask: pre-push check {pre['state'].upper()} on your head merged onto master "
-                     f"{pre.get('master', '')[:12]}; nothing was reported. The merge pre-gate would reject this head.\n"
-                     f"{pre['detail']}\n"
+        if pre['state'] in ('fail', 'conflict', 'unavailable'):
+            why = 'The merge pre-gate would reject this head.' if pre['state'] != 'unavailable' else 'The check could not run.'
+            sys.exit(f"coord-ask: pre-push check {pre['state'].upper()} for your head merged onto master "
+                     f"{pre.get('master', '')[:12]}; nothing was reported. {why}\n{pre['detail']}\n"
                      'Fix it (merge origin/master, repair, push a new head) and run --done again; if the failure is not '
-                     "yours (e.g. master itself is broken), run --done --no-check 'REASON'.")
+                     "yours (e.g. master itself is broken, or a tool cannot be installed), run --done --no-check 'REASON'.")
         if pre['state'] == 'skipped': print(f"coord-ask: pre-push check skipped: {pre['detail']}", file=sys.stderr)
     else:
         body = a.text if a.text is not None else sys.stdin.read()
