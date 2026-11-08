@@ -18,7 +18,11 @@ def main():
     if not args.cloud_vm: ap.error('explicit --cloud-vm required under H232; host execution unsupported')
     meter=load('measure'); meter.CLOUD_VM_OPT_IN=True; audit=load('audit'); args.refs=args.refs.resolve(); args.refs.mkdir(parents=True,exist_ok=True); args.work=args.work.resolve(); args.work.mkdir(parents=True,exist_ok=True)
     root=args.refs/args.project
-    def run(cmd,name,timeout=1800,cwd=None): return meter.command(cmd,cwd or root,args.work/(name+'.log'),timeout)
+    def run(cmd,name,timeout=1800,cwd=None):
+        log=args.work/(name+'.log'); suffix=0
+        while log.exists():
+            suffix+=1; log=args.work/(name+'-'+str(suffix)+'.log')
+        return meter.command(cmd,cwd or root,log,timeout)
     def git(*cmd): return subprocess.check_output(['git','-C',str(root),*cmd],text=True).strip()
     if not root.exists():
         r=meter.command(['git','clone','--depth','1','https://github.com/'+REPOS[args.project]+'.git',str(root)],args.refs,args.work/'clone.log')
@@ -31,7 +35,7 @@ def main():
     assert state['pin']==PINS[args.project] and state['source']==str(root)
     def save(): meter.atomic_write_json(statefile,state)
     for tool in ['lean','lake']:
-        r=run([tool,'--version'],tool+'-version',60); observed=(args.work/(tool+'-version.log')).read_text().strip(); assert r['exit_code']==0
+        r=run([tool,'--version'],tool+'-version',60); observed=pathlib.Path(r['log']).read_text().strip(); assert r['exit_code']==0
         if tool+'_version' in state: assert state[tool+'_version']==observed, 'resume toolchain mismatch'
         state[tool+'_version']=observed
     manifest=json.loads((root/'lake-manifest.json').read_text()); pkgdir=root/manifest.get('packagesDir','.lake/packages'); pkgdir.mkdir(parents=True,exist_ok=True)
@@ -56,8 +60,37 @@ def main():
             assert subprocess.check_output(['git','-C',str(dest),'rev-parse','HEAD'],text=True).strip()==package['rev'], 'dependency pin mismatch: '+package['name']
             assert not subprocess.check_output(['git','-C',str(dest),'status','--porcelain','--untracked-files=no'],text=True).strip(), 'dirty dependency: '+package['name']
     verify_dependencies()
-    if 'cache' not in state:
-        state['cache']=run(['lake','exe','cache','get'],'dependency-cache',1800); save()
+    # Shallow SHA fetches omit release tags. Lake needs the exact tag to fetch
+    # ProofWidgets' mandatory JS archive; fetching the tag does not change HEAD.
+    tags_added=False
+    if not state.get('release_tags_prepared'):
+        for package in manifest['packages']:
+            if package['name']!='proofwidgets': continue
+            dest=pkgdir/package['name']
+            listing=run(['git','ls-remote','--tags','origin'],'release-tags-'+package['name']+'-'+str(len(state['preparation'])),120,dest)
+            state['preparation'].append(listing); save()
+            if listing['exit_code']: raise SystemExit('release tag discovery failed')
+            tags=set()
+            for line in pathlib.Path(listing['log']).read_text().splitlines():
+                cols=line.split()
+                if len(cols)==2 and cols[0]==package['rev'] and cols[1].startswith('refs/tags/'):
+                    tags.add(cols[1].removeprefix('refs/tags/').removesuffix('^{}'))
+            for tag in sorted(tags):
+                r=run(['git','fetch','--depth','1','origin','refs/tags/'+tag+':refs/tags/'+tag],'release-tag-'+tag.replace('/','_')+'-'+str(len(state['preparation'])),120,dest)
+                state['preparation'].append(r); save()
+                if r['exit_code']: raise SystemExit('release tag fetch failed')
+                resolved=subprocess.check_output(['git','-C',str(dest),'rev-parse','refs/tags/'+tag+'^{commit}'],text=True).strip()
+                assert resolved==package['rev'], 'release tag does not resolve to dependency pin'
+                tags_added=True
+        state['release_tags_prepared']=True
+        state['release_cache_retry_pending']=tags_added and state.get('cache',{}).get('exit_code',0)!=0
+        save(); verify_dependencies()
+    retry_release=state.get('release_cache_retry_pending',False)
+    if 'cache' not in state or retry_release:
+        history=state.setdefault('cache_attempts',[])
+        if 'cache' in state and not history: history.append(state['cache'])
+        state['cache']=run(['lake','exe','cache','get'],'dependency-cache-'+str(len(history)),1800)
+        history.append(state['cache']); state['release_cache_retry_pending']=False; save()
     if not state['build_attempts'] or state['build_attempts'][-1]['exit_code']:
         r=run(['lake','build','EvmYul' if args.project=='EvmYul' else 'Main'],'build-'+str(len(state['build_attempts'])),1800)
         state['build_attempts'].append(r); save()
