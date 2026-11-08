@@ -3205,7 +3205,11 @@ import Solidity.Frontend.Yul.Parsing
 import Solidity.Frontend.Yul.ScopedParse
 import Solidity.Frontend.Yul.WordParse
 import Solidity.Hash.Adaptive
+import Solidity.Hash.Bridge
 import Solidity.Hash.CollisionBound
+import Solidity.Hash.CollisionBridge
+import Solidity.Hash.CollisionBridgeCompiler
+import Solidity.Hash.CollisionBridgeControls
 import Solidity.Hashes
 import Solidity.Keccak
 import Solidity.KeySort
