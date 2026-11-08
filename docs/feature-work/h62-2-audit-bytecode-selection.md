@@ -2953,3 +2953,40 @@ transport. In particular,
 and initial `WordFrame` facts; it does not construct that producer or establish
 emission provenance. These boundaries remain open for G01 and the original
 Source/runtime correspondence audit.
+
+
+### Value-checked body field domains
+
+The six proof projections classified above now each have a separate joint-domain
+witness using the existing `ValueCheckedBodies.UInt.certificate` or
+`ValueCheckedBodies.Bool.certificate`. The nil body and actual output fragment,
+compiled whole/body objects, compiler equalities and machine facts are supplied
+together. The executed-domain instances use size zero: they witness a short-input
+rejection case, **not supported-body successful execution**. Both additional
+actual-run controls concern the uint nonpayable instance, with callvalue one;
+one proves revert and the other rejects replacing that result with success.
+
+The generated additive module passed the pinned serial native check in 11.552
+seconds, with a 187932672-byte workload peak and standard-only printed axioms.
+All 246 frozen import products were hash-verified against the sealed source-prefix
+receipt. That original aggregate receipt remains RED; reuse of these products
+does not close its 703-source obligation. This closure excludes PowerBounds,
+and no Bridge or prerequisite build was started. Independent finder/skeptic
+reviews required pinned import-receipt and exact native-command checks; both
+were added to the receipt-only verifier and the findings resolved. The existing
+130 Python tooling tests pass; they are distinct from kernel acceptance.
+
+Exact source, raw-type pins, compiler artifact, import manifests, kernel/axiom
+and resource records, verifier and reviews are privately archived and were read
+back byte-for-byte:
+
+```text
+evidence: 57711dd4b4d3d7101a73b7f860795e408b4f4d96 evidence/solidity-parallel-20261103/executable-bytecode/value-checked-body-domains-fb6fd1d1.json
+```
+
+These are six additional per-statement domains, not global census closure,
+Source/runtime/G01 correspondence, a supported-body success theorem, physical
+realization or full Bridge/package/performance validation. All original STOPs
+and remaining success/control obligations are retained. Legacy RuntimeConsumer
+semantic ownership is master/coordinator per the latest ownership lookup; that
+lookup authorizes no change to the legacy contract or its dependent definitions.
