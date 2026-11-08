@@ -124,7 +124,9 @@ theorem short_before_body (base : Nat) (kind : Solidity.AbiEntry.Kind) (label : 
   rw [List.append_assoc]
   exact run_append_revert (SingleWordGate.short_before_word C base kind label machine size initialSize short)
 
-/-- info: 'Solidity.Backend.AbiEntry.WordCarrierEntryBody.Binding.admitted' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiEntry.WordCarrierEntryBody.Binding.admitted' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms admitted
 /-- info: 'Solidity.Backend.AbiEntry.WordCarrierEntryBody.Binding.whole_selected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms whole_selected
@@ -231,7 +233,7 @@ def certificate : Interface.WordCarrierEntryBodyCertificate program where
   early_rejection := early_rejection
 
 
-/-- info: 'Solidity.Backend.AbiEntry.WordCarrierEntryBody.admitted' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiEntry.WordCarrierEntryBody.admitted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms admitted
 /-- info: 'Solidity.Backend.AbiEntry.WordCarrierEntryBody.selected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms selected
