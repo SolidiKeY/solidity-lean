@@ -76,6 +76,7 @@ theorem entry_form (input : Solidity.AbiEntry.Input) (fuel : Nat) (kind : Solidi
     · simp only [dif_pos valid]; rfl
     · simp only [dif_neg valid]; rfl
 
+set_option backward.isDefEq.respectTransparency false in
 theorem entry_rejection (C : Contract) (base : Nat) (kind : Solidity.AbiEntry.Kind) (label : Fin W)
     (result : Compiler.Compilation base (Frag.init RouteCtx) (program C kind label))
     (found : Compiler.compile base (Frag.init RouteCtx) (program C kind label)=some result)
