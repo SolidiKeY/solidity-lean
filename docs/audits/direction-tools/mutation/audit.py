@@ -59,6 +59,7 @@ def main():
         path="Solidity/Examples/Tactics/"+file+".lean"
         assert 0<line<=len(lean[path].splitlines())
         m["expected_failing_candidate"]={"path":path,"line":line,"name":name,"status":"unvalidated candidate; may not kill this boundary"}
+    specs[26]["expected_failing_candidate"]["status"]="non-discriminating: postcondition holds for either branch; no expected kill established"
     specs[28]["expected_failing_candidate"]=None
     specs[28]["constraint_search_result"]="No exact uint256-to-int threshold 2^255 constraint found in inspected cast examples; downcast is not a valid killer"
     for m in specs[len(candidates):]:

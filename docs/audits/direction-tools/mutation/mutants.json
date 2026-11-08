@@ -4396,7 +4396,7 @@
       "line": 135,
       "name": "ifNegated",
       "path": "Solidity/Examples/Tactics/Branch.lean",
-      "status": "unvalidated candidate; may not kill this boundary"
+      "status": "non-discriminating: postcondition holds for either branch; no expected kill established"
     },
     "generated": false,
     "id": "M27",
