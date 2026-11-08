@@ -20,7 +20,9 @@ TOTAL='Solidity.Backend.AbiWorld.PublicCompilerTotal.'
 CONTROLS='Solidity.Backend.AbiWorld.PublicCompilerTotalControls.'
 REQUESTED=[TOTAL+n for n in ['compile_core','compile_isSome','compile_init','compile_agrees']]+[CONTROLS+n for n in ['program_ok','program_accepted','program_kernel','program_code_nonempty','program_agrees_fresh']]
 SOURCE='tests/h62/item2/audit-readonly-calls/CommandSurface.lean'
-LEAN=Path('/workspace/.setup/tools/lean-4.24.0-linux/bin/lean')
+if os.environ.get('AUDIT_RESOURCE_MODE')=='host' and not os.environ.get('AUDIT_LEAN_SDK'):
+    raise ValueError('host checker requires explicitly configured SDK')
+LEAN=Path(os.environ.get('AUDIT_LEAN_SDK','/workspace/.setup/tools/lean-4.24.0-linux'))/'bin/lean'
 PREFIX='H62_COMMAND_SURFACE '
 CANONICAL_SHA='77dd8d2b6a7f771206458bbef38915f9f5269964b861a1a803d8dbd601ee862d'
 
