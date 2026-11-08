@@ -61,13 +61,13 @@ theorem composed (C : Contract) (base : Nat) (kind : Solidity.AbiEntry.Kind) (la
     WordCarrierBinding.run_program C base kind label machine word size initialWord initialSize
   simp only [wordCarrierOutcome] at bindingRun
   by_cases short : size.val<36
-  · rw [if_pos short] at bindingRun ⊢
+  · rw [ite_eq_left short] at bindingRun ⊢
     exact run_append_revert bindingRun
-  · rw [if_neg short] at bindingRun ⊢
+  · rw [ite_eq_right short] at bindingRun ⊢
     by_cases valid : kind.valid word.val=true
-    · rw [if_pos valid] at bindingRun ⊢
+    · rw [ite_eq_left valid] at bindingRun ⊢
       exact run_append_ok bindingRun
-    · rw [if_neg valid] at bindingRun ⊢
+    · rw [ite_eq_right valid] at bindingRun ⊢
       exact run_append_revert bindingRun
 
 theorem executed (base : Nat) (kind : Solidity.AbiEntry.Kind) (label : Fin W) (body : Prog C UIntBoundCtx Δ)
@@ -88,6 +88,7 @@ theorem executed (base : Nat) (kind : Solidity.AbiEntry.Kind) (label : Fin W) (b
   rw [sameWhole,sameBody,code]
   exact composed C base kind label _ machine word size initialWord initialSize
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Raw semantic success identifies the actual local subsequently read by the body. -/
 theorem decoded_body (base : Nat) (kind : Solidity.AbiEntry.Kind) (label : Fin W) (body : Prog C UIntBoundCtx Δ)
     (outFrag : Frag Δ) (bodyCore : inFragP (Frag.init UIntBoundCtx) body=some outFrag)
@@ -111,7 +112,7 @@ theorem decoded_body (base : Nat) (kind : Solidity.AbiEntry.Kind) (label : Fin W
     ⟨value,semantic,_,cell⟩
   refine ⟨value,semantic,cell,?_⟩
   rw [executed base kind label body outFrag bodyCore whole back wholeFound bodyFound machine _ size initialWord initialSize]
-  simp only [represented,if_neg full,rawArgumentWord,if_pos valid]
+  simp only [represented,ite_eq_right full,rawArgumentWord,ite_eq_left valid]
 
 /-- A short head prevents both the word read and all body execution. -/
 theorem short_before_body (base : Nat) (kind : Solidity.AbiEntry.Kind) (label : Fin W) (body : Prog C UIntBoundCtx Δ)
@@ -197,7 +198,7 @@ theorem early_rejection (base : Nat) (kind : Solidity.AbiEntry.Kind) (payable : 
     (machine : Machine) (blocked : (payable || decide (machine.callvalue.val=0))=false) :
     run whole.code machine=.revert := by
   rw [gated base kind payable label body outFrag bodyCore whole found machine]
-  simp only [blocked,Bool.false_eq_true,if_false]
+  simp only [blocked,Bool.false_eq_true,ite_false]
 
 theorem decoded_body (base : Nat) (kind : Solidity.AbiEntry.Kind) (payable : Bool) (label : Fin W) (body : Prog C UIntBoundCtx Δ)
     (outFrag : Frag Δ) (bodyCore : inFragP (Frag.init UIntBoundCtx) body=some outFrag)
@@ -220,7 +221,7 @@ theorem decoded_body (base : Nat) (kind : Solidity.AbiEntry.Kind) (payable : Boo
     (Binding.whole_selected base kind label body outFrag bodyCore) bodyFound
     input fuel machine size initialWord initialSize represented full valid with ⟨value,semantic,cell,bodyRun⟩
   refine ⟨value,semantic,cell,?_⟩
-  rw [gated base kind payable label body outFrag bodyCore whole wholeFound machine,if_pos allowed,bodyRun]
+  rw [gated base kind payable label body outFrag bodyCore whole wholeFound machine,ite_eq_left allowed,bodyRun]
 
 def certificate : Interface.WordCarrierEntryBodyCertificate program where
   selected := fun base kind payable label body outFrag bodyCore =>
