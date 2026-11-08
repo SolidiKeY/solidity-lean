@@ -29,7 +29,7 @@ theorem SourceBoolRefsAt.eval_nested_loc {E : Source.Env} {Γ : Source.RCtx} {H 
     (hq : hp.index r .dyn k=some q) (hl : l.1.toNat<hp.len q .dyn) :
     (Source.evalLoc G F (horizon+3) (sourceNestedLoc root i j)).run y=(.ok (.mem (address q.id) l.1.toNat),y) := by
   have hc := hr.child_at k.1.toNat q hq
-  rw [sourceNestedLoc,Source.evalLoc,Source.Hoare.run_bind,hr.eval_parent_read G F horizon root i k q hroot hi hq]
+  rw [sourceNestedLoc,Source.evalLoc.eq_def,Source.Hoare.run_bind,hr.eval_parent_read G F horizon root i k q hroot hi hq]
   change ((Source.evalE G F (horizon+2) (.local j)) >>= fun v => Source.indexNat v >>= fun n =>
     Source.indexLoc F (.memRef rfl (address q.id) : Source.Val E.layout (.array .memory .bool none)) n).run y=_
   rw [Source.Hoare.run_bind,source_local_value_run G F (horizon+1) y j _ hj]
@@ -165,7 +165,7 @@ theorem SourceBoolRefsAt.resolved_nested_assign_word {E : Source.Env} {Γ : Sour
     have hout : out=σ.heap.set q (MObj.setElem .dyn (σ.heap.get q) l.val v) := by
       have hw : σ.heap.writeAddr (.index q .dyn (Evm.Memory.indexValue l)) v=
           some (σ.heap.set q (MObj.setElem .dyn (σ.heap.get q) l.val v)) := by
-        simp only [Heap.writeAddr,Heap.setIndex,Evm.Memory.indexValue,Int.toNat_natCast];exact if_pos hj
+        simp only [Heap.writeAddr,Heap.setIndex,Evm.Memory.indexValue,Int.toNat_natCast];exact ite_eq_left hj
       exact Option.some.inj (ho.symm.trans hw)
     rw [hout]
     exact ha.setArray q l.val hj v (.val (Evm.bword v)) rfl
@@ -180,7 +180,7 @@ theorem SourceBoolRefsAt.eval_nested_loc_parent_bounds {E : Source.Env} {Γ : So
     (hi : y.1.get i=sourceUint k) (hk : hp.len r .dyn≤k.1.toNat) :
     (Source.evalLoc G F (horizon+3) (sourceNestedLoc root i j)).run y=
       (.error (.revert (Source.panicData .index)),y) := by
-  rw [sourceNestedLoc,Source.evalLoc,Source.Hoare.run_bind,hr.eval_parent_bounds G F horizon root i k hroot hi hk]
+  rw [sourceNestedLoc,Source.evalLoc.eq_def,Source.Hoare.run_bind,hr.eval_parent_bounds G F horizon root i k hroot hi hk]
 
 theorem SourceBoolRefsAt.eval_nested_loc_child_bounds {E : Source.Env} {Γ : Source.RCtx} {H : HTy}
     {y : Source.EMState E Γ} {parentAddress : Nat} {hp : Heap H} {r : HRef H BoolRefsRef}
@@ -193,7 +193,7 @@ theorem SourceBoolRefsAt.eval_nested_loc_child_bounds {E : Source.Env} {Γ : Sou
     (Source.evalLoc G F (horizon+3) (sourceNestedLoc root i j)).run y=
       (.error (.revert (Source.panicData .index)),y) := by
   have hc := hr.child_at k.1.toNat q hq
-  rw [sourceNestedLoc,Source.evalLoc,Source.Hoare.run_bind,hr.eval_parent_read G F horizon root i k q hroot hi hq]
+  rw [sourceNestedLoc,Source.evalLoc.eq_def,Source.Hoare.run_bind,hr.eval_parent_read G F horizon root i k q hroot hi hq]
   change ((Source.evalE G F (horizon+2) (.local j)) >>= fun v => Source.indexNat v >>= fun n =>
     Source.indexLoc F (.memRef rfl (address q.id) : Source.Val E.layout (.array .memory .bool none)) n).run y=_
   rw [Source.Hoare.run_bind,source_local_value_run G F (horizon+1) y j _ hj]
@@ -265,7 +265,7 @@ theorem SourceBoolRefsAt.nested_assign_child_bounds {E : Source.Env} {Γ : Sourc
       (.val (.simple (.local rhs))))=.error .revert ∧ Evm.run (nestedWriteCode (C := C) b root i j rhs) m=.revert := by
   have hn : σ.heap.writeAddr (.index q .dyn (Evm.Memory.indexValue l)) v=none := by
     simp only [Heap.writeAddr,Heap.setIndex,Evm.Memory.indexValue,Int.toNat_natCast]
-    exact if_neg (Nat.not_lt.mpr hl)
+    exact ite_eq_right (Nat.not_lt.mpr hl)
   have hword : Evm.run (Evm.Memory.writeArrayCode (base q.id)) ((m.push (.val (Evm.bword v))).push (.val l))=.revert := by
     rcases Evm.Memory.writeArray_correct (hm.state.heap.arrays q) l v (.val (Evm.bword v)) rfl with ⟨_,hh,_,_⟩|⟨_,hc⟩
     · rw [hn] at hh;cases hh
