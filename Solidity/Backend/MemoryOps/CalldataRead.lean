@@ -130,13 +130,13 @@ theorem decodedBoolSlice_transport {D : Source.Layout} {c : Source.Calldata D}
   obtain ⟨b, hm, hr⟩ := decodedBoolSlice_overwrite_read hc hp dst a offset start stop i hb hd hi
   exact ⟨b, hm, hr, overwriteSlice_frame hp dst q a offset _ hd hne⟩
 
-/-- info: 'Solidity.Backend.MemoryOps.decodedBoolRead_iff' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.MemoryOps.decodedBoolRead_iff' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms decodedBoolRead_iff
 /-- info: 'Solidity.Backend.MemoryOps.decodedBoolRead_bound' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms decodedBoolRead_bound
-/-- info: 'Solidity.Backend.MemoryOps.decodedBoolSlice_overwrite_read' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.decodedBoolSlice_overwrite_read' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms decodedBoolSlice_overwrite_read
-/-- info: 'Solidity.Backend.MemoryOps.decodedBoolSlice_transport' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.decodedBoolSlice_transport' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms decodedBoolSlice_transport
 
 end Solidity.Backend.MemoryOps
