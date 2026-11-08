@@ -86,4 +86,10 @@ async function run({vscode,config,events,sessionFor,requestPhase=require('./phas
  }catch(error){error.observation=result;throw error;}
  finally{result.events=events.slice(begin);result.forbiddenActions=forbidden(result.events);save();}
 }
-module.exports={phases,validate,run,preparation,trustErrors};
+// Failure transport only: never substitute this partial snapshot for a host result.
+function partialEvidence(directory,runId,target){
+ const file=path.join(directory,'menu-observations.json');let bytes;
+ try{bytes=fs.readFileSync(file);const observation=JSON.parse(bytes);if(observation.runId!==runId||observation.target!==target)throw Error('Foreign partial menu identity');return{status:'failed-partial',file,sha256:createHash('sha256').update(bytes).digest('hex'),observation};}
+ catch(error){return{status:'unavailable',file,...(bytes?{sha256:createHash('sha256').update(bytes).digest('hex')}:{}),error:error.message};}
+}
+module.exports={phases,validate,run,preparation,trustErrors,partialEvidence};

@@ -47,3 +47,9 @@ test('trust renderer rejects UI replacement inside either capture bracket (injec
  }
 });
 test('trust runner accepts only explicit opt-in on bounded contribution suite',()=>{const{parse}=require('../parity/run.cjs');assert.throws(()=>parse(['--menu-trust','transitions']),/require contribution/);assert.throws(()=>parse(['--suite','contribution-menus','--menu-trust','fake']),/require contribution/);assert.equal(parse(['--suite','contribution-menus','--menu-trust','transitions','--workers','1','--obligations','1','--trials','1','--warmups','0']).menuTrust,'transitions');});
+
+
+test('missing host report retains complete failed partial menu record without promotion (injected file boundary)',()=>{
+ const fs=require('node:fs'),os=require('node:os'),path=require('node:path'),{partialEvidence}=require('../parity/menu-lifecycle.cjs'),dir=fs.mkdtempSync(path.join(os.tmpdir(),'menu-partial-'));
+ try{const original=trustedFixture();original.trust.steps=original.trust.steps.slice(0,3);original.trust.steps[2].error='CDP timeout DOMSnapshot.captureSnapshot';fs.writeFileSync(path.join(dir,'menu-observations.json'),JSON.stringify(original));const report=JSON.parse(JSON.stringify({status:'broken',error:'No fresh extension-host report',partialMenuEvidence:partialEvidence(dir,'run','local')}));assert.equal(report.status,'broken');assert.equal(report.result,undefined);assert.deepEqual(report.partialMenuEvidence.observation,original);assert.equal(report.partialMenuEvidence.status,'failed-partial');assert.equal(report.partialMenuEvidence.observation.trust.steps[2].error,'CDP timeout DOMSnapshot.captureSnapshot');assert.ok(validate(original,'run','local','/','transitions').length);assert.equal(partialEvidence(dir,'run','dafny').status,'unavailable');assert.equal(partialEvidence(dir,'foreign','local').observation,undefined);}finally{fs.rmSync(dir,{recursive:true,force:true});}
+});

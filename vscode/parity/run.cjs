@@ -235,6 +235,7 @@ async function launch(config,options) {
     renderer:{...(rendererCapture||{captured:false,reason:'Host did not reach renderer capture'}),inputProbe:probe||{status:'unexamined'}},
     protocol:protocol(options.trace==='off'?null:config.trace),
     applied:config.target==='local'?{workers:config.workers,cache:'exact snapshot and persistent Lean document',reason:'The local cache does not implement Dafny caching-policy levels'}:{workers:config.workers,cache:config.cache}};
+  if(options.suite==='contribution-menus'&&!result)run.partialMenuEvidence=require('./menu-lifecycle.cjs').partialEvidence(config.dir,config.runId,config.target);
   if(result?.initialCompletedSinceHostMs!==undefined)run.result.metrics.processLaunchThroughVerificationMs=result.startedWallTime-launchedWallTime+result.initialCompletedSinceHostMs;
   if(result?.metrics?.activationMs!==undefined)run.result.metrics.processLaunchThroughActivationMs=result.startedWallTime-launchedWallTime+result.metrics.activationMs;
   const logs=join(portable,'user-data/logs');
