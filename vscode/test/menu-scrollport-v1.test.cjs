@@ -43,3 +43,8 @@ test('attempt and cleanup record failures retain refusal and still attempt Escap
  for(const filename of ['menu-attempts.json','menu-cleanup-error.json']){const {anchor,probe}=fixture();probe.hitOwned=false;const dir=fs.mkdtempSync(path.join(os.tmpdir(),'scrollport-finally-fail-'));fs.mkdirSync(path.join(dir,filename));let count=0,escapes=0;
  try{await assert.rejects(require('../parity/renderer.cjs').captureContributionMenu({async request(method){if(method==='Runtime.evaluate')return{result:{value:++count===1?anchor:probe}};if(method==='Input.dispatchKeyEvent')escapes++;throw Error('Injected cleanup/capture transport failure');}},dir,{target:'local',kind:'editor',anchorAdmission:helper.version,binding:{uri}}),error=>{assert.equal(error.code,'ERR_ASSERTION');assert.ok(error.reportingErrors?.length);return true;});assert.ok(escapes>0,'Escape cleanup attempted despite recording failure');}finally{fs.rmSync(dir,{recursive:true,force:true});}}
 });
+
+test('CSS identity matrix has identical geometry; nonidentity and malformed transforms remain refused',()=>{
+ const {anchor,probe}=fixture();probe.clips[0].transform='matrix(1, 0, 0, 1, 0, 0)';assert.deepEqual(helper.admit(probe,anchor,uri).point,{x:160,y:112});
+ for(const transform of ['matrix(2, 0, 0, 1, 0, 0)','matrix(1, 0, 0, 1, 0, 1)','matrix(0, 1, -1, 0, 0, 0)','matrix(1,,0,1,0,0)','matrix(1, 0, 0, 1, NaN, 0)','translate(0px)']){probe.clips[0].transform=transform;assert.throws(()=>helper.admit(probe,anchor,uri));}
+});
