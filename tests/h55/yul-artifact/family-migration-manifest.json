@@ -3,7 +3,7 @@
   "scope": "Frozen 57-input H55 family queue; proof-entrypoint reuse is partial family migration, not definition or full-family completion.",
   "frozen_input_count": 57,
   "fully_migrated_families": 0,
-  "partially_migrated_input_files": 28,
+  "partially_migrated_input_files": 29,
   "entries": [
     {
       "path": "Solidity/Yul/Compilation/CaseCompletion.lean",
@@ -169,7 +169,8 @@
       "path": "Solidity/Yul/Compilation/MultiSwitchCompletion.lean",
       "status": "proof_reuse_partial",
       "migrated_declarations": [
-        "Solidity.Yul.Compilation.MultiSwitchCompletion.completion_iff"
+        "Solidity.Yul.Compilation.MultiSwitchCompletion.completion_iff",
+        "Solidity.Yul.Compilation.MultiSwitchCompletion.model_to_source"
       ],
       "existing_definitions_changed": false
     },
@@ -225,7 +226,8 @@
       "path": "Solidity/Yul/Compilation/ScopedForCompletion.lean",
       "status": "proof_reuse_partial",
       "migrated_declarations": [
-        "Solidity.Yul.Compilation.ScopedForCompletion.completion_iff"
+        "Solidity.Yul.Compilation.ScopedForCompletion.completion_iff",
+        "Solidity.Yul.Compilation.ScopedForCompletion.model_to_source"
       ],
       "existing_definitions_changed": false
     },
@@ -237,8 +239,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/ScopedLoopCompletion.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.ScopedLoopCompletion.source_more"
+      ],
       "existing_definitions_changed": false
     },
     {

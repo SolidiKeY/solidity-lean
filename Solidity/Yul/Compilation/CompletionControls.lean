@@ -6,6 +6,17 @@ This header adds no source or model execution premise to a family theorem. -/
 namespace Solidity.Yul.Compilation.CompletionControls
 open Backend Scalar MachineAdapter Solidity.Yul.Closed ProducerExpressions
 
+/-- Turn an existing additive completion-refinement law into completion at a
+larger horizon. The operational function and its proved refinement law stay
+explicit; this says nothing about noncompletion or target execution. -/
+theorem completed_horizon {α : Type} (run : Nat → Option α)
+    (refineAdd : ∀ fuel extra, Refines (run fuel) (run (fuel + extra)))
+    {lo hi : Nat} (bound : lo ≤ hi) {value : α}
+    (done : run lo = some value) : run hi = some value := by
+  obtain ⟨extra, eq⟩ := Nat.exists_eq_add_of_le bound
+  rw [eq]
+  exact refineAdd lo extra value done
+
 theorem sourceLocals_injective {n : Nat} : Function.Injective (@sourceLocals n) := by
   intro a b same
   apply Vector.ext
