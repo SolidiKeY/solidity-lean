@@ -2,6 +2,7 @@
 
 The lightweight worker named lean is a process-control fixture, not a Lean proof.
 """
+import argparse
 import importlib.util
 import json
 import os
@@ -19,6 +20,13 @@ SCRIPTS = ROOT/'scripts/h62/item4/generic-v08'
 sys.path.insert(0, str(SCRIPTS))
 from width_resources import process_usage, MeasurementError
 from width_scope import require_scope, ScopeError
+
+# Imports and ordinary unittest discovery must retain host hard-scope policy.
+CLOUD_VM_H232 = False
+
+
+def cloud_arguments(cloud_vm_h232=False):
+    return ['--cloud-vm-h232'] if cloud_vm_h232 else []
 
 
 class Measurement(unittest.TestCase):
@@ -82,14 +90,24 @@ class Measurement(unittest.TestCase):
                 with self.assertRaises(MeasurementError):
                     process_usage(321, root, lambda _: True)
 
-    def test_missing_cgroup_reports_unvalidated_lifecycle(self):
+    def test_default_and_explicit_cloud_admission_are_distinct(self):
+        self.assertEqual(cloud_arguments(), [])
+        self.assertEqual(cloud_arguments(True), ['--cloud-vm-h232'])
+        for mode in (False, True):
+            fixture = Ownership('test_monitor_sigkill_cannot_orphan_worker')
+            admitted = Mock(return_value={'membership': '/actual'})
+            with patch.dict(Ownership.setUp.__globals__, CLOUD_VM_H232=mode, require_scope=admitted):
+                self.assertIsNone(fixture.setUp())
+            admitted.assert_called_once_with(cloud_vm_h232=mode)
+
+    def test_missing_observations_report_unvalidated_lifecycle(self):
         fixture = Ownership('test_monitor_sigkill_cannot_orphan_worker')
-        # Admission may read /review.scope/memory.max, not the cgroup root.
+        # Missing required observations must skip rather than claim cleanup validation.
         failure = Mock(side_effect=ScopeError('scope observation unavailable'))
         with patch.dict(Ownership.setUp.__globals__, require_scope=failure):
             with self.assertRaisesRegex(unittest.SkipTest, 'NOT VALIDATED'):
                 fixture.setUp()
-        failure.assert_called_once_with()
+        failure.assert_called_once_with(cloud_vm_h232=CLOUD_VM_H232)
 
     def test_valid_nested_scope_admission_is_not_skipped(self):
         fixture = Ownership('test_monitor_sigkill_cannot_orphan_worker')
@@ -98,7 +116,7 @@ class Measurement(unittest.TestCase):
         admitted = Mock(return_value=observation)
         with patch.dict(Ownership.setUp.__globals__, require_scope=admitted):
             self.assertIsNone(fixture.setUp())
-        admitted.assert_called_once_with()
+        admitted.assert_called_once_with(cloud_vm_h232=CLOUD_VM_H232)
 
 
 def running(pid):
@@ -122,9 +140,9 @@ def wait_for(predicate, seconds=10):
 class Ownership(unittest.TestCase):
     def setUp(self):
         try:
-            require_scope()
+            require_scope(cloud_vm_h232=CLOUD_VM_H232)
         except ScopeError as error:
-            self.skipTest('hard resource scope unavailable; lifecycle NOT VALIDATED: '+str(error))
+            self.skipTest('required memory observations unavailable; lifecycle NOT VALIDATED: '+str(error))
 
     def exercise(self, case):
         with tempfile.TemporaryDirectory() as folder:
@@ -177,7 +195,7 @@ module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
 with Path({str(lock)!r}).open('a') as owner:
     fcntl.flock(owner,fcntl.LOCK_EX)
     command=[sys.executable,'-B',{str(launcher)!r},'--record',{str(record)!r},'--seconds','15',
-        '--aggregate','--aggregate-parent','--parent-pid',str(os.getpid()),'--lease-fd',str(owner.fileno()),
+        *{cloud_arguments(CLOUD_VM_H232)!r},'--aggregate','--aggregate-parent','--parent-pid',str(os.getpid()),'--lease-fd',str(owner.fileno()),
         '--',{str(worker)!r},'-j1']
     try: result=module.run_monitor(command,pass_fds=(owner.fileno(),))
     except BaseException: raise SystemExit(1)
@@ -257,4 +275,9 @@ with Path({str(lock)!r}).open('a') as owner:
 
 
 if __name__ == '__main__':
-    unittest.main()
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument('--cloud-vm-h232', action='store_true',
+                        help='Explicit H232 cloud-VM lifecycle admission only')
+    mode, unittest_args = parser.parse_known_args()
+    CLOUD_VM_H232 = mode.cloud_vm_h232
+    unittest.main(argv=[sys.argv[0], *unittest_args])
