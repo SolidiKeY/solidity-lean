@@ -198,4 +198,52 @@ theorem calldata_zero_fuel_observation (free : Nat) :
 #print axioms calldata_reference_failure
 #print axioms calldata_short_head
 #print axioms calldata_zero_fuel_observation
+
+/-! Guarded regression: eager bytes checks are ordered. A missing length word
+reverts first; an oversized length or failed allocation can panic before payload
+validation. Constructive success must retain all four checks on one input. -/
+theorem memory_bytes_success_of_bounds (I : Input) (fuel pos a next : Nat)
+    (head : pos + 31 < I.size)
+    (length : load I.data pos ≤ lim)
+    (allocation : alloc I a (roundUp (load I.data pos) + 32) = .ok next)
+    (payload : pos + 32 + load I.data pos ≤ I.size) :
+    mdec I (fuel + 1) .bytes pos a =
+      .ok (.bytes (bytesAt I.data (pos + 32) (load I.data pos)), next) := by
+  simp only [mdec, head, if_true, Nat.not_lt.mpr length, if_false, allocation,
+    Nat.not_lt.mpr payload]
+
+theorem memory_bytes_missing_length (I : Input) (fuel pos a : Nat)
+    (missing : ¬ pos + 31 < I.size) :
+    mdec I (fuel + 1) .bytes pos a = .error .revert := by
+  simp only [mdec, missing, if_false]
+
+theorem memory_bytes_oversized_length (I : Input) (fuel pos a : Nat)
+    (head : pos + 31 < I.size) (oversized : lim < load I.data pos) :
+    mdec I (fuel + 1) .bytes pos a = .error .panic := by
+  simp only [mdec, head, oversized, if_true]
+
+theorem memory_bytes_allocation_failure (I : Input) (fuel pos a : Nat) (failure : Fail)
+    (head : pos + 31 < I.size) (length : load I.data pos ≤ lim)
+    (allocation : alloc I a (roundUp (load I.data pos) + 32) = .error failure) :
+    mdec I (fuel + 1) .bytes pos a = .error failure := by
+  simp only [mdec, head, if_true, Nat.not_lt.mpr length, if_false, allocation]
+
+theorem memory_bytes_truncated_payload (I : Input) (fuel pos a next : Nat)
+    (head : pos + 31 < I.size) (length : load I.data pos ≤ lim)
+    (allocation : alloc I a (roundUp (load I.data pos) + 32) = .ok next)
+    (truncated : I.size < pos + 32 + load I.data pos) :
+    mdec I (fuel + 1) .bytes pos a = .error .revert := by
+  simp only [mdec, head, if_true, Nat.not_lt.mpr length, if_false, allocation, truncated]
+
+-- Bytes have no nested elements: positive mdec fuel does not affect this branch.
+theorem memory_bytes_positive_fuel_independent (I : Input) (first second pos a : Nat) :
+    mdec I (first + 1) .bytes pos a = mdec I (second + 1) .bytes pos a := by
+  rfl
+
+#print axioms memory_bytes_success_of_bounds
+#print axioms memory_bytes_missing_length
+#print axioms memory_bytes_oversized_length
+#print axioms memory_bytes_allocation_failure
+#print axioms memory_bytes_truncated_payload
+#print axioms memory_bytes_positive_fuel_independent
 end Solidity.H62.AuditLanguage.AbiDynamicWitness
