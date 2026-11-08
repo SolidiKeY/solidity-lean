@@ -1,4 +1,5 @@
 import Solidity.Lowering.V07.ConditionalAssignments
+import Solidity.Lowering.G19.AssignmentReturnFlag
 
 /-! Statement-level consumer of the published V07 conditional assignment
 producer. Existing intrinsic source statements and target blocks only. -/
@@ -25,14 +26,10 @@ theorem source_run {E : Source.Env} {Γ : Source.RCtx} {τ : Source.STy}
     (Source.execS G F (fuel+4) nps ph (R := R) (M := M)
       (statement (k := k) ci ca i a j b) s.1).run (.nil,s.2) =
       (.ok (Source.Out.normal (ConditionalAssignments.sourceAfter s ci choice i a j b).1),(.nil,s.2)) := by
-  have hr : (Source.evalE G F (fuel+3) (.assign (.local ci) (.local ca))).run s =
-      (.ok (.val (.bool choice)),(s.1.set ci (.bool choice),s.2)) :=
-    source_assign_local_run G F (fuel+1) s ci ca _ read
-  simp only [ExceptT.run] at hr
   have sub : (Source.EM.sub s.1 (Source.evalE G F (fuel+3)
       (.assign (.local ci) (.local ca)))).run (.nil,s.2) =
-      (.ok (.val (.bool choice),s.1.set ci (.bool choice)),(.nil,s.2)) := by
-    simp only [Source.EM.sub,ExceptT.run,ExceptT.mk,hr]
+      (.ok (.val (.bool choice),s.1.set ci (.bool choice)),(.nil,s.2)) :=
+    AssignmentReturnFlag.assignment_sub_run G F (fuel+1) s.1 s.2 ci ca (.bool choice) read
   have branchRun (dest donor : Source.Idx Γ τ) :
       (Source.execS G F (fuel+3) nps ph (R := R) (M := M) (k := k)
         (.expr (.assign (.local dest) (.local donor))) (s.1.set ci (.bool choice))).run (.nil,s.2) =

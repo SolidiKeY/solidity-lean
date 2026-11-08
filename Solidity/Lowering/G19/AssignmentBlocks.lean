@@ -47,13 +47,10 @@ theorem source_items_run {E : Source.Env} {Γ : Source.RCtx}
   | nil => rfl
   | cons step rest ih =>
     rcases step with ⟨dest,donor⟩
-    have evalRun : Source.evalE G F (fuel+rest.length+2) (.assign (.local dest) (.local donor)) (plan := none) (calldataKnown := true) s =
-        (.ok (.val (s.1.get donor)),(s.1.set dest (s.1.get donor),s.2)) :=
-      source_assign_local_run G F (fuel+rest.length) s dest donor _ rfl
     have sub : (Source.EM.sub s.1 (Source.evalE G F (fuel+rest.length+2)
         (.assign (.local dest) (.local donor)))).run (.nil,s.2) =
-        (.ok (.val (s.1.get donor),s.1.set dest (s.1.get donor)),(.nil,s.2)) := by
-      simp only [Source.EM.sub,ExceptT.run,ExceptT.mk,evalRun]
+        (.ok (.val (s.1.get donor),s.1.set dest (s.1.get donor)),(.nil,s.2)) :=
+      AssignmentReturnFlag.assignment_sub_run G F (fuel+rest.length) s.1 s.2 dest donor _ rfl
     have headRun : (Source.execS G F (fuel+rest.length+3) nps ph (R := R) (M := M) (k := k)
         (.expr (.assign (.local dest) (.local donor))) s.1).run (.nil,s.2) =
         (.ok (Source.Out.normal (s.1.set dest (s.1.get donor))),(.nil,s.2)) := by

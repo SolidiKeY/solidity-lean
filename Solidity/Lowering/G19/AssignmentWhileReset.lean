@@ -45,9 +45,7 @@ theorem condition_sub {E : Source.Env} {srcΓ : Source.RCtx}
     (st : Source.St E) (i a : Source.Idx srcΓ .bool) (v : Bool) (read : xs.get a = .bool v) :
     (Source.EM.sub xs (Source.evalE G F (fuel+2) (.assign (.local i) (.local a)))).run (.nil,st) =
       (.ok (.val (.bool v),xs.set i (.bool v)),(.nil,st)) := by
-  have h : Source.evalE G F (fuel+2) (.assign (.local i) (.local a)) (plan := none) (calldataKnown := true) (xs,st) =
-      (.ok (.val (.bool v)),(xs.set i (.bool v),st)) := source_assign_local_run G F fuel (xs,st) i a _ read
-  simp only [Source.EM.sub,ExceptT.run,ExceptT.mk,h]
+  exact AssignmentReturnFlag.assignment_sub_run G F fuel xs st i a (.bool v) read
 
 theorem literal_sub {E : Source.Env} {srcΓ : Source.RCtx}
     (G : Source.Glob E) (F : Source.Fr) (fuel : Nat) (xs : Source.Locals E.layout srcΓ)

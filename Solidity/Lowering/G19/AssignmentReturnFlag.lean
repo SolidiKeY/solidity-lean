@@ -31,6 +31,22 @@ def reached {srcΓ : Source.RCtx} {C : Contract} {Γ : Ctx}
     (TEnv.get (boolSlot m rhs rhsBool) target.env)).push
     (t := .val .bool) (TEnv.get (boolSlot m rhs rhsBool) target.env)
 
+/-- Shared exact local-assignment step under the statement evaluator's
+local scope. It preserves the source store and returns the updated locals;
+it assumes only the donor value, never execution or a desired postcondition. -/
+theorem assignment_sub_run {E : Source.Env} {Γ : Source.RCtx} {τ : Source.STy}
+    (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
+    (ls : Source.Locals E.layout Γ) (st : Source.St E)
+    (i a : Source.Idx Γ τ) (value : Source.Val E.layout τ) (read : ls.get a = value) :
+    (Source.EM.sub ls (Source.evalE G F (fuel+2)
+      (.assign (.local i) (.local a)))).run (.nil,st) =
+      (.ok (.val value,ls.set i value),(.nil,st)) := by
+  have step : Source.evalE (plan := none) (calldataKnown := true) G F (fuel+2)
+      (.assign (.local i) (.local a)) (ls,st) =
+      (.ok (.val value),(ls.set i value,st)) :=
+    source_assign_local_run G F fuel (ls,st) i a value read
+  simp only [Source.EM.sub,ExceptT.run,ExceptT.mk,step]
+
 /-- Actual Source statement equation. The fuel offset is derived from its
 assignment/if/return equations, not an admitted-source unrolling limit. -/
 theorem source_run {E : Source.Env} {srcΓ : Source.RCtx}
@@ -45,11 +61,8 @@ theorem source_run {E : Source.Env} {srcΓ : Source.RCtx}
         else Source.Out.normal (ls.set i (.bool choice))),(.nil,st)) := by
   have sub : (Source.EM.sub ls (Source.evalE G F (fuel+2)
       (.assign (.local i) (.local a)))).run (.nil,st) =
-      (.ok (.val (.bool choice),ls.set i (.bool choice)),(.nil,st)) := by
-    have hr : Source.evalE (plan := none) (calldataKnown := true) G F (fuel+2) (.assign (.local i) (.local a)) (ls,st) =
-        (.ok (.val (.bool choice)),(ls.set i (.bool choice),st)) :=
-        source_assign_local_run G F fuel (ls,st) i a (.bool choice) read
-    simp only [Source.EM.sub,ExceptT.run,ExceptT.mk,hr]
+      (.ok (.val (.bool choice),ls.set i (.bool choice)),(.nil,st)) :=
+    AssignmentReturnFlag.assignment_sub_run G F fuel ls st i a (.bool choice) read
   rw [Source.execS,Source.Hoare.run_bind,sub]
   cases choice <;> rfl
 
