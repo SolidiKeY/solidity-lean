@@ -123,11 +123,11 @@ theorem short_before_word (C : Contract) (base : Nat) (kind : Solidity.AbiEntry.
 theorem uint_specialization (C : Contract) (bits : Nat) (label : Fin W) :
     program C (.uint bits) label=UIntBinding.program C bits label := rfl
 
-/-- info: 'Solidity.Backend.AbiEntry.WordCarrierBinding.admitted' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiEntry.WordCarrierBinding.admitted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms admitted
 /-- info: 'Solidity.Backend.AbiEntry.WordCarrierBinding.selected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms selected
-/-- info: 'Solidity.Backend.AbiEntry.WordCarrierBinding.code' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.AbiEntry.WordCarrierBinding.code' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms code
 /-- info: 'Solidity.Backend.AbiEntry.WordCarrierBinding.run_program' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms run_program
@@ -141,6 +141,8 @@ theorem uint_specialization (C : Contract) (bits : Nat) (label : Fin W) :
 #guard_msgs (whitespace := lax) in #print axioms certificate
 /-- info: 'Solidity.Backend.AbiEntry.WordCarrierBinding.short_before_word' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms short_before_word
-/-- info: 'Solidity.Backend.AbiEntry.WordCarrierBinding.uint_specialization' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiEntry.WordCarrierBinding.uint_specialization' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms uint_specialization
 end Solidity.Backend.AbiEntry.WordCarrierBinding
