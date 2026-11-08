@@ -37,8 +37,7 @@ theorem final_height (locals : Vector Scalar.Word 2) (m final : Evm.Machine) (ca
  skip = 0 ∧ final.stack.length = 2+caller.length := by
  obtain ⟨_,_,_,out,_,_,_,_,done,frame⟩ := model_to_source artifact locals m final caller skip ran
  refine ⟨done,?_⟩
- rw [frame]
- simp only [List.length_append,List.length_map,Vector.length_toList]
+ exact CompletionControls.frame_height #v[] out m final caller frame
 
 theorem stale_output_refused (m : Evm.Machine) (caller : List Evm.Word) :
  Evm.run artifact.code {m with stack := coreWord 0::coreWord 0::caller} ≠

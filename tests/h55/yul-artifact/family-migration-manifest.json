@@ -3,12 +3,14 @@
   "scope": "Frozen 57-input H55 family queue; proof-entrypoint reuse is partial family migration, not definition or full-family completion.",
   "frozen_input_count": 57,
   "fully_migrated_families": 0,
-  "partially_migrated_input_files": 29,
+  "partially_migrated_input_files": 50,
   "entries": [
     {
       "path": "Solidity/Yul/Compilation/CaseCompletion.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.CaseCompletion.model_to_source"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -21,8 +23,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/GuardedForCompletionControls.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.GuardedForCompletion.Controls.recovered_skipped"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -35,8 +39,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/InitializedLoopCompletionControls.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.InitializedLoopCompletion.Controls.recovered"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -49,8 +55,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/LetBranchCompilationControls.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.LetBranchCompilation.Controls.source_done"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -77,8 +85,11 @@
     },
     {
       "path": "Solidity/Yul/Compilation/LetControlCompilationControls.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.LetControlCompilation.Controls.body_source",
+        "Solidity.Yul.Compilation.LetControlCompilation.Controls.source_done"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -91,8 +102,11 @@
     },
     {
       "path": "Solidity/Yul/Compilation/LetControlCompletionControls.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.LetControlCompletion.Controls.mixed_high_source",
+        "Solidity.Yul.Compilation.LetControlCompletion.Controls.mixed_zero_source"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -105,8 +119,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/LetScopeCompilationControls.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.LetScopeCompilation.Controls.body_source"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -147,8 +163,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/LetSequenceCompletionControls.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.LetSequenceCompletion.Controls.triple_source"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -161,8 +179,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/LoopControlCompletionControls.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.LoopControlCompletion.Controls.pending_refused"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -176,8 +196,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/MultiSwitchCompletionControls.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.MultiSwitchCompletion.Controls.final_height"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -204,8 +226,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/ScopedControlCompletionControls.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.ScopedControlCompletion.Controls.success_iff"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -218,8 +242,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/ScopedForCompilationControls.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.ScopedForCompilation.Controls.source_done"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -233,8 +259,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/ScopedForCompletionControls.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.ScopedForCompletion.Controls.success_iff"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -255,8 +283,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/SequenceCompletionControls.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.SequenceCompletion.Controls.final_height"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -269,8 +299,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/SourceLoopCompletionControls.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.SourceLoopModelCompletion.Controls.pending_refused"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -305,8 +337,11 @@
     },
     {
       "path": "Solidity/Yul/Compilation/StructuredSequenceCompletionControls.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.StructuredSequenceCompletion.Controls.final_height",
+        "Solidity.Yul.Compilation.StructuredSequenceCompletion.Controls.pending_skip_refused"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -333,15 +368,18 @@
     },
     {
       "path": "Solidity/Yul/Compilation/SwitchCompletionControls.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.SwitchCompletion.Controls.final_height"
+      ],
       "existing_definitions_changed": false
     },
     {
       "path": "Solidity/Yul/Compilation/SwitchSequence.lean",
       "status": "proof_reuse_partial",
       "migrated_declarations": [
-        "Solidity.Yul.Compilation.SwitchSequence.Artifact.normal_to_model"
+        "Solidity.Yul.Compilation.SwitchSequence.Artifact.normal_to_model",
+        "Solidity.Yul.Compilation.SwitchSequence.Artifact.join_source"
       ],
       "existing_definitions_changed": false
     },
@@ -355,8 +393,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/SwitchSequenceCompletionControls.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.SwitchSequenceCompletion.Controls.final_height"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -375,8 +415,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/ZeroControlCompilationControls.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.ZeroControlCompilation.Controls.body_source"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -389,8 +431,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/ZeroControlCompletionControls.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.ZeroControlCompletion.Controls.success_iff"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -403,8 +447,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/ZeroScopeCompletionControls.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.ZeroScopeCompletion.Controls.dirty_body"
+      ],
       "existing_definitions_changed": false
     }
   ]
