@@ -128,6 +128,12 @@ The final finder corrected the catalog insertion point to follow the v13
 entry. The final skeptic requested explicit labeling of the manual gap list
 and informational-only inventory semantics; both corrections are incorporated.
 
+The H185/H186 decision update received independent read-only finder and skeptic
+reviews with no Lean server and no findings. Both confirmed the owner-input
+wait and provisioning requirement remain intact, with no gate waiver or
+completion claim. Both coordination questions were acknowledged after recording
+the selected option A decisions; their dependencies remain pending.
+
 ## Checkpoint handoff
 
 Inventory is partial until its reviews and required gates pass. Suite, fresh
