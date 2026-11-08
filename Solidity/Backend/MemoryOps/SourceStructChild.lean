@@ -30,7 +30,7 @@ theorem SourceBoolStructAt.eval_child_loc {E : Source.Env} {Γ : Source.RCtx} {H
     (hk : k.1.toNat<hp.len (hp.field r layout.child_type) .dyn) :
     (Source.evalLoc G F (n+3) (sourceStructChildLoc layout root i)).run y=
       (.ok (.mem (address (hp.field r layout.child_type).id) k.1.toNat),y) := by
-  rw [sourceStructChildLoc,Source.evalLoc,Source.Hoare.run_bind,hr.eval_member_child G F n root hroot]
+  rw [sourceStructChildLoc,Source.evalLoc.eq_def,Source.Hoare.run_bind,hr.eval_member_child G F n root hroot]
   change ((Source.evalE G F (n+2) (.local i)) >>= fun v => Source.indexNat v >>= fun k =>
     Source.indexLoc F (.memRef rfl (address (hp.field r layout.child_type).id) : Source.Val E.layout SourceBoolArrayTy) k).run y=_
   rw [Source.Hoare.run_bind,source_local_value_run G F (n+1) y i _ hi]
@@ -45,7 +45,7 @@ theorem SourceBoolStructAt.eval_child_read {E : Source.Env} {Γ : Source.RCtx} {
     (hv : hp.index (hp.field r layout.child_type) .dyn k=some v) :
     (Source.evalE G F (n+3) (sourceStructChildRead layout root i)).run y=(.ok (.val (.bool v)),y) := by
   have hk : k.1.toNat<hp.len (hp.field r layout.child_type) .dyn := (List.getElem?_eq_some_iff.mp hv).1
-  rw [sourceStructChildRead,Source.evalE,Source.Hoare.run_bind,hr.eval_member_child G F n root hroot]
+  rw [sourceStructChildRead,Source.evalE.eq_def,Source.Hoare.run_bind,hr.eval_member_child G F n root hroot]
   change ((Source.evalE G F (n+2) (.local i)) >>= fun v => Source.indexNat v >>= fun k =>
     Source.indexLoc F (.memRef rfl (address (hp.field r layout.child_type).id) : Source.Val E.layout SourceBoolArrayTy) k >>= fun loc =>
     Source.readLoc F loc >>= fun v => pure (Source.RVal.val v)).run y=_
@@ -67,6 +67,7 @@ theorem SourceBoolStructAt.parent_ne_leaf {E : Source.Env} {Γ : Source.RCtx} {H
   have ht := congrArg Sigma.fst (Option.some.inj (hr.parent.symm.trans hc))
   cases ht
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The selected child's actual write frames the existing named parent and
 ALL other intrinsic objects. Source aliases at different addresses are framed;
 no global address injection is required. -/
@@ -231,7 +232,7 @@ theorem SourceBoolStructAt.child_bounds {E : Source.Env} {Γ : Source.RCtx} {H :
       (.error (.revert (Source.panicData .index)),y) := by
   have hl : (Source.evalLoc G F (n+3) (sourceStructChildLoc layout root i)).run y=
       (.error (.revert (Source.panicData .index)),y) := by
-    rw [sourceStructChildLoc,Source.evalLoc,Source.Hoare.run_bind,hr.eval_member_child G F n root hroot]
+    rw [sourceStructChildLoc,Source.evalLoc.eq_def,Source.Hoare.run_bind,hr.eval_member_child G F n root hroot]
     change ((Source.evalE G F (n+2) (.local i)) >>= fun v => Source.indexNat v >>= fun k =>
       Source.indexLoc F (.memRef rfl (address (hp.field r layout.child_type).id) : Source.Val E.layout SourceBoolArrayTy) k).run y=_
     rw [Source.Hoare.run_bind,source_local_value_run G F (n+1) y i _ hi]
