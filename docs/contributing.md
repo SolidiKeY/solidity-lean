@@ -37,19 +37,15 @@ each proof iteration. Documentation-only edits need path and link checks.
 
 ## Before pushing
 
-The merge pre-gate runs `gate.sh touched` on your head merged onto current
-`origin/master`: it builds the modules you changed and the library modules that
-import them, with the coverage described in
-[`scripts/coord-tools/README.md`](../scripts/coord-tools/README.md). It is not a
-full build. Run the same check first:
+The merge pre-gate runs `gate.sh touched` on your head merged onto current `origin/master`.
+It builds changed modules and their library importers; see [coverage](../scripts/coord-tools/README.md).
+It is not a full build. Run the same check first:
 
 1. `git fetch origin master && git merge origin/master` (or a temporary worktree
    with the merge), then `bash scripts/coord-tools/gate.sh touched` in that tree.
-   Fix failures there: the pre-gate rejects a head that builds only on an older
-   base, or only in the files it changed. On a lane, `coord-ask --done` runs this
-   check itself and reports only a head that passes it (or is already on master);
-   anything else (a failure, a conflict, a check that cannot run) needs
-   `--no-check REASON`. The push records the checked head and any command override.
+   Fix failures: pre-gate rejects heads that build only on an older base or only in changed files.
+   On lanes, `coord-ask --done` runs this check and reports only passing heads or heads already on master.
+   Failure, conflict or an unavailable check requires `--no-check REASON`; the push records the checked head and any command override.
 2. A change to a module with many importers (for example `Solidity/Source/**`)
    keeps existing statements: add the new form beside the old one as a versioned
    pair (H57) and move the importers in the same head, or keep the old form until
