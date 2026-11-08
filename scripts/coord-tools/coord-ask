@@ -14,7 +14,8 @@ through a GitHub webhook and opens, follows up (same lane + QID) or closes the i
 checkout's build caches, COORD_CACHE_DIRS), then COORD_PREPUSH_CMD there (default `bash scripts/coord-tools/gate.sh
 touched`), exactly what the merge pre-gate runs. On a failure or a conflict it prints the first errors and does not
 report done: fix it and push, or pass `--no-check REASON` when the failure is not yours. Results are cached per
-(head, master); a missing tool (lake, node) skips the check with a note. `prepush:` is recorded in the push.
+(head, master, check); a gate that fails only because a tool (lake, node) is missing is skipped with a note, never a
+gate that fails for another reason. `prepush:` is recorded in the push.
 --done also checks the head against the fetched master: when it lacks master commits older than COORD_STALE_HOURS
 (6), it warns (the merge pre-gate builds the head merged onto current master) and records `behind:` in the push; it
 never refuses.
@@ -58,7 +59,6 @@ def first_errors(text, limit=30):
 def prepush(no_check):
     """The merge pre-gate's own check, run here first. Returns {state: pass|fail|conflict|skipped, detail, master}."""
     if no_check: return {'state': 'skipped', 'detail': f'--no-check: {no_check}'}
-    if os.environ.get('COORD_PREPUSH', '1') == '0': return {'state': 'skipped', 'detail': 'COORD_PREPUSH=0'}
     if subprocess.run(['git', 'fetch', '-q', 'origin', 'master'], capture_output=True).returncode:
         return {'state': 'skipped', 'detail': 'git fetch origin master failed'}
     rp = lambda *x: subprocess.run(['git', *x], capture_output=True, text=True).stdout.strip()
@@ -95,10 +95,19 @@ def prepush(no_check):
                                text=True, env=dict(os.environ, GATE_BASE=master, GATE_LOGS=logs))
             text = r.stdout + r.stderr + ''.join(open(os.path.join(logs, f), errors='replace').read()
                                                 for f in sorted(os.listdir(logs)) if f.endswith('.log'))
+            # Judge each failing gate by its own log: a missing tool (lake, node) skips only the gates it broke; any
+            # other failing gate is a real failure, even beside a missing tool.
+            tsv = os.path.join(logs, 'gates.tsv')
+            failed = [l.rstrip('\n').split('\t') for l in open(tsv)] if os.path.exists(tsv) else []
+            failed = [f for f in failed if f and f[0] == 'FAIL']
+            log_of = lambda f: open(f[3], errors='replace').read() if len(f) > 3 and os.path.exists(f[3]) else ''
+            real = [f for f in failed if not TOOL_MISSING.search(log_of(f))]
             if r.returncode == 0: res = {'state': 'pass', 'detail': 'gate passed on the merged tree', 'master': master}
-            elif r.returncode == 127 or TOOL_MISSING.search(text):
-                res = {'state': 'skipped', 'detail': 'a tool the gate needs is missing: ' + (TOOL_MISSING.search(text) or
+            elif not failed and not os.path.exists(tsv) and (r.returncode == 127 or TOOL_MISSING.search(text)):
+                res = {'state': 'skipped', 'detail': 'the check cannot run here: ' + (TOOL_MISSING.search(text) or
                        re.search('.*', text)).group(0)[:120], 'master': master}
+            elif failed and not real:
+                res = {'state': 'skipped', 'detail': 'tools missing for gates ' + ', '.join(f[1] for f in failed), 'master': master}
             else:
                 res = {'state': 'fail', 'detail': first_errors(text).replace(w + '/', ''), 'master': master}
     finally:
