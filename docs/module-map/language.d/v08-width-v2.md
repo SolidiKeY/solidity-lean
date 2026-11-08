@@ -5,7 +5,7 @@ outside the checkout. It explicitly requires master Lean4.24.0 commit
 `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`; ambient Lake is not used. The frozen
 v1 `reproduce-width.py` keeps its separate Lean4.35.0/archive pin unchanged.
 The existing `bounded.py` runs every local import and the v2 test with `-j1`,
-verified kernel MemoryMax=12GiB and MemorySwapMax=0, a12GiB host reserve,
+H232 cloud-VM isolation, a12GiB host reserve,
 plus the existing address-space and sampled-RSS diagnostics, and a shared
 300second execution deadline. No pass is accepted after the observed deadline;
 monitor sampling is0.25seconds and failed-check termination has up to5seconds
@@ -30,14 +30,24 @@ is owned. Aggregate-mode workers inherit the writer lease and use a Linux
 parent-death SIGKILL guard, including the parent-loss-before-registration race;
 monitor SIGKILL therefore cannot leave an unowned worker running. Lifecycle
 regressions separately cover the fork-to-assignment window and monitor death.
-If sandbox cgroup observations are unavailable, those lifecycle tests report
+If required host-memory/no-swap observations are unavailable, those lifecycle tests report
 NOT VALIDATED/skipped; that is not successful cleanup evidence. The public
 checker itself still refuses unavailable resource observations.
 
-The v2 checker refuses to start Lean without observable hard scope limits;
-polling RSS is not a substitute. Enter an existing approved scope, for example
-with `systemd-run --user --scope -p MemoryMax=12G -p MemorySwapMax=0` before
-the checker command. The inherited scope is verified by `width_scope.py` and
-recorded in receipts. Missing delegation or controller data is a resource wait,
-not a passing gate. Frozen v1 defaults are separate and do not authorize a v2
-resource-policy exception.
+Only on the authorized cloud VM, explicitly add `--cloud-vm-h232` to select
+H232 admission. It is propagated explicitly to each monitor; absent that flag,
+the driver and monitor require the strict12GiB/no-swap hard scope. No ambient
+variable or ordinary-host fallback selects the cloud exception. Both modes
+record actual unified cgroup membership and fail on observed migration.
+H232 authorizes serial execution without a systemd scope: no systemd scope on
+the cloud VM (H232). The VM is the isolation; the host pre-gate separately
+enforces its16GiB/no-swap merge cap. Local checks retain one Lean process,
+12GiB address-space and sampled aggregate-RSS bounds, no swap, the existing
+host reserve and deadline. Local success does not certify the host pre-gate.
+The separate strict scope verifier remains regression-tested and is the default admission route. Frozen v1 defaults remain unchanged.
+
+Lifecycle regressions also default to strict host admission, including under
+unittest discovery. On the authorized cloud VM run
+`python3 -B tests/h62/item4/generic-v08/test_width_v2_lifecycle.py --cloud-vm-h232`.
+Only this explicit test-runner option selects cloud admission and passes the
+same option to its monitor fixtures; no environment fallback enables it.
