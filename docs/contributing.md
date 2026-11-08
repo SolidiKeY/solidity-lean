@@ -38,11 +38,10 @@ each proof iteration. Documentation-only edits need path and link checks.
 ## Before pushing
 
 The merge pre-gate runs `gate.sh touched` on your head merged onto current
-`origin/master`. It builds the `Solidity/` modules you changed and the library
-modules that import them; importers in `Examples`, `TestSuite` and `Corpus` are
-built only when you change `Syntax`, `Semantics` or `Calculus`, or set
-`GATE_EXAMPLES=1` (use that, or `gate.sh checkpoint`/`full`, to claim them).
-Run the same check first:
+`origin/master`: it builds the modules you changed and the library modules that
+import them, with the coverage described in
+[`scripts/coord-tools/README.md`](../scripts/coord-tools/README.md). It is not a
+full build. Run the same check first:
 
 1. `git fetch origin master && git merge origin/master` (or a temporary worktree
    with the merge), then `bash scripts/coord-tools/gate.sh touched` in that tree.
