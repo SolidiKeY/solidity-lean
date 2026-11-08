@@ -16,6 +16,9 @@ recovery and `scripts/h62/item2/audit-language/source_roles.py` for lexical role
 `--refine` reuses frozen definition refinements while retaining range constraints.
 Write bulk output outside the checkout and archive evidence privately under H145.
 The original authenticated-ownership checks remain strict.
+Run `scripts/h62/item2/audit-language/source_acceptance.py --census EXTERNAL_JSON`
+for fresh source-only reconciliation. It does not run or replace historical
+ownership acceptance, imported telescope checks or witness certification.
 
 For a named law family, run
 `scripts/h62/item2/audit-language/family_coverage.py --source SOURCE --witness WITNESS`
