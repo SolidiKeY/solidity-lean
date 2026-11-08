@@ -3070,3 +3070,17 @@ These gasless intrinsic IR controls do not establish arbitrary-body completion,
 Source/runtime/G01 correspondence, physical byte loading, charged/fork behavior,
 full Bridge/package/performance validation or original census closure. The
 703-source/190-core/37-Bridge obligations and all existing STOPs remain open.
+
+
+### Source-range replay constraints
+
+`source_range_bindings` requires pinned UTF-8 snapshots and retains missing
+ranges explicitly. Selection columns are Unicode codepoint offsets on LF-based
+lines; line slices can extend beyond a declaration. Binding those bytes must
+not be treated as matching a statement, identifying its owner, instantiating
+inherited obligations or supplying a witness. Replay inputs, recipe, raw-output
+reassembly and oversized-input retention details are indexed privately:
+
+```text
+evidence: 3985e3705bf522bddefcf6a653698320ce690600 evidence/solidity-parallel-20261103/executable-bytecode/source-range-accounting-77ed8f61/INDEX.json
+```
