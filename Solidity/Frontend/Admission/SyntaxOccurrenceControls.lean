@@ -80,4 +80,31 @@ theorem malformed_modifier_tag_retained :
 /-- info: 'Solidity.Frontend.Admission.OccurrenceControls.malformed_modifier_tag_retained' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms malformed_modifier_tag_retained
 
+
+open Solidity.Language
+
+theorem original_header_refusal (path : String) :
+    sourceSubsetRefusals (structuralImportUnit path) (fun f => decide (f ≠ .imports)) =
+      [(⟨_,Syn.importPath path none⟩,.imports)] ∧
+    sourceSubsetRefusal? (Syn.unit Syn.nil) (fun f => decide (f ≠ .imports)) = none ∧
+    (structuralImportUnit path).env = (Syn.unit Syn.nil).env := ⟨rfl,rfl,rfl⟩
+
+theorem literal_refusal_site (literal : Lit) :
+    syntaxFieldRefusal? (Syn.lit literal) syntaxSubsetFeaturesAt (fun _ => false) =
+      some (⟨_,Syn.lit literal⟩,literalFeature literal) := by
+  cases literal <;> rfl
+
+/-- Intentional negative control: an empty classifier silences diagnostics on genuinely refused syntax. -/
+theorem silent_empty_classifier_is_not_raw_safety :
+    syntaxFieldRefusal? Examples.withAssembly (fun _ => ([] : List Feature)) (fun _ => false) = none ∧
+      .inlineAssembly ∈ Examples.withAssembly.rejections :=
+  ⟨emptySyntaxClassifier_none _ _,by decide⟩
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.original_header_refusal' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms original_header_refusal
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.literal_refusal_site' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms literal_refusal_site
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.silent_empty_classifier_is_not_raw_safety' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms silent_empty_classifier_is_not_raw_safety
+
 end Solidity.Frontend.Admission.OccurrenceControls
