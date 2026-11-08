@@ -115,11 +115,11 @@ def certificate : Interface.CoreSpecialCertificate endpoint route where
 #guard_msgs (whitespace := lax) in #print axioms selected
 /-- info: 'Solidity.Backend.AbiEntry.CoreSpecial.endpoint_selected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms endpoint_selected
-/-- info: 'Solidity.Backend.AbiEntry.CoreSpecial.endpoint_code' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.AbiEntry.CoreSpecial.endpoint_code' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms endpoint_code
-/-- info: 'Solidity.Backend.AbiEntry.CoreSpecial.endpoint_pushes' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiEntry.CoreSpecial.endpoint_pushes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms endpoint_pushes
-/-- info: 'Solidity.Backend.AbiEntry.CoreSpecial.target_choice' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiEntry.CoreSpecial.target_choice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms target_choice
 /-- info: 'Solidity.Backend.AbiEntry.CoreSpecial.executed' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms executed
