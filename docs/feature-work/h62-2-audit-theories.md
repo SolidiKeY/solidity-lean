@@ -19,3 +19,9 @@ Missing historical receipts can be reconstructed with [rebuild_frozen_evidence.p
 [Leaf-extension packets](../../tests/h62/item2/audit-theories/LeafProgressWitnesses.lean) preserve full all-horizon premises and distinguish builtin source success from configuration-only emit/error/effect inputs. [Certificate refusal controls](../../scripts/h62/item2/audit-theories/check_leaf_progress_controls.py) require the designated whole-law packet.
 
 [Frozen leaf premise roles](../../scripts/h62/item2/audit-theories/leaf_progress_input_roles.py) run against original history and pin both all-horizon laws. [Rehashed corruption controls](../../scripts/h62/item2/audit-theories/check_leaf_role_controls.py) reject selected-horizon substitutions and altered type, configuration or owner metadata.
+
+[Tuple-progress packets](../../tests/h62/item2/audit-theories/TupleProgressWitnesses.lean) retain exact constructor-required fit proofs alongside slot/fragment and all-lower-horizon laws. [Certificate controls](../../scripts/h62/item2/audit-theories/check_tuple_progress_controls.py) require the complete declaration packet.
+
+[Tuple premise roles](../../scripts/h62/item2/audit-theories/tuple_progress_input_roles.py) distinguish ordinary joint inputs from intentional H69 type separation. [Rehashed controls](../../scripts/h62/item2/audit-theories/check_tuple_role_controls.py) preserve duplicate anonymous hypotheses and late data, and keep classification independent of supplied coverage labels.
+
+[Current helper replay](../../scripts/h62/item2/audit-theories/replay_current_helpers.py) recursively discovers every audit helper and requires an exact match with the verified source census. It forces fresh bounded checks of all helpers and KeySort; historical statement accounting and full integration gates remain separate.
