@@ -1,5 +1,6 @@
 import Solidity.Source.Machine
 import Solidity.Source.FailurePrimitives
+import Solidity.Source.LibrarySemantics
 
 /-!
 # Expression and statement semantics (S02, S03)
@@ -247,6 +248,27 @@ def cdTail (data : Bytes) (i stride : Nat) : R (Nat × Nat) :=
     let len := wordAt (data.drop off) 0
     if 2 ^ 64 ≤ len then .error (.revert [])
     else if off + 32 + stride * len ≤ data.length then pure (4 + off + 32, len) else .error (.revert [])
+
+/-- Decode only the standard `Error(string)` selector and an in-bounds
+ABI string. Reuses `cdTail` bounds/length checks; malformed data and other
+selectors are not handled by a named Error clause. No allocation occurs here. -/
+def errorStringBytes (data : Bytes) : Option Bytes :=
+  if data.take 4 == errorSelector then
+    match cdTail (data.drop 4) 0 1 with
+    | .ok (offset, length) => some ((data.drop offset).take length)
+    | .error _ => none
+  else none
+
+theorem errorStringBytes_wrongSelector (data : List UInt8)
+    (wrong : data.take 4 ≠ errorSelector) : errorStringBytes data = none := by
+  simp only [errorStringBytes, beq_iff_eq, wrong, if_false]
+
+/-- Successful generic ABI bounds checking supplies the exact Error bytes. -/
+theorem errorStringBytes_of_decode (data : List UInt8) (offset length : Nat)
+    (selector : data.take 4 = errorSelector)
+    (decoded : cdTail (data.drop 4) 0 1 = .ok (offset, length)) :
+    errorStringBytes data = some ((data.drop offset).take length) := by
+  simp only [errorStringBytes, selector, beq_self_eq_true, if_true, decoded]
 
 /-- Dynamic calldata element shapes supported by the actual indirect-head
 reader. Represented positive-width static arrays are included; structs and
@@ -913,229 +935,232 @@ def setRets {D : Layout} {Γ : RCtx} (l : Locals D Γ) (base : Nat) : {rs : List
 
 /-! ## The interpreter -/
 
+
 mutual
 
 /-- **Expression evaluation** at horizon `n`. -/
-def evalE (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ) (plan : FailureExecution.RuntimePlan := none) :
+def evalE (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ) (plan : FailureExecution.RuntimePlan := none) (calldataKnown : Bool := true) :
     EM E Γ (RVal E.layout τ) :=
   match n with
   | 0 => halt .timeout
   | n + 1 =>
-  match e with
-  | .const q => pure (.const q)
-  | .bytesLit nl len => pure (.hex nl.value len)
-  | .addressLit ds =>
-    let v := ds.foldl (fun acc d => acc * 16 + d.val) 0
-    pure (.val (.address ⟨v % 2 ^ 160, Nat.mod_lt _ (by decide)⟩))
-  | .bool b => pure (.val (.bool b))
-  | .str bs => pure (.strLit bs)
-  | .local i => do return .val ((← locals).get i)
-  | .state (τ := τ) d _ =>
-    if d.isConst then do
-      match G.prog.consts d with
-      | some ri =>
-        let (v, _) ← sub (L0 E) (evalE (plan := plan) G F n ri.e)
-        if h : ri.τ = τ then return h ▸ v else halt (.stuck "constant type")
-      | none => halt (.stuck "constant without a value")
-    else if τ.byRef then do return .val (← storRef τ d.path)
-    else do return .val (← readAt F d.path τ)
-  | .this _ => pure (.val (.contract F.this))
-  | .tuple es => do return .tuple (← evalArgs (plan := plan) G F n es)
-  | .conv (τ := τ) a _ => do convRV F n τ (← evalE (plan := plan) G F n a)
-  | .convExplicit (τ := τ) a _ => do convExplicitRV F n τ (← evalE (plan := plan) G F n a)
-  | .unary op a => do
-    let x ← getV (← evalE (plan := plan) G F n a)
-    return .val (← lift (unaryVal F.checked op x))
-  | .incDec inc pre l => do
-    let loc ← evalLoc (plan := plan) G F n l
-    let old ← readLoc F loc
-    let new ← lift (incDecVal F.checked inc old)
-    writeLoc F n loc new
-    return .val (if pre then new else old)
-  | .delete l => do
-    deleteLoc F n (← evalLoc (plan := plan) G F n l)
-    return RVal.unit
-  | .binary op a b => do
-    if op = .and || op = .or then
-      let x ← getV (← evalE (plan := plan) G F n a)
-      match x.key with
-      | some kx =>
-        if (op = .and && kx = 0) || (op = .or && kx = 1) then return .val x
-        else return .val (← getV (← evalE (plan := plan) G F n b))
-      | none => halt (.stuck "logical operand")
-    else
-      let (x, y) ← evalPair (plan := plan) G F n a b
-      return .val (← lift (binVal F.checked op (← getV x) (← getV y)))
-  | .compare op a b => do
-    let (x, y) ← evalPair (plan := plan) G F n a b
-    return .val (.bool (← lift (cmpVal op (← getV x) (← getV y))))
-  | .compareConst op qa qb => do return .val (.bool (← lift (cmpConst op qa qb)))
-  | .shiftLike op a b _ => do
-    let (x, k) ← evalPair (plan := plan) G F n a b
-    return .val (← lift (shiftVal F.checked op (← lift k.amount) (← getV x)))
-  | .cond c a b => do
-    match ← getV (← evalE (plan := plan) G F n c) with
-    | .bool true => evalE (plan := plan) G F n a
-    | _ => evalE (plan := plan) G F n b
-  | .assign l rhs => do
-    let v ← evalE (plan := plan) G F n rhs
-    let loc ← evalLoc (plan := plan) G F n l
-    let x ← getV v
-    writeLoc F n loc x
-    return .val x
-  | .compound (τ := τ) op l rhs _ => do
-    let v ← evalE (plan := plan) G F n rhs
-    let loc ← evalLoc (plan := plan) G F n l
-    let old ← readLoc F loc
-    let new ← match op.kind? with
-      | some .shift =>
-        lift (shiftVal F.checked (if op = .shl then .shl else if op = .sar then .sar else .shr) (← lift v.amount) old)
-      | _ => do
-        let y ← getV (← convRV F n τ v)
-        lift (binVal F.checked (AssignOp.binOp op) old y)
-    writeLoc F n loc new
-    return .val new
-  | .indexArray (τ := τ) a i _ => do
-    let av ← getV (← evalE (plan := plan) G F n a)
-    let k ← indexNat (← evalE (plan := plan) G F n i)
-    let loc ← indexLoc F av k
-    return .val (← readLoc F loc)
-  | .indexMapping (τv := τv) a k => do
-    match ← getV (← evalE (plan := plan) G F n a) with
-    | .storRef _ p =>
-      let s ← keyStep F n (← evalE (plan := plan) G F n k)
-      return .val (← readLoc F (Loc.stor (τ := τv) (p.go s)))
-    | _ => halt (.stuck "mapping not in storage")
-  | .indexBytes a i _ => do
-    let av ← evalE (plan := plan) G F n a
-    let k ← indexNat (← evalE (plan := plan) G F n i)
-    match av with
-    | .val (.fixedBytes bs _) =>
-      match bs[k]? with
-      | some b => return .val (Val.fixedBytes (n := 1) (h := by decide) [b] rfl)
-      | none => lift (panic .index)
-    | .val (.memRef _ addr) => return .val (← readLoc F (Loc.memByte addr k))
-    | .val (.storRef _ p) =>
-      if k < (← readLen F p) then return .val (← readAt F (p.go (.index k)) (.fixedBytes 1 (by decide)))
-      else lift (panic .index)
-    | .val (.cdRef _ off len) => return .val (← lift (cdByte F off len k))
-    | _ => halt (.stuck "byte index")
-  | .length (ρ := ρ) a _ => do
-    let k ← lengthOf F (← getV (← evalE (plan := plan) G F n a))
-    match ρ with
-    | .int t => return .val (intWrap t k)
-    | _ => halt (.stuck "length type")
-  | .payable a => do
-    match ← getV (← evalE (plan := plan) G F n a) with
-    | .address x | .contract x => return .val (.address x)
-    | _ => halt (.stuck "payable")
-  | .call (rs := rs) d _ args => do
-    let vs ← evalConvArgs (plan := plan) G F n args
-    let (r, _) ← sub (L0 E) (callInternal (plan := plan) G F n d vs rs)
-    return r
-  | .magic (τ := τ) b m _ =>
-    match b, m, τ with
-    | .msg, "sender", .address _ => pure (.val (.address F.sender))
-    | .msg, "value", .int t => do return .val (← lift (mkInt t F.value.val))
-    | .block, "timestamp", .int t => do return .val (← lift (mkInt t G.timestamp.val))
-    | _, _, _ => halt (.stuck "magic member")
-  | .balance a => do
-    match ← getV (← evalE (plan := plan) G F n a) with
-    | .address x =>
-      let s ← st
-      let w := match (s.ex.world.accounts x).code with
-        | some _ => Monetary.wordView (s.ex.world.accounts x).balance
-        | none => G.fixed.ledger G.balance0 s.events x
-      return .val (intWrap IntTy.u256 w.val)
-  | .builtin (τ := τ) b args _ => evalBuiltin (plan := plan) G F n b args τ
-  | .member (τ := τ) a i _ => do
-    match ← getV (← evalE (plan := plan) G F n a) with
-    | .storRef _ p => return .val (← readLoc F (Loc.stor (τ := τ) (p.go (.field i))))
-    | .memRef _ addr => return .val (← readLoc F (Loc.mem (τ := τ) addr i))
-    | _ => halt (.stuck "member of calldata")
-  | .structNew (dn := dn) _ args => do
-    let vs ← evalConvArgs (plan := plan) G F n args
-    let fs ← fieldsOf vs (E.layout.fields dn)
-    return .val (← allocRef (Data.struct (l := .memory) (d := dn) fs))
-  | .extCall (rs := rs) target d _ value args => do
-    let a ← match ← getV (← evalE (plan := plan) G F n target) with
-      | .contract x => pure x
-    let v ← match ← getV (← evalE (plan := plan) G F n value) with
-      | .int x _ => pure x
-    let vs ← evalConvArgs (plan := plan) G F n args
-    let ps := match d.fnSig E with | some (ps, _) => ps | none => []
-    let input := G.selector (sigOf E.layout d.name ps) ++ (← encodeVals F n false vs.toR)
-    if (← instanceAt G a).isNone && !G.hasCode (← st).events a then halt (.revert [])
-    let (out, _) ← sub (L0 E) (callAddr (plan := plan) G F n a ⟨v.toNat % 2 ^ 256, Nat.mod_lt _ (by decide)⟩ input
-      (d.fnMut == some .view || d.fnMut == some .pure))
-    extReturn rs out
-  | .transfer a v => do
-    match ← pay (plan := plan) G F n a v with
-    | .success _ => return RVal.unit
-    | .revert d => halt (.revert d)
-  | .send a v => do
-    match ← pay (plan := plan) G F n a v with
-    | .success _ => return .val (.bool true)
-    | .revert _ => return .val (.bool false)
-  | .abiEncode k args => do
-    let vs ← evalArgs (plan := plan) G F n args
-    let data ← match k, vs with
-      | .encode, vs => encodeVals F n false vs
-      | .encodePacked, vs => encodeVals F n true vs
-      | .encodeWithSelector, .cons s vs => do
-        let sel := (← getV (← convRV F n (.fixedBytes 4 (by decide)) s)).bytesOf
-        pure (sel ++ (← encodeVals F n false vs))
-      | .encodeWithSignature, .cons s vs => do
-        let sig ← bytesOfRV F n s
-        pure ((wordBytes (G.fixed.hash sig)).take 4 ++ (← encodeVals F n false vs))
-      | _, _ => halt (.stuck "abi arguments")
-    return .val (← allocRef (Data.bytes (l := .memory) data))
-  | .assignCopy (τ := τ) l rhs _ => do
-    let v ← evalE (plan := plan) G F n rhs
-    match ← evalLoc (plan := plan) G F n l with
-    | .stor p =>
-      copyInto F n τ p v
-      return .val (← storRef τ p)
-    | _ => halt (.stuck "copy target")
-  | .abiDecode (τs := τs) data _ _ => do
-    let v ← evalE (plan := plan) G F n data
-    abiDecodeData (← bytesOfRV F n v) τs
-  | .inlineArray args _ => do
-    let vs ← evalConvArgs (plan := plan) G F n args
-    return .val (← allocRef (inlineData vs))
-  | .newArray (τ := τ) _ len _ => do
-    -- a length of `2^64` or more panics `0x41` (solc's `array_allocation_size`
-    -- check); solc's later `finalize_allocation` panic is not modelled
-    let k ← indexNat (← evalE (plan := plan) G F n len)
-    if 2 ^ 64 ≤ k then lift (panic .alloc)
-    else return .val (← allocRef (← lift (newData τ k)))
-  | .slice a _ s _ e _ toEnd => do
-    let av ← getV (← evalE (plan := plan) G F n a)
-    let si ← indexNat (← evalE (plan := plan) G F n s)
-    let ei ← indexNat (← evalE (plan := plan) G F n e)
-    return .val (← lift (sliceR av si ei toEnd))
+  let run : EM E Γ (RVal E.layout τ) :=
+    match e with
+    | .const q => pure (.const q)
+    | .bytesLit nl len => pure (.hex nl.value len)
+    | .addressLit ds =>
+      let v := ds.foldl (fun acc d => acc * 16 + d.val) 0
+      pure (.val (.address ⟨v % 2 ^ 160, Nat.mod_lt _ (by decide)⟩))
+    | .bool b => pure (.val (.bool b))
+    | .str bs => pure (.strLit bs)
+    | .local i => do return .val ((← locals).get i)
+    | .state (τ := τ) d _ =>
+      if d.isConst then do
+        match G.prog.consts d with
+        | some ri =>
+          let (v, _) ← sub (L0 E) (evalE (plan := plan) (calldataKnown := calldataKnown) G F n ri.e)
+          if h : ri.τ = τ then return h ▸ v else halt (.stuck "constant type")
+        | none => halt (.stuck "constant without a value")
+      else if τ.byRef then do return .val (← storRef τ d.path)
+      else do return .val (← readAt F d.path τ)
+    | .this _ => pure (.val (.contract F.this))
+    | .tuple es => do return .tuple (← evalArgs (plan := plan) (calldataKnown := calldataKnown) G F n es)
+    | .conv (τ := τ) a _ => do convRV F n τ (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n a)
+    | .convExplicit (τ := τ) a _ => do convExplicitRV F n τ (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n a)
+    | .unary op a => do
+      let x ← getV (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n a)
+      return .val (← lift (unaryVal F.checked op x))
+    | .incDec inc pre l => do
+      let loc ← evalLoc (plan := plan) (calldataKnown := calldataKnown) G F n l
+      let old ← readLoc F loc
+      let new ← lift (incDecVal F.checked inc old)
+      writeLoc F n loc new
+      return .val (if pre then new else old)
+    | .delete l => do
+      deleteLoc F n (← evalLoc (plan := plan) (calldataKnown := calldataKnown) G F n l)
+      return RVal.unit
+    | .binary op a b => do
+      if op = .and || op = .or then
+        let x ← getV (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n a)
+        match x.key with
+        | some kx =>
+          if (op = .and && kx = 0) || (op = .or && kx = 1) then return .val x
+          else return .val (← getV (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n b))
+        | none => halt (.stuck "logical operand")
+      else
+        let (x, y) ← evalPair (plan := plan) (calldataKnown := calldataKnown) G F n a b
+        return .val (← lift (binVal F.checked op (← getV x) (← getV y)))
+    | .compare op a b => do
+      let (x, y) ← evalPair (plan := plan) (calldataKnown := calldataKnown) G F n a b
+      return .val (.bool (← lift (cmpVal op (← getV x) (← getV y))))
+    | .compareConst op qa qb => do return .val (.bool (← lift (cmpConst op qa qb)))
+    | .shiftLike op a b _ => do
+      let (x, k) ← evalPair (plan := plan) (calldataKnown := calldataKnown) G F n a b
+      return .val (← lift (shiftVal F.checked op (← lift k.amount) (← getV x)))
+    | .cond c a b => do
+      match ← getV (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n c) with
+      | .bool true => evalE (plan := plan) (calldataKnown := calldataKnown) G F n a
+      | _ => evalE (plan := plan) (calldataKnown := calldataKnown) G F n b
+    | .assign l rhs => do
+      let v ← evalE (plan := plan) (calldataKnown := calldataKnown) G F n rhs
+      let loc ← evalLoc (plan := plan) (calldataKnown := calldataKnown) G F n l
+      let x ← getV v
+      writeLoc F n loc x
+      return .val x
+    | .compound (τ := τ) op l rhs _ => do
+      let v ← evalE (plan := plan) (calldataKnown := calldataKnown) G F n rhs
+      let loc ← evalLoc (plan := plan) (calldataKnown := calldataKnown) G F n l
+      let old ← readLoc F loc
+      let new ← match op.kind? with
+        | some .shift =>
+          lift (shiftVal F.checked (if op = .shl then .shl else if op = .sar then .sar else .shr) (← lift v.amount) old)
+        | _ => do
+          let y ← getV (← convRV F n τ v)
+          lift (binVal F.checked (AssignOp.binOp op) old y)
+      writeLoc F n loc new
+      return .val new
+    | .indexArray (τ := τ) a i _ => do
+      let av ← getV (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n a)
+      let k ← indexNat (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n i)
+      let loc ← indexLoc F av k
+      return .val (← readLoc F loc)
+    | .indexMapping (τv := τv) a k => do
+      match ← getV (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n a) with
+      | .storRef _ p =>
+        let s ← keyStep F n (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n k)
+        return .val (← readLoc F (Loc.stor (τ := τv) (p.go s)))
+      | _ => halt (.stuck "mapping not in storage")
+    | .indexBytes a i _ => do
+      let av ← evalE (plan := plan) (calldataKnown := calldataKnown) G F n a
+      let k ← indexNat (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n i)
+      match av with
+      | .val (.fixedBytes bs _) =>
+        match bs[k]? with
+        | some b => return .val (Val.fixedBytes (n := 1) (h := by decide) [b] rfl)
+        | none => lift (panic .index)
+      | .val (.memRef _ addr) => return .val (← readLoc F (Loc.memByte addr k))
+      | .val (.storRef _ p) =>
+        if k < (← readLen F p) then return .val (← readAt F (p.go (.index k)) (.fixedBytes 1 (by decide)))
+        else lift (panic .index)
+      | .val (.cdRef _ off len) => return .val (← lift (cdByte F off len k))
+      | _ => halt (.stuck "byte index")
+    | .length (ρ := ρ) a _ => do
+      let k ← lengthOf F (← getV (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n a))
+      match ρ with
+      | .int t => return .val (intWrap t k)
+      | _ => halt (.stuck "length type")
+    | .payable a => do
+      match ← getV (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n a) with
+      | .address x | .contract x => return .val (.address x)
+      | _ => halt (.stuck "payable")
+    | .call (rs := rs) d _ args => do
+      let vs ← evalConvArgs (plan := plan) (calldataKnown := calldataKnown) G F n args
+      let (r, _) ← sub (L0 E) (callInternal (plan := plan) (calldataKnown := calldataKnown) G F n d vs rs)
+      return r
+    | .magic (τ := τ) b m _ =>
+      match b, m, τ with
+      | .msg, "sender", .address _ => pure (.val (.address F.sender))
+      | .msg, "value", .int t => do return .val (← lift (mkInt t F.value.val))
+      | .block, "timestamp", .int t => do return .val (← lift (mkInt t G.timestamp.val))
+      | _, _, _ => halt (.stuck "magic member")
+    | .balance a => do
+      match ← getV (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n a) with
+      | .address x =>
+        let s ← st
+        let w := match (s.ex.world.accounts x).code with
+          | some _ => Monetary.wordView (s.ex.world.accounts x).balance
+          | none => G.fixed.ledger G.balance0 s.events x
+        return .val (intWrap IntTy.u256 w.val)
+    | .builtin (τ := τ) b args _ => evalBuiltin (plan := plan) (calldataKnown := calldataKnown) G F n b args τ
+    | .member (τ := τ) a i _ => do
+      match ← getV (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n a) with
+      | .storRef _ p => return .val (← readLoc F (Loc.stor (τ := τ) (p.go (.field i))))
+      | .memRef _ addr => return .val (← readLoc F (Loc.mem (τ := τ) addr i))
+      | _ => halt (.stuck "member of calldata")
+    | .structNew (dn := dn) _ args => do
+      let vs ← evalConvArgs (plan := plan) (calldataKnown := calldataKnown) G F n args
+      let fs ← fieldsOf vs (E.layout.fields dn)
+      return .val (← allocRef (Data.struct (l := .memory) (d := dn) fs))
+    | .extCall (rs := rs) target d _ value args => do
+      let a ← match ← getV (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n target) with
+        | .contract x => pure x
+      let v ← match ← getV (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n value) with
+        | .int x _ => pure x
+      let vs ← evalConvArgs (plan := plan) (calldataKnown := calldataKnown) G F n args
+      let ps := match d.fnSig E with | some (ps, _) => ps | none => []
+      let input := G.selector (sigOf E.layout d.name ps) ++ (← encodeVals F n false vs.toR)
+      if (← instanceAt G a).isNone && !G.hasCode (← st).events a then halt (.revert [])
+      let (out, _) ← sub (L0 E) (callAddr (plan := plan) G F n a ⟨v.toNat % 2 ^ 256, Nat.mod_lt _ (by decide)⟩ input
+        (d.fnMut == some .view || d.fnMut == some .pure))
+      extReturn rs out
+    | .transfer a v => do
+      match ← pay (plan := plan) (calldataKnown := calldataKnown) G F n a v with
+      | .success _ => return RVal.unit
+      | .revert d => halt (.revert d)
+    | .send a v => do
+      match ← pay (plan := plan) (calldataKnown := calldataKnown) G F n a v with
+      | .success _ => return .val (.bool true)
+      | .revert _ => return .val (.bool false)
+    | .abiEncode k args => do
+      let vs ← evalArgs (plan := plan) (calldataKnown := calldataKnown) G F n args
+      let data ← match k, vs with
+        | .encode, vs => encodeVals F n false vs
+        | .encodePacked, vs => encodeVals F n true vs
+        | .encodeWithSelector, .cons s vs => do
+          let sel := (← getV (← convRV F n (.fixedBytes 4 (by decide)) s)).bytesOf
+          pure (sel ++ (← encodeVals F n false vs))
+        | .encodeWithSignature, .cons s vs => do
+          let sig ← bytesOfRV F n s
+          pure ((wordBytes (G.fixed.hash sig)).take 4 ++ (← encodeVals F n false vs))
+        | _, _ => halt (.stuck "abi arguments")
+      return .val (← allocRef (Data.bytes (l := .memory) data))
+    | .assignCopy (τ := τ) l rhs _ => do
+      let v ← evalE (plan := plan) (calldataKnown := calldataKnown) G F n rhs
+      match ← evalLoc (plan := plan) (calldataKnown := calldataKnown) G F n l with
+      | .stor p =>
+        copyInto F n τ p v
+        return .val (← storRef τ p)
+      | _ => halt (.stuck "copy target")
+    | .abiDecode (τs := τs) data _ _ => do
+      let v ← evalE (plan := plan) (calldataKnown := calldataKnown) G F n data
+      abiDecodeData (← bytesOfRV F n v) τs
+    | .inlineArray args _ => do
+      let vs ← evalConvArgs (plan := plan) (calldataKnown := calldataKnown) G F n args
+      return .val (← allocRef (inlineData vs))
+    | .newArray (τ := τ) _ len _ => do
+      -- a length of `2^64` or more panics `0x41` (solc's `array_allocation_size`
+      -- check); solc's later `finalize_allocation` panic is not modelled
+      let k ← indexNat (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n len)
+      if 2 ^ 64 ≤ k then lift (panic .alloc)
+      else return .val (← allocRef (← lift (newData τ k)))
+    | .slice a _ s _ e _ toEnd => do
+      let av ← getV (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n a)
+      let si ← indexNat (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n s)
+      let ei ← indexNat (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n e)
+      return .val (← lift (sliceR av si ei toEnd))
+  withLibraryCalldata calldataKnown τ run
 termination_by structural n
 
 /-- Two operands in the pipeline's order: right first under legacy, left
 first via IR; the values in source order. -/
-def evalPair (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {σ τ : STy} (a : RExpr E Γ σ) (b : RExpr E Γ τ) (plan : FailureExecution.RuntimePlan := none) :
+def evalPair (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {σ τ : STy} (a : RExpr E Γ σ) (b : RExpr E Γ τ) (plan : FailureExecution.RuntimePlan := none) (calldataKnown : Bool := true) :
     EM E Γ (RVal E.layout σ × RVal E.layout τ) :=
   match n with
   | 0 => halt .timeout
   | n + 1 =>
     match G.pipeline with
     | .legacy => do
-      let y ← evalE (plan := plan) G F n b
-      let x ← evalE (plan := plan) G F n a
+      let y ← evalE (plan := plan) (calldataKnown := calldataKnown) G F n b
+      let x ← evalE (plan := plan) (calldataKnown := calldataKnown) G F n a
       pure (x, y)
     | .viaIR => do
-      let x ← evalE (plan := plan) G F n a
-      let y ← evalE (plan := plan) G F n b
+      let x ← evalE (plan := plan) (calldataKnown := calldataKnown) G F n a
+      let y ← evalE (plan := plan) (calldataKnown := calldataKnown) G F n b
       pure (x, y)
 termination_by structural n
 
 /-- Arguments, left to right. -/
-def evalArgs (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τs : List STy} (es : RArgs E Γ τs) (plan : FailureExecution.RuntimePlan := none) :
+def evalArgs (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τs : List STy} (es : RArgs E Γ τs) (plan : FailureExecution.RuntimePlan := none) (calldataKnown : Bool := true) :
     EM E Γ (RVals E.layout τs) :=
   match n with
   | 0 => halt .timeout
@@ -1143,12 +1168,12 @@ def evalArgs (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τs : List STy} (es : 
     match es with
     | .nil => pure .nil
     | .cons e es => do
-      let v ← evalE (plan := plan) G F n e
-      pure (.cons v (← evalArgs (plan := plan) G F n es))
+      let v ← evalE (plan := plan) (calldataKnown := calldataKnown) G F n e
+      pure (.cons v (← evalArgs (plan := plan) (calldataKnown := calldataKnown) G F n es))
 termination_by structural n
 
 /-- Arguments converted to parameter types, left to right. -/
-def evalConvArgs (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τs : List STy} (es : RConvArgs E Γ τs) (plan : FailureExecution.RuntimePlan := none) :
+def evalConvArgs (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τs : List STy} (es : RConvArgs E Γ τs) (plan : FailureExecution.RuntimePlan := none) (calldataKnown : Bool := true) :
     EM E Γ (Vals E.layout τs) :=
   match n with
   | 0 => halt .timeout
@@ -1156,12 +1181,12 @@ def evalConvArgs (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τs : List STy} (e
     match es with
     | .nil => pure .nil
     | .cons (τ := τ) e _ es => do
-      let v ← getV (← convRV F n τ (← evalE (plan := plan) G F n e))
-      pure (.cons v (← evalConvArgs (plan := plan) G F n es))
+      let v ← getV (← convRV F n τ (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n e))
+      pure (.cons v (← evalConvArgs (plan := plan) (calldataKnown := calldataKnown) G F n es))
 termination_by structural n
 
 /-- **Lvalues** as locations: the base, then the index or key. -/
-def evalLoc (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τ : STy} (l : RLVal E Γ τ) (plan : FailureExecution.RuntimePlan := none) :
+def evalLoc (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τ : STy} (l : RLVal E Γ τ) (plan : FailureExecution.RuntimePlan := none) (calldataKnown : Bool := true) :
     EM E Γ (Loc E.layout Γ τ) :=
   match n with
   | 0 => halt .timeout
@@ -1170,23 +1195,23 @@ def evalLoc (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τ : STy} (l : RLVal E 
     | .local i => pure (.local i)
     | .state d _ _ => pure (.stor d.path)
     | .indexArray a _ i _ => do
-      let av ← getV (← evalE (plan := plan) G F n a)
-      let k ← indexNat (← evalE (plan := plan) G F n i)
+      let av ← getV (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n a)
+      let k ← indexNat (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n i)
       indexLoc F av k
     | .indexMapping a k => do
-      match ← getV (← evalE (plan := plan) G F n a) with
-      | .storRef _ p => pure (.stor (p.go (← keyStep F n (← evalE (plan := plan) G F n k))))
+      match ← getV (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n a) with
+      | .storRef _ p => pure (.stor (p.go (← keyStep F n (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n k))))
       | _ => halt (.stuck "mapping not in storage")
     | .indexBytes a _ i _ => do
-      let av ← getV (← evalE (plan := plan) G F n a)
-      let k ← indexNat (← evalE (plan := plan) G F n i)
+      let av ← getV (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n a)
+      let k ← indexNat (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n i)
       match av with
       | .memRef _ addr => pure (.memByte addr k)
       | .storRef _ p =>
         if k < (← readLen F p) then pure (.stor (p.go (.index k))) else lift (panic .index)
       | _ => halt (.stuck "byte index")
     | .member a _ i _ => do
-      match ← getV (← evalE (plan := plan) G F n a) with
+      match ← getV (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n a) with
       | .storRef _ p => pure (.stor (p.go (.field i)))
       | .memRef _ addr => pure (.mem addr i)
       | _ => halt (.stuck "member")
@@ -1195,12 +1220,12 @@ termination_by structural n
 /-- **Builtin functions**: every argument evaluated (left to right;
 `addmod`/`mulmod` right to left under legacy), then the function. -/
 def evalBuiltin (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {σs : List STy} (b : Builtin)
-    (args : RArgs E Γ σs) (τ : STy) (plan : FailureExecution.RuntimePlan := none) : EM E Γ (RVal E.layout τ) :=
+    (args : RArgs E Γ σs) (τ : STy) (plan : FailureExecution.RuntimePlan := none) (calldataKnown : Bool := true) : EM E Γ (RVal E.layout τ) :=
   match n with
   | 0 => halt .timeout
   | n + 1 => do
-    let vs ← if (b = .addmod || b = .mulmod) && G.pipeline = .legacy then evalArgsRev (plan := plan) G F n args
-      else evalArgs (plan := plan) G F n args
+    let vs ← if (b = .addmod || b = .mulmod) && G.pipeline = .legacy then evalArgsRev (plan := plan) (calldataKnown := calldataKnown) G F n args
+      else evalArgs (plan := plan) (calldataKnown := calldataKnown) G F n args
     let res : EM E Γ (RVal E.layout τ) := do
       if h : τ = .tuple [] then return h ▸ RVal.unit else halt (.stuck "builtin result")
     let none' : EM E Γ (RVal E.layout τ) := halt (.stuck "builtin")
@@ -1280,7 +1305,7 @@ def evalBuiltin (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {σs : List STy} (b 
 termination_by structural n
 
 /-- Arguments, right to left (values in source order). -/
-def evalArgsRev (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τs : List STy} (es : RArgs E Γ τs) (plan : FailureExecution.RuntimePlan := none) :
+def evalArgsRev (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τs : List STy} (es : RArgs E Γ τs) (plan : FailureExecution.RuntimePlan := none) (calldataKnown : Bool := true) :
     EM E Γ (RVals E.layout τs) :=
   match n with
   | 0 => halt .timeout
@@ -1288,20 +1313,20 @@ def evalArgsRev (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τs : List STy} (es
     match es with
     | .nil => pure .nil
     | .cons e es => do
-      let vs ← evalArgsRev (plan := plan) G F n es
-      pure (.cons (← evalE (plan := plan) G F n e) vs)
+      let vs ← evalArgsRev (plan := plan) (calldataKnown := calldataKnown) G F n es
+      pure (.cons (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n e) vs)
 termination_by structural n
 
 /-- **A payment** (`transfer`, `send`): the call with value and no data;
 whether it succeeded. -/
 def pay (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} (a : RExpr E Γ (.address true))
-    (v : RExpr E Γ (.int IntTy.u256)) (plan : FailureExecution.RuntimePlan := none) : EM E Γ Outcome :=
+    (v : RExpr E Γ (.int IntTy.u256)) (plan : FailureExecution.RuntimePlan := none) (calldataKnown : Bool := true) : EM E Γ Outcome :=
   match n with
   | 0 => halt .timeout
   | n + 1 => do
-    let x ← match ← getV (← evalE (plan := plan) G F n a) with
+    let x ← match ← getV (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n a) with
       | .address x => pure x
-    let w ← match ← getV (← evalE (plan := plan) G F n v) with
+    let w ← match ← getV (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n v) with
       | .int i _ => pure i
     let (out, _) ← sub (L0 E) (callAddr (plan := plan) G F n x ⟨w.toNat % 2 ^ 256, Nat.mod_lt _ (by decide)⟩ [] false)
     pure out
@@ -1310,14 +1335,14 @@ termination_by structural n
 /-- **Statement execution** at horizon `n`, in a body with `nps`
 parameters (its return slots below them), modifiers' `_` running `ph`. -/
 def execS (G : Glob E) (F : Fr) (n : Nat) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool}
-    {k : SCtx} {Γ Γ' : RCtx} (s : RStmt E R M k Γ Γ') (l : Locals E.layout Γ) (plan : FailureExecution.RuntimePlan := none) :
+    {k : SCtx} {Γ Γ' : RCtx} (s : RStmt E R M k Γ Γ') (l : Locals E.layout Γ) (plan : FailureExecution.RuntimePlan := none) (calldataKnown : Bool := true) :
     EM E [] (Out E.layout Γ Γ') :=
   match n with
   | 0 => halt .timeout
   | n + 1 =>
   match s with
   | .expr e => do
-    let (_, l') ← sub l (evalE (plan := plan) G F n e)
+    let (_, l') ← sub l (evalE (plan := plan) (calldataKnown := calldataKnown) G F n e)
     pure (.normal l')
   | .placeholder _ => do
     match ph with
@@ -1329,7 +1354,7 @@ def execS (G : Glob E) (F : Fr) (n : Nat) (nps : Nat) (ph : Option (Ph E)) {R : 
         let lin ← match G.pipeline with
           | .legacy => pure cur
           | .viaIR => zeroInner n ph.body.rs.length ph.orig
-        let lout ← runMods (plan := plan) G F n ph.body ph.rest lin
+        let lout ← runMods (plan := plan) (calldataKnown := calldataKnown) G F n ph.body ph.rest lin
         modSt fun s => { s with fnLocals := ⟨_, lout⟩ }
         pure (.normal l)
       else halt (.stuck "placeholder frame")
@@ -1337,49 +1362,49 @@ def execS (G : Glob E) (F : Fr) (n : Nat) (nps : Nat) (ph : Option (Ph E)) {R : 
     let (v, l') ← sub l (zeroVal (E := E) n τ)
     pure (.normal (.cons v l'))
   | .declInit (τ := τ) e _ => do
-    let (v, l') ← sub l (do getV (← convRV F n τ (← evalE (plan := plan) G F n e)))
+    let (v, l') ← sub l (do getV (← convRV F n τ (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n e)))
     pure (.normal (.cons v l'))
   | .declTuple slots e _ => do
-    let (vs, l') ← sub l (do lift (← evalE (plan := plan) G F n e).untuple)
+    let (vs, l') ← sub l (do lift (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n e).untuple)
     let (l'', _) ← sub l' (pushVals F n slots vs l')
     pure (.normal l'')
   | .block b => do
-    let out ← execItems (plan := plan) G F n nps ph b l
+    let out ← execItems (plan := plan) (calldataKnown := calldataKnown) G F n nps ph b l
     lift out.close
   | .ifThen c t => do
-    let (cv, l1) ← sub l (evalE (plan := plan) G F n c)
+    let (cv, l1) ← sub l (evalE (plan := plan) (calldataKnown := calldataKnown) G F n c)
     match ← getV cv with
-    | .bool true => do lift (← execS (plan := plan) G F n nps ph t l1).close
+    | .bool true => do lift (← execS (plan := plan) (calldataKnown := calldataKnown) G F n nps ph t l1).close
     | _ => pure (.normal l1)
   | .ifElse c t f => do
-    let (cv, l1) ← sub l (evalE (plan := plan) G F n c)
+    let (cv, l1) ← sub l (evalE (plan := plan) (calldataKnown := calldataKnown) G F n c)
     match ← getV cv with
-    | .bool true => do lift (← execS (plan := plan) G F n nps ph t l1).close
-    | _ => do lift (← execS (plan := plan) G F n nps ph f l1).close
+    | .bool true => do lift (← execS (plan := plan) (calldataKnown := calldataKnown) G F n nps ph t l1).close
+    | _ => do lift (← execS (plan := plan) (calldataKnown := calldataKnown) G F n nps ph f l1).close
   | .whileLoop (l := lp) c body => do
-    let (cv, l1) ← sub l (evalE (plan := plan) G F n c)
+    let (cv, l1) ← sub l (evalE (plan := plan) (calldataKnown := calldataKnown) G F n c)
     match ← getV cv with
     | .bool true =>
-      match ← execS (plan := plan) G F n nps ph body l1 with
-      | .normal l2 => execS (plan := plan) G F n nps ph (.whileLoop (l := lp) c body) (← lift (l2.restore _))
-      | .cont l2 => execS (plan := plan) G F n nps ph (.whileLoop (l := lp) c body) l2
+      match ← execS (plan := plan) (calldataKnown := calldataKnown) G F n nps ph body l1 with
+      | .normal l2 => execS (plan := plan) (calldataKnown := calldataKnown) G F n nps ph (.whileLoop (l := lp) c body) (← lift (l2.restore _))
+      | .cont l2 => execS (plan := plan) (calldataKnown := calldataKnown) G F n nps ph (.whileLoop (l := lp) c body) l2
       | .brk l2 => pure (.normal l2)
       | .ret l2 => pure (.ret l2)
     | _ => pure (.normal l1)
   | .doWhile (l := lp) body c => do
-    let l1 ← match ← execS (plan := plan) G F n nps ph body l with
+    let l1 ← match ← execS (plan := plan) (calldataKnown := calldataKnown) G F n nps ph body l with
       | .normal l2 => lift (l2.restore _)
       | .cont l2 => pure l2
       | .brk l2 => return .normal l2
       | .ret l2 => return .ret l2
-    let (cv, l3) ← sub l1 (evalE (plan := plan) G F n c)
+    let (cv, l3) ← sub l1 (evalE (plan := plan) (calldataKnown := calldataKnown) G F n c)
     match ← getV cv with
-    | .bool true => execS (plan := plan) G F n nps ph (.doWhile (l := lp) body c) l3
+    | .bool true => execS (plan := plan) (calldataKnown := calldataKnown) G F n nps ph (.doWhile (l := lp) body c) l3
     | _ => pure (.normal l3)
   | .forLoop init c post body => do
-    match ← execS (plan := plan) G F n nps ph init l with
+    match ← execS (plan := plan) (calldataKnown := calldataKnown) G F n nps ph init l with
     | .normal l1 =>
-      match ← forIter (plan := plan) G F n nps ph c post body l1 with
+      match ← forIter (plan := plan) (calldataKnown := calldataKnown) G F n nps ph c post body l1 with
       | .normal l2 => pure (.normal (← lift (l2.restore _)))
       | .ret l2 => pure (.ret (← lift (l2.restore _)))
       | _ => halt (.stuck "for loop")
@@ -1389,35 +1414,49 @@ def execS (G : Glob E) (F : Fr) (n : Nat) (nps : Nat) (ph : Option (Ph E)) {R : 
   | .cont => pure (.cont l)
   | .ret _ => pure (.ret l)
   | .retVal (τ := τ) hR e _ => do
-    let (v, l1) ← sub l (do getV (← convRV F n τ (← evalE (plan := plan) G F n e)))
+    let (v, l1) ← sub l (do getV (← convRV F n τ (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n e)))
     let base := Γ.length - (nps + R.length)
     pure (.ret (← lift (l1.setAt base v)))
   | .retTuple es => do
-    let (vs, l1) ← sub l (evalConvArgs (plan := plan) G F n es)
+    let (vs, l1) ← sub l (evalConvArgs (plan := plan) (calldataKnown := calldataKnown) G F n es)
     pure (.ret (← lift (setRets l1 (Γ.length - (nps + R.length)) vs)))
   | .emit (ps := ps) ev _ args => do
-    let (vs, l1) ← sub l (evalConvArgs (plan := plan) G F n args)
+    let (vs, l1) ← sub l (evalConvArgs (plan := plan) (calldataKnown := calldataKnown) G F n args)
     let data ← encodeVals F n false vs.toR
     if F.static then halt (.revert [])
     modSt fun s => { s with logs := (F.this, G.selector (sigOf E.layout ev.name ps) ++ data) :: s.logs }
     pure (.normal l1)
   | .revertError (ps := ps) er _ args => do
-    let (vs, _) ← sub l (evalConvArgs (plan := plan) G F n args)
+    let (vs, _) ← sub l (evalConvArgs (plan := plan) (calldataKnown := calldataKnown) G F n args)
     let data ← encodeVals F n false vs.toR
     halt (.revert (G.selector (sigOf E.layout er.name ps) ++ data))
   | .rethrow i => do
     match l.get i with
     | .memRef _ a => halt (.revert (← heapBytes a))
     | _ => halt (.stuck "rethrow")
+  | .tryLibrary (rs := rs) d _ _ args ok cat => do
+    let (argv, l1) ← sub l (evalConvArgs (plan := plan) (calldataKnown := calldataKnown) G F n args)
+    let result ← callLibrary (plan := plan) G F n d argv rs
+    match result with
+    | .ok values => do
+      let o ← execItems (plan := plan) (calldataKnown := calldataKnown) G F n nps ph ok (values.onto l1)
+      lift (← lift (o.up Γ)).close
+    | .error data =>
+      match errorStringBytes data with
+      | none => halt (.revert data)
+      | some message => do
+        let text ← allocRef (Data.string (D := E.layout) (l := .memory) message)
+        let o ← execItems (plan := plan) (calldataKnown := calldataKnown) G F n nps ph cat (.cons text l1)
+        lift (← lift (o.up Γ)).close
   | .tryCall (rs := rs) target d _ args ok cbind cat => do
     -- `try` (lane FU2-B): the target and arguments are evaluated, and a
     -- call to an address without code reverts, outside the `try`; the
     -- call's revert runs the `catch` clause; returns that do not decode
     -- revert outside it, as solc's.
     let (out, l1) ← sub l (do
-      let a ← match ← getV (← evalE (plan := plan) G F n target) with
+      let a ← match ← getV (← evalE (plan := plan) (calldataKnown := calldataKnown) G F n target) with
         | .contract x => pure x
-      let vs ← evalConvArgs (plan := plan) G F n args
+      let vs ← evalConvArgs (plan := plan) (calldataKnown := calldataKnown) G F n args
       let ps := match d.fnSig E with | some (ps, _) => ps | none => []
       let input := G.selector (sigOf E.layout d.name ps) ++ (← encodeVals F n false vs.toR)
       if (← instanceAt G a).isNone && !G.hasCode (← st).events a then halt (.revert [])
@@ -1428,48 +1467,48 @@ def execS (G : Glob E) (F : Fr) (n : Nat) (nps : Nat) (ph : Option (Ph E)) {R : 
     | .success data => do
       if data.length < 32 * rs.length then halt (.revert [])
       let vs ← lift (decodeVals E.layout data rs 0)
-      let o ← execItems (plan := plan) G F n nps ph ok (vs.onto l1)
+      let o ← execItems (plan := plan) (calldataKnown := calldataKnown) G F n nps ph ok (vs.onto l1)
       lift (← lift (o.up Γ)).close
     | .revert data =>
       match cbind, cat with
       | true, cat => do
         let r ← allocRef (Data.bytes (D := E.layout) (l := .memory) data)
-        let o ← execItems (plan := plan) G F n nps ph cat (.cons r l1)
+        let o ← execItems (plan := plan) (calldataKnown := calldataKnown) G F n nps ph cat (.cons r l1)
         lift (← lift (o.up Γ)).close
       | false, cat => do
-        let o ← execItems (plan := plan) G F n nps ph cat l1
+        let o ← execItems (plan := plan) (calldataKnown := calldataKnown) G F n nps ph cat l1
         lift o.close
 termination_by structural n
 
 /-- The iterations of a `for` loop: condition, body, step. -/
 def forIter (G : Glob E) (F : Fr) (n : Nat) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool}
     {u : Bool} {Γ₁ Γ₂ : RCtx} (c : ROptBool E Γ₁) (post : ROptExpr E Γ₁)
-    (body : RStmt E R M ⟨true, u⟩ Γ₁ Γ₂) (l : Locals E.layout Γ₁) (plan : FailureExecution.RuntimePlan := none) : EM E [] (Out E.layout Γ₁ Γ₁) :=
+    (body : RStmt E R M ⟨true, u⟩ Γ₁ Γ₂) (l : Locals E.layout Γ₁) (plan : FailureExecution.RuntimePlan := none) (calldataKnown : Bool := true) : EM E [] (Out E.layout Γ₁ Γ₁) :=
   match n with
   | 0 => halt .timeout
   | n + 1 => do
     let (go, l1) ← match c with
       | .none => pure (true, l)
       | .some ce => do
-        let (cv, l1) ← sub l (evalE (plan := plan) G F n ce)
+        let (cv, l1) ← sub l (evalE (plan := plan) (calldataKnown := calldataKnown) G F n ce)
         match ← getV cv with
         | .bool b => pure (b, l1)
     if !go then return .normal l1
-    let l2 ← match ← execS (plan := plan) G F n nps ph body l1 with
+    let l2 ← match ← execS (plan := plan) (calldataKnown := calldataKnown) G F n nps ph body l1 with
       | .normal l2 => lift (l2.restore _)
       | .cont l2 => pure l2
       | .brk l2 => return .normal l2
       | .ret l2 => return .ret l2
     let l3 ← match post with
       | .none => pure l2
-      | .some pe => do pure (← sub l2 (evalE (plan := plan) G F n pe)).2
-    forIter (plan := plan) G F n nps ph c post body l3
+      | .some pe => do pure (← sub l2 (evalE (plan := plan) (calldataKnown := calldataKnown) G F n pe)).2
+    forIter (plan := plan) (calldataKnown := calldataKnown) G F n nps ph c post body l3
 termination_by structural n
 
 /-- **Block execution**: items in order; an `unchecked` block's arithmetic
 wraps. -/
 def execItems (G : Glob E) (F : Fr) (n : Nat) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool}
-    {k : SCtx} {Γ Γ' : RCtx} (b : RItems E R M k Γ Γ') (l : Locals E.layout Γ) (plan : FailureExecution.RuntimePlan := none) :
+    {k : SCtx} {Γ Γ' : RCtx} (b : RItems E R M k Γ Γ') (l : Locals E.layout Γ) (plan : FailureExecution.RuntimePlan := none) (calldataKnown : Bool := true) :
     EM E [] (Out E.layout Γ Γ') :=
   match n with
   | 0 => halt .timeout
@@ -1477,14 +1516,14 @@ def execItems (G : Glob E) (F : Fr) (n : Nat) (nps : Nat) (ph : Option (Ph E)) {
   match b with
   | .nil => pure (.normal l)
   | .stmt s rest => do
-    match ← execS (plan := plan) G F n nps ph s l with
-    | .normal l1 => lift ((← execItems (plan := plan) G F n nps ph rest l1).up _)
+    match ← execS (plan := plan) (calldataKnown := calldataKnown) G F n nps ph s l with
+    | .normal l1 => lift ((← execItems (plan := plan) (calldataKnown := calldataKnown) G F n nps ph rest l1).up _)
     | .brk l1 => pure (.brk l1)
     | .cont l1 => pure (.cont l1)
     | .ret l1 => pure (.ret l1)
   | .unchecked inner rest => do
-    match ← execItems (plan := plan) G { F with checked := false } n nps ph inner l with
-    | .normal l1 => execItems (plan := plan) G F n nps ph rest (← lift (l1.restore _))
+    match ← execItems (plan := plan) (calldataKnown := calldataKnown) G { F with checked := false } n nps ph inner l with
+    | .normal l1 => execItems (plan := plan) (calldataKnown := calldataKnown) G F n nps ph rest (← lift (l1.restore _))
     | .brk l1 => pure (.brk l1)
     | .cont l1 => pure (.cont l1)
     | .ret l1 => pure (.ret l1)
@@ -1494,18 +1533,18 @@ termination_by structural n
 arguments in the function's locals, its body with `_` running the rest; the
 function's final locals. -/
 def runMods (G : Glob E) (F : Fr) (n : Nat) (b : RBody E) (mods : List (RModInv E b.locals))
-    (l : Locals E.layout b.locals) (plan : FailureExecution.RuntimePlan := none) : EM E [] (Locals E.layout b.locals) :=
+    (l : Locals E.layout b.locals) (plan : FailureExecution.RuntimePlan := none) (calldataKnown : Bool := true) : EM E [] (Locals E.layout b.locals) :=
   match n with
   | 0 => halt .timeout
   | n + 1 =>
   match mods with
   | [] => do
-    match ← execItems (plan := plan) G F n b.ps.length none b.items l with
+    match ← execItems (plan := plan) (calldataKnown := calldataKnown) G F n b.ps.length none b.items l with
     | .normal l' => lift (l'.restore _)
     | .ret l' => pure l'
     | _ => halt (.stuck "break outside a loop")
   | m :: rest => do
-    let (vs, l1) ← sub l (evalConvArgs (plan := plan) G F n m.args)
+    let (vs, l1) ← sub l (evalConvArgs (plan := plan) (calldataKnown := calldataKnown) G F n m.args)
     match G.prog.body (G.dispatchMod F.contract m.modifier) with
     | none => halt (.stuck "modifier without a body")
     | some mb =>
@@ -1513,7 +1552,7 @@ def runMods (G : Glob E) (F : Fr) (n : Nat) (b : RBody E) (mods : List (RModInv 
       if h : m.ps.reverseAux [] = mb.locals then
         let saved := (← st).fnLocals
         modSt fun s => { s with fnLocals := ⟨_, l1⟩ }
-        let r ← attempt (execItems (plan := plan) G F n mb.ps.length (some ⟨b, rest, l1⟩) mb.items (h ▸ ml))
+        let r ← attempt (execItems (plan := plan) (calldataKnown := calldataKnown) G F n mb.ps.length (some ⟨b, rest, l1⟩) mb.items (h ▸ ml))
         let ⟨Γf, lf⟩ := (← st).fnLocals
         modSt fun s => { s with fnLocals := saved }
         if let .error hl := r then halt hl
@@ -1525,7 +1564,7 @@ termination_by structural n
 return slots as the callee's locals, its modifiers and body, its return
 slots as the value; a checked context. -/
 def callInternal (G : Glob E) (F : Fr) (n : Nat) (d : Decl) {ps : List STy} (vs : Vals E.layout ps)
-    (rs : List STy) (plan : FailureExecution.RuntimePlan := none) : EM E [] (RVal E.layout (STy.ret rs)) :=
+    (rs : List STy) (plan : FailureExecution.RuntimePlan := none) (calldataKnown : Bool := true) : EM E [] (RVal E.layout (STy.ret rs)) :=
   match n with
   | 0 => halt .timeout
   | n + 1 => do
@@ -1535,10 +1574,46 @@ def callInternal (G : Glob E) (F : Fr) (n : Nat) (d : Decl) {ps : List STy} (vs 
       let rv ← zeroVals n rs
       let l0 := rv.onto (vs.onto (L0 E))
       if h : rs.reverseAux (ps.reverseAux []) = b.locals then
-        let l' ← runMods (plan := plan) G { F with checked := true } n b b.mods (h ▸ l0)
+        let l' ← runMods (plan := plan) (calldataKnown := calldataKnown) G { F with checked := true } n b b.mods (h ▸ l0)
         let out ← lift (retVals l' 0 rs)
         pure (mkRet rs out)
       else halt (.stuck "call frame")
+termination_by structural n
+
+/-- Typed delegated library entry. Storage pointers retain identity;
+callee memory is fresh, and reverted storage/logs roll back before handling.
+A pointer signature has no fabricated ABI bytes: any calldata-reference
+observation explicitly refuses. This is not physical ABI/linkage adequacy. -/
+def callLibrary (G : Glob E) (F : Fr) (n : Nat) (d : Decl) {ps : List STy}
+    (values : Vals E.layout ps) (rs : List STy) (plan : FailureExecution.RuntimePlan := none) :
+    EM E [] (Except Bytes (Vals E.layout rs)) :=
+  match n with
+  | 0 => halt .timeout
+  | n + 1 => FailureExecution.preflight plan do
+    if F.depth ≥ 1024 then return .error []
+    if !libraryBoundary ps rs then halt (.stuck "unsupported library ABI boundary")
+    let known := ps.all STy.isValue
+    let input ← if known then do
+        let encoded ← encodeVals F n false values.toR
+        pure (G.selector (sigOf E.layout d.name ps) ++ encoded)
+      else pure []
+    let saved ← mark
+    modSt fun state => { state with heap := Heap.empty }
+    let action := callInternal (plan := plan) (calldataKnown := known) G
+      { F with cd := input, depth := F.depth + 1 } n d values rs
+    let result ← attempt (match plan with
+      | none => action
+      | some _ => FailureExecution.frame plan action)
+    modSt fun state => { state with heap := saved.2.2 }
+    match result with
+    | .ok value => do
+      let raw ← lift (unRet rs value)
+      let values ← lift raw.toVals
+      FailureExecution.preflight plan (pure (.ok values))
+    | .error (.revert data) => do
+      rollbackTo saved
+      FailureExecution.preflight plan (pure (.error data))
+    | .error other => halt other
 termination_by structural n
 
 /-- **A call to an address** with value and input data, as its caller

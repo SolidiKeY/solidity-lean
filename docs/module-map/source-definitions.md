@@ -67,7 +67,9 @@
 | `Source/Infer.lean` | S02 item 1b: type inference computing derivations (`Typed.infer`, `StmtD.infer`, `ItemsD.infer`), sound by construction. |
 | `Source/Elaborate.lean` | S02 item 1b: the elaborator `elaborate : Resolution → Option Elaborated` (bodies, modifiers, initializers, constants, base arguments), coherent by construction. |
 | `Source/ElaborateExamples.lean` | Controls of the elaborator: a unit with inheritance, a base argument, a modifier and an initializer elaborated from syntax and run. |
-| `Source/Horizon.lean` | S05 item 2, last part of the `Horizon` split (imports `HorizonFuel`, `HorizonGrow`, `HorizonConst`): a timed-out run's events are a prefix of a larger horizon's (`approxAt`, `runTx_events_mono`). |
+| `Source/HorizonApproxExpressions.lean` | Event-prefix helper and expression proofs, split to keep each kernel check bounded; preserves qualified names exported by `Source/Horizon`. |
+| `Source/HorizonApproxStatements.lean` | Statement event-prefix proofs and the shared known-mode induction; re-exported through the unchanged public facade. |
+| `Source/Horizon.lean` | S05 item 2, last part of the `Horizon` split (imports `HorizonFuel`, `HorizonGrow`, `HorizonConst`): both calldata modes share the ordinary-plan event-prefix induction (`approxAtKnown`); the frozen `ApproxAt` specialization and transaction prefix law remain (`approxAt`, `runTx_events_mono`). |
 | `Source/HorizonDeploy.lean` | S05 item 2: a deployment not completed at a horizon shows a prefix of its events at every larger one (`deploy_events_mono`). |
 | `Source/Session.lean`, `Source/SessionExamples.lean` | Sessions showing the events of unfinished transactions (`sessionAtEvents`, `sourceLangEvents`), consistent, and their controls. |
 | `Source/Hoare.lean` | V04b: Hoare triples over the interpreter monad `EM` (`Hoare`, `NotStuck`), with a rule per combinator (`bind`, `sub'`, `attempt'`, `lift'`, …). |
@@ -133,12 +135,16 @@
 | `Source/Agreement/PrimitiveSlotReverseControls.lean` | Retained source/tail/neighbors and real opposite-direction controls. |
 | `Source/Agreement/PrimitiveCopySequence.lean` | Both orders of concrete primitive copies, actual intermediate reads, normal agreements/clients and horizon-four timeouts. |
 | `Source/Agreement/PrimitiveCopySequenceControls.lean` | Original-value survival by copy order, same-input model noncommutation and swap refusal controls. |
-| `Source/HorizonFuel.lean` | S05 item 2, first part of the `Horizon` split: fuel monotonicity (`belowAt`) and horizon independence (`runTx_stable`, `firstDone_runTx`, `runTx_stuck_stable`). |
-| `Source/HorizonGrow.lean` | S05 item 2, `Horizon` split: every interpreter function only appends events (`grow_go`, `growAt`). |
+| `Source/HorizonFuel.lean` | S05 item 2, first part of the `Horizon` split: shared plan-indexed `HorizonAt`, both-calldata-mode completed-run monotonicity (`belowAtKnown`), frozen `BelowAt` specialization, and horizon independence (`runTx_stable`, `firstDone_runTx`, `runTx_stuck_stable`). |
+| `Source/HorizonGrow.lean` | S05 item 2, `Horizon` split: both calldata modes only append events (`growAtKnown`) over the shared horizon schema; the frozen `GrowAt` interface specializes to ordinary mode. No enabled-plan instance follows from the schema alone. |
 | `Source/HorizonConst.lean` | S05 item 2, `Horizon` split: the helpers that leave the events as they are (`const_go`). |
 # H125 additive Source typing pair
 
 | `Source/TypingV2.lean` | H57 additive environment-aware local declaration judgment over frozen v1 derivations; generic policy fold, compatibility bridge and positive H24 admission, with no Lowering import. |
+
+| `Source/ExpressionTyping.lean` | Byte-preserving split of expression/type-name rules; re-exported by Source/Typing. |
+| `Source/LibraryTyping.lean` | Generic qualified/using library target lookup, typed receiver matching and supported boundary. |
+| `Source/LibrarySemantics.lean` | Shared typed calldata guard and ordinary/unavailable/non-calldata laws; no physical pointer ABI fabrication. |
 | `Source/CalldataLayout.lean` | ABI head dimensions for the owned calldata aggregate subset (`cdStaticWords`, `cdHeadBytes`, `STy.cdStride`), taken from v14 781938cf. |
 | `Source/CalldataAggregates.lean` | S02/G18.04 nested calldata reads, string and static-reference slices, and typed read-only locations, taken from v14 781938cf. |
 | `Source/CalldataStaticCopyControls.lean` | G18.05 controls of `cdToMem` copying statically encoded elements (`uint256[2][]`, `uint256[2]`) at the head stride, with validation and the `stuck` dynamic-element case; the nested arm is called directly; its typed-source reachability is in `CalldataNestedCopyControls`. |
@@ -188,16 +194,16 @@
 | `Source/FailureRequestHorizon.lean` | Actual requestScope event growth and fixed-plan horizon approximation with per-balance body premises; timeout cleanup rethrows without events. |
 | `Source/FailureRequestHorizonControls.lean` | Inhabited request horizon/full-state/wide-input/byte controls, cut/drop distinctions, caught-cut refusal and changed-plan counterexample. |
 
-| `Source/FailureEvaluatorGrow.lean` | Closed event-growth induction over all17 existing Source evaluator functions with an arbitrary enabled fixed plan; generated proof basis, no body-growth/NoFail/outcome premise. |
+| `Source/FailureEvaluatorGrow.lean` | Closed fixed-plan event-growth induction through the shared eighteen-operation HorizonAt schema, covering both calldata modes; the existing seventeen-field GrowAt API remains unchanged. |
 | `Source/FailureEvaluatorGrowControls.lean` | Actual entered-frame induction use, all-horizon prefix transport and changed-plan/event-erasure counterexamples; transitive standard axiom pins. |
 | `Source/FailureTransactionGrowth.lean` | Actual runTxWithPlan event growth from the closed induction and real root operations; no session/Approx/P8 claim. |
 
 | `Source/FailureScopeStability.lean` | Actual frame/request Below transport with genuine timeout rethrow; no blanket attempt transport. |
-| `Source/FailureEvaluatorStability.lean` | Closed enabled-plan BelowAt induction for all17 existing Source evaluator functions; exact-byte generated proof basis, no external execution premise. |
+| `Source/FailureEvaluatorStability.lean` | Closed fixed-plan equality-or-timeout induction through the shared eighteen-operation HorizonAt schema, covering both calldata modes and projecting to the unchanged legacy BelowAt API. |
 | `Source/FailureTransactionStability.lean` | Actual planned root Below and complete result/state stability after non-timeout completion at all larger fixed-plan horizons. |
 | `Source/FailureStabilityControls.lean` | Full frozen Source revert/panic/stuck/request-stop transport and timeout/attempt counterexamples; standard transitive axiom pins. |
 
-| `Source/FailureEvaluatorApprox.lean` | Closed fixed-plan event-prefix Approx induction for all17 actual Source evaluator functions; exact-byte generated proof basis, no NoFail/execution premise. |
+| `Source/FailureEvaluatorApprox.lean` | Closed fixed-plan event-prefix approximation through the shared eighteen-operation HorizonAt schema, with full completed-state equality and the unchanged legacy ApproxAt API. |
 | `Source/FailureTransactionApprox.lean` | Actual planned root approximation and event-prefix inclusion at every larger horizon, including timeouts; no session/deployment/P8 assertion. |
 | `Source/FailureApproxControls.lean` | Actual timeout-prefix/completed-cut controls and changed-plan/captured-timeout counterexamples; exact standard axiom pins. |
 
