@@ -2132,3 +2132,14 @@ without inventing a trust predicate. The original three-second preparation
 limit, product predicates and proof settings are unchanged. Tests use injected
 CDP/envelopes and are not native evidence. Real reload/capture failures remain
 failures; no raster/ABA, macOS, full lifecycle or row-judgment claim follows.
+
+
+The supervisor's explicit `native-editor` profile preserves the original
+native runner's RSS guards and headroom checks without applying Lean's virtual
+address-space cap to Electron. Observed Lean/Lake children fail that profile; process sampling cannot prove
+absence of short-lived invocations, so this is restricted to reviewed
+editor-only collection and never admits proof work. Finite inherited address
+limits refuse native admission without being lifted.
+The default Lean profile retains its existing address-space and aggregate
+limits. This distinguishes Electron address reservation from resident memory;
+it grants no proof-budget or resource-stop waiver.
