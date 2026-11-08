@@ -38,7 +38,7 @@ function parse(args) {
   const options={trials:5,warmups:1,workers:[1,2,4],obligations:8,timeoutMs:300000,operationTimeoutMs:60000,targets:['dafny','local'],cache:['none','basic'],trace:'on',suite:'full'};
   const keys={'--code':'code','--dafny':'dafny','--dafny-extension':'dafnyExtension','--dotnet':'dotnet','--output':'output',
     '--trials':'trials','--warmups':'warmups','--workers':'workers','--obligations':'obligations','--timeout-ms':'timeoutMs','--operation-timeout-ms':'operationTimeoutMs','--targets':'targets','--cache':'cache','--trace':'trace',
-    '--memory-reserve-mib':'memoryReserveMiB','--memory-max-mib':'memoryMaxMiB','--suite':'suite','--menu-trust':'menuTrust','--menu-recovery-from':'menuRecoveryFrom'};
+    '--memory-reserve-mib':'memoryReserveMiB','--memory-max-mib':'memoryMaxMiB','--suite':'suite','--menu-trust':'menuTrust','--menu-recovery-from':'menuRecoveryFrom','--menu-anchor':'menuAnchor'};
   for(let i=0;i<args.length;i++) {
     if(args[i]==='--help') return {help:true};
     const key=keys[args[i]];if(!key||!args[i+1]||args[i+1].startsWith('--')) throw new Error('Invalid option '+args[i]);
@@ -57,6 +57,7 @@ function parse(args) {
   if(!['on','off'].includes(options.trace))throw new Error('Invalid trace');
   if(!['contribution-menus','verification-time-limit','full','benchmark','visual','commands','custom-commands','custom-default-commands','custom-import-actions','compiler-output','dafny-compiler-output','dafny-command-output','output-lifecycle','testing-symbols','trace-unavailable','trace-visibility','trace-light-show','proof-help','proof-hover'].includes(options.suite))throw new Error('Invalid suite');
   if(options.menuTrust!==undefined&&(!['transitions','recovery'].includes(options.menuTrust)||options.suite!=='contribution-menus'))throw Error('Native trust transitions require contribution-menus');
+  if(options.menuAnchor!==undefined&&(options.menuAnchor!=='visible-scrollport-v1'||options.suite!=='contribution-menus'||options.menuTrust!==undefined))throw Error('Versioned menu anchor requires ordinary contribution-menus only');
   if((options.menuTrust==='recovery')!==!!options.menuRecoveryFrom)throw Error('Recovery requires explicit predecessor directory and recovery mode');
   if(options.suite==='contribution-menus'&&(options.workers.some(w=>w!==1)||options.obligations!==1||options.trials!==1||options.warmups!==0||options.trace!=='on'))throw Error('Menu capture requires single serial trial, one worker/obligation and protocol');
   if(options.suite==='verification-time-limit'&&(options.trace!=='on'||options.workers.some(w=>w!==1)||options.obligations!==1))throw Error('Time-limit probe requires protocol, one worker and one obligation');
@@ -92,7 +93,7 @@ function shortSummary(report) {
   return lines.join('\n');
 }
 async function launch(config,options) {
-  config={...config,suite:options.suite||'full',menuTrust:options.menuTrust,runId:randomUUID(),sourceHead:git(repo)};
+  config={...config,suite:options.suite||'full',menuTrust:options.menuTrust,...(options.menuAnchor?{menuAnchor:options.menuAnchor}:{}),runId:randomUUID(),sourceHead:git(repo)};
   mkdirSync(config.dir,{recursive:true});mkdirSync(config.workspace,{recursive:true});config.filesystemCapability=require('./filesystem.cjs').recursiveCapability(config.dir);
   const cache={'none':'No caching',basic:'Basic caching',advanced:'Advanced caching'}[config.cache];
   const settings= config.target==='dafny' ? {'dafny.version':'custom','dafny.cliPath':resolve(options.dafny),'dafny.dotnetExecutablePath':resolve(options.dotnet),
@@ -266,7 +267,7 @@ async function main(args=process.argv.slice(2)) {
     dotnetVersion:options.dotnet?spawnSync(resolve(options.dotnet),['--list-runtimes'],{encoding:'utf8',timeout:10000}).stdout?.trim():null,
     leanVersion:spawnSync('lean',['--version'],{encoding:'utf8',timeout:10000}).stdout?.trim()||null,
     cpuQuota:process.platform==='linux'&&existsSync('/sys/fs/cgroup/cpu.max')?readFileSync('/sys/fs/cgroup/cpu.max','utf8').trim():null,
-    sourceFiles:Object.fromEntries(['vscode/src/extension.cjs','vscode/src/backend.cjs','vscode/src/rpc.cjs','vscode/src/lsp-client.cjs','vscode/src/lsp-server.cjs','vscode/src/lsp-worker.cjs','vscode/src/lean-session.cjs','vscode/src/worker-pool.cjs','vscode/src/language-services.cjs','vscode/src/editor-services.cjs','vscode/src/project.cjs','vscode/src/solidity-text.cjs','scripts/source-locations.mjs','scripts/test-solidity.mjs','scripts/solc-ast.mjs','vscode/parity/run.cjs','vscode/parity/host.cjs','vscode/parity/observe.cjs','vscode/parity/verification-limit.cjs','vscode/parity/core.cjs','vscode/parity/observe.cjs','vscode/parity/renderer.cjs','vscode/parity/menu-lifecycle.cjs','vscode/parity/workloads.cjs'].map(path=>[path,createHash('sha256').update(readFileSync(join(repo,path))).digest('hex')])),
+    sourceFiles:Object.fromEntries(['vscode/src/extension.cjs','vscode/src/backend.cjs','vscode/src/rpc.cjs','vscode/src/lsp-client.cjs','vscode/src/lsp-server.cjs','vscode/src/lsp-worker.cjs','vscode/src/lean-session.cjs','vscode/src/worker-pool.cjs','vscode/src/language-services.cjs','vscode/src/editor-services.cjs','vscode/src/project.cjs','vscode/src/solidity-text.cjs','scripts/source-locations.mjs','scripts/test-solidity.mjs','scripts/solc-ast.mjs','vscode/parity/run.cjs','vscode/parity/host.cjs','vscode/parity/observe.cjs','vscode/parity/verification-limit.cjs','vscode/parity/core.cjs','vscode/parity/observe.cjs','vscode/parity/renderer.cjs','vscode/parity/menu-lifecycle.cjs','vscode/parity/menu-scrollport-v1.cjs','vscode/parity/workloads.cjs'].map(path=>[path,createHash('sha256').update(readFileSync(join(repo,path))).digest('hex')])),
     memoryLimit:process.platform==='linux'&&existsSync('/sys/fs/cgroup/memory.max')?readFileSync('/sys/fs/cgroup/memory.max','utf8').trim():null},runs,summary:[],comparisons:[],
     limitations:['Equivalent constant-return obligations cover a shared semantic fragment, not general theorem-prover equivalence.',
       'No OS page-cache eviction is attempted. Process-cold and live-server warm timings are separate.',

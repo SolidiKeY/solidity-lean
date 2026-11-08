@@ -25,7 +25,10 @@ function menuErrors(value,runId,target,workspace){
   if(b?.sourceHash!==createHash('sha256').update(expectedText).digest('hex')||b?.language!==expectedLanguage||b?.scheme!==(row.phase==='untitled'?'untitled':'file')||b?.trusted!==true)errors.push('wrong source/language/scope');
   if(workspace&&row.phase!=='untitled'){const expectedUri=require('node:url').pathToFileURL(path.join(workspace,row.phase==='unrelated'?'unrelated.txt':'menus.'+(target==='local'?'sol':'dfy'))).href;if(b?.uri!==expectedUri)errors.push('wrong resource');}
   const label=target==='local'?'Solidity Lean':'Dafny',custom=target==='local'?'Build Compiler Artifact with Import Options':'Build with Custom Arguments';
-  if(m?.kind!==kind||!!m?.before?.items?.some(i=>i.label===label)!==visible||visible&&!m?.before?.items?.some(i=>i.label.includes(custom))||row.capture?.runId!==runId||row.capture?.phase!=='menus-'+row.phase||row.capture?.metadataHash!==createHash('sha256').update(JSON.stringify({binding:b,target,kind,visible,...(row.tabOwnership?{tabOwnership:row.tabOwnership}:{})})).digest('hex'))errors.push('wrong menu/phase ownership');
+  if(m?.kind!==kind||!!m?.before?.items?.some(i=>i.label===label)!==visible||visible&&!m?.before?.items?.some(i=>i.label.includes(custom))||row.capture?.runId!==runId||row.capture?.phase!=='menus-'+row.phase||row.capture?.metadataHash!==createHash('sha256').update(JSON.stringify({binding:b,target,kind,...(value.anchorAdmission&&kind==='editor'?{anchorAdmission:value.anchorAdmission}:{}),visible,...(row.tabOwnership?{tabOwnership:row.tabOwnership}:{})})).digest('hex'))errors.push('wrong menu/phase ownership');
+  if(value.anchorAdmission&&value.anchorAdmission!=='visible-scrollport-v1')errors.push('Unknown menu anchor admission');
+  if(kind==='editor'&&value.anchorAdmission){try{const a=m?.anchorAdmission;assert.equal(a?.version,value.anchorAdmission);assert.equal(a.checks.length,2);for(const check of a.checks)assert.deepEqual(require('./menu-scrollport-v1.cjs').admit(check.probe,a.anchor,b.uri),check);assert.deepEqual(a.checks[0].probe.rendererLifetime,a.checks[1].probe.rendererLifetime);assert.deepEqual(a.checks[0].probe.rendererLifetime,m.before.rendererLifetime);assert.deepEqual(a.checks[0].probe.rendererLifetime,m.after.rendererLifetime);}catch(error){errors.push('Invalid visible-scrollport admission: '+error.message);}}
+  else if(m?.anchorAdmission)errors.push('Unrequested visible-scrollport admission');
   if(row.tabOwnership){try{assert.equal(kind,'tab');require('./menu-tab-ownership.cjs').assertObservation(row.tabOwnership,b,{runId});assert.deepEqual(row.tabAfter,row.tabOwnership);assert.deepEqual(m?.tabOwnership,row.tabOwnership);require('./menu-tab-ownership.cjs').assertDOM(m?.before,row.tabOwnership);require('./menu-tab-ownership.cjs').assertDOM(m?.after,row.tabOwnership);}catch(error){errors.push('wrong public tab resource/epoch: '+error.message);}}
   if(sourcePhase&&JSON.stringify(b)!==JSON.stringify(value?.phases?.[0]?.binding))errors.push('source lifetime changed');
   if(!m?.before?.items?.every(i=>typeof i.label==='string'&&Object.hasOwn(i,'ariaDisabled')&&[null,'true','false'].includes(i.ariaDisabled)&&Object.hasOwn(i,'className')&&i.withinViewport===true&&['left','top','right','bottom'].every(k=>Number.isFinite(i.bounds?.[k]))&&i.bounds.right>i.bounds.left&&i.bounds.bottom>i.bounds.top))errors.push('incomplete/clipped raw menu state');
@@ -66,8 +69,9 @@ function trustErrors(value,runId,target,expected=['initial','grant','deny','lost
 }
 function validate(value,runId,target,workspace,trustMode){try{return [...menuErrors(value,runId,target,workspace),...(trustMode?trustErrors(value,runId,target):[])];}catch(error){return ['Malformed native menu observation: '+error.message];}}
 // Current ordinary collection requires resource ownership; historical recovery stays unchanged.
-function validateCurrent(value,runId,target,workspace,trustMode,sourceHead){
+function validateCurrent(value,runId,target,workspace,trustMode,sourceHead,menuAnchor){
  const errors=validate(value,runId,target,workspace,trustMode),row=value?.phases?.find(r=>r.phase==='tab');
+ if(value?.anchorAdmission!==menuAnchor)errors.push('Menu anchor launch mode differs');
  try{assert.match(sourceHead,/^[a-f0-9]{40}$/);assert.ok(row?.tabOwnership,'Missing current public tab ownership');require('./menu-tab-ownership.cjs').assertObservation(row.tabOwnership,row.binding,{runId,sourceHead});}catch(error){errors.push('Current public tab contract: '+error.message);}return errors;
 }
 async function run({vscode,config,events,sessionFor,requestPhase=require('./phase-capture.cjs').requestPhase}){
@@ -75,7 +79,7 @@ async function run({vscode,config,events,sessionFor,requestPhase=require('./phas
  const begin=events.length,target=config.target,language=target==='local'?'solidity':'dafny',source=require('./workloads.cjs').workload(target,1),file=path.join(config.workspace,'menus.'+(target==='local'?'sol':'dfy'));
  fs.writeFileSync(file,source);const doc=await vscode.workspace.openTextDocument(file),rows=[];
  const binding=d=>({uri:d.uri.toString(),version:d.version,sourceHash:createHash('sha256').update(d.getText()).digest('hex'),session:sessionFor(d),language:d.languageId,scheme:d.uri.scheme,trusted:vscode.workspace.isTrusted});
- const result={status:'partial',runId:config.runId,target,phases:rows,untrusted:{status:'missing',reason:'Existing pinned runner disables workspace trust UI; this launch cannot evidence an untrusted window.'},scope:'Actual Linux menu endpoint/AX/PNG observations only; no command, proof, raster/ABA or macOS equivalence.'};
+ const result={status:'partial',runId:config.runId,target,...(config.menuAnchor?{anchorAdmission:config.menuAnchor}:{}),phases:rows,untrusted:{status:'missing',reason:'Existing pinned runner disables workspace trust UI; this launch cannot evidence an untrusted window.'},scope:'Actual Linux menu endpoint/AX/PNG observations only; no command, proof, raster/ABA or macOS equivalence.'};
  if(config.menuTrust)result.trust={mode:'native-workspace-trust',settings:{enabled:vscode.workspace.getConfiguration('security.workspace.trust').get('enabled'),startupPrompt:vscode.workspace.getConfiguration('security.workspace.trust').get('startupPrompt'),enabledUserValue:vscode.workspace.getConfiguration('security.workspace.trust').inspect('enabled')?.globalValue},steps:[]};
  const save=()=>fs.writeFileSync(path.join(config.dir,'menu-observations.json'),JSON.stringify(result,null,2));
  async function capture(phase,d,kind='editor'){
@@ -84,7 +88,7 @@ async function run({vscode,config,events,sessionFor,requestPhase=require('./phas
   const start=events.length,row={phase,binding:before,eventStart:start-begin};rows.push(row);save();
   let tab;
   try{if(kind==='tab'){tab=require('./menu-tab-ownership.cjs').monitor(vscode,d,config,sessionFor(d));row.tabOwnership=tab.initial;save();}
-   row.capture=await requestPhase(config.dir,config.runId,'menus-'+phase,{binding:before,target,kind,visible:phase==='source'||phase==='restored'||phase==='untitled'&&target==='dafny',...(tab?{tabOwnership:row.tabOwnership}:{})},config.operationTimeoutMs);if(tab)row.tabAfter=tab.assertCurrent();row.after=binding(d);assert.deepEqual(row.after,before);row.eventEnd=events.length-begin;row.events=events.slice(start);save();}
+   row.capture=await requestPhase(config.dir,config.runId,'menus-'+phase,{binding:before,target,kind,...(config.menuAnchor&&kind==='editor'?{anchorAdmission:config.menuAnchor}:{}),visible:phase==='source'||phase==='restored'||phase==='untitled'&&target==='dafny',...(tab?{tabOwnership:row.tabOwnership}:{})},config.operationTimeoutMs);if(tab)row.tabAfter=tab.assertCurrent();row.after=binding(d);assert.deepEqual(row.after,before);row.eventEnd=events.length-begin;row.events=events.slice(start);save();}
   catch(error){row.error=error.message;if(error.cleanupErrors)row.cleanupErrors=error.cleanupErrors;error.observation=result;throw error;}
   finally{try{tab?.dispose();}catch(error){row.cleanupError=error.message;if(!row.error){row.error=error.message;throw error;}}finally{row.eventEnd=events.length-begin;row.events=events.slice(start);save();}}
  }
@@ -104,7 +108,7 @@ async function run({vscode,config,events,sessionFor,requestPhase=require('./phas
   await capture('source',doc);const textFile=path.join(config.workspace,'unrelated.txt');fs.writeFileSync(textFile,'Menu language isolation.\n');const unrelated=await vscode.workspace.openTextDocument(textFile);await capture('unrelated',unrelated);
   const untitled=await vscode.workspace.openTextDocument({language,content:source});await capture('untitled',untitled);await capture('tab',doc,'tab');await capture('restored',doc);
   if(config.menuTrust){await trustStep('deny',false);await trustStep('lost');await trustStep('restore',true);await trustStep('restored');result.untrusted={status:'partial',reason:'Native trust UI/API/menu endpoints only; full parity and reload/matrix coverage remain open.'};}
-  assert.equal(doc.getText(),source);assert.equal(fs.readFileSync(file,'utf8'),source);result.events=events.slice(begin);result.forbiddenActions=forbidden(result.events);assert.deepEqual(validateCurrent(result,config.runId,target,config.workspace,config.menuTrust,config.sourceHead),[]);save();return result;
+  assert.equal(doc.getText(),source);assert.equal(fs.readFileSync(file,'utf8'),source);result.events=events.slice(begin);result.forbiddenActions=forbidden(result.events);assert.deepEqual(validateCurrent(result,config.runId,target,config.workspace,config.menuTrust,config.sourceHead,config.menuAnchor),[]);save();return result;
  }catch(error){error.observation=result;throw error;}
  finally{result.events=events.slice(begin);result.forbiddenActions=forbidden(result.events);save();}
 }

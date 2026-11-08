@@ -93,6 +93,12 @@
       "decision": "Direct send_user_message_question_reply,2026-11-08",
       "status": "answered; native recovery blocked",
       "authorization": "Keep strict predecessor admission; recovery remains blocked"
+    },
+    {
+      "question": "Q-MENU-VIRTUAL-ANCHOR-01",
+      "decision": "H199 user,2026-11-08; substantive verbatim answer supplied in this thread",
+      "authorization": "Authorize a separate versioned visible-scrollport admission path (original mouse point, observed scrollport, elementFromPoint ownership, strict path, deadlines and failed run retained); independent review and unchanged full parity validation.",
+      "status": "authorized; implementation and evidence remain subject to original gates"
     }
   ]
 }

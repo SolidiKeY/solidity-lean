@@ -51,3 +51,12 @@ Real-backend tests additionally need the built `Solidity.Frontend.Testing` API
 and compiler setup. Follow the guarded build workflow in
 [contributing.md](../docs/contributing.md). Optional comparison tooling is in
 [vscode/parity](parity/).
+
+For the existing bounded `contribution-menus` runner, `--menu-anchor visible-scrollport-v1`
+selects H199's separate editor-scrollport admission. It retains the original mouse
+point and three-second readiness deadline, requires observed clipping and owned
+`elementFromPoint` hits before mouse press/release, and records raw probe failures.
+Omitting the option retains strict full-rectangle admission. Tabs keep their strict
+public-resource checks; trust-transition/recovery runs reject this option. DOM
+endpoints do not certify raster glyphs or mutation ABA, and this option does not
+waive the original failed run or either independent row judgment.
