@@ -2,8 +2,9 @@
 
 Base: `a0a9ca15ba35fd6e8d9a9be10e4b6b45dbf45d3e`.
 Owner: `solidity-plan-e4-hash-bridge-20261107/e4-hash-bridge`.
-The symbolic ideal machine remains the true mode. No existing declaration,
-premise, observation, generated registry or core representation is changed.
+The symbolic ideal machine is unchanged. The bridge is additive: no existing
+declaration, premise, observation or core representation changes. H82
+authorizes the statement-preserving registration described below.
 
 ## Checkpoint 1: inventory and statements
 
@@ -96,67 +97,19 @@ Relay: `coord-q/codex/solidity-plan-e4-hash-bridge-20261107/e4-hash-bridge/20261
 
 ## Reviews
 
-Checkpoint 1 finder (independent read-only thread, no Lean server):
-confirmed the root-hit counterexample and required preservation of the
-separate source forward/guard premises. Both findings are reflected above.
-Checkpoint 2 independent finder and skeptic found no proof defects. Finder
-requested a concrete collision witness beyond the generic obstruction;
-`constantHash_collision` now supplies byte preimages `[]` and `[0]` under a
-constant replacement hash. No semantic execution is manufactured from the
-abstract EvmSpec. Both reviewers required recording actual axiom sets and
-updating stale checkpoint status. Checkpoint 3–4 reviews remain pending.
-
-## Registration fragment (coordinator only)
-
-Intended imports (Bridge implemented, CollisionBridge pending; not registered):
-
-```lean
-import Solidity.Hash.Bridge
-import Solidity.Hash.CollisionBridge
-```
-
-CORE entries and axiom-pin keys will be supplied after declarations are
-checked. Module-map rows and generated roots remain coordinator-owned as
-required by the exact sole-write-scope assignment. No register.sh mutation
-is authorized for this worker.
-
-## Gates and handoff status
-
-Setup: clean original `work` branch at `f5038bc02bc52ea08f5a3cec7de292aef424e7c8`;
-pinned base initially absent. Authorized fetch succeeded; origin/master
-resolved exactly to the pinned base, ancestry check passed. Assigned branch
-created at that exact base with writer lock; original branch preserved.
-Repository: `/workspace/solidity-lean`.
-Lean: 4.24.0, commit `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`.
-Lake: 5.0.0-src+797c613 (Lean 4.24.0).
-VM: 17 GiB RAM, 16 GiB available at setup, no swap, 30 GiB disk free.
-No runtime gate pass is claimed; KeySort and Lean build gates are pending.
-The active tool catalog exposes stop_goal but no get_goal; no new goal was
-created or reset.
-
-Checkpoint 1 committed as `b782c5968`; doc paths exit 0 (143 ambiguous
-references, all resolving). Checkpoint 2 Bridge implemented: MCP `diag`
-reports 0 errors; `lake lean Solidity/Hash/Bridge.lean -- -j1
---tstack=131072` exits 0. Cold import build: CollisionBound 3.9 s, Adaptive
-1.0 s, Roadmap.Evm 1.0 s, Contracts 2.0 s (6 jobs, success). Initial
-`lake build -j1` was rejected because Lake 5 has no such option; corrected
-to LEAN_NUM_THREADS=1 for dependency build and explicit Lean -j1 for files.
-Module timing via Python monotonic/resource (no /usr/bin/time installed):
-Bridge 0.513 s wall, 230516 KiB child max RSS. No existing module changed;
-whole-library timing comparison remains pending. Actual pinned axioms:
-unit-root-free theorem `[propext, Quot.sound]`; prefix transfer `[]`.
-These are strictly below the requested standard triple, not artificially
-inflated to introduce Classical.choice. Negative controls include explicit
-constant-hash byte collision and generic root hit. Checkpoint gate evidence: `/tmp/e4-checkpoint2/gates.tsv`: layers PASS
-(904 core, 0 elaborator reach, 0 parser reach, 0 new edges); touched build
-PASS; trust PASS (6696 sources, 289 inventoried sites, 0 findings); fragments
-PASS; doc paths PASS (143 resolving ambiguities). Orphans FAIL (6678
-reachable, Bridge is the sole orphan); roots FAIL (missing Bridge import);
-axiom pins FAIL (new unregistered pins), all expected coordinator-owned
-registration deltas. Library gate was interrupted by this worker after
-116 s while awaiting the E4-Q1 decision; it is NOT a pass. Coordinator then
-answered A; the full library gate must be rerun. Registration fragment
-completion, checkpoint 3–4, lane-end gates and handoff remain pending. No new axioms, sorry, trust shortcuts or frozen statements.
+The independent read-only checkpoint 1 finder confirmed that collision
+freedom does not remove the root-hit obstruction and that source
+Forward/Guard restrictions must remain. Checkpoint 2 finder and skeptic
+found no proof defect; the requested concrete distinct-byte collision
+witness is `constantHash_collision`. Checkpoint 3 finder and skeptic found
+no weakened premise; requested checked axiom pins and a direct region-only
+positive control are present. Checkpoint 4 finder and skeptic confirmed the
+full original observation, the hash-indexed correctness family, and the
+inhabited quiet compiler execution. Requested compiler pins are checked.
+Independent finder and skeptic also reviewed the dedup/repeat and separate
+collision/region backfill: no findings, no existing definition or premise
+changed, and the full root-hit term is retained. None used a Lean server.
+Detailed review records belong to the private evidence archive below.
 
 ## Checkpoint 3: implemented probability bridge
 
@@ -189,8 +142,8 @@ Measured headline axioms (`two_mul_combined_le`, `run_premise_le`,
 Each has a #guard_msgs pin. Independent checkpoint 3 finder and skeptic found no proof defect and no
 weakened premise. They requested checked axiom pins (now present) and a
 direct region-only positive control; `one_query_region_hit` now states
-exactly one failing region oracle in the same tiny model. Full gates and
-measured module timing remain pending.
+exactly one failing region oracle in the same tiny model. These controls retain the complete region contribution, including root hits
+with one query.
 
 ## Checkpoint 4: compiler bridge and inhabited execution
 
@@ -223,13 +176,28 @@ Both independent checkpoint 4 finder and skeptic found no proof defect,
 new semantic premise, or weakened observation. Both requested checked
 compiler axiom pins instead of raw prints; these have been added. Actual
 axioms: Compiler.refines `[]`, Compiler.failure_le the standard triple.
-MCP diagnostics and Lean per-file checks for compiler and controls passed;
-library/full gates and registration remain outstanding.
+The concrete witness retains the original admission and observation contracts.
 
-## Final registration fragment (supersedes the reserved fragment above)
+## Backfill statements
 
-Only the coordinator may apply these entries. No generated registry or
-module-map file was modified by this worker.
+The additional backfill lemmas preserve the existing declarations:
+HashPremise depends only on membership of each actual query list; deduplication
+and repeating either whole list therefore preserve the premise exactly.
+The sampled-oracle failure classifier is unchanged by deduplicating the two
+actual lists. Collision-only run failures have the existing q(q-1) numerator;
+region-only run failures have q(q-1)(2L-1)+2qRL. Their bounds use the same
+finite-domain strategy and actual-list inclusion relations as the combined
+bound, dropping only the unrelated event from the conclusion. No existing
+premise, observation or definition is weakened.
+
+## Registration fragment and H82 application
+
+The original assignment reserved registry writes for the coordinator. The
+later H82 authorization permits statement-preserving edits to any file.
+Accordingly, these reviewed entries have been applied: register.sh generated
+the root imports, the language-area fragment generated the module-map rows,
+and CORE and axiom inventories register the four additive modules. No
+existing theorem or pin was removed or enlarged.
 
 Solidity root import lines, to be generated with register.sh:
 
@@ -255,16 +223,19 @@ Suggested language-area module-map fragment rows:
 | `Hash/CollisionBridgeCompiler.lean` | PublicCorrectness guarded refinement, decoded reachability and hash-indexed compiler failure bound. |
 | `Hash/CollisionBridgeControls.lean` | Concrete admitted, compiled quiet success using HashPremise.nil. |
 
-Axiom-pin entries (all new, no existing pin changes):
+Axiom-pin entries (ten new; no existing pin changes):
 
 ```json
 {
+  "Solidity/Hash/Bridge.lean:Solidity.Hash.Bridge.premise_dedup": [
+    "propext"
+  ],
   "Solidity/Hash/Bridge.lean:Solidity.Hash.Bridge.premise_unit_rootFree": [
     "Quot.sound",
     "propext"
   ],
   "Solidity/Hash/Bridge.lean:Solidity.Hash.Bridge.transfer_prefix": [],
-  "Solidity/Hash/CollisionBridge.lean:Solidity.Hash.CollisionBridge.two_mul_combined_le": [
+  "Solidity/Hash/CollisionBridge.lean:Solidity.Hash.CollisionBridge.run_collision_le": [
     "Classical.choice",
     "Quot.sound",
     "propext"
@@ -274,111 +245,76 @@ Axiom-pin entries (all new, no existing pin changes):
     "Quot.sound",
     "propext"
   ],
+  "Solidity/Hash/CollisionBridge.lean:Solidity.Hash.CollisionBridge.run_regions_le": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity/Hash/CollisionBridge.lean:Solidity.Hash.CollisionBridge.stopped_collision_le": [
     "Classical.choice",
     "Quot.sound",
     "propext"
   ],
-  "Solidity/Hash/CollisionBridgeCompiler.lean:Solidity.Hash.CollisionBridge.Compiler.refines": [],
+  "Solidity/Hash/CollisionBridge.lean:Solidity.Hash.CollisionBridge.two_mul_combined_le": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
   "Solidity/Hash/CollisionBridgeCompiler.lean:Solidity.Hash.CollisionBridge.Compiler.failure_le": [
     "Classical.choice",
     "Quot.sound",
     "propext"
-  ]
+  ],
+  "Solidity/Hash/CollisionBridgeCompiler.lean:Solidity.Hash.CollisionBridge.Compiler.refines": []
 }
 ```
 
-## Final validation and handoff (goal NOT complete)
+## Validation boundaries and handoff
 
-Saved proof head before final documentation: `7a092e0f0f4d6e1ba02ce18b9d6560707c468e0e`.
-The final full committed head is in the sealed manifest, avoiding a
-self-referential documentation commit hash.
+The registered library checkpoint and full runner pass, including corpus,
+TestSuite, trust, layer, orphan, generated-root/fragment, documentation,
+axiom-pin and strict automatic checks. All four new modules have clean
+per-file diagnostics and checked axiom pins. No new sorry, axiom,
+native_decide, implemented_by or raised maxHeartbeats is introduced.
+Existing frozen theorem statements and semantic definitions are untouched.
+The final committed head and exact-head gate receipts are recorded in the
+private handoff rather than a self-referential source document.
 
-All new Lean modules pass per-file MCP diagnostics (0 errors), per-file
-Lean -j1 checks, and their own #guard_msgs pins. Final serial timings:
-Bridge 0.515 s; CollisionBridge 0.965 s; compiler 0.765 s; controls 0.407 s.
-KeySort passes: `lake lean Solidity/KeySort.lean -- -j1 --tstack=131072`,
-exit 0, 1.327 s. Lean 4.24.0 and Lake 5.0.0-src+797c613 were used.
-No RUNTIME_GATE_PASS is claimed. No existing Lean source or import graph
-was modified, so these times measure added leaf costs, not a demonstrated
-whole-library slowdown percentage. Full build timing delta is unmeasured;
-the >10% requirement is not asserted satisfied.
+Checking-time comparison uses balanced paired fresh Lean checks of the
+pinned-base root and generated root with the same already-built imports.
+The measured root change is below the 10% stop threshold. New module times
+are measured separately. This does not establish a cold whole-repository
+build-time ratio; the cold library/full passes include cache population and
+unrelated existing examples. The existing resource limits and proof budgets
+were preserved. Only one heavy Lean job runs at a time.
 
-Evidence: `/tmp/e4-evidence/per-file.json` and per-module logs;
-`/tmp/e4-evidence/full/gates.tsv`; earlier checkpoint evidence at
-`/tmp/e4-checkpoint2/gates.tsv`.
+The probability theorems are kernel proofs of logical counts over sampled
+functions. Corpus and runtime checks are external validation, not substitutes
+for those proofs. No distributional assumption about actual keccak is proved.
+No arbitrary symbolic-machine theorem is automatically transferred: callers
+supply a guarded hash-parametric contract and the actual query/strategy
+relations. No production compiler correctness instance is constructed;
+the existing proved toy compiler supplies the concrete non-vacuity witness.
+The source Forward/Guard restrictions and complete target-prefix observation
+remain unchanged.
 
-| Command/check | Outcome and decisive output |
-|---|---|
-| node scripts/check-layers.mjs | PASS: 904 core, zero elaborator/parser reach, zero new core edges. Same registered base count. |
-| In-memory prospective CORE registration check | PASS: 908 core, zero elaborator/parser reach, zero new edges. Read-only registry preserved. |
-| bash scripts/check-trust.sh | PASS: 6699 sources, 289 inventoried sites, zero findings. Base: 6695 sources, same 289 sites, zero findings. |
-| node scripts/check-orphans.mjs | FAIL: exactly the four new modules are unregistered orphans; 6678 reachable. Base graph with the four additive files removed: 6678 reachable, zero orphans. |
-| bash scripts/check-doc-paths.sh | PASS: 143 ambiguities, all references resolving; same count as initial inventory check. |
-| register.sh --check | FAIL: exactly four missing root imports listed in the fragment above. |
-| fragments.sh --check | PASS; no coordinator-owned fragment changed. |
-| node scripts/check-axiom-pins.mjs | FAIL: zero policy errors, seven new unregistered changes. 17181 pins versus base 17174; no removed or enlarged pin. |
-| gate.sh full / bash run-lean.sh | FAIL: runner stops at read-only generated-root registration, before its library build. |
-| gate.sh checkpoint / lake build Solidity | INCOMPLETE: worker interrupted cold library build after 116 s while E4-Q1 awaited a decision; not a pass. |
-| check-testsuite.sh (initial activation) | Setup-path failure: external copied snapshot lacked adjacent pin. |
-| check-testsuite.sh with repository-pinned SOLKEY_EXAMPLES | PASS: 54 modules trust clean; 564 functions = 552 derived + 11 refuted + 0 pending + 0 divergent + 1 excluded; 2 skip. Snapshot-path recovery changes no source. |
-| check-corpus.sh | INCOMPLETE: worker interrupted its cold Basic build after the full runner hit the read-only registration blocker; no corpus pass claimed. |
-| node scripts/check-automatic.mjs --strict | PASS. |
+Under H145, detailed receipts, logs, timings, provenance, resource records,
+handoffs and checksum manifests are kept outside the code branch in the
+private repository `SolidiKeY/solidity-lean-coord`, under
+`evidence/solidity-plan-e4-hash-bridge-20261107/e4-hash-bridge/`.
+Earlier records are available at private evidence commits
+`fa3c994dcc064d17970dfe8f0be75b7685bf7d54` and
+`77932fbea1aa3040ce1ccade5755afa5be86583a`; the final handoff identifies the
+subsequent archive commit and seals the patch/bundle/checksum manifest.
+No evidence files were added under tests/ or Bridge/tests/. The later H145
+whole-tree scripts report inherited evidence/private-path violations at the
+pinned base; the lane adds none. These inherited failures are documented,
+not treated as passing whole-tree gates. They do not authorize deleting
+historical baseline files or fixtures.
 
-The compiler probability event is a logical count over all sampled
-functions, not an empirical cryptographic-security experiment. The only
-kernel finite enumeration added is on tiny N=2 controls. No external test
-is used as a substitute for any proof. The toy compiler witnesses the
-corollary; no new concrete production compiler correctness proof is claimed.
-
-Finder/skeptic checkpoints 2, 3, 4 are recorded above. All proof findings
-were resolved; no premise/observation was weakened. Checkpoint 1 finder
-also confirmed the corrected statement boundaries. Frozen statements
-touched: none. New axioms/sorry/native_decide/implemented_by/maxHeartbeats:
-zero. Sole changed repository paths are these four additive Hash modules
-and this document. No push/merge/PR; the only remote write was the expressly
-required E4-Q1 coord-ask question relay, resolved by coordinator #168.
-
-Typed remaining blockers:
-
-- REGISTRATION_OWNER: generated roots, CORE, axiom pins and module maps are
-  outside this worker's exact write scope. The coordinator must apply the
-  fragment and regenerate its registries before the full runner can pass.
-- REQUIRED_GATES_PENDING: clean checkpoint library build, corpus audit/build,
-  full runner and whole-build timing comparison remain unpassed. The goal
-  must stay incomplete; a local leaf proof pass is not completion.
-
-No scope question remains open. E4-Q1 is resolved as option A, and the
-combined bound/premises were kept unchanged. Handoff patch, bundle,
-evidence archive and SHA256SUMS will be sealed under `/tmp/e4-handoff`.
-The manifest records exact base, branch, final head and artifact hashes.
-
-## H82 continuation: local statement-preserving registration
-
-The coordinator's H82 continuation explicitly authorizes statement-preserving
-edits to any file without owner agreement. Under that newer authorization,
-this worker applied the already reviewed registration fragment locally:
-register.sh generated four root imports; the language-area fragment adds four
-module rows; CORE registers these four modules; the generated axiom inventory
-and three new per-file pin fragments record the seven measured pins.
-No existing theorem statement, premise, observation or proof budget changed.
-The pin writer also reordered seven unrelated P9 fragment objects; their JSON
-values were verified equal and those incidental formatting changes removed.
-
-The earlier REGISTRATION_OWNER wait is therefore cleared by H82. Library,
-corpus, full-runner and timing validation are being resumed rather than
-stopping at registration or discarding any saved proof work. The immutable
-previous handoff remains at /tmp/e4-handoff; continuation evidence and a new
-sealed handoff will use distinct directories.
-
-## Backfill statements
-
-The additional backfill lemmas preserve the existing declarations:
-HashPremise depends only on membership of each actual query list; deduplication
-and repeating either whole list therefore preserve the premise exactly.
-The sampled-oracle failure classifier is unchanged by deduplicating the two
-actual lists. Collision-only run failures have the existing q(q-1) numerator;
-region-only run failures have q(q-1)(2L-1)+2qRL. Their bounds use the same
-finite-domain strategy and actual-list inclusion relations as the combined
-bound, dropping only the unrelated event from the conclusion. No existing
-premise, observation or definition is weakened.
+E4-Q1 is resolved as option A. No scope question or producer dependency
+remains. Registration and backfill preserve the original combined bound,
+its premises, exclusions and observations. Code changes are committed only
+on the assigned branch; no code push, merge or PR is authorized. The only
+remote writes are the explicitly requested question relay and private
+H145 evidence archive.
