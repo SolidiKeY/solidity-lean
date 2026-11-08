@@ -83,4 +83,43 @@ theorem selected_function_subterm_covered (Γ : Ctx) (name : String)
 /-- info: 'Solidity.Frontend.Admission.selected_function_subterm_covered' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms selected_function_subterm_covered
 
+/-! Source-unit headers must remain available separately from the declaration
+inventory. Regression: inserting a pragma changes source syntax while leaving
+the Source resolution environment unchanged. These laws justify neither a
+feature classification nor reconstruction of lexical input. -/
+
+/-- Declaration collection erases a leading pragma for every remaining unit. -/
+theorem pragma_env_unchanged (words : List String) (rest : Syn (.list .top)) :
+    (Syn.unit (.cons (.pragma words) rest)).env = (Syn.unit rest).env := rfl
+
+/-- The canonical intrinsic syntax visitor still retains that pragma. -/
+theorem pragma_syntax_preserved (words : List String) (rest : Syn (.list .top)) :
+    (⟨.top, .pragma words⟩ : SyntaxOccurrence) ∈
+      syntaxOccurrences (Syn.unit (.cons (.pragma words) rest)) := by
+  apply (syntaxOccurrences_iff _ _).mpr
+  exact .child (List.mem_singleton_self _)
+    (.child (List.mem_cons_self ..) (.refl _))
+
+/-- No decoder of only the declaration environment can recover every source
+unit. A header-sensitive extractor must retain the required header information
+separately, for example in the original unit. -/
+theorem source_unit_not_recoverable_from_env :
+    ¬ ∃ recover : Env → Syn .unit, ∀ u : Syn .unit, recover u.env = u := by
+  rintro ⟨recover,correct⟩
+  have empty := correct (Syn.unit .nil)
+  have header := correct (Syn.unit (.cons (.pragma ["solidity", "^0.8.38"]) .nil))
+  have same : Syn.unit .nil =
+      Syn.unit (.cons (.pragma ["solidity", "^0.8.38"]) .nil) :=
+    empty.symm.trans header
+  cases Syn.unit.inj same
+
+/-- info: 'Solidity.Frontend.Admission.pragma_env_unchanged' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms pragma_env_unchanged
+
+/-- info: 'Solidity.Frontend.Admission.pragma_syntax_preserved' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms pragma_syntax_preserved
+
+/-- info: 'Solidity.Frontend.Admission.source_unit_not_recoverable_from_env' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms source_unit_not_recoverable_from_env
+
 end Solidity.Frontend.Admission

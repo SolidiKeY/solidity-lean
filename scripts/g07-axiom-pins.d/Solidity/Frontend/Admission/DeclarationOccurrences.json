@@ -11,6 +11,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Frontend/Admission/DeclarationOccurrences.lean:Solidity.Frontend.Admission.pragma_env_unchanged": [],
+ "Solidity/Frontend/Admission/DeclarationOccurrences.lean:Solidity.Frontend.Admission.pragma_syntax_preserved": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Frontend/Admission/DeclarationOccurrences.lean:Solidity.Frontend.Admission.resolved_declaration_subterm_covered": [
   "Quot.sound",
   "propext"
@@ -18,5 +23,6 @@
  "Solidity/Frontend/Admission/DeclarationOccurrences.lean:Solidity.Frontend.Admission.selected_function_subterm_covered": [
   "Quot.sound",
   "propext"
- ]
+ ],
+ "Solidity/Frontend/Admission/DeclarationOccurrences.lean:Solidity.Frontend.Admission.source_unit_not_recoverable_from_env": []
 }
