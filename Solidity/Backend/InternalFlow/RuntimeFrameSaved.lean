@@ -69,7 +69,7 @@ theorem pushed_allocator (pointerCell : Nat) (address : Fin W) (value : Word)
     (payloadAbove : b + Γ.length ≤ address.val) (payloadBelow : address.val < frame) :
     GrowsAllocator b frame 0 σ base m σ base (Stack.pushed m pointerCell address value) := by
   intro cursor positive alloc space
-  simpa only [Nat.add_zero] using
+  simpa only [Nat.add_zero,Stack.pushed] using
     (alloc.localWrite address.val (by omega) payloadBelow value).localWrite
       pointerCell (by omega) pointerBelow (.val (wmod (1 + address.val)))
 
@@ -112,7 +112,7 @@ theorem save_reference (repr : StateRepr L b frame F σ base m)
       simp only [Evm.run,exec_cons_zero,Instr.step,Machine.next,pointerValue,Out.ok_bind,exec_nil,Machine.push]
     rw [saveCode,Evm.run_append_ok load]
     exact Stack.push_run m pointerCell address _ pointer separate
-  · simp only [Stack.pushed,upd,if_neg (Ne.symm separate),↓reduceIte]
+  · simp only [Stack.pushed,upd,ite_eq_right (Ne.symm separate),↓reduceIte]
 
 /-- Primitive values are saved with their actual ReprV proof, not a
 same-typed value selected independently of the caller destination. -/
@@ -130,5 +130,5 @@ theorem save_scalar (repr : StateRepr L b frame F σ base m)
   · have load : Evm.run [.mload (cellOf b index)] m = .ok (m.push word) 0 := rfl
     rw [saveCode,Evm.run_append_ok load]
     exact Stack.push_run m pointerCell address word pointer separate
-  · simp only [Stack.pushed,upd,if_neg (Ne.symm separate),↓reduceIte]
+  · simp only [Stack.pushed,upd,ite_eq_right (Ne.symm separate),↓reduceIte]
 end Solidity.Backend.InternalFlow.RuntimeFrame
