@@ -1,0 +1,340 @@
+{
+  "status": "partial",
+  "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+  "checkpoints": {
+    "inventory": "done",
+    "local_stratified_measurement": "partial",
+    "declaration_ranking": "partial",
+    "reference_builds": "pending",
+    "full_build_estimate": "pending",
+    "incremental_graph": "done",
+    "ten_prioritized_changes": "pending",
+    "final_reviews": "pending",
+    "clean_checkout_reproduction": "pending",
+    "handoff": "pending"
+  },
+  "tracked_lean_modules": 8291,
+  "tracked_lean_lines": 1311130,
+  "areas": [
+    {
+      "area": "Backend",
+      "detected_generated_lines": 149,
+      "lines": 279224,
+      "marker_associated_unresolved_lines": 2510,
+      "modules": 2015,
+      "unmarked_not_proven_handwritten_lines": 274346,
+      "unresolved_chain_agreement_lines": 2219,
+      "passing_samples": 4,
+      "sample_lines": 486,
+      "sample_wall_seconds": 18.10611563099991,
+      "sample_seconds_per_kloc": 37.25538195678994,
+      "reference_ratios": null,
+      "verdict": "pending matched reference checks"
+    },
+    {
+      "area": "Yul",
+      "lines": 197439,
+      "marker_associated_unresolved_lines": 7316,
+      "modules": 1827,
+      "unmarked_not_proven_handwritten_lines": 188247,
+      "unresolved_chain_agreement_lines": 1876,
+      "passing_samples": 1,
+      "sample_lines": 50,
+      "sample_wall_seconds": 0.7044707620000281,
+      "sample_seconds_per_kloc": 14.089415240000562,
+      "reference_ratios": null,
+      "verdict": "pending matched reference checks"
+    },
+    {
+      "area": "Calculus",
+      "lines": 169330,
+      "marker_associated_unresolved_lines": 1550,
+      "modules": 388,
+      "unmarked_not_proven_handwritten_lines": 163247,
+      "unresolved_chain_agreement_lines": 4533,
+      "passing_samples": 0,
+      "sample_lines": 0,
+      "sample_wall_seconds": 0,
+      "sample_seconds_per_kloc": null,
+      "reference_ratios": null,
+      "verdict": "pending matched reference checks"
+    },
+    {
+      "area": "Lowering",
+      "lines": 104250,
+      "marker_associated_unresolved_lines": 20,
+      "modules": 716,
+      "unmarked_not_proven_handwritten_lines": 103912,
+      "unresolved_chain_agreement_lines": 318,
+      "passing_samples": 0,
+      "sample_lines": 0,
+      "sample_wall_seconds": 0,
+      "sample_seconds_per_kloc": null,
+      "reference_ratios": null,
+      "verdict": "pending matched reference checks"
+    },
+    {
+      "area": "Frontend",
+      "detected_generated_lines": 3905,
+      "lines": 102235,
+      "marker_associated_unresolved_lines": 455,
+      "modules": 512,
+      "unmarked_not_proven_handwritten_lines": 97875,
+      "passing_samples": 0,
+      "sample_lines": 0,
+      "sample_wall_seconds": 0,
+      "sample_seconds_per_kloc": null,
+      "reference_ratios": null,
+      "verdict": "pending matched reference checks"
+    },
+    {
+      "area": "Bridge",
+      "lines": 64746,
+      "modules": 524,
+      "unmarked_not_proven_handwritten_lines": 62806,
+      "unresolved_chain_agreement_lines": 1940,
+      "passing_samples": 0,
+      "sample_lines": 0,
+      "sample_wall_seconds": 0,
+      "sample_seconds_per_kloc": null,
+      "reference_ratios": null,
+      "verdict": "pending matched reference checks"
+    },
+    {
+      "area": "Examples",
+      "lines": 61471,
+      "marker_associated_unresolved_lines": 121,
+      "modules": 356,
+      "unmarked_not_proven_handwritten_lines": 52622,
+      "unresolved_chain_agreement_lines": 8728,
+      "passing_samples": 0,
+      "sample_lines": 0,
+      "sample_wall_seconds": 0,
+      "sample_seconds_per_kloc": null,
+      "reference_ratios": null,
+      "verdict": "pending matched reference checks"
+    },
+    {
+      "area": "Source",
+      "detected_generated_lines": 626,
+      "lines": 50041,
+      "modules": 262,
+      "unmarked_not_proven_handwritten_lines": 45638,
+      "unresolved_chain_agreement_lines": 3777,
+      "passing_samples": 0,
+      "sample_lines": 0,
+      "sample_wall_seconds": 0,
+      "sample_seconds_per_kloc": null,
+      "reference_ratios": null,
+      "verdict": "pending matched reference checks"
+    },
+    {
+      "area": "Evm",
+      "lines": 45857,
+      "modules": 279,
+      "unmarked_not_proven_handwritten_lines": 45857,
+      "passing_samples": 0,
+      "sample_lines": 0,
+      "sample_wall_seconds": 0,
+      "sample_seconds_per_kloc": null,
+      "reference_ratios": null,
+      "verdict": "pending matched reference checks"
+    },
+    {
+      "area": "Semantics",
+      "lines": 25790,
+      "modules": 82,
+      "unmarked_not_proven_handwritten_lines": 25678,
+      "unresolved_chain_agreement_lines": 112,
+      "passing_samples": 0,
+      "sample_lines": 0,
+      "sample_wall_seconds": 0,
+      "sample_seconds_per_kloc": null,
+      "reference_ratios": null,
+      "verdict": "pending matched reference checks"
+    }
+  ],
+  "incremental": [
+    {
+      "all_tracked_potential_dependents": 7463,
+      "dependent_lines": 1165346,
+      "module": "Solidity.Keccak",
+      "rebuilds_including_changed_module": 7464,
+      "workload_rebuilds": {
+        "Bridge": 1220,
+        "checkpoint": 5892,
+        "full": 6297
+      }
+    },
+    {
+      "all_tracked_potential_dependents": 5720,
+      "dependent_lines": 947786,
+      "module": "Solidity.KeySort",
+      "rebuilds_including_changed_module": 5721,
+      "workload_rebuilds": {
+        "Bridge": 1072,
+        "checkpoint": 4234,
+        "full": 4640
+      }
+    },
+    {
+      "all_tracked_potential_dependents": 5712,
+      "dependent_lines": 946048,
+      "module": "Solidity.AST",
+      "rebuilds_including_changed_module": 5713,
+      "workload_rebuilds": {
+        "Bridge": 1071,
+        "checkpoint": 4232,
+        "full": 4638
+      }
+    },
+    {
+      "all_tracked_potential_dependents": 5697,
+      "dependent_lines": 943337,
+      "module": "Solidity.Syntax.Raw",
+      "rebuilds_including_changed_module": 5698,
+      "workload_rebuilds": {
+        "Bridge": 1067,
+        "checkpoint": 4226,
+        "full": 4632
+      }
+    },
+    {
+      "all_tracked_potential_dependents": 4759,
+      "dependent_lines": 807680,
+      "module": "Solidity.Semantics.Value",
+      "rebuilds_including_changed_module": 4760,
+      "workload_rebuilds": {
+        "Bridge": 788,
+        "checkpoint": 3538,
+        "full": 3940
+      }
+    },
+    {
+      "all_tracked_potential_dependents": 3505,
+      "dependent_lines": 448872,
+      "module": "Solidity.Source.Types",
+      "rebuilds_including_changed_module": 3506,
+      "workload_rebuilds": {
+        "Bridge": 182,
+        "checkpoint": 3210,
+        "full": 3212
+      }
+    }
+  ],
+  "build_workloads": {
+    "Bridge": {
+      "reachable_modules": 1393,
+      "roots": [
+        "SolidityBridge"
+      ]
+    },
+    "checkpoint": {
+      "reachable_modules": 6324,
+      "roots": [
+        "Solidity"
+      ]
+    },
+    "full": {
+      "reachable_modules": 6734,
+      "roots": [
+        "Solidity",
+        "SolidityExamples",
+        "SoliditySlowExamples",
+        "SolkeyTestSuite",
+        "SolidityLean"
+      ]
+    }
+  },
+  "historical": {
+    "observations": 60,
+    "source": "docs/audits/architecture-tools/timing-sample.tsv",
+    "source_base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+    "use": "inventory only; not pooled with fresh timings"
+  },
+  "fresh_passing_samples": 5,
+  "fresh_attempted_samples": 5,
+  "sample_plan_modules": 40,
+  "sample_method": "four deterministic physical-size quantile midpoint modules per largest area; targeted slow/generated strata still pending; no statistical representativeness asserted",
+  "slowest_sampled_modules": [
+    {
+      "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/SourceOrigin.lean",
+      "lines": 46,
+      "wall_seconds": 5.933705138999983
+    },
+    {
+      "path": "Solidity/Backend/Passes/ReferenceCallCaptureFailureControls.lean",
+      "lines": 86,
+      "wall_seconds": 5.83461035199997
+    },
+    {
+      "path": "Solidity/Backend/PrimitivePackets/CheckedMul/Controls.lean",
+      "lines": 224,
+      "wall_seconds": 4.426636051999992
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/SourceUintFixedCompound.lean",
+      "lines": 130,
+      "wall_seconds": 1.911164087999964
+    },
+    {
+      "path": "Solidity/Yul/Adapters/HeapCallOutput.lean",
+      "lines": 50,
+      "wall_seconds": 0.7044707620000281
+    }
+  ],
+  "slowest_sampled_declarations": null,
+  "full_build_estimate_seconds": null,
+  "published_reference_times": [
+    {
+      "project": "CakeML",
+      "url": "https://raw.githubusercontent.com/CakeML/cakeml/b3e6ea34ca1aed91a57703a30549260ce6f6448e/build-instructions.sh",
+      "kind": "cited, not measured",
+      "seconds": 72000,
+      "comparable_to_serial_module_elaboration": false,
+      "source_sha256": "7ea19557d33c516a7e50ad50cf0e5f28a8ea2424f9454951f86a3df6302aab9d",
+      "excerpts": [
+        {
+          "line": 41,
+          "text": "## note: a full build (including the bootstrapped compiler)"
+        },
+        {
+          "line": 42,
+          "text": "## takes a long time (~20 hours) and requires much RAM (~16 GB)"
+        }
+      ],
+      "boundary": "full CakeML including bootstrapped compiler; parallelism, CPU and HOL revision unspecified; not a matched check-only timing"
+    },
+    {
+      "project": "CompCert",
+      "url": "https://compcert.org/man/manual002.html",
+      "kind": "cited, not measured",
+      "seconds": null,
+      "comparable_to_serial_module_elaboration": false,
+      "status": "unavailable",
+      "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+      "settling_measurement": "retrieve a published proof-build timing with source revision, hardware and workload boundary"
+    }
+  ],
+  "limitations": [
+    "no systemd scope on the cloud VM (H232); 12 GiB conservative process-group RSS stop, 3 GiB available-memory reserve; no swap",
+    "Toolchain is Lean 4.24.0 / Lake 5.0.0-src+797c613; reference pins use different versions",
+    "First mixed-artifact-cache attempt discarded; only clean detached-worktree observations retained",
+    "Basic profiler threshold suppressed to avoid guard_msgs contamination; structured traces provide command attribution at 100 ms threshold",
+    "All-tracked reverse closure is potential invalidation; named workload closures model requested build targets, not measured rebuild execution",
+    "Generated paths and bounded spans separated from ambiguous markers and unmarked source; unmarked does not mean handwritten",
+    "No matched ratios or full-build estimates until required sampling and reference checks finish"
+  ],
+  "waits": [
+    {
+      "id": "compcert-published-time",
+      "reason": "manual host returned proxy 403; pinned source README contains no numeric proof-build time",
+      "next": "seek a public cited mirror or paper; continue other items"
+    },
+    {
+      "id": "clear-toolchain",
+      "reason": "official v4.9.1 Linux release archive returned 404; tag exists",
+      "next": "inspect official release metadata or source-supported installation route; do not substitute toolchain"
+    }
+  ]
+}

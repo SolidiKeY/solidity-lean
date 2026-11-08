@@ -1,0 +1,1393 @@
+{
+  "areas": {
+    "Automation": {
+      "lines": 84,
+      "modules": 3,
+      "unmarked_not_proven_handwritten_lines": 59,
+      "unresolved_chain_agreement_lines": 25
+    },
+    "Backend": {
+      "detected_generated_lines": 149,
+      "lines": 279224,
+      "marker_associated_unresolved_lines": 2510,
+      "modules": 2015,
+      "unmarked_not_proven_handwritten_lines": 274346,
+      "unresolved_chain_agreement_lines": 2219
+    },
+    "Bridge": {
+      "lines": 64746,
+      "modules": 524,
+      "unmarked_not_proven_handwritten_lines": 62806,
+      "unresolved_chain_agreement_lines": 1940
+    },
+    "Calculus": {
+      "lines": 169330,
+      "marker_associated_unresolved_lines": 1550,
+      "modules": 388,
+      "unmarked_not_proven_handwritten_lines": 163247,
+      "unresolved_chain_agreement_lines": 4533
+    },
+    "Core": {
+      "lines": 4284,
+      "modules": 18,
+      "unmarked_not_proven_handwritten_lines": 4284
+    },
+    "Corpus": {
+      "detected_generated_lines": 4204,
+      "lines": 4204,
+      "modules": 9
+    },
+    "Counterexamples": {
+      "lines": 413,
+      "modules": 4,
+      "unmarked_not_proven_handwritten_lines": 413
+    },
+    "Evm": {
+      "lines": 45857,
+      "modules": 279,
+      "unmarked_not_proven_handwritten_lines": 45857
+    },
+    "Examples": {
+      "lines": 61471,
+      "marker_associated_unresolved_lines": 121,
+      "modules": 356,
+      "unmarked_not_proven_handwritten_lines": 52622,
+      "unresolved_chain_agreement_lines": 8728
+    },
+    "Frontend": {
+      "detected_generated_lines": 3905,
+      "lines": 102235,
+      "marker_associated_unresolved_lines": 455,
+      "modules": 512,
+      "unmarked_not_proven_handwritten_lines": 97875
+    },
+    "Hash": {
+      "lines": 2265,
+      "modules": 6,
+      "unmarked_not_proven_handwritten_lines": 2265
+    },
+    "Language": {
+      "lines": 5964,
+      "modules": 8,
+      "unmarked_not_proven_handwritten_lines": 5964
+    },
+    "Lowering": {
+      "lines": 104250,
+      "marker_associated_unresolved_lines": 20,
+      "modules": 716,
+      "unmarked_not_proven_handwritten_lines": 103912,
+      "unresolved_chain_agreement_lines": 318
+    },
+    "Optimizer": {
+      "lines": 6658,
+      "modules": 16,
+      "unmarked_not_proven_handwritten_lines": 6658
+    },
+    "Other": {
+      "detected_generated_lines": 7189,
+      "lines": 123027,
+      "marker_associated_unresolved_lines": 1078,
+      "modules": 1037,
+      "unmarked_not_proven_handwritten_lines": 112975,
+      "unresolved_chain_agreement_lines": 1785
+    },
+    "Precompiles": {
+      "lines": 2072,
+      "modules": 11,
+      "unmarked_not_proven_handwritten_lines": 2072
+    },
+    "Roadmap": {
+      "lines": 4728,
+      "marker_associated_unresolved_lines": 38,
+      "modules": 20,
+      "unmarked_not_proven_handwritten_lines": 4611,
+      "unresolved_chain_agreement_lines": 79
+    },
+    "Semantics": {
+      "lines": 25790,
+      "modules": 82,
+      "unmarked_not_proven_handwritten_lines": 25678,
+      "unresolved_chain_agreement_lines": 112
+    },
+    "SolcValidation": {
+      "lines": 7626,
+      "marker_associated_unresolved_lines": 1031,
+      "modules": 30,
+      "unmarked_not_proven_handwritten_lines": 6595
+    },
+    "Solkey": {
+      "lines": 266,
+      "modules": 5,
+      "unmarked_not_proven_handwritten_lines": 266
+    },
+    "SortCheck": {
+      "lines": 1281,
+      "modules": 3,
+      "unmarked_not_proven_handwritten_lines": 1281
+    },
+    "Source": {
+      "detected_generated_lines": 626,
+      "lines": 50041,
+      "modules": 262,
+      "unmarked_not_proven_handwritten_lines": 45638,
+      "unresolved_chain_agreement_lines": 3777
+    },
+    "Stipend": {
+      "lines": 274,
+      "modules": 1,
+      "unmarked_not_proven_handwritten_lines": 274
+    },
+    "Storage": {
+      "lines": 4049,
+      "modules": 21,
+      "unmarked_not_proven_handwritten_lines": 4049
+    },
+    "Syntax": {
+      "lines": 14545,
+      "modules": 21,
+      "unmarked_not_proven_handwritten_lines": 14517,
+      "unresolved_chain_agreement_lines": 28
+    },
+    "TestSuite": {
+      "lines": 4710,
+      "modules": 49,
+      "unmarked_not_proven_handwritten_lines": 4710
+    },
+    "Theory": {
+      "lines": 8890,
+      "modules": 25,
+      "unmarked_not_proven_handwritten_lines": 8890
+    },
+    "Tools": {
+      "lines": 8575,
+      "modules": 31,
+      "unmarked_not_proven_handwritten_lines": 8575
+    },
+    "Typing": {
+      "lines": 6832,
+      "modules": 12,
+      "unmarked_not_proven_handwritten_lines": 6832
+    },
+    "Yul": {
+      "lines": 197439,
+      "marker_associated_unresolved_lines": 7316,
+      "modules": 1827,
+      "unmarked_not_proven_handwritten_lines": 188247,
+      "unresolved_chain_agreement_lines": 1876
+    }
+  },
+  "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+  "build_workloads": {
+    "Bridge": {
+      "reachable_modules": 1393,
+      "roots": [
+        "SolidityBridge"
+      ]
+    },
+    "checkpoint": {
+      "reachable_modules": 6324,
+      "roots": [
+        "Solidity"
+      ]
+    },
+    "full": {
+      "reachable_modules": 6734,
+      "roots": [
+        "Solidity",
+        "SolidityExamples",
+        "SoliditySlowExamples",
+        "SolkeyTestSuite",
+        "SolidityLean"
+      ]
+    }
+  },
+  "historical": {
+    "samples": [
+      {
+        "area": "Yul",
+        "base_lines": 83,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.319,
+        "historical_wall_seconds": 0.894,
+        "path": "Solidity/Yul/Views/RetainedGuardObserverControls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Backend",
+        "base_lines": 93,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.574,
+        "historical_wall_seconds": 0.744,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingHeadViewsControls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Backend",
+        "base_lines": 341,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.512,
+        "historical_wall_seconds": 2.812,
+        "path": "Solidity/Backend/MemoryCopies/FixedPathCopyControls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Backend",
+        "base_lines": 390,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.528,
+        "historical_wall_seconds": 3.554,
+        "path": "Solidity/Backend/MemoryOps/SourceUintFixedDeclareAliasControls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Backend",
+        "base_lines": 143,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.512,
+        "historical_wall_seconds": 1.21,
+        "path": "Solidity/Backend/StructuredFlow/ConditionalReturnCompilerControls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Backend",
+        "base_lines": 226,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.511,
+        "historical_wall_seconds": 3.984,
+        "path": "Solidity/Backend/AbiEntry/SelectorGateBodyControls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Yul",
+        "base_lines": 46,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.24,
+        "historical_wall_seconds": 1.463,
+        "path": "Solidity/Yul/Views/PackedDynamicMixedControls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Lowering",
+        "base_lines": 270,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.475,
+        "historical_wall_seconds": 3.158,
+        "path": "Solidity/Lowering/StorageOps/SourceBoolFixedStorageCopyControls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Lowering",
+        "base_lines": 113,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.496,
+        "historical_wall_seconds": 0.995,
+        "path": "Solidity/Lowering/V08/MetadataControls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Frontend",
+        "base_lines": 177,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.211,
+        "historical_wall_seconds": 0.725,
+        "path": "Solidity/Frontend/ExpressionUniqueness/PostfixControls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Yul",
+        "base_lines": 129,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.204,
+        "historical_wall_seconds": 0.458,
+        "path": "Solidity/Yul/Views/ScalarWritebackControls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Backend",
+        "base_lines": 133,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.53,
+        "historical_wall_seconds": 2.628,
+        "path": "Solidity/Backend/AbiEntry/SizeBranchesControls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Backend",
+        "base_lines": 60,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.518,
+        "historical_wall_seconds": 0.649,
+        "path": "Solidity/Backend/Aggregates/G18Controls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Backend",
+        "base_lines": 108,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.555,
+        "historical_wall_seconds": 1.823,
+        "path": "Solidity/Backend/MemoryCopies/SingletonCopyControls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Backend",
+        "base_lines": 190,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.53,
+        "historical_wall_seconds": 1.38,
+        "path": "Solidity/Backend/StorageOps/PrimitiveSnapshotCommutationControls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Frontend",
+        "base_lines": 44,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.219,
+        "historical_wall_seconds": 0.262,
+        "path": "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Backend",
+        "base_lines": 89,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.54,
+        "historical_wall_seconds": 1.512,
+        "path": "Solidity/Backend/MemoryOps/StructDefaults/WordControls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Backend",
+        "base_lines": 80,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.205,
+        "historical_wall_seconds": 1.038,
+        "path": "Solidity/Backend/Passes/SourceCallControls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Lowering",
+        "base_lines": 160,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.441,
+        "historical_wall_seconds": 1.138,
+        "path": "Solidity/Lowering/Readonly/Controls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Yul",
+        "base_lines": 90,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.212,
+        "historical_wall_seconds": 0.609,
+        "path": "Solidity/Yul/Views/FixedNominalStructControls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Lowering",
+        "base_lines": 95,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.526,
+        "historical_wall_seconds": 3.211,
+        "path": "Solidity/Lowering/StorageOps/SourceVaryingByteCaptureControls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Yul",
+        "base_lines": 78,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.256,
+        "historical_wall_seconds": 0.868,
+        "path": "Solidity/Yul/Views/StructWordHeapControls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Backend",
+        "base_lines": 131,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.571,
+        "historical_wall_seconds": 2.747,
+        "path": "Solidity/Backend/AbiEntry/DispatchRefusalControls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Backend",
+        "base_lines": 104,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.564,
+        "historical_wall_seconds": 0.922,
+        "path": "Solidity/Backend/StructuredFlow/ReturnPairCompilerControls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Yul",
+        "base_lines": 107,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.491,
+        "historical_wall_seconds": 1.745,
+        "path": "Solidity/Yul/Compilation/LetControlCompilationControls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Backend",
+        "base_lines": 79,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.497,
+        "historical_wall_seconds": 0.991,
+        "path": "Solidity/Backend/AbiEntry/OffsetChecksControls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Backend",
+        "base_lines": 258,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.486,
+        "historical_wall_seconds": 1.826,
+        "path": "Solidity/Backend/MemoryCopies/BudgetedReferenceControls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Yul",
+        "base_lines": 65,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.212,
+        "historical_wall_seconds": 0.3,
+        "path": "Solidity/Yul/Views/FixedInventoryRejectionControls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Yul",
+        "base_lines": 92,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.479,
+        "historical_wall_seconds": 1.343,
+        "path": "Solidity/Yul/Compilation/GuardedForCompilationControls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Yul",
+        "base_lines": 91,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.565,
+        "historical_wall_seconds": 2.061,
+        "path": "Solidity/Yul/Adapters/P6ResidualSequenceControls.lean",
+        "status": "PASS",
+        "stratum": "C"
+      },
+      {
+        "area": "Yul",
+        "base_lines": 102,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.229,
+        "historical_wall_seconds": 0.348,
+        "path": "Solidity/Yul/Views/MemoryImageOrder.lean",
+        "status": "PASS",
+        "stratum": "L"
+      },
+      {
+        "area": "Evm",
+        "base_lines": 33,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.517,
+        "historical_wall_seconds": 0.506,
+        "path": "Solidity/Evm/MemoryLoopHorizonObjectOldHeaders.lean",
+        "status": "PASS",
+        "stratum": "L"
+      },
+      {
+        "area": "Calculus",
+        "base_lines": 307,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.507,
+        "historical_wall_seconds": 4.517,
+        "path": "Solidity/Calculus/LowerRun.lean",
+        "status": "PASS",
+        "stratum": "L"
+      },
+      {
+        "area": "Backend",
+        "base_lines": 120,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.533,
+        "historical_wall_seconds": 0.576,
+        "path": "Solidity/Backend/MemoryCopies/NestedStoragePathInterface.lean",
+        "status": "PASS",
+        "stratum": "L"
+      },
+      {
+        "area": "Semantics",
+        "base_lines": 264,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.503,
+        "historical_wall_seconds": 0.838,
+        "path": "Solidity/Semantics/Ends.lean",
+        "status": "PASS",
+        "stratum": "L"
+      },
+      {
+        "area": "Yul",
+        "base_lines": 83,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.497,
+        "historical_wall_seconds": 2.766,
+        "path": "Solidity/Yul/Checks/LocalBoolBinding.lean",
+        "status": "PASS",
+        "stratum": "L"
+      },
+      {
+        "area": "Yul",
+        "base_lines": 50,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.594,
+        "historical_wall_seconds": 0.703,
+        "path": "Solidity/Yul/Views/RetainedLoopHeaderReadback.lean",
+        "status": "PASS",
+        "stratum": "L"
+      },
+      {
+        "area": "Yul",
+        "base_lines": 79,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.529,
+        "historical_wall_seconds": 1.65,
+        "path": "Solidity/Yul/Checks/RawDeclarationFrame.lean",
+        "status": "PASS",
+        "stratum": "L"
+      },
+      {
+        "area": "Backend",
+        "base_lines": 28,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.508,
+        "historical_wall_seconds": 0.533,
+        "path": "Solidity/Backend/MemoryCopies/SourceFieldsInterface.lean",
+        "status": "PASS",
+        "stratum": "L"
+      },
+      {
+        "area": "Backend",
+        "base_lines": 134,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.509,
+        "historical_wall_seconds": 0.695,
+        "path": "Solidity/Backend/StorageOps/PrimitiveSnapshotCommutation.lean",
+        "status": "PASS",
+        "stratum": "L"
+      },
+      {
+        "area": "Yul",
+        "base_lines": 955,
+        "classification": "marker_associated_unresolved",
+        "historical_peak_gib": 0.21,
+        "historical_wall_seconds": 3.041,
+        "path": "Solidity/Yul/Checks/Bytes.lean",
+        "status": "PASS",
+        "stratum": "L"
+      },
+      {
+        "area": "Backend",
+        "base_lines": 110,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.495,
+        "historical_wall_seconds": 0.736,
+        "path": "Solidity/Backend/MemoryOps/SliceBounds.lean",
+        "status": "PASS",
+        "stratum": "L"
+      },
+      {
+        "area": "Frontend",
+        "base_lines": 237,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.334,
+        "historical_wall_seconds": 0.862,
+        "path": "Solidity/Frontend/SolcJson/CallMetadata.lean",
+        "status": "PASS",
+        "stratum": "L"
+      },
+      {
+        "area": "Calculus",
+        "base_lines": 49,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.327,
+        "historical_wall_seconds": 0.38,
+        "path": "Solidity/Calculus/Budget.lean",
+        "status": "PASS",
+        "stratum": "L"
+      },
+      {
+        "area": "Storage",
+        "base_lines": 220,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.532,
+        "historical_wall_seconds": 0.847,
+        "path": "Solidity/Storage/Representation/GraphFrames.lean",
+        "status": "PASS",
+        "stratum": "L"
+      },
+      {
+        "area": "Yul",
+        "base_lines": 127,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.515,
+        "historical_wall_seconds": 3.137,
+        "path": "Solidity/Yul/Checks/RawTypedScope.lean",
+        "status": "PASS",
+        "stratum": "L"
+      },
+      {
+        "area": "Calculus",
+        "base_lines": 43,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.509,
+        "historical_wall_seconds": 0.543,
+        "path": "Solidity/Calculus/RefInputs.lean",
+        "status": "PASS",
+        "stratum": "L"
+      },
+      {
+        "area": "Yul",
+        "base_lines": 93,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.227,
+        "historical_wall_seconds": 0.44,
+        "path": "Solidity/Yul/Compilation/ShapeCapacity.lean",
+        "status": "PASS",
+        "stratum": "L"
+      },
+      {
+        "area": "Evm",
+        "base_lines": 54,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.511,
+        "historical_wall_seconds": 0.673,
+        "path": "Solidity/Evm/MemoryLoopHorizonObjectNewSeparation.lean",
+        "status": "PASS",
+        "stratum": "L"
+      },
+      {
+        "area": "Lowering",
+        "base_lines": 25,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.216,
+        "historical_wall_seconds": 0.229,
+        "path": "Solidity/Lowering/Readonly/EvalEffectsBase.lean",
+        "status": "PASS",
+        "stratum": "L"
+      },
+      {
+        "area": "Backend",
+        "base_lines": 34,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.495,
+        "historical_wall_seconds": 0.551,
+        "path": "Solidity/Backend/MemoryCopies/CheckedCaptureInterface.lean",
+        "status": "PASS",
+        "stratum": "L"
+      },
+      {
+        "area": "Calculus",
+        "base_lines": 1107,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.512,
+        "historical_wall_seconds": 3.312,
+        "path": "Solidity/Calculus/RunFrameOwn.lean",
+        "status": "PASS",
+        "stratum": "L"
+      },
+      {
+        "area": "Backend",
+        "base_lines": 67,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.572,
+        "historical_wall_seconds": 0.698,
+        "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingCallViews.lean",
+        "status": "PASS",
+        "stratum": "L"
+      },
+      {
+        "area": "Yul",
+        "base_lines": 80,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.512,
+        "historical_wall_seconds": 0.828,
+        "path": "Solidity/Yul/Compilation/ScopedForCompletion.lean",
+        "status": "PASS",
+        "stratum": "L"
+      },
+      {
+        "area": "Yul",
+        "base_lines": 78,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.523,
+        "historical_wall_seconds": 0.603,
+        "path": "Solidity/Yul/Views/SourceBalanceInputs.lean",
+        "status": "PASS",
+        "stratum": "L"
+      },
+      {
+        "area": "Backend",
+        "base_lines": 84,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.216,
+        "historical_wall_seconds": 0.324,
+        "path": "Solidity/Backend/LabelExec/Loops.lean",
+        "status": "PASS",
+        "stratum": "L"
+      },
+      {
+        "area": "Backend",
+        "base_lines": 48,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.539,
+        "historical_wall_seconds": 0.662,
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedMul/Execution.lean",
+        "status": "PASS",
+        "stratum": "L"
+      },
+      {
+        "area": "Calculus",
+        "base_lines": 104,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.506,
+        "historical_wall_seconds": 0.82,
+        "path": "Solidity/Calculus/FilteredMembership.lean",
+        "status": "PASS",
+        "stratum": "L"
+      },
+      {
+        "area": "Core",
+        "base_lines": 113,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.473,
+        "historical_wall_seconds": 0.797,
+        "path": "Solidity/Semantics.lean",
+        "status": "PASS",
+        "stratum": "L"
+      },
+      {
+        "area": "Yul",
+        "base_lines": 135,
+        "classification": "unmarked_not_proven_handwritten",
+        "historical_peak_gib": 0.524,
+        "historical_wall_seconds": 3.427,
+        "path": "Solidity/Yul/Checks/RawCheckedControlDoWhile.lean",
+        "status": "PASS",
+        "stratum": "L"
+      }
+    ],
+    "source": "docs/audits/architecture-tools/timing-sample.tsv",
+    "source_base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+    "warning": "60 nonrandom historical observations; base_lines are current pinned base, NOT measured-source denominator; no fresh seconds/kloc inferred"
+  },
+  "incremental": [
+    {
+      "all_tracked_potential_dependents": 7463,
+      "dependent_lines": 1165346,
+      "module": "Solidity.Keccak",
+      "rebuilds_including_changed_module": 7464,
+      "workload_rebuilds": {
+        "Bridge": 1220,
+        "checkpoint": 5892,
+        "full": 6297
+      }
+    },
+    {
+      "all_tracked_potential_dependents": 5720,
+      "dependent_lines": 947786,
+      "module": "Solidity.KeySort",
+      "rebuilds_including_changed_module": 5721,
+      "workload_rebuilds": {
+        "Bridge": 1072,
+        "checkpoint": 4234,
+        "full": 4640
+      }
+    },
+    {
+      "all_tracked_potential_dependents": 5712,
+      "dependent_lines": 946048,
+      "module": "Solidity.AST",
+      "rebuilds_including_changed_module": 5713,
+      "workload_rebuilds": {
+        "Bridge": 1071,
+        "checkpoint": 4232,
+        "full": 4638
+      }
+    },
+    {
+      "all_tracked_potential_dependents": 5697,
+      "dependent_lines": 943337,
+      "module": "Solidity.Syntax.Raw",
+      "rebuilds_including_changed_module": 5698,
+      "workload_rebuilds": {
+        "Bridge": 1067,
+        "checkpoint": 4226,
+        "full": 4632
+      }
+    },
+    {
+      "all_tracked_potential_dependents": 4759,
+      "dependent_lines": 807680,
+      "module": "Solidity.Semantics.Value",
+      "rebuilds_including_changed_module": 4760,
+      "workload_rebuilds": {
+        "Bridge": 788,
+        "checkpoint": 3538,
+        "full": 3940
+      }
+    },
+    {
+      "all_tracked_potential_dependents": 3505,
+      "dependent_lines": 448872,
+      "module": "Solidity.Source.Types",
+      "rebuilds_including_changed_module": 3506,
+      "workload_rebuilds": {
+        "Bridge": 182,
+        "checkpoint": 3210,
+        "full": 3212
+      }
+    }
+  ],
+  "inputs": {
+    "docs/audits/architecture-tools": {
+      "files": [
+        "docs/audits/architecture-tools/core_closure.py",
+        "docs/audits/architecture-tools/doc_names.py",
+        "docs/audits/architecture-tools/dup_decls.py",
+        "docs/audits/architecture-tools/dup_general.py",
+        "docs/audits/architecture-tools/imports.py",
+        "docs/audits/architecture-tools/near_files.py",
+        "docs/audits/architecture-tools/olean_sizes.py",
+        "docs/audits/architecture-tools/timing-sample.tsv",
+        "docs/audits/architecture-tools/unreferenced.py"
+      ],
+      "present": true
+    },
+    "docs/audits/build-speed": {
+      "files": [
+        "docs/audits/build-speed-tools/churn.py",
+        "docs/audits/build-speed-tools/import_graph.py",
+        "docs/audits/build-speed-tools/measure.sh",
+        "docs/audits/build-speed-tools/pins.py",
+        "docs/audits/build-speed-tools/profile.sh",
+        "docs/audits/build-speed-tools/scan.py",
+        "docs/audits/build-speed.md"
+      ],
+      "present": true
+    },
+    "docs/audits/proof-coverage-tools": {
+      "files": [
+        "docs/audits/proof-coverage-tools/statement-sample.txt",
+        "docs/audits/proof-coverage-tools/theorem_census.py"
+      ],
+      "present": true
+    },
+    "scripts/bench": {
+      "files": [],
+      "present": false
+    },
+    "scripts/build-measure": {
+      "files": [
+        "scripts/build-measure-report.py",
+        "scripts/build-measure.py"
+      ],
+      "present": true
+    },
+    "scripts/differential": {
+      "files": [],
+      "present": false
+    }
+  },
+  "largest_areas": [
+    "Backend",
+    "Yul",
+    "Calculus",
+    "Lowering",
+    "Frontend",
+    "Bridge",
+    "Examples",
+    "Source",
+    "Evm",
+    "Semantics"
+  ],
+  "method": "all tracked Lean physical lines; nested-comment/string-stripped header imports; transitive reverse closure includes roots and Bridge, excludes external packages; generated path markers plus bounded BEGIN/END regions; ambiguous file headers and chain/agreement names unresolved; remaining lines not proven handwritten",
+  "sample_plan": [
+    {
+      "area": "Backend",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Backend.PrimitivePackets.UnsignedDiv.Data",
+        "Solidity.Source.Eval"
+      ],
+      "lines": 46,
+      "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/SourceOrigin.lean",
+      "quartile": 1
+    },
+    {
+      "area": "Backend",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Backend.Passes.ReferenceCallCaptureFailure",
+        "Solidity.Backend.Passes.ReferenceCallReadbackControls"
+      ],
+      "lines": 86,
+      "path": "Solidity/Backend/Passes/ReferenceCallCaptureFailureControls.lean",
+      "quartile": 2
+    },
+    {
+      "area": "Backend",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Backend.MemoryOps.SourceUintFixedCompoundSource",
+        "Solidity.Evm.MemoryObjectStatements"
+      ],
+      "lines": 130,
+      "path": "Solidity/Backend/MemoryOps/SourceUintFixedCompound.lean",
+      "quartile": 3
+    },
+    {
+      "area": "Backend",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Backend.PrimitivePackets.CheckedMul.Agreement",
+        "Solidity.Backend.PrimitivePackets.CheckedMul.Populated",
+        "Solidity.Backend.PrimitivePackets.PanicBytes",
+        "Solidity.Source.SemanticsExamples"
+      ],
+      "lines": 224,
+      "path": "Solidity/Backend/PrimitivePackets/CheckedMul/Controls.lean",
+      "quartile": 4
+    },
+    {
+      "area": "Yul",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Yul.Adapters.FrameHeap",
+        "Solidity.Yul.Adapters.RawPhysicalCallAccess"
+      ],
+      "lines": 50,
+      "path": "Solidity/Yul/Adapters/HeapCallOutput.lean",
+      "quartile": 1
+    },
+    {
+      "area": "Yul",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Yul.RawLiteralScope"
+      ],
+      "lines": 75,
+      "path": "Solidity/Yul/RawIntegerInitialization.lean",
+      "quartile": 2
+    },
+    {
+      "area": "Yul",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Yul.LocalCoordinates",
+        "Solidity.Yul.DirectUpdates"
+      ],
+      "lines": 103,
+      "path": "Solidity/Yul/CoordinateUpdates.lean",
+      "quartile": 3
+    },
+    {
+      "area": "Yul",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Yul.Views.FixedDeclarationSource"
+      ],
+      "lines": 168,
+      "path": "Solidity/Yul/Views/FixedDeclarationControls.lean",
+      "quartile": 4
+    },
+    {
+      "area": "Calculus",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Calculus.Taclet"
+      ],
+      "lines": 64,
+      "path": "Solidity/Calculus/CallbackRules.lean",
+      "quartile": 1
+    },
+    {
+      "area": "Calculus",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Calculus.Shift"
+      ],
+      "lines": 156,
+      "path": "Solidity/Calculus/JoinSequence.lean",
+      "quartile": 2
+    },
+    {
+      "area": "Calculus",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Calculus.MemInst"
+      ],
+      "lines": 331,
+      "path": "Solidity/Calculus/MemObserve.lean",
+      "quartile": 3
+    },
+    {
+      "area": "Calculus",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Calculus.DecideLang",
+        "Solidity.Calculus.ReadBounds",
+        "Solidity.Calculus.TermEq",
+        "Solidity.Calculus.Decide"
+      ],
+      "lines": 1043,
+      "path": "Solidity/Calculus/Closer/Facts.lean",
+      "quartile": 4
+    },
+    {
+      "area": "Lowering",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Lowering.V08.BoolErrorStatement",
+        "Solidity.Lowering.V08.BoolErrorControls"
+      ],
+      "lines": 54,
+      "path": "Solidity/Lowering/V08/BoolErrorStatementControls.lean",
+      "quartile": 1
+    },
+    {
+      "area": "Lowering",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Lowering.V08.LiteralFailureCopiedReason",
+        "Solidity.Lowering.V08.LiteralFailureCopySelectorControls"
+      ],
+      "lines": 93,
+      "path": "Solidity/Lowering/V08/LiteralFailureCopiedReasonControls.lean",
+      "quartile": 2
+    },
+    {
+      "area": "Lowering",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Lowering.G19.ReturnTail"
+      ],
+      "lines": 137,
+      "path": "Solidity/Lowering/G19/AssignmentBlocks.lean",
+      "quartile": 3
+    },
+    {
+      "area": "Lowering",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Lowering.V07.UnsignedNarrowing"
+      ],
+      "lines": 251,
+      "path": "Solidity/Lowering/V07/UnsignedAddition.lean",
+      "quartile": 4
+    },
+    {
+      "area": "Frontend",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Frontend.Checked.TypeCorpusMembers",
+        "Solidity.Frontend.Checked.TypeCorpusRoundtripFirst",
+        "Solidity.Frontend.Checked.TypeCorpusRoundtripSecond"
+      ],
+      "lines": 21,
+      "path": "Solidity/Frontend/Checked/TypePrintRoundtrip.lean",
+      "quartile": 1
+    },
+    {
+      "area": "Frontend",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Roadmap.Frontend",
+        "Solidity.Frontend.Static.Units",
+        "Solidity.Frontend.Static.Consts",
+        "Solidity.Frontend.Static.UserOps",
+        "Solidity.Frontend.Static.Inheritance"
+      ],
+      "lines": 102,
+      "path": "Solidity/Frontend/Static/Certificates.lean",
+      "quartile": 2
+    },
+    {
+      "area": "Frontend",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Frontend.Checked.Check",
+        "Solidity.Frontend.TypeGrammarH28.ParserBasics",
+        "Solidity.Frontend.TypeGrammarH28.Layouts"
+      ],
+      "lines": 179,
+      "path": "Solidity/Frontend/TypeGrammarH28/ParserChecks.lean",
+      "quartile": 3
+    },
+    {
+      "area": "Frontend",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Frontend.StatementGrammarH28.LeafCoverage",
+        "Solidity.Frontend.StatementGrammarH28.YieldSplit",
+        "Solidity.Frontend.StatementGrammarH28.G0List"
+      ],
+      "lines": 357,
+      "path": "Solidity/Frontend/StatementGrammarH28/BlockLeafCoverage.lean",
+      "quartile": 4
+    },
+    {
+      "area": "Bridge",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "SolidityBridge.Arith.Shifts",
+        "SolidityBridge.Arith.NarrowBitwise"
+      ],
+      "lines": 46,
+      "path": "Bridge/SolidityBridge/Arith/NarrowShifts.lean",
+      "quartile": 1
+    },
+    {
+      "area": "Bridge",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "SolidityBridge.ExternalEvm.Assembly.StaticLoop"
+      ],
+      "lines": 79,
+      "path": "Bridge/SolidityBridge/ExternalEvm/Assembly/Automatic.lean",
+      "quartile": 2
+    },
+    {
+      "area": "Bridge",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "SolidityBridge.RoadmapV15.P10.PublishedRemainder",
+        "SolidityBridge.RoadmapV15.P10.WordPushFixtures",
+        "Solidity.Backend.PrimitivePackets.SignedMod.Controls"
+      ],
+      "lines": 119,
+      "path": "Bridge/SolidityBridge/RoadmapV15/P10/PublishedRemainderControls.lean",
+      "quartile": 3
+    },
+    {
+      "area": "Bridge",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "SolidityBridge.Yul.LiteralSelection",
+        "SolidityBridge.Yul.StructuredSource",
+        "Solidity.Yul.Compilation.MachineControl"
+      ],
+      "lines": 199,
+      "path": "Bridge/SolidityBridge/Yul/ControlRealization.lean",
+      "quartile": 4
+    },
+    {
+      "area": "Examples",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Examples.DecisionHashCore"
+      ],
+      "lines": 44,
+      "path": "Solidity/Examples/DecisionHashThreeKinds.lean",
+      "quartile": 1
+    },
+    {
+      "area": "Examples",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Calculus.Close",
+        "Solidity.Calculus.Surface",
+        "Solidity.Calculus.Closers"
+      ],
+      "lines": 91,
+      "path": "Solidity/Examples/Tactics/OwnStructs.lean",
+      "quartile": 2
+    },
+    {
+      "area": "Examples",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Solkey.QuantifiedDiamond",
+        "Solidity.Calculus.Close",
+        "Solidity.Calculus.Surface",
+        "Solidity.Calculus.Closers",
+        "Solidity.Semantics.RevertMemory",
+        "Solidity.Tools.Counterexample",
+        "Solidity.Examples.Termination"
+      ],
+      "lines": 152,
+      "path": "Solidity/Examples/Tactics/QuantifiedDiamond.lean",
+      "quartile": 3
+    },
+    {
+      "area": "Examples",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Calculus.ProvesDerive",
+        "Solidity.Calculus.DecideComplete",
+        "Solidity.Calculus.Close",
+        "Solidity.Calculus.Surface",
+        "Solidity.Syntax.Inlined",
+        "Solidity.Calculus.Closers",
+        "Solidity.Tools.Inspect"
+      ],
+      "lines": 329,
+      "path": "Solidity/Examples/Benchmark/Purchase.lean",
+      "quartile": 4
+    },
+    {
+      "area": "Source",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Source.Progress.ForwardingReturns"
+      ],
+      "lines": 50,
+      "path": "Solidity/Source/Progress/InitializedLocals.lean",
+      "quartile": 1
+    },
+    {
+      "area": "Source",
+      "classification": "unresolved_chain_agreement",
+      "imports": [
+        "Solidity.Source.Agreement.BoolSlotSaved"
+      ],
+      "lines": 85,
+      "path": "Solidity/Source/Agreement/BoolSlotSavedControls.lean",
+      "quartile": 2
+    },
+    {
+      "area": "Source",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Source.FailureEvaluatorApprox",
+        "Solidity.Source.HorizonDeploy"
+      ],
+      "lines": 152,
+      "path": "Solidity/Source/FailureDeploymentHorizon.lean",
+      "quartile": 3
+    },
+    {
+      "area": "Source",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Source.WellTyped",
+        "Solidity.Source.ValueProgress"
+      ],
+      "lines": 329,
+      "path": "Solidity/Source/Decode.lean",
+      "quartile": 4
+    },
+    {
+      "area": "Evm",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Evm.MemoryLoopHorizonObjectFinite"
+      ],
+      "lines": 38,
+      "path": "Solidity/Evm/MemoryLoopHorizonObjectStability.lean",
+      "quartile": 1
+    },
+    {
+      "area": "Evm",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Evm.MemoryDefaultFixedBuilder",
+        "Solidity.Evm.MemoryObjectNested"
+      ],
+      "lines": 77,
+      "path": "Solidity/Evm/MemoryDefaultDynamic.lean",
+      "quartile": 2
+    },
+    {
+      "area": "Evm",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Evm.MemoryRefArrayPaths"
+      ],
+      "lines": 137,
+      "path": "Solidity/Evm/MemoryRefArrayStatements.lean",
+      "quartile": 3
+    },
+    {
+      "area": "Evm",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Evm.MemoryHeap",
+        "Solidity.Evm.MemoryRefs",
+        "Solidity.Evm.Expr",
+        "Solidity.Semantics.RunFrame"
+      ],
+      "lines": 262,
+      "path": "Solidity/Evm/MemorySource.lean",
+      "quartile": 4
+    },
+    {
+      "area": "Semantics",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Semantics.Nondeterminism.Fork",
+        "Solidity.Stipend.Rule"
+      ],
+      "lines": 54,
+      "path": "Solidity/Semantics/Nondeterminism/ForkStipend.lean",
+      "quartile": 1
+    },
+    {
+      "area": "Semantics",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Semantics.RecursiveStorage.Defaults"
+      ],
+      "lines": 140,
+      "path": "Solidity/Semantics/RecursiveStorage/Paths.lean",
+      "quartile": 2
+    },
+    {
+      "area": "Semantics",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Semantics.CtxEquiv.Controls"
+      ],
+      "lines": 260,
+      "path": "Solidity/Semantics/CtxEquiv/AdversaryControls.lean",
+      "quartile": 3
+    },
+    {
+      "area": "Semantics",
+      "classification": "unmarked_not_proven_handwritten",
+      "imports": [
+        "Solidity.Semantics.Ends"
+      ],
+      "lines": 558,
+      "path": "Solidity/Semantics/NoPanic.lean",
+      "quartile": 4
+    }
+  ]
+}
