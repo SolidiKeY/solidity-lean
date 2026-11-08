@@ -1483,6 +1483,32 @@ P20 pending producer fields remain explicit obligations; importing them proves
 no concrete Source/compiler adequacy. General P16/full VY1 and final lane gates
 remain open.
 
+### Declaration-field classifiers
+
+Reuse `declarationFieldUses` for direct metadata classifiers over intrinsic
+`Syn` nodes. Its exact membership and original-unit witness lemmas retain the
+actual declaration roster and syntax site; `declarationElementaryUses_iff`
+instantiates this API. A classifier can return an empty or incomplete list, so
+these traversal laws do not establish classifier validity, whole-catalog
+coverage, lexical scope, or admission. Keep the original source unit available:
+its headers cannot be recovered from the declaration environment alone.
+`LocationFeatures.lean` instantiates the collector for every explicit `DataLoc`
+field in `Syn`: parameter and variable-declaration metadata. Its independent
+relation proves exact direct-field accounting, and a generic unused-function
+control retains all three locations while omission yields no location feature.
+These are syntax features; legality and default/inferred locations remain
+separate from this subset and from operational admission.
+
+`declarationFieldRefusals` retains every rejected field and its actual
+intrinsic declaration/site; `declarationFieldRefusal?` selects the first.
+The exactness and source-witness lemmas are relative to the supplied classifier
+and Boolean predicate. The predicate sees field values, not a derived typing
+context. An empty or incomplete classifier can be silent, and an accept-all
+predicate can silence nonempty syntax. Do not equate silence with admission:
+complete extraction, classifier validity and the versioned profile/policy
+linkage must be established separately. Sites do not provide unique character
+offsets or prove lexical scope.
+
 ### P16 generated-file maintenance
 
 Run `python3 -B scripts/h62/item1/p16-generator/check.py` to verify the generated
