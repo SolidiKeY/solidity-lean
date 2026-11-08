@@ -65,7 +65,7 @@ theorem early_rejection (base bits : Nat) (payable : Bool) (label : Fin W) (body
     (machine : Machine) (blocked : (payable || decide (machine.callvalue.val=0))=false) :
     run whole.code machine=.revert := by
   rw [gated base bits payable label body outFrag bodyCore whole found machine]
-  simp only [blocked,Bool.false_eq_true,if_false]
+  simp only [blocked,Bool.false_eq_true,ite_false]
 
 theorem decoded_body (base bits : Nat) (payable : Bool) (label : Fin W) (body : Prog C UIntBoundCtx Δ)
     (outFrag : Frag Δ) (bodyCore : inFragP (Frag.init UIntBoundCtx) body=some outFrag)
@@ -88,7 +88,7 @@ theorem decoded_body (base bits : Nat) (payable : Bool) (label : Fin W) (body : 
     (UIntBindingBody.whole_selected base bits label body outFrag bodyCore) bodyFound
     input fuel machine size initialWord initialSize represented full valid with ⟨value,semantic,cell,bodyRun⟩
   refine ⟨value,semantic,cell,?_⟩
-  rw [gated base bits payable label body outFrag bodyCore whole wholeFound machine,if_pos allowed,bodyRun]
+  rw [gated base bits payable label body outFrag bodyCore whole wholeFound machine,ite_eq_left allowed,bodyRun]
 
 def certificate : Interface.ValueCheckedUIntBodyCertificate program where
   selected := fun base bits payable label body outFrag bodyCore =>
@@ -170,7 +170,7 @@ theorem early_rejection (base : Nat) (payable : Bool) (label : Fin W) (body : Pr
     (machine : Machine) (blocked : (payable || decide (machine.callvalue.val=0))=false) :
     run whole.code machine=.revert := by
   rw [gated base payable label body outFrag bodyCore whole found machine]
-  simp only [blocked,Bool.false_eq_true,if_false]
+  simp only [blocked,Bool.false_eq_true,ite_false]
 
 theorem decoded_body (base : Nat) (payable : Bool) (label : Fin W) (body : Prog C BoolBoundCtx Δ)
     (outFrag : Frag Δ) (bodyCore : inFragP (Frag.init BoolBoundCtx) body=some outFrag)
@@ -193,7 +193,7 @@ theorem decoded_body (base : Nat) (payable : Bool) (label : Fin W) (body : Prog 
     (BoolBindingBody.whole_selected base label body outFrag bodyCore) bodyFound
     input fuel machine size initialWord initialSize represented full valid with ⟨value,semantic,cell,bodyRun⟩
   refine ⟨value,semantic,cell,?_⟩
-  rw [gated base payable label body outFrag bodyCore whole wholeFound machine,if_pos allowed,bodyRun]
+  rw [gated base payable label body outFrag bodyCore whole wholeFound machine,ite_eq_left allowed,bodyRun]
 
 def certificate : Interface.ValueCheckedBoolBodyCertificate program where
   selected := fun base payable label body outFrag bodyCore =>
