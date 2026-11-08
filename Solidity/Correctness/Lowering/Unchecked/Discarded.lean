@@ -1,4 +1,5 @@
 import Solidity.Correctness.Lowering.Unchecked.LocalUpdate
+import Solidity.Correctness.Lowering.Unchecked.CompoundOne
 import Solidity.Source.Eval
 import Solidity.Source.Hoare
 
@@ -115,8 +116,39 @@ theorem literalCompound_statement {E : Source.Env} {Γ : Source.RCtx}
   exact (expr_of_discarded G F (fuel + 2) nps ph plan known _ _ ls st discarded).trans
     (incDec_statement G F (fuel + 3) nps ph plan known ls st inc pre (.local i)).symm
 
+/-- One Source statement law for literal-one compound assignment and every
+prefix/postfix increment/decrement form, at arbitrary integer lvalues and all
+horizons. No local-target, successful-read, successful-write or no-panic
+premise is imposed. This does not certify the raw or intrinsic target output. -/
+theorem compoundOne_statement {E : Source.Env} {Γ : Source.RCtx}
+    {R : List Source.STy} {M : Bool} {k : Source.SCtx}
+    (G : Source.Glob E) (F : Source.Fr) (horizon nps : Nat) (ph : Option (Source.Ph E))
+    (plan : Source.FailureExecution.RuntimePlan) (known : Bool)
+    (ls : Source.Locals E.layout Γ) (st : Source.St E)
+    (t : Source.IntTy) (inc pre : Bool) (l : Source.RLVal E Γ (.int t))
+    (fits : (if inc then Source.AssignOp.add else .sub).fits E.isBase E.mapFree
+      (.rational (Source.Q.ofInt 1)) (.int t) = true) :
+    (Source.execS G F horizon nps ph
+      (.expr (.compound (if inc then .add else .sub) l (.const (Source.Q.ofInt 1)) fits)
+        : Source.RStmt E R M k Γ Γ) ls (plan := plan) (calldataKnown := known)).run (.nil, st) =
+    (Source.execS G F horizon nps ph
+      (.expr (.incDec inc pre l) : Source.RStmt E R M k Γ Γ) ls
+      (plan := plan) (calldataKnown := known)).run (.nil, st) := by
+  cases horizon with
+  | zero => rfl
+  | succ n =>
+    have discarded : ((Source.evalE G F n
+        (.compound (if inc then .add else .sub) l (.const (Source.Q.ofInt 1)) fits)
+        (plan := plan) (calldataKnown := known)) >>= fun _ => pure ()).run (ls, st) =
+      ((Source.evalE G F n (.incDec inc true l)
+        (plan := plan) (calldataKnown := known)) >>= fun _ => pure ()).run (ls, st) := by
+      rw [compoundOne_eval G F n plan known t inc l fits]
+    exact (expr_of_discarded G F n nps ph plan known _ _ ls st discarded).trans
+      (incDec_statement G F (n + 1) nps ph plan known ls st inc pre l).symm
+
 #print axioms incDec_discarded
 #print axioms incDec_statement
 #print axioms literalCompound_statement
+#print axioms compoundOne_statement
 
 end Solidity.Correctness.Lowering.Unchecked
