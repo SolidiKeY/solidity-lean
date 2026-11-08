@@ -21,10 +21,10 @@ private theorem actual (bound : Nat) (word : Fin W) :
   UnsignedGate.executed C 7 bound label (compiled bound) (UnsignedGate.selected C 7 bound label) (machine word) word rfl
 private theorem accepted (bound : Nat) (word : Fin W) (valid : word.val<bound) :
     run (compiled bound).code (machine word)=.ok (written word) 0 := by
-  simpa only [unsignedGateOutcome,if_pos valid] using actual bound word
+  simpa only [unsignedGateOutcome,ite_eq_left valid,written] using actual bound word
 private theorem rejected (bound : Nat) (word : Fin W) (invalid : ¬word.val<bound) :
     run (compiled bound).code (machine word)=.revert := by
-  simpa only [unsignedGateOutcome,if_neg invalid] using actual bound word
+  simpa only [unsignedGateOutcome,ite_eq_right invalid] using actual bound word
 
 theorem bool_boundaries :
     run (compiled 2).code (machine (wmod 0))=.ok (written (wmod 0)) 0 ∧
@@ -79,7 +79,7 @@ theorem raw_uint8_failure (fuel len : Nat) :
 theorem raw_uint8_value (fuel len : Nat) :
     ∃ value,Solidity.AbiEntry.cval raw (fuel+1) (.word (.uint 8)) 1 len=.ok value := by
   have valid : (Solidity.AbiEntry.Kind.uint 8).valid (Solidity.AbiEntry.load raw.data 1)=true := by decide
-  simp only [Solidity.AbiEntry.cval,dif_pos valid]
+  simp only [Solidity.AbiEntry.cval,dite_eq_left valid]
   exact ⟨_,rfl⟩
 
 theorem empty_word_not_entry :
