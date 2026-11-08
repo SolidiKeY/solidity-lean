@@ -134,7 +134,14 @@ function receiverMembers(text,point,analysis){
 }
 
 function completion(text,point,analysis){
-  const before=text.slice(0,offset(text,point)),prefix=/[\w$]*$/.exec(before)[0];
+  const cursor=offset(text,point),token=require('./solidity-text.cjs').tokens(text).find(t=>t.start<cursor&&cursor<=t.end&&(t.kind==='comment'||t.kind==='string'));
+  if(token){
+    let inside=cursor<token.end;
+    if(token.kind==='comment')inside ||= token.text.startsWith('//')||token.text.length<4||!token.text.endsWith('*/');
+    else if(!inside){const raw=token.text.replace(/^(?:hex|unicode)(?=["'])/,'');let escapes=0;for(let i=raw.length-2;i>=0&&raw[i]==='\\';i--)escapes++;inside=raw.length<2||raw.at(-1)!==raw[0]||escapes%2===1;}
+    if(inside)return {isIncomplete:true,items:[]};
+  }
+  const before=text.slice(0,cursor),prefix=/[\w$]*$/.exec(before)[0];
   const member=/\.\s*[\w$]*$/.test(before),items=[];
   if(!member)items.push(...keywords.map(label=>({label,kind:14})));
   if(member){for(const node of receiverMembers(text,point,analysis)||[])if(node.name)items.push({label:node.name,kind:node.nodeType==='FunctionDefinition'?3:6,detail:node.typeDescriptions?.typeString});}

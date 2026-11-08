@@ -1,0 +1,7 @@
+// Real pinned compiler plus local completion; no native UI/kernel/EVM claim.
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),os=require('node:os'),lang=require('../src/language-services.cjs');
+test('real compiler index does not admit comment or literal completion contexts',async t=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'completion-lexical-')),source=path.join(dir,'Contexts.sol'),text=['pragma solidity ^0.8.34;','contract Contexts {','// con','/* con */','function control() public pure returns(bytes memory){','string memory a="con"; string memory b=unicode"con"; bytes memory c=hex"ca";','return bytes(a);','}','}'].join('\n');fs.writeFileSync(source,text);
+ try{const {compileFixture}=await import('../../scripts/solc-ast.mjs'),compiled=compileFixture({args:['--source',source,'--out',path.join(dir,'out.json'),'--no-wrapper'],sourceBytes:Buffer.from(text),analysisOnly:true,quiet:true}),analysis=lang.index(text,compiled.rawAst);for(const needle of ['// con','/* con','"con','unicode"con','hex"ca']){const point=lang.position(text,text.indexOf(needle)+needle.length);assert.deepEqual(lang.completion(text,point,analysis).items,[],needle);}assert.ok(lang.completion(text,lang.position(text,text.indexOf('control')+3),analysis).items.some(i=>i.label==='control'));t.diagnostic(JSON.stringify({boundary:'compiler/JavaScript only',compiler:compiled.compiler,sourceHash:compiled.sourceHash}));}finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
