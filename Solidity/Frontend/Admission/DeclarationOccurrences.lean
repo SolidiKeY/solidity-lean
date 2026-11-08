@@ -175,4 +175,55 @@ theorem declaration_occurrence_in_source_unit (u : Syn .unit)
 /-- info: 'Solidity.Frontend.Admission.declaration_occurrence_in_source_unit' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms declaration_occurrence_in_source_unit
 
+/-! Metadata classifiers share one declaration traversal. Regression: adding
+another direct-field classifier must not silently select only executed roots or
+lose the original declaration/site. Classifier completeness remains a separate
+obligation; these laws establish exactly the supplied classifier's occurrences. -/
+
+universe u
+
+/-- Retain each actual declaration and syntax site alongside a classified field.
+The classifier sees the intrinsic syntax category; it cannot replace the roster. -/
+def declarationFieldUses {α : Type u} (E : Env)
+    (fields : ∀ {c : Cat}, Syn c → List α) : List (DeclarationOccurrence × α) :=
+  (declarationOccurrences E).flatMap fun site =>
+    (fields site.2.2).map fun value => (site,value)
+
+/-- Exactness for any direct metadata-field classifier, without a coverage
+premise or a second traversal implementation. -/
+theorem declarationFieldUses_iff {α : Type u} (E : Env)
+    (fields : ∀ {c : Cat}, Syn c → List α)
+    (site : DeclarationOccurrence) (value : α) :
+    (site,value) ∈ declarationFieldUses E fields ↔
+      site.Occurs E ∧ value ∈ fields site.2.2 := by
+  simp only [declarationFieldUses, List.mem_flatMap, List.mem_map]
+  constructor
+  · rintro ⟨other, member, field, present, equality⟩
+    have sites := congrArg Prod.fst equality
+    have values := congrArg Prod.snd equality
+    dsimp only at sites values
+    cases sites
+    cases values
+    exact ⟨(declarationOccurrences_iff E site).mp member,present⟩
+  · rintro ⟨occurs,present⟩
+    exact ⟨site,(declarationOccurrences_iff E site).mpr occurs,value,present,rfl⟩
+
+/-- A reported field has both its original source-unit syntax site and its
+classifier membership. This does not assert that the classifier reports every
+language feature or that every source-unit site belongs to a declaration. -/
+theorem declarationFieldUses_source_witness {α : Type u} (unit : Syn .unit)
+    (fields : ∀ {c : Cat}, Syn c → List α)
+    (site : DeclarationOccurrence) (value : α)
+    (present : (site,value) ∈ declarationFieldUses unit.env fields) :
+    site.2 ∈ syntaxOccurrences unit ∧ value ∈ fields site.2.2 := by
+  have found := (declarationFieldUses_iff unit.env fields site value).mp present
+  exact ⟨declaration_occurrence_in_source_unit unit site
+    ((declarationOccurrences_iff unit.env site).mpr found.1),found.2⟩
+
+/-- info: 'Solidity.Frontend.Admission.declarationFieldUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms declarationFieldUses_iff
+
+/-- info: 'Solidity.Frontend.Admission.declarationFieldUses_source_witness' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms declarationFieldUses_source_witness
+
 end Solidity.Frontend.Admission

@@ -152,17 +152,7 @@ theorem declarationElementaryUses_iff (E : Env)
     (site : DeclarationOccurrence) (e : Elem) :
     (site,e) ∈ declarationElementaryUses E ↔
       site.Occurs E ∧ e ∈ elementaryFieldsAt site.2.2 := by
-  simp only [declarationElementaryUses, List.mem_flatMap, List.mem_map]
-  constructor
-  · rintro ⟨other, member, field, present, equality⟩
-    have sites := congrArg Prod.fst equality
-    have fields := congrArg Prod.snd equality
-    dsimp only at sites fields
-    cases sites
-    cases fields
-    exact ⟨(declarationOccurrences_iff E site).mp member,present⟩
-  · rintro ⟨occurs,present⟩
-    exact ⟨site,(declarationOccurrences_iff E site).mpr occurs,e,present,rfl⟩
+  exact declarationFieldUses_iff E elementaryFieldsAt site e
 
 /-- Mapping-key metadata is retained even though it is not a syntax child. -/
 theorem mapping_key_field (e : Elem) (valid : e ≠ .addressPayable)
