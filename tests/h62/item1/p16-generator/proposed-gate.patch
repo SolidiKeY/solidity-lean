@@ -1,12 +1,10 @@
 --- a/scripts/coord-tools/gate.sh
 +++ b/scripts/coord-tools/gate.sh
-@@ -87,6 +87,9 @@
+@@ -113,6 +113,7 @@
+     run_gate trust bash scripts/check-trust.sh
      run_gate orphans node scripts/check-orphans.mjs
-     run_gate layers node scripts/check-layers.mjs
      run_gate roots bash scripts/coord-tools/register.sh --check
-+    run_gate p16-generated python3 scripts/h62/item1/p16-generator/generate.py --migration --check
-+    run_gate p16-census python3 -B scripts/h62/item1/p16-generator/census.py
-+    run_gate p16-baseline python3 -B scripts/h62/item1/p16-generator/census.py --baseline
++    run_gate p16-generated python3 -B scripts/h62/item1/p16-generator/check.py
      run_gate fragments bash scripts/coord-tools/fragments.sh --check
      run_gate doc-paths bash scripts/check-doc-paths.sh
      run_gate axiom-pins node scripts/check-axiom-pins.mjs

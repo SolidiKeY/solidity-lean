@@ -1483,6 +1483,16 @@ P20 pending producer fields remain explicit obligations; importing them proves
 no concrete Source/compiler adequacy. General P16/full VY1 and final lane gates
 remain open.
 
+### P16 generated-file maintenance
+
+Run `python3 -B scripts/h62/item1/p16-generator/check.py` to verify the generated
+marker, complete P16 bytes, ordered import/documentation census and pinned Git
+baseline. Edit registered fragments rather than the generated interface. The
+baseline commit must exist locally. This integrity check does not certify live
+producer completeness, semantic coverage or Lean elaboration. Extension ordering
+and producer membership require separate reconciliation; central gate adoption
+remains pending.
+
 ### P20 represented-success consumer (V2)
 
 Use `Backend/Selection/P20ConsumerInterface.lean`'s
