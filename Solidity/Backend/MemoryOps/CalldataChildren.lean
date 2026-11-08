@@ -110,18 +110,18 @@ theorem referenceSlice_empty {H : HTy} {R Q : RefTy} (hp : Heap H)
   simpa only [Nat.sub_self, List.take_zero] using
     overwriteSlice_empty hp dst a offset (by simpa only [List.length_nil, Nat.add_zero] using hd)
 
-/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.overwrite' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.overwrite' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms BoolChildRepr.overwrite
-/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.read_iff' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.read_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms BoolChildRepr.read_iff
-/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.alias_iff' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.alias_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms BoolChildRepr.alias_iff
-/-- info: 'Solidity.Backend.MemoryOps.boolChild_parent_ne' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.MemoryOps.boolChild_parent_ne' depends on axioms: [propext] -/
 #guard_msgs in #print axioms boolChild_parent_ne
-/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.alias' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.MemoryOps.BoolChildRepr.alias' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms BoolChildRepr.alias
-/-- info: 'Solidity.Backend.MemoryOps.decodedBoolChildren_overwrite' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.decodedBoolChildren_overwrite' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms decodedBoolChildren_overwrite
-/-- info: 'Solidity.Backend.MemoryOps.referenceSlice_empty' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.referenceSlice_empty' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms referenceSlice_empty
 end Solidity.Backend.MemoryOps
