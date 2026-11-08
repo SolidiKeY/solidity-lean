@@ -18,7 +18,7 @@ WITNESSES={
  'Solidity.Path.strip?_append_append':("PathWitnesses",'path_strip_append_append_joint_witness'),
  'Solidity.ObsLoc.app_path':("PathWitnesses",'obsloc_app_path_joint_witness'),
  'Solidity.ObsLoc.strip?_path':("PathWitnesses",'obsloc_strip_path_joint_witness'),
- 'Solidity.Obs.ext':("PathWitnesses",'obs_ext_joint_witness'),
+ 'Solidity.Obs.ext':("ObservationDomains",'obs_ext_populated_joint_witness'),
  'Solidity.Obs.find_word':("PathWitnesses",'obs_find_word_joint_witness'),
  'Solidity.Obs.find_len':("PathWitnesses",'obs_find_len_joint_witness'),
  'Solidity.Obs.find_save_same':("PathWitnesses",'obs_find_save_same_joint_witness'),
