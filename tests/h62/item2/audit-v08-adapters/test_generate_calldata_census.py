@@ -59,6 +59,24 @@ class Generator(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'sort changed'):
             generator.render(changed, stream=True)
 
+    def test_optional_result_shapes_keep_old_fields_and_filters(self):
+        ordinary = generator.render(TEMPLATE, stream=True)
+        shaped = generator.render(TEMPLATE, stream=True, result_shapes=True)
+        self.assertNotIn('("result_shape", resultShape)', ordinary)
+        self.assertIn('("result_shape", resultShape)', shaped)
+        for token in ('environment.getModuleIdxFor? name', 'targets.findSome?',
+                      'collectAxioms name', '("type_expr",', '("binders",'):
+            self.assertEqual(ordinary.count(token), shaped.count(token))
+        self.assertNotIn('body is reused verbatim', shaped)
+        self.assertNotIn('only the global', shaped)
+        self.assertIn('additional structural result fields', shaped)
+        self.assertIn('result.isAppOfArity ``Eq 3', shaped)
+        self.assertIn('args[1]! == args[2]!', shaped)
+        for changed in (TEMPLATE.replace('let axioms ←', 'let altered ←'),
+                        TEMPLATE.replace('let row :=', 'let alteredRow :=')):
+            with self.assertRaisesRegex(ValueError, 'anchors changed'):
+                generator.render(changed, result_shapes=True)
+
     def test_generation_is_exclusive_in_both_modes(self):
         for optimized in (False, True):
             with tempfile.TemporaryDirectory() as folder:

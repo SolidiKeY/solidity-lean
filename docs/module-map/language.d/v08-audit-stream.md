@@ -7,3 +7,10 @@ exclusive-write guards are retained. Bind any new capture to the current
 collector/template hashes; do not relabel historical receipts. Sort captured
 rows outside Lean when deterministic presentation is needed. Inventory and
 name matching do not establish feasibility, statement fidelity or H68 adequacy.
+
+`--result-shapes` optionally captures the conclusion head after all binders,
+equality operand heads and their kernel defining modules, and syntactic
+reflexivity. These are structural observations, without reduction or semantic
+proof. A generated equation's defining module does not transfer ownership of
+the referenced evaluator. Default captured fields remain unchanged unless the
+option is enabled. Bind shaped captures to their own fresh generator hashes.

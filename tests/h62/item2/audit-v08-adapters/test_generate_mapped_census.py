@@ -54,6 +54,16 @@ class Generator(unittest.TestCase):
             self.assertIn('let constants := environment.constants.toList\n', source)
             self.assertEqual(source.count(module.MARKER), sorted_source.count(module.MARKER))
 
+    def test_result_shape_option_preserves_bindings(self):
+        with tempfile.TemporaryDirectory() as folder:
+            repo = self.setup_repo(folder)
+            ordinary, expected, expected_template = self.prepare(repo, stream=True)
+            source, bindings, template = self.prepare(repo, stream=True, result_shapes=True)
+            self.assertEqual((bindings, template), (expected, expected_template))
+            self.assertIn('("result_shape", resultShape)', source)
+            self.assertNotIn('("result_shape", resultShape)', ordinary)
+            self.assertEqual(source.count(module.MARKER), ordinary.count(module.MARKER))
+
     def test_selection_bounds_and_duplicates(self):
         with tempfile.TemporaryDirectory() as folder:
             repo = self.setup_repo(folder)
