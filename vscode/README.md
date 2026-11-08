@@ -91,3 +91,9 @@ source sessions and public close-event counts without replacing their returned
 promises. These diagnostics do not prove which result the aggregate symbol API
 consumed. Unknown return objects and recording failures remain explicit; the
 strict request-correlation check is unchanged.
+
+`--suite workspace-symbols --targets local,dafny` uses the original one-function
+fixtures for ordered function/absent/function workspace-symbol API queries.
+Use one worker/obligation/trial, zero warmups and protocol on. Raw API diagnostics
+and owned process/source/session protocol records remain separate from rendered
+search, cancellation UI, verification and the original row judgments.
