@@ -1499,6 +1499,16 @@ control retains all three locations while omission yields no location feature.
 These are syntax features; legality and default/inferred locations remain
 separate from this subset and from operational admission.
 
+`declarationFieldRefusals` retains every rejected field and its actual
+intrinsic declaration/site; `declarationFieldRefusal?` selects the first.
+The exactness and source-witness lemmas are relative to the supplied classifier
+and Boolean predicate. The predicate sees field values, not a derived typing
+context. An empty or incomplete classifier can be silent, and an accept-all
+predicate can silence nonempty syntax. Do not equate silence with admission:
+complete extraction, classifier validity and the versioned profile/policy
+linkage must be established separately. Sites do not provide unique character
+offsets or prove lexical scope.
+
 ### P16 generated-file maintenance
 
 Run `python3 -B scripts/h62/item1/p16-generator/check.py` to verify the generated

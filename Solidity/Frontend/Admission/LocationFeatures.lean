@@ -271,4 +271,34 @@ theorem unused_parameter_location_reported (loc : DataLoc) :
 /-- info: 'Solidity.Frontend.Admission.unused_parameter_location_reported' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms unused_parameter_location_reported
 
+/-- Omitted location metadata cannot create an intrinsic refusal, for any
+supplied acceptance predicate. This does not infer a default location. -/
+theorem omitted_location_no_refusal (accepts : DataLoc → Bool) :
+    declarationFieldRefusal? (explicitLocationUnit none).env dataLocationFieldsAt accepts = none := rfl
+
+/-- The same real unused syntax is silent under accept-all and non-silent
+under reject-all. The generic predicate is not itself an admission policy;
+this control must not be mistaken for operational eligibility. -/
+theorem explicit_location_predicate_gap (loc : DataLoc) :
+    declarationFieldRefusal? (explicitLocationUnit (some loc)).env dataLocationFieldsAt
+      (fun _ => true) = none ∧
+    declarationFieldRefusal? (explicitLocationUnit (some loc)).env dataLocationFieldsAt
+      (fun _ => false) ≠ none := by
+  constructor
+  · exact (declarationFieldRefusal?_none_iff _ dataLocationFieldsAt (fun _ => true)).mpr
+      (fun _ _ _ _ => rfl)
+  · intro silent
+    have accepted := (declarationFieldRefusal?_none_iff _ dataLocationFieldsAt
+      (fun _ => false)).mp silent
+    obtain ⟨site,value,occurs,field,_⟩ :=
+      (declarationLocationFeatures_iff _ (dataLocationFeature loc)).mp
+        (unused_parameter_location_reported loc)
+    have impossible : false = true := accepted site value occurs field.mem_fields
+    cases impossible
+
+/-- info: 'Solidity.Frontend.Admission.omitted_location_no_refusal' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms omitted_location_no_refusal
+/-- info: 'Solidity.Frontend.Admission.explicit_location_predicate_gap' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms explicit_location_predicate_gap
+
 end Solidity.Frontend.Admission
