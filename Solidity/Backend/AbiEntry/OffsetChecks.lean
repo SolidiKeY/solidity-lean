@@ -60,13 +60,26 @@ theorem region_raw (size address length stride : Scalar.Word) (suffix : Stack) :
     swap,exchange,Option.map_some,flag_zero]
   rfl
 
+private theorem slt_word (a b : Scalar.Word) :
+    decide (a.toInt<b.toInt)=Solidity.AbiEntry.slt a.toNat b.toNat := by
+  unfold Solidity.AbiEntry.slt
+  rw [signed a,signed b]
+
 theorem tail_correct (size base relative extent : Scalar.Word) (suffix : Stack) :
     run tailCode (extent::size::base::relative::suffix)=
       some (flag (Solidity.AbiEntry.tailFits size.toNat base.toNat relative.toNat extent.toNat)::suffix) := by
-  rw [tail_raw]
-  unfold Solidity.AbiEntry.tailFits Solidity.AbiEntry.slt
-  rw [←signed relative,←signed ((size-base)-(extent-1)),sub_nat,sub_nat,sub_nat]
-  rfl
+  have one : (1 : Scalar.Word).toNat=1 := rfl
+  have extentNat : (extent-1).toNat=Solidity.AbiEntry.sub extent.toNat 1 :=
+    (sub_nat extent 1).trans (congrArg (Solidity.AbiEntry.sub extent.toNat) one)
+  have boundNat : ((size-base)-(extent-1)).toNat=
+      Solidity.AbiEntry.sub (Solidity.AbiEntry.sub size.toNat base.toNat)
+        (Solidity.AbiEntry.sub extent.toNat 1) :=
+    (sub_nat (size-base) (extent-1)).trans
+      ((congrArg (fun n => Solidity.AbiEntry.sub n (extent-1).toNat) (sub_nat size base)).trans
+        (congrArg (Solidity.AbiEntry.sub (Solidity.AbiEntry.sub size.toNat base.toNat)) extentNat))
+  rw [tail_raw,slt_word]
+  exact congrArg (fun n => some (flag (Solidity.AbiEntry.slt relative.toNat n)::suffix)) boundNat
+
 
 theorem region_correct (size address length stride : Scalar.Word) (suffix : Stack) :
     run regionCode (length::stride::size::address::suffix)=
