@@ -61,6 +61,7 @@ class SavedOutputs(unittest.TestCase):
         self.assertEqual(totals['all']['source_span_lines']+self.report['unassigned_physical_lines'],self.report['source_totals']['physical_lines'])
 
     def test_unreachable_csv(self):
+        self.assertNotIn(b'\r', (HERE/'unreachable.csv').read_bytes())
         with (HERE/'unreachable.csv').open() as f: rows=list(csv.DictReader(f))
         self.assertEqual(sum(int(x['decls']) for x in rows),self.report['implicit_sensitivity']['neither']['all']['declarations'])
         self.assertEqual(sum(int(x['lines']) for x in rows),self.report['implicit_sensitivity']['neither']['all']['source_span_lines'])

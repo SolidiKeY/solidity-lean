@@ -380,7 +380,7 @@ def render():
                  limitations=report['limitations'],citations=['Solidity/Theorems.lean','lakefile.toml','.github/workflows/lean.yml',
                    'docs/audits/architecture-tools/dup_decls.py','docs/audits/architecture-tools/near_files.py',
                    'scripts/core-import-closure.mjs','docs/audits/build-speed.md','docs/audits/proof-coverage-tools/theorem_census.py'])
-    out=io.StringIO();writer=csv.DictWriter(out,fieldnames=['module','decls','lines','last_touched','generated','path']);writer.writeheader();writer.writerows(sorted(unreachable,key=lambda r:(-r['lines'],r['module'])))
+    out=io.StringIO();writer=csv.DictWriter(out,fieldnames=['module','decls','lines','last_touched','generated','path'],lineterminator='\n');writer.writeheader();writer.writerows(sorted(unreachable,key=lambda r:(-r['lines'],r['module'])))
     return {**shards,'reach.json':json.dumps(report,indent=2,ensure_ascii=False)+'\n',
             'summary.json':json.dumps(summary,indent=2,ensure_ascii=False)+'\n','unreachable.csv':out.getvalue()}
 
