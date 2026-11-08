@@ -37,7 +37,7 @@ initialize registerBuiltinAttribute {
 }
 
 inductive Status where
-  | proved | open | unstated | mismatch | sorried
+  | proved | open | unstated | mismatch | sorried | assumed
 deriving BEq, Inhabited
 
 def Status.label : Status → String
@@ -45,7 +45,8 @@ def Status.label : Status → String
   | .open => "open"
   | .unstated => "unstated"
   | .mismatch => "mismatch"
-  | .sorried => "sorry"
+  | .sorried => r"sorry"
+  | .assumed => "assumed"
 
 def status (e : Entry) : MetaM Status := do
   let env ← getEnv
@@ -55,7 +56,13 @@ def status (e : Entry) : MetaM Status := do
   let us := pi.levelParams.map Level.param
   let ty := pi.instantiateTypeLevelParams us
   unless ← withoutModifyingState (isDefEq ty (mkConst e.decl)) do return .mismatch
-  if (← collectAxioms e.proof).contains ``sorryAx then return .sorried
+  let axioms ← collectAxioms e.proof
+  if axioms.any (fun a => (mkConst a).isSorry) then return .sorried
+  if pi matches .axiomInfo _ then return .assumed
+  -- Only the repository's standard logical foundations support a completed proof.
+  -- In particular, compiler/interpreter trust and custom assumptions do not.
+  if axioms.any (fun a => a != ``propext && a != ``Classical.choice && a != ``Quot.sound) then
+    return .assumed
   return .proved
 
 def statuses : MetaM (Array (Entry × Status)) := do
