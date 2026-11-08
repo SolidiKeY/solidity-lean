@@ -11,6 +11,7 @@
   },
   "disagreement_classes": {},
   "excluded_current_reference_lock_sha256": "39b1ce55d3978f318323dfbcf1c094b734507d1483e92c586d5e58c8d0e304f4",
+  "expected_adapter_boundary": "Halt and return/revert bytes reconstructed from bound producer records; logs/rollback pins checked. Hashed storage trie adapter not independently reconstructed; serialized expected/actual storage compared only",
   "families": {
     "0": 32,
     "1": 32,
@@ -36,6 +37,8 @@
   },
   "per_input_time_ratios": null,
   "producer_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "producer_manifest_files_checked": 29,
+  "producer_source_drift_boundary": "Only files enumerated by archived producer manifest; not all repository dependencies or reference environment",
   "producer_sources_changed_vs_audit_checkout": [],
   "reference_environment_reproduction": "UNVERIFIABLE",
   "report_bindings_verified": 3,

@@ -2,7 +2,7 @@
 """Verify coordinator archive and analyze captured records; never execute Lean/solc/EVM.
 Reproduce: python3 docs/audits/direction-tools/mutation/captured.py ARCHIVE --extract OUTSIDE_CHECKOUT
 """
-import argparse, collections, hashlib, json, tarfile
+import argparse, collections, hashlib, json, re, tarfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[4]
 OUT=Path(__file__).resolve().parent
@@ -43,6 +43,15 @@ def main():
   assert r['source_sha256']==sha(record['source'].encode())
   compact=json.dumps(request,separators=(',',':'),ensure_ascii=False).encode();assert r['input_sha256']==sha(compact)
   for field in ['seed','kind','a','b']:assert r[field]==record[field]
+  expected_record=record['expected']
+  halt='revert' if expected_record['failed'] else 'return'
+  words=[]
+  for name,value in zip(['x','y'],expected_record['storage']):
+   match=re.fullmatch(name+r' = (0|[1-9][0-9]*)',value);assert match
+   number=int(match[1]);assert 0<=number<2**256;words.append(format(number,'064x'))
+  expected_output=expected_record['revertData'] if expected_record['failed'] else '0x'+''.join(words)
+  assert r['expected']['halt']==halt and r['expected']['output']==expected_output
+  assert r['expected']['logs']==[] and r['expected']['rollback'] is True
   diffs=sorted(k for k in ['halt','output','storage_full','logs','rollback'] if r['expected'][k]!=r['actual'][k])
   assert sorted(r['fields'])==diffs
   status='mismatch' if diffs else 'match';assert r['status']==status
@@ -52,7 +61,7 @@ def main():
  sources=json.loads(blobs['evidence/producer-sources.json']);drift=[]
  for name,digest in sources['source_sha256'].items():
   if not (ROOT/name).exists() or sha((ROOT/name).read_bytes())!=digest:drift.append(name)
- result=dict(archive_sha256=ARCHIVE_SHA,manifest_files_verified=len(manifest['files']),report_bindings_verified=len(bindings),source_inputs=len(inputs),captured_comparisons=len(rows),counts=dict(counts),modes=dict(modes),families=dict(families),captured_halts=dict(halts),captured_agreement=counts['match']/len(rows),disagreement_classes=dict(classes),producer_base=sources['base'],producer_sources_changed_vs_audit_checkout=drift,reference_environment_reproduction='UNVERIFIABLE',historical_reference_lock_sha256=report['reference_lock_sha256'],excluded_current_reference_lock_sha256=manifest['rejected_current_reference_lock_sha256'],per_input_time_ratios=None,scope='Historical captured observation analysis only; no fresh execution, theorem validation, source runtime rebuild or full G52 qualification',limitations=manifest['limitations'])
+ result=dict(archive_sha256=ARCHIVE_SHA,manifest_files_verified=len(manifest['files']),report_bindings_verified=len(bindings),source_inputs=len(inputs),captured_comparisons=len(rows),counts=dict(counts),modes=dict(modes),families=dict(families),captured_halts=dict(halts),captured_agreement=counts['match']/len(rows),disagreement_classes=dict(classes),producer_base=sources['base'],producer_sources_changed_vs_audit_checkout=drift,producer_manifest_files_checked=len(sources['source_sha256']),producer_source_drift_boundary='Only files enumerated by archived producer manifest; not all repository dependencies or reference environment',expected_adapter_boundary='Halt and return/revert bytes reconstructed from bound producer records; logs/rollback pins checked. Hashed storage trie adapter not independently reconstructed; serialized expected/actual storage compared only',reference_environment_reproduction='UNVERIFIABLE',historical_reference_lock_sha256=report['reference_lock_sha256'],excluded_current_reference_lock_sha256=manifest['rejected_current_reference_lock_sha256'],per_input_time_ratios=None,scope='Historical captured observation analysis only; no fresh execution, theorem validation, source runtime rebuild or full G52 qualification',limitations=manifest['limitations'])
  data=json.dumps(result,indent=2,sort_keys=True)+'\n';assert len(data.encode())<1000000
  (OUT/'captured-results.json').write_text(data);print(data)
 if __name__=='__main__':main()
