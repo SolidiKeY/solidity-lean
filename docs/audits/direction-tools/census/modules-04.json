@@ -10,6 +10,7 @@
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.1076923076923077,
     "description": "Declarations: captureAlias, capture_source, suffix",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MappedTail",
@@ -21,9 +22,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/AllocatingCapture.lean",
+    "presumed_handwritten_lines": 95,
     "proof_lines": 65,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -37,6 +40,7 @@
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.18095238095238095,
     "description": "Declarations: initialBase, initialMachine, initial_repr",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MappedSequence",
@@ -47,9 +51,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/AllocatingControls.lean",
+    "presumed_handwritten_lines": 161,
     "proof_lines": 105,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -62,6 +68,7 @@
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.28,
     "description": "Declarations: firstProgram, middleProgram, firstCode",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.HeapApplication"
@@ -71,9 +78,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/AllocatingMiddle.lean",
+    "presumed_handwritten_lines": 84,
     "proof_lines": 50,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -84,6 +93,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: objects_budgeted_construction_link, objects_budgeted_memory_link, construction_budgeted_memory_link",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.HeapBoundary"
@@ -93,9 +103,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/AllocatorPreservation.lean",
+    "presumed_handwritten_lines": 57,
     "proof_lines": 37,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -108,6 +120,7 @@
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.05813953488372093,
     "description": "Declarations: assignmentStage, reached",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.CapturedValueStability",
@@ -118,9 +131,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/AssignedBareRevert.lean",
+    "presumed_handwritten_lines": 107,
     "proof_lines": 86,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -134,6 +149,7 @@
     "definition_lines": 24,
     "definition_to_proof_line_ratio": 0.47058823529411764,
     "description": "Declarations: C, \u0393, F",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.AssignedBareRevert"
@@ -143,9 +159,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/AssignedBareRevertControls.lean",
+    "presumed_handwritten_lines": 104,
     "proof_lines": 51,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -154,6 +172,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.AssignedBareRevertControls"
@@ -163,8 +182,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/AssignedBareRevertPins.lean",
+    "presumed_handwritten_lines": 55,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -178,6 +199,7 @@
     "definition_lines": 28,
     "definition_to_proof_line_ratio": 0.4057971014492754,
     "description": "Declarations: C, A, \u0393",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.AssignmentAdditionPass",
@@ -190,9 +212,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/AssignmentAdditionControls.lean",
+    "presumed_handwritten_lines": 121,
     "proof_lines": 69,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -206,6 +230,7 @@
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.11428571428571428,
     "description": "Declarations: value, reached, reached_value",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MappedTail",
@@ -218,9 +243,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/AssignmentAdditionPass.lean",
+    "presumed_handwritten_lines": 95,
     "proof_lines": 70,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -229,6 +256,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.AssignmentAdditionControls"
@@ -238,8 +266,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/AssignmentAdditionPins.lean",
+    "presumed_handwritten_lines": 22,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -253,6 +283,7 @@
     "definition_lines": 32,
     "definition_to_proof_line_ratio": 0.38095238095238093,
     "description": "Declarations: C, A, \u0393",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.AssignmentMultiplicationPass",
@@ -265,9 +296,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/AssignmentMultiplicationControls.lean",
+    "presumed_handwritten_lines": 143,
     "proof_lines": 84,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -281,6 +314,7 @@
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.11428571428571428,
     "description": "Declarations: value, reached, reached_value",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MappedTail",
@@ -293,9 +327,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/AssignmentMultiplicationPass.lean",
+    "presumed_handwritten_lines": 95,
     "proof_lines": 70,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -304,6 +340,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.AssignmentMultiplicationControls"
@@ -313,8 +350,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/AssignmentMultiplicationPins.lean",
+    "presumed_handwritten_lines": 26,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -328,6 +367,7 @@
     "definition_lines": 29,
     "definition_to_proof_line_ratio": 0.3918918918918919,
     "description": "Declarations: C, A, \u0393",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.AssignmentSubtractionPass",
@@ -340,9 +380,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/AssignmentSubtractionControls.lean",
+    "presumed_handwritten_lines": 127,
     "proof_lines": 74,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -355,6 +397,7 @@
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.22033898305084745,
     "description": "Declarations: value, reached, reached_value",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MappedTail",
@@ -366,9 +409,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/AssignmentSubtractionPass.lean",
+    "presumed_handwritten_lines": 87,
     "proof_lines": 59,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -377,6 +422,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 63,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.AssignmentSubtractionControls"
@@ -386,8 +432,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/AssignmentSubtractionPins.lean",
+    "presumed_handwritten_lines": 0,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -396,6 +444,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 149,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReachabilityControls",
@@ -407,8 +456,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/AxiomPins.lean",
+    "presumed_handwritten_lines": 0,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -419,6 +470,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: application",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ValueReflection",
@@ -429,9 +481,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/BitwiseValueContext.lean",
+    "presumed_handwritten_lines": 49,
     "proof_lines": 33,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -444,6 +498,7 @@
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.25806451612903225,
     "description": "Declarations: state, input, represented",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.BitwiseValueContext",
@@ -454,9 +509,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/BitwiseValueContextControls.lean",
+    "presumed_handwritten_lines": 91,
     "proof_lines": 31,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -467,6 +524,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Exact terminal adapters for the checked compilation entry",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler"
@@ -476,9 +534,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/Boundary.lean",
+    "presumed_handwritten_lines": 103,
     "proof_lines": 72,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -489,6 +549,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: value_mem_ne, bump_memory_shape, capture_local_alias",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryCompile"
@@ -498,9 +559,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/CaptureAliases.lean",
+    "presumed_handwritten_lines": 74,
     "proof_lines": 58,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -514,6 +577,7 @@
     "definition_lines": 35,
     "definition_to_proof_line_ratio": 1.25,
     "description": "Declarations: F, stmt, val",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.CaptureControls",
@@ -524,9 +588,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/CaptureCases.lean",
+    "presumed_handwritten_lines": 89,
     "proof_lines": 28,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -540,6 +606,7 @@
     "definition_lines": 54,
     "definition_to_proof_line_ratio": 0.5510204081632653,
     "description": "Declarations: A, first, second",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.CaptureTransport",
@@ -551,9 +618,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/CaptureControls.lean",
+    "presumed_handwritten_lines": 201,
     "proof_lines": 98,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -566,6 +635,7 @@
     "definition_lines": 32,
     "definition_to_proof_line_ratio": 0.26666666666666666,
     "description": "Declarations: eight, old, oldCode",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.SignedWidthCapture"
@@ -575,9 +645,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/CaptureMutation.lean",
+    "presumed_handwritten_lines": 193,
     "proof_lines": 120,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -588,6 +660,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Capture certificates with separated frames and typed context extension",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.Frame",
@@ -598,9 +671,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/CaptureTransport.lean",
+    "presumed_handwritten_lines": 140,
     "proof_lines": 111,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -611,6 +686,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: joined_readback",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.CapturedValueStability"
@@ -620,9 +696,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/CapturedReadback.lean",
+    "presumed_handwritten_lines": 30,
     "proof_lines": 23,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -635,6 +713,7 @@
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.1005586592178771,
     "description": "Declarations: value_shared, program, compiled",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ValueCertificate",
@@ -646,9 +725,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/CapturedValueStability.lean",
+    "presumed_handwritten_lines": 259,
     "proof_lines": 179,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -661,6 +742,7 @@
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.061068702290076333,
     "description": "Declarations: program, selected, public_selection",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.PrimitivePackets.CheckedAdd.Agreement",
@@ -672,9 +754,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/CheckedAdditionCapture.lean",
+    "presumed_handwritten_lines": 170,
     "proof_lines": 131,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -687,6 +771,7 @@
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.8095238095238095,
     "description": "Declarations: capturedCode, initial, final",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.CheckedAdditionCapture",
@@ -697,9 +782,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/CheckedAdditionCaptureControls.lean",
+    "presumed_handwritten_lines": 51,
     "proof_lines": 21,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -708,6 +795,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.CheckedAdditionCaptureControls"
@@ -717,8 +805,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/CheckedAdditionCapturePins.lean",
+    "presumed_handwritten_lines": 19,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -731,6 +821,7 @@
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.2,
     "description": "Declarations: program, selected, public_selection",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.CheckedAdditionCapture",
@@ -741,9 +832,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/CheckedAdditionReachedOverflow.lean",
+    "presumed_handwritten_lines": 103,
     "proof_lines": 70,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -756,6 +849,7 @@
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.1836734693877551,
     "description": "Declarations: initial, maximum, captured",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.CheckedAdditionReachedOverflow",
@@ -766,9 +860,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/CheckedAdditionReachedOverflowControls.lean",
+    "presumed_handwritten_lines": 81,
     "proof_lines": 49,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -777,6 +873,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.CheckedAdditionReachedOverflowControls"
@@ -786,8 +883,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/CheckedAdditionReachedOverflowPins.lean",
+    "presumed_handwritten_lines": 19,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -798,6 +897,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: intrinsic_success, success, guard_exact",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.CheckedAdditionReachedOverflow"
@@ -807,9 +907,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/CheckedAdditionSequenceSuccess.lean",
+    "presumed_handwritten_lines": 137,
     "proof_lines": 115,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -822,6 +924,7 @@
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 0.3888888888888889,
     "description": "Declarations: initial, next, middle",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.CheckedAdditionSequenceSuccess",
@@ -832,9 +935,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/CheckedAdditionSequenceSuccessControls.lean",
+    "presumed_handwritten_lines": 100,
     "proof_lines": 54,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -843,6 +948,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.CheckedAdditionSequenceSuccessControls"
@@ -852,8 +958,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/CheckedAdditionSequenceSuccessPins.lean",
+    "presumed_handwritten_lines": 19,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -862,6 +970,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ClosedValueControls",
@@ -872,8 +981,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ClosedHashPins.lean",
+    "presumed_handwritten_lines": 66,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -886,6 +997,7 @@
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.24074074074074073,
     "description": "Declarations: signed, signedCert, signedCode",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ClosedValues",
@@ -896,9 +1008,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ClosedValueControls.lean",
+    "presumed_handwritten_lines": 93,
     "proof_lines": 54,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -909,6 +1023,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: represented_word, application, prefix_capacity",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.PublishedValues",
@@ -919,9 +1034,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ClosedValues.lean",
+    "presumed_handwritten_lines": 68,
     "proof_lines": 49,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -934,6 +1051,7 @@
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.2,
     "description": "Declarations: program, code, whole",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.PrimitivePackets.Comparisons.Agreement",
@@ -944,9 +1062,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ComparisonReferenceCapture.lean",
+    "presumed_handwritten_lines": 131,
     "proof_lines": 80,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -960,6 +1080,7 @@
     "definition_lines": 49,
     "definition_to_proof_line_ratio": 0.4152542372881356,
     "description": "Declarations: A, \u0393, F",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ComparisonReferenceCapture",
@@ -972,9 +1093,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ComparisonReferenceCaptureControls.lean",
+    "presumed_handwritten_lines": 259,
     "proof_lines": 118,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -988,6 +1111,7 @@
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.6428571428571429,
     "description": "Declarations: words, addresses, prefixCode",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.CompilerCallScopeRecognition",
@@ -998,9 +1122,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/CompilerCallScopeControls.lean",
+    "presumed_handwritten_lines": 36,
     "proof_lines": 14,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1009,6 +1135,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.CompilerCallScopeControls"
@@ -1018,8 +1145,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/CompilerCallScopePins.lean",
+    "presumed_handwritten_lines": 68,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1032,6 +1161,7 @@
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.04081632653061224,
     "description": "Declarations: accepted_some, actual, accepted",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryCallScopeControls",
@@ -1042,9 +1172,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/CompilerCallScopeRecognition.lean",
+    "presumed_handwritten_lines": 131,
     "proof_lines": 98,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1053,6 +1185,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.AxiomPins",
@@ -1073,8 +1206,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/CompilerProofChecks.lean",
+    "presumed_handwritten_lines": 95,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1087,6 +1222,7 @@
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.125,
     "description": "Declarations: argumentProgram, argument_some, argumentActual",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryCallScopeFailures"
@@ -1096,9 +1232,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/CompilerScopedFailure.lean",
+    "presumed_handwritten_lines": 105,
     "proof_lines": 64,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1107,6 +1245,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.CompilerScopedFailure"
@@ -1116,8 +1255,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/CompilerScopedFailurePins.lean",
+    "presumed_handwritten_lines": 68,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1130,6 +1271,7 @@
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.11290322580645161,
     "description": "Declarations: program, rightProgram, accepted_some",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.CompilerCallScopeControls"
@@ -1139,9 +1281,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/CompilerWholeScope.lean",
+    "presumed_handwritten_lines": 94,
     "proof_lines": 62,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1155,6 +1299,7 @@
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.6666666666666666,
     "description": "Declarations: words, addresses, complete_vector",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.CompilerWholeScope"
@@ -1164,9 +1309,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/CompilerWholeScopeControls.lean",
+    "presumed_handwritten_lines": 39,
     "proof_lines": 15,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1175,6 +1322,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.CompilerWholeScopeControls"
@@ -1184,8 +1332,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/CompilerWholeScopePins.lean",
+    "presumed_handwritten_lines": 68,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1198,6 +1348,7 @@
     "definition_lines": 23,
     "definition_to_proof_line_ratio": 0.2911392405063291,
     "description": "Declarations: arm, program, branchFrag",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MappedTail"
@@ -1207,9 +1358,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ConditionalReferenceCapture.lean",
+    "presumed_handwritten_lines": 128,
     "proof_lines": 79,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1220,6 +1373,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: input",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ConditionalReferenceCapture"
@@ -1229,9 +1383,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ConditionalReferenceInput.lean",
+    "presumed_handwritten_lines": 20,
     "proof_lines": 15,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1240,6 +1396,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.CaptureCases",
@@ -1251,8 +1408,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ContinuationPins.lean",
+    "presumed_handwritten_lines": 127,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1265,6 +1424,7 @@
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.22857142857142856,
     "description": "Inhabited staged compiler controls",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.Stack",
@@ -1276,9 +1436,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/Controls.lean",
+    "presumed_handwritten_lines": 152,
     "proof_lines": 70,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1289,6 +1451,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: mapped_output_core, compilation_rep_core, compilation_core_mapped_link",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MappedSequence"
@@ -1298,9 +1461,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/CoreBoundary.lean",
+    "presumed_handwritten_lines": 63,
     "proof_lines": 45,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1313,6 +1478,7 @@
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.16161616161616163,
     "description": "Declarations: suffixProg, suffixCert, suffix",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.CoreBoundary",
@@ -1323,9 +1489,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/CoreBoundaryControls.lean",
+    "presumed_handwritten_lines": 151,
     "proof_lines": 99,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1334,6 +1502,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.CoreBoundaryControls"
@@ -1343,8 +1512,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/CoreBoundaryPins.lean",
+    "presumed_handwritten_lines": 49,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1357,6 +1528,7 @@
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.04054054054054054,
     "description": "Declarations: expression, expression_source, unpack",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MappedTail",
@@ -1367,9 +1539,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/DeferredCondition.lean",
+    "presumed_handwritten_lines": 106,
     "proof_lines": 74,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1382,6 +1556,7 @@
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.36363636363636365,
     "description": "Declarations: operand, code, reader",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.DeferredCondition",
@@ -1392,9 +1567,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/DeferredConditionControls.lean",
+    "presumed_handwritten_lines": 114,
     "proof_lines": 33,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1405,6 +1582,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: source_iff, revert_witness_iff, reached_shared",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.DeferredCondition"
@@ -1414,9 +1592,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/DeferredConditionFailure.lean",
+    "presumed_handwritten_lines": 165,
     "proof_lines": 129,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1429,6 +1609,7 @@
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 0.2988505747126437,
     "description": "Declarations: bad, operand, code",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.DeferredConditionFailure",
@@ -1439,9 +1620,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/DeferredConditionFailureControls.lean",
+    "presumed_handwritten_lines": 245,
     "proof_lines": 87,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1452,6 +1635,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: compilation_fault_iff, compilation_fault_tail_iff, compilation_mapped_fault_iff",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.SourceTerminalFailure"
@@ -1461,9 +1645,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/Divergence.lean",
+    "presumed_handwritten_lines": 136,
     "proof_lines": 113,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1476,6 +1662,7 @@
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.04294478527607362,
     "description": "Declarations: initialSpin, middleSpin, lastSpin",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.Spin",
@@ -1487,9 +1674,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/DivergenceControls.lean",
+    "presumed_handwritten_lines": 210,
     "proof_lines": 163,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1498,6 +1687,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.DivergenceControls",
@@ -1508,8 +1698,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/DivergencePins.lean",
+    "presumed_handwritten_lines": 76,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1520,6 +1712,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: compilation_mapped_fault_witness_iff, compilation_triple_fault_witness_iff, triple_fault_associations",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.Divergence"
@@ -1529,9 +1722,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/DivergenceWitness.lean",
+    "presumed_handwritten_lines": 76,
     "proof_lines": 62,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1544,6 +1739,7 @@
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.1111111111111111,
     "description": "Declarations: reached, payment_free, execution",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MappedTail",
@@ -1555,9 +1751,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/EffectfulConditionalAssignment.lean",
+    "presumed_handwritten_lines": 75,
     "proof_lines": 54,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1571,6 +1769,7 @@
     "definition_lines": 53,
     "definition_to_proof_line_ratio": 0.6973684210526315,
     "description": "Declarations: C, \u0393, src\u0393",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.EffectfulConditionalAssignment",
@@ -1582,9 +1781,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/EffectfulConditionalControls.lean",
+    "presumed_handwritten_lines": 157,
     "proof_lines": 76,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1593,6 +1794,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.EffectfulConditionalControls"
@@ -1602,8 +1804,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/EffectfulConditionalPins.lean",
+    "presumed_handwritten_lines": 53,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1616,6 +1820,7 @@
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.10869565217391304,
     "description": "Declarations: reached, payment_free, execution",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MappedTail",
@@ -1626,9 +1831,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/EffectfulReferencePair.lean",
+    "presumed_handwritten_lines": 64,
     "proof_lines": 46,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1642,6 +1849,7 @@
     "definition_lines": 23,
     "definition_to_proof_line_ratio": 0.34328358208955223,
     "description": "Declarations: src\u0393, sourceHeap, source",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.EffectfulReferencePair",
@@ -1653,9 +1861,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/EffectfulReferencePairControls.lean",
+    "presumed_handwritten_lines": 114,
     "proof_lines": 67,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1664,6 +1874,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 59,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.EffectfulReferencePairControls"
@@ -1673,8 +1884,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/EffectfulReferencePairPins.lean",
+    "presumed_handwritten_lines": 0,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1687,6 +1900,7 @@
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.125,
     "description": "Declarations: reached, payment_free, execution",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MappedTail",
@@ -1697,9 +1911,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/EffectfulShortCircuit.lean",
+    "presumed_handwritten_lines": 73,
     "proof_lines": 48,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1713,6 +1929,7 @@
     "definition_lines": 54,
     "definition_to_proof_line_ratio": 0.4954128440366973,
     "description": "Declarations: C, \u0393, src\u0393",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.EffectfulShortCircuit",
@@ -1724,9 +1941,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/EffectfulShortCircuitControls.lean",
+    "presumed_handwritten_lines": 196,
     "proof_lines": 109,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1735,6 +1954,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 91,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.EffectfulShortCircuitControls"
@@ -1744,8 +1964,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/EffectfulShortCircuitPins.lean",
+    "presumed_handwritten_lines": 0,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1758,6 +1980,7 @@
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.09523809523809523,
     "description": "Exact saved-tail independence for all eleven Compilation constructors",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.TailLoop",
@@ -1768,9 +1991,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/EmittedTail.lean",
+    "presumed_handwritten_lines": 98,
     "proof_lines": 63,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1783,6 +2008,7 @@
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.07407407407407407,
     "description": "Declarations: params, decoded, decoded_repr",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Semantics.AbiEntryProofs",
@@ -1793,9 +2019,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/EntryReception.lean",
+    "presumed_handwritten_lines": 117,
     "proof_lines": 81,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1808,6 +2036,7 @@
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.16666666666666666,
     "description": "Declarations: words, admitted_complete_vectors, wrong_order_after_admission",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.EntryReception",
@@ -1818,9 +2047,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/EntryReceptionControls.lean",
+    "presumed_handwritten_lines": 51,
     "proof_lines": 30,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1829,6 +2060,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.EntryReceptionControls"
@@ -1838,8 +2070,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/EntryReceptionPins.lean",
+    "presumed_handwritten_lines": 37,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1852,6 +2086,7 @@
     "definition_lines": 39,
     "definition_to_proof_line_ratio": 1.054054054054054,
     "description": "Declarations: badRead, badTest, conjunction",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ValueCertificate",
@@ -1862,9 +2097,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ExpressionControls.lean",
+    "presumed_handwritten_lines": 121,
     "proof_lines": 37,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1877,6 +2114,7 @@
     "definition_lines": 23,
     "definition_to_proof_line_ratio": 0.3382352941176471,
     "description": "Declarations: immediate, middle_witness, third_witness",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.FaultTail",
@@ -1887,9 +2125,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/FaultControls.lean",
+    "presumed_handwritten_lines": 127,
     "proof_lines": 68,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1898,6 +2138,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.FaultControls"
@@ -1907,8 +2148,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/FaultPins.lean",
+    "presumed_handwritten_lines": 33,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1919,6 +2162,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: compilation_mapped_fault_reached_iff, compilation_triple_fault_reached_iff, compilation_triple_fault_reached_left_iff",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.DivergenceWitness"
@@ -1928,9 +2172,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/FaultReached.lean",
+    "presumed_handwritten_lines": 106,
     "proof_lines": 91,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1941,6 +2187,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: compilation_third_fault_shared",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.FaultReached"
@@ -1950,9 +2197,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/FaultTail.lean",
+    "presumed_handwritten_lines": 55,
     "proof_lines": 44,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1965,6 +2214,7 @@
     "definition_lines": 24,
     "definition_to_proof_line_ratio": 0.6153846153846154,
     "description": "Declarations: sourceVector, both_complete_source_vectors, vector",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.FixedBooleanSequence"
@@ -1974,9 +2224,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/FixedBooleanControls.lean",
+    "presumed_handwritten_lines": 85,
     "proof_lines": 39,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -1990,6 +2242,7 @@
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.2191780821917808,
     "description": "Declarations: selected, captureStage, badObserve",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.FixedBooleanControls",
@@ -2000,9 +2253,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/FixedBooleanFailure.lean",
+    "presumed_handwritten_lines": 112,
     "proof_lines": 73,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2011,6 +2266,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.FixedBooleanFailure"
@@ -2020,8 +2276,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/FixedBooleanPins.lean",
+    "presumed_handwritten_lines": 133,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2035,6 +2293,7 @@
     "definition_lines": 44,
     "definition_to_proof_line_ratio": 0.33587786259541985,
     "description": "Declarations: A, Captured, Final",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReferenceControls",
@@ -2046,9 +2305,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/FixedBooleanSequence.lean",
+    "presumed_handwritten_lines": 221,
     "proof_lines": 131,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2059,6 +2320,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Independent frame reservation and fresh typed locals",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.Stack"
@@ -2068,9 +2330,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/Frame.lean",
+    "presumed_handwritten_lines": 48,
     "proof_lines": 24,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2081,6 +2345,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: preserves_memory, changed_memory_refutes, allocation_witness",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Selection.FramedLoweringInterface",
@@ -2091,9 +2356,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/FramedMemoryBoundary.lean",
+    "presumed_handwritten_lines": 77,
     "proof_lines": 41,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2106,6 +2373,7 @@
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.03225806451612903,
     "description": "Declarations: wholeStage, whole_recognized, whole_code",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.FreshBooleanFailure",
@@ -2116,9 +2384,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/FreshBooleanCompilation.lean",
+    "presumed_handwritten_lines": 83,
     "proof_lines": 62,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2131,6 +2401,7 @@
     "definition_lines": 55,
     "definition_to_proof_line_ratio": 0.7432432432432432,
     "description": "Declarations: words, throughInitialization, throughReceiver",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.FreshBooleanFailure"
@@ -2140,9 +2411,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/FreshBooleanControls.lean",
+    "presumed_handwritten_lines": 161,
     "proof_lines": 74,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2155,6 +2428,7 @@
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.04065040650406504,
     "description": "Declarations: prefixProgram, wholeProgram, prefixCode",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.FreshBooleanPrefix",
@@ -2165,9 +2439,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/FreshBooleanFailure.lean",
+    "presumed_handwritten_lines": 294,
     "proof_lines": 246,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2176,6 +2452,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.FreshBooleanControls",
@@ -2186,8 +2463,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/FreshBooleanPins.lean",
+    "presumed_handwritten_lines": 149,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2200,6 +2479,7 @@
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.02702702702702703,
     "description": "Declarations: population_tail, initializer_tail, provisioner",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.FixedBooleanFailure",
@@ -2210,9 +2490,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/FreshBooleanPrefix.lean",
+    "presumed_handwritten_lines": 101,
     "proof_lines": 74,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2225,6 +2507,7 @@
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.06329113924050633,
     "description": "Declarations: observed_success, stale_map_refused, skipped_effect",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.HeapObservations",
@@ -2235,9 +2518,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/HeapApplication.lean",
+    "presumed_handwritten_lines": 119,
     "proof_lines": 79,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2248,6 +2533,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: referenceArrays_memory_link, objects_memory_link, construction_memory_link",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.CoreBoundary"
@@ -2257,9 +2543,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/HeapBoundary.lean",
+    "presumed_handwritten_lines": 75,
     "proof_lines": 53,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2273,6 +2561,7 @@
     "definition_lines": 28,
     "definition_to_proof_line_ratio": 0.42424242424242425,
     "description": "Declarations: Child, Parent, Locals",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.HeapBoundary",
@@ -2284,9 +2573,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/HeapBoundaryControls.lean",
+    "presumed_handwritten_lines": 123,
     "proof_lines": 66,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2295,6 +2586,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.AllocatingMiddle"
@@ -2304,8 +2596,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/HeapBoundaryPins.lean",
+    "presumed_handwritten_lines": 113,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2318,6 +2612,7 @@
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.06936416184971098,
     "description": "Declarations: child, defaultLeft, defaultRight",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.HeapBoundaryControls",
@@ -2328,9 +2623,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/HeapObservations.lean",
+    "presumed_handwritten_lines": 210,
     "proof_lines": 173,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2343,6 +2640,7 @@
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.0851063829787234,
     "description": "Declarations: noRefs, heap16, physical16",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.HeapBoundaryControls"
@@ -2352,9 +2650,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/HeapPrefix.lean",
+    "presumed_handwritten_lines": 68,
     "proof_lines": 47,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2365,6 +2665,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: assertion_source, concrete_link, linked_success",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.Sequence",
@@ -2376,9 +2677,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/LinkedControls.lean",
+    "presumed_handwritten_lines": 99,
     "proof_lines": 59,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2391,6 +2694,7 @@
     "definition_lines": 28,
     "definition_to_proof_line_ratio": 0.26666666666666666,
     "description": "Declarations: actual_resources, fresh, compiled",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.LoopScopeTerminal"
@@ -2400,9 +2704,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/LoopAllocatingSuffix.lean",
+    "presumed_handwritten_lines": 167,
     "proof_lines": 105,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2413,6 +2719,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: scope_cost_prefix, scope_cost_allocation_input, loops_memory_link",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.CoreBoundary",
@@ -2424,9 +2731,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/LoopBoundary.lean",
+    "presumed_handwritten_lines": 156,
     "proof_lines": 128,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2437,6 +2746,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: after_scope, correlated, shared",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.LoopCallControls"
@@ -2446,9 +2756,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/LoopCallApplication.lean",
+    "presumed_handwritten_lines": 108,
     "proof_lines": 87,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2462,6 +2774,7 @@
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.42857142857142855,
     "description": "Declarations: Returned, argumentEffect, callee",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.LoopCallsBoundary",
@@ -2473,9 +2786,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/LoopCallControls.lean",
+    "presumed_handwritten_lines": 81,
     "proof_lines": 35,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2488,6 +2803,7 @@
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.18181818181818182,
     "description": "Declarations: badArguments, staleArgument, argument",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.LoopCallObservations"
@@ -2497,9 +2813,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/LoopCallFailures.lean",
+    "presumed_handwritten_lines": 132,
     "proof_lines": 88,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2512,6 +2830,7 @@
     "definition_lines": 34,
     "definition_to_proof_line_ratio": 0.6538461538461539,
     "description": "Declarations: okMachine, target, target_run",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.LoopCallApplication"
@@ -2521,9 +2840,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/LoopCallObservations.lean",
+    "presumed_handwritten_lines": 116,
     "proof_lines": 52,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2532,6 +2853,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.LoopCallFailures"
@@ -2541,8 +2863,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/LoopCallPins.lean",
+    "presumed_handwritten_lines": 103,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2553,6 +2877,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: loops_budgeted_memoryCalls_link, loop_scopes_budgeted_memoryCalls_link",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.LoopBoundary",
@@ -2563,9 +2888,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/LoopCallsBoundary.lean",
+    "presumed_handwritten_lines": 34,
     "proof_lines": 20,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2574,6 +2901,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.LoopPrefixControls",
@@ -2584,8 +2912,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/LoopPins.lean",
+    "presumed_handwritten_lines": 248,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2598,6 +2928,7 @@
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 0.16447368421052633,
     "description": "Declarations: effect, failedBody, failing",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.LoopScopeTerminal"
@@ -2607,9 +2938,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/LoopPrefixControls.lean",
+    "presumed_handwritten_lines": 218,
     "proof_lines": 152,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2622,6 +2955,7 @@
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.014634146341463415,
     "description": "Declarations: canonical_completion, shared_completion, old_references_and_zero_cost",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReframedLoops",
@@ -2632,9 +2966,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/LoopReframedCompletion.lean",
+    "presumed_handwritten_lines": 251,
     "proof_lines": 205,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2643,6 +2979,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.LoopReframedCompletion"
@@ -2652,8 +2989,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/LoopReframedCompletionDraftAxioms.lean",
+    "presumed_handwritten_lines": 12,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2666,6 +3005,7 @@
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.10975609756097561,
     "description": "Declarations: oldValue, demandOld, afterCheck",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReframedFailureWitness",
@@ -2677,9 +3017,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/LoopReframedFailureControls.lean",
+    "presumed_handwritten_lines": 234,
     "proof_lines": 164,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2690,6 +3032,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: budget, preparation_input, room",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.LoopScopeControls",
@@ -2700,9 +3043,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/LoopScopeApplication.lean",
+    "presumed_handwritten_lines": 91,
     "proof_lines": 66,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2716,6 +3061,7 @@
     "definition_lines": 44,
     "definition_to_proof_line_ratio": 0.8461538461538461,
     "description": "Declarations: \u0393, \u0394, \u03a9",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.LoopBoundary",
@@ -2726,9 +3072,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/LoopScopeControls.lean",
+    "presumed_handwritten_lines": 132,
     "proof_lines": 52,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2741,6 +3089,7 @@
     "definition_lines": 32,
     "definition_to_proof_line_ratio": 1.7777777777777777,
     "description": "Declarations: arrayAt, lengthAt, beforeVector",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.LoopScopeApplication"
@@ -2750,9 +3099,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/LoopScopeObservations.lean",
+    "presumed_handwritten_lines": 70,
     "proof_lines": 18,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2765,6 +3116,7 @@
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.031914893617021274,
     "description": "Declarations: prefix_relations, prefix_tails, reject",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.LoopScopeTrace",
@@ -2775,9 +3127,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/LoopScopeTerminal.lean",
+    "presumed_handwritten_lines": 124,
     "proof_lines": 94,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2790,6 +3144,7 @@
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 0.31645569620253167,
     "description": "Declarations: okMachine, machine_get, preparedTarget",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.LoopScopeObservations"
@@ -2799,9 +3154,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/LoopScopeTrace.lean",
+    "presumed_handwritten_lines": 141,
     "proof_lines": 79,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2812,6 +3169,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: loop_scopes_triple_shared",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.LoopBoundary",
@@ -2822,9 +3180,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/LoopSequence.lean",
+    "presumed_handwritten_lines": 50,
     "proof_lines": 37,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2835,6 +3195,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: int_range, evalT_shr, shr_int_inFrag",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.SimLemmas",
@@ -2845,9 +3206,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MachineSar.lean",
+    "presumed_handwritten_lines": 122,
     "proof_lines": 75,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2856,6 +3219,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MachineSar"
@@ -2865,8 +3229,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MachineSarPins.lean",
+    "presumed_handwritten_lines": 29,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2879,6 +3245,7 @@
     "definition_lines": 46,
     "definition_to_proof_line_ratio": 0.3026315789473684,
     "description": "Explicit output maps at typed compilation boundaries",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.Sequence"
@@ -2888,9 +3255,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MappedSequence.lean",
+    "presumed_handwritten_lines": 243,
     "proof_lines": 152,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2901,6 +3270,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: mapped_output_stack, compilation_success_shared_mapped",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.EmittedTail",
@@ -2911,9 +3281,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MappedTail.lean",
+    "presumed_handwritten_lines": 84,
     "proof_lines": 66,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2924,6 +3296,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: input_iff, selected, public_left",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryJoinedOutput"
@@ -2933,9 +3306,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryAssociation.lean",
+    "presumed_handwritten_lines": 81,
     "proof_lines": 51,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2946,6 +3321,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: both_outputs, both_failures",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryAssociation",
@@ -2956,9 +3332,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryAssociationControls.lean",
+    "presumed_handwritten_lines": 60,
     "proof_lines": 44,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2967,6 +3345,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryAssociationControls"
@@ -2976,8 +3355,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryAssociationPins.lean",
+    "presumed_handwritten_lines": 25,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -2988,6 +3369,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: allocation_free, consumer_free, budget",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryCallControls"
@@ -2997,9 +3379,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryCallApplication.lean",
+    "presumed_handwritten_lines": 87,
     "proof_lines": 63,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3010,6 +3394,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: memoryCalls_memory_link, memoryCalls_budgeted_memory_link, memory_budgeted_memoryCalls_link",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MappedTail",
@@ -3020,9 +3405,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryCallBoundary.lean",
+    "presumed_handwritten_lines": 56,
     "proof_lines": 38,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3036,6 +3423,7 @@
     "definition_lines": 40,
     "definition_to_proof_line_ratio": 0.6896551724137931,
     "description": "Declarations: C, A, Before",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryCallBoundary",
@@ -3046,9 +3434,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryCallControls.lean",
+    "presumed_handwritten_lines": 126,
     "proof_lines": 58,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3062,6 +3452,7 @@
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 0.325,
     "description": "Declarations: Returned, argumentBody, argumentProgram",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryCallObservations"
@@ -3071,9 +3462,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryCallFailures.lean",
+    "presumed_handwritten_lines": 133,
     "proof_lines": 80,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3086,6 +3479,7 @@
     "definition_lines": 36,
     "definition_to_proof_line_ratio": 0.75,
     "description": "Declarations: arrayAt, lengthAt, sourceVector",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryCallApplication"
@@ -3095,9 +3489,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryCallObservations.lean",
+    "presumed_handwritten_lines": 117,
     "proof_lines": 48,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3106,6 +3502,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryCallFailures"
@@ -3115,8 +3512,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryCallPins.lean",
+    "presumed_handwritten_lines": 151,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3130,6 +3529,7 @@
     "definition_lines": 70,
     "definition_to_proof_line_ratio": 1.4893617021276595,
     "description": "Declarations: AliasContext, prefixProgram, leading",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryCallObservations"
@@ -3139,9 +3539,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryCallReuse.lean",
+    "presumed_handwritten_lines": 154,
     "proof_lines": 47,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3154,6 +3556,7 @@
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.006578947368421052,
     "description": "Declarations: beginning, budget, input",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryCallReuse"
@@ -3163,9 +3566,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryCallReuseApplication.lean",
+    "presumed_handwritten_lines": 183,
     "proof_lines": 152,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3178,6 +3583,7 @@
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.0392156862745098,
     "description": "Declarations: unreachable, nonallocating, reached",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryCallReuseObservations"
@@ -3187,9 +3593,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryCallReuseFailure.lean",
+    "presumed_handwritten_lines": 70,
     "proof_lines": 51,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3202,6 +3610,7 @@
     "definition_lines": 75,
     "definition_to_proof_line_ratio": 1.25,
     "description": "Declarations: arrayAt, lengthAt, oldVector",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryCallReuseApplication"
@@ -3211,9 +3620,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryCallReuseObservations.lean",
+    "presumed_handwritten_lines": 176,
     "proof_lines": 60,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3222,6 +3633,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryCallReuseFailure"
@@ -3231,8 +3643,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryCallReusePins.lean",
+    "presumed_handwritten_lines": 217,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3245,6 +3659,7 @@
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.028985507246376812,
     "description": "Declarations: compiled, frag, code",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryScopeBoundary"
@@ -3254,9 +3669,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryCallScopeBoundary.lean",
+    "presumed_handwritten_lines": 91,
     "proof_lines": 69,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3269,6 +3686,7 @@
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.19696969696969696,
     "description": "Declarations: scopeProgram, scopeProducer, scopeChecked",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryCallScopeBoundary",
@@ -3279,9 +3697,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryCallScopeControls.lean",
+    "presumed_handwritten_lines": 97,
     "proof_lines": 66,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3294,6 +3714,7 @@
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.3076923076923077,
     "description": "Declarations: reached, unreachable, later",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryCallScopeBoundary",
@@ -3304,9 +3725,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryCallScopeFailures.lean",
+    "presumed_handwritten_lines": 65,
     "proof_lines": 39,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3320,6 +3743,7 @@
     "definition_lines": 29,
     "definition_to_proof_line_ratio": 1.0,
     "description": "Declarations: arrayAt, lengthAt, sourceVector",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryCallScopeControls",
@@ -3330,9 +3754,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryCallScopeObservations.lean",
+    "presumed_handwritten_lines": 81,
     "proof_lines": 29,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3341,6 +3767,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryCallScopeObservations",
@@ -3351,8 +3778,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryCallScopePins.lean",
+    "presumed_handwritten_lines": 96,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3363,6 +3792,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: memory_compile_join, memory_compile_single_block",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReindexedMemory"
@@ -3372,9 +3802,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryCompilerSequence.lean",
+    "presumed_handwritten_lines": 69,
     "proof_lines": 52,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3385,6 +3817,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: cost_join, successful_prefix, failed_prefix",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryCompilerSequence",
@@ -3395,9 +3828,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryJoinCost.lean",
+    "presumed_handwritten_lines": 77,
     "proof_lines": 53,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3410,6 +3845,7 @@
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.14457831325301204,
     "description": "Declarations: appendAllocation, suffixCode, prefix_public",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryJoinCost",
@@ -3421,9 +3857,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryJoinCostControls.lean",
+    "presumed_handwritten_lines": 127,
     "proof_lines": 83,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3432,6 +3870,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryJoinCostControls"
@@ -3441,8 +3880,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryJoinCostPins.lean",
+    "presumed_handwritten_lines": 25,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3453,6 +3894,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: frame_start, frame_join, input_iff",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryJoinCost"
@@ -3462,9 +3904,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryJoinFrame.lean",
+    "presumed_handwritten_lines": 104,
     "proof_lines": 80,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3477,6 +3921,7 @@
     "definition_lines": 22,
     "definition_to_proof_line_ratio": 0.24444444444444444,
     "description": "Declarations: actual_budget, admitted, admitted_execution",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryJoinFrame",
@@ -3488,9 +3933,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryJoinFrameControls.lean",
+    "presumed_handwritten_lines": 143,
     "proof_lines": 90,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3499,6 +3946,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryJoinFrameControls"
@@ -3508,8 +3956,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryJoinFramePins.lean",
+    "presumed_handwritten_lines": 31,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3522,6 +3972,7 @@
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.046875,
     "description": "Declarations: suffixOut, suffix_source, joined_source",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryJoinCostControls"
@@ -3531,9 +3982,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryJoinedAllocation.lean",
+    "presumed_handwritten_lines": 87,
     "proof_lines": 64,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3546,6 +3999,7 @@
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.11666666666666667,
     "description": "Declarations: whole_some, wholeCode, whole_public",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryJoinedAllocation"
@@ -3555,9 +4009,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryJoinedAllocationControls.lean",
+    "presumed_handwritten_lines": 90,
     "proof_lines": 60,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3566,6 +4022,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryJoinedAllocationControls"
@@ -3575,8 +4032,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryJoinedAllocationPins.lean",
+    "presumed_handwritten_lines": 22,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3587,6 +4046,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: compose, public_compose",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryTripleAdmission"
@@ -3596,9 +4056,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryJoinedOutput.lean",
+    "presumed_handwritten_lines": 53,
     "proof_lines": 32,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3609,6 +4071,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: public_shared, public_failure",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryJoinedOutput",
@@ -3619,9 +4082,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryJoinedOutputControls.lean",
+    "presumed_handwritten_lines": 53,
     "proof_lines": 36,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3630,6 +4095,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryJoinedOutputControls"
@@ -3639,8 +4105,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryJoinedOutputPins.lean",
+    "presumed_handwritten_lines": 16,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3653,6 +4121,7 @@
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.21875,
     "description": "Declarations: bodyProgram, body, outerCode",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryScopeBoundary",
@@ -3663,9 +4132,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryScopeAllocation.lean",
+    "presumed_handwritten_lines": 53,
     "proof_lines": 32,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3678,6 +4149,7 @@
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.056338028169014086,
     "description": "Declarations: program, compiled, code",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MappedTail"
@@ -3687,9 +4159,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryScopeBoundary.lean",
+    "presumed_handwritten_lines": 94,
     "proof_lines": 71,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3702,6 +4176,7 @@
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.17699115044247787,
     "description": "Declarations: bodyProgram, body, outerCode",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryScopeBoundary",
@@ -3712,9 +4187,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryScopeControls.lean",
+    "presumed_handwritten_lines": 163,
     "proof_lines": 113,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3723,6 +4200,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryScopeControls",
@@ -3733,8 +4211,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryScopePins.lean",
+    "presumed_handwritten_lines": 84,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3745,6 +4225,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: links, public_admission",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryJoinFrame",
@@ -3755,9 +4236,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryTripleAdmission.lean",
+    "presumed_handwritten_lines": 63,
     "proof_lines": 43,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3771,6 +4254,7 @@
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 0.1875,
     "description": "Declarations: ReadCtx, lengthValue, capture",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryTripleAdmission",
@@ -3783,9 +4267,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryTripleAdmissionControls.lean",
+    "presumed_handwritten_lines": 166,
     "proof_lines": 112,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3794,6 +4280,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryTripleAdmissionControls"
@@ -3803,8 +4290,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/MemoryTripleAdmissionPins.lean",
+    "presumed_handwritten_lines": 25,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3815,6 +4304,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: success, empty_revert",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.DeferredConditionFailure",
@@ -3825,9 +4315,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/P12ConditionExecution.lean",
+    "presumed_handwritten_lines": 60,
     "proof_lines": 38,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3838,6 +4330,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: execution, empty_revert, nonempty_revert_incompatible",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReturnedMemoryCapture",
@@ -3848,9 +4341,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/P12MemoryCapture.lean",
+    "presumed_handwritten_lines": 102,
     "proof_lines": 67,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3861,6 +4356,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: execution, empty_revert, nonempty_revert_incompatible",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReturnedStorageCapture",
@@ -3871,9 +4367,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/P12StorageCapture.lean",
+    "presumed_handwritten_lines": 100,
     "proof_lines": 72,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3887,6 +4385,7 @@
     "definition_lines": 36,
     "definition_to_proof_line_ratio": 0.7659574468085106,
     "description": "Declarations: C, \u0393, F",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.AssignedBareRevert",
@@ -3897,9 +4396,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/PositiveAllocationFailure.lean",
+    "presumed_handwritten_lines": 109,
     "proof_lines": 47,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3912,6 +4413,7 @@
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.125,
     "description": "Declarations: nearCursor, nearTarget, stale_budget_fits",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.PositiveAllocationFailure"
@@ -3921,9 +4423,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/PositiveAllocationFailureControls.lean",
+    "presumed_handwritten_lines": 84,
     "proof_lines": 56,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3932,6 +4436,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 83,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.PositiveAllocationFailureControls"
@@ -3941,8 +4446,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/PositiveAllocationFailurePins.lean",
+    "presumed_handwritten_lines": 0,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3951,6 +4458,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.StatefulPowerControls",
@@ -3961,8 +4469,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/PowerMetadataPins.lean",
+    "presumed_handwritten_lines": 106,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3975,6 +4485,7 @@
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.028169014084507043,
     "description": "Declarations: prefix_bases, observed_shared, stale",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.PreservedAllocatorObservations"
@@ -3984,9 +4495,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/PreservedAllocatorApplication.lean",
+    "presumed_handwritten_lines": 91,
     "proof_lines": 71,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -3999,6 +4512,7 @@
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.13846153846153847,
     "description": "Declarations: objectCode, suffixProgram, suffixCode",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReferenceObjectCertificate",
@@ -4009,9 +4523,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/PreservedAllocatorControls.lean",
+    "presumed_handwritten_lines": 98,
     "proof_lines": 65,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4024,6 +4540,7 @@
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.10317460317460317,
     "description": "Declarations: failingProgram, failingCode, failing_cost",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.PreservedAllocatorApplication"
@@ -4033,9 +4550,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/PreservedAllocatorNegatives.lean",
+    "presumed_handwritten_lines": 171,
     "proof_lines": 126,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4048,6 +4567,7 @@
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.1134020618556701,
     "description": "Declarations: oldChild, orphan, retained",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.PreservedAllocatorControls"
@@ -4057,9 +4577,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/PreservedAllocatorObservations.lean",
+    "presumed_handwritten_lines": 128,
     "proof_lines": 97,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4068,6 +4590,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.PreservedAllocatorNegatives"
@@ -4077,8 +4600,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/PreservedAllocatorPins.lean",
+    "presumed_handwritten_lines": 141,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4091,6 +4616,7 @@
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.4444444444444444,
     "description": "Declarations: environment, reached_environment, rhs",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.PublishedValues",
@@ -4101,9 +4627,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/PublishedMixedCapture.lean",
+    "presumed_handwritten_lines": 93,
     "proof_lines": 45,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4116,6 +4644,7 @@
     "definition_lines": 22,
     "definition_to_proof_line_ratio": 0.24444444444444444,
     "description": "Declarations: C, self, state",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.PublishedValues",
@@ -4126,9 +4655,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/PublishedValueControls.lean",
+    "presumed_handwritten_lines": 156,
     "proof_lines": 90,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4137,6 +4668,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.PublishedValueControls",
@@ -4147,8 +4679,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/PublishedValuePins.lean",
+    "presumed_handwritten_lines": 116,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4161,6 +4695,7 @@
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.14444444444444443,
     "description": "Declarations: encode_wrap_sub, sub_result, expression",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Scalar.Wrapping",
@@ -4173,9 +4708,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/PublishedValues.lean",
+    "presumed_handwritten_lines": 143,
     "proof_lines": 90,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4189,6 +4726,7 @@
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.31666666666666665,
     "description": "Declarations: good, gc, update",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.CapturedReadback",
@@ -4202,9 +4740,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/QueueCompletionControls.lean",
+    "presumed_handwritten_lines": 107,
     "proof_lines": 60,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4213,6 +4753,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 71,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.QueueCompletionControls"
@@ -4222,8 +4763,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/QueueCompletionPins.lean",
+    "presumed_handwritten_lines": 0,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4237,6 +4780,7 @@
     "definition_lines": 55,
     "definition_to_proof_line_ratio": 0.7857142857142857,
     "description": "Fresh-state reachability and exact non-stack independence controls",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ExpressionControls"
@@ -4246,9 +4790,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReachabilityControls.lean",
+    "presumed_handwritten_lines": 160,
     "proof_lines": 70,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4261,6 +4807,7 @@
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.6060606060606061,
     "description": "Declarations: path, reached, offset",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.PublishedMixedCapture"
@@ -4270,9 +4817,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReachedHash.lean",
+    "presumed_handwritten_lines": 79,
     "proof_lines": 33,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4286,6 +4835,7 @@
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 0.5952380952380952,
     "description": "Declarations: caller, base, machine",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReferenceCallReadback",
@@ -4296,9 +4846,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReferenceCallArgumentFailure.lean",
+    "presumed_handwritten_lines": 91,
     "proof_lines": 42,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4307,6 +4859,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 103,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReferenceCallArgumentPrefix"
@@ -4316,8 +4869,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReferenceCallArgumentPins.lean",
+    "presumed_handwritten_lines": 0,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4330,6 +4885,7 @@
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.20833333333333334,
     "description": "Declarations: saveCode, successMachine, saved",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReferenceCallArgumentFailure",
@@ -4340,9 +4896,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReferenceCallArgumentPrefix.lean",
+    "presumed_handwritten_lines": 75,
     "proof_lines": 48,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4353,6 +4911,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: source_capture_revert, capture_revert_iff",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReferenceCallReadback"
@@ -4362,9 +4921,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReferenceCallCaptureFailure.lean",
+    "presumed_handwritten_lines": 65,
     "proof_lines": 51,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4377,6 +4938,7 @@
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.16363636363636364,
     "description": "Declarations: bad, bc, bad_source",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReferenceCallCaptureFailure",
@@ -4387,9 +4949,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReferenceCallCaptureFailureControls.lean",
+    "presumed_handwritten_lines": 86,
     "proof_lines": 55,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4398,6 +4962,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 39,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReferenceCallCaptureFailureControls"
@@ -4407,8 +4972,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReferenceCallCaptureFailurePins.lean",
+    "presumed_handwritten_lines": 0,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4419,6 +4986,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: execution, call_revert",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.CapturedReadback",
@@ -4430,9 +4998,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReferenceCallReadback.lean",
+    "presumed_handwritten_lines": 108,
     "proof_lines": 91,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4446,6 +5016,7 @@
     "definition_lines": 38,
     "definition_to_proof_line_ratio": 0.4470588235294118,
     "description": "Declarations: \u0394, caller, bases",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReferenceCallReadback",
@@ -4457,9 +5028,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReferenceCallReadbackControls.lean",
+    "presumed_handwritten_lines": 148,
     "proof_lines": 85,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4468,6 +5041,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 55,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReferenceCallReadbackControls"
@@ -4477,8 +5051,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReferenceCallReadbackPins.lean",
+    "presumed_handwritten_lines": 0,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4491,6 +5067,7 @@
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.24444444444444444,
     "description": "Declarations: program, compiled, execution",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReferenceCaptureStability",
@@ -4501,9 +5078,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReferenceCaptureCertificate.lean",
+    "presumed_handwritten_lines": 72,
     "proof_lines": 45,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4514,6 +5093,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: capture_rebind_readback",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryCompile"
@@ -4523,9 +5103,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReferenceCaptureStability.lean",
+    "presumed_handwritten_lines": 74,
     "proof_lines": 58,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4539,6 +5121,7 @@
     "definition_lines": 36,
     "definition_to_proof_line_ratio": 1.1612903225806452,
     "description": "Declarations: \u0393b, fb, state",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReachabilityControls"
@@ -4548,9 +5131,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReferenceControls.lean",
+    "presumed_handwritten_lines": 92,
     "proof_lines": 31,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4563,6 +5148,7 @@
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.08333333333333333,
     "description": "Declarations: reference_ptr_objects, reference_stmt_objects, reference_prog_objects",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.AllocatorPreservation"
@@ -4572,9 +5158,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReferenceObjectCertificate.lean",
+    "presumed_handwritten_lines": 43,
     "proof_lines": 24,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4585,6 +5173,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: allocator_reservation_shrink, allocation_input_reservation_shrink, positive_allocation_refuses_zero_frame",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReframedSequence"
@@ -4594,9 +5183,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReframedCapacity.lean",
+    "presumed_handwritten_lines": 37,
     "proof_lines": 26,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4610,6 +5201,7 @@
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.14102564102564102,
     "description": "Declarations: left, right, frame_gap",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReframedSequence",
@@ -4620,9 +5212,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReframedControls.lean",
+    "presumed_handwritten_lines": 118,
     "proof_lines": 78,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4631,6 +5225,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.LoopReframedFailureControls"
@@ -4640,8 +5235,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReframedFailureDraftAxioms.lean",
+    "presumed_handwritten_lines": 21,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4652,6 +5249,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: compilation_reframed_revert_witness_iff, compilation_reframed_reached_revert_shared, compilation_reframed_reached_fault_shared",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReframedSequence"
@@ -4661,9 +5259,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReframedFailureWitness.lean",
+    "presumed_handwritten_lines": 117,
     "proof_lines": 97,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4674,6 +5274,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: allocator_growth_reservation_shrink, allocator_growth_reframed_comp, reached",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReframedCapacity",
@@ -4684,9 +5285,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReframedGrowth.lean",
+    "presumed_handwritten_lines": 101,
     "proof_lines": 72,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4695,6 +5298,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReframedGrowth"
@@ -4704,8 +5308,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReframedGrowthPins.lean",
+    "presumed_handwritten_lines": 12,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4714,6 +5320,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReframedLoops"
@@ -4723,8 +5330,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReframedLoopPins.lean",
+    "presumed_handwritten_lines": 11,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4735,6 +5344,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: loops_shrinking_link, loop_scopes_shrinking_link, bounds",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReframedSequence",
@@ -4745,9 +5355,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReframedLoops.lean",
+    "presumed_handwritten_lines": 76,
     "proof_lines": 54,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4756,6 +5368,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReframedTerminals"
@@ -4765,8 +5378,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReframedPins.lean",
+    "presumed_handwritten_lines": 65,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4779,6 +5394,7 @@
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.056451612903225805,
     "description": "Declarations: memory_state_shrink, ReframedLink, memory_shrinking_link",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.Frame",
@@ -4789,9 +5405,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReframedSequence.lean",
+    "presumed_handwritten_lines": 165,
     "proof_lines": 124,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4804,6 +5422,7 @@
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.07142857142857142,
     "description": "Declarations: program, stage, source",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReframedControls",
@@ -4815,9 +5434,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReframedTerminals.lean",
+    "presumed_handwritten_lines": 122,
     "proof_lines": 84,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4830,6 +5451,7 @@
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.027559055118110236,
     "description": "Declarations: ReachedReframedLink, compilation_reframed_triple_shared, compilation_reframed_triple_revert_iff",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReframedSequence",
@@ -4840,9 +5462,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReframedTriple.lean",
+    "presumed_handwritten_lines": 292,
     "proof_lines": 254,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4855,6 +5479,7 @@
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.0594059405940594,
     "description": "Declarations: middle_room, first_link, second_link",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReframedTriple",
@@ -4867,9 +5492,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReframedTripleControls.lean",
+    "presumed_handwritten_lines": 130,
     "proof_lines": 101,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4878,6 +5505,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReframedTripleWrongOrder"
@@ -4887,8 +5515,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReframedTriplePins.lean",
+    "presumed_handwritten_lines": 119,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4901,6 +5531,7 @@
     "definition_lines": 29,
     "definition_to_proof_line_ratio": 0.1746987951807229,
     "description": "Declarations: effects, readLast, split_consumer",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MemoryCompilerSequence",
@@ -4912,9 +5543,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReframedTripleWrongOrder.lean",
+    "presumed_handwritten_lines": 238,
     "proof_lines": 166,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4927,6 +5560,7 @@
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.10526315789473684,
     "description": "Declarations: memory_reindex, memory_reindex_code, memory_reindex_frag",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MappedSequence"
@@ -4936,9 +5570,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReindexedMemory.lean",
+    "presumed_handwritten_lines": 39,
     "proof_lines": 19,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4949,6 +5585,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: execution",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MappedTail",
@@ -4959,9 +5596,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/RelatedMemoryCapture.lean",
+    "presumed_handwritten_lines": 58,
     "proof_lines": 47,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4975,6 +5614,7 @@
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 0.6410256410256411,
     "description": "Declarations: src\u0393, oldIndex, newIndex",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.RelatedMemoryCapture",
@@ -4985,9 +5625,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/RelatedMemoryCaptureControls.lean",
+    "presumed_handwritten_lines": 85,
     "proof_lines": 39,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -4996,6 +5638,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.RelatedMemoryCaptureControls"
@@ -5005,8 +5648,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/RelatedMemoryCapturePins.lean",
+    "presumed_handwritten_lines": 38,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5017,6 +5662,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: execution",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MappedTail",
@@ -5027,9 +5673,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/RelatedStorageCapture.lean",
+    "presumed_handwritten_lines": 62,
     "proof_lines": 52,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5043,6 +5691,7 @@
     "definition_lines": 43,
     "definition_to_proof_line_ratio": 1.162162162162162,
     "description": "Declarations: C, live, other",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.RelatedStorageCapture",
@@ -5053,9 +5702,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/RelatedStorageCaptureControls.lean",
+    "presumed_handwritten_lines": 101,
     "proof_lines": 37,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5064,6 +5715,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.RelatedStorageCaptureControls"
@@ -5073,8 +5725,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/RelatedStorageCapturePins.lean",
+    "presumed_handwritten_lines": 41,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5087,6 +5741,7 @@
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.3793103448275862,
     "description": "Declarations: expression, certificate, symbolic",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ClosedValues",
@@ -5097,9 +5752,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ResolvedMetadata.lean",
+    "presumed_handwritten_lines": 61,
     "proof_lines": 29,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5112,6 +5769,7 @@
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.3541666666666667,
     "description": "Declarations: selector, declaration, resolved",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ResolvedMetadata",
@@ -5123,9 +5781,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ResolvedMetadataControls.lean",
+    "presumed_handwritten_lines": 92,
     "proof_lines": 48,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5136,6 +5796,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: readback, excludes_revert_with",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MappedTail"
@@ -5145,9 +5806,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReturnedMemoryCapture.lean",
+    "presumed_handwritten_lines": 73,
     "proof_lines": 51,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5160,6 +5823,7 @@
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.3333333333333333,
     "description": "Declarations: fresh, fresh_bound, whole_input",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReturnedMemoryCapture",
@@ -5171,9 +5835,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReturnedMemoryCaptureControls.lean",
+    "presumed_handwritten_lines": 66,
     "proof_lines": 24,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5184,6 +5850,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: readback",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MappedTail",
@@ -5194,9 +5861,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReturnedStorageCapture.lean",
+    "presumed_handwritten_lines": 51,
     "proof_lines": 35,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5209,6 +5878,7 @@
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 1.25,
     "description": "Declarations: public_selection, source_run, application",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ReturnedStorageCapture",
@@ -5219,9 +5889,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ReturnedStorageCaptureControls.lean",
+    "presumed_handwritten_lines": 27,
     "proof_lines": 4,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5234,6 +5906,7 @@
     "definition_lines": 22,
     "definition_to_proof_line_ratio": 0.08627450980392157,
     "description": "Declarations: panicProg, panicStage, panic_recognized",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.SourceTerminalFailure",
@@ -5244,9 +5917,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/RevertControls.lean",
+    "presumed_handwritten_lines": 337,
     "proof_lines": 255,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5255,6 +5930,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.RevertControls"
@@ -5264,8 +5940,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/RevertPins.lean",
+    "presumed_handwritten_lines": 79,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5276,6 +5954,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: compilation_mapped_revert_witness_iff, compilation_triple_revert_witness_iff, compilation_triple_revert_witness_left_iff",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.TripleSequence"
@@ -5285,9 +5964,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/RevertWitness.lean",
+    "presumed_handwritten_lines": 117,
     "proof_lines": 99,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5298,6 +5979,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: capture_stage_revert_iff",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.CapturedValueStability"
@@ -5307,9 +5989,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/RuntimeCaptureReflection.lean",
+    "presumed_handwritten_lines": 30,
     "proof_lines": 25,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5320,6 +6004,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: capture",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducer",
@@ -5330,9 +6015,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/RuntimeReturnCapture.lean",
+    "presumed_handwritten_lines": 120,
     "proof_lines": 104,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5345,6 +6032,7 @@
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.12903225806451613,
     "description": "Declarations: operand, valueCode, suffix",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.RuntimeReturnCapture",
@@ -5355,9 +6043,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/RuntimeReturnCaptureControls.lean",
+    "presumed_handwritten_lines": 134,
     "proof_lines": 93,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5366,6 +6056,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.RuntimeReturnCaptureControls"
@@ -5375,8 +6066,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/RuntimeReturnCapturePins.lean",
+    "presumed_handwritten_lines": 45,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5387,6 +6080,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: capture_revert",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.RuntimeReturnCapture"
@@ -5396,9 +6090,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/RuntimeReturnFailure.lean",
+    "presumed_handwritten_lines": 93,
     "proof_lines": 77,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5411,6 +6107,7 @@
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.15151515151515152,
     "description": "Declarations: operand, valueCode, suffix",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.RuntimeReturnFailure",
@@ -5421,9 +6118,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/RuntimeReturnFailureControls.lean",
+    "presumed_handwritten_lines": 143,
     "proof_lines": 99,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5432,6 +6131,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.RuntimeReturnFailureControls"
@@ -5441,8 +6141,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/RuntimeReturnFailurePins.lean",
+    "presumed_handwritten_lines": 43,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5453,6 +6155,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: capture",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameNoneProducer",
@@ -5464,9 +6167,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/RuntimeVoidCapture.lean",
+    "presumed_handwritten_lines": 127,
     "proof_lines": 113,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5479,6 +6184,7 @@
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.18,
     "description": "Declarations: operand, valueCode, suffix",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.RuntimeVoidCapture",
@@ -5490,9 +6196,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/RuntimeVoidCaptureControls.lean",
+    "presumed_handwritten_lines": 147,
     "proof_lines": 100,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5501,6 +6209,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 55,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.RuntimeVoidCaptureControls"
@@ -5510,8 +6219,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/RuntimeVoidCapturePins.lean",
+    "presumed_handwritten_lines": 0,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5522,6 +6233,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: terminal_exact, revert_iff, no_fault",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameNoneProducer",
@@ -5533,9 +6245,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/RuntimeVoidReflection.lean",
+    "presumed_handwritten_lines": 148,
     "proof_lines": 130,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5548,6 +6262,7 @@
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 0.23636363636363636,
     "description": "Declarations: badArgument, badArgs, badCall",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.RuntimeVoidReflection",
@@ -5558,9 +6273,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/RuntimeVoidReflectionControls.lean",
+    "presumed_handwritten_lines": 170,
     "proof_lines": 110,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5569,6 +6286,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 91,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.RuntimeVoidReflectionControls"
@@ -5578,8 +6296,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/RuntimeVoidReflectionPins.lean",
+    "presumed_handwritten_lines": 0,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5592,6 +6312,7 @@
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.12121212121212122,
     "description": "Typed sequencing across two checked compilation branches",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.Stack",
@@ -5602,9 +6323,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/Sequence.lean",
+    "presumed_handwritten_lines": 114,
     "proof_lines": 66,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5615,6 +6338,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: compilation_pair_shared",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.TripleSequence"
@@ -5624,9 +6348,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/SharedPair.lean",
+    "presumed_handwritten_lines": 52,
     "proof_lines": 43,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5639,6 +6365,7 @@
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.26865671641791045,
     "description": "Declarations: update, zero, program",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.PrimitivePackets.Shifts.General",
@@ -5650,9 +6377,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ShiftCapture.lean",
+    "presumed_handwritten_lines": 134,
     "proof_lines": 67,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5666,6 +6395,7 @@
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.23684210526315788,
     "description": "Declarations: \u0393, i, j",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ShiftCapture",
@@ -5676,9 +6406,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ShiftCaptureControls.lean",
+    "presumed_handwritten_lines": 170,
     "proof_lines": 76,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5691,6 +6423,7 @@
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.1,
     "description": "Declarations: expression, compiled, source",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ValueCertificate"
@@ -5700,9 +6433,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ShortCircuitBoundary.lean",
+    "presumed_handwritten_lines": 106,
     "proof_lines": 80,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5713,6 +6448,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: revert_witness_iff",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ShortCircuitBoundary"
@@ -5722,9 +6458,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/ShortCircuitWitness.lean",
+    "presumed_handwritten_lines": 28,
     "proof_lines": 23,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5737,6 +6475,7 @@
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.11607142857142858,
     "description": "Declarations: update, program, selectable",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.PrimitivePackets.SignedDiv.Execution",
@@ -5748,9 +6487,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/SignedDivisionCapture.lean",
+    "presumed_handwritten_lines": 189,
     "proof_lines": 112,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5764,6 +6505,7 @@
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.16260162601626016,
     "description": "Declarations: i, j, name",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.SignedDivisionCapture",
@@ -5774,9 +6516,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/SignedDivisionCaptureControls.lean",
+    "presumed_handwritten_lines": 252,
     "proof_lines": 123,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5789,6 +6533,7 @@
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.17894736842105263,
     "description": "Declarations: update, program, selectable",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.PrimitivePackets.SignedMod.Selection",
@@ -5799,9 +6544,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/SignedRemainderCapture.lean",
+    "presumed_handwritten_lines": 183,
     "proof_lines": 95,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5815,6 +6562,7 @@
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.16666666666666666,
     "description": "Declarations: i, j, name",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.SignedRemainderCapture",
@@ -5825,9 +6573,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/SignedRemainderCaptureControls.lean",
+    "presumed_handwritten_lines": 185,
     "proof_lines": 78,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5840,6 +6590,7 @@
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.17333333333333334,
     "description": "Declarations: update, program, selectable",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.PrimitivePackets.SignedSub.Execution",
@@ -5851,9 +6602,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/SignedSubtractionCapture.lean",
+    "presumed_handwritten_lines": 147,
     "proof_lines": 75,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5867,6 +6620,7 @@
     "definition_lines": 24,
     "definition_to_proof_line_ratio": 0.3,
     "description": "Declarations: i, j, name",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.SignedSubtractionCapture",
@@ -5878,9 +6632,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/SignedSubtractionCaptureControls.lean",
+    "presumed_handwritten_lines": 189,
     "proof_lines": 80,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5893,6 +6649,7 @@
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.085,
     "description": "Declarations: localOperand, localCode, program",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.SignedWidthGuard",
@@ -5904,9 +6661,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/SignedWidthCapture.lean",
+    "presumed_handwritten_lines": 276,
     "proof_lines": 200,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5919,6 +6678,7 @@
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 0.1736111111111111,
     "description": "Declarations: lower, upper, outside",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Scalar.WidthGuards",
@@ -5930,9 +6690,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/SignedWidthGuard.lean",
+    "presumed_handwritten_lines": 247,
     "proof_lines": 144,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5943,6 +6705,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: execution",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ValueCertificate",
@@ -5954,9 +6717,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/SourceAdditionValue.lean",
+    "presumed_handwritten_lines": 44,
     "proof_lines": 30,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5970,6 +6735,7 @@
     "definition_lines": 30,
     "definition_to_proof_line_ratio": 0.6818181818181818,
     "description": "Declarations: C, T, \u0393",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.SourceAdditionValue",
@@ -5981,9 +6747,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/SourceAdditionValueControls.lean",
+    "presumed_handwritten_lines": 95,
     "proof_lines": 44,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -5992,6 +6760,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.SourceAdditionValueControls"
@@ -6001,8 +6770,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/SourceAdditionValuePins.lean",
+    "presumed_handwritten_lines": 14,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6013,6 +6784,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: halt_bind, call_zero, call_depth",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.Eval"
@@ -6022,9 +6794,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/SourceCallBoundary.lean",
+    "presumed_handwritten_lines": 56,
     "proof_lines": 28,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6037,6 +6811,7 @@
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.09302325581395349,
     "description": "Declarations: value, fold_shift, value_cons",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MachineV2"
@@ -6046,9 +6821,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/SourceCallBytes.lean",
+    "presumed_handwritten_lines": 215,
     "proof_lines": 129,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6061,6 +6838,7 @@
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.5714285714285714,
     "description": "Declarations: target, before, captured",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.SourceTypedCall",
@@ -6071,9 +6849,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/SourceCallControls.lean",
+    "presumed_handwritten_lines": 80,
     "proof_lines": 28,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6086,6 +6866,7 @@
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.12727272727272726,
     "description": "Declarations: run_modSt, run_attempt, childFrame",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.SourceTypedCall"
@@ -6095,9 +6876,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/SourceCallFrame.lean",
+    "presumed_handwritten_lines": 92,
     "proof_lines": 55,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6111,6 +6894,7 @@
     "definition_lines": 51,
     "definition_to_proof_line_ratio": 1.1333333333333333,
     "description": "Declarations: raw, final, rawAt",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.WorldCalls.ClosedSourceFrame"
@@ -6120,9 +6904,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/SourceCallProducer.lean",
+    "presumed_handwritten_lines": 196,
     "proof_lines": 45,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6136,6 +6922,7 @@
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.06451612903225806,
     "description": "Declarations: origin, produced_raw, inhabited",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.SourceCallProducer",
@@ -6146,9 +6933,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/SourceCallProducerControls.lean",
+    "presumed_handwritten_lines": 101,
     "proof_lines": 31,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6162,6 +6951,7 @@
     "definition_lines": 34,
     "definition_to_proof_line_ratio": 0.3953488372093023,
     "description": "Declarations: receiver, amount, input",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.SourceCallProducer",
@@ -6172,9 +6962,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/SourceCallProducerV2.lean",
+    "presumed_handwritten_lines": 233,
     "proof_lines": 86,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6188,6 +6980,7 @@
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.24242424242424243,
     "description": "Declarations: origin, small, source_payload",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.SourceCallProducerV2",
@@ -6198,9 +6991,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/SourceCallProducerV2Controls.lean",
+    "presumed_handwritten_lines": 114,
     "proof_lines": 33,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6211,6 +7006,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: execution",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ValueCertificate",
@@ -6222,9 +7018,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/SourceNarrowingValue.lean",
+    "presumed_handwritten_lines": 49,
     "proof_lines": 36,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6238,6 +7036,7 @@
     "definition_lines": 23,
     "definition_to_proof_line_ratio": 0.7419354838709677,
     "description": "Declarations: C, T, \u0393",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.SourceNarrowingValue",
@@ -6249,9 +7048,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/SourceNarrowingValueControls.lean",
+    "presumed_handwritten_lines": 73,
     "proof_lines": 31,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6260,6 +7061,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 47,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.SourceNarrowingValueControls"
@@ -6269,8 +7071,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/SourceNarrowingValuePins.lean",
+    "presumed_handwritten_lines": 0,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6281,6 +7085,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: joined_halt_iff, terminal_failure_errors_iff, joined_terminal_failure_iff",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.RevertWitness"
@@ -6290,9 +7095,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/SourceTerminalFailure.lean",
+    "presumed_handwritten_lines": 96,
     "proof_lines": 77,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6306,6 +7113,7 @@
     "definition_lines": 29,
     "definition_to_proof_line_ratio": 0.43283582089552236,
     "description": "Declarations: Captured, capture, resume",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.SourceCallBoundary"
@@ -6315,9 +7123,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/SourceTypedCall.lean",
+    "presumed_handwritten_lines": 124,
     "proof_lines": 67,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6330,6 +7140,7 @@
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.0975609756097561,
     "description": "Declarations: program, iter, diverges",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.Divergence",
@@ -6340,9 +7151,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/Spin.lean",
+    "presumed_handwritten_lines": 68,
     "proof_lines": 41,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6353,6 +7166,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Arbitrary saved stack tails at compilation boundaries",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.Boundary"
@@ -6362,9 +7176,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/Stack.lean",
+    "presumed_handwritten_lines": 90,
     "proof_lines": 60,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6377,6 +7193,7 @@
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.3333333333333333,
     "description": "Declarations: captureProgram, captureCompiled, declaration",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.StatefulValueNegatives"
@@ -6386,9 +7203,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/StatefulCaptureControls.lean",
+    "presumed_handwritten_lines": 76,
     "proof_lines": 39,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6399,6 +7218,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: binary_success, binary_failure, unary_success",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.StatefulValues"
@@ -6408,9 +7228,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/StatefulChecked.lean",
+    "presumed_handwritten_lines": 115,
     "proof_lines": 101,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6421,6 +7243,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: physical, uint_division, uint_remainder",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.StatefulValues"
@@ -6430,9 +7253,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/StatefulDivision.lean",
+    "presumed_handwritten_lines": 96,
     "proof_lines": 81,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6445,6 +7270,7 @@
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.04411764705882353,
     "description": "Declarations: source, operands, component",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.StatefulValues"
@@ -6454,9 +7280,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/StatefulModular.lean",
+    "presumed_handwritten_lines": 95,
     "proof_lines": 68,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6469,6 +7297,7 @@
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.07142857142857142,
     "description": "Declarations: nineCode, addition, multiplication",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.StatefulSpecialControls"
@@ -6478,9 +7307,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/StatefulModularControls.lean",
+    "presumed_handwritten_lines": 83,
     "proof_lines": 56,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6491,6 +7322,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: operands, source_success, application",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.StatefulValues",
@@ -6501,9 +7333,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/StatefulPower.lean",
+    "presumed_handwritten_lines": 109,
     "proof_lines": 85,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6516,6 +7350,7 @@
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.21686746987951808,
     "description": "Declarations: power, compiled, answer",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.StatefulPower",
@@ -6526,9 +7361,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/StatefulPowerControls.lean",
+    "presumed_handwritten_lines": 135,
     "proof_lines": 83,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6541,6 +7378,7 @@
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.21951219512195122,
     "description": "Declarations: signedSecond, signedFour, signed_second_source",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.StatefulDivision",
@@ -6552,9 +7390,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/StatefulSpecialControls.lean",
+    "presumed_handwritten_lines": 124,
     "proof_lines": 82,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6567,6 +7407,7 @@
     "definition_lines": 22,
     "definition_to_proof_line_ratio": 0.23157894736842105,
     "description": "Declarations: wrapping, wrappingCode, comparison",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.StatefulChecked",
@@ -6577,9 +7418,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/StatefulValueControls.lean",
+    "presumed_handwritten_lines": 147,
     "proof_lines": 95,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6592,6 +7435,7 @@
     "definition_lines": 23,
     "definition_to_proof_line_ratio": 0.27058823529411763,
     "description": "Declarations: readNine, nine, underflow",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.StatefulValueControls"
@@ -6601,9 +7445,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/StatefulValueNegatives.lean",
+    "presumed_handwritten_lines": 141,
     "proof_lines": 85,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6612,6 +7458,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.StatefulCaptureControls",
@@ -6622,8 +7469,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/StatefulValuePins.lean",
+    "presumed_handwritten_lines": 260,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6634,6 +7483,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: binary_source, unary_source, operands",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.ClosedValues",
@@ -6645,9 +7495,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/StatefulValues.lean",
+    "presumed_handwritten_lines": 153,
     "proof_lines": 125,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6660,6 +7512,7 @@
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.06862745098039216,
     "description": "Declarations: allocating_shared, pipeline_shared, reached_failure_all_tails",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.EmittedTail",
@@ -6670,9 +7523,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/TailControls.lean",
+    "presumed_handwritten_lines": 142,
     "proof_lines": 102,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6685,6 +7540,7 @@
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.05128205128205128,
     "description": "Declarations: spin, checked, source_diverges",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.TailControls"
@@ -6694,9 +7550,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/TailDivergence.lean",
+    "presumed_handwritten_lines": 57,
     "proof_lines": 39,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6709,6 +7567,7 @@
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.052083333333333336,
     "description": "Declarations: TurnMatches, turn_tail, iter_tail",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.TailMachine"
@@ -6718,9 +7577,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/TailLoop.lean",
+    "presumed_handwritten_lines": 120,
     "proof_lines": 96,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6733,6 +7594,7 @@
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.12,
     "description": "Stack suffix transport for actual target execution",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Machine"
@@ -6742,9 +7604,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/TailMachine.lean",
+    "presumed_handwritten_lines": 107,
     "proof_lines": 75,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6755,6 +7619,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: compilation_mapped_reflect_success, compilation_triple_reflect_success, terminal_reflection_inhabited",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.DivergenceWitness",
@@ -6765,9 +7630,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/TerminalReflection.lean",
+    "presumed_handwritten_lines": 103,
     "proof_lines": 85,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6781,6 +7648,7 @@
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.2564102564102564,
     "description": "Declarations: A, \u039e, loc",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.TripleControls"
@@ -6790,9 +7658,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/TripleAllocation.lean",
+    "presumed_handwritten_lines": 133,
     "proof_lines": 78,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6805,6 +7675,7 @@
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.0873015873015873,
     "description": "Declarations: initial_repr7, prefix_input7, captureProg",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.TripleSequence",
@@ -6815,9 +7686,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/TripleControls.lean",
+    "presumed_handwritten_lines": 170,
     "proof_lines": 126,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6830,6 +7703,7 @@
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.23076923076923078,
     "description": "Declarations: stop, first, first_source",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.TripleControls"
@@ -6839,9 +7713,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/TripleFailures.lean",
+    "presumed_handwritten_lines": 107,
     "proof_lines": 65,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6850,6 +7726,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.TripleSuffix",
@@ -6860,8 +7737,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/TriplePins.lean",
+    "presumed_handwritten_lines": 80,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6874,6 +7753,7 @@
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.03867403314917127,
     "description": "Declarations: ReachedMappedLink, memory_third_budgeted_link, compilation_triple_success",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.MappedTail"
@@ -6883,9 +7763,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/TripleSequence.lean",
+    "presumed_handwritten_lines": 226,
     "proof_lines": 181,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6899,6 +7781,7 @@
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.2608695652173913,
     "description": "Declarations: A, lastStage, finalSource",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.TripleAllocation"
@@ -6908,9 +7791,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/TripleSuffix.lean",
+    "presumed_handwritten_lines": 76,
     "proof_lines": 46,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6924,6 +7809,7 @@
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.1320754716981132,
     "description": "Declarations: program, compiled, expanded_public",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerRefTupleControls",
@@ -6935,9 +7821,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/TupleReturnConsumer.lean",
+    "presumed_handwritten_lines": 107,
     "proof_lines": 53,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6950,6 +7838,7 @@
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.2916666666666667,
     "description": "Declarations: code, cells, observe",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.TupleReturnConsumer"
@@ -6959,9 +7848,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/TupleReturnConsumerControls.lean",
+    "presumed_handwritten_lines": 74,
     "proof_lines": 24,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -6974,6 +7865,7 @@
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.08125,
     "description": "Declarations: first, second, program",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.PrimitivePackets.UnsignedDiv.Composition",
@@ -6985,9 +7877,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/UnsignedDependentCapture.lean",
+    "presumed_handwritten_lines": 241,
     "proof_lines": 160,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -7001,6 +7895,7 @@
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.23076923076923078,
     "description": "Declarations: Tail, qname, rname",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.UnsignedDependentFailure",
@@ -7011,9 +7906,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/UnsignedDependentControls.lean",
+    "presumed_handwritten_lines": 142,
     "proof_lines": 52,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Backend",
@@ -7024,6 +7921,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: immediate, reached, reached_source",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.Passes.UnsignedDependentCapture"
@@ -7033,8 +7931,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Backend/Passes/UnsignedDependentFailure.lean",
+    "presumed_handwritten_lines": 144,
     "proof_lines": 109,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   }
 ]

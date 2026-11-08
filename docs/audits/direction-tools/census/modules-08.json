@@ -12,6 +12,7 @@
     "definition_lines": 158,
     "definition_to_proof_line_ratio": null,
     "description": "The proof tree as data, and the script it writes",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.RuleKit"
@@ -21,8 +22,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Calculus/TreeData.lean",
+    "presumed_handwritten_lines": 279,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Calculus",
@@ -36,6 +39,7 @@
     "definition_lines": 45,
     "definition_to_proof_line_ratio": 1.0714285714285714,
     "description": "Complete arithmetic over bounded typed variables",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.ScalarCode"
@@ -45,9 +49,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Calculus/TypedLinear.lean",
+    "presumed_handwritten_lines": 143,
     "proof_lines": 42,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Calculus",
@@ -62,6 +68,7 @@
     "definition_lines": 243,
     "definition_to_proof_line_ratio": 0.34129213483146065,
     "description": "Update simplification on scoped formulas",
+    "generated_lines": 0,
     "implemented_by": 9,
     "imports": [
       "Solidity.Calculus.UpdateRules"
@@ -71,9 +78,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Calculus/UpdRuleScoped.lean",
+    "presumed_handwritten_lines": 1336,
     "proof_lines": 712,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Calculus",
@@ -86,6 +95,7 @@
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.055944055944055944,
     "description": "The steps after the program, on the scoped sequent",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Sound"
@@ -95,9 +105,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Calculus/UpdateRules.lean",
+    "presumed_handwritten_lines": 426,
     "proof_lines": 286,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Calculus",
@@ -111,6 +123,7 @@
     "definition_lines": 53,
     "definition_to_proof_line_ratio": 0.43089430894308944,
     "description": "A visited set with logarithmic membership",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [],
     "imports_in": 4,
@@ -118,9 +131,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Calculus/VisitedSet.lean",
+    "presumed_handwritten_lines": 264,
     "proof_lines": 123,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Calculus",
@@ -132,6 +147,7 @@
     "definition_lines": 97,
     "definition_to_proof_line_ratio": null,
     "description": "The walk on a scoped goal",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Derive",
@@ -143,8 +159,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Calculus/WalkSyntax.lean",
+    "presumed_handwritten_lines": 282,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Calculus",
@@ -157,6 +175,7 @@
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.08,
     "description": "A weakening's scope ends, and a loop body's frame: the syntax",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Blocks"
@@ -166,9 +185,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Calculus/WkOver.lean",
+    "presumed_handwritten_lines": 106,
     "proof_lines": 50,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Corpus",
@@ -182,6 +203,7 @@
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 1.0833333333333333,
     "description": "The solkey corpus: what an obligation is",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Logic",
@@ -192,9 +214,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Corpus/Basic.lean",
+    "presumed_handwritten_lines": 125,
     "proof_lines": 12,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Corpus",
@@ -207,6 +231,7 @@
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.3684210526315789,
     "description": "The corpus's `TestSuite` is the imported one",
+    "generated_lines": 140,
     "implemented_by": 0,
     "imports": [
       "Solidity.Corpus.Basic",
@@ -221,9 +246,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Corpus/Imported.lean",
+    "presumed_handwritten_lines": 0,
     "proof_lines": 19,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Corpus",
@@ -234,6 +261,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "solkey `solc/SolcArrays.sol`, ported",
+    "generated_lines": 238,
     "implemented_by": 0,
     "imports": [
       "Solidity.Corpus.Basic"
@@ -243,9 +271,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Corpus/SolcArrays.lean",
+    "presumed_handwritten_lines": 0,
     "proof_lines": 129,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Corpus",
@@ -256,6 +286,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "solkey `solc/SolcControlFlow.sol`, ported",
+    "generated_lines": 188,
     "implemented_by": 0,
     "imports": [
       "Solidity.Corpus.Basic"
@@ -265,9 +296,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Corpus/SolcControlFlow.lean",
+    "presumed_handwritten_lines": 0,
     "proof_lines": 99,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Corpus",
@@ -278,6 +311,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "solkey `solc/SolcExpressions.sol`, ported",
+    "generated_lines": 331,
     "implemented_by": 0,
     "imports": [
       "Solidity.Corpus.Basic"
@@ -287,9 +321,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Corpus/SolcExpressions.lean",
+    "presumed_handwritten_lines": 0,
     "proof_lines": 178,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Corpus",
@@ -300,6 +336,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "solkey `solc/SolcMappings.sol`, ported",
+    "generated_lines": 171,
     "implemented_by": 0,
     "imports": [
       "Solidity.Corpus.Basic"
@@ -309,9 +346,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Corpus/SolcMappings.lean",
+    "presumed_handwritten_lines": 0,
     "proof_lines": 98,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Corpus",
@@ -322,6 +361,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "solkey `solc/SolcMemory.sol`, ported",
+    "generated_lines": 206,
     "implemented_by": 0,
     "imports": [
       "Solidity.Corpus.Basic"
@@ -331,9 +371,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Corpus/SolcMemory.lean",
+    "presumed_handwritten_lines": 0,
     "proof_lines": 124,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Corpus",
@@ -344,6 +386,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "solkey `solc/SolcStructs.sol`, ported",
+    "generated_lines": 181,
     "implemented_by": 0,
     "imports": [
       "Solidity.Corpus.Basic"
@@ -353,9 +396,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Corpus/SolcStructs.lean",
+    "presumed_handwritten_lines": 0,
     "proof_lines": 105,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Corpus",
@@ -366,6 +411,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "solkey `TestSuite.sol`, derived",
+    "generated_lines": 2624,
     "implemented_by": 0,
     "imports": [
       "Solidity.Corpus.Imported",
@@ -376,9 +422,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Corpus/TestSuite.lean",
+    "presumed_handwritten_lines": 0,
     "proof_lines": 1554,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Counterexamples",
@@ -389,6 +437,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "The pre-`e67a0d7c48` delete fallthroughs were inconsistent",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.KeySort"
@@ -398,9 +447,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Counterexamples/DeleteFamilyGenericOverlap.lean",
+    "presumed_handwritten_lines": 188,
     "proof_lines": 69,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Counterexamples",
@@ -411,6 +462,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "External try witnesses do not establish a callback diamond",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.CallbackHolds"
@@ -420,9 +472,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Counterexamples/DiamondTry.lean",
+    "presumed_handwritten_lines": 40,
     "proof_lines": 13,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Counterexamples",
@@ -435,6 +489,7 @@
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.1891891891891892,
     "description": "The `12e72a1b4b` sort bug, caught",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.SortCheck.Faithfulness"
@@ -444,9 +499,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Counterexamples/PreFixSortAnnotations.lean",
+    "presumed_handwritten_lines": 114,
     "proof_lines": 37,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Counterexamples",
@@ -457,6 +514,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Static array and mapping sorts are not their runtime nodes",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Typing.Sorts"
@@ -466,9 +524,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Counterexamples/StaticRuntimeSort.lean",
+    "presumed_handwritten_lines": 71,
     "proof_lines": 18,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "ERC7201",
@@ -481,6 +541,7 @@
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 2.25,
     "description": "ERC-7201 namespace integers",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.RevertBytes",
@@ -491,9 +552,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/ERC7201.lean",
+    "presumed_handwritten_lines": 38,
     "proof_lines": 4,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Eqns",
@@ -502,6 +565,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Equation lemmas named by hand",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Lean.Meta.Eqns",
@@ -512,8 +576,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Eqns.lean",
+    "presumed_handwritten_lines": 46,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -529,6 +595,7 @@
     "definition_lines": 321,
     "definition_to_proof_line_ratio": 321.0,
     "description": "The compiler over the scoped syntax",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Layout",
@@ -539,9 +606,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/Compile.lean",
+    "presumed_handwritten_lines": 487,
     "proof_lines": 1,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -555,6 +624,7 @@
     "definition_lines": 232,
     "definition_to_proof_line_ratio": 0.7656765676567657,
     "description": "The checked compiler entry",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Correct",
@@ -573,9 +643,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/Compiler.lean",
+    "presumed_handwritten_lines": 637,
     "proof_lines": 303,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -589,6 +661,7 @@
     "definition_lines": 23,
     "definition_to_proof_line_ratio": 0.025191675794085433,
     "description": "The scoped compiler is correct",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Stmt"
@@ -600,9 +673,11 @@
     ],
     "native_decide": 0,
     "path": "Solidity/Evm/Correct.lean",
+    "presumed_handwritten_lines": 1232,
     "proof_lines": 913,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -616,6 +691,7 @@
     "definition_lines": 48,
     "definition_to_proof_line_ratio": 0.2513089005235602,
     "description": "The scoped compiler at work",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compile",
@@ -626,9 +702,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/Examples.lean",
+    "presumed_handwritten_lines": 481,
     "proof_lines": 191,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -639,6 +717,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Checked exponentiation",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Layout"
@@ -648,9 +727,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/Exp.lean",
+    "presumed_handwritten_lines": 202,
     "proof_lines": 158,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -663,6 +744,7 @@
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.01808785529715762,
     "description": "Expressions over the typed run",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Sim"
@@ -672,9 +754,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/Expr.lean",
+    "presumed_handwritten_lines": 452,
     "proof_lines": 387,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -688,6 +772,7 @@
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.031914893617021274,
     "description": "The typed run, read off the machine",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Examples",
@@ -698,9 +783,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/Interpreter.lean",
+    "presumed_handwritten_lines": 143,
     "proof_lines": 94,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -714,6 +801,7 @@
     "definition_lines": 164,
     "definition_to_proof_line_ratio": 0.8586387434554974,
     "description": "Storage layout and the code sequences",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Machine"
@@ -723,9 +811,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/Layout.lean",
+    "presumed_handwritten_lines": 623,
     "proof_lines": 191,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -741,6 +831,7 @@
     "definition_lines": 289,
     "definition_to_proof_line_ratio": 2.3688524590163933,
     "description": "An EVM-style stack machine",
+    "generated_lines": 0,
     "implemented_by": 1,
     "imports": [
       "Solidity.Semantics"
@@ -750,9 +841,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/Machine.lean",
+    "presumed_handwritten_lines": 697,
     "proof_lines": 122,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -768,6 +861,7 @@
     "definition_lines": 159,
     "definition_to_proof_line_ratio": 0.9244186046511628,
     "description": "The EVM machine with revert and return data (version 2)",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Machine"
@@ -777,9 +871,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MachineV2.lean",
+    "presumed_handwritten_lines": 533,
     "proof_lines": 172,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -792,6 +888,7 @@
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.2647058823529412,
     "description": "Version-2 EVM machine: witnesses and negative controls",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MachineV2"
@@ -801,9 +898,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MachineV2Controls.lean",
+    "presumed_handwritten_lines": 175,
     "proof_lines": 68,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -817,6 +916,7 @@
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 0.19444444444444445,
     "description": "Memory arrays on the word-addressed machine",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.SimLemmas",
@@ -827,9 +927,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/Memory.lean",
+    "presumed_handwritten_lines": 180,
     "proof_lines": 108,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -843,6 +945,7 @@
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.08050847457627118,
     "description": "Bump allocation in word memory",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryHeap"
@@ -852,9 +955,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryAlloc.lean",
+    "presumed_handwritten_lines": 316,
     "proof_lines": 236,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -867,6 +972,7 @@
     "definition_lines": 45,
     "definition_to_proof_line_ratio": 2.3684210526315788,
     "description": "Declarations: cursor, nextCursor, machine",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryAlloc"
@@ -876,9 +982,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryAllocExamples.lean",
+    "presumed_handwritten_lines": 95,
     "proof_lines": 19,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -891,6 +999,7 @@
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.03424657534246575,
     "description": "Source allocation and word-memory allocation",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryAlloc",
@@ -902,9 +1011,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryAllocSource.lean",
+    "presumed_handwritten_lines": 189,
     "proof_lines": 146,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -918,6 +1029,7 @@
     "definition_lines": 396,
     "definition_to_proof_line_ratio": 1.0448548812664908,
     "description": "Declarations: C, size, cursor",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryAllocSource",
@@ -929,9 +1041,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryAllocSourceExamples.lean",
+    "presumed_handwritten_lines": 960,
     "proof_lines": 379,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -944,6 +1058,7 @@
     "definition_lines": 231,
     "definition_to_proof_line_ratio": 0.9352226720647774,
     "description": "Declarations: C, bases, initial",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -955,9 +1070,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryCallExamples.lean",
+    "presumed_handwritten_lines": 612,
     "proof_lines": 247,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -972,6 +1089,7 @@
     "definition_lines": 292,
     "definition_to_proof_line_ratio": 4.5625,
     "description": "Checked internal calls with memory frames",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryCompile",
@@ -982,9 +1100,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryCalls.lean",
+    "presumed_handwritten_lines": 416,
     "proof_lines": 64,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -997,6 +1117,7 @@
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.09183673469387756,
     "description": "Capturing checked bump results on the stack",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryCompound",
@@ -1008,9 +1129,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryCapture.lean",
+    "presumed_handwritten_lines": 138,
     "proof_lines": 98,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1026,6 +1149,7 @@
     "definition_lines": 670,
     "definition_to_proof_line_ratio": 1.384297520661157,
     "description": "A checked compiler path for primitive arrays and structs",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLocals",
@@ -1050,9 +1174,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryCompile.lean",
+    "presumed_handwritten_lines": 1266,
     "proof_lines": 484,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1066,6 +1192,7 @@
     "definition_lines": 154,
     "definition_to_proof_line_ratio": 1.305084745762712,
     "description": "Declarations: C, H, r0",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryCompile",
@@ -1077,9 +1204,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryCompileExamples.lean",
+    "presumed_handwritten_lines": 339,
     "proof_lines": 118,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1092,6 +1221,7 @@
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.03816793893129771,
     "description": "Compound writes and bumps through memory references",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStatements"
@@ -1101,9 +1231,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryCompound.lean",
+    "presumed_handwritten_lines": 178,
     "proof_lines": 131,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1116,6 +1248,7 @@
     "definition_lines": 128,
     "definition_to_proof_line_ratio": 1.9692307692307693,
     "description": "Storage representation bounds for reached memory copies",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStorageStructCopy"
@@ -1125,9 +1258,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryCopyBound.lean",
+    "presumed_handwritten_lines": 231,
     "proof_lines": 65,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1140,6 +1275,7 @@
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.140625,
     "description": "Declarations: vectors_heq, arrays_eq_of_vectors, array_replicate_eq",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryDefaultChildrenSim"
@@ -1149,9 +1285,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryDefaultArraySource.lean",
+    "presumed_handwritten_lines": 88,
     "proof_lines": 64,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1164,6 +1302,7 @@
     "definition_lines": 62,
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: DefaultBuildResult, DefaultBuilder, DefaultBuilder.empty",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectFlatFixed"
@@ -1173,8 +1312,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryDefaultBuilder.lean",
+    "presumed_handwritten_lines": 80,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1187,6 +1328,7 @@
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.15789473684210525,
     "description": "Declarations: defaultChildrenCopy, defaultChildrenCopy_zero, defaultChildrenCopy_succ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryDefaultBuilder",
@@ -1197,9 +1339,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryDefaultChildren.lean",
+    "presumed_handwritten_lines": 82,
     "proof_lines": 57,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1210,6 +1354,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: defaultChildren_sim",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryDefaultChildren"
@@ -1219,9 +1364,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryDefaultChildrenSim.lean",
+    "presumed_handwritten_lines": 127,
     "proof_lines": 118,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1234,6 +1381,7 @@
     "definition_lines": 23,
     "definition_to_proof_line_ratio": 3.8333333333333335,
     "description": "Declarations: defaultCells, compileDefaultAny, compileDefault",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryDefaultDynamic"
@@ -1243,9 +1391,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryDefaultCompile.lean",
+    "presumed_handwritten_lines": 41,
     "proof_lines": 6,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1258,6 +1408,7 @@
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.030303030303030304,
     "description": "Declarations: referenceArrayCode, referenceArray_correct",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryDefaultFixedBuilder",
@@ -1268,9 +1419,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryDefaultDynamic.lean",
+    "presumed_handwritten_lines": 77,
     "proof_lines": 66,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1283,6 +1436,7 @@
     "definition_lines": 65,
     "definition_to_proof_line_ratio": 10.833333333333334,
     "description": "Declarations: fixedDefaultPrefix, fixedDefaultCode, fixedDefaultPrefix_run",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryDefaultParent"
@@ -1292,9 +1446,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryDefaultFixedBuilder.lean",
+    "presumed_handwritten_lines": 82,
     "proof_lines": 6,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1305,6 +1461,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: objectCells_array, AllocatorRepr.adoptDefaultParent, defaultLoop_exit",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryDefaultArraySource"
@@ -1314,9 +1471,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryDefaultParent.lean",
+    "presumed_handwritten_lines": 68,
     "proof_lines": 56,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1329,6 +1488,7 @@
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.25,
     "description": "Primitive memory deletion",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStatements"
@@ -1338,9 +1498,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryDelete.lean",
+    "presumed_handwritten_lines": 64,
     "proof_lines": 28,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1353,6 +1515,7 @@
     "definition_lines": 29,
     "definition_to_proof_line_ratio": 0.26126126126126126,
     "description": "Declarations: C, child, parent",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -1363,9 +1526,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryDynamicFixedDefaultExamples.lean",
+    "presumed_handwritten_lines": 173,
     "proof_lines": 111,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1378,6 +1543,7 @@
     "definition_lines": 40,
     "definition_to_proof_line_ratio": 1.8181818181818181,
     "description": "Declarations: H, ref, base",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Memory"
@@ -1387,9 +1553,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryExamples.lean",
+    "presumed_handwritten_lines": 87,
     "proof_lines": 22,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1402,6 +1570,7 @@
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.10256410256410256,
     "description": "Composing typed value code",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemorySource"
@@ -1411,9 +1580,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryExpr.lean",
+    "presumed_handwritten_lines": 194,
     "proof_lines": 156,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1427,6 +1598,7 @@
     "definition_lines": 236,
     "definition_to_proof_line_ratio": 2.2264150943396226,
     "description": "Declarations: first, other, element",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -1437,9 +1609,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryExprExamples.lean",
+    "presumed_handwritten_lines": 436,
     "proof_lines": 106,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1452,6 +1626,7 @@
     "definition_lines": 80,
     "definition_to_proof_line_ratio": 0.6201550387596899,
     "description": "Declarations: C, childTy, parentTy",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler"
@@ -1461,9 +1636,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryFixedChildArrayExamples.lean",
+    "presumed_handwritten_lines": 257,
     "proof_lines": 129,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1478,6 +1655,7 @@
     "definition_lines": 190,
     "definition_to_proof_line_ratio": 0.979381443298969,
     "description": "A typed, memory-preserving fixed-copy compiler fragment",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryFixedMixedCopy",
@@ -1489,9 +1667,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryFixedCompile.lean",
+    "presumed_handwritten_lines": 435,
     "proof_lines": 194,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1504,6 +1684,7 @@
     "definition_lines": 114,
     "definition_to_proof_line_ratio": 1.4074074074074074,
     "description": "Initialized, inhabited fixed primitive-array inputs to the public compiler.",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -1514,9 +1695,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryFixedCopyExamples.lean",
+    "presumed_handwritten_lines": 246,
     "proof_lines": 81,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1529,6 +1712,7 @@
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 0.26582278481012656,
     "description": "Declarations: C, child, parent",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -1539,9 +1723,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryFixedDefaultExamples.lean",
+    "presumed_handwritten_lines": 126,
     "proof_lines": 79,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1554,6 +1740,7 @@
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 0.3291139240506329,
     "description": "Declarations: C, child, parent",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -1564,9 +1751,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryFixedDynamicDefaultExamples.lean",
+    "presumed_handwritten_lines": 131,
     "proof_lines": 79,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1577,6 +1766,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: assignFixedAwareArray_correct, assignFixedAwareStruct_correct",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryFixedShapeSource"
@@ -1586,9 +1776,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryFixedMixedCopy.lean",
+    "presumed_handwritten_lines": 90,
     "proof_lines": 77,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1601,6 +1793,7 @@
     "definition_lines": 43,
     "definition_to_proof_line_ratio": 0.35537190082644626,
     "description": "Declarations: C, name, H",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -1611,9 +1804,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryFixedMixedExamples.lean",
+    "presumed_handwritten_lines": 178,
     "proof_lines": 121,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1626,6 +1821,7 @@
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.26153846153846155,
     "description": "Declarations: keepCopy, popRange, fixedClear",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryFixedStorageCopy"
@@ -1635,9 +1831,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryFixedShapeCode.lean",
+    "presumed_handwritten_lines": 98,
     "proof_lines": 65,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1648,6 +1846,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: primStrip, primOverlay, fixedPadStore_live",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryFixedShapeCode"
@@ -1657,9 +1856,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryFixedShapeLaws.lean",
+    "presumed_handwritten_lines": 103,
     "proof_lines": 90,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1672,6 +1873,7 @@
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.0759493670886076,
     "description": "Declarations: FixedStateRepr.storeDrop, assignFixedDynamicCode, assignFixedPadCode",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryFixedShapeLaws"
@@ -1681,9 +1883,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryFixedShapeSource.lean",
+    "presumed_handwritten_lines": 99,
     "proof_lines": 79,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1697,6 +1901,7 @@
     "definition_lines": 27,
     "definition_to_proof_line_ratio": 0.2647058823529412,
     "description": "Primitive fixed memory payloads copied to inline storage",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStorageStructCopy"
@@ -1706,9 +1911,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryFixedStorageCopy.lean",
+    "presumed_handwritten_lines": 172,
     "proof_lines": 102,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1721,6 +1928,7 @@
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.43902439024390244,
     "description": "Memory results with fresh identities",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryAllocSource"
@@ -1730,9 +1938,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryGrowResult.lean",
+    "presumed_handwritten_lines": 89,
     "proof_lines": 41,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1745,6 +1955,7 @@
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.12698412698412698,
     "description": "Separated memory objects",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Memory"
@@ -1754,9 +1965,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryHeap.lean",
+    "presumed_handwritten_lines": 97,
     "proof_lines": 63,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1769,6 +1982,7 @@
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.04455445544554455,
     "description": "Local operations in the memory compiler",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemorySource"
@@ -1778,9 +1992,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLocals.lean",
+    "presumed_handwritten_lines": 242,
     "proof_lines": 202,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1795,6 +2011,7 @@
     "definition_lines": 45,
     "definition_to_proof_line_ratio": 0.31690140845070425,
     "description": "Checked memory loops",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryCompile"
@@ -1804,9 +2021,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoop.lean",
+    "presumed_handwritten_lines": 228,
     "proof_lines": 142,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1819,6 +2038,7 @@
     "definition_lines": 50,
     "definition_to_proof_line_ratio": 0.9090909090909091,
     "description": "Declarations: C, \u0393, R",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopExamples"
@@ -1828,9 +2048,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopAllocExamples.lean",
+    "presumed_handwritten_lines": 146,
     "proof_lines": 55,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1845,6 +2067,7 @@
     "definition_lines": 135,
     "definition_to_proof_line_ratio": 0.6553398058252428,
     "description": "Declarations: StmtCert, ProgCert, StmtCert.Cost",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoop"
@@ -1854,9 +2077,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopCompile.lean",
+    "presumed_handwritten_lines": 406,
     "proof_lines": 206,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1869,6 +2094,7 @@
     "definition_lines": 35,
     "definition_to_proof_line_ratio": 0.7,
     "description": "Declarations: condition, loopStmt, program",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -1880,9 +2106,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopExamples.lean",
+    "presumed_handwritten_lines": 151,
     "proof_lines": 50,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1896,6 +2124,7 @@
     "definition_lines": 31,
     "definition_to_proof_line_ratio": 0.17415730337078653,
     "description": "Declarations: CountedLoopPrefix, CountedLoopPrefix.forget, iterN_succ_of_pending",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizon"
@@ -1905,9 +2134,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopFiniteHorizon.lean",
+    "presumed_handwritten_lines": 250,
     "proof_lines": 178,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1920,6 +2151,7 @@
     "definition_lines": 38,
     "definition_to_proof_line_ratio": 0.6229508196721312,
     "description": "Declarations: C, \u0393, R",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopFiniteHorizon",
@@ -1930,9 +2162,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopFiniteHorizonControls.lean",
+    "presumed_handwritten_lines": 144,
     "proof_lines": 61,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1946,6 +2180,7 @@
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.19767441860465115,
     "description": "Public finite-horizon transport for the actual memory-loop source and target",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoop"
@@ -1955,9 +2190,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizon.lean",
+    "presumed_handwritten_lines": 132,
     "proof_lines": 86,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1970,6 +2207,7 @@
     "definition_lines": 40,
     "definition_to_proof_line_ratio": 1.0256410256410255,
     "description": "Declarations: C, \u0393, R",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizon",
@@ -1980,9 +2218,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonAllocControls.lean",
+    "presumed_handwritten_lines": 115,
     "proof_lines": 39,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -1993,6 +2233,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: iterN_add_of_pending, loopIterN_add_of_pending",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopFiniteHorizon"
@@ -2002,9 +2243,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonAppend.lean",
+    "presumed_handwritten_lines": 42,
     "proof_lines": 31,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2015,6 +2258,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: source_append, target_append",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonAppend",
@@ -2026,9 +2270,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonAppendControls.lean",
+    "presumed_handwritten_lines": 19,
     "proof_lines": 6,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2039,6 +2285,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: FiniteLoopRoom.succ_iff, FiniteLoopRoom.succ_of_stopped",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonRestriction"
@@ -2048,9 +2295,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonCapacity.lean",
+    "presumed_handwritten_lines": 40,
     "proof_lines": 27,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2061,6 +2310,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: stop_room_one, spin_room_one, stop_transport",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonCapacity",
@@ -2071,9 +2321,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonCapacityControls.lean",
+    "presumed_handwritten_lines": 33,
     "proof_lines": 19,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2084,6 +2336,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: CountedHorizonRelation.completed_state, LoopCert.target_completed_prefix, LoopCert.completed_runs",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopFiniteHorizon"
@@ -2093,9 +2346,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonCompleted.lean",
+    "presumed_handwritten_lines": 51,
     "proof_lines": 37,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2106,6 +2361,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: LoopCert.completed_allocator",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonCompleted",
@@ -2116,9 +2372,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonCompletedAllocator.lean",
+    "presumed_handwritten_lines": 33,
     "proof_lines": 21,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2129,6 +2387,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: stop_zero_prefix",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonCompletedAllocator",
@@ -2140,9 +2399,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonCompletedAllocatorControls.lean",
+    "presumed_handwritten_lines": 26,
     "proof_lines": 13,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2153,6 +2414,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: stop_target_one, stop_runs",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonCompleted",
@@ -2163,9 +2425,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonCompletedControls.lean",
+    "presumed_handwritten_lines": 21,
     "proof_lines": 9,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2178,6 +2442,7 @@
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 0.9130434782608695,
     "description": "Declarations: stop, spin, body",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizon",
@@ -2188,9 +2453,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonControls.lean",
+    "presumed_handwritten_lines": 66,
     "proof_lines": 23,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2201,6 +2468,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: CountedLoopPrefix.state_unique, CountedLoopPrefix.cost_unique, countedPrefix_of_iterN_pending_unique",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopFiniteHorizon"
@@ -2210,9 +2478,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonCost.lean",
+    "presumed_handwritten_lines": 38,
     "proof_lines": 25,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2223,6 +2493,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: spin_source_one, spin_unique_zero_cost",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonCost",
@@ -2233,9 +2504,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonCostControls.lean",
+    "presumed_handwritten_lines": 23,
     "proof_lines": 11,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2246,6 +2519,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: CountedLoopPrefix.cost_le, CountedLoopPrefix.extend_pending_mono",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonCost"
@@ -2255,9 +2529,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonCostGrowth.lean",
+    "presumed_handwritten_lines": 36,
     "proof_lines": 24,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2268,6 +2544,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: spin_source_two, spin_extension, allocating_cost_exact",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonCostGrowth",
@@ -2279,9 +2556,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonCostGrowthControls.lean",
+    "presumed_handwritten_lines": 32,
     "proof_lines": 18,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2294,6 +2573,7 @@
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.4230769230769231,
     "description": "Declarations: body, code, cert",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectFinite"
@@ -2303,9 +2583,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectAllocating.lean",
+    "presumed_handwritten_lines": 54,
     "proof_lines": 26,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2316,6 +2598,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: body_run_ok, prefixes, source_pending",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectAllocating"
@@ -2325,9 +2608,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectAllocatingPrefixes.lean",
+    "presumed_handwritten_lines": 31,
     "proof_lines": 17,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2338,6 +2623,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: target_pending, target_allocator",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectAllocatingPrefixes",
@@ -2349,9 +2635,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectAllocatingTarget.lean",
+    "presumed_handwritten_lines": 59,
     "proof_lines": 44,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2362,6 +2650,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: ProgFrag.correct_scope",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectConstructionCompile",
@@ -2372,9 +2661,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectBodyScope.lean",
+    "presumed_handwritten_lines": 23,
     "proof_lines": 10,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2385,6 +2676,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: FiniteLoopRoom.restrict, FiniteLoopRoom.succ_iff, FiniteLoopRoom.succ_of_stopped",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectPrefix"
@@ -2394,9 +2686,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectCapacity.lean",
+    "presumed_handwritten_lines": 47,
     "proof_lines": 33,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2407,6 +2701,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: bounded_horizons",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectCompileAllocating",
@@ -2417,9 +2712,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectCapacityControls.lean",
+    "presumed_handwritten_lines": 33,
     "proof_lines": 21,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2430,6 +2727,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: checked_nested_reads_after_loop",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectAllocatingTarget"
@@ -2439,9 +2737,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectCheckedNested.lean",
+    "presumed_handwritten_lines": 59,
     "proof_lines": 45,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2452,6 +2752,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: checked_local_reads_after_loop",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectAllocatingTarget"
@@ -2461,9 +2762,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectCheckedReads.lean",
+    "presumed_handwritten_lines": 41,
     "proof_lines": 27,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2477,6 +2780,7 @@
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.6666666666666666,
     "description": "Declarations: CompiledLoop, compileLoop, CompiledLoop.correct_finite_horizon",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectFinite"
@@ -2486,9 +2790,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectCompile.lean",
+    "presumed_handwritten_lines": 46,
     "proof_lines": 18,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2499,6 +2805,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: selected, represented",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectCompile",
@@ -2509,9 +2816,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectCompileAllocating.lean",
+    "presumed_handwritten_lines": 36,
     "proof_lines": 22,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2522,6 +2831,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: CountedHorizonRelation.completed_state, LoopCert.target_completed_prefix, LoopCert.completed_runs",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectFinite"
@@ -2531,9 +2841,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectCompletedAllocator.lean",
+    "presumed_handwritten_lines": 73,
     "proof_lines": 58,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2544,6 +2856,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: CountedLoopPrefix.state_unique, CountedLoopPrefix.cost_unique, countedPrefix_of_iterN_pending_unique",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectCoverage"
@@ -2553,9 +2866,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectCost.lean",
+    "presumed_handwritten_lines": 66,
     "proof_lines": 49,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2566,6 +2881,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: CountedLoopPrefix.extend_pending, countedPrefix_of_iterN_pending",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectPrefix"
@@ -2575,9 +2891,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectCoverage.lean",
+    "presumed_handwritten_lines": 44,
     "proof_lines": 31,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2588,6 +2906,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: bounded_execution",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectAllocatingTarget",
@@ -2599,9 +2918,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectCursorControls.lean",
+    "presumed_handwritten_lines": 41,
     "proof_lines": 28,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2614,6 +2935,7 @@
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.16842105263157894,
     "description": "Declarations: CountedHorizonRelation, CountedHorizonRelation.forget, LoopCert.finite_horizon_step",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectStep"
@@ -2623,9 +2945,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectFinite.lean",
+    "presumed_handwritten_lines": 133,
     "proof_lines": 95,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2638,6 +2962,7 @@
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.15384615384615385,
     "description": "Declarations: cert, represented, populated_horizons",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectFinite",
@@ -2648,9 +2973,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectFiniteControls.lean",
+    "presumed_handwritten_lines": 43,
     "proof_lines": 26,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2661,6 +2988,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: bounded_heap_execution",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectCursorControls",
@@ -2671,9 +2999,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectHeapControls.lean",
+    "presumed_handwritten_lines": 40,
     "proof_lines": 27,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2684,6 +3014,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: body_heap_length, prefix_heap_length",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectAllocatingPrefixes"
@@ -2693,9 +3024,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectHeapGrowth.lean",
+    "presumed_handwritten_lines": 27,
     "proof_lines": 14,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2706,6 +3039,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: body_keeps_heap, prefix_keeps_heap",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectAllocatingPrefixes"
@@ -2715,9 +3049,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectHeapKeeps.lean",
+    "presumed_handwritten_lines": 24,
     "proof_lines": 11,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2728,6 +3064,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: body_heap_types, prefix_heap_types",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectAllocatingPrefixes"
@@ -2737,9 +3074,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectHeapTypes.lean",
+    "presumed_handwritten_lines": 27,
     "proof_lines": 14,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2752,6 +3091,7 @@
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.3793103448275862,
     "description": "Declarations: OriginalLiveCell, target_old_live_cells",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectOldHeaders",
@@ -2762,9 +3102,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectLiveCells.lean",
+    "presumed_handwritten_lines": 56,
     "proof_lines": 29,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2775,6 +3117,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: body_local_ref, prefix_local_ref, target_local_aliases",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectAllocatingTarget",
@@ -2785,9 +3128,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectLocalAlias.lean",
+    "presumed_handwritten_lines": 68,
     "proof_lines": 52,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2798,6 +3143,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: populated_aliases",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectLocalAlias",
@@ -2808,9 +3154,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectLocalAliasControls.lean",
+    "presumed_handwritten_lines": 41,
     "proof_lines": 28,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2821,6 +3169,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: target_local_array_bounds",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectLocalAlias",
@@ -2831,9 +3180,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectLocalBounds.lean",
+    "presumed_handwritten_lines": 57,
     "proof_lines": 43,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2844,6 +3195,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: populated_read_outcomes",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectLocalRefLoads",
@@ -2855,9 +3207,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectLocalLoadControls.lean",
+    "presumed_handwritten_lines": 45,
     "proof_lines": 31,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2868,6 +3222,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: target_local_array_loads",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectLocalAlias",
@@ -2878,9 +3233,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectLocalLoads.lean",
+    "presumed_handwritten_lines": 64,
     "proof_lines": 50,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2891,6 +3248,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: target_local_array_reads",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectLocalAlias",
@@ -2901,9 +3259,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectLocalReads.lean",
+    "presumed_handwritten_lines": 52,
     "proof_lines": 37,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2914,6 +3274,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: target_local_reference_loads",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectLocalAlias",
@@ -2924,9 +3285,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectLocalRefLoads.lean",
+    "presumed_handwritten_lines": 67,
     "proof_lines": 52,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2937,6 +3300,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: target_nested_array_bounds",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectLocalRefLoads",
@@ -2947,9 +3311,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectNestedBounds.lean",
+    "presumed_handwritten_lines": 66,
     "proof_lines": 51,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2962,6 +3328,7 @@
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.17142857142857143,
     "description": "Declarations: nestedCode, populated_nested_outcomes",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectNestedLoads",
@@ -2974,9 +3341,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectNestedControls.lean",
+    "presumed_handwritten_lines": 58,
     "proof_lines": 35,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -2987,6 +3356,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: target_nested_array_loads",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectLocalRefLoads"
@@ -2996,9 +3366,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectNestedLoads.lean",
+    "presumed_handwritten_lines": 64,
     "proof_lines": 50,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3009,6 +3381,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: body_ref_cases, prefix_new_empty, target_new_array_headers",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectAllocatingTarget",
@@ -3019,9 +3392,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectNewArrays.lean",
+    "presumed_handwritten_lines": 67,
     "proof_lines": 52,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3032,6 +3407,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: prefix_new_ref, target_new_array_inventory",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectNewArrays",
@@ -3042,9 +3418,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectNewInventory.lean",
+    "presumed_handwritten_lines": 46,
     "proof_lines": 31,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3055,6 +3433,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: target_new_array_separation",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectNewInventory",
@@ -3065,9 +3444,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectNewSeparation.lean",
+    "presumed_handwritten_lines": 54,
     "proof_lines": 41,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3078,6 +3459,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: two_fresh_arrays",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectNewSeparation",
@@ -3088,9 +3470,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectNewSeparationControls.lean",
+    "presumed_handwritten_lines": 51,
     "proof_lines": 39,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3101,6 +3485,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: finiteLoopRoom_iff_observations, LoopCert.correct_horizon_of_observation_room",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectCost",
@@ -3111,9 +3496,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectObservedRoom.lean",
+    "presumed_handwritten_lines": 43,
     "proof_lines": 29,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3124,6 +3511,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: value_word_unique, target_old_array_elements",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectAllocatingTarget",
@@ -3134,9 +3522,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectOldElements.lean",
+    "presumed_handwritten_lines": 58,
     "proof_lines": 44,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3147,6 +3537,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: target_old_array_headers",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectAllocatingTarget",
@@ -3157,9 +3548,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectOldHeaders.lean",
+    "presumed_handwritten_lines": 33,
     "proof_lines": 20,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3170,6 +3563,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: target_old_struct_primitive_fields, target_old_struct_reference_fields",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectOldElements"
@@ -3179,9 +3573,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectOldStructs.lean",
+    "presumed_handwritten_lines": 65,
     "proof_lines": 51,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3192,6 +3588,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: CountedHorizonRelation.pending_iff, CountedHorizonRelation.revert_iff, CountedHorizonRelation.no_fault",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectFinite"
@@ -3201,9 +3598,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectOutcomes.lean",
+    "presumed_handwritten_lines": 67,
     "proof_lines": 49,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3214,6 +3613,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: CountedHorizonRelation.pending_state, LoopCert.target_pending_prefix, LoopCert.pending_allocator",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectFinite"
@@ -3223,9 +3623,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectPendingAllocator.lean",
+    "presumed_handwritten_lines": 59,
     "proof_lines": 45,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3239,6 +3641,7 @@
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.5384615384615384,
     "description": "Declarations: CountedLoopPrefix, FiniteLoopRoom, CountedLoopPrefix.iterN_eq",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectConstructionCompile",
@@ -3249,9 +3652,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectPrefix.lean",
+    "presumed_handwritten_lines": 58,
     "proof_lines": 26,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3262,6 +3667,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: LoopCert.resume_pending",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectPendingAllocator",
@@ -3272,9 +3678,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectResume.lean",
+    "presumed_handwritten_lines": 29,
     "proof_lines": 16,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3285,6 +3693,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: target_retained_new_headers",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectNewInventory",
@@ -3296,9 +3705,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectRetainedNew.lean",
+    "presumed_handwritten_lines": 45,
     "proof_lines": 30,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3309,6 +3720,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: target_retained_new_refs",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectNewInventory",
@@ -3319,9 +3731,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectRetainedRefs.lean",
+    "presumed_handwritten_lines": 51,
     "proof_lines": 37,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3334,6 +3748,7 @@
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.30303030303030304,
     "description": "Declarations: LoopRunResult, LoopCert.correct_runs",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectFinite"
@@ -3343,9 +3758,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectRuns.lean",
+    "presumed_handwritten_lines": 57,
     "proof_lines": 33,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3356,6 +3773,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: StateRepr.drop, GrowingResult.drop",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectAllocationCost",
@@ -3366,9 +3784,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectScope.lean",
+    "presumed_handwritten_lines": 33,
     "proof_lines": 19,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3379,6 +3799,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: populated_drop",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectScope",
@@ -3389,9 +3810,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectScopeControls.lean",
+    "presumed_handwritten_lines": 19,
     "proof_lines": 8,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3402,6 +3825,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: FiniteLoopRoom.after_completion, LoopCert.correct_horizons_after_completion",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectFinite"
@@ -3411,9 +3835,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectStability.lean",
+    "presumed_handwritten_lines": 38,
     "proof_lines": 25,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3424,6 +3850,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: LoopCert.correct, LoopCert.correct_of_terminal",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectRuns",
@@ -3434,9 +3861,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectStatement.lean",
+    "presumed_handwritten_lines": 43,
     "proof_lines": 29,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3447,6 +3876,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: represented, populated_runs",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectStatement",
@@ -3457,9 +3887,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectStatementControls.lean",
+    "presumed_handwritten_lines": 31,
     "proof_lines": 19,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3473,6 +3905,7 @@
     "definition_lines": 22,
     "definition_to_proof_line_ratio": 0.5,
     "description": "Declarations: LoopCert, HorizonRelation, LoopCert.horizon_step",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectCoverage",
@@ -3483,9 +3916,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectStep.lean",
+    "presumed_handwritten_lines": 81,
     "proof_lines": 44,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3496,6 +3931,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: CountedLoopPrefix.cost_le_turns, finiteLoopRoom_of_turn_bound",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObjectPrefix"
@@ -3505,9 +3941,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObjectTurnBound.lean",
+    "presumed_handwritten_lines": 40,
     "proof_lines": 27,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3518,6 +3956,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: finiteLoopRoom_iff_observations, LoopCert.correct_horizon_of_observation_room",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonCost"
@@ -3527,9 +3966,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObservedRoom.lean",
+    "presumed_handwritten_lines": 42,
     "proof_lines": 29,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3540,6 +3981,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: represented",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonObservedRoom",
@@ -3550,9 +3992,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonObservedRoomControls.lean",
+    "presumed_handwritten_lines": 26,
     "proof_lines": 14,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3563,6 +4007,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: CountedHorizonRelation.pending_iff, CountedHorizonRelation.revert_iff, CountedHorizonRelation.no_fault",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopFiniteHorizon"
@@ -3572,9 +4017,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonOutcomes.lean",
+    "presumed_handwritten_lines": 46,
     "proof_lines": 32,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3585,6 +4032,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: no_fault, pending_agreement",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonOutcomes",
@@ -3595,9 +4043,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonOutcomesControls.lean",
+    "presumed_handwritten_lines": 22,
     "proof_lines": 10,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3608,6 +4058,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: CountedHorizonRelation.pending_state, LoopCert.target_pending_prefix",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopFiniteHorizon"
@@ -3617,9 +4068,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonPending.lean",
+    "presumed_handwritten_lines": 37,
     "proof_lines": 24,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3630,6 +4083,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: spin_target_one, spin_prefix_one",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonPending",
@@ -3640,9 +4094,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonPendingControls.lean",
+    "presumed_handwritten_lines": 26,
     "proof_lines": 14,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3653,6 +4109,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: FiniteLoopRoom.prefix_input, LoopCert.pending_allocator",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonPending"
@@ -3662,9 +4119,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonPrefixCapacity.lean",
+    "presumed_handwritten_lines": 43,
     "proof_lines": 30,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3675,6 +4134,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: body_run, allocating_input",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonPrefixCapacity",
@@ -3685,9 +4145,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonPrefixCapacityControls.lean",
+    "presumed_handwritten_lines": 29,
     "proof_lines": 17,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3698,6 +4160,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: FiniteLoopRoom.restrict, LoopCert.correct_horizons_le",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopFiniteHorizon"
@@ -3707,9 +4170,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonRestriction.lean",
+    "presumed_handwritten_lines": 30,
     "proof_lines": 17,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3720,6 +4185,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: represented",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonRestriction",
@@ -3730,9 +4196,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonRestrictionControls.lean",
+    "presumed_handwritten_lines": 21,
     "proof_lines": 9,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3743,6 +4211,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: LoopCert.resume_pending",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonPending",
@@ -3753,9 +4222,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonResume.lean",
+    "presumed_handwritten_lines": 28,
     "proof_lines": 16,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3766,6 +4237,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: spin_resume",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonResume",
@@ -3776,9 +4248,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonResumeControls.lean",
+    "presumed_handwritten_lines": 23,
     "proof_lines": 11,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3789,6 +4263,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: LoopCert.finite_revert_iff, LoopCert.reverted_runs",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonOutcomes"
@@ -3798,9 +4273,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonRevert.lean",
+    "presumed_handwritten_lines": 29,
     "proof_lines": 17,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3813,6 +4290,7 @@
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.42105263157894735,
     "description": "Declarations: condition, compiled, cert",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonRevert",
@@ -3823,9 +4301,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonRevertControls.lean",
+    "presumed_handwritten_lines": 42,
     "proof_lines": 19,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3836,6 +4316,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: FiniteLoopRoom.after_completion, LoopCert.correct_horizons_after_completion",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopFiniteHorizon"
@@ -3845,9 +4326,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonStability.lean",
+    "presumed_handwritten_lines": 38,
     "proof_lines": 25,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3858,6 +4341,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: stop_source_one, stop_all_horizons",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonStability",
@@ -3868,9 +4352,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonStabilityControls.lean",
+    "presumed_handwritten_lines": 24,
     "proof_lines": 12,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3881,6 +4367,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: CountedLoopPrefix.cost_le_turns, finiteLoopRoom_of_turn_bound",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopFiniteHorizon"
@@ -3890,9 +4377,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonTurnBound.lean",
+    "presumed_handwritten_lines": 40,
     "proof_lines": 27,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3905,6 +4394,7 @@
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.3,
     "description": "Declarations: body, body_cost, allocating_room",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizonTurnBound"
@@ -3914,9 +4404,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopHorizonTurnBoundControls.lean",
+    "presumed_handwritten_lines": 25,
     "proof_lines": 10,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3929,6 +4421,7 @@
     "definition_lines": 112,
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: singleton, StmtCert, ProgCert",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopCompile"
@@ -3938,8 +4431,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopScope.lean",
+    "presumed_handwritten_lines": 134,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3952,6 +4447,7 @@
     "definition_lines": 85,
     "definition_to_proof_line_ratio": 0.4594594594594595,
     "description": "Declarations: C, \u0393, R",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopExamples",
@@ -3963,9 +4459,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopScopeAllocExamples.lean",
+    "presumed_handwritten_lines": 366,
     "proof_lines": 185,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -3978,6 +4476,7 @@
     "definition_lines": 36,
     "definition_to_proof_line_ratio": 0.34285714285714286,
     "description": "Declarations: OldCostView, old_cost_view, singleton_finite_cost",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopScopeDemand"
@@ -3987,9 +4486,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopScopeBudget.lean",
+    "presumed_handwritten_lines": 160,
     "proof_lines": 105,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4003,6 +4504,7 @@
     "definition_lines": 90,
     "definition_to_proof_line_ratio": 0.6818181818181818,
     "description": "Declarations: CompiledStmt, CompiledProg, compileBase",
+    "generated_lines": 0,
     "implemented_by": 2,
     "imports": [
       "Solidity.Evm.MemoryLoopScopeRoom"
@@ -4012,9 +4514,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopScopeCompile.lean",
+    "presumed_handwritten_lines": 247,
     "proof_lines": 132,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4027,6 +4531,7 @@
     "definition_lines": 28,
     "definition_to_proof_line_ratio": 0.35443037974683544,
     "description": "Declarations: StmtDemandView, DemandView, StmtDemand.view",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopScopeRoom"
@@ -4036,9 +4541,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopScopeDemand.lean",
+    "presumed_handwritten_lines": 128,
     "proof_lines": 79,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4051,6 +4558,7 @@
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.109375,
     "description": "Declarations: trueSpin, trueSpin_diverges, spinCondition",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -4062,9 +4570,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopScopeDivergenceExamples.lean",
+    "presumed_handwritten_lines": 177,
     "proof_lines": 128,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4077,6 +4587,7 @@
     "definition_lines": 35,
     "definition_to_proof_line_ratio": 1.1666666666666667,
     "description": "Declarations: cond, turns, blockTurns",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -4087,9 +4598,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopScopeExamples.lean",
+    "presumed_handwritten_lines": 119,
     "proof_lines": 30,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4102,6 +4615,7 @@
     "definition_lines": 47,
     "definition_to_proof_line_ratio": 1.8076923076923077,
     "description": "Declarations: stmtMetaM, progMetaM, stmtMeta",
+    "generated_lines": 0,
     "implemented_by": 2,
     "imports": [
       "Solidity.Evm.MemoryLoopScope"
@@ -4111,9 +4625,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopScopeMeta.lean",
+    "presumed_handwritten_lines": 88,
     "proof_lines": 26,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4124,6 +4640,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: old_stmt_cost_zero, old_cost_zero, cost_nonallocating",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopScopeSound"
@@ -4133,9 +4650,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopScopeRoom.lean",
+    "presumed_handwritten_lines": 113,
     "proof_lines": 98,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4148,6 +4667,7 @@
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.06666666666666667,
     "description": "Declarations: StmtSound, ProgSound, run_singleton",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopScopeMeta"
@@ -4157,9 +4677,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopScopeSound.lean",
+    "presumed_handwritten_lines": 193,
     "proof_lines": 165,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4172,6 +4694,7 @@
     "definition_lines": 51,
     "definition_to_proof_line_ratio": 0.9272727272727272,
     "description": "Declarations: C, irC, bases",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopAllocExamples",
@@ -4183,9 +4706,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopScopeSourceExamples.lean",
+    "presumed_handwritten_lines": 142,
     "proof_lines": 55,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4198,6 +4723,7 @@
     "definition_lines": 51,
     "definition_to_proof_line_ratio": 0.9272727272727272,
     "description": "Declarations: C, irC, bases",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopAllocExamples",
@@ -4208,9 +4734,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryLoopSourceExamples.lean",
+    "presumed_handwritten_lines": 141,
     "proof_lines": 55,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4225,6 +4753,7 @@
     "definition_lines": 33,
     "definition_to_proof_line_ratio": 0.4125,
     "description": "Declarations: Certificate, Prefix, Room",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizon",
@@ -4236,9 +4765,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryMixedLoop.lean",
+    "presumed_handwritten_lines": 135,
     "proof_lines": 80,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4251,6 +4782,7 @@
     "definition_lines": 22,
     "definition_to_proof_line_ratio": 0.6111111111111112,
     "description": "Declarations: C, \u0393, R",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryMixedLoopCompile",
@@ -4263,9 +4795,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryMixedLoopAllocation.lean",
+    "presumed_handwritten_lines": 78,
     "proof_lines": 36,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4279,6 +4813,7 @@
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.1527777777777778,
     "description": "Declarations: Prefix.cost_zero, room_nonallocating, room_one_turn",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryMixedLoop"
@@ -4288,9 +4823,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryMixedLoopCompile.lean",
+    "presumed_handwritten_lines": 104,
     "proof_lines": 72,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4304,6 +4841,7 @@
     "definition_lines": 36,
     "definition_to_proof_line_ratio": 1.125,
     "description": "Declarations: D, condition, reset",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryMixedLoopCompile",
@@ -4315,9 +4853,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryMixedLoopControls.lean",
+    "presumed_handwritten_lines": 116,
     "proof_lines": 32,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4331,6 +4871,7 @@
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.1956521739130435,
     "description": "Declarations: D, yes, no",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryMixedLoopCompile",
@@ -4341,9 +4882,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryMixedLoopDivergence.lean",
+    "presumed_handwritten_lines": 74,
     "proof_lines": 46,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4357,6 +4900,7 @@
     "definition_lines": 31,
     "definition_to_proof_line_ratio": 0.25833333333333336,
     "description": "Declarations: CountedPrefix, CountedPrefix.forget, CountedPrefix.iterN_eq",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryMixedLoopCompile",
@@ -4367,9 +4911,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryMixedLoopFinite.lean",
+    "presumed_handwritten_lines": 171,
     "proof_lines": 120,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4382,6 +4928,7 @@
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 0.26582278481012656,
     "description": "Declarations: C, child, parent",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -4392,9 +4939,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryNestedFixedDefaultExamples.lean",
+    "presumed_handwritten_lines": 126,
     "proof_lines": 79,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4407,6 +4956,7 @@
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.09243697478991597,
     "description": "Declarations: fixedAddrCode, addressCode, readCode",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjects"
@@ -4416,9 +4966,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryObjectAccess.lean",
+    "presumed_handwritten_lines": 156,
     "proof_lines": 119,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4431,6 +4983,7 @@
     "definition_lines": 38,
     "definition_to_proof_line_ratio": 0.926829268292683,
     "description": "Declarations: GrowingResult, ResultRepr.growing, arrayCost",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectPrimitive",
@@ -4441,9 +4994,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryObjectAllocationCost.lean",
+    "presumed_handwritten_lines": 107,
     "proof_lines": 41,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4457,6 +5012,7 @@
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.17592592592592593,
     "description": "Declarations: HeapRepr.mem_eq, AllocatorRepr, AllocatorRepr.legacy",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectFrame"
@@ -4466,9 +5022,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryObjectAllocator.lean",
+    "presumed_handwritten_lines": 157,
     "proof_lines": 108,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4481,6 +5039,7 @@
     "definition_lines": 101,
     "definition_to_proof_line_ratio": 0.7112676056338029,
     "description": "Declarations: C, childTy, parentTy",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -4491,9 +5050,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryObjectArrayExamples.lean",
+    "presumed_handwritten_lines": 297,
     "proof_lines": 142,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4506,6 +5067,7 @@
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.2962962962962963,
     "description": "Declarations: childrenCondition, storeChild, childrenBody",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectReserve"
@@ -4515,9 +5077,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryObjectChildLoop.lean",
+    "presumed_handwritten_lines": 48,
     "proof_lines": 27,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4530,6 +5094,7 @@
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.05263157894736842,
     "description": "Declarations: childrenCopy, childrenCopy_zero, childrenCopy_succ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectChildLoop"
@@ -4539,9 +5104,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryObjectChildrenCopy.lean",
+    "presumed_handwritten_lines": 76,
     "proof_lines": 57,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4552,6 +5119,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: storeChildMachine_eq, children_sim",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectChildrenCopy"
@@ -4561,9 +5129,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryObjectChildrenSim.lean",
+    "presumed_handwritten_lines": 122,
     "proof_lines": 111,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4578,6 +5148,7 @@
     "definition_lines": 72,
     "definition_to_proof_line_ratio": 1.6,
     "description": "Declarations: StmtFrag, ProgFrag, CompiledStmt",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectStatements",
@@ -4588,9 +5159,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryObjectCompile.lean",
+    "presumed_handwritten_lines": 136,
     "proof_lines": 45,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4605,6 +5178,7 @@
     "definition_lines": 107,
     "definition_to_proof_line_ratio": 0.4495798319327731,
     "description": "Declarations: StmtFrag, ProgFrag, CompiledStmt",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectAllocationCost",
@@ -4615,9 +5189,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryObjectConstructionCompile.lean",
+    "presumed_handwritten_lines": 369,
     "proof_lines": 238,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4630,6 +5206,7 @@
     "definition_lines": 83,
     "definition_to_proof_line_ratio": 0.4256410256410256,
     "description": "Declarations: C, child, parent",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -4640,9 +5217,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryObjectConstructionExamples.lean",
+    "presumed_handwritten_lines": 336,
     "proof_lines": 195,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4655,6 +5234,7 @@
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.04,
     "description": "Declarations: StateRepr.adopt, nested_decl, nested_rebind",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectNested",
@@ -4665,9 +5245,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryObjectConstructionSource.lean",
+    "presumed_handwritten_lines": 145,
     "proof_lines": 125,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4680,6 +5262,7 @@
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.005917159763313609,
     "description": "Declarations: emptyArray, emptyArray_copy, newEmptyArray_copy",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectGrow",
@@ -4690,9 +5273,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryObjectEmpty.lean",
+    "presumed_handwritten_lines": 194,
     "proof_lines": 169,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4705,6 +5290,7 @@
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.019230769230769232,
     "description": "Declarations: ValueSim, binaryValue_correct, unaryValue_correct",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectAllocator",
@@ -4715,9 +5301,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryObjectExpr.lean",
+    "presumed_handwritten_lines": 173,
     "proof_lines": 156,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4728,6 +5316,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: cells_setStruct, HeapRepr.setStruct, StateRepr.setStruct",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectValues",
@@ -4738,9 +5327,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryObjectFieldFrame.lean",
+    "presumed_handwritten_lines": 79,
     "proof_lines": 65,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4753,6 +5344,7 @@
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.031746031746031744,
     "description": "Declarations: defaultFixed, copyPrimitiveDefaults, defaultFixed_copy",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectFlatStruct"
@@ -4762,9 +5354,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryObjectFlatFixed.lean",
+    "presumed_handwritten_lines": 77,
     "proof_lines": 63,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4777,6 +5371,7 @@
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.0423728813559322,
     "description": "Declarations: objectCells, cells_alloc_fresh, Ownership.adopt",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectReserve",
@@ -4787,9 +5382,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryObjectFlatStruct.lean",
+    "presumed_handwritten_lines": 141,
     "proof_lines": 118,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4800,6 +5397,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: Ownership.base_injective, cells_set, Ownership.setArray",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectAccess"
@@ -4809,9 +5407,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryObjectFrame.lean",
+    "presumed_handwritten_lines": 209,
     "proof_lines": 184,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4822,6 +5422,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: allocRef_split, ValueRepr.wk, cells_keeps",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectAllocator",
@@ -4832,9 +5433,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryObjectGrow.lean",
+    "presumed_handwritten_lines": 112,
     "proof_lines": 96,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4847,6 +5450,7 @@
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.08256880733944955,
     "description": "Declarations: nestedCopy, nestedCopy_source, nestedPrefix",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectChildrenSim"
@@ -4856,9 +5460,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryObjectNested.lean",
+    "presumed_handwritten_lines": 134,
     "proof_lines": 109,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4873,6 +5479,7 @@
     "definition_lines": 30,
     "definition_to_proof_line_ratio": 0.3,
     "description": "Declarations: PtrFrag, CompiledPtr, compilePtrAny",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectAllocator"
@@ -4882,9 +5489,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryObjectPaths.lean",
+    "presumed_handwritten_lines": 149,
     "proof_lines": 100,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4895,6 +5504,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: AllocatorRepr.allocatePrimitive, StateRepr.allocatePrimitive, primitiveDeclare_correct",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectConstructionSource"
@@ -4904,9 +5514,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryObjectPrimitive.lean",
+    "presumed_handwritten_lines": 126,
     "proof_lines": 113,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4919,6 +5531,7 @@
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.05172413793103448,
     "description": "Declarations: Gap, AllocatorRepr.reserveArray, AllocatorRepr.writeGap",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectEmpty"
@@ -4928,9 +5541,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryObjectReserve.lean",
+    "presumed_handwritten_lines": 78,
     "proof_lines": 58,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4945,6 +5560,7 @@
     "definition_lines": 22,
     "definition_to_proof_line_ratio": 0.1437908496732026,
     "description": "Declarations: SrcFrag, CompiledSrc, compileSrc",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectValues",
@@ -4955,9 +5571,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryObjectStatements.lean",
+    "presumed_handwritten_lines": 196,
     "proof_lines": 153,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4972,6 +5590,7 @@
     "definition_lines": 54,
     "definition_to_proof_line_ratio": 3.375,
     "description": "Declarations: ValFrag, CompiledVal, compileVal",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryObjectPaths",
@@ -4982,9 +5601,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryObjectValues.lean",
+    "presumed_handwritten_lines": 83,
     "proof_lines": 16,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -4998,6 +5619,7 @@
     "definition_lines": 34,
     "definition_to_proof_line_ratio": 0.2956521739130435,
     "description": "Typed ownership of every represented memory object",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRefArrayState"
@@ -5007,9 +5629,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryObjects.lean",
+    "presumed_handwritten_lines": 194,
     "proof_lines": 115,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5022,6 +5646,7 @@
     "definition_lines": 311,
     "definition_to_proof_line_ratio": 1.2244094488188977,
     "description": "Declarations: C, leafName, holderName",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler"
@@ -5031,9 +5656,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryPathExamples.lean",
+    "presumed_handwritten_lines": 661,
     "proof_lines": 254,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5048,6 +5675,7 @@
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.11299435028248588,
     "description": "Typed pointer paths through memory structs",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructSource"
@@ -5057,9 +5685,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryPaths.lean",
+    "presumed_handwritten_lines": 228,
     "proof_lines": 177,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5072,6 +5702,7 @@
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 0.26582278481012656,
     "description": "Declarations: C, child, parent",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -5082,9 +5713,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryPrimitiveStructArrayDefaultExamples.lean",
+    "presumed_handwritten_lines": 126,
     "proof_lines": 79,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5097,6 +5730,7 @@
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 0.65,
     "description": "Declarations: C, \u0393, R",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveRoom",
@@ -5108,9 +5742,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRecursiveAllocation.lean",
+    "presumed_handwritten_lines": 105,
     "proof_lines": 40,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5123,6 +5759,7 @@
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.3392857142857143,
     "description": "Declarations: stmtShape, stmt_shape, progShape",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveComposition"
@@ -5132,9 +5769,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRecursiveBranchRoom.lean",
+    "presumed_handwritten_lines": 97,
     "proof_lines": 56,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5148,6 +5787,7 @@
     "definition_lines": 27,
     "definition_to_proof_line_ratio": 1.173913043478261,
     "description": "Declarations: D, \u0393, state",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveBranchRoom",
@@ -5159,9 +5799,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRecursiveBranchRoomControls.lean",
+    "presumed_handwritten_lines": 75,
     "proof_lines": 23,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5175,6 +5817,7 @@
     "definition_lines": 128,
     "definition_to_proof_line_ratio": 6.4,
     "description": "Declarations: StmtCert, ProgCert, StmtCost",
+    "generated_lines": 0,
     "implemented_by": 2,
     "imports": [
       "Solidity.Evm.MemoryRecursiveLiftFull"
@@ -5184,9 +5827,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRecursiveCert.lean",
+    "presumed_handwritten_lines": 179,
     "proof_lines": 20,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5200,6 +5845,7 @@
     "definition_lines": 114,
     "definition_to_proof_line_ratio": 1.3734939759036144,
     "description": "Declarations: CompiledStmt, CompiledProg, compileBase",
+    "generated_lines": 0,
     "implemented_by": 2,
     "imports": [
       "Solidity.Evm.MemoryRecursiveSound"
@@ -5209,9 +5855,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRecursiveCompile.lean",
+    "presumed_handwritten_lines": 218,
     "proof_lines": 83,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5224,6 +5872,7 @@
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.22727272727272727,
     "description": "Declarations: block, block_found, branch",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveNesting"
@@ -5233,9 +5882,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRecursiveComposition.lean",
+    "presumed_handwritten_lines": 73,
     "proof_lines": 44,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5249,6 +5900,7 @@
     "definition_lines": 23,
     "definition_to_proof_line_ratio": 0.71875,
     "description": "Declarations: D, left, \u039e",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveNestingBudget",
@@ -5259,9 +5911,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRecursiveCompositionControls.lean",
+    "presumed_handwritten_lines": 80,
     "proof_lines": 32,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5275,6 +5929,7 @@
     "definition_lines": 40,
     "definition_to_proof_line_ratio": 0.8695652173913043,
     "description": "Declarations: D, condition, effects",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveHorizon",
@@ -5285,9 +5940,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRecursiveControls.lean",
+    "presumed_handwritten_lines": 127,
     "proof_lines": 46,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5298,6 +5955,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: demand_cons_base_nonallocating_le, cost_cons_base_nonallocating_le, stmtDemand_loop_one_turn_le",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveDemandViews"
@@ -5307,9 +5965,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRecursiveDemandBounds.lean",
+    "presumed_handwritten_lines": 71,
     "proof_lines": 54,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5322,6 +5982,7 @@
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.2777777777777778,
     "description": "Declarations: stmtDemand_base, stmtCost_base, stmtDemand_loop",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveBranchRoom",
@@ -5332,9 +5993,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRecursiveDemandViews.lean",
+    "presumed_handwritten_lines": 64,
     "proof_lines": 36,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5348,6 +6011,7 @@
     "definition_lines": 30,
     "definition_to_proof_line_ratio": 0.6666666666666666,
     "description": "Declarations: StmtCert.pushes_zero, ProgCert.pushes_zero, Choice",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -5358,9 +6022,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRecursiveDispatch.lean",
+    "presumed_handwritten_lines": 103,
     "proof_lines": 45,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5374,6 +6040,7 @@
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 0.72,
     "description": "Declarations: D, program, recursiveOut",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveNesting",
@@ -5384,9 +6051,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRecursiveDispatchControls.lean",
+    "presumed_handwritten_lines": 74,
     "proof_lines": 25,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5400,6 +6069,7 @@
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.16666666666666666,
     "description": "Declarations: D, yes, inner",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveHorizon",
@@ -5410,9 +6080,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRecursiveDivergence.lean",
+    "presumed_handwritten_lines": 58,
     "proof_lines": 36,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5426,6 +6098,7 @@
     "definition_lines": 31,
     "definition_to_proof_line_ratio": 0.25833333333333336,
     "description": "Declarations: CountedPrefix, CountedPrefix.forget, CountedPrefix.iterN_eq",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveLift",
@@ -5436,9 +6109,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRecursiveFinite.lean",
+    "presumed_handwritten_lines": 171,
     "proof_lines": 120,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5449,6 +6124,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: ProgCert.loop_horizon, loop_room_nonallocating, ProgCert.loop_finite_horizon",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveRoom",
@@ -5459,9 +6135,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRecursiveHorizon.lean",
+    "presumed_handwritten_lines": 45,
     "proof_lines": 29,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5476,6 +6154,7 @@
     "definition_lines": 42,
     "definition_to_proof_line_ratio": 0.525,
     "description": "Declarations: BodyProfile, BodyProfile.Sound, Certificate",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLoopHorizon",
@@ -5487,9 +6166,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRecursiveLift.lean",
+    "presumed_handwritten_lines": 148,
     "proof_lines": 80,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5502,6 +6183,7 @@
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.09302325581395349,
     "description": "Declarations: BodyProfile.ofScope, BodyProfile.ofScope_sound, Certificate.correct",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveLift"
@@ -5511,9 +6193,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRecursiveLiftFull.lean",
+    "presumed_handwritten_lines": 60,
     "proof_lines": 43,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5526,6 +6210,7 @@
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.20930232558139536,
     "description": "Declarations: restrict_self, loopProgram, wrap",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveDispatch"
@@ -5535,9 +6220,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRecursiveNesting.lean",
+    "presumed_handwritten_lines": 73,
     "proof_lines": 43,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5548,6 +6235,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: compile_every_depth_budget, execution_every_depth",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveComposition"
@@ -5557,9 +6245,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRecursiveNestingBudget.lean",
+    "presumed_handwritten_lines": 44,
     "proof_lines": 31,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5570,6 +6260,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: room_one_turn, loop_room_one_turn, ProgCert.loop_correct_one_turn",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveHorizon"
@@ -5579,9 +6270,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRecursiveOneTurn.lean",
+    "presumed_handwritten_lines": 59,
     "proof_lines": 36,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5594,6 +6287,7 @@
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 0.18181818181818182,
     "description": "Declarations: stmtallocatesM, progallocatesM, StmtCert.allocates",
+    "generated_lines": 0,
     "implemented_by": 2,
     "imports": [
       "Solidity.Evm.MemoryRecursiveCompile"
@@ -5603,9 +6297,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRecursiveRoom.lean",
+    "presumed_handwritten_lines": 193,
     "proof_lines": 143,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5618,6 +6314,7 @@
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.07936507936507936,
     "description": "Declarations: StmtSound, ProgSound, base_sound",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRecursiveCert"
@@ -5627,9 +6324,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRecursiveSound.lean",
+    "presumed_handwritten_lines": 226,
     "proof_lines": 189,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5643,6 +6342,7 @@
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 0.17105263157894737,
     "description": "Identity words in dynamic memory arrays",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRefs"
@@ -5652,9 +6352,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRefArray.lean",
+    "presumed_handwritten_lines": 212,
     "proof_lines": 152,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5669,6 +6371,7 @@
     "definition_lines": 56,
     "definition_to_proof_line_ratio": 1.5135135135135136,
     "description": "Declarations: StmtFrag, ProgFrag, CompiledStmt",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRefArrayStatements"
@@ -5678,9 +6381,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRefArrayCompile.lean",
+    "presumed_handwritten_lines": 114,
     "proof_lines": 37,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5693,6 +6398,7 @@
     "definition_lines": 63,
     "definition_to_proof_line_ratio": 0.4772727272727273,
     "description": "Declarations: C, childTy, parentTy",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler"
@@ -5702,9 +6408,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRefArrayExamples.lean",
+    "presumed_handwritten_lines": 237,
     "proof_lines": 132,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5719,6 +6427,7 @@
     "definition_lines": 30,
     "definition_to_proof_line_ratio": 0.7692307692307693,
     "description": "Declarations: RefPtrFrag, CompiledRefPtr, compileRefPtrAny",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRefArrayState",
@@ -5729,9 +6438,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRefArrayPaths.lean",
+    "presumed_handwritten_lines": 84,
     "proof_lines": 39,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5744,6 +6455,7 @@
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.03669724770642202,
     "description": "Declarations: RefArrayStateRepr, RefArrayStateRepr.push, RefArrayStateRepr.setMem",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRefArray",
@@ -5754,9 +6466,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRefArrayState.lean",
+    "presumed_handwritten_lines": 132,
     "proof_lines": 109,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5769,6 +6483,7 @@
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.03333333333333333,
     "description": "Declarations: RefArrayResultRepr, RefPtrFrag.run_of_eval, RefPtrFrag.rebind",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRefArrayPaths"
@@ -5778,9 +6493,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRefArrayStatements.lean",
+    "presumed_handwritten_lines": 137,
     "proof_lines": 120,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5793,6 +6510,7 @@
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.016260162601626018,
     "description": "Fresh defaults for reference-valued memory members",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryRefWrite",
@@ -5803,9 +6521,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRefDelete.lean",
+    "presumed_handwritten_lines": 150,
     "proof_lines": 123,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5816,6 +6536,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Reference-valued member assignment",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryPaths"
@@ -5825,9 +6546,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRefWrite.lean",
+    "presumed_handwritten_lines": 210,
     "proof_lines": 184,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5840,6 +6563,7 @@
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 0.26582278481012656,
     "description": "Declarations: C, child, parent",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -5850,9 +6574,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryReferenceArrayRebindExamples.lean",
+    "presumed_handwritten_lines": 126,
     "proof_lines": 79,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5865,6 +6591,7 @@
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.051094890510948905,
     "description": "Declarations: reference_decl, reference_rebind, referenceDeclareCode",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryDefaultCompile",
@@ -5875,9 +6602,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryReferenceDefaultSource.lean",
+    "presumed_handwritten_lines": 160,
     "proof_lines": 137,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5890,6 +6619,7 @@
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.026845637583892617,
     "description": "Declarations: RefFieldsRepr, RefFieldsRepr.withoutStructs, RefFieldsRepr.mem_eq",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructGrow"
@@ -5899,9 +6629,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryRefs.lean",
+    "presumed_handwritten_lines": 184,
     "proof_lines": 149,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5912,6 +6644,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Scope exit in the memory simulation",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryGrowResult"
@@ -5921,9 +6654,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryScope.lean",
+    "presumed_handwritten_lines": 52,
     "proof_lines": 32,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5937,6 +6672,7 @@
     "definition_lines": 37,
     "definition_to_proof_line_ratio": 0.21264367816091953,
     "description": "Scoped source operations on represented memory",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryHeap",
@@ -5949,9 +6685,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemorySource.lean",
+    "presumed_handwritten_lines": 262,
     "proof_lines": 174,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5964,6 +6702,7 @@
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.06,
     "description": "Memory programs with guards and primitive storage writes",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLocals"
@@ -5973,9 +6712,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStatements.lean",
+    "presumed_handwritten_lines": 72,
     "proof_lines": 50,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -5990,6 +6731,7 @@
     "definition_lines": 31,
     "definition_to_proof_line_ratio": 0.3974358974358974,
     "description": "Declarations: StmtFrag, ProgFrag, CompiledStmt",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStorageObjectCopy"
@@ -5999,9 +6741,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStorageConstructionCompile.lean",
+    "presumed_handwritten_lines": 131,
     "proof_lines": 78,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6014,6 +6758,7 @@
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.19718309859154928,
     "description": "Runtime-length array copy code",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStorageCopyLoop"
@@ -6023,9 +6768,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStorageCopyCode.lean",
+    "presumed_handwritten_lines": 111,
     "proof_lines": 71,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6041,6 +6788,7 @@
     "definition_lines": 582,
     "definition_to_proof_line_ratio": 1.1524752475247524,
     "description": "Copy-bearing finite-memory certificates",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryCompile",
@@ -6051,9 +6799,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStorageCopyCompile.lean",
+    "presumed_handwritten_lines": 1164,
     "proof_lines": 505,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6066,6 +6816,7 @@
     "definition_lines": 140,
     "definition_to_proof_line_ratio": 1.12,
     "description": "Nonvacuous checked compiler inputs and source/compiled observations for",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -6076,9 +6827,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStorageCopyExamples.lean",
+    "presumed_handwritten_lines": 339,
     "proof_lines": 125,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6091,6 +6844,7 @@
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.03529411764705882,
     "description": "Typed source laws for memory-to-storage array copies",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStorageCopyCode",
@@ -6101,9 +6855,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStorageCopyLaws.lean",
+    "presumed_handwritten_lines": 119,
     "proof_lines": 85,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6116,6 +6872,7 @@
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.07432432432432433,
     "description": "Iterative memory-to-storage word copies",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Memory"
@@ -6125,9 +6882,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStorageCopyLoop.lean",
+    "presumed_handwritten_lines": 199,
     "proof_lines": 148,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6140,6 +6899,7 @@
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.06521739130434782,
     "description": "Source simulation of runtime-length memory-to-storage copies",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStorageCopyLaws",
@@ -6150,9 +6910,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStorageCopySource.lean",
+    "presumed_handwritten_lines": 71,
     "proof_lines": 46,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6165,6 +6927,7 @@
     "definition_lines": 61,
     "definition_to_proof_line_ratio": 1.3863636363636365,
     "description": "Declarations: C, recordName, \u0394",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -6175,9 +6938,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStorageLifecycleExamples.lean",
+    "presumed_handwritten_lines": 128,
     "proof_lines": 44,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6188,6 +6953,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: Objects.StateRepr.fixedCopy, restoreObjects, restoreAllocator",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryFixedCompile",
@@ -6198,9 +6964,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStorageObjectCopy.lean",
+    "presumed_handwritten_lines": 57,
     "proof_lines": 41,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6213,6 +6981,7 @@
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.04411764705882353,
     "description": "Primitive-member memory-to-storage struct copies",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStorageCopySource",
@@ -6223,9 +6992,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStorageStructCopy.lean",
+    "presumed_handwritten_lines": 176,
     "proof_lines": 136,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6239,6 +7010,7 @@
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.12941176470588237,
     "description": "Primitive fields in memory structs",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Memory"
@@ -6248,9 +7020,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStruct.lean",
+    "presumed_handwritten_lines": 129,
     "proof_lines": 85,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6263,6 +7037,7 @@
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.11864406779661017,
     "description": "Allocator ownership of represented structs",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructHeap",
@@ -6273,9 +7048,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStructAlloc.lean",
+    "presumed_handwritten_lines": 93,
     "proof_lines": 59,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6288,6 +7065,7 @@
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.036585365853658534,
     "description": "Primitive array constructor arguments stored into memory members",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructDefaultSource"
@@ -6297,9 +7075,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStructArrayChild.lean",
+    "presumed_handwritten_lines": 105,
     "proof_lines": 82,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6312,6 +7092,7 @@
     "definition_lines": 57,
     "definition_to_proof_line_ratio": 0.5588235294117647,
     "description": "Declarations: C, leaf, holderName",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler"
@@ -6321,9 +7102,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStructArrayInputExamples.lean",
+    "presumed_handwritten_lines": 182,
     "proof_lines": 102,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6336,6 +7119,7 @@
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.05434782608695652,
     "description": "Primitive-member struct copies",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructDefault"
@@ -6345,9 +7129,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStructCopy.lean",
+    "presumed_handwritten_lines": 128,
     "proof_lines": 92,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6358,6 +7144,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Reserving a populated primitive struct",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructCopyCode"
@@ -6367,9 +7154,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStructCopyAlloc.lean",
+    "presumed_handwritten_lines": 164,
     "proof_lines": 144,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6384,6 +7173,7 @@
     "definition_lines": 36,
     "definition_to_proof_line_ratio": 0.24324324324324326,
     "description": "Loading and initializing copied struct members",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructCopy",
@@ -6394,9 +7184,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStructCopyCode.lean",
+    "presumed_handwritten_lines": 223,
     "proof_lines": 148,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6409,6 +7201,7 @@
     "definition_lines": 71,
     "definition_to_proof_line_ratio": 1.0441176470588236,
     "description": "Ordinary Solidity storage-to-memory copies retain populated primitive values",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -6419,9 +7212,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStructCopyExamples.lean",
+    "presumed_handwritten_lines": 173,
     "proof_lines": 68,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6434,6 +7229,7 @@
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.06666666666666667,
     "description": "Storage-to-memory primitive struct simulation",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructCopyAlloc"
@@ -6443,9 +7239,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStructCopySource.lean",
+    "presumed_handwritten_lines": 152,
     "proof_lines": 120,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6458,6 +7256,7 @@
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.09615384615384616,
     "description": "Source allocation of primitive structs",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructSource",
@@ -6469,9 +7268,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStructDefault.lean",
+    "presumed_handwritten_lines": 212,
     "proof_lines": 156,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6485,6 +7286,7 @@
     "definition_lines": 33,
     "definition_to_proof_line_ratio": 0.3793103448275862,
     "description": "Executable finite-default layouts and their certificates",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructDefaultPlan"
@@ -6494,9 +7296,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStructDefaultCode.lean",
+    "presumed_handwritten_lines": 149,
     "proof_lines": 87,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6509,6 +7313,7 @@
     "definition_lines": 268,
     "definition_to_proof_line_ratio": 1.6242424242424243,
     "description": "Ordinary Solidity struct literals use the default-allocation compiler clause",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -6519,9 +7324,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStructDefaultExamples.lean",
+    "presumed_handwritten_lines": 565,
     "proof_lines": 165,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6534,6 +7341,7 @@
     "definition_lines": 35,
     "definition_to_proof_line_ratio": 0.4375,
     "description": "Finite default-allocation sizes",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructDefault"
@@ -6543,9 +7351,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStructDefaultLayout.lean",
+    "presumed_handwritten_lines": 151,
     "proof_lines": 80,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6559,6 +7369,7 @@
     "definition_lines": 117,
     "definition_to_proof_line_ratio": 0.78,
     "description": "Certificates for finite default construction",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructReferenceCode",
@@ -6572,9 +7383,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStructDefaultPlan.lean",
+    "presumed_handwritten_lines": 310,
     "proof_lines": 150,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6585,6 +7398,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: DefaultPlan.declare_correct, StateRepr.stack, DefaultPlan.deleteLocal_correct",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructDefaultPlan"
@@ -6594,9 +7408,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStructDefaultSource.lean",
+    "presumed_handwritten_lines": 115,
     "proof_lines": 99,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6609,6 +7425,7 @@
     "definition_lines": 137,
     "definition_to_proof_line_ratio": 0.5393700787401575,
     "description": "Declarations: H, r0, r1",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructGrow",
@@ -6619,9 +7436,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStructExamples.lean",
+    "presumed_handwritten_lines": 480,
     "proof_lines": 254,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6634,6 +7453,7 @@
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.025,
     "description": "Allocation with live structs",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructAlloc"
@@ -6643,9 +7463,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStructGrow.lean",
+    "presumed_handwritten_lines": 340,
     "proof_lines": 280,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6659,6 +7481,7 @@
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.088,
     "description": "Framing primitive struct fields",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStruct",
@@ -6669,9 +7492,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStructHeap.lean",
+    "presumed_handwritten_lines": 169,
     "proof_lines": 125,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6682,6 +7507,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Allocating a struct with initialized reference members",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructCopyAlloc"
@@ -6691,9 +7517,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStructReferenceAlloc.lean",
+    "presumed_handwritten_lines": 200,
     "proof_lines": 177,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6706,6 +7534,7 @@
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.08421052631578947,
     "description": "Initializing a parent with previously allocated children",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructReferenceAlloc"
@@ -6715,9 +7544,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStructReferenceCode.lean",
+    "presumed_handwritten_lines": 238,
     "proof_lines": 190,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6730,6 +7561,7 @@
     "definition_lines": 46,
     "definition_to_proof_line_ratio": 0.8679245283018868,
     "description": "Declarations: deletion, deleteCompiled, delete_cost",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructReferenceDefaultLiterals"
@@ -6739,9 +7571,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStructReferenceDefaultBoundaries.lean",
+    "presumed_handwritten_lines": 127,
     "proof_lines": 53,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6754,6 +7588,7 @@
     "definition_lines": 82,
     "definition_to_proof_line_ratio": 1.2058823529411764,
     "description": "Declarations: C, bases, initial",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compiler",
@@ -6764,9 +7599,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStructReferenceDefaultExamples.lean",
+    "presumed_handwritten_lines": 179,
     "proof_lines": 68,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6779,6 +7616,7 @@
     "definition_lines": 47,
     "definition_to_proof_line_ratio": 2.238095238095238,
     "description": "Declarations: legacy, viaIR, legacyCompiled",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructReferenceDefaultModes"
@@ -6788,9 +7626,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStructReferenceDefaultLiterals.lean",
+    "presumed_handwritten_lines": 85,
     "proof_lines": 21,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6803,6 +7643,7 @@
     "definition_lines": 45,
     "definition_to_proof_line_ratio": 1.1842105263157894,
     "description": "Declarations: C, bases, initial",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryStructReferenceDefaultExamples"
@@ -6812,9 +7653,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStructReferenceDefaultModes.lean",
+    "presumed_handwritten_lines": 103,
     "proof_lines": 38,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6827,6 +7670,7 @@
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.10526315789473684,
     "description": "Scoped primitive struct fields",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.MemoryLocals"
@@ -6836,9 +7680,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/MemoryStructSource.lean",
+    "presumed_handwritten_lines": 82,
     "proof_lines": 57,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6852,6 +7698,7 @@
     "definition_lines": 64,
     "definition_to_proof_line_ratio": 0.08951048951048951,
     "description": "The machine's storage represents the typed storage",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Layout",
@@ -6862,9 +7709,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/Repr.lean",
+    "presumed_handwritten_lines": 1023,
     "proof_lines": 715,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6877,6 +7726,7 @@
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.00872093023255814,
     "description": "Signed words",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Layout"
@@ -6886,9 +7736,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/Signed.lean",
+    "presumed_handwritten_lines": 458,
     "proof_lines": 344,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6903,6 +7755,7 @@
     "definition_lines": 63,
     "definition_to_proof_line_ratio": 0.08160621761658031,
     "description": "The simulation over the scoped syntax",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.SimLemmas",
@@ -6914,9 +7767,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/Sim.lean",
+    "presumed_handwritten_lines": 1157,
     "proof_lines": 772,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6929,6 +7784,7 @@
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.014367816091954023,
     "description": "The machine lemmas of the simulation",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Repr",
@@ -6941,9 +7797,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/SimLemmas.lean",
+    "presumed_handwritten_lines": 938,
     "proof_lines": 696,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6957,6 +7815,7 @@
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.01485148514851485,
     "description": "Statements over the typed run",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Expr",
@@ -6967,9 +7826,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/Stmt.lean",
+    "presumed_handwritten_lines": 980,
     "proof_lines": 808,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -6980,6 +7841,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "The typed storage, read along a path",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Theory.Typed.Obs"
@@ -6989,9 +7851,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/StorageLemmas.lean",
+    "presumed_handwritten_lines": 214,
     "proof_lines": 147,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -7004,6 +7868,7 @@
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.15517241379310345,
     "description": "Computed image snapshots materialized in the intrinsic heap",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.TryByteImage",
@@ -7016,9 +7881,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/TryByteCapture.lean",
+    "presumed_handwritten_lines": 114,
     "proof_lines": 58,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -7034,6 +7901,7 @@
     "definition_lines": 64,
     "definition_to_proof_line_ratio": 2.2857142857142856,
     "description": "Intrinsic scalar-frame byte images for try producer witnesses",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Semantics.State",
@@ -7044,9 +7912,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/TryByteImage.lean",
+    "presumed_handwritten_lines": 149,
     "proof_lines": 28,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -7059,6 +7929,7 @@
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.3333333333333333,
     "description": "Declarations: sourceCall, caller, mode",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.TryPanicSourceControl"
@@ -7068,9 +7939,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/TryPanicCallMetadata.lean",
+    "presumed_handwritten_lines": 36,
     "proof_lines": 12,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -7083,6 +7956,7 @@
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.13580246913580246,
     "description": "Declarations: map_error_inv, rawTail, inner",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.TryPanicProducer"
@@ -7092,9 +7966,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/TryPanicCarrier.lean",
+    "presumed_handwritten_lines": 127,
     "proof_lines": 81,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -7109,6 +7985,7 @@
     "definition_lines": 102,
     "definition_to_proof_line_ratio": 1.186046511627907,
     "description": "M1: source-linked computed Panic producer, not source admission",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.TryByteCapture"
@@ -7118,9 +7995,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/TryPanicProducer.lean",
+    "presumed_handwritten_lines": 288,
     "proof_lines": 86,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -7134,6 +8013,7 @@
     "definition_lines": 32,
     "definition_to_proof_line_ratio": 0.9142857142857143,
     "description": "Declarations: Buffer, within, put",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.TryPanicSourceBytes"
@@ -7143,9 +8023,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/TryPanicSourceBody.lean",
+    "presumed_handwritten_lines": 96,
     "proof_lines": 35,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -7158,6 +8040,7 @@
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.13559322033898305,
     "description": "Declarations: clipped, clipped_length, clipped_get",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.TryPanicSourceBody"
@@ -7167,9 +8050,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/TryPanicSourceBodyImage.lean",
+    "presumed_handwritten_lines": 97,
     "proof_lines": 59,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -7182,6 +8067,7 @@
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.05555555555555555,
     "description": "Declarations: byteAt, selector_byte, code_byte",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.TryPanicSourceControl"
@@ -7191,9 +8077,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/TryPanicSourceBytes.lean",
+    "presumed_handwritten_lines": 134,
     "proof_lines": 90,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -7207,6 +8095,7 @@
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 0.26881720430107525,
     "description": "Declarations: Caller, Handler, return94",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.SolcJson.TryPanicSourceCaller"
@@ -7216,9 +8105,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/TryPanicSourceControl.lean",
+    "presumed_handwritten_lines": 169,
     "proof_lines": 93,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -7229,6 +8120,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: completed_exact, completion_iff, completion_unique",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.TryPanicSourceFrame"
@@ -7238,9 +8130,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/TryPanicSourceDeterminism.lean",
+    "presumed_handwritten_lines": 152,
     "proof_lines": 114,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -7251,6 +8145,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: cons_put, raw_bytes, raw_image",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.TryPanicSourceBodyImage"
@@ -7260,9 +8155,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/TryPanicSourceExecution.lean",
+    "presumed_handwritten_lines": 106,
     "proof_lines": 69,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Evm",
@@ -7275,6 +8172,7 @@
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 0.18584070796460178,
     "description": "Declarations: freshK, at64K, entryK",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.TryPanicSourcePlan"
@@ -7284,8 +8182,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Evm/TryPanicSourceFrame.lean",
+    "presumed_handwritten_lines": 175,
     "proof_lines": 113,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   }
 ]

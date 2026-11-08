@@ -375,7 +375,7 @@
       "category": "axiom_pins",
       "lines": 3905,
       "path": "Solidity/Frontend/ExpressionUniqueness/AxiomPins.lean",
-      "what": "Declarations: "
+      "what": "axiom_pins checks/imports in Solidity/Frontend/ExpressionUniqueness/AxiomPins.lean"
     },
     {
       "area": "Backend",
@@ -590,12 +590,16 @@
         "lines": 1452
       },
       "marked_generated": {
-        "files": 37,
-        "lines": 15487
+        "files": 36,
+        "lines": 14749
+      },
+      "mixed_generated_blocks": {
+        "files": 2,
+        "lines": 996
       },
       "unmarked": {
-        "files": 6621,
-        "lines": 1096034
+        "files": 6620,
+        "lines": 1095776
       }
     },
     "code_lines": 878656,
@@ -613,15 +617,15 @@
     "definition_lines": 218914,
     "definition_to_proof_line_ratio": 0.38000427021800676,
     "files": 6717,
-    "generated_lines": 23620,
-    "generated_share": 0.021068480589703384,
+    "generated_lines": 23502,
+    "generated_share": 0.02096322738438649,
     "implemented_by": 176,
     "imports_in": 21360,
     "imports_out": 12763,
     "lines": 1121106,
     "maxHeartbeats_options": 16,
     "native_decide": 0,
-    "presumed_handwritten_lines": 1096034,
+    "presumed_handwritten_lines": 1096152,
     "proof_lines": 576083,
     "sorry": 0,
     "unknown_import_only_lines": 1452

@@ -1317,13 +1317,13 @@
           "files": 1,
           "lines": 8
         },
-        "marked_generated": {
-          "files": 1,
-          "lines": 738
+        "mixed_generated_blocks": {
+          "files": 2,
+          "lines": 996
         },
         "unmarked": {
-          "files": 260,
-          "lines": 49295
+          "files": 259,
+          "lines": 49037
         }
       },
       "code_lines": 37844,
@@ -1341,15 +1341,15 @@
       "definition_lines": 10892,
       "definition_to_proof_line_ratio": 0.45959745136925606,
       "files": 262,
-      "generated_lines": 738,
-      "generated_share": 0.014747906716492476,
+      "generated_lines": 620,
+      "generated_share": 0.012389840330928638,
       "implemented_by": 0,
       "imports_in": 1227,
       "imports_out": 440,
       "lines": 50041,
       "maxHeartbeats_options": 0,
       "native_decide": 0,
-      "presumed_handwritten_lines": 49295,
+      "presumed_handwritten_lines": 49413,
       "proof_lines": 23699,
       "sorry": 0,
       "timing": {
@@ -1929,7 +1929,7 @@
   },
   "methodology": {
     "counts": "Lexical, nested comments and strings removed; anchored declaration commands; no kernel/semantic claims. Physical lines include comments/blanks.",
-    "generated": "Corpus except handwritten Basic.lean, AxiomPins, proven generated registry roots, explicit source-generation header; other import-only modules are unknown; unmarked is presumed handwritten, may contain unmarked generated code. Chain/agreement name alone is not a generation marker.",
+    "generated": "Corpus except handwritten Basic.lean, AxiomPins, proven generated registry roots, explicit source-generation header; other import-only modules are unknown; explicit BEGIN/END generator blocks counted separately excluding delimiters; unmarked is presumed handwritten, may contain unmarked generated code. Chain/agreement name alone is not a generation marker.",
     "imports": "Direct syntactic edges, multiplicity preserved; incoming includes all tracked Lean modules. Not transitive closure.",
     "line_ratio": "Nonblank lexical command spans for theorem/lemma versus other declaration kinds; instance proofs counted under definition. Approximation, not proof-term size.",
     "references": "docs/audits/architecture.md section 3; reused committed timing, no Lean executed.",
@@ -2026,12 +2026,16 @@
         "lines": 1502
       },
       "marked_generated": {
-        "files": 45,
-        "lines": 16576
+        "files": 44,
+        "lines": 15838
+      },
+      "mixed_generated_blocks": {
+        "files": 2,
+        "lines": 996
       },
       "unmarked": {
-        "files": 8162,
-        "lines": 1275367
+        "files": 8161,
+        "lines": 1275109
       }
     },
     "code_lines": 1028031,
@@ -2049,15 +2053,15 @@
     "definition_lines": 254324,
     "definition_to_proof_line_ratio": 0.3976938124807466,
     "files": 8277,
-    "generated_lines": 31902,
-    "generated_share": 0.024375540105946725,
+    "generated_lines": 31784,
+    "generated_share": 0.02428537918398253,
     "implemented_by": 177,
     "imports_in": 21364,
     "imports_out": 23815,
     "lines": 1308771,
     "maxHeartbeats_options": 16,
     "native_decide": 0,
-    "presumed_handwritten_lines": 1275367,
+    "presumed_handwritten_lines": 1275485,
     "proof_lines": 639497,
     "sorry": 0,
     "unknown_import_only_lines": 1502
@@ -2079,12 +2083,16 @@
         "lines": 1452
       },
       "marked_generated": {
-        "files": 37,
-        "lines": 15487
+        "files": 36,
+        "lines": 14749
+      },
+      "mixed_generated_blocks": {
+        "files": 2,
+        "lines": 996
       },
       "unmarked": {
-        "files": 6621,
-        "lines": 1096034
+        "files": 6620,
+        "lines": 1095776
       }
     },
     "code_lines": 878656,
@@ -2102,15 +2110,15 @@
     "definition_lines": 218914,
     "definition_to_proof_line_ratio": 0.38000427021800676,
     "files": 6717,
-    "generated_lines": 23620,
-    "generated_share": 0.021068480589703384,
+    "generated_lines": 23502,
+    "generated_share": 0.02096322738438649,
     "implemented_by": 176,
     "imports_in": 21360,
     "imports_out": 12763,
     "lines": 1121106,
     "maxHeartbeats_options": 16,
     "native_decide": 0,
-    "presumed_handwritten_lines": 1096034,
+    "presumed_handwritten_lines": 1096152,
     "proof_lines": 576083,
     "sorry": 0,
     "unknown_import_only_lines": 1452

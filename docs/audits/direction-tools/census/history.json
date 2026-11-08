@@ -1550,13 +1550,13 @@
       },
       "Source": {
         "by_category": {
-          "marked_generated": {
-            "files": 1,
-            "lines": 723
+          "mixed_generated_blocks": {
+            "files": 2,
+            "lines": 981
           },
           "unmarked": {
-            "files": 41,
-            "lines": 21560
+            "files": 40,
+            "lines": 21302
           }
         },
         "code_lines": 16035,
@@ -1574,15 +1574,15 @@
         "definition_lines": 7255,
         "definition_to_proof_line_ratio": 0.8968970206453208,
         "files": 42,
-        "generated_lines": 723,
-        "generated_share": 0.03244625948032132,
+        "generated_lines": 620,
+        "generated_share": 0.027823901629044565,
         "implemented_by": 0,
         "imports_in": 130,
         "imports_out": 68,
         "lines": 22283,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
-        "presumed_handwritten_lines": 21560,
+        "presumed_handwritten_lines": 21663,
         "proof_lines": 8089,
         "sorry": 0,
         "unknown_import_only_lines": 0
@@ -1988,8 +1988,8 @@
     "definition_lines": 102678,
     "definition_to_proof_line_ratio": 0.6773089177226462,
     "files": 1071,
-    "generated_lines": 10108,
-    "generated_share": 0.027051112901197067,
+    "generated_lines": 10005,
+    "generated_share": 0.026775463452362154,
     "goal_status": "unavailable: no authoritative goal-closure parser/counter; absent file is not zero goals",
     "goals_closed": null,
     "goals_file_present": false,
@@ -2008,7 +2008,7 @@
     "month": "2026-10",
     "native_decide": 0,
     "opaque": 3,
-    "presumed_handwritten_lines": 362805,
+    "presumed_handwritten_lines": 362908,
     "proof_lines": 151597,
     "revision": "22073f4445e7cab7560812a5ef4e081bf8ff5e87",
     "roadmap_command_files": [],
@@ -3105,13 +3105,13 @@
             "files": 1,
             "lines": 8
           },
-          "marked_generated": {
-            "files": 1,
-            "lines": 738
+          "mixed_generated_blocks": {
+            "files": 2,
+            "lines": 996
           },
           "unmarked": {
-            "files": 260,
-            "lines": 49295
+            "files": 259,
+            "lines": 49037
           }
         },
         "code_lines": 37844,
@@ -3129,15 +3129,15 @@
         "definition_lines": 10892,
         "definition_to_proof_line_ratio": 0.45959745136925606,
         "files": 262,
-        "generated_lines": 738,
-        "generated_share": 0.014747906716492476,
+        "generated_lines": 620,
+        "generated_share": 0.012389840330928638,
         "implemented_by": 0,
         "imports_in": 1227,
         "imports_out": 440,
         "lines": 50041,
         "maxHeartbeats_options": 0,
         "native_decide": 0,
-        "presumed_handwritten_lines": 49295,
+        "presumed_handwritten_lines": 49413,
         "proof_lines": 23699,
         "sorry": 0,
         "unknown_import_only_lines": 8
@@ -3586,8 +3586,8 @@
     "definition_lines": 218914,
     "definition_to_proof_line_ratio": 0.38000427021800676,
     "files": 6717,
-    "generated_lines": 23620,
-    "generated_share": 0.021068480589703384,
+    "generated_lines": 23502,
+    "generated_share": 0.02096322738438649,
     "goal_status": "unavailable: no authoritative goal-closure parser/counter; absent file is not zero goals",
     "goals_closed": null,
     "goals_file_present": false,
@@ -3611,7 +3611,7 @@
     "month": "2026-11",
     "native_decide": 0,
     "opaque": 3,
-    "presumed_handwritten_lines": 1096034,
+    "presumed_handwritten_lines": 1096152,
     "proof_lines": 576083,
     "revision": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
     "roadmap_command_files": [],

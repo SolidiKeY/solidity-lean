@@ -6,6 +6,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.TestSuite.MemoryLoopReplay.Assemble07"
@@ -15,8 +16,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/TestSuite/MemoryLoopReplay/Assemble08.lean",
+    "presumed_handwritten_lines": 104,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "TestSuite",
@@ -25,6 +28,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.TestSuite.MemoryLoopReplay.Assemble08"
@@ -34,8 +38,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/TestSuite/MemoryLoopReplay/Assemble09.lean",
+    "presumed_handwritten_lines": 91,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "TestSuite",
@@ -44,6 +50,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.MemoryLoopReplay",
@@ -54,8 +61,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/TestSuite/MemoryLoopReplay/Discover00.lean",
+    "presumed_handwritten_lines": 105,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "TestSuite",
@@ -64,6 +73,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.TestSuite.MemoryLoopReplay.Discover00"
@@ -73,8 +83,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/TestSuite/MemoryLoopReplay/Discover01.lean",
+    "presumed_handwritten_lines": 104,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "TestSuite",
@@ -83,6 +95,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.TestSuite.MemoryLoopReplay.Discover01"
@@ -92,8 +105,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/TestSuite/MemoryLoopReplay/Discover02.lean",
+    "presumed_handwritten_lines": 104,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "TestSuite",
@@ -102,6 +117,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.TestSuite.MemoryLoopReplay.Discover02"
@@ -111,8 +127,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/TestSuite/MemoryLoopReplay/Discover03.lean",
+    "presumed_handwritten_lines": 104,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "TestSuite",
@@ -121,6 +139,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.TestSuite.MemoryLoopReplay.Discover03"
@@ -130,8 +149,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/TestSuite/MemoryLoopReplay/Discover04.lean",
+    "presumed_handwritten_lines": 104,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "TestSuite",
@@ -140,6 +161,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.TestSuite.MemoryLoopReplay.Discover04"
@@ -149,8 +171,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/TestSuite/MemoryLoopReplay/Discover05.lean",
+    "presumed_handwritten_lines": 104,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "TestSuite",
@@ -159,6 +183,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.TestSuite.MemoryLoopReplay.Discover05"
@@ -168,8 +193,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/TestSuite/MemoryLoopReplay/Discover06.lean",
+    "presumed_handwritten_lines": 104,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "TestSuite",
@@ -178,6 +205,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.TestSuite.MemoryLoopReplay.Discover06"
@@ -187,8 +215,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/TestSuite/MemoryLoopReplay/Discover07.lean",
+    "presumed_handwritten_lines": 104,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "TestSuite",
@@ -197,6 +227,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.TestSuite.MemoryLoopReplay.Discover07"
@@ -206,8 +237,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/TestSuite/MemoryLoopReplay/Discover08.lean",
+    "presumed_handwritten_lines": 104,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "TestSuite",
@@ -216,6 +249,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.TestSuite.MemoryLoopReplay.Discover08"
@@ -225,8 +259,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/TestSuite/MemoryLoopReplay/Discover09.lean",
+    "presumed_handwritten_lines": 91,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "TestSuite",
@@ -238,6 +274,7 @@
     "definition_lines": 67,
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: typedRefusal",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.MemoryLoopReplay",
@@ -248,8 +285,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/TestSuite/MemoryLoopReplay/FallbackPairControls.lean",
+    "presumed_handwritten_lines": 77,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "TestSuite",
@@ -262,6 +301,7 @@
     "definition_lines": 181,
     "definition_to_proof_line_ratio": 4.641025641025641,
     "description": "Declarations: kernelTypingRefusal, rejectFlatHint, largeCondition",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.TestSuite.MemoryLoopReplay.Discover09"
@@ -271,9 +311,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/TestSuite/MemoryLoopReplay/Refusals.lean",
+    "presumed_handwritten_lines": 268,
     "proof_lines": 39,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "TestSuite",
@@ -284,6 +326,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "solkey's `TestSuite` obligations, in solkey's syntax",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Solkey.TestSuite",
@@ -294,9 +337,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/TestSuite/Problems.lean",
+    "presumed_handwritten_lines": 54,
     "proof_lines": 3,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "TestSuite",
@@ -307,6 +352,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: Solkey.TestSuite.unprovableStorageShortCircuitMutation.refuted, Solkey.TestSuite.unprovableInvariantBreakPostcondition.refuted, Solkey.TestSuite.unprovableInvariantForContinueUpdate.refuted",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.TestSuite.ScopedProblems",
@@ -317,9 +363,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/TestSuite/Refuted.lean",
+    "presumed_handwritten_lines": 53,
     "proof_lines": 22,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "TestSuite",
@@ -328,6 +376,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "What is derived of solkey's `TestSuite`",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.TestSuite.Derived1",
@@ -358,8 +407,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/TestSuite/Report.lean",
+    "presumed_handwritten_lines": 120,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "TestSuite",
@@ -368,6 +419,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "solkey's `TestSuite` obligations, declared",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.TestSuite.Problems",
@@ -378,8 +430,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/TestSuite/ScopedProblems.lean",
+    "presumed_handwritten_lines": 22,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "TestSuite",
@@ -388,6 +442,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "The suggestions `#solkey_derive?` prints, pinned",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.TestSuite.ScopedProblems"
@@ -397,8 +452,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/TestSuite/Suggestions.lean",
+    "presumed_handwritten_lines": 59,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Theorems",
@@ -412,6 +469,7 @@
     "definition_lines": 54,
     "definition_to_proof_line_ratio": 0.7941176470588235,
     "description": "The main theorems, in one page",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Sound",
@@ -427,9 +485,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Theorems.lean",
+    "presumed_handwritten_lines": 360,
     "proof_lines": 68,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Theory",
@@ -442,6 +502,7 @@
     "definition_lines": 90,
     "definition_to_proof_line_ratio": 0.4017857142857143,
     "description": "What a typed symbol denotes in the Theory, and the bridge",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Signature",
@@ -452,9 +513,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Theory/Bridge/Denote.lean",
+    "presumed_handwritten_lines": 402,
     "proof_lines": 224,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Theory",
@@ -467,6 +530,7 @@
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.11504424778761062,
     "description": "Callees that change nothing",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.CallerModelValid"
@@ -476,9 +540,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Theory/CallerModel/Static.lean",
+    "presumed_handwritten_lines": 198,
     "proof_lines": 113,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Theory",
@@ -492,6 +558,7 @@
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.3541666666666667,
     "description": "`assignable` is sound (S3.2)",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Theory.Mutability.View",
@@ -502,9 +569,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Theory/Mutability/Assignable.lean",
+    "presumed_handwritten_lines": 140,
     "proof_lines": 48,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Theory",
@@ -515,6 +584,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Frame facts for proofs (S3.3)",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Theory.Mutability.View",
@@ -526,9 +596,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Theory/Mutability/Closer.lean",
+    "presumed_handwritten_lines": 97,
     "proof_lines": 47,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Theory",
@@ -539,6 +611,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "A non-payable entry refuses value (S3.1, payable)",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Theory.Mutability.View",
@@ -549,9 +622,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Theory/Mutability/Payable.lean",
+    "presumed_handwritten_lines": 118,
     "proof_lines": 51,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Theory",
@@ -565,6 +640,7 @@
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.037122969837587005,
     "description": "A pure body does not read the state (S3.1, pure)",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Theory.Mutability.View"
@@ -574,9 +650,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Theory/Mutability/Pure.lean",
+    "presumed_handwritten_lines": 586,
     "proof_lines": 431,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Theory",
@@ -590,6 +668,7 @@
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.06417112299465241,
     "description": "A read-only body commits nothing (S3.1, view)",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Semantics.Transient",
@@ -600,9 +679,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Theory/Mutability/View.lean",
+    "presumed_handwritten_lines": 306,
     "proof_lines": 187,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Theory",
@@ -616,6 +697,7 @@
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.19642857142857142,
     "description": "Progress with internal calls over the extended fragment (S4.1)",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Theory.Progress.Fragment"
@@ -625,9 +707,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Theory/Progress/Calls.lean",
+    "presumed_handwritten_lines": 118,
     "proof_lines": 56,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Theory",
@@ -642,6 +726,7 @@
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.16346153846153846,
     "description": "Witnesses and negative controls for progress (S4.1, S4.2)",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Theory.Progress.Program",
@@ -653,9 +738,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Theory/Progress/Controls.lean",
+    "presumed_handwritten_lines": 248,
     "proof_lines": 104,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Theory",
@@ -670,6 +757,7 @@
     "definition_lines": 61,
     "definition_to_proof_line_ratio": 0.24206349206349206,
     "description": "The extensible progress fragment (S4.1, S4.2)",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Theory.Progress.Tuple",
@@ -680,9 +768,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Theory/Progress/Fragment.lean",
+    "presumed_handwritten_lines": 428,
     "proof_lines": 252,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Theory",
@@ -696,6 +786,7 @@
     "definition_lines": 20,
     "definition_to_proof_line_ratio": 0.47619047619047616,
     "description": "Leaf statements as extensions (S4.2)",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Theory.Progress.Fragment",
@@ -707,9 +798,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Theory/Progress/Leaves.lean",
+    "presumed_handwritten_lines": 137,
     "proof_lines": 42,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Theory",
@@ -722,6 +815,7 @@
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.3076923076923077,
     "description": "How a well-typed run ends (S4.1)",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.ExprProgress",
@@ -732,9 +826,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Theory/Progress/Outcome.lean",
+    "presumed_handwritten_lines": 126,
     "proof_lines": 39,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Theory",
@@ -745,6 +841,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Progress (S4.1): the public statements",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Theory.Progress.Calls",
@@ -756,9 +853,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Theory/Progress/Program.lean",
+    "presumed_handwritten_lines": 154,
     "proof_lines": 64,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Theory",
@@ -772,6 +871,7 @@
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.13114754098360656,
     "description": "Progress of tuple declarations (S4.2)",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Source.StmtProgress",
@@ -782,9 +882,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Theory/Progress/Tuple.lean",
+    "presumed_handwritten_lines": 130,
     "proof_lines": 61,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Theory",
@@ -800,6 +902,7 @@
     "definition_lines": 53,
     "definition_to_proof_line_ratio": 0.2849462365591398,
     "description": "Reachable states under a caller model (O12 orthogonal to O11)",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Theory.Reachable.CleanTail",
@@ -810,9 +913,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Theory/Reachable/CallerModel.lean",
+    "presumed_handwritten_lines": 367,
     "proof_lines": 186,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Theory",
@@ -825,6 +930,7 @@
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.057692307692307696,
     "description": "Clean tails follow from reachability (O12 over O6)",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Theory.Reachable.Mode",
@@ -835,9 +941,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Theory/Reachable/CleanTail.lean",
+    "presumed_handwritten_lines": 111,
     "proof_lines": 52,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Theory",
@@ -852,6 +960,7 @@
     "definition_lines": 24,
     "definition_to_proof_line_ratio": 0.46153846153846156,
     "description": "Reachable starting states as a mode (`docs/options.md`, O12)",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Lifetime"
@@ -861,9 +970,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Theory/Reachable/Mode.lean",
+    "presumed_handwritten_lines": 164,
     "proof_lines": 52,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Theory",
@@ -876,6 +987,7 @@
     "definition_lines": 5,
     "definition_to_proof_line_ratio": null,
     "description": "Two paths that part",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Semantics"
@@ -885,8 +997,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Theory/Segs.lean",
+    "presumed_handwritten_lines": 30,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Theory",
@@ -902,6 +1016,7 @@
     "definition_lines": 56,
     "definition_to_proof_line_ratio": 0.057435897435897436,
     "description": "The leaves of a type, and the expansions they give",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Typing.Values"
@@ -911,9 +1026,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Theory/Typed/Leaves.lean",
+    "presumed_handwritten_lines": 1323,
     "proof_lines": 975,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Theory",
@@ -927,6 +1044,7 @@
     "definition_lines": 38,
     "definition_to_proof_line_ratio": 0.04318181818181818,
     "description": "The Theory of memory, typed",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.StateFacts",
@@ -937,9 +1055,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Theory/Typed/Mem.lean",
+    "presumed_handwritten_lines": 1253,
     "proof_lines": 880,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Theory",
@@ -952,6 +1072,7 @@
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.10596026490066225,
     "description": "A copy into memory, below its root",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Theory.Typed.Mem"
@@ -961,9 +1082,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Theory/Typed/MemMirror.lean",
+    "presumed_handwritten_lines": 233,
     "proof_lines": 151,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Theory",
@@ -972,6 +1095,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "The Theory, typed: a value is its observations",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Theory.Typed.Obs.Paths",
@@ -983,8 +1107,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Theory/Typed/Obs.lean",
+    "presumed_handwritten_lines": 0,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 41
   },
   {
     "area": "Theory",
@@ -997,6 +1123,7 @@
     "definition_lines": 40,
     "definition_to_proof_line_ratio": 0.09569377990430622,
     "description": "Observations under the storage operations",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Theory.Typed.Obs.Values"
@@ -1006,9 +1133,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Theory/Typed/Obs/Ops.lean",
+    "presumed_handwritten_lines": 627,
     "proof_lines": 418,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Theory",
@@ -1025,6 +1154,7 @@
     "definition_lines": 55,
     "definition_to_proof_line_ratio": 0.11434511434511435,
     "description": "Observations: typed paths and values read below them",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Semantics.Heap"
@@ -1034,9 +1164,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Theory/Typed/Obs/Paths.lean",
+    "presumed_handwritten_lines": 665,
     "proof_lines": 481,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Theory",
@@ -1051,6 +1183,7 @@
     "definition_lines": 122,
     "definition_to_proof_line_ratio": 0.1983739837398374,
     "description": "Observations of values and storages",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Theory.Typed.Obs.Paths"
@@ -1060,9 +1193,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Theory/Typed/Obs/Values.lean",
+    "presumed_handwritten_lines": 888,
     "proof_lines": 615,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1074,6 +1209,7 @@
     "definition_lines": 30,
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: qUpdate, qTransform, quoteTransform",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.ProofTree",
@@ -1086,8 +1222,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/CallFunctionShare.lean",
+    "presumed_handwritten_lines": 50,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1102,6 +1240,7 @@
     "definition_lines": 102,
     "definition_to_proof_line_ratio": null,
     "description": "What the `Tools/` commands share",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Syntax",
@@ -1112,8 +1251,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/Common.lean",
+    "presumed_handwritten_lines": 196,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1126,6 +1267,7 @@
     "definition_lines": 151,
     "definition_to_proof_line_ratio": null,
     "description": "Complete decisions after exact source recognition",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DeclarationStaticReduction",
@@ -1136,8 +1278,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/CompleteVerification.lean",
+    "presumed_handwritten_lines": 215,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1154,6 +1298,7 @@
     "definition_lines": 800,
     "definition_to_proof_line_ratio": 3.076923076923077,
     "description": "Counterexamples: scoped formulas evaluated in a typed state",
+    "generated_lines": 0,
     "implemented_by": 2,
     "imports": [
       "Solidity.Calculus.SolSpec",
@@ -1170,9 +1315,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/Counterexample.lean",
+    "presumed_handwritten_lines": 1577,
     "proof_lines": 260,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1184,6 +1331,7 @@
     "definition_lines": 88,
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: result, target, address",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.CreationTryImport"
@@ -1193,8 +1341,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/CreationTryReplay.lean",
+    "presumed_handwritten_lines": 108,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1207,6 +1357,7 @@
     "definition_lines": 207,
     "definition_to_proof_line_ratio": null,
     "description": "`#difftest`: the typed run against the compiled code, on random states",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Evm.Compile",
@@ -1218,8 +1369,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/DiffTest.lean",
+    "presumed_handwritten_lines": 358,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1233,6 +1386,7 @@
     "definition_lines": 134,
     "definition_to_proof_line_ratio": 6.7,
     "description": "Declarations: boundedWalk, boundedWalk_closed, boundedValid",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.InputReduction",
@@ -1244,9 +1398,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/DirectArithmetic.lean",
+    "presumed_handwritten_lines": 200,
     "proof_lines": 20,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1259,6 +1415,7 @@
     "definition_lines": 149,
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: buildObligation, Stronger, primitivePositions",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Testing",
@@ -1271,8 +1428,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/DirectRuntime.lean",
+    "presumed_handwritten_lines": 185,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1285,6 +1444,7 @@
     "definition_lines": 379,
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: PendingCapture, normalizeSpine, successor",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.LatexSolkey",
@@ -1295,8 +1455,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/Elementary.lean",
+    "presumed_handwritten_lines": 428,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1310,6 +1472,7 @@
     "definition_lines": 71,
     "definition_to_proof_line_ratio": 2.2903225806451615,
     "description": "Declarations: wrapperName, resultName, byteRets",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Syntax.Elab"
@@ -1319,9 +1482,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/EntryReturn.lean",
+    "presumed_handwritten_lines": 156,
     "proof_lines": 31,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1333,6 +1498,7 @@
     "definition_lines": 83,
     "definition_to_proof_line_ratio": null,
     "description": "`#wp`, `#step`: looking inside the calculus",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.DecideScoped",
@@ -1348,8 +1514,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/Inspect.lean",
+    "presumed_handwritten_lines": 171,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1363,6 +1531,7 @@
     "definition_lines": 416,
     "definition_to_proof_line_ratio": null,
     "description": "The calculus's notation as LaTeX",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.LatexTerm"
@@ -1372,8 +1541,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/Latex.lean",
+    "presumed_handwritten_lines": 584,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1385,6 +1556,7 @@
     "definition_lines": 48,
     "definition_to_proof_line_ratio": null,
     "description": "A derivation, and a solkey function's obligation, as LaTeX",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.Latex",
@@ -1396,8 +1568,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/LatexSolkey.lean",
+    "presumed_handwritten_lines": 92,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1413,6 +1587,7 @@
     "definition_lines": 704,
     "definition_to_proof_line_ratio": null,
     "description": "Scoped terms, updates and formulas as LaTeX",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "LeanTeX",
@@ -1423,8 +1598,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/LatexTerm.lean",
+    "presumed_handwritten_lines": 976,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1437,6 +1614,7 @@
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.14285714285714285,
     "description": "Storages too large to write down",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Problem",
@@ -1447,9 +1625,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/LazyStorage.lean",
+    "presumed_handwritten_lines": 62,
     "proof_lines": 21,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1461,6 +1641,7 @@
     "definition_lines": 18,
     "definition_to_proof_line_ratio": null,
     "description": "Compiled dependent-leaf countermodels",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.LeafArithmetic",
@@ -1471,8 +1652,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/LeafArithmetic.lean",
+    "presumed_handwritten_lines": 40,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1484,6 +1667,7 @@
     "definition_lines": 73,
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: result, address, input",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.LibraryTryImport"
@@ -1493,8 +1677,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/LibraryTryReplay.lean",
+    "presumed_handwritten_lines": 86,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1506,6 +1692,7 @@
     "definition_lines": 119,
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: sender, ownerAddress, recipientAddress",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.PaymentImport"
@@ -1515,8 +1702,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/PaymentReplay.lean",
+    "presumed_handwritten_lines": 132,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1529,6 +1718,7 @@
     "definition_lines": 73,
     "definition_to_proof_line_ratio": null,
     "description": "Certified precondition audits",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.Preconditions",
@@ -1539,8 +1729,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/Preconditions.lean",
+    "presumed_handwritten_lines": 105,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1553,6 +1745,7 @@
     "definition_lines": 108,
     "definition_to_proof_line_ratio": null,
     "description": "Checked program traces for documents",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.Elementary"
@@ -1562,8 +1755,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/ProgramTrace.lean",
+    "presumed_handwritten_lines": 164,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1575,6 +1770,7 @@
     "definition_lines": 63,
     "definition_to_proof_line_ratio": null,
     "description": "`#proof_tree`, `#proof_node`, `#proof_tree_json`: solkey's proof tree",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.ProofTree",
@@ -1587,8 +1783,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/ProofTree.lean",
+    "presumed_handwritten_lines": 158,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1600,6 +1798,7 @@
     "definition_lines": 17,
     "definition_to_proof_line_ratio": null,
     "description": "Compiled arithmetic selection with finite query replay",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.QueryArithmetic",
@@ -1610,8 +1809,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/QueryArithmetic.lean",
+    "presumed_handwritten_lines": 44,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1623,6 +1824,7 @@
     "definition_lines": 154,
     "definition_to_proof_line_ratio": null,
     "description": "`#run`: call a contract's function in the typed run",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.Common",
@@ -1635,8 +1837,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/Run.lean",
+    "presumed_handwritten_lines": 278,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1649,6 +1853,7 @@
     "definition_lines": 105,
     "definition_to_proof_line_ratio": null,
     "description": "Printing states as Solidity",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Semantics",
@@ -1659,8 +1864,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/Show.lean",
+    "presumed_handwritten_lines": 172,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1673,6 +1880,7 @@
     "definition_lines": 87,
     "definition_to_proof_line_ratio": null,
     "description": "Bounded typed programs printed for an external solc/EthereumJS oracle",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Lean",
@@ -1685,8 +1893,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/SolCases.lean",
+    "presumed_handwritten_lines": 129,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1699,6 +1909,7 @@
     "definition_lines": 173,
     "definition_to_proof_line_ratio": null,
     "description": "A certified model witness for the exact tested formula",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.Counterexample"
@@ -1708,8 +1919,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/SourceCounterexample.lean",
+    "presumed_handwritten_lines": 244,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1721,6 +1934,7 @@
     "definition_lines": 113,
     "definition_to_proof_line_ratio": null,
     "description": "`#taclet`: a rule of the calculus",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Calculus.PrintedRules",
@@ -1734,8 +1948,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/Taclet.lean",
+    "presumed_handwritten_lines": 218,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1748,6 +1964,7 @@
     "definition_lines": 483,
     "definition_to_proof_line_ratio": 21.0,
     "description": "Replay upstream typed ABI semantic vectors",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Import",
@@ -1764,9 +1981,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/Upstream.lean",
+    "presumed_handwritten_lines": 636,
     "proof_lines": 23,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1779,6 +1998,7 @@
     "definition_lines": 214,
     "definition_to_proof_line_ratio": null,
     "description": "Upstream replay: typed ABI entry decoding",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Semantics.AbiEntry",
@@ -1791,8 +2011,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/UpstreamEntry.lean",
+    "presumed_handwritten_lines": 388,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1806,6 +2028,7 @@
     "definition_lines": 54,
     "definition_to_proof_line_ratio": 0.38028169014084506,
     "description": "Kernel facts for failed postcondition slots",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.Counterexample"
@@ -1815,9 +2038,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/VerifierMetadata.lean",
+    "presumed_handwritten_lines": 272,
     "proof_lines": 142,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Tools",
@@ -1830,6 +2055,7 @@
     "definition_lines": 89,
     "definition_to_proof_line_ratio": null,
     "description": "`#verify`: prove a specification, or refute it",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Tools.CompleteVerification"
@@ -1839,8 +2065,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Tools/Verify.lean",
+    "presumed_handwritten_lines": 151,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "TypeGraph",
@@ -1856,6 +2084,7 @@
     "definition_lines": 55,
     "definition_to_proof_line_ratio": 1.1,
     "description": "A finite declaration graph for recursive Solidity structs. Node positions",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.AST"
@@ -1865,9 +2094,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/TypeGraph.lean",
+    "presumed_handwritten_lines": 147,
     "proof_lines": 50,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Typing",
@@ -1878,6 +2109,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "What the tests of `wt(storage)` decide",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Typing.Constructibility"
@@ -1887,9 +2119,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Typing/CanonTest.lean",
+    "presumed_handwritten_lines": 80,
     "proof_lines": 49,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Typing",
@@ -1902,6 +2136,7 @@
     "definition_lines": 44,
     "definition_to_proof_line_ratio": 0.16356877323420074,
     "description": "Declarations: ordinaryDefaultFold, SVal.OrdinaryDefault, SFields.OrdinaryDefault",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Typing.Values"
@@ -1911,9 +2146,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Typing/CleanTail.lean",
+    "presumed_handwritten_lines": 390,
     "proof_lines": 269,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Typing",
@@ -1927,6 +2164,7 @@
     "definition_lines": 88,
     "definition_to_proof_line_ratio": 0.06263345195729537,
     "description": "Clean tails, kept by a contract that exposes nothing",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Typing.CleanTail",
@@ -1937,9 +2175,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Typing/CleanTailRun.lean",
+    "presumed_handwritten_lines": 1802,
     "proof_lines": 1405,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Typing",
@@ -1952,6 +2192,7 @@
     "definition_lines": 142,
     "definition_to_proof_line_ratio": 0.16784869976359337,
     "description": "Which storages are reachable, exactly",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Typing.Fits"
@@ -1961,9 +2202,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Typing/Constructibility.lean",
+    "presumed_handwritten_lines": 1296,
     "proof_lines": 846,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Typing",
@@ -1977,6 +2220,7 @@
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.10714285714285714,
     "description": "Reachable storage fits (decision 77, its conditional form)",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Typing.Tight"
@@ -1986,9 +2230,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Typing/Fits.lean",
+    "presumed_handwritten_lines": 172,
     "proof_lines": 84,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Typing",
@@ -2002,6 +2248,7 @@
     "definition_lines": 30,
     "definition_to_proof_line_ratio": 0.04297994269340974,
     "description": "A hereditary predicate the typed run keeps",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Typing.Values",
@@ -2012,9 +2259,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Typing/HeredRun.lean",
+    "presumed_handwritten_lines": 910,
     "proof_lines": 698,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Typing",
@@ -2028,6 +2277,7 @@
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.40476190476190477,
     "description": "What every reachable storage satisfies beyond its types",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Typing.HeredRun"
@@ -2037,9 +2287,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Typing/Reachability.lean",
+    "presumed_handwritten_lines": 161,
     "proof_lines": 42,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Typing",
@@ -2052,6 +2304,7 @@
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.47058823529411764,
     "description": "Runtime sorts of typed values",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Semantics.Heap"
@@ -2061,9 +2314,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Typing/Sorts.lean",
+    "presumed_handwritten_lines": 92,
     "proof_lines": 34,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Typing",
@@ -2075,6 +2330,7 @@
     "definition_lines": 5,
     "definition_to_proof_line_ratio": null,
     "description": "The shape of a run invariant",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Semantics.State"
@@ -2084,8 +2340,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Typing/Soundness.lean",
+    "presumed_handwritten_lines": 31,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Typing",
@@ -2099,6 +2357,7 @@
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.1590909090909091,
     "description": "Tight storage: what every reachable storage satisfies beyond canonical",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Typing.Reachability"
@@ -2108,9 +2367,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Typing/Tight.lean",
+    "presumed_handwritten_lines": 189,
     "proof_lines": 88,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Typing",
@@ -2124,6 +2385,7 @@
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.06779661016949153,
     "description": "Invariants of the typed run",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Typing.Soundness",
@@ -2134,9 +2396,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Typing/TypedRunInv.lean",
+    "presumed_handwritten_lines": 358,
     "proof_lines": 236,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Typing",
@@ -2151,6 +2415,7 @@
     "definition_lines": 71,
     "definition_to_proof_line_ratio": 0.07465825446898001,
     "description": "Typed storage values, hereditarily",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Theory.Typed.Obs",
@@ -2161,9 +2426,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Typing/Values.lean",
+    "presumed_handwritten_lines": 1351,
     "proof_lines": 951,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Update",
@@ -2176,6 +2443,7 @@
     "definition_lines": 16,
     "definition_to_proof_line_ratio": null,
     "description": "Modalities, and what the terms' signature leaves to the interpreter",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Theory.Segs"
@@ -2185,8 +2453,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Update.lean",
+    "presumed_handwritten_lines": 58,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -2195,6 +2465,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.RawSourceForPost",
@@ -2395,8 +2666,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul.lean",
+    "presumed_handwritten_lines": 0,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 194
   },
   {
     "area": "Yul",
@@ -2407,6 +2680,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: allocated_supported, allocation_roundtrip",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.ComputedFrameHeap",
@@ -2417,9 +2691,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/AllocatedComputedFrame.lean",
+    "presumed_handwritten_lines": 57,
     "proof_lines": 40,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -2432,6 +2708,7 @@
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.8,
     "description": "Declarations: E, initial, data",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.AllocatedComputedFrame",
@@ -2442,9 +2719,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/AllocatedComputedFrameControls.lean",
+    "presumed_handwritten_lines": 53,
     "proof_lines": 20,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -2455,6 +2734,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: copy_one, byte_outside, byte_map",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.SelectedPhysicalStore",
@@ -2465,9 +2745,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/CheckedResidualStore.lean",
+    "presumed_handwritten_lines": 88,
     "proof_lines": 62,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -2480,6 +2762,7 @@
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.35555555555555557,
     "description": "Declarations: base, residual, reserved",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.CheckedResidualStore",
@@ -2490,9 +2773,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/CheckedResidualStoreControls.lean",
+    "presumed_handwritten_lines": 120,
     "proof_lines": 45,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -2506,6 +2791,7 @@
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.12030075187969924,
     "description": "Declarations: Error, prepare, owner_roundtrip",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ComputedPlacement",
@@ -2516,9 +2802,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/ComputedFrameHeap.lean",
+    "presumed_handwritten_lines": 187,
     "proof_lines": 133,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -2531,6 +2819,7 @@
     "definition_lines": 32,
     "definition_to_proof_line_ratio": 0.3595505617977528,
     "description": "Declarations: E, initial, bytes",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.ComputedFrameHeap",
@@ -2541,9 +2830,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/ComputedFrameHeapControls.lean",
+    "presumed_handwritten_lines": 174,
     "proof_lines": 89,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -2556,6 +2847,7 @@
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.07692307692307693,
     "description": "Declarations: encoded_fits, frameOf, prepareFrame",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.MemoryAgreement",
@@ -2568,9 +2860,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/FrameHeap.lean",
+    "presumed_handwritten_lines": 270,
     "proof_lines": 195,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -2583,6 +2877,7 @@
     "definition_lines": 63,
     "definition_to_proof_line_ratio": 0.4315068493150685,
     "description": "Declarations: C, carrier, residual",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.FrameHeap",
@@ -2595,9 +2890,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/FrameHeapControls.lean",
+    "presumed_handwritten_lines": 298,
     "proof_lines": 146,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -2608,6 +2905,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: residual_unchanged",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.FrameHeap",
@@ -2618,9 +2916,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/HeapCallOutput.lean",
+    "presumed_handwritten_lines": 50,
     "proof_lines": 34,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -2633,6 +2933,7 @@
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.23809523809523808,
     "description": "Declarations: C, carrier, residual",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.HeapCallOutput",
@@ -2643,9 +2944,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/HeapCallOutputControls.lean",
+    "presumed_handwritten_lines": 98,
     "proof_lines": 63,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -2656,6 +2959,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: preserve, preserve_interval",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.HeapCallOutput"
@@ -2665,9 +2969,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/HeapOutputReserved.lean",
+    "presumed_handwritten_lines": 51,
     "proof_lines": 35,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -2680,6 +2986,7 @@
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.2,
     "description": "Declarations: residual, fits, reserved",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.HeapOutputReserved",
@@ -2690,9 +2997,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/HeapOutputReservedControls.lean",
+    "presumed_handwritten_lines": 81,
     "proof_lines": 50,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -2706,6 +3015,7 @@
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.07446808510638298,
     "description": "Declarations: Write, sourceWrites, wordWrites",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6Memory"
@@ -2715,9 +3025,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/HeapWriteback.lean",
+    "presumed_handwritten_lines": 239,
     "proof_lines": 188,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -2731,6 +3043,7 @@
     "definition_lines": 43,
     "definition_to_proof_line_ratio": 0.35833333333333334,
     "description": "Declarations: C, A, \u0393",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.HeapWriteback",
@@ -2741,9 +3054,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/HeapWritebackControls.lean",
+    "presumed_handwritten_lines": 214,
     "proof_lines": 120,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -2754,6 +3069,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: image_eq, entry_eq, entries_eq",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.MemoryImageReadUniqueness",
@@ -2764,9 +3080,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/ImageIdentity.lean",
+    "presumed_handwritten_lines": 55,
     "proof_lines": 44,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -2779,6 +3097,7 @@
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.07272727272727272,
     "description": "Declarations: Fits, writeback, fits_view",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6Memory"
@@ -2788,9 +3107,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/MemoryAgreement.lean",
+    "presumed_handwritten_lines": 88,
     "proof_lines": 55,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -2803,6 +3124,7 @@
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.4782608695652174,
     "description": "Declarations: C, image, changed",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.MemoryAgreement"
@@ -2812,9 +3134,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/MemoryAgreementControls.lean",
+    "presumed_handwritten_lines": 54,
     "proof_lines": 23,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -2825,6 +3149,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: save_eq_write, read_eq_read, copy_eq_write_read",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.Bytes",
@@ -2835,9 +3160,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/MemoryBytes.lean",
+    "presumed_handwritten_lines": 93,
     "proof_lines": 71,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -2849,6 +3176,7 @@
     "definition_lines": 5,
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: seed, forward, backward",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.MemoryBytes"
@@ -2858,8 +3186,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/MemoryBytesControls.lean",
+    "presumed_handwritten_lines": 29,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -2873,6 +3203,7 @@
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.030303030303030304,
     "description": "Declarations: Prepared, success, failure",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.HeapWriteback"
@@ -2882,9 +3213,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/ObjectWriteback.lean",
+    "presumed_handwritten_lines": 249,
     "proof_lines": 198,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -2897,6 +3230,7 @@
     "definition_lines": 28,
     "definition_to_proof_line_ratio": 0.2828282828282828,
     "description": "Declarations: E, empty, rawBytes",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.ObjectWriteback",
@@ -2907,9 +3241,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/ObjectWritebackControls.lean",
+    "presumed_handwritten_lines": 178,
     "proof_lines": 99,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -2922,6 +3258,7 @@
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.047058823529411764,
     "description": "Declarations: expression, run, outside",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ByteWriteInventory"
@@ -2931,9 +3268,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ByteAssignment.lean",
+    "presumed_handwritten_lines": 109,
     "proof_lines": 85,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -2946,6 +3285,7 @@
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.4583333333333333,
     "description": "Declarations: glob, state, assignment",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ByteAssignment",
@@ -2957,9 +3297,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ByteAssignmentControls.lean",
+    "presumed_handwritten_lines": 60,
     "proof_lines": 24,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -2970,6 +3312,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: copied_byte, byte_update_exists",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6CopySource",
@@ -2980,9 +3323,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ByteCopyPreparation.lean",
+    "presumed_handwritten_lines": 50,
     "proof_lines": 33,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -2995,6 +3340,7 @@
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.04,
     "description": "Declarations: familyImage, family_update_exists, payload_outside",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ByteCopyPreparation"
@@ -3004,9 +3350,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ByteFamilyCopy.lean",
+    "presumed_handwritten_lines": 179,
     "proof_lines": 150,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3019,6 +3367,7 @@
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.5757575757575758,
     "description": "Declarations: placement, first, string",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ByteFamilyCopy",
@@ -3030,9 +3379,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ByteFamilyCopyControls.lean",
+    "presumed_handwritten_lines": 85,
     "proof_lines": 33,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3045,6 +3396,7 @@
     "definition_lines": 45,
     "definition_to_proof_line_ratio": 0.35714285714285715,
     "description": "Declarations: touch, touch_capacity, touch_image",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalFrameImage",
@@ -3055,9 +3407,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ByteMemory.lean",
+    "presumed_handwritten_lines": 232,
     "proof_lines": 126,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3070,6 +3424,7 @@
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 0.4666666666666667,
     "description": "Declarations: C, key, image",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ByteMemory"
@@ -3079,9 +3434,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ByteMemoryControls.lean",
+    "presumed_handwritten_lines": 106,
     "proof_lines": 45,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3092,6 +3449,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: payload_outside, payload_copy",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ByteFamilyCopy"
@@ -3101,9 +3459,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ByteObjectCopy.lean",
+    "presumed_handwritten_lines": 54,
     "proof_lines": 33,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3116,6 +3476,7 @@
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.0975609756097561,
     "description": "Declarations: changed_view, endpoint, empty_view",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ByteObjectCopy",
@@ -3126,9 +3487,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ByteObjectCopyControls.lean",
+    "presumed_handwritten_lines": 69,
     "proof_lines": 41,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3141,6 +3504,7 @@
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.05555555555555555,
     "description": "Declarations: heap_read, length_read, read_byte",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6RetainedRegionCopy",
@@ -3151,9 +3515,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ByteReferenceReads.lean",
+    "presumed_handwritten_lines": 102,
     "proof_lines": 72,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3164,6 +3530,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: retained_access, string_write, string_write_outside",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ByteReferenceReads",
@@ -3174,9 +3541,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ByteReferenceReadsControls.lean",
+    "presumed_handwritten_lines": 52,
     "proof_lines": 33,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3189,6 +3558,7 @@
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.1,
     "description": "Declarations: payload_set, header_same, byteWord",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ByteReferenceReads"
@@ -3198,9 +3568,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ByteReferenceWrite.lean",
+    "presumed_handwritten_lines": 171,
     "proof_lines": 130,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3213,6 +3585,7 @@
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.15625,
     "description": "Declarations: image, offset, reached",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ByteReferenceWrite",
@@ -3223,9 +3596,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ByteReferenceWriteControls.lean",
+    "presumed_handwritten_lines": 62,
     "proof_lines": 32,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3236,6 +3611,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: write",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ByteReferenceWrite"
@@ -3245,9 +3621,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ByteWriteInventory.lean",
+    "presumed_handwritten_lines": 122,
     "proof_lines": 108,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3260,6 +3638,7 @@
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.09615384615384616,
     "description": "Declarations: secondFrame, kernel_twice, inhabited_initial",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ByteWriteInventory",
@@ -3270,9 +3649,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ByteWriteInventoryControls.lean",
+    "presumed_handwritten_lines": 82,
     "proof_lines": 52,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3285,6 +3666,7 @@
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.109375,
     "description": "Declarations: writePair, frame_eq_of_fields, accessedWords",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ByteMemory"
@@ -3294,9 +3676,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ByteWriteOrder.lean",
+    "presumed_handwritten_lines": 98,
     "proof_lines": 64,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3309,6 +3693,7 @@
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.9411764705882353,
     "description": "Declarations: C, image, span",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ByteWriteOrder"
@@ -3318,9 +3703,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ByteWriteOrderControls.lean",
+    "presumed_handwritten_lines": 71,
     "proof_lines": 17,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3331,6 +3718,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: success, late_halt, outside",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ByteWriteInventory",
@@ -3341,9 +3729,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ByteWriteSub.lean",
+    "presumed_handwritten_lines": 98,
     "proof_lines": 75,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3356,6 +3746,7 @@
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.04,
     "description": "Declarations: output, empty_child, caller_reads",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ByteWriteSub",
@@ -3367,9 +3758,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ByteWriteSubControls.lean",
+    "presumed_handwritten_lines": 78,
     "proof_lines": 50,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3380,6 +3773,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: clipped_callBytes, clipped_copy_read, source_target_clipped_hash",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6Inputs",
@@ -3390,9 +3784,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6CalldataHash.lean",
+    "presumed_handwritten_lines": 71,
     "proof_lines": 51,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3405,6 +3801,7 @@
     "definition_lines": 27,
     "definition_to_proof_line_ratio": 1.0384615384615385,
     "description": "Declarations: E, C, F",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6CalldataHash",
@@ -3415,9 +3812,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6CalldataHashControls.lean",
+    "presumed_handwritten_lines": 81,
     "proof_lines": 26,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3431,6 +3830,7 @@
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.07092198581560284,
     "description": "Declarations: expression, after, after_found",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ByteAssignment"
@@ -3440,9 +3840,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ChainedByteAssignment.lean",
+    "presumed_handwritten_lines": 172,
     "proof_lines": 141,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3455,6 +3857,7 @@
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.3333333333333333,
     "description": "Declarations: state, assignment, firstFrame",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ChainedByteAssignment",
@@ -3465,9 +3868,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ChainedByteAssignmentControls.lean",
+    "presumed_handwritten_lines": 88,
     "proof_lines": 45,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3480,6 +3885,7 @@
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.125,
     "description": "Declarations: src, dst, reached",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ByteCopyPreparation",
@@ -3490,9 +3896,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ChangedPayloadHashControls.lean",
+    "presumed_handwritten_lines": 172,
     "proof_lines": 120,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3507,6 +3915,7 @@
     "definition_lines": 24,
     "definition_to_proof_line_ratio": 0.24242424242424243,
     "description": "Declarations: SpanPair, copy, copy_capacity",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6SnapshotCopy"
@@ -3516,9 +3925,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6CopyHistory.lean",
+    "presumed_handwritten_lines": 160,
     "proof_lines": 99,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3531,6 +3942,7 @@
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 2.6,
     "description": "Declarations: owned, dirty, later",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6CopyHistory",
@@ -3541,9 +3953,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6CopyHistoryControls.lean",
+    "presumed_handwritten_lines": 54,
     "proof_lines": 5,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3554,6 +3968,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: readBE_rebase, copied_word, nominal_update_exists",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6SnapshotCopy",
@@ -3564,9 +3979,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6CopyPreparation.lean",
+    "presumed_handwritten_lines": 67,
     "proof_lines": 48,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3579,6 +3996,7 @@
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.1111111111111111,
     "description": "Declarations: image, src, dst",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6CopyPreparation",
@@ -3589,9 +4007,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6CopyPreparationControls.lean",
+    "presumed_handwritten_lines": 122,
     "proof_lines": 81,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3602,6 +4022,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: update_action, unchanged_action",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6CopyPreparation"
@@ -3611,9 +4032,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6CopySource.lean",
+    "presumed_handwritten_lines": 38,
     "proof_lines": 23,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3626,6 +4049,7 @@
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.07936507936507936,
     "description": "Declarations: data, heap, state",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6CopySource",
@@ -3636,9 +4060,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6CopySourceControls.lean",
+    "presumed_handwritten_lines": 98,
     "proof_lines": 63,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3649,6 +4075,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: store_image, transport",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.ArrayWordHeap",
@@ -3660,9 +4087,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6HeapWordStore.lean",
+    "presumed_handwritten_lines": 56,
     "proof_lines": 38,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3675,6 +4104,7 @@
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.2222222222222222,
     "description": "Declarations: C, carrier, fits",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6HeapWordStore",
@@ -3686,9 +4116,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6HeapWordStoreControls.lean",
+    "presumed_handwritten_lines": 77,
     "proof_lines": 45,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3699,6 +4131,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: live_hash, completed_hash",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6CopyHistory",
@@ -3710,9 +4143,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6HistoryHash.lean",
+    "presumed_handwritten_lines": 70,
     "proof_lines": 49,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3725,6 +4160,7 @@
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.3103448275862069,
     "description": "Declarations: state, cursor, payloadSpan",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6HistoryHash",
@@ -3735,9 +4171,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6HistoryHashControls.lean",
+    "presumed_handwritten_lines": 72,
     "proof_lines": 29,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3750,6 +4188,7 @@
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.08108108108108109,
     "description": "Declarations: byteLocal, hashAt, hashAt_run",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6HistoryHash",
@@ -3760,9 +4199,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6HistoryHashRef.lean",
+    "presumed_handwritten_lines": 106,
     "proof_lines": 74,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3775,6 +4216,7 @@
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.11290322580645161,
     "description": "Declarations: owned, out, history_result",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6HistoryHashRef",
@@ -3786,9 +4228,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6HistoryHashRefControls.lean",
+    "presumed_handwritten_lines": 98,
     "proof_lines": 62,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3801,6 +4245,7 @@
     "definition_lines": 36,
     "definition_to_proof_line_ratio": 1.0909090909090908,
     "description": "Declarations: C, F, image",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6Inputs",
@@ -3811,9 +4256,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6InputControls.lean",
+    "presumed_handwritten_lines": 138,
     "proof_lines": 33,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3826,6 +4273,7 @@
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.045871559633027525,
     "description": "Declarations: callBytes, callBytes_length, copyCalldata",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ByteMemory",
@@ -3837,9 +4285,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6Inputs.lean",
+    "presumed_handwritten_lines": 156,
     "proof_lines": 109,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3852,6 +4302,7 @@
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.08,
     "description": "Declarations: elementSpan, write_frame, write_eval_aliases",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Backend.MemoryOps.PhysicalUintWrite",
@@ -3863,9 +4314,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6Memory.lean",
+    "presumed_handwritten_lines": 168,
     "proof_lines": 125,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3879,6 +4332,7 @@
     "definition_lines": 32,
     "definition_to_proof_line_ratio": 0.3018867924528302,
     "description": "Declarations: C, A, \u0393",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6Memory",
@@ -3889,9 +4343,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6MemoryControls.lean",
+    "presumed_handwritten_lines": 163,
     "proof_lines": 106,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3904,6 +4360,7 @@
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.17073170731707318,
     "description": "Declarations: fits, run, bytes",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.MultiRootByteBoundary",
@@ -3914,9 +4371,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6MultiRootByte.lean",
+    "presumed_handwritten_lines": 68,
     "proof_lines": 41,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3929,6 +4388,7 @@
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.1111111111111111,
     "description": "Declarations: C, image, room",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6MultiRootByte",
@@ -3939,9 +4399,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6MultiRootByteControls.lean",
+    "presumed_handwritten_lines": 101,
     "proof_lines": 72,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3952,6 +4414,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: refresh, append_success",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6MultiRootByte",
@@ -3962,9 +4425,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6MultiRootByteRefresh.lean",
+    "presumed_handwritten_lines": 79,
     "proof_lines": 63,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -3977,6 +4442,7 @@
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.09523809523809523,
     "description": "Declarations: firstPlan, secondPlan, firstOut",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6MultiRootByteRefresh",
@@ -3987,9 +4453,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6MultiRootByteRefreshControls.lean",
+    "presumed_handwritten_lines": 66,
     "proof_lines": 42,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4003,6 +4471,7 @@
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.20833333333333334,
     "description": "Declarations: roomDecision, CopyProgress, checkedCopies",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ResidualSequence"
@@ -4012,9 +4481,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ResidualCapacity.lean",
+    "presumed_handwritten_lines": 113,
     "proof_lines": 72,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4027,6 +4498,7 @@
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.7142857142857143,
     "description": "Declarations: badDestination, badSource, later",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ResidualCapacity",
@@ -4037,9 +4509,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ResidualCapacityControls.lean",
+    "presumed_handwritten_lines": 81,
     "proof_lines": 14,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4052,6 +4526,7 @@
     "definition_lines": 19,
     "definition_to_proof_line_ratio": 0.3220338983050847,
     "description": "Declarations: sourceSpan, destinationSpan, copyFrame",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ByteMemory",
@@ -4064,9 +4539,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ResidualCopy.lean",
+    "presumed_handwritten_lines": 114,
     "proof_lines": 59,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4079,6 +4556,7 @@
     "definition_lines": 31,
     "definition_to_proof_line_ratio": 0.62,
     "description": "Declarations: C, carrier, residual",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ResidualCopy",
@@ -4089,9 +4567,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ResidualCopyControls.lean",
+    "presumed_handwritten_lines": 131,
     "proof_lines": 50,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4104,6 +4584,7 @@
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.14516129032258066,
     "description": "Declarations: requestExtent, extent, extraWords",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ResidualResume"
@@ -4113,9 +4594,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ResidualReserve.lean",
+    "presumed_handwritten_lines": 101,
     "proof_lines": 62,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4128,6 +4611,7 @@
     "definition_lines": 1,
     "definition_to_proof_line_ratio": 0.1,
     "description": "Declarations: completed, actual_source",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ResidualReserve",
@@ -4138,9 +4622,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ResidualReserveControls.lean",
+    "presumed_handwritten_lines": 44,
     "proof_lines": 10,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4153,6 +4639,7 @@
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.06818181818181818,
     "description": "Declarations: resume, extension_identity, resumed_source",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ResidualCapacity"
@@ -4162,9 +4649,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ResidualResume.lean",
+    "presumed_handwritten_lines": 67,
     "proof_lines": 44,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4177,6 +4666,7 @@
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.8888888888888888,
     "description": "Declarations: crossing, suffix, work",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ResidualResume",
@@ -4187,9 +4677,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ResidualResumeControls.lean",
+    "presumed_handwritten_lines": 54,
     "proof_lines": 9,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4202,6 +4694,7 @@
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.25757575757575757,
     "description": "Declarations: CopyRoom, runCopies, runCopies_image",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ResidualCopy"
@@ -4211,9 +4704,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ResidualSequence.lean",
+    "presumed_handwritten_lines": 111,
     "proof_lines": 66,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4226,6 +4721,7 @@
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.22857142857142856,
     "description": "Declarations: onward, requests, rooms",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ResidualSequence",
@@ -4236,9 +4732,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6ResidualSequenceControls.lean",
+    "presumed_handwritten_lines": 91,
     "proof_lines": 35,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4249,6 +4747,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: transport",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6HeapWordStore",
@@ -4259,9 +4758,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6RetainedArrayHeader.lean",
+    "presumed_handwritten_lines": 50,
     "proof_lines": 36,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4274,6 +4775,7 @@
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.2537313432835821,
     "description": "Declarations: image, sink, length",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6RetainedArrayHeader",
@@ -4284,9 +4786,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6RetainedArrayHeaderControls.lean",
+    "presumed_handwritten_lines": 108,
     "proof_lines": 67,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4297,6 +4801,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: transport",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6HeapWordStore",
@@ -4307,9 +4812,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6RetainedByteHeader.lean",
+    "presumed_handwritten_lines": 46,
     "proof_lines": 32,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4322,6 +4829,7 @@
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 0.42,
     "description": "Declarations: C, image, image_at",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6RetainedByteHeader",
@@ -4332,9 +4840,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6RetainedByteHeaderControls.lean",
+    "presumed_handwritten_lines": 95,
     "proof_lines": 50,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4345,6 +4855,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: transport",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6HeapWordStore",
@@ -4355,9 +4866,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6RetainedHeapWordStore.lean",
+    "presumed_handwritten_lines": 50,
     "proof_lines": 36,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4370,6 +4883,7 @@
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.2641509433962264,
     "description": "Declarations: program, actual_sequence, C",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6RetainedHeapWordStore",
@@ -4381,9 +4895,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6RetainedHeapWordStoreControls.lean",
+    "presumed_handwritten_lines": 86,
     "proof_lines": 53,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4396,6 +4912,7 @@
     "definition_lines": 24,
     "definition_to_proof_line_ratio": 0.15584415584415584,
     "description": "Declarations: familySnapshot, update_none_iff, prepareEntry",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ByteFamilyCopy"
@@ -4405,9 +4922,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6RetainedRegionCopy.lean",
+    "presumed_handwritten_lines": 208,
     "proof_lines": 154,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4420,6 +4939,7 @@
     "definition_lines": 27,
     "definition_to_proof_line_ratio": 0.3253012048192771,
     "description": "Declarations: residual, fits, image",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6RetainedRegionCopy",
@@ -4430,9 +4950,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6RetainedRegionCopyControls.lean",
+    "presumed_handwritten_lines": 165,
     "proof_lines": 83,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4445,6 +4967,7 @@
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.175,
     "description": "Declarations: applyCopy, reached_image, success",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ByteMemory",
@@ -4455,9 +4978,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6SnapshotCopy.lean",
+    "presumed_handwritten_lines": 70,
     "proof_lines": 40,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4470,6 +4995,7 @@
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.30303030303030304,
     "description": "Declarations: source, destination, dirtySource",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6SnapshotCopy",
@@ -4481,9 +5007,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/P6SnapshotCopyControls.lean",
+    "presumed_handwritten_lines": 77,
     "proof_lines": 33,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4496,6 +5024,7 @@
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.1,
     "description": "Declarations: payload, payload_length, payload_bound",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.ObjectWriteback",
@@ -4507,9 +5036,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/PhysicalObject.lean",
+    "presumed_handwritten_lines": 164,
     "proof_lines": 110,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4522,6 +5053,7 @@
     "definition_lines": 46,
     "definition_to_proof_line_ratio": 0.5679012345679012,
     "description": "Declarations: C, E, initial",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.PhysicalObject",
@@ -4532,9 +5064,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/PhysicalObjectControls.lean",
+    "presumed_handwritten_lines": 165,
     "proof_lines": 81,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4547,6 +5081,7 @@
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.075,
     "description": "Declarations: writeBytes_mstore, mstore_step, applySlice",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.InventorySnapshotHistory",
@@ -4557,9 +5092,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/PhysicalSnapshotSlice.lean",
+    "presumed_handwritten_lines": 120,
     "proof_lines": 80,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4572,6 +5109,7 @@
     "definition_lines": 24,
     "definition_to_proof_line_ratio": 1.5,
     "description": "Declarations: zero, frame, initial",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.PhysicalSnapshotSlice",
@@ -4582,9 +5120,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/PhysicalSnapshotSliceControls.lean",
+    "presumed_handwritten_lines": 103,
     "proof_lines": 16,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4597,6 +5137,7 @@
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.09821428571428571,
     "description": "Declarations: span, store, readWord",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6ByteMemory",
@@ -4608,9 +5149,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/RawPhysical.lean",
+    "presumed_handwritten_lines": 165,
     "proof_lines": 112,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4621,6 +5164,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: decode_reads, encode_decode, frame_identity",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.RawPhysicalInterior"
@@ -4630,9 +5174,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/RawPhysicalAnyImage.lean",
+    "presumed_handwritten_lines": 71,
     "proof_lines": 46,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4645,6 +5191,7 @@
     "definition_lines": 11,
     "definition_to_proof_line_ratio": 0.21568627450980393,
     "description": "Declarations: source, destination, copied",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.RawPhysicalAnyImage",
@@ -4655,9 +5202,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/RawPhysicalAnyImageControls.lean",
+    "presumed_handwritten_lines": 85,
     "proof_lines": 51,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4670,6 +5219,7 @@
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.15,
     "description": "Declarations: inputArea, reached, image",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.RawPhysicalCallFrame"
@@ -4679,9 +5229,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/RawPhysicalCallAccess.lean",
+    "presumed_handwritten_lines": 90,
     "proof_lines": 60,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4694,6 +5246,7 @@
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.3541666666666667,
     "description": "Declarations: input, output, entry",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.RawPhysicalCallAccess",
@@ -4704,9 +5257,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/RawPhysicalCallAccessControls.lean",
+    "presumed_handwritten_lines": 87,
     "proof_lines": 48,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4719,6 +5274,7 @@
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.11538461538461539,
     "description": "Declarations: completed, execute_eq, revert_fields",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.RawPhysicalCallOutput"
@@ -4728,9 +5284,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/RawPhysicalCallFrame.lean",
+    "presumed_handwritten_lines": 80,
     "proof_lines": 52,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4743,6 +5301,7 @@
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.32075471698113206,
     "description": "Declarations: entry, parent, input",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.RawPhysicalCallFrame",
@@ -4754,9 +5313,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/RawPhysicalCallFrameControls.lean",
+    "presumed_handwritten_lines": 94,
     "proof_lines": 53,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4769,6 +5330,7 @@
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 0.28888888888888886,
     "description": "Declarations: prefixArea, written, outputArea",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.RawPhysicalAnyImage",
@@ -4779,9 +5341,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/RawPhysicalCallOutput.lean",
+    "presumed_handwritten_lines": 148,
     "proof_lines": 90,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4794,6 +5358,7 @@
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.2222222222222222,
     "description": "Declarations: area, reached, updated",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.RawPhysicalCallOutput",
@@ -4804,9 +5369,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/RawPhysicalCallOutputControls.lean",
+    "presumed_handwritten_lines": 89,
     "proof_lines": 54,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4817,6 +5384,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: copy_high_mono, transport, copied_raw_word",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.RawPhysicalAnyImage",
@@ -4827,9 +5395,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/RawPhysicalCalldata.lean",
+    "presumed_handwritten_lines": 73,
     "proof_lines": 50,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4842,6 +5412,7 @@
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.17307692307692307,
     "description": "Declarations: frame, start, wordArea",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.RawPhysicalCalldata",
@@ -4852,9 +5423,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/RawPhysicalCalldataControls.lean",
+    "presumed_handwritten_lines": 83,
     "proof_lines": 52,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4867,6 +5440,7 @@
     "definition_lines": 36,
     "definition_to_proof_line_ratio": 0.8,
     "description": "Declarations: E, boolCtx, boolCell",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.RawPhysical",
@@ -4877,9 +5451,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/RawPhysicalControls.lean",
+    "presumed_handwritten_lines": 141,
     "proof_lines": 45,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4892,6 +5468,7 @@
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.16666666666666666,
     "description": "Declarations: word_roundtrip, hashWord, code",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.RawPhysicalUpdate",
@@ -4902,9 +5479,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/RawPhysicalHash.lean",
+    "presumed_handwritten_lines": 146,
     "proof_lines": 96,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4917,6 +5496,7 @@
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 0.26582278481012656,
     "description": "Declarations: input, destination, value",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.RawPhysicalHash",
@@ -4927,9 +5507,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/RawPhysicalHashControls.lean",
+    "presumed_handwritten_lines": 125,
     "proof_lines": 79,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4942,6 +5524,7 @@
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.022727272727272728,
     "description": "Declarations: bytes_word_inverse, wordAfter, wordAfter_bytes",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.RawPhysicalUpdate",
@@ -4953,9 +5536,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/RawPhysicalInterior.lean",
+    "presumed_handwritten_lines": 113,
     "proof_lines": 88,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4968,6 +5553,7 @@
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.2857142857142857,
     "description": "Declarations: index, address, input",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.RawPhysicalInterior",
@@ -4978,9 +5564,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/RawPhysicalInteriorControls.lean",
+    "presumed_handwritten_lines": 57,
     "proof_lines": 28,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -4993,6 +5581,7 @@
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.14,
     "description": "Declarations: offset, separated, encodeList",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.RawPhysical",
@@ -5004,9 +5593,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/RawPhysicalInventory.lean",
+    "presumed_handwritten_lines": 149,
     "proof_lines": 100,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5019,6 +5610,7 @@
     "definition_lines": 24,
     "definition_to_proof_line_ratio": 0.4528301886792453,
     "description": "Declarations: E, fnTy, ctx",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.RawPhysicalProducer",
@@ -5029,9 +5621,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/RawPhysicalInventoryControls.lean",
+    "presumed_handwritten_lines": 102,
     "proof_lines": 53,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5042,6 +5636,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: transport",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Interfaces.P16",
@@ -5052,9 +5647,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/RawPhysicalProducer.lean",
+    "presumed_handwritten_lines": 40,
     "proof_lines": 26,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5067,6 +5664,7 @@
     "definition_lines": 6,
     "definition_to_proof_line_ratio": 0.13043478260869565,
     "description": "Declarations: copy, high_mono, world_copy",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.RawPhysicalAnyImage",
@@ -5077,9 +5675,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/RawPhysicalReturndata.lean",
+    "presumed_handwritten_lines": 74,
     "proof_lines": 46,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5092,6 +5692,7 @@
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.15384615384615385,
     "description": "Declarations: entry, source, area",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.RawPhysicalReturndata",
@@ -5103,9 +5704,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/RawPhysicalReturndataControls.lean",
+    "presumed_handwritten_lines": 84,
     "proof_lines": 52,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5116,6 +5719,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: patch_reads, reencode, decode_view",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.RawPhysicalWriteback"
@@ -5125,9 +5729,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/RawPhysicalUpdate.lean",
+    "presumed_handwritten_lines": 93,
     "proof_lines": 73,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5140,6 +5746,7 @@
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.1891891891891892,
     "description": "Declarations: value, updated, area",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.RawPhysicalUpdate",
@@ -5150,9 +5757,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/RawPhysicalUpdateControls.lean",
+    "presumed_handwritten_lines": 65,
     "proof_lines": 37,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5163,6 +5772,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: write_read_self, list_unchanged, idempotent",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.RawPhysicalInventory"
@@ -5172,9 +5782,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/RawPhysicalWriteback.lean",
+    "presumed_handwritten_lines": 68,
     "proof_lines": 45,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5187,6 +5799,7 @@
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.05128205128205128,
     "description": "Declarations: whole_frame_identity, tail_outside, zeroImage",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.RawPhysicalWriteback",
@@ -5197,9 +5810,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/RawPhysicalWritebackControls.lean",
+    "presumed_handwritten_lines": 61,
     "proof_lines": 39,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5210,6 +5825,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: word_slice, select_facts, word_apply",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.PhysicalSnapshotSlice",
@@ -5221,9 +5837,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/SelectedPhysicalStore.lean",
+    "presumed_handwritten_lines": 105,
     "proof_lines": 75,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5236,6 +5854,7 @@
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.16,
     "description": "Declarations: selected_shrink, residual, encoded",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.SelectedPhysicalStore",
@@ -5246,9 +5865,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/SelectedPhysicalStoreControls.lean",
+    "presumed_handwritten_lines": 97,
     "proof_lines": 25,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5261,6 +5882,7 @@
     "definition_lines": 2,
     "definition_to_proof_line_ratio": 0.03571428571428571,
     "description": "Declarations: magicCode, magic_target, magic",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Views.SourceBalanceOperands",
@@ -5271,9 +5893,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/SourceEnvironmentSlice.lean",
+    "presumed_handwritten_lines": 85,
     "proof_lines": 56,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5284,6 +5908,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: ordered_target, source_pair, ordered_values",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.SourceEnvironmentSlice",
@@ -5295,9 +5920,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/SourceEnvironmentSliceControls.lean",
+    "presumed_handwritten_lines": 96,
     "proof_lines": 65,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5310,6 +5937,7 @@
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 0.1574074074074074,
     "description": "Declarations: consumeValue, consume, consumeLocal",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.P6Inputs",
@@ -5320,9 +5948,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/SourceSliceFrame.lean",
+    "presumed_handwritten_lines": 161,
     "proof_lines": 108,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5336,6 +5966,7 @@
     "definition_lines": 26,
     "definition_to_proof_line_ratio": 0.7878787878787878,
     "description": "Declarations: C, E, \u0393",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Adapters.SourceSliceFrame",
@@ -5346,9 +5977,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Adapters/SourceSliceFrameControls.lean",
+    "presumed_handwritten_lines": 99,
     "proof_lines": 33,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5363,6 +5996,7 @@
     "definition_lines": 63,
     "definition_to_proof_line_ratio": 1.05,
     "description": "Declarations: TargetEnv, TargetD, checkTarget",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.ExpressionCheck",
@@ -5373,9 +6007,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/AssignmentCheck.lean",
+    "presumed_handwritten_lines": 155,
     "proof_lines": 60,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5388,6 +6024,7 @@
     "definition_lines": 16,
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: Env, Env.reads, Env.writes",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.AssignmentCheck",
@@ -5398,8 +6035,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/BlockEnvironment.lean",
+    "presumed_handwritten_lines": 32,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5413,6 +6052,7 @@
     "definition_lines": 229,
     "definition_to_proof_line_ratio": 3.0533333333333332,
     "description": "Intrinsic extraction of shared scoped Yul typing",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.BlockTyping"
@@ -5422,9 +6062,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/BlockExtract.lean",
+    "presumed_handwritten_lines": 396,
     "proof_lines": 75,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5435,6 +6077,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: modal_for_skip, termModal_post_congr, modal_initialized_loop",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.WordSyntax"
@@ -5444,9 +6087,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/BlockExtractLogic.lean",
+    "presumed_handwritten_lines": 98,
     "proof_lines": 75,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5461,6 +6106,7 @@
     "definition_lines": 77,
     "definition_to_proof_line_ratio": 1.5098039215686274,
     "description": "Declarations: HeaderD, headerNode, headerNode_sound",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.FunctionScope",
@@ -5471,9 +6117,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/BlockHeaders.lean",
+    "presumed_handwritten_lines": 176,
     "proof_lines": 51,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5488,6 +6136,7 @@
     "definition_lines": 71,
     "definition_to_proof_line_ratio": 1.290909090909091,
     "description": "Concrete scope-indexed block-checker interface",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.BlockEnvironment",
@@ -5498,9 +6147,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/BlockScope.lean",
+    "presumed_handwritten_lines": 165,
     "proof_lines": 55,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5513,6 +6164,7 @@
     "definition_lines": 32,
     "definition_to_proof_line_ratio": 1.0,
     "description": "Closed-root compatibility for the shared intrinsic Yul checker",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.ScopedBlockTyping"
@@ -5522,9 +6174,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/BlockTyping.lean",
+    "presumed_handwritten_lines": 86,
     "proof_lines": 32,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5539,6 +6193,7 @@
     "definition_lines": 120,
     "definition_to_proof_line_ratio": 0.6217616580310881,
     "description": "Declarations: Failure, PathD, PathsD",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.CatalogLaws",
@@ -5549,9 +6204,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/BuiltinUse.lean",
+    "presumed_handwritten_lines": 351,
     "proof_lines": 193,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5565,6 +6222,7 @@
     "definition_lines": 339,
     "definition_to_proof_line_ratio": null,
     "description": "Arity-indexed Osaka inline-Yul builtins",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [],
     "imports_in": 9,
@@ -5572,8 +6230,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Builtins.lean",
+    "presumed_handwritten_lines": 369,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5586,6 +6246,7 @@
     "definition_lines": 4,
     "definition_to_proof_line_ratio": 0.12903225806451613,
     "description": "Declarations: lookup_builtin_name, lookupBuiltin_sound, NoBuiltin",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Static"
@@ -5595,9 +6256,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/CatalogLaws.lean",
+    "presumed_handwritten_lines": 53,
     "proof_lines": 31,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5606,6 +6269,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Yul.Grammar"
@@ -5615,8 +6279,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/CheckedParse.lean",
+    "presumed_handwritten_lines": 0,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 3
   },
   {
     "area": "Yul",
@@ -5625,6 +6291,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Checks.Arithmetic.Part00",
@@ -5636,8 +6303,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/Arithmetic.lean",
+    "presumed_handwritten_lines": 0,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 5
   },
   {
     "area": "Yul",
@@ -5648,6 +6317,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: v0000, v0001, v0002",
+    "generated_lines": 1008,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Words"
@@ -5657,9 +6327,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/Arithmetic/Part00.lean",
+    "presumed_handwritten_lines": 0,
     "proof_lines": 1000,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5670,6 +6342,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: v1000, v1001, v1002",
+    "generated_lines": 1008,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Words"
@@ -5679,9 +6352,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/Arithmetic/Part01.lean",
+    "presumed_handwritten_lines": 0,
     "proof_lines": 1000,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5692,6 +6367,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: v2000, v2001, v2002",
+    "generated_lines": 16,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Words"
@@ -5701,9 +6377,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/Arithmetic/Part02.lean",
+    "presumed_handwritten_lines": 0,
     "proof_lines": 8,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5715,6 +6393,7 @@
     "definition_lines": 56,
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: sig, locals, reads",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.AssignmentCheck",
@@ -5725,8 +6404,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/Assignments.lean",
+    "presumed_handwritten_lines": 70,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5740,6 +6421,7 @@
     "definition_lines": 162,
     "definition_to_proof_line_ratio": 6.230769230769231,
     "description": "Declarations: outEnv, twoEnv, emitted",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.WordSyntax",
@@ -5750,9 +6432,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/BlockExtract.lean",
+    "presumed_handwritten_lines": 230,
     "proof_lines": 26,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5765,6 +6449,7 @@
     "definition_lines": 126,
     "definition_to_proof_line_ratio": 63.0,
     "description": "Declarations: list, lit, varExpr",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.ClosedSyntax",
@@ -5775,9 +6460,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/BlockTyping.lean",
+    "presumed_handwritten_lines": 206,
     "proof_lines": 2,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5788,6 +6475,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: v0000, v0001, v0002",
+    "generated_lines": 955,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Words"
@@ -5797,9 +6485,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/Bytes.lean",
+    "presumed_handwritten_lines": 0,
     "proof_lines": 947,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5811,6 +6501,7 @@
     "definition_lines": 67,
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: env, boolShape, u8Shape",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.CleanLocals",
@@ -5821,8 +6512,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/CleanLocals.lean",
+    "presumed_handwritten_lines": 98,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5836,6 +6529,7 @@
     "definition_lines": 57,
     "definition_to_proof_line_ratio": 28.5,
     "description": "Declarations: valueSig, returns, older",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.ClosedFunctions",
@@ -5846,9 +6540,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/ClosedFunctions.lean",
+    "presumed_handwritten_lines": 83,
     "proof_lines": 2,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5861,6 +6557,7 @@
     "definition_lines": 72,
     "definition_to_proof_line_ratio": 8.0,
     "description": "Declarations: no_memory_builtin, returnD, olderD",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.ClosedProfile",
@@ -5871,9 +6568,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/ClosedPure.lean",
+    "presumed_handwritten_lines": 114,
     "proof_lines": 9,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5886,6 +6585,7 @@
     "definition_lines": 122,
     "definition_to_proof_line_ratio": 8.133333333333333,
     "description": "Declarations: mulDivRootD, countdownCall, countdownCallD",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.ClosedRun",
@@ -5896,9 +6596,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/ClosedRun.lean",
+    "presumed_handwritten_lines": 166,
     "proof_lines": 15,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5907,6 +6609,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Yul.Checks.ClosedSyntax"
@@ -5916,8 +6619,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/ClosedSyntax.lean",
+    "presumed_handwritten_lines": 0,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 3
   },
   {
     "area": "Yul",
@@ -5926,6 +6631,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.Static"
@@ -5935,8 +6641,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/Contracts.lean",
+    "presumed_handwritten_lines": 23,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5945,6 +6653,7 @@
     "declarations": {},
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Frontend.Yul.Checks.DeclarationParsing"
@@ -5954,8 +6663,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/DeclarationParsing.lean",
+    "presumed_handwritten_lines": 0,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 3
   },
   {
     "area": "Yul",
@@ -5968,6 +6679,7 @@
     "definition_lines": 88,
     "definition_to_proof_line_ratio": 44.0,
     "description": "Declarations: statements, decl, fn",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.DeclarationScope"
@@ -5977,9 +6689,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/DeclarationScopes.lean",
+    "presumed_handwritten_lines": 105,
     "proof_lines": 2,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -5992,6 +6706,7 @@
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.3103448275862069,
     "description": "Declarations: legal, functions, env",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.DeclarationCheck",
@@ -6002,9 +6717,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/Declarations.lean",
+    "presumed_handwritten_lines": 76,
     "proof_lines": 29,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6017,6 +6734,7 @@
     "definition_lines": 128,
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: arg2, bin, set",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.DirectBindings",
@@ -6027,8 +6745,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/DirectBindings.lean",
+    "presumed_handwritten_lines": 158,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6041,6 +6761,7 @@
     "definition_lines": 85,
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: mutate, mutateProof, copyFlag",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.DirectControl",
@@ -6051,8 +6772,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/DirectControl.lean",
+    "presumed_handwritten_lines": 114,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6065,6 +6788,7 @@
     "definition_lines": 58,
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: control, Case, one",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.DirectUpdates",
@@ -6075,8 +6799,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/DirectUpdates.lean",
+    "presumed_handwritten_lines": 87,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6089,6 +6815,7 @@
     "definition_lines": 72,
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: types, small, flag",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.DirectWords"
@@ -6098,8 +6825,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/DirectWords.lean",
+    "presumed_handwritten_lines": 95,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6113,6 +6842,7 @@
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.3,
     "description": "Declarations: D, u8, u16",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.DirtyReadback",
@@ -6123,9 +6853,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/DirtyReadbackControls.lean",
+    "presumed_handwritten_lines": 116,
     "proof_lines": 40,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6138,6 +6870,7 @@
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.6363636363636364,
     "description": "Declarations: seed, tail, nested",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.EvmArithmetic",
@@ -6148,9 +6881,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/EvmArithmetic.lean",
+    "presumed_handwritten_lines": 56,
     "proof_lines": 22,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6163,6 +6898,7 @@
     "definition_lines": 35,
     "definition_to_proof_line_ratio": 0.5737704918032787,
     "description": "Declarations: nested, supported, expressionWitness",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.EvmBitwise",
@@ -6173,9 +6909,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/EvmBitwise.lean",
+    "presumed_handwritten_lines": 158,
     "proof_lines": 61,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6188,6 +6926,7 @@
     "definition_lines": 21,
     "definition_to_proof_line_ratio": 1.105263157894737,
     "description": "Declarations: seed, tail, chain",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.EvmSigned",
@@ -6198,9 +6937,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/EvmSigned.lean",
+    "presumed_handwritten_lines": 63,
     "proof_lines": 19,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6213,6 +6954,7 @@
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.5714285714285714,
     "description": "Declarations: empty, lit, plus",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.ExpressionCheck"
@@ -6222,9 +6964,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/Expressions.lean",
+    "presumed_handwritten_lines": 56,
     "proof_lines": 14,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6238,6 +6982,7 @@
     "definition_lines": 12,
     "definition_to_proof_line_ratio": 0.48,
     "description": "Declarations: X, decls, value_plain",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.ExternalCheck"
@@ -6247,9 +6992,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/External.lean",
+    "presumed_handwritten_lines": 68,
     "proof_lines": 25,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6261,6 +7008,7 @@
     "definition_lines": 76,
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: types, declarations, root",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.ExternalScope"
@@ -6270,8 +7018,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/ExternalScopes.lean",
+    "presumed_handwritten_lines": 89,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6284,6 +7034,7 @@
     "definition_lines": 10,
     "definition_to_proof_line_ratio": 0.3125,
     "description": "Declarations: source, prepared, cache",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.WordSyntax",
@@ -6295,9 +7046,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/ExtractDivergence.lean",
+    "presumed_handwritten_lines": 64,
     "proof_lines": 32,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6311,6 +7064,7 @@
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.28,
     "description": "Declarations: state_slot_reindexed, constant_reindexed, source_value_capture_refused",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.GlobalExternal",
@@ -6321,9 +7075,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/GlobalExternal.lean",
+    "presumed_handwritten_lines": 61,
     "proof_lines": 25,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6336,6 +7092,7 @@
     "definition_lines": 43,
     "definition_to_proof_line_ratio": 43.0,
     "description": "Declarations: pairBody, fixture, expected",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.BlockHeaders",
@@ -6346,9 +7103,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/Headers.lean",
+    "presumed_handwritten_lines": 61,
     "proof_lines": 1,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6359,6 +7118,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: diverge_firstDone_none, countdown_completion_stable",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.HorizonAdapter",
@@ -6369,9 +7129,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/Horizons.lean",
+    "presumed_handwritten_lines": 40,
     "proof_lines": 25,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6385,6 +7147,7 @@
     "definition_lines": 201,
     "definition_to_proof_line_ratio": 0.556786703601108,
     "description": "Declarations: env, functionTy, ctx",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.DirectUpdates",
@@ -6402,9 +7165,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBlock.lean",
+    "presumed_handwritten_lines": 1197,
     "proof_lines": 361,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6417,6 +7182,7 @@
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.3611111111111111,
     "description": "Declarations: code, policy, call",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalBlockLogic",
@@ -6428,9 +7194,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBlockDivergence.lean",
+    "presumed_handwritten_lines": 70,
     "proof_lines": 36,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6443,6 +7211,7 @@
     "definition_lines": 5,
     "definition_to_proof_line_ratio": 0.1,
     "description": "Declarations: expected, post, done",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalBlockLogic",
@@ -6453,9 +7222,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBlockLogic.lean",
+    "presumed_handwritten_lines": 79,
     "proof_lines": 50,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6468,6 +7239,7 @@
     "definition_lines": 28,
     "definition_to_proof_line_ratio": 0.9655172413793104,
     "description": "Declarations: init, first, body",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalBoolBinding",
@@ -6478,9 +7250,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBoolBinding.lean",
+    "presumed_handwritten_lines": 83,
     "proof_lines": 29,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6493,6 +7267,7 @@
     "definition_lines": 82,
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: env, ctx, x",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalBoolControlAgreement",
@@ -6504,8 +7279,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBoolControl.lean",
+    "presumed_handwritten_lines": 126,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6518,6 +7295,7 @@
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 1.4705882352941178,
     "description": "Declarations: state, read, setTrue",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalBoolControlRepresentation",
@@ -6528,9 +7306,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBoolControlRepresentation.lean",
+    "presumed_handwritten_lines": 75,
     "proof_lines": 17,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6543,6 +7323,7 @@
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 5.0,
     "description": "Declarations: statement, witness, bodyWitness",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalBoolDivergence",
@@ -6553,9 +7334,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBoolDivergence.lean",
+    "presumed_handwritten_lines": 35,
     "proof_lines": 3,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6568,6 +7351,7 @@
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 5.0,
     "description": "Declarations: statement, witness, bodyWitness",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalBoolDoDivergence",
@@ -6578,9 +7362,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBoolDoDivergence.lean",
+    "presumed_handwritten_lines": 35,
     "proof_lines": 3,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6593,6 +7379,7 @@
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 1.1538461538461537,
     "description": "Declarations: failingCondition, failing, statement",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalBoolDoWhile",
@@ -6603,9 +7390,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBoolDoWhile.lean",
+    "presumed_handwritten_lines": 55,
     "proof_lines": 13,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6618,6 +7407,7 @@
     "definition_lines": 60,
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: ctx, env, expr",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalBoolAgreement",
@@ -6629,8 +7419,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBoolExpr.lean",
+    "presumed_handwritten_lines": 103,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6643,6 +7435,7 @@
     "definition_lines": 3,
     "definition_to_proof_line_ratio": 0.3,
     "description": "Declarations: witness, concrete, partialWrite",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalBoolFailure",
@@ -6653,9 +7446,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBoolFailure.lean",
+    "presumed_handwritten_lines": 34,
     "proof_lines": 10,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6669,6 +7464,7 @@
     "definition_lines": 24,
     "definition_to_proof_line_ratio": 2.0,
     "description": "Declarations: LoopCtx, BodyCtx, test",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalBoolFor",
@@ -6679,9 +7475,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBoolFor.lean",
+    "presumed_handwritten_lines": 61,
     "proof_lines": 12,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6694,6 +7492,7 @@
     "definition_lines": 22,
     "definition_to_proof_line_ratio": 1.1,
     "description": "Declarations: enteredFalse, repeatFalse, statement",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalBoolForNoGuard",
@@ -6704,9 +7503,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBoolForNoGuard.lean",
+    "presumed_handwritten_lines": 71,
     "proof_lines": 20,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6719,6 +7520,7 @@
     "definition_lines": 29,
     "definition_to_proof_line_ratio": 2.230769230769231,
     "description": "Declarations: post, postFalse, badPost",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalBoolForPost",
@@ -6729,9 +7531,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBoolForPost.lean",
+    "presumed_handwritten_lines": 71,
     "proof_lines": 13,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6744,6 +7548,7 @@
     "definition_lines": 23,
     "definition_to_proof_line_ratio": 1.2777777777777777,
     "description": "Declarations: yes, no, setCounterFalse",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalBoolForPostRepresentation",
@@ -6754,9 +7559,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBoolForPostRepresentation.lean",
+    "presumed_handwritten_lines": 69,
     "proof_lines": 18,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6769,6 +7576,7 @@
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 1.5625,
     "description": "Declarations: test, writeOuter, body",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalBoolForRepresentation",
@@ -6779,9 +7587,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBoolForRepresentation.lean",
+    "presumed_handwritten_lines": 68,
     "proof_lines": 16,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6794,6 +7604,7 @@
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.16,
     "description": "Declarations: selected, witness, andStable",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalBoolHorizon",
@@ -6804,9 +7615,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBoolHorizon.lean",
+    "presumed_handwritten_lines": 87,
     "proof_lines": 50,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6819,6 +7632,7 @@
     "definition_lines": 18,
     "definition_to_proof_line_ratio": 1.6363636363636365,
     "description": "Declarations: yes, no, assignNo",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalBoolIf",
@@ -6830,9 +7644,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBoolIf.lean",
+    "presumed_handwritten_lines": 52,
     "proof_lines": 11,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6845,6 +7661,7 @@
     "definition_lines": 17,
     "definition_to_proof_line_ratio": 1.4166666666666667,
     "description": "Declarations: noItems, noProof, noOne",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalBoolIfElse",
@@ -6855,9 +7672,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBoolIfElse.lean",
+    "presumed_handwritten_lines": 51,
     "proof_lines": 12,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6870,6 +7689,7 @@
     "definition_lines": 25,
     "definition_to_proof_line_ratio": 0.9259259259259259,
     "description": "Declarations: initial, readExpr, readProof",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalBoolInitialization",
@@ -6880,9 +7700,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBoolInitialization.lean",
+    "presumed_handwritten_lines": 79,
     "proof_lines": 27,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6895,6 +7717,7 @@
     "definition_lines": 15,
     "definition_to_proof_line_ratio": 0.8823529411764706,
     "description": "Declarations: body, proof, witness",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalBoolItemRepresentation",
@@ -6905,9 +7728,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBoolItemRepresentation.lean",
+    "presumed_handwritten_lines": 85,
     "proof_lines": 17,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6920,6 +7745,7 @@
     "definition_lines": 16,
     "definition_to_proof_line_ratio": 0.6956521739130435,
     "description": "Declarations: body, witness, closed",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalBoolItemScope",
@@ -6930,9 +7756,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBoolItemScope.lean",
+    "presumed_handwritten_lines": 70,
     "proof_lines": 23,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6946,6 +7774,7 @@
     "definition_lines": 31,
     "definition_to_proof_line_ratio": 1.0,
     "description": "Declarations: C1, C2, C3",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalBoolItems",
@@ -6956,9 +7785,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBoolItems.lean",
+    "presumed_handwritten_lines": 87,
     "proof_lines": 31,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6971,6 +7802,7 @@
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.8125,
     "description": "Declarations: yes, setTrue, faultExpr",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalBoolPostRepresentation",
@@ -6981,9 +7813,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBoolPostRepresentation.lean",
+    "presumed_handwritten_lines": 55,
     "proof_lines": 16,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -6996,6 +7830,7 @@
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.7647058823529411,
     "description": "Declarations: env, cleanTrue, cleanFalse",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalBoolRepresentation"
@@ -7005,9 +7840,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBoolRepresentation.lean",
+    "presumed_handwritten_lines": 65,
     "proof_lines": 17,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -7020,6 +7857,7 @@
     "definition_lines": 9,
     "definition_to_proof_line_ratio": 0.375,
     "description": "Declarations: body, witness, concrete",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalBoolScope",
@@ -7030,9 +7868,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBoolScope.lean",
+    "presumed_handwritten_lines": 56,
     "proof_lines": 24,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -7045,6 +7885,7 @@
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.8125,
     "description": "Declarations: read, stop, setFalse",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalBoolScopeRepresentation",
@@ -7055,9 +7896,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBoolScopeRepresentation.lean",
+    "presumed_handwritten_lines": 60,
     "proof_lines": 16,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -7071,6 +7914,7 @@
     "definition_lines": 27,
     "definition_to_proof_line_ratio": 1.173913043478261,
     "description": "Declarations: Middle, Out, inner",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalBoolUnchecked",
@@ -7081,9 +7925,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBoolUnchecked.lean",
+    "presumed_handwritten_lines": 75,
     "proof_lines": 23,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -7096,6 +7942,7 @@
     "definition_lines": 22,
     "definition_to_proof_line_ratio": 1.0,
     "description": "Declarations: items, proof, one",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalBoolWhile",
@@ -7106,9 +7953,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBoolWhile.lean",
+    "presumed_handwritten_lines": 72,
     "proof_lines": 22,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -7121,6 +7970,7 @@
     "definition_lines": 14,
     "definition_to_proof_line_ratio": 0.875,
     "description": "Declarations: body, proof, statement",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalBoolWhileRepresentation",
@@ -7131,9 +7981,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalBoolWhileRepresentation.lean",
+    "presumed_handwritten_lines": 57,
     "proof_lines": 16,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -7147,6 +7999,7 @@
     "definition_lines": 82,
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: U8, env, ctx",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalCompareControl",
@@ -7157,8 +8010,10 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalCompareControl.lean",
+    "presumed_handwritten_lines": 113,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -7169,6 +8024,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: legacyObserved, viaObserved, legacyStable",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalCompareHorizon",
@@ -7179,9 +8035,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalCompareHorizon.lean",
+    "presumed_handwritten_lines": 94,
     "proof_lines": 63,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -7194,6 +8052,7 @@
     "definition_lines": 37,
     "definition_to_proof_line_ratio": 0.5362318840579711,
     "description": "Declarations: boolDefault, zeroBool, zero8",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalDefaultBinding",
@@ -7204,9 +8063,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalDefaultBinding.lean",
+    "presumed_handwritten_lines": 152,
     "proof_lines": 69,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -7220,6 +8081,7 @@
     "definition_lines": 37,
     "definition_to_proof_line_ratio": 1.4230769230769231,
     "description": "Declarations: stop, yesGuard, setFalse",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalDefaultControlRepresentation",
@@ -7230,9 +8092,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalDefaultControlRepresentation.lean",
+    "presumed_handwritten_lines": 108,
     "proof_lines": 26,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -7245,6 +8109,7 @@
     "definition_lines": 29,
     "definition_to_proof_line_ratio": 0.6904761904761905,
     "description": "Declarations: assigningTest, afterGuardBodyState, statement",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalDefaultDoWhile",
@@ -7255,9 +8120,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalDefaultDoWhile.lean",
+    "presumed_handwritten_lines": 123,
     "proof_lines": 42,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -7268,6 +8135,7 @@
     },
     "definition_to_proof_line_ratio": 0.0,
     "description": "Declarations: completedObserved, completedStable, blockObserved",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalDefaultHorizon",
@@ -7278,9 +8146,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalDefaultHorizon.lean",
+    "presumed_handwritten_lines": 71,
     "proof_lines": 38,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -7294,6 +8164,7 @@
     "definition_lines": 37,
     "definition_to_proof_line_ratio": 1.0571428571428572,
     "description": "Declarations: YesOut, NoOut, yesItems",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalDefaultIfElse",
@@ -7304,9 +8175,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalDefaultIfElse.lean",
+    "presumed_handwritten_lines": 119,
     "proof_lines": 35,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -7319,6 +8192,7 @@
     "definition_lines": 32,
     "definition_to_proof_line_ratio": 0.7619047619047619,
     "description": "Declarations: items, proof, firstState",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalDefaultItems",
@@ -7329,9 +8203,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalDefaultItems.lean",
+    "presumed_handwritten_lines": 107,
     "proof_lines": 42,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -7344,6 +8220,7 @@
     "definition_lines": 13,
     "definition_to_proof_line_ratio": 0.48148148148148145,
     "description": "Declarations: witness, concrete, concreteNoPost",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalDefaultNoGuard",
@@ -7354,9 +8231,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalDefaultNoGuard.lean",
+    "presumed_handwritten_lines": 75,
     "proof_lines": 27,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -7369,6 +8248,7 @@
     "definition_lines": 36,
     "definition_to_proof_line_ratio": 0.8181818181818182,
     "description": "Declarations: postFalse, postTrue, guardTrue",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalDefaultPostIter",
@@ -7379,9 +8259,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalDefaultPostIter.lean",
+    "presumed_handwritten_lines": 135,
     "proof_lines": 44,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -7394,6 +8276,7 @@
     "definition_lines": 7,
     "definition_to_proof_line_ratio": 0.35,
     "description": "Declarations: witness, concrete, postWriteStopsGuard",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalDefaultPostRepresentation",
@@ -7405,9 +8288,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalDefaultPostRepresentation.lean",
+    "presumed_handwritten_lines": 61,
     "proof_lines": 20,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -7421,6 +8306,7 @@
     "definition_lines": 28,
     "definition_to_proof_line_ratio": 1.5555555555555556,
     "description": "Declarations: zero8, zero256, Out",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalDefaultRepresentation",
@@ -7431,9 +8317,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalDefaultRepresentation.lean",
+    "presumed_handwritten_lines": 78,
     "proof_lines": 18,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -7447,6 +8335,7 @@
     "definition_lines": 35,
     "definition_to_proof_line_ratio": 0.8536585365853658,
     "description": "Declarations: inner, inside, Middle",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalDefaultUnchecked",
@@ -7457,9 +8346,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalDefaultUnchecked.lean",
+    "presumed_handwritten_lines": 110,
     "proof_lines": 41,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -7473,6 +8364,7 @@
     "definition_lines": 36,
     "definition_to_proof_line_ratio": 1.2857142857142858,
     "description": "Declarations: items, proof, Out",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalDefaultWhile",
@@ -7483,9 +8375,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalDefaultWhile.lean",
+    "presumed_handwritten_lines": 113,
     "proof_lines": 28,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -7498,6 +8392,7 @@
     "definition_lines": 8,
     "definition_to_proof_line_ratio": 0.2222222222222222,
     "description": "Declarations: toggleItems, toggleBody, witness",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalDoWhileHorizon",
@@ -7508,9 +8403,11 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalDoWhileHorizon.lean",
+    "presumed_handwritten_lines": 77,
     "proof_lines": 36,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   },
   {
     "area": "Yul",
@@ -7522,6 +8419,7 @@
     "definition_lines": 42,
     "definition_to_proof_line_ratio": null,
     "description": "Declarations: capturedStatement, fixtures, run",
+    "generated_lines": 0,
     "implemented_by": 0,
     "imports": [
       "Solidity.Yul.LocalExprStatement",
@@ -7532,7 +8430,9 @@
     "maxHeartbeats": [],
     "native_decide": 0,
     "path": "Solidity/Yul/Checks/LocalExprStatement.lean",
+    "presumed_handwritten_lines": 84,
     "roadmap_commands": 0,
-    "sorry": 0
+    "sorry": 0,
+    "unknown_import_only_lines": 0
   }
 ]
