@@ -26,20 +26,12 @@ private abbrev PrimitiveOwnershipPlan.flowInput {E ds d active Γ F layout fixed
     (fun c member => p.view static c (layout.primitive_root_member fixed p.nextRaw c member)),
     p.nextRaw,p.reencode static,p.nextChecked⟩
 
-/-- Keep the established computational unfolding contract; the preparation
-proofs below specialize the shared checked interface. -/
+/-- Specialize the shared checked following computation. -/
 abbrev PrimitiveOwnershipPlan.following? {E ds d active Γ F layout fixed written value s r}
     (p : @PrimitiveOwnershipPlan E ds d active Γ F layout fixed written value s r)
     (static : F.static = false) (q v : Roadmap.Word) :
     Option (PrimitiveOwnershipPlan F layout fixed q v p.step.1.2 p.step.2) :=
-  have roots : finiteView layout.registrations (p.step.1.2.2.ex.world.accounts F.this).storage p.nextRaw :=
-    fun c member => p.view static c (layout.primitive_root_member fixed p.nextRaw c member)
-  if checked : packedSeparationCheck (layout.primitiveSnapshot fixed (saveSlot p.nextRaw q v)) = true then
-    match prepared : finiteAccountWrite? F.this (layout.primitiveSnapshot fixed (saveSlot p.nextRaw q v)) (saveSlot p.nextRaw q v) with
-    | none => none
-    | some op => some ⟨p.next,layout.primitiveSourceInventory_view F fixed p.step.1.2 p.nextRaw roots,
-        p.nextRaw,p.reencode static,p.nextChecked,checked,op,prepared⟩
-  else none
+  (p.flowInput static q v).run?
 
 -- Normal delta reduction identifies legacy and generic matcher helpers.
 set_option smartUnfolding false in
