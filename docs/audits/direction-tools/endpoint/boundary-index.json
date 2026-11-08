@@ -1,0 +1,511 @@
+{
+  "lowering_mentions": [
+    {
+      "code": "lowerLoops (some rets) raw",
+      "line": 226,
+      "path": "Solidity/Frontend/Import.lean"
+    },
+    {
+      "code": "let body \u2190 lowerLoops (some (d.rets.map fun (n, _) => (lookupBy n \u03c1).getD n)) body",
+      "line": 829,
+      "path": "Solidity/Syntax/Elab/Arms.lean"
+    },
+    {
+      "code": "return \u2190 elabStmtsP (\u2190 lowerLoops none [s])",
+      "line": 1522,
+      "path": "Solidity/Syntax/Elab/Arms.lean"
+    },
+    {
+      "code": "| s@(.whileLoop ..) | s@(.forLoop ..) | s@(.doWhile ..) => do elabStmtsP (\u2190 lowerLoops none [s])",
+      "line": 1926,
+      "path": "Solidity/Syntax/Elab/Arms.lean"
+    },
+    {
+      "code": "withReader (fun sc => { sc with unchecked := true }) (elabBranch (\u2190 ElabM.lift (uncheckStmts ss)))",
+      "line": 2036,
+      "path": "Solidity/Syntax/Elab/Arms.lean"
+    },
+    {
+      "code": "def lowerLoops (rs : Option (List String)) (ss : List RawStmt) : ElabM (List RawStmt) := do",
+      "line": 543,
+      "path": "Solidity/Syntax/Elab/Lower.lean"
+    },
+    {
+      "code": "ElabM.lift (lowerReturns [] (\u2190 lowerLoops (some []) code))",
+      "line": 701,
+      "path": "Solidity/Syntax/Elab/Lower.lean"
+    },
+    {
+      "code": "partial def uncheckStmts : List RawStmt \u2192 Except String (List RawStmt)",
+      "line": 707,
+      "path": "Solidity/Syntax/Elab/Lower.lean"
+    },
+    {
+      "code": "| .ite c t e => do pure (.ite (\u2190 c.uncheck) (\u2190 uncheckStmts t) (\u2190 uncheckStmts e))",
+      "line": 720,
+      "path": "Solidity/Syntax/Elab/Lower.lean"
+    },
+    {
+      "code": "| .unchecked b => do pure (.unchecked (\u2190 uncheckStmts b))",
+      "line": 721,
+      "path": "Solidity/Syntax/Elab/Lower.lean"
+    },
+    {
+      "code": "| .checked o b => do pure (.checked o (\u2190 uncheckStmts b))",
+      "line": 723,
+      "path": "Solidity/Syntax/Elab/Lower.lean"
+    },
+    {
+      "code": "| .block b => do pure (.block (\u2190 uncheckStmts b))",
+      "line": 724,
+      "path": "Solidity/Syntax/Elab/Lower.lean"
+    },
+    {
+      "code": "pure (.tryCall (\u2190 e.uncheck) g (\u2190 as.mapM RawExpr.uncheck) rets (\u2190 uncheckStmts ok)",
+      "line": 726,
+      "path": "Solidity/Syntax/Elab/Lower.lean"
+    },
+    {
+      "code": "(\u2190 uncheckStmts err) code (\u2190 uncheckStmts pnc) (\u2190 uncheckStmts other))",
+      "line": 727,
+      "path": "Solidity/Syntax/Elab/Lower.lean"
+    },
+    {
+      "code": "| .whileLoop a c b => do pure (.whileLoop a (\u2190 c.uncheck) (\u2190 uncheckStmts b))",
+      "line": 729,
+      "path": "Solidity/Syntax/Elab/Lower.lean"
+    },
+    {
+      "code": "| .doWhile a b c => do pure (.doWhile a (\u2190 uncheckStmts b) (\u2190 c.uncheck))",
+      "line": 730,
+      "path": "Solidity/Syntax/Elab/Lower.lean"
+    },
+    {
+      "code": "| .loop a c b => do pure (.loop a (\u2190 c.uncheck) (\u2190 uncheckStmts b))",
+      "line": 731,
+      "path": "Solidity/Syntax/Elab/Lower.lean"
+    },
+    {
+      "code": "pure (.forLoop a (\u2190 uncheckStmts i) (\u2190 c.mapM RawExpr.uncheck) (\u2190 uncheckStmts u)",
+      "line": 733,
+      "path": "Solidity/Syntax/Elab/Lower.lean"
+    },
+    {
+      "code": "(\u2190 uncheckStmts b))",
+      "line": 734,
+      "path": "Solidity/Syntax/Elab/Lower.lean"
+    },
+    {
+      "code": "pure (s' :: (\u2190 uncheckStmts ss))",
+      "line": 736,
+      "path": "Solidity/Syntax/Elab/Lower.lean"
+    }
+  ],
+  "public_correctness_or_stages_mentions": [
+    {
+      "code": "theorem refines (h : PublicCorrectness S V compiler envAbs X)",
+      "line": 29,
+      "path": "Solidity/Hash/CollisionBridgeCompiler.lean"
+    },
+    {
+      "code": "theorem prefix_refines (h : PublicCorrectness S V compiler envAbs X)",
+      "line": 48,
+      "path": "Solidity/Hash/CollisionBridgeCompiler.lean"
+    },
+    {
+      "code": "theorem decode_reach (h : PublicCorrectness S V compiler envAbs X)",
+      "line": 59,
+      "path": "Solidity/Hash/CollisionBridgeCompiler.lean"
+    },
+    {
+      "code": "theorem prefix_empty (h : PublicCorrectness S V compiler envAbs X)",
+      "line": 72,
+      "path": "Solidity/Hash/CollisionBridgeCompiler.lean"
+    },
+    {
+      "code": "PublicCorrectness (S g) (V g) (compiler g) (envAbs g) (X g))",
+      "line": 106,
+      "path": "Solidity/Hash/CollisionBridgeCompiler.lean"
+    },
+    {
+      "code": "structure PublicCorrectness {I : IntrinsicSpec} (S : SourceSpec) (V : EvmSpec)",
+      "line": 937,
+      "path": "Solidity/Roadmap/Contracts.lean"
+    },
+    {
+      "code": "theorem PublicCorrectness.transfer (h : PublicCorrectness S V compiler envAbs X) :",
+      "line": 1016,
+      "path": "Solidity/Roadmap/Contracts.lean"
+    },
+    {
+      "code": "theorem PublicCorrectness.allPipelines (h : PublicCorrectness S V compiler envAbs X)",
+      "line": 1025,
+      "path": "Solidity/Roadmap/Contracts.lean"
+    },
+    {
+      "code": "theorem PublicCorrectness.compiles (h : PublicCorrectness S V compiler envAbs X)",
+      "line": 1032,
+      "path": "Solidity/Roadmap/Contracts.lean"
+    },
+    {
+      "code": "theorem PublicCorrectness.succeeds (h : PublicCorrectness S V compiler envAbs X)",
+      "line": 1043,
+      "path": "Solidity/Roadmap/Contracts.lean"
+    },
+    {
+      "code": "theorem PublicCorrectness.succeeds_hashing (h : PublicCorrectness S V compiler envAbs X)",
+      "line": 1060,
+      "path": "Solidity/Roadmap/Contracts.lean"
+    },
+    {
+      "code": "theorem PublicCorrectness.not_alwaysRevert (h : PublicCorrectness S V compiler envAbs X)",
+      "line": 1078,
+      "path": "Solidity/Roadmap/Contracts.lean"
+    },
+    {
+      "code": "theorem PublicCorrectness.allowed_iff (h : PublicCorrectness S V compiler envAbs X)",
+      "line": 1087,
+      "path": "Solidity/Roadmap/Contracts.lean"
+    },
+    {
+      "code": "theorem PublicCorrectness.envAbs_eq (h : PublicCorrectness S V compiler envAbs X)",
+      "line": 1093,
+      "path": "Solidity/Roadmap/Contracts.lean"
+    },
+    {
+      "code": "#guard_msgs in #print axioms Solidity.Roadmap.PublicCorrectness.transfer",
+      "line": 1104,
+      "path": "Solidity/Roadmap/Contracts.lean"
+    },
+    {
+      "code": "theorem _root_.Solidity.Roadmap.PublicCorrectness.observes",
+      "line": 63,
+      "path": "Solidity/Roadmap/Controls.lean"
+    },
+    {
+      "code": "(h : PublicCorrectness S V compiler envAbs X) {i : S.Input} {r : S.Resolved}",
+      "line": 64,
+      "path": "Solidity/Roadmap/Controls.lean"
+    },
+    {
+      "code": "theorem _root_.Solidity.Roadmap.PublicCorrectness.observedBySource",
+      "line": 79,
+      "path": "Solidity/Roadmap/Controls.lean"
+    },
+    {
+      "code": "(h : PublicCorrectness S V compiler envAbs X) {i : S.Input} {r : S.Resolved}",
+      "line": 80,
+      "path": "Solidity/Roadmap/Controls.lean"
+    },
+    {
+      "code": "theorem _root_.Solidity.Roadmap.PublicCorrectness.rejects",
+      "line": 91,
+      "path": "Solidity/Roadmap/Controls.lean"
+    },
+    {
+      "code": "(h : PublicCorrectness S V compiler envAbs X) {i : S.Input}",
+      "line": 92,
+      "path": "Solidity/Roadmap/Controls.lean"
+    },
+    {
+      "code": "PublicCorrectness toySource toyEvm (compilerWith f) id toyExport where",
+      "line": 555,
+      "path": "Solidity/Roadmap/Controls.lean"
+    },
+    {
+      "code": "PublicCorrectness toySource toyEvm toyCompiler id toyExport :=",
+      "line": 621,
+      "path": "Solidity/Roadmap/Controls.lean"
+    },
+    {
+      "code": "PublicCorrectness toySource toyEvm (compilerWith loopToRevert) id toyExport :=",
+      "line": 634,
+      "path": "Solidity/Roadmap/Controls.lean"
+    },
+    {
+      "code": "\u00ac PublicCorrectness toySource toyEvm revertCompiler envAbs X := by",
+      "line": 664,
+      "path": "Solidity/Roadmap/Controls.lean"
+    },
+    {
+      "code": "\u00ac PublicCorrectness toySource toyEvm (compilerWith hashRevert) envAbs X := by",
+      "line": 691,
+      "path": "Solidity/Roadmap/Controls.lean"
+    },
+    {
+      "code": "\u00ac PublicCorrectness toySource toyEvm alteredCompiler envAbs X := by",
+      "line": 718,
+      "path": "Solidity/Roadmap/Controls.lean"
+    },
+    {
+      "code": "\u00ac PublicCorrectness toySource toyEvm erasingCompiler envAbs X := by",
+      "line": 735,
+      "path": "Solidity/Roadmap/Controls.lean"
+    },
+    {
+      "code": "\u00ac PublicCorrectness toySource toyEvm (compilerWith loopToSucceed) envAbs X := by",
+      "line": 752,
+      "path": "Solidity/Roadmap/Controls.lean"
+    },
+    {
+      "code": "\u00ac PublicCorrectness toySource toyEvm sloppyCompiler envAbs X := by",
+      "line": 768,
+      "path": "Solidity/Roadmap/Controls.lean"
+    },
+    {
+      "code": "\u00ac PublicCorrectness toySource toyEvm linkBlindCompiler envAbs X := by",
+      "line": 780,
+      "path": "Solidity/Roadmap/Controls.lean"
+    },
+    {
+      "code": "#guard_msgs in #print axioms Solidity.Roadmap.PublicCorrectness.observes",
+      "line": 861,
+      "path": "Solidity/Roadmap/Controls.lean"
+    },
+    {
+      "code": "#guard_msgs in #print axioms Solidity.Roadmap.PublicCorrectness.rejects",
+      "line": 863,
+      "path": "Solidity/Roadmap/Controls.lean"
+    },
+    {
+      "code": "#guard_msgs in #print axioms Solidity.Roadmap.PublicCorrectness.observedBySource",
+      "line": 875,
+      "path": "Solidity/Roadmap/Controls.lean"
+    },
+    {
+      "code": "PublicCorrectness S V compiler (sourceEnv lowering backend execution)",
+      "line": 131,
+      "path": "Solidity/Roadmap/G49Final/FoldedPublic.lean"
+    },
+    {
+      "code": "have publicProof : PublicCorrectness S V compiler (sourceEnv lowering backend execution)",
+      "line": 134,
+      "path": "Solidity/Roadmap/G49Final/FoldedPublic.lean"
+    },
+    {
+      "code": "#guard_msgs in #print axioms Solidity.Roadmap.PublicCorrectness.ctx_succeeds",
+      "line": 366,
+      "path": "Solidity/Semantics/CtxEquiv/Controls.lean"
+    },
+    {
+      "code": "#guard_msgs in #print axioms Solidity.Roadmap.PublicCorrectness.ctxRefines_back",
+      "line": 384,
+      "path": "Solidity/Semantics/CtxEquiv/Controls.lean"
+    },
+    {
+      "code": "#guard_msgs in #print axioms Solidity.Roadmap.PublicCorrectness.ctxRefines_forward",
+      "line": 386,
+      "path": "Solidity/Semantics/CtxEquiv/Controls.lean"
+    },
+    {
+      "code": "#guard_msgs in #print axioms Solidity.Roadmap.PublicCorrectness.transfer'",
+      "line": 388,
+      "path": "Solidity/Semantics/CtxEquiv/Controls.lean"
+    },
+    {
+      "code": "theorem PublicCorrectness.artifactRefines (h : PublicCorrectness S V compiler envAbs X)",
+      "line": 330,
+      "path": "Solidity/Semantics/CtxEquiv/Unify.lean"
+    },
+    {
+      "code": "theorem PublicCorrectness.ctxRefines_back (h : PublicCorrectness S V compiler envAbs X)",
+      "line": 342,
+      "path": "Solidity/Semantics/CtxEquiv/Unify.lean"
+    },
+    {
+      "code": "theorem PublicCorrectness.ctxRefines_forward (h : PublicCorrectness S V compiler envAbs X)",
+      "line": 349,
+      "path": "Solidity/Semantics/CtxEquiv/Unify.lean"
+    },
+    {
+      "code": "theorem PublicCorrectness.ctx_succeeds (h : PublicCorrectness S V compiler envAbs X)",
+      "line": 358,
+      "path": "Solidity/Semantics/CtxEquiv/Unify.lean"
+    },
+    {
+      "code": "theorem PublicCorrectness.transfer' (h : PublicCorrectness S V compiler envAbs X) :",
+      "line": 368,
+      "path": "Solidity/Semantics/CtxEquiv/Unify.lean"
+    },
+    {
+      "code": "def stages : Stages toySource toyIntrinsic toyEvmLang toyEvm :=",
+      "line": 57,
+      "path": "Solidity/Yul/Composition/CorrectnessControls.lean"
+    },
+    {
+      "code": "structure Stages (S : SourceSpec) (I : IntrinsicSpec)",
+      "line": 15,
+      "path": "Solidity/Yul/Composition/CorrectnessInstances.lean"
+    },
+    {
+      "code": "def Stages.emit (C : Stages S I Asm V) (r : S.Resolved)",
+      "line": 26,
+      "path": "Solidity/Yul/Composition/CorrectnessInstances.lean"
+    },
+    {
+      "code": "def Stages.compileAt (C : Stages S I Asm V) (table : Artifact)",
+      "line": 41,
+      "path": "Solidity/Yul/Composition/CorrectnessInstances.lean"
+    },
+    {
+      "code": "theorem Stages.compile_admitted (C : Stages S I Asm V) (table : Artifact)",
+      "line": 48,
+      "path": "Solidity/Yul/Composition/CorrectnessInstances.lean"
+    },
+    {
+      "code": "unfold Stages.compileAt",
+      "line": 52,
+      "path": "Solidity/Yul/Composition/CorrectnessInstances.lean"
+    },
+    {
+      "code": "theorem Stages.coverage (C : Stages S I Asm V) (table : Artifact) (i : S.Input) :",
+      "line": 64,
+      "path": "Solidity/Yul/Composition/CorrectnessInstances.lean"
+    },
+    {
+      "code": "unfold Stages.compileAt at h",
+      "line": 71,
+      "path": "Solidity/Yul/Composition/CorrectnessInstances.lean"
+    },
+    {
+      "code": "def Stages.env (C : Stages S I Asm V) (e : V.lang.Env) : S.lang.Env :=",
+      "line": 76,
+      "path": "Solidity/Yul/Composition/CorrectnessInstances.lean"
+    },
+    {
+      "code": "def Stages.need (C : Stages S I Asm V) (r : S.Resolved)",
+      "line": 80,
+      "path": "Solidity/Yul/Composition/CorrectnessInstances.lean"
+    },
+    {
+      "code": "theorem Stages.forward (C : Stages S I Asm V) (r : S.Resolved)",
+      "line": 91,
+      "path": "Solidity/Yul/Composition/CorrectnessInstances.lean"
+    },
+    {
+      "code": "theorem Stages.completed (C : Stages S I Asm V) (r : S.Resolved)",
+      "line": 112,
+      "path": "Solidity/Yul/Composition/CorrectnessInstances.lean"
+    },
+    {
+      "code": "theorem Stages.backward (C : Stages S I Asm V) (r : S.Resolved)",
+      "line": 124,
+      "path": "Solidity/Yul/Composition/CorrectnessInstances.lean"
+    },
+    {
+      "code": "theorem Stages.refines (C : Stages S I Asm V) (r : S.Resolved)",
+      "line": 155,
+      "path": "Solidity/Yul/Composition/CorrectnessInstances.lean"
+    },
+    {
+      "code": "def Stages.Linked (C : Stages S I Asm V) (r : S.Resolved)",
+      "line": 173,
+      "path": "Solidity/Yul/Composition/CorrectnessInstances.lean"
+    },
+    {
+      "code": "theorem Stages.linked_compile (C : Stages S I Asm V) (table : Artifact)",
+      "line": 178,
+      "path": "Solidity/Yul/Composition/CorrectnessInstances.lean"
+    },
+    {
+      "code": "def Stages.compiler (C : Stages S I Asm V) (tables : S.Input \u2192 Artifact) :",
+      "line": 186,
+      "path": "Solidity/Yul/Composition/CorrectnessInstances.lean"
+    },
+    {
+      "code": "def Stages.TablesLinked (C : Stages S I Asm V) (tables : S.Input \u2192 Artifact) : Prop :=",
+      "line": 190,
+      "path": "Solidity/Yul/Composition/CorrectnessInstances.lean"
+    },
+    {
+      "code": "theorem Stages.specTransfer (C : Stages S I Asm V) (tables : S.Input \u2192 Artifact)",
+      "line": 196,
+      "path": "Solidity/Yul/Composition/CorrectnessInstances.lean"
+    },
+    {
+      "code": "def Stages.intrinsicEnv (C : Stages S I Asm V) (e : V.lang.Env) : I.lang.Env :=",
+      "line": 11,
+      "path": "Solidity/Yul/Composition/CorrectnessPublic.lean"
+    },
+    {
+      "code": "def Stages.stateExport (C : Stages S I Asm V)",
+      "line": 14,
+      "path": "Solidity/Yul/Composition/CorrectnessPublic.lean"
+    },
+    {
+      "code": "structure PublicBoundary (C : Stages S I Asm V) (tables : S.Input \u2192 Artifact)",
+      "line": 24,
+      "path": "Solidity/Yul/Composition/CorrectnessPublic.lean"
+    },
+    {
+      "code": "theorem Stages.publicCorrectness (C : Stages S I Asm V) (tables : S.Input \u2192 Artifact)",
+      "line": 68,
+      "path": "Solidity/Yul/Composition/CorrectnessPublic.lean"
+    },
+    {
+      "code": "PublicCorrectness S V (C.compiler tables) C.env (C.stateExport decode) where",
+      "line": 71,
+      "path": "Solidity/Yul/Composition/CorrectnessPublic.lean"
+    },
+    {
+      "code": "exact \u27e8ev, hev, by unfold Stages.env; rw [hv, ha, hi]\u27e9",
+      "line": 78,
+      "path": "Solidity/Yul/Composition/CorrectnessPublic.lean"
+    },
+    {
+      "code": "unfold Stages.compiler Stages.compileAt",
+      "line": 11,
+      "path": "Solidity/Yul/Composition/CorrectnessPublicControls.lean"
+    },
+    {
+      "code": "PublicCorrectness toySource toyEvm (stages.compiler table) stages.env",
+      "line": 33,
+      "path": "Solidity/Yul/Composition/CorrectnessPublicControls.lean"
+    },
+    {
+      "code": "``Solidity.Roadmap.PublicCorrectness.transfer,",
+      "line": 993,
+      "path": "TrustAudit.lean"
+    },
+    {
+      "code": "``Solidity.Roadmap.PublicCorrectness.not_alwaysRevert,",
+      "line": 994,
+      "path": "TrustAudit.lean"
+    },
+    {
+      "code": "``Solidity.Roadmap.PublicCorrectness.observes,",
+      "line": 995,
+      "path": "TrustAudit.lean"
+    },
+    {
+      "code": "``Solidity.Roadmap.PublicCorrectness.rejects,",
+      "line": 996,
+      "path": "TrustAudit.lean"
+    },
+    {
+      "code": "``Solidity.Roadmap.PublicCorrectness.observedBySource,",
+      "line": 1009,
+      "path": "TrustAudit.lean"
+    },
+    {
+      "code": "#check @Solidity.Roadmap.PublicCorrectness.decode_reach",
+      "line": 245,
+      "path": "tests/h55/g49-final-theorem/staging/CalculusControls.lean"
+    },
+    {
+      "code": "\u00ac (\u2203 (_h : PublicCorrectness S V compiler envAbs X) (_hv : S.NonVacuous),",
+      "line": 18,
+      "path": "tests/h62/item2/audit-roadmap/WitnessObstruction.lean"
+    },
+    {
+      "code": "\u00ac PublicCorrectness S V (fun _ => none) envAbs X := by",
+      "line": 31,
+      "path": "tests/h62/item2/audit-roadmap/WitnessObstruction.lean"
+    },
+    {
+      "code": "PublicCorrectness toySource toyEvm toyCompiler id toyExport \u2227",
+      "line": 40,
+      "path": "tests/h62/item2/audit-roadmap/WitnessObstruction.lean"
+    }
+  ]
+}

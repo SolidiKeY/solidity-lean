@@ -1,29 +1,13 @@
 import Solidity.Frontend.Admission.ElementaryFeatures
 import Solidity.Frontend.Admission.LocationFeatures
 
-/-!
-# A concrete structural feature subset from the original source unit
+/-! # A concrete structural feature subset from the original source unit
 
-Regression: imports disappear from `unit.env`, while unused bodies and explicit
-metadata must remain visible. This collector reuses `Syn.ctor`, the generated
-generic projection, and the canonical intrinsic visitor; it adds no indexed
-match or per-shape traversal. It combines selected payload-independent
-constructor features with the existing elementary/location classifiers.
-Calls, allocation, tuples, assembly, user/function types and pragmas need
-payload/context-sensitive classification. Other missing metadata, lexical and
-resolved features also remain open, even on marked constructors. Membership
-bridges do not assert old/new order or multiplicity equality. Sites are
-intrinsic subterm values, not unique positions or lexical scopes.
-This subset never activates an admission
-policy or certifies typing, execution or complete feature extraction.
--/
+Regression: imports disappear from `unit.env`, while unused bodies and explicit metadata must remain visible. This collector reuses `Syn.ctor`, the generated generic projection, and the canonical intrinsic visitor; it adds no indexed match or per-shape traversal. It combines selected payload-independent constructor features with the existing elementary/location classifiers. Calls, allocation, tuples, assembly, user/function types and pragmas need payload/context-sensitive classification. Other missing metadata, lexical and resolved features also remain open, even on marked constructors. Membership bridges do not assert old/new order or multiplicity equality. Sites are intrinsic subterm values, not unique positions or lexical scopes. This subset never activates an admission policy or certifies typing, execution or complete feature extraction. -/
 namespace Solidity.Frontend.Admission
 open Solidity.Source Solidity.Language
 
-/-- Selected payload-independent features. A missing marker is an extraction
-gap, not evidence that the construct or a complete program is supported.
-In particular, `.call` can be a conversion, and `.assembly` can be a canonical
-rethrow; their payload-sensitive distinctions must not be guessed here. -/
+/-- Selected payload-independent features. A missing marker is an extraction gap, not evidence that the construct or a complete program is supported. In particular, `.call` can be a conversion, and `.assembly` can be a canonical rethrow; their payload-sensitive distinctions must not be guessed here. -/
 def constructorFeature? : Ctor → Option Feature
   | .unit => some .sourceUnits
   | .importPath => some .imports
@@ -88,14 +72,13 @@ def constructorFeature? : Ctor → Option Feature
   | .uncheckedItem => some .uncheckedBlock
   | _ => none
 
-/-- Combine actual constructor and metadata classifiers without changing
-any of their existing definitions. No default locations are inferred. -/
+/-- Combine actual constructor and metadata classifiers without changing any of their existing definitions. No default locations are inferred. -/
 def structuralFeaturesAt {c : Cat} (s : Syn c) : List Feature :=
   (constructorFeature? s.ctor).toList ++
     ((elementaryFieldsAt s).map elementaryFeature ++
       (dataLocationFieldsAt s).map dataLocationFeature)
 
-/-- Every selected constructor marker is retained by the combined classifier. -/
+
 theorem constructor_feature_covered {c : Cat} (s : Syn c) (f : Feature)
     (classified : constructorFeature? s.ctor = some f) :
     f ∈ structuralFeaturesAt s := by
@@ -104,37 +87,34 @@ theorem constructor_feature_covered {c : Cat} (s : Syn c) (f : Feature)
     exact List.mem_singleton_self _
   exact List.mem_append.mpr (.inl present)
 
-/-- Combining classifiers does not drop any explicit elementary field. -/
+
 theorem elementary_feature_covered {c : Cat} (s : Syn c) (e : Elem)
     (present : e ∈ elementaryFieldsAt s) : elementaryFeature e ∈ structuralFeaturesAt s :=
   List.mem_append.mpr (.inr (List.mem_append.mpr (.inl
     (List.mem_map.mpr ⟨e,present,rfl⟩))))
 
-/-- Combining classifiers does not drop any explicit data-location field. -/
+
 theorem location_feature_covered {c : Cat} (s : Syn c) (loc : DataLoc)
     (present : DirectDataLocation s loc) : dataLocationFeature loc ∈ structuralFeaturesAt s :=
   List.mem_append.mpr (.inr (List.mem_append.mpr (.inr
     (List.mem_map.mpr ⟨loc,present.mem_fields,rfl⟩))))
 
-/-- Whole-unit uses retain the original intrinsic site, including headers.
-The caller cannot substitute a selected declaration or execution-root roster. -/
+/-- Whole-unit uses retain the original intrinsic site, including headers. The caller cannot substitute a selected declaration or execution-root roster. -/
 def sourceStructuralUses (unit : Syn .unit) : List (SyntaxOccurrence × Feature) :=
   (syntaxOccurrences unit).flatMap fun site =>
     (structuralFeaturesAt site.2).map fun feature => (site,feature)
 
-/-- Exact uses against the independent original-unit subterm relation. -/
+
 theorem sourceStructuralUses_iff (unit : Syn .unit) (site : SyntaxOccurrence) (f : Feature) :
     (site,f) ∈ sourceStructuralUses unit ↔
       Syn.Sub site ⟨.unit,unit⟩ ∧ f ∈ structuralFeaturesAt site.2 := by
   exact syntaxFieldUses_iff unit structuralFeaturesAt site f
 
-/-- Ordered, duplicate-preserving projection of this explicitly partial
-feature subset. This is not a Source admission certificate. -/
+/-- Ordered, duplicate-preserving projection of this explicitly partial feature subset. This is not a Source admission certificate. -/
 def sourceStructuralSubset (unit : Syn .unit) : List Feature :=
   (sourceStructuralUses unit).map Prod.snd
 
-/-- A reported feature has an original intrinsic site and classifier witness;
-every such subterm/classification contributes its feature. -/
+/-- A reported feature has an original intrinsic site and classifier witness; every such subterm/classification contributes its feature. -/
 theorem sourceStructuralSubset_iff (unit : Syn .unit) (f : Feature) :
     f ∈ sourceStructuralSubset unit ↔
       ∃ site : SyntaxOccurrence, Syn.Sub site ⟨.unit,unit⟩ ∧ f ∈ structuralFeaturesAt site.2 := by
@@ -146,8 +126,7 @@ theorem sourceStructuralSubset_iff (unit : Syn .unit) (f : Feature) :
   · rintro ⟨site,subterm,present⟩
     exact ⟨(site,f),(sourceStructuralUses_iff unit site f).mpr ⟨subterm,present⟩,rfl⟩
 
-/-- The new whole-unit scan includes every elementary declaration feature
-already certified by the declaration-aware collector. -/
+
 theorem sourceStructuralSubset_elementary (unit : Syn .unit) (f : Feature)
     (present : f ∈ declarationElementaryFeatures unit.env) :
     f ∈ sourceStructuralSubset unit := by
@@ -158,7 +137,7 @@ theorem sourceStructuralSubset_elementary (unit : Syn .unit) (f : Feature)
   rw [← classified]
   exact elementary_feature_covered site.2 e field
 
-/-- The new scan also includes every certified explicit-location feature. -/
+
 theorem sourceStructuralSubset_location (unit : Syn .unit) (f : Feature)
     (present : f ∈ declarationLocationFeatures unit.env) :
     f ∈ sourceStructuralSubset unit := by
@@ -169,23 +148,19 @@ theorem sourceStructuralSubset_location (unit : Syn .unit) (f : Feature)
   rw [← classified]
   exact location_feature_covered site.2 loc field
 
-/-- An import-only original unit guards header retention after environment
-construction. This fixture asserts syntax features, not import resolution. -/
+/-- An import-only original unit guards header retention after environment construction. This fixture asserts syntax features, not import resolution. -/
 def structuralImportUnit (path : String) : Syn .unit :=
   .unit (.cons (.importPath path none) .nil)
 
-/-- Header feature extraction is nonempty even without carried declarations. -/
+
 theorem structuralImportUnit_features (path : String) :
     sourceStructuralSubset (structuralImportUnit path) = [.sourceUnits,.imports] := rfl
 
-/-- The declaration environment erases this import, even though the original
-unit's structural feature subset retains it. -/
+
 theorem structuralImportUnit_env (path : String) :
     (structuralImportUnit path).env = (Syn.unit Syn.nil).env := rfl
 
-/-- Exact limitation: this concrete subset cannot be reconstructed from the
-declaration environment alone. The producer must retain the unit or
-equivalent header information beyond `Env`; this API takes the original unit. -/
+/-- Exact limitation: this concrete subset cannot be reconstructed from the declaration environment alone. The producer must retain the unit or equivalent header information beyond `Env`; this API takes the original unit. -/
 theorem sourceStructuralSubset_not_env_only :
     ¬ ∃ extract : Env → List Feature, ∀ unit : Syn .unit,
       extract unit.env = sourceStructuralSubset unit := by
@@ -197,8 +172,7 @@ theorem sourceStructuralSubset_not_env_only :
     empty.symm.trans imported
   exact (by decide : ([.sourceUnits] : List Feature) ≠ [.sourceUnits,.imports]) impossible
 
-/-- Regression: no payload-sensitive interpretation is guessed from these
-constructor tags, including conversion-versus-call and canonical rethrow. -/
+/-- Regression: no payload-sensitive interpretation is guessed from these constructor tags, including conversion-versus-call and canonical rethrow. -/
 theorem constructor_payload_gaps :
     ([.call,.new,.tuple,.assembly,.userType,.fnType,.pragma] : List Ctor).map constructorFeature? =
       [none,none,none,none,none,none,none] := rfl
@@ -225,5 +199,764 @@ theorem constructor_payload_gaps :
 #guard_msgs (whitespace := lax) in #print axioms sourceStructuralSubset_not_env_only
 /-- info: 'Solidity.Frontend.Admission.constructor_payload_gaps' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms constructor_payload_gaps
+
+/-! Literal payload tags must survive collection even in unused syntax. These markers classify the existing intrinsic literal form only: lexical spelling, UTF-8 validity, contextual address classification, exact constant folding and admission are not inferred from decoded bytes or a numeric value. -/
+
+
+def literalFeature : Lit → Feature
+  | .str _ => .stringLiterals
+  | .hexStr _ => .hexLiterals
+  | .unicodeStr _ => .unicodeLiterals
+  | .bool _ => .booleanLiterals
+  | .num _ => .numericLiterals
+
+/-- Direct literal fields; descendants are handled by the canonical visitor. A denomination also contains a numeric literal, but its unit feature is separate. -/
+def literalFeaturesAt {c : Cat} (s : Syn c) : List Feature :=
+  Syn.casesOn (motive := fun _ _ => List Feature) s
+    ([])
+    (fun _ _ => [])
+    ([])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ _ => [])
+    (fun _ _ _ _ _ _ _ _ _ => [])
+    (fun _ _ _ _ _ => [])
+    (fun _ _ _ _ _ _ _ => [])
+    ([])
+    (fun _ _ _ => [])
+    (fun _ _ _ _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun value => [literalFeature value])
+    (fun _ _ => [.numericLiterals])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    ([])
+    ([])
+    (fun _ _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    ([])
+    ([])
+    ([])
+    (fun _ _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+
+
+def syntaxLiteralUses {c : Cat} (root : Syn c) : List (SyntaxOccurrence × Feature) :=
+  syntaxFieldUses root literalFeaturesAt
+
+theorem syntaxLiteralUses_iff {c : Cat} (root : Syn c) (site : SyntaxOccurrence)
+    (f : Feature) :
+    (site,f) ∈ syntaxLiteralUses root ↔
+      Syn.Sub site ⟨c,root⟩ ∧ f ∈ literalFeaturesAt site.2 :=
+  syntaxFieldUses_iff root literalFeaturesAt site f
+
+/-- Equal decoded byte payloads retain their distinct intrinsic literal tags. This is not a proof that any byte sequence is well formed or admitted. -/
+theorem literal_payload_tags (bytes : List UInt8) (b : Bool) (n : NumLit) :
+    ([Lit.str bytes,.hexStr bytes,.unicodeStr bytes,.bool b,.num n].map literalFeature) =
+      [.stringLiterals,.hexLiterals,.unicodeLiterals,.booleanLiterals,.numericLiterals] := rfl
+
+
+theorem literal_root_uses (l : Lit) (n : NumLit) (u : Denom) :
+    syntaxLiteralUses (.lit l) = [(⟨_,.lit l⟩,literalFeature l)] ∧
+    syntaxLiteralUses (.litUnit n u) = [(⟨_,.litUnit n u⟩,.numericLiterals)] := ⟨rfl,rfl⟩
+
+/-- info: 'Solidity.Frontend.Admission.syntaxLiteralUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxLiteralUses_iff
+/-- info: 'Solidity.Frontend.Admission.literal_payload_tags' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms literal_payload_tags
+/-- info: 'Solidity.Frontend.Admission.literal_root_uses' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms literal_root_uses
+
+
+/-! Regression: identical constructor tags must retain prefix/compound/unit distinctions, including removed years. These are intrinsic syntax markers, not typing, arithmetic/folding, lvalue scheduling, lexical validity or admission proofs. Compose through the generic collector; old subsets stay frozen. -/
+def prefixFeature : PrefixOp → Feature
+  | .inc | .dec => .increments
+  | .not | .bitNot | .neg => .unaryArithmetic
+  | .delete => .deleteExpression
+
+def assignmentPayloadFeatures : AssignOp → List Feature
+  | .assign => []
+  | .bitOr | .bitXor | .bitAnd | .shl | .sar | .shr | .add | .sub | .mul | .div | .mod =>
+      [.compoundAssignment]
+
+def denominationFeature : Denom → Feature
+  | .wei | .gwei | .ether => .etherUnits
+  | .seconds | .minutes | .hours | .days | .weeks => .timeUnits
+  | .years => .removedUnits
+
+def payloadFeaturesAt {c : Cat} (s : Syn c) : List Feature :=
+  Syn.casesOn (motive := fun _ _ => List Feature) s
+    ([])
+    (fun _ _ => [])
+    ([])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ _ => [])
+    (fun _ _ _ _ _ _ _ _ _ => [])
+    (fun _ _ _ _ _ => [])
+    (fun _ _ _ _ _ _ _ => [])
+    ([])
+    (fun _ _ _ => [])
+    (fun _ _ _ _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun op _ => [prefixFeature op])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun op _ _ => assignmentPayloadFeatures op)
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ unit => [denominationFeature unit])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    ([])
+    ([])
+    (fun _ _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    ([])
+    ([])
+    ([])
+    (fun _ _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+
+def syntaxPayloadUses {c : Cat} (root : Syn c) : List (SyntaxOccurrence × Feature) :=
+  syntaxFieldUses root payloadFeaturesAt
+
+theorem syntaxPayloadUses_iff {c : Cat} (root : Syn c) (site : SyntaxOccurrence) (f : Feature) :
+    (site,f) ∈ syntaxPayloadUses root ↔ Syn.Sub site ⟨c,root⟩ ∧ f ∈ payloadFeaturesAt site.2 :=
+  syntaxFieldUses_iff root payloadFeaturesAt site f
+
+theorem prefix_payload_tags :
+    ([PrefixOp.inc,.dec,.not,.bitNot,.delete,.neg].map prefixFeature) =
+      [.increments,.increments,.unaryArithmetic,.unaryArithmetic,.deleteExpression,.unaryArithmetic] := rfl
+
+theorem denomination_payload_tags :
+    ([Denom.wei,.gwei,.ether,.seconds,.minutes,.hours,.days,.weeks,.years].map denominationFeature) =
+      [.etherUnits,.etherUnits,.etherUnits,.timeUnits,.timeUnits,.timeUnits,.timeUnits,.timeUnits,.removedUnits] := rfl
+
+theorem assignment_payload_none_iff (op : AssignOp) :
+    assignmentPayloadFeatures op = [] ↔ op = .assign := by
+  cases op <;> decide
+
+/-- info: 'Solidity.Frontend.Admission.syntaxPayloadUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxPayloadUses_iff
+/-- info: 'Solidity.Frontend.Admission.prefix_payload_tags' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms prefix_payload_tags
+/-- info: 'Solidity.Frontend.Admission.denomination_payload_tags' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms denomination_payload_tags
+/-- info: 'Solidity.Frontend.Admission.assignment_payload_none_iff' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms assignment_payload_none_iff
+
+
+/-! Regression: visibility is metadata, so constructor-only traversal misses explicit fields in unused declarations and function types. Account for all six carriers through the generic visitor. Omission stays absent; legacy constructor visibility and syntactically invalid function-type visibility remain raw syntax evidence, not defaults, legality, admission or dispatch proofs. -/
+def ctorVisibility : CtorVis → Visibility
+  | .internal => .internal
+  | .pub => .pub
+
+def stateVisibility : StateVis → Visibility
+  | .pub => .pub
+  | .priv => .priv
+  | .internal => .internal
+
+inductive DirectVisibility : {c : Cat} → Syn c → Visibility → Prop where
+  | constructor (params mods payable body) (v : CtorVis) :
+      DirectVisibility (.constructor params mods payable (some v) body) (ctorVisibility v)
+  | function {t : Bool} (name params mutability mods virtual override returns body) (v : Visibility) :
+      DirectVisibility (.function (t := t) name params (some v) mutability mods virtual override returns body) v
+  | fallback (sig mutability mods virtual override body) :
+      DirectVisibility (.fallback sig true mutability mods virtual override body) .external
+  | receive (payable mods virtual override body) :
+      DirectVisibility (.receive true payable mods virtual override body) .external
+  | stateVar (ty const override transient name init) (v : StateVis) :
+      DirectVisibility (.stateVar ty (some v) const override transient name init) (stateVisibility v)
+  | fnType (params mutability returns) (v : Visibility) :
+      DirectVisibility (.fnType params (some v) mutability returns) v
+
+def visibilityFieldsAt {c : Cat} (s : Syn c) : List Visibility :=
+  Syn.casesOn (motive := fun _ _ => List Visibility) s
+    ([])
+    (fun _ _ => [])
+    ([])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ vis _ => vis.toList.map ctorVisibility)
+    (fun _ _ vis _ _ _ _ _ _ => vis.toList)
+    (fun _ _ _ _ _ => [])
+    (fun _ external _ _ _ _ _ => if external then [.external] else [])
+    ([])
+    (fun _ _ _ => [])
+    (fun external _ _ _ _ _ => if external then [.external] else [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ vis _ _ _ _ _ => vis.toList.map stateVisibility)
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ vis _ _ => vis.toList)
+    (fun _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    ([])
+    ([])
+    (fun _ _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    ([])
+    ([])
+    ([])
+    (fun _ _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+
+theorem DirectVisibility.mem_fields {c : Cat} {s : Syn c} {v : Visibility}
+    (field : DirectVisibility s v) : v ∈ visibilityFieldsAt s := by
+  cases field <;> exact List.mem_singleton_self _
+
+theorem visibilityFieldsAt_sound {c : Cat} (s : Syn c) (v : Visibility)
+    (present : v ∈ visibilityFieldsAt s) : DirectVisibility s v := by
+  cases s with
+  | constructor params mods payable vis body =>
+    cases vis with
+    | none => exact False.elim (List.not_mem_nil present)
+    | some value =>
+      have same := List.mem_singleton.mp present
+      cases same
+      exact .constructor params mods payable body value
+  | function name params vis mutability mods virtual override returns body =>
+    cases vis with
+    | none => exact False.elim (List.not_mem_nil present)
+    | some value =>
+      have same := List.mem_singleton.mp present
+      cases same
+      exact .function name params mutability mods virtual override returns body _
+  | fallback sig external mutability mods virtual override body =>
+    cases external with
+    | false => exact False.elim (List.not_mem_nil present)
+    | true =>
+      have same := List.mem_singleton.mp present
+      cases same
+      exact .fallback sig mutability mods virtual override body
+  | receive external payable mods virtual override body =>
+    cases external with
+    | false => exact False.elim (List.not_mem_nil present)
+    | true =>
+      have same := List.mem_singleton.mp present
+      cases same
+      exact .receive payable mods virtual override body
+  | stateVar ty vis const override transient name init =>
+    cases vis with
+    | none => exact False.elim (List.not_mem_nil present)
+    | some value =>
+      have same := List.mem_singleton.mp present
+      cases same
+      exact .stateVar ty const override transient name init value
+  | fnType params vis mutability returns =>
+    cases vis with
+    | none => exact False.elim (List.not_mem_nil present)
+    | some value =>
+      have same := List.mem_singleton.mp present
+      cases same
+      exact .fnType params mutability returns _
+  | _ => exact False.elim (List.not_mem_nil present)
+
+theorem visibilityFieldsAt_iff {c : Cat} (s : Syn c) (v : Visibility) :
+    v ∈ visibilityFieldsAt s ↔ DirectVisibility s v :=
+  ⟨visibilityFieldsAt_sound s v,DirectVisibility.mem_fields⟩
+
+def syntaxVisibilityUses {c : Cat} (root : Syn c) : List (SyntaxOccurrence × Visibility) :=
+  syntaxFieldUses root visibilityFieldsAt
+
+theorem syntaxVisibilityUses_iff {c : Cat} (root : Syn c) (site : SyntaxOccurrence) (v : Visibility) :
+    (site,v) ∈ syntaxVisibilityUses root ↔ Syn.Sub site ⟨c,root⟩ ∧ DirectVisibility site.2 v := by
+  rw [syntaxVisibilityUses, syntaxFieldUses_iff, visibilityFieldsAt_iff]
+
+def declarationVisibilityUses (E : Env) : List (DeclarationOccurrence × Visibility) :=
+  declarationFieldUses E visibilityFieldsAt
+
+theorem declarationVisibilityUses_iff (E : Env) (site : DeclarationOccurrence) (v : Visibility) :
+    (site,v) ∈ declarationVisibilityUses E ↔ site.Occurs E ∧ DirectVisibility site.2.2 v := by
+  rw [declarationVisibilityUses, declarationFieldUses_iff, visibilityFieldsAt_iff]
+
+/-- info: 'Solidity.Frontend.Admission.visibilityFieldsAt_iff' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms visibilityFieldsAt_iff
+/-- info: 'Solidity.Frontend.Admission.syntaxVisibilityUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxVisibilityUses_iff
+/-- info: 'Solidity.Frontend.Admission.declarationVisibilityUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms declarationVisibilityUses_iff
+
+
+def visibilityFeaturesAt {c : Cat} (s : Syn c) : List Feature :=
+  (visibilityFieldsAt s).map fun _ => .visibility
+
+theorem visibilityFeaturesAt_iff {c : Cat} (s : Syn c) (f : Feature) :
+    f ∈ visibilityFeaturesAt s ↔ f = .visibility ∧ ∃ v, DirectVisibility s v := by
+  change (f ∈ (visibilityFieldsAt s).map (fun _ => Feature.visibility)) ↔ _
+  rw [List.mem_map]
+  constructor
+  · rintro ⟨v,field,equal⟩
+    exact ⟨equal.symm, v, (visibilityFieldsAt_iff s v).mp field⟩
+  · rintro ⟨rfl,v,field⟩
+    exact ⟨v,(visibilityFieldsAt_iff s v).mpr field,rfl⟩
+
+/-- info: 'Solidity.Frontend.Admission.visibilityFeaturesAt_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms visibilityFeaturesAt_iff
+
+
+/-! Regression: written mutability on unused declarations and function types is metadata, not a child. The five carriers use the shared syntax visitor. Absent/false stays empty; state-variable getters must not invent written pure/view qualifiers. This raw inventory proves neither mutability legality, effects, nonpayable entry checks nor admission. -/
+inductive DirectMutability : {c : Cat} → Syn c → Mutability → Prop where
+  | constructor (params mods vis body) :
+      DirectMutability (.constructor params mods true vis body) .payable
+  | function {t : Bool} (name params vis mods virtual override returns body) (state : Mutability) :
+      DirectMutability (.function (t := t) name params vis (some state) mods virtual override returns body) state
+  | fallback (sig external mods virtual override body) (state : Mutability) :
+      DirectMutability (.fallback sig external (some state) mods virtual override body) state
+  | receive (external mods virtual override body) :
+      DirectMutability (.receive external true mods virtual override body) .payable
+  | fnType (params vis returns) (state : Mutability) :
+      DirectMutability (.fnType params vis (some state) returns) state
+
+def mutabilityFieldsAt {c : Cat} (s : Syn c) : List Mutability :=
+  Syn.casesOn (motive := fun _ _ => List Mutability) s
+    ([])
+    (fun _ _ => [])
+    ([])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ payable _ _ => if payable then [.payable] else [])
+    (fun _ _ _ state _ _ _ _ _ => state.toList)
+    (fun _ _ _ _ _ => [])
+    (fun _ _ state _ _ _ _ => state.toList)
+    ([])
+    (fun _ _ _ => [])
+    (fun _ payable _ _ _ _ => if payable then [.payable] else [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ state _ => state.toList)
+    (fun _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    ([])
+    ([])
+    (fun _ _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    ([])
+    ([])
+    ([])
+    (fun _ _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+
+theorem DirectMutability.mem_fields {c : Cat} {s : Syn c} {state : Mutability}
+    (field : DirectMutability s state) : state ∈ mutabilityFieldsAt s := by
+  cases field <;> exact List.mem_singleton_self _
+
+theorem mutabilityFieldsAt_sound {c : Cat} (s : Syn c) (state : Mutability)
+    (present : state ∈ mutabilityFieldsAt s) : DirectMutability s state := by
+  cases s with
+  | constructor params mods payable vis body =>
+    cases payable with
+    | false => exact False.elim (List.not_mem_nil present)
+    | true =>
+      have same := List.mem_singleton.mp present
+      cases same
+      exact .constructor params mods vis body
+  | function name params vis stateOpt mods virtual override returns body =>
+    cases stateOpt with
+    | none => exact False.elim (List.not_mem_nil present)
+    | some value =>
+      have same := List.mem_singleton.mp present
+      cases same
+      exact .function name params vis mods virtual override returns body _
+  | fallback sig external stateOpt mods virtual override body =>
+    cases stateOpt with
+    | none => exact False.elim (List.not_mem_nil present)
+    | some value =>
+      have same := List.mem_singleton.mp present
+      cases same
+      exact .fallback sig external mods virtual override body _
+  | receive external payable mods virtual override body =>
+    cases payable with
+    | false => exact False.elim (List.not_mem_nil present)
+    | true =>
+      have same := List.mem_singleton.mp present
+      cases same
+      exact .receive external mods virtual override body
+  | fnType params vis stateOpt returns =>
+    cases stateOpt with
+    | none => exact False.elim (List.not_mem_nil present)
+    | some value =>
+      have same := List.mem_singleton.mp present
+      cases same
+      exact .fnType params vis returns _
+  | _ => exact False.elim (List.not_mem_nil present)
+
+theorem mutabilityFieldsAt_iff {c : Cat} (s : Syn c) (state : Mutability) :
+    state ∈ mutabilityFieldsAt s ↔ DirectMutability s state :=
+  ⟨mutabilityFieldsAt_sound s state,DirectMutability.mem_fields⟩
+
+def syntaxMutabilityUses {c : Cat} (root : Syn c) : List (SyntaxOccurrence × Mutability) :=
+  syntaxFieldUses root mutabilityFieldsAt
+
+theorem syntaxMutabilityUses_iff {c : Cat} (root : Syn c) (site : SyntaxOccurrence) (state : Mutability) :
+    (site,state) ∈ syntaxMutabilityUses root ↔ Syn.Sub site ⟨c,root⟩ ∧ DirectMutability site.2 state := by
+  rw [syntaxMutabilityUses, syntaxFieldUses_iff, mutabilityFieldsAt_iff]
+
+def declarationMutabilityUses (E : Env) : List (DeclarationOccurrence × Mutability) :=
+  declarationFieldUses E mutabilityFieldsAt
+
+theorem declarationMutabilityUses_iff (E : Env) (site : DeclarationOccurrence) (state : Mutability) :
+    (site,state) ∈ declarationMutabilityUses E ↔ site.Occurs E ∧ DirectMutability site.2.2 state := by
+  rw [declarationMutabilityUses, declarationFieldUses_iff, mutabilityFieldsAt_iff]
+
+def mutabilityFeaturesAt {c : Cat} (s : Syn c) : List Feature :=
+  (mutabilityFieldsAt s).map fun _ => .stateMutability
+
+theorem mutabilityFeaturesAt_iff {c : Cat} (s : Syn c) (f : Feature) :
+    f ∈ mutabilityFeaturesAt s ↔ f = .stateMutability ∧ ∃ state, DirectMutability s state := by
+  change (f ∈ (mutabilityFieldsAt s).map (fun _ => Feature.stateMutability)) ↔ _
+  rw [List.mem_map]
+  constructor
+  · rintro ⟨state,field,equal⟩
+    exact ⟨equal.symm, state, (mutabilityFieldsAt_iff s state).mp field⟩
+  · rintro ⟨rfl,state,field⟩
+    exact ⟨state,(mutabilityFieldsAt_iff s state).mpr field,rfl⟩
+
+/-- info: 'Solidity.Frontend.Admission.mutabilityFieldsAt_iff' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms mutabilityFieldsAt_iff
+/-- info: 'Solidity.Frontend.Admission.syntaxMutabilityUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxMutabilityUses_iff
+/-- info: 'Solidity.Frontend.Admission.declarationMutabilityUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms declarationMutabilityUses_iff
+/-- info: 'Solidity.Frontend.Admission.mutabilityFeaturesAt_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms mutabilityFeaturesAt_iff
 
 end Solidity.Frontend.Admission

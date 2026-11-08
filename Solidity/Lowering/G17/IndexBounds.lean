@@ -4,9 +4,7 @@ import Solidity.Lowering.V08.AbiObservations
 import Solidity.Backend.Failure.Observe
 import Solidity.Theory.Typed.Mem
 
-/-! Bounds checks from the existing checked-program metadata. The guard
-reads captured simple indices and a live reference; it introduces no Source
-heap relation and makes no claim about admission or a whole lowering pass. -/
+/-! Bounds checks from the existing checked-program metadata. The guard reads captured simple indices and a live reference; it introduces no Source heap relation and makes no claim about admission or a whole lowering pass. Guard metadata is run after the base identity and index input have been captured, before the final memory read. The actual checked-program store preserves the original successful captured store and gives a bounds failure its exact 0x32 payload. In bounds the guarded read is the original captured read. Out of bounds it emits the exact Source panic payload, rather than an empty native revert. No access-success result is assumed. -/
 namespace Solidity.Lowering.G17.IndexBounds
 variable {C : Contract} {Γ : Ctx} {R : RefTy} {p : PrimTy}
 
@@ -96,8 +94,6 @@ private theorem bounds_run (target : State C Γ) (array : ArrTy R (.prim p))
       rw [if_pos inside]
       rfl
 
-/-- Guard metadata is run after the base identity and index input have been
-captured, before the final memory read. -/
 def readOperand (i a : Idx Γ (.mem R)) (hm : (Ty.ref R).mapFree = true)
     (array : ArrTy R (.prim p)) (index : Simple C Γ .uint) :
     DeferredSource.Operand C Γ (.prim p) :=
@@ -105,8 +101,6 @@ def readOperand (i a : Idx Γ (.mem R)) (hm : (Ty.ref R).mapFree = true)
       (code array .here hm (index.wk (.drop .refl))),
     .val (.readMem (.index array (.var .here hm) (.simple (index.wk (.drop .refl)))))⟩
 
-/-- Reuse the repository's checked-program transformation for stores whose
-index and assigned scalar have already been captured. -/
 def writeCode (i a : Idx Γ (.mem R)) (hm : (Ty.ref R).mapFree = true)
     (array : ArrTy R (.prim p)) (index : Simple C Γ .uint) (value : Simple C Γ p) :
     Prog C Γ (.mem R :: Γ) :=
@@ -166,9 +160,6 @@ private theorem prefix_run (target : State C Γ) (i a : Idx Γ (.mem R))
   rw [heap]
   split <;> rfl
 
-/-- In bounds the guarded read is the original captured read. Out of bounds
-it emits the exact Source panic payload, rather than an empty native revert.
-No access-success result is assumed. -/
 theorem read_run (target : State C Γ) (i a : Idx Γ (.mem R))
     (hm : (Ty.ref R).mapFree = true) (old assigned : HRef target.H R)
     (readI : TEnv.get i target.env = some old) (readA : TEnv.get a target.env = some assigned)
@@ -189,8 +180,6 @@ theorem read_run (target : State C Γ) (i a : Idx Γ (.mem R))
     rfl
   · simp only [inside,if_false,bind,Except.bind]
 
-/-- The actual checked-program store preserves the original successful
-captured store and gives a bounds failure its exact 0x32 payload. -/
 theorem write_run (target : State C Γ) (i a : Idx Γ (.mem R))
     (hm : (Ty.ref R).mapFree = true) (old assigned : HRef target.H R)
     (readI : TEnv.get i target.env = some old) (readA : TEnv.get a target.env = some assigned)
@@ -215,6 +204,129 @@ theorem write_run (target : State C Γ) (i a : Idx Γ (.mem R))
     rw [captured]
     rfl
   · simp only [inside,if_false]
+
+
+def effectfulReadOperand (base : Idx Γ (.mem R)) (hm : (Ty.ref R).mapFree = true)
+    (array : ArrTy R (.prim p)) (index : DeferredSource.Operand C Γ (.prim .uint)) :
+    DeferredSource.Operand C Γ (.prim p) :=
+  ⟨_,(IndexCapture.effectfulIndexCode base hm index).join
+      (code array (.there .here) hm (.local .here)),
+    .val (.readMem (.index array (.var (.there .here) hm) (.simple (.local .here))))⟩
+
+/-- The captured base is checked in the reached heap after arbitrary index effects; private captures survive caller rebinding, with exact bounds panic and prefix halts. -/
+theorem effectfulRead_run (target : State C Γ) (base : Idx Γ (.mem R))
+    (hm : (Ty.ref R).mapFree = true) (old : HRef target.H R)
+    (read : TEnv.get base target.env = some old) (array : ArrTy R (.prim p))
+    (index : DeferredSource.Operand C Γ (.prim .uint)) :
+    (effectfulReadOperand base hm array index).run target = (do
+      let (out,value) ← index.run target
+      match value with
+      | .prim k =>
+        if k.val.toNat < out.st.heap.len (HRef.wk out.ext old) array then
+          let value ← TRes.ofOpt (out.st.heap.index (HRef.wk out.ext old) array k)
+          pure (out,SVal.prim value)
+        else .error (THalt.ofData (Source.panicData .index))) := by
+  unfold effectfulReadOperand
+  rw [DeferredSource.Operand.run,DeferredSource.join_run]
+  unfold TRun.seq
+  have first := IndexCapture.effectfulIndexCode_run target base hm old read index
+  change (IndexCapture.effectfulIndexCode base hm index).runR target = _ at first
+  rw [first]
+  cases run : index.run target with
+  | error err => rfl
+  | ok result =>
+    obtain ⟨out,value⟩ := result
+    cases value with
+    | prim k =>
+      dsimp only [Except.map,bind,Except.bind]
+      have guard := bounds_run
+        ((out.st.push (t := .mem R) (some (HRef.wk out.ext old))).push (t := .val .uint) k)
+        array (.there .here) hm (HRef.wk out.ext old) rfl (.local .here)
+      change (code array (.there .here) hm (.local .here)).runR _ = _ at guard
+      rw [guard]
+      by_cases inside : k.val.toNat < out.st.heap.len (HRef.wk out.ext old) array
+      · simp only [Simple.evalT,State.push,TEnv.get,inside,if_true]
+        simp only [Src.valueT,Val.evalT,MLoc.addrT,MPath.mvalT,TEnv.get,Simple.evalT,
+          Heap.readAddr,bind,Except.bind,pure,Except.pure]
+        have scope : ((IndexCapture.effectfulIndexCode base hm index).join
+            (code array (.there .here) hm (.local .here))).ext =
+            (.push (.push .refl) : Ext Γ (.val .uint :: .mem R :: Γ)) := Subsingleton.elim _ _
+        rw [scope]
+        cases TRes.ofOpt (out.st.heap.index (HRef.wk out.ext old) array k) <;> rfl
+      · simp only [Simple.evalT,State.push,TEnv.get,inside,if_false]
+
+
+def effectfulWriteCode (base : Idx Γ (.mem R)) (hm : (Ty.ref R).mapFree = true)
+    (array : ArrTy R (.prim p)) (index : DeferredSource.Operand C Γ (.prim .uint))
+    (value : Simple C Γ p) : Prog C Γ (.val .uint :: .mem R :: Γ) :=
+  (IndexCapture.effectfulIndexCode base hm index).join
+    ((code array (.there .here) hm (.local .here)).join
+      (.cons (.assignMem (.index array (.var (.there .here) hm) (.simple (.local .here)))
+        (.val (.simple (value.wk (.drop (.drop .refl)))))) .nil))
+
+/-- A native store uses the captured identity/index and reached heap/caller value after index effects; bounds failures retain exact panic data, without a Source assignment-order claim. -/
+theorem effectfulWrite_run (target : State C Γ) (base : Idx Γ (.mem R))
+    (hm : (Ty.ref R).mapFree = true) (old : HRef target.H R)
+    (read : TEnv.get base target.env = some old) (array : ArrTy R (.prim p))
+    (index : DeferredSource.Operand C Γ (.prim .uint)) (value : Simple C Γ p) :
+    (effectfulWriteCode base hm array index value).run target = (do
+      let (out,result) ← index.run target
+      match result with
+      | .prim k =>
+        if k.val.toNat < out.st.heap.len (HRef.wk out.ext old) array then
+          let hp ← TRes.ofOpt
+            (out.st.heap.setIndex (HRef.wk out.ext old) array k (value.evalT out.st))
+          pure (⟨((out.st.withHeap hp).push (t := .mem R) (some (HRef.wk out.ext old))).push
+            (t := .val .uint) k,out.ext⟩ : Out C target.H (.val .uint :: .mem R :: Γ))
+        else .error (THalt.ofData (Source.panicData .index))) := by
+  unfold effectfulWriteCode
+  rw [DeferredSource.join_run]
+  unfold TRun.seq
+  have first := IndexCapture.effectfulIndexCode_run target base hm old read index
+  change (IndexCapture.effectfulIndexCode base hm index).runR target = _ at first
+  rw [first]
+  cases run : index.run target with
+  | error err => rfl
+  | ok result =>
+    obtain ⟨out,result⟩ := result
+    cases result with
+    | prim k =>
+      let captured := (out.st.push (t := .mem R) (some (HRef.wk out.ext old))).push (t := .val .uint) k
+      let store : Stmt C (.val .uint :: .mem R :: Γ) (.val .uint :: .mem R :: Γ) :=
+        .assignMem (.index array (.var (.there .here) hm) (.simple (.local .here)))
+          (.val (.simple (value.wk (.drop (.drop .refl)))))
+      dsimp only [Except.map,bind,Except.bind]
+      have joined := DeferredSource.join_run (code array (.there .here) hm (.local .here))
+        (.cons store .nil) captured
+      change ((code array (.there .here) hm (.local .here)).join (.cons store .nil)).runR captured = _ at joined
+      rw [joined]
+      unfold TRun.seq
+      have guard := bounds_run captured array (.there .here) hm (HRef.wk out.ext old) rfl (.local .here)
+      change (code array (.there .here) hm (.local .here)).runR captured =
+        (if k.val.toNat < out.st.heap.len (HRef.wk out.ext old) array then
+          .ok (⟨captured,List.prefix_refl _⟩ : Out C out.st.H (.val .uint :: .mem R :: Γ))
+        else .error (THalt.ofData (Source.panicData .index))) at guard
+      rw [guard]
+      by_cases inside : k.val.toNat < out.st.heap.len (HRef.wk out.ext old) array
+      · simp only [inside,if_true,Except.map]
+        have single := V07.singleton_run captured store
+        change (Prog.cons store .nil).runR captured = store.runR captured at single
+        rw [single]
+        have weak := Simple.evalT_wk (.drop (t := .val .uint) (.drop (t := .mem R) .refl))
+          out.st (k,some (HRef.wk out.ext old),out.st.env) value
+        change (value.wk (.drop (.drop .refl))).evalT captured = value.evalT out.st at weak
+        have head : TEnv.get (.there .here) captured.env = some (HRef.wk out.ext old) := rfl
+        have idx : (Simple.local (C := C) (.here : Idx (.val .uint :: .mem R :: Γ) (.val .uint))).evalT captured = k := rfl
+        simp only [store,Stmt.runR,TRun.assignMem,MSrc.mvalT,Val.evalT,weak,MLoc.addrT,
+          MPath.mvalT,head,idx,Heap.writeAddr,bind,Except.bind,pure,Except.pure]
+        have heap : captured.heap = out.st.heap := rfl
+        rw [heap]
+        cases TRes.ofOpt (out.st.heap.setIndex (HRef.wk out.ext old) array k (value.evalT out.st)) <;> rfl
+      · simp only [inside,if_false]
+
+#print axioms effectfulWrite_run
+
+#print axioms effectfulRead_run
 
 #print axioms panic_run
 #print axioms dynamic_test

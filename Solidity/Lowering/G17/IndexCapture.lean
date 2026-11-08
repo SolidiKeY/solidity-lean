@@ -1,20 +1,17 @@
+import Solidity.Lowering.G17.OperandStore
 import Solidity.Lowering.V07.ReferenceEffects
+import Solidity.Lowering.V07.ShortCircuit
 
-/-! Indexed native access after reference capture and local rebinding. The
-captured object identity is retained for every array shape and primitive type.
-This is an operational ingredient for indexAccess, not yet Source transport,
-a heap/world relation, or coverage of storage/mapping/calldata indexing. -/
+/-! Indexed native access after reference capture and local rebinding. The captured object identity is retained for every array shape and primitive type. This is an operational ingredient for indexAccess, not yet Source transport, a heap/world relation, or coverage of storage/mapping/calldata indexing. The separate Source-only laws factor child results; they are not correspondence theorems. Capture the old identity before rebinding the caller slot; the fresh slot keeps it while the caller slot is rebound. -/
 namespace Solidity.Lowering.G17.IndexCapture
 open V07
 variable {C : Contract} {Γ : Ctx} {R : RefTy} {p : PrimTy}
 
-/-- Capture the old identity before rebinding the caller slot. -/
 def captureCode (i a : Idx Γ (.mem R)) (hm : (Ty.ref R).mapFree = true) :
     Prog C Γ (.mem R :: Γ) :=
   (memoryCapture i hm).join
     (.cons (.rebindMem (.there i) (.alias (.var (.there a) hm))) .nil)
 
-/-- The fresh slot keeps the old identity while the caller slot is rebound. -/
 theorem capture_run (target : State C Γ) (i a : Idx Γ (.mem R))
     (hm : (Ty.ref R).mapFree = true) (old assigned : HRef target.H R)
     (readI : TEnv.get i target.env = some old) (readA : TEnv.get a target.env = some assigned) :
@@ -32,9 +29,7 @@ def readOperand (i a : Idx Γ (.mem R)) (hm : (Ty.ref R).mapFree = true)
     DeferredSource.Operand C Γ (.prim p) :=
   ⟨_,captureCode i a hm,.val (.readMem (.index array (.var .here hm) (index.wk (.drop .refl))))⟩
 
-/-- The index is evaluated after rebinding, but the indexed object is the
-captured reference. Bounds failures use the existing heap lookup/revert law.
-No result of the desired read is an input premise. -/
+/-- The index is evaluated after rebinding, but the indexed object is the captured reference. Bounds failures use the existing heap lookup/revert law. No result of the desired read is an input premise. -/
 theorem read_run (target : State C Γ) (i a : Idx Γ (.mem R))
     (hm : (Ty.ref R).mapFree = true) (old assigned : HRef target.H R)
     (readI : TEnv.get i target.env = some old) (readA : TEnv.get a target.env = some assigned)
@@ -62,8 +57,7 @@ theorem read_run (target : State C Γ) (i a : Idx Γ (.mem R))
     dsimp only [State.setLocal]
     cases TRes.ofOpt (target.heap.index old array k) <;> rfl
 
-/-- A write through the captured base; the RHS and index retain their existing
-native evaluation order at the reached caller. -/
+/-- A write through the captured base; the RHS and index retain their existing native evaluation order at the reached caller. -/
 def writeCode (i a : Idx Γ (.mem R)) (hm : (Ty.ref R).mapFree = true)
     (array : ArrTy R (.prim p)) (index : Val C Γ .uint) (value : Val C Γ p) :
     Prog C Γ (.mem R :: Γ) :=
@@ -71,8 +65,7 @@ def writeCode (i a : Idx Γ (.mem R)) (hm : (Ty.ref R).mapFree = true)
     (.index array (.var .here hm) (index.wk (.drop .refl)))
     (.val (value.wk (.drop .refl)))) .nil)
 
-/-- Capturing the reference retains the referent for indexed writes, even
-when the original caller slot has been rebound to another object. -/
+/-- Capturing the reference retains the referent for indexed writes, even when the original caller slot has been rebound to another object. -/
 theorem write_run (target : State C Γ) (i a : Idx Γ (.mem R))
     (hm : (Ty.ref R).mapFree = true) (old assigned : HRef target.H R)
     (readI : TEnv.get i target.env = some old) (readA : TEnv.get a target.env = some assigned)
@@ -124,6 +117,149 @@ theorem write_run (target : State C Γ) (i a : Idx Γ (.mem R))
       dsimp only [captured,post,State.push,State.setLocal]
       cases TRes.ofOpt (target.heap.setIndex old array k v) <;> rfl
 
+def effectfulIndexCode (i : Idx Γ (.mem R)) (hm : (Ty.ref R).mapFree = true)
+    (index : DeferredSource.Operand C Γ (.prim .uint)) :
+    Prog C Γ (.val .uint :: .mem R :: Γ) :=
+  (memoryCapture i hm).join
+    (.cons (.declLocal .uint (.user "captured_index") none)
+      (.cons (storePrimitiveOperand .here ((index.wk (.drop .refl)).wk (.drop .refl))) .nil))
+
+private theorem index_after_capture (index : DeferredSource.Operand C Γ (.prim .uint))
+    (target : State C Γ) (old : HRef target.H R) :
+    (index.wk (.drop .refl)).run (target.push (t := .mem R) (some old)) =
+      (index.run target).map (fun (out,value) =>
+        ((⟨out.st.push (t := .mem R) (some (HRef.wk out.ext old)),out.ext⟩ :
+          Out C target.H (.mem R :: Γ)),value)) := by
+  have weak := DeferredSource.Operand.run_wk index (.drop (t := .mem R) .refl)
+    target (some old,target.env)
+  simpa only [liftedT₂,Out.lift,State.lift,State.push,TEnv.put,TEnv.wk,LTy.TDenote.wk,
+    Option.map_some] using weak
+
+/-- Capture reference identity before an arbitrary index prefix; retain reached caller/heap effects and halts, with both private captures protected from aliasing. -/
+theorem effectfulIndexCode_run (target : State C Γ) (i : Idx Γ (.mem R))
+    (hm : (Ty.ref R).mapFree = true) (old : HRef target.H R)
+    (read : TEnv.get i target.env = some old)
+    (index : DeferredSource.Operand C Γ (.prim .uint)) :
+    (effectfulIndexCode i hm index).run target =
+      (index.run target).map (fun (out,value) => match value with
+        | .prim k => (⟨(out.st.push (t := .mem R) (some (HRef.wk out.ext old))).push (t := .val .uint) k,
+            out.ext⟩ : Out C target.H (.val .uint :: .mem R :: Γ))) := by
+  unfold effectfulIndexCode
+  rw [DeferredSource.join_run]
+  have first := memory_capture_run target i hm old read
+  change (memoryCapture i hm).runR target = _ at first
+  unfold TRun.seq
+  rw [first]
+  dsimp only []
+  have reserve : (Stmt.declLocal .uint (.user "captured_index") none).run
+      (target.push (t := .mem R) (some old)) =
+      .ok (⟨(target.push (t := .mem R) (some old)).push (t := .val .uint) (PrimTy.dflt .uint),
+        List.prefix_refl _⟩) := rfl
+  have reserved := Prog.run_cons_ok
+    (P := .cons (storePrimitiveOperand .here ((index.wk (.drop .refl)).wk (.drop .refl))) .nil) reserve
+  change (Prog.cons (.declLocal .uint (.user "captured_index") none)
+    (.cons (storePrimitiveOperand .here ((index.wk (.drop .refl)).wk (.drop .refl))) .nil)).runR
+      (target.push (t := .mem R) (some old)) = _ at reserved
+  rw [reserved]
+  dsimp only [Prog.run]
+  have single := singleton_run
+    ((target.push (t := .mem R) (some old)).push (t := .val .uint) (PrimTy.dflt .uint))
+    (storePrimitiveOperand .here ((index.wk (.drop .refl)).wk (.drop .refl)))
+  change (Prog.cons (storePrimitiveOperand .here ((index.wk (.drop .refl)).wk (.drop .refl))) .nil).runR
+    ((target.push (t := .mem R) (some old)).push (t := .val .uint) (PrimTy.dflt .uint)) = _ at single
+  rw [single]
+  dsimp only [Stmt.run]
+  have stored := storePrimitive_fresh_run (index.wk (.drop (t := .mem R) .refl))
+    (target.push (t := .mem R) (some old)) (PrimTy.dflt .uint)
+  change (storePrimitiveOperand .here ((index.wk (.drop .refl)).wk (.drop .refl))).runR
+    ((target.push (t := .mem R) (some old)).push (t := .val .uint) (PrimTy.dflt .uint)) = _ at stored
+  rw [stored,index_after_capture]
+  cases run : index.run target with
+  | error err => rfl
+  | ok result =>
+    obtain ⟨out,value⟩ := result
+    cases value with
+    | prim k => rfl
+
+#print axioms index_after_capture
+#print axioms effectfulIndexCode_run
+/-- Source array capture composes all child results and exact reached failures; the earlier success-only law below remains a derived specialization, without a Source/native relation. -/
+theorem source_capture_all {E : Source.Env} {srcΓ : Source.RCtx}
+    {location : Source.DataLoc} {element indexTy : Source.STy} {length : Option Nat}
+    (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
+    (base : Source.RExpr E srcΓ (.array location element length))
+    (index : Source.RExpr E srcΓ indexTy) (hi : indexTy.isIndex = true)
+    (source middle after : Source.EMState E srcΓ)
+    (baseResult : Source.R (Source.RVal E.layout (.array location element length)))
+    (indexResult : Source.R (Source.RVal E.layout indexTy))
+    (baseRun : (Source.evalE G F fuel base).run source = (baseResult,middle))
+    (indexRun : (Source.evalE G F fuel index).run middle = (indexResult,after)) :
+    let selected (captured : Source.Val E.layout (.array location element length)) :
+        Source.EM E srcΓ (Source.Loc E.layout srcΓ element) := do
+      let value ← Source.EM.lift indexResult
+      let k ← Source.indexNat value
+      Source.indexLoc F captured k
+    (Source.evalE G F (fuel+1) (.indexArray base index hi)).run source =
+      (match (generalizing := false) baseResult with
+       | .error halt => (.error halt,middle)
+       | .ok (.val captured) =>
+         (do let loc ← selected captured; return Source.RVal.val (τ := element) (← Source.readLoc F loc)).run after) ∧
+    ∀ writable : location ≠ .calldata,
+      (Source.evalLoc G F (fuel+1) (.indexArray base writable index hi)).run source =
+        (match (generalizing := false) baseResult with
+         | .error halt => (.error halt,middle)
+         | .ok (.val captured) => (selected captured).run after) := by
+  dsimp only
+  constructor
+  · rw [Source.evalE,Source.Hoare.run_bind,baseRun]
+    cases baseResult with
+    | error halt => rfl
+    | ok value =>
+      cases value with
+      | val captured =>
+        dsimp only []
+        rw [Source.Hoare.run_bind,source_getV_run]
+        dsimp only []
+        rw [Source.Hoare.run_bind,indexRun]
+        cases indexResult with
+        | error halt => rfl
+        | ok value => simp only [Source.EM.lift,pure_bind,bind_assoc]
+  · intro writable
+    rw [Source.evalLoc,Source.Hoare.run_bind,baseRun]
+    cases baseResult with
+    | error halt => rfl
+    | ok value =>
+      cases value with
+      | val captured =>
+        dsimp only []
+        rw [Source.Hoare.run_bind,source_getV_run]
+        dsimp only []
+        rw [Source.Hoare.run_bind,indexRun]
+        cases indexResult <;> rfl
+
+theorem source_capture_order {E : Source.Env} {srcΓ : Source.RCtx}
+    {location : Source.DataLoc} {element indexTy : Source.STy} {length : Option Nat}
+    (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
+    (base : Source.RExpr E srcΓ (.array location element length))
+    (index : Source.RExpr E srcΓ indexTy) (hi : indexTy.isIndex = true)
+    (source middle after : Source.EMState E srcΓ)
+    (captured : Source.Val E.layout (.array location element length))
+    (indexValue : Source.RVal E.layout indexTy)
+    (baseRun : (Source.evalE G F fuel base).run source = (.ok (.val captured),middle))
+    (indexRun : (Source.evalE G F fuel index).run middle = (.ok indexValue,after)) :
+    let selected : Source.EM E srcΓ (Source.Loc E.layout srcΓ element) := do
+      let k ← Source.indexNat indexValue
+      Source.indexLoc F captured k
+    (Source.evalE G F (fuel+1) (.indexArray base index hi)).run source =
+      (do let loc ← selected; return Source.RVal.val (τ := element) (← Source.readLoc F loc)).run after ∧
+    ∀ writable : location ≠ .calldata,
+      (Source.evalLoc G F (fuel+1) (.indexArray base writable index hi)).run source = selected.run after := by
+  have all := source_capture_all G F fuel base index hi source middle after
+    (.ok (.val captured)) (.ok indexValue) baseRun indexRun
+  simpa only [Source.EM.lift,pure_bind] using all
+
+#print axioms source_capture_all
+#print axioms source_capture_order
 #print axioms capture_run
 #print axioms read_run
 #print axioms write_run

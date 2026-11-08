@@ -2,10 +2,7 @@ import Solidity.Lowering.G17.OperandStore
 import Solidity.Lowering.V07.ShortCircuit
 import Solidity.Lowering.V07.ReferenceEffects
 
-/-! One Boolean-operator family: evaluate the left operand once, retain its
-caller effects, and run the right operand only when its value requires it.
-Both prefixes are arbitrary interpreted programs, including heap growth and
-halts. The private Boolean binder never aliases a caller binding. -/
+/-! One Boolean-operator family: evaluate the left operand once, retain its caller effects, and run the right operand only when its value requires it. Both prefixes are arbitrary interpreted programs, including heap growth and halts. The private Boolean binder never aliases a caller binding. -/
 namespace Solidity.Lowering.G17
 open V07
 variable {C : Contract} {Γ : Ctx}
@@ -17,11 +14,11 @@ theorem store_fresh_run (e : DeferredSource.Operand C Γ (.prim .bool))
       (target.push (t := .val .bool) previous) =
     (e.run target).map (fun (out,value) => match value with
       | .prim b => (⟨out.st.push (t := .val .bool) b,out.ext⟩ : Out C target.H (.val .bool :: Γ))) := by
-  rw [storeOperand_run]
-  have weak := DeferredSource.Operand.run_wk e (.drop (t := .val .bool) .refl)
-    target (previous,target.env)
-  change (e.wk (.drop .refl)).run (target.push (t := .val .bool) previous) = _ at weak
-  rw [weak]
+  have same : storeOperand .here (e.wk (.drop .refl)) =
+      storePrimitiveOperand .here (e.wk (.drop .refl)) := by
+    cases e with
+    | mk Δ code value => cases value <;> rfl
+  rw [same,storePrimitive_fresh_run]
   cases run : e.run target with
   | error err => rfl
   | ok result =>
@@ -95,8 +92,7 @@ def shortOperand (conj : Bool) (left right : DeferredSource.Operand C Γ (.prim 
       (.cons (storeOperand .here (left.wk (.drop .refl))) (branchCode conj right)),
     .val (.simple (.local .here))⟩
 
-/-- Operational lazy composition for both Boolean operators. No RHS execution
-premise is needed on a skipped branch. All reached caller effects survive. -/
+/-- Operational lazy composition for both Boolean operators. No RHS execution premise is needed on a skipped branch. All reached caller effects survive. -/
 theorem shortOperand_run (conj : Bool) (left right : DeferredSource.Operand C Γ (.prim .bool))
     (target : State C Γ) :
     (shortOperand conj left right).run target = (do
