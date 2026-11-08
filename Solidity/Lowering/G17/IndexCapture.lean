@@ -1,18 +1,17 @@
+import Solidity.Lowering.G17.OperandStore
 import Solidity.Lowering.V07.ReferenceEffects
 import Solidity.Lowering.V07.ShortCircuit
 
-/-! Indexed native access after reference capture and local rebinding. The captured object identity is retained for every array shape and primitive type. This is an operational ingredient for indexAccess, not yet Source transport, a heap/world relation, or coverage of storage/mapping/calldata indexing. The separate Source-only laws factor child results; they are not correspondence theorems. -/
+/-! Indexed native access after reference capture and local rebinding. The captured object identity is retained for every array shape and primitive type. This is an operational ingredient for indexAccess, not yet Source transport, a heap/world relation, or coverage of storage/mapping/calldata indexing. The separate Source-only laws factor child results; they are not correspondence theorems. Capture the old identity before rebinding the caller slot; the fresh slot keeps it while the caller slot is rebound. -/
 namespace Solidity.Lowering.G17.IndexCapture
 open V07
 variable {C : Contract} {Γ : Ctx} {R : RefTy} {p : PrimTy}
 
-/-- Capture the old identity before rebinding the caller slot. -/
 def captureCode (i a : Idx Γ (.mem R)) (hm : (Ty.ref R).mapFree = true) :
     Prog C Γ (.mem R :: Γ) :=
   (memoryCapture i hm).join
     (.cons (.rebindMem (.there i) (.alias (.var (.there a) hm))) .nil)
 
-/-- The fresh slot keeps the old identity while the caller slot is rebound. -/
 theorem capture_run (target : State C Γ) (i a : Idx Γ (.mem R))
     (hm : (Ty.ref R).mapFree = true) (old assigned : HRef target.H R)
     (readI : TEnv.get i target.env = some old) (readA : TEnv.get a target.env = some assigned) :
@@ -118,6 +117,72 @@ theorem write_run (target : State C Γ) (i a : Idx Γ (.mem R))
       dsimp only [captured,post,State.push,State.setLocal]
       cases TRes.ofOpt (target.heap.setIndex old array k v) <;> rfl
 
+def effectfulIndexCode (i : Idx Γ (.mem R)) (hm : (Ty.ref R).mapFree = true)
+    (index : DeferredSource.Operand C Γ (.prim .uint)) :
+    Prog C Γ (.val .uint :: .mem R :: Γ) :=
+  (memoryCapture i hm).join
+    (.cons (.declLocal .uint (.user "captured_index") none)
+      (.cons (storePrimitiveOperand .here ((index.wk (.drop .refl)).wk (.drop .refl))) .nil))
+
+private theorem index_after_capture (index : DeferredSource.Operand C Γ (.prim .uint))
+    (target : State C Γ) (old : HRef target.H R) :
+    (index.wk (.drop .refl)).run (target.push (t := .mem R) (some old)) =
+      (index.run target).map (fun (out,value) =>
+        ((⟨out.st.push (t := .mem R) (some (HRef.wk out.ext old)),out.ext⟩ :
+          Out C target.H (.mem R :: Γ)),value)) := by
+  have weak := DeferredSource.Operand.run_wk index (.drop (t := .mem R) .refl)
+    target (some old,target.env)
+  simpa only [liftedT₂,Out.lift,State.lift,State.push,TEnv.put,TEnv.wk,LTy.TDenote.wk,
+    Option.map_some] using weak
+
+/-- Capture reference identity before an arbitrary index prefix; retain reached caller/heap effects and halts, with both private captures protected from aliasing. -/
+theorem effectfulIndexCode_run (target : State C Γ) (i : Idx Γ (.mem R))
+    (hm : (Ty.ref R).mapFree = true) (old : HRef target.H R)
+    (read : TEnv.get i target.env = some old)
+    (index : DeferredSource.Operand C Γ (.prim .uint)) :
+    (effectfulIndexCode i hm index).run target =
+      (index.run target).map (fun (out,value) => match value with
+        | .prim k => (⟨(out.st.push (t := .mem R) (some (HRef.wk out.ext old))).push (t := .val .uint) k,
+            out.ext⟩ : Out C target.H (.val .uint :: .mem R :: Γ))) := by
+  unfold effectfulIndexCode
+  rw [DeferredSource.join_run]
+  have first := memory_capture_run target i hm old read
+  change (memoryCapture i hm).runR target = _ at first
+  unfold TRun.seq
+  rw [first]
+  dsimp only []
+  have reserve : (Stmt.declLocal .uint (.user "captured_index") none).run
+      (target.push (t := .mem R) (some old)) =
+      .ok (⟨(target.push (t := .mem R) (some old)).push (t := .val .uint) (PrimTy.dflt .uint),
+        List.prefix_refl _⟩) := rfl
+  have reserved := Prog.run_cons_ok
+    (P := .cons (storePrimitiveOperand .here ((index.wk (.drop .refl)).wk (.drop .refl))) .nil) reserve
+  change (Prog.cons (.declLocal .uint (.user "captured_index") none)
+    (.cons (storePrimitiveOperand .here ((index.wk (.drop .refl)).wk (.drop .refl))) .nil)).runR
+      (target.push (t := .mem R) (some old)) = _ at reserved
+  rw [reserved]
+  dsimp only [Prog.run]
+  have single := singleton_run
+    ((target.push (t := .mem R) (some old)).push (t := .val .uint) (PrimTy.dflt .uint))
+    (storePrimitiveOperand .here ((index.wk (.drop .refl)).wk (.drop .refl)))
+  change (Prog.cons (storePrimitiveOperand .here ((index.wk (.drop .refl)).wk (.drop .refl))) .nil).runR
+    ((target.push (t := .mem R) (some old)).push (t := .val .uint) (PrimTy.dflt .uint)) = _ at single
+  rw [single]
+  dsimp only [Stmt.run]
+  have stored := storePrimitive_fresh_run (index.wk (.drop (t := .mem R) .refl))
+    (target.push (t := .mem R) (some old)) (PrimTy.dflt .uint)
+  change (storePrimitiveOperand .here ((index.wk (.drop .refl)).wk (.drop .refl))).runR
+    ((target.push (t := .mem R) (some old)).push (t := .val .uint) (PrimTy.dflt .uint)) = _ at stored
+  rw [stored,index_after_capture]
+  cases run : index.run target with
+  | error err => rfl
+  | ok result =>
+    obtain ⟨out,value⟩ := result
+    cases value with
+    | prim k => rfl
+
+#print axioms index_after_capture
+#print axioms effectfulIndexCode_run
 /-- Source array capture composes all child results and exact reached failures; the earlier success-only law below remains a derived specialization, without a Source/native relation. -/
 theorem source_capture_all {E : Source.Env} {srcΓ : Source.RCtx}
     {location : Source.DataLoc} {element indexTy : Source.STy} {length : Option Nat}
