@@ -43,9 +43,7 @@ theorem shared : ∃ (canonical : Machine) (selected : Nat → Fin W), canonical
     MappedOutput actual 1 128 base initial {machine with stack := tail}
       result.st {canonical with stack := tail} selected := by
   obtain ⟨canonical,selected,_,empty,runs⟩ := WholeProgram.success_shared_mapped actual initial_input source_run
-  refine ⟨canonical,selected,empty,?_⟩
-  intro tail
-  simpa only [free,Nat.add_zero] using runs tail
+  exact ⟨canonical,selected,empty,fun tail => by simpa only [free,Nat.add_zero] using runs tail⟩
 
 theorem resources : ∃ (canonical : Machine) (selected : Nat → Fin W), canonical.stack = [] ∧ ∀ tail,
     run actual.code {machine with stack := tail} = .ok {canonical with stack := tail} 0 ∧
@@ -53,14 +51,12 @@ theorem resources : ∃ (canonical : Machine) (selected : Nat → Fin W), canoni
       result.st {canonical with stack := tail} selected ∧
     StructAllocatorRepr result.st.heap selected 128 (wmod 264) {canonical with stack := tail} := by
   obtain ⟨canonical,selected,empty,runs⟩ := shared
-  refine ⟨canonical,selected,empty,?_⟩
-  intro tail
+  refine ⟨canonical,selected,empty,fun tail => ?_⟩
   have observed := (CompilerCallScopeRecognition.memory_calls_mapped_iff actual branch
     base selected initial {machine with stack := tail} result.st {canonical with stack := tail}).mp (runs tail).2
   have growth := observed.2.2
   rw [allocation_cost] at growth
-  have allocated := growth (wmod 256) (by decide) (initial_repr.2.mem_eq rfl) (by decide +kernel)
-  exact ⟨(runs tail).1,(runs tail).2,allocated⟩
+  exact ⟨(runs tail).1,(runs tail).2,growth (wmod 256) (by decide) (initial_repr.2.mem_eq rfl) (by decide +kernel)⟩
 
 theorem heap_objects : result.st.H.length = 4 := by with_unfolding_all decide +kernel
 
