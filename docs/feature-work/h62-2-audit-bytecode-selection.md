@@ -3124,11 +3124,21 @@ Never flatten inspection fingerprints to feed a single-snapshot report join.
 shared declaration names or module scopes. Keep each slice's fingerprint,
 module roster (including empty entries), report pointers and unresolved records.
 Union counts do not establish a coherent kernel environment or proof/source
-acceptance. Retain unsupported attempts beside successful report pointers; an
-unsupported attempt is neither refutation nor additional domain credit. The
-replay of existing selection, composition and premise reports and its original
-receipts are indexed privately:
+acceptance. Retain unsupported attempts beside successful report pointers;
+unsupported is neither refutation nor additional domain credit.
+
+Before scheduling an apparently unreported target, reconcile all available
+policy reports and the existing manual target roster. Missing from one slice
+means no pointer in that slice, not that the target has never been treated.
+The current-code reconciliation retains 564 distinct reported proof targets,
+518 unsupported-only targets and 2,221 no-report records across 3,303 supplied
+records in two separate inspection slices. It also retains the 103-entry manual
+roster as non-proof metadata. These are pointer counts with **zero new witness
+or census credit**; 38 core and 37 Bridge modules remain uninspected. The old
+capture is preserved: recomputation differs only in the collector hash, rather
+than relabelling that capture as current-code validation. Exact consumed
+historical inputs, current recipe/output and all gaps are indexed privately:
 
 ```text
-evidence: 367dedb39a7abbff68043ae3cce925f9c8ea2772 evidence/solidity-parallel-20261103/executable-bytecode/selection-report-extension-badea2c2/INDEX.json
+evidence: 8a25f378a0c0cead2ab4f55ac2b9d69d935ad939 evidence/solidity-parallel-20261103/executable-bytecode/report-reconciliation-3b91707b/INDEX.json
 ```
