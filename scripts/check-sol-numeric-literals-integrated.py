@@ -117,6 +117,10 @@ def input_hashes(directory):
 
 
 def stage(evidence, output):
+    evidence_tree, output_tree = evidence.resolve(), output.resolve()
+    require(not output_tree.is_relative_to(evidence_tree) and
+            not evidence_tree.is_relative_to(output_tree),
+            "private input and output trees must not overlap")
     require(not output.exists() and not output.is_symlink() and
             not output.resolve().is_relative_to(ROOT), "new external output directory required")
     require(not evidence.resolve().is_relative_to(ROOT), "evidence must remain outside checkout")

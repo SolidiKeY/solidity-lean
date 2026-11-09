@@ -95,6 +95,39 @@ class IntegratedTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 gate.stage(root, gate.ROOT / 'not-an-output')
 
+    def test_overlapping_trees_refused_before_any_staging(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            evidence = base / 'input'
+            evidence.mkdir()
+            (evidence / 'record.json').write_text('{"source":"unchanged"}')
+            alias = base / 'alias'
+            alias.symlink_to(evidence, target_is_directory=True)
+            before = gate.input_hashes(evidence)
+            for output in (evidence / 'output', evidence, base, alias / 'output'):
+                with self.subTest(output=output), patch.object(gate, 'git') as git, patch.object(gate.shutil, 'copytree') as copy:
+                    with self.assertRaisesRegex(ValueError, 'must not overlap'):
+                        gate.stage(evidence, output)
+                    git.assert_not_called()
+                    copy.assert_not_called()
+                self.assertEqual(gate.input_hashes(evidence), before)
+                self.assertEqual(set(evidence.iterdir()), {evidence / 'record.json'})
+            self.assertFalse((evidence / 'output').exists())
+
+    def test_disjoint_private_trees_still_stage_exact_inputs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            evidence, output = base / 'input', base / 'output'
+            evidence.mkdir()
+            (evidence / 'record.json').write_text('{}')
+            before = gate.input_hashes(evidence)
+            with patch.object(gate, 'git', return_value=''):
+                snapshot, hashes, sources = gate.stage(evidence, output)
+            self.assertEqual(hashes, before)
+            self.assertEqual(sources, {})
+            self.assertEqual(gate.input_hashes(snapshot / 'tests/sol-numeric-literals/evidence'), before)
+            self.assertEqual(gate.input_hashes(evidence), before)
+
     def test_delegation_retains_final_checks_and_redirects_private_io(self):
         with tempfile.TemporaryDirectory() as tmp:
             base = Path(tmp)
