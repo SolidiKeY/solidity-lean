@@ -20,6 +20,7 @@ theorem selector_capacity_room : capacitySuffix.length+2≤1024 := by decide
 
 theorem selector_raw_match (suffix : Solidity.Backend.Scalar.Stack) :
     Solidity.Backend.Scalar.run (SelectorMatch.code matchSelector) (matchWord::suffix)=some ((1 : Solidity.Backend.Scalar.Word)::suffix) := by
+  unfold matchWord
   rw [SelectorMatch.raw matchSelector matchFrame match_full_prefix suffix]
   rfl
 
