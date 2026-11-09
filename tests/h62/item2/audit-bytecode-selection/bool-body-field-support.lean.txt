@@ -1,0 +1,72 @@
+/-! Guards splitting compiler/classifier/memory premises into incompatible
+witnesses or assuming the body's target result. Reuse the actual Boolean body
+compiler and certificate; controls distinguish successful binding, dirty-word
+rejection, short-head error order and preserved caller stack. No Source/native,
+payment, physical or gas adequacy is asserted. -/
+open Solidity Solidity.Evm Solidity.Backend.AbiEntry
+open Solidity.Backend.AbiEntry.Interface
+
+def bodyContract : Contract := {vars := []}
+def bodyLabel : Fin W := wmod 13
+def bodyNil : Prog bodyContract BoolBoundCtx BoolBoundCtx := .nil
+def bodyWhole := BoolBindingBody.selectedWhole 7 bodyLabel bodyNil (Frag.init BoolBoundCtx) rfl
+def bodyBack := BoolBindingBody.selectedBody 7 bodyNil (Frag.init BoolBoundCtx) rfl
+
+theorem bodyWholeFound : Compiler.compile 7 (Frag.init RouteCtx)
+    (BoolBindingBody.program bodyLabel bodyNil)=some bodyWhole :=
+  BoolBindingBody.whole_selected 7 bodyLabel bodyNil (Frag.init BoolBoundCtx) rfl
+
+theorem bodyBackFound : Compiler.compile 7 (Frag.init BoolBoundCtx) bodyNil=some bodyBack :=
+  BoolBindingBody.body_selected 7 bodyNil (Frag.init BoolBoundCtx) rfl
+
+def bodyMachine (word size : Fin W) : Machine :=
+  {Machine.init with mem := fun address => if address=7 then .val word
+    else if address=8 then .val size else .val (wmod 71),
+    stack := [.val (wmod 11),.val (wmod 99)]}
+
+theorem body_nil_outcome (word size : Fin W) :
+    run bodyWhole.code (bodyMachine word size)=
+      if size.val<36 then .revert else
+        if Solidity.AbiEntry.Kind.bool.valid word.val then
+          .ok (boolBoundMachine 7 bodyLabel word (bodyMachine word size)) 0 else .revert := by
+  rw [BoolBindingBody.executed 7 bodyLabel bodyNil (Frag.init BoolBoundCtx) rfl
+    bodyWhole bodyBack bodyWholeFound bodyBackFound (bodyMachine word size) word size rfl rfl]
+  rfl
+
+theorem bool_body_success :
+    run bodyWhole.code (bodyMachine (wmod 1) (wmod 36))=
+      .ok (boolBoundMachine 7 bodyLabel (wmod 1) (bodyMachine (wmod 1) (wmod 36))) 0 := by
+  rw [body_nil_outcome]
+  rfl
+
+theorem bool_body_success_binds_and_preserves :
+    (boolBoundMachine 7 bodyLabel (wmod 1) (bodyMachine (wmod 1) (wmod 36))).mem 9=.val (wmod 1) ∧
+    (boolBoundMachine 7 bodyLabel (wmod 1) (bodyMachine (wmod 1) (wmod 36))).stack=
+      [.val (wmod 11),.val (wmod 99)] := ⟨rfl,rfl⟩
+
+theorem bool_body_revert_all_refused :
+    run bodyWhole.code (bodyMachine (wmod 1) (wmod 36))≠.revert := by
+  rw [bool_body_success]
+  intro impossible
+  cases impossible
+
+theorem bool_body_dirty_refused :
+    run bodyWhole.code (bodyMachine (wmod 2) (wmod 36))=.revert := by
+  rw [body_nil_outcome]
+  rfl
+
+def boolBodyShortMachine : Machine :=
+  {Machine.init with mem := fun address => if address=8 then .val (wmod 35) else .slot (.root 0)}
+
+theorem bool_body_short_skips_word : run bodyWhole.code boolBodyShortMachine=.revert :=
+  BoolBindingBody.short_before_body 7 bodyLabel bodyNil (Frag.init BoolBoundCtx) rfl
+    boolBodyShortMachine (wmod 35) rfl (by decide)
+
+#print axioms bodyWholeFound
+#print axioms bodyBackFound
+#print axioms body_nil_outcome
+#print axioms bool_body_success
+#print axioms bool_body_success_binds_and_preserves
+#print axioms bool_body_revert_all_refused
+#print axioms bool_body_dirty_refused
+#print axioms bool_body_short_skips_word
