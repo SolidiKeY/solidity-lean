@@ -88,7 +88,9 @@ def hashBound : Nat := 2 ^ 128
 bound; `(Solidity.Hash.dedup xs).length`, computed without choice). -/
 def distinctCount : List Bytes → Nat
   | [] => 0
-  | x :: xs => if xs.elem x then distinctCount xs else distinctCount xs + 1
+  | x :: xs =>
+    letI : BEq UInt8 := ⟨fun a b => @decide (a = b) (UInt8.decEq a b)⟩
+    if xs.elem x then distinctCount xs else distinctCount xs + 1
 
 /-! ## Finite prefixes and their order -/
 
@@ -624,7 +626,7 @@ structure Artifact where
 
 /-- The creation bytes the table holds for the contract at position `k`. -/
 def Artifact.initcode (art : Artifact) (k : Nat) : Bytes :=
-  ((art.contracts[k]?).map CodeUnit.initcode).getD []
+  (((art.contracts.drop k).head?).map CodeUnit.initcode).getD []
 
 /-- No nonempty unit's creation bytes are a prefix of another's, so the
 creation bytes of a `CREATE` name the unit they come from (interfaces and
@@ -633,12 +635,24 @@ def Artifact.PrefixFree (art : Artifact) : Prop :=
   ∀ j k, j < art.contracts.length → k < art.contracts.length → j ≠ k →
     art.initcode j ≠ [] → ¬ art.initcode j <+: art.initcode k
 
+/-- Preserve the Lean 4.24 public matcher signature with an axiom-free eliminator. -/
+def createsOf.match_1.{u_1} (motive : Event → Sort u_1) (e : Event)
+    (h_1 : ∀ value c a, motive (.create value c a)) (h_2 : ∀ x, motive x) : motive e :=
+  Event.casesOn e
+    (fun sender value args outcome address => h_2 (.deploy sender value args outcome address))
+    (fun callee value input static => h_2 (.call callee value input static))
+    h_1
+    (fun outcome created => h_2 (.answer outcome created))
+    (fun sender target value timestamp input outcome => h_2 (.tx sender target value timestamp input outcome))
+    (fun target sender value input static => h_2 (.reenter target sender value input static))
+    (fun outcome => h_2 (.reentered outcome))
+    (fun target value => h_2 (.credit target value))
+
 /-- The creations of a history: the position of the created contract and the
 constructor arguments. -/
 def createsOf (h : List Event) : List (Nat × Bytes) :=
-  h.filterMap fun
-    | .create _ c a => some (c, a)
-    | _ => none
+  h.filterMap fun e => createsOf.match_1 (fun _ => Option (Nat × Bytes)) e
+    (fun _ c a => some (c, a)) (fun _ => none)
 
 /-! ## The six contracts -/
 
@@ -1100,7 +1114,7 @@ end Solidity.Roadmap
 
 /-- info: 'Solidity.Roadmap.Cert.comp' depends on axioms: [propext] -/
 #guard_msgs in #print axioms Solidity.Roadmap.Cert.comp
-/-- info: 'Solidity.Roadmap.PublicCorrectness.transfer' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Solidity.Roadmap.PublicCorrectness.transfer' does not depend on any axioms -/
 #guard_msgs in #print axioms Solidity.Roadmap.PublicCorrectness.transfer
 
 namespace Solidity.Roadmap
