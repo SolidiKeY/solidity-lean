@@ -20,7 +20,7 @@ import types
 import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
-APPROVED_MASTER = "34950767333d88b3273b98500ea43e23cdaea069"
+APPROVED_MASTER = "55f1dde51c8803a870a845a86f6e2f65036d112e"
 BRANCH = "codex/solidity-sol2-20261104/numeric-literals"
 CONTROL_FILES = {"scripts/check-sol-numeric-literals-integrated.py",
                  "scripts/test-sol-numeric-literals-integrated.py"}
