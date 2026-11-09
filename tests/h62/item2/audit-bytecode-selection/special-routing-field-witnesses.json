@@ -1,0 +1,10 @@
+{
+  "special_routes_selected_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.SpecialRoutesCertificate.selected",
+    "proof": "\u27e8SpecialRoutes.route,SpecialRoutes.certificate,payableContract,2,some specialReceive,some specialFallback,True.intro\u27e9"
+  },
+  "special_routes_executed_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.SpecialRoutesCertificate.executed",
+    "proof": "\u27e8SpecialRoutes.route,SpecialRoutes.certificate,payableContract,2,some specialReceive,some specialFallback,specialCompilation (some specialReceive) (some specialFallback),special_found (some specialReceive) (some specialFallback),payableMachine (wmod 0) (wmod 1),wmod 0,rfl,True.intro\u27e9"
+  }
+}
