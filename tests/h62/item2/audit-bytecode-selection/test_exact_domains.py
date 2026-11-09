@@ -59,6 +59,33 @@ class ExactDomainTests(unittest.TestCase):
     def data_row(self):
         row=self.closed_row();row['binders']=[{'name':'n','binder_info':'Lean.BinderInfo.default','type':'Nat','proof_binder':False,'head_constant':'Nat'}]
         return row
+    def test_declaration_defaults_keep_unranged_intake_separate(self):
+        row=self.data_row();row['declaration_range']=None
+        before=json.loads(json.dumps(row))
+        with self.assertRaisesRegex(ValueError,'source candidate lacks ranged original theorem'):
+            target.data_render(ROOT,[row],[row['name']])
+        program,pins=target.declaration_data_render(ROOT,[row],[row['name']])
+        self.assertEqual(row,before)
+        self.assertEqual(pins['namespace'],target.NAMESPACE+'.DeclarationDefaults')
+        self.assertEqual(pins['declaration_ranges_present'],0)
+        self.assertIsNone(next(iter(pins['targets'].values()))['declaration_range'])
+        self.assertFalse(pins['source_correspondence_established'])
+        self.assertFalse(pins['kernel_accepted'])
+        self.assertIn('defaultDomainProof',program)
+        self.assertIn('unsupported-default',program)
+
+    def test_declaration_defaults_refuse_wrong_kind_universe_and_proof_binders(self):
+        row=self.data_row();row['declaration_range']=None
+        for names in ([],['missing'],[row['name'],row['name']]):
+            with self.subTest(names=names),self.assertRaises(ValueError):
+                target.declaration_data_render(ROOT,[row],names)
+        for key,value in [('is_theorem',False),('level_params',['u']),('binders',[])]:
+            changed=dict(row);changed[key]=value
+            with self.subTest(key=key),self.assertRaises(ValueError):
+                target.declaration_data_render(ROOT,[changed],[row['name']])
+        row['binders'][0]['proof_binder']=True
+        with self.assertRaises(ValueError):target.declaration_data_render(ROOT,[row],[row['name']])
+
     def test_data_render_reuses_transform_and_keeps_full_dependent_witness(self):
         row=self.data_row();program,manifest=target.data_render(ROOT,[row],[row['name']])
         self.assertEqual(program.count(target.macro_fragment(self.macro)),1)

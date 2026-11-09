@@ -626,6 +626,12 @@ def data_render(repo, rows, source_candidate_names, expectations=None, *, decide
     names = set(source_candidate_names)
     selected = sorted((r for r in rows if r["name"] in names and r["binders"] and
                        not r["level_params"] and any(b["proof_binder"] for b in r["binders"]) == decide_premises),key=lambda r:r["name"])
+    return _default_declaration_program(repo, selected, expectations, decide_premises=decide_premises, sampled_inputs=sampled_inputs)
+
+
+def _default_declaration_program(repo, selected, expectations, *, decide_premises=False, sampled_inputs=False, declaration_scope=False):
+    """Shared checked-default program; caller establishes its own intake boundary."""
+    import kernel_metadata as metadata
     if not selected:
         raise ValueError("no proof-bearing source candidates" if decide_premises else "no data-only source candidates")
     if expectations is not None and set(expectations) != {r["name"] for r in selected}:
@@ -634,10 +640,16 @@ def data_render(repo, rows, source_candidate_names, expectations=None, *, decide
     frozen_map, producer_sources = _frozen_scope(repo,modules)
     namespace = NAMESPACE+".SampledDefaults" if sampled_inputs else (NAMESPACE+".DecidableDefaults" if decide_premises else DATA_NAMESPACE)
     local_namespace = "SampledDefaults" if sampled_inputs else ("DecidableDefaults" if decide_premises else "Defaults")
+    if declaration_scope:
+        local_namespace = "DeclarationDefaults"
+        namespace = NAMESPACE+"."+local_namespace
     fragment = macro_fragment((repo/MACRO_PATH).read_text())
     program = "import Lean\n" + "".join("import "+m+"\n" for m in modules)
     program += "/-! Guard default witness attempts from dropping proof premises or treating unsupported defaults as impossible. Original conclusions are not proved. -/\n"
-    program += fragment + "\nnamespace "+local_namespace+"\nopen Lean Meta Elab Term\n" + (sampled_checker() if sampled_inputs else (decidable_checker() if decide_premises else DATA_CHECKER))
+    checker = sampled_checker() if sampled_inputs else (decidable_checker() if decide_premises else DATA_CHECKER)
+    if declaration_scope:
+        checker = checker.replace(DATA_NAMESPACE+".", namespace+".")
+    program += fragment + "\nnamespace "+local_namespace+"\nopen Lean Meta Elab Term\n" + checker
     program += '/-- error: data hypothesis audit: missing or ambiguous kernel name -/\n#guard_msgs in\n#default_hypothesis_batch ["missing.kernel.name" => reject_missing against% "" expecting% "probe"]\n'
     program += '/-- error: data hypothesis audit: recorded type differs -/\n#guard_msgs in\n#default_hypothesis_batch ["'+namespace+'.positiveToy" => reject_type against% "wrong recorded type" expecting% "probe"]\n'
     targets = {}
@@ -667,6 +679,39 @@ def data_render(repo, rows, source_candidate_names, expectations=None, *, decide
         "producer_source_sha256":producer_sources,"generated_lean_sha256":sha(program.encode()),
         "expected_results":expectations,"kernel_accepted":False,"witness_ledger_linked":False,
         "boundary":"Default attempts only; unsupported is not uninhabited; no proof premises, original conclusions, Source or compiler coverage assumed"}
+
+
+def declaration_data_render(repo, rows, declaration_names, expectations=None):
+    """Guard regression: an unranged kernel declaration must not masquerade as a source candidate.
+
+    Reuse the same checked-default kernel policy for exact monomorphic data-only
+    theorem records. Missing ranges stay missing; this intake authenticates no
+    theorem source, generated origin, semantic ownership or census coverage.
+    The original ranged-source data_render boundary remains unchanged.
+    """
+    import kernel_metadata as metadata
+    metadata.validate_rows(rows)
+    if (not isinstance(declaration_names, (list, tuple)) or not declaration_names or
+            any(not isinstance(n, str) or not n for n in declaration_names) or
+            len(set(declaration_names)) != len(declaration_names)):
+        raise ValueError("invalid declaration candidate roster")
+    by_name = {r["name"]: r for r in rows}
+    if len(by_name) != len(rows):
+        raise ValueError("duplicate kernel identity")
+    selected = []
+    for name in sorted(declaration_names):
+        row = by_name.get(name)
+        if (row is None or not row["is_theorem"] or not row["proof_type"] or
+                row["level_params"] or not row["binders"] or
+                any(b["proof_binder"] for b in row["binders"])):
+            raise ValueError("declaration default requires a monomorphic data-only theorem")
+        selected.append(row)
+    program, manifest = _default_declaration_program(repo, selected, expectations, declaration_scope=True)
+    manifest.update(intake_kind="kernel declarations; not source candidates",
+                    source_correspondence_established=False,
+                    declaration_ranges_present=sum(r["declaration_range"] is not None for r in selected),
+                    boundary="Default declaration attempts only; unsupported is not uninhabited. Module input hashes do not authenticate theorem source, generated origin, ownership, original conclusions or compiler/runtime coverage.")
+    return program, manifest
 
 
 PROJECTION_DOMAIN_CHECKER = r'''
