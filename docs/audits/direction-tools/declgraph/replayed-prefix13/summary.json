@@ -3,6 +3,7 @@
   "boundaries": [
     "This combines only the selected additional cached captures; the19earlier dense files remain separate.",
     "Native structural-name hashes identify units; root/snapshot repetitions remain observation events, not unique successful theorem counts.",
+    "covered_check_commands counts commands with at least one observed root; missing-parent and parentless events can remain. It is not root completeness.",
     "Imported pointer witnesses and stage2 name/range correspondences stay separate; stage2 membership does not prove source creation origin.",
     "Unobserved declarations are never classified unused; macro-only, uncached, reflective, symbolic-name, CI and runtime roots remain incomplete.",
     "Provenance labels classify pinned source paths/markers; untraced and unresolved chain/agreement code is not certified handwritten.",
