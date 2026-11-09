@@ -1,0 +1,14 @@
+{
+  "signed_binding_selected_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.SignedBindingCertificate.selected",
+    "proof": "\u27e8SignedBinding.program,SignedBinding.certificate,signedContract,7,8,signedLabel,True.intro\u27e9"
+  },
+  "signed_binding_executed_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.SignedBindingCertificate.executed",
+    "proof": "\u27e8SignedBinding.program,SignedBinding.certificate,signedContract,7,8,signedLabel,signedCompilation,signed_found,signedMachine (wmod 127) (wmod 36),wmod 127,wmod 36,rfl,rfl,True.intro\u27e9"
+  },
+  "signed_binding_entry_rejection_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.SignedBindingCertificate.entry_rejection",
+    "proof": "\u27e8SignedBinding.program,SignedBinding.certificate,signedContract,7,8,signedLabel,signedCompilation,signed_found,signedEmptyInput,0,signedMachine (rawArgumentWord signedEmptyInput) (wmod 0),wmod 0,rfl,rfl,rfl,True.intro\u27e9"
+  }
+}
