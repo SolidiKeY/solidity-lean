@@ -58,6 +58,7 @@ theorem new_parameter : TEnv.get .here lowered.env =
 theorem protected_aliases : TEnv.get (.there .here) lowered.env =
     TEnv.get (.there (.there .here)) lowered.env := rfl
 
+set_option backward.isDefEq.respectTransparency false in
 theorem protected_object : MObj.elems ArrTy.dyn (lowered.heap.get
     (HRef.wk (List.prefix_append aliasTarget.H [boolR])
       ((State.init C).alloc oldObject).2)) = [170,187].map byteWord := by
@@ -77,6 +78,7 @@ theorem independent_ids : sourceBefore.2.heap.next ≠
 theorem wrong_order : MObj.elems ArrTy.dyn (lowered.heap.get
     (aliasTarget.alloc (object aliasTarget.H values room)).2) ≠ [false,true] := by
   rw [ordered_contents]
+  change ([true,false] : List Bool) ≠ [false,true]
   decide
 
 def dirtyData : Roadmap.Bytes := word 32 ++ word 3 ++ word 1 ++ word 0 ++ word 2
