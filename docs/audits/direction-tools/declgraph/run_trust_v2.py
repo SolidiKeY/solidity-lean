@@ -50,7 +50,7 @@ def main():
   API['assert_sources'](a.source_root);v1=(a.source_root/'TrustAudit.lean').read_bytes();v2=T['TARGET'].read_bytes();T['verify'](v1,v2)
   target=a.source_root/'docs/audits/direction-tools/declgraph/v2/TrustAuditV2.lean';assert target.read_bytes()==v2
   version=subprocess.check_output(['lean','--version'],text=True).strip();assert 'version 4.24.0,' in version and '797c613' in version
-  cmd=['lean','--tstack=131072','-j1','-M10000',str(target)];producers={n:SHA(HERE/n) for n in ('run_trust_v2.py','trust_audit_v2.py','warm_trust_v2.py','audit.py','owned_native.py')};inputs={};attempts=[]
+  cmd=['lean','--tstack=131072','-j1','-M10000',str(target)];producers={n:SHA(HERE/n) for n in ('run_trust_v2.py','trust_audit_v2.py','warm_trust_v2.py','audit.py','owned_native.py','lease_lifecycle.py')};inputs={};attempts=[]
   for path in a.attempt:
    path=path.resolve();d=json.loads(path.read_text());assert d['base']==API['BASE'] and d['timeout_seconds']==600 and d['module']==W['MODULE']
    assert d['source_sha256']==SHA(a.source_root/pathlib.Path(W['MODULE'].replace('.','/')).with_suffix('.lean'))
