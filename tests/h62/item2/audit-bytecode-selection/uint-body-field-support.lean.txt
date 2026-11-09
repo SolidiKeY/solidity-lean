@@ -7,7 +7,7 @@ open Solidity Solidity.Evm Solidity.Backend.AbiEntry
 open Solidity.Backend.AbiEntry.Interface
 
 def bodyContract : Contract := {vars := []}
-def bodyLabel : Fin W := wmod 256553
+def bodyLabel : Fin W := wmod 13
 def bodyNil : Prog bodyContract UIntBoundCtx UIntBoundCtx := .nil
 def bodyWhole := UIntBindingBody.selectedWhole 7 8 bodyLabel bodyNil (Frag.init UIntBoundCtx) rfl
 def bodyBack := UIntBindingBody.selectedBody 7 bodyNil (Frag.init UIntBoundCtx) rfl
@@ -23,7 +23,7 @@ def bodyMachine (word size : Fin W) : Machine :=
   {Machine.init with
     mem := fun address => if address=7 then .val word
       else if address=8 then .val size else .val (wmod 71)
-    stack := [.val (wmod 256551),.val (wmod 99)]}
+    stack := [.val (wmod 11),.val (wmod 99)]}
 
 theorem body_nil_outcome (word size : Fin W) :
     run bodyWhole.code (bodyMachine word size)=
@@ -35,18 +35,18 @@ theorem body_nil_outcome (word size : Fin W) :
   rfl
 
 theorem uint_body_success :
-    run bodyWhole.code (bodyMachine (wmod 25655) (wmod 36))=
-      .ok (uintBoundMachine 7 bodyLabel (wmod 25655) (bodyMachine (wmod 25655) (wmod 36))) 0 := by
+    run bodyWhole.code (bodyMachine (wmod 255) (wmod 36))=
+      .ok (uintBoundMachine 7 bodyLabel (wmod 255) (bodyMachine (wmod 255) (wmod 36))) 0 := by
   rw [body_nil_outcome]
   rfl
 
 theorem uint_body_success_binds_and_preserves :
-    (uintBoundMachine 7 bodyLabel (wmod 25655) (bodyMachine (wmod 25655) (wmod 36))).mem 9=.val (wmod 25655) ∧
-    (uintBoundMachine 7 bodyLabel (wmod 25655) (bodyMachine (wmod 25655) (wmod 36))).stack=
-      [.val (wmod 256551),.val (wmod 99)] := ⟨rfl,rfl⟩
+    (uintBoundMachine 7 bodyLabel (wmod 255) (bodyMachine (wmod 255) (wmod 36))).mem 9=.val (wmod 255) ∧
+    (uintBoundMachine 7 bodyLabel (wmod 255) (bodyMachine (wmod 255) (wmod 36))).stack=
+      [.val (wmod 11),.val (wmod 99)] := ⟨rfl,rfl⟩
 
 theorem uint_body_revert_all_refused :
-    run bodyWhole.code (bodyMachine (wmod 25655) (wmod 36))≠.revert := by
+    run bodyWhole.code (bodyMachine (wmod 255) (wmod 36))≠.revert := by
   rw [uint_body_success]
   intro impossible
   cases impossible
