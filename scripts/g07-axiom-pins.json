@@ -10232,6 +10232,52 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/FailurePaths/StorageEncoderTimeout.lean:Solidity.Backend.FailurePaths.StorageEncoderTimeout.incomplete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/StorageEncoderTimeout.lean:Solidity.Backend.FailurePaths.StorageEncoderTimeout.local_abi_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/StorageEncoderTimeoutControls.lean:Solidity.Backend.FailurePaths.StorageEncoderTimeout.Controls.actual_incomplete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/StorageEncoderTimeoutControls.lean:Solidity.Backend.FailurePaths.StorageEncoderTimeout.Controls.actual_local_completes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/StorageEncoderTimeoutControls.lean:Solidity.Backend.FailurePaths.StorageEncoderTimeout.Controls.actual_local_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/StorageEncoderTimeoutControls.lean:Solidity.Backend.FailurePaths.StorageEncoderTimeout.Controls.declared_error": [],
+ "Solidity/Backend/FailurePaths/StorageEncoderTimeoutControls.lean:Solidity.Backend.FailurePaths.StorageEncoderTimeout.Controls.error_signature_memory": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/StorageEncoderTimeoutControls.lean:Solidity.Backend.FailurePaths.StorageEncoderTimeout.Controls.error_signature_storage_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/StorageEncoderTimeoutControls.lean:Solidity.Backend.FailurePaths.StorageEncoderTimeout.Controls.exact_completion": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/StorageEncoderTimeoutControls.lean:Solidity.Backend.FailurePaths.StorageEncoderTimeout.Controls.timeout_not_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/InternalFlow/RuntimeFrameP1Bridge.lean:Solidity.Backend.InternalFlow.RuntimeFrame.P1Bridge.p1_frame_bridge": [
   "Classical.choice",
   "Quot.sound",
