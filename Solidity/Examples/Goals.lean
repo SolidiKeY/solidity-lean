@@ -1,7 +1,8 @@
 import Solidity.Goals
 
 /-! The whole roadmap, unpinned: each goal module pins its own lines in
-`Solidity/Examples/Goals/<Name>.lean`, so lanes never share a pin. -/
+`Solidity/Examples/Goals/<Name>.lean`, one `#guard_msgs` block per goal, so a lane
+flipping its goal edits only its own block. -/
 
 #roadmap
 

@@ -74,7 +74,9 @@ def statuses : MetaM (Array (Entry × Status)) := do
 def report (rs : Array (Entry × Status)) (only : Name → Bool := fun _ => true) : String :=
   let proved (n : Name) := rs.any fun (e, s) => e.decl == n && s == .proved
   let line := fun ((e, s) : Entry × Status) =>
-    let blocked := if s == .proved then [] else e.deps.toList.filter (! proved ·)
+    -- Even a proved goal lists its unproved dependencies: its theorem alone does not
+    -- discharge them.
+    let blocked := e.deps.toList.filter (! proved ·)
     let tail := (if blocked.isEmpty then "" else s!" blocked by {blocked}") ++
       (e.plan.map (s!" plan {·}") |>.getD "")
     s!"{s.label} {e.decl} ← {e.proof}{tail}"

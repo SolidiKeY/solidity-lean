@@ -23,7 +23,14 @@ run_cmd liftTermElabM do
   unless (← getConstInfo ``projectFinished).value! == conj do
     throwError "projectFinished is not the conjunction of its six components"
   let st ← Solidity.Goal.status e
-  unless (← getEnv).contains `Solidity.Finish.project_finished || st == .open do
-    throwError "finish line reported {st.label} without its theorem"
+  if (← getEnv).contains `Solidity.Finish.project_finished then
+    -- Once the theorem exists, the finish line counts only when it and every component
+    -- are proved (no `sorry`, no axiom).
+    unless st == .proved do throwError "finish line theorem is {st.label}"
+    for c in components do
+      let some ce := es.find? (·.decl == c) | throwError "component {c} lost"
+      let cs ← Solidity.Goal.status ce
+      unless cs == .proved do throwError "finish line claimed with component {c} {cs.label}"
+  else unless st == .open do throwError "finish line reported {st.label} without its theorem"
 
 end Solidity.Goals
