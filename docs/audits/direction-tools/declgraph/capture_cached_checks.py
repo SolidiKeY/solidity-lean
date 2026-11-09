@@ -19,7 +19,7 @@ def timed_capture(cmd,output,*,lock_path=LOCK,timeout=660):
  # until this process owns the writer lease. Cancellation leaves no status.
  with open(lock_path,'a') as lease:
   fcntl.flock(lease,fcntl.LOCK_EX)
-  proc=subprocess.Popen(cmd,stdout=output,stderr=subprocess.STDOUT,start_new_session=True)
+  proc=subprocess.Popen(cmd,stdout=output,stderr=subprocess.STDOUT,start_new_session=True,pass_fds=(lease.fileno(),))
   try:
    try:return proc.wait(timeout=timeout)
    except subprocess.TimeoutExpired:
@@ -29,14 +29,16 @@ def timed_capture(cmd,output,*,lock_path=LOCK,timeout=660):
     except subprocess.TimeoutExpired:os.killpg(proc.pid,signal.SIGKILL);proc.wait()
     return 124
   finally:
-   # Only descendants of this owned session can remain in this group.
-   try:os.killpg(proc.pid,signal.SIGTERM)
+   # Drain the owned group even if its immediate wrapper exited on TERM.
+   try:os.killpg(proc.pid,signal.SIGKILL)
    except ProcessLookupError:pass
+   proc.wait()
 
 def validate_status(status,fixed,allowed_runner):
  assert all(status[k]==fixed[k] for k in ('path','source_sha256')),'Queue/input drift'
  prior=dict(status['producers']);runner=prior.pop('capture_cached_checks.py');assert runner in allowed_runner
  current=dict(fixed['producers']);current_runner=current.pop('capture_cached_checks.py');assert prior==current
+ assert runner==current_runner or status['exit_code']!=124,'Legacy timeout may be an unstarted lock wait; explicit recovery required'
  # Only an explicitly supplied exact ancestor blob may have the old wrapper.
  assert status['command']==fixed['command'] or (runner!=current_runner and status['command']==['flock',LOCK]+fixed['command']),'Queue command drift'
 

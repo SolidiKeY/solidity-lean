@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Queue receipt field tampering and atomic status replacement fixtures."""
-import copy,fcntl,json,pathlib,runpy,sys,tempfile,threading,time
+import copy,fcntl,json,os,signal,subprocess,pathlib,runpy,sys,tempfile,threading,time
 M=runpy.run_path(str(pathlib.Path(__file__).with_name('capture_cached_checks.py')));H=M['HERE']
 def main():
  with tempfile.TemporaryDirectory() as d:
@@ -18,11 +18,11 @@ def main():
    except AssertionError:pass
    else:raise AssertionError('Tampered receipt accepted: '+field)
   state=root/'status.json';M['atomic_json'](state,{'first':1});M['atomic_json'](state,{'second':2});assert json.loads(state.read_text())=={'second':2};assert not list(root.glob('status.json.tmp-*'))
-  fixed=dict(path='Fixture.lean',source_sha256='source',command=['python3','capture.py'],producers={'capture_cached_checks.py':'current','native':'same'})
+  fixed=dict(path='Fixture.lean',source_sha256='source',exit_code=0,command=['python3','capture.py'],producers={'capture_cached_checks.py':'current','native':'same'})
   status=copy.deepcopy(fixed);M['validate_status'](status,fixed,{'current','old'})
   status['command']=['flock',M['LOCK']]+fixed['command'];status['producers']['capture_cached_checks.py']='old'
   M['validate_status'](status,fixed,{'current','old'})
-  for runners,changed in [({'current'},status),({'current','old'},dict(status,command=['wrong'])),({'current','old'},dict(status,producers=fixed['producers']))]:
+  for runners,changed in [({'current'},status),({'current','old'},dict(status,command=['wrong'])),({'current','old'},dict(status,producers=fixed['producers'])),({'current','old'},dict(status,exit_code=124))]:
    try:M['validate_status'](changed,fixed,runners)
    except AssertionError:pass
    else:raise AssertionError('Unverified legacy command accepted')
@@ -40,5 +40,39 @@ def main():
    assert not worker.is_alive() and result==[0] and marker.read_text()=='started'
   with (root/'timeout.log').open('w') as output:
    assert M['timed_capture']([sys.executable,'-c','import time;time.sleep(10)'],output,lock_path=lock,timeout=0.1)==124
- print('CACHED_QUEUE_FIXTURES_PASS native_recipe module version graph_receipt source atomic_replace lock_wait_excluded child_timeout legacy_command')
+  descendant=root/'descendant.pid'
+  resistant="import os,signal,time;from pathlib import Path;signal.signal(signal.SIGTERM,signal.SIG_IGN);Path("+repr(str(descendant))+").write_text(str(os.getpid()));time.sleep(10)"
+  wrapper="import subprocess,sys,time;subprocess.Popen("+repr([sys.executable,'-c',resistant])+");time.sleep(10)"
+  with (root/'descendant.log').open('w') as output:
+   assert M['timed_capture']([sys.executable,'-c',wrapper],output,lock_path=lock,timeout=0.3)==124
+  assert descendant.exists(),'Descendant fixture failed to start'
+  stat=pathlib.Path('/proc')/descendant.read_text()/'stat';deadline=time.monotonic()+2
+  while stat.exists() and stat.read_text().split()[2]!='Z':
+   assert time.monotonic()<deadline,'TERM-resistant owned descendant survived timeout';time.sleep(0.01)
+  # SIGTERM of the queue parent must not release a still-running child's lease.
+  marker.unlink();release=root/'release';pidfile=root/'child.pid'
+  child="import os,time;from pathlib import Path;Path("+repr(str(pidfile))+").write_text(str(os.getpid()));Path("+repr(str(marker))+").write_text('started');exec(\"while not Path("+repr(str(release))+").exists(): time.sleep(0.01)\")"
+  parent="import runpy,sys;M=runpy.run_path("+repr(str(H/'capture_cached_checks.py'))+");M['timed_capture']("+repr([sys.executable,'-c',child])+",sys.stdout,lock_path="+repr(str(lock))+",timeout=10)"
+  with (root/'orphan.log').open('w') as output:
+   owner=subprocess.Popen([sys.executable,'-c',parent],stdout=output,stderr=output)
+   try:
+    deadline=time.monotonic()+5
+    while not marker.exists() and time.monotonic()<deadline:time.sleep(0.01)
+    assert marker.exists(),'Child failed to start'
+    owner.terminate();owner.wait(timeout=5)
+    with lock.open('a') as lease:
+     try:fcntl.flock(lease,fcntl.LOCK_EX|fcntl.LOCK_NB)
+     except BlockingIOError:pass
+     else:raise AssertionError('Queue termination released active child lease')
+     release.write_text('finish')
+     while True:
+      try:fcntl.flock(lease,fcntl.LOCK_EX|fcntl.LOCK_NB);break
+      except BlockingIOError:
+       assert time.monotonic()<deadline,'Child failed to release lease';time.sleep(0.01)
+   finally:
+    if owner.poll() is None:owner.kill();owner.wait()
+    if pidfile.exists():
+     try:os.killpg(int(pidfile.read_text()),signal.SIGKILL)
+     except ProcessLookupError:pass
+ print('CACHED_QUEUE_FIXTURES_PASS native_recipe module version graph_receipt source atomic_replace lock_wait_excluded child_timeout legacy_command orphan_lease descendant_cleanup')
 if __name__=='__main__':main()
