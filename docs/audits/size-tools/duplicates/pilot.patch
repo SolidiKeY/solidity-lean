@@ -1,0 +1,1493 @@
+diff --git a/Solidity/TestSuite/Derived1.lean b/Solidity/TestSuite/Derived1.lean
+index fd6381efc..08c294334 100644
+--- a/Solidity/TestSuite/Derived1.lean
++++ b/Solidity/TestSuite/Derived1.lean
+@@ -14,119 +14,41 @@ open scoped Scoped
+-theorem Solkey.TestSuite.additionStorageWrite.proved : ⊢ Solkey.TestSuite.additionStorageWrite.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageRootReadWrite.proved : ⊢ Solkey.TestSuite.storageRootReadWrite.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldWriteRead.proved : ⊢ Solkey.TestSuite.storageFieldWriteRead.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldDeepAddAssign.proved : ⊢ Solkey.TestSuite.storageFieldDeepAddAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldGlobalAge.proved : ⊢ Solkey.TestSuite.storageFieldGlobalAge.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageAliasWrite.proved : ⊢ Solkey.TestSuite.storageAliasWrite.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexRootMapping.proved : ⊢ Solkey.TestSuite.storageIndexRootMapping.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexAddAssign.proved : ⊢ Solkey.TestSuite.storageIndexAddAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexMappingAddAssign.proved : ⊢ Solkey.TestSuite.storageIndexMappingAddAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexArrayAddAssignOutOfBoundsReverts.proved : ⊢ Solkey.TestSuite.storageIndexArrayAddAssignOutOfBoundsReverts.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexArrayReadOutOfBoundsReverts.proved : ⊢ Solkey.TestSuite.storageIndexArrayReadOutOfBoundsReverts.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexReadComplexReceiverBindLocalRoot.proved : ⊢ Solkey.TestSuite.storageIndexReadComplexReceiverBindLocalRoot.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexWriteRootRhsComplexReceiver.proved : ⊢ Solkey.TestSuite.storageIndexWriteRootRhsComplexReceiver.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.requireTrueLiteral.proved : ⊢ Solkey.TestSuite.requireTrueLiteral.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.requireFalseLiteral.proved : ⊢ Solkey.TestSuite.requireFalseLiteral.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageBoolRootReadWrite.proved : ⊢ Solkey.TestSuite.storageBoolRootReadWrite.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageBoolRootCopy.proved : ⊢ Solkey.TestSuite.storageBoolRootCopy.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageBoolFieldRead.proved : ⊢ Solkey.TestSuite.storageBoolFieldRead.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageBoolMappingRead.proved : ⊢ Solkey.TestSuite.storageBoolMappingRead.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageBoolArrayRead.proved : ⊢ Solkey.TestSuite.storageBoolArrayRead.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageBoolFieldStoreRoot.proved : ⊢ Solkey.TestSuite.storageBoolFieldStoreRoot.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.additionBothStorage.proved : ⊢ Solkey.TestSuite.additionBothStorage.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.additionSimple.proved : ⊢ Solkey.TestSuite.additionSimple.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.additionStorageRead.proved : ⊢ Solkey.TestSuite.additionStorageRead.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.divisionSimple.proved : ⊢ Solkey.TestSuite.divisionSimple.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.greaterEqualSimple.proved : ⊢ Solkey.TestSuite.greaterEqualSimple.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.greaterThanSimple.proved : ⊢ Solkey.TestSuite.greaterThanSimple.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.lessEqualSimple.proved : ⊢ Solkey.TestSuite.lessEqualSimple.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.lessThanSimple.proved : ⊢ Solkey.TestSuite.lessThanSimple.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.logicalAndSimple.proved : ⊢ Solkey.TestSuite.logicalAndSimple.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.logicalAndShortCircuitRhs.proved : ⊢ Solkey.TestSuite.logicalAndShortCircuitRhs.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.logicalNotSimple.proved : ⊢ Solkey.TestSuite.logicalNotSimple.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.logicalOrSimple.proved : ⊢ Solkey.TestSuite.logicalOrSimple.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.logicalOrShortCircuitRhs.proved : ⊢ Solkey.TestSuite.logicalOrShortCircuitRhs.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.ternaryCaptureCond.proved : ⊢ Solkey.TestSuite.ternaryCaptureCond.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.ternaryToIf.proved : ⊢ Solkey.TestSuite.ternaryToIf.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.ifUnfold.proved : ⊢ Solkey.TestSuite.ifUnfold.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.ifElseUnfold.proved : ⊢ Solkey.TestSuite.ifElseUnfold.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.ifSplit.proved : ⊢ Solkey.TestSuite.ifSplit.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.ifElseSplit.proved : ⊢ Solkey.TestSuite.ifElseSplit.problem := by
+-  sol_prove
++solkey_prove_batch
++  Solkey.TestSuite.additionStorageWrite
++  Solkey.TestSuite.storageRootReadWrite
++  Solkey.TestSuite.storageFieldWriteRead
++  Solkey.TestSuite.storageFieldDeepAddAssign
++  Solkey.TestSuite.storageFieldGlobalAge
++  Solkey.TestSuite.storageAliasWrite
++  Solkey.TestSuite.storageIndexRootMapping
++  Solkey.TestSuite.storageIndexAddAssign
++  Solkey.TestSuite.storageIndexMappingAddAssign
++  Solkey.TestSuite.storageIndexArrayAddAssignOutOfBoundsReverts
++  Solkey.TestSuite.storageIndexArrayReadOutOfBoundsReverts
++  Solkey.TestSuite.storageIndexReadComplexReceiverBindLocalRoot
++  Solkey.TestSuite.storageIndexWriteRootRhsComplexReceiver
++  Solkey.TestSuite.requireTrueLiteral
++  Solkey.TestSuite.requireFalseLiteral
++  Solkey.TestSuite.storageBoolRootReadWrite
++  Solkey.TestSuite.storageBoolRootCopy
++  Solkey.TestSuite.storageBoolFieldRead
++  Solkey.TestSuite.storageBoolMappingRead
++  Solkey.TestSuite.storageBoolArrayRead
++  Solkey.TestSuite.storageBoolFieldStoreRoot
++  Solkey.TestSuite.additionBothStorage
++  Solkey.TestSuite.additionSimple
++  Solkey.TestSuite.additionStorageRead
++  Solkey.TestSuite.divisionSimple
++  Solkey.TestSuite.greaterEqualSimple
++  Solkey.TestSuite.greaterThanSimple
++  Solkey.TestSuite.lessEqualSimple
++  Solkey.TestSuite.lessThanSimple
++  Solkey.TestSuite.logicalAndSimple
++  Solkey.TestSuite.logicalAndShortCircuitRhs
++  Solkey.TestSuite.logicalNotSimple
++  Solkey.TestSuite.logicalOrSimple
++  Solkey.TestSuite.logicalOrShortCircuitRhs
++  Solkey.TestSuite.ternaryCaptureCond
++  Solkey.TestSuite.ternaryToIf
++  Solkey.TestSuite.ifUnfold
++  Solkey.TestSuite.ifElseUnfold
++  Solkey.TestSuite.ifSplit
++  Solkey.TestSuite.ifElseSplit
+diff --git a/Solidity/TestSuite/Derived10.lean b/Solidity/TestSuite/Derived10.lean
+index 32e642f21..7ce258f81 100644
+--- a/Solidity/TestSuite/Derived10.lean
++++ b/Solidity/TestSuite/Derived10.lean
+@@ -16,119 +16,41 @@ open scoped Scoped
+-theorem Solkey.TestSuite.testMemoryDeleteAlias.proved : ⊢ Solkey.TestSuite.testMemoryDeleteAlias.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testMemoryDeleteIdentityFieldFreshensSlot.proved : ⊢ Solkey.TestSuite.testMemoryDeleteIdentityFieldFreshensSlot.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testMemoryDeletePrimitiveField.proved : ⊢ Solkey.TestSuite.testMemoryDeletePrimitiveField.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testMemoryEvaluationOrder.proved : ⊢ Solkey.TestSuite.testMemoryEvaluationOrder.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testMemoryFieldShallowCopy.proved : ⊢ Solkey.TestSuite.testMemoryFieldShallowCopy.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testMemoryIndexWriteImpureIndexPrimitiveRhs.proved : ⊢ Solkey.TestSuite.testMemoryIndexWriteImpureIndexPrimitiveRhs.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testMemoryIndexWriteImpureIndexRefRhs.proved : ⊢ Solkey.TestSuite.testMemoryIndexWriteImpureIndexRefRhs.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testMemoryRootAlias.proved : ⊢ Solkey.TestSuite.testMemoryRootAlias.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testMemoryRootDeleteRebindsOnlyLocal.proved : ⊢ Solkey.TestSuite.testMemoryRootDeleteRebindsOnlyLocal.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testMemoryTokenArrayAuxiliaryCases.proved : ⊢ Solkey.TestSuite.testMemoryTokenArrayAuxiliaryCases.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testMemoryUintArrayAuxiliaryCases.proved : ⊢ Solkey.TestSuite.testMemoryUintArrayAuxiliaryCases.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testMemoryUintArrayPostdecrement.proved : ⊢ Solkey.TestSuite.testMemoryUintArrayPostdecrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testMemoryUintArrayPostincrement.proved : ⊢ Solkey.TestSuite.testMemoryUintArrayPostincrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testMemoryUintArrayPredecrement.proved : ⊢ Solkey.TestSuite.testMemoryUintArrayPredecrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testMemoryFieldWriteImpureReceiver.proved : ⊢ Solkey.TestSuite.testMemoryFieldWriteImpureReceiver.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testMemoryStructFixedMemberLength.proved : ⊢ Solkey.TestSuite.testMemoryStructFixedMemberLength.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testMemoryFixedArrayLength.proved : ⊢ Solkey.TestSuite.testMemoryFixedArrayLength.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testMemoryNestedFixedArrayLength.proved : ⊢ Solkey.TestSuite.testMemoryNestedFixedArrayLength.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testNewArrayOfFixedElementLength.proved : ⊢ Solkey.TestSuite.testNewArrayOfFixedElementLength.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testMemoryDynamicArrayDefaultLength.proved : ⊢ Solkey.TestSuite.testMemoryDynamicArrayDefaultLength.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryDelete.proved : ⊢ Solkey.TestSuite.memoryDelete.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryFieldWriteMemRefImpureReceiver.proved : ⊢ Solkey.TestSuite.memoryFieldWriteMemRefImpureReceiver.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryIndexWriteMemRefImpureReceiver.proved : ⊢ Solkey.TestSuite.memoryIndexWriteMemRefImpureReceiver.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.indexWriteBothImpureMemoryValue.proved : ⊢ Solkey.TestSuite.indexWriteBothImpureMemoryValue.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.indexWriteBothImpureMemRef.proved : ⊢ Solkey.TestSuite.indexWriteBothImpureMemRef.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryFieldAsMappingKey.proved : ⊢ Solkey.TestSuite.memoryFieldAsMappingKey.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.indexWriteValueRhsCapture.proved : ⊢ Solkey.TestSuite.indexWriteValueRhsCapture.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryIndexWriteMemRefRhsCapture.proved : ⊢ Solkey.TestSuite.memoryIndexWriteMemRefRhsCapture.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryIndexDeleteNonSimpleIndexCapture.proved : ⊢ Solkey.TestSuite.memoryIndexDeleteNonSimpleIndexCapture.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryFieldSubAssignUnfold.proved : ⊢ Solkey.TestSuite.memoryFieldSubAssignUnfold.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryFieldMulAssignUnfold.proved : ⊢ Solkey.TestSuite.memoryFieldMulAssignUnfold.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryFieldDivAssignUnfold.proved : ⊢ Solkey.TestSuite.memoryFieldDivAssignUnfold.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryFieldModAssignUnfold.proved : ⊢ Solkey.TestSuite.memoryFieldModAssignUnfold.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryFieldPostincrementUnfold.proved : ⊢ Solkey.TestSuite.memoryFieldPostincrementUnfold.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryFieldPredecrementUnfold.proved : ⊢ Solkey.TestSuite.memoryFieldPredecrementUnfold.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryFieldPostdecrementUnfold.proved : ⊢ Solkey.TestSuite.memoryFieldPostdecrementUnfold.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryFieldDeleteUnfold.proved : ⊢ Solkey.TestSuite.memoryFieldDeleteUnfold.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryFieldReadUnfoldResult.proved : ⊢ Solkey.TestSuite.memoryFieldReadUnfoldResult.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryIndexReadUnfoldResult.proved : ⊢ Solkey.TestSuite.memoryIndexReadUnfoldResult.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryIndexArraySubAssignUnfold.proved : ⊢ Solkey.TestSuite.memoryIndexArraySubAssignUnfold.problem := by
+-  sol_prove
++solkey_prove_batch
++  Solkey.TestSuite.testMemoryDeleteAlias
++  Solkey.TestSuite.testMemoryDeleteIdentityFieldFreshensSlot
++  Solkey.TestSuite.testMemoryDeletePrimitiveField
++  Solkey.TestSuite.testMemoryEvaluationOrder
++  Solkey.TestSuite.testMemoryFieldShallowCopy
++  Solkey.TestSuite.testMemoryIndexWriteImpureIndexPrimitiveRhs
++  Solkey.TestSuite.testMemoryIndexWriteImpureIndexRefRhs
++  Solkey.TestSuite.testMemoryRootAlias
++  Solkey.TestSuite.testMemoryRootDeleteRebindsOnlyLocal
++  Solkey.TestSuite.testMemoryTokenArrayAuxiliaryCases
++  Solkey.TestSuite.testMemoryUintArrayAuxiliaryCases
++  Solkey.TestSuite.testMemoryUintArrayPostdecrement
++  Solkey.TestSuite.testMemoryUintArrayPostincrement
++  Solkey.TestSuite.testMemoryUintArrayPredecrement
++  Solkey.TestSuite.testMemoryFieldWriteImpureReceiver
++  Solkey.TestSuite.testMemoryStructFixedMemberLength
++  Solkey.TestSuite.testMemoryFixedArrayLength
++  Solkey.TestSuite.testMemoryNestedFixedArrayLength
++  Solkey.TestSuite.testNewArrayOfFixedElementLength
++  Solkey.TestSuite.testMemoryDynamicArrayDefaultLength
++  Solkey.TestSuite.memoryDelete
++  Solkey.TestSuite.memoryFieldWriteMemRefImpureReceiver
++  Solkey.TestSuite.memoryIndexWriteMemRefImpureReceiver
++  Solkey.TestSuite.indexWriteBothImpureMemoryValue
++  Solkey.TestSuite.indexWriteBothImpureMemRef
++  Solkey.TestSuite.memoryFieldAsMappingKey
++  Solkey.TestSuite.indexWriteValueRhsCapture
++  Solkey.TestSuite.memoryIndexWriteMemRefRhsCapture
++  Solkey.TestSuite.memoryIndexDeleteNonSimpleIndexCapture
++  Solkey.TestSuite.memoryFieldSubAssignUnfold
++  Solkey.TestSuite.memoryFieldMulAssignUnfold
++  Solkey.TestSuite.memoryFieldDivAssignUnfold
++  Solkey.TestSuite.memoryFieldModAssignUnfold
++  Solkey.TestSuite.memoryFieldPostincrementUnfold
++  Solkey.TestSuite.memoryFieldPredecrementUnfold
++  Solkey.TestSuite.memoryFieldPostdecrementUnfold
++  Solkey.TestSuite.memoryFieldDeleteUnfold
++  Solkey.TestSuite.memoryFieldReadUnfoldResult
++  Solkey.TestSuite.memoryIndexReadUnfoldResult
++  Solkey.TestSuite.memoryIndexArraySubAssignUnfold
+diff --git a/Solidity/TestSuite/Derived2.lean b/Solidity/TestSuite/Derived2.lean
+index d57b6ad7e..100d862ba 100644
+--- a/Solidity/TestSuite/Derived2.lean
++++ b/Solidity/TestSuite/Derived2.lean
+@@ -14,119 +14,41 @@ open scoped Scoped
+-theorem Solkey.TestSuite.ifTrue.proved : ⊢ Solkey.TestSuite.ifTrue.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.ifFalse.proved : ⊢ Solkey.TestSuite.ifFalse.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.ifElseTrue.proved : ⊢ Solkey.TestSuite.ifElseTrue.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.ifElseFalse.proved : ⊢ Solkey.TestSuite.ifElseFalse.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.ifElseNegated.proved : ⊢ Solkey.TestSuite.ifElseNegated.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.moduloSimple.proved : ⊢ Solkey.TestSuite.moduloSimple.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.multiplicationSimple.proved : ⊢ Solkey.TestSuite.multiplicationSimple.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.notEqualSimple.proved : ⊢ Solkey.TestSuite.notEqualSimple.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.powerSimple.proved : ⊢ Solkey.TestSuite.powerSimple.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.requireGuardBox.proved : ⊢ Solkey.TestSuite.requireGuardBox.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.requireHoldsDiamond.proved : ⊢ Solkey.TestSuite.requireHoldsDiamond.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageAliasRebindAlias.proved : ⊢ Solkey.TestSuite.storageAliasRebindAlias.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageDeepFieldPostincrement.proved : ⊢ Solkey.TestSuite.storageDeepFieldPostincrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageDeepFieldPreincrement.proved : ⊢ Solkey.TestSuite.storageDeepFieldPreincrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldAddAssign.proved : ⊢ Solkey.TestSuite.storageFieldAddAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldCopyValueField.proved : ⊢ Solkey.TestSuite.storageFieldCopyValueField.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldDeepDivAssign.proved : ⊢ Solkey.TestSuite.storageFieldDeepDivAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldDeepModAssign.proved : ⊢ Solkey.TestSuite.storageFieldDeepModAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldDeepMulAssign.proved : ⊢ Solkey.TestSuite.storageFieldDeepMulAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldDeepSubAssign.proved : ⊢ Solkey.TestSuite.storageFieldDeepSubAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldDeepWriteRead.proved : ⊢ Solkey.TestSuite.storageFieldDeepWriteRead.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldDelete.proved : ⊢ Solkey.TestSuite.storageFieldDelete.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldDivAssign.proved : ⊢ Solkey.TestSuite.storageFieldDivAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldModAssign.proved : ⊢ Solkey.TestSuite.storageFieldModAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldMulAssign.proved : ⊢ Solkey.TestSuite.storageFieldMulAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldPostdecrementAssign.proved : ⊢ Solkey.TestSuite.storageFieldPostdecrementAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldPostdecrement.proved : ⊢ Solkey.TestSuite.storageFieldPostdecrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldPostincrementAssign.proved : ⊢ Solkey.TestSuite.storageFieldPostincrementAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldPostincrement.proved : ⊢ Solkey.TestSuite.storageFieldPostincrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldPredecrementAssign.proved : ⊢ Solkey.TestSuite.storageFieldPredecrementAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldPredecrement.proved : ⊢ Solkey.TestSuite.storageFieldPredecrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldPreincrementAssign.proved : ⊢ Solkey.TestSuite.storageFieldPreincrementAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldPreincrement.proved : ⊢ Solkey.TestSuite.storageFieldPreincrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldReadBindLocal.proved : ⊢ Solkey.TestSuite.storageFieldReadBindLocal.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldReadStoreRoot.proved : ⊢ Solkey.TestSuite.storageFieldReadStoreRoot.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldSubAssign.proved : ⊢ Solkey.TestSuite.storageFieldSubAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldWriteRhsCapture.proved : ⊢ Solkey.TestSuite.storageFieldWriteRhsCapture.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexCopyValue.proved : ⊢ Solkey.TestSuite.storageIndexCopyValue.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexDeleteMappingBool.proved : ⊢ Solkey.TestSuite.storageIndexDeleteMappingBool.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexDeleteMappingStruct.proved : ⊢ Solkey.TestSuite.storageIndexDeleteMappingStruct.problem := by
+-  sol_prove
++solkey_prove_batch
++  Solkey.TestSuite.ifTrue
++  Solkey.TestSuite.ifFalse
++  Solkey.TestSuite.ifElseTrue
++  Solkey.TestSuite.ifElseFalse
++  Solkey.TestSuite.ifElseNegated
++  Solkey.TestSuite.moduloSimple
++  Solkey.TestSuite.multiplicationSimple
++  Solkey.TestSuite.notEqualSimple
++  Solkey.TestSuite.powerSimple
++  Solkey.TestSuite.requireGuardBox
++  Solkey.TestSuite.requireHoldsDiamond
++  Solkey.TestSuite.storageAliasRebindAlias
++  Solkey.TestSuite.storageDeepFieldPostincrement
++  Solkey.TestSuite.storageDeepFieldPreincrement
++  Solkey.TestSuite.storageFieldAddAssign
++  Solkey.TestSuite.storageFieldCopyValueField
++  Solkey.TestSuite.storageFieldDeepDivAssign
++  Solkey.TestSuite.storageFieldDeepModAssign
++  Solkey.TestSuite.storageFieldDeepMulAssign
++  Solkey.TestSuite.storageFieldDeepSubAssign
++  Solkey.TestSuite.storageFieldDeepWriteRead
++  Solkey.TestSuite.storageFieldDelete
++  Solkey.TestSuite.storageFieldDivAssign
++  Solkey.TestSuite.storageFieldModAssign
++  Solkey.TestSuite.storageFieldMulAssign
++  Solkey.TestSuite.storageFieldPostdecrementAssign
++  Solkey.TestSuite.storageFieldPostdecrement
++  Solkey.TestSuite.storageFieldPostincrementAssign
++  Solkey.TestSuite.storageFieldPostincrement
++  Solkey.TestSuite.storageFieldPredecrementAssign
++  Solkey.TestSuite.storageFieldPredecrement
++  Solkey.TestSuite.storageFieldPreincrementAssign
++  Solkey.TestSuite.storageFieldPreincrement
++  Solkey.TestSuite.storageFieldReadBindLocal
++  Solkey.TestSuite.storageFieldReadStoreRoot
++  Solkey.TestSuite.storageFieldSubAssign
++  Solkey.TestSuite.storageFieldWriteRhsCapture
++  Solkey.TestSuite.storageIndexCopyValue
++  Solkey.TestSuite.storageIndexDeleteMappingBool
++  Solkey.TestSuite.storageIndexDeleteMappingStruct
+diff --git a/Solidity/TestSuite/Derived3.lean b/Solidity/TestSuite/Derived3.lean
+index 22c2ce2b1..690acef21 100644
+--- a/Solidity/TestSuite/Derived3.lean
++++ b/Solidity/TestSuite/Derived3.lean
+@@ -14,119 +14,41 @@ open scoped Scoped
+-theorem Solkey.TestSuite.storageIndexDeleteNseIndex.proved : ⊢ Solkey.TestSuite.storageIndexDeleteNseIndex.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexDelete.proved : ⊢ Solkey.TestSuite.storageIndexDelete.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexDivAssign.proved : ⊢ Solkey.TestSuite.storageIndexDivAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexModAssign.proved : ⊢ Solkey.TestSuite.storageIndexModAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexMulAssign.proved : ⊢ Solkey.TestSuite.storageIndexMulAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexMultipleWrites.proved : ⊢ Solkey.TestSuite.storageIndexMultipleWrites.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexPostdecrementAssign.proved : ⊢ Solkey.TestSuite.storageIndexPostdecrementAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexPostdecrement.proved : ⊢ Solkey.TestSuite.storageIndexPostdecrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexPostincrementAssign.proved : ⊢ Solkey.TestSuite.storageIndexPostincrementAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexPostincrement.proved : ⊢ Solkey.TestSuite.storageIndexPostincrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexPredecrementAssign.proved : ⊢ Solkey.TestSuite.storageIndexPredecrementAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexPredecrement.proved : ⊢ Solkey.TestSuite.storageIndexPredecrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexPreincrementAssign.proved : ⊢ Solkey.TestSuite.storageIndexPreincrementAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexPreincrement.proved : ⊢ Solkey.TestSuite.storageIndexPreincrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexReadMappingStoreRoot.proved : ⊢ Solkey.TestSuite.storageIndexReadMappingStoreRoot.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexReadNseIndex.proved : ⊢ Solkey.TestSuite.storageIndexReadNseIndex.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexSubAssign.proved : ⊢ Solkey.TestSuite.storageIndexSubAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexWriteNseChain.proved : ⊢ Solkey.TestSuite.storageIndexWriteNseChain.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageLocalDeclSkip.proved : ⊢ Solkey.TestSuite.storageLocalDeclSkip.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageMatrixNseIndex.proved : ⊢ Solkey.TestSuite.storageMatrixNseIndex.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageMatrixWriteRead.proved : ⊢ Solkey.TestSuite.storageMatrixWriteRead.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageRootAddAssign.proved : ⊢ Solkey.TestSuite.storageRootAddAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageRootCopySource.proved : ⊢ Solkey.TestSuite.storageRootCopySource.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageRootDeleteStruct.proved : ⊢ Solkey.TestSuite.storageRootDeleteStruct.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageRootDelete.proved : ⊢ Solkey.TestSuite.storageRootDelete.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageRootDisjoint.proved : ⊢ Solkey.TestSuite.storageRootDisjoint.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageRootDivAssign.proved : ⊢ Solkey.TestSuite.storageRootDivAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageRootModAssign.proved : ⊢ Solkey.TestSuite.storageRootModAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageRootMulAssign.proved : ⊢ Solkey.TestSuite.storageRootMulAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageRootMultipleWrites.proved : ⊢ Solkey.TestSuite.storageRootMultipleWrites.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageRootPostdecrementAssign.proved : ⊢ Solkey.TestSuite.storageRootPostdecrementAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageRootPostincrementAssign.proved : ⊢ Solkey.TestSuite.storageRootPostincrementAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageRootPostincrement.proved : ⊢ Solkey.TestSuite.storageRootPostincrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageRootPredecrement.proved : ⊢ Solkey.TestSuite.storageRootPredecrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageRootPreincrementAssign.proved : ⊢ Solkey.TestSuite.storageRootPreincrementAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageRootPreincrement.proved : ⊢ Solkey.TestSuite.storageRootPreincrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageRootSubAssign.proved : ⊢ Solkey.TestSuite.storageRootSubAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageRootWriteRhsCapture.proved : ⊢ Solkey.TestSuite.storageRootWriteRhsCapture.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.subtractionSimple.proved : ⊢ Solkey.TestSuite.subtractionSimple.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.subtractionStorageRead.proved : ⊢ Solkey.TestSuite.subtractionStorageRead.problem := by
+-  sol_prove
++solkey_prove_batch
++  Solkey.TestSuite.storageIndexDeleteNseIndex
++  Solkey.TestSuite.storageIndexDelete
++  Solkey.TestSuite.storageIndexDivAssign
++  Solkey.TestSuite.storageIndexModAssign
++  Solkey.TestSuite.storageIndexMulAssign
++  Solkey.TestSuite.storageIndexMultipleWrites
++  Solkey.TestSuite.storageIndexPostdecrementAssign
++  Solkey.TestSuite.storageIndexPostdecrement
++  Solkey.TestSuite.storageIndexPostincrementAssign
++  Solkey.TestSuite.storageIndexPostincrement
++  Solkey.TestSuite.storageIndexPredecrementAssign
++  Solkey.TestSuite.storageIndexPredecrement
++  Solkey.TestSuite.storageIndexPreincrementAssign
++  Solkey.TestSuite.storageIndexPreincrement
++  Solkey.TestSuite.storageIndexReadMappingStoreRoot
++  Solkey.TestSuite.storageIndexReadNseIndex
++  Solkey.TestSuite.storageIndexSubAssign
++  Solkey.TestSuite.storageIndexWriteNseChain
++  Solkey.TestSuite.storageLocalDeclSkip
++  Solkey.TestSuite.storageMatrixNseIndex
++  Solkey.TestSuite.storageMatrixWriteRead
++  Solkey.TestSuite.storageRootAddAssign
++  Solkey.TestSuite.storageRootCopySource
++  Solkey.TestSuite.storageRootDeleteStruct
++  Solkey.TestSuite.storageRootDelete
++  Solkey.TestSuite.storageRootDisjoint
++  Solkey.TestSuite.storageRootDivAssign
++  Solkey.TestSuite.storageRootModAssign
++  Solkey.TestSuite.storageRootMulAssign
++  Solkey.TestSuite.storageRootMultipleWrites
++  Solkey.TestSuite.storageRootPostdecrementAssign
++  Solkey.TestSuite.storageRootPostincrementAssign
++  Solkey.TestSuite.storageRootPostincrement
++  Solkey.TestSuite.storageRootPredecrement
++  Solkey.TestSuite.storageRootPreincrementAssign
++  Solkey.TestSuite.storageRootPreincrement
++  Solkey.TestSuite.storageRootSubAssign
++  Solkey.TestSuite.storageRootWriteRhsCapture
++  Solkey.TestSuite.subtractionSimple
++  Solkey.TestSuite.subtractionStorageRead
+diff --git a/Solidity/TestSuite/Derived4.lean b/Solidity/TestSuite/Derived4.lean
+index 544b444ff..371d0ee5e 100644
+--- a/Solidity/TestSuite/Derived4.lean
++++ b/Solidity/TestSuite/Derived4.lean
+@@ -14,119 +14,41 @@ open scoped Scoped
+-theorem Solkey.TestSuite.unaryMinusSimple.proved : ⊢ Solkey.TestSuite.unaryMinusSimple.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testNestedStorageWrites.proved : ⊢ Solkey.TestSuite.testNestedStorageWrites.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testStorageAliases.proved : ⊢ Solkey.TestSuite.testStorageAliases.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testStorageArrayReadWrite.proved : ⊢ Solkey.TestSuite.testStorageArrayReadWrite.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testStorageDeletePaperCase.proved : ⊢ Solkey.TestSuite.testStorageDeletePaperCase.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testStorageMapReadWriteAndDelete.proved : ⊢ Solkey.TestSuite.testStorageMapReadWriteAndDelete.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testStorageIndexDeleteOutOfBoundsReverts.proved : ⊢ Solkey.TestSuite.testStorageIndexDeleteOutOfBoundsReverts.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testFixedArrayDeleteKeepsLength.proved : ⊢ Solkey.TestSuite.testFixedArrayDeleteKeepsLength.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testFixedArrayLength.proved : ⊢ Solkey.TestSuite.testFixedArrayLength.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testFixedArrayIndexInBounds.proved : ⊢ Solkey.TestSuite.testFixedArrayIndexInBounds.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testFixedStructArrayLength.proved : ⊢ Solkey.TestSuite.testFixedStructArrayLength.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testStructFixedMemberLength.proved : ⊢ Solkey.TestSuite.testStructFixedMemberLength.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testFixedElementOfDynamicArrayLength.proved : ⊢ Solkey.TestSuite.testFixedElementOfDynamicArrayLength.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testMappingOfFixedArrayLength.proved : ⊢ Solkey.TestSuite.testMappingOfFixedArrayLength.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testFixedStructArrayDeleteResetsElements.proved : ⊢ Solkey.TestSuite.testFixedStructArrayDeleteResetsElements.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testStructWithFixedArrayDeleteKeepsLength.proved : ⊢ Solkey.TestSuite.testStructWithFixedArrayDeleteKeepsLength.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testFixedMappingArrayDeleteKeepsEntries.proved : ⊢ Solkey.TestSuite.testFixedMappingArrayDeleteKeepsEntries.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testStorageStructDeleteSkipsMappingMember.proved : ⊢ Solkey.TestSuite.testStorageStructDeleteSkipsMappingMember.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testStorageWriteAndRead.proved : ⊢ Solkey.TestSuite.testStorageWriteAndRead.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldDecomposition.proved : ⊢ Solkey.TestSuite.storageFieldDecomposition.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldDeepValue.proved : ⊢ Solkey.TestSuite.storageFieldDeepValue.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexDecomposition.proved : ⊢ Solkey.TestSuite.storageIndexDecomposition.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexRootArray.proved : ⊢ Solkey.TestSuite.storageIndexRootArray.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldDisjointFields.proved : ⊢ Solkey.TestSuite.storageFieldDisjointFields.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldDisjointRoots.proved : ⊢ Solkey.TestSuite.storageFieldDisjointRoots.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageAliasRebindOriginal.proved : ⊢ Solkey.TestSuite.storageAliasRebindOriginal.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testSimpleAssert.proved : ⊢ Solkey.TestSuite.testSimpleAssert.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.localArithmeticInRange.proved : ⊢ Solkey.TestSuite.localArithmeticInRange.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.signedUnaryMinusInRange.proved : ⊢ Solkey.TestSuite.signedUnaryMinusInRange.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.additionLeftImpureRightReadFirst.proved : ⊢ Solkey.TestSuite.additionLeftImpureRightReadFirst.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.additionRightImpure.proved : ⊢ Solkey.TestSuite.additionRightImpure.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.additionBothOperandsImpure.proved : ⊢ Solkey.TestSuite.additionBothOperandsImpure.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.subtractionLeftImpureRightReadFirst.proved : ⊢ Solkey.TestSuite.subtractionLeftImpureRightReadFirst.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.lessThanLeftImpureRightReadFirst.proved : ⊢ Solkey.TestSuite.lessThanLeftImpureRightReadFirst.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testCopyPrimitiveRoot.proved : ⊢ Solkey.TestSuite.testCopyPrimitiveRoot.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.nestedMappingWriteRead.proved : ⊢ Solkey.TestSuite.nestedMappingWriteRead.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.nestedMappingRowAlias.proved : ⊢ Solkey.TestSuite.nestedMappingRowAlias.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.mappingOfLedgerMember.proved : ⊢ Solkey.TestSuite.mappingOfLedgerMember.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.mappingPointerTernary.proved : ⊢ Solkey.TestSuite.mappingPointerTernary.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.mappingReadAsKey.proved : ⊢ Solkey.TestSuite.mappingReadAsKey.problem := by
+-  sol_prove
++solkey_prove_batch
++  Solkey.TestSuite.unaryMinusSimple
++  Solkey.TestSuite.testNestedStorageWrites
++  Solkey.TestSuite.testStorageAliases
++  Solkey.TestSuite.testStorageArrayReadWrite
++  Solkey.TestSuite.testStorageDeletePaperCase
++  Solkey.TestSuite.testStorageMapReadWriteAndDelete
++  Solkey.TestSuite.testStorageIndexDeleteOutOfBoundsReverts
++  Solkey.TestSuite.testFixedArrayDeleteKeepsLength
++  Solkey.TestSuite.testFixedArrayLength
++  Solkey.TestSuite.testFixedArrayIndexInBounds
++  Solkey.TestSuite.testFixedStructArrayLength
++  Solkey.TestSuite.testStructFixedMemberLength
++  Solkey.TestSuite.testFixedElementOfDynamicArrayLength
++  Solkey.TestSuite.testMappingOfFixedArrayLength
++  Solkey.TestSuite.testFixedStructArrayDeleteResetsElements
++  Solkey.TestSuite.testStructWithFixedArrayDeleteKeepsLength
++  Solkey.TestSuite.testFixedMappingArrayDeleteKeepsEntries
++  Solkey.TestSuite.testStorageStructDeleteSkipsMappingMember
++  Solkey.TestSuite.testStorageWriteAndRead
++  Solkey.TestSuite.storageFieldDecomposition
++  Solkey.TestSuite.storageFieldDeepValue
++  Solkey.TestSuite.storageIndexDecomposition
++  Solkey.TestSuite.storageIndexRootArray
++  Solkey.TestSuite.storageFieldDisjointFields
++  Solkey.TestSuite.storageFieldDisjointRoots
++  Solkey.TestSuite.storageAliasRebindOriginal
++  Solkey.TestSuite.testSimpleAssert
++  Solkey.TestSuite.localArithmeticInRange
++  Solkey.TestSuite.signedUnaryMinusInRange
++  Solkey.TestSuite.additionLeftImpureRightReadFirst
++  Solkey.TestSuite.additionRightImpure
++  Solkey.TestSuite.additionBothOperandsImpure
++  Solkey.TestSuite.subtractionLeftImpureRightReadFirst
++  Solkey.TestSuite.lessThanLeftImpureRightReadFirst
++  Solkey.TestSuite.testCopyPrimitiveRoot
++  Solkey.TestSuite.nestedMappingWriteRead
++  Solkey.TestSuite.nestedMappingRowAlias
++  Solkey.TestSuite.mappingOfLedgerMember
++  Solkey.TestSuite.mappingPointerTernary
++  Solkey.TestSuite.mappingReadAsKey
+diff --git a/Solidity/TestSuite/Derived5.lean b/Solidity/TestSuite/Derived5.lean
+index 224f249a8..9f7ab6f2d 100644
+--- a/Solidity/TestSuite/Derived5.lean
++++ b/Solidity/TestSuite/Derived5.lean
+@@ -14,119 +14,41 @@ open scoped Scoped
+-theorem Solkey.TestSuite.boolKeyMapping.proved : ⊢ Solkey.TestSuite.boolKeyMapping.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.boolIsTrueOrFalse.proved : ⊢ Solkey.TestSuite.boolIsTrueOrFalse.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.boolKeyMappingSymbolicKey.proved : ⊢ Solkey.TestSuite.boolKeyMappingSymbolicKey.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.numberLiteralForms.proved : ⊢ Solkey.TestSuite.numberLiteralForms.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.localAddAssign.proved : ⊢ Solkey.TestSuite.localAddAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.localMulAssign.proved : ⊢ Solkey.TestSuite.localMulAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.localDivAssign.proved : ⊢ Solkey.TestSuite.localDivAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.localModAssign.proved : ⊢ Solkey.TestSuite.localModAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.localPostincrement.proved : ⊢ Solkey.TestSuite.localPostincrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.localPreincrementAssign.proved : ⊢ Solkey.TestSuite.localPreincrementAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.localPostdecrement.proved : ⊢ Solkey.TestSuite.localPostdecrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.localPredecrement.proved : ⊢ Solkey.TestSuite.localPredecrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.localDeclPostdecrement.proved : ⊢ Solkey.TestSuite.localDeclPostdecrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.localDeclPredecrement.proved : ⊢ Solkey.TestSuite.localDeclPredecrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.subAssignValueRhsCapture.proved : ⊢ Solkey.TestSuite.subAssignValueRhsCapture.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.mulAssignValueRhsCapture.proved : ⊢ Solkey.TestSuite.mulAssignValueRhsCapture.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.divAssignValueRhsCapture.proved : ⊢ Solkey.TestSuite.divAssignValueRhsCapture.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.modAssignValueRhsCapture.proved : ⊢ Solkey.TestSuite.modAssignValueRhsCapture.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.boolInequalityCaptureLhs.proved : ⊢ Solkey.TestSuite.boolInequalityCaptureLhs.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.boolInequalityCaptureRhs.proved : ⊢ Solkey.TestSuite.boolInequalityCaptureRhs.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.greaterThanCaptureRhs.proved : ⊢ Solkey.TestSuite.greaterThanCaptureRhs.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.greaterEqualCaptureLhs.proved : ⊢ Solkey.TestSuite.greaterEqualCaptureLhs.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.greaterEqualCaptureRhs.proved : ⊢ Solkey.TestSuite.greaterEqualCaptureRhs.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.lessEqualCaptureLhs.proved : ⊢ Solkey.TestSuite.lessEqualCaptureLhs.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.lessEqualCaptureRhs.proved : ⊢ Solkey.TestSuite.lessEqualCaptureRhs.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.logicalNotCapture.proved : ⊢ Solkey.TestSuite.logicalNotCapture.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.unaryMinusCapture.proved : ⊢ Solkey.TestSuite.unaryMinusCapture.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.multiplicationUnfoldLeft.proved : ⊢ Solkey.TestSuite.multiplicationUnfoldLeft.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.multiplicationUnfoldRight.proved : ⊢ Solkey.TestSuite.multiplicationUnfoldRight.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.divisionUnfoldLeft.proved : ⊢ Solkey.TestSuite.divisionUnfoldLeft.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.divisionUnfoldRight.proved : ⊢ Solkey.TestSuite.divisionUnfoldRight.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.moduloUnfoldLeft.proved : ⊢ Solkey.TestSuite.moduloUnfoldLeft.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.moduloUnfoldRight.proved : ⊢ Solkey.TestSuite.moduloUnfoldRight.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.signedDivisionTruncates.proved : ⊢ Solkey.TestSuite.signedDivisionTruncates.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.signedModuloTakesDividendSign.proved : ⊢ Solkey.TestSuite.signedModuloTakesDividendSign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageSignedDivModAssign.proved : ⊢ Solkey.TestSuite.storageSignedDivModAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.powerUnfoldLeft.proved : ⊢ Solkey.TestSuite.powerUnfoldLeft.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.powerUnfoldRight.proved : ⊢ Solkey.TestSuite.powerUnfoldRight.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.subtractionUnfoldRight.proved : ⊢ Solkey.TestSuite.subtractionUnfoldRight.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.parenthesizedRightOperand.proved : ⊢ Solkey.TestSuite.parenthesizedRightOperand.problem := by
+-  sol_prove
++solkey_prove_batch
++  Solkey.TestSuite.boolKeyMapping
++  Solkey.TestSuite.boolIsTrueOrFalse
++  Solkey.TestSuite.boolKeyMappingSymbolicKey
++  Solkey.TestSuite.numberLiteralForms
++  Solkey.TestSuite.localAddAssign
++  Solkey.TestSuite.localMulAssign
++  Solkey.TestSuite.localDivAssign
++  Solkey.TestSuite.localModAssign
++  Solkey.TestSuite.localPostincrement
++  Solkey.TestSuite.localPreincrementAssign
++  Solkey.TestSuite.localPostdecrement
++  Solkey.TestSuite.localPredecrement
++  Solkey.TestSuite.localDeclPostdecrement
++  Solkey.TestSuite.localDeclPredecrement
++  Solkey.TestSuite.subAssignValueRhsCapture
++  Solkey.TestSuite.mulAssignValueRhsCapture
++  Solkey.TestSuite.divAssignValueRhsCapture
++  Solkey.TestSuite.modAssignValueRhsCapture
++  Solkey.TestSuite.boolInequalityCaptureLhs
++  Solkey.TestSuite.boolInequalityCaptureRhs
++  Solkey.TestSuite.greaterThanCaptureRhs
++  Solkey.TestSuite.greaterEqualCaptureLhs
++  Solkey.TestSuite.greaterEqualCaptureRhs
++  Solkey.TestSuite.lessEqualCaptureLhs
++  Solkey.TestSuite.lessEqualCaptureRhs
++  Solkey.TestSuite.logicalNotCapture
++  Solkey.TestSuite.unaryMinusCapture
++  Solkey.TestSuite.multiplicationUnfoldLeft
++  Solkey.TestSuite.multiplicationUnfoldRight
++  Solkey.TestSuite.divisionUnfoldLeft
++  Solkey.TestSuite.divisionUnfoldRight
++  Solkey.TestSuite.moduloUnfoldLeft
++  Solkey.TestSuite.moduloUnfoldRight
++  Solkey.TestSuite.signedDivisionTruncates
++  Solkey.TestSuite.signedModuloTakesDividendSign
++  Solkey.TestSuite.storageSignedDivModAssign
++  Solkey.TestSuite.powerUnfoldLeft
++  Solkey.TestSuite.powerUnfoldRight
++  Solkey.TestSuite.subtractionUnfoldRight
++  Solkey.TestSuite.parenthesizedRightOperand
+diff --git a/Solidity/TestSuite/Derived6.lean b/Solidity/TestSuite/Derived6.lean
+index 134ccaeb4..a6d5549dc 100644
+--- a/Solidity/TestSuite/Derived6.lean
++++ b/Solidity/TestSuite/Derived6.lean
+@@ -14,110 +14,38 @@ open scoped Scoped
+-theorem Solkey.TestSuite.parenthesizedLeftOperand.proved : ⊢ Solkey.TestSuite.parenthesizedLeftOperand.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.parenthesizedCondition.proved : ⊢ Solkey.TestSuite.parenthesizedCondition.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldDeleteUnfold.proved : ⊢ Solkey.TestSuite.storageFieldDeleteUnfold.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldPredecrementUnfold.proved : ⊢ Solkey.TestSuite.storageFieldPredecrementUnfold.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldPostdecrementUnfold.proved : ⊢ Solkey.TestSuite.storageFieldPostdecrementUnfold.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexAddAssignUnfold.proved : ⊢ Solkey.TestSuite.storageIndexAddAssignUnfold.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexSubAssignUnfold.proved : ⊢ Solkey.TestSuite.storageIndexSubAssignUnfold.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexMulAssignUnfold.proved : ⊢ Solkey.TestSuite.storageIndexMulAssignUnfold.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexDivAssignUnfold.proved : ⊢ Solkey.TestSuite.storageIndexDivAssignUnfold.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexModAssignUnfold.proved : ⊢ Solkey.TestSuite.storageIndexModAssignUnfold.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexPreincrementUnfold.proved : ⊢ Solkey.TestSuite.storageIndexPreincrementUnfold.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexPostincrementUnfold.proved : ⊢ Solkey.TestSuite.storageIndexPostincrementUnfold.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexPredecrementUnfold.proved : ⊢ Solkey.TestSuite.storageIndexPredecrementUnfold.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexPostdecrementUnfold.proved : ⊢ Solkey.TestSuite.storageIndexPostdecrementUnfold.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexMappingSubAssign.proved : ⊢ Solkey.TestSuite.storageIndexMappingSubAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexMappingMulAssign.proved : ⊢ Solkey.TestSuite.storageIndexMappingMulAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexMappingDivAssign.proved : ⊢ Solkey.TestSuite.storageIndexMappingDivAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexMappingModAssign.proved : ⊢ Solkey.TestSuite.storageIndexMappingModAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexMappingPreincrement.proved : ⊢ Solkey.TestSuite.storageIndexMappingPreincrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexMappingPostincrement.proved : ⊢ Solkey.TestSuite.storageIndexMappingPostincrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexMappingPredecrement.proved : ⊢ Solkey.TestSuite.storageIndexMappingPredecrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexMappingPostdecrement.proved : ⊢ Solkey.TestSuite.storageIndexMappingPostdecrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexMappingPreincrementAssignment.proved : ⊢ Solkey.TestSuite.storageIndexMappingPreincrementAssignment.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexMappingPostincrementAssignment.proved : ⊢ Solkey.TestSuite.storageIndexMappingPostincrementAssignment.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexMappingPredecrementAssignment.proved : ⊢ Solkey.TestSuite.storageIndexMappingPredecrementAssignment.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexMappingPostdecrementAssignment.proved : ⊢ Solkey.TestSuite.storageIndexMappingPostdecrementAssignment.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexReadArrayStoreRoot.proved : ⊢ Solkey.TestSuite.storageIndexReadArrayStoreRoot.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storagePopUnfold.proved : ⊢ Solkey.TestSuite.storagePopUnfold.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageRootPostdecrement.proved : ⊢ Solkey.TestSuite.storageRootPostdecrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageRootPredecrementAssign.proved : ⊢ Solkey.TestSuite.storageRootPredecrementAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.ternaryToIfStorage.proved : ⊢ Solkey.TestSuite.ternaryToIfStorage.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.transferToOwner.proved : ⊢ Solkey.TestSuite.transferToOwner.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.transferUnfoldReceiver.proved : ⊢ Solkey.TestSuite.transferUnfoldReceiver.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.transferUnfoldArgument.proved : ⊢ Solkey.TestSuite.transferUnfoldArgument.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.tryCallCatchKeepsState.proved : ⊢ Solkey.TestSuite.tryCallCatchKeepsState.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.tryCallBindsReturnAndPanicCode.proved : ⊢ Solkey.TestSuite.tryCallBindsReturnAndPanicCode.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.tryCallUnmatchedFailureReverts.proved : ⊢ Solkey.TestSuite.tryCallUnmatchedFailureReverts.problem := by
+-  sol_prove
++solkey_prove_batch
++  Solkey.TestSuite.parenthesizedLeftOperand
++  Solkey.TestSuite.parenthesizedCondition
++  Solkey.TestSuite.storageFieldDeleteUnfold
++  Solkey.TestSuite.storageFieldPredecrementUnfold
++  Solkey.TestSuite.storageFieldPostdecrementUnfold
++  Solkey.TestSuite.storageIndexAddAssignUnfold
++  Solkey.TestSuite.storageIndexSubAssignUnfold
++  Solkey.TestSuite.storageIndexMulAssignUnfold
++  Solkey.TestSuite.storageIndexDivAssignUnfold
++  Solkey.TestSuite.storageIndexModAssignUnfold
++  Solkey.TestSuite.storageIndexPreincrementUnfold
++  Solkey.TestSuite.storageIndexPostincrementUnfold
++  Solkey.TestSuite.storageIndexPredecrementUnfold
++  Solkey.TestSuite.storageIndexPostdecrementUnfold
++  Solkey.TestSuite.storageIndexMappingSubAssign
++  Solkey.TestSuite.storageIndexMappingMulAssign
++  Solkey.TestSuite.storageIndexMappingDivAssign
++  Solkey.TestSuite.storageIndexMappingModAssign
++  Solkey.TestSuite.storageIndexMappingPreincrement
++  Solkey.TestSuite.storageIndexMappingPostincrement
++  Solkey.TestSuite.storageIndexMappingPredecrement
++  Solkey.TestSuite.storageIndexMappingPostdecrement
++  Solkey.TestSuite.storageIndexMappingPreincrementAssignment
++  Solkey.TestSuite.storageIndexMappingPostincrementAssignment
++  Solkey.TestSuite.storageIndexMappingPredecrementAssignment
++  Solkey.TestSuite.storageIndexMappingPostdecrementAssignment
++  Solkey.TestSuite.storageIndexReadArrayStoreRoot
++  Solkey.TestSuite.storagePopUnfold
++  Solkey.TestSuite.storageRootPostdecrement
++  Solkey.TestSuite.storageRootPredecrementAssign
++  Solkey.TestSuite.ternaryToIfStorage
++  Solkey.TestSuite.transferToOwner
++  Solkey.TestSuite.transferUnfoldReceiver
++  Solkey.TestSuite.transferUnfoldArgument
++  Solkey.TestSuite.tryCallCatchKeepsState
++  Solkey.TestSuite.tryCallBindsReturnAndPanicCode
++  Solkey.TestSuite.tryCallUnmatchedFailureReverts
+diff --git a/Solidity/TestSuite/Derived7.lean b/Solidity/TestSuite/Derived7.lean
+index 08ecb2d8e..3bbaf0f34 100644
+--- a/Solidity/TestSuite/Derived7.lean
++++ b/Solidity/TestSuite/Derived7.lean
+@@ -16,122 +16,42 @@ open scoped Scoped
+-theorem Solkey.TestSuite.storageIndexWriteComplexReceiverCopySource.proved : ⊢ Solkey.TestSuite.storageIndexWriteComplexReceiverCopySource.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldWriteRootRhsComplexReceiver.proved : ⊢ Solkey.TestSuite.storageFieldWriteRootRhsComplexReceiver.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storagePushValue.proved : ⊢ Solkey.TestSuite.storagePushValue.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storagePushComplexReceiverNonsimpleArg.proved : ⊢ Solkey.TestSuite.storagePushComplexReceiverNonsimpleArg.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storagePushValueCopySource.proved : ⊢ Solkey.TestSuite.storagePushValueCopySource.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testStorageComplexReceiverEmptyPush.proved : ⊢ Solkey.TestSuite.testStorageComplexReceiverEmptyPush.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldCopyStruct.proved : ⊢ Solkey.TestSuite.storageFieldCopyStruct.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldDeleteThenCopy.proved : ⊢ Solkey.TestSuite.storageFieldDeleteThenCopy.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldDeleteThenCopyDeep.proved : ⊢ Solkey.TestSuite.storageFieldDeleteThenCopyDeep.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageFieldWriteCaptureSrc.proved : ⊢ Solkey.TestSuite.storageFieldWriteCaptureSrc.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexCopysourceAfterPush.proved : ⊢ Solkey.TestSuite.storageIndexCopysourceAfterPush.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageIndexDecomposeAfterPush.proved : ⊢ Solkey.TestSuite.storageIndexDecomposeAfterPush.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storagePopAfterPush.proved : ⊢ Solkey.TestSuite.storagePopAfterPush.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storagePopNonempty.proved : ⊢ Solkey.TestSuite.storagePopNonempty.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storagePopUnknownLength.proved : ⊢ Solkey.TestSuite.storagePopUnknownLength.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storagePushEmpty.proved : ⊢ Solkey.TestSuite.storagePushEmpty.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storagePushLengthPositive.proved : ⊢ Solkey.TestSuite.storagePushLengthPositive.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storagePushLocalBind.proved : ⊢ Solkey.TestSuite.storagePushLocalBind.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storagePushNonsimpleArg.proved : ⊢ Solkey.TestSuite.storagePushNonsimpleArg.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storagePushReturnAssign.proved : ⊢ Solkey.TestSuite.storagePushReturnAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageRootCopyStruct.proved : ⊢ Solkey.TestSuite.storageRootCopyStruct.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storageRootDeleteThenCopy.proved : ⊢ Solkey.TestSuite.storageRootDeleteThenCopy.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testDeepPopDoesNotResetMappingMember.proved : ⊢ Solkey.TestSuite.testDeepPopDoesNotResetMappingMember.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testDeleteArrayDoesNotResetElementMappingMember.proved : ⊢ Solkey.TestSuite.testDeleteArrayDoesNotResetElementMappingMember.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testNestedIndexWriteImpureIndexPrimitiveRhs.proved : ⊢ Solkey.TestSuite.testNestedIndexWriteImpureIndexPrimitiveRhs.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testNestedIndexReadImpureIndex.proved : ⊢ Solkey.TestSuite.testNestedIndexReadImpureIndex.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testNestedIndexWriteImpureReceiverAndIndex.proved : ⊢ Solkey.TestSuite.testNestedIndexWriteImpureReceiverAndIndex.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testNestedIndexReadImpureReceiverAndIndex.proved : ⊢ Solkey.TestSuite.testNestedIndexReadImpureReceiverAndIndex.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testStorageDeleteImpureReceiver.proved : ⊢ Solkey.TestSuite.testStorageDeleteImpureReceiver.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testStoragePushImpureReceiver.proved : ⊢ Solkey.TestSuite.testStoragePushImpureReceiver.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testCompoundAssignImpureReceiver.proved : ⊢ Solkey.TestSuite.testCompoundAssignImpureReceiver.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testIndexWriteReceiverReadsMutatedVar.proved : ⊢ Solkey.TestSuite.testIndexWriteReceiverReadsMutatedVar.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testStorageComplexReceiverPushFieldLvalue.proved : ⊢ Solkey.TestSuite.testStorageComplexReceiverPushFieldLvalue.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testStorageComplexReceiverPushLvalueCopy.proved : ⊢ Solkey.TestSuite.testStorageComplexReceiverPushLvalueCopy.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testStorageIndexWriteImpureIndexPrimitiveRhs.proved : ⊢ Solkey.TestSuite.testStorageIndexWriteImpureIndexPrimitiveRhs.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testStorageIndexWriteImpureIndexRefRhs.proved : ⊢ Solkey.TestSuite.testStorageIndexWriteImpureIndexRefRhs.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testStorageEvaluationOrder.proved : ⊢ Solkey.TestSuite.testStorageEvaluationOrder.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testStorageFieldDeepCopy.proved : ⊢ Solkey.TestSuite.testStorageFieldDeepCopy.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testStorageMapStructCopy.proved : ⊢ Solkey.TestSuite.testStorageMapStructCopy.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testStorageNestedPushReturnAlias.proved : ⊢ Solkey.TestSuite.testStorageNestedPushReturnAlias.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.storagePushReadBack.proved : ⊢ Solkey.TestSuite.storagePushReadBack.problem := by
+-  sol_prove
++solkey_prove_batch
++  Solkey.TestSuite.storageIndexWriteComplexReceiverCopySource
++  Solkey.TestSuite.storageFieldWriteRootRhsComplexReceiver
++  Solkey.TestSuite.storagePushValue
++  Solkey.TestSuite.storagePushComplexReceiverNonsimpleArg
++  Solkey.TestSuite.storagePushValueCopySource
++  Solkey.TestSuite.testStorageComplexReceiverEmptyPush
++  Solkey.TestSuite.storageFieldCopyStruct
++  Solkey.TestSuite.storageFieldDeleteThenCopy
++  Solkey.TestSuite.storageFieldDeleteThenCopyDeep
++  Solkey.TestSuite.storageFieldWriteCaptureSrc
++  Solkey.TestSuite.storageIndexCopysourceAfterPush
++  Solkey.TestSuite.storageIndexDecomposeAfterPush
++  Solkey.TestSuite.storagePopAfterPush
++  Solkey.TestSuite.storagePopNonempty
++  Solkey.TestSuite.storagePopUnknownLength
++  Solkey.TestSuite.storagePushEmpty
++  Solkey.TestSuite.storagePushLengthPositive
++  Solkey.TestSuite.storagePushLocalBind
++  Solkey.TestSuite.storagePushNonsimpleArg
++  Solkey.TestSuite.storagePushReturnAssign
++  Solkey.TestSuite.storageRootCopyStruct
++  Solkey.TestSuite.storageRootDeleteThenCopy
++  Solkey.TestSuite.testDeepPopDoesNotResetMappingMember
++  Solkey.TestSuite.testDeleteArrayDoesNotResetElementMappingMember
++  Solkey.TestSuite.testNestedIndexWriteImpureIndexPrimitiveRhs
++  Solkey.TestSuite.testNestedIndexReadImpureIndex
++  Solkey.TestSuite.testNestedIndexWriteImpureReceiverAndIndex
++  Solkey.TestSuite.testNestedIndexReadImpureReceiverAndIndex
++  Solkey.TestSuite.testStorageDeleteImpureReceiver
++  Solkey.TestSuite.testStoragePushImpureReceiver
++  Solkey.TestSuite.testCompoundAssignImpureReceiver
++  Solkey.TestSuite.testIndexWriteReceiverReadsMutatedVar
++  Solkey.TestSuite.testStorageComplexReceiverPushFieldLvalue
++  Solkey.TestSuite.testStorageComplexReceiverPushLvalueCopy
++  Solkey.TestSuite.testStorageIndexWriteImpureIndexPrimitiveRhs
++  Solkey.TestSuite.testStorageIndexWriteImpureIndexRefRhs
++  Solkey.TestSuite.testStorageEvaluationOrder
++  Solkey.TestSuite.testStorageFieldDeepCopy
++  Solkey.TestSuite.testStorageMapStructCopy
++  Solkey.TestSuite.testStorageNestedPushReturnAlias
++  Solkey.TestSuite.storagePushReadBack
+diff --git a/Solidity/TestSuite/Derived9.lean b/Solidity/TestSuite/Derived9.lean
+index 3a9e42090..e18f4298c 100644
+--- a/Solidity/TestSuite/Derived9.lean
++++ b/Solidity/TestSuite/Derived9.lean
+@@ -16,119 +16,41 @@ open scoped Scoped
+-theorem Solkey.TestSuite.memoryDeclDefault.proved : ⊢ Solkey.TestSuite.memoryDeclDefault.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryArrayIndex.proved : ⊢ Solkey.TestSuite.memoryArrayIndex.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryNewIntoStructField.proved : ⊢ Solkey.TestSuite.memoryNewIntoStructField.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryNewIntoNestedField.proved : ⊢ Solkey.TestSuite.memoryNewIntoNestedField.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryNewIntoIndex.proved : ⊢ Solkey.TestSuite.memoryNewIntoIndex.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryDeepField.proved : ⊢ Solkey.TestSuite.memoryDeepField.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryFieldAddAssign.proved : ⊢ Solkey.TestSuite.memoryFieldAddAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryFieldSubAssign.proved : ⊢ Solkey.TestSuite.memoryFieldSubAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryFieldMulAssign.proved : ⊢ Solkey.TestSuite.memoryFieldMulAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryFieldDivAssign.proved : ⊢ Solkey.TestSuite.memoryFieldDivAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryFieldModAssign.proved : ⊢ Solkey.TestSuite.memoryFieldModAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryFieldAddAssignUnfold.proved : ⊢ Solkey.TestSuite.memoryFieldAddAssignUnfold.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryFieldAddAssignNse.proved : ⊢ Solkey.TestSuite.memoryFieldAddAssignNse.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryFieldPreincrement.proved : ⊢ Solkey.TestSuite.memoryFieldPreincrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryFieldPostincrement.proved : ⊢ Solkey.TestSuite.memoryFieldPostincrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryFieldPredecrement.proved : ⊢ Solkey.TestSuite.memoryFieldPredecrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryFieldPostdecrement.proved : ⊢ Solkey.TestSuite.memoryFieldPostdecrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryFieldPreincrementAssignment.proved : ⊢ Solkey.TestSuite.memoryFieldPreincrementAssignment.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryFieldPostincrementAssignment.proved : ⊢ Solkey.TestSuite.memoryFieldPostincrementAssignment.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryFieldPredecrementAssignment.proved : ⊢ Solkey.TestSuite.memoryFieldPredecrementAssignment.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryFieldPostdecrementAssignment.proved : ⊢ Solkey.TestSuite.memoryFieldPostdecrementAssignment.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryFieldPreincrementUnfold.proved : ⊢ Solkey.TestSuite.memoryFieldPreincrementUnfold.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryFieldAlias.proved : ⊢ Solkey.TestSuite.memoryFieldAlias.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryFieldReferenceAssign.proved : ⊢ Solkey.TestSuite.memoryFieldReferenceAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryIndexArrayAddAssign.proved : ⊢ Solkey.TestSuite.memoryIndexArrayAddAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryIndexArraySubAssign.proved : ⊢ Solkey.TestSuite.memoryIndexArraySubAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryIndexArrayMulAssign.proved : ⊢ Solkey.TestSuite.memoryIndexArrayMulAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryIndexArrayDivAssign.proved : ⊢ Solkey.TestSuite.memoryIndexArrayDivAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryIndexArrayModAssign.proved : ⊢ Solkey.TestSuite.memoryIndexArrayModAssign.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryIndexArrayAddAssignUnfold.proved : ⊢ Solkey.TestSuite.memoryIndexArrayAddAssignUnfold.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryIndexArrayPreincrementUnfold.proved : ⊢ Solkey.TestSuite.memoryIndexArrayPreincrementUnfold.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryIndexArrayPreincrement.proved : ⊢ Solkey.TestSuite.memoryIndexArrayPreincrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryIndexArrayPostdecrement.proved : ⊢ Solkey.TestSuite.memoryIndexArrayPostdecrement.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryIndexArrayPostincrementAssignment.proved : ⊢ Solkey.TestSuite.memoryIndexArrayPostincrementAssignment.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryIndexArrayPredecrementAssignment.proved : ⊢ Solkey.TestSuite.memoryIndexArrayPredecrementAssignment.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryIndexWriteNse.proved : ⊢ Solkey.TestSuite.memoryIndexWriteNse.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryRootAlias.proved : ⊢ Solkey.TestSuite.memoryRootAlias.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryRootDeleteFresh.proved : ⊢ Solkey.TestSuite.memoryRootDeleteFresh.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.memoryStructArrayIndex.proved : ⊢ Solkey.TestSuite.memoryStructArrayIndex.problem := by
+-  sol_prove
+-
+-theorem Solkey.TestSuite.testMemoryAliasing.proved : ⊢ Solkey.TestSuite.testMemoryAliasing.problem := by
+-  sol_prove
++solkey_prove_batch
++  Solkey.TestSuite.memoryDeclDefault
++  Solkey.TestSuite.memoryArrayIndex
++  Solkey.TestSuite.memoryNewIntoStructField
++  Solkey.TestSuite.memoryNewIntoNestedField
++  Solkey.TestSuite.memoryNewIntoIndex
++  Solkey.TestSuite.memoryDeepField
++  Solkey.TestSuite.memoryFieldAddAssign
++  Solkey.TestSuite.memoryFieldSubAssign
++  Solkey.TestSuite.memoryFieldMulAssign
++  Solkey.TestSuite.memoryFieldDivAssign
++  Solkey.TestSuite.memoryFieldModAssign
++  Solkey.TestSuite.memoryFieldAddAssignUnfold
++  Solkey.TestSuite.memoryFieldAddAssignNse
++  Solkey.TestSuite.memoryFieldPreincrement
++  Solkey.TestSuite.memoryFieldPostincrement
++  Solkey.TestSuite.memoryFieldPredecrement
++  Solkey.TestSuite.memoryFieldPostdecrement
++  Solkey.TestSuite.memoryFieldPreincrementAssignment
++  Solkey.TestSuite.memoryFieldPostincrementAssignment
++  Solkey.TestSuite.memoryFieldPredecrementAssignment
++  Solkey.TestSuite.memoryFieldPostdecrementAssignment
++  Solkey.TestSuite.memoryFieldPreincrementUnfold
++  Solkey.TestSuite.memoryFieldAlias
++  Solkey.TestSuite.memoryFieldReferenceAssign
++  Solkey.TestSuite.memoryIndexArrayAddAssign
++  Solkey.TestSuite.memoryIndexArraySubAssign
++  Solkey.TestSuite.memoryIndexArrayMulAssign
++  Solkey.TestSuite.memoryIndexArrayDivAssign
++  Solkey.TestSuite.memoryIndexArrayModAssign
++  Solkey.TestSuite.memoryIndexArrayAddAssignUnfold
++  Solkey.TestSuite.memoryIndexArrayPreincrementUnfold
++  Solkey.TestSuite.memoryIndexArrayPreincrement
++  Solkey.TestSuite.memoryIndexArrayPostdecrement
++  Solkey.TestSuite.memoryIndexArrayPostincrementAssignment
++  Solkey.TestSuite.memoryIndexArrayPredecrementAssignment
++  Solkey.TestSuite.memoryIndexWriteNse
++  Solkey.TestSuite.memoryRootAlias
++  Solkey.TestSuite.memoryRootDeleteFresh
++  Solkey.TestSuite.memoryStructArrayIndex
++  Solkey.TestSuite.testMemoryAliasing
+diff --git a/Solidity/TestSuite/ScopedProblems.lean b/Solidity/TestSuite/ScopedProblems.lean
+index 213ce5d77..246f9d47a 100644
+--- a/Solidity/TestSuite/ScopedProblems.lean
++++ b/Solidity/TestSuite/ScopedProblems.lean
+@@ -22,0 +23,11 @@ timing gate (`docs/intrinsic.md`, W3b lane `testsuite`).
++
++open Solidity
++open scoped Scoped
++
++/-- Declare the listed scoped obligations, preserving their public theorem names. -/
++macro "solkey_prove_batch " names:ident+ : command => do
++  let commands ← names.mapM fun name => do
++    let proved := Lean.mkIdent (name.getId ++ `proved)
++    let problem := Lean.mkIdent (name.getId ++ `problem)
++    `(theorem $proved : ⊢ $problem := by sol_prove)
++  return ⟨Lean.mkNullNode commands⟩

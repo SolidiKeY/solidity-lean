@@ -112,7 +112,7 @@ saving here is measured.
 
 - [Test vectors as theorems (repo-wide)](size-test-vectors.md): pilot saves 73.4% of source lines and 53.0% of bytes while preserving 1,947 theorems; compiled size and memory increase.
 
-- Duplicates (repo-wide): pending, lane size-duplicates.
+- [Duplicates (repo-wide)](size-duplicates.md): 679 net lines saved with scanner compatibility, 358 public theorem names retained; 781-line projection for Derived1–12.
 
 Each lane of batch `size-reduction-1108` replaces its own line above with a
 link to its study and its measured result.
