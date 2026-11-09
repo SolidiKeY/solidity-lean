@@ -65,14 +65,45 @@ list is available until the actual suite has run.
   admission. No vault/multisig Solidity file was found in that snapshot.
   Upstream result records mark the old MultiSigWallet compilation suite as
   lacking a harness adapter. No exclusion or replacement is authorized.
-- `VU1-I1` (measurement/frontend owner): locating admitted representative inputs
-  and supplying complete disjoint telemetry is assigned to the existing owners
-  by user decision H185, option A. U01 waits for their exact published inputs;
-  it will not invent substitute fixtures or infer missing phase costs. This
-  resolves the scope question while leaving the dependency outstanding.
-  The requested prior-art studies and Hard problems list were not located
-  under the named paths at this base. Do not freeze a replacement measurement
-  interface until their location or an owner direction is established.
+- `VU1-I1` is now assigned to the **coordinator as waker**, following the
+  factory liveness fallback. The coordinator must name the concrete telemetry
+  producer lane and published API/commit, or obtain an explicit lease extension.
+  Frontend timers and chunked kernel-check sites are outside this lane's lease.
+  H185's full disjoint telemetry requirement is unchanged; no phase is inferred
+  as zero and no unsupported representative is silently replaced.
+- This lane takes source preparation and admission evidence inside
+  `scripts/bench/**` itself. Exact representative inputs still require demonstrated
+  frontend admission, rather than an unnamed-owner wait. The request to the
+  coordinator includes the required admitted token/vault/multisig paths.
+- The requested prior-art studies and Hard problems list were not located under
+  the named paths at this base; the coordinator request records the missing
+  producer/interface prerequisites. No new telemetry interface is frozen here.
+
+## In-scope admission preparation
+
+`node scripts/bench/admission.mjs --help` wraps the existing source compiler and
+frontend listing API. It does not rebuild the compiler, translator or verifier.
+Build the frontend first with `lake build Solidity.Frontend.Testing`, then run
+under the repository writer lock, for example:
+
+```sh
+LEAN_NUM_THREADS=1 node scripts/bench/admission.mjs --soljson "$SOLJSON_DIR" \
+  --out .lake/bench/testsuite-admission.json \
+  tests/migration/solkey/keyext.solidity.examples/TestSuite.sol
+```
+
+The compiler directory must contain the binary pinned by the vendored snapshot;
+no sibling SolKeY checkout is needed. Every raw frontend row and compiler/tool
+error is retained, including internal, skipped and unsupported rows. A successful
+listing requires at least one ready row and the existing listing-success policy;
+`readyRows` does not count internal/skipped rows as admitted functions. An
+unfinished attempt never passes, and the report is invalidated before each run.
+
+These reports are admission evidence only: `verification` is `not-run`, and
+`sourceToVerdictBaseline` is false. They contain no U01 wall-time/RSS baseline,
+phase partition, kernel certification claim or native verdict. Save outputs in
+ignored runtime storage and archive evidence privately, not in the code branch.
+The trust-boundary controls are `node --test scripts/bench/admission.test.mjs`.
 
 ## Exact out-of-scope owner diff
 
