@@ -3,8 +3,8 @@
   "kind": "external-dafny-parity-inventory",
   "inventory": {
     "path": "tests/editor-parity/inventory/dafny-editor-features.json",
-    "bytes": 776611,
-    "sha256": "d891815fcf92a6bbdf9fb5806ce04ee150a8ccda5baa20970ae675f3498eda0e",
+    "bytes": 776997,
+    "sha256": "2e7c5d1b61d7e3e350b8122e4db08f5e14cce4ef774d8f2b2eb910d0843c39fc",
     "rows": 491,
     "features": 93,
     "mechanicalRows": 398
