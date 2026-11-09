@@ -17,7 +17,8 @@
       "path": "Solidity/Yul/Compilation/GuardedForCompletion.lean",
       "status": "proof_reuse_partial",
       "migrated_declarations": [
-        "Solidity.Yul.Compilation.GuardedForCompletion.completion_iff"
+        "Solidity.Yul.Compilation.GuardedForCompletion.completion_iff",
+        "Solidity.Yul.Compilation.GuardedForCompletion.model_to_source"
       ],
       "existing_definitions_changed": false
     },
@@ -174,7 +175,9 @@
       "path": "Solidity/Yul/Compilation/LoopControlCompletion.lean",
       "status": "proof_reuse_partial",
       "migrated_declarations": [
-        "Solidity.Yul.Compilation.LoopControlCompletion.completion_iff"
+        "Solidity.Yul.Compilation.LoopControlCompletion.completion_iff",
+        "Solidity.Yul.Compilation.LoopControlCompletion.source_nonzero",
+        "Solidity.Yul.Compilation.LoopControlCompletion.model_to_source"
       ],
       "existing_definitions_changed": false
     },
