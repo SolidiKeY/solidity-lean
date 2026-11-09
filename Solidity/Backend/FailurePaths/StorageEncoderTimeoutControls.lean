@@ -2,9 +2,7 @@ import Solidity.Backend.FailurePaths.StorageEncoderTimeout
 import Solidity.Source.Semantics
 import Solidity.Source.Elaborate
 
-/-! Inhabited storage encoder and actual local-argument controls, with timeout
-versus exact completion distinguished. The fixture environment is a local
-control, never substituted into an admitted custom-error caller. -/
+/-! Seeded Source controls distinguish timeout/completion; their Env is not an admitted production caller. -/
 namespace Solidity.Backend.FailurePaths.StorageEncoderTimeout.Controls
 open Source
 open Source.EM
@@ -66,8 +64,7 @@ theorem timeout_not_revert (pipeline : Roadmap.Pipeline) (payload : Roadmap.Byte
   cases same
 
 
-/-- Ordinary error parameters select memory, so the storage-reference timeout
-cannot be plugged into the existing identity-conversion local-error theorem. -/
+/-- Error parameters use memory; the storage witness cannot instantiate identity-conversion local-error encoding. -/
 theorem error_signature_memory :
     bytesError.paramTys E = some [.bytes .memory] := rfl
 
