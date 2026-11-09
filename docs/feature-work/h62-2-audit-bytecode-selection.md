@@ -1930,6 +1930,22 @@ Checkpoint static exception: doc-paths exits1 for newly adopted master's
 as an upstream documentation wait, not counted as a passing gate.
 
 
+A fresh selector-only revalidation uses the existing generic field extractor
+for four of these already-listed certificate targets. It retains the actual
+certificate, a nonempty caller tail, capacity and representation premises, and
+checks three-byte refusal versus four-byte selector acceptance. All four fields
+and five boundary controls passed one bounded native check in 9.516 seconds
+(container peak 196,513,792 bytes), with standard-only axioms and 70 exact frozen
+import bindings. This is **zero new domain/census credit**; the earlier 103-target
+capture is not revalidated by this packet. No native loading, gas, Source/runtime,
+G01 or whole-lane acceptance follows. Redundant public fixture copies were
+removed; exact regenerated inputs and the reconciliation verifier are private:
+
+```text
+evidence: 1f259a17b20a242d2756db6a17c53eccd01e2d7e evidence/solidity-parallel-20261103/executable-bytecode/head-check-revalidation-df7396f9.json
+```
+
+
 ### Ordered binder/head accounting (2026-11-07)
 
 The generic metadata helper now preserves each supplied declaration's ordered
