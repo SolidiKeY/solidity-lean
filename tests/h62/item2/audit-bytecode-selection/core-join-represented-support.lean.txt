@@ -20,8 +20,8 @@ theorem represented_nil_all_tails (rest : List Instr) :
   rfl
 
 theorem represented_revert_all_refused :
-    run ((joinCompilation 0).code++[.jump 1,.revert]) representedMachine≠.revert := by
-  rw [represented_nil_all_tails]
+    run ((joinCompilation 0).code++[.jump 1]++[.revert]) representedMachine≠.revert := by
+  rw [represented_nil_all_tails [.revert]]
   intro impossible
   cases impossible
 
