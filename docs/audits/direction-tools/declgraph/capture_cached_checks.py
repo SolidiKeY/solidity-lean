@@ -3,7 +3,7 @@
 Each Lean capture holds the repository writer lock. Failed files are retained
 and skipped; integrity failures are hard errors. No full library rebuild runs.
 """
-import argparse,hashlib,json,os,pathlib,re,runpy,signal,subprocess,time,tempfile
+import argparse,fcntl,hashlib,json,os,pathlib,re,runpy,signal,subprocess,time,tempfile
 HERE=pathlib.Path(__file__).resolve().parent
 API=runpy.run_path(str(HERE/'audit.py'));SHA=runpy.run_path(str(HERE/'module_graph.py'))['sha']
 LOCK='/tmp/solidity-lean-feature-groups-20261025/writer.lock'
@@ -13,6 +13,32 @@ def atomic_json(path,data):
  with tempfile.NamedTemporaryFile(mode='w',dir=path.parent,prefix=path.name+'.tmp-',delete=False) as f:
   json.dump(data,f,sort_keys=True);f.write('\n');f.flush();os.fsync(f.fileno());name=f.name
  os.replace(name,path)
+
+def timed_capture(cmd,output,*,lock_path=LOCK,timeout=660):
+ # Lock contention is scheduling, not capture runtime. No child or timer exists
+ # until this process owns the writer lease. Cancellation leaves no status.
+ with open(lock_path,'a') as lease:
+  fcntl.flock(lease,fcntl.LOCK_EX)
+  proc=subprocess.Popen(cmd,stdout=output,stderr=subprocess.STDOUT,start_new_session=True)
+  try:
+   try:return proc.wait(timeout=timeout)
+   except subprocess.TimeoutExpired:
+    try:os.killpg(proc.pid,signal.SIGTERM)
+    except ProcessLookupError:pass
+    try:proc.wait(timeout=5)
+    except subprocess.TimeoutExpired:os.killpg(proc.pid,signal.SIGKILL);proc.wait()
+    return 124
+  finally:
+   # Only descendants of this owned session can remain in this group.
+   try:os.killpg(proc.pid,signal.SIGTERM)
+   except ProcessLookupError:pass
+
+def validate_status(status,fixed,allowed_runner):
+ assert all(status[k]==fixed[k] for k in ('path','source_sha256')),'Queue/input drift'
+ prior=dict(status['producers']);runner=prior.pop('capture_cached_checks.py');assert runner in allowed_runner
+ current=dict(fixed['producers']);current_runner=current.pop('capture_cached_checks.py');assert prior==current
+ # Only an explicitly supplied exact ancestor blob may have the old wrapper.
+ assert status['command']==fixed['command'] or (runner!=current_runner and status['command']==['flock',LOCK]+fixed['command']),'Queue command drift'
 
 def validate_capture(directory,source,path,view,version,graph_sha,producers):
  meta=json.loads((directory/'receipt.json').read_text())
@@ -32,7 +58,7 @@ def selection():
  return sorted(eligible-reused),sorted(reused),sorted({r['path'] for r in census}-eligible)
 
 def main():
- p=argparse.ArgumentParser();p.add_argument('--source-root',type=pathlib.Path,required=True);p.add_argument('--view',type=pathlib.Path,required=True);p.add_argument('--captures',type=pathlib.Path,required=True);p.add_argument('--out',type=pathlib.Path,required=True);p.add_argument('--limit',type=int);p.add_argument('--check',action='store_true');p.add_argument('--prior-runner-commit');p.add_argument('--recover-interrupted',action='store_true');a=p.parse_args()
+ p=argparse.ArgumentParser();p.add_argument('--source-root',type=pathlib.Path,required=True);p.add_argument('--view',type=pathlib.Path,required=True);p.add_argument('--captures',type=pathlib.Path,required=True);p.add_argument('--out',type=pathlib.Path,required=True);p.add_argument('--limit',type=int);p.add_argument('--check',action='store_true');p.add_argument('--prior-runner-commit',action='append',default=[]);p.add_argument('--recover-interrupted',action='store_true');a=p.parse_args()
  for k in ('source_root','view','captures','out'):setattr(a,k,getattr(a,k).resolve())
  API['assert_sources'](a.source_root);queue,reused,uncached=selection();assert a.limit is None or a.limit>0
  if a.limit is not None:queue=queue[:a.limit]
@@ -41,10 +67,10 @@ def main():
  graph_file=HERE.parents[3]/'.lake/refactor-cache/declgraph-module-native.jsonl.receipt.json';graph_sha=SHA(graph_file)
  graph=json.loads(graph_file.read_text());assert pathlib.Path(graph['reference_view']).resolve()==a.view and graph['modules_sha256']==producers['modules.txt']
  allowed_runner={producers['capture_cached_checks.py']}
- if a.prior_runner_commit:
-  assert re.fullmatch('[0-9a-f]{40}',a.prior_runner_commit)
-  subprocess.run(['git','merge-base','--is-ancestor',a.prior_runner_commit,'HEAD'],cwd=HERE.parents[3],check=True)
-  blob=subprocess.check_output(['git','show',a.prior_runner_commit+':docs/audits/direction-tools/declgraph/capture_cached_checks.py'],cwd=HERE.parents[3]);allowed_runner.add(hashlib.sha256(blob).hexdigest())
+ for prior_commit in a.prior_runner_commit:
+  assert re.fullmatch('[0-9a-f]{40}',prior_commit)
+  subprocess.run(['git','merge-base','--is-ancestor',prior_commit,'HEAD'],cwd=HERE.parents[3],check=True)
+  blob=subprocess.check_output(['git','show',prior_commit+':docs/audits/direction-tools/declgraph/capture_cached_checks.py'],cwd=HERE.parents[3]);allowed_runner.add(hashlib.sha256(blob).hexdigest())
  def integrity(path):
   assert producers=={n:SHA(HERE/n) for n in names},'Producer drift'
   assert SHA(graph_file)==graph_sha,'Graph receipt drift'
@@ -53,12 +79,11 @@ def main():
  files=[];resource_wait=None
  for index,path in enumerate(queue):
   stem=hashlib.sha256(path.encode()).hexdigest()[:20];directory=a.captures/stem;status_file=a.captures/(stem+'.status.json');summary=a.captures/(stem+'.summary.json');log=a.captures/(stem+'.driver.log')
-  cmd=['flock',LOCK,'python3','-I',str(HERE/'capture_compact.py'),'--source-root',str(a.source_root),'--view',str(a.view),'--capture',str(directory),'--file',path,'--out',str(summary)]
+  cmd=['python3','-I',str(HERE/'capture_compact.py'),'--source-root',str(a.source_root),'--view',str(a.view),'--capture',str(directory),'--file',path,'--out',str(summary)]
   fixed=dict(path=path,command=cmd,source_sha256=SHA(a.source_root/path),producers=producers)
   integrity(path)
   if status_file.exists():
-   status=json.loads(status_file.read_text());assert all(status[k]==fixed[k] for k in ('path','command','source_sha256')),'Queue/input drift'
-   prior=dict(status['producers']);assert prior.pop('capture_cached_checks.py') in allowed_runner;current=dict(producers);current.pop('capture_cached_checks.py');assert prior==current
+   status=json.loads(status_file.read_text());validate_status(status,fixed,allowed_runner)
    assert status['log_sha256']==SHA(log)
   else:
    assert not a.check,'Missing queue status: '+path
@@ -85,18 +110,7 @@ def main():
      for item in (directory,summary,log):
       if item.exists():item.rename(pathlib.Path(str(item)+suffix))
     with log.open('w') as output:
-     proc=subprocess.Popen(cmd,stdout=output,stderr=subprocess.STDOUT,start_new_session=True)
-     try:code=proc.wait(timeout=660)
-     except subprocess.TimeoutExpired:
-      try:os.killpg(proc.pid,signal.SIGTERM)
-      except ProcessLookupError:pass
-      try:proc.wait(timeout=5)
-      except subprocess.TimeoutExpired:os.killpg(proc.pid,signal.SIGKILL);proc.wait()
-      code=124
-     finally:
-      # Only descendants of this owned session can remain in this group.
-      try:os.killpg(proc.pid,signal.SIGTERM)
-      except ProcessLookupError:pass
+     code=timed_capture(cmd,output)
     integrity(path)
     if code!=0:
      API['assert_sources'](a.source_root)
