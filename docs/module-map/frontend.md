@@ -178,6 +178,40 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/ConstantDepth/Controls.lean` | SOL-CB controls, decided on the real `evalConst`/`nconstP`/`rank`/`acyclicB`: a chain whose rank is the declaration count and one just below it (one level fewer refuses), a shared diamond, contract scopes with inheritance and shadowing, duplicates, used and unused cycles, a qualified member reference and `uint8` overflow; clash-free acyclic units are tied to `TEval` through `evalConst_iff`/`evalConst_none_iff`. Ends with the lane's exact axiom pins. |
 | `Frontend/ConstantDepth/Correspondence.lean` | SOL-CB backfill: a declared constant's graph edges are exactly the resolved constant paths of its initializer; rank decreases on each and along every path; typed evaluation, named constants and array lengths are functional under the clash-free acyclic contract. |
 | `Frontend/ConstantDepth/Determinism.lean` | SOL-CB backfill: `TEval`, `NamedConst` and `ArrayLenOK` are deterministic in every environment (no clash-freedom or acyclicity premise), by mutual recursion on the derivations. |
+| `Backend/PrimitivePackets/Constants/Controls.lean` | Kernel integer-constant controls for every legal width/sign, endpoints, saved stack and invalid values. |
+| `Frontend/NumericLiteralProofs/Audit.lean` | Full owned kernel declaration, signature and transitive axiom inventory. |
+| `Frontend/NumericLiteralProofs/Backfill.lean` | Exact numeric consumed-prefix, source-range and denomination-separation theorems. |
+| `Frontend/NumericLiteralProofs/Classification.lean` | Accepted numeric token classification and nonnumeric word separation. |
+| `Frontend/NumericLiteralProofs/Controls.lean` | Inhabited grammar constructors and scanner-arm positive and refusal controls. |
+| `Frontend/NumericLiteralProofs/Digits.lean` | Independent decimal digit spelling and universal scanner correspondence with suffix preservation. |
+| `Frontend/NumericLiteralProofs/Fixtures.lean` | Typed fixed solc-0.8.38 differential spelling fixtures. |
+| `Frontend/NumericLiteralProofs/Refusals.lean` | Arbitrary-length numeric refusal families and malformed spelling boundaries. |
+| `Frontend/NumericLiteralProofs/Span.lean` | Numeric source-range and suffix-consumption correspondence. |
+| `Frontend/NumericLiteralProofs/Spellings.lean` | Independent decimal and hexadecimal spelling relations and exact decoder correspondence. |
+| `Frontend/NumericLiteralProofs/Underscores.lean` | Grammar-admitted underscore erasure preserves digit sequences and values. |
+| `Frontend/NumericLiteralProofs/Values.lean` | Exact decimal scale/exponent and hexadecimal numeric interpretation. |
+| `Frontend/NumericLiteralProofs/WordTable.lean` | All fixed words are disjoint from numeric token results. |
+| `Frontend/NumericLiteralProofs/WordTable/Part09.lean` | Structural fixed-word prefix decision proofs; numeric tokens are refused for this table segment. |
+| `Frontend/NumericLiteralProofs/WordTable/Part10.lean` | Structural fixed-word prefix decision proofs; numeric tokens are refused for this table segment. |
+| `Frontend/NumericLiteralProofs/WordTable/Part11.lean` | Structural fixed-word prefix decision proofs; numeric tokens are refused for this table segment. |
+| `Frontend/NumericLiteralProofs/WordTable/Part12.lean` | Structural fixed-word prefix decision proofs; numeric tokens are refused for this table segment. |
+| `Frontend/NumericLiteralProofs/WordTable/Part13.lean` | Structural fixed-word prefix decision proofs; numeric tokens are refused for this table segment. |
+| `Frontend/NumericLiteralProofs/WordTable/Part14.lean` | Structural fixed-word prefix decision proofs; numeric tokens are refused for this table segment. |
+| `Frontend/NumericLiteralProofs/WordTable/Part15.lean` | Structural fixed-word prefix decision proofs; numeric tokens are refused for this table segment. |
+| `Frontend/NumericLiteralProofs/WordTable/Part16.lean` | Structural fixed-word prefix decision proofs; numeric tokens are refused for this table segment. |
+| `Frontend/NumericLiteralProofs/WordTable/Part17.lean` | Structural fixed-word prefix decision proofs; numeric tokens are refused for this table segment. |
+| `Frontend/NumericLiteralProofs/WordTable/Part18.lean` | Structural fixed-word prefix decision proofs; numeric tokens are refused for this table segment. |
+| `Frontend/NumericLiteralProofs/WordTable/Part19.lean` | Structural fixed-word prefix decision proofs; numeric tokens are refused for this table segment. |
+| `Frontend/NumericLiteralProofs/WordTable/Part20.lean` | Structural fixed-word prefix decision proofs; numeric tokens are refused for this table segment. |
+| `Frontend/NumericLiteralProofs/WordTable/Part21.lean` | Structural fixed-word prefix decision proofs; numeric tokens are refused for this table segment. |
+| `Frontend/NumericLiteralProofs/WordTable/Part22.lean` | Structural fixed-word prefix decision proofs; numeric tokens are refused for this table segment. |
+| `Frontend/NumericLiteralProofs/WordTable/Part23.lean` | Structural fixed-word prefix decision proofs; numeric tokens are refused for this table segment. |
+| `Frontend/NumericLiteralProofs/WordTable/Part24.lean` | Structural fixed-word prefix decision proofs; numeric tokens are refused for this table segment. |
+| `Frontend/NumericLiteralProofs/WordTable/Part25.lean` | Structural fixed-word prefix decision proofs; numeric tokens are refused for this table segment. |
+| `Frontend/NumericLiteralProofs/WordTable/Part26.lean` | Structural fixed-word prefix decision proofs; numeric tokens are refused for this table segment. |
+| `Frontend/NumericLiteralProofs/WordTable/Part27.lean` | Structural fixed-word prefix decision proofs; numeric tokens are refused for this table segment. |
+| `Frontend/NumericLiteralProofs/WordTable/Part28.lean` | Structural fixed-word prefix decision proofs; numeric tokens are refused for this table segment. |
+| `Frontend/NumericLiteralProofs/WordTable/Part29.lean` | Structural fixed-word prefix decision proofs; numeric tokens are refused for this table segment. |
 | Module | Role |
 | --- | --- |
 | `Frontend/SpecOriginsV1.lean` | Additive source-pinned NatSpec directive origins, exact legacy clause-field agreement and forget lemmas; unsupported layouts have no origin. |
