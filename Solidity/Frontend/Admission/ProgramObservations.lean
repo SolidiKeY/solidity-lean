@@ -1,9 +1,7 @@
 import Solidity.Frontend.Admission.RootObservations
 import Solidity.Source.Elaborated
 
-/-! Finite observation scanning of the actual carried Program. This closes
-container enumeration, not semantic reachability or all-feature extraction.
-No program, source relation, profile or evaluator representation is changed. -/
+/-! Finite observation scanning of the actual carried Program. This closes container enumeration, not semantic reachability or all-feature extraction. No program, source relation, profile or evaluator representation is changed. -/
 namespace Solidity.Frontend.Admission
 open Solidity.Source
 

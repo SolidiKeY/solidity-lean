@@ -1429,4 +1429,156 @@ theorem syntaxFreeFunctionUses_iff {c : Cat} (root : Syn c) (site : SyntaxOccurr
 /-- info: 'Solidity.Frontend.Admission.syntaxFreeFunctionUses_iff' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms syntaxFreeFunctionUses_iff
 
+
+/-! Regression: unit-level pragma traversal must not duplicate markers at ancestor sites or erase raw words with the resolution environment. Reuse the existing intrinsic eliminator and generic visitor; tags assert neither lexical/version validity, coder selection, profile activation nor admission. -/
+inductive DirectPragma : {c : Cat} → Syn c → List String → Prop where
+  | pragma (words : List String) : DirectPragma (.pragma words) words
+
+def pragmaWordsAt {c : Cat} (s : Syn c) : List (List String) := by
+  apply Syn.casesOn (motive := fun _ _ => List (List String)) s
+  case pragma => intro words; exact [words]
+  all_goals (intros; exact [])
+
+def pragmaFeature : List String → Feature
+  | "solidity" :: _ => .pragmaVersion
+  | ["abicoder", "v1"] | ["abicoder", "v2"] | ["experimental", "ABIEncoderV2"] => .pragmaAbicoder
+  | _ => .pragmaOther
+
+theorem pragmaWordsAt_iff {c : Cat} (s : Syn c) (words : List String) :
+    words ∈ pragmaWordsAt s ↔ DirectPragma s words := by
+  cases s with
+  | pragma actual =>
+    simp only [pragmaWordsAt, List.mem_singleton]
+    constructor
+    · intro same; cases same; exact .pragma _
+    · intro direct; cases direct; rfl
+  | _ =>
+    simp only [pragmaWordsAt, List.not_mem_nil]
+    constructor <;> intro impossible <;> cases impossible
+
+def syntaxPragmaUses {c : Cat} (root : Syn c) : List (SyntaxOccurrence × Feature) :=
+  syntaxFieldUses root (fun s => (pragmaWordsAt s).map pragmaFeature)
+
+theorem syntaxPragmaUses_iff {c : Cat} (root : Syn c) (site : SyntaxOccurrence) (f : Feature) :
+    (site,f) ∈ syntaxPragmaUses root ↔
+      Syn.Sub site ⟨c,root⟩ ∧ ∃ words, DirectPragma site.2 words ∧ pragmaFeature words = f := by
+  rw [syntaxPragmaUses, syntaxFieldUses_iff]
+  constructor
+  · rintro ⟨subterm,present⟩
+    obtain ⟨words,present,same⟩ := List.mem_map.mp present
+    exact ⟨subterm,words,(pragmaWordsAt_iff _ _).mp present,same⟩
+  · rintro ⟨subterm,words,direct,same⟩
+    exact ⟨subterm,List.mem_map.mpr ⟨words,(pragmaWordsAt_iff _ _).mpr direct,same⟩⟩
+
+/-- info: 'Solidity.Frontend.Admission.pragmaWordsAt_iff' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms pragmaWordsAt_iff
+/-- info: 'Solidity.Frontend.Admission.syntaxPragmaUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxPragmaUses_iff
+
+
+/-! Regression: written array dimensions and nested unused types must survive extraction without inferring constant/positive bounds or validity. Reuse the intrinsic eliminator, constructor tag and generic visitor; old candidates and Source remain unchanged, with no profile/admission claim. -/
+inductive DirectArrayType : {c : Cat} → Syn c → Feature → Prop where
+  | dynamic (element : Syn .typeName) : DirectArrayType (.array element .none) .dynamicArrays
+  | fixed (element : Syn .typeName) (length : Syn .expr) :
+      DirectArrayType (.array element (.some length)) .fixedArrays
+
+def arrayTypeFeaturesAt {c : Cat} (s : Syn c) : List Feature := by
+  apply Syn.casesOn (motive := fun _ _ => List Feature) s
+  case array =>
+    intro element dimension
+    exact [if dimension.ctor = .none then .dynamicArrays else .fixedArrays]
+  all_goals (intros; exact [])
+
+theorem arrayTypeFeaturesAt_iff {c : Cat} (s : Syn c) (f : Feature) :
+    f ∈ arrayTypeFeaturesAt s ↔ DirectArrayType s f := by
+  cases s with
+  | array element dimension =>
+    cases dimension with
+    | none =>
+      simp only [arrayTypeFeaturesAt, Syn.ctor, if_true, List.mem_singleton]
+      constructor
+      · intro same; cases same; exact .dynamic _
+      · intro direct; cases direct; rfl
+    | some length =>
+      simp only [arrayTypeFeaturesAt, Syn.ctor, reduceCtorEq, if_false, List.mem_singleton]
+      constructor
+      · intro same; cases same; exact .fixed _ _
+      · intro direct; cases direct; rfl
+  | _ =>
+    simp only [arrayTypeFeaturesAt, List.not_mem_nil]
+    constructor <;> intro impossible <;> cases impossible
+
+def syntaxArrayTypeUses {c : Cat} (root : Syn c) : List (SyntaxOccurrence × Feature) :=
+  syntaxFieldUses root arrayTypeFeaturesAt
+
+theorem syntaxArrayTypeUses_iff {c : Cat} (root : Syn c) (site : SyntaxOccurrence) (f : Feature) :
+    (site,f) ∈ syntaxArrayTypeUses root ↔
+      Syn.Sub site ⟨c,root⟩ ∧ DirectArrayType site.2 f := by
+  rw [syntaxArrayTypeUses, syntaxFieldUses_iff, arrayTypeFeaturesAt_iff]
+
+/-- info: 'Solidity.Frontend.Admission.arrayTypeFeaturesAt_iff' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms arrayTypeFeaturesAt_iff
+/-- info: 'Solidity.Frontend.Admission.syntaxArrayTypeUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxArrayTypeUses_iff
+
+
+/-! Regression: a visibility field on a function declaration must not become a function-type marker. Reuse the existing direct visibility projection and constructor tag; only written internal/external type visibility is classified, without inferring omitted defaults, validating signatures or changing policy/admission. -/
+inductive DirectExplicitFunctionType : {c : Cat} → Syn c → Feature → Prop where
+  | internal (params mutability returns) :
+      DirectExplicitFunctionType (.fnType params (some .internal) mutability returns) .internalFunctionTypes
+  | external (params mutability returns) :
+      DirectExplicitFunctionType (.fnType params (some .external) mutability returns) .externalFunctionTypes
+
+def functionTypeVisibilityFeature? : Visibility → Option Feature
+  | .internal => some .internalFunctionTypes
+  | .external => some .externalFunctionTypes
+  | .priv | .pub => none
+
+def explicitFunctionTypeFeaturesAt {c : Cat} (s : Syn c) : List Feature :=
+  if s.ctor = .fnType then (visibilityFieldsAt s).filterMap functionTypeVisibilityFeature? else []
+
+theorem explicitFunctionTypeFeaturesAt_iff {c : Cat} (s : Syn c) (f : Feature) :
+    f ∈ explicitFunctionTypeFeaturesAt s ↔ DirectExplicitFunctionType s f := by
+  cases s with
+  | fnType params visibility mutability returns =>
+    cases visibility with
+    | none =>
+      change f ∈ ([] : List Feature) ↔ _
+      constructor <;> intro impossible <;> cases impossible
+    | some value =>
+      cases value with
+      | internal =>
+        change f ∈ [Feature.internalFunctionTypes] ↔ _
+        constructor
+        · intro same; cases List.mem_singleton.mp same; exact .internal _ _ _
+        · intro direct; cases direct; exact List.mem_singleton.mpr rfl
+      | external =>
+        change f ∈ [Feature.externalFunctionTypes] ↔ _
+        constructor
+        · intro same; cases List.mem_singleton.mp same; exact .external _ _ _
+        · intro direct; cases direct; exact List.mem_singleton.mpr rfl
+      | priv =>
+        change f ∈ ([] : List Feature) ↔ _
+        constructor <;> intro impossible <;> cases impossible
+      | pub =>
+        change f ∈ ([] : List Feature) ↔ _
+        constructor <;> intro impossible <;> cases impossible
+  | _ =>
+    simp only [explicitFunctionTypeFeaturesAt, Syn.ctor, reduceCtorEq, if_false, List.not_mem_nil]
+    constructor <;> intro impossible <;> cases impossible
+
+def syntaxExplicitFunctionTypeUses {c : Cat} (root : Syn c) : List (SyntaxOccurrence × Feature) :=
+  syntaxFieldUses root explicitFunctionTypeFeaturesAt
+
+theorem syntaxExplicitFunctionTypeUses_iff {c : Cat} (root : Syn c)
+    (site : SyntaxOccurrence) (f : Feature) :
+    (site,f) ∈ syntaxExplicitFunctionTypeUses root ↔
+      Syn.Sub site ⟨c,root⟩ ∧ DirectExplicitFunctionType site.2 f := by
+  rw [syntaxExplicitFunctionTypeUses, syntaxFieldUses_iff, explicitFunctionTypeFeaturesAt_iff]
+
+/-- info: 'Solidity.Frontend.Admission.explicitFunctionTypeFeaturesAt_iff' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms explicitFunctionTypeFeaturesAt_iff
+/-- info: 'Solidity.Frontend.Admission.syntaxExplicitFunctionTypeUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxExplicitFunctionTypeUses_iff
+
 end Solidity.Frontend.Admission

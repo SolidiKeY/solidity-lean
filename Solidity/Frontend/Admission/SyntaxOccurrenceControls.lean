@@ -324,4 +324,63 @@ theorem free_function_composed_diagnostic :
 /-- info: 'Solidity.Frontend.Admission.OccurrenceControls.free_function_composed_diagnostic' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms free_function_composed_diagnostic
 
+
+/-! Regression: raw pragma words remain single typed-site occurrences, including duplicate coder tags and malformed/unknown spellings. Frozen candidates stay unchanged; this is no well-formedness, selected-coder, profile or admission witness. -/
+def pragmaUnit : Syn .unit := .unit (.cons (.pragma ["solidity","not-a-version"])
+  (.cons (.pragma ["abicoder","v1"]) (.cons (.pragma ["experimental","ABIEncoderV2"])
+    (.cons (.pragma ["abicoder","v3"]) (.cons (.pragma []) .nil)))))
+
+theorem pragma_sites_and_frozen_gap :
+    syntaxPragmaUses pragmaUnit =
+      [(⟨.top,.pragma ["solidity","not-a-version"]⟩,.pragmaVersion),
+       (⟨.top,.pragma ["abicoder","v1"]⟩,.pragmaAbicoder),
+       (⟨.top,.pragma ["experimental","ABIEncoderV2"]⟩,.pragmaAbicoder),
+       (⟨.top,.pragma ["abicoder","v3"]⟩,.pragmaOther),
+       (⟨.top,.pragma []⟩,.pragmaOther)] ∧
+    sourceCandidateMetadataV2Refusal? pragmaUnit
+      (fun f => decide (f ≠ .pragmaAbicoder)) = none := ⟨rfl,rfl⟩
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.pragma_sites_and_frozen_gap' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms pragma_sites_and_frozen_gap
+
+
+/-! Regression: nested unused array types retain each typed site once in preorder, even with an unresolved written length. This is raw dimension presence, not constant evaluation, well-formedness, allocation or admission; frozen candidate silence remains explicit. -/
+def dynamicArrayType : Syn .typeName := .array (.elem .bool) .none
+def writtenArrayType : Syn .typeName := .array dynamicArrayType (.some (.ident "notConstant"))
+def arrayTypeUnit : Syn .unit := .unit (.cons (.contract false "C" .none .nil
+  (.cons (.stateVar writtenArrayType none none none false "unused" .none) .nil)) .nil)
+
+theorem array_type_sites_and_frozen_gap :
+    syntaxArrayTypeUses arrayTypeUnit =
+      [(⟨.typeName,writtenArrayType⟩,.fixedArrays),(⟨.typeName,dynamicArrayType⟩,.dynamicArrays)] ∧
+    sourceCandidateMetadataV2Refusal? arrayTypeUnit
+      (fun f => decide (f ≠ .fixedArrays)) = none := ⟨rfl,rfl⟩
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.array_type_sites_and_frozen_gap' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms array_type_sites_and_frozen_gap
+
+
+/-! Regression: function-type markers retain their actual unused-declaration sites and distinguish all four visibility spellings plus omission. An external function declaration is not a function type; omitted/invalid type visibility stays an extraction gap, not an admission or default-inference claim. -/
+def functionTypeNode (visibility : Option Visibility) : Syn .typeName :=
+  .fnType .nil visibility (some .view) .nil
+def externalFunctionNode : Syn (.part false) :=
+  .function (.ident "f") .nil (some .external) none .nil false none .nil (.some (.block .nil))
+def functionTypeUnit : Syn .unit := .unit (.cons (.contract false "C" .none .nil
+  (.cons (.stateVar (functionTypeNode (some .internal)) none none none false "i" .none)
+    (.cons (.stateVar (functionTypeNode (some .external)) none none none false "e" .none) .nil))) .nil)
+
+theorem explicit_function_type_sites_and_gaps :
+    syntaxExplicitFunctionTypeUses functionTypeUnit =
+      [(⟨.typeName,functionTypeNode (some .internal)⟩,.internalFunctionTypes),
+       (⟨.typeName,functionTypeNode (some .external)⟩,.externalFunctionTypes)] ∧
+    explicitFunctionTypeFeaturesAt (functionTypeNode none) = [] ∧
+    explicitFunctionTypeFeaturesAt (functionTypeNode (some .priv)) = [] ∧
+    explicitFunctionTypeFeaturesAt (functionTypeNode (some .pub)) = [] ∧
+    explicitFunctionTypeFeaturesAt externalFunctionNode = [] ∧
+    sourceCandidateMetadataV2Refusal? functionTypeUnit
+      (fun f => decide (f ≠ .externalFunctionTypes)) = none := ⟨rfl,rfl,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.explicit_function_type_sites_and_gaps' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms explicit_function_type_sites_and_gaps
+
 end Solidity.Frontend.Admission.OccurrenceControls
