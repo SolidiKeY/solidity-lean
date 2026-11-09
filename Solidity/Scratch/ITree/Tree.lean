@@ -66,6 +66,12 @@ def bind : Tree C R → (R → Tree C S) → Tree C S
 
 def map (g : R → S) (t : Tree C R) : Tree C S := t.bind fun r => .ret (g r)
 
+/-- The deterministic reading: every callee changes nothing (`Stmt.run`'s
+reading of a payment). -/
+def runDet : Tree C R → R
+  | .ret r => r
+  | .vis e k => (k e.same).runDet
+
 end Tree
 
 /-- What a callee may leave from a state: `CallerModel.Allows M J`, or
