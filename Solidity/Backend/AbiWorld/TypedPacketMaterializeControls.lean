@@ -44,7 +44,7 @@ def render (bs : List UInt8) := "["++String.intercalate "," (bs.map (fun b=>toSt
 #guard_msgs (whitespace := lax) in #print axioms exact_limit
 /-- info: 'Solidity.Backend.AbiWorld.TypedPacketMaterializeControls.one_over_limit' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms one_over_limit
-/-- info: 'Solidity.Backend.AbiWorld.TypedPacketMaterializeControls.empty_baseline' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.AbiWorld.TypedPacketMaterializeControls.empty_baseline' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms empty_baseline
 /-- info: 'Solidity.Backend.AbiWorld.TypedPacketMaterializeControls.wrong_head_offset' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms wrong_head_offset
