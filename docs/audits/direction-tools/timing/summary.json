@@ -1,11 +1,11 @@
 {
-  "status": "partial",
+  "status": "done",
   "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
   "checkpoints": {
     "inventory": "done",
     "local_stratified_measurement": "done",
     "declaration_ranking": "done",
-    "reference_builds": "partial",
+    "reference_builds": "done",
     "full_build_estimate": "done",
     "incremental_graph": "done",
     "ten_prioritized_changes": "done"
@@ -62,6 +62,22 @@
           "seconds_per_kloc": 37.25538195678994
         }
       },
+      "unmarked_file_sensitivity": {
+        "local_unmarked_quartile": {
+          "modules": 4,
+          "lines": 486,
+          "wall_seconds": 18.10611563099991,
+          "seconds_per_kloc": 37.25538195678994
+        },
+        "reference_unmarked": {
+          "modules": 58,
+          "lines": 8867,
+          "wall_seconds": 132.00253439099743,
+          "seconds_per_kloc": 14.88694421912681
+        },
+        "ratio": 2.502554010306834,
+        "boundary": "file-class sensitivity only; unmarked is not proven handwritten; not a new population or proof-productivity verdict"
+      },
       "source_inventory": {
         "detected_generated_lines": 149,
         "lines": 279224,
@@ -113,6 +129,22 @@
           "seconds_per_kloc": 212.02752815404014
         }
       },
+      "unmarked_file_sensitivity": {
+        "local_unmarked_quartile": {
+          "modules": 4,
+          "lines": 396,
+          "wall_seconds": 83.96290114899989,
+          "seconds_per_kloc": 212.02752815404014
+        },
+        "reference_unmarked": {
+          "modules": 58,
+          "lines": 8867,
+          "wall_seconds": 132.00253439099743,
+          "seconds_per_kloc": 14.88694421912681
+        },
+        "ratio": 14.242515121513403,
+        "boundary": "file-class sensitivity only; unmarked is not proven handwritten; not a new population or proof-productivity verdict"
+      },
       "source_inventory": {
         "lines": 197439,
         "marker_associated_unresolved_lines": 7316,
@@ -163,6 +195,22 @@
           "seconds_per_kloc": 14.022047423986535
         }
       },
+      "unmarked_file_sensitivity": {
+        "local_unmarked_quartile": {
+          "modules": 4,
+          "lines": 1594,
+          "wall_seconds": 29.0491581160004,
+          "seconds_per_kloc": 18.224064062735508
+        },
+        "reference_unmarked": {
+          "modules": 27,
+          "lines": 5216,
+          "wall_seconds": 193.10017574201265,
+          "seconds_per_kloc": 37.02073921434292
+        },
+        "ratio": 0.492266347174261,
+        "boundary": "file-class sensitivity only; unmarked is not proven handwritten; not a new population or proof-productivity verdict"
+      },
       "source_inventory": {
         "lines": 169330,
         "marker_associated_unresolved_lines": 1550,
@@ -171,12 +219,12 @@
         "unresolved_chain_agreement_lines": 4533
       },
       "reference": "Clear",
-      "ratio": null,
-      "outlier": null,
-      "verdict": "inconclusive",
-      "reason": "No complete paired measurement.",
+      "ratio": 0.5154526641778137,
+      "outlier": false,
+      "verdict": "within band; this looks fine",
+      "reason": "Observed check-time density is within the threefold band.",
       "verdict_evidence": null,
-      "settling_measurement": "Complete the four planned local quartile checks and the pinned reference per-file protocol.",
+      "settling_measurement": null,
       "comparability": "local toolchain, plain invocation flags and recorded checkout paths validated; per-observation machine identity is incomplete; source obligations and reference Lean versions differ; check-cost calibration, not proof productivity"
     },
     {
@@ -212,6 +260,22 @@
           "wall_seconds": 6.463599792999958,
           "seconds_per_kloc": 12.081494940186836
         }
+      },
+      "unmarked_file_sensitivity": {
+        "local_unmarked_quartile": {
+          "modules": 4,
+          "lines": 535,
+          "wall_seconds": 6.463599792999958,
+          "seconds_per_kloc": 12.081494940186836
+        },
+        "reference_unmarked": {
+          "modules": 58,
+          "lines": 8867,
+          "wall_seconds": 132.00253439099743,
+          "seconds_per_kloc": 14.88694421912681
+        },
+        "ratio": 0.8115496882607028,
+        "boundary": "file-class sensitivity only; unmarked is not proven handwritten; not a new population or proof-productivity verdict"
       },
       "source_inventory": {
         "lines": 104250,
@@ -263,6 +327,22 @@
           "seconds_per_kloc": 6.886125185129129
         }
       },
+      "unmarked_file_sensitivity": {
+        "local_unmarked_quartile": {
+          "modules": 4,
+          "lines": 659,
+          "wall_seconds": 4.537956497000096,
+          "seconds_per_kloc": 6.886125185129129
+        },
+        "reference_unmarked": {
+          "modules": 58,
+          "lines": 8867,
+          "wall_seconds": 132.00253439099743,
+          "seconds_per_kloc": 14.88694421912681
+        },
+        "ratio": 0.4625613614029537,
+        "boundary": "file-class sensitivity only; unmarked is not proven handwritten; not a new population or proof-productivity verdict"
+      },
       "source_inventory": {
         "detected_generated_lines": 3905,
         "lines": 102235,
@@ -313,6 +393,22 @@
           "seconds_per_kloc": 25.52000727539574
         }
       },
+      "unmarked_file_sensitivity": {
+        "local_unmarked_quartile": {
+          "modules": 4,
+          "lines": 443,
+          "wall_seconds": 11.305363223000313,
+          "seconds_per_kloc": 25.52000727539574
+        },
+        "reference_unmarked": {
+          "modules": 27,
+          "lines": 5216,
+          "wall_seconds": 193.10017574201265,
+          "seconds_per_kloc": 37.02073921434292
+        },
+        "ratio": 0.6893435360012623,
+        "boundary": "file-class sensitivity only; unmarked is not proven handwritten; not a new population or proof-productivity verdict"
+      },
       "source_inventory": {
         "lines": 64746,
         "modules": 524,
@@ -320,12 +416,12 @@
         "unresolved_chain_agreement_lines": 1940
       },
       "reference": "Clear",
-      "ratio": null,
-      "outlier": null,
-      "verdict": "inconclusive",
-      "reason": "No complete paired measurement.",
+      "ratio": 0.7218124176175332,
+      "outlier": false,
+      "verdict": "within band; this looks fine",
+      "reason": "Observed check-time density is within the threefold band.",
       "verdict_evidence": null,
-      "settling_measurement": "Complete the four planned local quartile checks and the pinned reference per-file protocol.",
+      "settling_measurement": null,
       "comparability": "local toolchain, plain invocation flags and recorded checkout paths validated; per-observation machine identity is incomplete; source obligations and reference Lean versions differ; check-cost calibration, not proof productivity"
     },
     {
@@ -362,6 +458,22 @@
           "seconds_per_kloc": 380.63111961716766
         }
       },
+      "unmarked_file_sensitivity": {
+        "local_unmarked_quartile": {
+          "modules": 4,
+          "lines": 616,
+          "wall_seconds": 101.1166531240001,
+          "seconds_per_kloc": 164.15041091558456
+        },
+        "reference_unmarked": {
+          "modules": 27,
+          "lines": 5216,
+          "wall_seconds": 193.10017574201265,
+          "seconds_per_kloc": 37.02073921434292
+        },
+        "ratio": 4.4340122428454345,
+        "boundary": "file-class sensitivity only; unmarked is not proven handwritten; not a new population or proof-productivity verdict"
+      },
       "source_inventory": {
         "lines": 61471,
         "marker_associated_unresolved_lines": 121,
@@ -370,12 +482,18 @@
         "unresolved_chain_agreement_lines": 8728
       },
       "reference": "Clear",
-      "ratio": null,
-      "outlier": null,
-      "verdict": "inconclusive",
-      "reason": "No complete paired measurement.",
-      "verdict_evidence": null,
-      "settling_measurement": "Complete the four planned local quartile checks and the pinned reference per-file protocol.",
+      "ratio": 4.6428593721493066,
+      "outlier": true,
+      "verdict": "justified",
+      "reason": "The sampled quartet kernel-checks concrete hash/execution results and structure/quantified tactic cases absent the Clear Peano suite; measured kernel-decide and simp work explain the extra validation workload. This justifies the sampled workload difference, not implementation optimality or the whole area.",
+      "verdict_evidence": [
+        "d6fd95f0886775d7c286813fa9b993a40ba7a777:Solidity/Examples/DecisionHashThreeKinds.lean",
+        "d6fd95f0886775d7c286813fa9b993a40ba7a777:Solidity/Examples/Tactics/OwnStructs.lean",
+        "d6fd95f0886775d7c286813fa9b993a40ba7a777:Solidity/Examples/Tactics/QuantifiedDiamond.lean",
+        "6ef2e7eda01080e5d5fd7474354c1a71adab5071:All.lean",
+        "summary.calibration.declaration_profiles.profiles: overlapping kernel-decide/simp spans; never add kernel and pin-inclusive spans"
+      ],
+      "settling_measurement": null,
       "comparability": "local toolchain, plain invocation flags and recorded checkout paths validated; per-observation machine identity is incomplete; source obligations and reference Lean versions differ; check-cost calibration, not proof productivity"
     },
     {
@@ -417,6 +535,22 @@
           "wall_seconds": 0.8712537679998604,
           "seconds_per_kloc": 10.250044329410123
         }
+      },
+      "unmarked_file_sensitivity": {
+        "local_unmarked_quartile": {
+          "modules": 3,
+          "lines": 531,
+          "wall_seconds": 19.868243737000284,
+          "seconds_per_kloc": 37.416654871940274
+        },
+        "reference_unmarked": {
+          "modules": 58,
+          "lines": 8867,
+          "wall_seconds": 132.00253439099743,
+          "seconds_per_kloc": 14.88694421912681
+        },
+        "ratio": 2.51338718820933,
+        "boundary": "file-class sensitivity only; unmarked is not proven handwritten; not a new population or proof-productivity verdict"
       },
       "source_inventory": {
         "detected_generated_lines": 626,
@@ -468,6 +602,22 @@
           "seconds_per_kloc": 7.506335655642206
         }
       },
+      "unmarked_file_sensitivity": {
+        "local_unmarked_quartile": {
+          "modules": 4,
+          "lines": 514,
+          "wall_seconds": 3.858256527000094,
+          "seconds_per_kloc": 7.506335655642206
+        },
+        "reference_unmarked": {
+          "modules": 58,
+          "lines": 8867,
+          "wall_seconds": 132.00253439099743,
+          "seconds_per_kloc": 14.88694421912681
+        },
+        "ratio": 0.5042227300078168,
+        "boundary": "file-class sensitivity only; unmarked is not proven handwritten; not a new population or proof-productivity verdict"
+      },
       "source_inventory": {
         "lines": 45857,
         "modules": 279,
@@ -515,6 +665,22 @@
           "wall_seconds": 6.6210623620002025,
           "seconds_per_kloc": 6.542551741106919
         }
+      },
+      "unmarked_file_sensitivity": {
+        "local_unmarked_quartile": {
+          "modules": 4,
+          "lines": 1012,
+          "wall_seconds": 6.6210623620002025,
+          "seconds_per_kloc": 6.542551741106919
+        },
+        "reference_unmarked": {
+          "modules": 58,
+          "lines": 8867,
+          "wall_seconds": 132.00253439099743,
+          "seconds_per_kloc": 14.88694421912681
+        },
+        "ratio": 0.4394825186958799,
+        "boundary": "file-class sensitivity only; unmarked is not proven handwritten; not a new population or proof-productivity verdict"
       },
       "source_inventory": {
         "lines": 25790,
@@ -1326,7 +1492,7 @@
       "settling_measurement": "Serial CI per-module fresh-elaboration timings at the frozen base for these exact roots, summed with output generation measured separately.",
       "reference_total_check_ratios": {
         "EvmYul": 72.09923419333613,
-        "Clear": null
+        "Clear": 43.410495729196796
       },
       "ratio_boundary": "Modelled complete local workload versus measured complete reference project body checks, prebuilt imports, uncontrolled OS page cache. Different project sizes and Lean versions; no CompCert/CakeML ratio because their cited build boundaries differ."
     },
@@ -1367,7 +1533,7 @@
       "settling_measurement": "Serial CI per-module fresh-elaboration timings at the frozen base for these exact roots, summed with output generation measured separately.",
       "reference_total_check_ratios": {
         "EvmYul": 434.6818699880158,
-        "Clear": null
+        "Clear": 261.7192217336769
       },
       "ratio_boundary": "Modelled complete local workload versus measured complete reference project body checks, prebuilt imports, uncontrolled OS page cache. Different project sizes and Lean versions; no CompCert/CakeML ratio because their cited build boundaries differ."
     },
@@ -1413,7 +1579,7 @@
       "settling_measurement": "Serial CI per-module fresh-elaboration timings at the frozen base for these exact roots, summed with output generation measured separately.",
       "reference_total_check_ratios": {
         "EvmYul": 504.4787074592207,
-        "Clear": null
+        "Clear": 303.74345886815706
       },
       "ratio_boundary": "Modelled complete local workload versus measured complete reference project body checks, prebuilt imports, uncontrolled OS page cache. Different project sizes and Lean versions; no CompCert/CakeML ratio because their cited build boundaries differ."
     }
@@ -1465,15 +1631,10 @@
     "Reference build-attempt timings include dependency preparation; only complete per-project module sums are compared.",
     "Recommendations use two dependency cost pools plus the eight slowest observed sample modules, not a global exhaustive ranking; no saving or proof-preservation implementation is claimed."
   ],
-  "waits": [
-    {
-      "lane": "da-timing",
-      "item": "Clear: complete pinned reference checks pending"
-    }
-  ],
+  "waits": [],
   "calibration": {
     "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
-    "status": "partial",
+    "status": "done",
     "local_sampling_complete": true,
     "profile_coverage": {
       "expected": 48,
@@ -1481,9 +1642,7 @@
       "missing": [],
       "complete": true
     },
-    "reference_gaps": [
-      "Clear"
-    ],
+    "reference_gaps": [],
     "attempted_observations": 53,
     "unique_current_modules": 48,
     "passing_current_modules": 48,
@@ -1559,18 +1718,23 @@
             "seconds_per_kloc": 14.88694421912681
           }
         },
-        "boundary": "project modules in default library import closure; warm dependency oleans, separate lake env lean -j1 invocation per module; physical lines; build attempts include preparation dependencies and are not matched module costs"
+        "boundary": "project modules in default library import closure; prebuilt dependency oleans; OS page cache uncontrolled, separate lake env lean -j1 invocation per module; physical lines; build attempts include preparation dependencies and are not matched module costs"
       },
       "Clear": {
         "pin": "6ef2e7eda01080e5d5fd7474354c1a71adab5071",
-        "status": "incomplete",
-        "expected_modules": null,
-        "observed_modules": 0,
-        "passing_modules": 0,
+        "status": "pass",
+        "expected_modules": 41,
+        "observed_modules": 41,
+        "passing_modules": 41,
         "failed_module_observations": 0,
-        "tracked_lean_lines": null,
-        "built_closure_lines": null,
-        "matched_check": null,
+        "tracked_lean_lines": 6227,
+        "built_closure_lines": 6201,
+        "matched_check": {
+          "modules": 41,
+          "lines": 6201,
+          "wall_seconds": 219.23918355001297,
+          "seconds_per_kloc": 35.355456144172386
+        },
         "versions": {
           "lean": "Lean (version 4.9.0, x86_64-unknown-linux-gnu, commit 1b78cb4836cf, Release)",
           "lake": "Lake version 5.0.0-1b78cb4 (Lean version 4.9.0)"
@@ -1599,11 +1763,36 @@
             "wall_seconds": 1800.099797805,
             "stop_reason": "timeout",
             "evidence_log": "/workspace/da-timing-work/clear-times/build-3.log"
+          },
+          {
+            "exit_code": 124,
+            "wall_seconds": 1800.0676386470004,
+            "stop_reason": "timeout",
+            "evidence_log": "/workspace/da-timing-work/clear-times/build-4.log"
+          },
+          {
+            "exit_code": 0,
+            "wall_seconds": 996.8906051049998,
+            "stop_reason": null,
+            "evidence_log": "/workspace/da-timing-work/clear-times/build-5.log"
           }
         ],
         "dependency_cache_status": 1,
-        "source_classes": null,
-        "boundary": null
+        "source_classes": {
+          "detected_generated": {
+            "modules": 14,
+            "lines": 985,
+            "wall_seconds": 26.139007808000315,
+            "seconds_per_kloc": 26.537063764467327
+          },
+          "unmarked_not_proven_handwritten": {
+            "modules": 27,
+            "lines": 5216,
+            "wall_seconds": 193.10017574201265,
+            "seconds_per_kloc": 37.02073921434292
+          }
+        },
+        "boundary": "project modules in default library import closure; prebuilt dependency oleans; OS page cache uncontrolled, separate lake env lean -j1 invocation per module; physical lines; build attempts include preparation dependencies and are not matched module costs"
       }
     },
     "per_area": [
@@ -1640,6 +1829,22 @@
             "wall_seconds": 18.10611563099991,
             "seconds_per_kloc": 37.25538195678994
           }
+        },
+        "unmarked_file_sensitivity": {
+          "local_unmarked_quartile": {
+            "modules": 4,
+            "lines": 486,
+            "wall_seconds": 18.10611563099991,
+            "seconds_per_kloc": 37.25538195678994
+          },
+          "reference_unmarked": {
+            "modules": 58,
+            "lines": 8867,
+            "wall_seconds": 132.00253439099743,
+            "seconds_per_kloc": 14.88694421912681
+          },
+          "ratio": 2.502554010306834,
+          "boundary": "file-class sensitivity only; unmarked is not proven handwritten; not a new population or proof-productivity verdict"
         },
         "source_inventory": {
           "detected_generated_lines": 149,
@@ -1692,6 +1897,22 @@
             "seconds_per_kloc": 212.02752815404014
           }
         },
+        "unmarked_file_sensitivity": {
+          "local_unmarked_quartile": {
+            "modules": 4,
+            "lines": 396,
+            "wall_seconds": 83.96290114899989,
+            "seconds_per_kloc": 212.02752815404014
+          },
+          "reference_unmarked": {
+            "modules": 58,
+            "lines": 8867,
+            "wall_seconds": 132.00253439099743,
+            "seconds_per_kloc": 14.88694421912681
+          },
+          "ratio": 14.242515121513403,
+          "boundary": "file-class sensitivity only; unmarked is not proven handwritten; not a new population or proof-productivity verdict"
+        },
         "source_inventory": {
           "lines": 197439,
           "marker_associated_unresolved_lines": 7316,
@@ -1742,6 +1963,22 @@
             "seconds_per_kloc": 14.022047423986535
           }
         },
+        "unmarked_file_sensitivity": {
+          "local_unmarked_quartile": {
+            "modules": 4,
+            "lines": 1594,
+            "wall_seconds": 29.0491581160004,
+            "seconds_per_kloc": 18.224064062735508
+          },
+          "reference_unmarked": {
+            "modules": 27,
+            "lines": 5216,
+            "wall_seconds": 193.10017574201265,
+            "seconds_per_kloc": 37.02073921434292
+          },
+          "ratio": 0.492266347174261,
+          "boundary": "file-class sensitivity only; unmarked is not proven handwritten; not a new population or proof-productivity verdict"
+        },
         "source_inventory": {
           "lines": 169330,
           "marker_associated_unresolved_lines": 1550,
@@ -1750,12 +1987,12 @@
           "unresolved_chain_agreement_lines": 4533
         },
         "reference": "Clear",
-        "ratio": null,
-        "outlier": null,
-        "verdict": "inconclusive",
-        "reason": "No complete paired measurement.",
+        "ratio": 0.5154526641778137,
+        "outlier": false,
+        "verdict": "within band; this looks fine",
+        "reason": "Observed check-time density is within the threefold band.",
         "verdict_evidence": null,
-        "settling_measurement": "Complete the four planned local quartile checks and the pinned reference per-file protocol.",
+        "settling_measurement": null,
         "comparability": "local toolchain, plain invocation flags and recorded checkout paths validated; per-observation machine identity is incomplete; source obligations and reference Lean versions differ; check-cost calibration, not proof productivity"
       },
       {
@@ -1791,6 +2028,22 @@
             "wall_seconds": 6.463599792999958,
             "seconds_per_kloc": 12.081494940186836
           }
+        },
+        "unmarked_file_sensitivity": {
+          "local_unmarked_quartile": {
+            "modules": 4,
+            "lines": 535,
+            "wall_seconds": 6.463599792999958,
+            "seconds_per_kloc": 12.081494940186836
+          },
+          "reference_unmarked": {
+            "modules": 58,
+            "lines": 8867,
+            "wall_seconds": 132.00253439099743,
+            "seconds_per_kloc": 14.88694421912681
+          },
+          "ratio": 0.8115496882607028,
+          "boundary": "file-class sensitivity only; unmarked is not proven handwritten; not a new population or proof-productivity verdict"
         },
         "source_inventory": {
           "lines": 104250,
@@ -1842,6 +2095,22 @@
             "seconds_per_kloc": 6.886125185129129
           }
         },
+        "unmarked_file_sensitivity": {
+          "local_unmarked_quartile": {
+            "modules": 4,
+            "lines": 659,
+            "wall_seconds": 4.537956497000096,
+            "seconds_per_kloc": 6.886125185129129
+          },
+          "reference_unmarked": {
+            "modules": 58,
+            "lines": 8867,
+            "wall_seconds": 132.00253439099743,
+            "seconds_per_kloc": 14.88694421912681
+          },
+          "ratio": 0.4625613614029537,
+          "boundary": "file-class sensitivity only; unmarked is not proven handwritten; not a new population or proof-productivity verdict"
+        },
         "source_inventory": {
           "detected_generated_lines": 3905,
           "lines": 102235,
@@ -1892,6 +2161,22 @@
             "seconds_per_kloc": 25.52000727539574
           }
         },
+        "unmarked_file_sensitivity": {
+          "local_unmarked_quartile": {
+            "modules": 4,
+            "lines": 443,
+            "wall_seconds": 11.305363223000313,
+            "seconds_per_kloc": 25.52000727539574
+          },
+          "reference_unmarked": {
+            "modules": 27,
+            "lines": 5216,
+            "wall_seconds": 193.10017574201265,
+            "seconds_per_kloc": 37.02073921434292
+          },
+          "ratio": 0.6893435360012623,
+          "boundary": "file-class sensitivity only; unmarked is not proven handwritten; not a new population or proof-productivity verdict"
+        },
         "source_inventory": {
           "lines": 64746,
           "modules": 524,
@@ -1899,12 +2184,12 @@
           "unresolved_chain_agreement_lines": 1940
         },
         "reference": "Clear",
-        "ratio": null,
-        "outlier": null,
-        "verdict": "inconclusive",
-        "reason": "No complete paired measurement.",
+        "ratio": 0.7218124176175332,
+        "outlier": false,
+        "verdict": "within band; this looks fine",
+        "reason": "Observed check-time density is within the threefold band.",
         "verdict_evidence": null,
-        "settling_measurement": "Complete the four planned local quartile checks and the pinned reference per-file protocol.",
+        "settling_measurement": null,
         "comparability": "local toolchain, plain invocation flags and recorded checkout paths validated; per-observation machine identity is incomplete; source obligations and reference Lean versions differ; check-cost calibration, not proof productivity"
       },
       {
@@ -1941,6 +2226,22 @@
             "seconds_per_kloc": 380.63111961716766
           }
         },
+        "unmarked_file_sensitivity": {
+          "local_unmarked_quartile": {
+            "modules": 4,
+            "lines": 616,
+            "wall_seconds": 101.1166531240001,
+            "seconds_per_kloc": 164.15041091558456
+          },
+          "reference_unmarked": {
+            "modules": 27,
+            "lines": 5216,
+            "wall_seconds": 193.10017574201265,
+            "seconds_per_kloc": 37.02073921434292
+          },
+          "ratio": 4.4340122428454345,
+          "boundary": "file-class sensitivity only; unmarked is not proven handwritten; not a new population or proof-productivity verdict"
+        },
         "source_inventory": {
           "lines": 61471,
           "marker_associated_unresolved_lines": 121,
@@ -1949,12 +2250,18 @@
           "unresolved_chain_agreement_lines": 8728
         },
         "reference": "Clear",
-        "ratio": null,
-        "outlier": null,
-        "verdict": "inconclusive",
-        "reason": "No complete paired measurement.",
-        "verdict_evidence": null,
-        "settling_measurement": "Complete the four planned local quartile checks and the pinned reference per-file protocol.",
+        "ratio": 4.6428593721493066,
+        "outlier": true,
+        "verdict": "justified",
+        "reason": "The sampled quartet kernel-checks concrete hash/execution results and structure/quantified tactic cases absent the Clear Peano suite; measured kernel-decide and simp work explain the extra validation workload. This justifies the sampled workload difference, not implementation optimality or the whole area.",
+        "verdict_evidence": [
+          "d6fd95f0886775d7c286813fa9b993a40ba7a777:Solidity/Examples/DecisionHashThreeKinds.lean",
+          "d6fd95f0886775d7c286813fa9b993a40ba7a777:Solidity/Examples/Tactics/OwnStructs.lean",
+          "d6fd95f0886775d7c286813fa9b993a40ba7a777:Solidity/Examples/Tactics/QuantifiedDiamond.lean",
+          "6ef2e7eda01080e5d5fd7474354c1a71adab5071:All.lean",
+          "summary.calibration.declaration_profiles.profiles: overlapping kernel-decide/simp spans; never add kernel and pin-inclusive spans"
+        ],
+        "settling_measurement": null,
         "comparability": "local toolchain, plain invocation flags and recorded checkout paths validated; per-observation machine identity is incomplete; source obligations and reference Lean versions differ; check-cost calibration, not proof productivity"
       },
       {
@@ -1996,6 +2303,22 @@
             "wall_seconds": 0.8712537679998604,
             "seconds_per_kloc": 10.250044329410123
           }
+        },
+        "unmarked_file_sensitivity": {
+          "local_unmarked_quartile": {
+            "modules": 3,
+            "lines": 531,
+            "wall_seconds": 19.868243737000284,
+            "seconds_per_kloc": 37.416654871940274
+          },
+          "reference_unmarked": {
+            "modules": 58,
+            "lines": 8867,
+            "wall_seconds": 132.00253439099743,
+            "seconds_per_kloc": 14.88694421912681
+          },
+          "ratio": 2.51338718820933,
+          "boundary": "file-class sensitivity only; unmarked is not proven handwritten; not a new population or proof-productivity verdict"
         },
         "source_inventory": {
           "detected_generated_lines": 626,
@@ -2047,6 +2370,22 @@
             "seconds_per_kloc": 7.506335655642206
           }
         },
+        "unmarked_file_sensitivity": {
+          "local_unmarked_quartile": {
+            "modules": 4,
+            "lines": 514,
+            "wall_seconds": 3.858256527000094,
+            "seconds_per_kloc": 7.506335655642206
+          },
+          "reference_unmarked": {
+            "modules": 58,
+            "lines": 8867,
+            "wall_seconds": 132.00253439099743,
+            "seconds_per_kloc": 14.88694421912681
+          },
+          "ratio": 0.5042227300078168,
+          "boundary": "file-class sensitivity only; unmarked is not proven handwritten; not a new population or proof-productivity verdict"
+        },
         "source_inventory": {
           "lines": 45857,
           "modules": 279,
@@ -2095,6 +2434,22 @@
             "seconds_per_kloc": 6.542551741106919
           }
         },
+        "unmarked_file_sensitivity": {
+          "local_unmarked_quartile": {
+            "modules": 4,
+            "lines": 1012,
+            "wall_seconds": 6.6210623620002025,
+            "seconds_per_kloc": 6.542551741106919
+          },
+          "reference_unmarked": {
+            "modules": 58,
+            "lines": 8867,
+            "wall_seconds": 132.00253439099743,
+            "seconds_per_kloc": 14.88694421912681
+          },
+          "ratio": 0.4394825186958799,
+          "boundary": "file-class sensitivity only; unmarked is not proven handwritten; not a new population or proof-productivity verdict"
+        },
         "source_inventory": {
           "lines": 25790,
           "modules": 82,
@@ -2142,7 +2497,7 @@
         "settling_measurement": "Serial CI per-module fresh-elaboration timings at the frozen base for these exact roots, summed with output generation measured separately.",
         "reference_total_check_ratios": {
           "EvmYul": 72.09923419333613,
-          "Clear": null
+          "Clear": 43.410495729196796
         },
         "ratio_boundary": "Modelled complete local workload versus measured complete reference project body checks, prebuilt imports, uncontrolled OS page cache. Different project sizes and Lean versions; no CompCert/CakeML ratio because their cited build boundaries differ."
       },
@@ -2183,7 +2538,7 @@
         "settling_measurement": "Serial CI per-module fresh-elaboration timings at the frozen base for these exact roots, summed with output generation measured separately.",
         "reference_total_check_ratios": {
           "EvmYul": 434.6818699880158,
-          "Clear": null
+          "Clear": 261.7192217336769
         },
         "ratio_boundary": "Modelled complete local workload versus measured complete reference project body checks, prebuilt imports, uncontrolled OS page cache. Different project sizes and Lean versions; no CompCert/CakeML ratio because their cited build boundaries differ."
       },
@@ -2229,7 +2584,7 @@
         "settling_measurement": "Serial CI per-module fresh-elaboration timings at the frozen base for these exact roots, summed with output generation measured separately.",
         "reference_total_check_ratios": {
           "EvmYul": 504.4787074592207,
-          "Clear": null
+          "Clear": 303.74345886815706
         },
         "ratio_boundary": "Modelled complete local workload versus measured complete reference project body checks, prebuilt imports, uncontrolled OS page cache. Different project sizes and Lean versions; no CompCert/CakeML ratio because their cited build boundaries differ."
       }
@@ -2652,7 +3007,7 @@
         "Native symbols do not establish allocation counts, a unique caller, proof redundancy or an area-wide verdict.",
         "Child CPU counters include the awaited Lake invocation and descendants; user-IP sampling includes Lean kernel but excludes OS kernel.",
         "Prebuilt dependency oleans do not imply warm OS page cache; retain each run major-fault and input-block counters.",
-        "Reference compiler is Lean4.22 versus local4.24; no compiler-version causal claim."
+        "Compiler versions are recorded separately; no compiler-version causal claim."
       ]
     },
     "declaration_profiles": {
