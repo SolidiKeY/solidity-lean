@@ -1,49 +1,137 @@
 #!/usr/bin/env python3
-import json,os,signal,subprocess,sys,time,threading,resource
+"""Serial VM guard: 12 GiB address-space cap, no swap, two 4 GiB reserves.
+
+The child owns a fresh process group. pidfd/select observes exit without reaping; waitid(WNOWAIT) keeps its leader
+unreaped until monitoring has stopped, so termination cannot target a reused process group.
+Sampling failures and failed resource checks always refuse a passing result.
+Commands must wait for their workers; detached/background daemons are unsupported.
+"""
+import json
+import os
 from pathlib import Path
-record=Path(sys.argv[1]); command=sys.argv[2:]
-tag='tv-yul-prototype-1108'
-reserve=4*1024**3
-use_vm_cap=os.environ.get('TVYUL_USE_VM_CAP')=='1'
-def under_reserve(sample):
-    return sample['os_available']<reserve or (not use_vm_cap and sample['effective_free']<reserve)
+import resource
+import signal
+import subprocess
+import sys
+import select
+import time
+
+RESERVE = 4 * 1024**3
+PROCESS_LIMIT = 12 * 1024**3
+VM_LIMIT = 16 * 1024**3
+
 
 def resources():
-    cg=Path('/sys/fs/cgroup')
-    limit=int((cg/'memory.max').read_text())
-    if use_vm_cap: assert limit<=16*1024**3, 'VM-cap opt-in requires hard cap at most16GiB'
-    current=int((cg/'memory.current').read_text())
-    stats=dict(row.split() for row in (cg/'memory.stat').read_text().splitlines())
-    inactive=int(stats['inactive_file'])
-    mem={row.split(':')[0]:int(row.split()[1])*1024 for row in Path('/proc/meminfo').read_text().splitlines() if len(row.split())>=3}
-    assert mem['SwapTotal']==0,'swap must remain unavailable'
-    return dict(limit=limit,current=current,working=current-inactive,effective_free=limit-current+inactive,os_available=mem['MemAvailable'])
+    cg = Path("/sys/fs/cgroup")
+    limit = int((cg / "memory.max").read_text())
+    if limit > VM_LIMIT:
+        raise RuntimeError("hard cgroup cap exceeds 16 GiB")
+    current = int((cg / "memory.current").read_text())
+    stats = dict(row.split() for row in (cg / "memory.stat").read_text().splitlines())
+    inactive = min(current, int(stats["inactive_file"]))
+    mem = {row.split(":")[0]: int(row.split()[1]) * 1024
+           for row in Path("/proc/meminfo").read_text().splitlines()
+           if len(row.split()) >= 3}
+    if mem["SwapTotal"] != 0:
+        raise RuntimeError("swap must remain unavailable")
+    return dict(limit=limit, current=current, working=current-inactive,
+                effective_free=limit-current+inactive, os_available=mem["MemAvailable"])
 
-samples=[resources()]; start=time.monotonic(); stopped=False
-if under_reserve(samples[0]):
-    code=125; stopped=True
-else:
-    child=subprocess.Popen(command,env=dict(os.environ,LEAN_NUM_THREADS='1',LEAN_LSP_MAX_OPEN_FILES='3',TVYUL_RESOURCE_TAG=tag),start_new_session=True)
-    finished=threading.Event()
-    def monitor():
-        global stopped
-        while not finished.wait(.25):
-            sample=resources(); samples.append(sample)
-            if under_reserve(sample):
-                stopped=True
-                marker=('TVYUL_RESOURCE_TAG='+tag).encode()
-                for proc in Path('/proc').iterdir():
-                    if not proc.name.isdigit() or int(proc.name)==os.getpid(): continue
-                    try:
-                        if marker in (proc/'environ').read_bytes().split(b'\0'):
-                            os.kill(int(proc.name),signal.SIGTERM)
-                    except (OSError,ProcessLookupError): pass
-                break
-    watcher=threading.Thread(target=monitor,daemon=True);watcher.start()
-    code=child.wait(); elapsed=time.monotonic()-start
-    finished.set();watcher.join()
-    if stopped: code=125
-result=dict(command=command,exit=code,seconds=elapsed if not stopped else time.monotonic()-start,child_maxrss_kib=resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss,resource_stop=stopped,vm_cap_opt_in=use_vm_cap,policy=('H232 explicit VM-cap opt-in: unchanged16GiB hard cgroup bound; no swap; 4GiB OS headroom; no extra inactive-file working-set cap; no virtual-address cap' if use_vm_cap else 'H232 VM cgroup bound; no swap; 4GiB OS and effective working-set headroom; no virtual-address cap'),cgroup_limit=samples[0]['limit'],peak_cgroup_current=max(s['current'] for s in samples),peak_cgroup_working=max(s['working'] for s in samples),minimum_effective_free=min(s['effective_free'] for s in samples),minimum_os_available=min(s['os_available'] for s in samples))
-record.parent.mkdir(parents=True,exist_ok=True);record.write_text(json.dumps(result,indent=2)+'\n')
-print('RESOURCE_CHECK',json.dumps(result),flush=True)
-sys.exit(code if code>=0 else 128-code)
+
+def under_reserve(sample):
+    return sample["os_available"] < RESERVE or sample["effective_free"] < RESERVE
+
+
+def effective_process_limit():
+    existing = resource.getrlimit(resource.RLIMIT_AS)
+    return min([PROCESS_LIMIT] + [value for value in existing if value != resource.RLIM_INFINITY])
+
+
+def run(command, sampler=resources, interval=0.25):
+    start = time.monotonic()
+    samples = []
+    stopped = False
+    monitor_error = None
+    child = None
+    pidfd = None
+    applied_limit = None
+
+    def refuse(error=None):
+        nonlocal stopped, monitor_error
+        stopped = True
+        if error is not None and monitor_error is None:
+            monitor_error = type(error).__name__ + ": " + str(error)
+        if child is not None:
+            # The leader is alive or unreaped; no wait/poll reaps it before signalling ends.
+            try:
+                os.killpg(child.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+
+    def sample_once():
+        sample = sampler()
+        samples.append(sample)
+        if under_reserve(sample):
+            refuse()
+
+    try:
+        applied_limit = effective_process_limit()
+        if signal.getsignal(signal.SIGCHLD) != signal.SIG_DFL:
+            raise RuntimeError("custom SIGCHLD handling is unsupported")
+        sample_once()
+        if not stopped:
+            child = subprocess.Popen(command, start_new_session=True,
+                                     preexec_fn=lambda: resource.setrlimit(resource.RLIMIT_AS, (applied_limit, applied_limit)),
+                                     env=dict(os.environ, LEAN_NUM_THREADS="1", LEAN_LSP_MAX_OPEN_FILES="3"))
+            pidfd = os.pidfd_open(child.pid)
+            while not stopped:
+                exited = bool(select.select([pidfd], [], [], interval)[0])
+                sample_once()
+                if exited:
+                    os.waitid(os.P_PID, child.pid, os.WEXITED | os.WNOWAIT)
+                    break
+    except BaseException as error:
+        refuse(error)
+    finally:
+        # Single-threaded monitoring has ended; only now may the PID be reaped.
+        child_exit = child.wait() if child is not None else None
+        if pidfd is not None:
+            os.close(pidfd)
+    elapsed = time.monotonic() - start
+    result = dict(command=command, exit=125 if stopped else child_exit,
+                  child_exit=child_exit, seconds=elapsed, resource_stop=stopped,
+                  monitor_error=monitor_error, configured_process_address_space_limit=PROCESS_LIMIT,
+                  applied_process_address_space_limit=applied_limit,
+                  policy="12GiB RLIMIT_AS; hard VM cap<=16GiB; no swap; 4GiB OS and effective-free reserves; own process group only; monitoring errors fail closed")
+    if samples:
+        result.update(cgroup_limit=samples[0]["limit"],
+                      peak_cgroup_current=max(s["current"] for s in samples),
+                      peak_cgroup_working=max(s["working"] for s in samples),
+                      minimum_effective_free=min(s["effective_free"] for s in samples),
+                      minimum_os_available=min(s["os_available"] for s in samples))
+    return result
+
+
+def main():
+    if len(sys.argv) < 3:
+        raise SystemExit("usage: bounded.py RECORD_JSON COMMAND...")
+    record = Path(sys.argv[1])
+    command = sys.argv[2:]
+    if os.environ.get("TVYUL_USE_VM_CAP") not in (None, "", "0"):
+        result = dict(command=command, exit=125, resource_stop=True,
+                      monitor_error="removed TVYUL_USE_VM_CAP bypass is refused")
+    else:
+        def cancelled(signum, _frame):
+            raise InterruptedError("guard received signal " + str(signum))
+        signal.signal(signal.SIGTERM, cancelled)
+        signal.signal(signal.SIGINT, cancelled)
+        result = run(command)
+    record.parent.mkdir(parents=True, exist_ok=True)
+    record.write_text(json.dumps(result, indent=2) + "\n")
+    print("RESOURCE_CHECK", json.dumps(result), flush=True)
+    code = result["exit"]
+    raise SystemExit(code if code >= 0 else 128-code)
+
+
+if __name__ == "__main__":
+    main()
