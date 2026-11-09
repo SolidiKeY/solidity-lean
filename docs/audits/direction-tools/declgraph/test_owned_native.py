@@ -23,6 +23,48 @@ def until(fn,timeout=5):
 def main():
  with tempfile.TemporaryDirectory() as directory:
   d=pathlib.Path(directory);leasepath=d/'lease';ids=d/'ids';log=d/'log'
+  # Deterministic cancellation AFTER real child creation, BEFORE Popen returns
+  # its handle to run(). The old handler raised with proc still None here.
+  for cancellation in (signal.SIGTERM,signal.SIGINT):
+   original=N['subprocess'].Popen;spawned=[];handlers={sig:signal.getsignal(sig) for sig in (signal.SIGTERM,signal.SIGINT)}
+   def during_spawn(*args,**kwargs):
+    child=original(*args,**kwargs);spawned.append(child);os.kill(os.getpid(),cancellation);return child
+   try:
+    N['subprocess'].Popen=during_spawn
+    with leasepath.open('a') as lease,log.open('w') as output:
+     fcntl.flock(lease,fcntl.LOCK_EX)
+     try:N['run']([sys.executable,'-I','-B','-c','import time;time.sleep(30)'],output,cwd=d,env=dict(os.environ),lease=lease,timeout=30)
+     except InterruptedError:pass
+     else:raise AssertionError('Startup cancellation was lost')
+     assert len(spawned)==1 and not alive(spawned[0].pid),'Startup child escaped cleanup'
+    assert available(leasepath) and all(signal.getsignal(sig)==handler for sig,handler in handlers.items())
+   finally:
+    N['subprocess'].Popen=original
+    for child in spawned:
+     if alive(child.pid):os.killpg(child.pid,signal.SIGKILL)
+     child.wait(timeout=5)
+  # Inject INT inside the first cleanup killpg call: cancellation must never
+  # unwind the drain, and must still be reported after the group is dead.
+  original_spawn=N['subprocess'].Popen;original_kill=N['os'].killpg;spawned=[];injected=[]
+  def tracked_spawn(*args,**kwargs):
+   child=original_spawn(*args,**kwargs);spawned.append(child);return child
+  def during_drain(group,sig):
+   if sig==signal.SIGTERM and not injected:injected.append(True);os.kill(os.getpid(),signal.SIGINT)
+   return original_kill(group,sig)
+  try:
+   N['subprocess'].Popen=tracked_spawn;N['os'].killpg=during_drain
+   with leasepath.open('a') as lease,log.open('w') as output:
+    fcntl.flock(lease,fcntl.LOCK_EX)
+    try:N['run']([sys.executable,'-I','-B','-c','import time;time.sleep(30)'],output,cwd=d,env=dict(os.environ),lease=lease,timeout=.2)
+    except InterruptedError:pass
+    else:raise AssertionError('Cleanup cancellation was lost')
+    assert injected and len(spawned)==1 and not alive(spawned[0].pid),'Cancellation escaped group drain'
+   assert available(leasepath)
+  finally:
+   N['subprocess'].Popen=original_spawn;N['os'].killpg=original_kill
+   for child in spawned:
+    if alive(child.pid):original_kill(child.pid,signal.SIGKILL)
+    child.wait(timeout=5)
   child="import os,subprocess,sys,time,json,pathlib; p=subprocess.Popen([sys.executable,'-c','import time;time.sleep(30)']);pathlib.Path(sys.argv[1]).write_text(json.dumps([os.getpid(),p.pid]));time.sleep(30)"
   command=[sys.executable,'-I','-B','-c',child,str(ids)]
   with leasepath.open('a') as lease,log.open('w') as output:
@@ -55,5 +97,5 @@ def main():
   finally:
    if proc.poll() is None:proc.kill();proc.wait()
    if ids.exists() and alive(int(ids.read_text())):os.kill(int(ids.read_text()),signal.SIGKILL)
- print('OWNED_NATIVE_FIXTURES_PASS timeout_group_cleanup term_group_cleanup repeated_signals_resistant_group sigkill_child_retains_lease budget_unchanged')
+ print('OWNED_NATIVE_FIXTURES_PASS startup_term_int_before_assignment cancellation_inside_cleanup timeout_group_cleanup term_group_cleanup repeated_signals_resistant_group sigkill_child_retains_lease budget_unchanged')
 if __name__=='__main__':main()
