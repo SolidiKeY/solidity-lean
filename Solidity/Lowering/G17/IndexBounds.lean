@@ -4,7 +4,7 @@ import Solidity.Lowering.V08.AbiObservations
 import Solidity.Backend.Failure.Observe
 import Solidity.Theory.Typed.Mem
 
-/-! Bounds checks from the existing checked-program metadata. The guard reads captured simple indices and a live reference; it introduces no Source heap relation and makes no claim about admission or a whole lowering pass. Guard metadata is run after the base identity and index input have been captured, before the final memory read. The actual checked-program store preserves the original successful captured store and gives a bounds failure its exact 0x32 payload. In bounds the guarded read is the original captured read. Out of bounds it emits the exact Source panic payload, rather than an empty native revert. No access-success result is assumed. -/
+/-! Bounds checks from the existing checked-program metadata. The guard reads captured simple indices and a live reference; it introduces no Source heap relation and makes no claim about admission or a whole lowering pass. Guard metadata is run after the base identity and index input have been captured, before the final memory read. The actual checked-program store preserves the original successful captured store and gives a bounds failure its exact 0x32 payload. In bounds the guarded read is the original captured read. Out of bounds it emits the exact Source panic payload, rather than an empty native revert. No access-success result is assumed. effectfulRead_run: The captured base is checked in the reached heap after arbitrary index effects; private captures survive caller rebinding, with exact bounds panic and prefix halts. effectfulWrite_run: A native store uses the captured identity/index and reached heap/caller value after index effects; bounds failures retain exact panic data, without a Source assignment-order claim. -/
 namespace Solidity.Lowering.G17.IndexBounds
 variable {C : Contract} {Γ : Ctx} {R : RefTy} {p : PrimTy}
 
@@ -213,7 +213,7 @@ def effectfulReadOperand (base : Idx Γ (.mem R)) (hm : (Ty.ref R).mapFree = tru
       (code array (.there .here) hm (.local .here)),
     .val (.readMem (.index array (.var (.there .here) hm) (.simple (.local .here))))⟩
 
-/-- The captured base is checked in the reached heap after arbitrary index effects; private captures survive caller rebinding, with exact bounds panic and prefix halts. -/
+
 theorem effectfulRead_run (target : State C Γ) (base : Idx Γ (.mem R))
     (hm : (Ty.ref R).mapFree = true) (old : HRef target.H R)
     (read : TEnv.get base target.env = some old) (array : ArrTy R (.prim p))
@@ -261,7 +261,7 @@ def effectfulWriteCode (base : Idx Γ (.mem R)) (hm : (Ty.ref R).mapFree = true)
       (.cons (.assignMem (.index array (.var (.there .here) hm) (.simple (.local .here)))
         (.val (.simple (value.wk (.drop (.drop .refl)))))) .nil))
 
-/-- A native store uses the captured identity/index and reached heap/caller value after index effects; bounds failures retain exact panic data, without a Source assignment-order claim. -/
+
 theorem effectfulWrite_run (target : State C Γ) (base : Idx Γ (.mem R))
     (hm : (Ty.ref R).mapFree = true) (old : HRef target.H R)
     (read : TEnv.get base target.env = some old) (array : ArrTy R (.prim p))
