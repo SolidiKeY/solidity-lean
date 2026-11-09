@@ -621,7 +621,13 @@
       "bundle_sha256": "063f1825f50e8a06a9ab4503abb9b6c592e667879954b7ea98777169379c9d7b",
       "review_instruction": "Fetch prototype bundle ref into a separate review ref; requires published base381328f608. This9e bundle includes unchanged4667operation bridge and the actual Artifact-dependent word exports. Previous2c0eb6 bundle is historical9d arithmetic-only export path. Never merge prototype history."
     },
-    "evidence": "evidence: 5c0b96e56ce5a1ab3cafaa40a58cd061704aacdd evidence/shrink-pilots-1108/tv-yul/tv-yul-artifact-path-checkpoint/"
+    "evidence": "evidence: 5c0b96e56ce5a1ab3cafaa40a58cd061704aacdd evidence/shrink-pilots-1108/tv-yul/tv-yul-artifact-path-checkpoint/",
+    "raw_checker_trial": {
+      "program": "Program.writeStatement byteField with its actual compiledWrite profile/writeBlock;2full256bitlocals,depth0,fuel12",
+      "result": "Raw decide fails at the unchanged default maximum recursion depth. Exact same proposition has the existing generated_check proof witness.",
+      "interpretation": "This is a failed kernel-reduction feasibility experiment, not a passing concrete checker run or an unfinished soundness theorem. The measured982line/121declaration workload uses proof-derived acceptance. Standalone negative benchmark source/logs are private validation evidence and not replacement implementation code.",
+      "budget_changes": []
+    }
   },
   "replacement_count_boundary": "proved_views_replacements counts only owner-approved family replacements; the2candidate exact word exports transferred through Artifacts are reported separately."
 }
