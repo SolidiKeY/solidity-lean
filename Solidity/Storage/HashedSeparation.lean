@@ -275,7 +275,7 @@ theorem locate_occ : ∀ (t : STy) (l : Loc) (p : List Step) {t' : STy} {l' x : 
   | .map v, l, .key k :: p, _, _, _, h, hx => by
     simp only [STy.locate] at h
     exact .entry (locate_occ v _ p h hx)
-  | .word, _, _ :: _, _, _, _, h, _ => by cases h
+  | .word, _, step :: _, _, _, _, h, _ => by cases step <;> cases h
   | .strct _, _, .index _ :: _, _, _, _, h, _ => by cases h
   | .strct _, _, .key _ :: _, _, _, _, h, _ => by cases h
   | .sarr _ _, _, .field _ :: _, _, _, _, h, _ => by cases h
