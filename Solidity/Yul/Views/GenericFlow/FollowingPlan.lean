@@ -3,8 +3,7 @@ import Solidity.Yul.Views.GenericFlow.Following
 
 namespace Solidity.Yul.Views.GenericFlow
 
-/-- Adapt the shared intrinsic Plan computations to checked following.
-State and journal remain lazy; the effective separation checker is explicit. -/
+/-- Adapt the shared intrinsic Plan computations to checked following. State and journal remain lazy; the effective separation checker is explicit. -/
 abbrev planShape {E Γ} (F : Source.Fr) (interface : Generic.OwnershipInterface E Γ F)
     (layout : interface.Layout) (fixed : Roadmap.Evm.Fixed) (written value : Roadmap.Word)
     (state : Unit → Source.EMState E Γ)
