@@ -1,11 +1,14 @@
 {
   "base": "381328f608032dd19c405373c2b265e83a969850",
   "prototype_commit": "9e8e83ae97b466c01e9306fb8b2246ded6469462",
-  "status": "provisional_unapproved",
+  "status": "basis_approved_validation_pending",
+  "basis_authorization": "H299 A: operation bridge approved as pilot basis, conditional on exact export restoration, retained Nat accounting, Views comparison and ordinary validation; no family-reduction acceptance.",
+  "selected_family": "Solidity.Yul.Views.Packing",
+  "family_reduction_accepted": false,
   "covered_views_family": null,
-  "verdict": null,
+  "verdict": "NO-GO",
   "boundary": "Packing only; two word proofs rederived, every other declaration retained. Shared existing library imports are excluded symmetrically; this is not a full import-closure size. All new checker, soundness/completeness, bridge, program, algebra and facade sources count.",
-  "technique_boundary": "Restored word exports now consume checker-produced Artifact run equalities and decode their equal first stack words. BitVec identities and refinement lemmas remain necessary and counted. Each helper executes one read or write code on a mathematically prepared input, not a concatenated two-code run. No owner-approved TV family coverage or reduction is claimed.",
+  "technique_boundary": "Restored word exports now consume checker-produced Artifact run equalities and decode their equal first stack words. BitVec identities and refinement lemmas remain necessary and counted. Each helper executes one read or write code on a mathematically prepared input, not a concatenated two-code run. H299 approves this operation bridge as the pilot basis; no broader family coverage or reduction acceptance is claimed.",
   "before": {
     "commit": "381328f608032dd19c405373c2b265e83a969850",
     "path": "Solidity/Yul/Views/Packing.lean",
@@ -464,7 +467,7 @@
       "Solidity.Yul.Views.Field.find_save_below",
       "Solidity.Yul.Views.Field.find_save_disjoint"
     ],
-    "boundary": "Packing is the sole family with explicit operation/Artifact mappings in this prototype. Widths/Regions are compatibility consumers. No mappings for typed storage/world writeback or arbitrary heterogeneous aggregate/byte geometry are implemented; their existing proofs are not deleted or given word-sized premises. This is an implemented footprint, not global impossibility or approved coverage."
+    "boundary": "Packing is the sole family with explicit operation/Artifact mappings in this prototype. Widths/Regions are compatibility consumers. No mappings for typed storage/world writeback or arbitrary heterogeneous aggregate/byte geometry are implemented; their existing proofs are not deleted or given word-sized premises. This is the sole explicitly mapped family in this prototype, not a global impossibility result or family-reduction acceptance."
   },
-  "largest_covered_family": "Unestablished while owner-approved TV bridge/coverage is pending; Packing is a provisional candidate, not a largest-covered claim."
+  "largest_covered_family": "Packing is the sole existing Views family with explicit mappings in this implemented operation bridge. Its two word exports are transferred; nine other theorem exports are retained. No broader typed-state or aggregate coverage or family-reduction acceptance."
 }
