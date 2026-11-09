@@ -147,6 +147,6 @@ theorem initial_stack_overflow :
 #guard_msgs (whitespace := lax) in #print axioms boundary_byte_store
 /-- info: 'Solidity.Backend.MemoryOps.Physical.ByteStoreControls.overlap_breaks_frame' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms overlap_breaks_frame
-/-- info: 'Solidity.Backend.MemoryOps.Physical.ByteStoreControls.byte_truncation' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.MemoryOps.Physical.ByteStoreControls.byte_truncation' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms byte_truncation
 end Solidity.Backend.MemoryOps.Physical.ByteStoreControls
