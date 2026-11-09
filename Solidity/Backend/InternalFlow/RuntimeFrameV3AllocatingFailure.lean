@@ -38,7 +38,7 @@ theorem source_failure {C : Contract} (σ : State C (Parameters A)) (depth n : N
      (TRun.seq GuardedRecursion.probe.runR
        (TRun.seq (TRun.call (nextArgs A rfl) .none .refl (AllocatingActivation.body depth).runR) TRun.nil)))
    .refl TRun.nil) TRun.nil σ=_
- simp only [TRun.seq,TRun.ite,guard,positive,boolT,if_true,allocated,probed,ok_bind,Except.map]
+ simp only [TRun.seq,TRun.ite,guard,positive,boolT,allocated,probed,Except.map,bind,Except.bind,ite_true]
 
 /-- Native caller export propagates the same halt, without producing a failed
 caller state. Evaluated arguments are a necessary actual execution premise. -/
@@ -50,7 +50,7 @@ theorem call_failure {C : Contract} {Γ : Ctx} (name : Name) (args : Args C Γ (
  have body := source_failure (caller.withEnv (Δ:=Parameters A) (countValue (n+1) fit,(some ref,()))) depth n fit ref rfl rfl failed
  change TRun.call args .none .refl (AllocatingActivation.body (depth+1)).runR caller=_
  unfold TRun.call
- simp only [evaluated,ok_bind,CallRet.enterT]
+ simp only [evaluated,CallRet.enterT]
  change (do
    let out ← (AllocatingActivation.body (depth+1)).run (caller.withEnv (Δ:=Parameters A) (countValue (n+1) fit,(some ref,())))
    pure (exported (ps:=Parameters A) (CallRet.none : CallRet Γ [] Γ) Ext.refl caller (countValue (n+1) fit,(some ref,())) out))=_
@@ -74,7 +74,7 @@ theorem target_suffix {C : Contract} {L b frame : Nat} {F : Frag (Parameters A)}
  have reached := represented.drop (.push .refl)
  have checked := ArrayProbe.failure_suffix reached (allocated_failure σ n fit ref counter alias failed)
    (activationCode (C:=C) b F pointer ++ suffix)
- simpa only [AllocatingActivation.code,List.append_assoc] using (run_append_ok allocated).trans checked
+ simpa only [AllocatingActivation.code,List.append_assoc,Frag.restrict,Frag.push,List.length_cons,Nat.add_sub_cancel_left,List.drop_succ_cons,List.drop_zero] using (run_append_ok allocated).trans checked
 
 /-- Failure of the real allocating loop turn propagates through the fixed
 return image as bare revert, never abstract fault or successful unwind. -/
@@ -90,7 +90,7 @@ theorem target_image {C : Contract} {L b frame : Nat} {F : Frag (Parameters A)}
  have guard := guard_run σ (n+1) fit counter base machine repr
  have positiveGuard : decide (0<n+1)=true := decide_eq_true (by omega)
  have checkedGuard : run (guardCompiled (C:=C) b F).code machine=.ok (machine.push w[1]) 0 := by
-   simpa only [positiveGuard,bword] using guard
+   simpa only [positiveGuard,bword,ite_true] using guard
  have failedTurn : run (AllocatingActivation.code (C:=C) b F pointer) machine=.revert := by
    simpa only [List.append_nil] using target_suffix σ n fit ref counter alias failed base machine repr cursor owner positive space room pointer []
  exact failing_loop _ _ _ machine (failing_turn _ _ machine checkedGuard failedTurn)
