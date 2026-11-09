@@ -26,6 +26,55 @@ class RegisteredNamesTests(unittest.TestCase):
         self.assertEqual(self.count('import Solidity.H290.G17.Real\n'), 1)
         self.assertEqual(self.count('import Solidity.G17.G18.Real -- G17 H290\n'), 2)
 
+    def test_canonical_module_import_forms(self):
+        for leading in ('', ' ', '\t'):
+            for modifier in ('', 'public ', 'meta ', 'public meta '):
+                for extra in ('', 'all '):
+                    if modifier.startswith('public') and extra:
+                        continue
+                    with self.subTest(leading=leading, modifier=modifier, extra=extra):
+                        source = (leading + 'module\nprelude\n' + leading + modifier +
+                                  'import ' + extra + 'Solidity.H290.G17.Real -- G99 H99\n')
+                        self.assertEqual(self.count(source), 3)
+        self.assertEqual(self.count(' import Solidity.Lowering.G17.Real\n'), 0)
+        self.assertEqual(self.count('import Lean\nimport Solidity.Lowering.G17.Real\n'), 0)
+        self.assertEqual(M['process_ids']('module\nimport G17\n', REGISTRY | {'G17'}), 1)
+
+    def test_invalid_module_import_forms_stay_counted(self):
+        module = 'Solidity.Lowering.G17.Real'
+        for source in ['public import ' + module, 'meta import ' + module,
+                       'import all ' + module, 'module\npublic import all ' + module,
+                       'module\npublic meta import all ' + module,
+                       'module\nmeta public import ' + module,
+                       'module\nmodule\nimport ' + module,
+                       'prelude\nmodule\nimport ' + module,
+                       'module\nimport ' + module + '\nmodule',
+                       'module\nimport ' + module + '\nprelude',
+                       'module\npublic! import ' + module,
+                       'module\nmeta? import ' + module,
+                       'module\nimport all! ' + module,
+                       'module\npublic import Solidity.Lowering.«G17».Real',
+                       'module\npublic import ' + module + ' trailing',
+                       'module\npublic import ' + module + '.Missing']:
+            with self.subTest(source=source):
+                self.retained(source)
+
+    def test_unknown_bare_imports_fail_closed(self):
+        module = 'Solidity.Lowering.G17.Real'
+        for name in ('module', 'prelude', 'public', 'meta', 'all', 'import',
+                     'namespace', 'end', 'UnknownBareModule'):
+            with self.subTest(name=name):
+                self.retained('import ' + name + '\nimport ' + module + '\n')
+                self.retained('import ' + module + '\nimport ' + name + '\n')
+        for root in ('Init', 'Lean', 'Std'):
+            self.assertEqual(self.count('import ' + root + '\nimport ' + module), 0)
+
+    def test_header_modifiers_do_not_change_namespace_policy(self):
+        source = ('module\npublic /- G99 H99 -/ meta import Solidity.G17.G18.Real\n'
+                  'namespace Solidity.G17.G18\nend Solidity.G17.G18\n')
+        self.assertEqual(self.count(source), 6)
+        self.retained('def x := 1\nmodule\npublic import Solidity.G17.G18.Real\n')
+
     def test_import_retained_boundaries(self):
         for source in ['import Solidity.Lowering.G17.Fake\n',
                        'import Solidity.Lowering.G17.Real.More\n',
@@ -34,7 +83,6 @@ class RegisteredNamesTests(unittest.TestCase):
                        'import Solidity.Lowering.G17.Real trailing\n',
                        'import Solidity.Lowering.G17.Real Solidity.G17.G18.Real\n',
                        'def x := 1\nimport Solidity.Lowering.G17.Real\n',
-                       ' import Solidity.Lowering.G17.Real\n',
                        ' def x := 1\nimport Solidity.Lowering.G17.Real\n',
                        'prelude\nprelude\nimport Solidity.Lowering.G17.Real\n',
                        'import Solidity.Lowering.G17.Real\nprelude\n',
