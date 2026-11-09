@@ -243,6 +243,8 @@
     "native_cli_area_rows": "cli-root-areas.csv",
     "native_cli_directory_rows": "cli-root-directories.csv",
     "native_cli_expression_roots": "cli-root-summary.json",
+    "native_compact_equivalence": "compact-equivalence-summary.json",
+    "native_compact_roots": "compact-pilot-summary.json",
     "native_expression_graph": "native-summary.json",
     "native_raw_reference_fixtures": "raw-ref-fixtures.json",
     "native_raw_reference_observation": "raw-reference-summary.json",
