@@ -22,7 +22,7 @@ theorem write_addr {C : Contract} (σ : State C (Parameters A)) (ref : HRef σ.H
  (n : Nat) (fit : n<W) (within : n<σ.heap.len ref .dyn) :
  σ.heap.writeAddr (.index ref .dyn (countValue n fit)) σ.env.1=some (changed σ ref n).heap := by
  simp only [Heap.writeAddr,Heap.setIndex,HeapDomain.index_nat]
- exact if_pos within
+ exact ite_eq_left within
 
 theorem source_write {C : Contract} (σ : State C (Parameters A)) (n : Nat) (fit : n+1<W) (ref : HRef σ.H A)
  (counter : TEnv.get (.here : Idx (Parameters A) (.val .uint)) σ.env=countValue (n+1) fit)
@@ -45,6 +45,7 @@ theorem lengths {C : Contract} (σ : State C (Parameters A)) (ref : HRef σ.H A)
  (changed σ ref n).heap.len other a=σ.heap.len other a :=
  Heap.len_writeAddr (write_addr σ ref n fit within) other a
 
+set_option backward.isDefEq.respectTransparency false in
 theorem read_after_write {C : Contract} (σ : State C (Parameters A)) (n : Nat) (fit : n+1<W) (ref : HRef σ.H A)
  (counter : TEnv.get (.here : Idx (Parameters A) (.val .uint)) σ.env=countValue (n+1) fit)
  (alias : TEnv.get (.there .here : Idx (Parameters A) (.mem A)) σ.env=some ref)
@@ -74,7 +75,7 @@ theorem written {C : Contract} {L b frame : Nat} {F : Frag (Parameters A)}
    (decrement_eval rfl σ n fit ref counter alias) σ.env.1 rfl within 0
  refine ⟨word,represented,target,after,?_,words⟩
  intro cursor positive owned space
- simpa only [Nat.add_zero] using owned.setArray ref n within σ.env.1 word represented
+ simpa only [Nat.add_zero,changed,State.withHeap] using owned.setArray ref n within σ.env.1 word represented
 
 def code {C : Contract} (b : Nat) (F : Frag (Parameters A)) (pointer : Nat) : List Instr :=
  (selected (C:=C) b F).code ++ AllocatingActivation.code (C:=C) b F pointer
@@ -188,7 +189,7 @@ theorem source_positive {C : Contract} (σ : State C (Parameters A)) (depth n : 
  change GuardedRecursion.probe.runR (AllocatingActivation.allocated (changed σ ref n))=
    .ok ⟨AllocatingActivation.allocated (changed σ ref n),List.prefix_refl _⟩ at probed
  change _=(call (AllocatingActivation.allocated (changed σ ref n))).map _
- simp only [TRun.seq,TRun.ite,guard,positive,boolT,wrote,allocated,probed,ok_bind,if_true,Except.map]
+ simp only [TRun.seq,TRun.ite,guard,positive,boolT,wrote,allocated,probed,Except.map]
  cases actual : call (AllocatingActivation.allocated (changed σ ref n)) with
  | error halt => rfl
  | ok out => simp only [TRun.nil];cases out;rfl
@@ -215,7 +216,7 @@ theorem source_failure {C : Contract} (σ : State C (Parameters A)) (depth : Nat
    (TRun.seq write.runR (TRun.seq (DomainTransport.scopedNew .bool AllocatingActivation.lengthExpr).runR
      (TRun.seq GuardedRecursion.probe.runR (TRun.seq (TRun.call (nextArgs A rfl) .none .refl (body depth).runR) TRun.nil))))
    .refl TRun.nil) TRun.nil σ=_
- simp only [TRun.seq,TRun.ite,guard,boolT,if_true,failed,ok_bind,Except.map]
+ simp only [TRun.seq,TRun.ite,guard,boolT,failed,Except.map,bind,Except.bind,ite_true]
 
 /-- Abstract one-step boundary: converting iterator and turn equations must
 not normalize a concrete compiled instruction image or caller machine. -/
@@ -395,7 +396,7 @@ theorem bad_source : (write (C:=P.C)).run bad=.error .revert := by
    pure (⟨bad.withHeap hp,List.prefix_refl _⟩ : Solidity.Out P.C bad.H (Parameters A)))=_
  have failed : bad.heap.writeAddr (.index P.r0 .dyn (countValue 2 (by decide))) bad.env.1=none := by
    simp only [Heap.writeAddr,Heap.setIndex,HeapDomain.index_nat]
-   apply if_neg
+   apply ite_eq_right
    change ¬2<callee.heap.len P.r0 .dyn
    rw [HeapDomain.Checks.length_zero]
    omega
@@ -416,7 +417,7 @@ theorem bad_turn : loopTurn (run (guardCompiled (C:=P.C) 2 F).code) (run (code (
  exact (one_eq_turn _ _ badMachine).symm.trans actual
 
 theorem bad_body (depth : Nat) : (body (depth+1)).run bad=.error .revert :=
- source_failure bad depth .revert (by simpa only using (guard_eval bad 3 rfl)) bad_source
+ source_failure bad depth .revert (by simpa only [show decide (0<(3:Nat))=true from rfl] using (guard_eval bad 3 rfl)) bad_source
 
 end Checks
 end Solidity.Backend.InternalFlow.RuntimeFrame.MutatingActivation
