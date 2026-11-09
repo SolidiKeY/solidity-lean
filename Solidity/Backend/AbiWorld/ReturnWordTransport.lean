@@ -135,7 +135,9 @@ end Solidity.Backend.AbiWorld.ReturnWordTransport
 #guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.AbiWorld.ReturnWordTransport.wordAt_index
 /-- info: 'Solidity.Backend.AbiWorld.ReturnWordTransport.words_readback' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.AbiWorld.ReturnWordTransport.words_readback
-/-- info: 'Solidity.Backend.AbiWorld.ReturnWordTransport.decode_transport' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.AbiWorld.ReturnWordTransport.decode_transport' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.AbiWorld.ReturnWordTransport.decode_transport
 /-- info: 'Solidity.Backend.AbiWorld.ReturnWordTransport.emitted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.AbiWorld.ReturnWordTransport.emitted
