@@ -21,7 +21,10 @@ theorem represented_nil_all_tails (rest : List Instr) :
 
 theorem represented_revert_all_refused :
     run ((joinCompilation 0).code++[.jump 1]++[.revert]) representedMachine≠.revert := by
-  rw [represented_nil_all_tails [.revert]]
+  have success : run ((joinCompilation 0).code++[.jump 1]++[.revert]) representedMachine=
+      .ok representedMachine 0 := by
+    simpa only [List.length_cons,List.length_nil] using represented_nil_all_tails [.revert]
+  rw [success]
   intro impossible
   cases impossible
 
