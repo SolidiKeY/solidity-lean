@@ -80,8 +80,9 @@ jobs:
         run: lake build Solidity SolidityExamples
       # H109/H134: the slow library stays out of default checkpoints. Each of its
       # modules builds on one core under its own 600 s budget, in import order,
-      # so a module that outgrows it is named (scripts/ci/build-slow-examples.sh);
-      # the library root then builds under the original 600 s library budget.
+      # so a module that outgrows it is named (scripts/ci/build-slow-examples.sh).
+      # The library step below then only checks the root file: the total is
+      # bounded per module (H134), no longer by one 600 s library budget.
       - name: Build H109 slow examples, one budget per module
         run: bash scripts/ci/build-slow-examples.sh
       - name: Build H109 slow examples
@@ -238,13 +239,14 @@ jobs:
   # Bridge/.lake (Mathlib, lean-auto, Loom, Velvet) is the one Actions cache of
   # this workflow. lean-action's own cache saved a new entry on every run of
   # every branch, which filled the repository's 10 GB limit; here only master
-  # saves, one entry per toolchain and manifest, and older entries are deleted.
-  # Branch and pull-request runs restore master's entry read-only.
+  # saves, one entry per commit, and `bridge-cache-evict` deletes the entries
+  # of older commits. Branch and pull-request runs restore master's entry
+  # read-only.
   bridge:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      actions: write
+    outputs:
+      cache-key: ${{ steps.bridge-key.outputs.prefix }}${{ github.sha }}
+      cache-prefix: ${{ steps.bridge-key.outputs.prefix }}
     steps:
       - uses: actions/checkout@v5
       - name: Bridge cache key
@@ -273,9 +275,22 @@ jobs:
         with:
           path: Bridge/.lake
           key: ${{ steps.bridge-key.outputs.prefix }}${{ github.sha }}
-      - name: Evict older bridge build caches (master only)
-        if: github.ref == 'refs/heads/master'
+
+  # Runs only on master and executes no code from the build: the one job that
+  # may delete caches (`actions: write`).
+  bridge-cache-evict:
+    needs: bridge
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: scripts/ci
+      - name: Evict bridge build caches of older commits
         env:
           GH_TOKEN: ${{ github.token }}
-          KEEP: ${{ steps.bridge-key.outputs.prefix }}${{ github.sha }}
-        run: bash scripts/ci/evict-caches.sh bridge-lake- "$KEEP"
+          GH_REPO: ${{ github.repository }}
+        run: bash scripts/ci/evict-caches.sh bridge-lake- "${{ needs.bridge.outputs.cache-key }}"

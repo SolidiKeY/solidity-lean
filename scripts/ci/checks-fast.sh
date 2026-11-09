@@ -48,6 +48,16 @@ for arg in "$@"; do
 done
 case "$jobs" in ''|*[!0-9]*|0) echo "checks-fast: CHECKS_FAST_JOBS must be a positive integer" >&2; exit 2;; esac
 
+# The environment CI gives these checks; a gate run without it could pass where CI fails.
+if [ "$(git rev-parse --is-shallow-repository)" != false ]; then
+  echo "checks-fast: shallow clone; the shrink-only baselines need full history (git fetch --unshallow)" >&2; exit 1
+fi
+node_major=$(node -p 'process.versions.node.split(".")[0]' 2>/dev/null) || node_major=0
+if [ "${node_major:-0}" -lt 22 ]; then echo "checks-fast: node >= 22 required (have ${node_major:-none})" >&2; exit 1; fi
+
+untracked=$(git ls-files --others --exclude-standard | wc -l)
+[ "$untracked" -eq 0 ] || echo "checks-fast: warning: $untracked untracked file(s) are checked here but absent from CI's checkout; commit or remove them"
+
 logs=$(mktemp -d "${TMPDIR:-/tmp}/checks-fast.XXXXXXXX") || exit 2
 names=()
 while IFS=$'\t' read -r name cmd; do

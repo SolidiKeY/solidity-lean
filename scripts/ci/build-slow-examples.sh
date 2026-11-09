@@ -9,7 +9,8 @@
 # Usage: scripts/ci/build-slow-examples.sh [--list]
 #   --list  print the modules in build order and exit
 # Environment: SLOW_EXAMPLE_BUDGET_S (default 600; values above 600 are refused).
-# Prints "PASS|FAIL|TIMEOUT <module> <seconds>s" per module; exit 0 all passed, 1 a build
+# Prints "PASS|FAIL|TIMEOUT <module> <seconds>s" per module, or SKIP for a module whose
+# slow import failed (it would only rebuild that import under its own budget); exit 0 all passed, 1 a build
 # failed or timed out, 2 usage error.
 set -uo pipefail
 root=$(git rev-parse --show-toplevel) || exit 2
@@ -44,18 +45,25 @@ def visit(m):
     for d in sorted(deps[m]): visit(d)
     state[m] = 2; order.append(m)
 for m in sorted(slow): visit(m)
-print("\n".join(order))
+print("\n".join(m + "\t" + ",".join(deps[m]) for m in order))
 PY
 ) || exit 2
-if [ "$list" = 1 ]; then echo "$order"; exit 0; fi
-failed=0
-while read -r m; do
+if [ "$list" = 1 ]; then cut -f1 <<<"$order"; exit 0; fi
+failed=0; bad=","
+while IFS=$'\t' read -r m deps; do
   [ -n "$m" ] || continue
+  # A module whose slow import failed would rebuild it under its own budget and fail too.
+  skip=""; IFS=, read -ra ds <<<"$deps"
+  for d in "${ds[@]}"; do case "$bad" in *",$d,"*) skip=$d;; esac; done
+  if [ -n "$skip" ]; then failed=1; bad="$bad$m,"; echo "SKIP $m (imports failed $skip)"; continue; fi
   start=$(date +%s)
   LEAN_NUM_THREADS=1 timeout --kill-after=10s "${budget}s" lake build "$m" </dev/null; st=$?
   secs=$(( $(date +%s) - start ))
   if [ "$st" -eq 0 ]; then echo "PASS $m ${secs}s"
-  elif [ "$st" -eq 124 ] || [ "$st" -eq 137 ]; then failed=1; echo "TIMEOUT $m ${secs}s (budget ${budget}s)"
-  else failed=1; echo "FAIL $m ${secs}s (exit $st)"; fi
+  else
+    failed=1; bad="$bad$m,"
+    if [ "$st" -eq 124 ] || [ "$st" -eq 137 ]; then echo "TIMEOUT $m ${secs}s (budget ${budget}s)"
+    else echo "FAIL $m ${secs}s (exit $st)"; fi
+  fi
 done <<<"$order"
 exit "$failed"
