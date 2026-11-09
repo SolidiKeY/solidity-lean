@@ -8,8 +8,7 @@ open Solidity.Source
 /-- Metadata only: the actual declaration and one intrinsic syntax site. -/
 abbrev DeclarationOccurrence := Decl × SyntaxOccurrence
 
-/-- Includes every carried declaration, including unused bodies. The caller
-cannot replace the environment roster with a selected list of roots. -/
+/-- Includes every carried declaration, including unused bodies. The caller cannot replace the environment roster with a selected list of roots. -/
 def declarationOccurrences (E : Env) : List DeclarationOccurrence :=
   E.decls.flatMap fun d => (syntaxOccurrences d.node).map (fun x => (d,x))
 
@@ -44,8 +43,7 @@ theorem declaration_subterm_covered (E : Env) (d : Decl) (member : d ∈ E.decls
     (d,site) ∈ declarationOccurrences E :=
   (declarationOccurrences_iff E _).mpr ⟨member,subterm⟩
 
-/-- Actual name resolution supplies roster membership; no additional target
-coverage hypothesis is added to the source resolver. -/
+/-- Actual name resolution supplies roster membership; no additional target coverage hypothesis is added to the source resolver. -/
 theorem resolved_declaration_subterm_covered {E : Env} {locals : List String}
     {scope : Option String} {name : String} {ds : List Decl} {d : Decl}
     (resolved : E.resolve locals scope name = some (.decls ds)) (chosen : d ∈ ds)
@@ -114,16 +112,14 @@ theorem source_unit_not_recoverable_from_env :
 /-- info: 'Solidity.Frontend.Admission.source_unit_not_recoverable_from_env' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms source_unit_not_recoverable_from_env
 
-/-- Compose the existing intrinsic subterm relation without replacing its
-representation or its immediate-child relation. -/
+/-- Compose the existing intrinsic subterm relation without replacing its representation or its immediate-child relation. -/
 theorem syntaxSub_trans {a b c : SyntaxOccurrence}
     (ab : Syn.Sub a b) (bc : Syn.Sub b c) : Syn.Sub a c := by
   induction bc with
   | refl => exact ab
   | child member sub ih => exact .child member ih
 
-/-- Every declaration returned by the actual collector retains its original
-syntax position. No separate declaration roster or coverage premise is used. -/
+/-- Every declaration returned by the actual collector retains its original syntax position. No separate declaration roster or coverage premise is used. -/
 theorem collected_declaration_subterm (scope : Option String) {c : Cat} (s : Syn c) :
     ∀ d ∈ s.collect scope,
       Syn.Sub ⟨d.kind.cat d.top,d.node⟩ ⟨c,s⟩ := by
@@ -149,8 +145,7 @@ theorem collected_declaration_subterm (scope : Option String) {c : Cat} (s : Syn
            | exact .child (List.mem_cons_of_mem _
                (List.mem_cons_of_mem _ (List.mem_singleton_self _))) (ih d nested))
 
-/-- Declaration inventory sites are genuine sites of their original source
-unit. The converse is deliberately absent: headers also occur in the unit. -/
+/-- Declaration inventory sites are genuine sites of their original source unit. The converse is deliberately absent: headers also occur in the unit. -/
 theorem declaration_occurrence_in_source_unit (u : Syn .unit)
     (site : DeclarationOccurrence) (present : site ∈ declarationOccurrences u.env) :
     site.2 ∈ syntaxOccurrences u := by
@@ -174,8 +169,7 @@ obligation; these laws establish exactly the supplied classifier's occurrences. 
 
 universe u
 
-/-- Retain each actual declaration and syntax site alongside a classified field.
-The classifier sees the intrinsic syntax category; it cannot replace the roster. -/
+/-- Retain each actual declaration and syntax site alongside a classified field. The classifier sees the intrinsic syntax category; it cannot replace the roster. -/
 def declarationFieldUses {α : Type u} (E : Env)
     (fields : ∀ {c : Cat}, Syn c → List α) : List (DeclarationOccurrence × α) :=
   (declarationOccurrences E).flatMap fun site =>
