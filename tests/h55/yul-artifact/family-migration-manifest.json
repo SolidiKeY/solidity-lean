@@ -3,7 +3,7 @@
   "scope": "Frozen 57-input H55 family queue; proof-entrypoint reuse is partial family migration, not definition or full-family completion.",
   "frozen_input_count": 57,
   "fully_migrated_families": 0,
-  "partially_migrated_input_files": 52,
+  "partially_migrated_input_files": 53,
   "entries": [
     {
       "path": "Solidity/Yul/Compilation/CaseCompletion.lean",
@@ -367,8 +367,11 @@
     },
     {
       "path": "Solidity/Yul/Compilation/SwitchCompilationControls.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.SwitchCompilation.Controls.matching_target",
+        "Solidity.Yul.Compilation.SwitchCompilation.Controls.default_target"
+      ],
       "existing_definitions_changed": false
     },
     {

@@ -23,7 +23,12 @@ theorem matching_source (c : Scalar.Word) :
 theorem matching_target (c : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) :
  Evm.run artifact.code {m with stack := coreWord dirty::coreWord c::caller} =
  .ok {m with stack := coreWord (update dirty)::coreWord c::caller} 0 :=
- artifact.normal_to_model 12 #v[dirty,c] #v[update dirty,c] (matching_source c) m caller
+ by
+ exact CompletionControls.normal_output (c := root) #v[update dirty,c]
+   (fun actual => Evm.run artifact.code {m with stack := coreWord dirty::coreWord c::caller} =
+     .ok {m with stack := actual.toList.map coreWord++caller} 0)
+   (artifact.source_to_model 12 #v[dirty,c] ⟨sourceLocals #v[update dirty,c],.normal⟩
+     (matching_source c) m caller)
 
 theorem default_source (b c : Scalar.Word) (different : b.toFin ≠ dirty.toFin) :
  evalStmt 3 .nil True.intro switchSource artifact.compiled.profile (sourceLocals #v[b,c]) =
@@ -35,7 +40,12 @@ theorem default_target (b c : Scalar.Word) (different : b.toFin ≠ dirty.toFin)
  (m : Evm.Machine) (caller : List Evm.Word) :
  Evm.run artifact.code {m with stack := coreWord b::coreWord c::caller} =
  .ok {m with stack := coreWord b::coreWord c::caller} 0 :=
- artifact.normal_to_model 3 #v[b,c] #v[b,c] (default_source b c different) m caller
+ by
+ exact CompletionControls.normal_output (c := root) #v[b,c]
+   (fun actual => Evm.run artifact.code {m with stack := coreWord b::coreWord c::caller} =
+     .ok {m with stack := actual.toList.map coreWord++caller} 0)
+   (artifact.source_to_model 3 #v[b,c] ⟨sourceLocals #v[b,c],.normal⟩
+     (default_source b c different) m caller)
 
 theorem low_alias_target (c : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) :
  Evm.run artifact.code {m with stack := coreWord lowOnly::coreWord c::caller} =
