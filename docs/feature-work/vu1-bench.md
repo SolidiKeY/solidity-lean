@@ -76,6 +76,11 @@ list is available until the actual suite has run.
   a concrete producer lane/task with a publication wake condition, or the
   already published telemetry commit/API and admitted fixture paths. It does
   not reopen `VU1-I1`, request a new policy decision or extend this lease.
+- `VU1-G1` asks the coordinator for a validated compatible cache publication,
+  or a concrete existing-owner publication task, for the bounded full gate's
+  `Solidity/Examples/Tactics/OpenLoops/RowsNine.lean` dependency. The original
+  replay limit stays unchanged. This requests an artifact or producer handle,
+  not permission to change the proof, its premises, the budget or this lease.
 - This lane takes source preparation and admission evidence inside
   `scripts/bench/**` itself. Exact representative inputs still require demonstrated
   frontend admission, rather than an unnamed-owner wait. The request to the
@@ -176,6 +181,13 @@ prepared Velvet directory through `TESTSUITE_BENCH_DIR` and that binary through
 process startup; even a passing run is neither a certified theorem nor the
 requested disjoint end-to-end U01 baseline. Missing phases remain unknown.
 
+The existing corpus generator launches multiple `lake lean` probes concurrently.
+For serial full validation, use an external launcher that locks those probe
+invocations and forwards their exact arguments, output and exit status to the
+pinned Lake. Builds still require the outer serial gate and resource guard;
+`LEAN_NUM_THREADS=1` alone does not serialize independent probe processes. Keep
+the operational launcher and its provenance with the private handoff.
+
 ## Budget decision
 
 The plan proposes fast p50 ≤ 1 s, p95 ≤ 10 s, and certified ≤ 60 s and
@@ -235,6 +247,15 @@ The final finder requested preserving the exact operational timing/RSS wrapper
 for the single certified CLI sample; it is retained with private evidence and
 identified by checksum. The skeptic confirmed the partial native denominator
 and the explicit RSS and trust boundaries. Neither sample is a U01 baseline.
+
+Independent read-only finder and skeptic reviews of the operational probe
+launcher confirmed its argument, output and exit-status preservation. They
+qualified that builds still rely on the outer guard and that PATH must resolve
+through the launcher; the private routing diagnostic checks that resolution.
+Neither reviewer executed Lean or a compiler.
+
+The final finder and skeptic confirmed that `VU1-G1` is a replay dependency
+request, distinct from the resolved memory policy and granting no gate waiver.
 
 ## Checkpoint handoff
 
