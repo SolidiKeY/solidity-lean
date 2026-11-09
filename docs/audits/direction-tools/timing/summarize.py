@@ -28,9 +28,12 @@ def main():
         summary['fresh_attempted_samples']=analysis['attempted_observations']
         summary['areas']=analysis['per_area']
         summary['baseline_only_counts']['waits']=summary['waits']
-        summary['waits']=[{'lane':'da-timing','item':r['path']+': '+r['status']} for r in analysis['current_gaps']]
-        summary['checkpoints'].update({'declaration_ranking':'partial','full_build_estimate':'partial','ten_prioritized_changes':'partial'})
+        summary['waits']=[{'lane':'da-timing','item':r['path']+': '+r['status']} for r in analysis['current_gaps']]+[{'lane':'da-timing','item':name+': complete pinned reference checks pending'} for name in analysis.get('reference_gaps',[])]
+        summary['checkpoints'].update({'local_stratified_measurement':'done' if analysis.get('local_sampling_complete') else 'partial','declaration_ranking':'done' if analysis.get('profile_coverage',{}).get('complete') else 'partial','reference_builds':'done' if analysis.get('reference_gaps')==[] else 'partial','full_build_estimate':'done' if analysis.get('local_sampling_complete') and analysis['full_check_only_estimates'] and all(m.get('module_mean_model_seconds') is not None for m in analysis['full_check_only_estimates'].values()) else 'partial','ten_prioritized_changes':'done' if analysis.get('local_sampling_complete') and len(analysis.get('ten_changes',[]))==10 and all(r.get('evidence_basis') is not None for r in analysis['ten_changes']) else 'partial'})
         summary['limitations']=[s for s in summary['limitations'] if not s.startswith('No matched ratios or full-build estimates')]+analysis['limitations']
+    # Execution receipts/reviews/handoffs live outside the findings artifact.
+    for key in ('final_reviews','clean_checkout_reproduction','handoff'): summary['checkpoints'].pop(key,None)
+    summary['status']='done' if all(value=='done' for value in summary['checkpoints'].values()) else 'partial'
     args.out.mkdir(parents=True,exist_ok=True); (args.out/'summary.json').write_text(json.dumps(summary,indent=2)+'\n')
     print(json.dumps({'status':summary['status'],'modules':summary['tracked_lean_modules'],'lines':summary['tracked_lean_lines'],'passing':summary['fresh_passing_samples']}))
 if __name__=='__main__': main()

@@ -21,8 +21,12 @@ def main():
         except RuntimeError as e: assert '--cloud-vm' in str(e)
         else: raise AssertionError('unguarded command helper')
         assert not (root/'must-not-write.log').exists()
+        real_read_text=pathlib.Path.read_text
+        def no_swap_fixture(path,*args,**kwargs):
+            if str(path)=='/proc/meminfo': return 'SwapTotal: 0 kB\nMemAvailable: 8388608 kB\n'
+            return real_read_text(path,*args,**kwargs)
         # A surviving compiler must stop launch before creating or replacing logs.
-        with mock.patch.object(mod,'CLOUD_VM_OPT_IN',True), mock.patch.object(mod,'active_compilers',return_value=[12345]):
+        with mock.patch.object(mod.pathlib.Path,'read_text',no_swap_fixture), mock.patch.object(mod,'CLOUD_VM_OPT_IN',True), mock.patch.object(mod,'active_compilers',return_value=[12345]):
             try: mod.command(['this-command-must-not-run'],root,root/'overlap-must-not-write.log')
             except RuntimeError as e: assert 'refusing overlap' in str(e)
             else: raise AssertionError('foreign compiler was ignored')
@@ -33,7 +37,7 @@ def main():
             def wait(self,timeout=None): return 0
         fake=FakeProcess()
         # Isolation failure after launch cleans up only our created session.
-        with mock.patch.object(mod,'CLOUD_VM_OPT_IN',True), mock.patch.object(mod,'active_compilers',side_effect=[[],PermissionError('scan denied')]), mock.patch.object(mod.subprocess,'Popen',return_value=fake), mock.patch.object(mod.os,'getpgid',return_value=0), mock.patch.object(mod.os,'killpg') as kill:
+        with mock.patch.object(mod.pathlib.Path,'read_text',no_swap_fixture), mock.patch.object(mod,'CLOUD_VM_OPT_IN',True), mock.patch.object(mod,'active_compilers',side_effect=[[],PermissionError('scan denied')]), mock.patch.object(mod.subprocess,'Popen',return_value=fake), mock.patch.object(mod.os,'getpgid',return_value=0), mock.patch.object(mod.os,'killpg') as kill:
             try: mod.command(['fixture-only'],root,root/'scan-failure.log')
             except PermissionError: pass
             else: raise AssertionError('post-launch scan failure swallowed')
@@ -87,6 +91,15 @@ def main():
         assert effective_summary['fresh_passing_samples']==1 and effective_summary['waits']==[]
         assert len(effective_summary['baseline_only_counts']['waits'])==1
         assert json.loads(changed.stdout)['passing']==1
+        # Replay must never follow pre-existing output aliases to raw data.
+        raw=root/'protected-input.json'; raw.write_text('{"keep": true}\n')
+        for kind in ('symlink','hardlink'):
+            alias=root/('alias-'+kind); alias.mkdir(); target=alias/'summary.json'
+            if kind=='symlink': target.symlink_to(raw)
+            else: target.hardlink_to(raw)
+            denied=subprocess.run([sys.executable,str(HERE/'reproduce.py'),'--sample',str(raw),'--out',str(alias)],capture_output=True,text=True)
+            assert denied.returncode==2 and '--out must be a new directory' in denied.stderr
+            assert json.loads(raw.read_text())=={'keep':True}
         subprocess.run([sys.executable,str(HERE/'summarize.py'),'--out',str(root/'summary')],check=True,capture_output=True)
         summary=json.loads((root/'summary/summary.json').read_text())
         assert summary['measurement_environment'] is None
