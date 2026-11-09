@@ -97,7 +97,11 @@ no sibling SolKeY checkout is needed. Every raw frontend row and compiler/tool
 error is retained, including internal, skipped and unsupported rows. A successful
 listing requires at least one ready row and the existing listing-success policy;
 `readyRows` does not count internal/skipped rows as admitted functions. An
-unfinished attempt never passes, and the report is invalidated before each run.
+unfinished attempt never passes. The selected output is invalidated before input
+discovery, hashing or Git setup; setup failures are saved as failed attempts.
+Normalized selectors, timeout and compiler directory are recorded. Final source
+bytes and every row source hash must match the initial snapshot, or the report
+retains a source-identity error and fails.
 
 These reports are admission evidence only: `verification` is `not-run`, and
 `sourceToVerdictBaseline` is false. They contain no U01 wall-time/RSS baseline,
@@ -171,6 +175,13 @@ On an elan-free installation, set `LAKE_CACHE_DIR` explicitly to the directory
 printed by the cache installer: its toolchain cache can differ from Lake's
 XDG default. Verify the active path with `lake env printenv LAKE_CACHE_DIR`
 before interpreting a cold rebuild as a cache miss for the pinned revision.
+
+The admission-preparation milestone received independent read-only finder and
+skeptic reviews with no Lean server. They identified stale-success retention on
+setup failure, omitted effective selectors and unbound source identities. The
+runner now invalidates pending output before discovery, records selectors,
+preserves partial rows/errors, and fails on row-hash or final-source drift.
+The no-Lean controls cover these cases; both reviewers confirmed the fixes.
 
 ## Checkpoint handoff
 

@@ -21,6 +21,27 @@ export function admissionResult(report, attemptFinished) {
   };
 }
 
+export function sourceIdentityErrors(inputs, results, readBytes = file => fs.readFileSync(file)) {
+  const expected = new Map(inputs.map(input => [path.resolve(input.path), input.sha256]));
+  const errors = [];
+  for (const input of inputs) {
+    try {
+      const observed = sourceHash(readBytes(input.path));
+      if (observed !== input.sha256) errors.push({stage: 'source-identity', source: input.path,
+        reason: 'source changed during admission', expectedSha256: input.sha256, observedSha256: observed});
+    } catch (error) {
+      errors.push({stage: 'source-identity', source: input.path, reason: error.message});
+    }
+  }
+  for (const row of results) {
+    const hash = row.source ? expected.get(path.resolve(row.source)) : undefined;
+    if (!hash || row.sourceHash !== hash) errors.push({stage: 'source-identity', source: row.source ?? null,
+      function: row.function ?? null, reason: 'frontend row does not match the recorded input source',
+      expectedSha256: hash ?? null, observedSha256: row.sourceHash ?? null});
+  }
+  return errors;
+}
+
 function main(args) {
   const options = {list: true, build: false, timeoutMs: 300000,
     solkey: path.join(root, 'tests/migration/solkey')};
@@ -42,26 +63,39 @@ function main(args) {
     } else if (arg.startsWith('--')) throw new Error('Unknown option: ' + arg);
     else paths.push(arg);
   }
-  if (!Number.isSafeInteger(options.timeoutMs) || options.timeoutMs <= 0 || options.timeoutMs > 300000)
-    throw new Error('timeout must be 1..300000 milliseconds; proof budgets are unchanged');
-  if (!paths.length) throw new Error('At least one Solidity source or directory is required');
-  const inputs = solidityFiles(paths).map(file => ({path: file, sha256: sourceHash(fs.readFileSync(file))}));
-  const head = execFileSync('git', ['rev-parse', 'HEAD'], {cwd: root, encoding: 'utf8'}).trim();
+  const selection = {paths: paths.map(file => path.resolve(file)), contract: options.contract ?? null,
+    function: options.function ?? null, timeoutMs: options.timeoutMs, solkey: options.solkey,
+    soljson: path.resolve(options.soljson ?? path.join(options.solkey, 'keyext.solidity.core/build/soljson'))};
+  options.soljson = selection.soljson;
+  let inputs = [], head = null, runnerSha256 = null;
   fs.mkdirSync(path.dirname(output), {recursive: true});
   const save = (report, finished) => {
-    const result = {...admissionResult(report, finished), head, inputs,
-      runnerSha256: sourceHash(fs.readFileSync(fileURLToPath(import.meta.url)))};
+    const result = {...admissionResult(report, finished), head, inputs, selection, runnerSha256};
     const temporary = output + '.' + process.pid + '.tmp';
     fs.writeFileSync(temporary, JSON.stringify(result, null, 2) + '\n');
     fs.renameSync(temporary, output);
     return result;
   };
-  // Invalidate any previous successful report before starting a new attempt.
-  save({results: [], errors: []}, false);
+  // Invalidate old success before discovery, hashing or Git setup can fail.
+  let latest = {results: [], errors: []};
+  save(latest, false);
   process.env.LEAN_NUM_THREADS = '1';
   let report;
-  try { report = runSolidityTests(paths, {...options, onProgress: r => save(r, false)}); }
-  catch (error) { report = {results: [], errors: [{stage: 'admission', reason: error.message}]}; }
+  try {
+    if (!Number.isSafeInteger(options.timeoutMs) || options.timeoutMs <= 0 || options.timeoutMs > 300000)
+      throw new Error('timeout must be 1..300000 milliseconds; proof budgets are unchanged');
+    if (!paths.length) throw new Error('At least one Solidity source or directory is required');
+    inputs = solidityFiles(paths).map(file => ({path: file, sha256: sourceHash(fs.readFileSync(file))}));
+    head = execFileSync('git', ['rev-parse', 'HEAD'], {cwd: root, encoding: 'utf8'}).trim();
+    runnerSha256 = sourceHash(fs.readFileSync(fileURLToPath(import.meta.url)));
+    report = runSolidityTests(paths, {...options, onProgress: r => {
+      latest = {results: [...r.results], errors: [...r.errors]};
+      save(latest, false);
+    }});
+  } catch (error) {
+    report = {results: latest.results, errors: [...latest.errors, {stage: 'admission', reason: error.message}]};
+  }
+  report = {...report, errors: [...report.errors, ...sourceIdentityErrors(inputs, report.results)]};
   const result = save(report, true);
   console.log(JSON.stringify({output, rows: result.rows, readyRows: result.readyRows,
     listingPassed: result.listingPassed, verification: result.verification}));
