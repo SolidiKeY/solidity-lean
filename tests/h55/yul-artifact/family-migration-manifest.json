@@ -17,7 +17,8 @@
       "path": "Solidity/Yul/Compilation/GuardedForCompletion.lean",
       "status": "proof_reuse_partial",
       "migrated_declarations": [
-        "Solidity.Yul.Compilation.GuardedForCompletion.completion_iff"
+        "Solidity.Yul.Compilation.GuardedForCompletion.completion_iff",
+        "Solidity.Yul.Compilation.GuardedForCompletion.model_to_source"
       ],
       "existing_definitions_changed": false
     },
