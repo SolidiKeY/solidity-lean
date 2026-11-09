@@ -1,1 +1,0 @@
-| [feature-work/abstraction-pilot.md](feature-work/abstraction-pilot.md) | Anti-unification deduplication pilot: helper lemmas, measured line/token/check-time savings vs au.py predictions, redesign proposals and rollout shape. |

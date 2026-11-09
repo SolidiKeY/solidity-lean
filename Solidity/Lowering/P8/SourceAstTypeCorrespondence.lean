@@ -24,6 +24,31 @@ theorem optional_name_exact (node : Json) (field name : String)
   rw [value]
   rfl
 
+/-- Mapping path keys retain the existing intrinsic path without normalization. -/
+theorem map_key_path (node : Json) (path : IdPath)
+    (converted : SourceAstTypes.typeNameLeaf node = .ok (.userType path)) :
+    SourceAstCompoundTypes.mapKey node = .ok (.path path) := by
+  unfold SourceAstCompoundTypes.mapKey
+  rw [converted]
+  rfl
+
+/-- Nonpayable elementary keys retain both constructor and grammar restriction. -/
+theorem map_key_element (node : Json) (value : Elem) (notPayable : value ≠ .addressPayable)
+    (converted : SourceAstTypes.typeNameLeaf node = .ok (.elem value)) :
+    SourceAstCompoundTypes.mapKey node = .ok (.elem value notPayable) := by
+  unfold SourceAstCompoundTypes.mapKey
+  rw [converted]
+  simp only [ok_bind, dif_neg notPayable]
+  rfl
+
+/-- Payable-address keys remain refused, rather than silently becoming plain address. -/
+theorem map_key_payable_refused (node : Json)
+    (converted : SourceAstTypes.typeNameLeaf node = .ok (.elem .addressPayable)) :
+    SourceAstCompoundTypes.mapKey node = .error "payable mapping key is not grammar syntax" := by
+  unfold SourceAstCompoundTypes.mapKey
+  rw [converted]
+  rfl
+
 /-- Key/value conversions and both optional mapping names are retained. -/
 theorem mapping_exact (fuel : Nat) (node rawKey rawValue : Json)
     (key : MapKey) (value : Syn .typeName) (keyName valueName : Option String)
@@ -173,4 +198,10 @@ theorem compound_leaf_exact (fuel : Nat) (node : Json) (out : Syn .typeName)
 #guard_msgs (whitespace := lax) in #print axioms mapping_exact
 /-- info: 'Solidity.Lowering.P8.SourceAstTypeCorrespondence.function_exact' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms function_exact
+/-- info: 'Solidity.Lowering.P8.SourceAstTypeCorrespondence.map_key_path' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms map_key_path
+/-- info: 'Solidity.Lowering.P8.SourceAstTypeCorrespondence.map_key_element' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms map_key_element
+/-- info: 'Solidity.Lowering.P8.SourceAstTypeCorrespondence.map_key_payable_refused' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms map_key_payable_refused
 end Solidity.Lowering.P8.SourceAstTypeCorrespondence

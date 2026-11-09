@@ -2155,3 +2155,918 @@ The non-Lean doc-path gate took65.995s;142 ambiguous basenames remain
 informational, all paths resolve. Scoped touched validation is recorded for
 this Python/docs delta only, not the pending P10 proof application. No full
 Lean/Bridge gate or runtime pass is claimed.
+
+
+### Closed explicit-hypothesis witnesses (2026-11-07)
+
+The existing exact-domain renderer now supports a generic closed-domain path.
+It selects355 source-position candidates from the sealed150-module inspection,
+including57 private kernel names, with no recorded binders/universe parameters.
+Lean then independently resolves the unique actual kernel name, compares the
+full recorded type expression, rechecks original theorem kind and universes,
+and runs the unchanged pinned hypothesis transformation. Only a derived `True`
+domain is accepted; each `True.intro` theorem is checked through `Lean.addDecl`.
+Command-local name indexes in batches of64 share lookup work without changing
+any target/type/domain check. Original theorem statements/conclusions are
+unchanged, and their conclusions are not established by these audit witnesses.
+
+The final guarded native group passes in17.581s, including7.078s serial toolkit
+automation. All355 generated witnesses are axiom-free. Eight refusal controls
+cover nonempty binders, non-theorems, universes, hidden binders, missing names
+and corrupted recorded types, including direct batch lookup/type controls.
+All615 selected import products were rebound to their saved frozen-source
+receipts. The355 target names are disjoint from the earlier103-target roster;
+no combined global ledger or full-census acceptance is inferred. Exact native
+hashes, parent inspection/type/source bindings and monitor receipts are checked
+by the external verify-proof.py recipe under
+`/workspace/parallel-20261103/executable-bytecode/closed-source-domains`.
+
+Failures remain preserved and rejected: first namespace/type-name/reserved-token
+errors, then a295s lookup timeout. The proof-only lookup optimization yielded
+an initial strict pass in10.223s; the final changed program added direct batch
+negative controls and toolkit checks. MCP diagnostics were attempted but failed
+on a read-only socket-lock path; the guarded CLI fallback and try-tactics ran
+serially (`decide` and `simp only` passed). No heartbeat or proof budget was
+raised. A genuinely new Q-BUDGET-01/H30/H33 checkpoint epoch spans13:23:24 to
+17:23:24 UTC; the older expired window was not extended. Four native groups
+consume329.653s total; the timeout is not treated as accepted evidence.
+
+Read-only finder/skeptic reviews pass the corrected batched implementation and
+final refusal controls. New source tests guard private type/name pinning,
+nonclosed/unmapped rosters, support-only WordValidation exclusion and exact
+renderer determinism. Source/kernel statement correspondence and global ledger
+links remain open; only these closed explicit-hypothesis domains are accepted.
+Original703-source closure, full190core+37Bridge inspection/statement/inherited
+accounting, supported-program success, other joint witnesses, Source/native/
+gas/fork and package/performance gates remain unfinished. PowerBounds STOP and
+producer/cache waits are unchanged. Masterc71469fa was adopted during this
+checkpoint. Its coordinator-reported full Bridge pass is recorded separately
+from local artifact readiness. The P10 review path is fully qualified, case
+alignment wording remains explicit, and the concrete depth witness remains an
+open implementation/validation obligation requiring Bridge prerequisites.
+
+
+Final checkpoint99source tests, trust/orphans/roots/fragments/whitespace and doc
+paths pass (56.145s;142 ambiguous basenames informational). No newly tracked
+Lean module or default-build import was added; generated355proofs remain H44
+external artifacts requiring the explicit native verifier. Scoped touched
+checks cover this generator/test/docs delta only. Full lane, P10 depth-control,
+Bridge/local-cache recovery and runtime acceptance are not asserted.
+
+### Data-only dependent hypothesis defaults
+
+The existing exact-domain renderer now attempts data-only, universe-free
+source candidates through the same pinned `hypotheses_of%` transformation.
+It retains every dependent existential binder, refuses proof binders, and asks
+existing `Inhabited` instances for concrete values. Each successful complete
+witness passes `Lean.addDecl`; unsupported synthesis creates no witness and
+is not evidence that a domain is empty. Resource errors propagate.
+
+The frozen-map slice has 363 candidates across 84 modules. A probe and a
+strict repeat produced 124 joint hypothesis witnesses and 239 explicitly
+unsupported default attempts. Exact kernel names, raw types and result JSON
+are pinned; standard axioms are checked. Eight refusal controls guard omitted
+proofs, empty/default failures, universes, hidden binders and corrupted records;
+two synthetic positive domains and a separate `Fin 0` impossibility control
+also check. The latter refutes only its intentional toy domain.
+
+Evidence is external under
+`/workspace/parallel-20261103/executable-bytecode/default-data-domains/`.
+`verify-proof.py` reproduces the source and binds native outputs, guards and
+602 existing frozen import products. The first probe failed on the command's
+IO API; that receipt is retained. No prerequisite or PowerBounds retry ran.
+The existing 13:23:24–17:23:24 UTC budget window was reused, not extended.
+Independent finder/skeptic static reviews found no blocking issue; native
+acceptance remains distinct from source authenticity or statement correspondence.
+
+These witnesses prove hypothesis feasibility, not the original conclusions,
+compiler success, G01 linkage or full census closure. The 239 unsupported
+cases remain uncovered by this strategy. The original 703-source closure,
+190-core/37-Bridge inspection and all remaining correspondence, joint-witness,
+physical, Source, gas/fork, performance and package gates remain open.
+H126 A remains binding: the nine out-of-census WordValidation domains are
+support-only, with no census or domain credit. No new tracked Lean module or
+public import is introduced.
+
+Final read-only reviews identified two verifier provenance gaps: probe-manifest
+import rebinding and an unpinned parent report. The verifier now rebinds the
+reconstructed strict manifest and checks the exact sealed parent hash/size
+before selection. Both reviewers confirmed the fixes; verifier replay passes.
+Native probe/strict times are 43.675s/39.822s, with no new module over 60s.
+
+### Decidable dependent premises
+
+The same generic default-domain constructor now has an opt-in proof-bearing
+mode. It retains every dependent existential binder, synthesizes a decision
+for each proof premise, and constructs `of_decide_eq_true` only when Lean
+reduces that decision to true. Complete witnesses still pass the kernel and
+standard-axiom checks. False, stuck or missing decisions are unsupported;
+resource exceptions propagate. The default data-only mode remains byte-exact
+against its prior renderer and its sealed artifact replays unchanged.
+
+The selected frozen-map slice contains 328 proof-bearing candidates across
+82 modules. Probe/strict kernel checks pass in 30.393s/28.826s: 18 hypothesis
+witnesses, including five private declarations, and 310 unsupported attempts.
+Five accepted targets repeat the existing public renderer roster; 13 lie
+outside that roster. These are local slice counts, not distinct global witness
+or census totals. Original conclusions and source correspondence remain open.
+
+Nine refusal controls, four synthetic inhabited domains and two intentional
+impossibility controls pass. In particular, a premise unsupported at default
+`n=0` has a checked alternative witness at `n=1`; a separate `False` premise
+has a checked impossible domain. Unsupported synthesis must never be read as
+an impossibility result for a frozen statement.
+
+External evidence is under
+`/workspace/parallel-20261103/executable-bytecode/decidable-premise-domains/`.
+The non-mutating `verify-proof.py --check` reconstructs the strict source,
+pins parent metadata/original source receipts, and rechecks 603 existing frozen
+import products and native guard/output receipts. Independent read-only
+finder and skeptic reviews pass. No Lean module exceeds 60s; no prerequisite,
+PowerBounds retry, proof-budget increase, new registered module or public
+import was added. The existing budget deadline remains 17:23:24 UTC.
+All original full-source/census, supported-program success, Source/physical,
+gas/fork, Bridge/runtime and performance obligations remain unfinished.
+
+### Bounded typed input sampling
+
+The existing checked-premise renderer now optionally tries four shared seeds
+(0, 1, 4, 32) for Nat/Bool/Fin inputs. This is diagonal sampling, not a search
+of all input combinations. Other data still use existing inhabited instances;
+all dependent proof premises still need actual checked decisions. Fin values
+use Fin.ofNat with NeZero evidence: if instance lookup misses a computed bound,
+the constructor first proves that bound nonzero through the checked decision
+path. Fin 0 is refused. No proof premise or bound is assumed.
+
+The same 328-candidate slice now has 49 accepted joint hypothesis witnesses
+and 279 unsupported attempts. All 18 prior successes are retained; 31 cases
+are recovered relative to that policy. Fifteen accepted declarations are private.
+Six accepted targets also occur in the existing public renderer roster; these
+counts do not imply new distinct global/census coverage. Probe/strict checks
+pass in 51.490s/37.088s, with no module above 60s. Two intervening elaboration
+failures and the earlier instance-only probe remain preserved, not accepted.
+
+Eleven inherited/sampled refusal checks, six synthetic positive domains and
+two intentional impossibility controls pass. Recovery at a nonzero Nat and a
+computed Fin bound is checked; the corresponding False/Fin-zero cases are
+refused. Unsupported sampling is never an emptiness result or a new exclusion.
+The prior data-only and unsampled checked-premise source/artifact replays still
+pass unchanged. No package performance or original-conclusion proof follows.
+
+Evidence is external under
+/workspace/parallel-20261103/executable-bytecode/sampled-premise-domains/.
+Its non-mutating verifier reconstructs the strict source, checks 603 frozen
+import products and sealed parent/source receipts, and pins the prior-policy
+comparison. Independent read-only finder and skeptic pass. The existing
+17:23:24 UTC budget deadline was reused; no prerequisite or PowerBounds retry,
+new registered module, public import or proof-budget increase occurred.
+
+The requested disk helper at /workspace/coord-tools/disk.sh was absent. H1
+cleanup removed only this worktree’s inactive regenerable native IR outputs
+and two CLI binaries with their build metadata. Shared caches, sealed evidence
+and Lean olean products remain untouched. Cleanup records include exact paths,
+file inventories and before/after free bytes; free space was restored above
+2 GiB. Native outputs will need regeneration for future full builds. All
+original source/census, supported-success, Source/physical, gas/fork, full
+runtime/Bridge and performance obligations remain open; H126 support-only
+WordValidation treatment is unchanged.
+
+### Deduplicated hypothesis-report accounting
+
+The existing metadata graph now accepts explicit report pointers with exact
+observed-type snapshots and receipt fingerprints. It preserves every source
+candidate and kernel record, earlier unsupported attempts beside later successful
+reports, unreported constants/fields/theorems, private names and uninstantiated
+parent metadata. Repeated successful reports count once per kernel target.
+Requested helper names do not assert that declarations exist, especially for
+unsupported attempts. The pure join validates metadata shape and association;
+it does not independently validate native proofs or grant source coverage.
+
+A replay bound to four existing sealed artifacts joins 1,374 reports to 3,262
+metadata records. It records 528 distinct targets with supplied successful
+reports, 518 with unsupported-only reports, and 2,216 with no report. The latter
+are 1,281 constants, 130 fields and 805 theorems; they are not silently omitted
+or classified as failed proof attempts. These are prefix report-accounting
+counts, not global witness-ledger or completed-census totals. Manual evidence
+outside these four artifacts is not classified by this index.
+
+The full 1,660 frozen lexical candidates remain in the source-position table.
+Their position joins retain exact signature hashes; 150 modules have supplied
+inspection metadata, while 40 core and 37 Bridge modules remain uninspected.
+Source identity/correspondence, inherited instantiation, global-versus-input
+premise roles and all acceptance flags remain open. Source-position matches and
+native-report pointers establish no additional theorem or full-source closure.
+
+Evidence is under
+/workspace/parallel-20261103/executable-bytecode/hypothesis-report-accounting/.
+The non-mutating replay pins parent metadata, the frozen census, four seal hashes
+and relevant native source/output/log/guard receipts. It reruns no Lean workload
+and mutates no earlier seal. Independent finder and skeptic found a Boolean/int
+snapshot-equality issue: Python treats True and 1 as equal. Canonical JSON
+comparison now rejects those substitutions; regression cases cover private and
+proof-type flags. Both reviewers pass the correction and final provenance join.
+All original 703-source, source/statement/owner, joint-witness/supported-success,
+Source/physical, gas/fork, Bridge/runtime and performance obligations remain.
+
+### Projection registry and raw type metadata
+
+A supplemental native inspector observes the actual projection registry, constructor
+and inductive types for all 130 projection records in the existing 150-module
+metadata prefix. It retains missing-metadata statuses explicitly and preserves the
+original inspector schema and template. The 130 records span 42 modules and 50
+constructors; parameter counts, field indices and structure membership agree in
+all records. RawTailGuardCertificate is the sole parent-bearing structure in this
+subset. These are uninstantiated type expressions, not inherited-type proofs,
+source ownership, field feasibility or joint witnesses.
+
+Two serial native checks took 6.718 and 7.429 seconds. Repeated metadata is
+identical apart from receipt fingerprints; the second source adds class-flag and
+wrong-module controls. Four hundred thirty-two frozen import products are
+rechecked against the earlier source/product receipt. The parser rejects stale
+types, modules, fingerprints, malformed Boolean/natural fields and incomplete
+streams. All 115 Python tests pass. The failed initial Name-qualification probe
+is retained alongside both passing runs. Independent finder and skeptic pass
+the generator, parser and provenance verifier. No census, source correspondence,
+inherited instantiation, global ledger or runtime acceptance is inferred.
+
+Evidence and non-mutating replay: /workspace/parallel-20261103/executable-bytecode/
+projection-registry-inspection/verify-inspection.py --check. H1 cleanup records
+retain SHA256-identical frozen products while removing owned live build copies;
+shared caches and earlier seals are unchanged. Original source closure and
+PowerBounds STOP remain binding.
+
+### Projection-to-kernel and parent-route join
+
+The generic registry join now binds the native supplement to every supplied
+kernel projection snapshot, rejecting stale types and incomplete rosters. It
+retains all 3,262 records: 130 projection nodes and 3,132 nonprojection names.
+The structure index has 50 roots and one parent edge, with no missing records
+or cycles in this supplied prefix. RawTailGuardCertificate reaches its three
+direct fields and the two TailGuardCertificate fields. Repeated parent routes
+retain all edges while counting each observed field name once per root.
+
+Of the 130 projection types, 117 are proposition-valued and 13 are data-valued.
+This classification proves no inhabitance. Registry ownership means the
+observed containing structure only; it establishes no actor/source ownership.
+Raw types remain uninstantiated, and inherited instantiation, correspondence,
+joint-witness, ledger and completed-census flags remain false. Missing records,
+cycles and unavailable parent projections remain explicit in synthetic controls.
+
+The pure replay verifies the preceding seal, exact parent metadata and native
+receipts, then invokes its non-mutating source/product check. It executes no
+new Lean inspection or prerequisite build. Evidence is under
+/workspace/parallel-20261103/executable-bytecode/projection-kernel-join/.
+The full Python suite passes 119 tests; direct projection-file execution passes
+eight tests. Finder and skeptic confirmed a test entry-point omission, now
+fixed by placing unittest.main after both classes and avoiding inherited test
+duplication. Both final reviews pass. Original source closure, all remaining
+190-core/37-Bridge obligations, producer waits and PowerBounds STOP persist.
+
+### Exact V2 frame-field hypothesis witnesses
+
+The existing pinned binder extractor now supports actual registered,
+monomorphic proposition-valued projections, rechecking their exact raw kernel
+types before extracting domains. It retains all input/output/self, tail and
+capacity-room binders. Data projections, nonprojections, unsupported universes,
+stale type snapshots and duplicate field targets are refused. The generic
+extractor is reused; no frozen field signature or original conclusion changes.
+
+Three named positive domains cover FrameCertificate.inputRoom, frame and
+capacity in the frozen Selection V2 interface. They use duplicateHead 7 over
+input [7], output [7,7], and tail [11,99] for the frame/capacity cases. The
+capacity witness includes its actual room proof. The original certificate
+supplies self; it is never silently assumed inhabited. A synthetic certificate
+with a False field has a refuted domain, retained as an intentional negative
+control rather than positive coverage. These are hypothesis-feasibility proofs,
+not the original field conclusions or whole-source/runtime adequacy.
+
+The three proofs pass native checking in 3.326 seconds. Their only axioms are
+propext, Classical.choice and Quot.sound; the empty-domain refutation uses none.
+The sole missing support module, the unchanged frozen FrameCapacityV2, was
+kernel-built in 8.066 seconds under the single 180-second prerequisite
+allowance. Including the failed receipt-wrapper group, its guarded total is
+12.791 seconds. No checked file exceeds 60 seconds. Original prefix products
+and the new module are SHA256-bound under unchanged module names; no cache key
+or artifact bytes are reconstructed. Initial missing-import, receipt-path and
+package-search-path failures remain recorded. No timing STOP was retried.
+
+The fixture frame-field-witnesses.json is checker-read proof source, not a
+receipt. The 122-test suite passes. Finder and skeptic confirmed a native
+receipt-path verification gap: the replay now pins complete stage-specific
+Lean commands, source/output paths and the reconstructed generated-source hash.
+Both final reviews pass. Proofs, native output and guards are sealed outside
+the code branch under /workspace/parallel-20261103/executable-bytecode/
+frame-field-domains/ and archived separately under H145. No global witness
+ledger, full census, inherited instantiation or original 703-source closure
+acceptance is inferred; all original producer waits and STOPs remain.
+
+### Literal and legacy-frame field domains
+
+The generic fixture is now selection-field-witnesses.json. It retains the
+three V2 frame domains and adds four exact frozen field domains: literal
+InstructionCertificate.success/refusal and legacy FrameCertificate.frame/
+prefixes. The instruction witnesses use the existing literalCertificate with
+an explicitly bounded finite word seven and a matching nonempty input stack.
+The refusal-domain witness establishes the equivalence's hypotheses; it does
+not claim that PUSH actually faults. The legacy witnesses adapt the genuine
+DUP frame and call the existing Scalar.prefix_capacity theorem. Their prefix
+case supplies an actual stackBound premise, split and reached-prefix equation.
+This does not repair V1's known conditional physical-capacity limitation.
+
+All seven distinct domains pass native checking in 5.538 seconds; four are new
+and three rechecked, not seven additional domains. Only standard axioms occur
+in the positive proofs; the shared impossible-certificate refutation remains
+axiom-free. All 36 import products were already verified, including the prior
+FrameCapacityV2 kernel build. No new prerequisite or timing-STOP retry ran.
+The first isolated check lacked the read-only parent-product mount, now fixed
+with an in-container product-hash preflight. Failed finite-word numeral
+elaboration was repaired with an explicit Fin constructor and decide bound.
+Both failures remain recorded. MCP diagnostics were unavailable because the
+checkout socket lock is read-only; the guarded native fallback was used.
+
+The 122-test suite passes, and independent read-only finder/skeptic source and
+provenance reviews pass. Replay pins intended source, complete command, output,
+standard axiom reports, prior seal and all 36 products. Evidence is sealed at
+/workspace/parallel-20261103/executable-bytecode/selection-field-domains/ and
+archived separately under H145. Earlier frame-field evidence must be replayed
+from its recorded historical commit because its checker-read fixture was
+renamed and extended. No inherited instantiation, global ledger, full census,
+Source/runtime adequacy or original closure acceptance is claimed.
+
+### Compiler-premise inspection and joint domains
+
+Two previously uninspected frozen modules, Selection.Premises and PremisesV2,
+now have native all-constant inspection packets: 41 records and 11 proposition
+fields. Their fingerprints remain separate from the earlier 150-module packet.
+This brings independently observed core modules to 152; 38 core and 37 Bridge
+modules remain uninspected. Native type/module observations establish no Source
+identity, actor ownership or statement correspondence. All 41 records remain
+accounted for, including the eight fields not witnessed by this checkpoint.
+
+Three exact field domains are witnessed: V1 CompilerPremise.preserves, and V2
+CompilerPremise.inhabited/preserves. They reuse Controls.identityCompiler and
+its preserves field, with all global parameters and real certificate self.
+Preservation cases include a concrete caller whose numeric stack is [11] and
+the actual final=initial relation proof. This demonstrates coexistence of the
+producer and per-input hypotheses. The identity relation remains source-
+independent; this is not Source coverage or a general G24/G49/runtime producer.
+The existing reject_false_compiler control was kernel-checked and reused.
+
+Three missing frozen support modules were checked serially in one 4.793-second
+group under a single 180-second prerequisite allowance. No allowance was
+multiplied per import. The two-module inspection took 6.797 seconds; the three
+field-domain proofs took 11.728 seconds. Every checked file stayed below 60
+seconds. Positive proofs use standard axioms only; the shared empty-certificate
+refutation remains axiom-free. No PowerBounds or other timing STOP was retried.
+
+The checker-read compiler-field-witnesses.json fixture and its regression test
+are code. The 123-test suite and independent finder/skeptic reviews pass. Native
+source, products, guard receipts and deterministic replay are sealed off-branch
+at /workspace/parallel-20261103/executable-bytecode/compiler-premise-inspection/
+and archived under H145. Owned inactive regenerable build outputs were removed
+for disk headroom; source, frozen products, shared cache and evidence remain
+intact. Future full builds may need those outputs fetched or rebuilt. Original
+closure, full census, source adequacy, runtime/Bridge and performance gates
+remain open; no global ledger or full-source acceptance is inferred.
+
+### Decoder-field feasibility and reject-all control
+
+The generic field renderer now accepts optional shared, hash-pinned audit
+support. Its default source and manifest outputs remain byte-identical to the
+previous implementation. Support is trusted reviewed Lean source, not a
+sandbox. One parametric reference self-adapter supplies all five exact frozen
+DecoderPremise domains: entry, closed, agrees, zero and succ. All global byte,
+height, step/run, reachability and self parameters remain explicit.
+
+The closed-domain witness includes a real gasless JUMPDEST transition: byte
+0x5b, PC zero to one, stack [11] preserved. Negative controls reject an empty
+entry-reachability predicate and corrupted result stack [12]. A general lemma
+proves that any admitted supported reference step rules out an always-none
+adapter; a concrete JUMPDEST instance supplies both hypotheses. This is local
+reference-adapter feasibility. Choosing reference step/iteration as adapter
+functions establishes no external Bridge decoder or G45.05-BR agreement.
+
+Both native runs pass: 5.214 seconds initially and 5.079 seconds with the
+generic reject-all control. All scoped axioms are propext/Quot.sound; the
+shared impossible-certificate control remains axiom-free. Thirty-four existing
+source/product bindings suffice; no new prerequisite build or STOP retry ran.
+The five decoder domains and earlier three compiler domains leave three
+runtime-consumer fields unwitnessed in the 11-field premise packet. This is
+local accounting, not a global ledger or completed census.
+
+The 125-test suite and independent read-only finder/skeptic source and final
+provenance reviews pass. Replay binds shared source, exact generated code,
+native commands/results/guards, prior seal and all imports. The final published
+master77dbfca86aa107955b83529007fcaf3b57c32f29 was adopted without discarding
+work. Its integration success is separate from local full validation. Native
+receipts and handoff are sealed outside the code branch under
+/workspace/parallel-20261103/executable-bytecode/decoder-field-domains/ and
+archived privately under H145. H1 cleanup removed only exited containers whose
+IDs match this lane's saved workload records, reclaiming VFS copies while
+retaining every host-bound proof product and receipt.
+
+### Frozen V2 control inspection and theorem domains
+
+The already built InterfaceV2Controls module now has an independent native
+all-constant packet: 17 records, comprising 13 kernel theorems and four other
+constants. Seven theorem names match frozen lexical candidates; six additional
+kernel theorem records receive no inferred source-parent ownership. This
+brings independently observed core modules to 153, leaving 37 core and 37
+Bridge modules uninspected. Packet fingerprints remain separate.
+
+The existing binder renderer now supports original theorems and explicitly
+refuted domains as well as registered projections. Original theorem kind,
+universes and raw type snapshots are checked before reusing the same pinned
+extractor. The projection entry point remains a backward-compatible wrapper;
+default source and manifest output tests still pass. A refuted-target roster
+emits negated domains and is pinned separately, preventing refutations from
+being counted as inhabited hypotheses. No original statement changes.
+
+Eight domains are positively witnessed, all axiom-free. Four domains are
+refuted as intentional negative controls: the oversized V2 program and its
+length auxiliary, the impossible wrong-result length auxiliary, and the V1
+overflow example's impossible stackBound premise. This reproduces the known
+conditional V1 capacity defect without repairing or endorsing it. These four
+refutations receive no positive witness credit. The remaining domain,
+reject_false_runtime, stays open because its composition argument was not
+supplied; no composition or source assumption is invented.
+
+Native inspection passed in 5.888 seconds. Domain checks passed in 6.956 and
+7.295 seconds, using 38 existing verified import products and no new
+prerequisite build or STOP retry. Refutations use only standard axioms; no file
+exceeds 60 seconds. The 127-test suite and independent read-only finder/skeptic
+source and provenance reviews pass. Raw packets, complete 17-record ledger,
+resource receipts and replay are sealed off-branch at
+/workspace/parallel-20261103/executable-bytecode/selection-controls-inspection/
+and archived privately under H145. Only exited lane-owned containers and
+regenerable import-view symlinks were removed; proof products remain intact.
+Original global census, Source/runtime/Bridge, physical, gas/fork, full closure
+and performance obligations remain open.
+
+
+### Frozen control source and binder accounting
+
+The 17-record InterfaceV2Controls inspection is now joined to its exact frozen
+source snapshot using the existing `source_obligation_inventory`,
+`binder_metadata` and `parent_metadata` helpers. All seven lexical theorem
+candidates have unique name/Unicode-position candidate edges. These remain
+candidate edges: no source authenticity, statement correspondence, ownership or
+additional witness credit follows. Ten records have declaration ranges; seven
+lack ranges, and ten kernel records have no lexical theorem candidate (including
+four constants). No auxiliary parent is guessed from a dotted name.
+
+The supplied records expose 34 ordered raw binders with six proof-binder flags.
+Of the 34 head observations, 24 name constants absent from this single-module
+packet and ten have no constant head. All global/per-input premise roles remain
+unclassified. In particular, a data-valued certificate can carry obligations;
+zero proof-binder flags do not show a hypothesis-free or inhabited domain. No
+private flags or structure-parent roots occur in this packet. That says nothing
+about private declarations or inherited obligations in the remaining census.
+
+The static reproduction first rejected source candidates without the required
+explicit edge metadata; supplying the independently recomputed position edges
+then reproduced byte-identical accounting. It pins the preserved parent checksum
+list, validates its manifest and three input file hashes and the frozen Git
+source hash, and records the current helper hash. It starts no
+Lean process, changes no frozen bytes, retries no stopped proof, and supplies no
+new gate, domain or full-census acceptance. Independent read-only finder and
+skeptic reviewed this accounting boundary. Original 703-source closure,
+190-core/37-Bridge inventory, joint witnesses, Source/runtime, G01 and physical
+obligations remain open. Evidence and reproduction are off branch under
+/workspace/parallel-20261103/executable-bytecode/control-source-accounting/ and
+archived privately under H145.
+
+
+### Frozen premise source and binder accounting
+
+The same static join now accounts for all 41 records in the sealed Premises and
+PremisesV2 packet, including eleven kernel theorems. The lexical theorem scanner
+finds zero source theorem candidates in these two files. Consequently all 41
+records remain unmatched to that lexical theorem inventory: generated theorems
+and structure fields are not silently excluded or credited as source matches.
+Thirty-six records have ranges and five lack them. Source bytes are pinned to
+the frozen native inspection inputs; the parent checksum list and input
+manifest/record hashes are checked before the join.
+
+Across these records there are 395 ordered raw binders, with 64 proof-binder
+flags. Thirty binder heads name records supplied in this packet, 143 name
+constants absent from it, and 222 have no constant head. Those are metadata
+observations, not classified global/per-input premises, instantiated dependent
+types or simultaneous witnesses. No private flags or structure-parent roots
+occur in this packet; no absence of inherited obligations elsewhere follows.
+All source/kernel correspondence, generated-declaration ownership and field
+obligations remain explicit open work. This adds no new domain or census credit.
+
+The existing generic helpers produced byte-identical static reports on replay;
+independent read-only finder and skeptic reviewed the counts and boundaries.
+No Lean workload, prerequisite build, budget extension or PowerBounds retry was
+performed. The original closure, full validation, Source/runtime/G01 and physical
+obligations are unchanged. Reproduction and evidence remain off branch under
+/workspace/parallel-20261103/executable-bytecode/premise-source-accounting/ and
+are archived privately under H145.
+
+
+### False-runtime control: reviewed parameter roles
+
+Source/signature review of the frozen `V2.Controls.reject_false_runtime` now
+classifies the intent of all ten parameters. `Observation`, `source`,
+`bridgeStep`, `bridgeRun` and `reachable` describe the chosen observation and
+runtime model. `ir`, `b`, `input` and `output` identify the compiled instance.
+`composition` is a data-valued certificate for that same instance. These are
+review annotations, not kernel-proved role classifications or inhabited domains.
+
+All ten observed binders have `proof_binder = false`. This does not make the
+hypothesis domain automatically inhabited: `composition` must be an actual
+`CompositionCertificate ir b input output`, carrying lowering, whole-control,
+assembly and roundtrip obligations. The other parameters cannot be selected
+independently of this dependent certificate and counted as a simultaneous
+witness. No certificate inhabitant is supplied by this review. The published
+`scalarComposition` constructor remains the reuse target; its unavailable
+import products include the held PowerBounds dependency. No replacement
+certificate framework or stopped build is introduced.
+
+The constantly-false relation occurs in the *negated conclusion* about
+`Nonempty RuntimeConsumer`, not as an assumed input relation or an impossible
+input proof. This is an intentional negative control, not an unexpected
+vacuous theorem. The only open domain in the 13-theorem control packet remains
+open; prior eight positive and four refuted controls are unchanged. The static
+reproduction binds the preserved native-record seal, exact raw target type and
+frozen source bytes. It establishes no source correspondence, inherited
+instantiation, compiler acceptance, runtime/G01 linkage or additional witness.
+Independent read-only finder and skeptic reviewed these boundaries. Evidence is
+kept off branch under
+/workspace/parallel-20261103/executable-bytecode/runtime-control-roles/.
+
+
+### Simultaneous false-runtime control domain: empty instance
+
+The previously open `V2.Controls.reject_false_runtime` domain now has one checked
+simultaneous witness. The fixture constructs an actual empty-program instance
+of the existing `LoweringCertificate`, `ControlCertificate` and
+`CompositionCertificate`. It reuses the published `irStack_injective` lemma for
+both directions of empty IR lowering. Control execution handles arbitrary
+assembly placement with zero steps; the exact input height zero bounds its only
+execution boundary. Assembly and `decode_encode` concern that same empty code.
+This is an instance of the existing framework, not a replacement compiler or
+control evaluator. No component certificate is assumed as an input premise.
+
+All ten parameters are supplied together, including this composition value.
+The explicit negative control then instantiates the original false-runtime
+refusal with that same value. The always-none bridge functions and empty
+reachability predicate are merely parameters of the audited refusal theorem;
+they supply no `DecoderPremise`, `RuntimeConsumer` or external Bridge producer.
+This closes only the last domain in the 13-theorem control packet: nine positive
+joint domains and four intentionally refuted control domains. Generated
+auxiliaries remain visible; source authenticity and global census coverage do
+not follow from this local packet accounting.
+
+The first native check retained two proof errors (an unreduced stack-bound goal
+and an attempted definitional roundtrip). The corrections explicitly reduce the
+bound and use the existing roundtrip theorem. The corrected witness checked in
+3.084 seconds; the final source with its concrete refusal control checked in 3.102 seconds
+under the same serial resource policy (173330432-byte workload peak). Both final
+axiom outputs are standard-only.
+The 39 exact existing import products exclude PowerBounds; no prerequisite build
+or stopped workload was retried. A clean-tree admission initially rejected three
+newly generated Python bytecode files before starting a workload; only those
+owned regenerable files were removed. All failed evidence is retained.
+
+The regression suite passes 128 tests, including exact disjoint supplementation
+of the prior open roster. The nonmutating verifier binds the checked generated
+source to the checker-read fixture, raw target type, frozen source scope, native
+output/log/monitor records and all 39 product hashes. Separate independent
+read-only finder and skeptic found no semantic issue. Logs, products, failed
+attempts and receipts stay off branch under
+/workspace/parallel-20261103/executable-bytecode/runtime-empty-domain/. Exact review evidence is now archived at the immutable
+H145 citation below; fresh-master adoption still awaits Git access repair. Original Source/runtime/G01, physical, Bridge, global census, performance
+and full validation obligations remain open; no runtime gate is claimed.
+
+
+### Runtime-consumer proof projections: simultaneous reference instances
+
+Three further joint domains now check: V1 `RuntimeConsumer.consume`, V2
+`RuntimeConsumer.consume`, and V2 `RuntimeConsumer.inhabited`. The witnesses
+supply every parameter, an actual consumer self, the nonempty identity compiler
+relation, the existing reference decoder, and the same empty composition
+certificate together. V2's admission witness includes a real successful empty
+IR run. Its consume proof preserves the full machine relation, derives equality
+of the numeric stacks, and uses the decoder's zero equation to realize the exact
+zero-step result with its stack bound. The V1 instance reuses that proved V2
+result with the inhabited identity compiler; it does not repair V1's general
+empty-relation vulnerability or establish Source coverage.
+
+The new generic negative control rejects an always-none run function for every
+`DecoderPremise`: even its zero-step equation must return the input state. The
+positive domain uses `LabelExec.advance` and the existing `referenceDecoder`,
+not that rejected iterator. Shared certificate and decoder support are consumed
+once rather than copied. These are empty-program reference instances, not an
+external Bridge adapter, general compiler theorem or G01 operational producer.
+
+The exact checked file passed in 4.868 seconds on its first native attempt with
+182697984-byte workload peak; all printed axioms are standard-only. The same 39
+verified import products suffice, without new prerequisite builds or a
+PowerBounds retry. The suite passes 129 tests. Exact source/receipt replay also
+joins the preserved three compiler and five decoder field witnesses by their
+raw type expressions: all eleven proof projections observed in the two frozen
+Premises modules now have separate per-statement joint-domain witnesses. This
+is not one universal witness across all programs, acceptance of the other 30
+kernel records, lexical theorem correspondence or global census closure.
+
+Independent read-only finder and skeptic review covers the proof, negative
+control and receipt join. Full original source/runtime, G01, physical, Bridge,
+performance and affected-build obligations remain open. Evidence, native output,
+ledger and reproduction stay off branch under
+/workspace/parallel-20261103/executable-bytecode/runtime-consumer-domains/;
+exact private evidence is now archived at the immutable H145 citation below;
+fresh-master adoption still awaits Git access repair.
+
+
+### H145 immutable review evidence
+
+The exact sealed runtime-control, empty-composition and runtime-consumer packets
+are archived in the private coordination repository:
+
+```text
+evidence: 22f01d60f11a07b6b92b72fee357ffc5abc5a868 evidence/solidity-parallel-20261103/executable-bytecode/
+```
+
+Publication used the authenticated GitHub connector after the VM Git credential
+was rejected; it did not publish code or change the sealed snapshots. The API
+returned the archive blob hash and commit, and nineteen key archived text files
+were read back at that immutable commit and compared byte-for-byte. This is
+transport verification, not coordinator integration acceptance.
+
+The empty-composition review material includes its
+[exact generated source](https://github.com/SolidiKeY/solidity-lean-coord/blob/22f01d60f11a07b6b92b72fee357ffc5abc5a868/evidence/solidity-parallel-20261103/executable-bytecode/runtime-empty-domain/RuntimeEmptyDomain.lean),
+[import hashes](https://github.com/SolidiKeY/solidity-lean-coord/blob/22f01d60f11a07b6b92b72fee357ffc5abc5a868/evidence/solidity-parallel-20261103/executable-bytecode/runtime-empty-domain/evidence/import-bindings.json),
+[kernel result](https://github.com/SolidiKeY/solidity-lean-coord/blob/22f01d60f11a07b6b92b72fee357ffc5abc5a868/evidence/solidity-parallel-20261103/executable-bytecode/runtime-empty-domain/final/evidence/proof-result.json),
+[axiom output](https://github.com/SolidiKeY/solidity-lean-coord/blob/22f01d60f11a07b6b92b72fee357ffc5abc5a868/evidence/solidity-parallel-20261103/executable-bytecode/runtime-empty-domain/final/evidence/proof.log),
+and [independent reviews](https://github.com/SolidiKeY/solidity-lean-coord/blob/22f01d60f11a07b6b92b72fee357ffc5abc5a868/evidence/solidity-parallel-20261103/executable-bytecode/runtime-empty-domain/evidence/reviews.md).
+The sibling runtime-consumer packet likewise contains its generated source,
+source/type pins, native kernel and axiom records, eleven-field linkage ledger,
+and reviews. The archive index identifies the compact binary archive containing
+native kernel output artifacts as well as all nonregenerable evidence. Shared
+regenerable import products remain separately retained on the VM with complete
+archive size and SHA256 in that index; their manifests and hashes are archived
+directly. Original seal/checksum files are preserved unchanged.
+
+The Python fixture assertions are structural roster/reuse checks. They do not
+render or kernel-check a witness and cannot substitute for the separately
+archived native check. Kernel acceptance claims refer only to the exact checked
+sources and records above. Merge acceptance remains with the coordinator;
+original Source/runtime/G01, physical, Bridge and global-census gaps are not
+resolved by this publication.
+
+### H151 historical evidence gaps
+
+Unavailable historical raw/MCP exports are **UNVERIFIABLE**; their original
+claims remain unproven. Fresh native records above cover only their explicitly
+named new witnesses and do not reconstruct or validate those lost exports.
+The historically referenced off-Git ExactInstances fixture certification is
+also **UNVERIFIABLE in this audit** from the available material. Its old
+acceptance claim receives no credit, and retrieval of that historical payload
+is removed from this lane's waits. Any fresh owner regeneration is a separate
+result; neither its repaired documentation nor this archive supplies that proof.
+Current producer obligations and regenerable missing Bridge/Mathlib products
+remain distinct from these historical gaps.
+
+
+### Composition/control/lowering field domains with immutable evidence
+
+Eight additional proof-projection domains have separate simultaneous witnesses:
+`CompositionCertificate.lowering`, `control`, `assembly`, `roundtrip`;
+`LoweringCertificate.success`; and `ControlCertificate.shape`, `room`, `realize`.
+They reuse the existing checked empty certificate. The lowering domain admits a
+nonempty `[11,99]` numeric frame and caller, independently of the control
+instance's exact height zero. The latter supplies its actual structured run,
+assembly equality and artifact together; it is not execution of the composition
+at the wrong input height.
+
+A generic negative control derives uniqueness of the assembled result from the
+certificate's existing assembly equation and rejects an explicitly different
+code artifact. Its concrete instance refuses a valid nonempty PUSH0 artifact as
+the result of assembling the certified empty block. No decoder equation alone
+is used as executable behavior.
+
+The first native check passed in 10.619 seconds (180113408-byte workload peak),
+with standard-only axiom outputs and unchanged serial resource/proof bounds.
+The same 39 verified products suffice; there is no new prerequisite build or
+PowerBounds retry. Exact raw-type linkage to the seven earlier checked fields
+accounts for all fifteen proof projections observed in frozen Interface and
+InterfaceV2. This is per-statement domain accounting, not all kernel records,
+source authenticity, V1 conditional-capacity repair or a universal producer.
+The 130 Python tests check structural tooling/rosters; kernel acceptance is
+supported separately by the exact source and native records archived here:
+
+```text
+evidence: cab4c8a24052c60c35b92e48e1bb0aaf67ad557f evidence/solidity-parallel-20261103/executable-bytecode/
+```
+
+The private `composition-field-domains` packet contains generated source, pins,
+import manifests/hashes, kernel/axiom/resource records, reviews and the fifteen-
+field ledger. Its sibling upload index identifies the compiled kernel artifact
+archive; shared regenerable import products remain separately retained. Sixteen
+key archived files were read back and compared byte-for-byte. Separate finder
+and skeptic proof/provenance reviews found no issue. Coordinator integration
+acceptance and all original Source/runtime/G01, physical, Bridge, global census,
+performance and full-build obligations remain open.
+
+Master access was recovered through authenticated Git-data reads: eight commits,
+fifty-four trees and twenty-eight blobs were added only after exact published
+Git SHA checks. Offline connectivity found 123938 reachable objects and zero
+missing objects; remote and original-base ancestries passed. Master 513b4815 was
+merged cleanly at 6a974407, retaining all local work and regenerating roots.
+This recovered Git transport, not Lean build artifacts or historical evidence.
+The later b89c3af4 publication arrived after the native check and remains the
+next adoption input; no acceptance on that later tree is inferred.
+
+
+### Value-checked body certificate premise roles
+
+`Backend/AbiEntry/ValueCheckedBodiesInterface.lean` belongs to the frozen
+bytecode-selection module map. Its six proof fields are the `selected`,
+`executed` and `early_rejection` projections of
+`Solidity.Backend.AbiEntry.Interface.ValueCheckedUIntBodyCertificate` and
+`Solidity.Backend.AbiEntry.Interface.ValueCheckedBoolBodyCertificate`.
+The source is unchanged from frozen base `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
+This is manual binder-role classification, not a simultaneous witness or a
+proof that either certificate is inhabited.
+
+Both certificates quantify over a chosen `program` implementation. A projection
+also requires the certificate itself: six separate field statements cannot be
+credited by treating that global obligation as an arbitrary data parameter.
+The following roles apply to both the uint and Boolean versions:
+
+| Field | Per-input premises | What remains to establish |
+|---|---|---|
+| `selected` | A body and output fragment with successful `inFragP` equality. | The global certificate and a jointly feasible body/fragment instance; the conclusion supplies successful whole and body compilations. |
+| `executed` | The same fragment equality, actual whole/body compilation objects and both compiler equalities, a machine and word/size values with both memory equalities. | All those premises together with one certificate; independent inhabitants of the object types do not suffice. |
+| `early_rejection` | The fragment equality, an actual whole compilation and its compiler equality, and a machine whose payable/callvalue guard is false. | A jointly feasible instance and the certificate; the false guard is a proposition to prove, not a freely selectable Boolean. |
+
+Base, label, payable flag, contract/context indices, body and output fragment
+are instance parameters; the uint version additionally takes `bits`. The
+`executed` memory equalities bind the supplied values to the same machine at
+`base` and `base+1`. They must not be replaced with facts about another machine.
+Its size and value-validity tests occur in the conditional conclusion, rather
+than as admission premises. Its accepted branch promises execution of the
+compiled continuation, which may itself revert; it does not promise a successful
+observable result for every body. Likewise, `selected` is conditional on fragment
+feasibility and is not unconditional compiler totality.
+
+No premise is classified as impossible here. No inherited-field, source-owner,
+Source/runtime/G01, physical, gas/fork, global-census or domain-closure credit
+follows from this classification. Exact simultaneous instances and meaningful
+supported-body success controls remain open.
+
+
+### Operational correspondence inventory: selection-to-Bridge boundary
+
+The following is a source inventory of existing contracts and transports, not
+fresh kernel validation or a producer-completion claim. Fully qualified names
+in the first four rows use the `Solidity.Backend.Selection` namespace.
+
+| Existing declaration and file | Supplied connection | Obligation retained |
+|---|---|---|
+| `LoweringCertificate.success`, `Backend/Selection/Interface.lean` | IR success with zero pending skip and the exact caller's nonstack frame is equivalent to `StructuredExec` for a supplied numeric output. | A concrete lowering certificate; arbitrary successful IR outcomes are not automatically known to have this shape. |
+| `FramedLoweringCertificate.reflect`, `Backend/Selection/FramedLoweringInterface.lean` | Every actual successful IR result from a supplied numerically represented initial stack is reflected to a numeric output, zero skip, the unchanged nonstack frame and structured execution. | A concrete strengthened certificate for the selected IR/block; the interface alone is not a producer. |
+| `CompositionCertificate.execute`, `Backend/Selection/Composition.lean` | A supplied actual IR success and matching entry height produce a safe finite fetched-byte run of the exact composed artifact. | The composition certificate, numeric input/caller alignment and actual success equation; neither Source observations nor byte-memory refinement follows. |
+| `decoder_advance` and `CompositionCertificate.execute_bridge`, `Backend/Selection/Composition.lean` | The named decoder premise transports finite byte runs and every checked prefix to the supplied Bridge runner. | Entry reachability, closure under actual byte steps, one-step agreement and the zero/successor iteration equations for that adapter. |
+| `Solidity.Backend.Selection.V2.CompilerPremise`, `Backend/Selection/PremisesV2.lean` | The chosen observation relation is nonempty, and every related machine pair has the stipulated IR success. | Relation coverage/authenticity for actual Source evaluations and budgets; one admitted pair does not establish either. |
+| `Solidity.Backend.Selection.V2.RuntimeConsumer`, `Backend/Selection/PremisesV2.lean` | Its independent admitted case fixes entry height, numeric stack, unchanged nonstack frame and actual IR success; `consume` states conditional Bridge execution. | A concrete consumer and the compiler/decoder premises; the structure declaration is not an implementation. |
+
+`DecoderPremise` in `Backend/Selection/Premises.lean` is shared by both versions.
+Its `zero` and `succ` fields constrain iteration independently of reachability;
+`entry`, `closed` and `agrees` constrain the supported state set. They must be
+supplied for the same encoded composition artifact, rather than for unrelated
+bytes or a substitute runner. The legacy compiler/consumer declarations in
+that file have no nonemptiness field; V2's admitted case must not be credited
+retroactively to them.
+
+The `budget` parameter indexes `source : Nat → SourceObservation`. None of
+these declarations equates it to Osaka gas or gives a gas-consumption bound.
+The existential finite byte-step count is likewise not a gas accounting result.
+Fault, revert, divergence, external-call behavior and physical memory adequacy
+remain distinct obligations rather than being covered by the finite-success
+transport. In particular,
+`Solidity.Backend.MemoryOps.Physical.ByteWorld.Producer.load_at` in
+`Backend/MemoryOps/PhysicalByteWorldInterface.lean` consumes a pending `Producer`
+and initial `WordFrame` facts; it does not construct that producer or establish
+emission provenance. These boundaries remain open for G01 and the original
+Source/runtime correspondence audit.
+
+
+### Value-checked body field domains
+
+The six proof projections classified above now each have a separate joint-domain
+witness using the existing `ValueCheckedBodies.UInt.certificate` or
+`ValueCheckedBodies.Bool.certificate`. The nil body and actual output fragment,
+compiled whole/body objects, compiler equalities and machine facts are supplied
+together. The executed-domain instances use size zero: they witness a short-input
+rejection case, **not supported-body successful execution**. Both additional
+actual-run controls concern the uint nonpayable instance, with callvalue one;
+one proves revert and the other rejects replacing that result with success.
+
+The generated additive module passed the pinned serial native check in 11.552
+seconds, with a 187932672-byte workload peak and standard-only printed axioms.
+All 246 frozen import products were hash-verified against the sealed source-prefix
+receipt. That original aggregate receipt remains RED; reuse of these products
+does not close its 703-source obligation. This closure excludes PowerBounds,
+and no Bridge or prerequisite build was started. Independent finder/skeptic
+reviews required pinned import-receipt and exact native-command checks; both
+were added to the receipt-only verifier and the findings resolved. The existing
+130 Python tooling tests pass; they are distinct from kernel acceptance.
+
+Exact source, raw-type pins, compiler artifact, import manifests, kernel/axiom
+and resource records, verifier and reviews are privately archived and were read
+back byte-for-byte:
+
+```text
+evidence: 57711dd4b4d3d7101a73b7f860795e408b4f4d96 evidence/solidity-parallel-20261103/executable-bytecode/value-checked-body-domains-fb6fd1d1.json
+```
+
+These are six additional per-statement domains, not global census closure,
+Source/runtime/G01 correspondence, a supported-body success theorem, physical
+realization or full Bridge/package/performance validation. All original STOPs
+and remaining success/control obligations are retained. Legacy RuntimeConsumer
+semantic ownership is master/coordinator per the latest ownership lookup; that
+lookup authorizes no change to the legacy contract or its dependent definitions.
+
+
+### Supported value-checked nil-body execution
+
+`value-checked-body-success.lean.txt` adds general success lemmas for the actual
+selected uint and Boolean programs with nil continuations. Both require the
+same machine's represented word and size 36, the existing payability guard and
+a valid word. The proof uses the real whole/body selection equations and the
+existing execution theorem; successful execution is the conclusion, not an
+admission premise. The nil continuation finishes with the exact existing bound
+machine and zero pending skip.
+
+A closed Boolean joint witness supplies the existing certificate, explicit
+polymorphic equality to `ValueCheckedBodies.Bool.program`, actual selected
+compilation, represented word 1/size 36 and successful execution together.
+Reject-all contradicts the actual compiler selection, and always-revert
+disagrees on represented valid payable Boolean inputs. Dirty Boolean word 2 and
+short size 35 still revert in that same selected implementation. This separates
+supported success from the preceding size-zero field-domain instances.
+
+The final seven printed theorem checks passed the serial native checker in
+5.791 seconds, with a 162000896-byte workload peak and standard-only axioms.
+Two earlier failed sources and their receipts are retained: one used an
+unavailable redundant simp name, and the next needed explicit polymorphic
+binders in the program equality. No proof/resource limits changed. All attempts
+use the same unextended checkpoint epoch and the same 246 verified frozen
+imports; no PowerBounds, Bridge or prerequisite workload was run.
+Independent read-only finder and skeptic reviews pass for source and receipt
+verification. Exact source, compiled artifact, argv, import identities, axiom and
+monitor records, reviews and both failures are privately archived; the package
+was read back byte-for-byte before this validation claim:
+
+```text
+evidence: 99d5eebe986795202aad6b98147a6e2f7e12c6f1 evidence/solidity-parallel-20261103/executable-bytecode/value-checked-body-success-0039ee35.json
+```
+
+This establishes gasless intrinsic IR behavior for nil continuations. It does
+not establish arbitrary-body success, Source authenticity/correspondence,
+physical byte loading, charged execution/fork acceptance, full census closure,
+Bridge/package validation or performance acceptance. The original aggregate
+source receipt remains RED and all original STOPs remain binding.
+
+
+### Selected continuations: local mutation and intentional revert
+
+`value-checked-body-continuations.lean.txt` extends the nil-body controls by
+instantiating the existing value-checked compiler with two admitted nonempty
+bodies. The uint body assigns 77 to the validated local. Its general theorem
+retains same-machine word/size representation, payability and validity premises,
+and proves the exact final machine update. A closed certificate/selection/run
+witness uses word 7 and size 36, proves local cell 9 becomes 77, and preserves
+the caller stack `[11,99]`.
+
+The Boolean body deliberately reverts after a valid full input. The resulting
+control refutes unconditional body success for every proposed successful final
+machine and pending skip. This is an intentional body outcome with feasible
+admission, not an impossible input premise. Dirty uint8 word 256 produces revert
+in the selected mutating program. That result does not establish a separate
+intermediate trace, mutation-order or rollback theorem.
+
+All five printed declarations passed the native serial check in 4.589 seconds,
+with a 163815424-byte workload peak and standard-only axioms. The existing
+seeded-input helper is reused through its exact previously checked module and
+artifact, with its identical 246 frozen dependencies; no product is reconstructed
+or rekeyed. The first attempt stopped before Lean because the helper directory
+was not mounted. A later proof attempt needed explicit memory/update types.
+Both failures are retained separately. The repaired run used the same unextended
+epoch and unchanged guards, with no PowerBounds, Bridge or prerequisite build.
+Separate finder/skeptic source and verifier reviews pass. Exact source, artifact,
+helper/import identities, native/axiom/resource records, reviews and failures
+were privately archived and read back byte-for-byte before this claim:
+
+```text
+evidence: 6f0645ac60be82621774491f52666f6896e22194 evidence/solidity-parallel-20261103/executable-bytecode/value-checked-body-continuations-9c6a1e49.json
+```
+
+These gasless intrinsic IR controls do not establish arbitrary-body completion,
+Source/runtime/G01 correspondence, physical byte loading, charged/fork behavior,
+full Bridge/package/performance validation or original census closure. The
+703-source/190-core/37-Bridge obligations and all existing STOPs remain open.

@@ -1,0 +1,4800 @@
+{
+  "status": "partial",
+  "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+  "checkpoints": {
+    "inventory": "done",
+    "local_stratified_measurement": "done",
+    "declaration_ranking": "done",
+    "reference_builds": "partial",
+    "full_build_estimate": "done",
+    "incremental_graph": "done",
+    "ten_prioritized_changes": "done"
+  },
+  "tracked_lean_modules": 8291,
+  "tracked_lean_lines": 1311130,
+  "measurement_versions": {
+    "lean": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)",
+    "lake": "Lake version 5.0.0-src+797c613 (Lean version 4.24.0)"
+  },
+  "measurement_environment": {
+    "metadata_scope": "latest runner invocation only; resumed rows retain original per-observation metadata or null",
+    "cloud_vm_opt_in": true,
+    "isolation": "H232 cloud VM; no systemd scope",
+    "swap_total_kib": 0,
+    "lean_num_threads": 1,
+    "rss_stop_kib": 12582912,
+    "available_memory_stop_kib": 3145728,
+    "measurement_checkout": "/workspace/da-timing-work/clean",
+    "tracked_source_clean": true
+  },
+  "areas": [
+    {
+      "area": "Backend",
+      "verdict_scope": "observed size-quartile sample only; area-wide representativeness is unestablished",
+      "local_quartile_coverage": {
+        "expected": 4,
+        "passed": 4,
+        "complete": true
+      },
+      "local_stratified": {
+        "modules": 4,
+        "lines": 486,
+        "wall_seconds": 18.10611563099991,
+        "seconds_per_kloc": 37.25538195678994
+      },
+      "local_all_samples": {
+        "modules": 4,
+        "lines": 486,
+        "wall_seconds": 18.10611563099991,
+        "seconds_per_kloc": 37.25538195678994
+      },
+      "local_source_classes": {
+        "detected_generated": {
+          "modules": 0,
+          "lines": 0,
+          "wall_seconds": null,
+          "seconds_per_kloc": null
+        },
+        "unmarked_not_proven_handwritten": {
+          "modules": 4,
+          "lines": 486,
+          "wall_seconds": 18.10611563099991,
+          "seconds_per_kloc": 37.25538195678994
+        }
+      },
+      "source_inventory": {
+        "detected_generated_lines": 149,
+        "lines": 279224,
+        "marker_associated_unresolved_lines": 2510,
+        "modules": 2015,
+        "unmarked_not_proven_handwritten_lines": 274346,
+        "unresolved_chain_agreement_lines": 2219
+      },
+      "reference": "EvmYul",
+      "ratio": 2.502554010306834,
+      "outlier": false,
+      "verdict": "within band; this looks fine",
+      "reason": "Observed check-time density is within the threefold band.",
+      "verdict_evidence": null,
+      "settling_measurement": null,
+      "comparability": "local toolchain, plain invocation flags and recorded checkout paths validated; per-observation machine identity is incomplete; source obligations and reference Lean versions differ; check-cost calibration, not proof productivity"
+    },
+    {
+      "area": "Yul",
+      "verdict_scope": "observed size-quartile sample only; area-wide representativeness is unestablished",
+      "local_quartile_coverage": {
+        "expected": 4,
+        "passed": 4,
+        "complete": true
+      },
+      "local_stratified": {
+        "modules": 4,
+        "lines": 396,
+        "wall_seconds": 83.96290114899989,
+        "seconds_per_kloc": 212.02752815404014
+      },
+      "local_all_samples": {
+        "modules": 4,
+        "lines": 396,
+        "wall_seconds": 83.96290114899989,
+        "seconds_per_kloc": 212.02752815404014
+      },
+      "local_source_classes": {
+        "detected_generated": {
+          "modules": 0,
+          "lines": 0,
+          "wall_seconds": null,
+          "seconds_per_kloc": null
+        },
+        "unmarked_not_proven_handwritten": {
+          "modules": 4,
+          "lines": 396,
+          "wall_seconds": 83.96290114899989,
+          "seconds_per_kloc": 212.02752815404014
+        }
+      },
+      "source_inventory": {
+        "lines": 197439,
+        "marker_associated_unresolved_lines": 7316,
+        "modules": 1827,
+        "unmarked_not_proven_handwritten_lines": 188247,
+        "unresolved_chain_agreement_lines": 1876
+      },
+      "reference": "EvmYul",
+      "ratio": 14.242515121513403,
+      "outlier": true,
+      "verdict": "inconclusive",
+      "reason": "Observed threefold outlier; causal judgement requires the named component measurement.",
+      "verdict_evidence": null,
+      "settling_measurement": "One matched CPU/allocation profile experiment for the dominating local module and corresponding reference checks, accounting for wall time not attributed by Lean basic/structured profilers under unchanged budgets. This settles sampled hotspot attribution only; an area-wide verdict needs a closure census or independently representative wider sample.",
+      "comparability": "local toolchain, plain invocation flags and recorded checkout paths validated; per-observation machine identity is incomplete; source obligations and reference Lean versions differ; check-cost calibration, not proof productivity"
+    },
+    {
+      "area": "Calculus",
+      "verdict_scope": "observed size-quartile sample only; area-wide representativeness is unestablished",
+      "local_quartile_coverage": {
+        "expected": 4,
+        "passed": 4,
+        "complete": true
+      },
+      "local_stratified": {
+        "modules": 4,
+        "lines": 1594,
+        "wall_seconds": 29.0491581160004,
+        "seconds_per_kloc": 18.224064062735508
+      },
+      "local_all_samples": {
+        "modules": 5,
+        "lines": 4736,
+        "wall_seconds": 66.40841660000024,
+        "seconds_per_kloc": 14.022047423986535
+      },
+      "local_source_classes": {
+        "detected_generated": {
+          "modules": 0,
+          "lines": 0,
+          "wall_seconds": null,
+          "seconds_per_kloc": null
+        },
+        "unmarked_not_proven_handwritten": {
+          "modules": 5,
+          "lines": 4736,
+          "wall_seconds": 66.40841660000024,
+          "seconds_per_kloc": 14.022047423986535
+        }
+      },
+      "source_inventory": {
+        "lines": 169330,
+        "marker_associated_unresolved_lines": 1550,
+        "modules": 388,
+        "unmarked_not_proven_handwritten_lines": 163247,
+        "unresolved_chain_agreement_lines": 4533
+      },
+      "reference": "Clear",
+      "ratio": null,
+      "outlier": null,
+      "verdict": "inconclusive",
+      "reason": "No complete paired measurement.",
+      "verdict_evidence": null,
+      "settling_measurement": "Complete the four planned local quartile checks and the pinned reference per-file protocol.",
+      "comparability": "local toolchain, plain invocation flags and recorded checkout paths validated; per-observation machine identity is incomplete; source obligations and reference Lean versions differ; check-cost calibration, not proof productivity"
+    },
+    {
+      "area": "Lowering",
+      "verdict_scope": "observed size-quartile sample only; area-wide representativeness is unestablished",
+      "local_quartile_coverage": {
+        "expected": 4,
+        "passed": 4,
+        "complete": true
+      },
+      "local_stratified": {
+        "modules": 4,
+        "lines": 535,
+        "wall_seconds": 6.463599792999958,
+        "seconds_per_kloc": 12.081494940186836
+      },
+      "local_all_samples": {
+        "modules": 4,
+        "lines": 535,
+        "wall_seconds": 6.463599792999958,
+        "seconds_per_kloc": 12.081494940186836
+      },
+      "local_source_classes": {
+        "detected_generated": {
+          "modules": 0,
+          "lines": 0,
+          "wall_seconds": null,
+          "seconds_per_kloc": null
+        },
+        "unmarked_not_proven_handwritten": {
+          "modules": 4,
+          "lines": 535,
+          "wall_seconds": 6.463599792999958,
+          "seconds_per_kloc": 12.081494940186836
+        }
+      },
+      "source_inventory": {
+        "lines": 104250,
+        "marker_associated_unresolved_lines": 20,
+        "modules": 716,
+        "unmarked_not_proven_handwritten_lines": 103912,
+        "unresolved_chain_agreement_lines": 318
+      },
+      "reference": "EvmYul",
+      "ratio": 0.8115496882607028,
+      "outlier": false,
+      "verdict": "within band; this looks fine",
+      "reason": "Observed check-time density is within the threefold band.",
+      "verdict_evidence": null,
+      "settling_measurement": null,
+      "comparability": "local toolchain, plain invocation flags and recorded checkout paths validated; per-observation machine identity is incomplete; source obligations and reference Lean versions differ; check-cost calibration, not proof productivity"
+    },
+    {
+      "area": "Frontend",
+      "verdict_scope": "observed size-quartile sample only; area-wide representativeness is unestablished",
+      "local_quartile_coverage": {
+        "expected": 4,
+        "passed": 4,
+        "complete": true
+      },
+      "local_stratified": {
+        "modules": 4,
+        "lines": 659,
+        "wall_seconds": 4.537956497000096,
+        "seconds_per_kloc": 6.886125185129129
+      },
+      "local_all_samples": {
+        "modules": 5,
+        "lines": 4564,
+        "wall_seconds": 21.62606307300007,
+        "seconds_per_kloc": 4.738401199167412
+      },
+      "local_source_classes": {
+        "detected_generated": {
+          "modules": 1,
+          "lines": 3905,
+          "wall_seconds": 17.088106575999973,
+          "seconds_per_kloc": 4.375955589244551
+        },
+        "unmarked_not_proven_handwritten": {
+          "modules": 4,
+          "lines": 659,
+          "wall_seconds": 4.537956497000096,
+          "seconds_per_kloc": 6.886125185129129
+        }
+      },
+      "source_inventory": {
+        "detected_generated_lines": 3905,
+        "lines": 102235,
+        "marker_associated_unresolved_lines": 455,
+        "modules": 512,
+        "unmarked_not_proven_handwritten_lines": 97875
+      },
+      "reference": "EvmYul",
+      "ratio": 0.4625613614029537,
+      "outlier": false,
+      "verdict": "within band; this looks fine",
+      "reason": "Observed check-time density is within the threefold band.",
+      "verdict_evidence": null,
+      "settling_measurement": null,
+      "comparability": "local toolchain, plain invocation flags and recorded checkout paths validated; per-observation machine identity is incomplete; source obligations and reference Lean versions differ; check-cost calibration, not proof productivity"
+    },
+    {
+      "area": "Bridge",
+      "verdict_scope": "observed size-quartile sample only; area-wide representativeness is unestablished",
+      "local_quartile_coverage": {
+        "expected": 4,
+        "passed": 4,
+        "complete": true
+      },
+      "local_stratified": {
+        "modules": 4,
+        "lines": 443,
+        "wall_seconds": 11.305363223000313,
+        "seconds_per_kloc": 25.52000727539574
+      },
+      "local_all_samples": {
+        "modules": 4,
+        "lines": 443,
+        "wall_seconds": 11.305363223000313,
+        "seconds_per_kloc": 25.52000727539574
+      },
+      "local_source_classes": {
+        "detected_generated": {
+          "modules": 0,
+          "lines": 0,
+          "wall_seconds": null,
+          "seconds_per_kloc": null
+        },
+        "unmarked_not_proven_handwritten": {
+          "modules": 4,
+          "lines": 443,
+          "wall_seconds": 11.305363223000313,
+          "seconds_per_kloc": 25.52000727539574
+        }
+      },
+      "source_inventory": {
+        "lines": 64746,
+        "modules": 524,
+        "unmarked_not_proven_handwritten_lines": 62806,
+        "unresolved_chain_agreement_lines": 1940
+      },
+      "reference": "Clear",
+      "ratio": null,
+      "outlier": null,
+      "verdict": "inconclusive",
+      "reason": "No complete paired measurement.",
+      "verdict_evidence": null,
+      "settling_measurement": "Complete the four planned local quartile checks and the pinned reference per-file protocol.",
+      "comparability": "local toolchain, plain invocation flags and recorded checkout paths validated; per-observation machine identity is incomplete; source obligations and reference Lean versions differ; check-cost calibration, not proof productivity"
+    },
+    {
+      "area": "Examples",
+      "verdict_scope": "observed size-quartile sample only; area-wide representativeness is unestablished",
+      "local_quartile_coverage": {
+        "expected": 4,
+        "passed": 4,
+        "complete": true
+      },
+      "local_stratified": {
+        "modules": 4,
+        "lines": 616,
+        "wall_seconds": 101.1166531240001,
+        "seconds_per_kloc": 164.15041091558456
+      },
+      "local_all_samples": {
+        "modules": 7,
+        "lines": 1165,
+        "wall_seconds": 443.43525435400034,
+        "seconds_per_kloc": 380.63111961716766
+      },
+      "local_source_classes": {
+        "detected_generated": {
+          "modules": 0,
+          "lines": 0,
+          "wall_seconds": null,
+          "seconds_per_kloc": null
+        },
+        "unmarked_not_proven_handwritten": {
+          "modules": 7,
+          "lines": 1165,
+          "wall_seconds": 443.43525435400034,
+          "seconds_per_kloc": 380.63111961716766
+        }
+      },
+      "source_inventory": {
+        "lines": 61471,
+        "marker_associated_unresolved_lines": 121,
+        "modules": 356,
+        "unmarked_not_proven_handwritten_lines": 52622,
+        "unresolved_chain_agreement_lines": 8728
+      },
+      "reference": "Clear",
+      "ratio": null,
+      "outlier": null,
+      "verdict": "inconclusive",
+      "reason": "No complete paired measurement.",
+      "verdict_evidence": null,
+      "settling_measurement": "Complete the four planned local quartile checks and the pinned reference per-file protocol.",
+      "comparability": "local toolchain, plain invocation flags and recorded checkout paths validated; per-observation machine identity is incomplete; source obligations and reference Lean versions differ; check-cost calibration, not proof productivity"
+    },
+    {
+      "area": "Source",
+      "verdict_scope": "observed size-quartile sample only; area-wide representativeness is unestablished",
+      "local_quartile_coverage": {
+        "expected": 4,
+        "passed": 4,
+        "complete": true
+      },
+      "local_stratified": {
+        "modules": 4,
+        "lines": 616,
+        "wall_seconds": 20.739497505000145,
+        "seconds_per_kloc": 33.66801543019504
+      },
+      "local_all_samples": {
+        "modules": 5,
+        "lines": 995,
+        "wall_seconds": 25.336014566999893,
+        "seconds_per_kloc": 25.46333122311547
+      },
+      "local_source_classes": {
+        "detected_generated": {
+          "modules": 0,
+          "lines": 0,
+          "wall_seconds": null,
+          "seconds_per_kloc": null
+        },
+        "unmarked_not_proven_handwritten": {
+          "modules": 4,
+          "lines": 910,
+          "wall_seconds": 24.464760799000032,
+          "seconds_per_kloc": 26.88435252637366
+        },
+        "unresolved_chain_agreement": {
+          "modules": 1,
+          "lines": 85,
+          "wall_seconds": 0.8712537679998604,
+          "seconds_per_kloc": 10.250044329410123
+        }
+      },
+      "source_inventory": {
+        "detected_generated_lines": 626,
+        "lines": 50041,
+        "modules": 262,
+        "unmarked_not_proven_handwritten_lines": 45638,
+        "unresolved_chain_agreement_lines": 3777
+      },
+      "reference": "EvmYul",
+      "ratio": 2.26158000826914,
+      "outlier": false,
+      "verdict": "within band; this looks fine",
+      "reason": "Observed check-time density is within the threefold band.",
+      "verdict_evidence": null,
+      "settling_measurement": null,
+      "comparability": "local toolchain, plain invocation flags and recorded checkout paths validated; per-observation machine identity is incomplete; source obligations and reference Lean versions differ; check-cost calibration, not proof productivity"
+    },
+    {
+      "area": "Evm",
+      "verdict_scope": "observed size-quartile sample only; area-wide representativeness is unestablished",
+      "local_quartile_coverage": {
+        "expected": 4,
+        "passed": 4,
+        "complete": true
+      },
+      "local_stratified": {
+        "modules": 4,
+        "lines": 514,
+        "wall_seconds": 3.858256527000094,
+        "seconds_per_kloc": 7.506335655642206
+      },
+      "local_all_samples": {
+        "modules": 4,
+        "lines": 514,
+        "wall_seconds": 3.858256527000094,
+        "seconds_per_kloc": 7.506335655642206
+      },
+      "local_source_classes": {
+        "detected_generated": {
+          "modules": 0,
+          "lines": 0,
+          "wall_seconds": null,
+          "seconds_per_kloc": null
+        },
+        "unmarked_not_proven_handwritten": {
+          "modules": 4,
+          "lines": 514,
+          "wall_seconds": 3.858256527000094,
+          "seconds_per_kloc": 7.506335655642206
+        }
+      },
+      "source_inventory": {
+        "lines": 45857,
+        "modules": 279,
+        "unmarked_not_proven_handwritten_lines": 45857
+      },
+      "reference": "EvmYul",
+      "ratio": 0.5042227300078168,
+      "outlier": false,
+      "verdict": "within band; this looks fine",
+      "reason": "Observed check-time density is within the threefold band.",
+      "verdict_evidence": null,
+      "settling_measurement": null,
+      "comparability": "local toolchain, plain invocation flags and recorded checkout paths validated; per-observation machine identity is incomplete; source obligations and reference Lean versions differ; check-cost calibration, not proof productivity"
+    },
+    {
+      "area": "Semantics",
+      "verdict_scope": "observed size-quartile sample only; area-wide representativeness is unestablished",
+      "local_quartile_coverage": {
+        "expected": 4,
+        "passed": 4,
+        "complete": true
+      },
+      "local_stratified": {
+        "modules": 4,
+        "lines": 1012,
+        "wall_seconds": 6.6210623620002025,
+        "seconds_per_kloc": 6.542551741106919
+      },
+      "local_all_samples": {
+        "modules": 4,
+        "lines": 1012,
+        "wall_seconds": 6.6210623620002025,
+        "seconds_per_kloc": 6.542551741106919
+      },
+      "local_source_classes": {
+        "detected_generated": {
+          "modules": 0,
+          "lines": 0,
+          "wall_seconds": null,
+          "seconds_per_kloc": null
+        },
+        "unmarked_not_proven_handwritten": {
+          "modules": 4,
+          "lines": 1012,
+          "wall_seconds": 6.6210623620002025,
+          "seconds_per_kloc": 6.542551741106919
+        }
+      },
+      "source_inventory": {
+        "lines": 25790,
+        "modules": 82,
+        "unmarked_not_proven_handwritten_lines": 25678,
+        "unresolved_chain_agreement_lines": 112
+      },
+      "reference": "EvmYul",
+      "ratio": 0.4394825186958799,
+      "outlier": false,
+      "verdict": "within band; this looks fine",
+      "reason": "Observed check-time density is within the threefold band.",
+      "verdict_evidence": null,
+      "settling_measurement": null,
+      "comparability": "local toolchain, plain invocation flags and recorded checkout paths validated; per-observation machine identity is incomplete; source obligations and reference Lean versions differ; check-cost calibration, not proof productivity"
+    }
+  ],
+  "incremental": [
+    {
+      "all_tracked_potential_dependents": 7463,
+      "dependent_lines": 1165346,
+      "module": "Solidity.Keccak",
+      "rebuilds_including_changed_module": 7464,
+      "workload_rebuilds": {
+        "Bridge": 1220,
+        "checkpoint": 5892,
+        "full": 6297
+      }
+    },
+    {
+      "all_tracked_potential_dependents": 5720,
+      "dependent_lines": 947786,
+      "module": "Solidity.KeySort",
+      "rebuilds_including_changed_module": 5721,
+      "workload_rebuilds": {
+        "Bridge": 1072,
+        "checkpoint": 4234,
+        "full": 4640
+      }
+    },
+    {
+      "all_tracked_potential_dependents": 5712,
+      "dependent_lines": 946048,
+      "module": "Solidity.AST",
+      "rebuilds_including_changed_module": 5713,
+      "workload_rebuilds": {
+        "Bridge": 1071,
+        "checkpoint": 4232,
+        "full": 4638
+      }
+    },
+    {
+      "all_tracked_potential_dependents": 5697,
+      "dependent_lines": 943337,
+      "module": "Solidity.Syntax.Raw",
+      "rebuilds_including_changed_module": 5698,
+      "workload_rebuilds": {
+        "Bridge": 1067,
+        "checkpoint": 4226,
+        "full": 4632
+      }
+    },
+    {
+      "all_tracked_potential_dependents": 4759,
+      "dependent_lines": 807680,
+      "module": "Solidity.Semantics.Value",
+      "rebuilds_including_changed_module": 4760,
+      "workload_rebuilds": {
+        "Bridge": 788,
+        "checkpoint": 3538,
+        "full": 3940
+      }
+    },
+    {
+      "all_tracked_potential_dependents": 3505,
+      "dependent_lines": 448872,
+      "module": "Solidity.Source.Types",
+      "rebuilds_including_changed_module": 3506,
+      "workload_rebuilds": {
+        "Bridge": 182,
+        "checkpoint": 3210,
+        "full": 3212
+      }
+    }
+  ],
+  "build_workloads": {
+    "Bridge": {
+      "area_counts": {
+        "Backend": {
+          "lines": 16965,
+          "modules": 114
+        },
+        "Bridge": {
+          "lines": 64746,
+          "modules": 524
+        },
+        "Calculus": {
+          "lines": 102084,
+          "modules": 207
+        },
+        "Core": {
+          "lines": 3850,
+          "modules": 15
+        },
+        "Evm": {
+          "lines": 28611,
+          "modules": 123
+        },
+        "Frontend": {
+          "lines": 8475,
+          "modules": 17
+        },
+        "Hash": {
+          "lines": 1647,
+          "modules": 2
+        },
+        "Language": {
+          "lines": 1272,
+          "modules": 1
+        },
+        "Lowering": {
+          "lines": 2603,
+          "modules": 19
+        },
+        "Other": {
+          "lines": 13671,
+          "modules": 75
+        },
+        "Precompiles": {
+          "lines": 2072,
+          "modules": 11
+        },
+        "Roadmap": {
+          "lines": 1545,
+          "modules": 2
+        },
+        "Semantics": {
+          "lines": 15949,
+          "modules": 35
+        },
+        "Source": {
+          "lines": 11359,
+          "modules": 27
+        },
+        "Storage": {
+          "lines": 2188,
+          "modules": 11
+        },
+        "Syntax": {
+          "lines": 14545,
+          "modules": 21
+        },
+        "Theory": {
+          "lines": 4139,
+          "modules": 8
+        },
+        "Tools": {
+          "lines": 915,
+          "modules": 5
+        },
+        "Typing": {
+          "lines": 6740,
+          "modules": 11
+        },
+        "Yul": {
+          "lines": 23622,
+          "modules": 165
+        }
+      },
+      "reachable_modules": 1393,
+      "roots": [
+        "SolidityBridge"
+      ]
+    },
+    "checkpoint": {
+      "area_counts": {
+        "Automation": {
+          "lines": 84,
+          "modules": 3
+        },
+        "Backend": {
+          "lines": 279224,
+          "modules": 2015
+        },
+        "Calculus": {
+          "lines": 169330,
+          "modules": 388
+        },
+        "Core": {
+          "lines": 4284,
+          "modules": 18
+        },
+        "Counterexamples": {
+          "lines": 413,
+          "modules": 4
+        },
+        "Evm": {
+          "lines": 45857,
+          "modules": 279
+        },
+        "Frontend": {
+          "lines": 102235,
+          "modules": 512
+        },
+        "Hash": {
+          "lines": 2265,
+          "modules": 6
+        },
+        "Language": {
+          "lines": 5964,
+          "modules": 8
+        },
+        "Lowering": {
+          "lines": 104250,
+          "modules": 716
+        },
+        "Optimizer": {
+          "lines": 6658,
+          "modules": 16
+        },
+        "Other": {
+          "lines": 7530,
+          "modules": 9
+        },
+        "Precompiles": {
+          "lines": 2072,
+          "modules": 11
+        },
+        "Roadmap": {
+          "lines": 4728,
+          "modules": 20
+        },
+        "Semantics": {
+          "lines": 25790,
+          "modules": 82
+        },
+        "SolcValidation": {
+          "lines": 7626,
+          "modules": 30
+        },
+        "Solkey": {
+          "lines": 231,
+          "modules": 4
+        },
+        "SortCheck": {
+          "lines": 1281,
+          "modules": 3
+        },
+        "Source": {
+          "lines": 50041,
+          "modules": 262
+        },
+        "Stipend": {
+          "lines": 274,
+          "modules": 1
+        },
+        "Storage": {
+          "lines": 4049,
+          "modules": 21
+        },
+        "Syntax": {
+          "lines": 14545,
+          "modules": 21
+        },
+        "Theory": {
+          "lines": 8890,
+          "modules": 25
+        },
+        "Tools": {
+          "lines": 8575,
+          "modules": 31
+        },
+        "Typing": {
+          "lines": 6832,
+          "modules": 12
+        },
+        "Yul": {
+          "lines": 197439,
+          "modules": 1827
+        }
+      },
+      "reachable_modules": 6324,
+      "roots": [
+        "Solidity"
+      ]
+    },
+    "full": {
+      "area_counts": {
+        "Automation": {
+          "lines": 84,
+          "modules": 3
+        },
+        "Backend": {
+          "lines": 279224,
+          "modules": 2015
+        },
+        "Calculus": {
+          "lines": 169330,
+          "modules": 388
+        },
+        "Core": {
+          "lines": 4284,
+          "modules": 18
+        },
+        "Counterexamples": {
+          "lines": 413,
+          "modules": 4
+        },
+        "Evm": {
+          "lines": 45857,
+          "modules": 279
+        },
+        "Examples": {
+          "lines": 61471,
+          "modules": 356
+        },
+        "Frontend": {
+          "lines": 102235,
+          "modules": 512
+        },
+        "Hash": {
+          "lines": 2265,
+          "modules": 6
+        },
+        "Language": {
+          "lines": 5964,
+          "modules": 8
+        },
+        "Lowering": {
+          "lines": 104250,
+          "modules": 716
+        },
+        "Optimizer": {
+          "lines": 6658,
+          "modules": 16
+        },
+        "Other": {
+          "lines": 7930,
+          "modules": 13
+        },
+        "Precompiles": {
+          "lines": 2072,
+          "modules": 11
+        },
+        "Roadmap": {
+          "lines": 4728,
+          "modules": 20
+        },
+        "Semantics": {
+          "lines": 25790,
+          "modules": 82
+        },
+        "SolcValidation": {
+          "lines": 7626,
+          "modules": 30
+        },
+        "Solkey": {
+          "lines": 266,
+          "modules": 5
+        },
+        "SortCheck": {
+          "lines": 1281,
+          "modules": 3
+        },
+        "Source": {
+          "lines": 50041,
+          "modules": 262
+        },
+        "Stipend": {
+          "lines": 274,
+          "modules": 1
+        },
+        "Storage": {
+          "lines": 4049,
+          "modules": 21
+        },
+        "Syntax": {
+          "lines": 14545,
+          "modules": 21
+        },
+        "TestSuite": {
+          "lines": 4710,
+          "modules": 49
+        },
+        "Theory": {
+          "lines": 8890,
+          "modules": 25
+        },
+        "Tools": {
+          "lines": 8575,
+          "modules": 31
+        },
+        "Typing": {
+          "lines": 6832,
+          "modules": 12
+        },
+        "Yul": {
+          "lines": 197439,
+          "modules": 1827
+        }
+      },
+      "reachable_modules": 6734,
+      "roots": [
+        "Solidity",
+        "SolidityExamples",
+        "SoliditySlowExamples",
+        "SolkeyTestSuite",
+        "SolidityLean"
+      ]
+    }
+  },
+  "historical": {
+    "observations": 60,
+    "source": "docs/audits/architecture-tools/timing-sample.tsv",
+    "source_base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+    "use": "inventory only; not pooled with fresh timings"
+  },
+  "samples_missing_environment_metadata": 9,
+  "fresh_passing_samples": 48,
+  "fresh_attempted_samples": 53,
+  "sample_plan_modules": 48,
+  "sample_method": "four deterministic physical-size quantile midpoint modules per largest area plus targeted slow/generated files; size-stratified rates reported separately; no statistical representativeness asserted",
+  "slowest_sampled_modules": [
+    {
+      "path": "Solidity/Examples/DecisionGaps.lean",
+      "seconds": 195.37071439500005,
+      "lines": 207,
+      "classification": "unmarked_not_proven_handwritten",
+      "selection": "targeted_tail_or_generated"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/RevertData.lean",
+      "seconds": 137.3613358030002,
+      "lines": 307,
+      "classification": "unmarked_not_proven_handwritten",
+      "selection": "targeted_tail_or_generated"
+    },
+    {
+      "path": "Solidity/Yul/RawIntegerInitialization.lean",
+      "seconds": 79.19439813300005,
+      "lines": 75,
+      "classification": "unmarked_not_proven_handwritten",
+      "selection": "size_quartile_midpoint"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/QuantifiedDiamond.lean",
+      "seconds": 42.675748285000054,
+      "lines": 152,
+      "classification": "unmarked_not_proven_handwritten",
+      "selection": "size_quartile_midpoint"
+    },
+    {
+      "path": "Solidity/Calculus/ArrayProperty.lean",
+      "seconds": 37.35925848399984,
+      "lines": 3142,
+      "classification": "unmarked_not_proven_handwritten",
+      "selection": "targeted_tail_or_generated"
+    },
+    {
+      "path": "Solidity/Examples/DecisionHashThreeKinds.lean",
+      "seconds": 29.15031883300003,
+      "lines": 44,
+      "classification": "unmarked_not_proven_handwritten",
+      "selection": "size_quartile_midpoint"
+    },
+    {
+      "path": "Solidity/Calculus/Closer/Facts.lean",
+      "seconds": 22.064303495000104,
+      "lines": 1043,
+      "classification": "unmarked_not_proven_handwritten",
+      "selection": "size_quartile_midpoint"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/OwnStructs.lean",
+      "seconds": 20.96397848399988,
+      "lines": 91,
+      "classification": "unmarked_not_proven_handwritten",
+      "selection": "size_quartile_midpoint"
+    },
+    {
+      "path": "Solidity/Frontend/ExpressionUniqueness/AxiomPins.lean",
+      "seconds": 17.088106575999973,
+      "lines": 3905,
+      "classification": "detected_generated",
+      "selection": "targeted_tail_or_generated"
+    },
+    {
+      "path": "Solidity/Source/FailureDeploymentHorizon.lean",
+      "seconds": 11.19858321300012,
+      "lines": 152,
+      "classification": "unmarked_not_proven_handwritten",
+      "selection": "size_quartile_midpoint"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/OpenLoops.lean",
+      "seconds": 9.586551031999988,
+      "lines": 35,
+      "classification": "unmarked_not_proven_handwritten",
+      "selection": "targeted_tail_or_generated"
+    },
+    {
+      "path": "Solidity.lean",
+      "seconds": 9.015842478000195,
+      "lines": 6320,
+      "classification": "detected_generated",
+      "selection": "targeted_tail_or_generated"
+    },
+    {
+      "path": "Solidity/Examples/Benchmark/Purchase.lean",
+      "seconds": 8.326607522000131,
+      "lines": 329,
+      "classification": "unmarked_not_proven_handwritten",
+      "selection": "size_quartile_midpoint"
+    },
+    {
+      "path": "Solidity/Source/Decode.lean",
+      "seconds": 8.033290843000032,
+      "lines": 329,
+      "classification": "unmarked_not_proven_handwritten",
+      "selection": "size_quartile_midpoint"
+    },
+    {
+      "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/SourceOrigin.lean",
+      "seconds": 5.933705138999983,
+      "lines": 46,
+      "classification": "unmarked_not_proven_handwritten",
+      "selection": "size_quartile_midpoint"
+    },
+    {
+      "path": "Solidity/Backend/Passes/ReferenceCallCaptureFailureControls.lean",
+      "seconds": 5.83461035199997,
+      "lines": 86,
+      "classification": "unmarked_not_proven_handwritten",
+      "selection": "size_quartile_midpoint"
+    },
+    {
+      "path": "Solidity/Source/Horizon.lean",
+      "seconds": 4.596517061999748,
+      "lines": 379,
+      "classification": "unmarked_not_proven_handwritten",
+      "selection": "targeted_tail_or_generated"
+    },
+    {
+      "path": "Solidity/Backend/PrimitivePackets/CheckedMul/Controls.lean",
+      "seconds": 4.426636051999992,
+      "lines": 224,
+      "classification": "unmarked_not_proven_handwritten",
+      "selection": "size_quartile_midpoint"
+    },
+    {
+      "path": "Solidity/Calculus/JoinSequence.lean",
+      "seconds": 4.044591385000103,
+      "lines": 156,
+      "classification": "unmarked_not_proven_handwritten",
+      "selection": "size_quartile_midpoint"
+    },
+    {
+      "path": "Solidity/Semantics/NoPanic.lean",
+      "seconds": 3.6267700040000364,
+      "lines": 558,
+      "classification": "unmarked_not_proven_handwritten",
+      "selection": "size_quartile_midpoint"
+    }
+  ],
+  "slowest_sampled_declarations": [
+    {
+      "path": "Solidity/Examples/Tactics/RevertData.lean",
+      "declaration": "Solidity.Examples.Tactics.RevertData.mixedReason",
+      "attributed_wall_seconds": 42.929956190995874,
+      "profile_categories_seconds": {
+        "Elab.async": 1.3222052979972214,
+        "Kernel": 1.1613977899998427
+      },
+      "auxiliary_lean_declaration": false,
+      "name_resolution": "qualified trace name"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/RevertData.lean",
+      "declaration": "Solidity.Examples.Tactics.RevertData.customData",
+      "attributed_wall_seconds": 32.01372339799814,
+      "profile_categories_seconds": {
+        "Elab.async": 32.01372339799814,
+        "Kernel": 30.597087736999615
+      },
+      "auxiliary_lean_declaration": false,
+      "name_resolution": "qualified trace name"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/RevertData.lean",
+      "declaration": "Solidity.Examples.Tactics.RevertData.Panics.panicSelector",
+      "attributed_wall_seconds": 26.122547040997073,
+      "profile_categories_seconds": {
+        "Elab.async": 22.366995485000313,
+        "Kernel": 21.22558629900031
+      },
+      "auxiliary_lean_declaration": false,
+      "name_resolution": "qualified trace name"
+    },
+    {
+      "path": "Solidity/Examples/DecisionHashThreeKinds.lean",
+      "declaration": "Solidity.Examples.DecisionHashes.namesThreeKindsBad_covered._proof_1",
+      "attributed_wall_seconds": 22.652442549999805,
+      "profile_categories_seconds": {
+        "Kernel": 22.652442549999805
+      },
+      "auxiliary_lean_declaration": true,
+      "name_resolution": "qualified trace name"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/QuantifiedDiamond.lean",
+      "declaration": "Solidity.Examples.Tactics.QuantifiedDiamond._example._proof_1",
+      "attributed_wall_seconds": 20.990377994000912,
+      "profile_categories_seconds": {
+        "Kernel": 20.990377994000912
+      },
+      "auxiliary_lean_declaration": true,
+      "name_resolution": "qualified trace name"
+    },
+    {
+      "path": "Solidity/Calculus/ArrayProperty.lean",
+      "declaration": "Solidity.Decide.ApfFml.topB_sound",
+      "attributed_wall_seconds": 19.34086698999256,
+      "profile_categories_seconds": {
+        "Elab.async": 19.34086698999256
+      },
+      "auxiliary_lean_declaration": false,
+      "name_resolution": "qualified trace name"
+    },
+    {
+      "path": "Solidity/Calculus/ArrayProperty.lean",
+      "declaration": "Solidity.Decide.ApfFml.bodyB_sound",
+      "attributed_wall_seconds": 19.268758168999106,
+      "profile_categories_seconds": {
+        "Elab.async": 19.268758168999106
+      },
+      "auxiliary_lean_declaration": false,
+      "name_resolution": "qualified trace name"
+    },
+    {
+      "path": "Solidity/Calculus/ArrayProperty.lean",
+      "declaration": "Solidity.Decide.apfNetFloor",
+      "attributed_wall_seconds": 19.25799339999631,
+      "profile_categories_seconds": {
+        "Elab.async": 19.25799339999631
+      },
+      "auxiliary_lean_declaration": false,
+      "name_resolution": "qualified trace name"
+    },
+    {
+      "path": "Solidity/Calculus/ArrayProperty.lean",
+      "declaration": "Solidity.Decide.ApfTm.guardB_sound",
+      "attributed_wall_seconds": 18.97473196796328,
+      "profile_categories_seconds": {
+        "Elab.async": 18.97473196796328
+      },
+      "auxiliary_lean_declaration": false,
+      "name_resolution": "qualified trace name"
+    },
+    {
+      "path": "Solidity/Calculus/ArrayProperty.lean",
+      "declaration": "Solidity.Decide.ApfFml.eqGuardB_sound",
+      "attributed_wall_seconds": 18.954794978989288,
+      "profile_categories_seconds": {
+        "Elab.async": 18.954794978989288
+      },
+      "auxiliary_lean_declaration": false,
+      "name_resolution": "qualified trace name"
+    },
+    {
+      "path": "Solidity/Calculus/ArrayProperty.lean",
+      "declaration": "Solidity.Decide.ApfTm.relB_sound",
+      "attributed_wall_seconds": 16.43569798398018,
+      "profile_categories_seconds": {
+        "Elab.async": 16.43569798398018,
+        "Kernel": 0.23557662799954415
+      },
+      "auxiliary_lean_declaration": false,
+      "name_resolution": "qualified trace name"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/RevertData.lean",
+      "declaration": "Solidity.Examples.Tactics.RevertData.externalReason",
+      "attributed_wall_seconds": 14.849738555967807,
+      "profile_categories_seconds": {
+        "Elab.async": 5.561142971975729,
+        "Kernel": 0.71789707400091
+      },
+      "auxiliary_lean_declaration": false,
+      "name_resolution": "qualified trace name"
+    },
+    {
+      "path": "Solidity/Source/FailureDeploymentHorizon.lean",
+      "declaration": "Solidity.Source.FailureExecution.PlannedDeploy.deploy_grow",
+      "attributed_wall_seconds": 13.231365944741293,
+      "profile_categories_seconds": {
+        "Elab.async": 13.231365944741293
+      },
+      "auxiliary_lean_declaration": false,
+      "name_resolution": "qualified trace name"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/RevertData.lean",
+      "declaration": "Solidity.Examples.Tactics.RevertData.Panics.divideCode",
+      "attributed_wall_seconds": 11.32797670298256,
+      "profile_categories_seconds": {
+        "Elab.async": 3.1528482849877326,
+        "Kernel": 1.2290963530000298
+      },
+      "auxiliary_lean_declaration": false,
+      "name_resolution": "qualified trace name"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/OwnStructs.lean",
+      "declaration": "Solidity.Examples.Tactics.OwnStructs.literal",
+      "attributed_wall_seconds": 11.033416893992573,
+      "profile_categories_seconds": {
+        "Elab.async": 2.02686266499199,
+        "Meta.Tactic.simp": 0.16364461899921298,
+        "Kernel": 0.33475166900083425
+      },
+      "auxiliary_lean_declaration": false,
+      "name_resolution": "qualified trace name"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/OwnStructs.lean",
+      "declaration": "Solidity.Examples.Tactics.OwnStructs.arrayOfStructs",
+      "attributed_wall_seconds": 10.328081913959235,
+      "profile_categories_seconds": {
+        "Elab.async": 8.948770669963212,
+        "Meta.Tactic.simp": 1.0511714719962328,
+        "Kernel": 0.7335603080000729
+      },
+      "auxiliary_lean_declaration": false,
+      "name_resolution": "qualified trace name"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/RevertData.lean",
+      "declaration": "Solidity.Examples.Tactics.RevertData.Panics.overflowCode",
+      "attributed_wall_seconds": 10.297693415986375,
+      "profile_categories_seconds": {
+        "Elab.async": 8.13574658298865,
+        "Kernel": 2.1224617040008305
+      },
+      "auxiliary_lean_declaration": false,
+      "name_resolution": "qualified trace name"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/RevertData.lean",
+      "declaration": "Solidity.Examples.Tactics.RevertData.symbolicCustom",
+      "attributed_wall_seconds": 10.149185913957655,
+      "profile_categories_seconds": {
+        "Elab.async": 7.437331254957244,
+        "Kernel": 0.7280104699991643
+      },
+      "auxiliary_lean_declaration": false,
+      "name_resolution": "qualified trace name"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/QuantifiedDiamond.lean",
+      "declaration": "Solidity.Examples.Tactics.QuantifiedDiamond.forCount",
+      "attributed_wall_seconds": 9.536806745871901,
+      "profile_categories_seconds": {
+        "Elab.async": 9.536806745871901,
+        "Kernel": 0.511969244999811
+      },
+      "auxiliary_lean_declaration": false,
+      "name_resolution": "qualified trace name"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/QuantifiedDiamond.lean",
+      "declaration": "Solidity.Examples.Tactics.QuantifiedDiamond.forCountIR",
+      "attributed_wall_seconds": 9.515630265848712,
+      "profile_categories_seconds": {
+        "Kernel": 0.5517834430001676,
+        "Elab.async": 9.515630265848712
+      },
+      "auxiliary_lean_declaration": false,
+      "name_resolution": "qualified trace name"
+    }
+  ],
+  "full_build_estimate_seconds": {
+    "Bridge": {
+      "roots": [
+        "SolidityBridge"
+      ],
+      "modules": 1393,
+      "module_mean_model_seconds": 9517.28164117043,
+      "line_rate_sensitivity_model_seconds": 12131.544980906216,
+      "observed_extrema_sensitivity_seconds": [
+        3984.487579119548,
+        23049.62389815945
+      ],
+      "pooled_extrapolation_areas": [
+        "Core",
+        "Hash",
+        "Language",
+        "Other",
+        "Precompiles",
+        "Roadmap",
+        "Storage",
+        "Syntax",
+        "Theory",
+        "Tools",
+        "Typing"
+      ],
+      "method": "area size-stratified mean observed per-module seconds times workload module count; unsampled areas use pooled seconds/line; targeted tails excluded; extrema are sensitivity scenarios, not statistical confidence bounds",
+      "boundary": "check-only body elaboration with warm imported oleans; excludes output/C generation, scheduling, downloads and dependency preparation; not an observed cold Lake build",
+      "verdict": "inconclusive",
+      "settling_measurement": "Serial CI per-module fresh-elaboration timings at the frozen base for these exact roots, summed with output generation measured separately.",
+      "reference_total_check_ratios": {
+        "EvmYul": 72.09923419333613,
+        "Clear": null
+      },
+      "ratio_boundary": "Modelled complete local workload versus measured complete reference project body checks, warm imports. Different project sizes and Lean versions; no CompCert/CakeML ratio because their cited build boundaries differ."
+    },
+    "checkpoint": {
+      "roots": [
+        "Solidity"
+      ],
+      "modules": 6324,
+      "module_mean_model_seconds": 57379.10849223613,
+      "line_rate_sensitivity_model_seconds": 63101.41538371614,
+      "observed_extrema_sensitivity_seconds": [
+        10229.099129514518,
+        175795.4960960407
+      ],
+      "pooled_extrapolation_areas": [
+        "Automation",
+        "Core",
+        "Counterexamples",
+        "Hash",
+        "Language",
+        "Optimizer",
+        "Other",
+        "Precompiles",
+        "Roadmap",
+        "SolcValidation",
+        "Solkey",
+        "SortCheck",
+        "Stipend",
+        "Storage",
+        "Syntax",
+        "Theory",
+        "Tools",
+        "Typing"
+      ],
+      "method": "area size-stratified mean observed per-module seconds times workload module count; unsampled areas use pooled seconds/line; targeted tails excluded; extrema are sensitivity scenarios, not statistical confidence bounds",
+      "boundary": "check-only body elaboration with warm imported oleans; excludes output/C generation, scheduling, downloads and dependency preparation; not an observed cold Lake build",
+      "verdict": "inconclusive",
+      "settling_measurement": "Serial CI per-module fresh-elaboration timings at the frozen base for these exact roots, summed with output generation measured separately.",
+      "reference_total_check_ratios": {
+        "EvmYul": 434.6818699880158,
+        "Clear": null
+      },
+      "ratio_boundary": "Modelled complete local workload versus measured complete reference project body checks, warm imports. Different project sizes and Lean versions; no CompCert/CakeML ratio because their cited build boundaries differ."
+    },
+    "full": {
+      "roots": [
+        "Solidity",
+        "SolidityExamples",
+        "SoliditySlowExamples",
+        "SolkeyTestSuite",
+        "SolidityLean"
+      ],
+      "modules": 6734,
+      "module_mean_model_seconds": 66592.4679309117,
+      "line_rate_sensitivity_model_seconds": 73405.8826037476,
+      "observed_extrema_sensitivity_seconds": [
+        13407.34871798613,
+        191202.03979614028
+      ],
+      "pooled_extrapolation_areas": [
+        "Automation",
+        "Core",
+        "Counterexamples",
+        "Hash",
+        "Language",
+        "Optimizer",
+        "Other",
+        "Precompiles",
+        "Roadmap",
+        "SolcValidation",
+        "Solkey",
+        "SortCheck",
+        "Stipend",
+        "Storage",
+        "Syntax",
+        "TestSuite",
+        "Theory",
+        "Tools",
+        "Typing"
+      ],
+      "method": "area size-stratified mean observed per-module seconds times workload module count; unsampled areas use pooled seconds/line; targeted tails excluded; extrema are sensitivity scenarios, not statistical confidence bounds",
+      "boundary": "check-only body elaboration with warm imported oleans; excludes output/C generation, scheduling, downloads and dependency preparation; not an observed cold Lake build",
+      "verdict": "inconclusive",
+      "settling_measurement": "Serial CI per-module fresh-elaboration timings at the frozen base for these exact roots, summed with output generation measured separately.",
+      "reference_total_check_ratios": {
+        "EvmYul": 504.4787074592207,
+        "Clear": null
+      },
+      "ratio_boundary": "Modelled complete local workload versus measured complete reference project body checks, warm imports. Different project sizes and Lean versions; no CompCert/CakeML ratio because their cited build boundaries differ."
+    }
+  },
+  "published_reference_times": [
+    {
+      "project": "CakeML",
+      "url": "https://raw.githubusercontent.com/CakeML/cakeml/b3e6ea34ca1aed91a57703a30549260ce6f6448e/build-instructions.sh",
+      "kind": "cited, not measured",
+      "seconds": 72000,
+      "comparable_to_serial_module_elaboration": false,
+      "source_sha256": "7ea19557d33c516a7e50ad50cf0e5f28a8ea2424f9454951f86a3df6302aab9d",
+      "excerpts": [
+        {
+          "line": 41,
+          "text": "## note: a full build (including the bootstrapped compiler)"
+        },
+        {
+          "line": 42,
+          "text": "## takes a long time (~20 hours) and requires much RAM (~16 GB)"
+        }
+      ],
+      "boundary": "full CakeML including bootstrapped compiler; parallelism, CPU and HOL revision unspecified; not a matched check-only timing"
+    },
+    {
+      "project": "CompCert",
+      "url": "https://compcert.org/man/manual002.html",
+      "kind": "cited, not measured",
+      "seconds": 900,
+      "comparable_to_serial_module_elaboration": false,
+      "status": "cited-public-web-extract",
+      "section": "2.3 Installation, Building the system",
+      "retrieval": "public-web tool, 2026-11-08; shell proxy cannot reach host",
+      "excerpt": "This step can take about 15 minutes on a recent machine with a single core",
+      "boundary": "make all: proof checking plus extraction and OCaml compiler construction; current manual not pinned source or matched hardware",
+      "shell_fetch_error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+    }
+  ],
+  "limitations": [
+    "Environment conditions are reported only when present in the supplied measurement metadata",
+    "Reference pins use different Lean versions; consult recorded measurement versions",
+    "The summary does not infer measurement provenance or discarded-run history from timing values",
+    "Structured profile thresholds and instrumentation must be read from individual recorded profile commands",
+    "All-tracked reverse closure is potential invalidation; named workload closures model requested build targets, not measured rebuild execution",
+    "Generated paths and bounded spans separated from ambiguous markers and unmarked source; unmarked does not mean handwritten",
+    "Targeted tails are separate from size-stratified rate estimates.",
+    "Generated source classes are marker-based; unmarked is not proven handwritten. Timing classes cover whole files; mixed generated spans are line-counted separately, not timed independently.",
+    "Full estimates are deterministic model outputs, not validated runtime bounds; named checkpoint/full/Bridge closures overlap and must not be summed. Quartiles are selected from all tracked area modules, not a random target-specific sample.",
+    "Reference build-attempt timings include dependency preparation; only complete per-project module sums are compared.",
+    "Recommendations use two dependency cost pools plus the eight slowest observed sample modules, not a global exhaustive ranking; no saving or proof-preservation implementation is claimed."
+  ],
+  "waits": [
+    {
+      "lane": "da-timing",
+      "item": "Clear: complete pinned reference checks pending"
+    }
+  ],
+  "calibration": {
+    "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+    "status": "partial",
+    "local_sampling_complete": true,
+    "profile_coverage": {
+      "expected": 48,
+      "observed": 48,
+      "missing": [],
+      "complete": true
+    },
+    "reference_gaps": [
+      "Clear"
+    ],
+    "attempted_observations": 53,
+    "unique_current_modules": 48,
+    "passing_current_modules": 48,
+    "failed_attempts": [
+      {
+        "path": "Bridge/SolidityBridge/Arith/NarrowShifts.lean",
+        "status": "dependency-cache-unavailable"
+      },
+      {
+        "path": "Bridge/SolidityBridge/ExternalEvm/Assembly/Automatic.lean",
+        "status": "dependency-cache-unavailable"
+      },
+      {
+        "path": "Bridge/SolidityBridge/RoadmapV15/P10/PublishedRemainderControls.lean",
+        "status": "dependency-cache-unavailable"
+      },
+      {
+        "path": "Bridge/SolidityBridge/Yul/ControlRealization.lean",
+        "status": "dependency-cache-unavailable"
+      },
+      {
+        "path": "Solidity.lean",
+        "status": "dependency-cache-unavailable"
+      }
+    ],
+    "current_gaps": [],
+    "reference_timings": {
+      "EvmYul": {
+        "pin": "047f63070309f436b66c61e276ab3b6d1169265a",
+        "status": "pass",
+        "expected_modules": 58,
+        "observed_modules": 58,
+        "passing_modules": 58,
+        "failed_module_observations": 0,
+        "tracked_lean_lines": 11339,
+        "built_closure_lines": 8867,
+        "matched_check": {
+          "modules": 58,
+          "lines": 8867,
+          "wall_seconds": 132.00253439099743,
+          "seconds_per_kloc": 14.88694421912681
+        },
+        "versions": {
+          "lean": "Lean (version 4.22.0, x86_64-unknown-linux-gnu, commit ba2cbbf09d4978f416e0ebd1fceeebc2c4138c05, Release)",
+          "lake": "Lake version 5.0.0-src+ba2cbbf (Lean version 4.22.0)"
+        },
+        "preparation_build_attempts": [
+          {
+            "exit_code": 1,
+            "wall_seconds": 757.9463971770001,
+            "stop_reason": null,
+            "evidence_log": "/workspace/da-timing-work/evmyul-times/build-0.log"
+          },
+          {
+            "exit_code": 0,
+            "wall_seconds": 395.3802379919998,
+            "stop_reason": null,
+            "evidence_log": "/workspace/da-timing-work/evmyul-times/build-1.log"
+          }
+        ],
+        "dependency_cache_status": 1,
+        "source_classes": {
+          "detected_generated": {
+            "modules": 0,
+            "lines": 0,
+            "wall_seconds": null,
+            "seconds_per_kloc": null
+          },
+          "unmarked_not_proven_handwritten": {
+            "modules": 58,
+            "lines": 8867,
+            "wall_seconds": 132.00253439099743,
+            "seconds_per_kloc": 14.88694421912681
+          }
+        },
+        "boundary": "project modules in default library import closure; warm dependency oleans, separate lake env lean -j1 invocation per module; physical lines; build attempts include preparation dependencies and are not matched module costs"
+      },
+      "Clear": {
+        "pin": "6ef2e7eda01080e5d5fd7474354c1a71adab5071",
+        "status": "incomplete",
+        "expected_modules": null,
+        "observed_modules": 0,
+        "passing_modules": 0,
+        "failed_module_observations": 0,
+        "tracked_lean_lines": null,
+        "built_closure_lines": null,
+        "matched_check": null,
+        "versions": {
+          "lean": "Lean (version 4.9.0, x86_64-unknown-linux-gnu, commit 1b78cb4836cf, Release)",
+          "lake": "Lake version 5.0.0-1b78cb4 (Lean version 4.9.0)"
+        },
+        "preparation_build_attempts": [
+          {
+            "exit_code": -15,
+            "wall_seconds": 124.42233815899999,
+            "stop_reason": null,
+            "evidence_log": "/workspace/da-timing-work/clear-times/build-0-1.log"
+          },
+          {
+            "exit_code": -15,
+            "wall_seconds": 57.336930915000266,
+            "stop_reason": null,
+            "evidence_log": "/workspace/da-timing-work/clear-times/build-1.log"
+          }
+        ],
+        "dependency_cache_status": 1,
+        "source_classes": null,
+        "boundary": null
+      }
+    },
+    "per_area": [
+      {
+        "area": "Backend",
+        "verdict_scope": "observed size-quartile sample only; area-wide representativeness is unestablished",
+        "local_quartile_coverage": {
+          "expected": 4,
+          "passed": 4,
+          "complete": true
+        },
+        "local_stratified": {
+          "modules": 4,
+          "lines": 486,
+          "wall_seconds": 18.10611563099991,
+          "seconds_per_kloc": 37.25538195678994
+        },
+        "local_all_samples": {
+          "modules": 4,
+          "lines": 486,
+          "wall_seconds": 18.10611563099991,
+          "seconds_per_kloc": 37.25538195678994
+        },
+        "local_source_classes": {
+          "detected_generated": {
+            "modules": 0,
+            "lines": 0,
+            "wall_seconds": null,
+            "seconds_per_kloc": null
+          },
+          "unmarked_not_proven_handwritten": {
+            "modules": 4,
+            "lines": 486,
+            "wall_seconds": 18.10611563099991,
+            "seconds_per_kloc": 37.25538195678994
+          }
+        },
+        "source_inventory": {
+          "detected_generated_lines": 149,
+          "lines": 279224,
+          "marker_associated_unresolved_lines": 2510,
+          "modules": 2015,
+          "unmarked_not_proven_handwritten_lines": 274346,
+          "unresolved_chain_agreement_lines": 2219
+        },
+        "reference": "EvmYul",
+        "ratio": 2.502554010306834,
+        "outlier": false,
+        "verdict": "within band; this looks fine",
+        "reason": "Observed check-time density is within the threefold band.",
+        "verdict_evidence": null,
+        "settling_measurement": null,
+        "comparability": "local toolchain, plain invocation flags and recorded checkout paths validated; per-observation machine identity is incomplete; source obligations and reference Lean versions differ; check-cost calibration, not proof productivity"
+      },
+      {
+        "area": "Yul",
+        "verdict_scope": "observed size-quartile sample only; area-wide representativeness is unestablished",
+        "local_quartile_coverage": {
+          "expected": 4,
+          "passed": 4,
+          "complete": true
+        },
+        "local_stratified": {
+          "modules": 4,
+          "lines": 396,
+          "wall_seconds": 83.96290114899989,
+          "seconds_per_kloc": 212.02752815404014
+        },
+        "local_all_samples": {
+          "modules": 4,
+          "lines": 396,
+          "wall_seconds": 83.96290114899989,
+          "seconds_per_kloc": 212.02752815404014
+        },
+        "local_source_classes": {
+          "detected_generated": {
+            "modules": 0,
+            "lines": 0,
+            "wall_seconds": null,
+            "seconds_per_kloc": null
+          },
+          "unmarked_not_proven_handwritten": {
+            "modules": 4,
+            "lines": 396,
+            "wall_seconds": 83.96290114899989,
+            "seconds_per_kloc": 212.02752815404014
+          }
+        },
+        "source_inventory": {
+          "lines": 197439,
+          "marker_associated_unresolved_lines": 7316,
+          "modules": 1827,
+          "unmarked_not_proven_handwritten_lines": 188247,
+          "unresolved_chain_agreement_lines": 1876
+        },
+        "reference": "EvmYul",
+        "ratio": 14.242515121513403,
+        "outlier": true,
+        "verdict": "inconclusive",
+        "reason": "Observed threefold outlier; causal judgement requires the named component measurement.",
+        "verdict_evidence": null,
+        "settling_measurement": "One matched CPU/allocation profile experiment for the dominating local module and corresponding reference checks, accounting for wall time not attributed by Lean basic/structured profilers under unchanged budgets. This settles sampled hotspot attribution only; an area-wide verdict needs a closure census or independently representative wider sample.",
+        "comparability": "local toolchain, plain invocation flags and recorded checkout paths validated; per-observation machine identity is incomplete; source obligations and reference Lean versions differ; check-cost calibration, not proof productivity"
+      },
+      {
+        "area": "Calculus",
+        "verdict_scope": "observed size-quartile sample only; area-wide representativeness is unestablished",
+        "local_quartile_coverage": {
+          "expected": 4,
+          "passed": 4,
+          "complete": true
+        },
+        "local_stratified": {
+          "modules": 4,
+          "lines": 1594,
+          "wall_seconds": 29.0491581160004,
+          "seconds_per_kloc": 18.224064062735508
+        },
+        "local_all_samples": {
+          "modules": 5,
+          "lines": 4736,
+          "wall_seconds": 66.40841660000024,
+          "seconds_per_kloc": 14.022047423986535
+        },
+        "local_source_classes": {
+          "detected_generated": {
+            "modules": 0,
+            "lines": 0,
+            "wall_seconds": null,
+            "seconds_per_kloc": null
+          },
+          "unmarked_not_proven_handwritten": {
+            "modules": 5,
+            "lines": 4736,
+            "wall_seconds": 66.40841660000024,
+            "seconds_per_kloc": 14.022047423986535
+          }
+        },
+        "source_inventory": {
+          "lines": 169330,
+          "marker_associated_unresolved_lines": 1550,
+          "modules": 388,
+          "unmarked_not_proven_handwritten_lines": 163247,
+          "unresolved_chain_agreement_lines": 4533
+        },
+        "reference": "Clear",
+        "ratio": null,
+        "outlier": null,
+        "verdict": "inconclusive",
+        "reason": "No complete paired measurement.",
+        "verdict_evidence": null,
+        "settling_measurement": "Complete the four planned local quartile checks and the pinned reference per-file protocol.",
+        "comparability": "local toolchain, plain invocation flags and recorded checkout paths validated; per-observation machine identity is incomplete; source obligations and reference Lean versions differ; check-cost calibration, not proof productivity"
+      },
+      {
+        "area": "Lowering",
+        "verdict_scope": "observed size-quartile sample only; area-wide representativeness is unestablished",
+        "local_quartile_coverage": {
+          "expected": 4,
+          "passed": 4,
+          "complete": true
+        },
+        "local_stratified": {
+          "modules": 4,
+          "lines": 535,
+          "wall_seconds": 6.463599792999958,
+          "seconds_per_kloc": 12.081494940186836
+        },
+        "local_all_samples": {
+          "modules": 4,
+          "lines": 535,
+          "wall_seconds": 6.463599792999958,
+          "seconds_per_kloc": 12.081494940186836
+        },
+        "local_source_classes": {
+          "detected_generated": {
+            "modules": 0,
+            "lines": 0,
+            "wall_seconds": null,
+            "seconds_per_kloc": null
+          },
+          "unmarked_not_proven_handwritten": {
+            "modules": 4,
+            "lines": 535,
+            "wall_seconds": 6.463599792999958,
+            "seconds_per_kloc": 12.081494940186836
+          }
+        },
+        "source_inventory": {
+          "lines": 104250,
+          "marker_associated_unresolved_lines": 20,
+          "modules": 716,
+          "unmarked_not_proven_handwritten_lines": 103912,
+          "unresolved_chain_agreement_lines": 318
+        },
+        "reference": "EvmYul",
+        "ratio": 0.8115496882607028,
+        "outlier": false,
+        "verdict": "within band; this looks fine",
+        "reason": "Observed check-time density is within the threefold band.",
+        "verdict_evidence": null,
+        "settling_measurement": null,
+        "comparability": "local toolchain, plain invocation flags and recorded checkout paths validated; per-observation machine identity is incomplete; source obligations and reference Lean versions differ; check-cost calibration, not proof productivity"
+      },
+      {
+        "area": "Frontend",
+        "verdict_scope": "observed size-quartile sample only; area-wide representativeness is unestablished",
+        "local_quartile_coverage": {
+          "expected": 4,
+          "passed": 4,
+          "complete": true
+        },
+        "local_stratified": {
+          "modules": 4,
+          "lines": 659,
+          "wall_seconds": 4.537956497000096,
+          "seconds_per_kloc": 6.886125185129129
+        },
+        "local_all_samples": {
+          "modules": 5,
+          "lines": 4564,
+          "wall_seconds": 21.62606307300007,
+          "seconds_per_kloc": 4.738401199167412
+        },
+        "local_source_classes": {
+          "detected_generated": {
+            "modules": 1,
+            "lines": 3905,
+            "wall_seconds": 17.088106575999973,
+            "seconds_per_kloc": 4.375955589244551
+          },
+          "unmarked_not_proven_handwritten": {
+            "modules": 4,
+            "lines": 659,
+            "wall_seconds": 4.537956497000096,
+            "seconds_per_kloc": 6.886125185129129
+          }
+        },
+        "source_inventory": {
+          "detected_generated_lines": 3905,
+          "lines": 102235,
+          "marker_associated_unresolved_lines": 455,
+          "modules": 512,
+          "unmarked_not_proven_handwritten_lines": 97875
+        },
+        "reference": "EvmYul",
+        "ratio": 0.4625613614029537,
+        "outlier": false,
+        "verdict": "within band; this looks fine",
+        "reason": "Observed check-time density is within the threefold band.",
+        "verdict_evidence": null,
+        "settling_measurement": null,
+        "comparability": "local toolchain, plain invocation flags and recorded checkout paths validated; per-observation machine identity is incomplete; source obligations and reference Lean versions differ; check-cost calibration, not proof productivity"
+      },
+      {
+        "area": "Bridge",
+        "verdict_scope": "observed size-quartile sample only; area-wide representativeness is unestablished",
+        "local_quartile_coverage": {
+          "expected": 4,
+          "passed": 4,
+          "complete": true
+        },
+        "local_stratified": {
+          "modules": 4,
+          "lines": 443,
+          "wall_seconds": 11.305363223000313,
+          "seconds_per_kloc": 25.52000727539574
+        },
+        "local_all_samples": {
+          "modules": 4,
+          "lines": 443,
+          "wall_seconds": 11.305363223000313,
+          "seconds_per_kloc": 25.52000727539574
+        },
+        "local_source_classes": {
+          "detected_generated": {
+            "modules": 0,
+            "lines": 0,
+            "wall_seconds": null,
+            "seconds_per_kloc": null
+          },
+          "unmarked_not_proven_handwritten": {
+            "modules": 4,
+            "lines": 443,
+            "wall_seconds": 11.305363223000313,
+            "seconds_per_kloc": 25.52000727539574
+          }
+        },
+        "source_inventory": {
+          "lines": 64746,
+          "modules": 524,
+          "unmarked_not_proven_handwritten_lines": 62806,
+          "unresolved_chain_agreement_lines": 1940
+        },
+        "reference": "Clear",
+        "ratio": null,
+        "outlier": null,
+        "verdict": "inconclusive",
+        "reason": "No complete paired measurement.",
+        "verdict_evidence": null,
+        "settling_measurement": "Complete the four planned local quartile checks and the pinned reference per-file protocol.",
+        "comparability": "local toolchain, plain invocation flags and recorded checkout paths validated; per-observation machine identity is incomplete; source obligations and reference Lean versions differ; check-cost calibration, not proof productivity"
+      },
+      {
+        "area": "Examples",
+        "verdict_scope": "observed size-quartile sample only; area-wide representativeness is unestablished",
+        "local_quartile_coverage": {
+          "expected": 4,
+          "passed": 4,
+          "complete": true
+        },
+        "local_stratified": {
+          "modules": 4,
+          "lines": 616,
+          "wall_seconds": 101.1166531240001,
+          "seconds_per_kloc": 164.15041091558456
+        },
+        "local_all_samples": {
+          "modules": 7,
+          "lines": 1165,
+          "wall_seconds": 443.43525435400034,
+          "seconds_per_kloc": 380.63111961716766
+        },
+        "local_source_classes": {
+          "detected_generated": {
+            "modules": 0,
+            "lines": 0,
+            "wall_seconds": null,
+            "seconds_per_kloc": null
+          },
+          "unmarked_not_proven_handwritten": {
+            "modules": 7,
+            "lines": 1165,
+            "wall_seconds": 443.43525435400034,
+            "seconds_per_kloc": 380.63111961716766
+          }
+        },
+        "source_inventory": {
+          "lines": 61471,
+          "marker_associated_unresolved_lines": 121,
+          "modules": 356,
+          "unmarked_not_proven_handwritten_lines": 52622,
+          "unresolved_chain_agreement_lines": 8728
+        },
+        "reference": "Clear",
+        "ratio": null,
+        "outlier": null,
+        "verdict": "inconclusive",
+        "reason": "No complete paired measurement.",
+        "verdict_evidence": null,
+        "settling_measurement": "Complete the four planned local quartile checks and the pinned reference per-file protocol.",
+        "comparability": "local toolchain, plain invocation flags and recorded checkout paths validated; per-observation machine identity is incomplete; source obligations and reference Lean versions differ; check-cost calibration, not proof productivity"
+      },
+      {
+        "area": "Source",
+        "verdict_scope": "observed size-quartile sample only; area-wide representativeness is unestablished",
+        "local_quartile_coverage": {
+          "expected": 4,
+          "passed": 4,
+          "complete": true
+        },
+        "local_stratified": {
+          "modules": 4,
+          "lines": 616,
+          "wall_seconds": 20.739497505000145,
+          "seconds_per_kloc": 33.66801543019504
+        },
+        "local_all_samples": {
+          "modules": 5,
+          "lines": 995,
+          "wall_seconds": 25.336014566999893,
+          "seconds_per_kloc": 25.46333122311547
+        },
+        "local_source_classes": {
+          "detected_generated": {
+            "modules": 0,
+            "lines": 0,
+            "wall_seconds": null,
+            "seconds_per_kloc": null
+          },
+          "unmarked_not_proven_handwritten": {
+            "modules": 4,
+            "lines": 910,
+            "wall_seconds": 24.464760799000032,
+            "seconds_per_kloc": 26.88435252637366
+          },
+          "unresolved_chain_agreement": {
+            "modules": 1,
+            "lines": 85,
+            "wall_seconds": 0.8712537679998604,
+            "seconds_per_kloc": 10.250044329410123
+          }
+        },
+        "source_inventory": {
+          "detected_generated_lines": 626,
+          "lines": 50041,
+          "modules": 262,
+          "unmarked_not_proven_handwritten_lines": 45638,
+          "unresolved_chain_agreement_lines": 3777
+        },
+        "reference": "EvmYul",
+        "ratio": 2.26158000826914,
+        "outlier": false,
+        "verdict": "within band; this looks fine",
+        "reason": "Observed check-time density is within the threefold band.",
+        "verdict_evidence": null,
+        "settling_measurement": null,
+        "comparability": "local toolchain, plain invocation flags and recorded checkout paths validated; per-observation machine identity is incomplete; source obligations and reference Lean versions differ; check-cost calibration, not proof productivity"
+      },
+      {
+        "area": "Evm",
+        "verdict_scope": "observed size-quartile sample only; area-wide representativeness is unestablished",
+        "local_quartile_coverage": {
+          "expected": 4,
+          "passed": 4,
+          "complete": true
+        },
+        "local_stratified": {
+          "modules": 4,
+          "lines": 514,
+          "wall_seconds": 3.858256527000094,
+          "seconds_per_kloc": 7.506335655642206
+        },
+        "local_all_samples": {
+          "modules": 4,
+          "lines": 514,
+          "wall_seconds": 3.858256527000094,
+          "seconds_per_kloc": 7.506335655642206
+        },
+        "local_source_classes": {
+          "detected_generated": {
+            "modules": 0,
+            "lines": 0,
+            "wall_seconds": null,
+            "seconds_per_kloc": null
+          },
+          "unmarked_not_proven_handwritten": {
+            "modules": 4,
+            "lines": 514,
+            "wall_seconds": 3.858256527000094,
+            "seconds_per_kloc": 7.506335655642206
+          }
+        },
+        "source_inventory": {
+          "lines": 45857,
+          "modules": 279,
+          "unmarked_not_proven_handwritten_lines": 45857
+        },
+        "reference": "EvmYul",
+        "ratio": 0.5042227300078168,
+        "outlier": false,
+        "verdict": "within band; this looks fine",
+        "reason": "Observed check-time density is within the threefold band.",
+        "verdict_evidence": null,
+        "settling_measurement": null,
+        "comparability": "local toolchain, plain invocation flags and recorded checkout paths validated; per-observation machine identity is incomplete; source obligations and reference Lean versions differ; check-cost calibration, not proof productivity"
+      },
+      {
+        "area": "Semantics",
+        "verdict_scope": "observed size-quartile sample only; area-wide representativeness is unestablished",
+        "local_quartile_coverage": {
+          "expected": 4,
+          "passed": 4,
+          "complete": true
+        },
+        "local_stratified": {
+          "modules": 4,
+          "lines": 1012,
+          "wall_seconds": 6.6210623620002025,
+          "seconds_per_kloc": 6.542551741106919
+        },
+        "local_all_samples": {
+          "modules": 4,
+          "lines": 1012,
+          "wall_seconds": 6.6210623620002025,
+          "seconds_per_kloc": 6.542551741106919
+        },
+        "local_source_classes": {
+          "detected_generated": {
+            "modules": 0,
+            "lines": 0,
+            "wall_seconds": null,
+            "seconds_per_kloc": null
+          },
+          "unmarked_not_proven_handwritten": {
+            "modules": 4,
+            "lines": 1012,
+            "wall_seconds": 6.6210623620002025,
+            "seconds_per_kloc": 6.542551741106919
+          }
+        },
+        "source_inventory": {
+          "lines": 25790,
+          "modules": 82,
+          "unmarked_not_proven_handwritten_lines": 25678,
+          "unresolved_chain_agreement_lines": 112
+        },
+        "reference": "EvmYul",
+        "ratio": 0.4394825186958799,
+        "outlier": false,
+        "verdict": "within band; this looks fine",
+        "reason": "Observed check-time density is within the threefold band.",
+        "verdict_evidence": null,
+        "settling_measurement": null,
+        "comparability": "local toolchain, plain invocation flags and recorded checkout paths validated; per-observation machine identity is incomplete; source obligations and reference Lean versions differ; check-cost calibration, not proof productivity"
+      }
+    ],
+    "full_check_only_estimates": {
+      "Bridge": {
+        "roots": [
+          "SolidityBridge"
+        ],
+        "modules": 1393,
+        "module_mean_model_seconds": 9517.28164117043,
+        "line_rate_sensitivity_model_seconds": 12131.544980906216,
+        "observed_extrema_sensitivity_seconds": [
+          3984.487579119548,
+          23049.62389815945
+        ],
+        "pooled_extrapolation_areas": [
+          "Core",
+          "Hash",
+          "Language",
+          "Other",
+          "Precompiles",
+          "Roadmap",
+          "Storage",
+          "Syntax",
+          "Theory",
+          "Tools",
+          "Typing"
+        ],
+        "method": "area size-stratified mean observed per-module seconds times workload module count; unsampled areas use pooled seconds/line; targeted tails excluded; extrema are sensitivity scenarios, not statistical confidence bounds",
+        "boundary": "check-only body elaboration with warm imported oleans; excludes output/C generation, scheduling, downloads and dependency preparation; not an observed cold Lake build",
+        "verdict": "inconclusive",
+        "settling_measurement": "Serial CI per-module fresh-elaboration timings at the frozen base for these exact roots, summed with output generation measured separately.",
+        "reference_total_check_ratios": {
+          "EvmYul": 72.09923419333613,
+          "Clear": null
+        },
+        "ratio_boundary": "Modelled complete local workload versus measured complete reference project body checks, warm imports. Different project sizes and Lean versions; no CompCert/CakeML ratio because their cited build boundaries differ."
+      },
+      "checkpoint": {
+        "roots": [
+          "Solidity"
+        ],
+        "modules": 6324,
+        "module_mean_model_seconds": 57379.10849223613,
+        "line_rate_sensitivity_model_seconds": 63101.41538371614,
+        "observed_extrema_sensitivity_seconds": [
+          10229.099129514518,
+          175795.4960960407
+        ],
+        "pooled_extrapolation_areas": [
+          "Automation",
+          "Core",
+          "Counterexamples",
+          "Hash",
+          "Language",
+          "Optimizer",
+          "Other",
+          "Precompiles",
+          "Roadmap",
+          "SolcValidation",
+          "Solkey",
+          "SortCheck",
+          "Stipend",
+          "Storage",
+          "Syntax",
+          "Theory",
+          "Tools",
+          "Typing"
+        ],
+        "method": "area size-stratified mean observed per-module seconds times workload module count; unsampled areas use pooled seconds/line; targeted tails excluded; extrema are sensitivity scenarios, not statistical confidence bounds",
+        "boundary": "check-only body elaboration with warm imported oleans; excludes output/C generation, scheduling, downloads and dependency preparation; not an observed cold Lake build",
+        "verdict": "inconclusive",
+        "settling_measurement": "Serial CI per-module fresh-elaboration timings at the frozen base for these exact roots, summed with output generation measured separately.",
+        "reference_total_check_ratios": {
+          "EvmYul": 434.6818699880158,
+          "Clear": null
+        },
+        "ratio_boundary": "Modelled complete local workload versus measured complete reference project body checks, warm imports. Different project sizes and Lean versions; no CompCert/CakeML ratio because their cited build boundaries differ."
+      },
+      "full": {
+        "roots": [
+          "Solidity",
+          "SolidityExamples",
+          "SoliditySlowExamples",
+          "SolkeyTestSuite",
+          "SolidityLean"
+        ],
+        "modules": 6734,
+        "module_mean_model_seconds": 66592.4679309117,
+        "line_rate_sensitivity_model_seconds": 73405.8826037476,
+        "observed_extrema_sensitivity_seconds": [
+          13407.34871798613,
+          191202.03979614028
+        ],
+        "pooled_extrapolation_areas": [
+          "Automation",
+          "Core",
+          "Counterexamples",
+          "Hash",
+          "Language",
+          "Optimizer",
+          "Other",
+          "Precompiles",
+          "Roadmap",
+          "SolcValidation",
+          "Solkey",
+          "SortCheck",
+          "Stipend",
+          "Storage",
+          "Syntax",
+          "TestSuite",
+          "Theory",
+          "Tools",
+          "Typing"
+        ],
+        "method": "area size-stratified mean observed per-module seconds times workload module count; unsampled areas use pooled seconds/line; targeted tails excluded; extrema are sensitivity scenarios, not statistical confidence bounds",
+        "boundary": "check-only body elaboration with warm imported oleans; excludes output/C generation, scheduling, downloads and dependency preparation; not an observed cold Lake build",
+        "verdict": "inconclusive",
+        "settling_measurement": "Serial CI per-module fresh-elaboration timings at the frozen base for these exact roots, summed with output generation measured separately.",
+        "reference_total_check_ratios": {
+          "EvmYul": 504.4787074592207,
+          "Clear": null
+        },
+        "ratio_boundary": "Modelled complete local workload versus measured complete reference project body checks, warm imports. Different project sizes and Lean versions; no CompCert/CakeML ratio because their cited build boundaries differ."
+      }
+    },
+    "incremental": [
+      {
+        "all_tracked_potential_dependents": 7463,
+        "dependent_lines": 1165346,
+        "module": "Solidity.Keccak",
+        "rebuilds_including_changed_module": 7464,
+        "workload_rebuilds": {
+          "Bridge": 1220,
+          "checkpoint": 5892,
+          "full": 6297
+        }
+      },
+      {
+        "all_tracked_potential_dependents": 5720,
+        "dependent_lines": 947786,
+        "module": "Solidity.KeySort",
+        "rebuilds_including_changed_module": 5721,
+        "workload_rebuilds": {
+          "Bridge": 1072,
+          "checkpoint": 4234,
+          "full": 4640
+        }
+      },
+      {
+        "all_tracked_potential_dependents": 5712,
+        "dependent_lines": 946048,
+        "module": "Solidity.AST",
+        "rebuilds_including_changed_module": 5713,
+        "workload_rebuilds": {
+          "Bridge": 1071,
+          "checkpoint": 4232,
+          "full": 4638
+        }
+      },
+      {
+        "all_tracked_potential_dependents": 5697,
+        "dependent_lines": 943337,
+        "module": "Solidity.Syntax.Raw",
+        "rebuilds_including_changed_module": 5698,
+        "workload_rebuilds": {
+          "Bridge": 1067,
+          "checkpoint": 4226,
+          "full": 4632
+        }
+      },
+      {
+        "all_tracked_potential_dependents": 4759,
+        "dependent_lines": 807680,
+        "module": "Solidity.Semantics.Value",
+        "rebuilds_including_changed_module": 4760,
+        "workload_rebuilds": {
+          "Bridge": 788,
+          "checkpoint": 3538,
+          "full": 3940
+        }
+      },
+      {
+        "all_tracked_potential_dependents": 3505,
+        "dependent_lines": 448872,
+        "module": "Solidity.Source.Types",
+        "rebuilds_including_changed_module": 3506,
+        "workload_rebuilds": {
+          "Bridge": 182,
+          "checkpoint": 3210,
+          "full": 3212
+        }
+      }
+    ],
+    "slowest_sampled_modules": [
+      {
+        "path": "Solidity/Examples/DecisionGaps.lean",
+        "seconds": 195.37071439500005,
+        "lines": 207,
+        "classification": "unmarked_not_proven_handwritten",
+        "selection": "targeted_tail_or_generated"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/RevertData.lean",
+        "seconds": 137.3613358030002,
+        "lines": 307,
+        "classification": "unmarked_not_proven_handwritten",
+        "selection": "targeted_tail_or_generated"
+      },
+      {
+        "path": "Solidity/Yul/RawIntegerInitialization.lean",
+        "seconds": 79.19439813300005,
+        "lines": 75,
+        "classification": "unmarked_not_proven_handwritten",
+        "selection": "size_quartile_midpoint"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/QuantifiedDiamond.lean",
+        "seconds": 42.675748285000054,
+        "lines": 152,
+        "classification": "unmarked_not_proven_handwritten",
+        "selection": "size_quartile_midpoint"
+      },
+      {
+        "path": "Solidity/Calculus/ArrayProperty.lean",
+        "seconds": 37.35925848399984,
+        "lines": 3142,
+        "classification": "unmarked_not_proven_handwritten",
+        "selection": "targeted_tail_or_generated"
+      },
+      {
+        "path": "Solidity/Examples/DecisionHashThreeKinds.lean",
+        "seconds": 29.15031883300003,
+        "lines": 44,
+        "classification": "unmarked_not_proven_handwritten",
+        "selection": "size_quartile_midpoint"
+      },
+      {
+        "path": "Solidity/Calculus/Closer/Facts.lean",
+        "seconds": 22.064303495000104,
+        "lines": 1043,
+        "classification": "unmarked_not_proven_handwritten",
+        "selection": "size_quartile_midpoint"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/OwnStructs.lean",
+        "seconds": 20.96397848399988,
+        "lines": 91,
+        "classification": "unmarked_not_proven_handwritten",
+        "selection": "size_quartile_midpoint"
+      },
+      {
+        "path": "Solidity/Frontend/ExpressionUniqueness/AxiomPins.lean",
+        "seconds": 17.088106575999973,
+        "lines": 3905,
+        "classification": "detected_generated",
+        "selection": "targeted_tail_or_generated"
+      },
+      {
+        "path": "Solidity/Source/FailureDeploymentHorizon.lean",
+        "seconds": 11.19858321300012,
+        "lines": 152,
+        "classification": "unmarked_not_proven_handwritten",
+        "selection": "size_quartile_midpoint"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/OpenLoops.lean",
+        "seconds": 9.586551031999988,
+        "lines": 35,
+        "classification": "unmarked_not_proven_handwritten",
+        "selection": "targeted_tail_or_generated"
+      },
+      {
+        "path": "Solidity.lean",
+        "seconds": 9.015842478000195,
+        "lines": 6320,
+        "classification": "detected_generated",
+        "selection": "targeted_tail_or_generated"
+      },
+      {
+        "path": "Solidity/Examples/Benchmark/Purchase.lean",
+        "seconds": 8.326607522000131,
+        "lines": 329,
+        "classification": "unmarked_not_proven_handwritten",
+        "selection": "size_quartile_midpoint"
+      },
+      {
+        "path": "Solidity/Source/Decode.lean",
+        "seconds": 8.033290843000032,
+        "lines": 329,
+        "classification": "unmarked_not_proven_handwritten",
+        "selection": "size_quartile_midpoint"
+      },
+      {
+        "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/SourceOrigin.lean",
+        "seconds": 5.933705138999983,
+        "lines": 46,
+        "classification": "unmarked_not_proven_handwritten",
+        "selection": "size_quartile_midpoint"
+      },
+      {
+        "path": "Solidity/Backend/Passes/ReferenceCallCaptureFailureControls.lean",
+        "seconds": 5.83461035199997,
+        "lines": 86,
+        "classification": "unmarked_not_proven_handwritten",
+        "selection": "size_quartile_midpoint"
+      },
+      {
+        "path": "Solidity/Source/Horizon.lean",
+        "seconds": 4.596517061999748,
+        "lines": 379,
+        "classification": "unmarked_not_proven_handwritten",
+        "selection": "targeted_tail_or_generated"
+      },
+      {
+        "path": "Solidity/Backend/PrimitivePackets/CheckedMul/Controls.lean",
+        "seconds": 4.426636051999992,
+        "lines": 224,
+        "classification": "unmarked_not_proven_handwritten",
+        "selection": "size_quartile_midpoint"
+      },
+      {
+        "path": "Solidity/Calculus/JoinSequence.lean",
+        "seconds": 4.044591385000103,
+        "lines": 156,
+        "classification": "unmarked_not_proven_handwritten",
+        "selection": "size_quartile_midpoint"
+      },
+      {
+        "path": "Solidity/Semantics/NoPanic.lean",
+        "seconds": 3.6267700040000364,
+        "lines": 558,
+        "classification": "unmarked_not_proven_handwritten",
+        "selection": "size_quartile_midpoint"
+      }
+    ],
+    "declaration_profiles": {
+      "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+      "method": "union of time-weight slices attributed by qualified async-proof/kernel trace names or matching command-source names; nested and cross-thread overlaps for a declaration merged; inclusive wall spans can overlap across declarations and MUST NOT be summed as module or CPU time; grouped mutual declarations remain groups; only sampled profiled modules ranked; below-threshold detail unknown",
+      "profiles": [
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 3.4200000000000005e-05,
+            "blocked": 0.354,
+            "blocked (unaccounted)": 3.17,
+            "compilation (IR)": 0.00772,
+            "compilation (LCNF base)": 0.0115,
+            "compilation (LCNF mono)": 0.0030600000000000002,
+            "congr simp thm": 0.027100000000000003,
+            "elaboration": 0.0267,
+            "fix level params": 0.00020300000000000003,
+            "import": 0.394,
+            "initialization": 0.0305,
+            "instantiate metavars": 0.00294,
+            "interpretation": 0.0783,
+            "let-to-have transformation": 0.00654,
+            "linting": 0.00286,
+            "parsing": 0.00418,
+            "process pre-definitions": 0.0024500000000000004,
+            "share common exprs": 0.00152,
+            "simp": 0.367,
+            "tactic execution": 4.37,
+            "type checking": 0.26,
+            "typeclass inference": 0.0169
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Backend/PrimitivePackets/UnsignedDiv/SourceOrigin.lean",
+          "profile_wall_seconds": 32.71633113199994,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "Meta.synthInstance": 0.006928345000022091,
+            "Elab.async": 4.434898237996153,
+            "tactic_command_simp": 3.918964655999094,
+            "Kernel": 0.22651020499994046
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=1"
+          ],
+          "unattributed_slices": 16
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 0.000101,
+            "blocked (unaccounted)": 4.6,
+            "compilation (IR)": 0.0066,
+            "compilation (LCNF base)": 0.006980000000000001,
+            "compilation (LCNF mono)": 0.00446,
+            "congr simp thm": 0.000524,
+            "elaboration": 0.0738,
+            "fix level params": 0.000415,
+            "import": 0.434,
+            "initialization": 0.03,
+            "instantiate metavars": 0.00186,
+            "interpretation": 0.139,
+            "let-to-have transformation": 0.00043,
+            "linting": 0.0064,
+            "parsing": 0.00543,
+            "process pre-definitions": 0.00816,
+            "share common exprs": 0.0026000000000000003,
+            "simp": 0.00197,
+            "tactic execution": 3.3,
+            "type checking": 0.658,
+            "typeclass inference": 0.121
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Backend/Passes/ReferenceCallCaptureFailureControls.lean",
+          "profile_wall_seconds": 56.059566722,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "Meta.synthInstance": 0.012446605999954044,
+            "tactic_command_decide": 4.4473335179999705,
+            "Kernel": 4.526919261999894,
+            "Elab.async": 4.533546577999252
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=1"
+          ],
+          "unattributed_slices": 48
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 4.99e-05,
+            "blocked (unaccounted)": 0.324,
+            "compilation (IR)": 0.00117,
+            "compilation (LCNF base)": 0.00166,
+            "compilation (LCNF mono)": 0.00047,
+            "congr simp thm": 0.0043,
+            "elaboration": 0.77,
+            "fix level params": 0.000834,
+            "import": 0.488,
+            "initialization": 0.0318,
+            "instantiate metavars": 0.0254,
+            "interpretation": 0.0443,
+            "let-to-have transformation": 0.000277,
+            "linting": 0.0146,
+            "parsing": 0.0183,
+            "process pre-definitions": 0.0109,
+            "share common exprs": 0.00477,
+            "simp": 0.0285,
+            "tactic execution": 0.17500000000000002,
+            "type checking": 0.0375,
+            "typeclass inference": 0.055
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Backend/MemoryOps/SourceUintFixedCompound.lean",
+          "profile_wall_seconds": 3.420258088999958,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "Meta.synthInstance": 0.029995510000153446,
+            "axiom_pin_commands": 0.9876223039997276,
+            "Elab.async": 0.31762391098611986,
+            "tactic_command_simp": 0.035003273000009355,
+            "Kernel": 0.037273454000009226
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=1"
+          ],
+          "unattributed_slices": 45
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 0.000379,
+            "blocked (unaccounted)": 0.398,
+            "compilation (IR)": 0.00375,
+            "compilation (LCNF base)": 0.00697,
+            "compilation (LCNF mono)": 0.0029100000000000003,
+            "congr simp thm": 0.0011200000000000001,
+            "dsimp": 0.000987,
+            "elaboration": 3.03,
+            "fix level params": 0.0006590000000000001,
+            "import": 0.427,
+            "initialization": 0.0291,
+            "instantiate metavars": 0.00182,
+            "interpretation": 0.053700000000000005,
+            "let-to-have transformation": 0.00536,
+            "linting": 0.012,
+            "parsing": 0.021,
+            "process pre-definitions": 0.01,
+            "share common exprs": 0.00377,
+            "simp": 0.0056500000000000005,
+            "tactic execution": 0.391,
+            "type checking": 0.0674,
+            "typeclass inference": 0.215
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Backend/PrimitivePackets/CheckedMul/Controls.lean",
+          "profile_wall_seconds": 5.335897569000053,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "Meta.synthInstance": 0.016355846999795177,
+            "tactic_command_decide": 0.038773139999248085,
+            "axiom_pin_commands": 3.158855015000212,
+            "Elab.async": 0.3647934089824557,
+            "Kernel": 0.06136698100005742
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=1"
+          ],
+          "unattributed_slices": 168
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 1.73e-05,
+            "congr simp thm": 0.00124,
+            "dsimp": 0.00165,
+            "elaboration": 0.0264,
+            "fix level params": 8.23e-05,
+            "import": 0.544,
+            "initialization": 0.032100000000000004,
+            "instantiate metavars": 0.000514,
+            "interpretation": 0.0285,
+            "let-to-have transformation": 0.00265,
+            "linting": 0.00217,
+            "parsing": 0.00328,
+            "process pre-definitions": 0.00152,
+            "share common exprs": 0.00113,
+            "simp": 0.00564,
+            "tactic execution": 0.0207,
+            "type checking": 0.00309,
+            "typeclass inference": 0.00547
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Yul/Adapters/HeapCallOutput.lean",
+          "profile_wall_seconds": 0.9059655670000666,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "Elab.async": 0.041761065998463895,
+            "Kernel": 0.0030803340000566093
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=1"
+          ],
+          "unattributed_slices": 7
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 6.500000000000001e-05,
+            "blocked": 5.16,
+            "compilation (IR)": 0.0112,
+            "compilation (LCNF base)": 0.116,
+            "compilation (LCNF mono)": 0.00625,
+            "congr simp thm": 0.0137,
+            "elaboration": 0.031,
+            "fix level params": 0.000224,
+            "import": 0.685,
+            "initialization": 0.0344,
+            "instantiate metavars": 0.0049299999999999995,
+            "interpretation": 0.0185,
+            "let-to-have transformation": 0.000135,
+            "linting": 0.0030600000000000002,
+            "parsing": 0.00329,
+            "process pre-definitions": 0.0029500000000000004,
+            "share common exprs": 0.00127,
+            "simp": 0.116,
+            "tactic execution": 8.16,
+            "type checking": 0.168,
+            "typeclass inference": 0.0426
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Yul/RawIntegerInitialization.lean",
+          "profile_wall_seconds": 72.66849315400032,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "Elab.async": 8.593853937990964,
+            "tactic_command_simp": 8.57733622799255
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 1
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 5.05e-05,
+            "blocked": 0.0502,
+            "compilation (IR)": 0.0008680000000000001,
+            "compilation (LCNF base)": 0.00135,
+            "compilation (LCNF mono)": 0.000639,
+            "congr simp thm": 0.0032500000000000003,
+            "elaboration": 0.0264,
+            "fix level params": 0.000297,
+            "import": 0.485,
+            "initialization": 0.0363,
+            "instantiate metavars": 0.00221,
+            "interpretation": 0.020100000000000003,
+            "let-to-have transformation": 8.999999999999999e-05,
+            "linting": 0.004730000000000001,
+            "parsing": 0.00396,
+            "process pre-definitions": 0.00378,
+            "share common exprs": 0.00133,
+            "simp": 0.0146,
+            "tactic execution": 0.0901,
+            "type checking": 0.0258,
+            "typeclass inference": 0.00197
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Yul/CoordinateUpdates.lean",
+          "profile_wall_seconds": 0.8276307359992643,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "Elab.async": 0.12573238499835135
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 1
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 0.24,
+            "compilation (IR)": 0.0135,
+            "compilation (LCNF base)": 0.0174,
+            "compilation (LCNF mono)": 0.009710000000000002,
+            "congr simp thm": 0.00175,
+            "elaboration": 0.533,
+            "fix level params": 0.0006500000000000001,
+            "import": 0.181,
+            "initialization": 0.0303,
+            "instantiate metavars": 0.00168,
+            "interpretation": 0.00458,
+            "let-to-have transformation": 0.0143,
+            "linting": 0.011800000000000001,
+            "parsing": 0.0178,
+            "process pre-definitions": 0.014,
+            "share common exprs": 0.00554,
+            "simp": 0.0181,
+            "tactic execution": 1.14,
+            "type checking": 1.26,
+            "typeclass inference": 0.108
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Yul/Views/FixedDeclarationControls.lean",
+          "profile_wall_seconds": 3.7712229270000535,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "Elab.async": 1.1019042119905353,
+            "Kernel": 0.3697021409999579
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 8
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 2.93e-05,
+            "blocked (unaccounted)": 0.00367,
+            "elaboration": 0.128,
+            "fix level params": 2.98e-05,
+            "import": 0.489,
+            "initialization": 0.0378,
+            "instantiate metavars": 3.57e-05,
+            "interpretation": 0.08940000000000001,
+            "let-to-have transformation": 3.7699999999999995e-05,
+            "linting": 0.00168,
+            "parsing": 0.00319,
+            "process pre-definitions": 0.000378,
+            "share common exprs": 0.000158,
+            "tactic execution": 0.00235,
+            "type checking": 0.0192,
+            "typeclass inference": 0.0024300000000000003
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Calculus/CallbackRules.lean",
+          "profile_wall_seconds": 0.8885990100006893,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {},
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 1
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 0.00442,
+            "blocked": 0.519,
+            "blocked (unaccounted)": 0.932,
+            "compilation (IR)": 0.014,
+            "compilation (LCNF base)": 0.020300000000000002,
+            "compilation (LCNF mono)": 0.00534,
+            "congr simp thm": 0.012,
+            "elaboration": 0.09,
+            "fix level params": 0.00232,
+            "import": 0.41100000000000003,
+            "initialization": 0.0307,
+            "instantiate metavars": 0.111,
+            "interpretation": 0.0233,
+            "let-to-have transformation": 0.00139,
+            "linting": 0.0141,
+            "parsing": 0.009300000000000001,
+            "process pre-definitions": 0.0485,
+            "share common exprs": 0.016800000000000002,
+            "simp": 0.0228,
+            "tactic execution": 2.42,
+            "type checking": 0.6930000000000001,
+            "typeclass inference": 0.0252
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Calculus/JoinSequence.lean",
+          "profile_wall_seconds": 4.219937439000205,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "Elab.async": 3.160184848992154,
+            "tactic_command_simp": 1.1730149349998682,
+            "Kernel": 0.5814360070005059
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 5
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 0.0135,
+            "blocked (unaccounted)": 0.704,
+            "compilation (IR)": 0.013300000000000001,
+            "compilation (LCNF base)": 0.0287,
+            "compilation (LCNF mono)": 0.014,
+            "congr simp thm": 0.00719,
+            "elaboration": 0.605,
+            "fix level params": 0.000898,
+            "import": 0.585,
+            "initialization": 0.0299,
+            "instantiate metavars": 0.00226,
+            "interpretation": 0.039799999999999995,
+            "let-to-have transformation": 0.00903,
+            "linting": 0.0219,
+            "parsing": 0.0308,
+            "process pre-definitions": 0.101,
+            "share common exprs": 0.00619,
+            "simp": 0.0659,
+            "tactic execution": 0.21,
+            "type checking": 0.123,
+            "typeclass inference": 0.0514
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Calculus/MemObserve.lean",
+          "profile_wall_seconds": 2.1762767159998475,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "Kernel": 0.4296789079997689,
+            "axiom_pin_commands": 0.24292096100002528,
+            "Elab.async": 0.1685714909993112
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 6
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 0.0009080000000000001,
+            "blocked": 64.8,
+            "blocked (unaccounted)": 20.6,
+            "compilation (IR)": 0.0344,
+            "compilation (LCNF base)": 0.111,
+            "compilation (LCNF mono)": 0.0343,
+            "congr simp thm": 0.032100000000000004,
+            "elaboration": 1.07,
+            "fix level params": 0.007240000000000001,
+            "import": 0.451,
+            "initialization": 0.0296,
+            "instantiate metavars": 0.249,
+            "interpretation": 0.0399,
+            "let-to-have transformation": 0.0025099999999999996,
+            "linting": 0.101,
+            "parsing": 0.0767,
+            "process pre-definitions": 0.16,
+            "share common exprs": 0.0555,
+            "simp": 1.04,
+            "tactic execution": 9.24,
+            "type checking": 1.17,
+            "typeclass inference": 0.209
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Calculus/Closer/Facts.lean",
+          "profile_wall_seconds": 22.456628470001306,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "Kernel": 8.62174895499833,
+            "Elab.async": 19.729556943986566,
+            "tactic_command_simp": 19.270766354998575
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 7
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 7.230000000000001e-05,
+            "blocked (unaccounted)": 0.052700000000000004,
+            "compilation (IR)": 0.00231,
+            "compilation (LCNF base)": 0.0013000000000000002,
+            "compilation (LCNF mono)": 0.00057,
+            "elaboration": 0.58,
+            "fix level params": 9.14e-05,
+            "import": 0.483,
+            "initialization": 0.028800000000000003,
+            "instantiate metavars": 0.000155,
+            "interpretation": 0.0237,
+            "let-to-have transformation": 0.00043400000000000003,
+            "linting": 0.00152,
+            "parsing": 0.00289,
+            "process pre-definitions": 0.00146,
+            "share common exprs": 0.000631,
+            "tactic execution": 0.0237,
+            "type checking": 0.016399999999999998,
+            "typeclass inference": 0.00364
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Lowering/V08/BoolErrorStatementControls.lean",
+          "profile_wall_seconds": 1.2675459789988963,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "axiom_pin_commands": 0.38246999599970877
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 7
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 0.081,
+            "blocked (unaccounted)": 0.47900000000000004,
+            "compilation (IR)": 0.013900000000000001,
+            "compilation (LCNF base)": 0.0317,
+            "compilation (LCNF mono)": 0.0077,
+            "elaboration": 1.64,
+            "fix level params": 0.000382,
+            "import": 0.551,
+            "initialization": 0.0291,
+            "instantiate metavars": 0.0007790000000000001,
+            "interpretation": 0.0325,
+            "let-to-have transformation": 0.00314,
+            "linting": 0.00652,
+            "parsing": 0.00958,
+            "process pre-definitions": 0.00526,
+            "share common exprs": 0.00114,
+            "tactic execution": 0.0512,
+            "type checking": 0.158,
+            "typeclass inference": 0.14200000000000002
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Lowering/V08/LiteralFailureCopiedReasonControls.lean",
+          "profile_wall_seconds": 2.918304684000759,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "tactic_command_decide": 0.31220431699790063,
+            "Kernel": 0.30962146499939264,
+            "eval_commands": 0.43198522599972783,
+            "axiom_pin_commands": 0.10092922200076282,
+            "Elab.async": 0.1537190229985863
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 8
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 0.000194,
+            "blocked": 0.028300000000000002,
+            "compilation (IR)": 0.00628,
+            "compilation (LCNF base)": 0.00578,
+            "compilation (LCNF mono)": 0.00287,
+            "congr simp thm": 0.00202,
+            "dsimp": 0.0034100000000000003,
+            "elaboration": 0.0864,
+            "fix level params": 0.00035299999999999996,
+            "import": 0.488,
+            "initialization": 0.0307,
+            "instantiate metavars": 0.00234,
+            "interpretation": 0.0294,
+            "let-to-have transformation": 0.000331,
+            "linting": 0.00847,
+            "parsing": 0.0123,
+            "process pre-definitions": 0.0145,
+            "share common exprs": 0.0024700000000000004,
+            "simp": 0.00775,
+            "tactic execution": 0.145,
+            "type checking": 0.0706,
+            "typeclass inference": 0.0569
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Lowering/G19/AssignmentBlocks.lean",
+          "profile_wall_seconds": 1.1326020489996154,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "Elab.async": 0.12404043699987233
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 1
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 0.000126,
+            "blocked": 0.273,
+            "compilation (IR)": 0.0023,
+            "compilation (LCNF base)": 0.0034900000000000005,
+            "compilation (LCNF mono)": 0.00266,
+            "congr simp thm": 0.0117,
+            "elaboration": 0.167,
+            "fix level params": 0.0006270000000000001,
+            "import": 0.429,
+            "initialization": 0.0309,
+            "instantiate metavars": 0.0020099999999999996,
+            "interpretation": 0.0233,
+            "let-to-have transformation": 0.00163,
+            "linting": 0.0176,
+            "parsing": 0.0285,
+            "process pre-definitions": 0.00844,
+            "share common exprs": 0.00401,
+            "simp": 0.0848,
+            "tactic execution": 0.47800000000000004,
+            "type checking": 0.0853,
+            "typeclass inference": 0.105
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Lowering/V07/UnsignedAddition.lean",
+          "profile_wall_seconds": 1.6133959799990407,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "Elab.async": 0.5794069579970091,
+            "tactic_command_simp": 0.3047627329993993
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 1
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 1.34e-05,
+            "congr simp thm": 0.00034300000000000004,
+            "elaboration": 0.00261,
+            "fix level params": 2.09e-05,
+            "import": 0.14200000000000002,
+            "initialization": 0.0291,
+            "instantiate metavars": 1.92e-05,
+            "interpretation": 0.00366,
+            "let-to-have transformation": 2.4299999999999998e-05,
+            "linting": 0.000287,
+            "parsing": 0.000567,
+            "process pre-definitions": 0.000245,
+            "share common exprs": 0.000122,
+            "simp": 0.0019399999999999999,
+            "tactic execution": 0.0025800000000000003,
+            "type checking": 0.000617,
+            "typeclass inference": 0.00281
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Frontend/Checked/TypePrintRoundtrip.lean",
+          "profile_wall_seconds": 0.27110056200035615,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {},
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 1
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 7.78e-05,
+            "blocked (unaccounted)": 0.0554,
+            "compilation (IR)": 0.00282,
+            "compilation (LCNF base)": 0.00725,
+            "compilation (LCNF mono)": 0.0033900000000000002,
+            "congr simp thm": 0.00046600000000000005,
+            "elaboration": 0.233,
+            "fix level params": 9.98e-05,
+            "import": 0.435,
+            "initialization": 0.0291,
+            "instantiate metavars": 0.000305,
+            "interpretation": 0.00747,
+            "let-to-have transformation": 0.000177,
+            "linting": 0.00239,
+            "parsing": 0.0037400000000000003,
+            "process pre-definitions": 0.00252,
+            "share common exprs": 0.000388,
+            "simp": 0.00366,
+            "tactic execution": 0.013900000000000001,
+            "type checking": 0.0023,
+            "typeclass inference": 0.0036000000000000003
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Frontend/Static/Certificates.lean",
+          "profile_wall_seconds": 0.8550248379997356,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "axiom_pin_commands": 0.20218718899972737
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 5
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 0.000115,
+            "blocked (unaccounted)": 0.26,
+            "compilation (IR)": 0.000555,
+            "compilation (LCNF base)": 0.00103,
+            "compilation (LCNF mono)": 0.000295,
+            "congr simp thm": 0.00109,
+            "elaboration": 0.241,
+            "fix level params": 0.000328,
+            "import": 0.111,
+            "initialization": 0.0422,
+            "instantiate metavars": 0.00268,
+            "interpretation": 0.0033799999999999998,
+            "let-to-have transformation": 0.000199,
+            "linting": 0.0121,
+            "parsing": 0.00983,
+            "process pre-definitions": 0.00475,
+            "share common exprs": 0.00192,
+            "simp": 0.0505,
+            "tactic execution": 0.139,
+            "type checking": 0.025500000000000002,
+            "typeclass inference": 0.0224
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Frontend/TypeGrammarH28/ParserChecks.lean",
+          "profile_wall_seconds": 0.7529914990009274,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "axiom_pin_commands": 0.2803421839997172
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 3
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 0.00653,
+            "blocked": 4.16,
+            "blocked (unaccounted)": 10.3,
+            "compilation (IR)": 0.009689999999999999,
+            "compilation (LCNF base)": 0.019,
+            "compilation (LCNF mono)": 0.00736,
+            "congr simp thm": 0.0146,
+            "elaboration": 0.53,
+            "fix level params": 0.000911,
+            "import": 0.122,
+            "initialization": 0.0298,
+            "instantiate metavars": 0.00159,
+            "interpretation": 0.00509,
+            "let-to-have transformation": 0.00344,
+            "linting": 0.0228,
+            "parsing": 0.025,
+            "process pre-definitions": 0.025,
+            "share common exprs": 0.00495,
+            "simp": 0.33,
+            "tactic execution": 1.67,
+            "type checking": 0.186,
+            "typeclass inference": 0.178
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Frontend/StatementGrammarH28/BlockLeafCoverage.lean",
+          "profile_wall_seconds": 3.1929306639995048,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "Kernel": 0.212438069999218,
+            "axiom_pin_commands": 2.163767128000036,
+            "Elab.async": 2.120731492996216,
+            "tactic_command_simp": 1.932708352001384
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 6
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 3.51e-05,
+            "blocked (unaccounted)": 0.074,
+            "congr simp thm": 0.0039,
+            "elaboration": 0.145,
+            "fix level params": 0.000186,
+            "import": 0.995,
+            "initialization": 0.0342,
+            "instantiate metavars": 0.000987,
+            "interpretation": 0.189,
+            "let-to-have transformation": 0.000102,
+            "linting": 0.00391,
+            "parsing": 0.00284,
+            "process pre-definitions": 0.00163,
+            "share common exprs": 0.000701,
+            "simp": 0.0176,
+            "tactic execution": 0.029,
+            "type checking": 0.00929,
+            "typeclass inference": 0.00604
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Bridge/SolidityBridge/Arith/NarrowShifts.lean",
+          "profile_wall_seconds": 2.195436508000057,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "axiom_pin_commands": 0.10656506399996579
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 3
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 6.800000000000001e-05,
+            "blocked": 0.016300000000000002,
+            "blocked (unaccounted)": 0.061700000000000005,
+            "compilation (IR)": 0.00567,
+            "compilation (LCNF base)": 0.0106,
+            "compilation (LCNF mono)": 0.00453,
+            "congr simp thm": 0.00492,
+            "elaboration": 0.048799999999999996,
+            "fix level params": 0.000124,
+            "import": 1.06,
+            "initialization": 0.028100000000000003,
+            "instantiate metavars": 0.00029,
+            "interpretation": 0.231,
+            "let-to-have transformation": 0.00141,
+            "linting": 0.0047,
+            "parsing": 0.006,
+            "process pre-definitions": 0.045200000000000004,
+            "share common exprs": 0.000616,
+            "simp": 0.12,
+            "tactic execution": 0.061700000000000005,
+            "type checking": 0.101,
+            "typeclass inference": 0.0689
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Bridge/SolidityBridge/ExternalEvm/Assembly/Automatic.lean",
+          "profile_wall_seconds": 2.5815935640002863,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {},
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 2
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 9.15e-05,
+            "blocked (unaccounted)": 0.368,
+            "compilation (IR)": 0.00168,
+            "compilation (LCNF base)": 0.0024500000000000004,
+            "compilation (LCNF mono)": 0.00342,
+            "congr simp thm": 0.0049900000000000005,
+            "dsimp": 0.005980000000000001,
+            "elaboration": 1.03,
+            "fix level params": 0.000335,
+            "import": 1.16,
+            "initialization": 0.0289,
+            "instantiate metavars": 0.000575,
+            "interpretation": 0.277,
+            "let-to-have transformation": 0.00075,
+            "linting": 0.00863,
+            "parsing": 0.0165,
+            "process pre-definitions": 0.004240000000000001,
+            "share common exprs": 0.0024,
+            "simp": 0.011800000000000001,
+            "tactic execution": 0.188,
+            "type checking": 0.0272,
+            "typeclass inference": 0.171
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Bridge/SolidityBridge/RoadmapV15/P10/PublishedRemainderControls.lean",
+          "profile_wall_seconds": 3.67369242300083,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "axiom_pin_commands": 1.2786990379989147
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 11
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 0.00039700000000000005,
+            "blocked (unaccounted)": 0.014199999999999999,
+            "compilation (IR)": 0.0030600000000000002,
+            "compilation (LCNF base)": 0.00973,
+            "compilation (LCNF mono)": 0.00364,
+            "congr simp thm": 0.00107,
+            "elaboration": 0.132,
+            "fix level params": 0.000523,
+            "import": 0.544,
+            "initialization": 0.032100000000000004,
+            "instantiate metavars": 0.0049900000000000005,
+            "interpretation": 0.027100000000000003,
+            "let-to-have transformation": 0.000738,
+            "linting": 0.008490000000000001,
+            "parsing": 0.012,
+            "process pre-definitions": 0.0143,
+            "share common exprs": 0.0028799999999999997,
+            "simp": 0.0103,
+            "tactic execution": 0.845,
+            "type checking": 0.914,
+            "typeclass inference": 0.0158
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Bridge/SolidityBridge/Yul/ControlRealization.lean",
+          "profile_wall_seconds": 4.5114932659998885,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "Elab.async": 0.8543081979975105,
+            "Kernel": 0.854066631000489
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 13
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 2.2499999999999998e-05,
+            "compilation (IR)": 0.00322,
+            "compilation (LCNF base)": 0.00313,
+            "compilation (LCNF mono)": 0.00093,
+            "congr simp thm": 0.00034,
+            "elaboration": 3.34,
+            "fix level params": 3.69e-05,
+            "import": 0.639,
+            "initialization": 0.028800000000000003,
+            "instantiate metavars": 7.43e-05,
+            "interpretation": 1.33,
+            "let-to-have transformation": 2.4e-05,
+            "linting": 0.0009559999999999999,
+            "parsing": 0.0013000000000000002,
+            "process pre-definitions": 0.00109,
+            "share common exprs": 0.000157,
+            "simp": 0.00158,
+            "tactic execution": 0.451,
+            "type checking": 22.7,
+            "typeclass inference": 0.042100000000000005
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Examples/DecisionHashThreeKinds.lean",
+          "profile_wall_seconds": 28.62767624099979,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "eval_commands": 3.0563087989985944,
+            "tactic_command_decide": 23.092319893999026,
+            "Kernel": 22.652442549999805,
+            "axiom_pin_commands": 1.6218945220001042
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 8
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 0.00027800000000000004,
+            "blocked": 19.0,
+            "blocked (unaccounted)": 1.95,
+            "compilation (IR)": 0.0669,
+            "compilation (LCNF base)": 0.045200000000000004,
+            "compilation (LCNF mono)": 0.0352,
+            "congr simp thm": 0.129,
+            "elaboration": 0.194,
+            "fix level params": 0.00564,
+            "import": 0.5630000000000001,
+            "initialization": 0.028399999999999998,
+            "instantiate metavars": 0.0399,
+            "interpretation": 0.613,
+            "let-to-have transformation": 0.000354,
+            "linting": 0.00443,
+            "parsing": 0.00661,
+            "process pre-definitions": 0.0867,
+            "share common exprs": 0.0633,
+            "simp": 15.9,
+            "tactic execution": 0.40900000000000003,
+            "type checking": 3.27,
+            "typeclass inference": 0.251
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Examples/Tactics/OwnStructs.lean",
+          "profile_wall_seconds": 22.073174122000637,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "eval_commands": 0.22554450899921358,
+            "Elab.async": 20.19248315086402,
+            "tactic_command_simp": 14.954349198969082,
+            "Meta.synthInstance": 0.1727468179948628,
+            "Meta.Tactic.simp": 2.077746968973428,
+            "Kernel": 2.5611033900007607
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 31
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 0.00029,
+            "blocked (unaccounted)": 56.3,
+            "compilation (IR)": 0.0843,
+            "compilation (LCNF base)": 0.08420000000000001,
+            "compilation (LCNF mono)": 0.0427,
+            "congr simp thm": 0.31,
+            "elaboration": 3.64,
+            "fix level params": 0.00802,
+            "import": 0.556,
+            "initialization": 0.0314,
+            "instantiate metavars": 0.060700000000000004,
+            "interpretation": 0.41100000000000003,
+            "let-to-have transformation": 0.000652,
+            "linting": 0.0217,
+            "parsing": 0.009949999999999999,
+            "process pre-definitions": 0.169,
+            "share common exprs": 0.0704,
+            "simp": 23.2,
+            "tactic execution": 11.7,
+            "type checking": 4.86,
+            "typeclass inference": 0.842
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Examples/Tactics/QuantifiedDiamond.lean",
+          "profile_wall_seconds": 46.513761635000265,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "tactic_command_decide": 23.494540022999047,
+            "Kernel": 23.49029684300162,
+            "axiom_pin_commands": 23.93636006999947,
+            "Elab.async": 41.671971299495546,
+            "tactic_command_simp": 10.712829122997821
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 36
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 0.000285,
+            "blocked": 5.68,
+            "blocked (unaccounted)": 0.0359,
+            "compilation (IR)": 0.06620000000000001,
+            "compilation (LCNF base)": 0.0458,
+            "compilation (LCNF mono)": 0.0368,
+            "elaboration": 0.27,
+            "fix level params": 0.000287,
+            "import": 0.518,
+            "initialization": 0.029500000000000002,
+            "instantiate metavars": 0.000312,
+            "interpretation": 0.495,
+            "let-to-have transformation": 0.000379,
+            "linting": 0.0039900000000000005,
+            "parsing": 0.00876,
+            "process pre-definitions": 0.0055,
+            "share common exprs": 0.00152,
+            "tactic execution": 0.0134,
+            "type checking": 6.88,
+            "typeclass inference": 0.014
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Examples/Benchmark/Purchase.lean",
+          "profile_wall_seconds": 8.543779204999737,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "eval_commands": 0.3040076759997755,
+            "Elab.async": 7.146817109985277,
+            "Kernel": 6.79408710199967
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 21
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 2.52e-05,
+            "blocked (unaccounted)": 0.128,
+            "congr simp thm": 0.00159,
+            "elaboration": 0.231,
+            "fix level params": 0.000184,
+            "import": 0.162,
+            "initialization": 0.032299999999999995,
+            "instantiate metavars": 0.0005769999999999999,
+            "interpretation": 0.0034900000000000005,
+            "let-to-have transformation": 7.55e-05,
+            "linting": 0.00393,
+            "parsing": 0.00363,
+            "process pre-definitions": 0.00263,
+            "share common exprs": 0.0014,
+            "simp": 0.0074,
+            "tactic execution": 0.0889,
+            "type checking": 0.00788,
+            "typeclass inference": 0.013800000000000002
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Source/Progress/InitializedLocals.lean",
+          "profile_wall_seconds": 0.6525372189989866,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "axiom_pin_commands": 0.33818572499975563
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 5
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 6.34e-05,
+            "elaboration": 0.0854,
+            "fix level params": 0.00038700000000000003,
+            "import": 0.485,
+            "initialization": 0.0293,
+            "instantiate metavars": 0.00484,
+            "interpretation": 0.0225,
+            "let-to-have transformation": 0.000193,
+            "linting": 0.0040999999999999995,
+            "parsing": 0.00852,
+            "process pre-definitions": 0.00444,
+            "share common exprs": 0.00229,
+            "tactic execution": 0.134,
+            "type checking": 0.0706,
+            "typeclass inference": 0.032
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Source/Agreement/BoolSlotSavedControls.lean",
+          "profile_wall_seconds": 0.9982043990003149,
+          "source_classification": "unresolved_chain_agreement",
+          "module_category_wall_seconds_lower_bounds": {},
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 1
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 0.000163,
+            "blocked": 12.1,
+            "blocked (unaccounted)": 10.9,
+            "compilation (IR)": 0.0009699999999999999,
+            "compilation (LCNF base)": 0.00151,
+            "compilation (LCNF mono)": 0.000897,
+            "congr simp thm": 0.036000000000000004,
+            "dsimp": 0.0419,
+            "elaboration": 0.138,
+            "fix level params": 0.00111,
+            "import": 0.209,
+            "initialization": 0.0313,
+            "instantiate metavars": 0.0219,
+            "interpretation": 0.07579999999999999,
+            "let-to-have transformation": 0.00026700000000000004,
+            "linting": 0.040600000000000004,
+            "parsing": 0.010400000000000001,
+            "process pre-definitions": 0.0717,
+            "share common exprs": 0.00722,
+            "simp": 2.75,
+            "tactic execution": 12.9,
+            "type checking": 0.045700000000000005,
+            "typeclass inference": 0.00731
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Source/FailureDeploymentHorizon.lean",
+          "profile_wall_seconds": 17.402620163000392,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "Elab.async": 13.367431865880265
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 1
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 0.00364,
+            "blocked": 8.18,
+            "blocked (unaccounted)": 21.8,
+            "compilation (IR)": 0.0176,
+            "compilation (LCNF base)": 0.0251,
+            "compilation (LCNF mono)": 0.00879,
+            "congr simp thm": 0.0582,
+            "dsimp": 0.0020800000000000003,
+            "elaboration": 0.653,
+            "fix level params": 0.0013100000000000002,
+            "import": 0.154,
+            "initialization": 0.0309,
+            "instantiate metavars": 0.0192,
+            "interpretation": 0.0077,
+            "let-to-have transformation": 0.00782,
+            "linting": 0.0285,
+            "parsing": 0.0233,
+            "process pre-definitions": 0.0265,
+            "share common exprs": 0.00764,
+            "simp": 0.505,
+            "tactic execution": 6.52,
+            "type checking": 0.149,
+            "typeclass inference": 0.0262
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Source/Decode.lean",
+          "profile_wall_seconds": 8.842756514999564,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "axiom_pin_commands": 8.19114050200209,
+            "Elab.async": 6.373645900992677,
+            "tactic_command_simp": 6.3244307219982145
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 17
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 2.24e-05,
+            "elaboration": 0.0165,
+            "fix level params": 6.79e-05,
+            "import": 0.501,
+            "initialization": 0.0299,
+            "instantiate metavars": 0.000398,
+            "interpretation": 0.024300000000000002,
+            "let-to-have transformation": 5.36e-05,
+            "linting": 0.00184,
+            "parsing": 0.00189,
+            "process pre-definitions": 0.000653,
+            "share common exprs": 0.00027,
+            "tactic execution": 0.0106,
+            "type checking": 0.00631,
+            "typeclass inference": 0.00236
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Evm/MemoryLoopHorizonObjectStability.lean",
+          "profile_wall_seconds": 0.7240711379999993,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {},
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 1
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 2.47e-05,
+            "compilation (IR)": 0.000449,
+            "compilation (LCNF base)": 0.000747,
+            "compilation (LCNF mono)": 0.00025800000000000004,
+            "congr simp thm": 0.0030499999999999998,
+            "elaboration": 0.0194,
+            "fix level params": 0.000414,
+            "import": 0.428,
+            "initialization": 0.028399999999999998,
+            "instantiate metavars": 0.0119,
+            "interpretation": 0.0254,
+            "let-to-have transformation": 0.00175,
+            "linting": 0.00635,
+            "parsing": 0.007690000000000001,
+            "process pre-definitions": 0.00429,
+            "share common exprs": 0.00263,
+            "simp": 0.0129,
+            "tactic execution": 0.21,
+            "type checking": 0.0864,
+            "typeclass inference": 0.0484
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Evm/MemoryDefaultDynamic.lean",
+          "profile_wall_seconds": 1.034486525999455,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "Elab.async": 0.2902049769964069
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 1
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 5.35e-05,
+            "blocked": 0.0185,
+            "blocked (unaccounted)": 0.012400000000000001,
+            "compilation (IR)": 0.000395,
+            "compilation (LCNF base)": 0.000613,
+            "compilation (LCNF mono)": 0.000417,
+            "congr simp thm": 0.010199999999999999,
+            "elaboration": 0.037200000000000004,
+            "fix level params": 0.00107,
+            "import": 0.449,
+            "initialization": 0.0294,
+            "instantiate metavars": 0.052000000000000005,
+            "interpretation": 0.0286,
+            "let-to-have transformation": 0.000124,
+            "linting": 0.0119,
+            "parsing": 0.0109,
+            "process pre-definitions": 0.012400000000000001,
+            "share common exprs": 0.00472,
+            "simp": 0.114,
+            "tactic execution": 0.217,
+            "type checking": 0.0431,
+            "typeclass inference": 0.00809
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Evm/MemoryRefArrayStatements.lean",
+          "profile_wall_seconds": 1.0376939039997524,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "Elab.async": 0.21608367500081657
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 1
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 0.000162,
+            "blocked": 0.11800000000000001,
+            "blocked (unaccounted)": 0.0021200000000000004,
+            "compilation (IR)": 0.0024900000000000005,
+            "compilation (LCNF base)": 0.00436,
+            "compilation (LCNF mono)": 0.0020299999999999997,
+            "congr simp thm": 0.00905,
+            "elaboration": 0.0952,
+            "fix level params": 0.000876,
+            "import": 0.435,
+            "initialization": 0.0291,
+            "instantiate metavars": 0.0251,
+            "interpretation": 0.0267,
+            "let-to-have transformation": 0.000375,
+            "linting": 0.0195,
+            "parsing": 0.0206,
+            "process pre-definitions": 0.0129,
+            "share common exprs": 0.0047599999999999995,
+            "simp": 0.0702,
+            "tactic execution": 0.321,
+            "type checking": 0.0635,
+            "typeclass inference": 0.0225
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Evm/MemorySource.lean",
+          "profile_wall_seconds": 1.3420665119992918,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "Elab.async": 0.3477733789943159,
+            "tactic_command_simp": 0.10040865799970924
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 1
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 0.000955,
+            "blocked (unaccounted)": 0.0197,
+            "compilation (IR)": 0.0012900000000000001,
+            "compilation (LCNF base)": 0.0016899999999999999,
+            "compilation (LCNF mono)": 0.00125,
+            "elaboration": 0.0591,
+            "fix level params": 5.1200000000000004e-05,
+            "import": 0.422,
+            "initialization": 0.032,
+            "instantiate metavars": 0.000122,
+            "interpretation": 0.0178,
+            "let-to-have transformation": 0.000299,
+            "linting": 0.00114,
+            "parsing": 0.0025800000000000003,
+            "process pre-definitions": 0.0011200000000000001,
+            "share common exprs": 0.000155,
+            "tactic execution": 0.0039,
+            "type checking": 0.0020499999999999997,
+            "typeclass inference": 0.00023200000000000003
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Semantics/Nondeterminism/ForkStipend.lean",
+          "profile_wall_seconds": 0.6538047200010624,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {},
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 1
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 0.000109,
+            "blocked": 0.599,
+            "blocked (unaccounted)": 0.0867,
+            "compilation (IR)": 0.00973,
+            "compilation (LCNF base)": 0.025,
+            "compilation (LCNF mono)": 0.011,
+            "congr simp thm": 0.0087,
+            "elaboration": 0.216,
+            "fix level params": 0.00047599999999999997,
+            "import": 0.41300000000000003,
+            "initialization": 0.028399999999999998,
+            "instantiate metavars": 0.0136,
+            "interpretation": 0.0185,
+            "let-to-have transformation": 0.00040500000000000003,
+            "linting": 0.009630000000000001,
+            "parsing": 0.009130000000000001,
+            "process pre-definitions": 0.019899999999999998,
+            "share common exprs": 0.00257,
+            "simp": 0.0543,
+            "tactic execution": 0.23900000000000002,
+            "type checking": 0.056799999999999996,
+            "typeclass inference": 0.024800000000000003
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Semantics/RecursiveStorage/Paths.lean",
+          "profile_wall_seconds": 1.3791308620002383,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "Elab.async": 0.37740591799654066,
+            "tactic_command_simp": 0.3438392839990556
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 3
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 0.000492,
+            "blocked (unaccounted)": 0.355,
+            "compilation (IR)": 0.00901,
+            "compilation (LCNF base)": 0.014400000000000001,
+            "compilation (LCNF mono)": 0.00886,
+            "congr simp thm": 0.00035299999999999996,
+            "elaboration": 0.20500000000000002,
+            "fix level params": 0.00047599999999999997,
+            "import": 0.403,
+            "initialization": 0.0274,
+            "instantiate metavars": 0.00127,
+            "interpretation": 0.0176,
+            "let-to-have transformation": 0.0020800000000000003,
+            "linting": 0.0085,
+            "parsing": 0.0145,
+            "process pre-definitions": 0.012400000000000001,
+            "share common exprs": 0.0024300000000000003,
+            "simp": 0.0022500000000000003,
+            "tactic execution": 0.116,
+            "type checking": 0.0375,
+            "typeclass inference": 0.056100000000000004
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Semantics/CtxEquiv/AdversaryControls.lean",
+          "profile_wall_seconds": 1.096085402999961,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "axiom_pin_commands": 0.3549268849994987
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 5
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 0.0005520000000000001,
+            "blocked": 1.86,
+            "blocked (unaccounted)": 0.179,
+            "compilation (IR)": 0.0205,
+            "compilation (LCNF base)": 0.0296,
+            "compilation (LCNF mono)": 0.00844,
+            "congr simp thm": 0.0293,
+            "dsimp": 0.00568,
+            "elaboration": 0.614,
+            "fix level params": 0.00182,
+            "import": 0.451,
+            "initialization": 0.0287,
+            "instantiate metavars": 0.0149,
+            "interpretation": 0.028100000000000003,
+            "let-to-have transformation": 0.00221,
+            "linting": 0.0294,
+            "parsing": 0.043500000000000004,
+            "process pre-definitions": 0.179,
+            "share common exprs": 0.0127,
+            "simp": 0.20700000000000002,
+            "tactic execution": 1.24,
+            "type checking": 0.306,
+            "typeclass inference": 0.0433
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Semantics/NoPanic.lean",
+          "profile_wall_seconds": 3.9931651999995665,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "tactic_command_simp": 1.4725709230005741,
+            "Elab.async": 0.5536559960003943
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 4
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "elaboration": 6.88e-05,
+            "import": 2.1,
+            "initialization": 0.0343,
+            "interpretation": 0.122,
+            "linting": 9.19e-05,
+            "parsing": 2.72e-05
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity.lean",
+          "profile_wall_seconds": 4.07837621499948,
+          "source_classification": "detected_generated",
+          "module_category_wall_seconds_lower_bounds": {},
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 1
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 0.00079,
+            "blocked": 0.10400000000000001,
+            "blocked (unaccounted)": 0.000541,
+            "compilation (IR)": 0.009710000000000002,
+            "compilation (LCNF base)": 0.026600000000000002,
+            "compilation (LCNF mono)": 0.0165,
+            "congr simp thm": 0.00223,
+            "elaboration": 0.201,
+            "fix level params": 0.000495,
+            "import": 0.133,
+            "initialization": 0.0335,
+            "instantiate metavars": 0.00226,
+            "interpretation": 0.0039,
+            "let-to-have transformation": 0.00163,
+            "linting": 0.0069500000000000004,
+            "parsing": 0.00983,
+            "process pre-definitions": 0.0315,
+            "share common exprs": 0.00369,
+            "simp": 0.0757,
+            "tactic execution": 0.343,
+            "type checking": 0.17200000000000001,
+            "typeclass inference": 0.0635
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/KeySort.lean",
+          "profile_wall_seconds": 1.337922204998904,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "Elab.async": 0.4015417519919574,
+            "tactic_command_simp": 0.13617077199928462
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 3
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "blocked (unaccounted)": 0.176,
+            "elaboration": 15.8,
+            "import": 0.157,
+            "initialization": 0.028100000000000003,
+            "interpretation": 0.00404,
+            "linting": 0.0621,
+            "parsing": 0.197
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Frontend/ExpressionUniqueness/AxiomPins.lean",
+          "profile_wall_seconds": 17.78175107899915,
+          "source_classification": "detected_generated",
+          "module_category_wall_seconds_lower_bounds": {
+            "axiom_pin_commands": 1.5925588659886272
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 53
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 0.0005510000000000001,
+            "blocked": 0.23800000000000002,
+            "blocked (unaccounted)": 1.52,
+            "compilation (IR)": 0.000849,
+            "compilation (LCNF base)": 0.00173,
+            "compilation (LCNF mono)": 0.000855,
+            "congr simp thm": 0.0005629999999999999,
+            "dsimp": 0.0184,
+            "elaboration": 2.87,
+            "fix level params": 0.00111,
+            "import": 0.132,
+            "initialization": 0.029,
+            "instantiate metavars": 0.00518,
+            "interpretation": 0.0227,
+            "let-to-have transformation": 0.00122,
+            "linting": 0.0513,
+            "parsing": 0.04070000000000001,
+            "process pre-definitions": 0.029,
+            "share common exprs": 0.005690000000000001,
+            "simp": 0.0074800000000000005,
+            "tactic execution": 1.52,
+            "type checking": 0.0589,
+            "typeclass inference": 0.211
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Source/Horizon.lean",
+          "profile_wall_seconds": 4.696995099999185,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "axiom_pin_commands": 3.9098739849999546,
+            "Elab.async": 0.9665852419920266
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 21
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 0.0079,
+            "blocked": 121.0,
+            "blocked (unaccounted)": 41.8,
+            "compilation (IR)": 0.09129999999999999,
+            "compilation (LCNF base)": 0.319,
+            "compilation (LCNF mono)": 0.10200000000000001,
+            "congr simp thm": 0.06490000000000001,
+            "dsimp": 0.0105,
+            "elaboration": 6.18,
+            "fix level params": 0.011800000000000001,
+            "import": 0.487,
+            "initialization": 0.0296,
+            "instantiate metavars": 0.2,
+            "interpretation": 0.0773,
+            "let-to-have transformation": 0.0362,
+            "linting": 0.336,
+            "parsing": 0.367,
+            "process pre-definitions": 1.3,
+            "share common exprs": 0.247,
+            "simp": 2.29,
+            "tactic execution": 19.6,
+            "type checking": 2.07,
+            "typeclass inference": 0.86
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Calculus/ArrayProperty.lean",
+          "profile_wall_seconds": 40.1197455140009,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "Kernel": 9.690624001000076,
+            "axiom_pin_commands": 19.845460421998055,
+            "Elab.async": 30.483348857976495,
+            "tactic_command_simp": 28.38177510299906
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 51
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 1.83e-05,
+            "blocked": 0.0436,
+            "blocked (unaccounted)": 0.126,
+            "compilation (IR)": 0.0345,
+            "compilation (LCNF base)": 0.024100000000000003,
+            "compilation (LCNF mono)": 0.025,
+            "elaboration": 0.0037300000000000002,
+            "fix level params": 1.2800000000000001e-05,
+            "import": 0.484,
+            "initialization": 0.0299,
+            "instantiate metavars": 0.00027,
+            "interpretation": 0.661,
+            "let-to-have transformation": 2.7e-05,
+            "linting": 0.00122,
+            "parsing": 0.000716,
+            "process pre-definitions": 0.000508,
+            "share common exprs": 4.43e-05,
+            "tactic execution": 0.0187,
+            "type checking": 8.18,
+            "typeclass inference": 0.013300000000000001
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Examples/Tactics/OpenLoops.lean",
+          "profile_wall_seconds": 9.608272734998536,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "Elab.async": 8.394539642998948,
+            "Kernel": 8.100667454000563
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 5
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 0.0006860000000000001,
+            "compilation (IR)": 0.0412,
+            "compilation (LCNF base)": 0.0535,
+            "compilation (LCNF mono)": 0.024399999999999998,
+            "elaboration": 18.4,
+            "fix level params": 0.00058,
+            "import": 0.519,
+            "initialization": 0.0317,
+            "instantiate metavars": 0.0014399999999999999,
+            "interpretation": 159.0,
+            "let-to-have transformation": 0.00386,
+            "linting": 0.00792,
+            "parsing": 0.016800000000000002,
+            "process pre-definitions": 0.0312,
+            "share common exprs": 0.00163,
+            "tactic execution": 0.0554,
+            "type checking": 14.4,
+            "typeclass inference": 0.342
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Examples/DecisionGaps.lean",
+          "profile_wall_seconds": 192.64789037300034,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "tactic_command_decide": 13.523557032989338,
+            "Kernel": 13.478509856000542,
+            "eval_commands": 177.13133330599405
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 66
+        },
+        {
+          "basic_profiler_cumulative_seconds": {
+            "attribute application": 0.000656,
+            "blocked": 94.3,
+            "blocked (unaccounted)": 0.32,
+            "compilation (IR)": 0.638,
+            "compilation (LCNF base)": 0.372,
+            "compilation (LCNF mono)": 0.355,
+            "congr simp thm": 0.0902,
+            "elaboration": 2.11,
+            "fix level params": 0.0207,
+            "import": 0.536,
+            "initialization": 0.029,
+            "instantiate metavars": 0.152,
+            "interpretation": 4.59,
+            "let-to-have transformation": 0.00419,
+            "linting": 0.0167,
+            "parsing": 0.030600000000000002,
+            "process pre-definitions": 0.326,
+            "share common exprs": 0.263,
+            "simp": 22.9,
+            "tactic execution": 0.746,
+            "type checking": 94.3,
+            "typeclass inference": 0.506
+          },
+          "component_boundary": "Lean basic-profiler cumulative totals are reported as emitted; do not subtract their sum from wall time or equate blocked time to CPU. Structured categories are inclusive lower bounds; untraced work is unknown.",
+          "path": "Solidity/Examples/Tactics/RevertData.lean",
+          "profile_wall_seconds": 128.78485923100015,
+          "source_classification": "unmarked_not_proven_handwritten",
+          "module_category_wall_seconds_lower_bounds": {
+            "eval_commands": 14.434922612987458,
+            "Elab.async": 123.58088971585222,
+            "Kernel": 93.96778146500141,
+            "tactic_command_simp": 22.98650559299998
+          },
+          "threshold_options": [
+            "-Dprofiler.threshold=100000000",
+            "-Dtrace.profiler.threshold=100"
+          ],
+          "unattributed_slices": 108
+        }
+      ],
+      "declarations_profiled": 326,
+      "slowest_sampled_declarations": [
+        {
+          "path": "Solidity/Examples/Tactics/RevertData.lean",
+          "declaration": "Solidity.Examples.Tactics.RevertData.mixedReason",
+          "attributed_wall_seconds": 42.929956190995874,
+          "profile_categories_seconds": {
+            "Elab.async": 1.3222052979972214,
+            "Kernel": 1.1613977899998427
+          },
+          "auxiliary_lean_declaration": false,
+          "name_resolution": "qualified trace name"
+        },
+        {
+          "path": "Solidity/Examples/Tactics/RevertData.lean",
+          "declaration": "Solidity.Examples.Tactics.RevertData.customData",
+          "attributed_wall_seconds": 32.01372339799814,
+          "profile_categories_seconds": {
+            "Elab.async": 32.01372339799814,
+            "Kernel": 30.597087736999615
+          },
+          "auxiliary_lean_declaration": false,
+          "name_resolution": "qualified trace name"
+        },
+        {
+          "path": "Solidity/Examples/Tactics/RevertData.lean",
+          "declaration": "Solidity.Examples.Tactics.RevertData.Panics.panicSelector",
+          "attributed_wall_seconds": 26.122547040997073,
+          "profile_categories_seconds": {
+            "Elab.async": 22.366995485000313,
+            "Kernel": 21.22558629900031
+          },
+          "auxiliary_lean_declaration": false,
+          "name_resolution": "qualified trace name"
+        },
+        {
+          "path": "Solidity/Examples/DecisionHashThreeKinds.lean",
+          "declaration": "Solidity.Examples.DecisionHashes.namesThreeKindsBad_covered._proof_1",
+          "attributed_wall_seconds": 22.652442549999805,
+          "profile_categories_seconds": {
+            "Kernel": 22.652442549999805
+          },
+          "auxiliary_lean_declaration": true,
+          "name_resolution": "qualified trace name"
+        },
+        {
+          "path": "Solidity/Examples/Tactics/QuantifiedDiamond.lean",
+          "declaration": "Solidity.Examples.Tactics.QuantifiedDiamond._example._proof_1",
+          "attributed_wall_seconds": 20.990377994000912,
+          "profile_categories_seconds": {
+            "Kernel": 20.990377994000912
+          },
+          "auxiliary_lean_declaration": true,
+          "name_resolution": "qualified trace name"
+        },
+        {
+          "path": "Solidity/Calculus/ArrayProperty.lean",
+          "declaration": "Solidity.Decide.ApfFml.topB_sound",
+          "attributed_wall_seconds": 19.34086698999256,
+          "profile_categories_seconds": {
+            "Elab.async": 19.34086698999256
+          },
+          "auxiliary_lean_declaration": false,
+          "name_resolution": "qualified trace name"
+        },
+        {
+          "path": "Solidity/Calculus/ArrayProperty.lean",
+          "declaration": "Solidity.Decide.ApfFml.bodyB_sound",
+          "attributed_wall_seconds": 19.268758168999106,
+          "profile_categories_seconds": {
+            "Elab.async": 19.268758168999106
+          },
+          "auxiliary_lean_declaration": false,
+          "name_resolution": "qualified trace name"
+        },
+        {
+          "path": "Solidity/Calculus/ArrayProperty.lean",
+          "declaration": "Solidity.Decide.apfNetFloor",
+          "attributed_wall_seconds": 19.25799339999631,
+          "profile_categories_seconds": {
+            "Elab.async": 19.25799339999631
+          },
+          "auxiliary_lean_declaration": false,
+          "name_resolution": "qualified trace name"
+        },
+        {
+          "path": "Solidity/Calculus/ArrayProperty.lean",
+          "declaration": "Solidity.Decide.ApfTm.guardB_sound",
+          "attributed_wall_seconds": 18.97473196796328,
+          "profile_categories_seconds": {
+            "Elab.async": 18.97473196796328
+          },
+          "auxiliary_lean_declaration": false,
+          "name_resolution": "qualified trace name"
+        },
+        {
+          "path": "Solidity/Calculus/ArrayProperty.lean",
+          "declaration": "Solidity.Decide.ApfFml.eqGuardB_sound",
+          "attributed_wall_seconds": 18.954794978989288,
+          "profile_categories_seconds": {
+            "Elab.async": 18.954794978989288
+          },
+          "auxiliary_lean_declaration": false,
+          "name_resolution": "qualified trace name"
+        },
+        {
+          "path": "Solidity/Calculus/ArrayProperty.lean",
+          "declaration": "Solidity.Decide.ApfTm.relB_sound",
+          "attributed_wall_seconds": 16.43569798398018,
+          "profile_categories_seconds": {
+            "Elab.async": 16.43569798398018,
+            "Kernel": 0.23557662799954415
+          },
+          "auxiliary_lean_declaration": false,
+          "name_resolution": "qualified trace name"
+        },
+        {
+          "path": "Solidity/Examples/Tactics/RevertData.lean",
+          "declaration": "Solidity.Examples.Tactics.RevertData.externalReason",
+          "attributed_wall_seconds": 14.849738555967807,
+          "profile_categories_seconds": {
+            "Elab.async": 5.561142971975729,
+            "Kernel": 0.71789707400091
+          },
+          "auxiliary_lean_declaration": false,
+          "name_resolution": "qualified trace name"
+        },
+        {
+          "path": "Solidity/Source/FailureDeploymentHorizon.lean",
+          "declaration": "Solidity.Source.FailureExecution.PlannedDeploy.deploy_grow",
+          "attributed_wall_seconds": 13.231365944741293,
+          "profile_categories_seconds": {
+            "Elab.async": 13.231365944741293
+          },
+          "auxiliary_lean_declaration": false,
+          "name_resolution": "qualified trace name"
+        },
+        {
+          "path": "Solidity/Examples/Tactics/RevertData.lean",
+          "declaration": "Solidity.Examples.Tactics.RevertData.Panics.divideCode",
+          "attributed_wall_seconds": 11.32797670298256,
+          "profile_categories_seconds": {
+            "Elab.async": 3.1528482849877326,
+            "Kernel": 1.2290963530000298
+          },
+          "auxiliary_lean_declaration": false,
+          "name_resolution": "qualified trace name"
+        },
+        {
+          "path": "Solidity/Examples/Tactics/OwnStructs.lean",
+          "declaration": "Solidity.Examples.Tactics.OwnStructs.literal",
+          "attributed_wall_seconds": 11.033416893992573,
+          "profile_categories_seconds": {
+            "Elab.async": 2.02686266499199,
+            "Meta.Tactic.simp": 0.16364461899921298,
+            "Kernel": 0.33475166900083425
+          },
+          "auxiliary_lean_declaration": false,
+          "name_resolution": "qualified trace name"
+        },
+        {
+          "path": "Solidity/Examples/Tactics/OwnStructs.lean",
+          "declaration": "Solidity.Examples.Tactics.OwnStructs.arrayOfStructs",
+          "attributed_wall_seconds": 10.328081913959235,
+          "profile_categories_seconds": {
+            "Elab.async": 8.948770669963212,
+            "Meta.Tactic.simp": 1.0511714719962328,
+            "Kernel": 0.7335603080000729
+          },
+          "auxiliary_lean_declaration": false,
+          "name_resolution": "qualified trace name"
+        },
+        {
+          "path": "Solidity/Examples/Tactics/RevertData.lean",
+          "declaration": "Solidity.Examples.Tactics.RevertData.Panics.overflowCode",
+          "attributed_wall_seconds": 10.297693415986375,
+          "profile_categories_seconds": {
+            "Elab.async": 8.13574658298865,
+            "Kernel": 2.1224617040008305
+          },
+          "auxiliary_lean_declaration": false,
+          "name_resolution": "qualified trace name"
+        },
+        {
+          "path": "Solidity/Examples/Tactics/RevertData.lean",
+          "declaration": "Solidity.Examples.Tactics.RevertData.symbolicCustom",
+          "attributed_wall_seconds": 10.149185913957655,
+          "profile_categories_seconds": {
+            "Elab.async": 7.437331254957244,
+            "Kernel": 0.7280104699991643
+          },
+          "auxiliary_lean_declaration": false,
+          "name_resolution": "qualified trace name"
+        },
+        {
+          "path": "Solidity/Examples/Tactics/QuantifiedDiamond.lean",
+          "declaration": "Solidity.Examples.Tactics.QuantifiedDiamond.forCount",
+          "attributed_wall_seconds": 9.536806745871901,
+          "profile_categories_seconds": {
+            "Elab.async": 9.536806745871901,
+            "Kernel": 0.511969244999811
+          },
+          "auxiliary_lean_declaration": false,
+          "name_resolution": "qualified trace name"
+        },
+        {
+          "path": "Solidity/Examples/Tactics/QuantifiedDiamond.lean",
+          "declaration": "Solidity.Examples.Tactics.QuantifiedDiamond.forCountIR",
+          "attributed_wall_seconds": 9.515630265848712,
+          "profile_categories_seconds": {
+            "Kernel": 0.5517834430001676,
+            "Elab.async": 9.515630265848712
+          },
+          "auxiliary_lean_declaration": false,
+          "name_resolution": "qualified trace name"
+        }
+      ]
+    },
+    "ten_changes_prioritization": "heuristic ranking by explicit cost pools: modelled potential per-core-edit invalidation, reference preparation attempts, and observed module checks. These have different operation/frequency boundaries; not the ten largest demonstrated savings",
+    "ten_changes": [
+      {
+        "candidate_cost_pool_seconds": 53459.472997510326,
+        "evidence_basis": {
+          "kind": "potential per-core-edit cost pool: graph affected-module fraction times checkpoint model; not observed rebuild time or savings",
+          "core": "Solidity.Keccak",
+          "affected_modules": 5892,
+          "workload_modules": 6324
+        },
+        "name": "Core invalidation fan-out",
+        "change": "Keep frequently edited leaf proofs and tests separate from stable high-fan-out core APIs, preserving intrinsic types and every theorem obligation.",
+        "measured_target": null,
+        "observed_target_wall_seconds": null,
+        "fresh_module_evidence": null,
+        "fresh_profile_evidence": null,
+        "prior_evidence": null,
+        "savings_status": "candidate cost pool, not measured savings; validate with obligation-preserving A/B checks"
+      },
+      {
+        "candidate_cost_pool_seconds": 757.9463971770001,
+        "evidence_basis": {
+          "kind": "largest observed reference preparation attempt; includes project work and failures, not cache-attributable savings",
+          "project": "EvmYul",
+          "log": "/workspace/da-timing-work/evmyul-times/build-0.log"
+        },
+        "name": "Mathlib/Bridge cache",
+        "change": "Make pinned proof-artifact delivery reliable through an available cache endpoint; retain source/toolchain hashes and checksum verification.",
+        "measured_target": null,
+        "observed_target_wall_seconds": null,
+        "fresh_module_evidence": null,
+        "fresh_profile_evidence": null,
+        "prior_evidence": "docs/audits/build-speed.md",
+        "savings_status": "candidate cost pool, not measured savings; validate with obligation-preserving A/B checks"
+      },
+      {
+        "candidate_cost_pool_seconds": 195.37071439500005,
+        "evidence_basis": {
+          "kind": "observed module body check",
+          "path": "Solidity/Examples/DecisionGaps.lean",
+          "log": "/workspace/da-timing-work/active-sample/46-plain.log"
+        },
+        "name": "Solidity/Examples/DecisionGaps",
+        "change": "Run finite verdict assertions in a compiled mandatory test runner, retaining every expected outcome and all kernel theorem checks.",
+        "measured_target": "Solidity/Examples/DecisionGaps.lean",
+        "observed_target_wall_seconds": 195.37071439500005,
+        "fresh_module_evidence": "/workspace/da-timing-work/active-sample/46-plain.log",
+        "fresh_profile_evidence": "/workspace/da-timing-work/profile-clean/46-profiler.log",
+        "prior_evidence": null,
+        "savings_status": "candidate cost pool, not measured savings; validate with obligation-preserving A/B checks"
+      },
+      {
+        "candidate_cost_pool_seconds": 137.3613358030002,
+        "evidence_basis": {
+          "kind": "observed module body check",
+          "path": "Solidity/Examples/Tactics/RevertData.lean",
+          "log": "/workspace/da-timing-work/active-sample/47-plain.log"
+        },
+        "name": "Solidity/Examples/Tactics/RevertData",
+        "change": "Reuse common checked byte-list and revert witnesses across the existing cases.",
+        "measured_target": "Solidity/Examples/Tactics/RevertData.lean",
+        "observed_target_wall_seconds": 137.3613358030002,
+        "fresh_module_evidence": "/workspace/da-timing-work/active-sample/47-plain.log",
+        "fresh_profile_evidence": "/workspace/da-timing-work/profile-clean/47-profiler.log",
+        "prior_evidence": null,
+        "savings_status": "candidate cost pool, not measured savings; validate with obligation-preserving A/B checks"
+      },
+      {
+        "candidate_cost_pool_seconds": 79.19439813300005,
+        "evidence_basis": {
+          "kind": "observed module body check",
+          "path": "Solidity/Yul/RawIntegerInitialization.lean",
+          "log": "/workspace/da-timing-work/active-sample/05-plain.log"
+        },
+        "name": "Solidity/Yul/RawIntegerInitialization",
+        "change": "Profile unattributed CPU/allocation cost first; if conversion normalization dominates, reuse checked range/conversion lemmas.",
+        "measured_target": "Solidity/Yul/RawIntegerInitialization.lean",
+        "observed_target_wall_seconds": 79.19439813300005,
+        "fresh_module_evidence": "/workspace/da-timing-work/active-sample/05-plain.log",
+        "fresh_profile_evidence": "/workspace/da-timing-work/profile-clean/05-profiler.log",
+        "prior_evidence": null,
+        "savings_status": "candidate cost pool, not measured savings; validate with obligation-preserving A/B checks"
+      },
+      {
+        "candidate_cost_pool_seconds": 42.675748285000054,
+        "evidence_basis": {
+          "kind": "observed module body check",
+          "path": "Solidity/Examples/Tactics/QuantifiedDiamond.lean",
+          "log": "/workspace/da-timing-work/active-sample/26-plain.log"
+        },
+        "name": "Solidity/Examples/Tactics/QuantifiedDiamond",
+        "change": "Share checked fuelled-execution lemmas across the loop and contract cases, preserving every case and fuel claim.",
+        "measured_target": "Solidity/Examples/Tactics/QuantifiedDiamond.lean",
+        "observed_target_wall_seconds": 42.675748285000054,
+        "fresh_module_evidence": "/workspace/da-timing-work/active-sample/26-plain.log",
+        "fresh_profile_evidence": "/workspace/da-timing-work/profile-clean/26-profiler.log",
+        "prior_evidence": null,
+        "savings_status": "candidate cost pool, not measured savings; validate with obligation-preserving A/B checks"
+      },
+      {
+        "candidate_cost_pool_seconds": 37.35925848399984,
+        "evidence_basis": {
+          "kind": "observed module body check",
+          "path": "Solidity/Calculus/ArrayProperty.lean",
+          "log": "/workspace/da-timing-work/active-sample/44-plain.log"
+        },
+        "name": "Solidity/Calculus/ArrayProperty",
+        "change": "Factor common array-transport equalities into reusable opaque checked intermediate lemmas.",
+        "measured_target": "Solidity/Calculus/ArrayProperty.lean",
+        "observed_target_wall_seconds": 37.35925848399984,
+        "fresh_module_evidence": "/workspace/da-timing-work/active-sample/44-plain.log",
+        "fresh_profile_evidence": "/workspace/da-timing-work/profile-clean/44-profiler.log",
+        "prior_evidence": null,
+        "savings_status": "candidate cost pool, not measured savings; validate with obligation-preserving A/B checks"
+      },
+      {
+        "candidate_cost_pool_seconds": 29.15031883300003,
+        "evidence_basis": {
+          "kind": "observed module body check",
+          "path": "Solidity/Examples/DecisionHashThreeKinds.lean",
+          "log": "/workspace/da-timing-work/active-sample/24-plain.log"
+        },
+        "name": "Solidity/Examples/DecisionHashThreeKinds",
+        "change": "Reuse checked hash-coverage lemmas in place of repeated finite kernel reduction, preserving all hash-kind cases.",
+        "measured_target": "Solidity/Examples/DecisionHashThreeKinds.lean",
+        "observed_target_wall_seconds": 29.15031883300003,
+        "fresh_module_evidence": "/workspace/da-timing-work/active-sample/24-plain.log",
+        "fresh_profile_evidence": "/workspace/da-timing-work/profile-clean/24-profiler.log",
+        "prior_evidence": null,
+        "savings_status": "candidate cost pool, not measured savings; validate with obligation-preserving A/B checks"
+      },
+      {
+        "candidate_cost_pool_seconds": 22.064303495000104,
+        "evidence_basis": {
+          "kind": "observed module body check",
+          "path": "Solidity/Calculus/Closer/Facts.lean",
+          "log": "/workspace/da-timing-work/active-sample/11-plain.log"
+        },
+        "name": "Solidity/Calculus/Closer/Facts",
+        "change": "Share checked operator-family strictness and eval-none lemmas instead of repeating constructor-case normalization.",
+        "measured_target": "Solidity/Calculus/Closer/Facts.lean",
+        "observed_target_wall_seconds": 22.064303495000104,
+        "fresh_module_evidence": "/workspace/da-timing-work/active-sample/11-plain.log",
+        "fresh_profile_evidence": "/workspace/da-timing-work/profile-clean/11-profiler.log",
+        "prior_evidence": null,
+        "savings_status": "candidate cost pool, not measured savings; validate with obligation-preserving A/B checks"
+      },
+      {
+        "candidate_cost_pool_seconds": 20.96397848399988,
+        "evidence_basis": {
+          "kind": "observed module body check",
+          "path": "Solidity/Examples/Tactics/OwnStructs.lean",
+          "log": "/workspace/da-timing-work/active-sample/25-plain.log"
+        },
+        "name": "Solidity/Examples/Tactics/OwnStructs",
+        "change": "Share typed contract metadata and checked struct witnesses while retaining every example proof.",
+        "measured_target": "Solidity/Examples/Tactics/OwnStructs.lean",
+        "observed_target_wall_seconds": 20.96397848399988,
+        "fresh_module_evidence": "/workspace/da-timing-work/active-sample/25-plain.log",
+        "fresh_profile_evidence": "/workspace/da-timing-work/profile-clean/25-profiler.log",
+        "prior_evidence": null,
+        "savings_status": "candidate cost pool, not measured savings; validate with obligation-preserving A/B checks"
+      }
+    ],
+    "limitations": [
+      "Targeted tails are separate from size-stratified rate estimates.",
+      "Generated source classes are marker-based; unmarked is not proven handwritten. Timing classes cover whole files; mixed generated spans are line-counted separately, not timed independently.",
+      "Full estimates are deterministic model outputs, not validated runtime bounds; named checkpoint/full/Bridge closures overlap and must not be summed. Quartiles are selected from all tracked area modules, not a random target-specific sample.",
+      "Reference build-attempt timings include dependency preparation; only complete per-project module sums are compared.",
+      "Recommendations use two dependency cost pools plus the eight slowest observed sample modules, not a global exhaustive ranking; no saving or proof-preservation implementation is claimed."
+    ]
+  },
+  "baseline_only_counts": {
+    "passing": 43,
+    "attempted": 48,
+    "areas": [
+      {
+        "area": "Backend",
+        "detected_generated_lines": 149,
+        "lines": 279224,
+        "marker_associated_unresolved_lines": 2510,
+        "modules": 2015,
+        "unmarked_not_proven_handwritten_lines": 274346,
+        "unresolved_chain_agreement_lines": 2219,
+        "passing_samples": 4,
+        "size_stratified_passing_samples": 4,
+        "size_stratified_seconds_per_kloc": 37.25538195678994,
+        "targeted_passing_samples": 0,
+        "sample_lines": 486,
+        "sample_wall_seconds": 18.10611563099991,
+        "sample_seconds_per_kloc": 37.25538195678994,
+        "reference_ratios": null,
+        "verdict": "pending matched reference checks"
+      },
+      {
+        "area": "Yul",
+        "lines": 197439,
+        "marker_associated_unresolved_lines": 7316,
+        "modules": 1827,
+        "unmarked_not_proven_handwritten_lines": 188247,
+        "unresolved_chain_agreement_lines": 1876,
+        "passing_samples": 4,
+        "size_stratified_passing_samples": 4,
+        "size_stratified_seconds_per_kloc": 212.02752815404014,
+        "targeted_passing_samples": 0,
+        "sample_lines": 396,
+        "sample_wall_seconds": 83.96290114899989,
+        "sample_seconds_per_kloc": 212.02752815404014,
+        "reference_ratios": null,
+        "verdict": "pending matched reference checks"
+      },
+      {
+        "area": "Calculus",
+        "lines": 169330,
+        "marker_associated_unresolved_lines": 1550,
+        "modules": 388,
+        "unmarked_not_proven_handwritten_lines": 163247,
+        "unresolved_chain_agreement_lines": 4533,
+        "passing_samples": 5,
+        "size_stratified_passing_samples": 4,
+        "size_stratified_seconds_per_kloc": 18.224064062735508,
+        "targeted_passing_samples": 1,
+        "sample_lines": 4736,
+        "sample_wall_seconds": 66.40841660000024,
+        "sample_seconds_per_kloc": 14.022047423986535,
+        "reference_ratios": null,
+        "verdict": "pending matched reference checks"
+      },
+      {
+        "area": "Lowering",
+        "lines": 104250,
+        "marker_associated_unresolved_lines": 20,
+        "modules": 716,
+        "unmarked_not_proven_handwritten_lines": 103912,
+        "unresolved_chain_agreement_lines": 318,
+        "passing_samples": 4,
+        "size_stratified_passing_samples": 4,
+        "size_stratified_seconds_per_kloc": 12.081494940186836,
+        "targeted_passing_samples": 0,
+        "sample_lines": 535,
+        "sample_wall_seconds": 6.463599792999958,
+        "sample_seconds_per_kloc": 12.081494940186836,
+        "reference_ratios": null,
+        "verdict": "pending matched reference checks"
+      },
+      {
+        "area": "Frontend",
+        "detected_generated_lines": 3905,
+        "lines": 102235,
+        "marker_associated_unresolved_lines": 455,
+        "modules": 512,
+        "unmarked_not_proven_handwritten_lines": 97875,
+        "passing_samples": 5,
+        "size_stratified_passing_samples": 4,
+        "size_stratified_seconds_per_kloc": 6.886125185129129,
+        "targeted_passing_samples": 1,
+        "sample_lines": 4564,
+        "sample_wall_seconds": 21.62606307300007,
+        "sample_seconds_per_kloc": 4.738401199167412,
+        "reference_ratios": null,
+        "verdict": "pending matched reference checks"
+      },
+      {
+        "area": "Bridge",
+        "lines": 64746,
+        "modules": 524,
+        "unmarked_not_proven_handwritten_lines": 62806,
+        "unresolved_chain_agreement_lines": 1940,
+        "passing_samples": 0,
+        "size_stratified_passing_samples": 0,
+        "size_stratified_seconds_per_kloc": null,
+        "targeted_passing_samples": 0,
+        "sample_lines": 0,
+        "sample_wall_seconds": 0,
+        "sample_seconds_per_kloc": null,
+        "reference_ratios": null,
+        "verdict": "pending matched reference checks"
+      },
+      {
+        "area": "Examples",
+        "lines": 61471,
+        "marker_associated_unresolved_lines": 121,
+        "modules": 356,
+        "unmarked_not_proven_handwritten_lines": 52622,
+        "unresolved_chain_agreement_lines": 8728,
+        "passing_samples": 7,
+        "size_stratified_passing_samples": 4,
+        "size_stratified_seconds_per_kloc": 164.15041091558456,
+        "targeted_passing_samples": 3,
+        "sample_lines": 1165,
+        "sample_wall_seconds": 443.43525435400034,
+        "sample_seconds_per_kloc": 380.63111961716766,
+        "reference_ratios": null,
+        "verdict": "pending matched reference checks"
+      },
+      {
+        "area": "Source",
+        "detected_generated_lines": 626,
+        "lines": 50041,
+        "modules": 262,
+        "unmarked_not_proven_handwritten_lines": 45638,
+        "unresolved_chain_agreement_lines": 3777,
+        "passing_samples": 5,
+        "size_stratified_passing_samples": 4,
+        "size_stratified_seconds_per_kloc": 33.66801543019504,
+        "targeted_passing_samples": 1,
+        "sample_lines": 995,
+        "sample_wall_seconds": 25.336014566999893,
+        "sample_seconds_per_kloc": 25.46333122311547,
+        "reference_ratios": null,
+        "verdict": "pending matched reference checks"
+      },
+      {
+        "area": "Evm",
+        "lines": 45857,
+        "modules": 279,
+        "unmarked_not_proven_handwritten_lines": 45857,
+        "passing_samples": 4,
+        "size_stratified_passing_samples": 4,
+        "size_stratified_seconds_per_kloc": 7.506335655642206,
+        "targeted_passing_samples": 0,
+        "sample_lines": 514,
+        "sample_wall_seconds": 3.858256527000094,
+        "sample_seconds_per_kloc": 7.506335655642206,
+        "reference_ratios": null,
+        "verdict": "pending matched reference checks"
+      },
+      {
+        "area": "Semantics",
+        "lines": 25790,
+        "modules": 82,
+        "unmarked_not_proven_handwritten_lines": 25678,
+        "unresolved_chain_agreement_lines": 112,
+        "passing_samples": 4,
+        "size_stratified_passing_samples": 4,
+        "size_stratified_seconds_per_kloc": 6.542551741106919,
+        "targeted_passing_samples": 0,
+        "sample_lines": 1012,
+        "sample_wall_seconds": 6.6210623620002025,
+        "sample_seconds_per_kloc": 6.542551741106919,
+        "reference_ratios": null,
+        "verdict": "pending matched reference checks"
+      }
+    ],
+    "waits": [
+      {
+        "lane": "da-timing",
+        "item": "Bridge/SolidityBridge/Arith/NarrowShifts.lean: dependency-cache-unavailable"
+      },
+      {
+        "lane": "da-timing",
+        "item": "Bridge/SolidityBridge/ExternalEvm/Assembly/Automatic.lean: dependency-cache-unavailable"
+      },
+      {
+        "lane": "da-timing",
+        "item": "Bridge/SolidityBridge/RoadmapV15/P10/PublishedRemainderControls.lean: dependency-cache-unavailable"
+      },
+      {
+        "lane": "da-timing",
+        "item": "Bridge/SolidityBridge/Yul/ControlRealization.lean: dependency-cache-unavailable"
+      },
+      {
+        "lane": "da-timing",
+        "item": "Solidity.lean: dependency-cache-unavailable"
+      }
+    ]
+  }
+}

@@ -505,3 +505,85 @@ def source_obligation_inventory(mapping, sources, rows, inspected_mapping):
     return {"obligations":sorted(obligations,key=lambda o:o["id"]),
         "kernel_records":graph["records"],
         "boundary":"Frozen lexical obligations with supplied type candidates only; kernel entries are graph summaries/hashes backed by caller-retained raw metadata; no statement correspondence, inherited instantiation or joint witnesses"}
+
+
+def hypothesis_report_index(rows, mapping, artifacts):
+    """Guard repeated proof reports from becoming duplicate or source coverage.
+
+    This pure join validates supplied snapshots and receipt shapes, not files,
+    kernel executions or source correspondence. Keep every kernel/source node,
+    all policy reports (including failed attempts beside later successes), and
+    unreported/private/inherited records. Callers retain raw metadata/receipts.
+    """
+    graph = source_candidate_graph(rows, mapping)
+    by_name = {row["name"]:row for row in rows}
+    snapshots = {name:observed_type(row) for name,row in by_name.items()}
+    canonical = lambda value: json.dumps(value,sort_keys=True,separators=(",",":"),allow_nan=False)
+    if not isinstance(artifacts, list):
+        raise ValueError("artifact reports are not a list")
+    receipt_fields = {"artifact_manifest_sha256", "source_sha256", "output_sha256",
+                      "native_result_sha256", "seal_sha256"}
+    identities, receipts, reports = set(), [], defaultdict(list)
+    for artifact in artifacts:
+        if (not isinstance(artifact, dict) or set(artifact)!={"id","receipt","entries"} or
+                not text(artifact["id"]) or artifact["id"] in identities):
+            raise ValueError("invalid or duplicate artifact identity")
+        identities.add(artifact["id"])
+        receipt = artifact["receipt"]
+        if (not isinstance(receipt,dict) or set(receipt)!=receipt_fields or
+                any(not isinstance(value,str) or re.fullmatch(r"[0-9a-f]{64}",value) is None
+                    for value in receipt.values())):
+            raise ValueError("invalid artifact receipt fingerprint")
+        receipts.append({"id":artifact["id"],"receipt":dict(receipt)})
+        if not isinstance(artifact["entries"],list) or not artifact["entries"]:
+            raise ValueError("artifact entries are empty or malformed")
+        targets, helpers = set(), set()
+        for entry in artifact["entries"]:
+            if not isinstance(entry,dict) or set(entry)!={"target","helper","status","reason"}:
+                raise ValueError("artifact entry schema differs")
+            target=entry["target"]
+            name=target.get("name") if isinstance(target,dict) else None
+            if (not text(name) or name not in by_name or not by_name[name]["is_theorem"] or
+                    canonical(target)!=canonical(snapshots[name])):
+                raise ValueError("artifact target snapshot differs from observed record")
+            if (name in targets or not text(entry["helper"]) or entry["helper"] in helpers):
+                raise ValueError("duplicate artifact target/helper")
+            targets.add(name);helpers.add(entry["helper"])
+            if (entry["status"] not in ("proved","unsupported-default") or
+                    not isinstance(entry["reason"],str) or
+                    (entry["status"]=="proved" and entry["reason"]!="") or
+                    (entry["status"]=="unsupported-default" and not entry["reason"])):
+                raise ValueError("invalid reported hypothesis outcome")
+            reports[name].append({"artifact_id":artifact["id"],"requested_helper":entry["helper"],
+                                  "reported_status":entry["status"],"reason":entry["reason"]})
+    declarations=[]
+    for node in graph["records"]:
+        name=node["name"];row=by_name[name]
+        entries=sorted(reports[name],key=lambda r:(r["artifact_id"],r["requested_helper"]))
+        status=("reported_proof" if any(e["reported_status"]=="proved" for e in entries) else
+                "reported_unsupported_attempts" if entries else "no_report")
+        declarations.append(dict(node,record_kind=row["kind"],is_projection=row["is_projection"],
+            proof_type=row["proof_type"],
+            hypothesis_classification="unclassified; report pointers do not classify global/per-input operational feasibility",
+            type_expr_sha256=snapshots[name]["type_expr_sha256"],
+            raw_binder_count=len(row["binders"]),
+            observed_proof_binder_count=sum(b["proof_binder"] for b in row["binders"]),
+            universe_parameter_count=len(row["level_params"]),
+            parent_metadata=json.loads(json.dumps(row["parents"])),
+            hypothesis_reports=entries,report_status=status,
+            proof_acceptance_established=False,inherited_obligations_established=False,
+            global_witness_ledger_linked=False))
+    sources=[{key:node[key] for key in ("id","module","kernel_names","accounting_status",
+              "statement_correspondence_established","joint_witness_established")}
+             for node in graph["sources"]]
+    return {"declarations":declarations,"source_candidates":sources,
+        "artifacts":sorted(receipts,key=lambda r:r["id"]),
+        "summary":{"kernel_records":len(declarations),"source_candidates":len(sources),
+            "artifact_reports":sum(len(d["hypothesis_reports"]) for d in declarations),
+            "distinct_reported_proof_targets":sum(d["report_status"]=="reported_proof" for d in declarations),
+            "unsupported_only_targets":sum(d["report_status"]=="reported_unsupported_attempts" for d in declarations),
+            "unreported_records":sum(d["report_status"]=="no_report" for d in declarations),
+            "unreported_by_record_kind":dict(sorted(Counter(d["record_kind"] for d in declarations if d["report_status"]=="no_report").items()))},
+        "proof_acceptance_established":False,"source_correspondence_established":False,
+        "full_census_accepted":False,"global_witness_ledger_linked":False,
+        "boundary":"Supplied report/source-position accounting only. Reported proof is a pointer, not independent kernel acceptance, feasibility, inherited instantiation or source coverage; raw metadata and native receipts remain caller obligations."}

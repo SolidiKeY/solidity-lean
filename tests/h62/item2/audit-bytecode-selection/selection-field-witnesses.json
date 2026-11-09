@@ -1,0 +1,30 @@
+{
+  "frame_inputRoom_joint_domain": {
+    "target": "Solidity.Backend.Selection.V2.FrameCertificate.inputRoom",
+    "proof": "⟨[7], [7,7], Solidity.Backend.Selection.V2.duplicateHead 7, True.intro⟩"
+  },
+  "frame_frame_joint_domain": {
+    "target": "Solidity.Backend.Selection.V2.FrameCertificate.frame",
+    "proof": "⟨[7], [7,7], Solidity.Backend.Selection.V2.duplicateHead 7, [11,99], True.intro⟩"
+  },
+  "frame_capacity_joint_domain": {
+    "target": "Solidity.Backend.Selection.V2.FrameCertificate.capacity",
+    "proof": "⟨[7], [7,7], Solidity.Backend.Selection.V2.duplicateHead 7, [11,99], by decide, True.intro⟩"
+  },
+  "legacy_frame_joint_domain": {
+    "target": "Solidity.Backend.Selection.FrameCertificate.frame",
+    "proof": "by\n  let d := Solidity.Backend.Selection.V2.duplicateHead 7\n  let c : Solidity.Backend.Selection.FrameCertificate [7] [7,7] := {\n    code := d.code\n    frame := d.frame\n    prefixes := by\n      intro tail bound before after reached split ran\n      apply Solidity.Backend.Scalar.prefix_capacity before after ran\n      rw [split]\n      exact bound }\n  exact ⟨[7], [7,7], c, [11,99], True.intro⟩"
+  },
+  "legacy_prefixes_joint_domain": {
+    "target": "Solidity.Backend.Selection.FrameCertificate.prefixes",
+    "proof": "by\n  let d := Solidity.Backend.Selection.V2.duplicateHead 7\n  let c : Solidity.Backend.Selection.FrameCertificate [7] [7,7] := {\n    code := d.code\n    frame := d.frame\n    prefixes := by\n      intro tail bound before after reached split ran\n      apply Solidity.Backend.Scalar.prefix_capacity before after ran\n      rw [split]\n      exact bound }\n  exact ⟨[7], [7,7], c, [11,99], by decide, [], c.code, [7,11,99], rfl, rfl, True.intro⟩"
+  },
+  "instruction_success_joint_domain": {
+    "target": "Solidity.Backend.Selection.InstructionCertificate.success",
+    "proof": "by\n  let value : Fin Solidity.Evm.W := ⟨7, by decide⟩\n  exact ⟨.push (.val value), Solidity.Backend.Selection.literalCertificate value, [11], [7,11], { Solidity.Evm.Machine.init with stack := Solidity.Backend.Selection.irStack [11] }, rfl, True.intro⟩"
+  },
+  "instruction_refusal_joint_domain": {
+    "target": "Solidity.Backend.Selection.InstructionCertificate.refusal",
+    "proof": "by\n  let value : Fin Solidity.Evm.W := ⟨7, by decide⟩\n  exact ⟨.push (.val value), Solidity.Backend.Selection.literalCertificate value, [11], { Solidity.Evm.Machine.init with stack := Solidity.Backend.Selection.irStack [11] }, rfl, True.intro⟩"
+  }
+}

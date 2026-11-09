@@ -1,0 +1,37 @@
+{
+ "tests/h62/item2/audit-v09-passes/StatefulCaptureWitness.lean:Solidity.Backend.Passes.AuditStatefulCapture.capture_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/StatefulCaptureWitness.lean:Solidity.Backend.Passes.AuditStatefulCapture.declaration_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/StatefulCaptureWitness.lean:Solidity.Backend.Passes.AuditStatefulCapture.initial_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/StatefulCaptureWitness.lean:Solidity.Backend.Passes.AuditStatefulCapture.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/StatefulCaptureWitness.lean:Solidity.Backend.Passes.AuditStatefulCapture.ordered_capture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/StatefulCaptureWitness.lean:Solidity.Backend.Passes.AuditStatefulCapture.ordered_without_capture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/StatefulCaptureWitness.lean:Solidity.Backend.Passes.AuditStatefulCapture.reached_application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

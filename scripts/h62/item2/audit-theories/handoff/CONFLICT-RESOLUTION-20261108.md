@@ -1,0 +1,11 @@
+# Conflict resolution handoff
+
+Published lane head c210afcbcffe1f7b2f429cca1ccd01636a80c1da is retained as an ancestor; current master 69cfed87bf7eb136e589d18582dc12b06a71709c is merged without rewriting history. Keep the concise upstream audit index and upstream deletion of CURRENT-QUEUE-20261107.md. The deleted queue remains available in c210afc history. No Lean source, statement, premise, budget or axiom change is made by this resolution.
+
+The attached environment presented an older clean checkout at /workspace/solidity-lean. The published lane and original frozen base were fetched and ancestry verified before restoring /workspace/audit-theories as an owned worktree. Historical off-git evidence directories are absent on this attached filesystem; do not treat prior reported paths as newly verified artifacts.
+
+The portable certificate-binding fix and both unrelated-valid-certificate corruption controls are retained. The exporter attaches this current handoff instead of the deleted dated queue; the original complete queue attachment remains mandatory. Historical archive tests and the +1.807579148% matched timing measurement are previous-checkpoint evidence, not rerun results. This resolution runs the available Python unit tests, merge ancestry and source-preservation checks; no Lean runtime gate is claimed.
+
+The original four-checkpoint assignment remains partial: 1361 ordinary/generated records and 456 input-role reviews remain pending, as do broader compiler, physical ABI, target gas/fork coverage and final Lean gates. History-based frozen fidelity and the intentional static-value H69 separation decision remain accepted; no operational refusal coverage is inferred. Original rendered assignment, full original work/backfill queue and scope manifest are preserved beside this file and in the cumulative bundle.
+
+Independent read-only finder and skeptic: PASS, no residual findings. Both checked upstream cleanup, unchanged canonical binding/controls and the attachment replacement; neither ran Lean/Lake, network operations or writes. The 13 Python tests, original ancestry, conflict census, attachment existence and lane-scoped whitespace checks pass. Historical archives and Lean gates were not rerun.

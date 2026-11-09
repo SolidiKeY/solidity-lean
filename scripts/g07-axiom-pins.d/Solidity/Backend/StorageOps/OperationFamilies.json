@@ -1,3 +1,11 @@
 {
- "Solidity/Backend/StorageOps/OperationFamilies.lean:Solidity.Backend.StorageOps.modifyMany_append": []
+ "Solidity/Backend/StorageOps/OperationFamilies.lean:Solidity.Backend.StorageOps.modifyMany_append": [],
+ "Solidity/Backend/StorageOps/OperationFamilies.lean:Solidity.Backend.StorageOps.modifyMany_failure_after_disjoint": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/OperationFamilies.lean:Solidity.Backend.StorageOps.modifyMany_failure_commutes": [
+  "Quot.sound",
+  "propext"
+ ]
 }

@@ -1,0 +1,27 @@
+{
+ "tests/h62/item2/audit-v09-passes/LinkingCertificates.lean:Solidity.Yul.Compilation.assembled_library_payload_not_jumpdest": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LinkingCertificates.lean:Solidity.Yul.Compilation.known_link_preserved": [],
+ "tests/h62/item2/audit-v09-passes/LinkingCertificates.lean:Solidity.Yul.Compilation.linked_pushTag_reference": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LinkingCertificates.lean:Solidity.Yul.Compilation.linked_reference_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LinkingCertificates.lean:Solidity.Yul.Compilation.push_payload_not_jumpdest": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LinkingCertificates.lean:Solidity.Yul.Compilation.resolved_address_witness": [
+  "Quot.sound",
+  "propext"
+ ]
+}

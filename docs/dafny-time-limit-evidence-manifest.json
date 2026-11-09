@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "status": "partial",
+  "sourceHead": "812016dcdc436d652cdc4795d7cd63359cfdd886",
+  "fileCount": 284,
+  "uncompressedBytes": 8548265,
+  "archive": {
+    "path": "/workspace/dafny-time-limit-20261107/bulk.tar.gz",
+    "bytes": 1120773,
+    "sha256": "a4b2142beeaf6476cd4b14090666972d74c8225f05a9446ab431f210e616d00f"
+  },
+  "index": {
+    "path": "/workspace/dafny-time-limit-20261107/files.json",
+    "bytes": 65469,
+    "sha256": "531efa552a4b5cbc7fbb32c1f9377df26b12e59c5b372d1ea83b44943818433f"
+  },
+  "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-time-limit-evidence-manifest.json --restore",
+  "boundaries": [
+    "Actual API/LSP/process/image data, no local proof execution or unlimited setting.",
+    "Queries across config races are raw observations; in-flight late-result rejection is not fully forced/certified.",
+    "API/settings values are not rendered settings evidence; Linux is not macOS.",
+    "Default units and scopes differ; no equivalence or default changes.",
+    "All three paired attempts retained, each outer exit1; final local partial accepted, Dafny finite argv/closure checks remain failed.",
+    "10 targeted controls pass; first review regression fails; source/code/evidence not a parity pass."
+  ]
+}

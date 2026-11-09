@@ -50,7 +50,7 @@ The list is meant to be closed under imports. The architecture audit
 found 95 direct core-to-non-core boundary edges. Those exact edges are pinned in
 `scripts/core-import-baseline.json`, SHA256
 `d202b21ddde800b40237b9c4a95482c17b8d5ea8d2c78c1b42e4bad7344ac80b`
-(also recorded in `scripts/core-import-baseline.sha256`). Reproduce the audited
+(enforced by `scripts/core-import-closure.mjs`). Reproduce the audited
 bytes with `python3 -B scripts/h62/item5/statement-graph/audit_core_baseline.py`.
 They are existing debt, not proof that the core is already closed.
 
@@ -62,7 +62,7 @@ its SHA256 is `880486dcbe8f1004449dc9f1d90f25a9964d0b2c5ea64dad3de3dd5cfc548b8d`
 Reproduce it with
 `node scripts/h62/item5/statement-graph/reproduce_core_baseline.mjs`.
 The original 95-edge snapshot remains immutable. The twelve are cleanup candidates,
-listed in [the tooling handoff section](feature-work/h62-5-statement-graph.md#authorized-current-master-import-baseline-and-merge-pre-gate),
+listed in [the tooling handoff section](../scripts/h62/item5/statement-graph),
 not a declaration that the package is closed under imports.
 
 `scripts/check-layers.mjs` now checks the Solidity-package import closure as well

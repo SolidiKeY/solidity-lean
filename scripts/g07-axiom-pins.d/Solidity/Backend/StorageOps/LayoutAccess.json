@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/StorageOps/LayoutAccess.lean:Solidity.Backend.StorageOps.LayoutAccess.resolved_word_count": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LayoutAccess.lean:Solidity.Backend.StorageOps.LayoutAccess.resolved_word_membership": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

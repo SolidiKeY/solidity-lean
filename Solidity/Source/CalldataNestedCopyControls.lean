@@ -43,8 +43,7 @@ def memNested : STy := .array .memory pair none
 
 theorem nested_implicit (B : DeclName → DeclName → Bool) (M : DeclName → Bool) : cdNested.implicit B M memNested = true := rfl
 
-/-- The storage-to-memory analogue converts the same way (copied by
-`loadMem`, inner arrays allocated by `loadElem`). -/
+/-- The storage-to-memory analogue converts the same way (copied by `loadMem`, inner arrays allocated by `loadElem`). -/
 theorem storage_nested_implicit (B : DeclName → DeclName → Bool) (M : DeclName → Bool) :
     STy.implicit B M (.array .storage (.array .storage u (some 2)) none) memNested = true := rfl
 
@@ -62,14 +61,11 @@ theorem element_refused (B : DeclName → DeclName → Bool) (M : DeclName → B
 /-- Memory does not convert to `calldata`. -/
 theorem to_calldata_refused (B : DeclName → DeclName → Bool) (M : DeclName → Bool) : memNested.implicit B M cdNested = false := rfl
 
-/-- `calldata` does not convert implicitly to `storage` (a copy into storage
-is an assignment, `STy.copiesTo`). -/
+/-- `calldata` does not convert implicitly to `storage` (a copy into storage is an assignment, `STy.copiesTo`). -/
 theorem to_storage_refused (B : DeclName → DeclName → Bool) (M : DeclName → Bool) :
     cdNested.implicit B M (.array .storage (.array .storage u (some 2)) none) = false := rfl
 
-/-- **A recorded gap** (`docs/feature-work/source-soundness.md`, census):
-`bytes[] calldata` now converts to `bytes[] memory`, as in solc, but
-`cdToMem` copies no dynamically encoded element, so the copy is `stuck`. -/
+/-- **A recorded gap** (`docs/feature-work/source-soundness.md`, census): `bytes[] calldata` now converts to `bytes[] memory`, as in solc, but `cdToMem` copies no dynamically encoded element, so the copy is `stuck`. -/
 def dynElems := (convRV frame 0 (.array .memory (.bytes .memory) none)
   (σ := .array .calldata (.bytes .calldata) none) (.val (.cdRef rfl 0 1)) : EM EB [] _).run (L0 EB, sB)
 
@@ -86,23 +82,20 @@ array of such structs (user decision 2026-11-06): `STy.implicit` asks
 def mU : Syn .typeName := .elem (.int false 256 (by decide))
 def mK : MapKey := .elem (.int false 256 (by decide)) (by decide)
 
-/-- `struct Keyed { uint256 a; mapping(uint256 => uint256) m; }` and
-`struct Plain { uint256 a; uint256[] xs; }`. -/
+/-- `struct Keyed { uint256 a; mapping(uint256 => uint256) m; }` and `struct Plain { uint256 a; uint256[] xs; }`. -/
 def mapEnv : Env := ⟨[
   ⟨.struct, "Keyed", none, true, .struct "Keyed" (.structMember mU "a")
     (.cons (.structMember (.mapping mK none mU none) "m") .nil)⟩,
   ⟨.struct, "Plain", none, true, .struct "Plain" (.structMember mU "a")
     (.cons (.structMember (.array mU .none) "xs") .nil)⟩]⟩
 
-/-- `mapEnv` with `struct Outer { Keyed k; }`, `struct Holder { Keyed[] ks; }`
-and `struct Wrap { Plain p; }`: a mapping held through a nested struct. -/
+/-- `mapEnv` with `struct Outer { Keyed k; }`, `struct Holder { Keyed[] ks; }` and `struct Wrap { Plain p; }`: a mapping held through a nested struct. -/
 def nestedEnv : Env := ⟨mapEnv.decls ++ [
   ⟨.struct, "Outer", none, true, .struct "Outer" (.structMember (.userType ⟨"Keyed", []⟩) "k") .nil⟩,
   ⟨.struct, "Holder", none, true, .struct "Holder" (.structMember (.array (.userType ⟨"Keyed", []⟩) .none) "ks") .nil⟩,
   ⟨.struct, "Wrap", none, true, .struct "Wrap" (.structMember (.userType ⟨"Plain", []⟩) "p") .nil⟩]⟩
 
-/-- **Nested structs**: `Outer` and `Holder` hold `Keyed`'s mapping, `Wrap`
-holds none; `Outer storage` does not copy to memory, `Wrap storage` does. -/
+/-- **Nested structs**: `Outer` and `Holder` hold `Keyed`'s mapping, `Wrap` holds none; `Outer storage` does not copy to memory, `Wrap storage` does. -/
 theorem nested_mapping_refused :
     nestedEnv.mapFree ⟨none, "Outer"⟩ = false ∧ nestedEnv.mapFree ⟨none, "Holder"⟩ = false ∧
     nestedEnv.mapFree ⟨none, "Wrap"⟩ = true ∧
@@ -136,11 +129,7 @@ theorem mapping_pointer_kept :
 
 /-! ## The conversion arm -/
 
-/-- **An implicit conversion of a `calldata` reference to a statically
-encoded memory array** runs `cdToMem` (`convRV`'s reference arm), keeps the
-memory invariant and is never `stuck`: the targets `cdToMem_static_ok`
-covers, which `STy.implicit` admits from `calldata` once elements are
-compared at the target's location. -/
+/-- **An implicit conversion of a `calldata` reference to a statically encoded memory array** runs `cdToMem` (`convRV`'s reference arm), keeps the memory invariant and is never `stuck`: the targets `cdToMem_static_ok` covers, which `STy.implicit` admits from `calldata` once elements are compared at the target's location. -/
 theorem convRV_cd_static_ok {E : Env} {Γ' : RCtx} {H : HeapTy} (F : Fr) (n : Nat) {σ τ : STy}
     (hσ : σ.loc? = some .calldata)
     (hτ : (∃ e m, τ = .array .memory (.array .memory e (some m)) none ∧

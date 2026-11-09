@@ -17,8 +17,16 @@ from pathlib import Path
 
 
 def run(command, repo, env, log, timeout=300):
+    if type(timeout) is not int or timeout <= 0:
+        raise ValueError("invalid external timeout")
+    memory = Path("/proc/meminfo").read_text()
+    swap = int(re.search(r"^SwapTotal:\s+(\d+)", memory, re.M)[1])*1024
+    minimum_available = int(re.search(r"^MemAvailable:\s+(\d+)", memory, re.M)[1])*1024
+    if swap or minimum_available < 4*1024**3:
+        raise RuntimeError("external no-swap/reserve prerequisite")
     def limits():
         resource.setrlimit(resource.RLIMIT_AS, (12 * 1024**3, 12 * 1024**3))
+        assert resource.getrlimit(resource.RLIMIT_AS) == (12*1024**3, 12*1024**3)
     started = time.monotonic()
     with log.open("w") as output:
         child = subprocess.Popen(command, cwd=repo, env=env, stdout=output, stderr=subprocess.STDOUT,
@@ -42,8 +50,11 @@ def run(command, repo, env, log, timeout=300):
                 owned = expanded
             rss = sum(processes.get(pid, (0, 0))[1] for pid in owned)
             peak = max(peak, rss)
+            memory = Path("/proc/meminfo").read_text()
+            swap = int(re.search(r"^SwapTotal:\s+(\d+)", memory, re.M)[1])*1024
             available = int(re.search(r"^MemAvailable:\s+(\d+)", Path("/proc/meminfo").read_text(), re.M)[1])*1024
-            if rss > 12*1024**3 or available < 4*1024**3 or time.monotonic()-started > timeout:
+            minimum_available = min(minimum_available, available)
+            if swap or rss > 12*1024**3 or available < 4*1024**3 or time.monotonic()-started > timeout:
                 stopped = "resource/time guard"
                 os.killpg(child.pid, signal.SIGTERM)
                 try: child.wait(timeout=10)
@@ -53,6 +64,13 @@ def run(command, repo, env, log, timeout=300):
         code = child.wait()
     result = dict(command=command, exit=code, seconds=round(time.monotonic()-started, 3),
                   peak_rss=peak, stopped=stopped, log=str(log))
+    result['external_guard'] = dict(schema=1, timeout_seconds=timeout,
+        aggregate_rss_limit_bytes=12*1024**3, address_space_soft_bytes=12*1024**3,
+        address_space_hard_bytes=12*1024**3, available_reserve_bytes=4*1024**3,
+        swap_total_bytes=swap, sampling_interval_seconds=0.5, termination_grace_seconds=10,
+        process_group=True, rlimit_as_applied=True, lean_num_threads=env.get('LEAN_NUM_THREADS'),
+        minimum_available_bytes=minimum_available,
+        runner_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())
     print(json.dumps(result), flush=True)
     return result
 

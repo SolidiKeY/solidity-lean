@@ -30,7 +30,9 @@ theorem model_to_source {c : Control} {n fuel ff : Nat} {arms : Cases [] [] c n}
    change some (.pop::fallback.code) = some code at selected
    cases Option.some.inj selected
    have popped : Evm.run [.pop] {m with stack := coreWord selector::(locals.toList.map coreWord++caller)} =
-     .ok {m with stack := locals.toList.map coreWord++caller} 0 := by rfl
+     .ok {m with stack := locals.toList.map coreWord++caller} 0 := by
+     exact MachineAdapter.stack_run (popPrefix 1) [.pop] rfl
+       (selector::locals.toList) locals.toList rfl m caller
    change Evm.run ([.pop]++fallback.code)
      {m with stack := coreWord selector::(locals.toList.map coreWord++caller)} = .ok final skip at ran
    rw [Evm.run_append_ok popped] at ran
@@ -67,7 +69,9 @@ theorem model_to_source {c : Control} {n fuel ff : Nat} {arms : Cases [] [] c n}
      rw [FramedBranch.nonzero_tail 1 (.pop::arm.code) ns
        {m with stack := coreWord selector::(locals.toList.map coreWord++caller)} (by decide)] at ran
      have popped : Evm.run [.pop] {m with stack := coreWord selector::(locals.toList.map coreWord++caller)} =
-       .ok {m with stack := locals.toList.map coreWord++caller} 0 := by rfl
+       .ok {m with stack := locals.toList.map coreWord++caller} 0 := by
+       exact MachineAdapter.stack_run (popPrefix 1) [.pop] rfl
+         (selector::locals.toList) locals.toList rfl m caller
      change Evm.run ([.pop]++arm.code)
        {m with stack := coreWord selector::(locals.toList.map coreWord++caller)} = .ok final skip at ran
      rw [Evm.run_append_ok popped] at ran
