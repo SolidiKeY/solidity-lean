@@ -61490,6 +61490,21 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/Preservation/Encoding.lean:Solidity.Source.Preservation.encode_storage_bytes_timeout_two": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Preservation/EncodingVariantControls.lean:Solidity.Source.Preservation.EncodingVariantControls.StorageTimeout.encoder_completes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Preservation/EncodingVariantControls.lean:Solidity.Source.Preservation.EncodingVariantControls.StorageTimeout.encoder_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/SemanticsExamples.lean:Solidity.Source.Env.fieldTy?_of_fieldAt": [
   "Classical.choice",
   "Quot.sound",
