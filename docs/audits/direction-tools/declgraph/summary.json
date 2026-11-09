@@ -1,5 +1,13 @@
 {
   "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+  "baseline_decision": {
+    "additive_v2": "not adopted",
+    "baseline": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+    "deletion_certification": "none permitted on the pinned baseline",
+    "id": "DG-BASE-1",
+    "source": "direct user decision",
+    "verification": "blocked"
+  },
   "constant_identity": "Global imported constant Name, not necessarily unique source declaration: cached modules can define the same fully qualified theorem name.",
   "deletable_now_verified_lines": 0,
   "external_constant_boundary": 4317,
@@ -230,6 +238,7 @@
   "source_reference_occurrences": 2551051,
   "status": "partial",
   "supplemental_measurements": {
+    "additive_trust_audit_v2": "trust-v2-summary.json",
     "cached_ir_inventory": "ir-summary.json",
     "ci_and_plan_catalog": "root-plan-catalog.json",
     "compiler_overrides": "compiler-edges.json",
@@ -237,6 +246,7 @@
     "historical_candidates": "historical-summary.json",
     "module_compiler_overrides": "module-compiler-attributes.json",
     "native_cached_replay_prefix13": "replayed-prefix13/summary.json",
+    "native_cached_replay_prefix130": "replayed-prefix130/summary.json",
     "native_candidate_bindings": "candidate-summary.json",
     "native_candidate_check_references": "check-reference-summary.json",
     "native_candidate_snapshot_binding": "candidate-snapshot-summary.json",

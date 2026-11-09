@@ -3,6 +3,7 @@
 This does not repair or replace v1 and does not repin declaration measurements.
 The v2 owner review and Lean checks are separate obligations.
 """
+if not __debug__: raise SystemExit('OPTIMIZED_PYTHON_UNSUPPORTED')
 import argparse,pathlib,runpy,subprocess
 HERE=pathlib.Path(__file__).resolve().parent
 Q=runpy.run_path(str(HERE/'capture_cached_checks.py'));API=Q['API']
