@@ -98,7 +98,8 @@ theorem overlap_breaks_frame (suffix : Backend.Program) :
     have good := restrict.writeByte_outside 63 0 (by intro c hc;subst c;decide)
     have run := mstore8_revert_live bytes ⟨63,by decide⟩ ⟨0,by decide⟩ ⟨63,by decide⟩ ⟨1,by decide⟩ [] suffix
     refine ⟨?_,rejected,good,?_,bad⟩
-    · simpa only [show Environment.readMemory (Environment.writeByte bytes 63 0) 63 1=[0] from rfl] using run
+    · simpa only [show UInt8.ofNat 0 = (0 : UInt8) from rfl,
+        show Environment.readMemory (Environment.writeByte bytes 63 0) 63 1=[0] from rfl] using run
     · decide
 
 /-- The supported byte APIs really truncate modulo256, rather than rejecting a
