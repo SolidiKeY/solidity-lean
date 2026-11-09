@@ -41027,8 +41027,15 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.syntaxTupleShapeUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.syntaxVisibilityUses_iff": [
   "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.tupleShapeFeaturesAt_iff": [
   "propext"
  ],
  "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.visibilityFeaturesAt_iff": [
@@ -41041,6 +41048,7 @@
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.array_type_sites_and_frozen_gap": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.candidate_refusals_not_truncated": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.canonical_rethrow_feature_retained": [],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.classifier_family_order_duplicates_and_gap": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.constness_carriers": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.constness_diagnostic_gap": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.different_buffers_remain_assembly": [],
@@ -41076,7 +41084,12 @@
   "propext"
  ],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.state_qualifier_combinations": [],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.tuple_group_sites_and_gaps": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.visibility_carriers": [],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceLaws.lean:Solidity.Frontend.Admission.combineSyntaxFields_mem": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Frontend/Admission/SyntaxOccurrenceLaws.lean:Solidity.Frontend.Admission.emptySyntaxClassifier_none": [
   "Classical.choice",
   "Quot.sound",
@@ -41095,6 +41108,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceLaws.lean:Solidity.Frontend.Admission.syntaxFieldRefusal?_combine_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Frontend/Admission/SyntaxOccurrenceLaws.lean:Solidity.Frontend.Admission.syntaxFieldRefusal?_none_iff": [
   "Classical.choice",
   "Quot.sound",
@@ -41109,6 +41127,10 @@
   "propext"
  ],
  "Solidity/Frontend/Admission/SyntaxOccurrenceLaws.lean:Solidity.Frontend.Admission.syntaxFieldRefusals_map": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceLaws.lean:Solidity.Frontend.Admission.syntaxFieldUses_combine_iff": [
   "Quot.sound",
   "propext"
  ],

@@ -1,0 +1,18 @@
+{
+  "value_gate_selected_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.ValueGateCertificate.selected",
+    "proof": "\u27e8ValueGate.program,ValueGate.certificate,payableContract,RouteCtx,3,Frag.init RouteCtx,false,True.intro\u27e9"
+  },
+  "value_gate_executed_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.ValueGateCertificate.executed",
+    "proof": "\u27e8ValueGate.program,ValueGate.certificate,payableContract,RouteCtx,3,Frag.init RouteCtx,false,valueGateCompilation false,value_gate_found false,valueMalformed (wmod 0),True.intro\u27e9"
+  },
+  "value_body_selected_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.ValueGateBodyCertificate.selected",
+    "proof": "\u27e8ValueGateBody.guard,ValueGateBody.certificate,payableContract,RouteCtx,RouteCtx,3,Frag.init RouteCtx,valueGateBody,false,Frag.init RouteCtx,rfl,True.intro\u27e9"
+  },
+  "value_body_executed_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.ValueGateBodyCertificate.executed",
+    "proof": "\u27e8ValueGateBody.guard,ValueGateBody.certificate,payableContract,RouteCtx,RouteCtx,3,Frag.init RouteCtx,valueGateBody,false,Frag.init RouteCtx,rfl,valueGateWhole false,valueGateBack,value_whole_found false,value_body_found,payableMachine (wmod 5) (wmod 0),True.intro\u27e9"
+  }
+}

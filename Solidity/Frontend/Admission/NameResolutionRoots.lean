@@ -1,8 +1,6 @@
 import Solidity.Source.Typing
 
-/-! Initial target membership derived from the actual source name resolver.
-No assumptions about arbitrary constructed RExpr targets or runtime receiver
-rosters are introduced. -/
+/-! Initial target membership derived from the actual source name resolver. No assumptions about arbitrary constructed RExpr targets or runtime receiver rosters are introduced. -/
 namespace Solidity.Frontend.Admission.NameResolutionRoots
 open Solidity.Source
 

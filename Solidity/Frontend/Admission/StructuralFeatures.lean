@@ -1581,4 +1581,59 @@ theorem syntaxExplicitFunctionTypeUses_iff {c : Cat} (root : Syn c)
 /-- info: 'Solidity.Frontend.Admission.syntaxExplicitFunctionTypeUses_iff' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms syntaxExplicitFunctionTypeUses_iff
 
+
+/-! Regression: grouping and tuple slots share a constructor but must not share a marker. Reuse intrinsic tags/elimination and the generic visitor; raw empty/holed forms retain syntax evidence, not typing, tuple-value, capture/evaluation-order, profile or admission guarantees. -/
+inductive DirectTupleShape : {c : Cat} → Syn c → Feature → Prop where
+  | group (value : Syn .expr) : DirectTupleShape (.tuple (.some value) .nil) .parentheses
+  | empty : DirectTupleShape (.tuple .none .nil) .tupleExpressions
+  | multiple (first next : Syn (.opt .expr)) (rest : Syn (.list (.opt .expr))) :
+      DirectTupleShape (.tuple first (.cons next rest)) .tupleExpressions
+
+def tupleShapeFeature (first : Syn (.opt .expr)) (rest : Syn (.list (.opt .expr))) : Feature :=
+  if rest.ctor = .nil ∧ first.ctor = .some then .parentheses else .tupleExpressions
+
+def tupleShapeFeaturesAt {c : Cat} (s : Syn c) : List Feature := by
+  apply Syn.casesOn (motive := fun _ _ => List Feature) s
+  case tuple => intro first rest; exact [tupleShapeFeature first rest]
+  all_goals (intros; exact [])
+
+theorem tupleShapeFeaturesAt_iff {c : Cat} (s : Syn c) (f : Feature) :
+    f ∈ tupleShapeFeaturesAt s ↔ DirectTupleShape s f := by
+  cases s with
+  | tuple first rest =>
+    cases rest with
+    | nil =>
+      cases first with
+      | none =>
+        change f ∈ [Feature.tupleExpressions] ↔ _
+        constructor
+        · intro same; cases List.mem_singleton.mp same; exact .empty
+        · intro direct; cases direct; exact List.mem_singleton.mpr rfl
+      | some value =>
+        change f ∈ [Feature.parentheses] ↔ _
+        constructor
+        · intro same; cases List.mem_singleton.mp same; exact .group _
+        · intro direct; cases direct; exact List.mem_singleton.mpr rfl
+    | cons next tail =>
+      change f ∈ [Feature.tupleExpressions] ↔ _
+      constructor
+      · intro same; cases List.mem_singleton.mp same; exact .multiple _ _ _
+      · intro direct; cases direct; exact List.mem_singleton.mpr rfl
+  | _ =>
+    simp only [tupleShapeFeaturesAt, List.not_mem_nil]
+    constructor <;> intro impossible <;> cases impossible
+
+def syntaxTupleShapeUses {c : Cat} (root : Syn c) : List (SyntaxOccurrence × Feature) :=
+  syntaxFieldUses root tupleShapeFeaturesAt
+
+theorem syntaxTupleShapeUses_iff {c : Cat} (root : Syn c) (site : SyntaxOccurrence) (f : Feature) :
+    (site,f) ∈ syntaxTupleShapeUses root ↔
+      Syn.Sub site ⟨c,root⟩ ∧ DirectTupleShape site.2 f := by
+  rw [syntaxTupleShapeUses, syntaxFieldUses_iff, tupleShapeFeaturesAt_iff]
+
+/-- info: 'Solidity.Frontend.Admission.tupleShapeFeaturesAt_iff' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms tupleShapeFeaturesAt_iff
+/-- info: 'Solidity.Frontend.Admission.syntaxTupleShapeUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxTupleShapeUses_iff
+
 end Solidity.Frontend.Admission

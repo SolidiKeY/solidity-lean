@@ -125,8 +125,15 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.syntaxTupleShapeUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.syntaxVisibilityUses_iff": [
   "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.tupleShapeFeaturesAt_iff": [
   "propext"
  ],
  "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.visibilityFeaturesAt_iff": [
