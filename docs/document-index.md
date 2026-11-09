@@ -344,6 +344,7 @@ and open obligations. Test proposals remain proposals until applied.
 - [tests/h62/item2/audit-calculus/PRIMITIVE-PROJECTION-CLASSIFICATION.md](../tests/h62/item2/audit-calculus/PRIMITIVE-PROJECTION-CLASSIFICATION.md)
 - [tests/h62/item2/audit-calculus/SOURCE-DETERMINISM-CLASSIFICATION.md](../tests/h62/item2/audit-calculus/SOURCE-DETERMINISM-CLASSIFICATION.md)
 - [tests/h62/item2/audit-language/registration-fragment.md](../tests/h62/item2/audit-language/registration-fragment.md)
+- [tests/h62/item5/statement-graph/README.md](../tests/h62/item5/statement-graph/README.md)
 - [tests/h62/item6/migrate-hash/README.md](../tests/h62/item6/migrate-hash/README.md)
 - [tests/source-immutables/README.md](../tests/source-immutables/README.md)
 - [tests/terra-20261103/audit-selection/README.md](../tests/terra-20261103/audit-selection/README.md)
