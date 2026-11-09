@@ -1,0 +1,88 @@
+/-! Guards treating signed entry validation as body execution, ignoring payment
+refusal, or silently borrowing numeric-memory premises for early rejection.
+Reuses the signed-binding fixture and actual compiler; a typed body overwrites
+the bound signed local. No Source-body, native loader, physical, gas or G01
+operational correspondence is asserted. -/
+
+def signedEntryBody : Prog signedContract SignedBoundCtx SignedBoundCtx :=
+  .cons (.assignLocal .here (.simple (.lit 0 (by decide)))) .nil
+
+def signedEntryWhole (payable : Bool) :=
+  SignedEntryBody.compiled 7 8 payable signedLabel signedEntryBody (Frag.init SignedBoundCtx) rfl
+
+def signedEntryBack := SignedEntryBody.Binding.selectedBody 7 signedEntryBody (Frag.init SignedBoundCtx) rfl
+
+theorem signed_entry_whole_found (payable : Bool) : Compiler.compile 7 (Frag.init RouteCtx)
+    (SignedEntryBody.program 8 payable signedLabel signedEntryBody)=some (signedEntryWhole payable) :=
+  SignedEntryBody.selected 7 8 payable signedLabel signedEntryBody (Frag.init SignedBoundCtx) rfl
+
+theorem signed_entry_back_found : Compiler.compile 7 (Frag.init SignedBoundCtx)
+    signedEntryBody=some signedEntryBack :=
+  SignedEntryBody.Binding.body_selected 7 signedEntryBody (Frag.init SignedBoundCtx) rfl
+
+def signedEntryMachine (word size value : Fin W) : Machine :=
+  {signedMachine word size with callvalue := value}
+
+def signedEntryWritten (word size value : Fin W) : Machine :=
+  let bound := signedBoundMachine 7 signedLabel word (signedEntryMachine word size value)
+  {bound with mem := upd bound.mem 9 (.val (wmod 0))}
+
+theorem signed_entry_actual (payable : Bool) (word size value : Fin W) :
+    run (signedEntryWhole payable).code (signedEntryMachine word size value)=
+      if payable || decide (value.val=0) then
+        if size.val<36 then .revert else if (Solidity.AbiEntry.Kind.int 8).valid word.val then
+          run signedEntryBack.code (signedBoundMachine 7 signedLabel word (signedEntryMachine word size value))
+        else .revert else .revert :=
+  SignedEntryBody.executed 7 8 payable signedLabel signedEntryBody (Frag.init SignedBoundCtx) rfl
+    (signedEntryWhole payable) signedEntryBack (signed_entry_whole_found payable) signed_entry_back_found
+    (signedEntryMachine word size value) word size rfl rfl
+
+theorem signed_entry_zero_value_success :
+    run (signedEntryWhole false).code (signedEntryMachine (wmod 127) (wmod 36) (wmod 0))=
+      .ok (signedEntryWritten (wmod 127) (wmod 36) (wmod 0)) 0 := by
+  rw [signed_entry_actual]
+  rfl
+
+theorem signed_entry_payable_success :
+    run (signedEntryWhole true).code (signedEntryMachine (wmod (W-1)) (wmod 36) (wmod 1))=
+      .ok (signedEntryWritten (wmod (W-1)) (wmod 36) (wmod 1)) 0 := by
+  rw [signed_entry_actual]
+  rfl
+
+theorem signed_entry_body_effect (word size value : Fin W) :
+    (signedEntryWritten word size value).mem 9=.val (wmod 0) ∧
+    (signedEntryWritten word size value).stack=[.val (wmod 11),.val (wmod 99)] := ⟨rfl,rfl⟩
+
+theorem signed_entry_bad_word_refused :
+    run (signedEntryWhole true).code (signedEntryMachine (wmod 128) (wmod 36) (wmod 1))=.revert := by
+  rw [signed_entry_actual]
+  rfl
+
+theorem signed_entry_revert_all_refused :
+    run (signedEntryWhole false).code (signedEntryMachine (wmod 127) (wmod 36) (wmod 0))≠.revert := by
+  rw [signed_entry_zero_value_success]
+  intro impossible
+  cases impossible
+
+def signedEntryBlocked : Machine :=
+  {Machine.init with callvalue := wmod 1, mem := fun _ => .slot (.root 0)}
+
+theorem signed_entry_early_refusal (machine : Machine)
+    (blocked : (false || decide (machine.callvalue.val=0))=false) :
+    run (signedEntryWhole false).code machine=.revert :=
+  SignedEntryBody.early_rejection 7 8 false signedLabel signedEntryBody (Frag.init SignedBoundCtx) rfl
+    (signedEntryWhole false) (signed_entry_whole_found false) machine blocked
+
+theorem signed_entry_malformed_memory_refused : run (signedEntryWhole false).code signedEntryBlocked=.revert :=
+  signed_entry_early_refusal signedEntryBlocked rfl
+
+#print axioms signed_entry_whole_found
+#print axioms signed_entry_back_found
+#print axioms signed_entry_actual
+#print axioms signed_entry_zero_value_success
+#print axioms signed_entry_payable_success
+#print axioms signed_entry_body_effect
+#print axioms signed_entry_bad_word_refused
+#print axioms signed_entry_revert_all_refused
+#print axioms signed_entry_early_refusal
+#print axioms signed_entry_malformed_memory_refused
