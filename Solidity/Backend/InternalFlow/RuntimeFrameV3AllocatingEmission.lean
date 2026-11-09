@@ -49,6 +49,7 @@ theorem source_zero {C : Contract} {Γ : Ctx} (name : Name) (argumentsExpr : Arg
  rw [AllocatingActivation.base_exhausts]
  rfl
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Real source success excludes a first-read failure, independent of emitter
 admission. No source/target agreement premise is used. -/
 theorem reads_of_success {C : Contract} (name : Name) (σ : State C (Parameters A))
@@ -117,8 +118,8 @@ theorem entry_bounds {C : Contract} {b lo L frame : Nat} {F : Frag (Parameters A
  change start+arena σ≤frame at reserve
  change lo<start ∨ start+arena σ≤lo at separate
  change start+arena σ<W at fits
- have three : 3≤arena σ := by rw [arena,if_pos reads];exact Nat.le_max_left _ _
- have pairs : 2*(counter σ).val≤arena σ := by rw [arena,if_pos reads];exact Nat.le_max_right _ _
+ have three : 3≤arena σ := by rw [arena,ite_eq_left reads];exact Nat.le_max_left _ _
+ have pairs : 2*(counter σ).val≤arena σ := by rw [arena,ite_eq_left reads];exact Nat.le_max_right _ _
  rcases separate with left | right <;> omega
 
 /-- Universal native recursive return transport over every actual frozen
@@ -130,7 +131,7 @@ theorem returns {C : Contract} (b lo : Nat) (F : Frag (Parameters A)) (name : Na
  have reads := reads_of_success name σ ref alias depth out actual
  have costEq : (plan b lo F).heapCost σ=4*(counter σ).val := by
    change cost σ=_
-   rw [cost,length_of_alias σ ref alias,AllocatingOutcome.demand,if_pos reads]
+   rw [cost,length_of_alias σ ref alias,AllocatingOutcome.demand,ite_eq_left reads]
  obtain ⟨workspace,pointerBelow,pointerBefore,bottomAbove,bottomBefore,reserve,fits⟩ := entry_bounds entry (by rw [length_of_alias σ ref alias];exact reads)
  by_cases zero : (counter σ).val=0
  · have prepared := RecursiveIngress.entry_prepared (plan b lo F) entry (by change 4≤4;decide) rfl
@@ -149,7 +150,7 @@ theorem returns {C : Contract} (b lo : Nat) (F : Frag (Parameters A)) (name : Na
      prepared.2.1.cursor prepared.2.2.1
    refine ⟨RecursiveIngress.prepared before lo (lo-1),base,(run_append_ok prepared.1).trans body,
      prepared.2.1.represented,rfl,BaseExtends.refl _,?_,prepared.2.1.cursor,prepared.2.2.2.1⟩
-   simpa only [costEq,zero,Nat.mul_zero] using prepared.2.2.2.2
+   simpa only [plan,show cost σ=4*(counter σ).val from costEq,zero,Nat.mul_zero] using prepared.2.2.2.2
  · have capacity : AllocationInput b frame (4*(counter σ).val) σ base before := by
      rw [←costEq]
      exact entry.capacity
@@ -176,12 +177,12 @@ theorem bare_revert {C : Contract} (b lo : Nat) (F : Frag (Parameters A)) (name 
    have classified := AllocatingQuotations.source_classification name args σ _ evaluated (counter σ).val (counter σ).isLt ref rfl rfl reads _ out source depth
    rw [actual] at classified
    by_cases enough : (counter σ).val<depth
-   · rw [if_pos enough] at classified;cases classified
-   · rw [if_neg enough] at classified;cases classified
+   · rw [ite_eq_left enough] at classified;cases classified
+   · rw [ite_eq_right enough] at classified;cases classified
  · have prepared := RecursiveIngress.entry_prepared (plan b lo F) entry (by change 4≤4;decide) rfl
    have costEq : (plan b lo F).heapCost σ=4 := by
      change cost σ=_
-     rw [cost,length_of_alias σ ref alias,AllocatingOutcome.demand,if_neg reads]
+     rw [cost,length_of_alias σ ref alias,AllocatingOutcome.demand,ite_eq_right reads]
    have capacity : AllocationInput b frame 4 σ base (RecursiveIngress.prepared before lo (lo-1)) := by
      rw [←costEq]
      exact prepared.2.1.capacity
