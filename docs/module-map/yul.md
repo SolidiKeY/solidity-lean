@@ -209,6 +209,7 @@
 | `Yul/Views/GenericFlow/FollowingLaws.lean` | Shared decoder-failure law for checked following; consumers avoid concrete dependent-match splitting. |
 | `Yul/Views/GenericFlow/FollowingPlan.lean` | Shared intrinsic Plan adapter for checked following, preserving lazy state and journal and an explicit effective checker. |
 | `Yul/Views/GenericFlow/Reads.lean` | Shared typed Plan read/preservation proofs and saved-header read equation; actual bank metadata remains explicit. |
+| `Yul/Views/GenericFlow/Batch.lean` | Shared intrinsic Plan preparation runner and batch laws; exact failure-prefix state and finite request recursion are preserved. |
 | `Yul/RawFrameLogic.lean` | Intrinsic raw-local frame logic and transport used by P16; retained typed frame obligations remain explicit. |
 | `Yul/Views/MemberDynamicLayout.lean` | Concrete member-dynamic environment, declarations and computed layout; serial elaboration piece. |
 | `Yul/Views/MemberDynamicInitial.lean` | Original concrete member coordinates, headers, initial state, views and encoding. |

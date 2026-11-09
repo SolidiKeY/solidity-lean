@@ -1,0 +1,14 @@
+{
+  "Examples": {
+    "verdict": "justified",
+    "ratio": 4.6428593721493066,
+    "reason": "The sampled quartet kernel-checks concrete hash/execution results and structure/quantified tactic cases absent the Clear Peano suite; measured kernel-decide and simp work explain the extra validation workload. This justifies the sampled workload difference, not implementation optimality or the whole area.",
+    "evidence": [
+      "d6fd95f0886775d7c286813fa9b993a40ba7a777:Solidity/Examples/DecisionHashThreeKinds.lean",
+      "d6fd95f0886775d7c286813fa9b993a40ba7a777:Solidity/Examples/Tactics/OwnStructs.lean",
+      "d6fd95f0886775d7c286813fa9b993a40ba7a777:Solidity/Examples/Tactics/QuantifiedDiamond.lean",
+      "6ef2e7eda01080e5d5fd7474354c1a71adab5071:All.lean",
+      "summary.calibration.declaration_profiles.profiles: overlapping kernel-decide/simp spans; never add kernel and pin-inclusive spans"
+    ]
+  }
+}

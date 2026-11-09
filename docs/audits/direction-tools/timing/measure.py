@@ -63,7 +63,7 @@ def terminate_owned_session(proc):
     except ProcessLookupError: pass
     proc.wait()
 
-def command(args,cwd,log,timeout=600):
+def command(args,cwd,log,timeout=600,observer=None):
     if not CLOUD_VM_OPT_IN: raise RuntimeError('cloud-only runner requires explicit --cloud-vm; host resource policy is not implemented')
     if int(re.search(r'^SwapTotal:\s+(\d+)',pathlib.Path('/proc/meminfo').read_text(),re.M)[1])!=0: raise RuntimeError('cloud runner requires swap disabled')
     foreign=active_compilers()
@@ -94,6 +94,7 @@ def command(args,cwd,log,timeout=600):
                 if reason:
                     terminate_owned_session(proc)
                     break
+                if observer is not None: observer.poll(proc.pid)
                 try: proc.wait(timeout=0.1)
                 except subprocess.TimeoutExpired: pass
         except BaseException:
