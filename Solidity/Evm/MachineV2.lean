@@ -68,7 +68,6 @@ theorem bytesNat_fold_lt (l : List UInt8) (acc : Nat) :
   | cons b l ih =>
     simp only [List.foldl_cons, List.length_cons, byteStep]
     have h := ih (acc * 256 + b.toNat)
-    simp only [byteStep] at h
     have hb : b.toNat < 256 := b.toNat_lt
     have : (acc * 256 + b.toNat + 1) * 256 ^ l.length ≤ (acc + 1) * 256 ^ (l.length + 1) := by
       rw [Nat.pow_succ', ← Nat.mul_assoc]
