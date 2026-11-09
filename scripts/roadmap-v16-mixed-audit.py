@@ -160,7 +160,7 @@ class CorruptionControls(unittest.TestCase):
   p=copy.deepcopy(POLICY);p['axiomPins'][PRE+'MixedMemoryControls.code_composes']=[]
   with self.assertRaises(core.Invalid):controls(NODES,p)
  def test_missing_private_helper(self):
-  n=copy.deepcopy(NODES);key=next(d for d in POLICY['dependencyPins'] if d.startswith('_private.Solidity.Roadmap.V16.'));n.pop(key)
+  n=copy.deepcopy(NODES);key=next(d for d in POLICY['dependencyPins'] if d.startswith(('_private.Solidity.Roadmap.V16.','_private.Solidity.Examples.Roadmap.V16.')));n.pop(key)
   with self.assertRaises(core.Invalid):controls(n,POLICY)
  def test_missing_dependency_pin(self):
   p=copy.deepcopy(POLICY);p['dependencyPins'].pop(next(iter(p['dependencyPins'])))

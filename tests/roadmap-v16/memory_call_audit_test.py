@@ -94,7 +94,7 @@ class AuditTests(unittest.TestCase):
         with self.assertRaises(m.core.Invalid):m.validate_scoped_dependencies(controls)
     def test_private_reached_helper_with_public_correctness(self):
         controls=copy.deepcopy(REPORT['controls'])
-        name='_private.Solidity.Roadmap.V16.MemoryCallConsumer.0.'+m.P+'secretAlias'
+        name='_private.Solidity.Examples.Roadmap.V16.MemoryCallConsumer.0.'+m.P+'secretAlias'
         row=next(r for r in controls['theorems'] if r['name']==m.P+'memory_call_diamond')
         row['dependencies'].append(name)
         controls['definitions'].append({'name':name,'ownerName':m.P+'secretAlias','dependencies':['Solidity.Roadmap.PublicCorrectness']})
@@ -102,7 +102,7 @@ class AuditTests(unittest.TestCase):
     def test_missing_private_reached_helper(self):
         controls=copy.deepcopy(REPORT['controls'])
         row=next(r for r in controls['theorems'] if r['name']==m.P+'memory_call_diamond')
-        row['dependencies'].append('_private.Solidity.Roadmap.V16.MemoryCallConsumer.0.'+m.P+'missingAlias')
+        row['dependencies'].append('_private.Solidity.Examples.Roadmap.V16.MemoryCallConsumer.0.'+m.P+'missingAlias')
         with self.assertRaises(m.core.Invalid):m.validate_scoped_dependencies(controls)
     def test_same_box_binder_strengthened(self):
         rows=self.theorem_map();premise=next(p for p in rows[m.P+'memory_call_box']['premises'] if p['name']=='box')

@@ -59,10 +59,18 @@ def closure(meta):
   seen.add(n);r=nodes[n];deps=set(r['dependencies'])|set(r['typeConstants'])
   core.require(not any('PublicCorrectness' in x for x in deps),'desired simulation oracle in reached helper')
   for dep in deps:
-   owned=dep.startswith(PRE) or (dep.startswith('_private.') and '.'+PRE in dep)
+   owned=dep.startswith(PRE) or (dep.startswith('_private.') and ('.'+PRE in dep or dep.startswith(('_private.Solidity.Roadmap.V16.','_private.Solidity.Examples.Roadmap.V16.'))))
    core.require(not owned or dep in nodes,'missing reached owned helper')
    if dep in nodes and dep not in seen:todo.append(dep)
  return sorted(seen)
+
+def actual_private_splitter(meta):
+ reached=set(closure(meta));nodes={r['name']:r for r in meta['theorems']+meta['definitions']}
+ for name in sorted(reached):
+  if name.startswith('_private.Solidity.Examples.Roadmap.V16.ConstructionCompilation.') and '.splitter' in name:
+   if any(name in set(nodes[parent]['dependencies'])|set(nodes[parent]['typeConstants']) for parent in reached if parent!=name):
+    return name
+ raise core.Invalid('missing actual reached private splitter for countercontrols')
 
 def controls(meta):
  rows={r['name']:r for r in meta['theorems']}
@@ -133,12 +141,13 @@ class NegativeControls(unittest.TestCase):
   with self.assertRaises(core.Invalid):closure(m)
  def test_absent_actual_private_splitter(self):
   m=copy.deepcopy(META)
-  name=next(r['name'] for r in m['theorems']+m['definitions'] if r['name'].startswith('_private.Solidity.Roadmap.V16.ConstructionCompilation.') and '.splitter' in r['name'])
+  name=actual_private_splitter(m)
   for kind in ['theorems','definitions']:m[kind]=[r for r in m[kind] if r['name']!=name]
   with self.assertRaises(core.Invalid):closure(m)
  def test_actual_private_splitter_oracle(self):
   m=copy.deepcopy(META)
-  row=next(r for r in m['theorems']+m['definitions'] if r['name'].startswith('_private.Solidity.Roadmap.V16.ConstructionCompilation.') and '.splitter' in r['name'])
+  name=actual_private_splitter(m)
+  row=next(r for r in m['theorems']+m['definitions'] if r['name']==name)
   row['dependencies'].append('Solidity.Roadmap.PublicCorrectness')
   with self.assertRaises(core.Invalid):closure(m)
  def test_unapproved_definition_axiom(self):

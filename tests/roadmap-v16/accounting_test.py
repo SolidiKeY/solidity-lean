@@ -30,6 +30,15 @@ class AccountingTests(unittest.TestCase):
             with self.assertRaises(m.Invalid):m.validate_owned_imports(fake)
             fake["modules"]=["Solidity.Roadmap.V16.Nested.Only"]
             m.validate_owned_imports(fake)
+    def test_relocated_owned_module_cannot_escape(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=pathlib.Path(tmp);p=root/"Solidity/Examples/Roadmap/V16/Only.lean"
+            p.parent.mkdir(parents=True);p.write_text("namespace Solidity.Roadmap.V16 end Solidity.Roadmap.V16\n")
+            discovered=m.sources(root)
+            self.assertIn(str(p.relative_to(root)),discovered)
+            with self.assertRaises(m.Invalid):
+                m.validate_owned_imports({"sources":discovered,"modules":[]})
+
     def test_absent_imported_module(self):self.inv["modules"].pop();self.invalid_inventory()
     def test_absent_constructor_obligation(self):
         self.report["obligations"]=[r for r in self.report["obligations"] if r["id"]!="constructor:Solidity.Stmt.assign"]

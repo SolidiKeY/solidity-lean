@@ -16,7 +16,7 @@ def require(test, message):
     if not test: raise Invalid(message)
 def digest(data): return hashlib.sha256(data).hexdigest()
 def sources(root):
-    return {str(p.relative_to(root)):digest(p.read_bytes()) for p in (root/"Solidity/Roadmap/V16").rglob("*.lean")}
+    return {str(p.relative_to(root)):digest(p.read_bytes()) for area in ["Solidity/Roadmap/V16", "Solidity/Examples/Roadmap/V16"] for p in (root/area).rglob("*.lean")}
 def validate_owned_imports(inv):
     owned={".".join(pathlib.Path(p).with_suffix("").parts) for p in inv["sources"]}
     require(owned <= set(inv["modules"]), "owned theorem module missing from checked import closure")

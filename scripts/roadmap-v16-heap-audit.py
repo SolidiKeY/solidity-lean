@@ -147,7 +147,7 @@ def merged(metas):
  return nodes
 
 def owned(name):
- return name.startswith(PRE) or (name.startswith('_private.') and ('.'+PRE in name or name.startswith('_private.Solidity.Roadmap.V16.')))
+ return name.startswith(PRE) or (name.startswith('_private.') and ('.'+PRE in name or name.startswith(('_private.Solidity.Roadmap.V16.','_private.Solidity.Examples.Roadmap.V16.'))))
 
 def closure(nodes,roots):
  seen=set();todo=list(roots)

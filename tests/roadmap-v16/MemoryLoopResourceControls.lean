@@ -1,6 +1,6 @@
 import Solidity.Evm.MemoryLoopScopeAllocExamples
 import Solidity.Evm.MemoryLoopExamples
-import Solidity.Roadmap.V16.MemoryLoopConsumer
+import Solidity.Examples.Roadmap.V16.MemoryLoopConsumer
 import Solidity.Evm.MemoryLoopSourceExamples
 import Solidity.Evm.MemoryLoopScopeSourceExamples
 import Solidity.Evm.MemoryLoopScopeExamples

@@ -1,5 +1,5 @@
 import Solidity.Roadmap.V16.SpecificationControls
-import Solidity.Roadmap.V16.MemoryCallConsumer
+import Solidity.Examples.Roadmap.V16.MemoryCallConsumer
 import Lean
 import Solidity.Evm.MemoryCallExamples
 

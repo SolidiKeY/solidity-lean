@@ -1,4 +1,4 @@
-import Solidity.Roadmap.V16.CalculusConsumer
+import Solidity.Examples.Roadmap.V16.CalculusConsumer
 import tests.«roadmap-v16».CoreConsumerControls
 import tests.«roadmap-v16».MixedMemoryControls
 import Lean
@@ -188,7 +188,8 @@ run_cmd do
   let mut theorems : Array Json := #[]
   for (n, info) in env.constants.toList do
     if (`Solidity.Roadmap.V16).isPrefixOf ((privateToUserName? n).getD n) ||
-        (`_private.Solidity.Roadmap.V16).isPrefixOf n then
+        (`_private.Solidity.Roadmap.V16).isPrefixOf n ||
+        (`_private.Solidity.Examples.Roadmap.V16).isPrefixOf n then
       if let .thmInfo _ := info then
         let axs ← collectAxioms n
         let ty ← liftTermElabM do return (← Meta.ppExpr info.type).pretty
@@ -216,7 +217,8 @@ run_cmd do
   let mut definitions : Array Json := #[]
   for (n, info) in env.constants.toList do
     if (`Solidity.Roadmap.V16).isPrefixOf ((privateToUserName? n).getD n) ||
-        (`_private.Solidity.Roadmap.V16).isPrefixOf n then
+        (`_private.Solidity.Roadmap.V16).isPrefixOf n ||
+        (`_private.Solidity.Examples.Roadmap.V16).isPrefixOf n then
       if let .defnInfo _ := info then
         let axs ← collectAxioms n
         let ty ← liftTermElabM do return (← Meta.ppExpr info.type).pretty
