@@ -1,0 +1,6 @@
+path	name	name_key_sha256	own_range	constant_kind	seen_as_root	seen_as_dependency
+Solidity/Backend/AbiWorld/ErrorOffsetWindowControls.lean	_eval	908055686131fce06b4829ffe915183477c4f4de813196294c3c31a05c74a45c	[71,0,71,5]	def	1	0
+Solidity/Backend/AbiWorld/ErrorOffsetWindowControls.lean	_eval	908055686131fce06b4829ffe915183477c4f4de813196294c3c31a05c74a45c	null	def	1	0
+Solidity/Backend/AbiWorld/ErrorReadWindowControls.lean	_eval	908055686131fce06b4829ffe915183477c4f4de813196294c3c31a05c74a45c	[78,0,78,5]	def	1	0
+Solidity/Backend/AbiWorld/PanicCallFrameControls.lean	_eval	908055686131fce06b4829ffe915183477c4f4de813196294c3c31a05c74a45c	[100,0,100,5]	def	1	0
+Solidity/Backend/Creation/Artifact.lean	Solidity.Backend.Creation.offsetInstr	3dc142b25ff58cc96ce4ab321b6f7a5a493d620499ab9abffce3749a9afb6bf3	[33,0,34,41]	def	0	1
