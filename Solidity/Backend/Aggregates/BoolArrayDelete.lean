@@ -9,6 +9,7 @@ open Solidity BoolArrays
 
 def empty (H : HTy) : MObj H boolR := ⟨[], SVal.zero_lt_bound⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Actual default copying allocates exactly one empty bool-array object. -/
 theorem default_heap {H : HTy} (heap : Heap H) :
     heap.allocDefault boolR rfl =
@@ -16,6 +17,7 @@ theorem default_heap {H : HTy} (heap : Heap H) :
   simp only [Heap.allocDefault, SVal.dflt_array, SVal.copyStToM_array,
     SVec.copyStToM_nil, empty]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The actual variable deletion result, exposing allocation and rebinding
 rather than postulating a simulation or identifying independent heaps. -/
 theorem run_var {C : Contract} {Γ : Ctx} (state : State C Γ)
@@ -28,6 +30,7 @@ theorem run_var {C : Contract} {Γ : Ctx} (state : State C Γ)
     SVal.copyStToM_array, SVec.copyStToM_nil,
     State.grow, State.alloc, empty]
   rfl
+set_option backward.isDefEq.respectTransparency false in
 /-- Relate the actual independently allocated defaults after sufficient Source
 fuel. This derives the new contents relation; old caller/alias preservation is
 a separate obligation, and Source timeout is not target logical failure. -/
@@ -48,6 +51,7 @@ theorem delete_related {E : Source.Env} {Λ : Source.RCtx} {C : Contract} {Γ : 
     rw [Heap.get_alloc_self]
     simp only [empty, MObj.wk, MObj.elems_dyn, List.map_nil]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Preserve an already related object through the actual deletion allocations.
 Occupied Source cells imply freshness separation; no extra address inequality
 or desired preservation premise is required. This observes heap contents,
