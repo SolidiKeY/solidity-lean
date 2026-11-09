@@ -14,7 +14,7 @@ open RecursiveSource RecursiveActivation GuardedRecursion GuardedPrefixes Alloca
 abbrev A := NativeUnwind.A
 
 def uintWord (n : Nat) (bound : n<Evm.W) : ReturnWordTransport.UInt :=
- ⟨n,by simpa only [AbiEntry.W_eq] using bound,decide_eq_true bound⟩
+ ⟨n,by simpa only [Evm.W, AbiEntry.W] using bound,decide_eq_true bound⟩
 
 theorem represented_counter {C : Contract} {L b frame : Nat} {F : Frag (Parameters A)}
  (σ : State C (Parameters A)) (base : Nat → Fin Evm.W) (machine : Machine)
