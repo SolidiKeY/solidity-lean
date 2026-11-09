@@ -30,9 +30,12 @@ initialize registerBuiltinAttribute {
     unless ci.type == .sort .zero do throwError "goal: {decl} must be a definition of type Prop"
     let proof := stx[1].getId
     let step := stx[2].getOptional?.bind (·.isStrLit?)
-    let deps ← match stx[3].getOptional? with
-      | some g => g[1].getArgs.mapM fun d => realizeGlobalConstNoOverloadWithInfo d
-      | none => pure #[]
+    -- `(" ← " ident+)?` parses to a null node holding the arrow and the identifiers:
+    -- two children, so `getOptional?` (one child) would silently drop every dependency.
+    let deps ← match stx[3].getArgs with
+      | #[_, ids] => ids.getArgs.mapM fun d => realizeGlobalConstNoOverloadWithInfo d
+      | #[] => pure #[]
+      | _ => throwError "goal: malformed dependency list"
     modifyEnv (goalExt.addEntry · { decl, proof, deps, plan := step })
 }
 
@@ -67,17 +70,27 @@ def statuses : MetaM (Array (Entry × Status)) := do
   let es := goalExt.getState (← getEnv)
   es.mapM fun e => return (e, ← status e)
 
-def report (rs : Array (Entry × Status)) : String :=
+/-- One line per goal selected by `only`; dependencies are looked up among all of `rs`. -/
+def report (rs : Array (Entry × Status)) (only : Name → Bool := fun _ => true) : String :=
   let proved (n : Name) := rs.any fun (e, s) => e.decl == n && s == .proved
   let line := fun ((e, s) : Entry × Status) =>
     let blocked := if s == .proved then [] else e.deps.toList.filter (! proved ·)
     let tail := (if blocked.isEmpty then "" else s!" blocked by {blocked}") ++
       (e.plan.map (s!" plan {·}") |>.getD "")
     s!"{s.label} {e.decl} ← {e.proof}{tail}"
-  "\n".intercalate (rs.toList.map line)
+  "\n".intercalate ((rs.toList.filter (only ·.1.decl)).map line)
 
 elab "#roadmap" : command => do
   let rs ← liftTermElabM statuses
   logInfo (report rs)
+
+/-- `#roadmap_goal g₁ … gₙ`: the `#roadmap` lines of the named goals only, so each goal
+module pins its own status. -/
+elab "#roadmap_goal " ids:ident+ : command => do
+  let names ← ids.mapM fun i => liftCoreM <| realizeGlobalConstNoOverloadWithInfo i
+  let rs ← liftTermElabM statuses
+  for n in names do
+    unless rs.any (·.1.decl == n) do throwError "#roadmap_goal: {n} carries no @[goal]"
+  logInfo (report rs names.contains)
 
 end Solidity.Goal
