@@ -55,4 +55,16 @@ class EvidenceMetrics(unittest.TestCase):
         for bad in [[],[item,item],[{**item,'steps':3.5}],[{**item,'index':True}]]:
             with self.assertRaises(ValueError):m.validate_metrics(bad,selected)
 
+class MatchingSubset(unittest.TestCase):
+    def test_default_rejects_mixed_jobs_and_explicit_subset_keeps_only_matches(self):
+        match=dict(index=1,status='payload_rejection_reference_match');error=dict(index=2,status='engine_error',retryable=True,error='native failure')
+        with self.assertRaises(ValueError):m.matching_subset([match,error])
+        self.assertEqual(m.matching_subset([match,error],True),[match]);self.assertEqual(error['error'],'native failure')
+        self.assertEqual(m.matching_subset([match]),[match])
+
+    def test_unsupported_downgrade_and_empty_match_sets_are_not_qualified(self):
+        match=dict(index=1,status='payload_rejection_reference_match')
+        for rows in [[dict(index=2,status='engine_error')],[match,dict(index=2,status='unsupported')],[]]:
+            with self.assertRaises(ValueError):m.matching_subset(rows,True)
+
 if __name__=='__main__':unittest.main()

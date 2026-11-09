@@ -2,7 +2,8 @@
 """Guarded regression: archive preflight or reported rejection labels alone must
 not qualify empty, input-unbound or malformed native artifacts. Only all-match
 jobs pass this initial reference-artifact qualifier; every error/unsupported job
-stays unqualified. No native execution, positive coverage, RPC or Source credit.
+stays unqualified by default. Explicit matching-subset mode keeps failures raw and
+propagates their job exit. No native execution, positive coverage, RPC or Source credit.
 """
 import argparse
 import gzip
@@ -92,7 +93,28 @@ def validate_metrics(items, selected):
                 'evidence metrics differ from original inputs/captured observations')
 
 
+def matching_subset(rows, allow_partial=False):
+    """Never treat unsupported/error rows as qualified or hide failed job exits."""
+    matches = [row for row in rows if row['status'] == 'payload_rejection_reference_match']
+    if not allow_partial:
+        require(len(matches) == len(rows), 'nonmatch/error/unsupported job remains unqualified')
+    else:
+        require(all(row['status'] in ('payload_rejection_reference_match', 'engine_error',
+                                     'payload_rejection_mismatch') for row in rows),
+                'unsupported job remains unqualified; no failure downgrade')
+    require(matches, 'job has no matching artifacts to qualify')
+    return matches
+
+
 def qualify(repo, bulk, label, command_path):
+    return _qualify(repo, bulk, label, command_path, False)
+
+
+def qualify_matches(repo, bulk, label, command_path):
+    return _qualify(repo, bulk, label, command_path, True)
+
+
+def _qualify(repo, bulk, label, command_path, allow_partial):
     directory = Path(__file__).resolve().parent
     modules = ('engine_rejection_qualification.py', 'engine_rejection_evidence.mjs',
                'engine_rejection_preflight.py', 'engine_execution_coverage.py')
@@ -103,11 +125,12 @@ def qualify(repo, bulk, label, command_path):
     require(captures == preflight['capture_sha256'], 'capture changed after archive preflight')
     rows_path = bulk/'evidence'/(label+'.jsonl')
     rows = [json.loads(line) for line in buffers[str(rows_path)].splitlines()]
-    require(all(row['status'] == 'payload_rejection_reference_match' for row in rows),
-            'nonmatch/error/unsupported job remains unqualified')
+    all_rows = rows
+    rows = matching_subset(all_rows, allow_partial)
     validate_observed_integer_types(rows)
-    selected = original_items(bulk/'engine-x-inputs.jsonl.gz', rows,
-                              preflight['archive_binding']['files']['engine-x-inputs.jsonl.gz'])
+    all_items = original_items(bulk/'engine-x-inputs.jsonl.gz', all_rows,
+                               preflight['archive_binding']['files']['engine-x-inputs.jsonl.gz'])
+    selected = [item for item in all_items if item['row']['status'] == 'payload_rejection_reference_match']
     checked = subprocess.run(['node', '--max-old-space-size=4096',
                               str(directory/'engine_rejection_evidence.mjs'), str(bulk)],
                              input=json.dumps(selected), text=True, capture_output=True,
@@ -130,7 +153,7 @@ def qualify(repo, bulk, label, command_path):
     require(digest(bulk/'reference/package-lock.json') == summary['reference_lock_sha256'], 'SDK lock changed during evidence check')
     for name, expected in checker_pins.items():
         require(digest(directory/name) == expected, 'qualification checker changed during execution')
-    return dict(schema=1, role='qualified-reference-rejection-artifacts-only',
+    result = dict(schema=1, role='qualified-reference-rejection-artifacts-only',
                 indices=[row['index'] for row in rows], qualified_rejection_cases=len(rows),
                 qualified_rejections=sum(x['qualified_rejections'] for x in metrics),
                 accepted_prefix_blocks=sum(x['accepted_prefix_blocks'] for x in metrics),
@@ -141,6 +164,16 @@ def qualify(repo, bulk, label, command_path):
                 new_native_executions=0, positive_payload_coverage_delta=0,
                 engine_rpc_complete=False, full_conformance=False, source_matches=0,
                 differential_complete=False, runtime_gate_pass=False)
+    if allow_partial:
+        command = json.loads(buffers[str(command_path)])
+        result.update(role='qualified-reference-rejection-matching-subset-only',
+                      original_indices=preflight['indices'],
+                      original_status_counts=preflight['reported_status_counts'],
+                      original_job_exit=command['exit'], propagated_exit=command['exit'],
+                      unqualified_rows=[row for row in all_rows if row['status'] != 'payload_rejection_reference_match'],
+                      unqualified_indices=[row['index'] for row in all_rows if row['status'] != 'payload_rejection_reference_match'],
+                      retryable_indices=[row['index'] for row in all_rows if row['status'] == 'engine_error'])
+    return result
 
 
 def main():
@@ -149,9 +182,12 @@ def main():
     parser.add_argument('--bulk', type=Path, required=True)
     parser.add_argument('--label', required=True)
     parser.add_argument('--command', type=Path, required=True)
+    parser.add_argument('--matches-only', action='store_true', help='qualify matching subset; preserve every failed job exit and raw nonmatch row')
     args = parser.parse_args()
-    print(json.dumps(qualify(args.repo.resolve(), args.bulk.resolve(), args.label, args.command.resolve()), indent=2))
-    return 2
+    function = qualify_matches if args.matches_only else qualify
+    result = function(args.repo.resolve(), args.bulk.resolve(), args.label, args.command.resolve())
+    print(json.dumps(result, indent=2))
+    return result.get('propagated_exit', 2)
 
 
 if __name__ == '__main__':
