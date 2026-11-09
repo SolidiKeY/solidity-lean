@@ -76,11 +76,16 @@ list is available until the actual suite has run.
   a concrete producer lane/task with a publication wake condition, or the
   already published telemetry commit/API and admitted fixture paths. It does
   not reopen `VU1-I1`, request a new policy decision or extend this lease.
-- `VU1-G1` asks the coordinator for a validated compatible cache publication,
-  or a concrete existing-owner publication task, for the bounded full gate's
-  `Solidity/Examples/Tactics/OpenLoops/RowsNine.lean` dependency. The original
-  replay limit stays unchanged. This requests an artifact or producer handle,
-  not permission to change the proof, its premises, the budget or this lease.
+- `VU1-G1` (#477) is resolved ownership: the existing producer is
+  `plan-ci0-ci-green-1109/ci0-lean-checks`, branch
+  `cloud/plan-ci0-ci-green-1109/ci0-lean-checks` (H383/H390, continued by H407).
+  Its unchanged 600-second CI budget does not raise or satisfy this lane's
+  300-second VM guard. Wake only after its reviewed repair, ordinary gates and
+  landing, guarded cache publication, and exact-input compatibility for this
+  lane. Retrieve published caches only with
+  `scripts/ci/fetch-lake-cache.sh` (H88/H367); a different-master cache is not
+  proof of a hit. Full acceptance remains pending. Do not rerun unchanged
+  timed-out dependencies or infer delivery from this routing answer.
 - This lane takes source preparation and admission evidence inside
   `scripts/bench/**` itself. Exact representative inputs still require demonstrated
   frontend admission, rather than an unnamed-owner wait. The request to the
@@ -188,6 +193,36 @@ pinned Lake. Builds still require the outer serial gate and resource guard;
 `LEAN_NUM_THREADS=1` alone does not serialize independent probe processes. Keep
 the operational launcher and its provenance with the private handoff.
 
+## Partial certified process measurements
+
+H377 permits independent measurements while producer inputs are pending,
+including measurements of current master. It gives no complete-U01 or full-gate
+acceptance credit. `scripts/bench/process-totals.py` consumes a finished admission
+report and invokes the existing certified CLI once per ready declaration, using
+its exact signature and checking the returned declaration ID, contract and source
+hash. Every input row remains in the report, including unsupported/internal rows.
+Run under the writer lock after building the existing frontend:
+
+```sh
+LEAN_NUM_THREADS=1 python3 scripts/bench/process-totals.py \
+  --admission /path/to/admission.json --soljson "$SOLJSON_DIR" \
+  --work /path/to/new-evidence-directory
+```
+
+`--repo` selects the measured checkout; its committed head and CLI fingerprint
+are recorded separately from the driver fingerprint. Each measurement uses a
+fresh CLI process with warm imported artifacts, without rebuilding. Existing
+supervisors retain the original per-tool timeout (at most 300 seconds); a function
+can include multiple tool jobs. Exit 135 retries once and both attempts remain.
+The new work directory prevents overwriting previous inputs or successes.
+
+Wall time covers the CLI invocation, including source compilation and kernel
+checking when successful. Linux `RUSAGE_CHILDREN.ru_maxrss` is the maximum
+individual-process RSS, not an aggregate tree peak. Disjoint phases, dynamic walk
+steps and aggregate peak RSS remain `null`; these partial totals are never a
+complete baseline. Failed, ambiguous, native-marked or source-mismatched results
+cannot become certified successes. Partial checkpoints survive interruption.
+
 ## Budget decision
 
 The plan proposes fast p50 ≤ 1 s, p95 ≤ 10 s, and certified ≤ 60 s and
@@ -256,6 +291,13 @@ Neither reviewer executed Lean or a compiler.
 
 The final finder and skeptic confirmed that `VU1-G1` is a replay dependency
 request, distinct from the resolved memory policy and granting no gate waiver.
+
+Independent read-only finder and skeptic reviews of the partial process driver
+identified an admission-snapshot checksum race. Parsing and hashing now use the
+same byte buffer, with an end-of-run identity check and a replacement control.
+Runtime/toolchain identity and effective per-tool timeout are recorded. The
+reviewers confirmed that refused rows and failed attempts remain visible, and
+that the RSS metric is an individual-process maximum rather than a tree peak.
 
 ## Checkpoint handoff
 
