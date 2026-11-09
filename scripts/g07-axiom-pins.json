@@ -40950,6 +40950,9 @@
  "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.mutabilityFieldsAt_iff": [
   "propext"
  ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.pragmaWordsAt_iff": [
+  "propext"
+ ],
  "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.prefix_payload_tags": [],
  "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.sourceStructuralSubset_elementary": [
   "Quot.sound",
@@ -41006,6 +41009,10 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.syntaxPragmaUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.syntaxVisibilityUses_iff": [
   "Quot.sound",
   "propext"
@@ -41043,6 +41050,7 @@
  ],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.original_header_refusal": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.override_carriers": [],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.pragma_sites_and_frozen_gap": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.qualifier_diagnostics": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.removed_years_payload_refused": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.repeated_payloads_retained": [],
