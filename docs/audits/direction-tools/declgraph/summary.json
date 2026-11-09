@@ -236,6 +236,7 @@
     "effect_on_liveness": "Old fields are provisional index statistics. Native module expression measurements supersede their semantic/source-binding interpretation; full CI/test liveness is still unresolved.",
     "historical_candidates": "historical-summary.json",
     "module_compiler_overrides": "module-compiler-attributes.json",
+    "native_cached_replay_prefix13": "replayed-prefix13/summary.json",
     "native_candidate_bindings": "candidate-summary.json",
     "native_candidate_check_references": "check-reference-summary.json",
     "native_candidate_snapshot_binding": "candidate-snapshot-summary.json",
