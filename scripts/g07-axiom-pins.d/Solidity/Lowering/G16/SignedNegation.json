@@ -1,0 +1,7 @@
+{
+ "Solidity/Lowering/G16/SignedNegation.lean:Solidity.Lowering.G16.SignedNegation.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

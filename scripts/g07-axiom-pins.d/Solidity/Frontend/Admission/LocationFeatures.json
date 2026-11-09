@@ -1,9 +1,12 @@
 {
- "Solidity/Frontend/Admission/LocationFeatures.lean:Solidity.Frontend.Admission.DirectDataLocation.mem_fields": [],
  "Solidity/Frontend/Admission/LocationFeatures.lean:Solidity.Frontend.Admission.dataLocationFieldsAt_iff": [
   "propext"
  ],
  "Solidity/Frontend/Admission/LocationFeatures.lean:Solidity.Frontend.Admission.dataLocationFieldsAt_sound": [
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/LocationFeatures.lean:Solidity.Frontend.Admission.declaration_location_subterm_reported": [
+  "Quot.sound",
   "propext"
  ],
  "Solidity/Frontend/Admission/LocationFeatures.lean:Solidity.Frontend.Admission.declarationLocationFeatures_iff": [
@@ -18,15 +21,12 @@
   "Quot.sound",
   "propext"
  ],
- "Solidity/Frontend/Admission/LocationFeatures.lean:Solidity.Frontend.Admission.declaration_location_subterm_reported": [
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Frontend/Admission/LocationFeatures.lean:Solidity.Frontend.Admission.explicitLocationUnit_features": [],
+ "Solidity/Frontend/Admission/LocationFeatures.lean:Solidity.Frontend.Admission.DirectDataLocation.mem_fields": [],
  "Solidity/Frontend/Admission/LocationFeatures.lean:Solidity.Frontend.Admission.explicit_location_predicate_gap": [
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Frontend/Admission/LocationFeatures.lean:Solidity.Frontend.Admission.explicitLocationUnit_features": [],
  "Solidity/Frontend/Admission/LocationFeatures.lean:Solidity.Frontend.Admission.omitted_location_no_refusal": [],
  "Solidity/Frontend/Admission/LocationFeatures.lean:Solidity.Frontend.Admission.unused_parameter_location_reported": []
 }

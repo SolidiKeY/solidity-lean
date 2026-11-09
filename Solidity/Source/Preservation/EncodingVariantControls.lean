@@ -2,9 +2,7 @@ import Solidity.Source.Preservation.EncodingVariants
 import Solidity.Source.Preservation.AllocationControls
 import Solidity.Source.Preservation.CallerReferenceControls
 
-/-! Actual Typed.toR encoding variants, both pipelines, an inhabited nonempty
-heap, complete caller/state observations and missing-head named refusals.
-The `*_mem` preservation triples are stated for an arbitrary heap typing. -/
+/-! Actual Typed.toR encoding variants, both pipelines, an inhabited nonempty heap, complete caller/state observations and missing-head named refusals. The `*_mem` preservation triples are stated for an arbitrary heap typing. -/
 namespace Solidity.Source.Preservation.EncodingVariantControls
 open AllocationControls
 
@@ -102,4 +100,34 @@ theorem missing_signature (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) :
 #print axioms signature_mem
 #print axioms selector_run
 #print axioms signature_run
+
+namespace StorageTimeout
+open EM
+/-! Regression: a storage-byte encoder that exhausts its actual copy horizon must remain timeout, not become a completed custom-error revert. This local producer fixes real Source operands and the whole reached state; it claims no compiler, session or failure-schedule adequacy. -/
+def unit : Syn .unit := .unit (.cons (.contract false "C" .none .nil
+  (.cons (.stateVar (.elem .bytes) none none none false "data" .none) .nil)) .nil)
+def E : Env := unit.env
+def path : SPath := ⟨⟨some "C", "data"⟩, []⟩
+def frame : Fr := AllocationControls.frame
+def values : RVals E.layout [.bytes .storage] := .cons (.val (.storRef rfl path)) .nil
+def seed : EM E [] Unit := do
+  writeLen frame path 2
+  writeAt (τ := .fixedBytes 1 (by decide)) frame (path.go (.index 0)) (.fixedBytes [17] rfl)
+  writeAt (τ := .fixedBytes 1 (by decide)) frame (path.go (.index 1)) (.fixedBytes [34] rfl)
+def initial : St E := (seed.run (.nil, St.init E)).2.2
+
+theorem encoder_timeout :
+    (encodeVals frame 2 false values : EM E [] Roadmap.Bytes).run (.nil, initial) =
+      (.error .timeout, (.nil, initial)) :=
+  encode_storage_bytes_timeout_two frame path false (.nil,initial) 17 rfl rfl
+
+theorem encoder_completes :
+    (encodeVals frame 4 false values : EM E [] Roadmap.Bytes).run (.nil, initial) =
+      (.ok (abiLayout [(true,[17,34])]), (.nil, initial)) := by rfl
+/-- info: 'Solidity.Source.Preservation.EncodingVariantControls.StorageTimeout.encoder_timeout' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms encoder_timeout
+/-- info: 'Solidity.Source.Preservation.EncodingVariantControls.StorageTimeout.encoder_completes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms encoder_completes
+end StorageTimeout
+
 end Solidity.Source.Preservation.EncodingVariantControls

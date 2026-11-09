@@ -1,15 +1,15 @@
 {
- "Solidity/Backend/Selection/P20Consumer.lean:Solidity.Backend.Selection.p20RepresentedConsumerV2": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
  "Solidity/Backend/Selection/P20Consumer.lean:Solidity.Backend.Selection.p20_false_domain_v2": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
  "Solidity/Backend/Selection/P20Consumer.lean:Solidity.Backend.Selection.p20_joint_success_v2": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Selection/P20Consumer.lean:Solidity.Backend.Selection.p20RepresentedConsumerV2": [
   "Classical.choice",
   "Quot.sound",
   "propext"
