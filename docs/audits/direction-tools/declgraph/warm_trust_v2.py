@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+"""Warm the unchanged RowsNine dependency for additive TrustAudit v2.
+Serial bounded Lean; preserve the pinned600s slow-example budget. All products,
+logs and receipts belong outside the code directory. No production source edits.
+"""
+import argparse,json,os,pathlib,runpy,subprocess,time
+HERE=pathlib.Path(__file__).resolve().parent
+Q=runpy.run_path(str(HERE/'capture_cached_checks.py'));API=Q['API'];SHA=Q['SHA'];W=runpy.run_path(str(HERE/'warm_checks.py'))
+MODULE='Solidity.Examples.Tactics.OpenLoops.RowsNine'
+def main():
+ p=argparse.ArgumentParser();p.add_argument('--source-root',type=pathlib.Path,required=True);p.add_argument('--view',type=pathlib.Path,required=True);p.add_argument('--out-view',type=pathlib.Path,required=True);p.add_argument('--logs',type=pathlib.Path,required=True);p.add_argument('--check',action='store_true');a=p.parse_args()
+ for n in ('source_root','view','out_view','logs'):setattr(a,n,getattr(a,n).resolve())
+ with Q['writer_lease']():
+  API['assert_sources'](a.source_root);assert a.view.is_dir() and a.view!=a.out_view and not a.out_view.is_relative_to(a.view)
+  version=subprocess.check_output(['lean','--version'],text=True).strip();assert 'version 4.24.0,' in version and '797c613' in version
+  source=a.source_root/pathlib.Path(MODULE.replace('.','/')).with_suffix('.lean');cmd=W['build_command'](a,MODULE);receipt=a.logs/'receipt.json';log=a.logs/'capture.log';producers={n:SHA(HERE/n) for n in ('warm_trust_v2.py','warm_checks.py','audit.py','capture_cached_checks.py')}
+  fixed=dict(base=API['BASE'],module=MODULE,command=cmd,source_sha256=SHA(source),source_root=str(a.source_root),input_view=str(a.view),output_view=str(a.out_view),lean=version,producers=producers,timeout_seconds=600)
+  if a.check:
+   d=json.loads(receipt.read_text());assert all(d[k]==v for k,v in fixed.items());assert d['log_sha256']==SHA(log)
+  else:
+   assert not a.out_view.exists() and not a.logs.exists(),'Fresh view/log directory required'
+   a.out_view.mkdir(parents=True);a.logs.mkdir(parents=True)
+   for f in a.view.rglob('*'):
+    if f.is_file():
+     to=a.out_view/f.relative_to(a.view);to.parent.mkdir(parents=True,exist_ok=True);os.link(f,to)
+   rel=pathlib.Path(MODULE.replace('.','/'));(a.out_view/rel).parent.mkdir(parents=True,exist_ok=True)
+   assert all(not (a.out_view/rel.with_suffix(s)).exists() for s in ('.olean','.ilean','.olean.server','.olean.private'))
+   started=time.monotonic()
+   with log.open('w') as output:
+    try:x=subprocess.run(cmd,cwd=a.source_root,env=dict(os.environ,LEAN_PATH=str(a.out_view),LEAN_NUM_THREADS='1'),stdout=output,stderr=subprocess.STDOUT,timeout=600);code=x.returncode
+    except subprocess.TimeoutExpired:code=124;output.write('TRUST_V2_ROWS_TIMEOUT600\n')
+   products={}
+   if code==0:
+    for suffix in ('.olean','.ilean'):
+     f=a.out_view/rel.with_suffix(suffix);assert f.is_file();products[str(f)]=SHA(f)
+    assert json.loads((a.out_view/rel.with_suffix('.ilean')).read_text())['module']==MODULE
+   else:W['quarantine'](a.out_view,a.logs,MODULE)
+   d=dict(fixed,exit_code=code,seconds=time.monotonic()-started,log_sha256=SHA(log),products=products);Q['atomic_json'](receipt,d)
+  for f in a.view.rglob('*'):
+   if f.is_file():assert os.path.samefile(f,a.out_view/f.relative_to(a.view)),'Input link changed'
+  assert all(SHA(pathlib.Path(p))==h for p,h in d['products'].items())
+  assert producers=={n:SHA(HERE/n) for n in producers};API['assert_sources'](a.source_root)
+  print('TRUST_V2_ROWS_'+('PASS' if d['exit_code']==0 else 'FAIL'),d['exit_code'])
+if __name__=='__main__':main()
