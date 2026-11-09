@@ -345,6 +345,14 @@ def comment_lines(source):
 PROCESS_ID = re.compile(r"\b[GH][0-9]+\b")
 _MODULE_NAME = r"[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)+"
 _IMPORT = re.compile(r"import[ \t]+(" + _MODULE_NAME + r")[ \t]*")
+# Pinned Lean.Parser.Module header grammar, independent of imported commands.
+_HEADER_IMPORT = re.compile(
+    r"[ \t]*(?:(?P<public>public)[ \t]+)?(?:(?P<meta>meta)[ \t]+)?"
+    r"import[ \t]+(?:(?P<all>all)[ \t]+)?"
+    r"(?P<name>[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*)[ \t]*")
+# Unknown bare names can be reserved header/command tokens. These standard
+# library roots are known identifiers in the pinned empty header environment.
+_HEADER_BARE_ROOTS = frozenset(("Init", "Lean", "Std"))
 _REGISTRY_ROOTS = ("Solidity.lean", "SolidityExamples.lean", "SoliditySlowExamples.lean",
                    "Bridge/SolidityBridge.lean")
 
@@ -417,7 +425,7 @@ def _command_mask(scanner):
 
 
 def process_ids(source, modules, scanner=None):
-    """H290 partial checkpoint: only certain module-header import tokens.
+    """H290 partial checkpoint: certain canonical module-header import tokens.
 
     Namespace/end classification awaits authoritative imported command context;
     even an empty textual pair can be a redefined command production.
@@ -432,18 +440,29 @@ def process_ids(source, modules, scanner=None):
     if masked is None or scanner.unclosed:
         return len(matches)
     exempt, offset = set(), 0
-    saw_import, saw_prelude = False, False
+    saw_import, saw_prelude, saw_module = False, False, False
     for line in masked.splitlines(keepends=True):
         text = line.rstrip("\r\n")
         if text.strip():
-            imported = _IMPORT.fullmatch(text)
+            imported = _HEADER_IMPORT.fullmatch(text)
             if imported:
+                name = imported["name"]
+                if "." not in name and name not in _HEADER_BARE_ROOTS:
+                    return len(matches)
+                if ((any(imported[k] for k in ("public", "meta", "all")) and not saw_module)
+                        or (imported["public"] and imported["all"])):
+                    return len(matches)
                 saw_import = True
-                if imported[1] in modules:
-                    exempt.update(offset + imported.start(1) + m.start()
-                                  for m in PROCESS_ID.finditer(imported[1])
+                # A bare G ID is never an exempt qualified module component.
+                if "." in name and name in modules:
+                    exempt.update(offset + imported.start("name") + m.start()
+                                  for m in PROCESS_ID.finditer(name)
                                   if m[0].startswith("G"))
-            elif text == "prelude":
+            elif text.strip(" \t") == "module":
+                if saw_module or saw_import or saw_prelude:
+                    return len(matches)
+                saw_module = True
+            elif text.strip(" \t") == "prelude":
                 if saw_import or saw_prelude:
                     return len(matches)
                 saw_prelude = True
