@@ -17,7 +17,7 @@ import sys
 import types
 
 ROOT = Path(__file__).resolve().parents[1]
-APPROVED_MASTER = "0781d0b90cfa2773f6304a5da5390eaa7c8c8538"
+APPROVED_MASTER = "34950767333d88b3273b98500ea43e23cdaea069"
 BRANCH = "codex/solidity-sol2-20261104/numeric-literals"
 CONTROL_FILES = {"scripts/check-sol-numeric-literals-integrated.py",
                  "scripts/test-sol-numeric-literals-integrated.py"}
@@ -123,7 +123,7 @@ def stage(evidence, output):
     before = input_hashes(evidence)
     snapshot = output / "snapshot"
     snapshot.mkdir(parents=True)
-    files = git("ls-files", "tests/sol-numeric-literals", "Solidity/Frontend/NumericLiteralProofs", LEGACY).splitlines()
+    files = git("ls-files", "tests/sol-numeric-literals", "Solidity/Frontend/NumericLiteralProofs", LEGACY, *sorted(CONTROL_FILES)).splitlines()
     source_hashes = {}
     for name in files:
         path = Path(name)
