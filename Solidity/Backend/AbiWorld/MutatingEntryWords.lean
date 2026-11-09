@@ -24,6 +24,7 @@ theorem readback (n : Nat) (fit : n+1<W) (suffix : List UInt8) :
   ReturnWordTransport.semanticWord (NativeParentWord.uintWord n (by omega))] :=
  ReturnWordTransport.words_readback [NativeParentWord.uintWord (n+1) fit,NativeParentWord.uintWord n (by omega)] suffix
 
+set_option backward.isDefEq.respectTransparency false in
 theorem allocated_read {C : Contract} (σ : State C (Parameters A)) (n : Nat) (fit : n+1<W)
  (ref : HRef σ.H A) (within : n<σ.heap.len ref .dyn) :
  let mutated := MutatingActivation.changed σ ref n
