@@ -23,9 +23,12 @@ def update (b : Scalar.Word) := scopeUpdate (middleUpdate b)
 theorem body_source (b : Scalar.Word) :
  evalStmt 18 .nil True.intro bodySource bodyArtifact.compiled.profile (sourceLocals #v[b]) =
  some ⟨sourceLocals #v[bodyUpdate b],.normal⟩ := by
- have last := evalStmt_stable (show 15 ≤ 17 by omega) .nil True.intro LetScopeCompilation.Controls.source
-   LetScopeCompilation.Controls.artifact.compiled.profile (sourceLocals #v[LetBranchCompilation.Controls.update b])
-   (LetScopeCompilation.Controls.source_done (LetBranchCompilation.Controls.update b))
+ have last := CompletionControls.completed_horizon
+   (fun fuel => evalStmt fuel .nil True.intro LetScopeCompilation.Controls.source
+     LetScopeCompilation.Controls.artifact.compiled.profile (sourceLocals #v[LetBranchCompilation.Controls.update b]))
+   (fun fuel extra => evalStmt_refines_add fuel extra .nil True.intro LetScopeCompilation.Controls.source
+     LetScopeCompilation.Controls.artifact.compiled.profile (sourceLocals #v[LetBranchCompilation.Controls.update b]))
+   (show 15 ≤ 17 by omega) (LetScopeCompilation.Controls.source_done (LetBranchCompilation.Controls.update b))
  exact LoopControlCompilation.sequence_source LetBranchCompilation.Controls.source LetScopeCompilation.Controls.source
    LetBranchCompilation.Controls.artifact.compiled.profile LetScopeCompilation.Controls.artifact.compiled.profile
    17 (sourceLocals #v[b]) (sourceLocals #v[LetBranchCompilation.Controls.update b])
@@ -46,9 +49,12 @@ theorem middle_source (b : Scalar.Word) :
 theorem source_done (b : Scalar.Word) :
  evalStmt 20 .nil True.intro source artifact.compiled.profile (sourceLocals #v[b]) =
  some ⟨sourceLocals #v[update b],.normal⟩ := by
- have last := evalStmt_stable (show 15 ≤ 19 by omega) .nil True.intro LetScopeCompilation.Controls.source
-   LetScopeCompilation.Controls.artifact.compiled.profile (sourceLocals #v[middleUpdate b])
-   (LetScopeCompilation.Controls.source_done (middleUpdate b))
+ have last := CompletionControls.completed_horizon
+   (fun fuel => evalStmt fuel .nil True.intro LetScopeCompilation.Controls.source
+     LetScopeCompilation.Controls.artifact.compiled.profile (sourceLocals #v[middleUpdate b]))
+   (fun fuel extra => evalStmt_refines_add fuel extra .nil True.intro LetScopeCompilation.Controls.source
+     LetScopeCompilation.Controls.artifact.compiled.profile (sourceLocals #v[middleUpdate b]))
+   (show 15 ≤ 19 by omega) (LetScopeCompilation.Controls.source_done (middleUpdate b))
  exact LoopControlCompilation.sequence_source middleSource LetScopeCompilation.Controls.source middleArtifact.compiled.profile
    LetScopeCompilation.Controls.artifact.compiled.profile 19 (sourceLocals #v[b]) (sourceLocals #v[middleUpdate b])
    (sourceLocals #v[update b]) (middle_source b) last

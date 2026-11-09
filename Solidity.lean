@@ -246,6 +246,7 @@ import Solidity.Backend.Environment.CompositionChecks
 import Solidity.Backend.Environment.Crypto
 import Solidity.Backend.Environment.CryptoChecks
 import Solidity.Backend.Environment.Frames
+import Solidity.Backend.Environment.LoadV2
 import Solidity.Backend.Environment.Metadata
 import Solidity.Backend.Environment.MetadataChecks
 import Solidity.Backend.Environment.Namespace
@@ -2410,6 +2411,12 @@ import Solidity.Calculus.UpdateRules
 import Solidity.Calculus.VisitedSet
 import Solidity.Calculus.WalkSyntax
 import Solidity.Calculus.WkOver
+import Solidity.Correctness.Lowering.Checker.Contract
+import Solidity.Correctness.Lowering.Checker.IntrinsicProbe
+import Solidity.Correctness.Lowering.Checker.MeasuredPilot
+import Solidity.Correctness.Lowering.Checker.RawProbe
+import Solidity.Correctness.Lowering.Checker.SourceAssociation
+import Solidity.Correctness.Lowering.Checker.WhileBreak
 import Solidity.Counterexamples.DeleteFamilyGenericOverlap
 import Solidity.Counterexamples.DiamondTry
 import Solidity.Counterexamples.PreFixSortAnnotations
@@ -3209,6 +3216,7 @@ import Solidity.Frontend.Yul.OccurrenceParse
 import Solidity.Frontend.Yul.Parsing
 import Solidity.Frontend.Yul.ScopedParse
 import Solidity.Frontend.Yul.WordParse
+import Solidity.Goals
 import Solidity.Hash.Adaptive
 import Solidity.Hash.Bridge
 import Solidity.Hash.CollisionBound
@@ -3226,6 +3234,19 @@ import Solidity.Language.FixedPoint.Conformance
 import Solidity.Language.FixedPoint.Laws
 import Solidity.Language.FixedPoint.Literals
 import Solidity.Language.FixedPoint.Storage
+import Solidity.Lowering.G16.AddressLiteralControls
+import Solidity.Lowering.G16.AddressLiterals
+import Solidity.Lowering.G16.Arithmetic
+import Solidity.Lowering.G16.ArithmeticControls
+import Solidity.Lowering.G16.ComparisonControls
+import Solidity.Lowering.G16.Comparisons
+import Solidity.Lowering.G16.Complement
+import Solidity.Lowering.G16.ComplementControls
+import Solidity.Lowering.G16.PanicGuard
+import Solidity.Lowering.G16.SignedNegation
+import Solidity.Lowering.G16.SignedNegationControls
+import Solidity.Lowering.G16.UnsignedQuotRem
+import Solidity.Lowering.G16.UnsignedQuotRemControls
 import Solidity.Lowering.G17.Conditional
 import Solidity.Lowering.G17.ConditionalControls
 import Solidity.Lowering.G17.IndexBounds
@@ -4245,6 +4266,8 @@ import Solidity.Source.MonetaryStorageControls
 import Solidity.Source.MonetaryWorld
 import Solidity.Source.Observe
 import Solidity.Source.Overloads
+import Solidity.Source.PowerV2
+import Solidity.Source.PowerV2Correct
 import Solidity.Source.Preservation.AllocatingControls
 import Solidity.Source.Preservation.AllocatingFragment
 import Solidity.Source.Preservation.AllocationBodyControls
@@ -4456,6 +4479,7 @@ import Solidity.Tools.DirectArithmetic
 import Solidity.Tools.DirectRuntime
 import Solidity.Tools.Elementary
 import Solidity.Tools.EntryReturn
+import Solidity.Tools.Goal
 import Solidity.Tools.Inspect
 import Solidity.Tools.Latex
 import Solidity.Tools.LatexSolkey

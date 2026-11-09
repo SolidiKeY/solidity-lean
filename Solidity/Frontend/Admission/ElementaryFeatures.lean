@@ -24,8 +24,7 @@ def elementaryFeature : Elem → Feature
   | .fixedBytes _ _ => .fixedBytesTypes
   | .fixed _ _ => .fixedPoint
 
-/-- Direct elementary fields only. Syntax descendants are visited by the
-existing generic visitor, not recursively duplicated here. -/
+/-- Direct elementary fields only. Syntax descendants are visited by the existing generic visitor, not recursively duplicated here. -/
 def elementaryFieldsAt {c : Cat} (s : Syn c) : List Elem :=
   Syn.casesOn (motive := fun _ _ => List Elem) s
     ([]) -- nil
@@ -146,8 +145,7 @@ def declarationElementaryUses (E : Env) : List (DeclarationOccurrence × Elem) :
   (declarationOccurrences E).flatMap fun site =>
     (elementaryFieldsAt site.2.2).map fun e => (site,e)
 
-/-- Exact occurrence membership: an actual carried declaration, an intrinsic
-subterm, and one of that site's direct elementary fields. -/
+/-- Exact occurrence membership: an actual carried declaration, an intrinsic subterm, and one of that site's direct elementary fields. -/
 theorem declarationElementaryUses_iff (E : Env)
     (site : DeclarationOccurrence) (e : Elem) :
     (site,e) ∈ declarationElementaryUses E ↔
@@ -163,8 +161,7 @@ theorem mapping_key_field (e : Elem) (valid : e ≠ .addressPayable)
 theorem value_type_field {top : Bool} (name : String) (e : Elem) :
     elementaryFieldsAt (.udvt (t := top) name e) = [e] := rfl
 
-/-- Fixed-point syntax is reported as fixed-point, without inferring that its
-policy eligibility supplies an implementation. -/
+/-- Fixed-point syntax is reported as fixed-point, without inferring that its policy eligibility supplies an implementation. -/
 theorem elementaryFeature_fixedPoint_iff (e : Elem) :
     elementaryFeature e = .fixedPoint ↔
       ∃ signed dims, e = .fixed signed dims := by
@@ -173,13 +170,11 @@ theorem elementaryFeature_fixedPoint_iff (e : Elem) :
     exact ⟨fun _ => ⟨signed,dims,rfl⟩,fun _ => rfl⟩
   | _ => simp only [elementaryFeature, reduceCtorEq, exists_false]
 
-/-- Ordered elementary-feature projection of the provenance-carrying uses.
-Duplicates are retained; this is not the complete program feature list. -/
+/-- Ordered elementary-feature projection of the provenance-carrying uses. Duplicates are retained; this is not the complete program feature list. -/
 def declarationElementaryFeatures (E : Env) : List Feature :=
   (declarationElementaryUses E).map fun use => elementaryFeature use.2
 
-/-- Every reported elementary feature has an actual declaration/site/field
-witness, and every such field contributes its classified feature. -/
+/-- Every reported elementary feature has an actual declaration/site/field witness, and every such field contributes its classified feature. -/
 theorem declarationElementaryFeatures_iff (E : Env) (f : Feature) :
     f ∈ declarationElementaryFeatures E ↔
       ∃ (site : DeclarationOccurrence) (e : Elem), site.Occurs E ∧ e ∈ elementaryFieldsAt site.2.2 ∧
@@ -208,9 +203,7 @@ theorem declarationElementaryFeatures_iff (E : Env) (f : Feature) :
 /-- info: 'Solidity.Frontend.Admission.declarationElementaryFeatures_iff' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms declarationElementaryFeatures_iff
 
-/-- Every extracted elementary feature is witnessed by an actual syntax site
-and direct elementary field in the original unit. This is one-way provenance,
-not completeness of the whole feature catalog or a source admission proof. -/
+/-- Every extracted elementary feature is witnessed by an actual syntax site and direct elementary field in the original unit. This is one-way provenance, not completeness of the whole feature catalog or a source admission proof. -/
 theorem declarationElementaryFeatures_source_witness (u : Syn .unit) (f : Feature)
     (present : f ∈ declarationElementaryFeatures u.env) :
     ∃ (site : SyntaxOccurrence) (e : Elem), site ∈ syntaxOccurrences u ∧

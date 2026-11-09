@@ -173,6 +173,130 @@ theorem effectful_prefix_controls :
 
 #print axioms effectful_prefix_controls
 
+
+private def writingIndex : DeferredSource.Operand C TgtCtx (.prim .uint) :=
+  ⟨_,.cons (.assignMem (.index .dyn (.var (.there .here) rfl) (.simple (.lit 0 (by decide))))
+      (.val seven))
+    (.cons (.rebindMem (.there .here) (.alias (.var .here rfl))) .nil),
+    .val (.simple (.lit 0 (by decide)))⟩
+
+/-- Rejects late-base bounds checks, stale-heap reads, lost allocation/rebinding effects, and swallowed index-prefix halts. -/
+theorem effectful_read_controls :
+    (IndexBounds.effectfulReadOperand (.there .here) rfl .dyn privateIndex).run target =
+      .error (THalt.ofData (Source.panicData .index)) ∧
+    (let g := target.allocDefaultG bytesR rfl
+     (IndexBounds.effectfulReadOperand (.there .here) rfl .dyn growingIndex).run target =
+      .ok ((⟨g.st.setLocal (.there .here) (some g.val),g.ext⟩ : Out C target.H TgtCtx),SVal.prim zero)) ∧
+    (IndexBounds.effectfulReadOperand (.there .here) rfl .dyn haltingIndex).run target =
+      .error .revert ∧
+    (IndexBounds.effectfulReadOperand (.there .here) rfl .dyn writingIndex).run target =
+      (writingIndex.run target).map (fun (out,_) => (out,SVal.prim (⟨7,by decide⟩ : PrimTy.uint.Denote))) := by
+  constructor
+  · rw [IndexBounds.effectfulRead_run target (.there .here) rfl old rfl]
+    have entered : privateIndex.run target = .ok
+        ((⟨after,List.prefix_refl _⟩ : Out C target.H TgtCtx),SVal.prim (⟨2,by decide⟩ : PrimTy.uint.Denote)) := rfl
+    rw [entered]
+    simp only [bind,Except.bind,after,State.setLocal,target,old,HRef.wk,Heap.len,Heap.get,
+      Objs.get,MObj.elems_dyn,List.length_cons,List.length_nil,Int.reduceToNat,Nat.lt_irrefl,if_false]
+  · constructor
+    · dsimp only
+      rw [IndexBounds.effectfulRead_run target (.there .here) rfl old rfl]
+      let g := target.allocDefaultG bytesR rfl
+      have entered : growingIndex.run target = .ok
+          ((⟨g.st.setLocal (.there .here) (some g.val),g.ext⟩ : Out C target.H TgtCtx),SVal.prim zero) := rfl
+      rw [entered]
+      have keeps : Heap.Keeps g.ext target.heap g.st.heap :=
+        SVal.keeps_copyStToM (SVal.dflt (.ref bytesR)) rfl target.heap
+      have contents : g.st.heap.get (HRef.wk g.ext old) =
+          (⟨[zero,zero],by decide⟩ : MObj g.st.H bytesR) := by
+        simpa only [target,old,Heap.get,Objs.get,MObj.wk,MVal.wk,List.map_cons,List.map_nil]
+          using keeps old
+      have length : g.st.heap.len (HRef.wk g.ext old) .dyn = 2 := by
+        simp only [Heap.len,contents,MObj.elems_dyn,List.length_cons,List.length_nil]
+      have lookup : g.st.heap.index (HRef.wk g.ext old) .dyn zero = some zero := by
+        simp only [Heap.index,contents,MObj.elems_dyn,zero,Int.toNat_zero,List.getElem?_cons_zero]
+      simp only [bind,Except.bind,State.setLocal,length,lookup,TRes.ofOpt,pure,Except.pure]
+      simp only [zero,Int.toNat_zero,Nat.zero_lt_succ,if_true]
+      rfl
+    · constructor
+      · rw [IndexBounds.effectfulRead_run target (.there .here) rfl old rfl]
+        rfl
+      · rw [IndexBounds.effectfulRead_run target (.there .here) rfl old rfl]
+        let written : State C TgtCtx := { after with
+          heap := (⟨[⟨7,by decide⟩,zero],by decide⟩,⟨[zero,zero,zero],by decide⟩,()) }
+        have update : (Stmt.assignMem
+            (.index .dyn (.var (.there .here) rfl) (.simple (.lit 0 (by decide)))) (.val seven)).run target =
+            .ok (⟨target.withHeap written.heap,List.prefix_refl _⟩ : Out C target.H TgtCtx) := by
+          change TRun.assignMem _ _ target = _
+          simp only [TRun.assignMem,MSrc.mvalT,Val.evalT,MLoc.addrT,MPath.mvalT,TEnv.get,
+            Simple.evalT,PrimTy.ofLit,bind,Except.bind,pure,Except.pure,target,seven,zero,old,
+            assigned,Nat.reducePow,Heap.writeAddr,Heap.setIndex,Heap.get,Objs.get,MObj.elems_dyn,
+            Int.toNat_zero,List.length_cons,List.length_nil,Nat.zero_lt_succ,if_true,Heap.set,
+            MObj.setElem_dyn,List.set_cons_zero,Objs.set,TRes.ofOpt,State.withHeap,written,after,
+            State.setLocal]
+        have entered : writingIndex.run target = .ok
+            ((⟨written,List.prefix_refl _⟩ : Out C target.H TgtCtx),SVal.prim zero) := by
+          unfold writingIndex DeferredSource.Operand.run
+          rw [Prog.run_cons_ok update]
+          have rebound := V07.memory_rebind_run (target.withHeap written.heap)
+            (.there .here) .here rfl assigned rfl
+          rw [Prog.run_cons_ok rebound,Prog.run_nil]
+          rfl
+        rw [entered]
+        simp only [bind,Except.bind,Except.map,written,after,State.setLocal,target,old,HRef.wk,
+          Heap.len,Heap.get,Objs.get,MObj.elems_dyn,List.length_cons,List.length_nil,
+          zero,Int.toNat_zero,Nat.zero_add,Nat.zero_lt_succ,if_true,Heap.index,getElem?_pos,List.getElem_cons_zero,
+          TRes.ofOpt,pure,Except.pure]
+
+#print axioms effectful_read_controls
+
+
+private def inBoundsIndex : DeferredSource.Operand C TgtCtx (.prim .uint) :=
+  ⟨_,.cons (.rebindMem (.there .here) (.alias (.var .here rfl))) .nil,
+    .val (.simple (.lit 0 (by decide)))⟩
+
+private def observeEffectfulWrite : Option (Int × Int × Nat) :=
+  match (IndexBounds.effectfulWriteCode (.there .here) rfl .dyn inBoundsIndex
+      (.lit 42 (by decide))).run target with
+  | .error _ => none
+  | .ok out =>
+    match out.st.heap.index (HRef.wk out.ext old) .dyn zero,
+        out.st.heap.index (HRef.wk out.ext assigned) .dyn zero,
+        TEnv.get (.there (.there (.there .here))) out.st.env with
+    | some x,some y,some caller => some (x.val,y.val,caller.id)
+    | _,_,_ => none
+
+/-- Rejects late-base writes, lost caller rebinding, bounds-panic relabelling, and swallowed index-prefix halts. -/
+theorem effectful_write_controls :
+    (IndexBounds.effectfulWriteCode (.there .here) rfl .dyn privateIndex
+      (.lit 42 (by decide))).run target = .error (THalt.ofData (Source.panicData .index)) ∧
+    (IndexBounds.effectfulWriteCode (.there .here) rfl .dyn haltingIndex
+      (.lit 42 (by decide))).run target = .error .revert ∧
+    observeEffectfulWrite = some (42,0,1) := by
+  constructor
+  · rw [IndexBounds.effectfulWrite_run target (.there .here) rfl old rfl]
+    have entered : privateIndex.run target = .ok
+        ((⟨after,List.prefix_refl _⟩ : Out C target.H TgtCtx),SVal.prim (⟨2,by decide⟩ : PrimTy.uint.Denote)) := rfl
+    rw [entered]
+    simp only [bind,Except.bind,after,State.setLocal,target,old,HRef.wk,Heap.len,Heap.get,
+      Objs.get,MObj.elems_dyn,List.length_cons,List.length_nil,Int.reduceToNat,Nat.lt_irrefl,if_false]
+  · constructor
+    · rw [IndexBounds.effectfulWrite_run target (.there .here) rfl old rfl]
+      rfl
+    · unfold observeEffectfulWrite
+      rw [IndexBounds.effectfulWrite_run target (.there .here) rfl old rfl]
+      have entered : inBoundsIndex.run target = .ok
+          ((⟨after,List.prefix_refl _⟩ : Out C target.H TgtCtx),SVal.prim zero) := rfl
+      rw [entered]
+      simp only [bind,Except.bind,after,State.setLocal,target,Nat.reducePow,zero,assigned,old,
+        Simple.evalT,PrimTy.ofLit,Heap.len,Heap.get,Objs.get,MObj.elems_dyn,Int.toNat_zero,
+        List.length_cons,List.length_nil,Nat.zero_add,Nat.zero_lt_succ,if_true,TRes.ofOpt,
+        Heap.setIndex,Heap.set,MObj.setElem_dyn,List.set_cons_zero,Objs.set,pure,Except.pure,
+        State.push,State.withHeap,Heap.index,HRef.wk,getElem?_pos,List.getElem_cons_zero,
+        TEnv.get,TEnv.set]
+
+#print axioms effectful_write_controls
+
 namespace SourceCapture
 open Source
 private abbrev sourceEnv := Preservation.MemoryBodyControls.E

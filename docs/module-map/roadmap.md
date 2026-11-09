@@ -34,3 +34,4 @@
 | `Roadmap/G49Final/FoldedPublic.lean` | `g49_g50_of_fold`: the conditional G49/G50 statement as a fold over the three frozen G01 passes (`pipeline`, `FoldStatement`), with the frozen `PublicCorrectness`/`SpecTransfer`; fifteen residual obligations stay explicit `PublicObligations` fields. |
 | `Roadmap/G49Final/BridgeGoal.lean` | H68 owner-bridge target type `BridgeGoal` (the existing `PassCorrect` with prescribed map, bound and the entire original local conclusion), its projections and the full-`Cert` positive control `cert_bridge`; no bridge is assumed. |
 | `Roadmap/G49Final/PassChain.lean` | Frozen G01 certificate-chain backfill: composes the existing Lowering, Compilation and Execution certificates at the lowered world and assembled artifact; constructs no producer. |
+| `Goals.lean`, `Tools/Goal.lean`, `Examples/Goals.lean` | Roadmap `@[goal]` definitions, the attribute and `#roadmap`, and pinned output, respectively. |

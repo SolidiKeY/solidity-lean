@@ -72,6 +72,17 @@ These are proposed follow-up work, not authorization to alter proofs or delete m
 9. **Track accepted-language progress.** The statement lane finds zero goal attributes; history cannot compute goals moved for the rapidly grown Backend/Yul portfolios. Add a user-approved endpoint/coverage metric rather than inferring progress from lines; gain: a monthly numerator tied to correctness statements.
 10. **Keep regenerable detail out of Git.** Delete the 38 permitted split census/duplicate files, saving exactly 6,452,407 committed bytes from the 8,952,242-byte launch input. Keep every script and summary. The retained input floor is 2,499,835 bytes before this audit's small files; the lease does not permit deleting other data to reach a stricter cap. Regenerate on demand using the commands below.
 
+## Making it smaller
+
+Findings from the second audit round (`direction-tools/declgraph`, `endpoint`, `mutation-run`, base `d6fd95f08`) and the investigation that follows it. Numbers are declaration-graph or source-span counts, not verified deletions.
+
+- **The proof core is nearly done; the size is in the compiler layers.** Endpoint (a) already derives 552 of 566 SolKey TestSuite obligations (97.5%) and claims 342 of 377 taclets (90.7%). Backend, Yul and Lowering (about 580k lines) serve endpoint (b), whose source-to-bytes chain is still open (`direction-tools/endpoint/summary.json`). Size should be judged against the endpoint chosen.
+- **Large families no headline theorem uses.** No declaration of `Backend/InternalFlow/` (9,092), `Frontend/SolcJson/` (4,526) or `SolcValidation/` (4,090) is reached from the 21 facade theorems. Unreached spans: 11,081, 8,923 and 5,814 lines; another 12,772 InternalFlow lines are used only by their own policy checks. Deletion still needs a removal rebuild; until then these families must not grow.
+- **The proofs constrain the semantics.** All 39 executed mutants (30 in Semantics) were killed. Shrinking must preserve that: re-run `direction-tools/mutation-run/run.py` after each consolidation.
+- **Replace per-scenario proofs by proved checkers (translation validation).** Prove once that a checker is sound (and, for a universal theorem, complete on the accepted fragment); the per-program check runs in the kernel (`decide`, never `native_decide`). Accept a pass only if checker plus proofs are at least 3x smaller than the per-scenario proofs it replaces and the kernel check of a real contract stays within the gate budget. Pilots: `lowering-checker-p1` (lowerLoops) and batch `shrink-pilots-1108` (Yul, Backend, Lowering families).
+- **Merge near-copies behind generic interfaces.** 88 near-file clusters (26,599 lines) and 2,743 same-statement clusters; plan steps `t1-yul-views-generic` and `t3-dedup-rollout`.
+- **Stop drift.** New code in Backend, Yul or Lowering names the `@[goal]` it advances; a CI line budget per area ratchets down as consolidation lands.
+
 ## Re-run and monthly comparison
 
 Use Python 3 standard library and Git; no Lean, Lake, new dependencies or full builds. The new calibration script/result use `README*` names because those are the only writable tool paths in this lane. Re-run in a disposable checkout: older producer scripts regenerate their frozen outputs and split shards in place. Set `T=docs/audits/direction-tools`, `CACHE` to an external directory, `OUT` to a scratch process directory, and `ARCHIVE` to the private coordination archive checkout when available. Do not run write-mode producers on a dirty working tree.

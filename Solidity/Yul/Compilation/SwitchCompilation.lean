@@ -123,7 +123,11 @@ theorem source_match {c : Control} {n fc : Nat} {test : Expr [] [] n 1}
  (ran : evalStmt horizon .nil True.intro arm ha (sourceLocals locals) = some ⟨sourceLocals out,.normal⟩) :
  evalStmt (horizon+2) .nil True.intro (.switch test (.cons label arm .nil) fallback)
    ⟨condition.profile,⟨ha,True.intro⟩,hf⟩ (sourceLocals locals) = some ⟨sourceLocals out,.normal⟩ := by
- have tested := evalExpr_stable bound .nil True.intro test condition.profile (sourceLocals locals) (condition.source locals)
+ have tested : evalExpr (horizon+1) .nil True.intro test condition.profile (sourceLocals locals) =
+   some (fun _ => (condition.value locals).toFin) := CompletionControls.completed_horizon
+   (fun fuel => evalExpr fuel .nil True.intro test condition.profile (sourceLocals locals))
+   (fun fuel extra => evalExpr_refines_add fuel extra .nil True.intro test condition.profile (sourceLocals locals))
+   bound (condition.source locals)
  change Option.bind (evalExpr (horizon+1) .nil True.intro test condition.profile (sourceLocals locals)) _ = _
  rw [tested]
  change Option.bind (if (condition.value locals).toFin = label then
@@ -142,7 +146,11 @@ theorem source_default {c : Control} {n fc : Nat} {test : Expr [] [] n 1}
  (ran : evalStmt (horizon+2) .nil True.intro fallback hf (sourceLocals locals) = some ⟨sourceLocals out,.normal⟩) :
  evalStmt (horizon+3) .nil True.intro (.switch test (.cons label arm .nil) fallback)
    ⟨condition.profile,⟨ha,True.intro⟩,hf⟩ (sourceLocals locals) = some ⟨sourceLocals out,.normal⟩ := by
- have tested := evalExpr_stable bound .nil True.intro test condition.profile (sourceLocals locals) (condition.source locals)
+ have tested : evalExpr (horizon+2) .nil True.intro test condition.profile (sourceLocals locals) =
+   some (fun _ => (condition.value locals).toFin) := CompletionControls.completed_horizon
+   (fun fuel => evalExpr fuel .nil True.intro test condition.profile (sourceLocals locals))
+   (fun fuel extra => evalExpr_refines_add fuel extra .nil True.intro test condition.profile (sourceLocals locals))
+   bound (condition.source locals)
  change Option.bind (evalExpr (horizon+2) .nil True.intro test condition.profile (sourceLocals locals)) _ = _
  rw [tested]
  change Option.bind (if (condition.value locals).toFin = label then

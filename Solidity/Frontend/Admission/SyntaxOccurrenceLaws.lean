@@ -1356,4 +1356,23 @@ theorem emptySyntaxClassifier_none {α : Type u} {c : Cat} (root : Syn c)
 /-- info: 'Solidity.Frontend.Admission.emptySyntaxClassifier_none' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms emptySyntaxClassifier_none
 
+
+theorem syntaxFieldRefusal?_append_none_iff {α : Type u} {c : Cat} (root : Syn c)
+    (first second : ∀ {k : Cat}, Syn k → List α) (accepts : α → Bool) :
+    syntaxFieldRefusal? root (fun s => first s ++ second s) accepts = none ↔
+      syntaxFieldRefusal? root first accepts = none ∧
+      syntaxFieldRefusal? root second accepts = none := by
+  rw [syntaxFieldRefusal?_none_iff, syntaxFieldRefusal?_none_iff, syntaxFieldRefusal?_none_iff]
+  constructor
+  · intro all
+    exact ⟨fun site value sub field => all site value sub (List.mem_append.mpr (.inl field)),
+      fun site value sub field => all site value sub (List.mem_append.mpr (.inr field))⟩
+  · rintro ⟨left,right⟩ site value sub field
+    rcases List.mem_append.mp field with present | present
+    · exact left site value sub present
+    · exact right site value sub present
+
+/-- info: 'Solidity.Frontend.Admission.syntaxFieldRefusal?_append_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxFieldRefusal?_append_none_iff
+
 end Solidity.Frontend.Admission

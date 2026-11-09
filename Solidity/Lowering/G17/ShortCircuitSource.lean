@@ -1,12 +1,12 @@
 import Solidity.Lowering.G17.ShortCircuit
 import Solidity.Source.ValueProgress
 
-/-! Compositional Source-to-native lazy Boolean lowering using the published P12 condition contract. The operands' existing producers supply their own success/revert proofs; no execution of the whole binary is a premise. This retains P12's explicit boundary: no admission/origin producer, Source fuel/stuck adequacy, physical gas, callback oracle or whole-pass claim. -/
+/-! Compositional Source-to-native lazy Boolean lowering using the published P12 condition contract. The operands' existing producers supply their own success/revert proofs; no execution of the whole binary is a premise. This retains P12's explicit boundary: no admission/origin producer, Source fuel/stuck adequacy, physical gas, callback oracle or whole-pass claim. source_short_step: Exact Source lazy step after the left operand reaches its value. shortCondition: One family constructor for both lazy Boolean operators. The RHS producer is invoked at the actual reached state only on the taken branch. Independent world/value relations and all caller bindings are retained through composition. -/
 namespace Solidity.Lowering.G17
 open V07 V07.P12NextInterface
 variable {E : Source.Env} {C : Contract} {srcΓ : Source.RCtx} {Γ : Ctx}
 
-/-- Exact Source lazy step after the left operand reaches its value. -/
+
 theorem source_short_step (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
     (source middle : Source.EMState E srcΓ) (conj b : Bool)
     (left right : Source.RExpr E srcΓ .bool)
@@ -49,7 +49,7 @@ private theorem source_error (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
       Bool.false_eq_true,if_true,if_false]
     rw [Source.Hoare.run_bind,leftRun]
 
-/-- One family constructor for both lazy Boolean operators. The RHS producer is invoked at the actual reached state only on the taken branch. Independent world/value relations and all caller bindings are retained through composition. -/
+
 def shortCondition (G : Source.Glob E) (F : Source.Fr) (m : ContextMap srcΓ Γ)
     (values : ValueRelation E C) (worlds : WorldRelation E C) (conj : Bool)
     (left right : Source.RExpr E srcΓ .bool)
