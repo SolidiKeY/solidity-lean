@@ -338,7 +338,14 @@
       "prototypes/ViewsPackingBridge.lean",
       "prototypes/ViewsPackingProgram.lean"
     ],
-    "convention": "Depth0, two existing word locals; arbitrary full machine and caller. No arbitrary newer-prefix-depth claim. Isolated harness copies frozen definitions except the two target word theorems; original Packing is absent from its import closure."
+    "convention": "Depth0, two existing word locals; arbitrary full machine and caller. No arbitrary newer-prefix-depth claim. Isolated harness copies frozen definitions except the two target word theorems; original Packing is absent from its import closure.",
+    "source_access": {
+      "commit": "4667f91cf7860a18ef63607c0127196b029f01c2",
+      "bundle_evidence_commit": "4bbd9340b3cc0140ee596fbb5cf630aaec221229",
+      "bundle_path": "evidence/shrink-pilots-1108/tv-yul/tv-yul-guard-bridge/prototype.bundle",
+      "bundle_sha256": "d494dc998c97ddb062769b79a3ffe611c381b06d9840fca93325a79317982a90",
+      "review_instruction": "Fetch bundle ref codex/shrink-pilots-1108/tv-yul-prototype into a separate review ref; requires published base381328f608. This bundle contains the requested4667 operation bridge; the older410195 bundle contains only auxiliary2aa. Never merge prototype history."
+    }
   },
   "scope_findings": [
     "Frozen882 Views modules /74635physical lines; lexical inventory and imports are not semantic impossibility proofs.",
