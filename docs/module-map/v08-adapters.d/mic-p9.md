@@ -7,3 +7,6 @@
 | `Lowering/P9/BodyRecognizerCompleteness.lean` | Existing readiness certificates imply their Boolean body checks; no new syntax admitted. |
 | `Lowering/P9/CatalogueRecognizerCompleteness.lean` | Entry/catalogue fuel monotonicity and relative completeness up to existential recognizer fuel, with original converse premises. |
 | `Lowering/P9/CatalogueCompletenessControls.lean` | Reference/unchecked and existing elaborated-unit controls, checked calls, inadequate-fuel distinction and all-fuel refusal. |
+
+| `Backend/FailurePaths/StorageEncoderTimeout.lean` | Actual primitive storage reads discharge encoder timeout and preserve the complete local ABI-evaluation state; no admitted custom-error or compiler claim. |
+| `Backend/FailurePaths/StorageEncoderTimeoutControls.lean` | Seeded unit/state timeout-versus-completion and both-pipeline local ABI controls; registered error memory signature and storage-signature refusal. |
