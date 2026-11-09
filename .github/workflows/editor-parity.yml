@@ -66,6 +66,12 @@ jobs:
           curl --fail --location --retry 3 https://raw.githubusercontent.com/ethereum/solc-bin/gh-pages/bin/soljson-v0.8.34+commit.80d5c536.js --output .cache/parity-solkey/keyext.solidity.core/build/soljson/soljson-v0.8.34+commit.80d5c536.js
           echo 'c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8  .cache/parity-solkey/keyext.solidity.core/build/soljson/soljson-v0.8.34+commit.80d5c536.js' | sha256sum -c -
           echo "SOLKEY_ROOT=$GITHUB_WORKSPACE/.cache/parity-solkey" >> "$GITHUB_ENV"
+      # Native resource admission (vscode/parity/resource-state.cjs) refuses a
+      # host with swap; hosted runners ship a swapfile.
+      - name: Disable runner swap for resource admission
+        run: |
+          sudo swapoff -a
+          grep -E '^SwapTotal:\s+0 kB$' /proc/meminfo
       - name: Validate source inventory and harness
         run: |
           node vscode/parity/discover.cjs --extension .cache/dafny-extension --server .cache/dafny-source --check-source

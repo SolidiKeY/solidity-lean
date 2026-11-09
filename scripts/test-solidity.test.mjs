@@ -483,18 +483,27 @@ test("nested enums in abi.decode are admitted at their carriers (tests/solc/Enum
 test("calldata: read-only memory parameters, a written copy refused, slices as views", () => {
   // docs/semantic-gaps.md, "Bytes and strings": a `calldata` parameter is a
   // memory parameter the body does not write (`calldataCheck`)
-  const report = runSolidityTests(["tests/solc/Calldata.sol"], {build:false, batchSize:1});
-  assert.deepEqual(report.errors, []);
-  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  const source = "tests/solc/Calldata.sol";
+  const listed = runSolidityTests([source], {build:false, list:true});
+  assert.deepEqual(listed.errors, []);
+  const admitted = Object.fromEntries(listed.results.map(r => [r.function, r.status]));
+  // Ordinary whole-calldata writable copies remain a separate interface.
+  assert.equal(admitted.writesCopy, 'unsupported');
+  // Slice hashing is admitted. Its symbolic copy-loop proof search stays
+  // open: the compiled walk passes the declaration's heartbeats after its
+  // 16384-step stage (`Calculus/ProvesDerive.lean`), ~295 s at one thread,
+  // past this suite's 300 s per-job bound on CI runners. Only its admission
+  // is checked here; the open search proves nothing either way.
+  assert.equal(admitted.sliceHashed, 'ready');
   for (const name of ['first', 'sumTwo', 'byteLength', 'hashOf', 'strLength', 'member', 'passes',
     'readAlias', 'localAlias',
     // a slice is a view: its offset and length (`RawStmt.sliceViews`)
-    'tail', 'sliceLength', 'sliceRead', 'sliceOfSlice', 'slicePast', 'decodeShortView'])
-    assert.equal(status[name], 'proved', name);
-  // Ordinary whole-calldata writable copies remain a separate interface.
-  assert.equal(status.writesCopy, 'unsupported');
-  // Slice hashing is admitted. Symbolic copy-loop proof search may stay open.
-  assert.match(status.sliceHashed, /^(proved|pending)$/);
+    'tail', 'sliceLength', 'sliceRead', 'sliceOfSlice', 'slicePast', 'decodeShortView']) {
+    assert.equal(admitted[name], 'ready', name);
+    const report = runSolidityTests([source], {build:false, function:name});
+    assert.deepEqual(report.errors, [], name);
+    assert.deepEqual(report.results.map(r => [r.function, r.status]), [[name, 'proved']]);
+  }
 });
 
 test("hashing: keccak256, sha256, ripemd160, ecrecover, abi.encode/encodePacked/decode, selectors, string keys, concat", () => {
@@ -941,6 +950,10 @@ test("solkey's solc/open ports close except where the model says why not", () =>
     // false on the EVM: `t ? 63 : 255` is a `uint8`, so `63 + 255` panics
     // (`0x11`); the model reverts there (`SolcOpen.ternaryLiteralOverflow`)
     ternaryLiteralOverflow: "pending",
+    // under the callback reading the external call may write `ix` before it
+    // is read (`ExecS.tryOk`, `docs/solkey-migration.md` "Expected-open is
+    // not falsity"); at the harness address it proves (`--self-address`, below)
+    tryArgumentSideEffect: "pending",
   };
   // `functionsRecursiveUnbounded` proves: its recursive call by the contract
   // true/true over the 1024 frames of the unrolling (`rec_auto`, kernel-port.md
