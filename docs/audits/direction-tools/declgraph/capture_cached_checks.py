@@ -8,11 +8,13 @@ HERE=pathlib.Path(__file__).resolve().parent
 API=runpy.run_path(str(HERE/'audit.py'));SHA=runpy.run_path(str(HERE/'module_graph.py'))['sha']
 LOCK='/tmp/solidity-lean-feature-groups-20261025/writer.lock'
 
-def atomic_json(path,data):
+def atomic_text(path,body):
  path.parent.mkdir(parents=True,exist_ok=True)
  with tempfile.NamedTemporaryFile(mode='w',dir=path.parent,prefix=path.name+'.tmp-',delete=False) as f:
-  json.dump(data,f,sort_keys=True);f.write('\n');f.flush();os.fsync(f.fileno());name=f.name
+  f.write(body);f.flush();os.fsync(f.fileno());name=f.name
  os.replace(name,path)
+
+def atomic_json(path,data):atomic_text(path,json.dumps(data,sort_keys=True)+'\n')
 
 @contextlib.contextmanager
 def writer_lease(lock_path=LOCK):
@@ -27,6 +29,12 @@ def capture_transaction(directory,*,lock_path=LOCK):
  # recovery, capture, validation and status publication.
  with writer_lease(lock_path) as lease:
   yield lease,(directory/'receipt.json').exists()
+
+def publish_summary(path,body,*,guard,check=False,lock_path=LOCK):
+ with writer_lease(lock_path):
+  guard()
+  if check:assert path.read_text()==body,'STALE queue summary'
+  else:atomic_text(path,body)
 
 def timed_capture(cmd,output,*,lock_path=LOCK,timeout=660,lease=None):
  # Lock contention is scheduling, not capture runtime. No child or timer exists
@@ -155,11 +163,12 @@ def main():
    if not a.check:print(index+1,len(queue),row['status'],path,flush=True)
    # Durable progress is evidence on the VM, not a code-branch result.
    if not a.check:atomic_json(a.captures/'progress.json',dict(processed=len(files),planned=len(queue),observed=sum(r['status']=='observed' for r in files),last=path))
- assert producers=={n:SHA(HERE/n) for n in names};API['assert_sources'](a.source_root)
+ def final_integrity():
+  assert producers=={n:SHA(HERE/n) for n in names},'Producer drift before publication'
+  assert SHA(graph_file)==graph_sha,'Graph receipt drift before publication'
+  API['assert_sources'](a.source_root)
  result=dict(base=API['BASE'],status='partial',planned_files=len(queue),processed_files=len(files),observed_files=sum(r['status']=='observed' for r in files),reused_dense_files=reused,uncached_syntax_files=uncached,resource_wait=resource_wait,files=files,deletable_now_verified_lines=0,boundaries=['Selection is cached files with explicit native syntax-census checks; macro-only and uncached files remain outside this queue.','A successful source capture is observational; complete check roots, reflection, symbolic lookups and compiler/runtime dependencies are not certified.','Existing19dense files are reused rather than re-elaborated.','Failures contribute no observed metric counts; source/provenance integrity failures stop the queue.'])
  body=json.dumps(result,sort_keys=True,indent=2)+'\n';assert len(body.encode())<1000000
- if a.check:assert a.out.read_text()==body,'STALE queue summary'
- else:
-  with writer_lease():a.out.write_text(body)
+ publish_summary(a.out,body,guard=final_integrity,check=a.check)
  print('CACHED_CHECK_QUEUE_PASS',len(files),len(queue),result['observed_files'])
 if __name__=='__main__':main()

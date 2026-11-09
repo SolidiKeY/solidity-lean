@@ -81,5 +81,20 @@ def main():
     if pidfile.exists():
      try:os.killpg(int(pidfile.read_text()),signal.SIGKILL)
      except ProcessLookupError:pass
- print('CACHED_QUEUE_FIXTURES_PASS native_recipe module version graph_receipt source atomic_replace lock_wait_excluded child_timeout legacy_command orphan_lease descendant_cleanup recovery_wait_recheck')
+  # Publication must revalidate after waiting for a concurrent writer.
+  published=root/'published.json';published.write_text('old');guarded=['original'];errors=[]
+  def guard():assert guarded==['original'],'Inputs changed while waiting'
+  def publish():
+   try:M['publish_summary'](published,'new',guard=guard,lock_path=lock)
+   except BaseException as exc:errors.append(exc)
+  with M['writer_lease'](lock):
+   publisher=threading.Thread(target=publish,daemon=True);publisher.start();time.sleep(0.1)
+   assert publisher.is_alive() and published.read_text()=='old'
+   guarded[0]='changed'
+  publisher.join(timeout=5)
+  assert not publisher.is_alive() and len(errors)==1 and isinstance(errors[0],AssertionError) and published.read_text()=='old'
+  guarded[0]='original';M['publish_summary'](published,'exact body\n',guard=guard,lock_path=lock)
+  assert published.read_text()=='exact body\n' and not list(root.glob('published.json.tmp-*'))
+  M['publish_summary'](published,'exact body\n',guard=guard,check=True,lock_path=lock)
+ print('CACHED_QUEUE_FIXTURES_PASS native_recipe module version graph_receipt source atomic_replace lock_wait_excluded child_timeout legacy_command orphan_lease descendant_cleanup recovery_wait_recheck publication_guard')
 if __name__=='__main__':main()
