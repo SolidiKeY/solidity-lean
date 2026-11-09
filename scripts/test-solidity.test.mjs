@@ -489,11 +489,13 @@ test("calldata: read-only memory parameters, a written copy refused, slices as v
   const admitted = Object.fromEntries(listed.results.map(r => [r.function, r.status]));
   // Ordinary whole-calldata writable copies remain a separate interface.
   assert.equal(admitted.writesCopy, 'unsupported');
-  // Slice hashing is admitted. Its symbolic copy-loop proof search stays
-  // open: the compiled walk passes the declaration's heartbeats after its
-  // 16384-step stage (`Calculus/ProvesDerive.lean`), ~295 s at one thread,
-  // past this suite's 300 s per-job bound on CI runners. Only its admission
-  // is checked here; the open search proves nothing either way.
+  // Slice hashing is admitted. Its obligation is false: an empty `bytes`
+  // reverts at `b[4:]` (`tests/upstream/DeclarationSourceValidation.lean`,
+  // `sliceHashed_notValid`, `sliceHashed_notDerivable`), so no proof run can
+  // close it. The run spends the declaration's heartbeats in the compiled
+  // walk after its 16384-step stage (`Calculus/ProvesDerive.lean`), reports
+  // `error`, and took 294.5 s locally at one thread and past the 300 s
+  // per-tool bound (`runTool`) on CI runners; only admission is checked here.
   assert.equal(admitted.sliceHashed, 'ready');
   for (const name of ['first', 'sumTwo', 'byteLength', 'hashOf', 'strLength', 'member', 'passes',
     'readAlias', 'localAlias',
@@ -950,10 +952,6 @@ test("solkey's solc/open ports close except where the model says why not", () =>
     // false on the EVM: `t ? 63 : 255` is a `uint8`, so `63 + 255` panics
     // (`0x11`); the model reverts there (`SolcOpen.ternaryLiteralOverflow`)
     ternaryLiteralOverflow: "pending",
-    // under the callback reading the external call may write `ix` before it
-    // is read (`ExecS.tryOk`, `docs/solkey-migration.md` "Expected-open is
-    // not falsity"); at the harness address it proves (`--self-address`, below)
-    tryArgumentSideEffect: "pending",
   };
   // `functionsRecursiveUnbounded` proves: its recursive call by the contract
   // true/true over the 1024 frames of the unrolling (`rec_auto`, kernel-port.md
