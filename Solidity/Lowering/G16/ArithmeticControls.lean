@@ -113,6 +113,75 @@ theorem wrong_checked_ring_rejected (pipeline : Roadmap.Pipeline) (fuel : Nat) :
 def zero_multiplier (pipeline : Roadmap.Pipeline) (fuel : Nat) :=
   checked_client 8 (by decide) .mul true 0 255 (by decide) (by decide) pipeline fuel
 
+
+/-- Inhabited signed ring clients for all valid widths, operators, modes and pipelines. -/
+def signed_checked_client (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256)
+    (op : RingOp) (checked : Bool) (x y : Int)
+    (hx : (SignedWidthCasts.ty bits valid).lo ≤ x ∧ x ≤ (SignedWidthCasts.ty bits valid).hi)
+    (hy : (SignedWidthCasts.ty bits valid).lo ≤ y ∧ y ≤ (SignedWidthCasts.ty bits valid).hi)
+    (pipeline : Roadmap.Pipeline) (fuel : Nat) :=
+  CheckedSigned.transport (MixedAssignmentControls.globals pipeline)
+    {Source.SemanticsExamples.F0 with checked := checked} fuel
+    (WordCastControls.source (SignedWidthCasts.ty bits valid) x y hx hy)
+    (WordCastControls.target (SignedWidthCasts.ty bits valid) x y hx hy)
+    bits valid op (WordCastControls.si _) (WordCastControls.ti _)
+    (WordCastControls.initial _ x y hx hy) true false x y hx hy rfl rfl
+
+/-- Observe the actual signed Source result while retaining panic-versus-value distinctions. -/
+def signedObserved (checked : Bool) (op : RingOp) (x y : Int)
+    (hx : (SignedWidthCasts.ty 8 (by decide)).lo ≤ x ∧ x ≤ (SignedWidthCasts.ty 8 (by decide)).hi)
+    (hy : (SignedWidthCasts.ty 8 (by decide)).lo ≤ y ∧ y ≤ (SignedWidthCasts.ty 8 (by decide)).hi)
+    (pipeline : Roadmap.Pipeline) (fuel : Nat) : Source.R (Option Int) :=
+  ((Source.evalE (MixedAssignmentControls.globals pipeline)
+    {Source.SemanticsExamples.F0 with checked := checked} (fuel+3)
+    (.binary op.source (.local (WordCastControls.si (SignedWidthCasts.ty 8 (by decide)) true))
+      (.local (WordCastControls.si (SignedWidthCasts.ty 8 (by decide)) false)))).run
+    (WordCastControls.source (SignedWidthCasts.ty 8 (by decide)) x y hx hy)).1.map
+      (fun result => match result with | .val value => value.key)
+
+private theorem signed_observed_run (checked : Bool) (op : RingOp) (x y : Int)
+    (hx : (SignedWidthCasts.ty 8 (by decide)).lo ≤ x ∧ x ≤ (SignedWidthCasts.ty 8 (by decide)).hi)
+    (hy : (SignedWidthCasts.ty 8 (by decide)).lo ≤ y ∧ y ≤ (SignedWidthCasts.ty 8 (by decide)).hi)
+    (pipeline : Roadmap.Pipeline) (fuel : Nat) :
+    signedObserved checked op x y hx hy pipeline fuel =
+      if checked = true ∧ ¬ ((SignedWidthCasts.ty 8 (by decide)).lo ≤ op.calculate x y ∧
+          op.calculate x y ≤ (SignedWidthCasts.ty 8 (by decide)).hi) then
+        .error (.revert (Source.panicData .arithmetic))
+      else .ok (some ((SignedWidthCasts.ty 8 (by decide)).wrap (op.calculate x y))) := by
+  have whole := signed_checked_client 8 (by decide) op checked x y hx hy pipeline fuel
+  unfold signedObserved
+  by_cases failed : checked = true ∧ ¬ ((SignedWidthCasts.ty 8 (by decide)).lo ≤ op.calculate x y ∧
+    op.calculate x y ≤ (SignedWidthCasts.ty 8 (by decide)).hi)
+  · simp only [if_pos failed] at whole
+    rw [whole.1,if_pos failed]
+    rfl
+  · simp only [if_neg failed] at whole
+    rw [whole.1,if_neg failed]
+    rfl
+
+/-- Reject lost signed overflow guards, including minimum times minus one, using actual Source runs. -/
+theorem wrong_signed_ring_rejected (pipeline : Roadmap.Pipeline) (fuel : Nat) :
+    signedObserved true .add 127 1 (by decide) (by decide) pipeline fuel ≠
+      signedObserved false .add 127 1 (by decide) (by decide) pipeline fuel ∧
+    signedObserved true .sub (-128) 1 (by decide) (by decide) pipeline fuel ≠
+      signedObserved false .sub (-128) 1 (by decide) (by decide) pipeline fuel ∧
+    signedObserved true .mul (-128) (-1) (by decide) (by decide) pipeline fuel ≠
+      signedObserved false .mul (-128) (-1) (by decide) (by decide) pipeline fuel := by
+  rw [signed_observed_run,signed_observed_run,signed_observed_run,signed_observed_run,
+    signed_observed_run,signed_observed_run]
+  change ((Except.error (.revert (Source.panicData .arithmetic)) : Source.R (Option Int)) ≠ .ok (some (-128))) ∧
+    ((Except.error (.revert (Source.panicData .arithmetic)) : Source.R (Option Int)) ≠ .ok (some 127)) ∧
+    ((Except.error (.revert (Source.panicData .arithmetic)) : Source.R (Option Int)) ≠ .ok (some (-128)))
+  simp only [ne_eq,reduceCtorEq,not_false_eq_true,and_self]
+
+/-- Exercise the checked native zero branch before any quotient or minimum rejection. -/
+def signed_zero_multiplier (pipeline : Roadmap.Pipeline) (fuel : Nat) :=
+  signed_checked_client 8 (by decide) .mul true 0 (-128) (by decide) (by decide) pipeline fuel
+
+/-- The minimum is not globally excluded: multiplying it by positive one succeeds. -/
+def signed_minimum_success (pipeline : Roadmap.Pipeline) (fuel : Nat) :=
+  signed_checked_client 8 (by decide) .mul true (-128) 1 (by decide) (by decide) pipeline fuel
+
 end Solidity.Lowering.G16.ArithmeticControls
 
 /-- info: 'Solidity.Lowering.G16.ArithmeticControls.wrong_wrapping_rejected' does not depend on any axioms -/
@@ -126,3 +195,7 @@ end Solidity.Lowering.G16.ArithmeticControls
 /-- info: 'Solidity.Lowering.G16.ArithmeticControls.wrong_checked_ring_rejected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Lowering.G16.ArithmeticControls.wrong_checked_ring_rejected
+
+/-- info: 'Solidity.Lowering.G16.ArithmeticControls.wrong_signed_ring_rejected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Lowering.G16.ArithmeticControls.wrong_signed_ring_rejected
