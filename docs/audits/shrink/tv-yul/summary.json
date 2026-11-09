@@ -406,8 +406,8 @@
     "No systemd scope on cloud VM(H232). Resource guard restores a12GiB RLIMIT_AS process cap, hard cgroup cap at most16GiB, no swap, and both4GiBOS/effective-free reserves. The16GiB bypass is removed; previous gates using it are withdrawn as current-policy validation and retained only as historical evidence. Strict-guard39-job measurements now pass; the earlier 37-record pin failure is historical and resolved upstream. Ordinary final validation remains pending; resource reserves remain mandatory."
   ],
   "outstanding": [
-    "Complete ordinary repository validation and final handoff under unchanged resource limits. Pin registry is repaired upstream and generated roots are now consistent.",
-    "Do not mark the original goal complete until final validation is satisfied; NO-GO is the measured comparison verdict only."
+    "Ordinary validation at integrated master ea93028b5dc9411bb95c2ca979c5df2945f99ae2: run-lean and corpus fail with allocation/thread-creation aborts in existing modules under the unchanged resource policy; other gate outcomes pass. TVYUL-VALIDATE routes the concrete repair to coordinator. H232/no-systemd guidance is already applied and does not resolve these aborts.",
+    "Complete the same required gates and final handoff after matching validated artifacts or an owner repair becomes available. Do not mark the original goal complete or accept family reduction."
   ],
   "questions": [],
   "resource_guard": {
@@ -427,11 +427,11 @@
     "review_instruction": "Fetch bundle ref codex/shrink-pilots-1108/tv-yul-prototype into a separate review ref if its Git object is unavailable. Requires published base381328f608; never merge prototype history."
   },
   "upstream_gate_dependency": {
-    "head": "257165a572cd87546da945c49ca18b6a000393cd",
-    "gate": "axiom-pins",
-    "status": "pass",
-    "decisive_output": "0 errors, 0 unrecorded changes, 0 baselined changes. Prior 37-record blocker resolved upstream.",
-    "scope": "No pin registry edited by this lane; no gate waiver."
+    "head": "ea93028b5dc9411bb95c2ca979c5df2945f99ae2",
+    "gate": "run-lean and corpus",
+    "status": "fail",
+    "decisive_output": "Existing modules abort with std::bad_alloc or failed to create thread, exit134; isolated Derived19 also aborts under explicit-j1 and unchanged12GiB cap. Pin registry and roots are repaired and pass.",
+    "scope": "No theorem, proof budget, process cap, reserve or gate changed. H232 applied; no systemd block. Coordinator repair routing requested under TVYUL-VALIDATE."
   },
   "provisional_views_comparison": {
     "status": "basis_approved_validation_pending",
