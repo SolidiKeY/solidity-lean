@@ -97,6 +97,9 @@ else
   run_gate layers node scripts/check-layers.mjs
   run_gate private-paths bash scripts/check-private-paths.sh
   run_gate evidence-files bash scripts/check-evidence-files.sh
+  # CI's `checks` job runs this same script (.github/workflows/lean.yml), so a
+  # tree that passes the gate cannot turn `checks` red.
+  run_gate checks-fast bash scripts/ci/checks-fast.sh
   [ "$failed" -eq 0 ] || exit "$failed"
   run_gate build-touched build_touched
   if [ "$mode" != touched ]; then
@@ -110,13 +113,9 @@ else
         run_gate examples lake build SolidityExamples SolkeyTestSuite
       fi
     fi
-    run_gate trust bash scripts/check-trust.sh
+    # trust, roots, fragments, doc-paths and axiom-pins ran in checks-fast.
     run_gate orphans node scripts/check-orphans.mjs
-    run_gate roots bash scripts/coord-tools/register.sh --check
     run_gate p16-generated python3 -B scripts/h62/item1/p16-generator/check.py
-    run_gate fragments bash scripts/coord-tools/fragments.sh --check
-    run_gate doc-paths bash scripts/check-doc-paths.sh
-    run_gate axiom-pins node scripts/check-axiom-pins.mjs
   fi
   if [ "$mode" = full ]; then
     run_gate testsuite bash scripts/check-testsuite.sh

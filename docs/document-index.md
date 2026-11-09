@@ -213,6 +213,7 @@ and open obligations. Test proposals remain proposals until applied.
 - [docs/audits/build-speed.md](audits/build-speed.md)
 - [docs/audits/coordination-process.md](audits/coordination-process.md)
 - [docs/audits/direction.md](audits/direction.md)
+- [docs/audits/itree-inspection.md](audits/itree-inspection.md)
 - [docs/audits/prior-art-lowering.md](audits/prior-art-lowering.md)
 - [docs/audits/proof-coverage.md](audits/proof-coverage.md)
 - [docs/audits/size-duplicates.md](audits/size-duplicates.md)

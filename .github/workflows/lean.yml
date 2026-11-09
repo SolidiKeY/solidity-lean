@@ -31,41 +31,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Audit source trust boundaries
-        run: |
-          node --test scripts/check-trust.test.mjs
-          bash scripts/check-trust.sh
-          bash scripts/check-private-paths.sh
-          bash scripts/check-evidence-files.sh
-      # The examples site's recorder, against a stand-in language server
-      # (`docs/site.md`; `pages.yml` runs it against Lean's).
-      - name: Test the site exporter
-        run: node --test scripts/site/export.test.mjs
-      - name: Check Dafny feature inventory
-        run: node scripts/check-dafny-features.mjs
-      - name: Check documentation and axiom-pin drift
-        run: |
-          node --test scripts/check-axiom-pins.test.mjs tests/h62/item5/statement-graph/h112-tooling.test.mjs
-          python3 -B tests/h62/item5/statement-graph/test_w0_tooling.py -v
-          bash scripts/check-doc-paths.sh
-          python3 scripts/check-doc-navigation.py
-          node scripts/check-axiom-pins.mjs
-      # The core (`docs/parallelism.md`) imports no module of the elaborator,
-      # the printers or the tactic front ends, even transitively.
-      - name: Check layering
-        run: node scripts/check-layers.mjs
-      # The library roots are generated from the file tree
-      # (`docs/parallelism.md`, P5): a stale root fails here.
-      - name: Check generated library roots
-        run: bash scripts/coord-tools/register.sh --check
-      # The module map, docs/README.md, TERRA-TODO.md and the axiom-pin
-      # inventory are generated from per-lane fragments (P5).
-      - name: Check generated bookkeeping files
-        run: bash scripts/coord-tools/fragments.sh --check
-      - name: Check slow example partition
-        run: python3 tests/h55/module-times/test_slow_examples.py
-      - name: Check pinned Solidity feature inventory
-        run: python3 scripts/solidity-feature-audit.py --check
+      # Every check of this job lives in one script that `gate.sh` runs too, so a
+      # merge that passes the lane gate cannot turn this job red. Lean-free:
+      # trust boundaries, site exporter, Dafny inventory, documentation and
+      # axiom-pin drift, layering, generated roots and bookkeeping files, the slow
+      # example partition and the pinned Solidity feature inventory.
+      - name: Fast checks (scripts/ci/checks-fast.sh)
+        run: bash scripts/ci/checks-fast.sh
 
   # Non-blocking until the editor-parity lane makes it pass from a fresh
   # checkout: the full inventory is a checksum-bound bundle kept off git (H44).
@@ -259,16 +231,47 @@ jobs:
           SOLIDITY_LEAN_NODE_EXECUTABLE: node
         run: xvfb-run -a node vscode/test/run-host.cjs
 
+  # Bridge/.lake (Mathlib, lean-auto, Loom, Velvet) is the one Actions cache of
+  # this workflow. lean-action's own cache saved a new entry on every run of
+  # every branch, which filled the repository's 10 GB limit; here only master
+  # saves, one entry per toolchain and manifest, and older entries are deleted.
+  # Branch and pull-request runs restore master's entry read-only.
   bridge:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
     steps:
       - uses: actions/checkout@v5
+      - name: Bridge cache key
+        id: bridge-key
+        run: echo "prefix=bridge-lake-${{ runner.os }}-${{ hashFiles('Bridge/lean-toolchain', 'Bridge/lake-manifest.json') }}-" >> "$GITHUB_OUTPUT"
+      - name: Restore bridge build cache
+        id: bridge-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: Bridge/.lake
+          key: ${{ steps.bridge-key.outputs.prefix }}${{ github.sha }}
+          restore-keys: ${{ steps.bridge-key.outputs.prefix }}
       - name: Build optional bridge
         uses: leanprover/lean-action@v1
         with:
           lake-package-directory: "Bridge"
+          use-github-cache: "false"
           use-mathlib-cache: "true"
           test: "false"
           lint: "false"
       - name: Verify pinned reference sources and bridge gate
         run: ./scripts/check-bridge.sh
+      - name: Save bridge build cache (master only)
+        if: github.ref == 'refs/heads/master' && steps.bridge-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: Bridge/.lake
+          key: ${{ steps.bridge-key.outputs.prefix }}${{ github.sha }}
+      - name: Evict older bridge build caches (master only)
+        if: github.ref == 'refs/heads/master'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          KEEP: ${{ steps.bridge-key.outputs.prefix }}${{ github.sha }}
+        run: bash scripts/ci/evict-caches.sh bridge-lake- "$KEEP"

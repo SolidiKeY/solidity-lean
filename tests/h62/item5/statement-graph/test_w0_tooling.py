@@ -75,6 +75,7 @@ assert.throws(()=>c.parseImports('import «Hidden»'));
                 (root/'scripts/coord-tools/gate.sh').write_bytes((ROOT/'scripts/coord-tools/gate.sh').read_bytes())
                 for name in ('check-layers.mjs','import-fanout.mjs','core-import-closure.mjs','core-import-baseline.json','core-import-current-baseline.json','check-private-paths.sh','check-evidence-files.sh'):
                     (root/'scripts'/name).write_bytes((ROOT/'scripts'/name).read_bytes())
+                (root/'scripts/ci').mkdir();(root/'scripts/ci/checks-fast.sh').write_text('#!/usr/bin/env bash\nexit 0\n')
                 (root/'scripts/core-import-allowlist.json').write_bytes((ROOT/'scripts/core-import-baseline.json').read_bytes())
                 snapshot=json.loads((ROOT/'scripts/core-import-current-baseline.json').read_text())
                 (root/'scripts/core-import-additions-allowlist.json').write_text(json.dumps([[x['source'],x['target']] for x in snapshot['additions']]))
