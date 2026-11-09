@@ -29,7 +29,15 @@ theorem source_done :
 theorem target_done (m : Evm.Machine) (caller : List Evm.Word) :
  Evm.run artifact.code {m with stack := coreWord 0::coreWord 0::caller} =
  .ok {m with stack := coreWord 0::coreWord 6::caller} 0 :=
- artifact.normal_to_model 6 #v[0,0] #v[0,6] source_done m caller
+ by
+ let target : Vector Scalar.Word 2 → Prop := fun actual =>
+   Evm.run artifact.code {m with stack := coreWord 0::coreWord 0::caller} =
+     .ok {m with stack := actual.toList.map coreWord++caller} 0
+ have transport : ∃ actual : Vector Scalar.Word 2,
+     (⟨sourceLocals #v[0,6],.normal⟩ : Outcome root 2) =
+       ⟨sourceLocals actual,.normal⟩ ∧ target actual :=
+   artifact.source_to_model 6 #v[0,0] ⟨sourceLocals #v[0,6],.normal⟩ source_done m caller
+ exact CompletionControls.normal_output (c := root) #v[0,6] target transport
 
 theorem lowered : lower 12 12 MultiSwitchCompilation.Controls.source second = some artifact := by rfl
 theorem first_fuel_refusal : lower 0 12 MultiSwitchCompilation.Controls.source second = none := by rfl
