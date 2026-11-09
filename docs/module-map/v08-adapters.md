@@ -902,6 +902,8 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Lowering/P9/BodyRecognizerCompleteness.lean` | Existing readiness certificates imply their Boolean body checks; no new syntax admitted. |
 | `Lowering/P9/CatalogueRecognizerCompleteness.lean` | Entry/catalogue fuel monotonicity and relative completeness up to existential recognizer fuel, with original converse premises. |
 | `Lowering/P9/CatalogueCompletenessControls.lean` | Reference/unchecked and existing elaborated-unit controls, checked calls, inadequate-fuel distinction and all-fuel refusal. |
+| `Backend/FailurePaths/StorageEncoderTimeout.lean` | Storage-read encoder/local ABI timeout with complete state; no admitted custom-error/compiler claim. |
+| `Backend/FailurePaths/StorageEncoderTimeoutControls.lean` | Seeded timeout/completion, both pipelines, memory error signature and storage refusal. |
 
 ### P8 Producer merge (H57, H60)
 
