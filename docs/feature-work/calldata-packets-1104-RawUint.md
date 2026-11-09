@@ -151,17 +151,7 @@ These additions do not provide compiler selection, Source object transport,
 native execution or whole-decoder dispatch/body composition. Those original
 G40 obligations remain open. Evidence is archived privately under H145.
 
-
 ## Raw uint body outcomes
 
-`UIntBindingBody.raw_executed` relates the actual semantic single-uint entry
-result to the publicly selected decoder/binding/body program. It quantifies
-arbitrary bytes, uint widths and supported typed bodies. Decoder failure
-prevents body execution; decoder success preserves the body result verbatim,
-including body revert or fault. The existing fuel+2 boundary and initial
-word/size representation premises remain explicit. No successful decoding or
-desired execution is assumed.
-
-This component does not implement recursive aggregate compilation, physical
-calldata loads, whole entry dispatch or Source-to-runtime correspondence.
-Those G40 producer obligations remain open for memory-reference consumers.
+`UIntBindingBody.raw_executed` relates semantic single-uint entry to the publicly selected decoder/binding/body program for arbitrary bytes, uint widths and supported typed bodies: failure prevents body execution; success preserves its result, including revert/fault.
+The fuel+2 boundary and initial word/size representation premises remain explicit; no successful decoding or desired execution is assumed. Recursive aggregate compilation, physical calldata loads, whole entry dispatch and Source-to-runtime correspondence remain open G40 obligations for memory-reference consumers.
