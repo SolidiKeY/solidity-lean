@@ -142,11 +142,13 @@ theorem changed_facts :
    (by change 1<after.heap.len reference .dyn;rw [length];decide) (P.uint 99 (by decide)) w[99] (ReprV.uint_of rfl) 8
  exact ⟨facts.1,facts.2.1,facts.2.2.1⟩
 
+set_option backward.isDefEq.respectTransparency false in
 theorem changed_read : ArrayProbe.value.evalT changed=.ok (P.uint 99 (by decide)) := by
  have read := Heap.readAddr_writeAddr_same changed_facts.1
  rw [HeapDomain.probe_eval changed 1 (by decide) reference rfl rfl,read]
  rfl
 
+set_option backward.isDefEq.respectTransparency false in
 theorem changed_domain : ReadDomain changed reference 2 := by
  rw [HeapDomain.domain_iff changed reference 2 (by decide),Heap.len_writeAddr changed_facts.1 reference .dyn]
  exact (HeapDomain.domain_iff after reference 2 (by decide)).1 domain_preserved
