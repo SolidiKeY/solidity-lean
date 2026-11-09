@@ -78,9 +78,10 @@ class PreflightControls(unittest.TestCase):
             with self.assertRaises(ValueError):self.check(summary,command,raw)
 
     def test_changed_transitive_validator_or_false_flags_fail(self):
-        for mutation in ['missing-observation','changed-worker','coverage','source','rpc']:
+        for mutation in ['missing-observation','missing-raw-encoder','changed-worker','coverage','source','rpc']:
             summary,command,raw=sample()
             if mutation=='missing-observation':summary['validator_sha256'].pop('eest_observation.mjs')
+            elif mutation=='missing-raw-encoder':summary['validator_sha256'].pop('engine_payload_encoding.mjs')
             elif mutation=='changed-worker':summary['validator_sha256']['eest_reference.mjs']='0'*64
             elif mutation=='coverage':summary['coverage_admitted']=True
             elif mutation=='source':summary['source_matches']=1

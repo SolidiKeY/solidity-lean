@@ -55,10 +55,18 @@ def validate_observed_integer_types(rows):
         exact_nat(native['steps'], 'steps')
         for field in ('payload_versions', 'forkchoice_version'):
             require(type(row['binding'].get(field)) is int, 'noncanonical payload binding version integer')
+        if 'raw_payload_indices' in row['binding']:
+            require(isinstance(row['binding']['raw_payload_indices'], list) and
+                    all(type(n) is int and n >= 0 for n in row['binding']['raw_payload_indices']),
+                    'noncanonical raw payload index integer')
         for expected in row['expected']:
             require(type(expected.get('block_index')) is int, 'noncanonical expected rejection index')
         for rejection in native['rejections']:
             require(type(rejection.get('block_index')) is int, 'noncanonical native rejection index')
+            if 'transaction_index' in rejection['validation_facts']:
+                require(type(rejection['validation_facts']['transaction_index']) is int and
+                        rejection['validation_facts']['transaction_index'] >= 0,
+                        'noncanonical decode transaction index')
             if 'transactionType' in rejection['validation_facts']:
                 require(type(rejection['validation_facts']['transactionType']) is int,
                         'noncanonical rejection transaction type')

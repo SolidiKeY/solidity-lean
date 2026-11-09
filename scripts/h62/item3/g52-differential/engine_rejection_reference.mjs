@@ -5,6 +5,7 @@
  * This partial adapter establishes neither Engine RPC nor Source agreement.
  */
 import {convertEngineFixture,engineConversionFailure} from './engine_payload_reference.mjs';
+import {encodePayloadForNativeDecode} from './engine_payload_encoding.mjs';
 import {classifyBlockRejection} from './eest_rejection.mjs';
 
 const keys=new Set(['forkchoiceUpdatedVersion','newPayloadVersion','params','validationError']);
@@ -35,8 +36,23 @@ export function rejectionPlan(record) {
 export async function convertExpectedInvalidEngineFixture(record,m) {
  const plan=rejectionPlan(record);
  if(plan.status!=='planned')return plan;
- const converted=await convertEngineFixture(plan.record,m);
+ // Only transport an expected-invalid gas-cap failure; native decode is NOT
+ // replaced. The byte provider is serialized here, never sent as a Block to VM.
+ let payloadIndex=0;const rawIndices=[];
+ const transport={...m,createBlockFromExecutionPayload:async(payload,options)=>{
+  const index=payloadIndex++;
+  try {return await m.createBlockFromExecutionPayload(payload,options);}
+  catch(error) {
+   const expected=plan.expected.find(item=>item.block_index===index);
+   if(!expected||!expected.expected_exception.split('|').includes('TransactionException.GAS_LIMIT_EXCEEDS_MAXIMUM')||!/^Invalid tx at index [0-9]+: Error: Transaction gas limit [0-9]+ exceeds the maximum allowed by EIP-7825 \([0-9]+\)$/.test(String(error)))throw error;
+   const encoded=await encodePayloadForNativeDecode(plan.record.fixture.engineNewPayloads[index],m);
+   rawIndices.push(index);
+   return {hash:()=>m.hexToBytes(encoded.block_hash),serialize:()=>m.hexToBytes(encoded.rlp),transactions:[]};
+  }
+ }};
+ const converted=await convertEngineFixture(plan.record,transport);
  if(converted.status!=='converted')return converted;
+ if(rawIndices.length)converted.binding.raw_payload_indices=rawIndices;
  for(const item of plan.expected)converted.record.fixture.blocks[item.block_index].expectException=item.expected_exception;
  return {...converted,expected:plan.expected};
 }
