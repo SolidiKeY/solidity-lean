@@ -75,10 +75,7 @@ theorem selected_function_subterm_covered (Γ : Ctx) (name : String)
 /-- info: 'Solidity.Frontend.Admission.selected_function_subterm_covered' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms selected_function_subterm_covered
 
-/-! Source-unit headers must remain available separately from the declaration
-inventory. Regression: inserting a pragma changes source syntax while leaving
-the Source resolution environment unchanged. These laws justify neither a
-feature classification nor reconstruction of lexical input. -/
+/-! Source-unit headers must remain available separately from the declaration inventory. Regression: inserting a pragma changes source syntax while leaving the Source resolution environment unchanged. These laws justify neither a feature classification nor reconstruction of lexical input. -/
 
 /-- Declaration collection erases a leading pragma for every remaining unit. -/
 theorem pragma_env_unchanged (words : List String) (rest : Syn (.list .top)) :
@@ -162,10 +159,7 @@ theorem declaration_occurrence_in_source_unit (u : Syn .unit)
 /-- info: 'Solidity.Frontend.Admission.declaration_occurrence_in_source_unit' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms declaration_occurrence_in_source_unit
 
-/-! Metadata classifiers share one declaration traversal. Regression: adding
-another direct-field classifier must not silently select only executed roots or
-lose the original declaration/site. Classifier completeness remains a separate
-obligation; these laws establish exactly the supplied classifier's occurrences. -/
+/-! Metadata classifiers share one declaration traversal. Regression: adding another direct-field classifier must not silently select only executed roots or lose the original declaration/site. Classifier completeness remains a separate obligation; these laws establish exactly the supplied classifier's occurrences. -/
 
 universe u
 
@@ -175,8 +169,7 @@ def declarationFieldUses {α : Type u} (E : Env)
   (declarationOccurrences E).flatMap fun site =>
     (fields site.2.2).map fun value => (site,value)
 
-/-- Exactness for any direct metadata-field classifier, without a coverage
-premise or a second traversal implementation. -/
+/-- Exactness for any direct metadata-field classifier, without a coverage premise or a second traversal implementation. -/
 theorem declarationFieldUses_iff {α : Type u} (E : Env)
     (fields : ∀ {c : Cat}, Syn c → List α)
     (site : DeclarationOccurrence) (value : α) :

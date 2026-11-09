@@ -3,7 +3,7 @@ import Solidity.Frontend.Admission.LocationFeatures
 
 /-! # A concrete structural feature subset from the original source unit
 
-Regression: imports disappear from `unit.env`, while unused bodies and explicit metadata must remain visible. This collector reuses `Syn.ctor`, the generated generic projection, and the canonical intrinsic visitor; it adds no indexed match or per-shape traversal. It combines selected payload-independent constructor features with the existing elementary/location classifiers. Calls, allocation, tuples, assembly, user/function types and pragmas need payload/context-sensitive classification. Other missing metadata, lexical and resolved features also remain open, even on marked constructors. Membership bridges do not assert old/new order or multiplicity equality. Sites are intrinsic subterm values, not unique positions or lexical scopes. This subset never activates an admission policy or certifies typing, execution or complete feature extraction. -/
+Regression: imports disappear from `unit.env`, while unused bodies and explicit metadata must remain visible. This collector reuses `Syn.ctor`, the generated generic projection, and the canonical intrinsic visitor; it adds no indexed match or per-shape traversal. It combines selected payload-independent constructor features with the existing elementary/location classifiers. Calls, allocation, tuples, assembly, user/function types and pragmas need payload/context-sensitive classification. Other missing metadata, lexical and resolved features also remain open, even on marked constructors. Membership bridges do not assert old/new order or multiplicity equality. Sites are intrinsic subterm values, not unique positions or lexical scopes. Override/transient metadata is inventoried from explicit keyword/flag presence, including an empty override list; it proves no override resolution, storage legality or inferred/default qualifier. This subset never activates an admission policy or certifies typing, execution or complete feature extraction. -/
 namespace Solidity.Frontend.Admission
 open Solidity.Source Solidity.Language
 
@@ -1164,5 +1164,221 @@ theorem syntaxConstnessRefusals_eq {c : Cat} (root : Syn c) (accepts : Feature �
 #guard_msgs (whitespace := lax) in #print axioms syntaxConstnessFeatures_eq
 /-- info: 'Solidity.Frontend.Admission.syntaxConstnessRefusals_eq' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms syntaxConstnessRefusals_eq
+
+
+/-! Regression: explicit override keywords (including some []) and true transient flags must survive syntax scanning. These markers certify no override resolution, storage legality, inferred qualifier or admission. -/
+inductive DirectDeclarationQualifier : {c : Cat} → Syn c → Feature → Prop where
+  | function {t : Bool} (name params vis mutability mods virtual returns body) (bases : List IdPath) :
+      DirectDeclarationQualifier (.function (t := t) name params vis mutability mods virtual
+        (some bases) returns body) .overrideDeclarations
+  | modifier (name params virtual body) (bases : List IdPath) :
+      DirectDeclarationQualifier (.modifier name params virtual (some bases) body) .overrideDeclarations
+  | fallback (sig external mutability mods virtual body) (bases : List IdPath) :
+      DirectDeclarationQualifier (.fallback sig external mutability mods virtual (some bases) body)
+        .overrideDeclarations
+  | receive (external payable mods virtual body) (bases : List IdPath) :
+      DirectDeclarationQualifier (.receive external payable mods virtual (some bases) body)
+        .overrideDeclarations
+  | stateOverride (ty vis const transient name init) (bases : List IdPath) :
+      DirectDeclarationQualifier (.stateVar ty vis const (some bases) transient name init)
+        .overrideDeclarations
+  | transient (ty vis const bases name init) :
+      DirectDeclarationQualifier (.stateVar ty vis const bases true name init) .transientState
+
+def overrideFeatures (bases : Option (List IdPath)) : List Feature :=
+  bases.toList.map (fun _ => .overrideDeclarations)
+
+def declarationQualifierFeaturesAt {c : Cat} (s : Syn c) : List Feature :=
+  Syn.casesOn (motive := fun _ _ => List Feature) s
+    ([])
+    (fun _ _ => [])
+    ([])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ _ => [])
+    (fun _ _ _ _ _ _ bases _ _ => overrideFeatures bases)
+    (fun _ _ _ bases _ => overrideFeatures bases)
+    (fun _ _ _ _ _ bases _ => overrideFeatures bases)
+    ([])
+    (fun _ _ _ => [])
+    (fun _ _ _ _ bases _ => overrideFeatures bases)
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ bases transient _ _ => overrideFeatures bases ++ (if transient then [.transientState] else []))
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    ([])
+    ([])
+    (fun _ _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    ([])
+    ([])
+    ([])
+    (fun _ _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+
+theorem DirectDeclarationQualifier.mem_features {c : Cat} {s : Syn c} {f : Feature}
+    (field : DirectDeclarationQualifier s f) : f ∈ declarationQualifierFeaturesAt s := by
+  cases field <;> simp [declarationQualifierFeaturesAt, overrideFeatures]
+
+theorem declarationQualifierFeaturesAt_sound {c : Cat} (s : Syn c) (f : Feature)
+    (present : f ∈ declarationQualifierFeaturesAt s) : DirectDeclarationQualifier s f := by
+  cases s with
+  | function name params vis mutability mods virtual bases returns body =>
+    cases bases with
+    | none => exact False.elim (List.not_mem_nil present)
+    | some paths =>
+      have same := List.mem_singleton.mp present
+      cases same
+      exact .function name params vis mutability mods virtual returns body paths
+  | modifier name params virtual bases body =>
+    cases bases with
+    | none => exact False.elim (List.not_mem_nil present)
+    | some paths =>
+      have same := List.mem_singleton.mp present
+      cases same
+      exact .modifier name params virtual body paths
+  | fallback sig external mutability mods virtual bases body =>
+    cases bases with
+    | none => exact False.elim (List.not_mem_nil present)
+    | some paths =>
+      have same := List.mem_singleton.mp present
+      cases same
+      exact .fallback sig external mutability mods virtual body paths
+  | receive external payable mods virtual bases body =>
+    cases bases with
+    | none => exact False.elim (List.not_mem_nil present)
+    | some paths =>
+      have same := List.mem_singleton.mp present
+      cases same
+      exact .receive external payable mods virtual body paths
+  | stateVar ty vis const bases transient name init =>
+    change f ∈ overrideFeatures bases ++ (if transient then [.transientState] else []) at present
+    rcases List.mem_append.mp present with overridden | isTransient
+    · cases bases with
+      | none => exact False.elim (List.not_mem_nil overridden)
+      | some paths =>
+        have same := List.mem_singleton.mp overridden
+        cases same
+        exact .stateOverride ty vis const transient name init paths
+    · cases transient with
+      | false => exact False.elim (List.not_mem_nil isTransient)
+      | true =>
+        have same := List.mem_singleton.mp isTransient
+        cases same
+        exact .transient ty vis const bases name init
+  | _ => exact False.elim (List.not_mem_nil present)
+
+theorem declarationQualifierFeaturesAt_iff {c : Cat} (s : Syn c) (f : Feature) :
+    f ∈ declarationQualifierFeaturesAt s ↔ DirectDeclarationQualifier s f :=
+  ⟨declarationQualifierFeaturesAt_sound s f,DirectDeclarationQualifier.mem_features⟩
+
+def syntaxDeclarationQualifierUses {c : Cat} (root : Syn c) : List (SyntaxOccurrence × Feature) :=
+  syntaxFieldUses root declarationQualifierFeaturesAt
+
+theorem syntaxDeclarationQualifierUses_iff {c : Cat} (root : Syn c)
+    (site : SyntaxOccurrence) (f : Feature) :
+    (site,f) ∈ syntaxDeclarationQualifierUses root ↔
+      Syn.Sub site ⟨c,root⟩ ∧ DirectDeclarationQualifier site.2 f := by
+  rw [syntaxDeclarationQualifierUses, syntaxFieldUses_iff, declarationQualifierFeaturesAt_iff]
+
+theorem syntaxDeclarationQualifierRefusals_iff {c : Cat} (root : Syn c)
+    (accepts : Feature → Bool) (site : SyntaxOccurrence) (f : Feature) :
+    (site,f) ∈ syntaxFieldRefusals root declarationQualifierFeaturesAt accepts ↔
+      Syn.Sub site ⟨c,root⟩ ∧ DirectDeclarationQualifier site.2 f ∧ accepts f = false := by
+  rw [syntaxFieldRefusals_iff, declarationQualifierFeaturesAt_iff]
+
+/-- info: 'Solidity.Frontend.Admission.declarationQualifierFeaturesAt_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms declarationQualifierFeaturesAt_iff
+/-- info: 'Solidity.Frontend.Admission.syntaxDeclarationQualifierUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxDeclarationQualifierUses_iff
+/-- info: 'Solidity.Frontend.Admission.syntaxDeclarationQualifierRefusals_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxDeclarationQualifierRefusals_iff
 
 end Solidity.Frontend.Admission
