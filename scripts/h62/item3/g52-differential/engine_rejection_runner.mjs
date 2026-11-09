@@ -56,7 +56,7 @@ export async function main(bulk,label,indices) {
  let verifier,worker,allocations,output;
  const guard=hostResourceGuard(()=>{verifier?.kill('SIGKILL');worker?.kill('SIGKILL');});
  try {
-  const names=['engine_rejection_runner.mjs','engine_rejection_reference.mjs','engine_payload_reference.mjs','engine_x_allocation.mjs','eest_reference.mjs','eest_observation.mjs','blockchain_adapter.mjs','eest_rejection.mjs','host_resource_guard.mjs','serial_semantics.py','eest_export.py','archive_census.py','pipeline.py'];const sources={};
+  const names=['engine_rejection_runner.mjs','engine_rejection_reference.mjs','engine_payload_reference.mjs','engine_payload_encoding.mjs','engine_x_allocation.mjs','eest_reference.mjs','eest_observation.mjs','blockchain_adapter.mjs','eest_rejection.mjs','host_resource_guard.mjs','serial_semantics.py','eest_export.py','archive_census.py','pipeline.py'];const sources={};
   for(const name of names)sources[name]=await digest(fileURLToPath(new URL('./'+name,import.meta.url)));
   // Run the existing independent archive regeneration, not receipt agreement.
   const binding=await new Promise((accept,reject)=>{
@@ -75,8 +75,8 @@ export async function main(bulk,label,indices) {
   const lockSha=await digest(bulk+'/reference/package-lock.json');
   allocations=new EngineXAllocations(bulk+'/engine-x-allocations.jsonl',JSON.parse(readFileSync(bulk+'/engine-x-allocations-index.json','utf8')));
   const require=createRequire(bulk+'/reference/package.json'),loaded=[];
-  for(const name of ['@ethereumjs/common','@ethereumjs/block','@ethereumjs/util','micro-eth-signer/kzg.js','@paulmillr/trusted-setups/fast-peerdas.js'])loaded.push(await import(pathToFileURL(require.resolve(name)).href));
-  const m={...loaded[0],...loaded[1],...loaded[2],kzg:new loaded[3].KZG(loaded[4].trustedSetup)};
+  for(const name of ['@ethereumjs/common','@ethereumjs/block','@ethereumjs/util','micro-eth-signer/kzg.js','@paulmillr/trusted-setups/fast-peerdas.js','@ethereumjs/rlp'])loaded.push(await import(pathToFileURL(require.resolve(name)).href));
+  const m={...loaded[0],...loaded[1],...loaded[2],...loaded[5],kzg:new loaded[3].KZG(loaded[4].trustedSetup)};
   const getWorker=()=>{
    if(!worker){worker=fork(fileURLToPath(new URL('./eest_reference.mjs',import.meta.url)),['--worker',bulk],{execArgv:['--max-old-space-size=4096'],stdio:['ignore','ignore','inherit','ipc']});const child=worker;child.on('error',()=>{});const clear=()=>{if(worker===child)worker=undefined;};child.once('exit',clear);child.once('close',clear);}
    return worker;
