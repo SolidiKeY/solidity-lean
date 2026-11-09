@@ -326,11 +326,11 @@
     "candidate_encoding": "Existing Roadmap.Word and intrinsically bounded Field.Value into existing Scalar.Word/Vector2 locals through BitVec.ofFin, with lossless conversion diagrams.",
     "candidate_operations": "Read via SHR/AND; write via AND/NOT/SHL/OR with lowMask=2^(8*width)-1. Masks fit at width32 and avoid a wrapping2^256 modulus literal. Normalize arbitrary payload words so no canonicality premise is added.",
     "remaining_obligations": [
-      "Obtain owner decision TVYUL-BRIDGE before any covered-family claim.",
-      "Restore Field.find_saveWord and Field.saveWord_unchanged with exact original statements; recompile unchanged downstream imports against the module-shadow harness.",
-      "Preserve/count all other exported statements and retained142lines of Nat/codec definitions/proofs; assess largest actually covered family and run matched Views comparison."
+      "Owner decision TVYUL-BRIDGE before any covered-family claim.",
+      "Establish whether the owner-approved bridge makes a translation-validation replacement of a Views family; current restored exports use direct bit algebra/refinement, not Artifact/checker as a proof dependency.",
+      "Assess largest actually TV-covered family once coverage is established; provisional Packing API preservation and measurements are complete."
     ],
-    "proof_scope": "Operation bridge only: exact read/write function agreement, actual originalYul evaluator, checker-produced unchanged Artifacts, lossless payload encoding, full machine/caller forward/backward. Original theorem exports/family replacement are not yet proved.",
+    "proof_scope": "Actual Yul operation bridge at4667 remains proved. Supplementary9d restores both exact word exports via bit algebra/refinement and replays unchanged Widths/Regions. This preserves the provisional Packing API, but does not establish TV proof replacement or owner-approved family coverage.",
     "family_preservation_proved": false,
     "prototype_commit": "4667f91cf7860a18ef63607c0127196b029f01c2",
     "prototype_paths": [
@@ -353,16 +353,16 @@
     "Packing includes unbounded Nat exports; ScalarWriteback adds typed Source.Storage and administrative Option cells; PackedAggregates adds arbitrary byte views, heterogeneous lists and unbounded layout coordinates."
   ],
   "limitations": [
-    "The concrete operation bridge is proved but not owner-approved. No covered Views family, restored family-export comparison or reduction is claimed; overall verdict remains null.",
+    "Owner approval and actual TV replacement coverage remain unestablished. All11Packing theorem statements are preserved in a provisional harness, including two new bit-algebra-derived word laws; that does not make them validator-derived proofs. No covered-family/largest-family/reduction claim or overall verdict.",
     "Auxiliary checker covers selected loop-free Backend.Block with a fixed total source horizon, not arbitrary raw EVM bytecode, loops or native/Source-G24 execution.",
     "get_goal is not exposed; existing persistent goal remains active, with no new goal or reset.",
-    "No systemd scope on cloud VM(H232). Resource guard restores a12GiB RLIMIT_AS process cap, hard cgroup cap at most16GiB, no swap, and both4GiBOS/effective-free reserves. The16GiB bypass is removed; previous gates using it are withdrawn as current-policy validation and retained only as historical evidence. Strict-guard39-job measurements now pass; current-head repository gates remain pending."
+    "No systemd scope on cloud VM(H232). Resource guard restores a12GiB RLIMIT_AS process cap, hard cgroup cap at most16GiB, no swap, and both4GiBOS/effective-free reserves. The16GiB bypass is removed; previous gates using it are withdrawn as current-policy validation and retained only as historical evidence. Strict-guard39-job measurements now pass; current upstream axiom-pins fails24unrecordedG16changes."
   ],
   "outstanding": [
-    "Owner decision on the proved operation bridge; Views remains endpoint and reduction unclaimed.",
-    "Original word theorem export restoration, unchanged downstream replay, full-family preservation/accounting and matched Views measurements.",
-    "Resolve upstream18missingG16pin records through their owner; rerun required gates.",
-    "Final finder/skeptic review, strict gates and handoff for the complete assignment."
+    "Owner decision on proved operation bridge; Views remains endpoint and reduction unclaimed.",
+    "Establish actual TV-proof replacement coverage and largest covered family; supplementary exact Packing exports/unchanged consumer replay/provisional measurements are complete and counted.",
+    "Resolve24unrecorded upstreamG16pin changes through owner; rerun required gates.",
+    "Final review, full gates and handoff for any complete approved-family result."
   ],
   "questions": [
     {
@@ -370,12 +370,13 @@
       "sources": [
         "latest-user-Views-endpoint-decision",
         "Views/Packing.lean",
-        "prototype:4667f91cf7860a18ef63607c0127196b029f01c2"
+        "prototype:4667f91cf7860a18ef63607c0127196b029f01c2",
+        "prototype:9d1088b7450a83dea259df26bcf7aae5fa190984"
       ],
-      "question": "The latest user decision requires an owner-approved Views-to-Artifact bridge. Does the owner approve prototype4667f91cf7860a18ef63607c0127196b029f01c2 as the operation bridge for the pilot? It proves lossless Field.findWord/saveWord agreement with actual originalYul read/write statements and unchanged bidirectional Artifacts at depth0/two locals/arbitrarycaller/fullmachine frame, including width32; no premise is weakened. The two original word theorem exports, complete family preservation and Views measurements remain unfinished, and no family reduction is claimed.",
+      "question": "Does the owner approve the unchanged operation bridge4667f91cf7860a18ef63607c0127196b029f01c2 as the Views pilot basis? It proves lossless Field.findWord/saveWord agreement with actual originalYul read/write and unchanged bidirectional Artifacts at depth0/two locals/arbitrarycaller/fullmachine frame, includingwidth32. Supplementary9d now preserves all11Packing statements and unchangedWidths/Regions, but restored word laws use bit algebra/refinement rather than Artifact/checker as a proof dependency. Provisional152/23->944/119 and0.4673s->7.6200s is not a covered-family verdict; no reduction claimed.",
       "options": [
-        "A: Approve this operation bridge as the pilot basis; restore exports, preserve/count retainedNat proofs and complete the Views comparison next.",
-        "B: Require a different or broader Views bridge; keep this prototype auxiliary and specify the required existing functions/state relation before any covered comparison."
+        "A: Approve this operation bridge as the pilot basis; determine actual TV replacement coverage and largest eligible family, retaining/counting all proofs before a final verdict.",
+        "B: Require a different or broader Views bridge; keep current operation bridge and API comparison auxiliary, and specify required existing functions/state relation."
       ]
     }
   ],
@@ -385,7 +386,7 @@
     "ownership": "Signals only the fresh child process group; pidfd/select observes exit without reaping, and waitid(WNOWAIT) retains the leader until single-threaded monitoring ends. No watcher thread, constant tag or /proc-wide signal loop. Trusted commands must wait for their workers; detached daemons are outside this runner contract.",
     "monitoring": "Sampling errors at initial, periodic or final sample mark refusal and terminate the owned group; no successful result after monitor failure.",
     "tests": "test_bounded.py covers actual virtual-address refusal without resident allocation, lower inherited cap preservation/reporting, both reserves, unrelated-process survival, initial/periodic/final sampling errors, pidfd monitoring errors, and removed bypass refusal.",
-    "validation": "Nine behavioral regressions and39matched checks pass under strict12GiB process cap and bothreserves. Library checkpoint builds successfully; its axiom-pins step fails on18upstreamG16records. No current full-gate pass is claimed."
+    "validation": "Nine safety regressions,39matched auxiliary checks and25provisionalPacking source/consumer checks pass under strict12GiBAS/both4GiBreserves. Library checkpoint previously builds successfully; current upstream axiom-pins recheck fails24unrecordedG16changes. No current full-gate pass claimed."
   },
   "prototype_source_access": {
     "commit": "2aa3a2a21a1e081be5a2a760f91c0d11a084c3e2",
@@ -396,10 +397,144 @@
     "review_instruction": "Fetch bundle ref codex/shrink-pilots-1108/tv-yul-prototype into a separate review ref if its Git object is unavailable. Requires published base381328f608; never merge prototype history."
   },
   "upstream_gate_dependency": {
-    "head": "5169d6c525b6b63b64fd0f899c366259df0269a5",
+    "head": "b38ce551a3cf8b13c439e5c363ddd04ff32552cc",
     "gate": "axiom-pins",
     "status": "fail",
-    "decisive_output": "0 errors,18unrecorded changes,0baselined changes; all missing records are existing G16 pins. Reproduced after latest upstream merge.",
+    "decisive_output": "0errors,24unrecorded changes,0baselined changes after latest upstream merge; exit1,20.558860614s, no resource stop, strict12GiBAS/both4GiBreserves. ExistingG16records; out-of-scope registry unchanged.",
     "scope": "No G16 pin registry edited; ownership ticket supplied to coordinator. No refusal weakened or failure waived."
+  },
+  "provisional_views_comparison": {
+    "status": "provisional_unapproved",
+    "prototype_commit": "9d1088b7450a83dea259df26bcf7aae5fa190984",
+    "inventory": "views.json",
+    "measurement_script": "measure-views.py",
+    "candidate": "Solidity.Yul.Views.Packing",
+    "covered_family": null,
+    "verdict": null,
+    "method_boundary": "Restored word exports use BitVec algebra/refinement, not Artifact/checker as a proof dependency. Actual bidirectional checker-produced Artifacts are proved separately. No translation-validation family replacement or reduction is claimed.",
+    "count_boundary": "Packing only; two word proofs rederived, every other declaration retained. Shared existing library imports are excluded symmetrically; this is not a full import-closure size. All new checker, soundness/completeness, bridge, program, algebra and facade sources count. Counts are physical source lines and lexical declarations, not automatically generated elaborated declarations.",
+    "before": {
+      "lines": 152,
+      "declarations": 23,
+      "kernel_check_seconds": 0.467322514999978,
+      "round_seconds": [
+        0.47417068799950357,
+        0.467322514999978,
+        0.46457417599958717
+      ]
+    },
+    "after": {
+      "lines": 944,
+      "declarations": 119,
+      "kernel_check_seconds": 7.620030712001608,
+      "round_seconds": [
+        7.620030712001608,
+        7.598721588999979,
+        7.662551959998382
+      ],
+      "components": [
+        {
+          "path": "prototypes/TvYulBlock.lean",
+          "lines": 508,
+          "declarations": 51
+        },
+        {
+          "path": "prototypes/ViewsPackingBase.lean",
+          "lines": 142,
+          "declarations": 21
+        },
+        {
+          "path": "prototypes/ViewsPackingBridge.lean",
+          "lines": 87,
+          "declarations": 16
+        },
+        {
+          "path": "prototypes/ViewsPackingProgram.lean",
+          "lines": 148,
+          "declarations": 27
+        },
+        {
+          "path": "prototypes/ViewsPackingLaws.lean",
+          "lines": 58,
+          "declarations": 4
+        },
+        {
+          "path": "prototypes/shadow/Solidity/Yul/Views/Packing.lean",
+          "lines": 1,
+          "declarations": 0
+        }
+      ]
+    },
+    "all_candidate_theorem_statements_preserved": true,
+    "preserved_statements": [
+      {
+        "name": "Solidity.Yul.Views.split_join",
+        "signature": "theorem split_join (w b : Nat) : w % b + b * (w / b) = w"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.save_unchanged",
+        "signature": "theorem Field.save_unchanged (f : Field) (w : Nat) : f.save w \u27e8f.find w, Nat.mod_lt _ (Nat.pow_pos (by decide))\u27e9 = w"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.find_save",
+        "signature": "theorem Field.find_save (f : Field) (w : Nat) (v : f.Value) : f.find (f.save w v) = v.val"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.save_low",
+        "signature": "theorem Field.save_low (f : Field) (w : Nat) (v : f.Value) : f.save w v % f.base = w % f.base"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.save_high",
+        "signature": "theorem Field.save_high (f : Field) (w : Nat) (v : f.Value) : f.save w v / f.base / f.modulus = w / f.base / f.modulus"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.save_lt",
+        "signature": "theorem Field.save_lt (f : Field) (w : Nat) (hw : w < 256 ^ 32) (v : f.Value) : f.save w v < 256 ^ 32"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.find_saveWord",
+        "signature": "theorem Field.find_saveWord (f : Field) (w : Roadmap.Word) (v : f.Value) : f.findWord (f.saveWord w v) = v"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.saveWord_unchanged",
+        "signature": "theorem Field.saveWord_unchanged (f : Field) (w : Roadmap.Word) : f.saveWord w (f.findWord w) = w"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.find_save_above",
+        "signature": "theorem Field.find_save_above (f g : Field) (w : Nat) (v : f.Value) (h : f.offset + f.width \u2264 g.offset) : g.find (f.save w v) = g.find w"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.find_save_below",
+        "signature": "theorem Field.find_save_below (f g : Field) (w : Nat) (v : f.Value) (h : g.offset + g.width \u2264 f.offset) : g.find (f.save w v) = g.find w"
+      },
+      {
+        "name": "Solidity.Yul.Views.Field.find_save_disjoint",
+        "signature": "theorem Field.find_save_disjoint (f g : Field) (w : Nat) (v : f.Value) (h : f.offset + f.width \u2264 g.offset \u2228 g.offset + g.width \u2264 f.offset) : g.find (f.save w v) = g.find w"
+      }
+    ],
+    "unchanged_consumers": [
+      "Solidity.Yul.Views.Widths",
+      "Solidity.Yul.Views.Regions"
+    ],
+    "kernel_checks": "25fresh serial-j1source/consumer checks plus preparation pass; both consumers checked against original and replacement Packing entry. All receipts applied12GiBAS, both4GiBreserves, no swap/resource stops/monitor errors.",
+    "timing": "Median of3 sums of fresh serial Lean elaboration+kernel checks including cached import loading/output writes, not isolated kernel CPU time. Shared imports prepared outside sums; unchanged downstream checks separately reported. Same frozen sources/toolchain/VM; cache fetched first; no systemd scope(H232).",
+    "size_ratio_before_over_after": 0.16101694915254236,
+    "required_ratio": 3,
+    "numerical_assessment": "Fails the3xsmaller requirement: candidate grows6.21x. Does not establish an owner-approved covered-family verdict.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "largest_covered_family": "Unestablished while owner-approved TV bridge/coverage is pending; Packing is a provisional candidate, not a largest-covered claim.",
+    "source_access": {
+      "commit": "9d1088b7450a83dea259df26bcf7aae5fa190984",
+      "bundle_evidence_commit": "2c0eb6ee82a2fed5e75bd03bf21f098036a67864",
+      "bundle_path": "evidence/shrink-pilots-1108/tv-yul/tv-yul-packing-checkpoint/prototype.bundle",
+      "bundle_sha256": "100974d5938e05fcde127c210fca0588bd42881f9bbbeefd8ef3587de788cad2",
+      "review_instruction": "Fetch prototype bundle ref into a separate review ref, requiring published base381328f608. Includes4667operationbridge and9dexactexport restoration. Never merge prototype history."
+    },
+    "evidence": "evidence: 2c0eb6ee82a2fed5e75bd03bf21f098036a67864 evidence/shrink-pilots-1108/tv-yul/tv-yul-packing-checkpoint/",
+    "reviews": "Read-only Codex finder/skeptic verify exact11headers, counts152/23->944/119,25strict guarded checks and unchangedconsumer replay; no blocking finding. Both emphasize algebra-versus-Artifact proof dependency and provisional/unapproved coverage. No builds/network/writes by reviewers."
   }
 }
