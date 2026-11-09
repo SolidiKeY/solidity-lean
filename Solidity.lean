@@ -1030,6 +1030,7 @@ import Solidity.Backend.MemoryOps.PhysicalByteStore
 import Solidity.Backend.MemoryOps.PhysicalByteStoreControls
 import Solidity.Backend.MemoryOps.PhysicalByteStoreSequence
 import Solidity.Backend.MemoryOps.PhysicalByteWorldInterface
+import Solidity.Backend.MemoryOps.PhysicalByteWorldV2Interface
 import Solidity.Backend.MemoryOps.PhysicalFixedChildControls
 import Solidity.Backend.MemoryOps.PhysicalFixedChildProgram
 import Solidity.Backend.MemoryOps.PhysicalFixedChildWrite
@@ -6328,6 +6329,8 @@ import Solidity.Yul.World.LifecycleBalancesFit
 import Solidity.Yul.World.LifecycleFrameControls
 import Solidity.Yul.World.LifecycleFrames
 import Solidity.Yul.World.LoadV2Port
+import Solidity.Yul.World.LoadV2Producer
+import Solidity.Yul.World.LoadV2ProducerControls
 import Solidity.Yul.World.LogBuiltin
 import Solidity.Yul.World.LogBuiltinControls
 import Solidity.Yul.World.LogPortRuleControls

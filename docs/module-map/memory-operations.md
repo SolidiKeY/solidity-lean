@@ -640,3 +640,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/Executable/CreationReturnPartition.lean` | Actual constructor-return byte classification with immutable/link/outside certificates and cross-region exclusion. |
 | `Backend/Executable/CreationReturnPartitionControls.lean` | Direct classification at an adjacent library boundary, populated patch boundaries and argument-leak negatives. |
 | `Backend/Executable/CreationReturnPartitionAudit.lean` | Complete classification signatures and scoped axiom guards. |
+| `Backend/MemoryOps/PhysicalByteWorldV2Interface.lean` | R3 additive versioned load contract and initial WordFrame point transport; frozen v1 unchanged, full adequacy excluded. |

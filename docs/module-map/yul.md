@@ -227,6 +227,8 @@
 | `Yul/Compilation/Artifact.lean` | Shared intrinsic normal-completion and typed-result certificates, actual-total-run constructors and exact producer images. |
 | `Yul/Compilation/ArtifactPreparation.lean` | General certified one/two-stage and prefix selection, accepted-object totality and exact preparation-image laws preserving Some/None without runtime-failure semantics. |
 | `Yul/Views/SourceGraphEndpoints.lean` | Isolated ordinary Source recursive uint256 mapping path to public typed graph slot endpoint; no value or reached-state adequacy claim. |
+| `Yul/World/LoadV2Producer.lean` | Concrete versioned Producer for the existing cell-only PUSH/MLOAD program; no v1 realization or compiler provenance. |
+| `Yul/World/LoadV2ProducerControls.lean` | Actual written full-word byte image, nonempty tail, low-byte refusal, address/capacity and underflow controls. |
 | `Yul/World/ReturndataByteLoad.lean`, `Yul/World/ReturndataByteLoadControls.lean` | Conditional published P6 load after actual function-level copy; exact byte framing and strict-bound controls, no concrete load producer. |
 | `Yul/World/CreationReturnWindow.lean`, `Yul/World/CreationReturnWindowControls.lean` | Conditional P14 returned-runtime linked-address windows with derived bounds and concrete constructor controls; not CREATE caller returndata. |
 

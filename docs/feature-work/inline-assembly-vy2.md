@@ -48,3 +48,16 @@ original proof credit without checked original-type/premise correspondence.
 Both preserved commits remain in Git history; the historical narrative is not
 restored as current guidance. This reconciliation is comments/documentation only
 and is not a validation, producer-completion or integration receipt.
+
+R3 permits the additive `PhysicalByteWorldV2Interface` and `LoadV2Producer` split
+next to frozen v1. Both current owners reviewed the exact names, signatures
+and import direction. The interface keeps every v1 address, capacity, initial
+32-byte-image and WordFrame premise, with the separately named `LoadV2.run`
+endpoint. The concrete instance uses the existing cell-indexed PUSH/MLOAD code.
+Controls construct an actual written high-word image and preserve a nonempty
+tail; low-byte substitution and bare MLOAD on an empty stack are rejected.
+
+This point-load contract does not realize frozen v1, migrate a compiler endpoint
+or establish Y04 physical/reached-state adequacy. Actual compiler selection,
+emission, Source origin, whole-program compatibility, gas/resource correspondence
+and full affected validation remain separate obligations.
