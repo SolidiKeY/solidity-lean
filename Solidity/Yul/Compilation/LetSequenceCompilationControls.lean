@@ -25,7 +25,12 @@ theorem source_done (b : Scalar.Word) :
 theorem target_done (b : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) :
  Evm.run artifact.code {m with stack := coreWord b::caller} =
  .ok {m with stack := coreWord (update (update b))::caller} 0 :=
- artifact.normal_to_model 16 #v[b] #v[update (update b)] (source_done b) m caller
+ by
+ exact CompletionControls.normal_output (c := root) #v[update (update b)]
+   (fun actual => Evm.run artifact.code {m with stack := coreWord b::caller} =
+     .ok {m with stack := actual.toList.map coreWord++caller} 0)
+   (artifact.source_to_model 16 #v[b] ⟨sourceLocals #v[update (update b)],.normal⟩
+     (source_done b) m caller)
 
 -- Distinguishes true sequential mutation from accidentally reusing input b.
 #guard update (update 0) ≠ update 0
