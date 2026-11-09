@@ -30,7 +30,15 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceLaws.lean:Solidity.Frontend.Admission.syntaxFieldRefusals_map": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Frontend/Admission/SyntaxOccurrenceLaws.lean:Solidity.Frontend.Admission.syntaxFieldUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceLaws.lean:Solidity.Frontend.Admission.syntaxFieldUses_map": [
   "Quot.sound",
   "propext"
  ],
