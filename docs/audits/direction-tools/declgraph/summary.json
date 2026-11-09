@@ -245,6 +245,8 @@
     "native_expression_graph": "native-summary.json",
     "native_raw_reference_fixtures": "raw-ref-fixtures.json",
     "native_raw_reference_observation": "raw-reference-summary.json",
+    "native_saved_check_dependencies": "snapshot-root-summary.json",
+    "native_saved_check_fixtures": "snapshot-root-fixtures.json",
     "pinned_trust_audit": "trust-audit-summary.json",
     "syntax_census": "syntax-census.json",
     "warm_check_recovery": "warm-check-summary.json"
