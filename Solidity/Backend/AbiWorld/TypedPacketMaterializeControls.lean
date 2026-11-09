@@ -17,12 +17,12 @@ def application (frame : Environment.Frame) (tail : List Roadmap.Word) :=
 theorem exact_limit (frame : Environment.Frame) :
  Failure.Slice.checkedRun code ⟨⟨0,by decide⟩::⟨128,by decide⟩::List.replicate 1020 ⟨77,by decide⟩,I⟩=
  some (⟨List.replicate 1020 ⟨77,by decide⟩,Environment.writeBytes I 0 packet⟩,some (.revert packet)) := by
- simpa only [List.length_replicate,show 1020+4≤1024 from by decide,if_true] using
+ simpa only [code,packet,List.length_replicate,show 1020+4≤1024 from by decide,ite_true] using
  (application frame (List.replicate 1020 ⟨77,by decide⟩)).2.1
 
 theorem one_over_limit (frame : Environment.Frame) :
  Failure.Slice.checkedRun code ⟨⟨0,by decide⟩::⟨128,by decide⟩::List.replicate 1021 ⟨77,by decide⟩,I⟩=none := by
- simpa only [List.length_replicate,show ¬1021+4≤1024 from by decide,if_false] using
+ simpa only [code,packet,List.length_replicate,show ¬1021+4≤1024 from by decide,ite_false] using
  (application frame (List.replicate 1021 ⟨77,by decide⟩)).2.1
 
 theorem empty_baseline : Failure.Slice.checkedRun [.op .REVERT]
