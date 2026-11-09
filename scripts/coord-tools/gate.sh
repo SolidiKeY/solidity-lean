@@ -104,6 +104,10 @@ else
   run_gate build-touched build_touched
   if [ "$mode" != touched ]; then
     if [ "$mode" = full ]; then
+      # H134: each slow example under its own 600 s one-core budget, as in CI
+      # (after the libraries it imports); run-lean.sh then finds them built.
+      run_gate library lake build Solidity SolidityExamples
+      run_gate slow-examples bash scripts/ci/build-slow-examples.sh
       run_gate run-lean bash run-lean.sh
     else
       # A checkpoint builds the library alone; a lane touching the core also
