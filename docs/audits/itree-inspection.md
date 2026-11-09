@@ -2,7 +2,7 @@
 
 Inspection with experiments (batch itree-20261109, lane `itree-inspection`),
 base `d890f91eb`. Nothing here is for merging: the experiments live in
-`Solidity/Scratch/ITree/` (not imported by any root, by design of
+`Solidity/Scratch/ITree` at commit f0249758a (deleted from master since; not imported by any root, by design of
 `register.sh`), and no core module changed.
 
 **Verdict.** Interaction trees are a **net loss** (`partial_fixpoint` for loops: irrelevant). The saving
@@ -70,12 +70,12 @@ still cannot evaluate the classical loop (Experiment C(i)).
 
 ## 2. Experiment A: finite tree + handlers (measured on the fragment)
 
-`Solidity/Scratch/ITree/Tree.lean` (168 raw): events `Ev` (a payment leaving
+`ITree/Tree` (f0249758a) (168 raw): events `Ev` (a payment leaving
 in a state, with the kind `transfer` or `send full`), answers (`Resume`, or
 `Option Resume` for a send), the free monad `Tree`, `bind`/`map`/`runDet`, and
 **one handler** `Handle A J viol` over an allowance `A` (`anyA` = `ExecS`,
 `M.Allows J` = `ExecSM`), with `mono`, `bind_iff`, `map_iff` and `runDet` (the
-generic `exec_run`). `Solidity/Scratch/ITree/Payments.lean` (339 raw): the
+generic `exec_run`). `ITree/Payments` (f0249758a) (339 raw): the
 tree semantics of `transfer`/`send` and of straight-line programs, together
 with the proofs below.
 
@@ -98,7 +98,7 @@ Side by side, the transfer/send fragment only (raw lines):
 | `exec_run`/`execM_run` cases | 46 | 23 | ~15 (`stmt_runDet`'s payment cases) |
 | `eq_run` cases | 3 | 3 | ~3 |
 | **Fragment total** | **161** | **80** | **~46** |
-| One-off infrastructure | – | ~10 (bridges) | ~95 code / 168 raw (`Tree.lean`) |
+| One-off infrastructure | – | ~10 (bridges) | ~95 code / 168 raw (`ITree/Tree`) |
 
 Extrapolation to the whole of `ExecS` (from the fragment's ratios, A vs B).
 Today the forking constructors are 287 code lines; at the fragment's ratio
@@ -119,7 +119,7 @@ become a `Handle` inversion.
 
 ## 3. Experiment B: `ExecS` by an allowance (measured)
 
-`Solidity/Scratch/ITree/ParamExec.lean` (872 raw) is generated mechanically
+`ITree/ParamExec` (f0249758a) (872 raw) is generated mechanically
 from `CallerModel.lean` and `CallerModelRun.lean`: `ExecSA (A : Allow C) J`
 replaces `M.Allows J` by `A`, and **one** `exec_run` (`execA_runS/P/F`) takes
 `hA : ∀ σ, A σ σ.storage σ.net σ.selfBalance`. It checks with no edits beyond
@@ -149,7 +149,7 @@ does not beat it at all (§2), let alone by a margin worth 31–49 files of chur
 
 ## 4. Experiment C: loops and coinduction
 
-**C(i) `partial_fixpoint`** (`Solidity/Scratch/ITree/Loop.lean`, 90 raw).
+**C(i) `partial_fixpoint`** (`ITree/Loop` (f0249758a), 90 raw).
 `runPF` (the loop in `Option`, `none` = never done) is accepted by Lean
 v4.24's `partial_fixpoint`, which generates the unfolding equation and
 `fixpoint_induct`. `Loop.run_eq : run body c σ = TLoop.run body c σ` is proved
@@ -164,7 +164,7 @@ It would replace `TLoop.run`, `iterN_done_le/unique`, `run_of_iterN` and
 away**, because kernel evaluation still needs fuel. Net **−30 to 0**:
 irrelevant.
 
-**C(ii) homegrown coinductive tree** (`Solidity/Scratch/ITree/Coind.lean`,
+**C(ii) homegrown coinductive tree** (`ITree/Coind` (f0249758a),
 185 raw, 126 code). Without Mathlib's M-types, a tree is a pointed coalgebra
 `CoTree E Ans R : Type 1` (states, `step : S → Node`, `root`), and equality
 becomes bisimilarity. Proved: `bind_assoc` up to strong bisimilarity (44
@@ -185,7 +185,7 @@ would also need a coinductive machine semantics (44–135 files mention both).
 
 ## 5. Experiment D: automation (measured)
 
-`Solidity/Scratch/ITree/Auto.lean`: today's run against the tree read
+`ITree/Auto` (f0249758a): today's run against the tree read
 deterministically (`(Prog.tree P σ).runDet`), on `ScopedRuns.guardLowCore`,
 `CallbackRuns.paysCore` and a 32-payment program. Kernel times are the
 profiler's "type checking" for `decide +kernel`.
