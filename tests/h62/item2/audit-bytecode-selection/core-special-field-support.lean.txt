@@ -1,0 +1,69 @@
+/-! Guards swapping receive/fallback priority, dropping value rejection, and
+using incompatible compiler/simulation/resource witnesses. Reuse existing typed
+dispatch bodies and represented state. The allocation premise stays exactly on
+endpoint(receive.orElse fallback); no Source/native/physical/gas adequacy follows. -/
+abbrev SpecialFixture := SpecialBody dispatchContract dispatchCtx (Frag.init dispatchCtx)
+def specialReceive : SpecialFixture := ⟨true,dispatchHit⟩
+def specialFallback : SpecialFixture := ⟨false,dispatchFallback⟩
+def specialBuilt (receive fallback : Option SpecialFixture) :=
+  CoreSpecial.compiled 0 (Frag.init dispatchCtx) .here receive fallback
+
+theorem special_found (receive fallback : Option SpecialFixture) :
+    Compiler.compile 0 (Frag.init dispatchCtx) (CoreSpecial.route (Frag.init dispatchCtx) .here receive fallback)=
+      some (specialBuilt receive fallback) :=
+  CoreSpecial.selected 0 (Frag.init dispatchCtx) .here receive fallback
+
+theorem special_room : 1+Prog.pushes
+    (CoreSpecial.endpoint (Frag.init dispatchCtx) ((some specialReceive).orElse (fun _ => some specialFallback))).program≤Lmax := by
+  rw [CoreSpecial.endpoint_pushes]
+  decide
+
+theorem special_absent_room : 1+Prog.pushes
+    (CoreSpecial.endpoint (C := dispatchContract) (Frag.init dispatchCtx) (none : Option SpecialFixture)).program≤Lmax := by
+  rw [CoreSpecial.endpoint_pushes]
+  decide
+
+theorem special_outcome (receive fallback : Option SpecialFixture)
+    (room : 1+Prog.pushes (CoreSpecial.endpoint (Frag.init dispatchCtx) (receive.orElse (fun _ => fallback))).program≤Lmax) :
+    run (specialBuilt receive fallback).code dispatchMachine=
+      run (compileProg 0 (CoreSpecial.endpoint (Frag.init dispatchCtx)
+        (specialBodyChoice receive fallback (wmod 5))).program) dispatchMachine :=
+  CoreSpecial.executed 1 0 (Frag.init dispatchCtx) .here receive fallback
+    (specialBuilt receive fallback) (special_found receive fallback) dispatchState dispatchMachine
+    dispatch_represented room (wmod 5) rfl
+
+theorem special_nonempty_uses_fallback :
+    run (specialBuilt (some specialReceive) (some specialFallback)).code dispatchMachine=.ok dispatchFallbackOut 0 := by
+  rw [special_outcome (some specialReceive) (some specialFallback) special_room]
+  rfl
+
+def specialEmptyMachine : Machine := {dispatchMachine with mem := upd dispatchMachine.mem 0 (.val (wmod 0))}
+def specialReceiveOut : Machine := {specialEmptyMachine with mem := upd specialEmptyMachine.mem 0 (.val (wmod 22))}
+
+theorem special_empty_prefers_receive :
+    run (specialBuilt (some specialReceive) (some specialFallback)).code specialEmptyMachine=.ok specialReceiveOut 0 := rfl
+
+theorem special_absent_endpoints_refused : run (specialBuilt none none).code dispatchMachine=.revert := by
+  rw [special_outcome none none special_absent_room]
+  rfl
+
+def specialPaidMachine : Machine := {dispatchMachine with callvalue := wmod 1}
+
+theorem special_nonpayable_value_refused :
+    run (specialBuilt (some specialReceive) (some specialFallback)).code specialPaidMachine=.revert := rfl
+
+theorem special_revert_all_refused :
+    run (specialBuilt (some specialReceive) (some specialFallback)).code dispatchMachine≠.revert := by
+  rw [special_nonempty_uses_fallback]
+  intro impossible
+  cases impossible
+
+#print axioms special_found
+#print axioms special_room
+#print axioms special_absent_room
+#print axioms special_outcome
+#print axioms special_nonempty_uses_fallback
+#print axioms special_empty_prefers_receive
+#print axioms special_absent_endpoints_refused
+#print axioms special_nonpayable_value_refused
+#print axioms special_revert_all_refused
