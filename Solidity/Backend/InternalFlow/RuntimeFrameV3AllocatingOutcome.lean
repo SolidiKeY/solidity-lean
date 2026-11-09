@@ -57,9 +57,9 @@ theorem after_arguments {C : Contract} {Γ : Ctx} {L b frame : Nat} {F : Frag Γ
  by_cases reads : count≤σ.heap.len ref .dyn
  · have room := returnRoom reads
    have budget : AllocationInput b frame (compiled.checked.cost σ+4*count) σ base before := by
-     simpa only [demand,if_pos reads] using capacity
+     simpa only [demand,ite_eq_left reads] using capacity
    have index : count<depth := by
-     simp only [requiredDepth,if_pos reads] at enough
+     simp only [requiredDepth,ite_eq_left reads] at enough
      omega
    cases count with
    | zero =>
@@ -70,7 +70,7 @@ theorem after_arguments {C : Contract} {Γ : Ctx} {L b frame : Nat} {F : Frag Γ
          base before initial lo pointer bottom start room.prefixBound room.boundary room.pointerAbove room.pointerBelow
          room.bottomAbove room.bottomBelow room.current room.bottomValue input
      refine .inl ⟨⟨σ,List.prefix_refl _⟩,target,addresses,source,executed,represented,stack,extended,?_⟩
-     simpa only [demand,if_pos reads,Nat.mul_zero,Nat.add_zero] using growth
+     simpa only [demand,ite_eq_left reads,Nat.mul_zero,Nat.add_zero] using growth
    | succ n =>
      obtain ⟨out,target,addresses,mid,prefixRun,source,executed,represented,stack,extended,growth,words,current,saved⟩ :=
        AllocatingQuotations.after_arguments name args compiled σ (countValue (n+1) bound,(some ref,())) evaluated
@@ -79,13 +79,13 @@ theorem after_arguments {C : Contract} {Γ : Ctx} {L b frame : Nat} {F : Frag Γ
          (room.savedRoom (by omega)) (room.savedFits (by omega)) room.current (room.bottomLocal (by omega)) room.bottomBelow
          (room.bottomBefore (by omega)) (room.separate (by omega)) room.bottomValue room.bottomAbove budget (room.notFragile (by omega))
      have actual : (InterfaceV1.recursiveSource name args .none AllocatingActivation.step depth).run σ=.ok out := by
-       simpa only [if_pos index] using source depth
+       simpa only [ite_eq_left index] using source depth
      refine .inl ⟨out,target,addresses,actual,executed,represented,stack,extended,?_⟩
-     simpa only [demand,if_pos reads] using growth
+     simpa only [demand,ite_eq_left reads] using growth
  · have budget : AllocationInput b frame (compiled.checked.cost σ+4) σ base before := by
-     simpa only [demand,if_neg reads] using capacity
+     simpa only [demand,ite_eq_right reads] using capacity
    have index : 0<depth := by
-     simp only [requiredDepth,if_neg reads] at enough
+     simp only [requiredDepth,ite_eq_right reads] at enough
      omega
    cases count with
    | zero => omega
@@ -135,12 +135,13 @@ theorem matched (depth : Nat) (enough : 1<depth) :
    (run ArgumentCall.code MemoryArgument.input) := by
  have reads : 1≤caller.heap.len ref .dyn := MemoryArgument.read_bound
  have capacity : AllocationInput 1 16 (checked.cost caller+demand 1 (caller.heap.len ref .dyn)) caller P.base MemoryArgument.input := by
-   simpa only [demand,if_pos reads] using ArgumentCall.total_capacity
+   simpa only [demand,ite_eq_left reads] using ArgumentCall.total_capacity
  have actual := after_arguments "allocatingCountdown" MemoryArgument.args ArgumentEntry.Checks.prepared caller
    1 (by decide) ref MemoryArgument.arguments P.base MemoryArgument.input MemoryArgument.initial 7 8 7 10
    (by change 1+checked.need≤16;rw [ArgumentEntry.Checks.need_eq];decide) (by intro positive;decide)
-   (fun _ => room) capacity depth (by simp only [requiredDepth,if_pos reads];omega)
- simpa only [demand,if_pos reads,ArgumentEntry.Checks.cost_zero,Nat.zero_add,ArgumentCall.caller_fragment] using actual
+   (fun _ => room) capacity depth (by simp only [requiredDepth,ite_eq_left reads];omega)
+ simp only [demand,ite_eq_left reads,ArgumentEntry.Checks.prepared,ArgumentEntry.Checks.cost_zero,Nat.zero_add,ArgumentCall.caller_fragment] at actual
+ with_unfolding_all exact actual
 theorem observations :
  (ArgumentCall.last.stack,[ArgumentCall.last.mem 0,ArgumentCall.last.mem 1,ArgumentCall.last.mem 2,ArgumentCall.last.mem 3,ArgumentCall.last.mem 4,ArgumentCall.last.mem 5,ArgumentCall.last.mem 7,ArgumentCall.last.mem 8,ArgumentCall.last.mem 9,
  ArgumentCall.last.mem 10,ArgumentCall.last.mem 11,ArgumentCall.last.mem 12,ArgumentCall.last.mem 13,ArgumentCall.last.mem 16,ArgumentCall.last.mem 17,ArgumentCall.last.mem 18,ArgumentCall.last.mem 20,ArgumentCall.last.mem 21])=
@@ -177,12 +178,13 @@ theorem matched (depth : Nat) (positive : 0<depth) :
    (run AllocatingZero.Checks.code Z) := by
  have reads : 0≤caller.heap.len ref .dyn := Nat.zero_le _
  have capacity : AllocationInput 1 16 (checked.cost caller+demand 0 (caller.heap.len ref .dyn)) caller P.base Z := by
-   simpa only [demand,if_pos reads,Nat.mul_zero,Nat.add_zero] using AllocatingZero.Checks.capacity
+   simpa only [demand,ite_eq_left reads,Nat.mul_zero,Nat.add_zero] using AllocatingZero.Checks.capacity
  have actual := after_arguments "allocatingCountdown" AllocatingZero.Checks.args AllocatingZero.Checks.prepared caller
    0 W_pos ref AllocatingZero.Checks.arguments P.base Z AllocatingZero.Checks.initial 6 8 7 10
    (by change 1+checked.need≤16;rw [AllocatingZero.Checks.need_eq];decide) (by intro impossible;omega)
-   (fun _ => room) capacity depth (by simp only [requiredDepth,if_pos reads];omega)
- simpa only [demand,if_pos reads,Nat.mul_zero,AllocatingZero.Checks.cost_zero,Nat.add_zero,AllocatingZero.Checks.caller_fragment] using actual
+   (fun _ => room) capacity depth (by simp only [requiredDepth,ite_eq_left reads];omega)
+ simp only [demand,ite_eq_left reads,Nat.mul_zero,AllocatingZero.Checks.prepared,AllocatingZero.Checks.cost_zero,Nat.add_zero,AllocatingZero.Checks.caller_fragment] at actual
+ with_unfolding_all exact actual
 
 theorem no_owner (cursor : Fin W) : ¬StructAllocatorRepr caller.heap P.base 16 cursor Z := AllocatingZero.Checks.no_owner cursor
 theorem observations :
@@ -226,13 +228,13 @@ theorem matched (depth : Nat) (positive : 0<depth) :
  GrowingResult 1 1 16 4 F caller P.base input
    ((ArgumentCalleeFailure.Checks.call depth).run caller) (run code input) := by
  have capacity : AllocationInput 1 16 (B.cost caller+demand 3 (caller.heap.len ref .dyn)) caller P.base input := by
-   simpa only [demand,if_neg bad_domain] using ArgumentCalleeFailure.Checks.total_capacity
+   simpa only [demand,ite_eq_right bad_domain] using ArgumentCalleeFailure.Checks.total_capacity
  have actual := after_arguments "allocatingCountdown" ArgumentCalleeFailure.Checks.args prepared caller
    3 (by decide) ref ArgumentCalleeFailure.Checks.args_succeed P.base input MemoryArgument.initial 0 0 0 0
    (by change 1+B.need≤16;rw [ArgumentCalleeFailure.Checks.need_eq];decide) (by intro positive;decide)
-   (fun reads => (bad_domain reads).elim) capacity depth (by simp only [requiredDepth,if_neg bad_domain];omega)
- have fragment : B.frag.restrict Γ=F := rfl
- simpa only [demand,if_neg bad_domain,ArgumentCalleeFailure.Checks.cost_zero,Nat.zero_add,fragment] using actual
+   (fun reads => (bad_domain reads).elim) capacity depth (by simp only [requiredDepth,ite_eq_right bad_domain];omega)
+ simp only [demand,ite_eq_right bad_domain] at actual
+ with_unfolding_all exact actual
 
 theorem target_revert : run code input=.revert := by
  rcases matched 1 (by decide) with ⟨out,m,addresses,source,rest⟩ | ⟨source,target⟩
@@ -241,7 +243,7 @@ theorem target_revert : run code input=.revert := by
  · exact target
 
 theorem wrong_cost : demand 3 (caller.heap.len ref .dyn)≠12 := by
- rw [demand,if_neg bad_domain]
+ rw [demand,ite_eq_right bad_domain]
  decide
 
 theorem zero_unmatched : ¬GrowingResult 1 1 16 4 F caller P.base input
