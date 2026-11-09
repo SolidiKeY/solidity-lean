@@ -31,8 +31,8 @@ theorem restore {C : Contract} {R : RefTy} {L b frame : Nat} {F : Frag (Paramete
    intro i small
    change i<2 at small
    rcases (by omega : i=0 ∨ i=1) with rfl | rfl
-   · simpa only [Nat.add_zero,snapshot,writeMachine,upd,if_neg (show b≠b+1 from by omega)] using reference
-   · simpa only [snapshot,writeMachine,upd,if_true] using counter
+   · simpa only [Nat.add_zero,snapshot,writeMachine,upd,ite_eq_right (show b≠b+1 from by omega)] using reference
+   · simpa only [snapshot,writeMachine,upd,ite_true] using counter
  obtain ⟨last,executed,recovered,values⟩ := Context.restore_context b (Parameters R) snapshot after
    lo pointer start locals above payload (.inl separate) fits current saved
  have heap : ∀ x, frame≤x → last.mem x=snapshot.mem x := by
@@ -50,15 +50,15 @@ theorem restore {C : Contract} {R : RefTy} {L b frame : Nat} {F : Frag (Paramete
  change last.mem b=snapshot.mem b at oldRef
  change last.mem (b+1)=snapshot.mem (b+1) at oldCounter
  refine ⟨last,executed,transported,recovered.stack,recovered.cursor,?_,?_,?_⟩
- · simpa only [snapshot,writeMachine,upd,if_neg (show b≠b+1 from by omega)] using oldRef
- · simpa only [snapshot,writeMachine,upd,if_true] using oldCounter
+ · simpa only [snapshot,writeMachine,upd,ite_eq_right (show b≠b+1 from by omega)] using oldRef
+ · simpa only [snapshot,writeMachine,upd,ite_true] using oldCounter
  · intro cursor positive initial space
    have ownership := recovered.allocator σ.heap base frame cursor (by
      intro x member
      change x∈[b,b+1] at member
      simp only [List.mem_cons,List.not_mem_nil,or_false] at member
      rcases member with rfl | rfl <;> constructor <;> omega) (by omega) below initial
-   simpa only [Nat.add_zero] using ownership
+   simpa only [State.setLocal, Nat.add_zero] using ownership
 
 namespace Checks
 open CountdownWitness RecursiveActivation
