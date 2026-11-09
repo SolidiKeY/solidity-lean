@@ -2,9 +2,7 @@ import Solidity.Yul.Views.GenericFlow.FollowingPlan
 
 namespace Solidity.Yul.Views.GenericFlow.Batch
 
-/-- Canonical checked preparation only. Failure retains the exact successful
-prefix state; Source errors retain their result and complete state. The finite
-request list is the recursion index, with no additional root/domain/fuel cap. -/
+/-- Canonical checked preparation only. Failure retains the exact successful prefix state; Source errors retain their result and complete state. The finite request list is the recursion index, with no additional root/domain/fuel cap. -/
 def run? {E Γ} (F : Source.Fr) (interface : Generic.OwnershipInterface E Γ F)
     (layout : interface.Layout) (fixed : Roadmap.Evm.Fixed)
     (check : List (ScalarPath E.layout (E.lay F.this)) → Bool) :

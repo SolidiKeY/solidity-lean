@@ -1,14 +1,6 @@
 /-!
 # Checked ownership following
-
-The varying computations and the existing, state-indexed Plan constructor are
-parameters. `Following` stores only actual inventory/encoding/check equations;
-it assumes no final view, inverse, frame or freshness law. In particular, its
-result remains the caller's intrinsic Plan type, not an erased state.
-
-The reducible runner preserves the separation-check/decoder branch order used
-by the existing negative Controls. Matches inspect parameter-only `Option`s,
-not indexed families (intrinsic Gate G0).
+The varying computations and the existing, state-indexed Plan constructor are parameters. `Following` stores only actual inventory/encoding/check equations; it assumes no final view, inverse, frame or freshness law. In particular, its result remains the caller's intrinsic Plan type, not an erased state. The reducible runner preserves the separation-check/decoder branch order used by the existing negative Controls. Matches inspect parameter-only `Option`s, not indexed families (intrinsic Gate G0).
 -/
 
 namespace Solidity.Yul.Views.GenericFlow
