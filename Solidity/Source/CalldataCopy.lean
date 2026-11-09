@@ -41,9 +41,17 @@ theorem cdToMem_array_run (F : Fr) (σ : STy) (offset length : Nat)
             ⟨.array .memory σ none,
               Data.array values.length (fun _ h => nomatch h)
                 (fun k => .val (values.get k))⟩).1})) := by
-  have notcd : (some DataLoc.memory : Option DataLoc) ≠ some .calldata := by decide
-  simp only [cdToMem,STy.loc?,dif_neg notcd]
-  rw [Hoare.run_bind,mapM_lift_run]
+  have selected : cdToMem (E := E) (Γ := Γ) F (.array .memory σ none) offset length =
+      (do
+        let xs ← (List.range length).mapM fun j =>
+          lift (decodeWord E.layout (cdWordAt F (offset+32*j)) σ)
+        return .val (← allocRef (Data.array (D := E.layout) (l := .memory) (n := none)
+          xs.length (fun _ h => nomatch h) (fun k => .val (xs.get k))))) := by
+    cases σ <;> try rfl
+    rename_i loc elem count
+    cases loc <;> cases count <;> try rfl
+    exact (plain _ _ rfl).elim
+  rw [selected,Hoare.run_bind,mapM_lift_run]
   cases (List.range length).mapM (fun j =>
     decodeWord E.layout (cdWordAt F (offset+32*j)) σ) <;> rfl
 
