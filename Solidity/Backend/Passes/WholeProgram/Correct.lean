@@ -9,7 +9,8 @@ For every program `Compiler.compile` accepts, on each of its eleven branches:
 the static check refuses or the explicit `Input` (the world premise) gives
 `AgreesExact`; success and revert transport; saved-tail
 independence with one shared canonical machine; and typed sequencing of two
-accepted programs through `BoundaryLink` / `MappedBoundaryLink`.
+accepted programs through `BoundaryLink` / `MappedBoundaryLink` (success and
+terminal failure for both).
 
 None of these carries the payment-freedom premise `Evm.Prog.pays P = false`
 of the generic Passes results (`Boundary`, `Sequence`, `EmittedTail`,
@@ -26,7 +27,8 @@ open Solidity.Evm Solidity.Evm.Compiler
 variable {C : Contract} {b L frame : Nat} {Γ Δ Ξ : Ctx}
   {F : Frag Γ} {P : Prog C Γ Δ} {Q : Prog C Δ Ξ}
 
-/-- `AgreesExact`, unfolded: the three outcomes of `compilation_exact`. -/
+/-- `correct_exact` with `AgreesExact` unfolded: the three outcomes of the
+pays-gated `compilation_exact`, here without its payment premise. -/
 theorem exact (result : Compilation b F P)
     {base : Nat → Fin W} {σ : State C Γ} {m : Machine}
     (hi : result.Input L frame base σ m) :
@@ -38,9 +40,11 @@ theorem exact (result : Compilation b F P)
     (P.run σ = .error .diverge ∧ run result.code m = .fault) :=
   Compilation.correct_exact result hi
 
-/-- **Whole-program intrinsic stage.** Every program the checked entry
-accepts is either statically refused at `L`/`frame` (no state is admitted)
-or, for every state and machine meeting its `Input`, agrees exactly. -/
+/-- **Whole-program intrinsic stage.** For a program the checked entry
+accepts: if the static check fires at `L`/`frame` no state is admitted, and
+every state and machine meeting its `Input` agree exactly. Both conjuncts hold
+for any `Compilation`; the acceptance premise fixes the result the endpoint
+names and is not used by the proof. -/
 theorem whole_program {result : Compilation b F P}
     (_accepted : Compiler.compile b F P = some result) :
     (staticRefused result L frame = true →
@@ -238,8 +242,35 @@ theorem sequence_mapped_success
   · rw [run_append_ok ht]
     exact ht'
 
-/-- Compiled code of an accepted program depends only on the joined program,
-so the two associations of a three-stage program compile to the same code. -/
+/-- Two-sided terminal failure through the explicit-map boundary. -/
+theorem sequence_mapped_revert_iff
+    (left : Compilation b F P) (right : Compilation b left.frag Q)
+    {base : Nat → Fin W} {σ : State C Γ} {m : Machine}
+    (hi : left.Input L frame base σ m)
+    (link : MappedBoundaryLink left right L frame base σ m) :
+    run (left.code ++ right.code) m = .revert ↔
+      TerminalFailure P σ ∨ ∃ o, P.run σ = .ok o ∧ TerminalFailure Q o.st := by
+  constructor
+  · intro ht
+    rcases exact left hi with ⟨o, mid, hs, hm, _, hr⟩ | ⟨hs, _⟩ | ⟨_, hm⟩
+    · obtain ⟨mb, hr'⟩ :=
+        (mapped_output_iff left (L + Evm.Prog.pushes P) frame base σ m o.st mid).mp hr
+      rw [run_append_ok hm] at ht
+      exact .inr ⟨o, hs, (revert_iff right (link o mid mb hs hm hr')).mp ht⟩
+    · exact .inl hs
+    · have hf := run_append_fault (c₂ := right.code) hm
+      rw [ht] at hf
+      cases hf
+  · rintro (hs | ⟨o, hs, hfail⟩)
+    · exact run_append_revert ((revert_iff left hi).mpr hs)
+    · obtain ⟨mid, hm, _, hr⟩ := success left hi hs
+      obtain ⟨mb, hr'⟩ :=
+        (mapped_output_iff left (L + Evm.Prog.pushes P) frame base σ m o.st mid).mp hr
+      rw [run_append_ok hm]
+      exact (revert_iff right (link o mid mb hs hm hr')).mpr hfail
+
+/-- The checked entry sees only the joined program, so the two associations
+of a three-stage program compile to the same code (or are both refused). -/
 theorem compile_codes_assoc {Ω : Ctx} (F : Frag Γ)
     (P : Prog C Γ Δ) (Q : Prog C Δ Ξ) (R : Prog C Ξ Ω) :
     (Compiler.compile b F ((P.join Q).join R)).map (·.code) =

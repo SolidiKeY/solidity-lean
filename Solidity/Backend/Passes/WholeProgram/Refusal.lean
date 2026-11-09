@@ -4,18 +4,22 @@ import Solidity.Evm.Compiler
 # Decidable static refusals for the checked compiler entry
 
 `Compilation.Input` (`Solidity/Evm/Compiler.lean`) mixes two kinds of
-premise. Its *static* part bounds only numbers known before any state is
-chosen: the array bound `L` against `Lmax` (`SimL.bound`, and on the core path
+premise. The *static* bounds checked here involve only numbers known before
+any state is chosen: the array bound `L` against `Lmax` (`SimL.bound`, and on the core path
 `L + pushes P ≤ Lmax`), the locals of the frame (`StateRepr.locals`:
 `b + Γ.length ≤ frame`) and the reserved frame (`b + requiredFrame ≤ frame`).
 Its *dynamic* part represents a particular typed state in a particular machine
 (`Sim`, heap, pointers, allocator, the copy bound `copyBoundProg P σ ≤ L`).
 
-`staticRefused` computes the static part for each of the eleven branches;
+`staticRefused` computes these bounds for each of the eleven branches;
 `staticRefused_input` proves that when it fires no state, machine and base map
-satisfy `Input`, and `staticRefused_of_input` is the converse: every accepted
-input passes the check. Whether every passing state is represented is the
-dynamic, world-side question and is not decided here.
+satisfy `Input`, and `staticRefused_of_input` is its contrapositive form:
+every accepted input passes the check. The check is sound, not complete: it
+omits bounds that are implied only through the dynamic part, such as
+`frame < W` when `Γ` holds a represented memory pointer (`HeapRepr.above`), or
+`0 < b` for a program whose allocation cost is positive in every state
+(`AllocationInput`). Whether every passing state is represented (the true
+converse) is the world-side question and is not decided here.
 -/
 namespace Solidity.Backend.Passes.WholeProgram
 
@@ -44,6 +48,7 @@ def staticRefused (result : Compilation b F P) (L frame : Nat) : Bool :=
   | .fixedMemory _ => memoryRefused b L frame Γ.length 0
   | .copyConstruction _ => memoryRefused b L frame Γ.length (Memory.frameNeedProg P)
 
+/-- `memoryRefused` passes exactly when its three bounds hold. -/
 theorem memoryRefused_false {b L frame locals need : Nat} :
     memoryRefused b L frame locals need = false ↔
       L ≤ Lmax ∧ b + locals ≤ frame ∧ b + need ≤ frame := by
@@ -81,12 +86,14 @@ theorem staticRefused_input (result : Compilation b F P) {L frame : Nat}
   cases h
 
 /-- The branches whose `Input` reserves `requiredFrame` cells above `b`:
-all but the core path and the two nonallocating reference/fixed paths. -/
+all but the core path and the reference-array and fixed-array paths, whose
+`Input` bounds only the locals, not a temporary frame. -/
 def reservesFrame (result : Compilation b F P) : Bool :=
   match result with
   | .core .. | .referenceArrays _ | .fixedMemory _ => false
   | _ => true
 
+/-- The memory-calls path reserves its call frames. -/
 theorem reservesFrame_of_isMemoryCalls (result : Compilation b F P)
     (h : result.isMemoryCalls = true) : reservesFrame result = true := by
   cases result <;> first | rfl | cases h
