@@ -4,94 +4,220 @@
   "slug": "tv-yul",
   "base": "381328f608032dd19c405373c2b265e83a969850",
   "status": "partial",
-  "verdict": null,
-  "technique": "Exact compiler-output equality as a baseline translation recognizer",
-  "prototype_commit": "da32dd0ece5a76a01c0d436cd3e9a6229cf8e4c1",
-  "prototype_path": "prototypes/TvYul.lean at prototype_commit (removed from branch tip)",
-  "merge_scope": "Assigned audit branch has only docs/audits/shrink/tv-yul/** changes and no prototype commit ancestry. Prototype checkpoints are preserved on the separate owned prototype_branch.",
+  "verdict": "NO-GO",
+  "technique": "Finite exhaustive semantic translation validation of loop-free WordControl-selected Backend.Block output",
+  "endpoint_authorization": {
+    "decision": "H264 A",
+    "question": "TVYUL-ENDPOINT",
+    "applied_and_acknowledged": true,
+    "endpoint": "Existing Yul/Compilation theorem family; original Views endpoint replaced"
+  },
+  "prototype_commit": "2aa3a2a21a1e081be5a2a760f91c0d11a084c3e2",
+  "prototype_branch": "codex/shrink-pilots-1108/tv-yul-prototype",
+  "prototype_paths": [
+    "prototypes/TvYulBlock.lean",
+    "prototypes/shadow/Solidity/Yul/Compilation/NormalWordTransport.lean"
+  ],
+  "merge_scope": "Only docs/audits/shrink/tv-yul/** in lane diff against integrated origin/master. No prototype commit is an ancestor of the assigned audit branch; prototype code remains exclusively on the separate owned prototype branch.",
+  "family": "NormalControl word-selector transports and unchanged controls",
+  "family_inventory": "pilot.json",
   "before": {
-    "selected_covered_family": null,
-    "lines": null,
-    "declarations": null,
-    "kernel_check_seconds": null,
-    "largest_module_candidate_not_a_selected_family": {
-      "path": "Solidity/Yul/Views/PackedAggregates.lean",
-      "physical_lines": 383,
-      "lexical_declarations": 41,
-      "theorems": [
-        "reverseByteIndex_twice",
-        "patchBytes_at",
-        "patchBytes_outside",
-        "patchBytes_unchanged",
-        "packedStart_spec",
-        "PackedMembers.end_mono",
-        "PackedMembers.encode_before",
-        "PackedMembers.encode_residual",
-        "PackedMembers.decode_encode",
-        "PackedMembers.encode_exists",
-        "PackedMembers.encode_unchanged",
-        "PackedMembers.encode_matches",
-        "PackedMembers.encode_idempotent",
-        "PackedMembers.owned_bounds",
-        "packedStruct_roundtrip",
-        "membersArray_arrayMembers",
-        "arrayMembers_scalar",
-        "packedArray_roundtrip",
-        "PackedMembers.head_tail_disjoint",
-        "PackedMembers.nextSlot_spec",
-        "PackedMembers.decode_congr"
-      ]
-    }
+    "lines": 647,
+    "declarations": 57,
+    "kernel_check_seconds": 8.435108046998721,
+    "round_seconds": [
+      8.435108046998721,
+      8.441016300998854,
+      8.400212317001206
+    ]
   },
   "after": {
-    "lines": 35,
-    "lexical_declarations": 5,
-    "checker": "checkSkip",
-    "soundness": "Solidity.Yul.Compilation.TvYulPilot.checkSkip_sound",
-    "completeness": "Refuted for this checker by checkSkip_incomplete: JUMP 0 has an actual Artifact but checkSkip rejects it",
-    "kernel_check_seconds": null,
-    "standalone_lean_plus_lake_wall_seconds": 0.8720828270000425,
-    "timing_boundary": "Single serial -j1 standalone elaboration/kernel check including Lake orchestration and cached-import replay; not isolated kernel time or a matched replacement workload"
+    "lines": 1059,
+    "declarations": 108,
+    "prototype_lines": 535,
+    "prototype_declarations": 53,
+    "retained_lines": 524,
+    "retained_declarations": 55,
+    "kernel_check_seconds": 10.7657267579998,
+    "round_seconds": [
+      10.7657267579998,
+      10.804034480000155,
+      10.740527398999802
+    ]
   },
-  "preserved_family_exports": null,
+  "size_ratio_before_over_after": 0.6109537299339,
+  "required_ratio": 3,
+  "verdict_reasons": [
+    "The matched workload grows from647 to1059 physical lines (57 to108 lexical declarations). Checker plus soundness, completeness, instances, tests and original-name facade alone is535 lines; five retained files cannot be counted as deleted.",
+    "Direct exhaustive evaluation on the existing two-local word-control fixture fails at the unchanged default maximum recursion depth. This is a failed experiment, not a passing kernel check. Generic proof-derived acceptance works but does not remove that runtime cost."
+  ],
+  "timing": {
+    "method": "Median of three sums of fresh serial Lean elaboration and kernel-check processes, including cached import loading and artifact writes. Not isolated proof-term kernel CPU time. Both workloads use the same source snapshot, toolchain, cache and VM resource policy; imports warmed by cache fetch before measurement.",
+    "command": "python3 -B docs/audits/shrink/tv-yul/measure.py PROTOTYPE_WORKTREE EVIDENCE_DIRECTORY --lean-bin LEAN_BIN",
+    "lean": "Lean 4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b",
+    "lake": "Lake 5.0.0-src+797c613",
+    "options": [
+      "-j1",
+      "--tstack=131072"
+    ],
+    "cache": "Initial frozen-base pack381328f608: +6710 entries. Refreshed before final exact-source rounds: pack5414256fdf, +4490 entries; first parts URL404, fallback archive and installation succeeded.",
+    "resources": "LEAN_NUM_THREADS=1; VM16GiB cgroup, no swap, 4GiB OS/effective-working-set reserve, no virtual-address cap. No systemd scope on cloud VM (H232).",
+    "passed_kernel_workloads": true,
+    "raw_checker_within_default_budget": false
+  },
+  "checker": {
+    "entry": "Solidity.Yul.Compilation.TvYulBlock.validate",
+    "soundness": [
+      "checkedArtifact",
+      "check_sound",
+      "validate_code"
+    ],
+    "completeness": [
+      "check_complete",
+      "check_correct",
+      "generated_check",
+      "validate_complete"
+    ],
+    "domain": "Full256bit locals and newer prefix, existing StmtWordP source profile, loop-free existing Backend.Block, existing WordControl selection, and one fixed total source horizon. NormalControl.Derivation derives the horizon/loop-free conditions, so the two original exported theorem signatures gain no premise.",
+    "relation": "Returns the unchanged actual Artifact type, preserving Artifact.source_to_model (every source horizon and full machine/caller frame), Artifact.model_to_source (every successful target run, zero skip and full final frame), normal_to_model and completion_iff.",
+    "scope_boundary": "Existing Backend.Block plus proved selector, not arbitrary raw EVM bytecode. No loops, native/gas/resource or Source/G24 adequacy claimed.",
+    "positive_controls": "Actual source sequence with conditional branches; selected block accepted; semantically equivalent different-size selected output accepted. Concrete direct proofs use zero locals/depth. Existing two-local/depth13 controls replay symbolically through generic acceptance.",
+    "negative_controls": "Wrong appended push rejected and proved to have no Artifact; insufficient horizon, loops and unsupported SSTORE selection refused.",
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "preserved_family_exports": [
+    {
+      "name": "Solidity.Yul.Compilation.NormalControl.Derivation.source",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.machine",
+      "method": "exact-header facade and kernel proof-type equality"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.source_machine",
+      "method": "exact-header facade and kernel proof-type equality"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.actual_visit",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.actual_emission",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.actual_selection",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.source",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.model_run",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.shifted_run",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.source_model",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.unequal_update",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.equal_update",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.zero_update",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.high_update",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.high_run",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.oversized",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalFramedTransport.word_instruction",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalFramedTransport.word_selection",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalFramedTransport.irStack_words",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalFramedTransport.Controls.source_and_run",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalFramedTransport.Controls.whole_reflected",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalFramedTransport.Controls.shifted_success",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalFramedTransport.Controls.high_only_success",
+      "method": "unchanged source recompiled against private facade"
+    }
+  ],
+  "all_family_theorem_statements_preserved": true,
   "weakened_existing_statements": [],
   "proved_views_replacements": 0,
-  "size_ratio": null,
-  "scope_findings": [
-    "882 Views modules and 1108 local import-closure modules at frozen base; closure includes no Compilation, Closed*, or Yul.Syntax modules. This is source inventory, not a proof of impossibility.",
-    "Views.ActualScalarWrite proves real Source account-storage mutation; Artifact describes intrinsic Yul word statements and preserves every Evm.Machine field except stack.",
-    "Compilation.PhysicalStore imports Views.MemoryImages and proves byte_run, word_memory, image_frame using Backend.Environment.runData. It explicitly distinguishes that machine from Evm.Machine; SelectedPhysicalStore uses runSlice. These are real bridges, but do not supply the assigned Artifact equivalence."
+  "preservation_evidence": "Original qualified machine/source_machine headers compared exactly; kernel equality of original and replacement theorem proof types passes. Six original modules (five unchanged plus replacement facade) and all23 original theorem exports recompiled in matched after rounds; existing guards and axioms pins retained.",
+  "largest_family_boundary": "WordControl-selected loop-free Backend.Block, uniform source horizon. Largest of the listed NormalControl selector groups by source lines; no repository-wide maximum or numeric/stack selector-inclusion theorem claimed. Larger ScopedControl has LoopControl leaves outside this domain.",
+  "normal_control_comparison_groups": {
+    "word": {
+      "physical_lines": 647,
+      "lexical_declarations": 57
+    },
+    "numeric": {
+      "physical_lines": 494,
+      "lexical_declarations": 49
+    },
+    "stack": {
+      "physical_lines": 292,
+      "lexical_declarations": 20
+    }
+  },
+  "raw_experiment": {
+    "command": "lean -j1 --tstack=131072 RawAttempt.lean",
+    "fixture": "NormalWordTransport.Controls.statement, compiled at horizon11, locals2, depth0",
+    "exit": 1,
+    "decisive_output": "maximum recursion depth has been reached",
+    "raised_budget": false,
+    "seconds": 0.6449559109996699
+  },
+  "limitations": [
+    "No repository-wide maximum-family theorem or numeric/stack selector-inclusion bridge is claimed; word group is largest of the inventoried NormalControl selector groups.",
+    "Raw evaluator is infeasible for nonzero locals/prefixes; exhaustive finite enumeration is mathematically a decision procedure, not a practical solver.",
+    "No systemd scope on cloud VM (H232); get_goal is not exposed. Existing persistent goal was not recreated or reset.",
+    "An earlier library checkpoint failed under an erroneous virtual-address cap and was stopped; it is not a passing gate. Corrected VM-bound final full validation remains outstanding."
   ],
   "questions": [],
   "outstanding": [
-    "Select a real covered Yul/Compilation family under H264 and name and preserve every exported theorem and Artifact forward/backward statement without weakening premises.",
-    "Implement the requested source/program plus compiled-output relation checker, with soundness and completeness or the allowed generic-lemma alternative. The current skip recognizer is deliberately incomplete.",
-    "Measure the authorized Compilation family before/after lines, declarations and serial kernel check time after cache fetch, and evaluate the 3x and gate-budget criteria.",
-    "Complete library checkpoint, final full gates, final finder/skeptic review, and final handoff; no RUNTIME_GATE_PASS or completed GO/NO-GO is claimed."
-  ],
-  "limitations": [
-    "No systemd scope on the cloud VM (H232); VM isolation, serial work, no swap, 12 GiB process limit for library checkpoint, 4 GiB initial available-memory reserve.",
-    "get_goal is not exposed in the active tool catalog; no second goal was created and no existing goal was reset.",
-    "Finder/skeptic reviewed this partial prototype/inventory read-only. They did not use Lean server and did not establish full assignment completion.",
-    "A new bridge may be constructible within prototype authorization. The scope question does not assert mathematical impossibility and is not an approval request to weaken any theorem."
-  ],
-  "integration_method": "Normal integration of the assigned audit branch is history-safe. It was recreated from the exact frozen base using only the docs diff; all previous prototype/checkpoint history is preserved separately on prototype_branch.",
-  "endpoint_authorization": {
-    "decision": "H264",
-    "choice": "A",
-    "endpoint": "Existing Solidity/Yul/Compilation theorem family preserving Artifact forward/backward statements",
-    "effect": "Replaces the original Views comparison endpoint. Concrete covered family selection and matched measurement remain outstanding."
-  },
-  "prototype_branch": "codex/shrink-pilots-1108/tv-yul-prototype",
-  "compilation_candidate": {
-    "status": "under investigation; coverage not yet proved",
-    "inventory": "family.json",
-    "stem": "ScopedControl",
-    "physical_lines": 579,
-    "lexical_declarations": 15,
-    "modules": [
-      "Solidity/Yul/Compilation/ScopedControlCompilation.lean",
-      "Solidity/Yul/Compilation/ScopedControlCompletion.lean"
-    ]
-  }
+    "Final full repository gates under corrected VM bounds; final read-only audit review and committed handoff."
+  ]
 }

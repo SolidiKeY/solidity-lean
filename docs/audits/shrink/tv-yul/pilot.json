@@ -1,0 +1,437 @@
+{
+  "base": "381328f608032dd19c405373c2b265e83a969850",
+  "prototype_commit": "2aa3a2a21a1e081be5a2a760f91c0d11a084c3e2",
+  "family": "NormalControl word-selector transports and unchanged controls",
+  "method": "Physical source lines and lexical declaration headers, not elaborated constants or proof-only lines. Five original modules retained; only NormalWordTransport is shadowed. All prototype tests and facade lines included.",
+  "before": {
+    "physical_lines": 647,
+    "lexical_declarations": 57,
+    "modules": [
+      {
+        "commit": "381328f608032dd19c405373c2b265e83a969850",
+        "path": "Solidity/Yul/Compilation/NormalControl.lean",
+        "sha256": "ca24643a2c5b7874b9f3a2023627f6b4e25b29dbcd39c168f6ab16d0dac8729c",
+        "physical_lines": 121,
+        "lexical_declarations": 6,
+        "theorems": [
+          {
+            "name": "Solidity.Yul.Compilation.NormalControl.Derivation.source",
+            "signature": "theorem Derivation.source {c n fuel} {stmt : Stmt [] [] c n} (compiled : Derivation fuel stmt) (locals : Vector Scalar.Word n) : evalStmt fuel .nil True.intro stmt compiled.profile (sourceLocals locals) = some \u27e8sourceLocals (compiled.update locals),.normal\u27e9"
+          }
+        ]
+      },
+      {
+        "commit": "381328f608032dd19c405373c2b265e83a969850",
+        "path": "Solidity/Yul/Compilation/NormalControlControls.lean",
+        "sha256": "c19bc6fd2b2960256b265ff01da70e47c9694a2d0b475a4da146e628a2a89419",
+        "physical_lines": 65,
+        "lexical_declarations": 12,
+        "theorems": []
+      },
+      {
+        "commit": "381328f608032dd19c405373c2b265e83a969850",
+        "path": "Solidity/Yul/Compilation/NormalWordTransport.lean",
+        "sha256": "39b74ffa0a9f1ffec43d94bb049980380f705f00efc16d525962d93218eff53d",
+        "physical_lines": 123,
+        "lexical_declarations": 2,
+        "theorems": [
+          {
+            "name": "Solidity.Yul.Compilation.NormalWordTransport.machine",
+            "signature": "theorem machine {c n fuel} {stmt : Stmt [] [] c n} (compiled : NormalControl.Derivation fuel stmt) (depth : Nat) (block : Backend.Block) (code : List Evm.Instr) (emitted : compiled.emit depth = some block) (translated : WordControl.blockCode block = some code) (locals : Vector Scalar.Word n) (newer : Vector Scalar.Word depth) (m : Evm.Machine) (caller : List Evm.Word) : Evm.run code {m with stack := (newer.toList ++ locals.toList).map coreWord ++ caller} = .ok {m with stack := (newer.toList ++ (compiled.update locals).toList).map coreWord ++ caller} 0"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.NormalWordTransport.source_machine",
+            "signature": "theorem source_machine {c n fuel} (stmt : Stmt [] [] c n) (compiled : NormalControl.Derivation fuel stmt) (_visited : NormalControl.compile fuel stmt = some compiled) (depth : Nat) (block : Backend.Block) (code : List Evm.Instr) (emitted : compiled.emit depth = some block) (translated : WordControl.blockCode block = some code) (locals : Vector Scalar.Word n) (newer : Vector Scalar.Word depth) (m : Evm.Machine) (caller : List Evm.Word) : (evalStmt fuel .nil True.intro stmt compiled.profile (ProducerExpressions.sourceLocals locals) = some \u27e8ProducerExpressions.sourceLocals (compiled.update locals),.normal\u27e9) \u2227 Evm.run code {m with stack := (newer.toList++locals.toList).map coreWord++caller} = .ok {m with stack := (newer.toList++(compiled.update locals).toList).map coreWord++caller} 0"
+          }
+        ]
+      },
+      {
+        "commit": "381328f608032dd19c405373c2b265e83a969850",
+        "path": "Solidity/Yul/Compilation/NormalWordTransportControls.lean",
+        "sha256": "ba4e2c198b7cce3f4cabab7a1519a2d021e80a5eba40cf88326a26034750a281",
+        "physical_lines": 160,
+        "lexical_declarations": 26,
+        "theorems": [
+          {
+            "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.actual_visit",
+            "signature": "theorem actual_visit : NormalControl.compile 11 statement = some compiled"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.actual_emission",
+            "signature": "theorem actual_emission : compiled.emit 0 = some block"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.actual_selection",
+            "signature": "theorem actual_selection : WordControl.blockCode block = some code"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.source",
+            "signature": "theorem source (locals : Vector Scalar.Word 2) : evalStmt 11 .nil True.intro statement compiled.profile (sourceLocals locals) = some \u27e8sourceLocals (compiled.update locals),.normal\u27e9"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.model_run",
+            "signature": "theorem model_run (locals : Vector Scalar.Word 2) (m : Evm.Machine) (caller : List Evm.Word) : Evm.run code {m with stack := locals.toList.map coreWord++caller} = .ok {m with stack := (compiled.update locals).toList.map coreWord++caller} 0"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.shifted_run",
+            "signature": "theorem shifted_run (locals : Vector Scalar.Word 2) (newer : Vector Scalar.Word 13) (m : Evm.Machine) (caller : List Evm.Word) : Evm.run shiftedCode {m with stack := (newer.toList++locals.toList).map coreWord++caller} = .ok {m with stack := (newer.toList++(compiled.update locals).toList).map coreWord++caller} 0"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.source_model",
+            "signature": "theorem source_model (locals : Vector Scalar.Word 2) (m : Evm.Machine) (caller : List Evm.Word) : (evalStmt 11 .nil True.intro statement compiled.profile (sourceLocals locals) = some \u27e8sourceLocals (compiled.update locals),.normal\u27e9) \u2227 Evm.run code {m with stack := locals.toList.map coreWord++caller} = .ok {m with stack := (compiled.update locals).toList.map coreWord++caller} 0"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.unequal_update",
+            "signature": "theorem unequal_update : compiled.update #v[2,3] = #v[7,~~~(2 : Scalar.Word)]"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.equal_update",
+            "signature": "theorem equal_update : compiled.update #v[5,5] = #v[7,~~~(25 : Scalar.Word)]"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.zero_update",
+            "signature": "theorem zero_update : compiled.update #v[0,0] = #v[0,~~~(0 : Scalar.Word)]"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.high_update",
+            "signature": "theorem high_update : compiled.update #v[highOnly,0] = #v[7,~~~highOnly]"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.high_run",
+            "signature": "theorem high_run (m : Evm.Machine) (caller : List Evm.Word) : Evm.run code {m with stack := [coreWord highOnly,coreWord 0]++caller} = .ok {m with stack := [coreWord 7,coreWord (~~~highOnly)]++caller} 0"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.oversized",
+            "signature": "theorem oversized (locals : Vector Scalar.Word 2) (m : Evm.Machine) (caller : Vector Evm.Word 1023) : Evm.run code {m with stack := locals.toList.map coreWord++caller.toList} = .ok {m with stack := (compiled.update locals).toList.map coreWord++caller.toList} 0 \u2227 1024 < (locals.toList.map coreWord++caller.toList).length"
+          }
+        ]
+      },
+      {
+        "commit": "381328f608032dd19c405373c2b265e83a969850",
+        "path": "Solidity/Yul/Compilation/NormalFramedTransport.lean",
+        "sha256": "cc9b5ecbb004a4acb6ecf2e8b09923ba794055d7ab1ffa38f7e8adceeb2f5964",
+        "physical_lines": 96,
+        "lexical_declarations": 5,
+        "theorems": [
+          {
+            "name": "Solidity.Yul.Compilation.NormalFramedTransport.word_instruction",
+            "signature": "theorem word_instruction (i : Backend.Instr) (j : Evm.Instr) (selected : WordMachine.selectInstr i = some j) : SignedMachine.selectInstr i = some j"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.NormalFramedTransport.word_selection",
+            "signature": "theorem word_selection (p : Backend.Program) (code : List Evm.Instr) (selected : WordMachine.selectCode p = some code) : SignedMachine.selectCode p = some code"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.NormalFramedTransport.irStack_words",
+            "signature": "theorem irStack_words (input : Stack) : irStack input = input.map coreWord"
+          }
+        ]
+      },
+      {
+        "commit": "381328f608032dd19c405373c2b265e83a969850",
+        "path": "Solidity/Yul/Compilation/NormalFramedTransportControls.lean",
+        "sha256": "6871626b6401c044b6b5c7b0c510ba93c63ab6b1696c342cf27e8a3734ff2d2c",
+        "physical_lines": 82,
+        "lexical_declarations": 6,
+        "theorems": [
+          {
+            "name": "Solidity.Yul.Compilation.NormalFramedTransport.Controls.source_and_run",
+            "signature": "theorem source_and_run (locals : Vector Scalar.Word 2) (tail : Stack) (m : Evm.Machine) : (Closed.evalStmt 11 .nil True.intro statement compiled.profile (ProducerExpressions.sourceLocals locals) = some \u27e8ProducerExpressions.sourceLocals (compiled.update locals),.normal\u27e9) \u2227 Evm.run code {m with stack := irStack (locals.toList++tail)} = .ok {m with stack := irStack ((compiled.update locals).toList++tail)} 0"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.NormalFramedTransport.Controls.whole_reflected",
+            "signature": "theorem whole_reflected (input : Stack) (m final : Evm.Machine) (skip : Nat) (ran : Evm.run code {m with stack := irStack input} = .ok final skip) : \u2203 output : Stack, skip = 0 \u2227 final = {m with stack := irStack output} \u2227 StructuredExec block input output"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.NormalFramedTransport.Controls.shifted_success",
+            "signature": "theorem shifted_success (locals : Vector Scalar.Word 2) (newer : Vector Scalar.Word 13) (tail : Stack) (m : Evm.Machine) : Evm.run shiftedCode {m with stack := irStack (newer.toList++locals.toList++tail)} = .ok {m with stack := irStack (newer.toList++(compiled.update locals).toList++tail)} 0"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.NormalFramedTransport.Controls.high_only_success",
+            "signature": "theorem high_only_success (m : Evm.Machine) : Evm.run code {m with stack := irStack [highOnly,0]} = .ok {m with stack := irStack [7,~~~highOnly]} 0"
+          }
+        ]
+      }
+    ]
+  },
+  "after": {
+    "physical_lines": 1059,
+    "lexical_declarations": 108,
+    "retained_paths": [
+      "Solidity/Yul/Compilation/NormalControl.lean",
+      "Solidity/Yul/Compilation/NormalControlControls.lean",
+      "Solidity/Yul/Compilation/NormalWordTransportControls.lean",
+      "Solidity/Yul/Compilation/NormalFramedTransport.lean",
+      "Solidity/Yul/Compilation/NormalFramedTransportControls.lean"
+    ],
+    "prototype": {
+      "physical_lines": 535,
+      "lexical_declarations": 53
+    },
+    "modules_added": [
+      {
+        "commit": "2aa3a2a21a1e081be5a2a760f91c0d11a084c3e2",
+        "path": "prototypes/TvYulBlock.lean",
+        "sha256": "fcf181983c37b315e3d1b0987a2885ab696399163bf0cc8c4a84c3a4a19a9da3",
+        "physical_lines": 508,
+        "lexical_declarations": 51,
+        "theorems": [
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.run_sound",
+            "signature": "theorem run_sound {block : Backend.Block} {input output : Scalar.Stack} (done : run block input = some output) : StructuredExec block input output"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.run_complete",
+            "signature": "theorem run_complete {block : Backend.Block} {input output : Scalar.Stack} (executed : StructuredExec block input output) : loopFree block = true \u2192 run block input = some output"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.run_iff",
+            "signature": "theorem run_iff {block : Backend.Block} {input output : Scalar.Stack} (free : loopFree block = true) : run block input = some output \u2194 StructuredExec block input output"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.allWords_iff",
+            "signature": "theorem allWords_iff (predicate : Scalar.Word \u2192 Bool) : allWords predicate = true \u2194 \u2200 word, predicate word = true"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.allFunctions_iff",
+            "signature": "theorem allFunctions_iff (n : Nat) (predicate : (Fin n \u2192 Scalar.Word) \u2192 Bool) : allFunctions n predicate = true \u2194 \u2200 values, predicate values = true"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.allInputs_iff",
+            "signature": "theorem allInputs_iff {n : Nat} (predicate : Vector Scalar.Word n \u2192 Bool) : allInputs predicate = true \u2194 \u2200 values, predicate values = true"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.sourceLocals_toWords",
+            "signature": "theorem sourceLocals_toWords {n : Nat} (values : Values n) : sourceLocals (toWords values) = values"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.toWords_sourceLocals",
+            "signature": "theorem toWords_sourceLocals {n : Nat} (values : Vector Scalar.Word n) : toWords (sourceLocals values) = values"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.sourceResult_iff",
+            "signature": "theorem sourceResult_iff {c : Control} {n : Nat} (fuel : Nat) (stmt : Stmt [] [] c n) (profile : StmtWordP stmt) (locals out : Vector Scalar.Word n) : sourceResult fuel stmt profile locals = some out \u2194 evalStmt fuel .nil True.intro stmt profile (sourceLocals locals) = some \u27e8sourceLocals out, .normal\u27e9"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.check_iff",
+            "signature": "theorem check_iff {c : Control} {n : Nat} (fuel depth : Nat) (stmt : Stmt [] [] c n) (profile : StmtWordP stmt) (block : Backend.Block) : check fuel depth stmt profile block = true \u2194 loopFree block = true \u2227 \u2200 locals : Vector Scalar.Word n, \u2203 out : Vector Scalar.Word n, sourceResult fuel stmt profile locals = some out \u2227 \u2200 newer : Vector Scalar.Word depth, run block (newer.toList ++ locals.toList) = some (newer.toList ++ out.toList)"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.check_sound",
+            "signature": "theorem check_sound {c : Control} {n : Nat} (fuel depth : Nat) (stmt : Stmt [] [] c n) (profile : StmtWordP stmt) (block : Backend.Block) (code : List Evm.Instr) (selected : WordControl.blockCode block = some code) (accepted : check fuel depth stmt profile block = true) : \u2203 artifact : Artifact depth stmt, artifact.code = code"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.check_complete",
+            "signature": "theorem check_complete {c : Control} {n : Nat} (fuel depth : Nat) (stmt : Stmt [] [] c n) (profile : StmtWordP stmt) (block : Backend.Block) (code : List Evm.Instr) (selected : WordControl.blockCode block = some code) (free : loopFree block = true) (total : \u2200 locals : Vector Scalar.Word n, \u2203 out : Vector Scalar.Word n, evalStmt fuel .nil True.intro stmt profile (sourceLocals locals) = some \u27e8sourceLocals out, .normal\u27e9) (artifact : Artifact depth stmt) (sameCode : artifact.code = code) : check fuel depth stmt profile block = true"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.check_correct",
+            "signature": "theorem check_correct {c : Control} {n : Nat} (fuel depth : Nat) (stmt : Stmt [] [] c n) (profile : StmtWordP stmt) (block : Backend.Block) (code : List Evm.Instr) (selected : WordControl.blockCode block = some code) (free : loopFree block = true) (total : \u2200 locals : Vector Scalar.Word n, \u2203 out : Vector Scalar.Word n, evalStmt fuel .nil True.intro stmt profile (sourceLocals locals) = some \u27e8sourceLocals out, .normal\u27e9) : check fuel depth stmt profile block = true \u2194 \u2203 artifact : Artifact depth stmt, artifact.code = code"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.generated",
+            "signature": "theorem generated {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n} (compiled : NormalControl.Derivation fuel stmt) (depth : Nat) (block : Backend.Block) (emitted : compiled.emit depth = some block) : loopFree block = true \u2227 \u2200 (locals : Vector Scalar.Word n) (newer : Vector Scalar.Word depth), StructuredExec block (newer.toList ++ locals.toList) (newer.toList ++ (compiled.update locals).toList)"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.generated_check",
+            "signature": "theorem generated_check {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n} (compiled : NormalControl.Derivation fuel stmt) (depth : Nat) (block : Backend.Block) (emitted : compiled.emit depth = some block) : check fuel depth stmt compiled.profile block = true"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.machine",
+            "signature": "theorem machine {c n fuel} {stmt : Stmt [] [] c n} (compiled : NormalControl.Derivation fuel stmt) (depth : Nat) (block : Backend.Block) (code : List Evm.Instr) (emitted : compiled.emit depth = some block) (translated : WordControl.blockCode block = some code) (locals : Vector Scalar.Word n) (newer : Vector Scalar.Word depth) (m : Evm.Machine) (caller : List Evm.Word) : Evm.run code {m with stack := (newer.toList ++ locals.toList).map coreWord ++ caller} = .ok {m with stack := (newer.toList ++ (compiled.update locals).toList).map coreWord ++ caller} 0"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.source_machine",
+            "signature": "theorem source_machine {c n fuel} (stmt : Stmt [] [] c n) (compiled : NormalControl.Derivation fuel stmt) (_visited : NormalControl.compile fuel stmt = some compiled) (depth : Nat) (block : Backend.Block) (code : List Evm.Instr) (emitted : compiled.emit depth = some block) (translated : WordControl.blockCode block = some code) (locals : Vector Scalar.Word n) (newer : Vector Scalar.Word depth) (m : Evm.Machine) (caller : List Evm.Word) : (evalStmt fuel .nil True.intro stmt compiled.profile (ProducerExpressions.sourceLocals locals) = some \u27e8ProducerExpressions.sourceLocals (compiled.update locals),.normal\u27e9) \u2227 Evm.run code {m with stack := (newer.toList++locals.toList).map coreWord++caller} = .ok {m with stack := (newer.toList++(compiled.update locals).toList).map coreWord++caller} 0"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.Controls.actual_check",
+            "signature": "theorem actual_check : check 4 0 statement compiled.profile block = true"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.Controls.equivalent_output",
+            "signature": "theorem equivalent_output : check 4 0 statement compiled.profile alternative = true"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.Controls.different_output",
+            "signature": "theorem different_output : alternativeCode.length \u2260 code.length"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.Controls.mutant_rejected",
+            "signature": "theorem mutant_rejected : check 4 0 statement compiled.profile mutant = false"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.Controls.mutant_has_no_artifact",
+            "signature": "theorem mutant_has_no_artifact : \u00ac \u2203 artifact : Artifact 0 statement, artifact.code = mutantCode"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.Controls.horizon_refused",
+            "signature": "theorem horizon_refused : check 0 0 statement compiled.profile block = false"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.Controls.loop_refused",
+            "signature": "theorem loop_refused : check 4 0 statement compiled.profile (.loop [] (.code [])) = false"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.validate_some",
+            "signature": "theorem validate_some {c : Control} {n : Nat} (fuel depth : Nat) (stmt : Stmt [] [] c n) (profile : StmtWordP stmt) (block : Backend.Block) (code : List Evm.Instr) (selected : WordControl.blockCode block = some code) (accepted : check fuel depth stmt profile block = true) : validate fuel depth stmt profile block = some (checkedArtifact fuel depth stmt profile block code selected accepted)"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.validate_complete",
+            "signature": "theorem validate_complete {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n} (compiled : NormalControl.Derivation fuel stmt) (depth : Nat) (block : Backend.Block) (code : List Evm.Instr) (emitted : compiled.emit depth = some block) (selected : WordControl.blockCode block = some code) : (validate fuel depth stmt compiled.profile block).isSome = true"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.validate_code",
+            "signature": "theorem validate_code {c : Control} {n : Nat} (fuel depth : Nat) (stmt : Stmt [] [] c n) (profile : StmtWordP stmt) (block : Backend.Block) (artifact : Artifact depth stmt) (returned : validate fuel depth stmt profile block = some artifact) : WordControl.blockCode block = some artifact.code"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.ProducedControls.accepts",
+            "signature": "theorem accepts : (validate 4 0 Controls.statement Controls.compiled.profile Controls.block).isSome = true"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.ProducedControls.accepts_alternative",
+            "signature": "theorem accepts_alternative : (validate 4 0 Controls.statement Controls.compiled.profile Controls.alternative).isSome = true"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.ProducedControls.rejects_mutant",
+            "signature": "theorem rejects_mutant : (validate 4 0 Controls.statement Controls.compiled.profile Controls.mutant).isSome = false"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.ProducedControls.rejects_loop",
+            "signature": "theorem rejects_loop : (validate 4 0 Controls.statement Controls.compiled.profile (.loop [] (.code []))).isSome = false"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulBlock.ProducedControls.selector_refusal",
+            "signature": "theorem selector_refusal : (validate 1 0 oneLocal True.intro (.code [.op .SSTORE])).isSome = false"
+          }
+        ]
+      },
+      {
+        "commit": "2aa3a2a21a1e081be5a2a760f91c0d11a084c3e2",
+        "path": "prototypes/shadow/Solidity/Yul/Compilation/NormalWordTransport.lean",
+        "sha256": "91c488e2dc3e49161a429bae0284fa51ba86b7a8d5231e29eb9d277d8fe5d087",
+        "physical_lines": 27,
+        "lexical_declarations": 2,
+        "theorems": [
+          {
+            "name": "Solidity.Yul.Compilation.NormalWordTransport.machine",
+            "signature": "theorem machine {c n fuel} {stmt : Stmt [] [] c n} (compiled : NormalControl.Derivation fuel stmt) (depth : Nat) (block : Backend.Block) (code : List Evm.Instr) (emitted : compiled.emit depth = some block) (translated : WordControl.blockCode block = some code) (locals : Vector Scalar.Word n) (newer : Vector Scalar.Word depth) (m : Evm.Machine) (caller : List Evm.Word) : Evm.run code {m with stack := (newer.toList ++ locals.toList).map coreWord ++ caller} = .ok {m with stack := (newer.toList ++ (compiled.update locals).toList).map coreWord ++ caller} 0"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.NormalWordTransport.source_machine",
+            "signature": "theorem source_machine {c n fuel} (stmt : Stmt [] [] c n) (compiled : NormalControl.Derivation fuel stmt) (_visited : NormalControl.compile fuel stmt = some compiled) (depth : Nat) (block : Backend.Block) (code : List Evm.Instr) (emitted : compiled.emit depth = some block) (translated : WordControl.blockCode block = some code) (locals : Vector Scalar.Word n) (newer : Vector Scalar.Word depth) (m : Evm.Machine) (caller : List Evm.Word) : (evalStmt fuel .nil True.intro stmt compiled.profile (ProducerExpressions.sourceLocals locals) = some \u27e8ProducerExpressions.sourceLocals (compiled.update locals),.normal\u27e9) \u2227 Evm.run code {m with stack := (newer.toList++locals.toList).map coreWord++caller} = .ok {m with stack := (newer.toList++(compiled.update locals).toList).map coreWord++caller} 0"
+          }
+        ]
+      }
+    ]
+  },
+  "normal_control_comparison_groups": {
+    "word": {
+      "physical_lines": 647,
+      "lexical_declarations": 57
+    },
+    "numeric": {
+      "physical_lines": 494,
+      "lexical_declarations": 49
+    },
+    "stack": {
+      "physical_lines": 292,
+      "lexical_declarations": 20
+    }
+  },
+  "preservation": [
+    {
+      "name": "Solidity.Yul.Compilation.NormalControl.Derivation.source",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.machine",
+      "method": "exact-header facade and kernel proof-type equality"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.source_machine",
+      "method": "exact-header facade and kernel proof-type equality"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.actual_visit",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.actual_emission",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.actual_selection",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.source",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.model_run",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.shifted_run",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.source_model",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.unequal_update",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.equal_update",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.zero_update",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.high_update",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.high_run",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalWordTransport.Controls.oversized",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalFramedTransport.word_instruction",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalFramedTransport.word_selection",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalFramedTransport.irStack_words",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalFramedTransport.Controls.source_and_run",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalFramedTransport.Controls.whole_reflected",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalFramedTransport.Controls.shifted_success",
+      "method": "unchanged source recompiled against private facade"
+    },
+    {
+      "name": "Solidity.Yul.Compilation.NormalFramedTransport.Controls.high_only_success",
+      "method": "unchanged source recompiled against private facade"
+    }
+  ],
+  "coverage_boundary": "WordControl-selected loop-free Backend.Block, uniform source horizon. Largest of the listed NormalControl selector groups by source lines; no repository-wide maximum or numeric/stack selector-inclusion theorem claimed. Larger ScopedControl has LoopControl leaves outside this domain."
+}
