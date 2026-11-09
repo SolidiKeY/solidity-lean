@@ -4,7 +4,7 @@
  * the original record to the pinned archive and use the bounded native worker.
  * This partial adapter establishes neither Engine RPC nor Source agreement.
  */
-import {convertEngineFixture} from './engine_payload_reference.mjs';
+import {convertEngineFixture,engineConversionFailure} from './engine_payload_reference.mjs';
 import {classifyBlockRejection} from './eest_rejection.mjs';
 
 const keys=new Set(['forkchoiceUpdatedVersion','newPayloadVersion','params','validationError']);
@@ -75,7 +75,7 @@ export async function executeExpectedInvalidEngineFixture(record,m,execute) {
   }
   return {...base,status:'payload_rejection_reference_match'};
  } catch(error) {
-  return {...limits,status:'engine_error',retryable:true,reason:'engine-rejection-conversion-or-evidence-failed',error:String(error)};
+  return {...limits,status:'engine_error',retryable:true,reason:'engine-rejection-conversion-or-evidence-failed',error:String(error),...(engineConversionFailure(error)?{conversion_failure:engineConversionFailure(error)}:{})};
  }
 }
 
