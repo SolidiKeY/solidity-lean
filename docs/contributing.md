@@ -32,20 +32,21 @@ path, navigation and generator checks.
 
 ## Before pushing
 
-The merge pre-gate runs `gate.sh touched` on your head merged onto current
-`origin/master` (coverage in [`scripts/coord-tools/README.md`](../scripts/coord-tools/README.md));
-it is not a full build.
+The merge pre-gate runs `gate.sh touched` on your head merged onto current `origin/master`;
+it builds changed modules and their library importers ([coverage](../scripts/coord-tools/README.md)), not the full library.
 
-1. Merge `origin/master` (or use a temporary merge worktree) and run
-   `bash scripts/coord-tools/gate.sh touched` there and fix failures: a head
-   that builds only on an older base is rejected. On a lane, `coord-ask --done`
-   runs this check; pass `--no-check REASON` only for a failure your change did
-   not cause (master broken, tool missing).
-2. Changing a module with many importers (e.g. `Solidity/Source/**`): add the
-   new form beside the old as a versioned pair (H57) and move the importers in
-   the same head, or keep the old form until they move.
-3. A new gate, baseline or audit must pass on the merged head: compute ratchet
-   baselines from the merge base and keep audits re-runnable from committed scripts.
+1. `git fetch origin master && git merge origin/master` (or use a temporary merge worktree),
+   then run `bash scripts/coord-tools/gate.sh touched` there and fix failures: heads that
+   build only on an older base or only in changed files are rejected. On lanes, `coord-ask --done`
+   runs this check and reports only passing heads or heads already on master. Failure, conflict or an unavailable
+   check blocks reporting; use `--no-check REASON` only for failures your change did not cause
+   (master broken, tool missing). The push records the checked head and any command override.
+2. Changing a module with many importers (e.g. `Solidity/Source/**`) must preserve existing
+   statements: add the new form beside the old as a versioned pair (H57) and move importers
+   in the same head, or keep the old form until they move.
+3. A new gate, baseline or audit must pass on the merged head, not only your base: compute
+   ratchet baselines from the merge base or regenerate at merge; keep audits re-runnable
+   from committed scripts.
 
 Progress and status go into your result, never into shared documents.
 

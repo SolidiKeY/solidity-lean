@@ -959,4 +959,210 @@ theorem mutabilityFeaturesAt_iff {c : Cat} (s : Syn c) (f : Feature) :
 /-- info: 'Solidity.Frontend.Admission.mutabilityFeaturesAt_iff' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms mutabilityFeaturesAt_iff
 
+
+/-! Regression: constructor-only tags miss written constant/immutable state-variable qualifiers; top-level constant syntax must also remain visible. The two actual carriers reuse the generic visitor. Omission is not inferred mutable/constant status, and these raw markers certify no initializer, write-once, location, typing or admission rule. -/
+inductive DirectConstness : {c : Cat} → Syn c → Constness → Prop where
+  | stateVar (ty vis override transient name init) (qualifier : Constness) :
+      DirectConstness (.stateVar ty vis (some qualifier) override transient name init) qualifier
+  | constant (ty name value) : DirectConstness (.constant ty name value) .constant
+
+def constnessFieldsAt {c : Cat} (s : Syn c) : List Constness :=
+  Syn.casesOn (motive := fun _ _ => List Constness) s
+    ([])
+    (fun _ _ => [])
+    ([])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ _ => [])
+    (fun _ _ _ _ _ _ _ _ _ => [])
+    (fun _ _ _ _ _ => [])
+    (fun _ _ _ _ _ _ _ => [])
+    ([])
+    (fun _ _ _ => [])
+    (fun _ _ _ _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ qualifier _ _ _ _ => qualifier.toList)
+    (fun _ _ _ => [.constant])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    ([])
+    ([])
+    (fun _ _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ => [])
+    (fun _ _ => [])
+    (fun _ _ _ _ => [])
+    (fun _ _ _ => [])
+    (fun _ _ => [])
+    ([])
+    ([])
+    ([])
+    (fun _ _ _ _ => [])
+    (fun _ _ => [])
+    (fun _ _ => [])
+    (fun _ => [])
+
+theorem DirectConstness.mem_fields {c : Cat} {s : Syn c} {qualifier : Constness}
+    (field : DirectConstness s qualifier) : qualifier ∈ constnessFieldsAt s := by
+  cases field <;> exact List.mem_singleton_self _
+
+theorem constnessFieldsAt_sound {c : Cat} (s : Syn c) (qualifier : Constness)
+    (present : qualifier ∈ constnessFieldsAt s) : DirectConstness s qualifier := by
+  cases s with
+  | stateVar ty vis option override transient name init =>
+    cases option with
+    | none => exact False.elim (List.not_mem_nil present)
+    | some value =>
+      have same := List.mem_singleton.mp present
+      cases same
+      exact .stateVar ty vis override transient name init _
+  | constant ty name value =>
+    have same := List.mem_singleton.mp present
+    cases same
+    exact .constant ty name value
+  | _ => exact False.elim (List.not_mem_nil present)
+
+theorem constnessFieldsAt_iff {c : Cat} (s : Syn c) (qualifier : Constness) :
+    qualifier ∈ constnessFieldsAt s ↔ DirectConstness s qualifier :=
+  ⟨constnessFieldsAt_sound s qualifier,DirectConstness.mem_fields⟩
+
+def constnessFeature : Constness → Feature
+  | .constant => .constants
+  | .immutable => .immutables
+
+def constnessFeaturesAt {c : Cat} (s : Syn c) : List Feature :=
+  (constnessFieldsAt s).map constnessFeature
+
+theorem constnessFeaturesAt_iff {c : Cat} (s : Syn c) (f : Feature) :
+    f ∈ constnessFeaturesAt s ↔
+      ∃ qualifier, DirectConstness s qualifier ∧ constnessFeature qualifier = f := by
+  change f ∈ (constnessFieldsAt s).map constnessFeature ↔ _
+  rw [List.mem_map]
+  constructor
+  · rintro ⟨qualifier,present,same⟩
+    exact ⟨qualifier,(constnessFieldsAt_iff s qualifier).mp present,same⟩
+  · rintro ⟨qualifier,field,same⟩
+    exact ⟨qualifier,(constnessFieldsAt_iff s qualifier).mpr field,same⟩
+
+def syntaxConstnessUses {c : Cat} (root : Syn c) : List (SyntaxOccurrence × Constness) :=
+  syntaxFieldUses root constnessFieldsAt
+
+theorem syntaxConstnessUses_iff {c : Cat} (root : Syn c) (site : SyntaxOccurrence) (qualifier : Constness) :
+    (site,qualifier) ∈ syntaxConstnessUses root ↔
+      Syn.Sub site ⟨c,root⟩ ∧ DirectConstness site.2 qualifier := by
+  rw [syntaxConstnessUses, syntaxFieldUses_iff, constnessFieldsAt_iff]
+
+def declarationConstnessUses (E : Env) : List (DeclarationOccurrence × Constness) :=
+  declarationFieldUses E constnessFieldsAt
+
+theorem declarationConstnessUses_iff (E : Env) (site : DeclarationOccurrence) (qualifier : Constness) :
+    (site,qualifier) ∈ declarationConstnessUses E ↔
+      site.Occurs E ∧ DirectConstness site.2.2 qualifier := by
+  rw [declarationConstnessUses, declarationFieldUses_iff, constnessFieldsAt_iff]
+
+/-- info: 'Solidity.Frontend.Admission.constnessFieldsAt_iff' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms constnessFieldsAt_iff
+/-- info: 'Solidity.Frontend.Admission.constnessFeaturesAt_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms constnessFeaturesAt_iff
+/-- info: 'Solidity.Frontend.Admission.syntaxConstnessUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxConstnessUses_iff
+/-- info: 'Solidity.Frontend.Admission.declarationConstnessUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms declarationConstnessUses_iff
+
+
+theorem syntaxConstnessFeatures_eq {c : Cat} (root : Syn c) :
+    syntaxFieldUses root constnessFeaturesAt =
+      (syntaxConstnessUses root).map (fun use => (use.1,constnessFeature use.2)) :=
+  syntaxFieldUses_map root constnessFieldsAt constnessFeature
+
+theorem syntaxConstnessRefusals_eq {c : Cat} (root : Syn c) (accepts : Feature → Bool) :
+    syntaxFieldRefusals root constnessFeaturesAt accepts =
+      (syntaxFieldRefusals root constnessFieldsAt (fun value => accepts (constnessFeature value))).map
+        (fun use => (use.1,constnessFeature use.2)) :=
+  syntaxFieldRefusals_map root constnessFieldsAt constnessFeature accepts
+
+/-- info: 'Solidity.Frontend.Admission.syntaxConstnessFeatures_eq' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxConstnessFeatures_eq
+/-- info: 'Solidity.Frontend.Admission.syntaxConstnessRefusals_eq' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxConstnessRefusals_eq
+
 end Solidity.Frontend.Admission
