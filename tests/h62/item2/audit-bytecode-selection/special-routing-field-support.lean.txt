@@ -44,7 +44,7 @@ theorem special_nonempty_fallback_refused (size value : Fin W)
 theorem special_absent_receive_paid_refused (value : Fin W) (nonzero : value.val≠0) :
     run (specialCompilation none (some specialFallback)).code (payableMachine (wmod 0) value)=.revert := by
   rw [special_actual]
-  change (if decide (value.val=0) then _ else .revert)=.revert
+  change (if decide (value.val=0) then _ else Out.revert)=Out.revert
   simp only [decide_eq_false nonzero,Bool.false_eq_true,if_false]
 
 theorem special_none_refused (size value : Fin W) :
