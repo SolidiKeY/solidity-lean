@@ -65,12 +65,13 @@ list is available until the actual suite has run.
   admission. No vault/multisig Solidity file was found in that snapshot.
   Upstream result records mark the old MultiSigWallet compilation suite as
   lacking a harness adapter. No exclusion or replacement is authorized.
-- `VU1-I1` is now assigned to the **coordinator as waker**, following the
-  factory liveness fallback. The coordinator must name the concrete telemetry
-  producer lane and published API/commit, or obtain an explicit lease extension.
-  Frontend timers and chunked kernel-check sites are outside this lane's lease.
-  H185's full disjoint telemetry requirement is unchanged; no phase is inferred
-  as zero and no unsupported representative is silently replaced.
+- `VU1-I1` follows the coordinator-confirmed H191 option A: existing owners
+  provide exact admitted fixtures and complete disjoint telemetry; U01 waits
+  for their published inputs. No instrumentation lease extension is authorized.
+  The **coordinator remains the routing/publication waker** under the factory
+  liveness protocol, rather than an unnamed-owner wait. This decision is
+  acknowledged; the question is not reopened. H232 remains the later standing
+  memory policy and removes the historical scope-provisioning requirement.
 - This lane takes source preparation and admission evidence inside
   `scripts/bench/**` itself. Exact representative inputs still require demonstrated
   frontend admission, rather than an unnamed-owner wait. The request to the
