@@ -4,6 +4,8 @@ import json
 import pathlib
 import sys
 
+from check_baseline_modules import check
+
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 MODULES = set((ROOT / 'tests/h55/shared-fixtures/v08-remaining-modules.txt').read_text().splitlines())
 FIELDS = {'module', 'name', 'typeExpr', 'levelParams', 'valueExpr', 'axioms',
@@ -28,6 +30,8 @@ def load(directory, baseline=False):
             rows[key] = row
     if {key[0] for key in rows} != MODULES or (baseline and len(rows) != 999):
         raise ValueError('missing module or incomplete pinned baseline')
+    if baseline:
+        check(rows, "v08_remaining")
     return rows
 
 
