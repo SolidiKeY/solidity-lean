@@ -183,6 +183,30 @@ class IntegratedTests(unittest.TestCase):
             self.assertEqual(gate.input_hashes(snapshot / 'tests/sol-numeric-literals/evidence'), before)
             self.assertEqual(gate.input_hashes(evidence), before)
 
+    def test_original_adoption_control_runs_on_exact_frozen_fixture(self):
+        original = gate.load_legacy()
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp)
+            snapshot = output / 'snapshot'
+            for name in (gate.LEGACY, gate.PACKET, 'tests/sol-numeric-literals/test-adoption.py'):
+                target = snapshot / name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes((gate.ROOT / name).read_bytes())
+            gate.legacy_adoption_control(original, snapshot, output,
+                                         ['python3', 'tests/sol-numeric-literals/test-adoption.py'])
+            binding = json.loads((output / 'legacy-adoption-control.json').read_text())
+            self.assertTrue(binding['real_checkout_and_index_unchanged'])
+            self.assertEqual(binding['published_fixture_master'], original.ADOPTED_MASTER)
+
+    def test_self_tests_require_clean_positive_baseline(self):
+        original = types.SimpleNamespace(validate_committed_inputs=Mock(side_effect=ValueError('dirty baseline')))
+        with patch.object(gate, 'stage') as stage, patch.object(gate, 'runtime_manifest') as runtime:
+            with self.assertRaisesRegex(ValueError, 'dirty baseline'):
+                gate.execute(original, Path('/input'), Path('/output'), self_test=True)
+            stage.assert_not_called()
+            runtime.assert_not_called()
+        original.validate_committed_inputs.assert_called_once_with()
+
     def test_delegation_retains_final_checks_and_redirects_private_io(self):
         with tempfile.TemporaryDirectory() as tmp:
             base = Path(tmp)
@@ -204,13 +228,14 @@ class IntegratedTests(unittest.TestCase):
                 self.assertEqual(json.loads((original.FOLDER / 'acceptance.json').read_text()), {'only': 'private projection'})
                 self.assertEqual(original.FOLDER / 'evidence/complete-gates', snapshot / 'tests/sol-numeric-literals/evidence/complete-gates')
                 original.run(['python3', 'tests/sol-numeric-literals/differential.py'])
+                original.run(['python3', 'tests/sol-numeric-literals/h35/test-h41.py'])
                 original.validate_h41_cache_record({})
                 raise ValueError('original validation failure')
             original.check = check
             with patch.object(gate, 'stage', return_value=(snapshot, {}, {})), patch.object(gate, 'git', return_value='head'), patch.object(gate, 'runtime_manifest', return_value=({'only': 'private projection'}, {'authority': 'H309'})):
                 with self.assertRaisesRegex(ValueError, 'original validation failure'):
                     gate.execute(original, evidence, output)
-            self.assertEqual(calls, [['python3', str(snapshot / 'tests/sol-numeric-literals/differential.py')], snapshot])
+            self.assertEqual(calls, [['python3', str(snapshot / 'tests/sol-numeric-literals/differential.py')], ['python3', str(snapshot / 'tests/sol-numeric-literals/h35/test-h41.py')], snapshot])
             self.assertIs(original.validate_foreign_paths, foreign)
             self.assertEqual(original.ROOT, gate.ROOT)
             self.assertTrue((output / 'input-binding.json').is_file())

@@ -11,6 +11,7 @@ records are copied to a new external output tree; no evidence is restored here.
 import argparse
 import copy
 import hashlib
+import os
 import json
 from pathlib import Path
 import shutil
@@ -209,7 +210,44 @@ def stage(evidence, output):
     return snapshot, before, source_hashes
 
 
+def legacy_adoption_control(original, snapshot, output, command):
+    """Retain the old adoption algorithm on its exact published positive fixture."""
+    fixture = output / "legacy-adoption-fixture"
+    fixture.mkdir()
+    paths = (LEGACY, PACKET, "tests/sol-numeric-literals/test-adoption.py")
+    hashes = {}
+    for name in paths:
+        source, target = snapshot / name, fixture / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, target)
+        hashes[name] = sha(source)
+        require(sha(target) == hashes[name], "legacy control source changed")
+    agents = subprocess.check_output(["git", "show", original.ADOPTED_MASTER + ":AGENTS.md"], cwd=ROOT)
+    (fixture / "AGENTS.md").write_bytes(agents)
+    git_dir = git("rev-parse", "--absolute-git-dir")
+    real_index = Path(git_dir) / "index"
+    index_before = sha(real_index)
+    status_before = git("status", "--porcelain")
+    env = dict(os.environ, GIT_DIR=git_dir, GIT_WORK_TREE=str(fixture),
+               GIT_INDEX_FILE=str(output / "legacy-adoption.index"), PYTHONDONTWRITEBYTECODE="1")
+    subprocess.run(["git", "read-tree", original.ADOPTED_MASTER], cwd=fixture, env=env, check=True)
+    try:
+        subprocess.run([command[0], str(fixture / command[1]), *command[2:]],
+                       cwd=fixture, env=env, check=True)
+    finally:
+        require(sha(real_index) == index_before and git("status", "--porcelain") == status_before,
+                "legacy adoption control changed the real checkout/index")
+        require(all(sha(snapshot / name) == h == sha(fixture / name) for name, h in hashes.items()),
+                "legacy control source mutated")
+    (output / "legacy-adoption-control.json").write_text(json.dumps(
+        {"published_fixture_master": original.ADOPTED_MASTER,
+         "agents_sha256": hashlib.sha256(agents).hexdigest(), "control_sources": hashes,
+         "real_checkout_and_index_unchanged": True}, indent=2) + "\n")
+
+
 def execute(original, evidence, output, implementation=False, self_test=False):
+    if self_test:
+        original.validate_committed_inputs()
     head = git("rev-parse", "HEAD")
     projected, transport = runtime_manifest()
     snapshot, before, sources = stage(evidence, output)
@@ -223,9 +261,12 @@ def execute(original, evidence, output, implementation=False, self_test=False):
     original_changed = original.changed_paths
     private_evidence = snapshot / "tests/sol-numeric-literals/evidence"
     redirected = {"tests/sol-numeric-literals/differential.py",
-                  "tests/sol-numeric-literals/h35/validate-axioms.py"}
+                  "tests/sol-numeric-literals/h35/validate-axioms.py",
+                  "tests/sol-numeric-literals/h35/test-h41.py"}
 
     def run(command):
+        if len(command) > 1 and command[1] == "tests/sol-numeric-literals/test-adoption.py":
+            return legacy_adoption_control(original, snapshot, output, command)
         if len(command) > 1 and command[1] in redirected:
             command = [command[0], str(snapshot / command[1]), *command[2:]]
         return original_run(command)
