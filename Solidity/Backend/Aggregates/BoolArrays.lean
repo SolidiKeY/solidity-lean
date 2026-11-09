@@ -57,6 +57,7 @@ def lower {D : Source.Layout} {C : Contract} {Γ : Ctx} (target : State C Γ)
     (values : List (Source.Val D .bool)) (room : (values.map value).length < 2^256) :
     State C (.mem boolR :: Γ) := target.allocPush (object target.H values room)
 
+set_option backward.isDefEq.respectTransparency false in
 theorem target_contents {D : Source.Layout} {C : Contract} {Γ : Ctx} (target : State C Γ)
     (values : List (Source.Val D .bool)) (room : (values.map value).length < 2^256) :
     MObj.elems ArrTy.dyn ((lower target values room).heap.get
@@ -156,6 +157,7 @@ theorem lowerCopy_failure {E : Source.Env} {C : Contract} {Γ : Ctx} (target : S
     rw [validation] at observed
     cases observed
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Actual Source copy/index and actual intrinsic Heap.readAddr agree on
 bool values. Both the array capacity and exact uint index (no truncation)
 are derived from the real entry and validation, with no desired run premise. -/
