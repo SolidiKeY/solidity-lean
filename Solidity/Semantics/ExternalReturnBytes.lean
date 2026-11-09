@@ -47,7 +47,7 @@ theorem decode_ok {ρ : Ctx} {rets : Binders ρ} {data : List UInt8}
     ∃ vs, words ρ.length data = .ok vs ∧ rets.decodeT vs = .ok (r, rest) := by
   cases read : words ρ.length data with
   | error e => simp only [decode, read] at decoded; cases decoded
-  | ok vs => exact ⟨vs, rfl, by simpa only [decode, read, Except.bind] using decoded⟩
+  | ok vs => exact ⟨vs, rfl, by simpa only [decode, read, bind, Except.bind] using decoded⟩
 
 /-- Even a single demanded primitive cannot decode an absent word. -/
 theorem empty_snoc {ρ : Ctx} (bs : Binders ρ) (p : PrimTy) (x : Var) :
@@ -72,11 +72,11 @@ theorem decode_error {ρ : Ctx} {rets : Binders ρ} {data : List UInt8}
     (failed : decode (C := C) (H := H) rets data = .error .revert) :
     ∃ vs, rets.decodeT (C := C) (H := H) vs = .error .revert := by
   cases read : words ρ.length data with
-  | ok vs => exact ⟨vs, by simpa only [decode, read, Except.bind] using failed⟩
+  | ok vs => exact ⟨vs, by simpa only [decode, read, bind, Except.bind] using failed⟩
   | error e =>
     cases rets with
     | nil => simp only [words, List.length_nil, Nat.zero_mul, Nat.zero_le,
-        if_true, List.range_zero, List.map_nil] at read; cases read
+        ite_true, List.range_zero, List.map_nil] at read; cases read
     | snoc bs p x => exact ⟨[], empty_snoc bs p x⟩
 
 /-- The view never replaces the original bytes. Raw catches use those bytes,
@@ -109,7 +109,7 @@ theorem classify_other {data : List UInt8}
 /-- This invokes the actual existing raw-catch decoder; no re-encoding occurs. -/
 theorem raw_data_exact (data : List UInt8) (bound : data.length < 2 ^ 256) :
     CatchKind.raw.decode data = some data := by
-  simp only [CatchKind.decode, if_pos bound]
+  simp only [CatchKind.decode, ite_eq_left bound]
 
 /-- info: 'Solidity.ExternalReturnBytes.decode_ok' depends on axioms: [propext] -/
 #guard_msgs in
