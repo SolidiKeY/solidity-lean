@@ -1,0 +1,97 @@
+{
+  "schema": "shrink-pilot-v1",
+  "batch": "shrink-pilots-1108",
+  "slug": "tv-yul",
+  "base": "381328f608032dd19c405373c2b265e83a969850",
+  "status": "partial",
+  "verdict": null,
+  "technique": "Exact compiler-output equality as a baseline translation recognizer",
+  "prototype_commit": "da32dd0ece5a76a01c0d436cd3e9a6229cf8e4c1",
+  "prototype_path": "prototypes/TvYul.lean at prototype_commit (removed from branch tip)",
+  "merge_scope": "Assigned audit branch has only docs/audits/shrink/tv-yul/** changes and no prototype commit ancestry. Prototype checkpoints are preserved on the separate owned prototype_branch.",
+  "before": {
+    "selected_covered_family": null,
+    "lines": null,
+    "declarations": null,
+    "kernel_check_seconds": null,
+    "largest_module_candidate_not_a_selected_family": {
+      "path": "Solidity/Yul/Views/PackedAggregates.lean",
+      "physical_lines": 383,
+      "lexical_declarations": 41,
+      "theorems": [
+        "reverseByteIndex_twice",
+        "patchBytes_at",
+        "patchBytes_outside",
+        "patchBytes_unchanged",
+        "packedStart_spec",
+        "PackedMembers.end_mono",
+        "PackedMembers.encode_before",
+        "PackedMembers.encode_residual",
+        "PackedMembers.decode_encode",
+        "PackedMembers.encode_exists",
+        "PackedMembers.encode_unchanged",
+        "PackedMembers.encode_matches",
+        "PackedMembers.encode_idempotent",
+        "PackedMembers.owned_bounds",
+        "packedStruct_roundtrip",
+        "membersArray_arrayMembers",
+        "arrayMembers_scalar",
+        "packedArray_roundtrip",
+        "PackedMembers.head_tail_disjoint",
+        "PackedMembers.nextSlot_spec",
+        "PackedMembers.decode_congr"
+      ]
+    }
+  },
+  "after": {
+    "lines": 35,
+    "lexical_declarations": 5,
+    "checker": "checkSkip",
+    "soundness": "Solidity.Yul.Compilation.TvYulPilot.checkSkip_sound",
+    "completeness": "Refuted for this checker by checkSkip_incomplete: JUMP 0 has an actual Artifact but checkSkip rejects it",
+    "kernel_check_seconds": null,
+    "standalone_lean_plus_lake_wall_seconds": 0.8720828270000425,
+    "timing_boundary": "Single serial -j1 standalone elaboration/kernel check including Lake orchestration and cached-import replay; not isolated kernel time or a matched replacement workload"
+  },
+  "preserved_family_exports": null,
+  "weakened_existing_statements": [],
+  "proved_views_replacements": 0,
+  "size_ratio": null,
+  "scope_findings": [
+    "882 Views modules and 1108 local import-closure modules at frozen base; closure includes no Compilation, Closed*, or Yul.Syntax modules. This is source inventory, not a proof of impossibility.",
+    "Views.ActualScalarWrite proves real Source account-storage mutation; Artifact describes intrinsic Yul word statements and preserves every Evm.Machine field except stack.",
+    "Compilation.PhysicalStore imports Views.MemoryImages and proves byte_run, word_memory, image_frame using Backend.Environment.runData. It explicitly distinguishes that machine from Evm.Machine; SelectedPhysicalStore uses runSlice. These are real bridges, but do not supply the assigned Artifact equivalence."
+  ],
+  "questions": [],
+  "outstanding": [
+    "Select a real covered Yul/Compilation family under H264 and name and preserve every exported theorem and Artifact forward/backward statement without weakening premises.",
+    "Implement the requested source/program plus compiled-output relation checker, with soundness and completeness or the allowed generic-lemma alternative. The current skip recognizer is deliberately incomplete.",
+    "Measure the authorized Compilation family before/after lines, declarations and serial kernel check time after cache fetch, and evaluate the 3x and gate-budget criteria.",
+    "Complete library checkpoint, final full gates, final finder/skeptic review, and final handoff; no RUNTIME_GATE_PASS or completed GO/NO-GO is claimed."
+  ],
+  "limitations": [
+    "No systemd scope on the cloud VM (H232); VM isolation, serial work, no swap, 12 GiB process limit for library checkpoint, 4 GiB initial available-memory reserve.",
+    "get_goal is not exposed in the active tool catalog; no second goal was created and no existing goal was reset.",
+    "Finder/skeptic reviewed this partial prototype/inventory read-only. They did not use Lean server and did not establish full assignment completion.",
+    "A new bridge may be constructible within prototype authorization. The scope question does not assert mathematical impossibility and is not an approval request to weaken any theorem."
+  ],
+  "integration_method": "Normal integration of the assigned audit branch is history-safe. It was recreated from the exact frozen base using only the docs diff; all previous prototype/checkpoint history is preserved separately on prototype_branch.",
+  "endpoint_authorization": {
+    "decision": "H264",
+    "choice": "A",
+    "endpoint": "Existing Solidity/Yul/Compilation theorem family preserving Artifact forward/backward statements",
+    "effect": "Replaces the original Views comparison endpoint. Concrete covered family selection and matched measurement remain outstanding."
+  },
+  "prototype_branch": "codex/shrink-pilots-1108/tv-yul-prototype",
+  "compilation_candidate": {
+    "status": "under investigation; coverage not yet proved",
+    "inventory": "family.json",
+    "stem": "ScopedControl",
+    "physical_lines": 579,
+    "lexical_declarations": 15,
+    "modules": [
+      "Solidity/Yul/Compilation/ScopedControlCompilation.lean",
+      "Solidity/Yul/Compilation/ScopedControlCompletion.lean"
+    ]
+  }
+}

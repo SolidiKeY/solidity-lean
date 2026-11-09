@@ -7,8 +7,8 @@ import argparse,csv,json,pathlib,runpy
 HERE=pathlib.Path(__file__).resolve().parent
 
 def main():
- p=argparse.ArgumentParser();p.add_argument('--results',type=pathlib.Path,default=HERE);a=p.parse_args();d=a.results
- api=runpy.run_path(str(HERE/'audit.py'));api['assert_sources']()
+ p=argparse.ArgumentParser();p.add_argument('--results',type=pathlib.Path,default=HERE);p.add_argument('--source-root',type=pathlib.Path,help='Explicit frozen-source checkout; default verifies this checkout');a=p.parse_args();d=a.results
+ api=runpy.run_path(str(HERE/'audit.py'));api['assert_sources'](a.source_root)
  inv=json.loads((HERE/'inventory.json').read_text());s=json.loads((d/'summary.json').read_text())
  assert inv==api['inventory'](),'Frozen inventory differs'
  assert s['base']==api['BASE'] and s['status']=='partial'

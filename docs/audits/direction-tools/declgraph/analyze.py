@@ -18,8 +18,8 @@ def closure(edges,seeds):
     return seen
 def testpath(p):
     return '/Examples/' in p or '/Corpus/' in p or '/TestSuite/' in p or bool(re.search(r'(?:Controls|Checks|Pins|Coverage)\.lean$',p))
-def run(graph,view,out):
-    src=API['assert_sources'](); source_provenance={p:API["provenance"](p,t) for p,t in src.items()}; mask=runpy.run_path(str(HERE.parent/'statements/scan.py'))['mask']; goals=[p for p,t in src.items() if re.search(r'@\[[^\]]*\bgoal\b',mask(t))];assert not goals,'Goal attributes need explicit root mapping: '+str(goals); nodes={};edges={};spans={}; indexed={};commands=set();source_edges=0
+def run(graph,view,out,source_root=None):
+    src=API['assert_sources'](source_root); source_provenance={p:API["provenance"](p,t) for p,t in src.items()}; mask=runpy.run_path(str(HERE.parent/'statements/scan.py'))['mask']; goals=[p for p,t in src.items() if re.search(r'@\[[^\]]*\bgoal\b',mask(t))];assert not goals,'Goal attributes need explicit root mapping: '+str(goals); nodes={};edges={};spans={}; indexed={};commands=set();source_edges=0
     for line in graph.open():
         r=json.loads(line);n=r['name'];nodes[n]=r;edges[n]=set(r['refs'])
     for p in src:
@@ -138,6 +138,7 @@ def run(graph,view,out):
         missing_files=len(missing),missing_physical_lines=sum(len(src[p].splitlines()) for p in missing),
         missing_by_area=dict(sorted(collections.Counter('/'.join(p.split('/')[:2]) for p in missing).items())),families=family,
         deletable_now_verified_lines=0,unused_but_planned_verified_lines=0,
+        supplemental_measurements={'syntax_census':'syntax-census.json','compiler_overrides':'compiler-edges.json','effect_on_liveness':'not integrated; syntax occurrences do not certify semantic roots'},
         limitations=['No systemd scope on the cloud VM (H232).',
             'Unreached and zero-incoming are measured only inside the explicitly indexed universe; missing modules can be consumers.',
             'Unowned source references are preserved as incoming uses but are not rooted; exact CI/#eval/example root reconstruction remains outstanding.',
@@ -152,5 +153,5 @@ def run(graph,view,out):
     (out/'summary.json').write_text(json.dumps(summary,sort_keys=True,indent=2)+'\n')
     print('GRAPH_ANALYSIS_PASS',len(nodes),'nodes',len(indexed),'modules')
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--graph',type=pathlib.Path,required=True);p.add_argument('--view',type=pathlib.Path,required=True);p.add_argument('--out',type=pathlib.Path,required=True);a=p.parse_args();run(a.graph,a.view,a.out)
+    p=argparse.ArgumentParser();p.add_argument('--graph',type=pathlib.Path,required=True);p.add_argument('--view',type=pathlib.Path,required=True);p.add_argument('--out',type=pathlib.Path,required=True);p.add_argument('--source-root',type=pathlib.Path,help='Explicit frozen-source checkout; default verifies this checkout');a=p.parse_args();run(a.graph,a.view,a.out,a.source_root)
 if __name__=='__main__':main()

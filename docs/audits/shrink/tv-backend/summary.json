@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "base": "381328f608032dd19c405373c2b265e83a969850",
+  "technique": "unused-family removal",
+  "prototype_commit": "43dac7b74f45f0d985044d76f3beb2340be19a8b",
+  "merge_scope": "docs/audits/shrink/tv-backend/**",
+  "family": {
+    "definition": "largest undirected import component after external dependency closure, omitting generated Solidity umbrella edges",
+    "input": "family.json",
+    "next_largest_component_lines": 2326,
+    "generated_root_exception": "Generated Solidity umbrella import edges omitted even when reached indirectly. scripts/AxiomAudit.lean is its sole tracked Lean consumer and is checked separately.",
+    "facade_import_overlap": []
+  },
+  "before": {
+    "files": 178,
+    "physical_lines": 17308,
+    "lexical_declarations": 1787,
+    "declaration_kinds": {
+      "abbrev": 133,
+      "def": 539,
+      "inductive": 2,
+      "structure": 40,
+      "theorem": 1073
+    },
+    "public_source_located_theorems": 1158,
+    "public_emitted_native_theorems": 2714,
+    "emitted_native_theorem_proof_terms": 2931
+  },
+  "after": {
+    "files": 0,
+    "physical_lines": 0,
+    "lexical_declarations": 0,
+    "selected_module_theorem_proof_terms": 0
+  },
+  "size": {
+    "after_at_most_one_third": true,
+    "selected_family_reduction_fraction": 1.0,
+    "whole_InternalFlow_before_lines": 38105,
+    "whole_InternalFlow_after_lines": 20797,
+    "physical_line_definition": "All physical Lean source lines, including blanks/comments. Declaration counts are lexical, not native constant counts."
+  },
+  "kernel_check": {
+    "before_seconds": 17.219537618,
+    "after_seconds": 0.0,
+    "before_checked_theorems": 2931,
+    "after_checked_theorems": 0,
+    "negative_control_rejected": true,
+    "default_internal_heartbeat_budget": 200000000,
+    "command": "lean -j1 -M12288 --run Replay.lean IMPORTS SELECTED OUTPUT EXPECTED_COUNT",
+    "boundary": "Sum of explicit env.addDeclCore(doCheck=true) calls for original theorem types/proof terms under fresh names, using imported dependencies. Includes private/generated emitted theorem constants; excludes definitions, inductives, import/scan overhead and independent transitive dependency replay. Zero after means no selected-module theorem work remains, not zero surviving-library cost."
+  },
+  "affected_root_check": {
+    "before_command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "-M12288",
+      "-t0",
+      "--tstack=131072",
+      "Solidity.lean"
+    ],
+    "after_command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "-M12288",
+      "-t0",
+      "--tstack=131072",
+      "Solidity.lean"
+    ],
+    "before_seconds": 3.5110986030000504,
+    "after_seconds": 2.59078858700002,
+    "before_exit_code": 0,
+    "after_exit_code": 0,
+    "before_max_rss_kib": 3777528,
+    "after_max_rss_kib": 3728076,
+    "boundary": "Trust-zero root import/elaboration wall time, separately from explicit kernel proof replay.",
+    "before_build_jobs": 6327,
+    "after_build_jobs": 6149,
+    "quarantined_removed_artifacts": 890
+  },
+  "theorem_preservation": {
+    "all_family_exports_preserved": false,
+    "public_source_located_statements": "statements.json",
+    "public_emitted_native_statements": "native-statements.json",
+    "source_located_names_removed": 1158,
+    "emitted_public_names_present_after": 4,
+    "emitted_public_names_absent_after": 2710,
+    "emission_boundary": "Shared/generated logical constants can survive under other retained emission owners; native emission counts are not source declaration origins.",
+    "retained_lean_source_files_modified": 0,
+    "retained_premises_weakened": false,
+    "facade_source_sha256": "cb68eb68cc471970fa149faabce9dc8fe16142cdff1b884611663ab40670bcc9",
+    "preserved_facade_theorems": [
+      "Solidity.Main.rule_sound",
+      "Solidity.Main.rule_unique",
+      "Solidity.Main.rule_is_step",
+      "Solidity.Main.rule_exists",
+      "Solidity.Main.rule_of_step",
+      "Solidity.Main.solkey_rule_exists",
+      "Solidity.Main.solkey_rule_lt_calculus",
+      "Solidity.Main.solkey_step_taclet",
+      "Solidity.Main.solkey_eq_calculus",
+      "Solidity.Main.solkey_lt_calculus",
+      "Solidity.Main.soundness",
+      "Solidity.Main.soundness'",
+      "Solidity.Main.solkey_soundness",
+      "Solidity.Main.callback_soundness",
+      "Solidity.Main.noCallback_soundness",
+      "Solidity.Main.noCallback_iff",
+      "Solidity.Main.cleanTail_holds",
+      "Solidity.Main.symex_sound",
+      "Solidity.Main.compiler_correct",
+      "Solidity.Main.compiler_net",
+      "Solidity.Main.compiler_checked"
+    ]
+  },
+  "validation": {
+    "affected_library_root_rebuilt": true,
+    "example_and_slow_roots_rebuilt": true,
+    "removed_source_exports_and_modules_absent": true,
+    "unchanged_facade_checked": true,
+    "reflective_axiom_audit_checked": true,
+    "serial": true,
+    "lean_heap_limit_mib": 12288,
+    "swap_enabled": false,
+    "cache_fetched_first": true,
+    "lean_version": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)",
+    "lake_version": "Lake version 5.0.0-src+797c613 (Lean version 4.24.0)"
+  },
+  "verdict": "GO",
+  "reason": "The largest externally unused connected runtime-frame component can be completely removed: 17,308 lines and 1,787 lexical declarations become zero. Affected roots rebuild without deleted artifacts, the named facade is unchanged, and selected-module kernel proof work disappears within unchanged resource/proof budgets. This verdict is for the removal pilot.",
+  "limitations": [
+    "no systemd scope on the cloud VM (H232)",
+    "Single measured timing pair; no statistical timing claim.",
+    "Family exports are intentionally removed by this alternative; downstream users outside the tracked repository are not covered.",
+    "Static import analysis and the checked reflective audit bound consumer coverage; arbitrary dynamic consumers are not certified.",
+    "The lane-only deletion prototype does not perform rollout metadata cleanup of historical module-map/prose/axiom-pin inventories. The delivered audit-only head restores every removed source and the generated root.",
+    "No compiler semantic adequacy theorem, deployed-EVM conformance result or external differential-test claim is added."
+  ],
+  "reproduction": [
+    "Set BASE=381328f608032dd19c405373c2b265e83a969850; AUDIT_HEAD to the delivered audit head; WORK to a fresh disposable worktree; OUT to a fresh external disk directory. Hold the repository writer lock; LEAN_NUM_THREADS=1; use pinned Lean 4.24.0.",
+    "git worktree add --detach \"$WORK\" \"$BASE\"",
+    "git archive \"$AUDIT_HEAD\" docs/audits/shrink/tv-backend | tar -x -C \"$WORK\"",
+    "cd \"$WORK\"; create \"$OUT/tmp\"; TMPDIR=\"$OUT/tmp\" bash scripts/ci/fetch-lake-cache.sh; lake build Solidity; python3 scripts/ci/restore-lake-artifacts.py",
+    "python3 -I docs/audits/shrink/tv-backend/inventory.py \"$OUT/inventory.json\"",
+    "python3 docs/audits/shrink/tv-backend/artifacts.py lists \"$OUT/inputs\"",
+    "lake env lean -j1 -M12288 --run docs/audits/direction-tools/declgraph/Export.lean graph \"$OUT/inputs/modules.txt\" \"$OUT/graph.jsonl\"",
+    "python3 docs/audits/shrink/tv-backend/manifest.py \"$OUT/graph.jsonl\" .lake/build/lib/lean \"$OUT/statements.json\" \"$OUT/native-statements.json\"; compare outputs byte-for-byte with the committed manifests",
+    "python3 docs/audits/shrink/tv-backend/replay.py .lake/build/lib/lean \"$OUT/inputs/modules.txt\" \"$OUT/inputs/modules.txt\" 2931 \"$OUT/before\"",
+    "python3 docs/audits/shrink/tv-backend/measure.py \"$OUT/root-before\"",
+    "git rm --pathspec-from-file=\"$OUT/inputs/paths.txt\"; bash scripts/coord-tools/register.sh; python3 docs/audits/shrink/tv-backend/artifacts.py quarantine \"$OUT/quarantine\"",
+    "lake build Solidity; python3 scripts/ci/restore-lake-artifacts.py; python3 docs/audits/shrink/tv-backend/measure.py \"$OUT/root-after\"",
+    "python3 docs/audits/shrink/tv-backend/replay.py .lake/build/lib/lean \"$OUT/inputs/imports-after.txt\" \"$OUT/inputs/modules.txt\" 0 \"$OUT/after\"",
+    "python3 docs/audits/shrink/tv-backend/assert_absent.py \"$OUT/exports\"",
+    "lake build SolidityExamples SoliditySlowExamples; python3 scripts/ci/restore-lake-artifacts.py; lake env lean -j1 -M12288 -t0 --tstack=131072 Solidity/Theorems.lean; lake env lean -j1 -M12288 --tstack=131072 scripts/AxiomAudit.lean",
+    "The delivered head restores the deletion prototype. On that audit-only head set SOLKEY_EXAMPLES to $PWD/tests/migration/solkey/keyext.solidity.examples (the committed pinned snapshot), then run test_inventory.py, check.py and scripts/coord-tools/gate.sh full; validate documentation paths/navigation. Preserve prototype commit 43dac7b74f45f0d985044d76f3beb2340be19a8b; no rollout or branch push is authorized."
+  ],
+  "handoff_scope_check": {
+    "reference": "--scope-base, else GATE_BASE, else origin/master",
+    "range": "merge-base(integration reference, HEAD)..HEAD",
+    "already_integrated_empty_diff": "allowed",
+    "prototype_measurement_base": "unchanged frozen base"
+  }
+}

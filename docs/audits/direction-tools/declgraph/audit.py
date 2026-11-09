@@ -19,11 +19,14 @@ def sources():
             if f.isfile(): out[f.name]=archive.extractfile(f).read().decode()
     assert proc.wait()==0
     return out
-def assert_sources():
+def assert_sources(source_root=None):
+    root=pathlib.Path(source_root).resolve() if source_root is not None else ROOT
     pinned=sources(); scope="docs/audits/direction-tools/declgraph/"
-    actual=set(git("ls-files","--cached","--others","--exclude-standard","--","*.lean").splitlines())
+    actual=set(subprocess.check_output(["git","ls-files","--cached","--others","--exclude-standard","--","*.lean"],cwd=root,text=True).splitlines())
     assert {p for p in actual if not p.startswith(scope)}=={p for p in pinned if not p.startswith(scope)}, "Lean source path set differs from pinned BASE"
-    assert all((ROOT/p).read_bytes()==t.encode() for p,t in pinned.items()), "Lean source bytes differ from pinned BASE"
+    assert all((root/p).read_bytes()==t.encode() for p,t in pinned.items()), "Lean source bytes differ from pinned BASE"
+    changed=subprocess.check_output(["git","diff","--name-only",BASE,"--"],cwd=root,text=True).splitlines()
+    assert all(p.startswith(scope) for p in changed), "Tracked build inputs outside audit scope differ from pinned BASE"
     return pinned
 def provenance(p,t):
     if p in ("Solidity.lean","SolidityExamples.lean","SoliditySlowExamples.lean","Bridge/SolidityBridge.lean"): return "generated_root"

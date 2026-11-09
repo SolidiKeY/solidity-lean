@@ -17,7 +17,8 @@
       "path": "Solidity/Yul/Compilation/GuardedForCompletion.lean",
       "status": "proof_reuse_partial",
       "migrated_declarations": [
-        "Solidity.Yul.Compilation.GuardedForCompletion.completion_iff"
+        "Solidity.Yul.Compilation.GuardedForCompletion.completion_iff",
+        "Solidity.Yul.Compilation.GuardedForCompletion.model_to_source"
       ],
       "existing_definitions_changed": false
     },
@@ -113,7 +114,8 @@
       "path": "Solidity/Yul/Compilation/LetScopeCompilation.lean",
       "status": "proof_reuse_partial",
       "migrated_declarations": [
-        "Solidity.Yul.Compilation.LetScopeCompilation.Artifact.normal_to_model"
+        "Solidity.Yul.Compilation.LetScopeCompilation.Artifact.normal_to_model",
+        "Solidity.Yul.Compilation.LetScopeCompilation.scope_source"
       ],
       "existing_definitions_changed": false
     },
@@ -277,7 +279,8 @@
       "path": "Solidity/Yul/Compilation/SequenceCompletion.lean",
       "status": "proof_reuse_partial",
       "migrated_declarations": [
-        "Solidity.Yul.Compilation.SequenceCompletion.completion_iff"
+        "Solidity.Yul.Compilation.SequenceCompletion.completion_iff",
+        "Solidity.Yul.Compilation.SequenceCompletion.model_to_source"
       ],
       "existing_definitions_changed": false
     },
