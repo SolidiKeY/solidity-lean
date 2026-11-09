@@ -1,0 +1,21 @@
+{
+  "async_reenable_rejected": true,
+  "boundaries": [
+    "Fixture events only; no repository-wide root or liveness census.",
+    "Raw contexts repeat declarations and include intermediate environments; rows are not distinct root counts.",
+    "A null import owner can denote a current-module or temporary declaration; it does not mean unused.",
+    "Saved contexts sample environments; declarations absent from all saved contexts are not observed. Context IDs are traversal order, not creation chronology.",
+    "Explicit async-option setters are rejected before elaboration; macro-created setters remain outside completeness claims.",
+    "Exclusion is post-command name presence; same-name transient versions may be omitted. Imported owners are first-owner hints, not resolved winners.",
+    "Enabled async or pending snapshot/lazy tasks are rejected; this raw capture does not certify arbitrary command effects.",
+    "Guarded failures, extension effects and runtime name construction require separate treatment."
+  ],
+  "eval_command_events": 1,
+  "example_command_events": 3,
+  "imported_owner_observed": true,
+  "lean": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)",
+  "local_owner_absent_as_expected": true,
+  "macro_generated_example_observed": true,
+  "producer_sha256": "a492a18c6b617716e4363c1a6521b744140d86ba28a353076c16c4a8b9f74683",
+  "raw_saved_context_rows": 22
+}
