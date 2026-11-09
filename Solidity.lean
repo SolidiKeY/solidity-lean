@@ -1988,6 +1988,7 @@ import Solidity.Backend.Transient.Controls
 import Solidity.Backend.Transient.Frames
 import Solidity.Backend.Transient.Instructions
 import Solidity.Backend.Transient.Mixed
+import Solidity.Backend.Transient.PayloadV2
 import Solidity.Backend.Transient.SourceCallback
 import Solidity.Backend.Transient.SourceFrames
 import Solidity.Backend.Transient.State
