@@ -47,7 +47,12 @@ theorem boundary_source (locals : Vector Scalar.Word 16) :
 theorem boundary_target (locals : Vector Scalar.Word 16) (m : Evm.Machine) (caller : List Evm.Word) :
  Evm.run boundaryArtifact.code {m with stack := locals.toList.map coreWord++caller} =
  .ok {m with stack := locals.toList.map coreWord++caller} 0 :=
- boundaryArtifact.normal_to_model 3 locals locals (boundary_source locals) m caller
+ by
+ exact CompletionControls.normal_output (c := root) locals
+   (fun actual => Evm.run boundaryArtifact.code {m with stack := locals.toList.map coreWord++caller} =
+     .ok {m with stack := actual.toList.map coreWord++caller} 0)
+   (boundaryArtifact.source_to_model 3 locals ⟨sourceLocals locals,.normal⟩
+     (boundary_source locals) m caller)
 
 theorem boundary_iff (locals out : Vector Scalar.Word 16) (m : Evm.Machine) (caller : List Evm.Word) :
  (∃ horizon, evalStmt horizon .nil True.intro lastSource boundaryArtifact.compiled.profile (sourceLocals locals) =
