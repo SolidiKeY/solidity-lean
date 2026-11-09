@@ -61465,6 +61465,31 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Source/PowerV2Correct.lean:Solidity.Source.PowerV2.shiftVal_checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/PowerV2Correct.lean:Solidity.Source.PowerV2.shiftVal_nonexp": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/PowerV2Correct.lean:Solidity.Source.PowerV2.shiftVal_nonint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/PowerV2Correct.lean:Solidity.Source.PowerV2.shiftVal_uint8_example": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/PowerV2Correct.lean:Solidity.Source.PowerV2.shiftVal_unchecked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Source/SemanticsExamples.lean:Solidity.Source.Env.fieldTy?_of_fieldAt": [
   "Classical.choice",
   "Quot.sound",
