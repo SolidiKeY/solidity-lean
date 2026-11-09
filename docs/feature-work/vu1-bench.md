@@ -92,7 +92,8 @@ LEAN_NUM_THREADS=1 node scripts/bench/admission.mjs --soljson "$SOLJSON_DIR" \
   tests/migration/solkey/keyext.solidity.examples/TestSuite.sol
 ```
 
-The compiler directory must contain the binary pinned by the vendored snapshot;
+Outputs must be JSON reports and must not alias inputs, including through
+symlinked parent directories. The compiler directory must contain the binary pinned by the vendored snapshot;
 no sibling SolKeY checkout is needed. Every raw frontend row and compiler/tool
 error is retained, including internal, skipped and unsupported rows. A successful
 listing requires at least one ready row and the existing listing-success policy;
@@ -108,6 +109,21 @@ These reports are admission evidence only: `verification` is `not-run`, and
 phase partition, kernel certification claim or native verdict. Save outputs in
 ignored runtime storage and archive evidence privately, not in the code branch.
 The trust-boundary controls are `node --test scripts/bench/admission.test.mjs`.
+
+`node scripts/bench/sizes.mjs --admission REPORT --out FILE` reuses the pinned
+compiler to attach static source sizes to admission rows. `declarationSpanBytes` is the UTF-8 span of the
+whole declaration, including signature, modifiers and body. It joins by the
+frontend's declaration ID and source hash, not by function name, and retains
+refused/internal/skipped rows. Its metric counts executable Solidity statement
+AST nodes in each source function body, with block containers excluded and loop
+header statement nodes included. Modifiers and callees are not expanded; inline
+assembly counts once. It records compiler identity and the input-report hash.
+
+A bodyless declaration, synthesized constructor or missing source declaration
+has an explicit unavailable size, never a fabricated zero. A genuinely empty
+body has zero statements. These are static source metrics, not dynamic walk
+steps, proof timings or a U01 baseline. Controls are
+`node --test scripts/bench/sizes.test.mjs`.
 
 ## Exact out-of-scope owner diff
 
@@ -182,6 +198,13 @@ setup failure, omitted effective selectors and unbound source identities. The
 runner now invalidates pending output before discovery, records selectors,
 preserves partial rows/errors, and fails on row-hash or final-source drift.
 The no-Lean controls cover these cases; both reviewers confirmed the fixes.
+
+The static-size preparation received independent read-only finder and skeptic
+reviews with no compiler or Lean execution by reviewers. The finder identified
+an input/output alias that could overwrite source data; shared canonical output
+checks and regression controls now prevent it. The skeptic requested an exact
+name for the whole-declaration byte span; `declarationSpanBytes` and its control
+now distinguish it from the body-only statement metric. Both confirmed the fixes.
 
 ## Checkpoint handoff
 

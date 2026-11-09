@@ -70,3 +70,16 @@ test('compiled-row identity and final bytes must both match the initial snapshot
     assert.equal(admissionResult({results: [row], errors}, true).listingPassed, false);
   }
 });
+
+
+test('admission output cannot overwrite Solidity input files', () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'u01-admission-control-'));
+  try {
+    const source = path.join(directory, 'source.sol');
+    const content = 'contract C {}'; fs.writeFileSync(source, content);
+    const run = spawnSync(process.execPath, [fileURLToPath(new URL('./admission.mjs', import.meta.url)),
+      '--out', source, source], {encoding: 'utf8'});
+    assert.equal(run.status, 2, run.stderr);
+    assert.equal(fs.readFileSync(source, 'utf8'), content);
+  } finally { fs.rmSync(directory, {recursive: true, force: true}); }
+});

@@ -7,6 +7,7 @@ import {fileURLToPath} from 'node:url';
 import {execFileSync} from 'node:child_process';
 import {runSolidityTests, solidityFiles, testsPassed} from '../test-solidity.mjs';
 import {sourceHash} from '../source-locations.mjs';
+import {assertReportOutput} from './report-path.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -67,6 +68,7 @@ function main(args) {
     function: options.function ?? null, timeoutMs: options.timeoutMs, solkey: options.solkey,
     soljson: path.resolve(options.soljson ?? path.join(options.solkey, 'keyext.solidity.core/build/soljson'))};
   options.soljson = selection.soljson;
+  assertReportOutput(output, selection.paths);
   let inputs = [], head = null, runnerSha256 = null;
   fs.mkdirSync(path.dirname(output), {recursive: true});
   const save = (report, finished) => {
