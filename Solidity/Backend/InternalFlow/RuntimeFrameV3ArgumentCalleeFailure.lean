@@ -8,6 +8,7 @@ namespace Solidity.Backend.InternalFlow.RuntimeFrame.ArgumentCalleeFailure
 open Evm Evm.Memory RecursiveSource RecursiveActivation GuardedRecursion GuardedPrefixes
 abbrev A : RefTy := CountdownWitness.A
 
+set_option backward.isDefEq.respectTransparency false in
 theorem after_arguments {C : Contract} {Γ : Ctx} {L b frame : Nat} {F : Frag Γ}
  (name : Name) (args : Args C Γ (Parameters A))
  (checked : Calls.Program b F (args.declsThen .nil)) (σ : State C Γ)
@@ -155,13 +156,13 @@ def code := checked.code++AllocatingReturn.image (C:=P.C) 4 CountdownWitness.F 8
 theorem source_failure (depth : Nat) : (call (depth+1)).run caller=.error .revert := specification.2.2.2.2.2.2.1 depth
 
 theorem target_failure : run code input=.revert := by
- simpa only [List.append_nil] using specification.2.2.2.2.2.2.2 []
+ simpa only [code,List.append_nil] using specification.2.2.2.2.2.2.2 []
 
 theorem suffix_absorbed (suffix : List Instr) : run (code++suffix) input=.revert := run_append_revert target_failure
 
 theorem source_zero : (call 0).run caller=.error .exhausted := by
  change TRun.call args .none .refl (AllocatingActivation.body 0).runR caller=_
- simp only [TRun.call,args_succeed,ok_bind,CallRet.enterT]
+ simp only [TRun.call,args_succeed,CallRet.enterT]
  change (do
    let out ← (AllocatingActivation.body 0).run child
    pure (exported (ps:=Parameters A) (CallRet.none : CallRet Γ [] Γ) Ext.refl caller child.env out))=_
