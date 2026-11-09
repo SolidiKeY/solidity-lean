@@ -7,6 +7,7 @@ deepest child, not the returned caller. -/
 namespace Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveDescent
 open Evm Evm.Memory RecursiveSource RecursiveActivation
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Every admitted countdown completes the same descent code. The index is
 an observation horizon, not a compilation or recursion-admission cutoff.
 Capacity is the actual two captured context cells per positive activation. -/
@@ -63,6 +64,7 @@ theorem complete {C : Contract} {R : RefTy} {L b frame : Nat} {F : Frag (Paramet
      simpa only [arithmetic] using finalCursor
 
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Every reached finite prefix preserves the actual next native parameters,
 not only the stopping endpoint. Neither a prefix run nor a reached StateRepr
 is supplied: both follow from checked capture/update and the initial capacity. -/
@@ -111,7 +113,7 @@ theorem reached_prefix {C : Contract} {R : RefTy} {L b frame : Nat} {F : Frag (P
          (by omega) (by omega) (by omega) (by omega) cursor
      refine ⟨after,finalAddresses,?_,?_,finalStack.trans stack,?_,?_,?_⟩
      · simpa only [loopIterN,turn] using running
-     · simpa only [Nat.add_sub_add_right] using finalRepr
+     · simpa only [child, State.withEnv, Nat.add_sub_add_right] using finalRepr
      · exact extended.trans (List.prefix_refl _) finalExt
      · exact growth.comp finalGrowth
      · have arithmetic : start+2+2*steps=start+2*(steps+1) := by omega
