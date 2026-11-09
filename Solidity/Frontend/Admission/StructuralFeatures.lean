@@ -1521,4 +1521,64 @@ theorem syntaxArrayTypeUses_iff {c : Cat} (root : Syn c) (site : SyntaxOccurrenc
 /-- info: 'Solidity.Frontend.Admission.syntaxArrayTypeUses_iff' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms syntaxArrayTypeUses_iff
 
+
+/-! Regression: a visibility field on a function declaration must not become a function-type marker. Reuse the existing direct visibility projection and constructor tag; only written internal/external type visibility is classified, without inferring omitted defaults, validating signatures or changing policy/admission. -/
+inductive DirectExplicitFunctionType : {c : Cat} → Syn c → Feature → Prop where
+  | internal (params mutability returns) :
+      DirectExplicitFunctionType (.fnType params (some .internal) mutability returns) .internalFunctionTypes
+  | external (params mutability returns) :
+      DirectExplicitFunctionType (.fnType params (some .external) mutability returns) .externalFunctionTypes
+
+def functionTypeVisibilityFeature? : Visibility → Option Feature
+  | .internal => some .internalFunctionTypes
+  | .external => some .externalFunctionTypes
+  | .priv | .pub => none
+
+def explicitFunctionTypeFeaturesAt {c : Cat} (s : Syn c) : List Feature :=
+  if s.ctor = .fnType then (visibilityFieldsAt s).filterMap functionTypeVisibilityFeature? else []
+
+theorem explicitFunctionTypeFeaturesAt_iff {c : Cat} (s : Syn c) (f : Feature) :
+    f ∈ explicitFunctionTypeFeaturesAt s ↔ DirectExplicitFunctionType s f := by
+  cases s with
+  | fnType params visibility mutability returns =>
+    cases visibility with
+    | none =>
+      change f ∈ ([] : List Feature) ↔ _
+      constructor <;> intro impossible <;> cases impossible
+    | some value =>
+      cases value with
+      | internal =>
+        change f ∈ [Feature.internalFunctionTypes] ↔ _
+        constructor
+        · intro same; cases List.mem_singleton.mp same; exact .internal _ _ _
+        · intro direct; cases direct; exact List.mem_singleton.mpr rfl
+      | external =>
+        change f ∈ [Feature.externalFunctionTypes] ↔ _
+        constructor
+        · intro same; cases List.mem_singleton.mp same; exact .external _ _ _
+        · intro direct; cases direct; exact List.mem_singleton.mpr rfl
+      | priv =>
+        change f ∈ ([] : List Feature) ↔ _
+        constructor <;> intro impossible <;> cases impossible
+      | pub =>
+        change f ∈ ([] : List Feature) ↔ _
+        constructor <;> intro impossible <;> cases impossible
+  | _ =>
+    simp only [explicitFunctionTypeFeaturesAt, Syn.ctor, reduceCtorEq, if_false, List.not_mem_nil]
+    constructor <;> intro impossible <;> cases impossible
+
+def syntaxExplicitFunctionTypeUses {c : Cat} (root : Syn c) : List (SyntaxOccurrence × Feature) :=
+  syntaxFieldUses root explicitFunctionTypeFeaturesAt
+
+theorem syntaxExplicitFunctionTypeUses_iff {c : Cat} (root : Syn c)
+    (site : SyntaxOccurrence) (f : Feature) :
+    (site,f) ∈ syntaxExplicitFunctionTypeUses root ↔
+      Syn.Sub site ⟨c,root⟩ ∧ DirectExplicitFunctionType site.2 f := by
+  rw [syntaxExplicitFunctionTypeUses, syntaxFieldUses_iff, explicitFunctionTypeFeaturesAt_iff]
+
+/-- info: 'Solidity.Frontend.Admission.explicitFunctionTypeFeaturesAt_iff' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms explicitFunctionTypeFeaturesAt_iff
+/-- info: 'Solidity.Frontend.Admission.syntaxExplicitFunctionTypeUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxExplicitFunctionTypeUses_iff
+
 end Solidity.Frontend.Admission

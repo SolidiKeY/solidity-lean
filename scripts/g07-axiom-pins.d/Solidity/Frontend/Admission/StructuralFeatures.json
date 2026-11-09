@@ -35,6 +35,9 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.explicitFunctionTypeFeaturesAt_iff": [
+  "propext"
+ ],
  "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.freeFunctionFeaturesAt_iff": [
   "propext"
  ],
@@ -95,6 +98,10 @@
   "propext"
  ],
  "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.syntaxDeclarationQualifierUses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/StructuralFeatures.lean:Solidity.Frontend.Admission.syntaxExplicitFunctionTypeUses_iff": [
   "Quot.sound",
   "propext"
  ],

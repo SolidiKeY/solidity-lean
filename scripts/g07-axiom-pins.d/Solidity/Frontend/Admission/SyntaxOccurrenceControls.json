@@ -8,6 +8,7 @@
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.distinct_payload_order": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.exact_pair_inventory": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.explicit_constness_unused": [],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.explicit_function_type_sites_and_gaps": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.explicit_mutability_unused": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.explicit_visibility_unused": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.free_function_category_and_gap": [],
