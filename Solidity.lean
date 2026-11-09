@@ -6314,6 +6314,7 @@ import Solidity.Yul.World.LifecycleAdapterChecks
 import Solidity.Yul.World.LifecycleBalancesFit
 import Solidity.Yul.World.LifecycleFrameControls
 import Solidity.Yul.World.LifecycleFrames
+import Solidity.Yul.World.LoadV2Port
 import Solidity.Yul.World.LogBuiltin
 import Solidity.Yul.World.LogBuiltinControls
 import Solidity.Yul.World.LogPortRuleControls
