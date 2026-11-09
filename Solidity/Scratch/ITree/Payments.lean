@@ -291,6 +291,49 @@ theorem handle_det {A : Allow C} {R : Type} {viol : R} {e : Ev C} {k : e.Ans →
     {o : R} (hc : e.kind.callsBack J.pay = false) (h : Handle A J viol (k e.same) o) :
     Handle A J viol (.vis e k) o := .det hc h
 
+/-- The tree's deterministic reading is the typed run, on the fragment. -/
+theorem stmt_runDet {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} (hs : Stmt.Frag s) (σ : State C Γ) :
+    (Stmt.tree s σ).runDet = .ofRes (s.run σ) := by
+  rcases hs with hp | hf
+  · cases s <;> try cases hp
+    case inl.transfer.refl r a =>
+      show (transferTree r a σ).runDet = .ofRes (TRun.transfer r a σ)
+      unfold transferTree; cases TRun.transfer r a σ <;> rfl
+    case inl.send.refl full pv r a =>
+      show (sendTree pv r a full σ).runDet = .ofRes (TRun.send pv r a σ)
+      unfold sendTree
+      cases hs : TRun.send pv r a σ with
+      | error e => rfl
+      | ok o =>
+        cases ht : TRun.transfer r a σ with
+        | error _ => rfl
+        | ok o₁ => rw [send_of_transfer ht] at hs; cases hs; rfl
+  · rw [tree_of_forks hf]; rfl
+
+theorem prog_runDet : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → Prog.Frag P → (σ : State C Γ) →
+    (Prog.tree P σ).runDet = .ofRes (P.run σ)
+  | _, _, .nil, _, _ => rfl
+  | _, _, .cons s P, hsP, σ => by
+    obtain ⟨hs, hP⟩ : Stmt.Frag s ∧ Prog.Frag P := hsP
+    rw [Prog.tree, Tree.runDet_bind, stmt_runDet hs]
+    cases h : s.run σ with
+    | error e =>
+      show COut.halt e = COut.ofRes (TRun.seq s.runR P.runR σ)
+      simp only [TRun.seq, Stmt.run] at h ⊢; rw [h]; rfl
+    | ok o₁ =>
+      rw [Prog.run_cons_ok h]
+      show (Tree.map _ (Prog.tree P o₁.st)).runDet = _
+      rw [Tree.map, Tree.runDet_bind, prog_runDet P hP o₁.st]
+      cases Prog.run o₁.st P <;> rfl
+
+/-- **`Prog.execM_run` on the fragment**, by the generic `Handle.runDet`
+(today 360 + 360 lines for `Stmt.exec_run` and `Stmt.execM_run`). -/
+theorem prog_execM_run (M : CallerModel C) {Γ Γ' : Ctx} (P : Prog C Γ Γ') (hP : Prog.Frag P)
+    (σ : State C Γ) :
+    ExecPM M J σ P (.ofRes (P.run σ)) ∨ ExecPM M J σ P .violated := by
+  rw [prog_iffM P hP, prog_iffM P hP, ← prog_runDet P hP σ]
+  exact Handle.runDet (fun σ => M.allows_refl J σ) _
+
 end Reproved
 
 end Solidity.Scratch.ITree

@@ -72,6 +72,11 @@ def runDet : Tree C R → R
   | .ret r => r
   | .vis e k => (k e.same).runDet
 
+theorem runDet_bind (t : Tree C R) (f : R → Tree C S) : (t.bind f).runDet = (f t.runDet).runDet := by
+  induction t with
+  | ret r => rfl
+  | vis e k ih => exact ih _
+
 end Tree
 
 /-- What a callee may leave from a state: `CallerModel.Allows M J`, or
@@ -141,6 +146,22 @@ theorem map_iff {t : Tree C R} {g : R → S} (hg : g viol = viol') {o : S} :
   constructor
   · rintro ⟨r, hr, h⟩; cases h; exact ⟨r, hr, rfl⟩
   · rintro ⟨r, hr, rfl⟩; exact ⟨r, hr, .ret⟩
+
+/-- **The deterministic reading is handled** (`Stmt.exec_run` and
+`Stmt.execM_run`, once for every tree): when the allowance admits a callee
+that changes nothing, the deterministic reading is an outcome, unless the
+invariant breaks on the way. -/
+theorem runDet (hA : ∀ {Γ : Ctx} (σ : State C Γ), A σ σ.storage σ.net σ.selfBalance) :
+    (t : Tree C R) → Handle A J viol t t.runDet ∨ Handle A J viol t viol
+  | .ret r => .inl .ret
+  | .vis e k => by
+    cases hc : e.kind.callsBack J.pay with
+    | false =>
+      exact (runDet hA (k e.same)).imp (.det hc) (.det hc)
+    | true =>
+      by_cases hJ : J.at e.st
+      · exact (runDet hA (k e.same)).imp (.resume hc hJ hJ (hA _)) (.resume hc hJ hJ (hA _))
+      · exact .inr (.violated hc hJ)
 
 end Handle
 
