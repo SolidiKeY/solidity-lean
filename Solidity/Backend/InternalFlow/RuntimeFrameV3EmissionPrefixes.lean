@@ -65,9 +65,9 @@ theorem running {C : Contract} {b lo L frame : Nat} {F : Frag (Parameters A)}
    have resume : AllocatingResume.Continuation σ σ (List.prefix_refl _) 0 := by
      intro depth
      cases actual : (AllocatingActivation.body depth).run σ with
-     | error halt => simp only [Nat.add_zero,actual,Except.map]
+     | error halt => simp only [Except.map]
      | ok out =>
-       simp only [Nat.add_zero,actual,Except.map]
+       simp only [Except.map]
        rw [AllocatingResume.reexport_self σ out (AllocatingResume.successful_env σ (counter σ).val (counter σ).isLt ref
          (counter_value σ) alias readable depth out actual)]
    refine ⟨ref,RecursiveIngress.prepared before lo (lo-1),σ,List.prefix_refl _,RecursiveIngress.prepared before lo (lo-1),base,
@@ -75,8 +75,8 @@ theorem running {C : Contract} {b lo L frame : Nat} {F : Frag (Parameters A)}
    · change σ.env=(countValue (counter σ).val (counter σ).isLt,(some ref,()))
      exact Prod.ext (counter_value σ) (Prod.ext alias (by cases σ.env.2.2;rfl))
    · omega
-   · simpa only [Nat.mul_zero] using prepared.2.2.2.2
-   · simpa only [Nat.mul_zero,Nat.add_zero] using prepared.2.1.cursor
+   · simpa only [Nat.mul_zero,plan] using prepared.2.2.2.2
+   · simpa only [Nat.mul_zero,Nat.add_zero,plan] using prepared.2.1.cursor
    · intro depth
      exact (call_body name σ ref alias readable (depth+0)).trans (resume depth)
    · intro j impossible;omega
@@ -87,7 +87,7 @@ theorem running {C : Contract} {b lo L frame : Nat} {F : Frag (Parameters A)}
  | succ steps =>
    have costEq : (plan b lo F).heapCost σ=4*(counter σ).val := by
      change cost σ=_
-     rw [cost,length_of_alias σ ref alias,AllocatingOutcome.demand,if_pos readable]
+     rw [cost,length_of_alias σ ref alias,AllocatingOutcome.demand,ite_eq_left readable]
    have capacity : AllocationInput b frame (4*(counter σ).val) σ base (RecursiveIngress.prepared before lo (lo-1)) := by
      rw [←costEq]
      exact prepared.2.1.capacity
@@ -137,6 +137,7 @@ theorem full_stop {C : Contract} {b lo L frame : Nat} {F : Frag (Parameters A)}
    (empty_turn _ (run (AllocatingActivation.code (C:=C) b F lo)) _ guard)
  exact ⟨entered,τ,after,addresses,setup,repr,zero,fun horizon bound => loopIterN_done_le bound stopped⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Invalid initial reads terminate on the actual first allocating turn.
 Only the successful ingress machine is exposed; failure has no reached Out. -/
 theorem failing {C : Contract} {b lo L frame : Nat} {F : Frag (Parameters A)}
@@ -150,7 +151,7 @@ theorem failing {C : Contract} {b lo L frame : Nat} {F : Frag (Parameters A)}
  obtain ⟨ref,alias,reference⟩ := entry.represented.pointers (.there .here)
  have readable : ¬(counter σ).val≤σ.heap.len ref .dyn := by rw [←length_of_alias σ ref alias];exact bad
  have prepared := RecursiveIngress.entry_prepared (plan b lo F) entry (by change 4≤4;decide) rfl
- have costEq : (plan b lo F).heapCost σ=4 := by change cost σ=4;rw [cost,AllocatingOutcome.demand,if_neg bad]
+ have costEq : (plan b lo F).heapCost σ=4 := by change cost σ=4;rw [cost,AllocatingOutcome.demand,ite_eq_right bad]
  have capacity : AllocationInput b frame 4 σ base (RecursiveIngress.prepared before lo (lo-1)) := by rw [←costEq];exact prepared.2.1.capacity
  rcases capacity with impossible | ⟨positive,cursor,owner,space⟩
  · cases impossible
@@ -163,11 +164,11 @@ theorem failing {C : Contract} {b lo L frame : Nat} {F : Frag (Parameters A)}
      have current := guard_run σ (n+1) bound count base (RecursiveIngress.prepared before lo (lo-1)) prepared.2.1.represented
      have currentOne : run (guardCompiled (C:=C) b F).code (RecursiveIngress.prepared before lo (lo-1))=
        .ok ((RecursiveIngress.prepared before lo (lo-1)).push w[1]) 0 := by
-       simpa only [decide_eq_true (by omega : 0<n+1),bword] using current
+       simpa only [decide_eq_true (by omega : 0<n+1),bword,ite_true] using current
      have workspace : b+4≤lo := entry.workspace
      have below : lo<frame := entry.pointerBelow
      have body := AllocatingFailure.target_suffix σ n bound ref count alias failed base _ prepared.2.1.represented cursor owner positive space (by omega) lo []
-     have turn := failing_turn _ _ _ currentOne (by simpa only [List.append_nil] using body)
+     have turn := failing_turn _ _ _ currentOne (by simpa only [List.append_nil,plan] using body)
      have first : loopIterN (run (guardCompiled (C:=C) b F).code) (run (AllocatingActivation.code (C:=C) b F lo)) 1
        (RecursiveIngress.prepared before lo (lo-1))=.inr .revert := turn
      have canonical : σ.env=(countValue (n+1) bound,(some ref,())) := Prod.ext count (Prod.ext alias (by cases σ.env.2.2;rfl))
@@ -275,17 +276,17 @@ theorem complete_observations (steps : Nat) (small : steps≤2) :
  have first : (machine steps small).mem 10=(if 0<steps then w[16] else w[0]) ∧
    (machine steps small).mem 11=(if 0<steps then w[2] else w[0]) := by
    by_cases positive : 0<steps
-   · rw [if_pos positive,if_pos positive]
+   · rw [ite_eq_left positive,ite_eq_left positive]
      exact saved 0 positive
-   · rw [if_neg positive,if_neg positive]
+   · rw [ite_eq_right positive,ite_eq_right positive]
      exact ⟨exterior 10 (by decide) (by decide) (by decide) (by decide) (by decide) (by decide) (.inr (by omega)),
        exterior 11 (by decide) (by decide) (by decide) (by decide) (by decide) (by decide) (.inr (by omega))⟩
  have second : (machine steps small).mem 12=(if 1<steps then w[16] else w[0]) ∧
    (machine steps small).mem 13=(if 1<steps then w[1] else w[0]) := by
    by_cases positive : 1<steps
-   · rw [if_pos positive,if_pos positive]
+   · rw [ite_eq_left positive,ite_eq_left positive]
      exact saved 1 positive
-   · rw [if_neg positive,if_neg positive]
+   · rw [ite_eq_right positive,ite_eq_right positive]
      exact ⟨exterior 12 (by decide) (by decide) (by decide) (by decide) (by decide) (by decide) (.inr (by omega)),
        exterior 13 (by decide) (by decide) (by decide) (by decide) (by decide) (by decide) (.inr (by omega))⟩
  rw [stack,cursor,older,active,count,bottom,pointer,marker,first.1,first.2,second.1,second.2,len0,a,b,len1,c]
