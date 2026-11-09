@@ -72,20 +72,22 @@ private theorem word_range (word : Roadmap.Word) :
 def sourceWord {D : Source.Layout} (word : Roadmap.Word) : Source.Val D (.int IntTy.u256) :=
   .int word.val (word_range word)
 
+set_option backward.isDefEq.respectTransparency false in
 theorem eval_value {E : Source.Env} {Γ : RCtx} (global : Glob E) (frame : Fr)
     (horizon : Nat) (locals : Source.Locals E.layout Γ) (state : Source.St E) :
     (Source.evalE global frame (horizon + 1)
       (.magic .msg "value" rfl : RExpr E Γ (.int IntTy.u256))).run (locals, state) =
       (.ok (.val (sourceWord frame.value)), (locals, state)) := by
-  simp only [Source.evalE, Source.mkInt, dif_pos (word_range frame.value), Source.EM.lift]
+  simp only [Source.evalE, Source.mkInt, dite_eq_left (word_range frame.value), Source.EM.lift]
   rfl
 
+set_option backward.isDefEq.respectTransparency false in
 theorem eval_timestamp {E : Source.Env} {Γ : RCtx} (global : Glob E) (frame : Fr)
     (horizon : Nat) (locals : Source.Locals E.layout Γ) (state : Source.St E) :
     (Source.evalE global frame (horizon + 1)
       (.magic .block "timestamp" rfl : RExpr E Γ (.int IntTy.u256))).run (locals, state) =
       (.ok (.val (sourceWord global.timestamp)), (locals, state)) := by
-  simp only [Source.evalE, Source.mkInt, dif_pos (word_range global.timestamp), Source.EM.lift]
+  simp only [Source.evalE, Source.mkInt, dite_eq_left (word_range global.timestamp), Source.EM.lift]
   rfl
 
 /-- Exact actual source and intrinsic word observations, with the timestamp
