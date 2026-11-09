@@ -71,12 +71,12 @@ theorem reached {C : Contract} {L b frame : Nat} {F : Frag (Parameters A)}
          (fits:=by omega) (current:=nextPointer)
      have guard := guard_run σ (count+1) bound counter base before repr
      have positiveGuard : run (guardCompiled (C:=C) b F).code before=.ok (before.push w[1]) 0 := by
-       simpa only [show decide (0<count+1)=true from decide_eq_true (by omega)] using guard
+       simpa only [show decide (0<count+1)=true from decide_eq_true (by omega),bword,ite_true] using guard
      have turn := successful_turn _ _ _ _ positiveGuard executed
      refine ⟨τ,firstExtension.trans lastExtension,after,finalAddresses,?_,finalRepr,?_,?_,kept.trans finalKeeps,
        finalStack.trans stack,extended.trans firstExtension finalBase,?_,?_,?_⟩
      · simpa only [loopIterN,turn] using running
-     · simpa only [Nat.add_sub_add_right] using finalEnv
+     · simpa only [inherited,HRef.wk,Nat.add_sub_add_right] using finalEnv
      · change τ.H.length=(σ.H++([.array (.prim .bool)] : HTy)).length+steps at finalSize
        simpa only [List.length_append,List.length_singleton,Nat.add_assoc,Nat.add_comm 1 steps] using finalSize
      · have combined := growth.comp finalGrowth
