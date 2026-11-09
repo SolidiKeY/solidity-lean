@@ -1381,4 +1381,52 @@ theorem syntaxDeclarationQualifierRefusals_iff {c : Cat} (root : Syn c)
 /-- info: 'Solidity.Frontend.Admission.syntaxDeclarationQualifierRefusals_iff' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms syntaxDeclarationQualifierRefusals_iff
 
+
+/-! Regression: a top-level function needs its dedicated freeFunctions marker as well as generic function detection. Reuse the existing constructor projection and intrinsic declaration category; no indexed match, representation rewrite, typing or admission claim is introduced. -/
+inductive DirectFreeFunction : {c : Cat} → Syn c → Prop where
+  | function (name params vis mutability mods virtual bases returns body) :
+      DirectFreeFunction (.function (t := true) name params vis mutability mods virtual bases returns body)
+
+def freeFunctionFeaturesAt {c : Cat} (s : Syn c) : List Feature :=
+  if c = .part true ∧ s.ctor = .function then [.freeFunctions] else []
+
+theorem DirectFreeFunction.tags {c : Cat} {s : Syn c} (observed : DirectFreeFunction s) :
+    c = .part true ∧ s.ctor = .function := by
+  cases observed
+  exact ⟨rfl,rfl⟩
+
+theorem directFreeFunction_of_tags {c : Cat} (s : Syn c)
+    (kind : c = .part true) (tag : s.ctor = .function) : DirectFreeFunction s := by
+  cases s with
+  | @function t name params vis mutability mods virtual bases returns body =>
+    cases t with
+    | false => cases kind
+    | true => exact .function name params vis mutability mods virtual bases returns body
+  | _ => cases tag
+
+theorem freeFunctionFeaturesAt_iff {c : Cat} (s : Syn c) (f : Feature) :
+    f ∈ freeFunctionFeaturesAt s ↔ f = .freeFunctions ∧ DirectFreeFunction s := by
+  unfold freeFunctionFeaturesAt
+  by_cases labels : c = .part true ∧ s.ctor = .function
+  · rw [if_pos labels]
+    exact ⟨fun present => ⟨List.mem_singleton.mp present,
+      directFreeFunction_of_tags s labels.1 labels.2⟩,
+      fun observed => List.mem_singleton.mpr observed.1⟩
+  · rw [if_neg labels]
+    exact ⟨fun impossible => False.elim (List.not_mem_nil impossible),
+      fun observed => False.elim (labels observed.2.tags)⟩
+
+def syntaxFreeFunctionUses {c : Cat} (root : Syn c) : List (SyntaxOccurrence × Feature) :=
+  syntaxFieldUses root freeFunctionFeaturesAt
+
+theorem syntaxFreeFunctionUses_iff {c : Cat} (root : Syn c) (site : SyntaxOccurrence) (f : Feature) :
+    (site,f) ∈ syntaxFreeFunctionUses root ↔
+      Syn.Sub site ⟨c,root⟩ ∧ f = .freeFunctions ∧ DirectFreeFunction site.2 := by
+  rw [syntaxFreeFunctionUses, syntaxFieldUses_iff, freeFunctionFeaturesAt_iff]
+
+/-- info: 'Solidity.Frontend.Admission.freeFunctionFeaturesAt_iff' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms freeFunctionFeaturesAt_iff
+/-- info: 'Solidity.Frontend.Admission.syntaxFreeFunctionUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxFreeFunctionUses_iff
+
 end Solidity.Frontend.Admission

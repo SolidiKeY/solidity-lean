@@ -31,8 +31,7 @@ inductive ObservationSite where
   | customError (declaration : Decl)
   | rethrow
 
-/-- Missing namespace members fail closed. Calls carry their declarations for
-subsequent closure extraction; their local status does not certify callees. -/
+/-- Missing namespace members fail closed. Calls carry their declarations for subsequent closure extraction; their local status does not certify callees. -/
 def ObservationSite.status : ObservationSite → Option Status
   | .builtin b => some b.status
   | .magic b m => b.memberStatus m
@@ -58,8 +57,7 @@ def ObservationSite.allowed (site : ObservationSite) : Bool :=
       decide (f.scope = .model ∨ f.scope = .abstract)
   | _ => false
 
-/-- A local acceptance must name a real feature in the frozen profile, with
-exactly the S01 status identifier and an allowed scope. Unknown IDs fail closed. -/
+/-- A local acceptance must name a real feature in the frozen profile, with exactly the S01 status identifier and an allowed scope. Unknown IDs fail closed. -/
 theorem ObservationSite.allowed_iff (site : ObservationSite) :
     site.allowed = true ↔ ∃ name f, site.status = some (.admitted name) ∧
       Feature.all.find? (fun f => f.id == name) = some f ∧ f.inProfile := by
@@ -83,8 +81,7 @@ theorem ObservationSite.allowed_iff (site : ObservationSite) :
         exact ⟨f, hf, hp⟩
 
 mutual
-/-- All local observation sites, in structural order; no fuel or truncation.
-The cases motives generalize every result index (intrinsic Gate G0). -/
+/-- All local observation sites, in structural order; no fuel or truncation. The cases motives generalize every result index (intrinsic Gate G0). -/
 def observations {E : Env} {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ) : List ObservationSite :=
   RExpr.casesOn (motive_1 := fun _ _ => List ObservationSite) e
     (fun _ => []) -- const
@@ -161,8 +158,7 @@ def optExprObservations {E : Env} {Γ : RCtx} : ROptExpr E Γ → List Observati
   | .some e => observations e
 
 mutual
-/-- Every expression-bearing statement position, including loop postconditions,
-all branches and try success/catch bodies. No execution-fuel bound is used. -/
+/-- Every expression-bearing statement position, including loop postconditions, all branches and try success/catch bodies. No execution-fuel bound is used. -/
 def stmtObservations {E : Env} {R : List STy} {M : Bool} {k : SCtx} {Γ Γ' : RCtx}
     (s : RStmt E R M k Γ Γ') : List ObservationSite :=
   RStmt.casesOn (motive_1 := fun _ _ _ _ => List ObservationSite) s
@@ -210,8 +206,7 @@ theorem root_observation_iff {E : Env} (roots : List (ExprRoot E)) (site : Obser
     site ∈ rootObservations roots ↔ ∃ root ∈ roots, site ∈ observations root.2.2 := by
   exact List.mem_flatMap
 
-/-- Admission of the collected local observations covers every supplied root,
-not just the first root. Callee bodies and statement roots remain a next step. -/
+/-- Admission of the collected local observations covers every supplied root, not just the first root. Callee bodies and statement roots remain a next step. -/
 theorem accepted_roots {E : Env} (roots : List (ExprRoot E))
     (h : (rootObservations roots).all ObservationSite.allowed = true)
     {root : ExprRoot E} (hr : root ∈ roots) {site : ObservationSite}
