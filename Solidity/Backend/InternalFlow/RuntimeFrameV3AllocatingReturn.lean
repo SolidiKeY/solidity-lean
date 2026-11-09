@@ -53,7 +53,7 @@ theorem endpoint {C : Contract} {L b frame : Nat} {F : Frag (Parameters A)}
    exact (congrArg (fun locals => τ.withEnv (Δ:=Parameters A) locals) data).trans rfl
  have fullAt : ParentPrefixes.sourceAt returned.st count bound=returned.st := by
    change returned.st.withEnv (Δ:=Parameters A) (countValue count bound,returned.st.env.2)=returned.st
-   have data : (countValue count bound,returned.st.env.2)=returned.st.env := by rw [returnEnv]
+   have data : (countValue count bound,returned.st.env.2)=returned.st.env := by rw [returnEnv];rfl
    exact (congrArg (fun locals => returned.st.withEnv (Δ:=Parameters A) locals) data).trans rfl
  have parentInput : StateRepr L b frame F (ParentPrefixes.sourceAt returned.st (count-count) (by omega)) addresses down := by
    simpa only [Nat.sub_self,zeroAt] using reprDown
