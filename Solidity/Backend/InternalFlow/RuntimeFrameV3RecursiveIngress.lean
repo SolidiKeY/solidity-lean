@@ -19,7 +19,7 @@ theorem growth {C : Contract} {Γ : Ctx} {b frame : Nat}
  (positive : 0<bottom) (below : bottom<frame) :
  GrowsAllocator b frame 0 σ base before σ base (prepared before pointer bottom) := by
  intro cursor basePositive owner room
- simpa only [Nat.add_zero] using owner.localWrite bottom positive below (before.mem pointer)
+ simpa only [Nat.add_zero,prepared] using owner.localWrite bottom positive below (before.mem pointer)
 
 /-- The frozen Entry's workspace establishes a private bottom cell one word
 below localLimit. No bottom-value or target-execution premise is added. -/
