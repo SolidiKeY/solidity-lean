@@ -21,6 +21,8 @@
   "propext"
  ],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.original_header_refusal": [],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.override_carriers": [],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.qualifier_diagnostics": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.removed_years_payload_refused": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.repeated_payloads_retained": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.silent_empty_classifier_is_not_raw_safety": [
@@ -28,5 +30,6 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.state_qualifier_combinations": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.visibility_carriers": []
 }
