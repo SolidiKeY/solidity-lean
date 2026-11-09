@@ -86,7 +86,7 @@ theorem exhaustion {C : Contract} (depth : Nat) (σ : State C (Parameters A))
          Stmt C (Parameters A) (Parameters A)).run parent=.error .exhausted := by
        change TRun.call (nextArgs A rfl) .none .refl (AllocatingActivation.body depth).runR parent=_
        unfold TRun.call
-       simp only [args,ok_bind,CallRet.enterT]
+       simp only [args,CallRet.enterT]
        change (do
          let out ← (AllocatingActivation.body depth).run child
          pure (exported CallRet.none Ext.refl parent child.env out)) = _
@@ -120,7 +120,7 @@ theorem call_exhaustion {C : Contract} {Γ : Ctx} (f : Name) (args : Args C Γ (
  have failed := exhaustion depth child count bound ref rfl rfl reads short
  change TRun.call args .none .refl (AllocatingActivation.body depth).runR caller=_
  unfold TRun.call
- simp only [evaluated,ok_bind,CallRet.enterT]
+ simp only [evaluated,CallRet.enterT]
  change (do
    let out ← (AllocatingActivation.body depth).run child
    pure (exported CallRet.none Ext.refl caller child.env out)) = _
@@ -209,7 +209,10 @@ theorem omitted_allocation : returned.st.H.length≠2 := by rw [allocation_count
 theorem wrong_old_content : returned.st.heap.readAddr (.index (P.r0.wk returned.ext) .dyn
  (countValue 1 (by decide)))≠some (P.uint 4 (by decide)) := by
  rw [old_objects.2.2.1]
- decide
+ intro bad
+ have value := congrArg Subtype.val (Option.some.inj bad)
+ change (9:Int)=4 at value
+ omega
 
 theorem wrong_reference_bound : ¬2≤caller.heap.len Evm.Memory.CompileExamples.r1 .dyn := by
  change ¬2≤callee.heap.len Evm.Memory.CompileExamples.r1 .dyn
