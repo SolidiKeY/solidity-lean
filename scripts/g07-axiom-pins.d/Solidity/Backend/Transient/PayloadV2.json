@@ -9,6 +9,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/Transient/PayloadV2.lean:Solidity.Backend.Transient.PayloadV2.callback_static_store_suffix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/Transient/PayloadV2.lean:Solidity.Backend.Transient.PayloadV2.callback_store_byte_revert": [
   "Classical.choice",
   "Quot.sound",
