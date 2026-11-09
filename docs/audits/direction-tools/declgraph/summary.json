@@ -1,5 +1,13 @@
 {
   "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+  "baseline_decision": {
+    "additive_v2": "not adopted",
+    "baseline": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+    "deletion_certification": "none permitted on the pinned baseline",
+    "id": "DG-BASE-1",
+    "source": "direct user decision",
+    "verification": "blocked"
+  },
   "constant_identity": "Global imported constant Name, not necessarily unique source declaration: cached modules can define the same fully qualified theorem name.",
   "deletable_now_verified_lines": 0,
   "external_constant_boundary": 4317,
