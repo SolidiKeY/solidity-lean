@@ -3,8 +3,7 @@ import Solidity.Frontend.Source
 /-!
 # Exact classification of extracted admission uses (G15 checkpoint 1)
 
-These theorems concern the existing classifier, not completeness of the JSON walker or agreement with source execution. In particular, rejection must not silently truncate the uses following its first diagnostic. The public compiler still needs certified extraction of every execution root and observation.
--/
+These theorems concern the existing classifier, not completeness of the JSON walker or agreement with source execution. In particular, rejection must not silently truncate the uses following its first diagnostic. The public compiler still needs certified extraction of every execution root and observation. -/
 namespace Solidity.Frontend.Source
 open Solidity.Language
 

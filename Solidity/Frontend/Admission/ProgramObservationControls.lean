@@ -1,7 +1,6 @@
 import Solidity.Frontend.Admission.ProgramObservations
 
-/-! Actual typed Program-field scanning controls. These are not witnesses of
-Elaborated, SourceSpec, imported solc programs or external execution. -/
+/-! Actual typed Program-field scanning controls. These are not witnesses of Elaborated, SourceSpec, imported solc programs or external execution. -/
 namespace Solidity.Frontend.Admission.ProgramControls
 open Solidity.Source
 
@@ -46,8 +45,7 @@ def program : Program env := {
   baseArgs := fun _ => [base]
   contracts := ["C"] }
 
-/-- Body, modifier argument, constant, constructor body/modifier, initializer,
-and base arguments all survive, with repetitions and structural order intact. -/
+/-- Body, modifier argument, constant, constructor body/modifier, initializer, and base arguments all survive, with repetitions and structural order intact. -/
 theorem all_containers : programObservations program =
     [.magic .msg "sender", .magic .block "timestamp", .magic .block "timestamp",
      .magic .msg "sender", .magic .block "timestamp", .magic .block "timestamp",
@@ -74,8 +72,7 @@ theorem body_only_refuted : programObservations program ≠ bodyObservations bod
   change 7 = 2 at hl
   cases hl
 
-/-- Roster omission remains visible; no theorem silently assumes arbitrary
-Program lookups outside the actual finite roster are covered. -/
+/-- Roster omission remains visible; no theorem silently assumes arbitrary Program lookups outside the actual finite roster are covered. -/
 def omitted : Program env := { program with contracts := [] }
 theorem missing_contract_changes_scan :
     programObservations omitted ≠ programObservations program := by

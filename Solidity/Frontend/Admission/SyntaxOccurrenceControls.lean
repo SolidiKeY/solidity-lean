@@ -425,4 +425,25 @@ theorem classifier_family_order_duplicates_and_gap :
 /-- info: 'Solidity.Frontend.Admission.OccurrenceControls.classifier_family_order_duplicates_and_gap' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms classifier_family_order_duplicates_and_gap
 
+/-! Regression: bytes/string metadata on mapping keys must not identify memory creation; explicit creation heads remain opt-in syntax evidence, including arrays with unresolved dimensions, not allocation/panic or admission witnesses. -/
+def memoryHeadArray : Syn .expr := .new (.array (.userType ⟨"Unknown",[]⟩) (.some (.ident "n")))
+def memoryHeadMapping : Syn .expr :=
+  .new (.mapping (.elem .string (by intro h; cases h)) none (.elem .bool) none)
+
+theorem memory_creation_heads_and_refusals :
+    memoryCreationHeadFeaturesAt memoryHeadArray = [.newMemory] ∧
+    memoryCreationHeadFeaturesAt (.new (.elem .bytes)) = [.newMemory] ∧
+    memoryCreationHeadFeaturesAt (.new (.elem .string)) = [.newMemory] ∧
+    memoryCreationHeadFeaturesAt (.new (.userType ⟨"Unknown",[]⟩)) = [] ∧
+    memoryCreationHeadFeaturesAt (.new (.elem .bool)) = [] ∧
+    memoryCreationHeadFeaturesAt memoryHeadMapping = [] ∧
+    syntaxFieldRefusal? memoryHeadArray memoryCreationHeadFeaturesAt
+      (fun f => decide (f ≠ .newMemory)) = some (⟨.expr,memoryHeadArray⟩,.newMemory) ∧
+    syntaxFieldRefusal? memoryHeadArray syntaxCandidateMetadataV2At
+      (fun f => decide (f ≠ .newMemory)) = none :=
+  ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.memory_creation_heads_and_refusals' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms memory_creation_heads_and_refusals
+
 end Solidity.Frontend.Admission.OccurrenceControls

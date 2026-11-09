@@ -1636,4 +1636,66 @@ theorem syntaxTupleShapeUses_iff {c : Cat} (root : Syn c) (site : SyntaxOccurren
 /-- info: 'Solidity.Frontend.Admission.syntaxTupleShapeUses_iff' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms syntaxTupleShapeUses_iff
 
+
+/-! Regression: only explicit array/bytes/string creation targets identify memory syntax; unresolved names and elementary metadata on other constructors must not masquerade as memory creation. This is head syntax, not allocation, typing, panic, profile or admission evidence. -/
+inductive DirectMemoryCreationHead : {c : Cat} → Syn c → Prop where
+  | array (element : Syn .typeName) (dimension : Syn (.opt .expr)) :
+      DirectMemoryCreationHead (.new (.array element dimension))
+  | bytes : DirectMemoryCreationHead (.new (.elem .bytes))
+  | string : DirectMemoryCreationHead (.new (.elem .string))
+
+def memoryCreationTarget (target : Syn .typeName) : Bool := by
+  apply Syn.casesOn (motive := fun _ _ => Bool) target
+  case array => intros; exact true
+  case elem => intro e; exact e == .bytes || e == .string
+  all_goals (intros; exact false)
+
+def memoryCreationHeadFeaturesAt {c : Cat} (s : Syn c) : List Feature := by
+  apply Syn.casesOn (motive := fun _ _ => List Feature) s
+  case new => intro target; exact if memoryCreationTarget target then [.newMemory] else []
+  all_goals (intros; exact [])
+
+theorem memoryCreationHeadFeaturesAt_iff {c : Cat} (s : Syn c) (f : Feature) :
+    f ∈ memoryCreationHeadFeaturesAt s ↔ DirectMemoryCreationHead s ∧ f = .newMemory := by
+  cases s with
+  | new target =>
+    cases target with
+    | array element dimension =>
+      change f ∈ [Feature.newMemory] ↔ _
+      exact ⟨fun h => ⟨.array _ _,List.mem_singleton.mp h⟩,
+        fun h => List.mem_singleton.mpr h.2⟩
+    | elem e =>
+      cases e
+      all_goals first
+        | (change f ∈ [Feature.newMemory] ↔ _
+           constructor
+           · intro h; exact ⟨.bytes,List.mem_singleton.mp h⟩
+           · intro h; exact List.mem_singleton.mpr h.2)
+        | (change f ∈ [Feature.newMemory] ↔ _
+           constructor
+           · intro h; exact ⟨.string,List.mem_singleton.mp h⟩
+           · intro h; exact List.mem_singleton.mpr h.2)
+        | (change f ∈ ([] : List Feature) ↔ _
+           constructor
+           · intro h; cases h
+           · intro h; cases h.1)
+    | _ =>
+      simp only [memoryCreationHeadFeaturesAt, memoryCreationTarget, Bool.false_eq_true,
+        ↓reduceIte, List.not_mem_nil, false_iff]
+      intro h; cases h.1
+  | _ =>
+    simp only [memoryCreationHeadFeaturesAt, List.not_mem_nil, false_iff]
+    intro h; cases h.1
+
+theorem syntaxMemoryCreationHeadUses_iff {c : Cat} (root : Syn c)
+    (site : SyntaxOccurrence) (f : Feature) :
+    (site,f) ∈ syntaxFieldUses root memoryCreationHeadFeaturesAt ↔
+      Syn.Sub site ⟨c,root⟩ ∧ DirectMemoryCreationHead site.2 ∧ f = .newMemory := by
+  rw [syntaxFieldUses_iff, memoryCreationHeadFeaturesAt_iff]
+
+/-- info: 'Solidity.Frontend.Admission.memoryCreationHeadFeaturesAt_iff' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms memoryCreationHeadFeaturesAt_iff
+/-- info: 'Solidity.Frontend.Admission.syntaxMemoryCreationHeadUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxMemoryCreationHeadUses_iff
+
 end Solidity.Frontend.Admission
