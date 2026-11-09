@@ -224,4 +224,15 @@ theorem constness_carriers (qualifier : Option Constness) :
 /-- info: 'Solidity.Frontend.Admission.OccurrenceControls.constness_carriers' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms constness_carriers
 
+
+/-! Regression: an old candidate classifier can silently omit an unused constant qualifier; the explicit metadata feature classifier must retain its refusal. This syntax-only control claims no initializer legality or canonical admission. -/
+theorem constness_diagnostic_gap :
+    sourceCandidateRefusal? (explicitConstnessUnit (some .constant))
+        (fun f => decide (f ≠ .constants)) = none ∧
+    (syntaxFieldRefusals (explicitConstnessUnit (some .constant)) constnessFeaturesAt
+        (fun f => decide (f ≠ .constants))).map Prod.snd = [.constants] := ⟨rfl,rfl⟩
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.constness_diagnostic_gap' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms constness_diagnostic_gap
+
 end Solidity.Frontend.Admission.OccurrenceControls

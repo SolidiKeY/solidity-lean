@@ -1,16 +1,9 @@
 import Solidity.Frontend.Admission.DeclarationOccurrences
 import Solidity.Language.Features
 
-/-!
-# Elementary-type features at actual Source syntax sites
+/-! # Elementary-type features at actual Source syntax sites
 
-Regression: mapping keys and value-type underlying types carry `Elem` fields,
-not separate `Syn` children. A declaration-wide feature inventory must retain
-these fields as well as elementary type names and elementary conversion heads.
-This collector reuses the canonical declaration visitor. It classifies only
-these explicit elementary fields; resolved user types, lexical features, the
-remaining feature inventory and admission remain separate obligations.
--/
+Regression: mapping keys and value-type underlying types carry `Elem` fields, not separate `Syn` children. A declaration-wide feature inventory must retain these fields as well as elementary type names and elementary conversion heads. This collector reuses the canonical declaration visitor. It classifies only these explicit elementary fields; resolved user types, lexical features, the remaining feature inventory and admission remain separate obligations. -/
 namespace Solidity.Frontend.Admission
 open Solidity.Source Solidity.Language
 
