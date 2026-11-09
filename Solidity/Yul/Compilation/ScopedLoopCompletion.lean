@@ -32,12 +32,21 @@ theorem source_more (condition : ProducerExpressions.Compiled fc test)
  evalLoop (max fc (max hb (max hp hr))+1) .nil True.intro test condition.profile step post.compiled.profile
    work body.compiled.profile (sourceLocals locals) = some (⟨sourceLocals out,.normal⟩ : Outcome c n) := by
  let H := max fc (max hb (max hp hr))
- have tested := evalExpr_stable (show fc ≤ H by dsimp only [H]; omega) .nil True.intro test condition.profile
-   (sourceLocals locals) (condition.source locals)
- have worked' := evalStmt_stable (show hb ≤ H by dsimp only [H]; omega) .nil True.intro work body.compiled.profile
-   (sourceLocals locals) worked
- have stepped' := evalStmt_stable (show hp ≤ H by dsimp only [H]; omega) .nil True.intro step post.compiled.profile
-   (sourceLocals mid) stepped
+ have tested : evalExpr H .nil True.intro test condition.profile (sourceLocals locals) =
+   some (fun _ => (condition.value locals).toFin) := CompletionControls.completed_horizon
+   (fun fuel => evalExpr fuel .nil True.intro test condition.profile (sourceLocals locals))
+   (fun fuel extra => evalExpr_refines_add fuel extra .nil True.intro test condition.profile (sourceLocals locals))
+   (show fc ≤ H by dsimp only [H]; omega) (condition.source locals)
+ have worked' : evalStmt H .nil True.intro work body.compiled.profile (sourceLocals locals) =
+   some ⟨sourceLocals mid,.normal⟩ := CompletionControls.completed_horizon
+   (fun fuel => evalStmt fuel .nil True.intro work body.compiled.profile (sourceLocals locals))
+   (fun fuel extra => evalStmt_refines_add fuel extra .nil True.intro work body.compiled.profile (sourceLocals locals))
+   (show hb ≤ H by dsimp only [H]; omega) worked
+ have stepped' : evalStmt H .nil True.intro step post.compiled.profile (sourceLocals mid) =
+   some ⟨sourceLocals next,.normal⟩ := CompletionControls.completed_horizon
+   (fun fuel => evalStmt fuel .nil True.intro step post.compiled.profile (sourceLocals mid))
+   (fun fuel extra => evalStmt_refines_add fuel extra .nil True.intro step post.compiled.profile (sourceLocals mid))
+   (show hp ≤ H by dsimp only [H]; omega) stepped
  have remaining' : evalLoop H .nil True.intro test condition.profile step post.compiled.profile
    work body.compiled.profile (sourceLocals next) = some (⟨sourceLocals out,.normal⟩ : Outcome c n) := by
    exact CompletionControls.completed_horizon
