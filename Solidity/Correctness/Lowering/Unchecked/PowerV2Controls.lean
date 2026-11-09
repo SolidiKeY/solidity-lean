@@ -33,7 +33,15 @@ theorem checked_overflow {D : Source.Layout} :
     Source.PowerV2.intPow (D := D) byteTy true 2 8 = Source.panic .arithmetic := by
   exact (Source.PowerV2.intPow_checked byteTy 2 8).trans rfl
 
+/-- Guard the new typed dispatcher against bypassing checked overflow while
+retaining the actual Source panic result and its bytes. -/
+theorem typed_checked_overflow {D : Source.Layout} :
+    Source.PowerV2.shiftVal (D := D) true .exp 8 (Source.intWrap byteTy 2) =
+      Source.panic .arithmetic := by
+  exact checked_overflow
+
 #print axioms cutoff_value
 #print axioms checked_overflow
+#print axioms typed_checked_overflow
 
 end Solidity.Correctness.Lowering.Unchecked.PowerV2Controls
