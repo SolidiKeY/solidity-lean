@@ -44,6 +44,8 @@ def main():
     parser.add_argument('--evidence', type=Path, required=True)
     parser.add_argument('--root', default='Solidity.Roadmap.G49Final.FoldedPublic')
     parser.add_argument('--controls', type=Path, default=Path('tests/h55/g49-final-theorem/PassCorrectControls.lean'))
+    parser.add_argument('--h62-exporter', action='store_true',
+                        help='compile the existing test-only constructor exporter before controls')
     args = parser.parse_args()
     evidence = args.evidence.resolve()
     if evidence.is_relative_to(ROOT):
@@ -82,6 +84,9 @@ def main():
 
         visit('Solidity.KeySort')
         visit(args.root)
+        if args.h62_exporter:
+            ordered.append(('tests.h62.item5.statement-graph.Exporter',
+                            ROOT / 'tests/h62/item5/statement-graph/Exporter.lean'))
         records = []
         for module, source in ordered:
             if available() < RESERVE:
@@ -94,7 +99,8 @@ def main():
             log_path = evidence / (module + '.log')
             with log_path.open('w') as log:
                 job = subprocess.Popen(command, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT,
-                                       env={**os.environ, 'LEAN_NUM_THREADS': '1', 'LEAN_PATH': str(cache)},
+                                       env={**os.environ, 'LEAN_NUM_THREADS': '1', 'LEAN_PATH': str(cache),
+                                            'H62_GRAPH_OUTPUT_DIR': str(evidence)},
                                        preexec_fn=bounds, start_new_session=True)
                 while job.poll() is None:
                     minimum = min(minimum, available())
@@ -123,7 +129,8 @@ def main():
         started, reason, minimum = time.monotonic(), None, available()
         with (evidence / 'controls.log').open('w') as log:
             job = subprocess.Popen(command, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT,
-                                   env={**os.environ, 'LEAN_NUM_THREADS': '1', 'LEAN_PATH': str(cache)},
+                                   env={**os.environ, 'LEAN_NUM_THREADS': '1', 'LEAN_PATH': str(cache),
+                                            'H62_GRAPH_OUTPUT_DIR': str(evidence)},
                                    preexec_fn=bounds, start_new_session=True)
             while job.poll() is None:
                 minimum = min(minimum, available())
@@ -133,7 +140,7 @@ def main():
                     break
                 time.sleep(.1)
             code = job.wait()
-        records.append(dict(module='H64Controls', command=command, exit_code=code,
+        records.append(dict(module='H55ConstructorCensus' if args.h62_exporter else 'H64Controls', command=command, exit_code=code,
                             stop_reason=reason, seconds=round(time.monotonic()-started, 3),
                             min_available_bytes=minimum,
                             source_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),
@@ -142,9 +149,18 @@ def main():
         (evidence / 'results.json').write_text(json.dumps(records, indent=2)+'\n')
         if code != 0 or reason is not None:
             raise SystemExit(1)
-        (evidence / 'run-status.json').write_text(json.dumps(dict(
-            status='pass', resultsSha256=hashlib.sha256((evidence/'results.json').read_bytes()).hexdigest()))+'\n')
-        print('H64_SOURCE_AND_CONTROLS_CHECK_PASS', flush=True)
+        outputs = {}
+        if args.h62_exporter:
+            for name in ('constructor-contracts.json', 'constructor-contracts-repeat.json'):
+                outputs[name] = hashlib.sha256((evidence / name).read_bytes()).hexdigest()
+            if len(set(outputs.values())) != 1:
+                raise ValueError('constructor export is not deterministic')
+        status = dict(status='pass', resultsSha256=hashlib.sha256((evidence/'results.json').read_bytes()).hexdigest())
+        if args.h62_exporter:
+            status['outputs'] = outputs
+        (evidence / 'run-status.json').write_text(json.dumps(status)+'\n')
+        print('H55_CONSTRUCTOR_EXPORT_CHECK_PASS' if args.h62_exporter else
+              'H64_SOURCE_AND_CONTROLS_CHECK_PASS', flush=True)
 
 
 if __name__ == '__main__':
