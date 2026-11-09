@@ -1,5 +1,7 @@
 """Guard inherited-byte drift, scope expansion and silent legacy-check bypass."""
 import importlib.util
+import copy
+import json
 from pathlib import Path
 import tempfile
 import os
@@ -84,6 +86,59 @@ class IntegratedTests(unittest.TestCase):
             self.assertEqual(Path(name).parent, Path(tmp))
             Path(name).unlink()
 
+    def test_h309_exact_pair_and_only_one_manifest_leaf_changes(self):
+        original = json.loads((gate.ROOT / gate.MANIFEST_PATH).read_text())
+        before = copy.deepcopy(original)
+        projected, info = gate.runtime_manifest()
+        expected = copy.deepcopy(original)
+        expected['gate_scripts'][gate.RUNTIME_PATH] = gate.RUNTIME_NEW_SHA256
+        self.assertEqual(projected, expected)
+        self.assertEqual(original, before)
+        self.assertEqual(info['approved_master'], '0781d0b90cfa2773f6304a5da5390eaa7c8c8538')
+        self.assertFalse(info['full_acceptance'])
+        wrong = copy.deepcopy(original)
+        wrong['gate_scripts'][gate.RUNTIME_PATH] = '0' * 64
+        with self.assertRaises(ValueError):
+            gate.project_runtime_manifest(wrong)
+        old = subprocess.check_output(['git', 'show', gate.RUNTIME_OLD_MASTER + ':' + gate.RUNTIME_PATH], cwd=gate.ROOT)
+        new = (gate.ROOT / gate.RUNTIME_PATH).read_bytes()
+        gate.check_runtime_pair(old, new)
+        for a, b in ((old + b'\n', new), (old, new + b'\n')):
+            with self.assertRaises(ValueError):
+                gate.check_runtime_pair(a, b)
+
+    def test_h309_refuses_modified_numeric_manifest_pins(self):
+        path = gate.ROOT / gate.MANIFEST_PATH
+        original_read = Path.read_bytes
+        manifest = json.loads(original_read(path))
+        mutations = []
+        source = copy.deepcopy(manifest)
+        source['modules'][0]['sha256'] = '0' * 64
+        mutations.append(source)
+        kernel = copy.deepcopy(manifest)
+        kernel['kernel_inventory_sha256'] = '0' * 64
+        mutations.append(kernel)
+        for mutated in mutations:
+            raw = json.dumps(mutated).encode()
+            def read(candidate):
+                return raw if candidate == path else original_read(candidate)
+            with patch.object(Path, 'read_bytes', read):
+                with self.assertRaisesRegex(ValueError, 'original acceptance manifest changed'):
+                    gate.runtime_manifest()
+
+    def test_h309_configuration_and_serial_mutations_refused(self):
+        old = b'moreLeanArgs = ["-j1"]\nnumber = 1\ntargets = ["A"]\n'
+        new = b'weakLeanArgs = ["-j1"]\nnumber = 1\ntargets = ["A"]\n'
+        gate.serial_runtime_equivalent(old, new)
+        for mutation in (new.replace(b'-j1', b'-j2'),
+                         new.replace(b'number = 1', b'number = true'),
+                         new.replace(b'number = 1', b'number = 1.0'),
+                         new.replace(b'["A"]', b'["A", "B"]'),
+                         new + b'moreLeanArgs = ["-j1"]\n',
+                         new + b'newFlag = true\n'):
+            with self.subTest(mutation=mutation), self.assertRaises(ValueError):
+                gate.serial_runtime_equivalent(old, mutation)
+
     def test_private_inputs_refuse_symlinks_and_checkout_paths(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -134,6 +189,7 @@ class IntegratedTests(unittest.TestCase):
             output, evidence = base / 'out', base / 'input'
             output.mkdir(); evidence.mkdir()
             snapshot = output / 'snapshot'
+            (snapshot / 'tests/sol-numeric-literals').mkdir(parents=True)
             calls = []
             original = types.SimpleNamespace(FOLDER=gate.ROOT / 'tests/sol-numeric-literals',
                 ROOT=gate.ROOT, run=lambda c: calls.append(c), permitted=lambda p: False,
@@ -145,12 +201,13 @@ class IntegratedTests(unittest.TestCase):
             def check(implementation, self_test):
                 self.assertEqual((implementation, self_test), (False, False))
                 self.assertEqual(unchanged, (original.validate_completion, original.validate_inventory, original.validate_registration))
+                self.assertEqual(json.loads((original.FOLDER / 'acceptance.json').read_text()), {'only': 'private projection'})
                 self.assertEqual(original.FOLDER / 'evidence/complete-gates', snapshot / 'tests/sol-numeric-literals/evidence/complete-gates')
                 original.run(['python3', 'tests/sol-numeric-literals/differential.py'])
                 original.validate_h41_cache_record({})
                 raise ValueError('original validation failure')
             original.check = check
-            with patch.object(gate, 'stage', return_value=(snapshot, {}, {})), patch.object(gate, 'git', return_value='head'):
+            with patch.object(gate, 'stage', return_value=(snapshot, {}, {})), patch.object(gate, 'git', return_value='head'), patch.object(gate, 'runtime_manifest', return_value=({'only': 'private projection'}, {'authority': 'H309'})):
                 with self.assertRaisesRegex(ValueError, 'original validation failure'):
                     gate.execute(original, evidence, output)
             self.assertEqual(calls, [['python3', str(snapshot / 'tests/sol-numeric-literals/differential.py')], snapshot])
