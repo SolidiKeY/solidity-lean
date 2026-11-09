@@ -13,6 +13,13 @@ REPOS={'EvmYul':'NethermindEth/EVMYulLean','Clear':'NethermindEth/Clear'}
 def load(name):
     spec=importlib.util.spec_from_file_location(name,HERE/(name+'.py')); mod=importlib.util.module_from_spec(spec); spec.loader.exec_module(mod); return mod
 
+def record_module(state,row):
+    # Current rows drive completion; append-only attempts retain every observed
+    # failure and its original timing/provenance when a module is retried.
+    history=state.setdefault('module_attempts',list(state['modules']))
+    history.append(row)
+    state['modules']=[old for old in state['modules'] if old['module']!=row['module']]+[row]
+
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument('--cloud-vm',action='store_true'); ap.add_argument('--project',choices=PINS,required=True); ap.add_argument('--refs',type=pathlib.Path,required=True); ap.add_argument('--work',type=pathlib.Path,required=True); args=ap.parse_args()
     if not args.cloud_vm: ap.error('explicit --cloud-vm required under H232; host execution unsupported')
@@ -140,7 +147,7 @@ def main():
     for i,mod in enumerate(order):
         if mod in prior and prior[mod]['check']['exit_code']==0: continue
         row={'module':mod,**info[mod]}; row['check']=run(['lake','env','lean','-j1','--tstack=131072','-DautoImplicit=false',row['path']],'module-'+str(i),600)
-        state['modules']=[r for r in state['modules'] if r['module']!=mod]+[row]; save(); print(mod,row['check']['exit_code'],flush=True)
+        record_module(state,row); save(); print(mod,row['check']['exit_code'],flush=True)
     state['status']='pass' if all(r['check']['exit_code']==0 for r in state['modules']) and len(state['modules'])==len(order) else 'fail'; save()
     print(state['status'],args.project,flush=True)
 if __name__=='__main__': main()
