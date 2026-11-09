@@ -9,7 +9,7 @@ Kernel-checked instances of each case of `CompilerEndpoint`:
 * accepted through bytes: the empty program (core branch, empty code, empty
   byte selection, a zero-step safe trace);
 * R1: `revertData []`, which no checked branch accepts;
-* R2: the scoped-call fixture `CompilerWholeScope.program` at the source frame
+* R2: the empty program at `L = Lmax + 1` (core bound), and the scoped-call fixture `CompilerWholeScope.program` at the source frame
   `1 + frameNeedProg program`, below its call-frame need;
 * R3: the same fixture's memory code, and the core code of `revert`;
 * R4: the empty program's bytes from an entry stack of 1025 words.
@@ -80,6 +80,32 @@ open Passes.CompilerWholeScope (program actual) in
 theorem scope_static_holds : staticBound actual 1 128 = true := by
   with_unfolding_all decide +kernel
 
+/-- The core branch's static bound: the empty program at `L = Lmax + 1`. -/
+theorem empty_static_refused :
+    (Compiler.compile 0 (Frag.init []) empty).map (fun r => staticBound r (Lmax + 1) 0) =
+      some false := by
+  decide +kernel
+
+/-! ## The IR-fault branch of `ByteAgree`
+
+No program the checked entry accepts reaches it today (only empty code is
+selected); the selector's own fault fixture `lateIR` (`PUSH 5; SWAP1` on an
+empty stack) shows the branch is inhabited: the IR faults and the bytes stick
+before their end. -/
+
+theorem late_capacity :
+    Scalar.stackBound MixedControls.lateCode (([] : Scalar.Stack).length : Int) = true := by
+  decide +kernel
+
+theorem late_fault_stuck (m : Machine) :
+    Evm.run MixedControls.lateIR { m with stack := [] } = .fault ∧
+      Stuck (encode MixedControls.lateCode) ⟨0, []⟩ := by
+  rcases byte_agree MixedControls.lateIR MixedControls.lateCode MixedControls.late_selected []
+      late_capacity { m with stack := [] } rfl with ⟨_, run, -⟩ | fault
+  · rw [MixedControls.late_fault m] at run
+    cases run
+  · exact fault
+
 /-! ## R3: no byte selection -/
 
 open Passes.CompilerWholeScope (actual) in
@@ -107,3 +133,5 @@ end Solidity.Backend.CompilerEndpointWitnesses
 #print axioms Solidity.Backend.CompilerEndpointWitnesses.scope_bytes_refused
 #print axioms Solidity.Backend.CompilerEndpointWitnesses.reverting_bytes_refused
 #print axioms Solidity.Backend.CompilerEndpointWitnesses.empty_capacity_refused
+#print axioms Solidity.Backend.CompilerEndpointWitnesses.empty_static_refused
+#print axioms Solidity.Backend.CompilerEndpointWitnesses.late_fault_stuck

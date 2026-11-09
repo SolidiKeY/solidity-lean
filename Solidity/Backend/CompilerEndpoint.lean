@@ -15,8 +15,11 @@ Every place where the chain stops is a named, decidable refusal:
   `b + requiredFrame ≤ frame`) fails for the world's bounds; then no world with
   those bounds is an `Input` (a consequence, proved by `input_bound`).
 * **R3** `compileScalar r.code = none`: no byte selection for the emitted code.
-  Every fixed-cell local (`mload`/`mstore`), storage, jump and call is refused
-  here, so today only stack-only code reaches bytes.
+  The selector takes numeric literals and operations, `pop`, `dup` and `swap`
+  only; every statement the checked entry emits code for also emits a
+  fixed-cell local (`mload`/`mstore`), storage access, `jumpi` (`assertTop`),
+  `revert`, `call` or `loop`. So today only programs with empty code reach
+  bytes; the byte half becomes informative as the selector widens.
 * **R4** `Scalar.stackBound code input.length = false`: the selected bytes
   would exceed the 1024-word stack from that entry height.
 
@@ -79,9 +82,14 @@ theorem effect_scalar (code : List UInt8) (i : Instr) (s : LabelExec.State)
     case JUMPDEST => cases free
     all_goals rfl
 
-/-- The byte machine is stuck: some reachable state has no supported step. -/
+/-- The byte machine is stuck: some reachable state inside the bytes (not at
+their end, where `fetch` also returns `none`) has no supported step. -/
 def Stuck (bytes : List UInt8) (start : LabelExec.State) : Prop :=
-  ∃ k s, LabelExec.advance k bytes start = some s ∧ LabelExec.step bytes s = none
+  ∃ k s, LabelExec.advance k bytes start = some s ∧ s.pc < bytes.length ∧
+    LabelExec.step bytes s = none
+
+theorem size_pos (i : Instr) : 0 < i.size := by
+  cases i <;> simp only [Instr.size] <;> omega
 
 /-- A scalar failure on control-free code leaves the byte machine stuck,
 whatever bytes surround the code. -/
@@ -98,16 +106,19 @@ theorem scalar_stuck (code : Program) (before after : List UInt8) (input : Scala
     rw [bytes]
     cases step : Scalar.step i input with
     | none =>
-      refine ⟨0, _, rfl, ?_⟩
-      rw [LabelExec.step_prefix, effect_scalar _ _ _ free.1]
-      simp only [step, Option.map_none]
+      refine ⟨0, _, rfl, ?_, ?_⟩
+      · have := size_pos i
+        simp only [List.length_append, Instr.length_encode]
+        omega
+      · rw [LabelExec.step_prefix, effect_scalar _ _ _ free.1]
+        simp only [step, Option.map_none]
     | some reached =>
       simp only [Scalar.run, step, Option.bind_some] at fails
-      obtain ⟨k, s, run, stuck⟩ := ih (before ++ i.encode) reached free.2 fails
+      obtain ⟨k, s, run, inside, stuck⟩ := ih (before ++ i.encode) reached free.2 fails
       have shift : before ++ (i.encode ++ (encode rest ++ after)) =
           (before ++ i.encode) ++ (encode rest ++ after) := by
         simp only [List.append_assoc]
-      refine ⟨k + 1, s, ?_, by rw [shift]; exact stuck⟩
+      refine ⟨k + 1, s, ?_, by rw [shift]; exact inside, by rw [shift]; exact stuck⟩
       have first : LabelExec.step (before ++ (i.encode ++ (encode rest ++ after)))
           ⟨before.length, input⟩ = some ⟨(before ++ i.encode).length, reached⟩ := by
         rw [LabelExec.step_prefix, LabelExec.effect_of_scalar _ _ _ _ _ step,
@@ -206,24 +217,6 @@ def AgreesBytes {C : Contract} {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Solidi
     r.Rep (L + Evm.Prog.pushes P) frame base σ m o.st m) ∨
   (P.run σ = .error .diverge ∧ Stuck (encode code) ⟨0, input⟩)
 
-theorem irStack_injective {input output : Scalar.Stack} (h : irStack input = irStack output) :
-    input = output := by
-  induction input generalizing output with
-  | nil => cases output with
-    | nil => rfl
-    | cons _ _ => cases h
-  | cons x xs ih => cases output with
-    | nil => cases h
-    | cons y ys =>
-      simp only [irStack, List.map_cons, List.cons.injEq, Word.val.injEq] at h
-      have hx : x = y := by
-        have := congrArg Fin.val h.1
-        simp only [wmod] at this
-        have hW : W = 2 ^ 256 := rfl
-        rw [hW, Nat.mod_eq_of_lt (BitVec.isLt x), Nat.mod_eq_of_lt (BitVec.isLt y)] at this
-        exact BitVec.eq_of_toNat_eq this
-      rw [hx, ih h.2]
-
 theorem agrees_bytes {C : Contract} {b L frame : Nat} {Γ Δ : Ctx} {F : Frag Γ}
     {P : Solidity.Prog C Γ Δ} (r : Compilation b F P) {code : Program}
     {base : Nat → Fin W} {σ : State C Γ} {m : Machine} {input : Scalar.Stack}
@@ -234,7 +227,7 @@ theorem agrees_bytes {C : Contract} {b L frame : Nat} {Γ Δ : Ctx} {F : Frag Γ
   · rcases bytes with ⟨output, hb, trace⟩ | ⟨hb, -⟩
     · rw [hc] at hb
       cases hb
-      have same : input = output := irStack_injective (stack.symm.trans hst.symm)
+      have same : input = output := Selection.irStack_injective (stack.symm.trans hst.symm)
       subst same
       refine .inl ⟨o, ho, trace, ?_⟩
       have machine : ({ m with stack := irStack input } : Machine) = m := by
@@ -280,6 +273,9 @@ def CompilerEndpoint : Prop :=
                 ∀ (L frame : Nat) (base : Nat → Fin W) (σ : State C Γ),
                   r.Input L frame base σ m → AgreesBytes r code L frame base σ m input))
 
+/-- `CompilerEndpoint` holds, composed from `Compilation.correct_exact`,
+`input_bound`, `compileScalar_equation`, `ExecutionTrace.scalar_bytes` and
+`scalar_stuck`; no stage is assumed. -/
 theorem compiler_endpoint_correct : CompilerEndpoint := by
   intro C Γ Δ b F P
   cases accepted : Compiler.compile b F P with
