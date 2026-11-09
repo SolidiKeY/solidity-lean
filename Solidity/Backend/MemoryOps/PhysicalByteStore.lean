@@ -122,6 +122,6 @@ theorem mstore8_revert_checked (bytes : Environment.Memory) (a v r n : Roadmap.W
 #guard_msgs (whitespace := lax) in #print axioms mstore8_revert_live
 /-- info: 'Solidity.Backend.MemoryOps.Physical.WordFrame.mstore8_revert' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms WordFrame.mstore8_revert
-/-- info: 'Solidity.Backend.MemoryOps.Physical.mstore8_short_stack' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.MemoryOps.Physical.mstore8_short_stack' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms mstore8_short_stack
 end Solidity.Backend.MemoryOps.Physical
