@@ -11,13 +11,15 @@ theorem inherited_numeric_accepts (suffix : Solidity.Backend.Scalar.Stack) :
     Solidity.Backend.Scalar.run TailGuard.code
       ((32 : Solidity.Backend.Scalar.Word)::64::0::0::0::32::64::0::suffix)=some (1::suffix) := by
   rw [inheritedTail.correct 64 0 0 32 0 32 0 suffix]
-  rfl
+  apply congrArg (fun word : Solidity.Backend.Scalar.Word => some (word::suffix))
+  decide
 
 theorem inherited_numeric_refuses (suffix : Solidity.Backend.Scalar.Stack) :
     Solidity.Backend.Scalar.run TailGuard.code
       ((32 : Solidity.Backend.Scalar.Word)::0::0::0::0::32::0::0::suffix)=some (0::suffix) := by
   rw [inheritedTail.correct 0 0 0 32 0 32 0 suffix]
-  rfl
+  apply congrArg (fun word : Solidity.Backend.Scalar.Word => some (word::suffix))
+  decide
 
 theorem inherited_capacity (suffix : Solidity.Backend.Scalar.Stack) (room : suffix.length+9≤1024) :
     Solidity.Backend.Scalar.stackBound TailGuard.code ((suffix.length+8 : Nat) : Int)=true :=
