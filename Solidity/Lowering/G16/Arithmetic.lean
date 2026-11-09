@@ -6,10 +6,8 @@ import Solidity.Lowering.V07.SignedNarrowAddition
 import Solidity.Lowering.V07.SignedNarrowSubtraction
 import Solidity.Lowering.V07.SignedNarrowMultiplication
 
-/-! Scalar arithmetic families built from the published V07 operational leaves.
-This module covers wrapping addition, subtraction and multiplication at
-all valid widths and signs, plus checked unsigned ring operations. Checked
-signed arithmetic and quotient/remainder remain separate obligations; no frontend selection or admission theorem is asserted. -/
+/-! V07 ring clauses: wrapping +, -, * at all widths/signs and checked unsigned operations.
+Checked signed arithmetic and quotient/remainder remain open; no frontend selection or admission claim. -/
 namespace Solidity.Lowering.G16.Arithmetic
 open Solidity.Lowering.V07
 
@@ -23,7 +21,7 @@ def RingOp.source : RingOp → Source.BinOp
 def RingOp.calculate : RingOp → Int → Int → Int
   | .add => (· + ·) | .sub => (· - ·) | .mul => (· * ·)
 
-/-- Reuse V07's actual word arithmetic and width-restoring value programs. -/
+/-- Reuse V07 word arithmetic and width restoration. -/
 def wrappingValue {C : Contract} {Γ : Ctx} (t : Source.IntTy) (op : RingOp) :
     Val C Γ (integerPrim t) → Val C Γ (integerPrim t) → Val C Γ (integerPrim t) :=
   match t with
@@ -36,9 +34,8 @@ def wrappingValue {C : Contract} {Γ : Ctx} (t : Source.IntTy) (op : RingOp) :
     | .sub => SignedNarrowSubtraction.subValue bits
     | .mul => SignedNarrowMultiplication.mulValue bits
 
-/-- One statement covers all three ring operations, every valid width, and
-both signs. The premises are initial local observations, never desired runs.
-The source is explicitly evaluated in an unchecked frame. -/
+/-- All three ring operations, widths and signs in an explicit unchecked Source frame.
+Premises observe initial locals, never desired runs. -/
 theorem wrapping_transport {E : Source.Env} {srcΓ : Source.RCtx}
     {C : Contract} {Γ : Ctx} {ι : Type}
     (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
@@ -69,8 +66,7 @@ theorem wrapping_transport {E : Source.Env} {srcΓ : Source.RCtx}
     | mul => exact SignedNarrowMultiplication.locals_transport bits valid G F fuel source target si ti family a b x y hx hy readA readB
 
 
-/-- Select the published V07 assignment/read operand without rebuilding its
-capture prefix or changing its pipeline order. -/
+/-- Reuse V07's assignment/read operand, capture prefix and pipeline order. -/
 def wrappingAssignmentOperand {C : Contract} {Γ : Ctx} (t : Source.IntTy)
     (op : RingOp) (pipeline : Roadmap.Pipeline) :
     Idx Γ (.val (integerPrim t)) → Idx Γ (.val (integerPrim t)) →
@@ -85,10 +81,8 @@ def wrappingAssignmentOperand {C : Contract} {Γ : Ctx} (t : Source.IntTy)
     | .sub => SignedNarrowSubtraction.assignReadOperand bits pipeline
     | .mul => SignedNarrowMultiplication.assignReadOperand bits pipeline
 
-/-- A single ring-family clause includes the actual pipeline-sensitive
-assignment/read pair, all valid widths/signs, and the derived caller update.
-Only initial alignment and reads are premises. This operational leaf does not
-supply frontend selection or the held validator association. -/
+/-- Pipeline-sensitive assignment/read at all widths/signs, with derived caller update.
+Only initial alignment/reads are assumed; no frontend selection or held validator association. -/
 theorem wrapping_assignment_transport {E : Source.Env} {srcΓ : Source.RCtx}
     {C : Contract} {Γ : Ctx} {ι : Type}
     (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
@@ -128,8 +122,7 @@ theorem wrapping_assignment_transport {E : Source.Env} {srcΓ : Source.RCtx}
 namespace CheckedUnsigned
 open UnsignedNarrowing (ty)
 
-/-- The narrow-width guard uses the same V07 modular result as the value
-program. Multiplication tests zero before executing the quotient. -/
+/-- Guard the V07 modular result at its width; multiplication tests zero before division. -/
 def condition {C : Contract} {Γ : Ctx} (bits : Nat)
     (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256) (op : RingOp)
     (a b : Val C Γ .uint) : Val C Γ .bool :=
@@ -233,9 +226,8 @@ private theorem condition_run {C : Contract} {Γ : Ctx} (target : State C Γ)
         simpa only [zero,false_or] using bounds
       simp only [reduced,RingOp.calculate]
 
-/-- Guarded reuse of the existing unsigned ring value program. This leaf
-advances `Solidity.Goals.lowerLoopsCorrect`; it does not replace the held
-validator/scalar endpoint or assert a frontend producer. -/
+/-- Guard the existing unsigned ring program toward `Solidity.Goals.lowerLoopsCorrect`.
+No replacement of the held validator/scalar endpoint or frontend producer is asserted. -/
 def operand {C : Contract} {Γ : Ctx} (bits : Nat)
     (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256) (op : RingOp)
     (checked : Bool) (a b : Idx Γ (.val .uint)) :
@@ -325,11 +317,9 @@ private theorem operand_run {C : Contract} {Γ : Ctx} (target : State C Γ)
     rw [value]
     rfl
 
-/-- One checked/wrapping unsigned ring clause includes every valid width,
-all three operators, success and arithmetic panic. The only premises observe
-initial aligned locals; no overflow exclusion or desired execution is assumed.
-The final relation is the wrapped-value law; on failure it does not describe
-an observed successful result. -/
+/-- All unsigned widths, three operators and both modes: success or arithmetic panic.
+Premises observe initial aligned locals, with no overflow exclusion or desired run.
+The final wrapped-value law does not assert observed success on failure. -/
 theorem transport {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} {Γ : Ctx} {ι : Type}
     (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
     (source : Source.EMState E srcΓ) (target : State C Γ)
