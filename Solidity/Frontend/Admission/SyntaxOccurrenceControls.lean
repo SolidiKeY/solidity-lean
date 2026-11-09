@@ -172,4 +172,34 @@ theorem mutability_carriers (state : Mutability) (payable : Bool) :
 /-- info: 'Solidity.Frontend.Admission.OccurrenceControls.mutability_carriers' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms mutability_carriers
 
+
+/-! Regression: an import refusal must not truncate later visibility/mutability/payload diagnostics in an unused function. The old partial classifier deliberately remains silent on written visibility; this is a scope-gap control, not a legal or eligible execution witness. -/
+def candidateUnusedFunction : Syn (.part true) :=
+  .function (.ident "unused")
+    (.cons (.param (.array (.elem .bool) (.some (.unaryPrefix .inc (.lit (.bool true)))))
+      (some .memory) none) .nil)
+    (some .pub) (some .view) .nil false none .nil .none
+
+def candidateUnit : Syn .unit :=
+  .unit (.cons (.importPath "p" none) (.cons (.topPart candidateUnusedFunction) .nil))
+
+def candidateAccepts (f : Feature) : Bool :=
+  decide (f ≠ .imports ∧ f ≠ .visibility ∧ f ≠ .stateMutability ∧ f ≠ .increments)
+
+theorem candidate_refusals_not_truncated :
+    (sourceCandidateRefusals candidateUnit candidateAccepts).map Prod.snd =
+      [.imports,.visibility,.stateMutability,.increments] ∧
+    sourceCandidateRefusal? candidateUnit candidateAccepts =
+      some (⟨.top,Syn.importPath "p" none⟩,.imports) := ⟨rfl,rfl⟩
+
+theorem old_subset_visibility_gap :
+    sourceSubsetRefusal? candidateUnit (fun f => decide (f ≠ .visibility)) = none ∧
+    sourceCandidateRefusal? candidateUnit (fun f => decide (f ≠ .visibility)) =
+      some (⟨.part true,candidateUnusedFunction⟩,.visibility) := ⟨rfl,rfl⟩
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.candidate_refusals_not_truncated' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms candidate_refusals_not_truncated
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.old_subset_visibility_gap' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms old_subset_visibility_gap
+
 end Solidity.Frontend.Admission.OccurrenceControls
