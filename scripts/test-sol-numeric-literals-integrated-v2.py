@@ -1,5 +1,8 @@
 """Guard registration transport overreach and acceptance before owner approval."""
 import copy
+from contextlib import contextmanager
+import hashlib
+import os
 import importlib.util
 import json
 from pathlib import Path
@@ -13,6 +16,46 @@ PATH = Path(__file__).with_name("check-sol-numeric-literals-integrated-v2.py")
 spec = importlib.util.spec_from_file_location("numeric_v2", PATH)
 v2 = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(v2)
+
+
+def source_identity():
+    def git(*args):
+        return subprocess.check_output(["git", "--no-optional-locks", *args], cwd=v2.ROOT)
+    index = Path(git("rev-parse", "--git-path", "index").decode().strip())
+    if not index.is_absolute():
+        index = v2.ROOT / index
+    return (git("rev-parse", "HEAD"), git("branch", "--show-current"),
+            git("status", "--porcelain"), hashlib.sha256(index.read_bytes()).hexdigest())
+
+
+@contextmanager
+def branch_fixture():
+    """Run real CLI guards on committed bytes without changing the caller's branch."""
+    before = source_identity()
+    env = dict(os.environ, GIT_TERMINAL_PROMPT="0", PYTHONDONTWRITEBYTECODE="1")
+    for key in ("GIT_DIR", "GIT_COMMON_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE",
+                "GIT_OBJECT_DIRECTORY", "GIT_ALTERNATE_OBJECT_DIRECTORIES"):
+        env.pop(key, None)
+    with tempfile.TemporaryDirectory(prefix="numeric-v2-branch-fixture-") as tmp:
+        fixture = Path(tmp) / "checkout"
+        def git(*args):
+            return subprocess.run(["git", *args], env=env, capture_output=True, text=True, check=True)
+        try:
+            git("clone", "--quiet", "--shared", "--no-checkout", str(v2.ROOT), str(fixture))
+            git("-C", str(fixture), "checkout", "--quiet", "-B",
+                "codex/solidity-sol2-20261104/numeric-literals", before[0].decode().strip())
+            for path in v2.CONTROL_FILES | set(v2.FROZEN):
+                if (fixture / path).read_bytes() != (v2.ROOT / path).read_bytes():
+                    raise AssertionError("CLI fixture differs from current committed controls: " + path)
+            yield fixture, env
+        finally:
+            if source_identity() != before:
+                raise AssertionError("branch fixture modified caller HEAD, branch, index or status")
+
+
+def fixture_cli(fixture, env, *args):
+    return subprocess.run(["python3", "-B", str(fixture / PATH.relative_to(v2.ROOT)), *args],
+                          cwd=fixture, env=env, capture_output=True, text=True)
 
 
 class RegistrationTransport(unittest.TestCase):
@@ -178,8 +221,9 @@ class RegistrationTransport(unittest.TestCase):
                 v2.verify_controls(raw.__getitem__, lambda p: {k: v for k, v in raw.items() if k != changed}[p])
 
     def test_diagnostic_is_explicitly_unbound(self):
-        result = subprocess.run(["python3", "-B", str(PATH), "--proposal-only"], cwd=v2.ROOT,
-                                capture_output=True, text=True, check=True)
+        with branch_fixture() as (fixture, env):
+            result = fixture_cli(fixture, env, "--proposal-only")
+            self.assertEqual(result.returncode, 0, result.stderr)
         record = json.loads(result.stdout)
         self.assertIsNone(record["approved_master"])
         self.assertFalse(record["full_acceptance"])
@@ -187,10 +231,18 @@ class RegistrationTransport(unittest.TestCase):
         self.assertIn("diagnostic-not-acceptance", record["scope"]["mode"])
 
     def test_full_cli_cannot_claim_unbound_acceptance(self):
-        result = subprocess.run(["python3", "-B", str(PATH)], cwd=v2.ROOT,
-                                capture_output=True, text=True)
+        with branch_fixture() as (fixture, env):
+            result = fixture_cli(fixture, env)
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("approval pending", result.stderr)
+
+    def test_real_cli_still_rejects_wrong_branch(self):
+        with branch_fixture() as (fixture, env):
+            subprocess.run(["git", "checkout", "--quiet", "--detach"], cwd=fixture,
+                           env=env, check=True, capture_output=True)
+            result = fixture_cli(fixture, env, "--proposal-only")
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("wrong original branch identity", result.stderr)
 
 
 if __name__ == "__main__":
