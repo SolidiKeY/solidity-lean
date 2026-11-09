@@ -16,6 +16,8 @@ def main():
         result=subprocess.run([sys.executable,str(HERE/'references.py'),'--project','EvmYul','--refs',str(root/'refs-must-not-exist'),'--work',str(forbidden)],capture_output=True,text=True)
         assert result.returncode==2 and '--cloud-vm' in result.stderr
         assert not forbidden.exists() and not (root/'refs-must-not-exist').exists()
+        native=subprocess.run([sys.executable,str(HERE/'native_profile.py'),'--repo',str(root/'not-a-repository'),'--file','missing.lean','--work',str(forbidden)],capture_output=True,text=True)
+        assert native.returncode==2 and '--cloud-vm' in native.stderr and not forbidden.exists()
         spec=importlib.util.spec_from_file_location('timing_measure',HERE/'measure.py'); mod=importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
         try: mod.command(['this-command-must-not-run'],root,root/'must-not-write.log')
         except RuntimeError as e: assert '--cloud-vm' in str(e)
@@ -42,6 +44,19 @@ def main():
             except PermissionError: pass
             else: raise AssertionError('post-launch scan failure swallowed')
             assert kill.call_args_list==[mock.call(fake.pid,mod.signal.SIGTERM),mock.call(fake.pid,mod.signal.SIGKILL)], 'surviving descendants were not stopped'
+        observer=mock.Mock();observer.poll.side_effect=RuntimeError('observer fixture failure')
+        with mock.patch.object(mod.pathlib.Path,'read_text',no_swap_fixture), mock.patch.object(mod,'CLOUD_VM_OPT_IN',True), mock.patch.object(mod,'active_compilers',return_value=[]), mock.patch.object(mod.subprocess,'Popen',return_value=fake), mock.patch.object(mod.os,'getpgid',return_value=0), mock.patch.object(mod.shutil,'disk_usage',return_value=mock.Mock(free=4*1024**3)), mock.patch.object(mod.os,'killpg') as kill:
+            try: mod.command(['fixture-only'],root,root/'observer-error.log',observer=observer)
+            except RuntimeError as error: assert str(error)=='observer fixture failure'
+            else: raise AssertionError('observer error swallowed')
+            assert kill.call_args_list==[mock.call(fake.pid,mod.signal.SIGTERM),mock.call(fake.pid,mod.signal.SIGKILL)]
+        refspec=importlib.util.spec_from_file_location('timing_refs',HERE/'references.py'); refs=importlib.util.module_from_spec(refspec);refspec.loader.exec_module(refs)
+        failed={'module':'A','check':{'exit_code':1,'wall_seconds':1.25,'log':'original-failure'}}
+        untouched={'module':'B','check':{'exit_code':0,'wall_seconds':2,'log':'original-B'}}
+        state={'modules':[failed,untouched]}; success={'module':'A','check':{'exit_code':0,'wall_seconds':3,'log':'retry-A'}}
+        refs.record_module(state,success)
+        assert state['module_attempts']==[failed,untouched,success]
+        assert state['modules']==[untouched,success] and state['module_attempts'][0]==failed
         # Interrupt the real resume loop immediately after its first checkpoint.
         # No Lean or Git runs: these interfaces are replaced by deterministic fixtures.
         fixture=root/'resume-fixture'; fixture.mkdir(); source=fixture/'source'; source.mkdir(); output=fixture/'results'; output.mkdir()

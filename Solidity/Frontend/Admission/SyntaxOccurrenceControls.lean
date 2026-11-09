@@ -2,7 +2,7 @@ import Solidity.Frontend.Admission.SyntaxOccurrenceLaws
 import Solidity.Frontend.Admission.ExclusionFeatures
 import Solidity.Source.Examples
 
-/-! Inhabited exact-payload/order controls. These are syntax inventories, not execution-root, semantic reachability or profile witnesses. -/
+/-! Inhabited exact-payload/order controls. These are syntax inventories, not execution-root, semantic reachability or profile witnesses. Qualifier controls guard omitted override keywords and transient flags without asserting legality. -/
 namespace Solidity.Frontend.Admission.OccurrenceControls
 open Solidity.Source
 
@@ -234,5 +234,39 @@ theorem constness_diagnostic_gap :
 
 /-- info: 'Solidity.Frontend.Admission.OccurrenceControls.constness_diagnostic_gap' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms constness_diagnostic_gap
+
+
+def stateQualifierUnit (bases : Option (List IdPath)) (transient : Bool) : Syn .unit :=
+  .unit (.cons (.contract false "C" .none .nil
+    (.cons (.stateVar (.elem .bool) none none bases transient "unused" .none) .nil)) .nil)
+
+theorem override_carriers :
+    [declarationQualifierFeaturesAt (Syn.function (t := false) (.ident "f") .nil none none .nil
+        false (some []) .nil .none),
+     declarationQualifierFeaturesAt (.modifier "m" .none false (some []) .none),
+     declarationQualifierFeaturesAt (.fallback .fbNoParams false none .nil false (some []) .none),
+     declarationQualifierFeaturesAt (.receive false false .nil false (some []) .none),
+     declarationQualifierFeaturesAt (.stateVar (.elem .bool) none none (some []) false "x" .none)] =
+      List.replicate 5 [.overrideDeclarations] := rfl
+
+theorem state_qualifier_combinations :
+    [declarationQualifierFeaturesAt (.stateVar (.elem .bool) none none none false "x" .none),
+     declarationQualifierFeaturesAt (.stateVar (.elem .bool) none none (some []) false "x" .none),
+     declarationQualifierFeaturesAt (.stateVar (.elem .bool) none none none true "x" .none),
+     declarationQualifierFeaturesAt (.stateVar (.elem .bool) none none (some []) true "x" .none)] =
+      [[],[.overrideDeclarations],[.transientState],[.overrideDeclarations,.transientState]] := rfl
+
+theorem qualifier_diagnostics :
+    (syntaxFieldRefusals (stateQualifierUnit (some []) true) declarationQualifierFeaturesAt
+      (fun _ => false)).map Prod.snd = [.overrideDeclarations,.transientState] ∧
+    sourceCandidateRefusal? (stateQualifierUnit (some []) true)
+      (fun f => decide (f ≠ .overrideDeclarations ∧ f ≠ .transientState)) = none := ⟨rfl,rfl⟩
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.override_carriers' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms override_carriers
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.state_qualifier_combinations' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms state_qualifier_combinations
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.qualifier_diagnostics' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms qualifier_diagnostics
 
 end Solidity.Frontend.Admission.OccurrenceControls
