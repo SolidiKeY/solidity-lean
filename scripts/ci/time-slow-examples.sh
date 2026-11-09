@@ -15,12 +15,13 @@ if [ $# -gt 0 ]; then mods=("$@"); else
 fi
 [ ${#mods[@]} -gt 0 ] || { echo "time-slow-examples: no modules" >&2; exit 2; }
 lake build SoliditySlowExamples >&2 || { echo "time-slow-examples: build failed" >&2; exit 1; }
+python3 scripts/ci/restore-lake-artifacts.py >&2 || { echo "time-slow-examples: artifact restore failed" >&2; exit 1; }
 out=$(mktemp)
 for m in "${mods[@]}"; do
   f=${m//.//}.lean
   [ -f "$f" ] || { echo "time-slow-examples: no file $f" >&2; exit 2; }
   start=$(date +%s.%N)
-  LEAN_NUM_THREADS=1 lake lean "$f" -- --tstack=131072 >/dev/null 2>&1; st=$?
+  LEAN_NUM_THREADS=1 lake lean "$f" -- --tstack=131072 >"${TIME_SLOW_LOG:-/dev/null}" 2>&1 </dev/null; st=$?
   end=$(date +%s.%N)
   printf '%.1f\t%s\t%s\n' "$(echo "$end - $start" | bc)" "$m" "$st" | tee -a "$out" >&2
 done
