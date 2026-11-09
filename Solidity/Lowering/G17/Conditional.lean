@@ -1,7 +1,7 @@
 import Solidity.Lowering.G17.ShortCircuitSource
 import Solidity.Lowering.V07.ConditionalAssignments
 
-/-! Effectful Boolean conditional composition through the existing P12 condition contract. Only the selected branch runs, at the condition's reached state. This does not supply admission/origin or fuel/stuck adequacy and is not a whole-pass theorem or a claim about non-Boolean conditional results. -/
+/-! Effectful Boolean conditional composition through the existing P12 condition contract. Only the selected branch runs, at the condition's reached state. This does not supply admission/origin or fuel/stuck adequacy and is not a whole-pass theorem or a claim about non-Boolean conditional results. conditionalOperand_run: Evaluate the condition once, then exactly one branch, retaining all caller writes, heap growth and halts without any branch-success premise. conditionalCondition: Compose independent Boolean condition/branch contracts at their actual reached states. No execution law for the complete conditional is a premise. -/
 namespace Solidity.Lowering.G17
 open V07 V07.P12NextInterface
 variable {C : Contract} {Γ : Ctx}
@@ -65,7 +65,7 @@ def conditionalOperand (condition yes no : DeferredSource.Operand C Γ (.prim .b
       (.cons (storeOperand .here (condition.wk (.drop .refl))) (choiceCode yes no)),
     .val (.simple (.local .here))⟩
 
-/-- Evaluate the condition once, then exactly one branch, retaining all caller writes, heap growth and halts without any branch-success premise. -/
+
 theorem conditionalOperand_run (condition yes no : DeferredSource.Operand C Γ (.prim .bool))
     (target : State C Γ) :
     (conditionalOperand condition yes no).run target = (do
@@ -130,7 +130,7 @@ private theorem source_choice_error (G : Source.Glob E) (F : Source.Fr) (fuel : 
     (Source.evalE G F (fuel+1) (.cond condition yes no)).run source = (.error halt,middle) := by
   rw [Source.evalE,Source.Hoare.run_bind,conditionRun]
 
-/-- Compose independent Boolean condition/branch contracts at their actual reached states. No execution law for the complete conditional is a premise. -/
+
 def conditionalCondition (G : Source.Glob E) (F : Source.Fr) (m : ContextMap srcΓ Γ)
     (values : ValueRelation E C) (worlds : WorldRelation E C)
     (condition yes no : Source.RExpr E srcΓ .bool)

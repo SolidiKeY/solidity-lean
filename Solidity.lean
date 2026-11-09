@@ -246,6 +246,7 @@ import Solidity.Backend.Environment.CompositionChecks
 import Solidity.Backend.Environment.Crypto
 import Solidity.Backend.Environment.CryptoChecks
 import Solidity.Backend.Environment.Frames
+import Solidity.Backend.Environment.LoadV2
 import Solidity.Backend.Environment.Metadata
 import Solidity.Backend.Environment.MetadataChecks
 import Solidity.Backend.Environment.Namespace
@@ -4265,6 +4266,8 @@ import Solidity.Source.MonetaryStorageControls
 import Solidity.Source.MonetaryWorld
 import Solidity.Source.Observe
 import Solidity.Source.Overloads
+import Solidity.Source.PowerV2
+import Solidity.Source.PowerV2Correct
 import Solidity.Source.Preservation.AllocatingControls
 import Solidity.Source.Preservation.AllocatingFragment
 import Solidity.Source.Preservation.AllocationBodyControls
@@ -5606,6 +5609,8 @@ import Solidity.Yul.Views.GeneratedRetainedControls
 import Solidity.Yul.Views.Generic.Plan
 import Solidity.Yul.Views.GenericFlow.Following
 import Solidity.Yul.Views.GenericFlow.FollowingLaws
+import Solidity.Yul.Views.GenericFlow.FollowingPlan
+import Solidity.Yul.Views.GenericFlow.Reads
 import Solidity.Yul.Views.HeapAllocationCommute
 import Solidity.Yul.Views.HeapAllocationControls
 import Solidity.Yul.Views.HeapAllocationFreshnessControls
@@ -6311,6 +6316,7 @@ import Solidity.Yul.World.LifecycleAdapterChecks
 import Solidity.Yul.World.LifecycleBalancesFit
 import Solidity.Yul.World.LifecycleFrameControls
 import Solidity.Yul.World.LifecycleFrames
+import Solidity.Yul.World.LoadV2Port
 import Solidity.Yul.World.LogBuiltin
 import Solidity.Yul.World.LogBuiltinControls
 import Solidity.Yul.World.LogPortRuleControls

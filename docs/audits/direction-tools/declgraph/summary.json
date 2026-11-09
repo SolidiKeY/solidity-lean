@@ -1,5 +1,6 @@
 {
   "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+  "constant_identity": "Global imported constant Name, not necessarily unique source declaration: cached modules can define the same fully qualified theorem name.",
   "deletable_now_verified_lines": 0,
   "external_constant_boundary": 4317,
   "facade_theorem_roots": 21,
@@ -225,11 +226,18 @@
     "LEAN_NUM_THREADS=1 LEAN_PATH=VIEW lean -j1 --run docs/audits/direction-tools/declgraph/Export.lean graph MODULES GRAPH",
     "python3 -I docs/audits/direction-tools/declgraph/analyze.py --graph GRAPH --view VIEW --out OUT"
   ],
+  "semantic_certification": "INVALID for semantic use: .ilean aliases can merge local binders and constants; earlier source-span and liveness fields are provisional index statistics pending native-range replay.",
   "source_reference_occurrences": 2551051,
   "status": "partial",
   "supplemental_measurements": {
+    "cached_ir_inventory": "ir-summary.json",
+    "ci_and_plan_catalog": "root-plan-catalog.json",
     "compiler_overrides": "compiler-edges.json",
-    "effect_on_liveness": "not integrated; syntax occurrences do not certify semantic roots",
+    "effect_on_liveness": "Old fields are provisional index statistics. Native module expression measurements supersede their semantic/source-binding interpretation; full CI/test liveness is still unresolved.",
+    "historical_candidates": "historical-summary.json",
+    "module_compiler_overrides": "module-compiler-attributes.json",
+    "native_candidate_bindings": "candidate-summary.json",
+    "native_expression_graph": "native-summary.json",
     "syntax_census": "syntax-census.json"
   },
   "unowned_source_reference_nodes": 96831,
