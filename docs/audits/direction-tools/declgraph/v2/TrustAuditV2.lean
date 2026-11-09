@@ -1,4 +1,3 @@
-import Solidity.Examples.Tactics.OpenLoops.RowsNine
 import Solidity.Examples.Tactics.PaymentSource
 import Solidity.Theorems
 import Solidity.Semantics.Termination
@@ -43,6 +42,7 @@ import Solidity.Examples.Tactics.AllLeftLater
 import Solidity.Examples.Tactics.Nonlinear
 import Solidity.Examples.Tactics.ArrayScans
 import Solidity.Examples.Tactics.OpenLoops
+import Solidity.Examples.Tactics.OpenLoops.RowsNine
 import Solidity.Examples.Tactics.ComputedRevert
 import Solidity.Examples.Tactics.Decide
 import Solidity.Examples.Tactics.Rigid
