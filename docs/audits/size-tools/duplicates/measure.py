@@ -24,6 +24,7 @@ ROOT = Path(subprocess.check_output(['git', '-C', str(HERE), 'rev-parse', '--sho
 INDICES = (1, 2, 3, 4, 5, 6, 7, 9, 10)
 FILES = [f'Solidity/TestSuite/Derived{i}.lean' for i in INDICES]
 SUPPORT = 'Solidity/TestSuite/ScopedProblems.lean'
+CHECKER = 'scripts/check-automatic.mjs'
 PAT = re.compile(r'theorem (Solkey\.TestSuite\.\w+)\.proved : ⊢ \1\.problem := by\n  sol_prove')
 DECL = re.compile(r'^\s*(?:theorem|lemma|def|abbrev|macro)\b', re.M)
 
@@ -57,6 +58,7 @@ def main():
     ap.add_argument('--out', type=Path)
     ap.add_argument('--summarize', type=Path, help='summarize an existing successful measurement without Lean')
     ap.add_argument('--lean', action='store_true')
+    ap.add_argument('--consumer', action='store_true', help='include the source-scanner adapter and check record parity')
     ap.add_argument('--inventory', action='store_true', help='regenerate and filter the frozen reachability clusters')
     ap.add_argument('--skip-cache', action='store_true')
     ap.add_argument('--repeats', type=int, default=3)
@@ -86,10 +88,14 @@ def main():
         if tree.exists():
             ap.error('use a fresh output directory; existing worktrees are never reset')
         run(['git', 'worktree', 'add', '--detach', str(tree), BASE], stdout=subprocess.DEVNULL)
-        before = {p: source(BASE, p) for p in [SUPPORT] + FILES}
+        before = {p: source(BASE, p) for p in [SUPPORT] + FILES + ([CHECKER] if a.consumer else [])}
         names = {p: PAT.findall(before[p]) for p in FILES}
         assert all(len(names[p]) == len(re.findall(r'^theorem ', before[p], re.M)) for p in FILES)
         run(['git', 'apply', '--unidiff-zero', str(HERE / 'pilot.patch')], cwd=tree)
+        if a.consumer:
+            lean_snapshot={p: (tree/p).read_bytes() for p in [SUPPORT]+FILES}
+            run(['git', 'apply', '--unidiff-zero', str(HERE/'consumer.patch')], cwd=tree)
+            assert all((tree/p).read_bytes()==t for p,t in lean_snapshot.items()), 'consumer adapter changed Lean inputs'
         changed = subprocess.check_output(['git', 'diff', '--name-only'], cwd=tree, text=True).splitlines()
         assert set(changed) == set(before), changed
         after = {p: (tree / p).read_text() for p in before}
@@ -110,6 +116,39 @@ def main():
                       projected_derived_lines=sum(len(t.splitlines()) for t in full),
                       rollout_line_saving=2*rollout-2*12-11,
                       limits='serial -j1 / LEAN_NUM_THREADS=1; no systemd scope on the cloud VM (H232)')
+        if a.consumer:
+            original=tree/'scripts/duplicates-original-automatic.mjs'
+            original.write_text(before[CHECKER])
+            fixture=out/'consumer-before.json'
+            fixture.write_text(json.dumps({p: before[p] for p in FILES}))
+            js = '''import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {proofs as old} from './scripts/duplicates-original-automatic.mjs';
+import {proofs as next} from './scripts/check-automatic.mjs';
+const before=JSON.parse(readFileSync(process.argv[1], 'utf8'));
+let names=0, unadapted=0;
+for (const [path, text] of Object.entries(before)) {
+  const after=readFileSync(path, 'utf8');
+  assert.deepEqual(next(after), old(text));
+  names+=old(text).length;
+  unadapted+=old(after).length;
+}
+assert.equal(names, 358);
+assert.equal(unadapted, 0);
+assert.throws(() => next('solkey_prove_batch\\n  exact foo'));
+assert.throws(() => next('solkey_prove_batch'));
+assert.ok(next('set_option maxRecDepth 8192 in\\nsolkey_prove_batch\\n  Solkey.TestSuite.foo')[0].opts);
+console.log(`PASS source scanner: ${names} original records preserved; empty/manual rows rejected; option classification retained`);
+'''
+            with (out/'consumer.log').open('w') as log:
+                run(['node', '--input-type=module', '-e', js, str(fixture)], cwd=tree, stdout=log, stderr=subprocess.STDOUT)
+            delta=len(after[CHECKER].splitlines())-len(before[CHECKER].splitlines())
+            result['consumer_adapter_lines']=delta
+            result['consumer_adapter_bytes']=len(after[CHECKER].encode())-len(before[CHECKER].encode())
+            result['consumer_patch_sha256']=hashlib.sha256((HERE/'consumer.patch').read_bytes()).hexdigest()
+            result['rollout_line_saving']-=delta
+            result['consumer']='358 original scanner records identical; malformed/manual rows rejected; options retained'
+            result['lean_after_sha256']={p: hashlib.sha256(after[p].encode()).hexdigest() for p in [SUPPORT]+FILES}
         if a.inventory:
             path=ROOT/'docs/audits/direction-tools/reachability/reach.py'
             spec=importlib.util.spec_from_file_location('duplicates_inventory', path)
