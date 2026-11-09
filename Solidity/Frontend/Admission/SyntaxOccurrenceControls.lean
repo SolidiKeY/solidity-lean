@@ -324,4 +324,23 @@ theorem free_function_composed_diagnostic :
 /-- info: 'Solidity.Frontend.Admission.OccurrenceControls.free_function_composed_diagnostic' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms free_function_composed_diagnostic
 
+
+/-! Regression: raw pragma words remain single typed-site occurrences, including duplicate coder tags and malformed/unknown spellings. Frozen candidates stay unchanged; this is no well-formedness, selected-coder, profile or admission witness. -/
+def pragmaUnit : Syn .unit := .unit (.cons (.pragma ["solidity","not-a-version"])
+  (.cons (.pragma ["abicoder","v1"]) (.cons (.pragma ["experimental","ABIEncoderV2"])
+    (.cons (.pragma ["abicoder","v3"]) (.cons (.pragma []) .nil)))))
+
+theorem pragma_sites_and_frozen_gap :
+    syntaxPragmaUses pragmaUnit =
+      [(⟨.top,.pragma ["solidity","not-a-version"]⟩,.pragmaVersion),
+       (⟨.top,.pragma ["abicoder","v1"]⟩,.pragmaAbicoder),
+       (⟨.top,.pragma ["experimental","ABIEncoderV2"]⟩,.pragmaAbicoder),
+       (⟨.top,.pragma ["abicoder","v3"]⟩,.pragmaOther),
+       (⟨.top,.pragma []⟩,.pragmaOther)] ∧
+    sourceCandidateMetadataV2Refusal? pragmaUnit
+      (fun f => decide (f ≠ .pragmaAbicoder)) = none := ⟨rfl,rfl⟩
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.pragma_sites_and_frozen_gap' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms pragma_sites_and_frozen_gap
+
 end Solidity.Frontend.Admission.OccurrenceControls

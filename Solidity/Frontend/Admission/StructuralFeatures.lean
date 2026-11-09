@@ -1429,4 +1429,50 @@ theorem syntaxFreeFunctionUses_iff {c : Cat} (root : Syn c) (site : SyntaxOccurr
 /-- info: 'Solidity.Frontend.Admission.syntaxFreeFunctionUses_iff' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms syntaxFreeFunctionUses_iff
 
+
+/-! Regression: unit-level pragma traversal must not duplicate markers at ancestor sites or erase raw words with the resolution environment. Reuse the existing intrinsic eliminator and generic visitor; tags assert neither lexical/version validity, coder selection, profile activation nor admission. -/
+inductive DirectPragma : {c : Cat} → Syn c → List String → Prop where
+  | pragma (words : List String) : DirectPragma (.pragma words) words
+
+def pragmaWordsAt {c : Cat} (s : Syn c) : List (List String) := by
+  apply Syn.casesOn (motive := fun _ _ => List (List String)) s
+  case pragma => intro words; exact [words]
+  all_goals (intros; exact [])
+
+def pragmaFeature : List String → Feature
+  | "solidity" :: _ => .pragmaVersion
+  | ["abicoder", "v1"] | ["abicoder", "v2"] | ["experimental", "ABIEncoderV2"] => .pragmaAbicoder
+  | _ => .pragmaOther
+
+theorem pragmaWordsAt_iff {c : Cat} (s : Syn c) (words : List String) :
+    words ∈ pragmaWordsAt s ↔ DirectPragma s words := by
+  cases s with
+  | pragma actual =>
+    simp only [pragmaWordsAt, List.mem_singleton]
+    constructor
+    · intro same; cases same; exact .pragma _
+    · intro direct; cases direct; rfl
+  | _ =>
+    simp only [pragmaWordsAt, List.not_mem_nil]
+    constructor <;> intro impossible <;> cases impossible
+
+def syntaxPragmaUses {c : Cat} (root : Syn c) : List (SyntaxOccurrence × Feature) :=
+  syntaxFieldUses root (fun s => (pragmaWordsAt s).map pragmaFeature)
+
+theorem syntaxPragmaUses_iff {c : Cat} (root : Syn c) (site : SyntaxOccurrence) (f : Feature) :
+    (site,f) ∈ syntaxPragmaUses root ↔
+      Syn.Sub site ⟨c,root⟩ ∧ ∃ words, DirectPragma site.2 words ∧ pragmaFeature words = f := by
+  rw [syntaxPragmaUses, syntaxFieldUses_iff]
+  constructor
+  · rintro ⟨subterm,present⟩
+    obtain ⟨words,present,same⟩ := List.mem_map.mp present
+    exact ⟨subterm,words,(pragmaWordsAt_iff _ _).mp present,same⟩
+  · rintro ⟨subterm,words,direct,same⟩
+    exact ⟨subterm,List.mem_map.mpr ⟨words,(pragmaWordsAt_iff _ _).mpr direct,same⟩⟩
+
+/-- info: 'Solidity.Frontend.Admission.pragmaWordsAt_iff' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms pragmaWordsAt_iff
+/-- info: 'Solidity.Frontend.Admission.syntaxPragmaUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxPragmaUses_iff
+
 end Solidity.Frontend.Admission
