@@ -39,7 +39,7 @@ theorem parents {C : Contract} {b lo L frame : Nat} {F : Frag (Parameters A)}
    simpa only [Nat.sub_self] using env
  have zeroAt : ParentPrefixes.sourceAt τ 0 W_pos=τ := by
    change τ.withEnv (Δ:=Parameters A) (countValue 0 W_pos,τ.env.2)=τ
-   have data : (countValue 0 W_pos,τ.env.2)=τ.env := by rw [zeroEnv]
+   have data : (countValue 0 W_pos,τ.env.2)=τ.env := by rw [zeroEnv];rfl
    exact (congrArg (fun locals => τ.withEnv (Δ:=Parameters A) locals) data).trans rfl
  obtain ⟨reachedRef,reachedAlias,reachedWord⟩ := repr.pointers (.there .here)
  have reachedAlias' : TEnv.get (.there .here : Idx (Parameters A) (.mem A)) τ.env=some (ref.wk e) := by rw [zeroEnv];rfl
