@@ -31,7 +31,7 @@ theorem boundary (a : Nat) (i : Input) (k : Nat) (hk : k ≤ i.bytes.length)
     simpa only [List.append_nil] using stackSafe_writes a (i.bytes.take k) [] machine bound stack
       (by simp only [Slice.stackSafe]; exact decide_eq_true (by omega))
   rw [take_writes a i k hk,Slice.checkedRun,safe]
-  simpa only [List.append_nil,Slice.run] using run_writes a (i.bytes.take k) [] machine bound
+  simpa only [List.append_nil,Slice.run,ite_true] using run_writes a (i.bytes.take k) [] machine bound
 
 /-- Full ordered written prefix and the untouched region are observed from
 that actual reached memory; no whole-world or rollback claim. -/
