@@ -1,4 +1,5 @@
 import Solidity.Backend.Passes.CompilerCallScopeControls
+import Solidity.Backend.Passes.WholeProgram.Correct
 
 /-! Concrete whole-program public recognition for the existing allocating
 scoped-call fixture. This is intrinsic-program adequacy, not SourceSpec/world
@@ -41,8 +42,7 @@ theorem shared : ∃ (canonical : Machine) (selected : Nat → Fin W), canonical
     run actual.code {machine with stack := tail} = .ok {canonical with stack := tail} 0 ∧
     MappedOutput actual 1 128 base initial {machine with stack := tail}
       result.st {canonical with stack := tail} selected := by
-  obtain ⟨canonical,selected,_,empty,runs⟩ := compilation_success_shared_mapped actual initial_input
-    (by decide +kernel) source_run
+  obtain ⟨canonical,selected,_,empty,runs⟩ := WholeProgram.success_shared_mapped actual initial_input source_run
   refine ⟨canonical,selected,empty,?_⟩
   intro tail
   simpa only [free,Nat.add_zero] using runs tail
@@ -68,9 +68,7 @@ theorem compiler_join_codes_assoc {C : Contract} {b : Nat} {Γ Δ Ξ Ω : Ctx} (
     (P : Prog C Γ Δ) (Q : Prog C Δ Ξ) (R : Prog C Ξ Ω) :
     (Compiler.compile b F ((P.join Q).join R)).map (·.code) =
       (Compiler.compile b F (P.join (Q.join R))).map (·.code) :=
-  @congrArg (Prog C Γ Ω) (Option (List Instr)) ((P.join Q).join R) (P.join (Q.join R))
-    (fun S : Prog C Γ Ω => (Compiler.compile b F S).map (·.code))
-    (typed_sequencing_assoc P Q R)
+  WholeProgram.compile_codes_assoc F P Q R
 
 theorem selected_code_associative :
     (Compiler.compile 1 (Frag.init []) program).map (·.code) =
@@ -85,10 +83,12 @@ theorem source_frame_strict : frameNeedProg program < actual.requiredFrame := by
   with_unfolding_all decide +kernel
 
 theorem source_frame_refused {selected : Nat → Fin W} {state : State C []} {m : Machine} :
-    ¬ actual.Input 1 (1+frameNeedProg program) selected state m := by
-  intro h
-  have bound := ((actual.memoryCalls_input branch 1 (1+frameNeedProg program) selected state m).mp h).2.1
-  have strict := source_frame_strict
-  omega
+    ¬ actual.Input 1 (1+frameNeedProg program) selected state m :=
+  WholeProgram.staticRefused_input actual <| WholeProgram.staticRefused_requiredFrame actual
+    (WholeProgram.reservesFrame_of_isMemoryCalls actual branch) (Nat.add_lt_add_left source_frame_strict 1)
+
+theorem lmax_refused {selected : Nat → Fin W} {state : State C []} {m : Machine} :
+    ¬ actual.Input (Lmax+1) 128 selected state m :=
+  WholeProgram.staticRefused_input actual (WholeProgram.staticRefused_of_lmax actual (Nat.lt_succ_self _))
 
 end Solidity.Backend.Passes.CompilerWholeScope
