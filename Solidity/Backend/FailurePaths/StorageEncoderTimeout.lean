@@ -1,15 +1,12 @@
 import Solidity.Backend.FailurePaths.Premises
 import Solidity.Source.Preservation.Encoding
 
-/-! Actual storage-byte encoder exhaustion from primitive reads. The same
-environment, local context and complete input state are retained. This is not
-an admitted custom-error call: ordinary error parameters resolve in memory. -/
+/-! Actual storage reads preserve complete state through encoder/local ABI timeout; ordinary error parameters use memory, so this proves no admitted custom-error call. -/
 namespace Solidity.Backend.FailurePaths.StorageEncoderTimeout
 open Source
 variable {E : Source.Env} {Γ : RCtx}
 
-/-- Discharge the existing timeout predicate using actual primitive reads,
-without assuming an encoder outcome or changing the caller environment. -/
+/-- Actual primitive reads discharge timeout in the same Env/state, without an encoder-outcome premise. -/
 theorem incomplete (frame : Fr) (path : Source.SPath) (packed : Bool)
     (before : EMState E Γ) (byte : UInt8)
     (lengthRead : (readLen frame path : EM E Γ Nat).run before = (.ok 2,before))
@@ -21,8 +18,7 @@ theorem incomplete (frame : Fr) (path : Source.SPath) (packed : Bool)
         EM E Γ Roadmap.Bytes) before before :=
   Preservation.encode_storage_bytes_timeout_two frame path packed before byte lengthRead firstRead
 
-/-- The real local argument is evaluated before the encoder timeout. No
-allocation or revert packet is produced, and the complete caller state survives. -/
+/-- Local ABI evaluation times out before allocation/revert, preserving complete caller state. -/
 theorem local_abi_timeout (global : Glob E) (frame : Fr)
     (i : Source.Idx Γ (.bytes .storage)) (locals : Locals E.layout Γ)
     (initial : St E) (path : Source.SPath) (byte : UInt8)
