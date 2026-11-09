@@ -76,7 +76,7 @@ theorem after_arguments {C : Contract} {Γ : Ctx} {L b frame : Nat} {F : Frag Γ
      have reachedOwner := prefixGrowth cursor hb owned leftSpace
      have afterSpace : (cursor.val+compiled.checked.cost σ)+4*count<W := by omega
      have grown := bodyGrowth ⟨cursor.val+compiled.checked.cost σ,leftSpace⟩ (by omega) reachedOwner afterSpace
-     simpa only [Nat.add_assoc] using grown
+     simpa only [Nat.add_assoc,out,exported,State.withEnv] using grown
    have refWord : mid.mem (b+Γ.length)=.val (base ref.id) := by
      obtain ⟨r,value,word⟩ := parameters.pointers (.there .here)
      have same : r=ref := Option.some.inj (value.symm.trans alias)
