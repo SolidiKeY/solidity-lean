@@ -133,3 +133,135 @@ theorem typed_out_of_bounds : Solidity.Backend.Aggregates.SourceArray.Controls.E
  Quot.sound] -/
 #guard_msgs in #print axioms typed_out_of_bounds
 end Solidity.Backend.Aggregates.SourceArray.Controls
+
+
+/-! A declared mapping whose values are dynamic storage arrays. These Source-only
+clients keep key/index order and actual length checks separate. They establish
+no Source/native relation, physical address correspondence, or H249 packet. -/
+namespace Solidity.Backend.Aggregates.SourceArray.Controls.Mapped
+
+/-- Consume the mapping-path law before the array-path law. -/
+theorem mapping_array_type (E : Source.Env) (p : Source.SPath)
+    (typed : E.pathTy p = some (.mapping .bool (.array .storage (.int .u8) none)))
+    (b : Bool) : E.pathTy (p.go (.key (ScalarMapping.Controls.keyBytes b))) =
+      some (.array .storage (.int .u8) none) := by
+  exact mapping_path E p .bool (.array .storage (.int .u8) none) typed
+    (ScalarMapping.Controls.keyBytes b)
+
+def declaration : Source.Decl :=
+  ⟨.stateVar, "buckets", none, true,
+    .stateVar (.mapping (.elem .bool (by decide)) none
+      (.array (.elem (.int false 8 Source.IntTy.u8.valid)) .none) none)
+      none none none false "buckets" .none⟩
+def env : Source.Env := ⟨[declaration]⟩
+abbrev E := env
+def root : Source.SPath := ⟨⟨none,"buckets"⟩,[]⟩
+def arrayPath (b : Bool) : Source.SPath := root.go (.key (ScalarMapping.Controls.keyBytes b))
+def cell (b : Bool) (i : Nat) : Source.SPath := (arrayPath b).go (.index i)
+
+theorem array_typed (b : Bool) :
+    E.pathTy (arrayPath b) = some (.array .storage (.int .u8) none) :=
+  mapping_array_type E root rfl b
+
+theorem element_typed (b : Bool) (i : Nat) : E.cellTy (cell b i) = .int .u8 :=
+  SourceArray.element_type E (arrayPath b) .u8 (array_typed b) i
+
+def storage : Source.Storage E.layout E.cellTy :=
+  ((((Source.Storage.empty.write (cell true 0) (.int 7 (by decide))).write
+    (cell true 1) (.int 11 (by decide))).write
+    (cell false 0) (.int 23 (by decide))).write
+    (arrayPath true) (.int 2 (by decide))).write
+    (arrayPath false) (.int 1 (by decide))
+
+abbrev frame := ScalarMapping.SourceMachine.Controls.frame
+def locals : Source.Locals E.layout [.bool] := .cons (.bool true) .nil
+def state : Source.St E :=
+  {ex := ⟨⟨fun a => ⟨((a.val+17) % 2^256),3,some 9,storage⟩⟩,
+      Source.Transient.empty,[.account ⟨99,by decide⟩ (Source.Account.empty _)]⟩,
+   heap := (Source.Heap.empty.alloc ⟨.bool,.val (.bool true)⟩).1,
+   events := [], logs := [(⟨13,by decide⟩,[1,2])],
+   fnLocals := ⟨[.bool],.cons (.bool false) .nil⟩}
+def reference (b : Bool) : Source.Val E.layout (.array .storage (.int .u8) none) :=
+  .storRef rfl (arrayPath b)
+
+/-- Actual selection and index-panic runs preserve the entire reached state. -/
+theorem selected_and_refused :
+    (Source.indexLoc (E := E) (Γ := [.bool]) frame (reference true) 1).run (locals,state) = (.ok (.stor (cell true 1)),(locals,state)) ∧
+    (Source.indexLoc (E := E) (Γ := [.bool]) frame (reference false) 1).run (locals,state) = (.error (.revert (Source.panicData .index)),(locals,state)) ∧
+    (Source.indexLoc (E := E) (Γ := [.bool]) frame (reference true) 99).run (locals,state) = (.error (.revert (Source.panicData .index)),(locals,state)) := by
+  refine ⟨?_,?_,?_⟩
+  · exact SourceArray.index_success E [.bool] frame state locals (arrayPath true) .u8
+      (array_typed true) 2 (by decide) rfl rfl 1 (by decide)
+  · exact SourceArray.index_failure E [.bool] frame state locals (arrayPath false) .u8
+      (array_typed false) 1 (by decide) rfl rfl 1 (by decide)
+  · exact SourceArray.index_failure E [.bool] frame state locals (arrayPath true) .u8
+      (array_typed true) 2 (by decide) rfl rfl 99 (by decide)
+
+/-- Static cell typing does not discharge bounds; key/index order matters.
+The fixture has live heap/journal/log state and distinct mapping contents. -/
+theorem ordered_state_controls :
+    E.cellTy (cell true 99) = .int .u8 ∧
+    E.pathTy ((root.go (.index 1)).go (.key (ScalarMapping.Controls.keyBytes true))) = none ∧
+    arrayPath true ≠ arrayPath false ∧
+    [(storage.read (arrayPath true)).bind Source.Val.key,
+     (storage.read (arrayPath false)).bind Source.Val.key,
+     (storage.read (cell true 1)).bind Source.Val.key,
+     (storage.read (cell false 0)).bind Source.Val.key] = [some 2,some 1,some 11,some 23] ∧
+    state.heap.next = 1 ∧
+    state.ex.journal.length = 1 ∧
+    state.logs.length = 1 := by
+  refine ⟨element_typed true 99, ?_⟩
+  decide +kernel
+
+/-- The selected cell is read through the actual Source location operation. -/
+theorem read_one :
+    ((Source.indexLoc (E := E) (Γ := [.bool]) frame (reference true) 1) >>= fun loc =>
+      Source.readLoc (E := E) (Γ := [.bool]) (τ := .int .u8) frame loc).run (locals,state) = (.ok (.int 11 (by decide)),(locals,state)) := by
+  rfl
+
+/-- The real Boolean key helper is sequenced before indexing and reading.
+This is a fixed pure index, not arbitrary effectful-index preservation. -/
+theorem key_index_read :
+    ∀ b : Bool,
+    ((Source.keyStep (E := E) (Γ := [.bool]) frame 0 (.val (.bool b))) >>= fun step =>
+      ((Source.indexLoc (E := E) (Γ := [.bool]) frame ((.storRef rfl (root.go step)) : Source.Val E.layout (.array .storage (.int .u8) none)) 1) >>= fun loc =>
+      Source.readLoc (E := E) (Γ := [.bool]) (τ := .int .u8) frame loc)).run (locals,state) = ((if b then .ok (.int 11 (by decide)) else .error (.revert (Source.panicData .index))),(locals,state)) := by
+  intro b
+  cases b <;> rfl
+
+/-- info: 'Solidity.Backend.Aggregates.SourceArray.Controls.Mapped.mapping_array_type' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms mapping_array_type
+
+/-- info: 'Solidity.Backend.Aggregates.SourceArray.Controls.Mapped.array_typed' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms array_typed
+
+/-- info: 'Solidity.Backend.Aggregates.SourceArray.Controls.Mapped.element_typed' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms element_typed
+
+/-- info: 'Solidity.Backend.Aggregates.SourceArray.Controls.Mapped.selected_and_refused' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms selected_and_refused
+
+/-- info: 'Solidity.Backend.Aggregates.SourceArray.Controls.Mapped.ordered_state_controls' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms ordered_state_controls
+
+/-- info: 'Solidity.Backend.Aggregates.SourceArray.Controls.Mapped.read_one' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms read_one
+
+/-- info: 'Solidity.Backend.Aggregates.SourceArray.Controls.Mapped.key_index_read' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms key_index_read
+
+end Solidity.Backend.Aggregates.SourceArray.Controls.Mapped
