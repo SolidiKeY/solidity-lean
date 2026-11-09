@@ -354,7 +354,9 @@
       "path": "Solidity/Yul/Compilation/SwitchCompilation.lean",
       "status": "proof_reuse_partial",
       "migrated_declarations": [
-        "Solidity.Yul.Compilation.SwitchCompilation.Artifact.normal_to_model"
+        "Solidity.Yul.Compilation.SwitchCompilation.Artifact.normal_to_model",
+        "Solidity.Yul.Compilation.SwitchCompilation.source_match",
+        "Solidity.Yul.Compilation.SwitchCompilation.source_default"
       ],
       "existing_definitions_changed": false
     },
