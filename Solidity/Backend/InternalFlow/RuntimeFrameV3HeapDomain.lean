@@ -66,7 +66,7 @@ theorem failure_iff {C : Contract} (σ : State C (Parameters A)) (n : Nat) (fit 
      cases live
    have outside : σ.heap.len ref .dyn≤n := by omega
    simp only [TRes.ofOpt]
-   exact ⟨fun _ => outside,fun _ => True.intro⟩
+   exact ⟨fun _ => outside,fun _ => rfl⟩
  | some v =>
    rw [read] at live
    have within : n<σ.heap.len ref .dyn := of_decide_eq_true live.symm
