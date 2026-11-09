@@ -1,0 +1,100 @@
+/-! Guards accepting dirty primitive words or independently inhabited but
+incompatible raw-word/size/compiler premises for the generic word carrier.
+Reuses the uint-body fixture machine; kind-indexed compiler and rejection proofs
+retain the raw uint carrier and fuel+2. This does not certify typed Source local
+representation, signature erasure, native loading, gas or G01 correspondence. -/
+
+def carrierCompilation (kind : Solidity.AbiEntry.Kind) :=
+  WordCarrierBinding.compiled bodyContract 7 kind bodyLabel
+
+theorem carrier_found (kind : Solidity.AbiEntry.Kind) : Compiler.compile 7 (Frag.init RouteCtx)
+    (WordCarrierBinding.program bodyContract kind bodyLabel)=some (carrierCompilation kind) :=
+  WordCarrierBinding.selected bodyContract 7 kind bodyLabel
+
+theorem carrier_actual (kind : Solidity.AbiEntry.Kind) (word size : Fin W) :
+    run (carrierCompilation kind).code (bodyMachine word size)=
+      wordCarrierOutcome 7 kind bodyLabel word size (bodyMachine word size) :=
+  WordCarrierBinding.executed bodyContract 7 kind bodyLabel (carrierCompilation kind) (carrier_found kind)
+    (bodyMachine word size) word size rfl rfl
+
+theorem carrier_enum_last_success :
+    run (carrierCompilation (.enumBelow 3)).code (bodyMachine (wmod 2) (wmod 36))=
+      .ok (uintBoundMachine 7 bodyLabel (wmod 2) (bodyMachine (wmod 2) (wmod 36))) 0 := by
+  rw [carrier_actual]
+  rfl
+
+theorem carrier_enum_capacity_refused :
+    run (carrierCompilation (.enumBelow 3)).code (bodyMachine (wmod 3) (wmod 36))=.revert := by
+  rw [carrier_actual]
+  rfl
+
+theorem carrier_fixed_bytes_aligned_success :
+    run (carrierCompilation (.fixedBytes 1)).code (bodyMachine (wmod (2^248)) (wmod 36))=
+      .ok (uintBoundMachine 7 bodyLabel (wmod (2^248)) (bodyMachine (wmod (2^248)) (wmod 36))) 0 := by
+  rw [carrier_actual]
+  rfl
+
+theorem carrier_fixed_bytes_dirty_refused :
+    run (carrierCompilation (.fixedBytes 1)).code (bodyMachine (wmod (2^248+1)) (wmod 36))=.revert := by
+  rw [carrier_actual]
+  rfl
+
+theorem carrier_bool_one_success :
+    run (carrierCompilation .bool).code (bodyMachine (wmod 1) (wmod 36))=
+      .ok (uintBoundMachine 7 bodyLabel (wmod 1) (bodyMachine (wmod 1) (wmod 36))) 0 := by
+  rw [carrier_actual]
+  rfl
+
+theorem carrier_bool_two_refused :
+    run (carrierCompilation .bool).code (bodyMachine (wmod 2) (wmod 36))=.revert := by
+  rw [carrier_actual]
+  rfl
+
+theorem carrier_address_max_success :
+    run (carrierCompilation (.uint 160)).code (bodyMachine (wmod (2^160-1)) (wmod 36))=
+      .ok (uintBoundMachine 7 bodyLabel (wmod (2^160-1)) (bodyMachine (wmod (2^160-1)) (wmod 36))) 0 := by
+  rw [carrier_actual]
+  rfl
+
+theorem carrier_address_upper_refused :
+    run (carrierCompilation (.uint 160)).code (bodyMachine (wmod (2^160)) (wmod 36))=.revert := by
+  rw [carrier_actual]
+  rfl
+
+theorem carrier_binds_and_preserves (word size : Fin W) :
+    (uintBoundMachine 7 bodyLabel word (bodyMachine word size)).mem 9=.val word ∧
+    (uintBoundMachine 7 bodyLabel word (bodyMachine word size)).stack=[.val (wmod 11),.val (wmod 99)] := ⟨rfl,rfl⟩
+
+theorem carrier_revert_all_refused :
+    run (carrierCompilation (.enumBelow 3)).code (bodyMachine (wmod 2) (wmod 36))≠.revert := by
+  rw [carrier_enum_last_success]
+  intro impossible
+  cases impossible
+
+theorem carrier_short_skips_word (kind : Solidity.AbiEntry.Kind) :
+    run (carrierCompilation kind).code uintBodyShortMachine=.revert :=
+  WordCarrierBinding.short_before_word bodyContract 7 kind bodyLabel uintBodyShortMachine (wmod 35) rfl (by decide)
+
+def carrierEmptyInput : Solidity.AbiEntry.Input := {data := [],free := 0}
+
+theorem carrier_entry_refusal (kind : Solidity.AbiEntry.Kind) (input : Solidity.AbiEntry.Input)
+    (fuel : Nat) (size : Fin W) (represented : size.val=input.size) :
+    (run (carrierCompilation kind).code (bodyMachine (rawArgumentWord input) size)=.revert ↔
+      Solidity.AbiEntry.entry input (fuel+2) (singleWordParams kind)=.error .revert) :=
+  WordCarrierBinding.entry_rejection bodyContract 7 kind bodyLabel (carrierCompilation kind) (carrier_found kind)
+    input fuel (bodyMachine (rawArgumentWord input) size) size rfl rfl represented
+
+#print axioms carrier_found
+#print axioms carrier_actual
+#print axioms carrier_enum_last_success
+#print axioms carrier_enum_capacity_refused
+#print axioms carrier_fixed_bytes_aligned_success
+#print axioms carrier_fixed_bytes_dirty_refused
+#print axioms carrier_bool_one_success
+#print axioms carrier_bool_two_refused
+#print axioms carrier_address_max_success
+#print axioms carrier_address_upper_refused
+#print axioms carrier_binds_and_preserves
+#print axioms carrier_revert_all_refused
+#print axioms carrier_short_skips_word
+#print axioms carrier_entry_refusal
