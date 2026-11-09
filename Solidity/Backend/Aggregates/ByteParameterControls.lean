@@ -39,6 +39,7 @@ theorem fresh_contents : MObj.elems ArrTy.dyn (lowered.heap.get
     (aliasTarget.alloc (bytesObj aliasTarget.H (ByteParameters.payload frame 68 3) capacity)).2) =
     [7,8,9].map byteWord := target_contents aliasTarget frame 68 3 capacity
 
+set_option backward.isDefEq.respectTransparency false in
 theorem old_contents : MObj.elems ArrTy.dyn (lowered.heap.get
     (HRef.wk (List.prefix_append aliasTarget.H [bytesR])
       ((State.init C).alloc oldObject).2)) = [170,187].map byteWord := by
