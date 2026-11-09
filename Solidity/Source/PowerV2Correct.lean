@@ -132,4 +132,49 @@ theorem cutoff_repaired :
 /-- info: 'Solidity.Source.PowerV2.cutoff_repaired' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms cutoff_repaired
 
+
+theorem shiftVal_nonexp {D : Layout} (checked : Bool) (op : BinOp) (exponent : Nat)
+    {τ : STy} (value : Val D τ) (different : op ≠ .exp) :
+    shiftVal checked op exponent value = Solidity.Source.shiftVal checked op exponent value := by
+  cases value with
+  | int base bound => exact if_neg different
+  | _ => rfl
+
+theorem shiftVal_checked {D : Layout} (op : BinOp) (exponent : Nat)
+    {τ : STy} (value : Val D τ) :
+    shiftVal true op exponent value = Solidity.Source.shiftVal true op exponent value := by
+  by_cases power : op = .exp
+  · subst op
+    cases value <;> rfl
+  · exact shiftVal_nonexp true op exponent value power
+
+theorem shiftVal_nonint {D : Layout} (checked : Bool) (op : BinOp) (exponent : Nat)
+    {τ : STy} (value : Val D τ) (notInt : ∀ t, τ ≠ .int t) :
+    shiftVal checked op exponent value = Solidity.Source.shiftVal checked op exponent value := by
+  cases value with
+  | int base bound => exact False.elim (notInt _ rfl)
+  | _ => rfl
+
+theorem shiftVal_unchecked {D : Layout} (t : IntTy) (base : Int)
+    (bound : t.lo ≤ base ∧ base ≤ t.hi) (exponent : Nat) :
+    shiftVal (D := D) false .exp exponent (.int base bound) =
+      pure (intWrap t (base ^ exponent)) := by
+  change intPow t false base exponent = _
+  exact intPow_unchecked t base exponent
+
+theorem shiftVal_uint8_example {D : Layout} :
+    shiftVal (D := D) false .exp 3 (intWrap ⟨false,8,by decide⟩ 2) =
+      .ok (intWrap ⟨false,8,by decide⟩ 8) := rfl
+
+/-- info: 'Solidity.Source.PowerV2.shiftVal_nonexp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms shiftVal_nonexp
+/-- info: 'Solidity.Source.PowerV2.shiftVal_checked' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms shiftVal_checked
+/-- info: 'Solidity.Source.PowerV2.shiftVal_nonint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms shiftVal_nonint
+/-- info: 'Solidity.Source.PowerV2.shiftVal_unchecked' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms shiftVal_unchecked
+/-- info: 'Solidity.Source.PowerV2.shiftVal_uint8_example' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms shiftVal_uint8_example
+
 end Solidity.Source.PowerV2
