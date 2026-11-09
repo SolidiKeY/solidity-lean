@@ -186,6 +186,19 @@ theorem callback_preserves_prefix (owner : Roadmap.Address) (entry : Transient.S
       .exit (.revert [UInt8.ofNat byteValue.val]) (writes entry callerPrefix) memory := by
   exact callback_store_byte_revert owner (writes entry callerPrefix) memory key stored offset byteValue
 
+/-- Static TSTORE refusal halts before any suffix and restores caller fields.
+It remains an exceptional static-write error, not an ordinary revert payload. -/
+theorem callback_static_store_suffix (owner : Roadmap.Address) (entry : Transient.State)
+    (memory : Memory) (key value : Word) (suffix : Program) :
+    callback owner true (Transient.storeCode key value ++ suffix) entry memory =
+      .error .staticWrite entry memory := by
+  simp only [callback,Transient.storeCode,List.cons_append,List.nil_append,run,push_actual]
+  simp only [step,lift,Transient.step,Evm.Machine.push,if_true,finish,
+    rollback,Nat.sub_self,undoN] <;> rfl
+
+/-- info: 'Solidity.Backend.Transient.PayloadV2.callback_static_store_suffix' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms callback_static_store_suffix
+
 /-- info: 'Solidity.Backend.Transient.PayloadV2.callback_store_byte_revert' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms callback_store_byte_revert
 /-- info: 'Solidity.Backend.Transient.PayloadV2.callback_preserves_prefix' depends on axioms: [propext, Classical.choice, Quot.sound] -/
