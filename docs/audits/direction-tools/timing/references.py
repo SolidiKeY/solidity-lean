@@ -142,7 +142,7 @@ def main():
         order.append(mod)
     visit('EvmYul' if args.project=='EvmYul' else 'Main')
     state['tracked_lean_lines']=sum(r['lines'] for r in info.values()); state['built_closure_lines']=sum(info[m]['lines'] for m in order); state['built_closure_modules']=len(order)
-    state['measurement_boundary']='project modules in default library import closure; warm dependency oleans, separate lake env lean -j1 invocation per module; physical lines; build attempts include preparation dependencies and are not matched module costs'
+    state['measurement_boundary']='project modules in default library import closure; prebuilt dependency oleans; OS page cache uncontrolled, separate lake env lean -j1 invocation per module; physical lines; build attempts include preparation dependencies and are not matched module costs'
     prior={r['module']:r for r in state['modules']}
     for i,mod in enumerate(order):
         if mod in prior and prior[mod]['check']['exit_code']==0: continue

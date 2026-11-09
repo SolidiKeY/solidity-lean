@@ -124,9 +124,9 @@
       "ratio": 14.242515121513403,
       "outlier": true,
       "verdict": "inconclusive",
-      "reason": "Observed threefold outlier; causal judgement requires the named component measurement.",
+      "reason": "CPU-bound native diagnostic; observed function families: allocation/reference-counting, container operations, expression equality/hash, expression replacement, expression-sharing family. Avoidability under unchanged proof obligations is not measured.",
       "verdict_evidence": null,
-      "settling_measurement": "One matched CPU/allocation profile experiment for the dominating local module and corresponding reference checks, accounting for wall time not attributed by Lean basic/structured profilers under unchanged budgets. This settles sampled hotspot attribution only; an area-wide verdict needs a closure census or independently representative wider sample.",
+      "settling_measurement": "One statement-identical opaque-lemma A/B on pinned Lean4.24 with unchanged premises, exclusions and proof budgets, alternating matched cache conditions; charge total checks of the module AND every introduced helper. A reproducible reduction establishes avoidable sampled hotspot cost, not an area-wide direction verdict.",
       "comparability": "local toolchain, plain invocation flags and recorded checkout paths validated; per-observation machine identity is incomplete; source obligations and reference Lean versions differ; check-cost calibration, not proof productivity"
     },
     {
@@ -1321,14 +1321,14 @@
         "Typing"
       ],
       "method": "area size-stratified mean observed per-module seconds times workload module count; unsampled areas use pooled seconds/line; targeted tails excluded; extrema are sensitivity scenarios, not statistical confidence bounds",
-      "boundary": "check-only body elaboration with warm imported oleans; excludes output/C generation, scheduling, downloads and dependency preparation; not an observed cold Lake build",
+      "boundary": "check-only body elaboration with prebuilt imported oleans; OS page cache uncontrolled; excludes output/C generation, scheduling, downloads and dependency preparation; not an observed cold Lake build",
       "verdict": "inconclusive",
       "settling_measurement": "Serial CI per-module fresh-elaboration timings at the frozen base for these exact roots, summed with output generation measured separately.",
       "reference_total_check_ratios": {
         "EvmYul": 72.09923419333613,
         "Clear": null
       },
-      "ratio_boundary": "Modelled complete local workload versus measured complete reference project body checks, warm imports. Different project sizes and Lean versions; no CompCert/CakeML ratio because their cited build boundaries differ."
+      "ratio_boundary": "Modelled complete local workload versus measured complete reference project body checks, prebuilt imports, uncontrolled OS page cache. Different project sizes and Lean versions; no CompCert/CakeML ratio because their cited build boundaries differ."
     },
     "checkpoint": {
       "roots": [
@@ -1362,14 +1362,14 @@
         "Typing"
       ],
       "method": "area size-stratified mean observed per-module seconds times workload module count; unsampled areas use pooled seconds/line; targeted tails excluded; extrema are sensitivity scenarios, not statistical confidence bounds",
-      "boundary": "check-only body elaboration with warm imported oleans; excludes output/C generation, scheduling, downloads and dependency preparation; not an observed cold Lake build",
+      "boundary": "check-only body elaboration with prebuilt imported oleans; OS page cache uncontrolled; excludes output/C generation, scheduling, downloads and dependency preparation; not an observed cold Lake build",
       "verdict": "inconclusive",
       "settling_measurement": "Serial CI per-module fresh-elaboration timings at the frozen base for these exact roots, summed with output generation measured separately.",
       "reference_total_check_ratios": {
         "EvmYul": 434.6818699880158,
         "Clear": null
       },
-      "ratio_boundary": "Modelled complete local workload versus measured complete reference project body checks, warm imports. Different project sizes and Lean versions; no CompCert/CakeML ratio because their cited build boundaries differ."
+      "ratio_boundary": "Modelled complete local workload versus measured complete reference project body checks, prebuilt imports, uncontrolled OS page cache. Different project sizes and Lean versions; no CompCert/CakeML ratio because their cited build boundaries differ."
     },
     "full": {
       "roots": [
@@ -1408,14 +1408,14 @@
         "Typing"
       ],
       "method": "area size-stratified mean observed per-module seconds times workload module count; unsampled areas use pooled seconds/line; targeted tails excluded; extrema are sensitivity scenarios, not statistical confidence bounds",
-      "boundary": "check-only body elaboration with warm imported oleans; excludes output/C generation, scheduling, downloads and dependency preparation; not an observed cold Lake build",
+      "boundary": "check-only body elaboration with prebuilt imported oleans; OS page cache uncontrolled; excludes output/C generation, scheduling, downloads and dependency preparation; not an observed cold Lake build",
       "verdict": "inconclusive",
       "settling_measurement": "Serial CI per-module fresh-elaboration timings at the frozen base for these exact roots, summed with output generation measured separately.",
       "reference_total_check_ratios": {
         "EvmYul": 504.4787074592207,
         "Clear": null
       },
-      "ratio_boundary": "Modelled complete local workload versus measured complete reference project body checks, warm imports. Different project sizes and Lean versions; no CompCert/CakeML ratio because their cited build boundaries differ."
+      "ratio_boundary": "Modelled complete local workload versus measured complete reference project body checks, prebuilt imports, uncontrolled OS page cache. Different project sizes and Lean versions; no CompCert/CakeML ratio because their cited build boundaries differ."
     }
   },
   "published_reference_times": [
@@ -1587,6 +1587,18 @@
             "wall_seconds": 57.336930915000266,
             "stop_reason": null,
             "evidence_log": "/workspace/da-timing-work/clear-times/build-1.log"
+          },
+          {
+            "exit_code": 124,
+            "wall_seconds": 1800.0416446220006,
+            "stop_reason": "timeout",
+            "evidence_log": "/workspace/da-timing-work/clear-times/build-2.log"
+          },
+          {
+            "exit_code": 124,
+            "wall_seconds": 1800.099797805,
+            "stop_reason": "timeout",
+            "evidence_log": "/workspace/da-timing-work/clear-times/build-3.log"
           }
         ],
         "dependency_cache_status": 1,
@@ -1691,9 +1703,9 @@
         "ratio": 14.242515121513403,
         "outlier": true,
         "verdict": "inconclusive",
-        "reason": "Observed threefold outlier; causal judgement requires the named component measurement.",
+        "reason": "CPU-bound native diagnostic; observed function families: allocation/reference-counting, container operations, expression equality/hash, expression replacement, expression-sharing family. Avoidability under unchanged proof obligations is not measured.",
         "verdict_evidence": null,
-        "settling_measurement": "One matched CPU/allocation profile experiment for the dominating local module and corresponding reference checks, accounting for wall time not attributed by Lean basic/structured profilers under unchanged budgets. This settles sampled hotspot attribution only; an area-wide verdict needs a closure census or independently representative wider sample.",
+        "settling_measurement": "One statement-identical opaque-lemma A/B on pinned Lean4.24 with unchanged premises, exclusions and proof budgets, alternating matched cache conditions; charge total checks of the module AND every introduced helper. A reproducible reduction establishes avoidable sampled hotspot cost, not an area-wide direction verdict.",
         "comparability": "local toolchain, plain invocation flags and recorded checkout paths validated; per-observation machine identity is incomplete; source obligations and reference Lean versions differ; check-cost calibration, not proof productivity"
       },
       {
@@ -2125,14 +2137,14 @@
           "Typing"
         ],
         "method": "area size-stratified mean observed per-module seconds times workload module count; unsampled areas use pooled seconds/line; targeted tails excluded; extrema are sensitivity scenarios, not statistical confidence bounds",
-        "boundary": "check-only body elaboration with warm imported oleans; excludes output/C generation, scheduling, downloads and dependency preparation; not an observed cold Lake build",
+        "boundary": "check-only body elaboration with prebuilt imported oleans; OS page cache uncontrolled; excludes output/C generation, scheduling, downloads and dependency preparation; not an observed cold Lake build",
         "verdict": "inconclusive",
         "settling_measurement": "Serial CI per-module fresh-elaboration timings at the frozen base for these exact roots, summed with output generation measured separately.",
         "reference_total_check_ratios": {
           "EvmYul": 72.09923419333613,
           "Clear": null
         },
-        "ratio_boundary": "Modelled complete local workload versus measured complete reference project body checks, warm imports. Different project sizes and Lean versions; no CompCert/CakeML ratio because their cited build boundaries differ."
+        "ratio_boundary": "Modelled complete local workload versus measured complete reference project body checks, prebuilt imports, uncontrolled OS page cache. Different project sizes and Lean versions; no CompCert/CakeML ratio because their cited build boundaries differ."
       },
       "checkpoint": {
         "roots": [
@@ -2166,14 +2178,14 @@
           "Typing"
         ],
         "method": "area size-stratified mean observed per-module seconds times workload module count; unsampled areas use pooled seconds/line; targeted tails excluded; extrema are sensitivity scenarios, not statistical confidence bounds",
-        "boundary": "check-only body elaboration with warm imported oleans; excludes output/C generation, scheduling, downloads and dependency preparation; not an observed cold Lake build",
+        "boundary": "check-only body elaboration with prebuilt imported oleans; OS page cache uncontrolled; excludes output/C generation, scheduling, downloads and dependency preparation; not an observed cold Lake build",
         "verdict": "inconclusive",
         "settling_measurement": "Serial CI per-module fresh-elaboration timings at the frozen base for these exact roots, summed with output generation measured separately.",
         "reference_total_check_ratios": {
           "EvmYul": 434.6818699880158,
           "Clear": null
         },
-        "ratio_boundary": "Modelled complete local workload versus measured complete reference project body checks, warm imports. Different project sizes and Lean versions; no CompCert/CakeML ratio because their cited build boundaries differ."
+        "ratio_boundary": "Modelled complete local workload versus measured complete reference project body checks, prebuilt imports, uncontrolled OS page cache. Different project sizes and Lean versions; no CompCert/CakeML ratio because their cited build boundaries differ."
       },
       "full": {
         "roots": [
@@ -2212,14 +2224,14 @@
           "Typing"
         ],
         "method": "area size-stratified mean observed per-module seconds times workload module count; unsampled areas use pooled seconds/line; targeted tails excluded; extrema are sensitivity scenarios, not statistical confidence bounds",
-        "boundary": "check-only body elaboration with warm imported oleans; excludes output/C generation, scheduling, downloads and dependency preparation; not an observed cold Lake build",
+        "boundary": "check-only body elaboration with prebuilt imported oleans; OS page cache uncontrolled; excludes output/C generation, scheduling, downloads and dependency preparation; not an observed cold Lake build",
         "verdict": "inconclusive",
         "settling_measurement": "Serial CI per-module fresh-elaboration timings at the frozen base for these exact roots, summed with output generation measured separately.",
         "reference_total_check_ratios": {
           "EvmYul": 504.4787074592207,
           "Clear": null
         },
-        "ratio_boundary": "Modelled complete local workload versus measured complete reference project body checks, warm imports. Different project sizes and Lean versions; no CompCert/CakeML ratio because their cited build boundaries differ."
+        "ratio_boundary": "Modelled complete local workload versus measured complete reference project body checks, prebuilt imports, uncontrolled OS page cache. Different project sizes and Lean versions; no CompCert/CakeML ratio because their cited build boundaries differ."
       }
     },
     "incremental": [
@@ -2432,6 +2444,217 @@
         "selection": "size_quartile_midpoint"
       }
     ],
+    "native_cpu_findings": {
+      "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+      "local": {
+        "head": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+        "module": "Solidity/Yul/RawIntegerInitialization.lean",
+        "lines": 75,
+        "versions": {
+          "lean": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)",
+          "lake": "Lake version 5.0.0-src+797c613 (Lean version 4.24.0)"
+        },
+        "instrumented_wall_seconds": 82.73172085399892,
+        "child_rusage_delta": {
+          "ru_utime": 82.02724199999999,
+          "ru_stime": 0.674158,
+          "ru_majflt": 0,
+          "ru_minflt": 235014,
+          "ru_inblock": 0,
+          "ru_oublock": 0,
+          "ru_nvcsw": 1252,
+          "ru_nivcsw": 556
+        },
+        "rusage_boundary": "awaited Lake invocation plus descendants; sampler IPs cover Lean user-space only",
+        "samples": 8102,
+        "unknown_samples": 174,
+        "lost_samples": 0,
+        "identified_family_samples_lower_bound": {
+          "allocation_reference_counting": 2716,
+          "container_operations": 2342,
+          "expression_equality_hash": 326,
+          "expression_replacement": 649,
+          "expression_sharing_family": 481
+        },
+        "identified_family_fraction_lower_bound": {
+          "allocation_reference_counting": 0.33522587015551714,
+          "container_operations": 0.28906442853616393,
+          "expression_equality_hash": 0.04023697852382128,
+          "expression_replacement": 0.08010367810417181,
+          "expression_sharing_family": 0.059368057269809926
+        },
+        "combined_identified_fraction_lower_bound": 0.803999012589484,
+        "top_symbols": [
+          {
+            "binary": "libleanshared.so",
+            "symbol": "lean_dec_ref_cold",
+            "samples": 1271,
+            "fraction_of_samples": 0.1568748457171069
+          },
+          {
+            "binary": "libleanshared.so",
+            "symbol": "mi_malloc_small",
+            "samples": 759,
+            "fraction_of_samples": 0.09368057269809923
+          },
+          {
+            "binary": "libleanshared.so",
+            "symbol": "_ZN4lean14replace_rec_fn5applyERKNS_4exprEj",
+            "samples": 593,
+            "fraction_of_samples": 0.07319180449271785
+          },
+          {
+            "binary": "libleanshared.so",
+            "symbol": "mi_new_n",
+            "samples": 534,
+            "fraction_of_samples": 0.06590965193779313
+          },
+          {
+            "binary": "libleanshared.so",
+            "symbol": "_ZN4lean25sharecommon_persistent_fnD2Ev",
+            "samples": 390,
+            "fraction_of_samples": 0.048136262651197234
+          },
+          {
+            "binary": "libleanshared.so",
+            "symbol": "_ZNSt3__112__hash_tableINS_17__hash_value_typeINS_4pairIP11lean_objectjEEN4lean4exprEEENS_22__unordered_map_hasherIS5_S8_NS6_14replace_rec_fn10key_hasherENS_8equal_toIS5_EELb1EEENS_21__unordered_map_equalIS5_S8_SD_SB_Lb1EEE16mi_stl_allocatorIS8_EE4findIS5_EENS_15__hash_iteratorIPNS_11__hash_nodeIS8_PvEEEERKT_",
+            "samples": 382,
+            "fraction_of_samples": 0.04714885213527524
+          },
+          {
+            "binary": "libleanshared.so",
+            "symbol": "_ZN4lean10expr_eq_fnILb0EE5applyERKNS_4exprES4_jb",
+            "samples": 326,
+            "fraction_of_samples": 0.04023697852382128
+          },
+          {
+            "binary": "libleanshared.so",
+            "symbol": "_ZNSt3__112__hash_tableINS_17__hash_value_typeINS_4pairIP11lean_objectjEEN4lean4exprEEENS_22__unordered_map_hasherIS5_S8_NS6_14replace_rec_fn10key_hasherENS_8equal_toIS5_EELb1EEENS_21__unordered_map_equalIS5_S8_SD_SB_Lb1EEE16mi_stl_allocatorIS8_EE25__emplace_unique_key_argsIS5_JNS2_IS5_S7_EEEEENS2_INS_15__hash_iteratorIPNS_11__hash_nodeIS8_PvEEEEbEERKT_DpOT0_",
+            "samples": 278,
+            "fraction_of_samples": 0.03431251542828931
+          },
+          {
+            "binary": "libleanshared.so",
+            "symbol": "_ZNSt3__112__hash_tableINS_17__hash_value_typeIN4lean4exprES3_EENS_22__unordered_map_hasherIS3_S4_NS2_9expr_hashENS_8equal_toIS3_EELb1EEENS_21__unordered_map_equalIS3_S4_S8_S6_Lb1EEENS_9allocatorIS4_EEE4findIS3_EENS_15__hash_iteratorIPNS_11__hash_nodeIS4_PvEEEERKT_",
+            "samples": 267,
+            "fraction_of_samples": 0.03295482596889657
+          },
+          {
+            "binary": "libleanshared.so",
+            "symbol": "_ZNSt3__112__hash_tableINS_17__hash_value_typeIP11lean_objectS3_EENS_22__unordered_map_hasherIS3_S4_NS_4hashIS3_EENS_8equal_toIS3_EELb1EEENS_21__unordered_map_equalIS3_S4_S9_S7_Lb1EEE16mi_stl_allocatorIS4_EE4findIS3_EENS_15__hash_iteratorIPNS_11__hash_nodeIS4_PvEEEERKT_",
+            "samples": 219,
+            "fraction_of_samples": 0.0270303628733646
+          }
+        ]
+      },
+      "reference": {
+        "head": "047f63070309f436b66c61e276ab3b6d1169265a",
+        "module": "EvmYul/Yul/Interpreter.lean",
+        "lines": 672,
+        "versions": {
+          "lean": "Lean (version 4.22.0, x86_64-unknown-linux-gnu, commit ba2cbbf09d4978f416e0ebd1fceeebc2c4138c05, Release)",
+          "lake": "Lake version 5.0.0-src+ba2cbbf (Lean version 4.22.0)"
+        },
+        "instrumented_wall_seconds": 34.10485514700122,
+        "child_rusage_delta": {
+          "ru_utime": 32.049676,
+          "ru_stime": 0.7612829999999999,
+          "ru_majflt": 2210,
+          "ru_minflt": 77877,
+          "ru_inblock": 2963624,
+          "ru_oublock": 0,
+          "ru_nvcsw": 11213,
+          "ru_nivcsw": 94
+        },
+        "rusage_boundary": "awaited Lake invocation plus descendants; sampler IPs cover Lean user-space only",
+        "samples": 3144,
+        "unknown_samples": 40,
+        "lost_samples": 0,
+        "identified_family_samples_lower_bound": {
+          "allocation_reference_counting": 976,
+          "container_operations": 240,
+          "expression_equality_hash": 62,
+          "expression_replacement": 73
+        },
+        "identified_family_fraction_lower_bound": {
+          "allocation_reference_counting": 0.3104325699745547,
+          "container_operations": 0.07633587786259542,
+          "expression_equality_hash": 0.019720101781170483,
+          "expression_replacement": 0.02321882951653944
+        },
+        "combined_identified_fraction_lower_bound": 0.42970737913486007,
+        "top_symbols": [
+          {
+            "binary": "libleanshared.so",
+            "symbol": "mi_malloc_small",
+            "samples": 390,
+            "fraction_of_samples": 0.12404580152671756
+          },
+          {
+            "binary": "libleanshared.so",
+            "symbol": "lean_dec_ref_cold",
+            "samples": 389,
+            "fraction_of_samples": 0.12372773536895675
+          },
+          {
+            "binary": "libleanshared.so",
+            "symbol": "mi_free",
+            "samples": 130,
+            "fraction_of_samples": 0.041348600508905854
+          },
+          {
+            "binary": "libleanshared.so",
+            "symbol": "l_Lean_PersistentHashMap_findAux___at___Lean_PersistentHashMap_find_x3f_spec__0___redArg",
+            "samples": 93,
+            "fraction_of_samples": 0.029580152671755726
+          },
+          {
+            "binary": "libleanshared.so",
+            "symbol": "l_Array_foldlMUnsafe_fold___at___Array_filterMapM___at___Lean_Meta_SynthInstance_getInstances_spec__5_spec__5",
+            "samples": 71,
+            "fraction_of_samples": 0.022582697201017812
+          },
+          {
+            "binary": "libleanshared.so",
+            "symbol": "lean_name_eq",
+            "samples": 61,
+            "fraction_of_samples": 0.01940203562340967
+          },
+          {
+            "binary": "libleanshared.so",
+            "symbol": "_ZN4lean10expr_eq_fnILb0EE5applyERKNS_4exprES4_jb",
+            "samples": 39,
+            "fraction_of_samples": 0.012404580152671756
+          },
+          {
+            "binary": "libleanshared.so",
+            "symbol": "l_Lean_Name_hash___override",
+            "samples": 39,
+            "fraction_of_samples": 0.012404580152671756
+          },
+          {
+            "binary": "libleanshared.so",
+            "symbol": "_ZN4lean14replace_rec_fn5applyERKNS_4exprEj",
+            "samples": 38,
+            "fraction_of_samples": 0.012086513994910942
+          },
+          {
+            "binary": "libleanshared.so",
+            "symbol": "_ZNSt3__112__hash_tableINS_17__hash_value_typeINS_4pairIP11lean_objectjEEN4lean4exprEEENS_22__unordered_map_hasherIS5_S8_NS6_14replace_rec_fn10key_hasherENS_8equal_toIS5_EELb1EEENS_21__unordered_map_equalIS5_S8_SD_SB_Lb1EEE16mi_stl_allocatorIS8_EE25__emplace_unique_key_argsIS5_JNS2_IS5_S7_EEEEENS2_INS_15__hash_iteratorIPNS_11__hash_nodeIS8_PvEEEEbEERKT_DpOT0_",
+            "samples": 37,
+            "fraction_of_samples": 0.011768447837150127
+          }
+        ]
+      },
+      "boundaries": [
+        "Diagnostic instrumented runs are not substituted for matched plain area timings.",
+        "Named top40 symbol families are exclusive lower bounds; unclassified/unknown/tail samples are not inferred.",
+        "Native symbols do not establish allocation counts, a unique caller, proof redundancy or an area-wide verdict.",
+        "Child CPU counters include the awaited Lake invocation and descendants; user-IP sampling includes Lean kernel but excludes OS kernel.",
+        "Prebuilt dependency oleans do not imply warm OS page cache; retain each run major-fault and input-block counters.",
+        "Reference compiler is Lean4.22 versus local4.24; no compiler-version causal claim."
+      ]
+    },
     "declaration_profiles": {
       "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
       "method": "union of time-weight slices attributed by qualified async-proof/kernel trace names or matching command-source names; nested and cross-thread overlaps for a declaration merged; inclusive wall spans can overlap across declarations and MUST NOT be summed as module or CPU time; grouped mutual declarations remain groups; only sampled profiled modules ranked; below-threshold detail unknown",
@@ -4450,11 +4673,11 @@
         "savings_status": "candidate cost pool, not measured savings; validate with obligation-preserving A/B checks"
       },
       {
-        "candidate_cost_pool_seconds": 757.9463971770001,
+        "candidate_cost_pool_seconds": 1800.099797805,
         "evidence_basis": {
           "kind": "largest observed reference preparation attempt; includes project work and failures, not cache-attributable savings",
-          "project": "EvmYul",
-          "log": "/workspace/da-timing-work/evmyul-times/build-0.log"
+          "project": "Clear",
+          "log": "/workspace/da-timing-work/clear-times/build-3.log"
         },
         "name": "Mathlib/Bridge cache",
         "change": "Make pinned proof-artifact delivery reliable through an available cache endpoint; retain source/toolchain hashes and checksum verification.",
@@ -4505,7 +4728,7 @@
           "log": "/workspace/da-timing-work/active-sample/05-plain.log"
         },
         "name": "Solidity/Yul/RawIntegerInitialization",
-        "change": "Profile unattributed CPU/allocation cost first; if conversion normalization dominates, reuse checked range/conversion lemmas.",
+        "change": "A/B statement-identical opaque checked transport lemmas to reduce expression-processing work, charging helper checks and preserving all proof obligations and budgets.",
         "measured_target": "Solidity/Yul/RawIntegerInitialization.lean",
         "observed_target_wall_seconds": 79.19439813300005,
         "fresh_module_evidence": "/workspace/da-timing-work/active-sample/05-plain.log",

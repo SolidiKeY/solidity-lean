@@ -16,19 +16,21 @@ def main():
     ap.add_argument('--reference',type=pathlib.Path,action='append',default=[])
     ap.add_argument('--out',type=pathlib.Path,required=True)
     ap.add_argument('--compare',action='store_true')
+    ap.add_argument('--native-findings',type=pathlib.Path)
     args=ap.parse_args(); out=args.out.resolve(); checkout=HERE.parents[3]
     if out==checkout or checkout in out.parents: ap.error('--out must be outside this checkout; never overwrite comparison targets')
     outputs={out/name for name in ('inventory.json','profiles.json','analysis.json','summary.json')}
-    if any(path.resolve() in outputs for path in [args.sample,*args.extra,*args.reference]): ap.error('an input would be overwritten by a derived output')
+    if any(path.resolve() in outputs for path in [args.sample,*args.extra,*args.reference]+([args.native_findings] if args.native_findings else [])): ap.error('an input would be overwritten by a derived output')
     try: out.mkdir(parents=True,exist_ok=False)
     except FileExistsError: ap.error('--out must be a new directory, preventing symlink/hardlink output aliases')
     def run(script,*argv):
         subprocess.run([sys.executable,str(HERE/script),*map(str,argv)],check=True,env=dict(os.environ,PYTHONDONTWRITEBYTECODE='1'))
     extras=[item for path in args.extra for item in ('--extra',path.resolve())]
     refs=[item for path in args.reference for item in ('--reference',path.resolve())]
+    native=['--native-findings',args.native_findings.resolve()] if args.native_findings else []
     run('audit.py','--out',out)
     run('profiles.py','--sample',args.sample.resolve(),*extras,'--out',out)
-    run('analyze.py','--inventory',out/'inventory.json','--sample',args.sample.resolve(),*extras,*refs,'--profiles',out/'profiles.json','--repo',HERE.parents[3],'--out',out)
+    run('analyze.py','--inventory',out/'inventory.json','--sample',args.sample.resolve(),*extras,*refs,*native,'--profiles',out/'profiles.json','--repo',HERE.parents[3],'--out',out)
     run('summarize.py','--sample',args.sample.resolve(),'--analysis',out/'analysis.json','--out',out)
     if args.compare:
         for name in ('inventory.json','summary.json'):
