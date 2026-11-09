@@ -16,12 +16,13 @@ theorem keyWord_lt {p : PrimTy} (k : p.Denote) : keyWord k < 2 ^ 256 := by
 theorem word_normalized {p : PrimTy} (v : p.Denote) :
     keyWord v % 2 ^ 256 = keyWord v := Nat.mod_eq_of_lt (keyWord_lt v)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Distinct keys of the same supported type have distinct padded words.
 This is a value-encoding fact, not an assumption about hash outputs. -/
 theorem keyWord_inj {p : PrimTy} {a b : p.Denote} (h : keyWord a = keyWord b) : a = b := by
   cases p with
   | bool =>
-    cases a <;> cases b <;> first | rfl | (simp only [keyWord, PrimTy.toWord, cond_true, cond_false] at h; omega)
+    cases a <;> cases b <;> first | rfl | (simp only [keyWord, PrimTy.toWord, Bool.cond_true, Bool.cond_false] at h; omega)
   | uint =>
     apply Subtype.ext
     have ha : 0 ≤ a.val := PrimTy.uint_nonneg a
