@@ -3897,6 +3897,7 @@ import Solidity.Lowering.V08.RoleControls
 import Solidity.Lowering.V08.ScalarCallableTransport
 import Solidity.Lowering.V08.SelectorControls
 import Solidity.Lowering.V08.SelectorObservations
+import Solidity.Lowering.V08.SharedFailureFixture
 import Solidity.Lowering.V08.SignedCallableControls
 import Solidity.Lowering.V08.SliceFailureControls
 import Solidity.Lowering.V08.SliceFailureLowering
