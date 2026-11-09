@@ -47,6 +47,24 @@ theorem scope_runs : ∃ m', run actual.code Passes.MemoryCallControls.machine =
       Passes.CompilerWholeScope.result.st m' :=
   actual.compile_success initial_input source_run
 
+/-- `compiler_endpoint_correct` itself, at the fixture: the checked entry
+accepts it, and at `L = 1`, `frame = 128` the endpoint takes its agreement
+branch (not R2), so the fixture's world agrees exactly with `Evm.run`. -/
+theorem scope_endpoint :
+    ∃ r : Compilation 1 (Frag.init []) program, Compiler.compile 1 (Frag.init []) program = some r ∧
+      frameRefused r 1 128 = false ∧
+      r.AgreesExact 1 128 Passes.MemoryCallControls.base Passes.MemoryCallControls.initial
+        Passes.MemoryCallControls.machine := by
+  rcases compiler_endpoint_correct 1 (Frag.init []) program with refused | ⟨r, hr, worlds⟩
+  · rw [accepted] at refused
+    cases refused
+  · rw [accepted] at hr
+    cases hr
+    rcases worlds 1 128 with ⟨check, -⟩ | ⟨check, agree⟩
+    · have passes : frameRefused actual 1 128 = false := scope_passes
+      exact absurd (passes.symm.trans check) Bool.false_ne_true
+    · exact ⟨actual, accepted, check, agree _ _ _ initial_input⟩
+
 /-! ## R1: the checked entry refuses -/
 
 /-- A program no checked branch accepts. -/
@@ -79,6 +97,7 @@ end Solidity.Backend.CompilerEndpointWitnesses
 
 #print axioms Solidity.Backend.CompilerEndpointWitnesses.scope_code_nonempty
 #print axioms Solidity.Backend.CompilerEndpointWitnesses.scope_agrees
+#print axioms Solidity.Backend.CompilerEndpointWitnesses.scope_endpoint
 #print axioms Solidity.Backend.CompilerEndpointWitnesses.scope_runs
 #print axioms Solidity.Backend.CompilerEndpointWitnesses.unsupported_refused
 #print axioms Solidity.Backend.CompilerEndpointWitnesses.scope_frame_no_world
