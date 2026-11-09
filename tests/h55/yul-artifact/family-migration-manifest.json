@@ -224,7 +224,8 @@
       "path": "Solidity/Yul/Compilation/ScopedControlCompletion.lean",
       "status": "proof_reuse_partial",
       "migrated_declarations": [
-        "Solidity.Yul.Compilation.ScopedControlCompletion.completion_iff"
+        "Solidity.Yul.Compilation.ScopedControlCompletion.completion_iff",
+        "Solidity.Yul.Compilation.ScopedControlCompletion.model_to_source"
       ],
       "existing_definitions_changed": false
     },
