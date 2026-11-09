@@ -1,0 +1,30 @@
+{
+  "boundary": "This compares two observations of one source. Equality preserves observations; it does not add semantic roots or certify full dependency coverage.",
+  "encoding": {
+    "binding_events": 17082,
+    "serialized_definitions": 951
+  },
+  "expanded_records_equal": true,
+  "measurements_equal": true,
+  "metrics": {
+    "active_nodes_without_parent": 3,
+    "ambiguous_import_binding_events": 0,
+    "counts": {
+      "binding": 17082,
+      "check_event": 3,
+      "command": 21,
+      "root_event": 82,
+      "snapshot_summary": 18
+    },
+    "covered_check_commands": 3,
+    "imported_pointer_binding_units": 942,
+    "missing_native_constant_events": 0,
+    "observed_check_commands": 3,
+    "path": "Solidity/Yul/Views/SourceEnvironmentControls.lean",
+    "root_name_command_observations": 3,
+    "stage2_name_range_units": 10,
+    "uncovered_check_command_ids": [],
+    "unresolved_import_origin_events": 0
+  },
+  "source": "Solidity/Yul/Views/SourceEnvironmentControls.lean"
+}

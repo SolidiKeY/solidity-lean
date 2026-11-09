@@ -17,10 +17,11 @@ def merge_tables(imported,stage2,im,st):
  assert all(k not in stage2 or stage2[k]==v for k,v in st.items())
  imported.update(im);stage2.update(st)
 
-def measure(raw,log,path):
+def measure(raw,log,path,*,records=None):
  counts=collections.Counter();commands=[];check_ids=set();root_ids=set();snapshots=[];imported={};stage2={};ambiguous=0;root_names=set();root_records=[];binding_records=[];all_command_ids=[]
- for line in raw.open():
-  r=json.loads(line);kind=r['record'];counts[kind]+=1;all_command_ids.append(r['command'])
+ stream=records if records is not None else (json.loads(line) for line in raw.open())
+ for r in stream:
+  kind=r['record'];counts[kind]+=1;all_command_ids.append(r['command'])
   assert kind in {'command','check_event','root_event','binding','snapshot_summary','missing_parent'}
   if kind=='command':commands.append(r)
   elif kind=='check_event':check_ids.add(r['command'])
