@@ -4,13 +4,7 @@ import Solidity.Language.Features
 /-!
 # Observation sites of resolved expression roots (G15 checkpoint 1)
 
-Walk the actual intrinsic resolved syntax, including expressions inside lvalues
-and both converted/unconverted argument lists. Declaration identities are
-retained at call sites; this module does not follow function bodies yet. This
-is a structural extraction interface, not an operational adequacy theorem or
-complete feature extraction for types, specification terms or the
-solc-JSON importer. No syntax representation is replaced. Library-call sites record typed delegated syntax
-under the existing abstract external-library feature, not ABI or linkage adequacy.
+Walk the actual intrinsic resolved syntax, including expressions inside lvalues and both converted/unconverted argument lists. Declaration identities are retained at call sites; this module does not follow function bodies yet. This is a structural extraction interface, not an operational adequacy theorem or complete feature extraction for types, specification terms or the solc-JSON importer. No syntax representation is replaced. Library-call sites record typed delegated syntax under the existing abstract external-library feature, not ABI or linkage adequacy.
 -/
 namespace Solidity.Frontend.Admission
 open Solidity.Source
