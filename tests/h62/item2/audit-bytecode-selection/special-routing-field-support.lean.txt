@@ -1,0 +1,96 @@
+/-! Guards wrong receive precedence, bypassing nonpayable fallback refusal,
+and treating malformed size memory as a counterexample to a numeric-size theorem.
+Reuses the existing route-machine fixture with base2: its memory3 word is now the
+explicit size input, not a selector. Observations select continuation labels;
+no special-body, fallback input/output, Source, native, gas or G01 adequacy. -/
+
+def specialReceive : SpecialRow := (wmod 11,true)
+def specialFallback : SpecialRow := (wmod 22,false)
+def specialCompilation (receive fallback : Option SpecialRow) :=
+  SpecialRoutes.compiled payableContract 2 receive fallback
+
+def specialWritten (size value label : Fin W) : Machine :=
+  {payableMachine size value with mem := upd (payableMachine size value).mem 3 (.val label)}
+
+theorem special_found (receive fallback : Option SpecialRow) : Compiler.compile 2 (Frag.init RouteCtx)
+    (SpecialRoutes.route payableContract receive fallback)=some (specialCompilation receive fallback) :=
+  SpecialRoutes.selected payableContract 2 receive fallback
+
+theorem special_actual (receive fallback : Option SpecialRow) (size value : Fin W) :
+    run (specialCompilation receive fallback).code (payableMachine size value)=
+      specialOutcome 2 receive fallback size (payableMachine size value) :=
+  SpecialRoutes.executed payableContract 2 receive fallback (specialCompilation receive fallback)
+    (special_found receive fallback) (payableMachine size value) size rfl
+
+theorem special_empty_receive (value : Fin W) :
+    run (specialCompilation (some specialReceive) (some specialFallback)).code (payableMachine (wmod 0) value)=
+      .ok (specialWritten (wmod 0) value (wmod 11)) 0 := by
+  rw [special_actual]
+  rfl
+
+theorem special_absent_receive_fallback_zero :
+    run (specialCompilation none (some specialFallback)).code (payableMachine (wmod 0) (wmod 0))=
+      .ok (specialWritten (wmod 0) (wmod 0) (wmod 22)) 0 := by
+  rw [special_actual]
+  rfl
+
+theorem special_nonempty_fallback_refused (size value : Fin W)
+    (nonempty : size.val≠0) (nonzero : value.val≠0) :
+    run (specialCompilation (some specialReceive) (some specialFallback)).code (payableMachine size value)=.revert := by
+  rw [special_actual]
+  simp only [specialOutcome,specialResult,if_neg nonempty,specialRowOutcome,specialFallback,
+    payableMachine,Bool.false_or,decide_eq_false nonzero,Bool.false_eq_true,if_false]
+
+theorem special_absent_receive_paid_refused (value : Fin W) (nonzero : value.val≠0) :
+    run (specialCompilation none (some specialFallback)).code (payableMachine (wmod 0) value)=.revert := by
+  rw [special_actual]
+  change (if decide (value.val=0) then _ else .revert)=.revert
+  simp only [decide_eq_false nonzero,Bool.false_eq_true,if_false]
+
+theorem special_none_refused (size value : Fin W) :
+    run (specialCompilation none none).code (payableMachine size value)=.revert := by
+  rw [special_actual]
+  by_cases empty : size.val=0
+  · simp only [specialOutcome,specialResult,if_pos empty,Option.orElse_none,specialRowOutcome]
+  · simp only [specialOutcome,specialResult,if_neg empty,specialRowOutcome]
+
+theorem special_payable_fallback (size value : Fin W) :
+    run (specialCompilation none (some (wmod 22,true))).code (payableMachine size value)=
+      .ok (specialWritten size value (wmod 22)) 0 := by
+  rw [special_actual]
+  by_cases empty : size.val=0
+  · simp only [specialOutcome,specialResult,if_pos empty,Option.orElse_none,specialRowOutcome,Bool.true_or,if_true]
+    rfl
+  · simp only [specialOutcome,specialResult,if_neg empty,specialRowOutcome,Bool.true_or,if_true]
+    rfl
+
+theorem special_revert_all_refused :
+    run (specialCompilation (some specialReceive) (some specialFallback)).code
+      (payableMachine (wmod 0) (wmod 1))≠.revert := by
+  rw [special_empty_receive]
+  intro impossible
+  cases impossible
+
+def specialMalformed : Machine :=
+  {payableMachine (wmod 0) (wmod 0) with mem := fun _ => .slot (.root 0)}
+
+theorem special_malformed_size_fault :
+    run (specialCompilation (some specialReceive) (some specialFallback)).code specialMalformed=.fault := by rfl
+
+theorem special_written_preserves (size value label : Fin W) :
+    (specialWritten size value label).mem 2=.val (wmod 71) ∧
+    (specialWritten size value label).mem 4=.val (wmod 71) ∧
+    (specialWritten size value label).stack=[.val (wmod 17),.val (wmod 29)] ∧
+    (specialWritten size value label).callvalue=value := ⟨rfl,rfl,rfl,rfl⟩
+
+#print axioms special_found
+#print axioms special_actual
+#print axioms special_empty_receive
+#print axioms special_absent_receive_fallback_zero
+#print axioms special_nonempty_fallback_refused
+#print axioms special_absent_receive_paid_refused
+#print axioms special_none_refused
+#print axioms special_payable_fallback
+#print axioms special_revert_all_refused
+#print axioms special_malformed_size_fault
+#print axioms special_written_preserves
