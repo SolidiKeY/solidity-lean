@@ -5,13 +5,14 @@ base `d890f91eb`. Nothing here is for merging: the experiments live in
 `Solidity/Scratch/ITree/` (not imported by any root, by design of
 `register.sh`), and no core module changed.
 
-**Verdict.** Interaction trees are **irrelevant to a net loss**. The saving
+**Verdict.** Interaction trees are a **net loss** (`partial_fixpoint` for loops: irrelevant). The saving
 the coordinator expected is real, but it comes from **parametrizing `ExecS` by
-a resumption predicate (B)**, which is a **modest saving**: about **−970
-lines** measured (−1.07k with the transaction-level twin), in 8 files, with
-mechanical churn in ≤28 client files. On top of B, finite trees with handlers
-(A) save between −300 and +200 more lines (an extrapolation) and require
-rewriting the constructor-level reasoning of 57 client files. Coinductive
+a resumption predicate (B)**, which is a **modest saving**: about **−940
+lines**, by arithmetic over measured line ranges (−1.04k with the
+transaction-level twin), in 8 files, with mechanical churn in ≤29 client
+files. On top of B, finite trees with handlers (A) **add** about +40 to +140
+lines (an extrapolation from the fragment, so a net loss), and they require
+rewriting the constructor-level reasoning of 31–49 client files. Coinductive
 trees (C(ii)) are a net loss in this repository: no kernel evaluation, a
 universe bump, and an `eutt` library to build. The recommended next step is B
 alone.
@@ -25,28 +26,28 @@ without docstrings or blank lines (the script is described under
 
 | Area | Files | Raw | Code def / lemma | Client files |
 |---|---|---:|---:|---:|
-| Callback runs `ExecS/P/F` | `Semantics/Callback.lean` | 1611 | 476 / 880 | 60 (`Exec[SPF]`), 57 use constructors by name |
+| Callback runs `ExecS/P/F` | `Semantics/Callback.lean` | 1611 | 476 / 880 | 60 (`Exec[SPF]`); 31–49 use its constructors by name (31: `Exec[SPF].ctor`; 49: loosest match) |
 | Caller-model copy `ExecSM/PM/FM` | `Calculus/CallerModel{,Run,Valid}.lean` | 1587 | 402 / 810 | 5 |
 | Callback weakening (thinning) | `CallbackWk`, `CallbackUnwk`, `CallbackFrame`, `CallbackCapture` | 1833 | 57 / 1506 | 2 + 3 importers |
 | Deferred relations | `DeferredCallback`, `DeferredCorrespondence`, `NativeDeferred*` | 756 | 65 / 529 | 2 + 2 |
 | Static invocation `Exec` | `Semantics/StaticInvocation.lean` | 185 | 49 / 83 | – |
 | Deterministic run | `Run`, `RunWk`, `RunAccel` | 4116 | 1025 / 2125 | 441 (`Prog.run`/`Stmt.run`), 414 (`TRun.`) |
 | Fuel twin | `Semantics/RunFuel.lean` | 472 | 120 / 259 | 15 importers |
-| Fuel ↔ classical bridge (`*approx*` declarations, everywhere) | 15 files | – | 885 lines in 83 decls | – |
+| Fuel ↔ classical bridge (`*approx*` declarations, everywhere) | 26 files | – | 885 lines in 83 decls | – |
 | Worlds and traces | `ContractWorld`, `PaymentWorld`, `Lifetime`, `Theory/Reachable/CallerModel`, `Source/Session` | 1710 | 407 / 737 | – |
 | Context equivalence | `Semantics/CtxEquiv/*` (8 files) | 1908 | 255 / 669 | – |
-| Lowering's "diverge ↔ fault" split | `Theorems.lean` l.269, `Goals.lean` l.25 | – | – | 120 files mention both `diverge` and `fault` |
+| Lowering's "diverge ↔ fault" split | `Theorems.lean` l.269, `Goals.lean` l.25 | – | – | 44 (word-bounded) to 135 (substring) files mention both `diverge` and `fault` |
 
 ### Duplicated rule lists (measured by `diff` after renaming)
 
 | Pair | Today | Difference |
 |---|---|---|
 | `ExecSM/PM/FM` vs `ExecS/P/F` (`CallerModel.lean` l.160–493 vs `Callback.lean` l.489–811) | 334 vs 325 raw | 21 differing diff lines: one premise `M.Allows J …` in `transferResume`, `sendResume`, `tryOk`, and docstrings |
-| `Stmt.execM_run` vs `Stmt.exec_run` (`CallerModelRun.lean` l.255–670 vs `Callback.lean` l.893–1302) | 416 vs 410 raw | 74 differing diff lines: the extra `M` argument and `(M.allows_refl J _)` at 2 resumptions |
+| `Stmt.execM_run` vs `Stmt.exec_run` (`CallerModelRun.lean` l.255–670 vs `Callback.lean` l.893–1302) | 417 vs 410 raw | after full renaming, 10 differing diff lines: `(M.allows_refl J _)` at 4 sites in 3 resumptions |
 | `ExecSM.toExecS` / `ExecS.ofExecSM` (×S/P/F) | 145 raw | constructor-by-constructor identity maps |
 | `holdsR`/`COut.thenFM` vs `holdsC`/`COut.thenF` | 31 vs 31 raw | `ExecPM M` for `ExecP`; plus `holdsR_any_iff`, `thenFM_any_iff` (36 code) to bridge them |
 | `ExecThen`, `ExecCall`, `DirectCall` vs `ExecP.cons/halt/violated` | 3 × ~10 | the same next/halt/violated "bind" shape, 4 more times (also `ExecF.seq*`) |
-| `Lifetime.Step` vs `Reachable.StepE` | 15 + 15 | `StepE` is `Step` with the run as a parameter; the bridge back (`noCallback` is `Lifetime`, l.157–246) is ~90 raw |
+| `Lifetime.Step` vs `Reachable.StepE` | 15 + 15 | `StepE` is `Step` with the run as a parameter; the bridge back (`noCallback` is `Lifetime`, `Theory/Reachable/CallerModel.lean` l.155–246) is ~90 raw. Defining `Step` from `StepE` would also need `StepE` moved from Theory into Semantics, for the import direction |
 | `StaticInvocation.Exec` | 33 | an independent event-trace model (read/credit/write/re-entry); no duplicate |
 
 ### Lemma classification (by family)
@@ -56,10 +57,10 @@ without docstrings or blank lines (the script is described under
 
 | Family | (a) | (b) | (c) |
 |---|---|---|---|
-| `ExecSM` + `CallerModelRun` + `holdsR` | defs 334, `toExecS`/`ofExecSM` 145, `execM_run` 420, `holdsR*` 31 + 45 — **all of it also disappears under B** | `mono` 75 (one generic `Handle.mono`, 8 code) | Reentry/lattice 158, `CallerModelValid` polarity/weakening ~300 |
+| `ExecSM` + `CallerModelRun` + `holdsR` | defs 334, `toExecS`/`ofExecSM` 144, `execM_run` 417, `holdsR*` 31 + 42 — **all of it also disappears under B** | `mono` 75 (one generic `Handle.mono`, 8 code) | Reentry/lattice 158, `CallerModelValid` polarity/weakening ~300 |
 | `ExecS` + `exec_run` + `eq_run` (`Callback.lean`) | – | `ExecS` 325 → a tree semantics + handler; `exec_run` 410 → generic `Handle.runDet` (11 code) + per-constructor `runDet (tree s) = run s`; `eq_run` ~300 → generic + per-constructor "no callback event" | forks/callsBack 310, send_cases etc. |
 | `CallbackWk`/`Unwk` | – | payment and `try` cases, 381 code (`transfer_wk` 22, `send_wk` 37, `tryCall_wk` 86, `catchData_wk` 29, unwk twins 13+44+90+36, helpers 24): the J/havoc bookkeeping becomes one generic lemma, the `TRun` commutations remain | ite/call/loop/block/det cases, ~800 |
-| Deferred relations | the 3 bind-shaped relations and their join/split lemmas, ~100 (also removable by a generic relational bind, without trees) | – | the rest, ~650 |
+| Deferred relations | – (the 3 bind-shaped relations and their join/split lemmas, ~100, can go with one generic relational bind, with or without trees) | – | the rest, ~650 |
 | Run, RunWk, RunAccel, RunFuel, `*approx*` | – | – | all: the deterministic run stays the definition (see Experiment D) |
 | Worlds, CtxEquiv, Session, Lowering | – | – | all; Session already has its own `Prefix Event Outcome` trace model |
 
@@ -102,17 +103,18 @@ Side by side, the transfer/send fragment only (raw lines):
 Extrapolation to the whole of `ExecS` (from the fragment's ratios, A vs B).
 Today the forking constructors are 287 code lines; at the fragment's ratio
 (tree 28 against 43 constructor lines) the tree semantics would take ~190.
-The remaining `exec_run`, `eq_run` and payment/`try` weakening cases take
-~1.1k lines under B; at the fragment's ratio, about half of them become
-generic. A finite tree **cannot** express a loop whose body pays (unboundedly
+The remaining `exec_run` (410), `eq_run` (~300) and payment/`try` weakening
+cases (381) take ~1.1k lines under B. In the fragment, `exec_run`/`eq_run`
+cases go from 26 lines (B) to ~18 (A), about 30 % less; at that ratio
+~330 lines become generic. A finite tree **cannot** express a loop whose body pays (unboundedly
 many events). It needs a fuelled tree (`∃ n, Handle (treeF n σ) o`, which
 matches `loopDiverge`'s over-approximation) and therefore a fuel ↔ classical
 bridge for every loop (`runF_approx`-style, +50–100). Per-constructor
 correspondence proofs (`runDet (Stmt.tree s σ) = s.run σ`) are needed because
-the run must stay the definition (D). Net, A beyond B: **−300 to +200 lines**,
-with infrastructure ~170 + fuelled loops ~100 + correspondence ~200–300
-against generic savings of ~500–600. Churn: 57 client files reason by
-`ExecS` constructor names (`cases h with | transferResume …`); each would
+the run must stay the definition (D). Net, A beyond B: **+40 to +140 lines (a net loss)**:
+infrastructure ~170 + fuelled loops ~100 + correspondence ~200–300 (470–570)
+against generic savings of ~430 (~97 from the constructors, 287 → 190, plus
+~330). Churn: 31–49 client files reason by `ExecS` constructor names (`cases h with | transferResume …`); each would
 become a `Handle` inversion.
 
 ## 3. Experiment B: `ExecS` by an allowance (measured)
@@ -130,18 +132,20 @@ names. Then `ExecS J := ExecSA anyA J` and `ExecSM M J := ExecSA (M.Allows J) J`
 |---|---:|
 | `ExecSM/PM/FM` (`CallerModel.lean` l.160–493) | 334 |
 | `holdsR`, `COut.thenFM` (l.495–525; `holdsC` takes the allowance) | 31 |
-| `toExecS`/`ofExecSM` ×3 (`CallerModelRun.lean`) → `Iff.rfl` and 3 lines | 145 → ~10 |
-| `execM_run` ×3 (`CallerModelRun.lean`) | 420 |
-| `holdsR_any_iff`, `thenFM_any_iff` (`CallerModelValid.lean`) | ~45 |
-| Added: allowance parameter and 3 premises in `ExecS`, `hA` in `exec_run` | +~15 |
-| **Net (callback family)** | **−~970** |
+| `toExecS`/`ofExecSM` ×3 (`CallerModelRun.lean` l.105–248) → `Iff.rfl` and 3 lines | 144 → ~10 |
+| `execM_run` ×3 (`CallerModelRun.lean` l.252–668) | 417 |
+| `holdsR_any_iff`, `thenFM_any_iff` (`CallerModelValid.lean` l.113–154) | 42 |
+| Added: allowance parameter and 3 premises in `ExecS`, `hA` in `exec_run`, allowance in `holdsC`, `abbrev`s | +~20 |
+| **Net (callback family), by arithmetic over these ranges** | **−~940** |
 | Optional, same idea at the transaction level: `Lifetime.Step := StepE noCallback`, its bridge (`Theory/Reachable/CallerModel.lean` l.157–246) | −~100 |
 
 Churn: the 89 uses of `transferResume`/`sendResume`/`tryOk` in 28 files gain
-one `trivial` argument or one `_` pattern. Keeping `ExecS`/`ExecSM` as
+one `trivial` argument or one `_` pattern, and `Theory/CallerModel/Static.lean`
+uses `toExecS`. ParamExec checks that the generic definitions and proofs
+compile; the core refactor itself was not carried out. Keeping `ExecS`/`ExecSM` as
 `abbrev`s leaves every other mention unchanged. Automation is unaffected (no
 run changes). This is the baseline that any tree refactor has to beat, and A
-does not beat it by a margin worth 57 files of churn.
+does not beat it at all (§2), let alone by a margin worth 31–49 files of churn.
 
 ## 4. Experiment C: loops and coinduction
 
@@ -176,7 +180,7 @@ needs, as well as `iter` laws and the handler-to-relation interpretation with
 divergence. At the measured 15–45 lines per basic law, that layer is ≥500
 lines (an extrapolation from 20+ lemmas). It still needs the fuel bridge for
 `decide`. Replacing the lowering theorem's "diverge ↔ fault" split by `eutt`
-would also need a coinductive machine semantics (120 files mention both).
+would also need a coinductive machine semantics (44–135 files mention both).
 **Net loss.**
 
 ## 5. Experiment D: automation (measured)
@@ -205,19 +209,20 @@ at all.
 
 | Area | Today (raw) | A (trees) | B (allowance) | C | Churn | Automation |
 |---|---:|---|---|---|---|---|
-| Caller-model copy | 1587 | −~975 (same as B) | **−~970** measured | – | 5 files | none |
-| `ExecS` + `exec_run` + `eq_run` | 1611 | −300 to +200 beyond B (extrapolated from the fragment) | 0 | fuelled loops +50–100 under A | 57 files (A) / 28 files, 89 sites (B) | none (run stays primary) |
-| Callback weakening | 1833 | −110 to −190 (30–50 % of the 381 payment/`try` lines; extrapolated) | 0 | – | 2–3 files | none |
-| Deferred relations | 756 | −~50 to −80 (bind shape; also possible without trees) | – | – | 2–4 files | none |
+| Caller-model copy | 1587 | same as B | **−~940** (range arithmetic) | – | 5 files | none |
+| `ExecS` + `exec_run` + `eq_run` + payment/`try` weakening | 1611 + 381 | +40 to +140 beyond B (extrapolated from the fragment; costs included) | 0 | fuelled loops +50–100 under A (included) | 31–49 files (A) / 29 files, 89 sites (B) | none (run stays primary) |
+| Callback weakening, other cases | 1833 − 381 | 0 | 0 | – | 2–3 files | none |
+| Deferred relations | 756 | 0 | 0 (−50 to −80 with a generic relational bind, independent of A/B) | – | 2–4 files | none |
 | Run, RunWk, RunAccel, RunFuel, `*approx*` | 4588 + 885 code | 0 | 0 | C(i) −30..0; C(ii) net loss | 441 files if the run changed | tree 2–3× slower |
 | Worlds / traces / CtxEquiv / Session | 3618 | 0 | −~100 (`Step`/`StepE`) | – | ≤3 files | none |
-| Lowering split | – | 0 | 0 | C(ii) needs coinductive machine semantics | 120 files | – |
+| Lowering split | – | 0 | 0 | C(ii) needs coinductive machine semantics | 44–135 files | – |
 | **New infrastructure** | – | ~170 raw (Tree) + ~100 (fuel) + correspondence 200–300 | ~10 | C(ii) 185 measured, ≥500 more | – | – |
 
-**Verdict.** Trees (A, C): **irrelevant / net loss**. The allowance
-parameter (B): **modest saving**, about −1k lines out of the ~6k-line
+**Verdict.** Trees (A, C(ii)): **net loss**; `partial_fixpoint` (C(i)):
+**irrelevant**. The allowance parameter (B): **modest saving**, about −940 lines out of the ~6k-line
 callback, caller-model, weakening and deferred family (~16 %). This confirms the coordinator's range
-(−500 to +1.5k) and locates the saving in B. **Next step:** apply B in the
+(−500 to +1.5k) and locates the saving in B. The skeptic review corrected
+the first draft's A estimate (−300..+200) to a net loss. **Next step:** apply B in the
 core (`ExecS` by an allowance, `ExecSM`, `holdsR` and `execM_run` deleted,
 the `Step`/`StepE` twin optional), and optionally add one generic relational
 bind for `ExecThen`/`ExecCall`/`DirectCall`. Do not introduce trees.
