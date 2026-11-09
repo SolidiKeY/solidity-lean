@@ -255,6 +255,7 @@
     "native_cli_directory_rows": "cli-root-directories.csv",
     "native_cli_expression_roots": "cli-root-summary.json",
     "native_combined_candidate_prefix13": "combined-prefix13/summary.json",
+    "native_combined_candidate_prefix130": "combined-prefix130/summary.json",
     "native_compact_equivalence": "compact-equivalence-summary.json",
     "native_compact_roots": "compact-pilot-summary.json",
     "native_expression_graph": "native-summary.json",
