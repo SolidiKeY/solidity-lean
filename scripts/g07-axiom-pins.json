@@ -40686,6 +40686,19 @@
  "Solidity/Frontend/Admission/ExclusionFeatures.lean:Solidity.Frontend.Admission.root_exclusion_feature_covered": [
   "propext"
  ],
+ "Solidity/Frontend/Admission/ExclusionFeatures.lean:Solidity.Frontend.Admission.sourceCandidateMetadataV2Refusal?_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ExclusionFeatures.lean:Solidity.Frontend.Admission.sourceCandidateMetadataV2Refusals_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ExclusionFeatures.lean:Solidity.Frontend.Admission.sourceCandidateMetadataV2Uses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Frontend/Admission/ExclusionFeatures.lean:Solidity.Frontend.Admission.sourceCandidateRefusal?_none_iff": [
   "Classical.choice",
   "Quot.sound",
@@ -40717,6 +40730,10 @@
   "propext"
  ],
  "Solidity/Frontend/Admission/ExclusionFeatures.lean:Solidity.Frontend.Admission.syntaxCandidateFeaturesAt_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ExclusionFeatures.lean:Solidity.Frontend.Admission.syntaxCandidateMetadataV2At_iff": [
   "Quot.sound",
   "propext"
  ],
@@ -40999,6 +41016,7 @@
  ],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.literal_refusal_site": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.malformed_modifier_tag_retained": [],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.metadata_v2_retains_all_refusals": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.mutability_carriers": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.nested_prefix_payloads": [],
  "Solidity/Frontend/Admission/SyntaxOccurrenceControls.lean:Solidity.Frontend.Admission.OccurrenceControls.old_subset_visibility_gap": [],
