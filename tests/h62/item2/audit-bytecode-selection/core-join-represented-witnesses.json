@@ -1,0 +1,6 @@
+{
+  "core_join_joined_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.CoreJoinCertificate.joined",
+    "proof": "\u27e8CoreJoin.certificate,joinContract,[],[],1,0,Frag.init [],joinNil,Frag.init [],rfl,joinCompilation 0,join_found 0,representedState,representedMachine,represented_input,represented_room,[.revert],True.intro\u27e9"
+  }
+}

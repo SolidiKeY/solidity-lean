@@ -1,0 +1,31 @@
+/-! Guards using a compiler certificate with incompatible simulation/resource
+witnesses or assuming the joined execution result. Reuse the prior actual nil
+compilation and Sim.init for the same state/machine. Arbitrary tails are skipped;
+no Source/native/physical or gas adequacy is established. -/
+
+def representedState := freshT joinContract 0 W_pos (wmod 0)
+def representedMachine := Machine.init (fun _ => 0) (wmod 0)
+
+theorem represented_input : Sim joinContract 1 0 (Frag.init []) representedState representedMachine :=
+  Sim.init joinContract 0 W_pos (fun _ => 0) (wmod 0) rfl
+
+theorem represented_room : 1+Prog.pushes joinNil≤Lmax := by decide
+
+theorem represented_nil_all_tails (rest : List Instr) :
+    run ((joinCompilation 0).code++[.jump rest.length]++rest) representedMachine=
+      .ok representedMachine 0 := by
+  rw [CoreJoin.joined 1 0 (Frag.init []) joinNil (Frag.init []) rfl
+    (joinCompilation 0) (join_found 0) representedState representedMachine
+    represented_input represented_room rest]
+  rfl
+
+theorem represented_revert_all_refused :
+    run ((joinCompilation 0).code++[.jump 1,.revert]) representedMachine≠.revert := by
+  rw [represented_nil_all_tails]
+  intro impossible
+  cases impossible
+
+#print axioms represented_input
+#print axioms represented_room
+#print axioms represented_nil_all_tails
+#print axioms represented_revert_all_refused
