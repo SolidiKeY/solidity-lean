@@ -231,6 +231,11 @@ guidance found no issues. Both checked the existing builder/runner arguments,
 the warm-request versus end-to-end boundary, and that `VU1-T1` executes H191
 without reopening the decided question. Neither used a compiler or Lean server.
 
+The final finder requested preserving the exact operational timing/RSS wrapper
+for the single certified CLI sample; it is retained with private evidence and
+identified by checksum. The skeptic confirmed the partial native denominator
+and the explicit RSS and trust boundaries. Neither sample is a U01 baseline.
+
 ## Checkpoint handoff
 
 Inventory is partial until its reviews and required gates pass. Suite, fresh
