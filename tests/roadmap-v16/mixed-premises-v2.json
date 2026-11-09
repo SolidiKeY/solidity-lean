@@ -4,8 +4,8 @@
   "baselinePolicySha256": "04bc05d69c42c71590e9f54e8f4ca2982a26d2b9430b8a9c59f7e7d34b6ae2c7",
   "originalLedgerSha256": "9f616d24cceae6881dc28cc428757f4a76df4ca65f33298b7cf152bcf9ed11eb",
   "checkedLedgerSha256": "0705f2ab263fe1dde33fd017b86426ef7329a2143216479232a60945f854c5a3",
-  "productionRevision": "482558c828580ef9ae78cba8fe595051e1a76fa8",
-  "productionLeanTreeSha256": "2e6d517d4e5fcf4972224663f74492ea5cacf62edc0edf36dc67218866b9894e",
+  "productionRevision": "e1124c5e264e7bdaafe70227a6dff4427eaac60f",
+  "productionLeanTreeSha256": "a695f99d14ea7fcac2e19090807f1e86f9dd08b4a912d25ebb83abb8519bb2d3",
   "toolchainSha256": "42779d67b81608af8a12aa4328d2ab47ca201925b3b2bd68369587b5340bb434",
   "extractors": {
     "tests/roadmap-v16/Inventory.lean": "e0f5e3ca9eee3a2bdc0b84e162dd8d56853ec63dba3757e4e73172aa48d22dde",
