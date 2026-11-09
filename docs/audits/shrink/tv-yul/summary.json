@@ -264,7 +264,7 @@
   },
   "views_bridge_candidate": {
     "approved": false,
-    "proved": false,
+    "proved": true,
     "coverage_claimed": false,
     "module_inventory": {
       "commit": "381328f608032dd19c405373c2b265e83a969850",
@@ -326,11 +326,19 @@
     "candidate_encoding": "Existing Roadmap.Word and intrinsically bounded Field.Value into existing Scalar.Word/Vector2 locals through BitVec.ofFin, with lossless conversion diagrams.",
     "candidate_operations": "Read via SHR/AND; write via AND/NOT/SHL/OR with lowMask=2^(8*width)-1. Masks fit at width32 and avoid a wrapping2^256 modulus literal. Normalize arbitrary payload words so no canonicality premise is added.",
     "remaining_obligations": [
-      "Prove actual existing Field.findWord/saveWord equivalence to original Yul evalStmt and its selected compiled block.",
-      "Preserve unchanged Artifact forward/backward statements and every exported Views statement.",
-      "Obtain owner approval of the concrete bridge; no owner approval currently exists.",
-      "Retain/count unbounded-Nat proofs and storage/map/heterogeneous aggregate guarantees outside a bounded-word bridge; two word statements alone do not establish module or largest-family coverage."
-    ]
+      "Obtain owner decision TVYUL-BRIDGE before any covered-family claim.",
+      "Restore Field.find_saveWord and Field.saveWord_unchanged with exact original statements; recompile unchanged downstream imports against the module-shadow harness.",
+      "Preserve/count all other exported statements and retained142lines of Nat/codec definitions/proofs; assess largest actually covered family and run matched Views comparison."
+    ],
+    "proof_scope": "Operation bridge only: exact read/write function agreement, actual originalYul evaluator, checker-produced unchanged Artifacts, lossless payload encoding, full machine/caller forward/backward. Original theorem exports/family replacement are not yet proved.",
+    "family_preservation_proved": false,
+    "prototype_commit": "4667f91cf7860a18ef63607c0127196b029f01c2",
+    "prototype_paths": [
+      "prototypes/ViewsPackingBase.lean",
+      "prototypes/ViewsPackingBridge.lean",
+      "prototypes/ViewsPackingProgram.lean"
+    ],
+    "convention": "Depth0, two existing word locals; arbitrary full machine and caller. No arbitrary newer-prefix-depth claim. Isolated harness copies frozen definitions except the two target word theorems; original Packing is absent from its import closure."
   },
   "scope_findings": [
     "Frozen882 Views modules /74635physical lines; lexical inventory and imports are not semantic impossibility proofs.",
@@ -338,24 +346,39 @@
     "Packing includes unbounded Nat exports; ScalarWriteback adds typed Source.Storage and administrative Option cells; PackedAggregates adds arbitrary byte views, heterogeneous lists and unbounded layout coordinates."
   ],
   "limitations": [
-    "No owner-approved Views-to-Artifact bridge or proved Views replacement. Covered-family reduction remains unclaimed.",
+    "The concrete operation bridge is proved but not owner-approved. No covered Views family, restored family-export comparison or reduction is claimed; overall verdict remains null.",
     "Auxiliary checker covers selected loop-free Backend.Block with a fixed total source horizon, not arbitrary raw EVM bytecode, loops or native/Source-G24 execution.",
     "get_goal is not exposed; existing persistent goal remains active, with no new goal or reset.",
     "No systemd scope on cloud VM(H232). Resource guard restores a12GiB RLIMIT_AS process cap, hard cgroup cap at most16GiB, no swap, and both4GiBOS/effective-free reserves. The16GiB bypass is removed; previous gates using it are withdrawn as current-policy validation and retained only as historical evidence. Strict-guard39-job measurements now pass; current-head repository gates remain pending."
   ],
   "outstanding": [
-    "Complete the branch-only candidate Views bridge and its proofs before requesting owner approval.",
-    "Establish a real approved covered Views family, preserve all its statements and measure its before/after workload; no endpoint or premise weakening.",
-    "Complete final runtime gates, final read-only reviews and committed handoff for each checkpoint."
+    "Owner decision on the proved operation bridge; Views remains endpoint and reduction unclaimed.",
+    "Original word theorem export restoration, unchanged downstream replay, full-family preservation/accounting and matched Views measurements.",
+    "Resolve upstream18missingG16pin records through their owner; rerun required gates.",
+    "Final finder/skeptic review, strict gates and handoff for the complete assignment."
   ],
-  "questions": [],
+  "questions": [
+    {
+      "id": "TVYUL-BRIDGE",
+      "sources": [
+        "latest-user-Views-endpoint-decision",
+        "Views/Packing.lean",
+        "prototype:4667f91cf7860a18ef63607c0127196b029f01c2"
+      ],
+      "question": "The latest user decision requires an owner-approved Views-to-Artifact bridge. Does the owner approve prototype4667f91cf7860a18ef63607c0127196b029f01c2 as the operation bridge for the pilot? It proves lossless Field.findWord/saveWord agreement with actual originalYul read/write statements and unchanged bidirectional Artifacts at depth0/two locals/arbitrarycaller/fullmachine frame, including width32; no premise is weakened. The two original word theorem exports, complete family preservation and Views measurements remain unfinished, and no family reduction is claimed.",
+      "options": [
+        "A: Approve this operation bridge as the pilot basis; restore exports, preserve/count retainedNat proofs and complete the Views comparison next.",
+        "B: Require a different or broader Views bridge; keep this prototype auxiliary and specify the required existing functions/state relation before any covered comparison."
+      ]
+    }
+  ],
   "resource_guard": {
     "process_limit": "12GiB RLIMIT_AS configured maximum; lower inherited limits preserved and actual applied cap reported.",
     "reserves": "4GiB OS available and4GiB effective free, neither bypassable",
     "ownership": "Signals only the fresh child process group; pidfd/select observes exit without reaping, and waitid(WNOWAIT) retains the leader until single-threaded monitoring ends. No watcher thread, constant tag or /proc-wide signal loop. Trusted commands must wait for their workers; detached daemons are outside this runner contract.",
     "monitoring": "Sampling errors at initial, periodic or final sample mark refusal and terminate the owned group; no successful result after monitor failure.",
     "tests": "test_bounded.py covers actual virtual-address refusal without resident allocation, lower inherited cap preservation/reporting, both reserves, unrelated-process survival, initial/periodic/final sampling errors, pidfd monitoring errors, and removed bypass refusal.",
-    "validation": "Nine behavioral regressions and all39matched source/kernel checks pass under the restored guard; repository gates must be validated at the committed correction head."
+    "validation": "Nine behavioral regressions and39matched checks pass under strict12GiB process cap and bothreserves. Library checkpoint builds successfully; its axiom-pins step fails on18upstreamG16records. No current full-gate pass is claimed."
   },
   "prototype_source_access": {
     "commit": "2aa3a2a21a1e081be5a2a760f91c0d11a084c3e2",
@@ -364,5 +387,12 @@
     "bundle_path": "evidence/shrink-pilots-1108/tv-yul/tv-yul-views-checkpoint/prototype.bundle",
     "bundle_sha256": "f4f8057896aa8285c22a6cd2bc907e45ae1764b554dffba2c5266e41ab34e7d7",
     "review_instruction": "Fetch bundle ref codex/shrink-pilots-1108/tv-yul-prototype into a separate review ref if its Git object is unavailable. Requires published base381328f608; never merge prototype history."
+  },
+  "upstream_gate_dependency": {
+    "head": "5169d6c525b6b63b64fd0f899c366259df0269a5",
+    "gate": "axiom-pins",
+    "status": "fail",
+    "decisive_output": "0 errors,18unrecorded changes,0baselined changes; all missing records are existing G16 pins. Reproduced after latest upstream merge.",
+    "scope": "No G16 pin registry edited; ownership ticket supplied to coordinator. No refusal weakened or failure waived."
   }
 }
