@@ -404,4 +404,25 @@ theorem tuple_group_sites_and_gaps :
 /-- info: 'Solidity.Frontend.Admission.OccurrenceControls.tuple_group_sites_and_gaps' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms tuple_group_sites_and_gaps
 
+
+/-! Regression: classifier families preserve site-first order and duplicates, while opt-in composition exposes a marker absent from a frozen candidate. String probes are not policy features; the real tuple control asserts syntax diagnostics only, not canonical selection, typing or admission. -/
+def probeA {c : Cat} (s : Syn c) : List String := if s.ctor = .ident then ["A","A"] else []
+def probeB {c : Cat} (s : Syn c) : List String := if s.ctor = .ident then ["B"] else []
+def probeClassifiers : List (SyntaxFieldClassifier String) := [probeA,probeB,probeA]
+
+theorem classifier_family_order_duplicates_and_gap :
+    (syntaxFieldUses (pairTree "x" "y") (combineSyntaxFields probeClassifiers)).map Prod.snd =
+      ["A","A","B","A","A","A","A","B","A","A"] ∧
+    syntaxFieldRefusals (pairTree "x" "y") (combineSyntaxFields probeClassifiers)
+      (fun value => decide (value ≠ "B")) =
+      [(⟨.expr,.ident "x"⟩,"B"),(⟨.expr,.ident "y"⟩,"B")] ∧
+    syntaxFieldRefusal? tupleShapeUnit
+      (combineSyntaxFields [syntaxCandidateMetadataV2At,tupleShapeFeaturesAt])
+      (fun f => decide (f ≠ .parentheses)) = some (⟨.expr,groupedBool⟩,.parentheses) ∧
+    sourceCandidateMetadataV2Refusal? tupleShapeUnit
+      (fun f => decide (f ≠ .parentheses)) = none := ⟨rfl,rfl,rfl,rfl⟩
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.classifier_family_order_duplicates_and_gap' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms classifier_family_order_duplicates_and_gap
+
 end Solidity.Frontend.Admission.OccurrenceControls
