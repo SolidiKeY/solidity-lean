@@ -2,7 +2,10 @@
 """coord-ask — the lane's only channel to the coordinator (runs on a lane VM; needs git and push access to the
 coordination repository, nothing else; in the lane's own repository it only fetches master, for --done).
 
-  coord-ask [-t TITLE] [-q QID] TEXT     ask a question (TEXT may also come on stdin); the QID leads the title
+  coord-ask [-t TITLE] [-q QID] [-k KIND] TEXT
+                                         ask a question (TEXT may also come on stdin); the QID leads the title.
+                                         KIND (see KINDS) lets standing rules answer it at once; semantics and
+                                         design questions are never decided by default
   coord-ask --ack QID [NOTE]             the coordinator's answer to QID was applied: closes the question
   coord-ask --done [--result FILE]       this turn finished; FILE (or - for stdin) is the turn's CLOUDVM-RESULT
                                             JSON, which the coordinator uses as the lane's result the moment it lands
@@ -23,6 +26,9 @@ Environment: COORD_Q_REPO (repository URL; default: this project's coordination 
 (override the batch/slug parsed from a codex/<batch>/<slug> branch name).
 """
 import argparse, json, os, re, shutil, subprocess, sys, tempfile, time
+
+KINDS = ('resource-scope', 'write-scope', 'frozen-contract', 'inherited-failure', 'missing-input', 'timing', 'metric',
+         'semantics', 'design', 'canary', 'other')   # keep in step with the coordinator's policy kinds
 
 
 def git(*a, inp=None, env=None):
@@ -104,6 +110,7 @@ def prepush(no_check):
 def main():
     ap = argparse.ArgumentParser(usage=__doc__)
     ap.add_argument('-t', dest='title', default=''); ap.add_argument('-q', dest='qid', default='')
+    ap.add_argument('-k', dest='kind', default='', choices=('',) + KINDS, metavar='KIND', help='one of: ' + ', '.join(KINDS))
     ap.add_argument('--ack', metavar='QID'); ap.add_argument('--done', action='store_true')
     ap.add_argument('--result', metavar='FILE')
     ap.add_argument('--no-check', metavar='REASON', default='', help='--done without the pre-push check (say why)')
@@ -146,7 +153,7 @@ def main():
     parts = lane.split('/')
     batch = os.environ.get('CLOUDVM_BATCH') or (parts[1] if len(parts) > 2 else '')
     slug = os.environ.get('CLOUDVM_SLUG') or (parts[2] if len(parts) > 2 else '')
-    extra = ''
+    extra = f'kind: {a.kind}\n' if a.kind and not (a.ack or a.done) else ''
     if a.done:
         note = pre['detail'].splitlines()[0][:120] if pre['state'] in ('pass', 'skipped') else ''
         if pre.get('cmd') and pre['cmd'] != CHECK_CMD: note += f"; command: {pre['cmd'][:100]}"   # an override is never silent
