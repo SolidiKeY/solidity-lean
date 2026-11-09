@@ -195,7 +195,7 @@ theorem eval_cdDoubleIndex_run {caller : RCtx} (G : Glob E) (F : Fr) (n : Nat) (
           let inner ← readLoc F location
           let element ← indexLoc F inner second
           return RVal.val (← readLoc F element)).run before := by
-  rw [evalE]
+  rw [evalE.eq_def]
   simp only [Hoare.run_bind]
   by_cases bound : first < length
   · rw [eval_cdArrayIndex_run G F n σ offset length first bound first_typed (.cons (.int second second_typed) tail) state]
