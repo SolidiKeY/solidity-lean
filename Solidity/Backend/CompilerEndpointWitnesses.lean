@@ -6,132 +6,80 @@ import Solidity.Backend.Passes.CompilerWholeScope
 
 Kernel-checked instances of each case of `CompilerEndpoint`:
 
-* accepted through bytes: the empty program (core branch, empty code, empty
-  byte selection, a zero-step safe trace);
+* accepted and agreeing with `Evm.run`: the scoped-call fixture
+  `CompilerWholeScope.program` (memory-calls branch, non-empty code) in its
+  world `L = 1`, `frame = 128`: the static check passes, the world is an
+  `Input`, and the compiled code runs to success in the related state;
 * R1: `revertData []`, which no checked branch accepts;
-* R2: the empty program at `L = Lmax + 1` (core bound), and the scoped-call fixture `CompilerWholeScope.program` at the source frame
-  `1 + frameNeedProg program`, below its call-frame need;
-* R3: the same fixture's memory code, and the core code of `revert`;
-* R4: the empty program's bytes from an entry stack of 1025 words.
-
-Today only empty code is selected to bytes: every emitted local, storage,
-branch and revert instruction is refused at R3.
+* R2: the same fixture at the source frame `1 + frameNeedProg program`, below
+  its call-frame need, and the empty program at `L = Lmax + 1` (core bound).
 -/
 namespace Solidity.Backend.CompilerEndpointWitnesses
 
-open Evm Evm.Compiler Selection Endpoint
+open Evm Evm.Compiler Endpoint
 open Passes.MemoryCallControls (C)
+open Passes.CompilerWholeScope (program actual accepted initial_input source_run)
 
-/-- The empty program. -/
-def empty : Solidity.Prog C [] [] := .nil
+/-! ## Accepted, agreeing with `Evm.run` -/
+
+/-- The fixture's compiled code is not empty. -/
+theorem scope_code_nonempty : actual.code.isEmpty = false := by
+  with_unfolding_all decide +kernel
+
+/-- The fixture's world passes the static check. -/
+theorem scope_passes : frameRefused actual 1 128 = false :=
+  frameRefused_of_input actual initial_input
+
+/-- The endpoint's agreement clause at the fixture's world. -/
+theorem scope_agrees :
+    ∃ r : Compilation 1 (Frag.init []) program, Compiler.compile 1 (Frag.init []) program = some r ∧
+      frameRefused r 1 128 = false ∧
+      r.AgreesExact 1 128 Passes.MemoryCallControls.base Passes.MemoryCallControls.initial
+        Passes.MemoryCallControls.machine :=
+  ⟨actual, accepted, scope_passes, actual.correct_exact initial_input⟩
+
+/-- The typed run succeeds, and so does `Evm.run` of the non-empty compiled
+code, its stack unchanged, in the state `Rep` relates. -/
+theorem scope_runs : ∃ m', run actual.code Passes.MemoryCallControls.machine = .ok m' 0 ∧
+    m'.stack = Passes.MemoryCallControls.machine.stack ∧
+    actual.Rep (1 + Evm.Prog.pushes program) 128 Passes.MemoryCallControls.base
+      Passes.MemoryCallControls.initial Passes.MemoryCallControls.machine
+      Passes.CompilerWholeScope.result.st m' :=
+  actual.compile_success initial_input source_run
+
+/-! ## R1: the checked entry refuses -/
 
 /-- A program no checked branch accepts. -/
 def unsupported : Solidity.Prog C [] [] := .cons (.revertData []) .nil
 
-/-- A program accepted by the core branch whose code has no byte selection. -/
-def reverting : Solidity.Prog C [] [] := .cons .revert .nil
-
-/-! ## Accepted through bytes -/
-
-theorem empty_accepted : (Compiler.compile 0 (Frag.init []) empty).isSome = true := by
-  decide +kernel
-
-theorem empty_code : (Compiler.compile 0 (Frag.init []) empty).map (·.code.length) = some 0 := by
-  decide +kernel
-
-theorem empty_selected :
-    ((Compiler.compile 0 (Frag.init []) empty).map (·.code)).bind compileScalar = some [] := by
-  decide +kernel
-
-theorem empty_capacity : Scalar.stackBound [] (([] : Scalar.Stack).length : Int) = true := by
-  decide +kernel
-
-/-- The accepted empty program runs through bytes: the IR succeeds unchanged and
-the bytes take a capacity-safe zero-step trace to the end of the code. -/
-theorem empty_through_bytes (m : Machine) (stack : m.stack = irStack []) :
-    ∃ r : Compilation 0 (Frag.init []) empty, Compiler.compile 0 (Frag.init []) empty = some r ∧
-      compileScalar r.code = some [] ∧ ByteAgree r.code [] [] m := by
-  cases accepted : Compiler.compile 0 (Frag.init []) empty with
-  | none =>
-    have := empty_accepted
-    rw [accepted] at this
-    cases this
-  | some r =>
-    have code : r.code = [] := by
-      have length := empty_code
-      rw [accepted] at length
-      exact List.eq_nil_of_length_eq_zero (Option.some.inj length)
-    have selected : compileScalar r.code = some [] := by rw [code]; rfl
-    exact ⟨r, rfl, selected, byte_agree r.code [] selected [] empty_capacity m stack⟩
-
-/-! ## R1: the checked entry refuses -/
-
 theorem unsupported_refused : Compiler.compile 0 (Frag.init []) unsupported = none :=
   Option.isNone_iff_eq_none.mp (by decide +kernel)
 
-/-! ## R2: a static frame bound fails -/
+/-! ## R2: a static bound fails -/
 
-open Passes.CompilerWholeScope (program actual branch) in
-theorem scope_static_refused :
-    staticBound actual 1 (1 + Memory.frameNeedProg program) = false := by
+/-- The fixture at the source frame, below its call-frame need. -/
+theorem scope_frame_refused :
+    frameRefused actual 1 (1 + Memory.frameNeedProg program) = true := by
   with_unfolding_all decide +kernel
 
-open Passes.CompilerWholeScope (program actual) in
-theorem scope_static_holds : staticBound actual 1 128 = true := by
-  with_unfolding_all decide +kernel
+theorem scope_frame_no_world (base : Nat → Fin W) (σ : State C []) (m : Machine) :
+    ¬ actual.Input 1 (1 + Memory.frameNeedProg program) base σ m :=
+  frame_stage actual 1 _ base σ m scope_frame_refused
 
-/-- The core branch's static bound: the empty program at `L = Lmax + 1`. -/
-theorem empty_static_refused :
-    (Compiler.compile 0 (Frag.init []) empty).map (fun r => staticBound r (Lmax + 1) 0) =
-      some false := by
-  decide +kernel
+/-- The empty program. -/
+def empty : Solidity.Prog C [] [] := .nil
 
-/-! ## The IR-fault branch of `ByteAgree`
-
-No program the checked entry accepts reaches it today (only empty code is
-selected); the selector's own fault fixture `lateIR` (`PUSH 5; SWAP1` on an
-empty stack) shows the branch is inhabited: the IR faults and the bytes stick
-before their end. -/
-
-theorem late_capacity :
-    Scalar.stackBound MixedControls.lateCode (([] : Scalar.Stack).length : Int) = true := by
-  decide +kernel
-
-theorem late_fault_stuck (m : Machine) :
-    Evm.run MixedControls.lateIR { m with stack := [] } = .fault ∧
-      Stuck (encode MixedControls.lateCode) ⟨0, []⟩ := by
-  rcases byte_agree MixedControls.lateIR MixedControls.lateCode MixedControls.late_selected []
-      late_capacity { m with stack := [] } rfl with ⟨_, run, -⟩ | fault
-  · rw [MixedControls.late_fault m] at run
-    cases run
-  · exact fault
-
-/-! ## R3: no byte selection -/
-
-open Passes.CompilerWholeScope (actual) in
-theorem scope_bytes_refused : compileScalar actual.code = none := by
-  with_unfolding_all decide +kernel
-
-theorem reverting_accepted : (Compiler.compile 0 (Frag.init []) reverting).isSome = true := by
-  decide +kernel
-
-theorem reverting_bytes_refused :
-    ((Compiler.compile 0 (Frag.init []) reverting).map (·.code)).bind compileScalar = none := by
-  decide +kernel
-
-/-! ## R4: the byte stack bound fails -/
-
-theorem empty_capacity_refused :
-    Scalar.stackBound [] ((List.replicate 1025 (0 : Scalar.Word)).length : Int) = false := by
+/-- The core branch's bound: the empty program at `L = Lmax + 1`. -/
+theorem empty_lmax_refused :
+    (Compiler.compile 0 (Frag.init []) empty).map (fun r => frameRefused r (Lmax + 1) 0) =
+      some true := by
   decide +kernel
 
 end Solidity.Backend.CompilerEndpointWitnesses
 
-#print axioms Solidity.Backend.CompilerEndpointWitnesses.empty_through_bytes
+#print axioms Solidity.Backend.CompilerEndpointWitnesses.scope_code_nonempty
+#print axioms Solidity.Backend.CompilerEndpointWitnesses.scope_agrees
+#print axioms Solidity.Backend.CompilerEndpointWitnesses.scope_runs
 #print axioms Solidity.Backend.CompilerEndpointWitnesses.unsupported_refused
-#print axioms Solidity.Backend.CompilerEndpointWitnesses.scope_static_refused
-#print axioms Solidity.Backend.CompilerEndpointWitnesses.scope_bytes_refused
-#print axioms Solidity.Backend.CompilerEndpointWitnesses.reverting_bytes_refused
-#print axioms Solidity.Backend.CompilerEndpointWitnesses.empty_capacity_refused
-#print axioms Solidity.Backend.CompilerEndpointWitnesses.empty_static_refused
-#print axioms Solidity.Backend.CompilerEndpointWitnesses.late_fault_stuck
+#print axioms Solidity.Backend.CompilerEndpointWitnesses.scope_frame_no_world
+#print axioms Solidity.Backend.CompilerEndpointWitnesses.empty_lmax_refused
