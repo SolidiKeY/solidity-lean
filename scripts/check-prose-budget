@@ -59,6 +59,7 @@ _NUMBER = re.compile(r'(?:0[xX][0-9a-fA-F_]+|0[oO][0-7_]+|0[bB][01_]+|[0-9][0-9_
 class _Scanner:
     def __init__(self, source):
         self.source = source
+        self.unclosed = False
         self.newlines = [m.start() for m in re.finditer("\n", source)]
         self.comments, self.docs, self.interpolations = set(), set(), set()
 
@@ -74,6 +75,7 @@ class _Scanner:
         while stack:
             token = _COMMENT.search(source, pos)
             if token is None:
+                self.unclosed = True
                 pos = len(source)
                 if collect:
                     for opening, doc in stack:
@@ -147,11 +149,13 @@ class _Scanner:
         if raw:
             closing = '"' + (raw[1] or "")
             end = source.find(closing, raw.end())
+            self.unclosed |= end < 0
             return len(source) if end < 0 else end + len(closing)
         if char:
             return char.end()
         if source[pos] == '"':
             token = _STRING.match(source, pos)
+            self.unclosed |= token is None
             return token.end() if token else len(source)
         return None
 
@@ -281,6 +285,7 @@ class _Scanner:
                 pos = min(pos + 1, len(self.source))
             else:
                 pos = self.code(pos, "}", collect)
+        self.unclosed = True
         return len(self.source)
 
     def code(self, pos=0, stop=None, collect=True):
@@ -326,6 +331,7 @@ class _Scanner:
                     return pos
             else:
                 pos += 1
+        self.unclosed |= bool(closers)
         return len(source)
 
 
@@ -336,11 +342,124 @@ def comment_lines(source):
     return len(scanner.comments), len(scanner.docs)
 
 
+PROCESS_ID = re.compile(r"\b[GH][0-9]+\b")
+_MODULE_NAME = r"[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)+"
+_IMPORT = re.compile(r"import[ \t]+(" + _MODULE_NAME + r")[ \t]*")
+_REGISTRY_ROOTS = ("Solidity.lean", "SolidityExamples.lean", "SoliditySlowExamples.lean",
+                   "Bridge/SolidityBridge.lean")
+
+
+def registered_modules(root):
+    """Read generated roots, never infer registration from the inspected source."""
+    modules = set()
+    for name in _REGISTRY_ROOTS:
+        path = root / name
+        if path.is_file():
+            for line in path.read_text(encoding="utf-8").splitlines():
+                if token := _IMPORT.fullmatch(line):
+                    modules.add(token[1])
+    return modules
+
+
+def _command_mask(scanner):
+    """Hide comments and opaque tokens without moving source offsets.
+
+    Comment trivia becomes spaces. Literals/quotations become nontrivia, so they
+    cannot accidentally turn a malformed command into a recognized command.
+    """
+    source = scanner.source
+    pieces, previous, pos = [], 0, 0
+    while token := _CODE.search(source, pos):
+        start = token.start()
+        pos = token.end()
+        opaque = True
+        if token[0] == "--":
+            end = source.find("\n", start)
+            pos = len(source) if end < 0 else end
+            opaque = False
+        elif token[0] == "/-":
+            pos = scanner.block(start, False)
+            if sum(1 if m[0] == "/-" else -1 for m in _COMMENT.finditer(source, start, pos)):
+                return None
+            opaque = False
+        elif source[start] == "«":
+            end = source.find("»", start + 1)
+            if end < 0:
+                return None
+            pos = end + 1
+        elif source[start] == "`":
+            opening = start
+            while opening < len(source) and source[opening] == "`":
+                opening += 1
+            opening = scanner.trivia(opening)
+            if opening < len(source) and source[opening] in _GROUPS:
+                # Quotations can introduce arbitrary command syntax. Fail closed
+                # for this file rather than recognize commands in their payload.
+                return None
+            pos = scanner.identifier(opening)
+            if pos is None:
+                return None
+        elif source[start] == '"' and start in scanner.interpolations:
+            pos = scanner.interpolated(start, False)
+        elif end := scanner.literal(start):
+            raw = RAW.match(source, start)
+            if source[start] == '"' and _STRING.match(source, start) is None:
+                return None
+            if raw and source.find('"' + (raw[1] or ""), raw.end()) < 0:
+                return None
+            pos = end
+        else:
+            continue
+        pieces.extend((source[previous:start], re.sub(r"[^\r\n]", "~" if opaque else " ", source[start:pos])))
+        previous = pos
+    pieces.append(source[previous:])
+    return "".join(pieces)
+
+
+def process_ids(source, modules, scanner=None):
+    """H290 partial checkpoint: only certain module-header import tokens.
+
+    Namespace/end classification awaits authoritative imported command context;
+    even an empty textual pair can be a redefined command production.
+    """
+    matches = list(PROCESS_ID.finditer(source))
+    if not matches or not modules:
+        return len(matches)
+    scanner = scanner or _Scanner(source)
+    if not getattr(scanner, "scanned", False):
+        scanner.code()
+    masked = _command_mask(scanner)
+    if masked is None or scanner.unclosed:
+        return len(matches)
+    exempt, offset = set(), 0
+    saw_import, saw_prelude = False, False
+    for line in masked.splitlines(keepends=True):
+        text = line.rstrip("\r\n")
+        if text.strip():
+            imported = _IMPORT.fullmatch(text)
+            if imported:
+                saw_import = True
+                if imported[1] in modules:
+                    exempt.update(offset + imported.start(1) + m.start()
+                                  for m in PROCESS_ID.finditer(imported[1])
+                                  if m[0].startswith("G"))
+            elif text == "prelude":
+                if saw_import or saw_prelude:
+                    return len(matches)
+                saw_prelude = True
+            else:
+                break
+        offset += len(line)
+    # Imported command syntax cannot consume an already parsed module header.
+    return len(matches) - len(exempt)
+
+
 def counts(root):
     for tree in ("docs", "Solidity"):
         if not (root / tree).is_dir():
             raise ValueError(f"missing source directory: {root / tree}")
     result = {}
+    modules = registered_modules(root)
     for tree in ("docs", "Solidity"):
         for path in sorted((root / tree).rglob("*")):
             if not path.is_file() or (tree == "Solidity" and path.suffix != ".lean"):
@@ -352,10 +471,12 @@ def counts(root):
             if tree == "docs":
                 row["docs_lines"] += len(source.splitlines())
             else:
-                comment, doc = comment_lines(source)
-                row["comment_lines"] += comment
-                row["docstring_lines"] += doc
-                row["process_ids"] += len(re.findall(r"\b[GH][0-9]+\b", source))
+                scanner = _Scanner(source)
+                scanner.code()
+                scanner.scanned = True
+                row["comment_lines"] += len(scanner.comments)
+                row["docstring_lines"] += len(scanner.docs)
+                row["process_ids"] += process_ids(source, modules, scanner)
     return result
 
 
