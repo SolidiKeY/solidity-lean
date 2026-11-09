@@ -1,3 +1,4 @@
+import Solidity.Lowering.V08.SharedFailureFixture
 import Solidity.Lowering.V08.TransactionPrefixes
 import Solidity.Lowering.V08.CreationSuccessControls
 import Solidity.Lowering.V08.Audit
@@ -48,14 +49,6 @@ def h3 : List (TRes Output) := h2 ++ [.error .revert]
 def h4 : List (TRes Output) := h3 ++ [.ok readValue]
 def frames : List (TransactionFrame Catalog Output) := [commit, failing, occupied, reading]
 
-private theorem extract_failure {α : Type} (run : TRes α) (halt : THalt)
-    (checked : run.halt? = some halt) : run = .error halt := by
-  cases run with
-  | ok value => cases checked
-  | error actual =>
-    have same : actual = halt := Option.some.inj checked
-    cases same
-    rfl
 
 theorem commit_reached : commit base.resetTransient = .ok (linked, commitValue) := by
   rw [commit, commit_frame_reached]
@@ -65,12 +58,12 @@ theorem commit_reached : commit base.resetTransient = .ok (linked, commitValue) 
 from the base-world failure equation. Real paid call/body/binary revert. -/
 theorem paid_failure_reached :
     linked.resetTransient.call (⟨self⟩ : Handle false) failureEntry HandlerControls.failureCtx =
-      .error laterHalt := extract_failure _ _ (by decide +kernel)
+      .error laterHalt := Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
 theorem failing_reached : failing linked.resetTransient = .error laterHalt := by
   rw [failing, paid_failure_reached]; rfl
 
 theorem collision_reached : linked.resetTransient.create false candidate goodCtor ctorCtx =
-    .error .revert := extract_failure _ _ (by decide +kernel)
+    .error .revert := Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
 theorem occupied_reached : occupied linked.resetTransient = .error .revert := by
   rw [occupied, collision_reached]; rfl
 
@@ -1276,7 +1269,7 @@ theorem mixed_weaker_than_raw :
 /-- Actual read before construction fails at the absent candidate, furnishing
 a nonempty reached prefix for the subsequent successful constructor segment. -/
 theorem prelude_read_failed : reading base.resetTransient = .error .revert :=
-  extract_failure _ _ (by decide +kernel)
+  Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
 
 theorem prelude_complete_run : transactPrefix base (reading :: frames) =
     (readWorld.resetTransient, .error .revert :: h4) := by

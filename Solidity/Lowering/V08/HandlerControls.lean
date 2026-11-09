@@ -1,3 +1,4 @@
+import Solidity.Lowering.V08.SharedFailureFixture
 import Solidity.Lowering.V08.NestedControls
 import Solidity.Lowering.V08.AbiObservations
 
@@ -63,14 +64,6 @@ private theorem extract_success {α : Type} (run : TRes (World NestedControls.ca
       cases same
       rfl
 
-private theorem extract_failure {α : Type} (run : TRes α) (halt : THalt)
-    (checked : run.halt? = some halt) : run = .error halt := by
-  cases run with
-  | ok value => cases checked
-  | error actual =>
-    have same : actual = halt := Option.some.inj checked
-    cases same
-    rfl
 
 private theorem extract_value {α : Type} (run : TRes α) (fallback : α)
     (checked : run.toOption.isSome = true) : run = .ok (run.toOption.getD fallback) := by
@@ -83,12 +76,12 @@ theorem setup_reached : setup = .ok base :=
 theorem outer_reached : NestedControls.enterOuter base.resetTransient = .ok (outer, [0xab, 0xcd]) :=
   extract_success _ _ (by decide +kernel)
 theorem constructor_failed : outer.create true third failingConstructor NestedControls.createCtx = .error constructorHalt :=
-  extract_failure _ _ (by decide +kernel)
+  Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
 theorem constructor_catchable : catchable constructorHalt = true := rfl
 theorem work_reached : work outer constructorHalt = .ok (handled, [0xb1, 0xb2]) :=
   extract_success _ _ (by decide +kernel)
 theorem later_failed : later handled [0xb1, 0xb2] = .error handlerHalt :=
-  extract_failure _ _ (by decide +kernel)
+  Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
 
 /-- Handler failure is derived from the paid prefix and the real failing call. -/
 theorem handler_failed : handler outer constructorHalt = .error handlerHalt := by
@@ -235,7 +228,7 @@ def panicWork (w : World NestedControls.catalog) (halt : THalt) : TRes (World Ne
   if halt = .panic then w.call (⟨self⟩ : Handle false) workEntry workCtx else .error .revert
 
 theorem panic_constructor_failed : outer.create true third panicConstructor NestedControls.createCtx = .error .panic :=
-  extract_failure _ _ (by decide +kernel)
+  Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
 theorem panic_work_reached : panicWork outer .panic = .ok (handled, [0xb1, 0xb2]) := by
   simpa only [panicWork, work, ↓reduceIte] using work_reached
 
@@ -257,7 +250,7 @@ def laterPanic (w : World NestedControls.catalog) (_ : List UInt8) :=
   w.call (⟨self⟩ : Handle false) panicEntry failureCtx
 
 theorem later_panic_failed : laterPanic handled [0xb1, 0xb2] = .error .panic :=
-  extract_failure _ _ (by decide +kernel)
+  Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
 
 def panicHandlerAttempt (w : World NestedControls.catalog) : TRes (World NestedControls.catalog × Unit) :=
   w.tryCreate (.ok [0xab, 0xcd]) true (fun _ => third) (fun _ => failingConstructor)
@@ -283,7 +276,7 @@ theorem guard_work_reached : guardWork outer .revert = .ok (handled, [0xb1, 0xb2
   simpa only [guardWork, work, ↓reduceIte] using work_reached
 
 theorem collision_failed : outer.create true self failingConstructor NestedControls.createCtx = .error .revert :=
-  extract_failure _ _ (by decide +kernel)
+  Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
 
 def collisionAttempt : TRes (World NestedControls.catalog × Unit) :=
   outer.tryCreate (.ok [0xab, 0xcd]) true (fun _ => self) (fun _ => failingConstructor)
