@@ -31,8 +31,7 @@ theorem root_decodes : (Source.decodeArg nestedData 0 nestedTy).run sourceBefore
     (.ok (.cdRef rfl 68 2),sourceBefore) := by
   rw [Source.decodeArg_cdArray_run nestedData 0 (.bytes .calldata) rfl sourceBefore]
   change (Source.cdArg E.layout nestedData 0 32 rfl,sourceBefore) = _
-  rw [Source.cdArg,nested_entry]
-  rfl
+  simp only [Source.cdArg,nested_entry,bind,Except.bind,pure,Except.pure]
 
 theorem second_tail : Source.cdNested nestedFrame 68 1 1 = .ok (228,2) := by
   have offset : Source.wordAt (nestedFrame.cd.drop 68) 1 = 128 := by decide +kernel
