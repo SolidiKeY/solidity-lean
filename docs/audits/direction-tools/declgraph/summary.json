@@ -238,6 +238,7 @@
     "module_compiler_overrides": "module-compiler-attributes.json",
     "native_candidate_bindings": "candidate-summary.json",
     "native_candidate_check_references": "check-reference-summary.json",
+    "native_check_context_model": "check-closure-summary.json",
     "native_cli_area_rows": "cli-root-areas.csv",
     "native_cli_directory_rows": "cli-root-directories.csv",
     "native_cli_expression_roots": "cli-root-summary.json",
