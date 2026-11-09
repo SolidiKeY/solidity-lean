@@ -13,7 +13,7 @@
   },
   "prototype_commit": "2aa3a2a21a1e081be5a2a760f91c0d11a084c3e2",
   "prototype_role": "Auxiliary Compilation checker, not an approved Views bridge.",
-  "merge_scope": "Only docs/audits/shrink/tv-yul/** in lane diff against integrated origin/master. Prototype commits remain on the separate owned prototype branch and are not audit-branch ancestors.",
+  "merge_scope": "Audit changes live under docs/audits/shrink/tv-yul/**. Coordinator TVYUL-ROOTS standing rule R2 additionally authorized generator-only root repair: ad622a854 adds the existing V08 SharedFailureFixture import using register.sh. Prototype commits remain on the separate owned prototype branch and are not audit-branch ancestors.",
   "before": {
     "selected_covered_family": null,
     "lines": 152,
@@ -403,11 +403,11 @@
     "H299 A approves the operation basis. Both original word exports are restored through actual validated Artifact runs; all11Packing statements and retained Nat proofs are preserved/countable. This measured prototype is NO-GO, not family-reduction acceptance. Ordinary validation is incomplete.",
     "Auxiliary checker covers selected loop-free Backend.Block with a fixed total source horizon, not arbitrary raw EVM bytecode, loops or native/Source-G24 execution.",
     "get_goal is not exposed; the original persistent goal is retained without creating or resetting a goal. Ordinary validation remains incomplete.",
-    "No systemd scope on cloud VM(H232). Resource guard restores a12GiB RLIMIT_AS process cap, hard cgroup cap at most16GiB, no swap, and both4GiBOS/effective-free reserves. The16GiB bypass is removed; previous gates using it are withdrawn as current-policy validation and retained only as historical evidence. Strict-guard39-job measurements now pass; last integrated upstream axiom-pins failed37unrecorded changes."
+    "No systemd scope on cloud VM(H232). Resource guard restores a12GiB RLIMIT_AS process cap, hard cgroup cap at most16GiB, no swap, and both4GiBOS/effective-free reserves. The16GiB bypass is removed; previous gates using it are withdrawn as current-policy validation and retained only as historical evidence. Strict-guard39-job measurements now pass; the earlier 37-record pin failure is historical and resolved upstream. Ordinary final validation remains pending; resource reserves remain mandatory."
   ],
   "outstanding": [
-    "Ordinary repository validation: current upstream pin registry has37unrecorded changes(28G16+9RoadmapV16),0axiom errors. Source owners/integrator must repair; no lane scope expansion or waiver.",
-    "Refresh required gates and handoff after registry repair. Do not mark original goal complete until ordinary validation is satisfied."
+    "Complete ordinary repository validation and final handoff under unchanged resource limits. Pin registry is repaired upstream and generated roots are now consistent.",
+    "Do not mark the original goal complete until final validation is satisfied; NO-GO is the measured comparison verdict only."
   ],
   "questions": [],
   "resource_guard": {
@@ -427,11 +427,11 @@
     "review_instruction": "Fetch bundle ref codex/shrink-pilots-1108/tv-yul-prototype into a separate review ref if its Git object is unavailable. Requires published base381328f608; never merge prototype history."
   },
   "upstream_gate_dependency": {
-    "head": "408b8fec414920c97c3f99766ada8f395d3c2b9c",
+    "head": "257165a572cd87546da945c49ca18b6a000393cd",
     "gate": "axiom-pins",
-    "status": "fail",
-    "decisive_output": "0errors,37unrecorded changes(28G16+9RoadmapV16),0baselined; strict H299 recheck exit1,20.725652834s,noresourceStop. Registry remains outside lane scope.",
-    "scope": "No G16 pin registry edited; ownership ticket supplied to coordinator. No refusal weakened or failure waived."
+    "status": "pass",
+    "decisive_output": "0 errors, 0 unrecorded changes, 0 baselined changes. Prior 37-record blocker resolved upstream.",
+    "scope": "No pin registry edited by this lane; no gate waiver."
   },
   "provisional_views_comparison": {
     "status": "basis_approved_validation_pending",
