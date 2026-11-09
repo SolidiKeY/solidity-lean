@@ -331,12 +331,12 @@
       "lexical_declarations": 57
     },
     "numeric": {
-      "physical_lines": 494,
-      "lexical_declarations": 49
+      "physical_lines": 600,
+      "lexical_declarations": 51
     },
     "stack": {
-      "physical_lines": 292,
-      "lexical_declarations": 20
+      "physical_lines": 328,
+      "lexical_declarations": 24
     }
   },
   "preservation": [
@@ -433,5 +433,5 @@
       "method": "unchanged source recompiled against private facade"
     }
   ],
-  "coverage_boundary": "WordControl-selected loop-free Backend.Block, uniform source horizon. Largest of the listed NormalControl selector groups by source lines; no repository-wide maximum or numeric/stack selector-inclusion theorem claimed. Larger ScopedControl has LoopControl leaves outside this domain."
+  "coverage_boundary": "WordControl-selected loop-free Backend.Block, uniform source horizon. Selected groups include their control fixtures (and NumericControls imported stack transport); shared transitive dependencies are excluded, so these are not complete import closures. Word is largest of the listed groups by source lines; no repository-wide maximum or numeric/stack selector-inclusion theorem claimed. Larger ScopedControl has LoopControl leaves outside this domain."
 }

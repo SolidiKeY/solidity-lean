@@ -57,8 +57,8 @@ def measure():
         return {key: sum(m[key] for m in modules) for key in ["physical_lines", "lexical_declarations"]}
     alternatives = {}
     for name, extra in [("word", ["NormalWordTransport", "NormalWordTransportControls", "NormalFramedTransport", "NormalFramedTransportControls"]),
-                        ("numeric", ["NormalNumericTransport", "NormalNumericTransportControls"]),
-                        ("stack", ["NormalStackTransport"])]:
+                        ("numeric", ["NormalNumericTransport", "NormalNumericTransportControls", "NormalStackTransport"]),
+                        ("stack", ["NormalStackTransport", "NormalStackControls"])]:
         alternatives[name] = totals([module(BASE, PREFIX + n + ".lean")
                                      for n in ["NormalControl", "NormalControlControls", *extra]])
     return {"base": BASE, "prototype_commit": PROTOTYPE,
@@ -70,7 +70,7 @@ def measure():
             "normal_control_comparison_groups": alternatives,
             "preservation": [{"name": s["name"], "method": "exact-header facade and kernel proof-type equality" if m["path"].endswith("/NormalWordTransport.lean") else "unchanged source recompiled against private facade"}
                              for m in before for s in m["theorems"]],
-            "coverage_boundary": "WordControl-selected loop-free Backend.Block, uniform source horizon. Largest of the listed NormalControl selector groups by source lines; no repository-wide maximum or numeric/stack selector-inclusion theorem claimed. Larger ScopedControl has LoopControl leaves outside this domain."}
+            "coverage_boundary": "WordControl-selected loop-free Backend.Block, uniform source horizon. Selected groups include their control fixtures (and NumericControls imported stack transport); shared transitive dependencies are excluded, so these are not complete import closures. Word is largest of the listed groups by source lines; no repository-wide maximum or numeric/stack selector-inclusion theorem claimed. Larger ScopedControl has LoopControl leaves outside this domain."}
 
 
 def main():
