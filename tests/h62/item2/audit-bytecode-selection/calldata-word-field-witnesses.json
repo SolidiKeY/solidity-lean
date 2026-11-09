@@ -1,0 +1,10 @@
+{
+  "calldata_window_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.CalldataWordCertificate.window",
+    "proof": "calldata_window_joint_family [17,34,51] 1 4"
+  },
+  "calldata_load_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.CalldataWordCertificate.load",
+    "proof": "calldata_load_joint_family rawCalldataFrame 1"
+  }
+}

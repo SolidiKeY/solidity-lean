@@ -1,0 +1,54 @@
+/-! Guards losing zero padding or rejecting unaligned/raw short calldata.
+The actual certificate is shared by both joint domains; no ABI admission,
+canonicality or Source execution premise is silently added. Generic domain
+families cover arbitrary data; controls preserve the full padded window. -/
+open Solidity Solidity.Backend.AbiEntry Solidity.Backend.AbiEntry.Interface
+
+def rawCalldataFrame : Source.Fr :=
+  {this := ⟨0,by decide⟩,sender := ⟨0,by decide⟩,value := ⟨0,by decide⟩,
+   static := false,contract := "",cd := [17,34,51]}
+
+theorem calldata_window_joint_family (bytes : List UInt8) (offset width : Nat) :
+    field_hypotheses_of% CalldataWordCertificate.window :=
+  ⟨CalldataWord.certificate,bytes,offset,width,True.intro⟩
+
+theorem calldata_load_joint_family (frame : Source.Fr) (offset : Nat) :
+    field_hypotheses_of% CalldataWordCertificate.load :=
+  ⟨CalldataWord.certificate,frame,offset,True.intro⟩
+
+theorem padded_window_length (bytes : List UInt8) (offset width : Nat) :
+    (Solidity.AbiEntry.bytesAt bytes offset width).length=width := by
+  rw [CalldataWord.window,Source.fitBytes_length]
+
+theorem unaligned_window :
+    Solidity.AbiEntry.bytesAt [17,34,51] 1 4=[34,51,0,0] := by decide
+
+theorem beyond_window :
+    Solidity.AbiEntry.bytesAt [17,34,51] 7 3=[0,0,0] := by decide
+
+theorem truncated_window_refused :
+    Solidity.AbiEntry.bytesAt [17,34,51] 1 4≠[34,51] := by decide
+
+theorem padded_window_refusal_refused :
+    Solidity.AbiEntry.bytesAt [17,34,51] 1 4≠[] := by decide
+
+theorem raw_unaligned_load_nonzero :
+    Solidity.AbiEntry.load rawCalldataFrame.cd 1≠0 := by decide
+
+theorem raw_beyond_load_zero :
+    Solidity.AbiEntry.load rawCalldataFrame.cd 7=0 := by decide
+
+theorem source_beyond_load_zero : Source.cdWordAt rawCalldataFrame 7=0 := by
+  rw [←CalldataWord.load rawCalldataFrame 7]
+  exact raw_beyond_load_zero
+
+#print axioms calldata_window_joint_family
+#print axioms calldata_load_joint_family
+#print axioms padded_window_length
+#print axioms unaligned_window
+#print axioms beyond_window
+#print axioms truncated_window_refused
+#print axioms padded_window_refusal_refused
+#print axioms raw_unaligned_load_nonzero
+#print axioms raw_beyond_load_zero
+#print axioms source_beyond_load_zero
