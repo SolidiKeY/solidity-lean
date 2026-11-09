@@ -83,6 +83,7 @@ theorem target_identity {C : Contract} {Γ : Ctx} (target : State C Γ) (frame :
     (offset length : Nat) (capacity : (payload frame offset length).length < 2^256) :
     (target.alloc (bytesObj target.H (payload frame offset length) capacity)).2.id = target.H.length := rfl
 
+set_option backward.isDefEq.respectTransparency false in
 theorem target_contents {C : Contract} {Γ : Ctx} (target : State C Γ) (frame : Source.Fr)
     (offset length : Nat) (capacity : (payload frame offset length).length < 2^256) :
     MObj.elems ArrTy.dyn ((lower target frame offset length capacity).heap.get
@@ -143,8 +144,7 @@ theorem entry_value (D : Source.Layout) {data : Roadmap.Bytes} {index offset len
     (entry : Source.cdTail data index 1 = .ok (offset,length)) :
     Source.cdArg D data index 1 (τ := .bytes .calldata) rfl =
       .ok (.cdRef rfl offset length) := by
-  rw [Source.cdArg,entry]
-  rfl
+  simp only [Source.cdArg,entry,bind,Except.bind,pure,Except.pure]
 
 /-- Actual ABI reference production and target value import, with entry-derived
 capacity and untruncated extent. The Source value stays a calldata reference. -/
