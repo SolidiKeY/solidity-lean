@@ -226,6 +226,8 @@
 | `Yul/Views/SourceGraphEndpoints.lean` | Isolated ordinary Source recursive uint256 mapping path to public typed graph slot endpoint; no value or reached-state adequacy claim. |
 | `Yul/World/ReturndataByteLoad.lean`, `Yul/World/ReturndataByteLoadControls.lean` | Conditional published P6 load after actual function-level copy; exact byte framing and strict-bound controls, no concrete load producer. |
 | `Yul/World/CreationReturnWindow.lean`, `Yul/World/CreationReturnWindowControls.lean` | Conditional P14 returned-runtime linked-address windows with derived bounds and concrete constructor controls; not CREATE caller returndata. |
+
+| `Yul/World/LoadV2Port.lean` | H274 general word-image inverse and actual cell-indexed V2 PUSH/MLOAD execution; compiler origin and consumer freeze remain pending. |
 | `Yul/Composition/SourceCatchBinding.lean` | Actual Source raw-bytes try/catch allocation and canonical rethrow: complete-state all-byte/all-horizon≥3 proof, old/new heap readback and scoped controls; no native/physical/full-Yul adequacy. |
 
 | `Yul/Composition/MonetaryLifecycleControls.lean` | H19 whole-Nat lifecycle payment/rollback and wide-balance refusal/self-beneficiary controls with nonempty caller journal; no world adequacy claim. |
