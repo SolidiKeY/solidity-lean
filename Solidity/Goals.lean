@@ -36,12 +36,13 @@ def compilerCorrectCollisionFree : Prop := Unstated
 @[goal Solidity.Semantics.run_panic_codes "w3-panic-codes"]
 def runCarriesPanicCodes : Prop := Unstated
 
--- Plan steps without vocabulary yet: each goal names the theorem expected to close it.
+-- Remaining plan steps: each goal names the theorem expected to close it; pa-lowering
+-- reuses the e1 statement, the others await vocabulary.
 
 @[goal Solidity.Correctness.Lowering.lowerLoops_correct "pa-lowering" ← lowerLoopsCorrect]
 def loweringStudyTarget : Prop := lowerLoopsCorrect
 
-@[goal Solidity.Trust.trusted_surface_closed "va1-trust-surface"]
+@[goal Solidity.Main.trusted_surface_closed "va1-trust-surface"]
 def trustedSurfaceClosed : Prop := Unstated
 
 @[goal Solidity.Validation.differential_agreement "va3-semantic-validation"]

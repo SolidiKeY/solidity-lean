@@ -8,7 +8,7 @@ unstated Solidity.Goals.lowerLoopsCorrect ← Solidity.Correctness.Lowering.lowe
 unstated Solidity.Goals.compilerCorrectCollisionFree ← Solidity.Hash.compiler_correct_collisionFree plan e4-hash-bridge
 unstated Solidity.Goals.runCarriesPanicCodes ← Solidity.Semantics.run_panic_codes plan w3-panic-codes
 open Solidity.Goals.loweringStudyTarget ← Solidity.Correctness.Lowering.lowerLoops_correct plan pa-lowering
-unstated Solidity.Goals.trustedSurfaceClosed ← Solidity.Trust.trusted_surface_closed plan va1-trust-surface
+unstated Solidity.Goals.trustedSurfaceClosed ← Solidity.Main.trusted_surface_closed plan va1-trust-surface
 unstated Solidity.Goals.differentialAgreement ← Solidity.Validation.differential_agreement plan va3-semantic-validation
 unstated Solidity.Goals.benchmarkBudgetsMet ← Solidity.Bench.budgets_met plan vu1-benchmarks
 unstated Solidity.Goals.fastModeAgrees ← Solidity.Automation.fast_mode_agrees plan vu2-fast-mode
