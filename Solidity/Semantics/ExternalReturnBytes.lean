@@ -111,10 +111,10 @@ theorem raw_data_exact (data : List UInt8) (bound : data.length < 2 ^ 256) :
     CatchKind.raw.decode data = some data := by
   simp only [CatchKind.decode, ite_eq_left bound]
 
-/-- info: 'Solidity.ExternalReturnBytes.decode_ok' depends on axioms: [propext] -/
+/-- info: 'Solidity.ExternalReturnBytes.decode_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms decode_ok
-/-- info: 'Solidity.ExternalReturnBytes.decode_error' depends on axioms: [propext] -/
+/-- info: 'Solidity.ExternalReturnBytes.decode_error' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms decode_error
 end Solidity.ExternalReturnBytes
