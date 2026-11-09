@@ -62,7 +62,10 @@
     "reference_only_unsupported": 732,
     "source": "docs/feature-work/h62-3-g52-differential.md",
     "source_sha256": "4110f3923608d46d7955dd4fe0a555313ac59f6e168e3afa8f06c5753a607c18",
-    "time_boundary": "Matched per-input repository and solc compile/run timings unavailable; no ratio invented"
+    "time_boundary": "UNVERIFIABLE historical-evidence gap under H151/H252: matched per-input repository and solc compile/run timings absent; required timing claim unproven",
+    "timing_claim": "unproven",
+    "timing_evidence_status": "UNVERIFIABLE",
+    "timing_policy": "H236 permits existing matched archive reuse only; no new timing run authorized; no missing-archive question under H252"
   },
   "execution_limitation": "no systemd scope on the cloud VM (H232)",
   "historical_capture": {
@@ -870,7 +873,7 @@
   "waits": [
     {
       "id": "QDATA-TIMINGS",
-      "reason": "Historical archive verified and analyzed; matched per-input timings absent. Coordinator awaits existing matched archive or separate bounded-run authorization; no rerun authorized"
+      "reason": "UNVERIFIABLE historical timing-evidence gap (H151/H252): no matched per-input timings in delivered archive and no authenticated replacement supplied. Required timing claim remains unproven and ratios null. H236 authorizes existing archive reuse only; no rerun or missing-archive question authorized. No independent authorized work remains"
     }
   ]
 }
