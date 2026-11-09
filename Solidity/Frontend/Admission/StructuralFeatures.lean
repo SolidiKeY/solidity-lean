@@ -1475,4 +1475,50 @@ theorem syntaxPragmaUses_iff {c : Cat} (root : Syn c) (site : SyntaxOccurrence) 
 /-- info: 'Solidity.Frontend.Admission.syntaxPragmaUses_iff' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms syntaxPragmaUses_iff
 
+
+/-! Regression: written array dimensions and nested unused types must survive extraction without inferring constant/positive bounds or validity. Reuse the intrinsic eliminator, constructor tag and generic visitor; old candidates and Source remain unchanged, with no profile/admission claim. -/
+inductive DirectArrayType : {c : Cat} → Syn c → Feature → Prop where
+  | dynamic (element : Syn .typeName) : DirectArrayType (.array element .none) .dynamicArrays
+  | fixed (element : Syn .typeName) (length : Syn .expr) :
+      DirectArrayType (.array element (.some length)) .fixedArrays
+
+def arrayTypeFeaturesAt {c : Cat} (s : Syn c) : List Feature := by
+  apply Syn.casesOn (motive := fun _ _ => List Feature) s
+  case array =>
+    intro element dimension
+    exact [if dimension.ctor = .none then .dynamicArrays else .fixedArrays]
+  all_goals (intros; exact [])
+
+theorem arrayTypeFeaturesAt_iff {c : Cat} (s : Syn c) (f : Feature) :
+    f ∈ arrayTypeFeaturesAt s ↔ DirectArrayType s f := by
+  cases s with
+  | array element dimension =>
+    cases dimension with
+    | none =>
+      simp only [arrayTypeFeaturesAt, Syn.ctor, if_true, List.mem_singleton]
+      constructor
+      · intro same; cases same; exact .dynamic _
+      · intro direct; cases direct; rfl
+    | some length =>
+      simp only [arrayTypeFeaturesAt, Syn.ctor, reduceCtorEq, if_false, List.mem_singleton]
+      constructor
+      · intro same; cases same; exact .fixed _ _
+      · intro direct; cases direct; rfl
+  | _ =>
+    simp only [arrayTypeFeaturesAt, List.not_mem_nil]
+    constructor <;> intro impossible <;> cases impossible
+
+def syntaxArrayTypeUses {c : Cat} (root : Syn c) : List (SyntaxOccurrence × Feature) :=
+  syntaxFieldUses root arrayTypeFeaturesAt
+
+theorem syntaxArrayTypeUses_iff {c : Cat} (root : Syn c) (site : SyntaxOccurrence) (f : Feature) :
+    (site,f) ∈ syntaxArrayTypeUses root ↔
+      Syn.Sub site ⟨c,root⟩ ∧ DirectArrayType site.2 f := by
+  rw [syntaxArrayTypeUses, syntaxFieldUses_iff, arrayTypeFeaturesAt_iff]
+
+/-- info: 'Solidity.Frontend.Admission.arrayTypeFeaturesAt_iff' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms arrayTypeFeaturesAt_iff
+/-- info: 'Solidity.Frontend.Admission.syntaxArrayTypeUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxArrayTypeUses_iff
+
 end Solidity.Frontend.Admission
