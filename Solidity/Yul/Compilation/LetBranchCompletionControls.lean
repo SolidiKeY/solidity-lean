@@ -40,7 +40,12 @@ theorem inverted_high_source :
 theorem inverted_high_target (m : Evm.Machine) (caller : List Evm.Word) :
  Evm.run invertedArtifact.code {m with stack := coreWord highOnly::caller} =
  .ok {m with stack := coreWord highOnly::caller} 0 :=
- invertedArtifact.normal_to_model 12 #v[highOnly] #v[highOnly] inverted_high_source m caller
+ by
+ exact CompletionControls.normal_output (c := root) #v[highOnly]
+   (fun actual => Evm.run invertedArtifact.code {m with stack := coreWord highOnly::caller} =
+     .ok {m with stack := actual.toList.map coreWord++caller} 0)
+   (invertedArtifact.source_to_model 12 #v[highOnly] ⟨sourceLocals #v[highOnly],.normal⟩
+     inverted_high_source m caller)
 
 theorem inverted_zero_source :
  evalStmt 17 .nil True.intro invertedSource invertedArtifact.compiled.profile (sourceLocals #v[0]) =
@@ -53,8 +58,14 @@ theorem inverted_zero_target (m : Evm.Machine) (caller : List Evm.Word) :
  Evm.run invertedArtifact.code {m with stack := coreWord 0::caller} =
  .ok {m with stack := coreWord (LetSequenceCompilation.Controls.update
    (LetSequenceCompilation.Controls.update 0))::caller} 0 :=
- invertedArtifact.normal_to_model 17 #v[0]
-   #v[LetSequenceCompilation.Controls.update (LetSequenceCompilation.Controls.update 0)] inverted_zero_source m caller
+ by
+ exact CompletionControls.normal_output (c := root)
+   #v[LetSequenceCompilation.Controls.update (LetSequenceCompilation.Controls.update 0)]
+   (fun actual => Evm.run invertedArtifact.code {m with stack := coreWord 0::caller} =
+     .ok {m with stack := actual.toList.map coreWord++caller} 0)
+   (invertedArtifact.source_to_model 17 #v[0]
+     ⟨sourceLocals #v[LetSequenceCompilation.Controls.update (LetSequenceCompilation.Controls.update 0)],.normal⟩
+     inverted_zero_source m caller)
 
 #guard invertedCondition.value #v[highOnly] = 0
 #guard invertedCondition.value #v[0] = 1
