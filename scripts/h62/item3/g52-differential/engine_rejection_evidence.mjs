@@ -3,13 +3,15 @@
  * qualify captured reference artifacts. No VM execution occurs in this checker.
  * Caller must independently archive-bind the original records and receipt/code
  * resources; standalone evidence checks grant no coverage or Source agreement.
- * Unattributed diagnostic/stage families and decode failures stay unqualified.
+ * Unattributed diagnostics and decode families other than input-bound EIP7825
+ * gas-cap refusals stay unqualified.
  */
 import {readFileSync} from 'node:fs';import {createRequire} from 'node:module';
 import {fileURLToPath,pathToFileURL} from 'node:url';import {resolve} from 'node:path';
 import {isDeepStrictEqual} from 'node:util';
 import {convertExpectedInvalidEngineFixture,executeExpectedInvalidEngineFixture} from './engine_rejection_reference.mjs';
 import {classifyBlockRejection} from './eest_rejection.mjs';
+import {gasLimitDecodeFacts} from './blockchain_adapter.mjs';
 import {EngineXAllocations} from './engine_x_allocation.mjs';
 const requireCondition=(ok,message)=>{if(!ok)throw new Error(message);};
 const equal=(a,b,message)=>requireCondition(isDeepStrictEqual(a,b),message);
@@ -66,6 +68,16 @@ export function validateRejectionFacts(rejection,transactions,m) {
  requireCondition(classified.status==='reference_match','native rejection diagnostic/category or rollback mismatch');
  for(const key of ['status','fields','actual_categories','matched_categories'])equal(rejection[key],classified[key],'rejection classification field mismatch: '+key);
 }
+export function validateDecodeRejection(rejection,rlp,decodeError,m,common) {
+ keys(rejection,'status,fields,actual_categories,matched_categories,block_index,expected_exception,engine_reason,validation_facts,before_state_root,after_state_root,before_head,after_head','decode rejection schema');
+ requireCondition(decodeError&&decodeError.message===rejection.engine_reason,'decode error differs from captured rejection');
+ const expected=gasLimitDecodeFacts(rlp,decodeError.message,m,common);
+ requireCondition(expected!==undefined,'unqualified decode diagnostic family');
+ equal(rejection.validation_facts,expected,'decode facts differ from exact input bytes/fork');
+ const classified=classifyBlockRejection(rejection.expected_exception,rejection.engine_reason,expected,rejection.before_state_root,rejection.after_state_root,rejection.before_head,rejection.after_head);
+ requireCondition(classified.status==='reference_match','decode classification/rollback mismatch');
+ for(const key of ['status','fields','actual_categories','matched_categories'])equal(rejection[key],classified[key],'decode classification field mismatch: '+key);
+}
 export async function validateNativeMatch(record,row,m) {
  requireCondition(row?.status==='payload_rejection_reference_match','nonmatch artifacts are not qualified');
  keys(row,'index,path,case,engine_rpc_complete,forkchoice_executed,source_semantics,differential_complete,binding,expected,native,status,allocation_binding,coverage_admitted,source_matches','matched row schema');
@@ -87,14 +99,20 @@ export async function validateNativeMatch(record,row,m) {
  const hardforks=m.Mainnet.hardforks.slice(0,lastFork+1).map(fork=>({name:fork.name,block:0}));
  const common=m.createCustomCommon({chainId:1,hardforks},m.Mainnet,{hardfork:m.Hardfork.Osaka,eips:[7934],params:{7934:{maxRlpBlockSize:8388608}},customCrypto:{kzg:m.kzg}});
  requireCondition(common.isActivatedEIP(7934)&&common.param('maxRlpBlockSize')===8388608n,'native decoder block-size rule mismatch');
- const blocks=converted.record.fixture.blocks.map(item=>m.createBlockFromRLP(m.hexToBytes(item.rlp),{common}));
+ const blocks=converted.record.fixture.blocks.map(item=>{try{return {block:m.createBlockFromRLP(m.hexToBytes(item.rlp),{common})};}catch(error){return {decodeError:error};}});
  const rejected=new Map(converted.expected.map((x,i)=>[x.block_index,i]));let head=converted.binding.genesis_hash,accepted=0,transactions=0,logs=0;
  for(const [index,item] of record.fixture.engineNewPayloads.entries()) {
   const payload=item.params[0];requireCondition(payload.parentHash===head,'payload history differs from last accepted prefix');
-  requireCondition(m.bytesToHex(blocks[index].hash())===payload.blockHash,'decoded block differs from input payload');
-  if(rejected.has(index))validateRejectionFacts(native.rejections[rejected.get(index)],blocks[index].transactions,m);
+  const decoded=blocks[index],rlp=converted.record.fixture.blocks[index].rlp;
+  if(decoded.block)requireCondition(m.bytesToHex(decoded.block.hash())===payload.blockHash,'decoded block differs from input payload');
+  else requireCondition(converted.binding.raw_payload_indices?.includes(index)&&rejected.has(index),'decode failure outside raw expected-invalid transport');
+  if(rejected.has(index)) {
+   const rejection=native.rejections[rejected.get(index)];
+   if(decoded.decodeError)validateDecodeRejection(rejection,rlp,decoded.decodeError,m,common);
+   else validateRejectionFacts(rejection,decoded.block.transactions,m);
+  }
   else {
-   const result=validateAcceptedBlock(native.blocks[accepted++],payload,blocks[index].transactions,m);transactions+=result.transactions;logs+=result.logs;head=payload.blockHash;
+   const result=validateAcceptedBlock(native.blocks[accepted++],payload,decoded.block.transactions,m);transactions+=result.transactions;logs+=result.logs;head=payload.blockHash;
   }
  }
  requireCondition(record.fixture.lastblockhash===head,'input final head differs from accepted prefix');
@@ -103,8 +121,8 @@ export async function validateNativeMatch(record,row,m) {
 export async function main(bulk,items) {
  requireCondition(Array.isArray(items)&&items.length>=1&&items.length<=4,'bounded evidence item list required');
  const require=createRequire(resolve(bulk,'reference/package.json')),loaded=[];
- for(const name of ['@ethereumjs/common','@ethereumjs/block','@ethereumjs/util','@ethereumjs/tx','micro-eth-signer/kzg.js','@paulmillr/trusted-setups/fast-peerdas.js'])loaded.push(await import(pathToFileURL(require.resolve(name)).href));
- const m={...loaded[0],...loaded[1],...loaded[2],...loaded[3],kzg:new loaded[4].KZG(loaded[5].trustedSetup)};
+ for(const name of ['@ethereumjs/common','@ethereumjs/block','@ethereumjs/util','@ethereumjs/tx','micro-eth-signer/kzg.js','@paulmillr/trusted-setups/fast-peerdas.js','@ethereumjs/rlp'])loaded.push(await import(pathToFileURL(require.resolve(name)).href));
+ const m={...loaded[0],...loaded[1],...loaded[2],...loaded[3],...loaded[6],kzg:new loaded[4].KZG(loaded[5].trustedSetup)};
  const allocations=new EngineXAllocations(resolve(bulk,'engine-x-allocations.jsonl'),JSON.parse(readFileSync(resolve(bulk,'engine-x-allocations-index.json'),'utf8')));
  try {
   const output=[];

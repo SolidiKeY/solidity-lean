@@ -18,7 +18,7 @@ from engine_execution_coverage import digest, require, external_bounds
 
 RUNNER = 'scripts/h62/item3/g52-differential/engine_rejection_runner.mjs'
 MODULES = ('engine_rejection_runner.mjs', 'engine_rejection_reference.mjs',
-           'engine_payload_reference.mjs', 'engine_x_allocation.mjs',
+           'engine_payload_reference.mjs', 'engine_payload_encoding.mjs', 'engine_x_allocation.mjs',
            'eest_reference.mjs', 'eest_observation.mjs', 'blockchain_adapter.mjs',
            'eest_rejection.mjs', 'host_resource_guard.mjs', 'serial_semantics.py',
            'eest_export.py', 'archive_census.py', 'pipeline.py')
