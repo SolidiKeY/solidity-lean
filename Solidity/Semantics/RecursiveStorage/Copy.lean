@@ -153,7 +153,14 @@ theorem Value.overlay_tail {n : Nat} {G : Schema n} {E : Ty n}
     ((Value.array oe ol oh os).overlay (.array ne nl nh ns)).slots
         ⟨i.val, Nat.lt_of_lt_of_le allocated (Nat.le_max_left _ _)⟩ =
       os ⟨i.val, allocated⟩ := by
-  simp only [Value.overlay, Value.slots, dif_neg (Nat.not_lt_of_ge newShadow),
+  with_unfolding_all change
+    (if h : i.val < nl.val then
+      Slot.overlay (if h' : i.val < oe.val then os ⟨i.val,h'⟩ else .absent)
+        (ns ⟨i.val,Nat.lt_of_lt_of_le h nh⟩)
+     else if i.val < ol.val then
+       (if h' : i.val < oe.val then os ⟨i.val,h'⟩ else .absent).clear
+     else if h' : i.val < oe.val then os ⟨i.val,h'⟩ else .absent) = _
+  simp only [dif_neg (Nat.not_lt_of_ge newShadow),
     if_neg (Nat.not_lt_of_ge oldShadow), dif_pos allocated]
 
 /-- A former live destination slot beyond the new end is cleared. -/
@@ -164,7 +171,14 @@ theorem Value.overlay_shortened {n : Nat} {G : Schema n} {E : Ty n}
     ((Value.array oe ol oh os).overlay (.array ne nl nh ns)).slots
         ⟨i.val, Nat.lt_of_lt_of_le (Nat.lt_of_lt_of_le live oh) (Nat.le_max_left _ _)⟩ =
       (os ⟨i.val, Nat.lt_of_lt_of_le live oh⟩).clear := by
-  simp only [Value.overlay, Value.slots, dif_neg (Nat.not_lt_of_ge newShadow),
+  with_unfolding_all change
+    (if h : i.val < nl.val then
+      Slot.overlay (if h' : i.val < oe.val then os ⟨i.val,h'⟩ else .absent)
+        (ns ⟨i.val,Nat.lt_of_lt_of_le h nh⟩)
+     else if i.val < ol.val then
+       (if h' : i.val < oe.val then os ⟨i.val,h'⟩ else .absent).clear
+     else if h' : i.val < oe.val then os ⟨i.val,h'⟩ else .absent) = _
+  simp only [dif_neg (Nat.not_lt_of_ge newShadow),
     if_pos live, dif_pos (Nat.lt_of_lt_of_le live oh)]
 
 /-- Read-back of assignment is the copy result, not necessarily the raw source
