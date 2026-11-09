@@ -2284,3 +2284,14 @@ alone is insufficient. On-mode checks the latest range, UTF16 comment movement
 and restoration; off-mode requires zero ghost notifications through shutdown.
 The distinct pinned on/off source fixtures are not a same-source A/B comparison.
 No VS Code decoration, local ghost semantics or kernel proof follows.
+
+
+For reference-only terminal-prefix construction, run
+`node vscode/parity/lifecycle-trace.cjs --terminal-prefix NEW_OUTPUT.json`
+with an external output path. The pinned registered Build callback uses injected
+editor, installer, OS and terminal endpoints. Cases cover null versus empty
+prefixes, literal configured prefixes and cwd, terminal reuse and early save
+refusals. No terminal command executes; simulated Windows is not native Windows
+coverage. Existing quoting and unquoted cwd text remain observable differences.
+Local terminal-prefix support and full native/lifecycle/judgment evidence remain
+unavailable. Failed receipts stay failed after serialization.
