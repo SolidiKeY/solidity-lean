@@ -30,7 +30,7 @@ def main():
   cmd=[sys.executable,'-I','-B',str(HERE/'run_trust_v2.py'),'--source-root',str(source),'--view',str(view),'--capture',str(capture),'--attempt',str(receipt),'--out',str(protected)]
   x=subprocess.run(cmd,text=True,capture_output=True);assert x.returncode!=0 and 'Only the designated checker summary' in x.stderr
   assert protected.read_bytes()==before and not capture.exists() and not receipt.exists()
- for name in ('trust_audit_v2.py','warm_trust_v2.py','run_trust_v2.py','owned_native.py'):
+ for name in ('trust_audit_v2.py','warm_trust_v2.py','run_trust_v2.py','owned_native.py','lease_lifecycle.py'):
   x=subprocess.run([sys.executable,'-I','-B','-O',str(HERE/name)],text=True,capture_output=True)
   assert x.returncode!=0 and 'OPTIMIZED_PYTHON_UNSUPPORTED' in x.stderr
  x=subprocess.run([sys.executable,'-I','-B','-O','-c',"import runpy; runpy.run_path("+repr(str(HERE/'trust_audit_v2.py'))+")['verify'](b'unrelated',b'invalid')"],text=True,capture_output=True)

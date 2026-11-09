@@ -69,7 +69,8 @@ def main():
   command=[sys.executable,'-I','-B','-c',child,str(ids)]
   with leasepath.open('a') as lease,log.open('w') as output:
    fcntl.flock(lease,fcntl.LOCK_EX);code=N['run'](command,output,cwd=d,env=dict(os.environ),lease=lease,timeout=.4)
-  assert code==124;pair=json.loads(ids.read_text());until(lambda:all(not alive(pid) for pid in pair));assert available(leasepath)
+   pair=json.loads(ids.read_text());assert code==124 and all(not alive(pid) for pid in pair),'Lease must still be held when quiescence is established'
+  assert available(leasepath)
   def wrapper(command):
    code="import fcntl,os,pathlib,runpy;N=runpy.run_path("+repr(str(HERE/'owned_native.py'))+");lease=open("+repr(str(leasepath))+",'a');fcntl.flock(lease,fcntl.LOCK_EX);out=open("+repr(str(log))+",'w');N['run']("+repr(command)+",out,cwd="+repr(str(d))+",env=dict(os.environ),lease=lease,timeout=30)"
    return subprocess.Popen([sys.executable,'-I','-B','-c',code],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
