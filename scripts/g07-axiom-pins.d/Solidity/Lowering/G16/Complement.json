@@ -1,0 +1,7 @@
+{
+ "Solidity/Lowering/G16/Complement.lean:Solidity.Lowering.G16.Complement.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

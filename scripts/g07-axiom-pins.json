@@ -46838,6 +46838,128 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/G16/AddressLiteralControls.lean:Solidity.Lowering.G16.AddressLiteralControls.wrong_address_rejected": [
+  "propext"
+ ],
+ "Solidity/Lowering/G16/AddressLiterals.lean:Solidity.Lowering.G16.AddressLiterals.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/Arithmetic.lean:Solidity.Lowering.G16.Arithmetic.CheckedAssignment.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/Arithmetic.lean:Solidity.Lowering.G16.Arithmetic.CheckedSigned.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/Arithmetic.lean:Solidity.Lowering.G16.Arithmetic.CheckedUnsigned.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/Arithmetic.lean:Solidity.Lowering.G16.Arithmetic.SignedQuotRem.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/Arithmetic.lean:Solidity.Lowering.G16.Arithmetic.wrapping_assignment_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/Arithmetic.lean:Solidity.Lowering.G16.Arithmetic.wrapping_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/ArithmeticControls.lean:Solidity.Lowering.G16.ArithmeticControls.wrong_assignment_order_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/ArithmeticControls.lean:Solidity.Lowering.G16.ArithmeticControls.wrong_checked_capture_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/ArithmeticControls.lean:Solidity.Lowering.G16.ArithmeticControls.wrong_checked_ring_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/ArithmeticControls.lean:Solidity.Lowering.G16.ArithmeticControls.wrong_signed_quotrem_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/ArithmeticControls.lean:Solidity.Lowering.G16.ArithmeticControls.wrong_signed_ring_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/ArithmeticControls.lean:Solidity.Lowering.G16.ArithmeticControls.wrong_wrapping_rejected": [],
+ "Solidity/Lowering/G16/ComparisonControls.lean:Solidity.Lowering.G16.ComparisonControls.wrong_comparison_rejected": [],
+ "Solidity/Lowering/G16/Comparisons.lean:Solidity.Lowering.G16.Comparisons.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/Complement.lean:Solidity.Lowering.G16.Complement.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/ComplementControls.lean:Solidity.Lowering.G16.ComplementControls.wrong_complement_rejected": [],
+ "Solidity/Lowering/G16/PanicGuard.lean:Solidity.Lowering.G16.PanicGuard.afterPrefix_false_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/PanicGuard.lean:Solidity.Lowering.G16.PanicGuard.afterPrefix_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/PanicGuard.lean:Solidity.Lowering.G16.PanicGuard.checked_false_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/PanicGuard.lean:Solidity.Lowering.G16.PanicGuard.checkedOperand_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/PanicGuard.lean:Solidity.Lowering.G16.PanicGuard.false_guard_not_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/PanicGuard.lean:Solidity.Lowering.G16.PanicGuard.run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/SignedNegation.lean:Solidity.Lowering.G16.SignedNegation.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/SignedNegationControls.lean:Solidity.Lowering.G16.SignedNegationControls.wrong_minimum_negation_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/UnsignedQuotRem.lean:Solidity.Lowering.G16.UnsignedQuotRem.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/UnsignedQuotRemControls.lean:Solidity.Lowering.G16.UnsignedQuotRemControls.wrong_quotrem_rejected": [],
  "Solidity/Lowering/P8/CheckedFrontendAdmission.lean:Solidity.Lowering.P8.CheckedFrontendAdmission.accepted_extraction": [
   "propext"
  ],
@@ -59395,6 +59517,26 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Roadmap/V16/TransportControls.lean:Solidity.Roadmap.V16.Checks.combination_success": [
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/TransportControls.lean:Solidity.Roadmap.V16.Checks.not_unconditional_loop_divergence": [
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/TransportControls.lean:Solidity.Roadmap.V16.Checks.revert_at_need": [
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/TransportControls.lean:Solidity.Roadmap.V16.Checks.success_at_need": [
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/TransportControls.lean:Solidity.Roadmap.V16.completed_stable": [],
+ "Solidity/Roadmap/V16/TransportControls.lean:Solidity.Roadmap.V16.completion_at_need": [],
+ "Solidity/Roadmap/V16/TransportControls.lean:Solidity.Roadmap.V16.decoded_invariant": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/TransportControls.lean:Solidity.Roadmap.V16.event_at_need": [],
+ "Solidity/Roadmap/V16/TransportControls.lean:Solidity.Roadmap.V16.event_invariant": [],
  "Solidity/Semantics/AbiAccess.lean:Solidity.AbiEntry.cat_cpart": [
   "Classical.choice",
   "Quot.sound",
@@ -61486,6 +61628,21 @@
   "propext"
  ],
  "Solidity/Source/PowerV2Correct.lean:Solidity.Source.PowerV2.shiftVal_unchecked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Preservation/Encoding.lean:Solidity.Source.Preservation.encode_storage_bytes_timeout_two": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Preservation/EncodingVariantControls.lean:Solidity.Source.Preservation.EncodingVariantControls.StorageTimeout.encoder_completes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Preservation/EncodingVariantControls.lean:Solidity.Source.Preservation.EncodingVariantControls.StorageTimeout.encoder_timeout": [
   "Classical.choice",
   "Quot.sound",
   "propext"
