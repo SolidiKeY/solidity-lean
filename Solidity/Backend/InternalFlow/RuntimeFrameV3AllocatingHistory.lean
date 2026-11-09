@@ -75,7 +75,7 @@ theorem history {C : Contract} {L b frame : Nat} {F : Frag (Parameters A)}
      have remainingSpace : nextCursor.val+4*steps<W := by change cursor.val+4+4*steps<W;omega
      have guard := guard_run σ (count+1) bound counter base before repr
      have positiveGuard : run (guardCompiled (C:=C) b F).code before=.ok (before.push w[1]) 0 := by
-       simpa only [show decide (0<count+1)=true from decide_eq_true (by omega)] using guard
+       simpa only [show decide (0<count+1)=true from decide_eq_true (by omega),bword,ite_true] using guard
      have turn := successful_turn _ _ _ _ positiveGuard executed
      have rest : loopIterN (run (guardCompiled (C:=C) b F).code)
          (run (AllocatingActivation.code (C:=C) b F pointer)) steps next=.inl after := by
