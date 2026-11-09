@@ -150,7 +150,7 @@ theorem specification :
 
 theorem retained_ownership : StructAllocatorRepr caller.heap addresses 16 (⟨22,by decide⟩ : Fin W) target := by
  have owner := specification.2.2.2.2 ⟨22,by decide⟩ (by decide) MemoryArgument.ownership (by rw [cost_zero];decide)
- simpa only [cost_zero,Nat.add_zero] using owner
+ simpa only [cost_zero,Nat.add_zero,State.withEnv] using owner
 
 theorem actual_source : program.run caller=.ok ⟨caller.withEnv (TEnv.append (Parameters A) MemoryArgument.child.env caller.env),List.prefix_refl _⟩ :=
  source args caller MemoryArgument.child.env MemoryArgument.arguments
