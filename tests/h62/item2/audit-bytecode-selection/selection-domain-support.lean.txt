@@ -57,3 +57,47 @@ theorem selection_add_underflow_refused :
 #print axioms selection_opcode_bad_stack_refused
 #print axioms selection_add_fixture_executes
 #print axioms selection_add_underflow_refused
+
+/-! Guard dropped constructor proof fields and reversed V1/V2 capacity reasoning.
+This adapter forgets V2 guarantees; it never upgrades a legacy certificate. -/
+def selectionLegacyOfV2 {input output : Scalar.Stack}
+    (certificate : V2.FrameCertificate input output) : FrameCertificate input output where
+  code := certificate.code
+  frame := certificate.frame
+  prefixes := by
+    intro tail bound before after reached split ran
+    apply Scalar.prefix_capacity before after ran
+    rw [split]
+    exact bound
+
+def selectionDupFrame : V2.FrameCertificate [7] [7,7] := V2.duplicateHead 7
+
+def selectionLegacyDup : FrameCertificate [7] [7,7] := selectionLegacyOfV2 selectionDupFrame
+
+theorem selection_add_component_selected : selectArithmetic .add = some addCertificate := rfl
+
+theorem selection_dup_frame_executes :
+    Scalar.run selectionDupFrame.code [7,99] = some [7,7,99] := selectionDupFrame.frame [99]
+
+theorem selection_legacy_dup_executes :
+    Scalar.run selectionLegacyDup.code [7,99] = some [7,7,99] := selectionLegacyDup.frame [99]
+
+theorem selection_dup_boundary_fits :
+    Scalar.stackBound selectionDupFrame.code
+      ((([7] : Scalar.Stack) ++ List.replicate 1022 99).length : Int) = true := by
+  apply selectionDupFrame.capacity (List.replicate 1022 99)
+  simp only [List.length_append, List.length_cons, List.length_nil, List.length_replicate]
+  decide
+
+theorem selection_dup_overflow_refused :
+    ¬ Nonempty (V2.FrameCertificate (([7] : Scalar.Stack) ++ List.replicate 1023 99)
+      (([7,7] : Scalar.Stack) ++ List.replicate 1023 99)) := by
+  apply V2.no_overfull_output
+  simp only [List.length_append, List.length_cons, List.length_nil, List.length_replicate]
+  decide
+
+#print axioms selection_add_component_selected
+#print axioms selection_dup_frame_executes
+#print axioms selection_legacy_dup_executes
+#print axioms selection_dup_boundary_fits
+#print axioms selection_dup_overflow_refused

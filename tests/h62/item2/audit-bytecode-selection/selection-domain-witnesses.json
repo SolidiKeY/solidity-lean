@@ -66,5 +66,41 @@
   "selection_xor_step_joint_domain": {
     "target": "Solidity.Backend.Selection.xorCertificate._proof_1",
     "proof": "⟨selectionOpcodeInput, selectionOpcodeMachine selectionOpcodeInput, selection_opcode_stack_coupled, True.intro⟩"
+  },
+  "selection_instruction_constructor_injEq_domain": {
+    "target": "Solidity.Backend.Selection.InstructionCertificate.mk.injEq",
+    "proof": "⟨Solidity.Evm.Instr.add, addCertificate.code, addCertificate.success, addCertificate.refusal, addCertificate.code, addCertificate.success, addCertificate.refusal, True.intro⟩"
+  },
+  "selection_instruction_constructor_inj_domain": {
+    "target": "Solidity.Backend.Selection.InstructionCertificate.mk.inj",
+    "proof": "⟨Solidity.Evm.Instr.add, addCertificate.code, addCertificate.success, addCertificate.refusal, addCertificate.code, addCertificate.success, addCertificate.refusal, rfl, True.intro⟩"
+  },
+  "selection_instruction_constructor_sizeOf_spec_domain": {
+    "target": "Solidity.Backend.Selection.InstructionCertificate.mk.sizeOf_spec",
+    "proof": "⟨Solidity.Evm.Instr.add, addCertificate.code, addCertificate.success, addCertificate.refusal, True.intro⟩"
+  },
+  "selection_legacy_frame_constructor_injEq_domain": {
+    "target": "Solidity.Backend.Selection.FrameCertificate.mk.injEq",
+    "proof": "⟨([7] : Scalar.Stack), ([7,7] : Scalar.Stack), selectionLegacyDup.code, selectionLegacyDup.frame, selectionLegacyDup.prefixes, selectionLegacyDup.code, selectionLegacyDup.frame, selectionLegacyDup.prefixes, True.intro⟩"
+  },
+  "selection_legacy_frame_constructor_inj_domain": {
+    "target": "Solidity.Backend.Selection.FrameCertificate.mk.inj",
+    "proof": "⟨([7] : Scalar.Stack), ([7,7] : Scalar.Stack), selectionLegacyDup.code, selectionLegacyDup.frame, selectionLegacyDup.prefixes, selectionLegacyDup.code, selectionLegacyDup.frame, selectionLegacyDup.prefixes, rfl, True.intro⟩"
+  },
+  "selection_legacy_frame_constructor_sizeOf_spec_domain": {
+    "target": "Solidity.Backend.Selection.FrameCertificate.mk.sizeOf_spec",
+    "proof": "⟨([7] : Scalar.Stack), ([7,7] : Scalar.Stack), selectionLegacyDup.code, selectionLegacyDup.frame, selectionLegacyDup.prefixes, True.intro⟩"
+  },
+  "selection_v2_frame_constructor_injEq_domain": {
+    "target": "Solidity.Backend.Selection.V2.FrameCertificate.mk.injEq",
+    "proof": "⟨([7] : Scalar.Stack), ([7,7] : Scalar.Stack), selectionDupFrame.code, selectionDupFrame.peak, selectionDupFrame.inputRoom, selectionDupFrame.frame, selectionDupFrame.capacity, selectionDupFrame.code, selectionDupFrame.peak, selectionDupFrame.inputRoom, selectionDupFrame.frame, selectionDupFrame.capacity, True.intro⟩"
+  },
+  "selection_v2_frame_constructor_inj_domain": {
+    "target": "Solidity.Backend.Selection.V2.FrameCertificate.mk.inj",
+    "proof": "⟨([7] : Scalar.Stack), ([7,7] : Scalar.Stack), selectionDupFrame.code, selectionDupFrame.peak, selectionDupFrame.inputRoom, selectionDupFrame.frame, selectionDupFrame.capacity, selectionDupFrame.code, selectionDupFrame.peak, selectionDupFrame.inputRoom, selectionDupFrame.frame, selectionDupFrame.capacity, rfl, True.intro⟩"
+  },
+  "selection_v2_frame_constructor_sizeOf_spec_domain": {
+    "target": "Solidity.Backend.Selection.V2.FrameCertificate.mk.sizeOf_spec",
+    "proof": "⟨([7] : Scalar.Stack), ([7,7] : Scalar.Stack), selectionDupFrame.code, selectionDupFrame.peak, selectionDupFrame.inputRoom, selectionDupFrame.frame, selectionDupFrame.capacity, True.intro⟩"
   }
 }
