@@ -39163,6 +39163,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/Transient/PayloadV2.lean:Solidity.Backend.Transient.PayloadV2.callback_static_store_suffix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/Transient/PayloadV2.lean:Solidity.Backend.Transient.PayloadV2.callback_store_byte_revert": [
   "Classical.choice",
   "Quot.sound",
@@ -39188,6 +39193,21 @@
   "propext"
  ],
  "Solidity/Backend/Transient/PayloadV2.lean:Solidity.Backend.Transient.PayloadV2.store_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Transient/PayloadV2Controls.lean:Solidity.Backend.Transient.PayloadV2Controls.actual_nonempty_rollback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Transient/PayloadV2Controls.lean:Solidity.Backend.Transient.PayloadV2Controls.static_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Transient/PayloadV2Controls.lean:Solidity.Backend.Transient.PayloadV2Controls.wrong_payload": [
   "Classical.choice",
   "Quot.sound",
   "propext"
