@@ -127,11 +127,11 @@ theorem raw_executed (base bits : Nat) (label : Fin W) (body : Prog C UIntBoundC
     SingleWordGate.entry_form]
   simp only [represented,rawArgumentWord]
   by_cases short : input.size<36
-  · simp only [if_pos short]
-  · simp only [if_neg short]
+  · simp only [ite_eq_left short]
+  · simp only [ite_eq_right short]
     by_cases valid : (Solidity.AbiEntry.Kind.uint bits).valid (Solidity.AbiEntry.load input.data 4)=true
-    · simp only [if_pos valid,dif_pos valid]
-    · simp only [if_neg valid,dif_neg valid]
+    · simp only [valid, ite_true, dite_true]
+    · simp only [valid, Bool.false_eq_true, ite_false, dite_false]
 
 /-- A short head prevents both the word read and all body execution. -/
 theorem short_before_body (base bits : Nat) (label : Fin W) (body : Prog C UIntBoundCtx Δ)
