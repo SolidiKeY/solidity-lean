@@ -240,6 +240,7 @@
   "supplemental_measurements": {
     "additive_trust_audit_v2": "trust-v2-summary.json",
     "cached_ir_inventory": "ir-summary.json",
+    "capture_failure_inventory_prefix260": "capture-failures-prefix260.json",
     "ci_and_plan_catalog": "root-plan-catalog.json",
     "compiler_overrides": "compiler-edges.json",
     "effect_on_liveness": "Old fields are provisional index statistics. Native module expression measurements supersede their semantic/source-binding interpretation; full CI/test liveness is still unresolved.",
@@ -255,6 +256,7 @@
     "native_cli_directory_rows": "cli-root-directories.csv",
     "native_cli_expression_roots": "cli-root-summary.json",
     "native_combined_candidate_prefix13": "combined-prefix13/summary.json",
+    "native_combined_candidate_prefix130": "combined-prefix130/summary.json",
     "native_compact_equivalence": "compact-equivalence-summary.json",
     "native_compact_roots": "compact-pilot-summary.json",
     "native_expression_graph": "native-summary.json",

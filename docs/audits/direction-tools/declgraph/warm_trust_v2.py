@@ -85,13 +85,17 @@ def main():
     d=json.loads(receipt.read_text());assert all(d[k]==v for k,v in fixed.items());assert d['log_sha256']==SHA(log)
    else:
     assert not a.out_view.exists() and not a.logs.exists(),'Fresh view/log directory required'
-    a.out_view.mkdir(parents=True);a.logs.mkdir(parents=True)
+    rel=pathlib.Path(MODULE.replace('.','/'))
+    assert all(not (a.view/rel.with_suffix(s)).exists() and not (a.view/rel.with_suffix(s)).is_symlink() for s in ('.olean','.ilean','.olean.server','.olean.private')),'Input view already contains target artifact'
+    # Fresh canonical destinations belong to this attempt. Cover preparation,
+    # including mkdir/link failures, before creating any output or log tree.
+    armed[0]=True
+    a.logs.mkdir(parents=True);a.out_view.mkdir(parents=True)
     for f in a.view.rglob('*'):
      if f.is_file():
       to=a.out_view/f.relative_to(a.view);to.parent.mkdir(parents=True,exist_ok=True);os.link(f,to)
-    rel=pathlib.Path(MODULE.replace('.','/'));(a.out_view/rel).parent.mkdir(parents=True,exist_ok=True)
+    (a.out_view/rel).parent.mkdir(parents=True,exist_ok=True)
     assert all(not (a.out_view/rel.with_suffix(s)).exists() for s in ('.olean','.ilean','.olean.server','.olean.private'))
-    armed[0]=True
     if armed[1] is not None:raise InterruptedError('Warm transaction cancelled before native start')
     started=time.monotonic()
     with log.open('w') as output:
