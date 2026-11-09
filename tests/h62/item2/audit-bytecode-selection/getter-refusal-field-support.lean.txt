@@ -1,0 +1,70 @@
+/-! Guards independently inhabited Source/target premises being mistaken for
+one simultaneous getter/refusal witness. Reuse the exact existing frozen getter
+fixture, including its synthetic hash parameter. These are model-only label and
+refusal controls, not Keccak, storage/ABI body, native or G01 acceptance. -/
+open Solidity Solidity.Evm Solidity.Backend.AbiEntry
+open Solidity.Backend.AbiEntry.Interface
+
+def getterFixtureEnv : Source.Env := (frozen_fixture% "_private.Solidity.Backend.AbiEntry.GetterRoutesControls.0.Solidity.Backend.AbiEntry.GetterRoutesControls.E" against% "Lean.Expr.forallE\n  `ordinary\n  (Lean.Expr.const `Bool [])\n  (Lean.Expr.forallE\n    `getters\n    (Lean.Expr.const `Bool [])\n    (Lean.Expr.const `Solidity.Source.Env [])\n    (Lean.BinderInfo.default))\n  (Lean.BinderInfo.default)") false true
+def getterFixtureGlobal : Source.Glob getterFixtureEnv := (frozen_fixture% "_private.Solidity.Backend.AbiEntry.GetterRoutesControls.0.Solidity.Backend.AbiEntry.GetterRoutesControls.global" against% "Lean.Expr.forallE\n  `ordinary\n  (Lean.Expr.const `Bool [])\n  (Lean.Expr.forallE\n    `getters\n    (Lean.Expr.const `Bool [])\n    (Lean.Expr.forallE\n      `pipeline\n      (Lean.Expr.const `Solidity.Roadmap.Pipeline [])\n      (Lean.Expr.app\n        (Lean.Expr.const `Solidity.Source.Glob [])\n        (Lean.Expr.app\n          (Lean.Expr.app\n            (Lean.Expr.const\n              (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkNum `_private.Solidity.Backend.AbiEntry.GetterRoutesControls 0) \"Solidity\") \"Backend\") \"AbiEntry\") \"GetterRoutesControls\") \"E\")\n              [])\n            (Lean.Expr.bvar 2))\n          (Lean.Expr.bvar 1)))\n      (Lean.BinderInfo.default))\n    (Lean.BinderInfo.default))\n  (Lean.BinderInfo.default)") false true .legacy
+def getterFixtureContract : Contract := (frozen_fixture% "_private.Solidity.Backend.AbiEntry.GetterRoutesControls.0.Solidity.Backend.AbiEntry.GetterRoutesControls.C" against% "Lean.Expr.const `Solidity.Contract []")
+def getterFixtureBytes : List UInt8 := (frozen_fixture% "_private.Solidity.Backend.AbiEntry.GetterRoutesControls.0.Solidity.Backend.AbiEntry.GetterRoutesControls.fullBytes" against% "Lean.Expr.app (Lean.Expr.const `List [Lean.Level.zero]) (Lean.Expr.const `UInt8 [])")
+def getterFixtureLabels : Source.Decl → Fin W := (frozen_fixture% "_private.Solidity.Backend.AbiEntry.GetterRoutesControls.0.Solidity.Backend.AbiEntry.GetterRoutesControls.labels" against% "Lean.Expr.forallE\n  `declaration\n  (Lean.Expr.const `Solidity.Source.Decl [])\n  (Lean.Expr.app (Lean.Expr.const `Fin []) (Lean.Expr.const `Solidity.Evm.W []))\n  (Lean.BinderInfo.default)")
+def getterFixtureFrame (value : Fin W) : Source.Fr := (frozen_fixture% "_private.Solidity.Backend.AbiEntry.GetterRoutesControls.0.Solidity.Backend.AbiEntry.GetterRoutesControls.frame" against% "Lean.Expr.forallE\n  `bytes\n  (Lean.Expr.app (Lean.Expr.const `List [Lean.Level.zero]) (Lean.Expr.const `UInt8 []))\n  (Lean.Expr.forallE\n    `value\n    (Lean.Expr.app (Lean.Expr.const `Fin []) (Lean.Expr.const `Solidity.Evm.W []))\n    (Lean.Expr.const `Solidity.Source.Fr [])\n    (Lean.BinderInfo.default))\n  (Lean.BinderInfo.default)") getterFixtureBytes value
+def getterFixtureMachine (value : Fin W) : Machine := (frozen_fixture% "_private.Solidity.Backend.AbiEntry.GetterRoutesControls.0.Solidity.Backend.AbiEntry.GetterRoutesControls.machine" against% "Lean.Expr.forallE\n  `bytes\n  (Lean.Expr.app (Lean.Expr.const `List [Lean.Level.zero]) (Lean.Expr.const `UInt8 []))\n  (Lean.Expr.forallE\n    `value\n    (Lean.Expr.app (Lean.Expr.const `Fin []) (Lean.Expr.const `Solidity.Evm.W []))\n    (Lean.Expr.const `Solidity.Evm.Machine [])\n    (Lean.BinderInfo.default))\n  (Lean.BinderInfo.default)") getterFixtureBytes value
+def getterFixtureWritten (value label : Fin W) : Machine := (frozen_fixture% "_private.Solidity.Backend.AbiEntry.GetterRoutesControls.0.Solidity.Backend.AbiEntry.GetterRoutesControls.written" against% "Lean.Expr.forallE\n  `bytes\n  (Lean.Expr.app (Lean.Expr.const `List [Lean.Level.zero]) (Lean.Expr.const `UInt8 []))\n  (Lean.Expr.forallE\n    `value\n    (Lean.Expr.app (Lean.Expr.const `Fin []) (Lean.Expr.const `Solidity.Evm.W []))\n    (Lean.Expr.forallE\n      `label\n      (Lean.Expr.app (Lean.Expr.const `Fin []) (Lean.Expr.const `Solidity.Evm.W []))\n      (Lean.Expr.const `Solidity.Evm.Machine [])\n      (Lean.BinderInfo.default))\n    (Lean.BinderInfo.default))\n  (Lean.BinderInfo.default)") getterFixtureBytes value label
+def getterFixtureCompilation := (frozen_fixture% "_private.Solidity.Backend.AbiEntry.GetterRoutesControls.0.Solidity.Backend.AbiEntry.GetterRoutesControls.compiled" against% "Lean.Expr.forallE\n  `ordinary\n  (Lean.Expr.const `Bool [])\n  (Lean.Expr.forallE\n    `getters\n    (Lean.Expr.const `Bool [])\n    (Lean.Expr.forallE\n      `pipeline\n      (Lean.Expr.const `Solidity.Roadmap.Pipeline [])\n      (Lean.Expr.app\n        (Lean.Expr.app\n          (Lean.Expr.app\n            (Lean.Expr.app\n              (Lean.Expr.app\n                (Lean.Expr.app\n                  (Lean.Expr.const `Solidity.Evm.Compiler.Compilation [])\n                  (Lean.Expr.const\n                    (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkNum `_private.Solidity.Backend.AbiEntry.GetterRoutesControls 0) \"Solidity\") \"Backend\") \"AbiEntry\") \"GetterRoutesControls\") \"C\")\n                    []))\n                (Lean.Expr.app\n                  (Lean.Expr.app\n                    (Lean.Expr.app (Lean.Expr.const `OfNat.ofNat [Lean.Level.zero]) (Lean.Expr.const `Nat []))\n                    (Lean.Expr.lit (Lean.Literal.natVal 7)))\n                  (Lean.Expr.app (Lean.Expr.const `instOfNatNat []) (Lean.Expr.lit (Lean.Literal.natVal 7)))))\n              (Lean.Expr.const `Solidity.Backend.AbiEntry.Interface.RouteCtx []))\n            (Lean.Expr.const `Solidity.Backend.AbiEntry.Interface.RouteCtx []))\n          (Lean.Expr.app\n            (Lean.Expr.const `Solidity.Evm.Frag.init [])\n            (Lean.Expr.const `Solidity.Backend.AbiEntry.Interface.RouteCtx [])))\n        (Lean.Expr.app\n          (Lean.Expr.app\n            (Lean.Expr.app\n              (Lean.Expr.app\n                (Lean.Expr.const `Solidity.Backend.AbiEntry.EntryRoutes.route [])\n                (Lean.Expr.const\n                  (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkNum `_private.Solidity.Backend.AbiEntry.GetterRoutesControls 0) \"Solidity\") \"Backend\") \"AbiEntry\") \"GetterRoutesControls\") \"C\")\n                  []))\n              (Lean.Expr.app\n                (Lean.Expr.app\n                  (Lean.Expr.app\n                    (Lean.Expr.app\n                      (Lean.Expr.const `Solidity.Backend.AbiEntry.GetterRoutes.table [])\n                      (Lean.Expr.app\n                        (Lean.Expr.app\n                          (Lean.Expr.const\n                            (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkNum `_private.Solidity.Backend.AbiEntry.GetterRoutesControls 0) \"Solidity\") \"Backend\") \"AbiEntry\") \"GetterRoutesControls\") \"E\")\n                            [])\n                          (Lean.Expr.bvar 2))\n                        (Lean.Expr.bvar 1)))\n                    (Lean.Expr.app\n                      (Lean.Expr.app\n                        (Lean.Expr.app\n                          (Lean.Expr.const\n                            (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkNum `_private.Solidity.Backend.AbiEntry.GetterRoutesControls 0) \"Solidity\") \"Backend\") \"AbiEntry\") \"GetterRoutesControls\") \"global\")\n                            [])\n                          (Lean.Expr.bvar 2))\n                        (Lean.Expr.bvar 1))\n                      (Lean.Expr.bvar 0)))\n                  (Lean.Expr.lit (Lean.Literal.strVal \"C\")))\n                (Lean.Expr.const\n                  (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkNum `_private.Solidity.Backend.AbiEntry.GetterRoutesControls 0) \"Solidity\") \"Backend\") \"AbiEntry\") \"GetterRoutesControls\") \"labels\")\n                  [])))\n            (Lean.Expr.app\n              (Lean.Expr.app\n                (Lean.Expr.app\n                  (Lean.Expr.const `Solidity.Backend.AbiEntry.SpecialRoutes.receiveRow [])\n                  (Lean.Expr.app\n                    (Lean.Expr.app\n                      (Lean.Expr.const\n                        (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkNum `_private.Solidity.Backend.AbiEntry.GetterRoutesControls 0) \"Solidity\") \"Backend\") \"AbiEntry\") \"GetterRoutesControls\") \"E\")\n                        [])\n                      (Lean.Expr.bvar 2))\n                    (Lean.Expr.bvar 1)))\n                (Lean.Expr.lit (Lean.Literal.strVal \"C\")))\n              (Lean.Expr.const\n                (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkNum `_private.Solidity.Backend.AbiEntry.GetterRoutesControls 0) \"Solidity\") \"Backend\") \"AbiEntry\") \"GetterRoutesControls\") \"labels\")\n                [])))\n          (Lean.Expr.app\n            (Lean.Expr.app\n              (Lean.Expr.app\n                (Lean.Expr.const `Solidity.Backend.AbiEntry.SpecialRoutes.fallbackRow [])\n                (Lean.Expr.app\n                  (Lean.Expr.app\n                    (Lean.Expr.const\n                      (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkNum `_private.Solidity.Backend.AbiEntry.GetterRoutesControls 0) \"Solidity\") \"Backend\") \"AbiEntry\") \"GetterRoutesControls\") \"E\")\n                      [])\n                    (Lean.Expr.bvar 2))\n                  (Lean.Expr.bvar 1)))\n              (Lean.Expr.lit (Lean.Literal.strVal \"C\")))\n            (Lean.Expr.const\n              (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkNum `_private.Solidity.Backend.AbiEntry.GetterRoutesControls 0) \"Solidity\") \"Backend\") \"AbiEntry\") \"GetterRoutesControls\") \"labels\")\n              []))))\n      (Lean.BinderInfo.default))\n    (Lean.BinderInfo.default))\n  (Lean.BinderInfo.default)") false true .legacy
+
+theorem getter_fixture_full (value : Fin W) : 4≤(getterFixtureFrame value).cd.length := by decide
+
+theorem getter_fixture_size (value : Fin W) : (wmod 4).val=(getterFixtureFrame value).cd.length := by decide
+
+theorem getter_fixture_found (value : Fin W) : Compiler.compile 7 (Frag.init RouteCtx)
+    (EntryRoutes.route getterFixtureContract
+      (GetterRoutes.table getterFixtureGlobal (getterFixtureFrame value).contract getterFixtureLabels)
+      (SpecialRoutes.receiveRow getterFixtureEnv (getterFixtureFrame value).contract getterFixtureLabels)
+      (SpecialRoutes.fallbackRow getterFixtureEnv (getterFixtureFrame value).contract getterFixtureLabels))=
+      some getterFixtureCompilation :=
+  GetterRoutes.selected getterFixtureGlobal (getterFixtureFrame value).contract getterFixtureLabels getterFixtureContract 7
+
+theorem getter_fixture_two_getters : (getterFixtureEnv.getters "C").length=2 :=
+  (GetterRoutesControls.getter_count false .legacy).1
+
+theorem getter_fixture_success : run getterFixtureCompilation.code (getterFixtureMachine (wmod 0))=
+    .ok (getterFixtureWritten (wmod 0) (wmod 11)) 0 := GetterRoutesControls.getter_zero .legacy
+
+theorem getter_fixture_paid_refusal (value : Fin W) (nonzero : value.val≠0) :
+    run getterFixtureCompilation.code (getterFixtureMachine value)=.revert :=
+  GetterRoutesControls.getter_nonzero .legacy value nonzero
+
+theorem getter_fixture_refusal_iff (value : Fin W) :
+    (run getterFixtureCompilation.code (getterFixtureMachine value)=.revert ↔
+      dispatchRefuses getterFixtureGlobal (getterFixtureFrame value)=true) :=
+  DispatchRefusal.compiled getterFixtureGlobal (getterFixtureFrame value) getterFixtureLabels getterFixtureContract 7
+    getterFixtureCompilation (getter_fixture_found value) (getterFixtureMachine value) (wmod 4)
+    rfl rfl (getter_fixture_size value) rfl
+
+theorem getter_fixture_refuses_one : dispatchRefuses getterFixtureGlobal (getterFixtureFrame (wmod 1))=true :=
+  (getter_fixture_refusal_iff (wmod 1)).mp (getter_fixture_paid_refusal (wmod 1) (by decide))
+
+theorem getter_fixture_source_refusal (fuel : Nat) :
+    Source.dispatch getterFixtureGlobal (getterFixtureFrame (wmod 1)) (fuel+1) (getterFixtureFrame (wmod 1)).cd=
+      Source.EM.halt (.revert []) :=
+  DispatchRefusal.source getterFixtureGlobal (getterFixtureFrame (wmod 1)) fuel getter_fixture_refuses_one
+
+/-- error: frozen fixture reference: missing or ambiguous kernel name -/
+#guard_msgs (whitespace := lax) in
+#check frozen_fixture% "__absent_frozen_fixture__" against% "__unused__"
+/-- error: frozen fixture reference: type snapshot mismatch -/
+#guard_msgs (whitespace := lax) in
+#check frozen_fixture% "_private.Solidity.Backend.AbiEntry.GetterRoutesControls.0.Solidity.Backend.AbiEntry.GetterRoutesControls.E" against% "__wrong_type__"
+
+#print axioms getter_fixture_full
+#print axioms getter_fixture_size
+#print axioms getter_fixture_found
+#print axioms getter_fixture_two_getters
+#print axioms getter_fixture_success
+#print axioms getter_fixture_paid_refusal
+#print axioms getter_fixture_refusal_iff
+#print axioms getter_fixture_refuses_one
+#print axioms getter_fixture_source_refusal

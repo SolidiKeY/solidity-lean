@@ -1,0 +1,15 @@
+/-! Guards audit references resolving the wrong frozen private constant or
+accepting a changed type snapshot. This is test-only source-to-kernel fixture
+intake through the existing hypothesis-audit prelude; no production API or
+semantic model is introduced. The resulting terms still undergo kernel checking. -/
+elab "frozen_fixture% " target:str " against% " expected:str : term => do
+  let matches := (← getEnv).constants.toList.filter fun entry => entry.1.toString == target.getString
+  unless matches.length == 1 do
+    throwError "frozen fixture reference: missing or ambiguous kernel name"
+  let name := matches.head!.1
+  let info ← getConstInfo name
+  unless info.levelParams.isEmpty do
+    throwError "frozen fixture reference: universe parameters require review"
+  unless reprStr info.type == expected.getString do
+    throwError "frozen fixture reference: type snapshot mismatch"
+  pure (mkConst name)
