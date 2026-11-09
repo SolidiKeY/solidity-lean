@@ -8,7 +8,7 @@ G01 operational linkage for VX1 remains open under H133. The authenticated consu
 
 `Solidity/Roadmap/Evm.lean` supplies abstract pinned semantics and resource contracts, not this concrete adapter. The P10 [frozen interface](../../Bridge/SolidityBridge/RoadmapV15/P10/FrozenInterface.lean) explicitly excludes resource abstraction and transaction/trace adequacy. Per-opcode fetched-step results and self-certificates therefore cannot discharge the G01 consumer contract. Source admission remains an upstream obligation; no Source definition or frozen interface was changed.
 
-The executable-bytecode lane owns this linkage. Question `Q-G01-OP-BOUNDARY` requests the authoritative concrete target/resource implementation and current consumer binding, or confirmation of the missing implementation scope. This boundary review supplies no operational certificate, source/runtime correspondence or joint-witness credit; VX1 must retain its G01 wait.
+The executable-bytecode lane owns this linkage. H275 selects an existing authoritative target/resource implementation and current consumer contract; the adapter must preserve their semantics. Question `Q-G01-OP-BOUNDARY` remains open for their exact head, declaration paths and provenance, which the decision itself does not supply. This boundary review supplies no operational certificate, source/runtime correspondence or joint-witness credit; VX1 must retain its G01 wait.
 
 Exact consumer/source hashes and independent review inputs are archived privately:
 
