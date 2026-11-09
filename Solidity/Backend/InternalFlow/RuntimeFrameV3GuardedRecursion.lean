@@ -13,14 +13,14 @@ theorem probe_success {C : Contract} (σ : State C (Parameters A)) (v : PrimTy.u
  (evaluated : ArrayProbe.value.evalT σ=.ok v) :
  (probe (C:=C)).run σ=.ok ⟨σ,List.prefix_refl _⟩ := by
  change TRun.block (.push .refl) (TRun.seq (TRun.declLocal .uint (some ArrayProbe.value)) TRun.nil) σ=_
- simp only [TRun.block,TRun.seq,TRun.declLocal,evaluated,ok_bind,TRun.nil,Except.map]
+ simp only [TRun.block,TRun.seq,TRun.declLocal,evaluated,bind,Except.bind,pure,Except.pure,TRun.nil,Except.map]
  rfl
 
 theorem probe_failure {C : Contract} (σ : State C (Parameters A))
  (evaluated : ArrayProbe.value.evalT σ=.error .revert) :
  (probe (C:=C)).run σ=.error .revert := by
  change TRun.block (.push .refl) (TRun.seq (TRun.declLocal .uint (some ArrayProbe.value)) TRun.nil) σ=_
- simp only [TRun.block,TRun.seq,TRun.declLocal,evaluated,error_bind,Except.map]
+ simp only [TRun.block,TRun.seq,TRun.declLocal,evaluated,bind,Except.bind,Except.map]
 
 def step {C : Contract} (depth : Nat) (back : Unit → Prog C (Parameters A) (Parameters A)) :
  Prog C (Parameters A) (Parameters A) :=
@@ -43,7 +43,7 @@ theorem source_failure {C : Contract} (σ : State C (Parameters A)) (depth : Nat
      (TRun.seq (TRun.call (nextArgs A rfl) .none .refl (body depth).runR) TRun.nil))
    .refl TRun.nil) TRun.nil σ=_
  change (probe (C:=C)).runR σ=.error .revert at failed
- simp only [TRun.seq,TRun.ite,guard,boolT,if_true,failed,ok_bind,Except.map]
+ simp only [TRun.seq,TRun.ite,guard,boolT,ite_true,failed,bind,Except.bind,Except.map]
 
 /-- Successful scoped evaluation selects the ACTUAL native child call. -/
 theorem source_positive {C : Contract} (σ : State C (Parameters A)) (depth : Nat)
@@ -56,11 +56,12 @@ theorem source_positive {C : Contract} (σ : State C (Parameters A)) (depth : Na
  change TRun.seq (TRun.ite nonzero .refl (TRun.seq (probe (C:=C)).runR (TRun.seq call TRun.nil))
    .refl TRun.nil) TRun.nil σ=call σ
  change (probe (C:=C)).runR σ=.ok ⟨σ,List.prefix_refl _⟩ at passed
- simp only [TRun.seq,TRun.ite,guard,boolT,if_true,passed,ok_bind,Except.map]
+ simp only [TRun.seq,TRun.ite,guard,boolT,ite_true,passed,bind,Except.bind,Except.map]
  cases actual : call σ with
- | error halt => simp only [actual,Except.map]
- | ok out => simp only [actual,TRun.nil,Except.map];cases out;rfl
+ | error halt => rfl
+ | ok out => simp only [TRun.nil];cases out;rfl
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The native child result here is actual execution evidence, discharged
 by the following nested client, not a target preservation assumption. -/
 theorem child_returns {C : Contract} (σ : State C (Parameters A)) (n : Nat) (bound : n+1<W)
@@ -75,14 +76,13 @@ theorem child_returns {C : Contract} (σ : State C (Parameters A)) (n : Nat) (bo
  have args := next_eval rfl σ n bound ref counter alias
  change TRun.call (nextArgs A rfl) .none .refl (body depth).runR σ=_
  unfold TRun.call
- simp only [args,ok_bind,CallRet.enterT]
+ simp only [args,bind,Except.bind,pure,Except.pure,CallRet.enterT]
  change (do
    let out ← (body depth).run (σ.withEnv (Δ:=Parameters A) (countValue n (by omega),(some ref,())))
    pure (⟨out.st.withEnv (TEnv.wk ((List.prefix_refl σ.H).trans out.ext) (Parameters A) σ.env),
      (List.prefix_refl σ.H).trans out.ext⟩ : Solidity.Out C σ.H (Parameters A)))=_
  rw [child]
- simp only [ok_bind,TEnv.wk_self]
- rfl
+ simp only [bind,Except.bind,pure,Except.pure,State.withEnv,TEnv.wk_self]
 
 theorem source_zero {C : Contract} (σ : State C (Parameters A)) (depth : Nat)
  (guard : nonzero.evalT σ=.ok false) : (body (depth+1)).run σ=.ok ⟨σ,List.prefix_refl _⟩ := by
@@ -90,7 +90,7 @@ theorem source_zero {C : Contract} (σ : State C (Parameters A)) (depth : Nat)
    (TRun.seq (probe (C:=C)).runR
      (TRun.seq (TRun.call (nextArgs A rfl) .none .refl (body depth).runR) TRun.nil))
    .refl TRun.nil) TRun.nil σ=_
- simp only [TRun.seq,TRun.ite,guard,boolT,if_false,TRun.nil,ok_bind,Except.map]
+ simp only [TRun.seq,TRun.ite,guard,boolT,TRun.nil,bind,Except.bind,Except.map]
  rfl
 
 theorem child_failure {C : Contract} (σ : State C (Parameters A)) (n : Nat) (bound : n+1<W)
@@ -103,7 +103,7 @@ theorem child_failure {C : Contract} (σ : State C (Parameters A)) (n : Nat) (bo
  have args := next_eval rfl σ n bound ref counter alias
  change TRun.call (nextArgs A rfl) .none .refl (body depth).runR σ=_
  unfold TRun.call
- simp only [args,ok_bind,CallRet.enterT]
+ simp only [args,bind,Except.bind,pure,Except.pure,CallRet.enterT]
  change (do
    let out ← (body depth).run (σ.withEnv (Δ:=Parameters A) (countValue n (by omega),(some ref,())))
    pure (⟨out.st.withEnv (TEnv.wk ((List.prefix_refl σ.H).trans out.ext) (Parameters A) σ.env),
@@ -121,16 +121,16 @@ def image {C : Contract} (b : Nat) (F : Frag (Parameters A)) (pointer bottom : N
 theorem failing_turn (rc rb : Machine → Evm.Out) (machine : Machine)
  (guard : rc machine=.ok (machine.push w[1]) 0) (failed : rb machine=.revert) :
  loopIterN rc rb 1 machine=.inr .revert := by
- simp only [loopIterN,loopTurn,guard,Machine.push,if_false,Nat.one_ne_zero,failed]
+ simp only [loopIterN,loopTurn,guard,Machine.push,ite_false,Nat.one_ne_zero,failed]
 
 theorem successful_turn (rc rb : Machine → Evm.Out) (machine next : Machine)
  (guard : rc machine=.ok (machine.push w[1]) 0) (executed : rb machine=.ok next 0) :
  loopTurn rc rb machine=.inl next := by
- simp only [loopTurn,guard,Machine.push,if_false,Nat.one_ne_zero,executed]
+ simp only [loopTurn,guard,Machine.push,ite_false,Nat.one_ne_zero,executed]
 
 theorem empty_turn (rc rb : Machine → Evm.Out) (machine : Machine)
  (guard : rc machine=.ok (machine.push w[0]) 0) : loopTurn rc rb machine=.inr (.ok machine 0) := by
- simp only [loopTurn,guard,Machine.push,if_true]
+ simp only [loopTurn,guard,Machine.push,ite_true]
 
 theorem successful_loop (condition body : List Instr) (machine last : Machine) (n : Nat)
  (observed : loopIterN (run condition) (run body) n machine=.inr (.ok last 0)) :
@@ -158,7 +158,7 @@ theorem target_failure {C : Contract} {L b frame : Nat} {F : Frag (Parameters A)
  have failed := ArrayProbe.failure_suffix repr evaluated (activationCode (C:=C) b F pointer)
  have positive : decide (0<n+1)=true := decide_eq_true (by omega)
  have checkedGuard : run (guardCompiled (C:=C) b F).code machine=.ok (machine.push w[1]) 0 := by
-   simpa only [positive,bword] using guard
+   simpa only [positive,bword,ite_true] using guard
  have observed := failing_turn (run (guardCompiled (C:=C) b F).code)
    (run (turnCode (C:=C) b F pointer)) machine checkedGuard failed
  exact failing_loop _ _ _ machine observed
@@ -175,7 +175,7 @@ theorem probed_turn {C : Contract} {L b frame : Nat} {F : Frag (Parameters A)}
  have guard := guard_run σ (n+1) bound counter base machine repr
  have positive : decide (0<n+1)=true := decide_eq_true (by omega)
  have checkedGuard : run (guardCompiled (C:=C) b F).code machine=.ok (machine.push w[1]) 0 := by
-   simpa only [positive,bword] using guard
+   simpa only [positive,bword,ite_true] using guard
  have checkedBody : run (turnCode (C:=C) b F pointer) machine=.ok next 0 :=
    (run_append_ok (ArrayProbe.success repr v evaluated)).trans activation
  exact successful_turn _ _ _ _ checkedGuard checkedBody
@@ -283,7 +283,7 @@ theorem good_target : ∃ last,
  have owned := growth ⟨22,by decide⟩ (by decide) ParentPrefixes.Checks.ownership (by decide)
  have initializedGrowth : GrowsAllocator 2 16 0 callee P.base AllocatorReturn.Checks.input callee P.base input := by
    intro c positive ownership space
-   simpa only [Nat.add_zero] using ownership.localWrite 7 (by decide) (by decide) w[10]
+   simpa only [input,ParentPrefixes.Checks.input,Nat.add_zero] using ownership.localWrite 7 (by decide) (by decide) w[10]
  have totalGrowth := initializedGrowth.comp growth
  refine ⟨last,completed,represented,stack,cursor,owned,?_,by simpa only [Nat.add_zero] using totalGrowth⟩
  have h0 := history 0 (by decide)
