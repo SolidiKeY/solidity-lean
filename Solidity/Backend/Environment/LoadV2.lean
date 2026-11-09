@@ -46,6 +46,37 @@ theorem run_append (frame : Frame) (first second : Program) (s : Slice) :
     | none => rfl
     | some next => exact ih next
 
+/-- General byte decoder bound; all UInt8 digits are intrinsically below256. -/
+theorem bytes_bound (bs : List UInt8) : ofBytesBE bs < 256 ^ bs.length := by
+  have same : ofBytesBE bs = Keccak.ofBytes (bs.map UInt8.toNat) := by
+    first | rfl | simp only [ofBytesBE,Keccak.ofBytes,List.foldl_map,Function.comp_apply,Nat.mul_comm]
+  rw [same]
+  have bound := Storage.ofBytes_lt (bs := bs.map UInt8.toNat) (by
+    intro b hb
+    obtain ⟨digit,_,rfl⟩ := List.mem_map.mp hb
+    exact digit.toNat_lt)
+  simpa only [List.length_map] using bound
+
+/-- A full32-byte memory load never reaches uintOfNat's defensive default. -/
+theorem memory_word_bound (memory : Memory) (offset : Nat) :
+    ofBytesBE (readMemory memory offset 32) < 2^256 := by
+  have bound := bytes_bound (readMemory memory offset 32)
+  simp only [readMemory,List.length_map,List.length_range] at bound
+  have power : (256:Nat)^32 = 2^256 := by decide
+  rw [power] at bound
+  exact bound
+
+theorem load_numeric (frame : Frame) (memory : Memory) (offset : Word)
+    (tail : List Word) :
+    step frame (.op .MLOAD) ⟨offset::tail,memory⟩ =
+      some ⟨lenU (ofBytesBE (readMemory memory offset.1.toNat 32))
+        (memory_word_bound memory offset.1.toNat)::tail,memory⟩ := by
+  rw [load_actual,uintOfNat_eq_lenU (memory_word_bound memory offset.1.toNat)]
+
+#print axioms bytes_bound
+#print axioms memory_word_bound
+#print axioms load_numeric
+
 #print axioms load_actual
 #print axioms load_underflow
 #print axioms step_compatible

@@ -1,5 +1,5 @@
 import Solidity.Yul.Views.PackedOwnershipReads
-import Solidity.Yul.Views.GenericFlow.Following
+import Solidity.Yul.Views.GenericFlow.FollowingPlan
 
 namespace Solidity.Yul.Views
 
@@ -9,14 +9,7 @@ private abbrev PackedOwnershipPlan.flowShape {E ds d active Γ F layout fixed wr
     (journal : Unit → ResidualJournal complementCarrierOwnership) :
     GenericFlow.PreparationShape (List (ScalarPath E.layout (E.lay F.this))) SlotView
       (Source.Op E.layout E.lay E.lay) (PackedOwnershipPlan F layout fixed q v (state ()) (journal ())) :=
-  ⟨fun _ => layout.unsignedSourceInventory? F fixed (state ()),
-    fun old => finiteEncode old ((state ()).2.ex.world.accounts F.this).storage
-      (fun slot => (journal ()).cells (complementKey false F.this slot)),
-    packedSeparationCheck,
-    fun raw => packedSeparationCheck (layout.unsignedSnapshot fixed (saveSlot raw q v)),
-    fun raw => finiteAccountWrite? F.this (layout.unsignedSnapshot fixed (saveSlot raw q v)) (saveSlot raw q v),
-    fun old computed raw encoded checked nextChecked op prepared =>
-      ⟨old,computed,raw,encoded,checked,nextChecked,op,prepared⟩⟩
+  GenericFlow.planShape F (packedOwnershipInterface d active Γ F) layout fixed q v state journal packedSeparationCheck
 
 private abbrev PackedOwnershipPlan.flowInput {E ds d active Γ F layout fixed written value s r}
     (p : @PackedOwnershipPlan E ds d active Γ F layout fixed written value s r)
