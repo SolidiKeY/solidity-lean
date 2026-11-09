@@ -39,7 +39,7 @@ def family : Evm.Instr → Family
   | .loop _ _ => .loop
 
 /-- Whether the proved scalar selector accepts one instruction. -/
-def selected (i : Evm.Instr) : Bool := (selectScalar i).isSome
+def instrSelected (i : Evm.Instr) : Bool := (selectScalar i).isSome
 
 /-- Coverage of one instruction list. -/
 structure Measure where
@@ -57,15 +57,15 @@ structure Measure where
 
 def firstRefused : Nat → List Evm.Instr → Option (Nat × Family)
   | _, [] => none
-  | k, i :: rest => if selected i then firstRefused (k + 1) rest else some (k, family i)
+  | k, i :: rest => if instrSelected i then firstRefused (k + 1) rest else some (k, family i)
 
 def refusedFamilies (ir : List Evm.Instr) : List Family :=
-  (ir.filter (! selected ·)).foldl
+  (ir.filter (! instrSelected ·)).foldl
     (fun seen i => if family i ∈ seen then seen else seen ++ [family i]) []
 
 def measure (ir : List Evm.Instr) : Measure where
   length := ir.length
-  refused := (ir.filter (! selected ·)).length
+  refused := (ir.filter (! instrSelected ·)).length
   first := firstRefused 0 ir
   families := refusedFamilies ir
   accepted := match stage ir 0 with | .ok _ => true | .error _ => false
@@ -78,7 +78,39 @@ theorem measure_accepted (ir : List Evm.Instr) (h : (measure ir).accepted = true
   · next accepted staged => exact ⟨accepted, staged⟩
   · cases h
 
-/-! ## Fixtures -/
+/-- A selector refusal of any instruction refuses the whole code. -/
+theorem compileScalar_refused (ir : List Evm.Instr) (i : Evm.Instr) (member : i ∈ ir)
+    (refused : selectScalar i = none) : compileScalar ir = none := by
+  induction ir with
+  | nil => cases member
+  | cons j rest ih =>
+    simp only [compileScalar, compileWith]
+    cases member with
+    | head => rw [refused]; rfl
+    | tail _ member =>
+      have tail : compileWith selectScalar rest = none := ih member
+      rw [tail]
+      cases selectScalar j <;> rfl
+
+/-- A measurement with a refused instruction is the R3 refusal at every height. -/
+theorem measure_refused (ir : List Evm.Instr) (h : (measure ir).refused ≠ 0) (n : Nat) :
+    stage ir n = .error .unselected := by
+  simp only [measure] at h
+  obtain ⟨i, member⟩ := List.exists_mem_of_length_pos (Nat.pos_of_ne_zero h)
+  have ⟨inIr, bad⟩ := List.mem_filter.mp member
+  have none : selectScalar i = none := by
+    simp only [instrSelected, Bool.not_eq_true', Option.isSome_eq_false_iff,
+      Option.isNone_iff_eq_none] at bad
+    exact bad
+  exact (stage_unselected ir n).mpr (compileScalar_refused ir i inIr none)
+
+/-! ## Fixtures
+
+Compiler results from the `Backend/Passes` controls, with the fragment and
+`b` of each source file. Several are statement sequences compiled from a
+non-initial fragment, not whole programs. -/
+
+namespace Coverage
 
 def wholeScope := (Compiler.compile 1 (Frag.init []) CompilerWholeScope.program).map (measure ·.code)
 def callScope := (Compiler.compile 1 MemoryCallControls.allocation.frag
@@ -114,7 +146,9 @@ def empty := (Compiler.compile 0 (Frag.init []) (.nil : Prog MemoryCallControls.
 
 /-! ## Compiled value fragments
 
-No whole compiled program except the empty one is accepted: every statement
+Among the measured fixtures only the empty program is accepted: the others
+start with, or contain, fixed-cell memory, a `loop`, or an `assertTop`
+skip-jump. The
 ends in a fixed-cell write, storage, or an `assertTop` skip-jump. The
 compiler's expression stage (`Evm.compileVal`) on locals-free unchecked
 arithmetic is accepted; checked `+` is refused at its overflow `JUMPI`. -/
@@ -218,14 +252,31 @@ theorem comparison_executes (m : Evm.Machine) (stack : m.stack = []) :
   exact ⟨accepted, staged,
     (accepted.success_iff [] [1] rfl m stack).mp (comparison_run m stack)⟩
 
+/-- The headline fixture's actual compiled code is refused (R3) at every height. -/
+theorem whole_scope_refused (n : Nat) :
+    stage CompilerWholeScope.actual.code n = .error .unselected := by
+  have measured := whole_scope_measure
+  rw [wholeScope, CompilerWholeScope.accepted, Option.map_some, Option.some.injEq] at measured
+  exact measure_refused _ (by rw [measured]; decide) n
+
+/-- Checked `2 + 3` is refused (R3) at every height. -/
+theorem checked_refused (n : Nat) : stage checkedCode n = .error .unselected :=
+  measure_refused _ (by rw [checked_measure]; decide) n
+
 #print axioms measure_accepted
-#print axioms whole_scope_measure
-#print axioms empty_measure
-#print axioms comparison_measure
-#print axioms checked_measure
-#print axioms comparison_selected
-#print axioms comparison_bytes
-#print axioms comparison_run
-#print axioms comparison_executes
+#print axioms compileScalar_refused
+#print axioms measure_refused
+#print axioms Coverage.whole_scope_measure
+#print axioms Coverage.empty_measure
+#print axioms Coverage.comparison_measure
+#print axioms Coverage.checked_measure
+#print axioms Coverage.comparison_selected
+#print axioms Coverage.comparison_bytes
+#print axioms Coverage.comparison_run
+#print axioms Coverage.comparison_executes
+#print axioms Coverage.whole_scope_refused
+#print axioms Coverage.checked_refused
+
+end Coverage
 
 end Solidity.Backend.Passes.Bytes
