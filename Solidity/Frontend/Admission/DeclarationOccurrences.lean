@@ -94,9 +94,7 @@ theorem pragma_syntax_preserved (words : List String) (rest : Syn (.list .top)) 
   exact .child (List.mem_singleton_self _)
     (.child (List.mem_cons_self ..) (.refl _))
 
-/-- No decoder of only the declaration environment can recover every source
-unit. A header-sensitive extractor must retain the required header information
-separately, for example in the original unit. -/
+/-- No decoder of only the declaration environment can recover every source unit. A header-sensitive extractor must retain the required header information separately, for example in the original unit. -/
 theorem source_unit_not_recoverable_from_env :
     ¬ ∃ recover : Env → Syn .unit, ∀ u : Syn .unit, recover u.env = u := by
   rintro ⟨recover,correct⟩
@@ -202,9 +200,7 @@ theorem declarationFieldUses_iff {α : Type u} (E : Env)
   · rintro ⟨occurs,present⟩
     exact ⟨site,(declarationOccurrences_iff E site).mpr occurs,value,present,rfl⟩
 
-/-- A reported field has both its original source-unit syntax site and its
-classifier membership. This does not assert that the classifier reports every
-language feature or that every source-unit site belongs to a declaration. -/
+/-- A reported field has both its original source-unit syntax site and its classifier membership. This does not assert that the classifier reports every language feature or that every source-unit site belongs to a declaration. -/
 theorem declarationFieldUses_source_witness {α : Type u} (unit : Syn .unit)
     (fields : ∀ {c : Cat}, Syn c → List α)
     (site : DeclarationOccurrence) (value : α)
