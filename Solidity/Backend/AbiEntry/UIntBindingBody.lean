@@ -1,7 +1,6 @@
 import Solidity.Backend.AbiEntry.UIntBindingBodyInterface
 
-/-! One existing compiler program: head/word validation, typed uint declaration,
-then the supplied typed body. Body execution is derived, never a premise. -/
+/-! Existing head/word validation, typed uint declaration and supplied typed body; body execution is derived, never assumed. -/
 namespace Solidity.Backend.AbiEntry.UIntBindingBody
 open Solidity.Evm
 open Interface (RouteCtx UIntBoundCtx singleWordParams rawArgumentWord uintBoundMachine uintBindingOutcome)
@@ -109,9 +108,6 @@ theorem decoded_body (base bits : Nat) (label : Fin W) (body : Prog C UIntBoundC
   rw [executed base bits label body outFrag bodyCore whole back wholeFound bodyFound machine _ size initialWord initialSize]
   simp only [represented,if_neg full,rawArgumentWord,if_pos valid]
 
-/-- Raw decoder failure prevents body execution; success runs the selected body
-with the byte-derived uint binding. No successful decoder result is assumed.
-The existing source fuel boundary is retained as fuel+2. -/
 theorem raw_executed (base bits : Nat) (label : Fin W) (body : Prog C UIntBoundCtx Δ)
     (outFrag : Frag Δ) (bodyCore : inFragP (Frag.init UIntBoundCtx) body=some outFrag)
     (input : Solidity.AbiEntry.Input) (fuel : Nat) (machine : Machine) (size : Fin W)
