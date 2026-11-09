@@ -21,7 +21,7 @@ theorem condition_run (m : Machine) (pointer bottom : Nat) (a z : Fin W)
  by_cases equal : a.val=z.val
  all_goals simp only [condition,run,exec_cons_zero,Instr.step,Machine.next,Out.ok_bind,
    exec_nil,hp,hb,Machine.push,bword,ne_eq,equal,not_true_eq_false,not_false_eq_true,
-   decide_true,decide_false,Bool.false_eq_true,if_true,if_false,Nat.one_ne_zero]
+   decide_true,decide_false,Bool.false_eq_true,ite_true,ite_false,Nat.one_ne_zero]
 
 theorem restore_same (m : Machine) (destination pointer : Nat) (address : Fin W)
  (different : destination≠pointer)
@@ -33,8 +33,8 @@ theorem restore_same (m : Machine) (destination pointer : Nat) (address : Fin W)
    funext x
    by_cases atDestination : x=destination
    · subst x
-     simp only [upd,if_neg different,if_true]
-   · simp only [upd,if_neg atDestination]
+     simp only [upd,ite_eq_right different,ite_true]
+   · simp only [upd,ite_eq_right atDestination]
  change {m with mem := (upd (upd m.mem pointer (.val (wmod (address.val-1)))) destination (m.mem (address.val-1)))} = _
  rw [same,memory]
  rfl
@@ -50,7 +50,7 @@ theorem turn_live (m : Machine) (destination pointer bottom : Nat) (a z : Fin W)
  have restored := Restore.run m destination pointer a hp positive separate
  rw [restore_same m destination pointer a destinationSeparate same] at restored
  simp only [loopTurn,condition,ne_eq,different,not_false_eq_true,decide_true,bword,
-   Machine.push,if_true,if_false,Nat.one_ne_zero]
+   Machine.push,ite_true,ite_false,Nat.one_ne_zero]
  rw [restored]
 
 theorem turn_done (m : Machine) (destination pointer bottom : Nat) (a : Fin W)
@@ -58,15 +58,15 @@ theorem turn_done (m : Machine) (destination pointer bottom : Nat) (a : Fin W)
  loopTurn (run (condition pointer bottom)) (run (Restore.code destination pointer)) m =
  .inr (.ok m 0) := by
  simp only [loopTurn,condition_run m pointer bottom a a hp hb,ne_eq,
-   not_true_eq_false,decide_false,bword,Machine.push,Bool.false_eq_true,if_false,if_true]
+   not_true_eq_false,decide_false,bword,Machine.push,Bool.false_eq_true,ite_false,ite_true]
 
 theorem write_current (m : Machine) (pointer : Nat) :
  writeMachine m pointer (m.mem pointer)=m := by
  have memory : upd m.mem pointer (m.mem pointer)=m.mem := by
    funext x
    by_cases same : x=pointer
-   · subst x;simp only [upd,if_true]
-   · simp only [upd,if_neg same]
+   · subst x;simp only [upd,ite_true]
+   · simp only [upd,ite_eq_right same]
  change {m with mem := upd m.mem pointer (m.mem pointer)}=m
  rw [memory]
 
@@ -75,8 +75,8 @@ theorem write_overwrite (m : Machine) (pointer : Nat) (first last : Word) :
  have memory : upd (upd m.mem pointer first) pointer last=upd m.mem pointer last := by
    funext x
    by_cases same : x=pointer
-   · subst x;simp only [upd,if_true]
-   · simp only [upd,if_neg same]
+   · subst x;simp only [upd,ite_true]
+   · simp only [upd,ite_eq_right same]
  change {m with mem := upd (upd m.mem pointer first) pointer last}=_
  rw [memory]
  rfl
@@ -103,8 +103,8 @@ theorem unwind_iter (n : Nat) (m : Machine) (destination pointer bottom start : 
    have endValue : (wmod (start+(n+1))).val=start+(n+1) := Nat.mod_eq_of_lt fits
    have startValue : (wmod start).val=start := Nat.mod_eq_of_lt (by omega)
    have lastWord : m.mem ((wmod (start+(n+1))).val-1)=m.mem destination := by
-     rw [endValue]
-     simpa only [Nat.add_assoc,Nat.add_sub_cancel] using saved n (by omega)
+     rw [endValue, show start+(n+1)-1=start+n from by omega]
+     exact saved n (by omega)
    have turn := turn_live m destination pointer bottom (wmod (start+(n+1))) (wmod start)
      hp hb (by rw [endValue,startValue];omega) (by rw [endValue];omega)
      (by rw [endValue];omega) destinationSeparate lastWord
@@ -113,14 +113,14 @@ theorem unwind_iter (n : Nat) (m : Machine) (destination pointer bottom start : 
    let next := writeMachine m pointer (.val (wmod (start+n)))
    have nextPointer : next.mem pointer=.val (wmod (start+n)) := upd_same _ _ _
    have nextBottom : next.mem bottom=.val (wmod start) := by
-     simpa only [next,writeMachine,upd,if_neg bottomSeparate] using hb
+     simpa only [next,writeMachine,upd,ite_eq_right bottomSeparate] using hb
    have nextSaved : ∀ i, i<n → next.mem (start+i)=next.mem destination := by
      intro i small
-     simpa only [next,writeMachine,upd,if_neg destinationSeparate,
-       if_neg (show start+i≠pointer by omega)] using saved i (by omega)
+     simpa only [next,writeMachine,upd,ite_eq_right destinationSeparate,
+       ite_eq_right (show start+i≠pointer by omega)] using saved i (by omega)
    have tail := ih next nextPointer nextBottom (by omega) nextSaved
    simp only [loopIterN,turn]
-   simpa only [next,write_overwrite] using tail
+   simpa only [loopIterN,next,write_overwrite] using tail
 
 /-- A genuine complete target run follows from the actual stopping horizon;
 no target endpoint or termination oracle is an input. -/
@@ -169,7 +169,7 @@ theorem turn_pop (m : Machine) (destination pointer bottom : Nat) (a z : Fin W)
  have condition := condition_run m pointer bottom a z hp hb
  have restored := Restore.run m destination pointer a hp positive separate
  simp only [loopTurn,condition,ne_eq,different,not_false_eq_true,decide_true,bword,
-   Machine.push,if_true,if_false,Nat.one_ne_zero]
+   Machine.push,ite_true,ite_false,Nat.one_ne_zero]
  rw [restored]
 
 theorem restore_merge (m : Machine) (destination pointer : Nat) (upper lower : Fin W)
@@ -183,10 +183,10 @@ theorem restore_merge (m : Machine) (destination pointer : Nat) (upper lower : F
    rw [read]
    funext x
    by_cases hd : x=destination
-   · subst x;simp only [upd,if_true]
+   · subst x;simp only [upd,ite_true]
    · by_cases hp : x=pointer
-     · subst x;simp only [upd,if_neg hd,if_true]
-     · simp only [Restore.restored,upd,if_neg hd,if_neg hp]
+     · subst x;simp only [upd,ite_eq_right hd,ite_true]
+     · simp only [Restore.restored,upd,ite_eq_right hd,ite_eq_right hp]
  change {m with mem := (upd (upd (Restore.restored m destination pointer upper).mem pointer (.val (wmod (lower.val-1)))) destination ((Restore.restored m destination pointer upper).mem (lower.val-1)))} = _
  rw [memory]
  rfl
@@ -212,7 +212,7 @@ theorem unwind_nonempty_iter (n : Nat) (m : Machine) (destination pointer bottom
    have turn := turn_pop m destination pointer bottom (wmod (start+1)) (wmod start) hp hb
      (by rw [endValue,startValue];omega) (by rw [endValue];omega) (by rw [endValue];omega)
    have nextPointer : next.mem pointer=.val (wmod start) := by
-     simp only [next,Restore.restored,upd,if_neg (Ne.symm destinationPointer),if_true,endValue,Nat.add_sub_cancel]
+     simp only [next,Restore.restored,upd,ite_eq_right (Ne.symm destinationPointer),ite_true,endValue,Nat.add_sub_cancel]
    have nextBottom : next.mem bottom=.val (wmod start) :=
      (Restore.outside m destination pointer _ bottom bottomPointer bottomDestination).trans hb
    simp only [loopIterN,turn]
@@ -226,7 +226,7 @@ theorem unwind_nonempty_iter (n : Nat) (m : Machine) (destination pointer bottom
      (by rw [endValue,startValue];omega) (by rw [endValue];omega) (by rw [endValue];omega)
    have decrement : (wmod (start+(n+1+1))).val-1=start+(n+1) := by rw [endValue];omega
    have nextPointer : next.mem pointer=.val (wmod (start+(n+1))) := by
-     simp only [next,Restore.restored,upd,if_neg (Ne.symm destinationPointer),if_true,decrement]
+     simp only [next,Restore.restored,upd,ite_eq_right (Ne.symm destinationPointer),ite_true,decrement]
    have nextBottom : next.mem bottom=.val (wmod start) :=
      (Restore.outside m destination pointer _ bottom bottomPointer bottomDestination).trans hb
    have tail := ih next nextPointer nextBottom (by omega)
@@ -235,7 +235,7 @@ theorem unwind_nonempty_iter (n : Nat) (m : Machine) (destination pointer bottom
    have merged := restore_merge m destination pointer (wmod (start+(n+1+1))) (wmod (start+1))
      (by rw [lowerValue];omega) (by rw [lowerValue];omega)
    simp only [loopIterN,turn]
-   simpa only [next,merged] using tail
+   simpa only [loopIterN,next,merged] using tail
 
 theorem unwind_nonempty_run (n : Nat) (m : Machine) (destination pointer bottom start : Nat)
  (hp : m.mem pointer=.val (wmod (start+(n+1))))
@@ -264,10 +264,10 @@ theorem restore_after_clobber (m : Machine) (destination pointer : Nat) (address
    rw [read]
    funext x
    by_cases hd : x=destination
-   · subst x;simp only [upd,if_true]
+   · subst x;simp only [upd,ite_true]
    · by_cases hp : x=pointer
-     · subst x;simp only [upd,if_neg hd,if_true]
-     · simp only [writeMachine,upd,if_neg hd,if_neg hp]
+     · subst x;simp only [upd,ite_eq_right hd,ite_true]
+     · simp only [writeMachine,upd,ite_eq_right hd,ite_eq_right hp]
  change {m with mem := (upd (upd (writeMachine m destination temporary).mem pointer (.val (wmod (address.val-1)))) destination ((writeMachine m destination temporary).mem (address.val-1)))} = _
  rw [memory]
  rfl
