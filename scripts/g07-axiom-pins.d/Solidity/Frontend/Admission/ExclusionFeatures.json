@@ -6,6 +6,19 @@
  "Solidity/Frontend/Admission/ExclusionFeatures.lean:Solidity.Frontend.Admission.root_exclusion_feature_covered": [
   "propext"
  ],
+ "Solidity/Frontend/Admission/ExclusionFeatures.lean:Solidity.Frontend.Admission.sourceCandidateMetadataV2Refusal?_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ExclusionFeatures.lean:Solidity.Frontend.Admission.sourceCandidateMetadataV2Refusals_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ExclusionFeatures.lean:Solidity.Frontend.Admission.sourceCandidateMetadataV2Uses_iff": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Frontend/Admission/ExclusionFeatures.lean:Solidity.Frontend.Admission.sourceCandidateRefusal?_none_iff": [
   "Classical.choice",
   "Quot.sound",
@@ -37,6 +50,10 @@
   "propext"
  ],
  "Solidity/Frontend/Admission/ExclusionFeatures.lean:Solidity.Frontend.Admission.syntaxCandidateFeaturesAt_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ExclusionFeatures.lean:Solidity.Frontend.Admission.syntaxCandidateMetadataV2At_iff": [
   "Quot.sound",
   "propext"
  ],

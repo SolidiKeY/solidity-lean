@@ -196,4 +196,58 @@ theorem sourceCandidateRefusal?_none_iff (unit : Syn .unit) (accepts : Feature �
 /-- info: 'Solidity.Frontend.Admission.sourceCandidateRefusal?_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms sourceCandidateRefusal?_none_iff
 
+
+/-! Regression: exact metadata classifiers must not remain disconnected from diagnostics. This opt-in extension keeps the old candidate frozen, appends constness then declaration qualifiers at each syntax site, and retains duplicates. It is a partial classifier relative to the supplied predicate, not canonical ProfileV2, typing, admission or execution adequacy. -/
+def syntaxCandidateMetadataV2At {c : Cat} (s : Syn c) : List Feature :=
+  syntaxCandidateFeaturesAt s ++ (constnessFeaturesAt s ++ declarationQualifierFeaturesAt s)
+
+theorem syntaxCandidateMetadataV2At_iff {c : Cat} (s : Syn c) (f : Feature) :
+    f ∈ syntaxCandidateMetadataV2At s ↔
+      f ∈ syntaxCandidateFeaturesAt s ∨
+      (∃ qualifier, DirectConstness s qualifier ∧ constnessFeature qualifier = f) ∨
+      DirectDeclarationQualifier s f := by
+  simp only [syntaxCandidateMetadataV2At, List.mem_append, constnessFeaturesAt_iff,
+    declarationQualifierFeaturesAt_iff]
+
+def sourceCandidateMetadataV2Uses (unit : Syn .unit) : List (SyntaxOccurrence × Feature) :=
+  syntaxFieldUses unit syntaxCandidateMetadataV2At
+
+theorem sourceCandidateMetadataV2Uses_iff (unit : Syn .unit) (site : SyntaxOccurrence) (f : Feature) :
+    (site,f) ∈ sourceCandidateMetadataV2Uses unit ↔
+      Syn.Sub site ⟨.unit,unit⟩ ∧ f ∈ syntaxCandidateMetadataV2At site.2 :=
+  syntaxFieldUses_iff unit syntaxCandidateMetadataV2At site f
+
+def sourceCandidateMetadataV2Refusals (unit : Syn .unit) (accepts : Feature → Bool) :
+    List (SyntaxOccurrence × Feature) := syntaxFieldRefusals unit syntaxCandidateMetadataV2At accepts
+
+def sourceCandidateMetadataV2Refusal? (unit : Syn .unit) (accepts : Feature → Bool) :
+    Option (SyntaxOccurrence × Feature) := syntaxFieldRefusal? unit syntaxCandidateMetadataV2At accepts
+
+theorem sourceCandidateMetadataV2Refusals_iff (unit : Syn .unit) (accepts : Feature → Bool)
+    (site : SyntaxOccurrence) (f : Feature) :
+    (site,f) ∈ sourceCandidateMetadataV2Refusals unit accepts ↔
+      Syn.Sub site ⟨.unit,unit⟩ ∧ f ∈ syntaxCandidateMetadataV2At site.2 ∧ accepts f = false :=
+  syntaxFieldRefusals_iff unit syntaxCandidateMetadataV2At accepts site f
+
+theorem sourceCandidateMetadataV2Refusal?_none_iff (unit : Syn .unit) (accepts : Feature → Bool) :
+    sourceCandidateMetadataV2Refusal? unit accepts = none ↔
+      sourceCandidateRefusal? unit accepts = none ∧
+      syntaxFieldRefusal? unit constnessFeaturesAt accepts = none ∧
+      syntaxFieldRefusal? unit declarationQualifierFeaturesAt accepts = none := by
+  change syntaxFieldRefusal? unit
+    (fun s => syntaxCandidateFeaturesAt s ++ (constnessFeaturesAt s ++ declarationQualifierFeaturesAt s)) accepts = none ↔ _
+  rw [syntaxFieldRefusal?_append_none_iff unit syntaxCandidateFeaturesAt
+    (fun s => constnessFeaturesAt s ++ declarationQualifierFeaturesAt s) accepts,
+    syntaxFieldRefusal?_append_none_iff unit constnessFeaturesAt declarationQualifierFeaturesAt accepts]
+  rfl
+
+/-- info: 'Solidity.Frontend.Admission.syntaxCandidateMetadataV2At_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxCandidateMetadataV2At_iff
+/-- info: 'Solidity.Frontend.Admission.sourceCandidateMetadataV2Uses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms sourceCandidateMetadataV2Uses_iff
+/-- info: 'Solidity.Frontend.Admission.sourceCandidateMetadataV2Refusals_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms sourceCandidateMetadataV2Refusals_iff
+/-- info: 'Solidity.Frontend.Admission.sourceCandidateMetadataV2Refusal?_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms sourceCandidateMetadataV2Refusal?_none_iff
+
 end Solidity.Frontend.Admission
