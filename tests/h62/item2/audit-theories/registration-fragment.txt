@@ -1,0 +1,84 @@
+DEFERRED REGISTRATION FRAGMENT — DO NOT APPLY WITHOUT AREA PRODUCER APPROVAL
+Current modules are standalone tests, intentionally absent from generated roots.
+No generated root, module map, axiom pin, or producer-owned source was changed.
+
+For coordinator consideration only, after exact-file owner routing:
+source tests/h62/item2/audit-theories/ProgressWitnesses.lean
+candidate Solidity/Theory/Audit/H62/ProgressWitnesses.lean
+import Solidity.Theory.Audit.H62.ProgressWitnesses
+row Theory/Audit/H62/ProgressWitnesses.lean | Joint progress-input witnesses and source-success/fuel controls.
+
+source tests/h62/item2/audit-theories/FiniteBoundary.lean
+candidate Solidity/Theory/Audit/H62/FiniteBoundary.lean
+import Solidity.Theory.Audit.H62.FiniteBoundary
+row Theory/Audit/H62/FiniteBoundary.lean | Certificate for the finite-shape/direct-array impossible-input boundary.
+
+source tests/h62/item2/audit-theories/ScopeControls.lean
+candidate Solidity/Theory/Audit/H62/ScopeControls.lean
+import Solidity.Theory.Audit.H62.ScopeControls
+row Theory/Audit/H62/ScopeControls.lean | Joint expression/block/body inputs; global-versus-per-input controls.
+
+ElaboratedCensus.lean imports Lean metaprogramming and must remain an optional
+standalone audit tool, outside dependency-free core roots. It is not proposed
+for core registration. Generated constant classification remains pending.
+
+source tests/h62/item2/audit-theories/PathWitnesses.lean
+candidate Solidity/Theory/Audit/H62/PathWitnesses.lean
+import Solidity.Theory.Audit.H62.PathWitnesses
+row Theory/Audit/H62/PathWitnesses.lean | Sixteen joint path/observation algebra input witnesses; no storage realizability or runtime claim.
+
+Totality modules remain optional audit tests. Do not promote blindly: their
+quoted test-to-test imports and compiler/fork dependencies need owner-approved
+module paths and layer checks before any generated-root registration.
+
+source tests/h62/item2/audit-theories/PathRemaining.lean
+candidate Solidity/Theory/Audit/H62/PathRemaining.lean
+import Solidity.Theory.Audit.H62.PathRemaining
+row Theory/Audit/H62/PathRemaining.lean | Twenty-five remaining joint path/observation/storage inputs; all41 explicit Paths statements covered with prior16. Adjust its local test import only after owner approval.
+
+source tests/h62/item2/audit-theories/MirrorWitnesses.lean
+candidate Solidity/Theory/Audit/H62/MirrorWitnesses.lean
+import Solidity.Theory.Audit.H62.MirrorWitnesses
+row Theory/Audit/H62/MirrorWitnesses.lean | Joint inputs for all thirteen explicit memory-mirror theorems, using populated heap and nonempty field/vector fixtures.
+
+source tests/h62/item2/audit-theories/BridgeWitnesses.lean
+candidate Solidity/Theory/Audit/H62/BridgeWitnesses.lean
+import Solidity.Theory.Audit.H62.BridgeWitnesses
+row Theory/Audit/H62/BridgeWitnesses.lean | Joint input witnesses for all eight unchanged Bridge/Denote interfaces with actual SOME successes; standalone pending registration.
+
+source tests/h62/item2/audit-theories/OutcomeWitnesses.lean
+candidate Solidity/Theory/Audit/H62/OutcomeWitnesses.lean
+import Solidity.Theory.Audit.H62.OutcomeWitnesses
+row Theory/Audit/H62/OutcomeWitnesses.lean | Joint inputs for all nine unchanged Progress/Outcome interfaces with universal NS and actual model success; optional Source.Semantics/CoreTotality imports require owner-approved placement before registration.
+
+source tests/h62/item2/audit-theories/CloserWitnesses.lean
+candidate Solidity/Theory/Audit/H62/CloserWitnesses.lean
+import Solidity.Theory.Audit.H62.CloserWitnesses
+row Theory/Audit/H62/CloserWitnesses.lean | Joint inputs for all four unchanged modal/Spec/transient frame facts, with successful nonempty ordinary/transient runs.
+
+source tests/h62/item2/audit-theories/PayableWitnesses.lean
+candidate Solidity/Theory/Audit/H62/PayableWitnesses.lean
+import Solidity.Theory.Audit.H62.PayableWitnesses
+row Theory/Audit/H62/PayableWitnesses.lean | Six feasible Payable joint packets, one explicitly accepted intentional H69 static-value boundary, and three successful model API controls; no operational static-refusal coverage.
+
+source tests/h62/item2/audit-theories/AssignableWitnesses.lean
+candidate Solidity/Theory/Audit/H62/AssignableWitnesses.lean
+import Solidity.Theory.Audit.H62.AssignableWitnesses
+row Theory/Audit/H62/AssignableWitnesses.lean | Joint inputs for all eight original assignable interfaces, with real nonempty storage-write and empty-clause refusal controls; standalone pending approved placement.
+
+source tests/h62/item2/audit-theories/PureBoundaryWitnesses.lean
+candidate Solidity/Theory/Audit/H62/PureBoundaryWitnesses.lean
+import Solidity.Theory.Audit.H62.PureBoundaryWitnesses
+row Theory/Audit/H62/PureBoundaryWitnesses.lean | Eight selected Pure input packets, nonidentity universally commuting terminating loops and visible outside replacement; PARTIAL8/26, optional standalone placement pending review.
+
+| `tests/h62/item2/audit-theories/ObservationDomains.lean` | Supplemental Obs.ext joint packet with inhabited word/length domains and observed fields; abstract Obs only. |
+
+| `tests/h62/item2/audit-theories/CleanTailWitnesses.lean` | All six original CleanTail joint telescopes, private input, admitted flag-write system and actual transient reset; source-model only. |
+
+| `tests/h62/item2/audit-theories/ReachableModeWitnesses.lean` | All11 original Reachable/Mode input packets includingprivate, universal setter success and persistent box obligations; source-model only. |
+
+# Proposal only: LeafProgressWitnesses imports unchanged Progress.Leaves + source examples.
+tests/h62/item2/audit-theories/LeafProgressWitnesses.lean
+
+# Proposal only: TupleProgressWitnesses imports unchanged tuple interface and owned progress fixture.
+tests/h62/item2/audit-theories/TupleProgressWitnesses.lean

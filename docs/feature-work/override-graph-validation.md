@@ -507,3 +507,53 @@ shared runner and puts execution timeouts inside the selected environment.
 Raw outputs are local in runtime/H44; no bulk
 logs or fixtures were added to Git. Lean/Source/ExtCall, theorem statements,
 premises, exclusions, proof budgets and CENTRAL/H41 holds are unchanged.
+
+
+## H82 continuation and inheritance successor relay
+
+Fresh narrow build (44 jobs) and both actual Source replays PASS at 4bdd5952:
+943 rows each, 448 parsed, candidate 90 accepts with zero mismatch; current
+checker reproduces documented false-pass families. The earlier stale replay
+wait is resolved by actual execution. New bulk archive is 125428585 bytes,
+SHA256 a78a6951b658780f93d634acf3da81f5734ea80f502e329c44a5eda47de29163,
+at runtime/H82/validated-bulk.tar.gz; committed BULK-MANIFEST anchors it. Old
+H44 archive remains intact. Eight output entries refreshed, only two bytesets
+differ; frozen fixtures/expectations/member inventory unchanged. Archive-bound
+--replays PASS. Fresh compiler 943 rows and getter code-generation 12 rows PASS.
+KeySort 377 taclets/131 read-bearing/table covers 131 PASS. Lean 4.24.0 (797c613),
+Lake 5.0.0-src+797c613; four committed guarded proof files PASS, nine regressions,
+25 adversarial controls, roots/fragments/layers/trust PASS (6147 sources, 289
+sites, zero findings). Incorrect initial direct trust invocation retained; its
+repository wrapper corrected it. No source/theorem/budget/premise change.
+
+Actual waits remain: central shared pins (zero errors, 4133 unrecorded, including
+135 lane pins), full cache-only exit 3 and thus full final gates. No unchanged
+cold build retry or VM cache shipping. No RUNTIME_GATE_PASS. Kernel proofs,
+external compiler checks and replay executions keep separate boundaries.
+The inheritance successor relay is accepted into the same goal. C3 head 70845978
+is already an ancestor, but its original final handoff path is absent here and
+its remote lane branch is not advertised. Final authenticated bundle, exact
+frozen assignment/scope bytes and explicit stopped acknowledgement are still
+required; no retiring scope edit/integration/stop request occurs. C3 H70 and
+original queue/backfill remain open without scope guessing. Both read-only
+reviews found no archive/provenance issue. Details: tests/sol-override-validation/H82-HANDOFF.md.
+
+
+## H151 current status and historical gaps
+
+The unavailable old C3 retirement runtime/seal export and historical H41 cache
+payload are **UNVERIFIABLE** documented gaps, not active waits. Their original
+claims remain unproven; authenticated report metadata alone is not their result.
+Do not recreate a retired VM or require lost exports before continuing. Available
+local/private-archive records and verified member Git/scope/stopped metadata
+remain distinct from these gaps. See the H151 ledger in c3-exactness.md.
+
+Fresh C3 per-file diagnostics and nine compiler fixtures have been regenerated
+as new limited observations. They do not validate the missing historical run,
+seal, timing or cache, and do not waive original acceptance requirements.
+The earlier shared-pin wait was cleared by the actual zero-drift inventory check
+at 77dbfca8. Current gate/source-pin owner decisions and present-day host-managed
+full-runtime readiness remain open. No historical-artifact retrieval wait is
+retained, no full completion/RUNTIME_GATE_PASS is claimed, and no theorem,
+source, gate, premise, exclusion or proof budget changes. H145 receipts remain
+private; H146/H147 shared warming remains a host responsibility.

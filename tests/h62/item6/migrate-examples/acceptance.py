@@ -69,6 +69,15 @@ class InterfaceAcceptance(unittest.TestCase):
         header["modules"].reverse()
         self.assertEqual(old["interface_sha256"],interfaces.inventory(self.raw(header,rows),scope)["interface_sha256"])
 
+    def test_streamed_inventory_keeps_validation(self):
+        scope,header,rows=self.fixture();raw=self.raw(header,rows)
+        expected=interfaces.inventory(raw,scope)
+        self.assertEqual(expected,interfaces.inventory(iter(raw.splitlines()),scope))
+        def truncated():
+            yield from raw.splitlines()[:-1]
+        with self.assertRaisesRegex(ValueError,"missing completion footer"):
+            interfaces.inventory(truncated(),scope)
+
     def test_visibility_only_changes_and_missing_flags(self):
         scope,header,rows=self.fixture();old=interfaces.inventory(self.raw(header,rows),scope)
         for field in ("private_name","protected_name"):

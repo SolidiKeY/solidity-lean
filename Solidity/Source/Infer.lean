@@ -710,6 +710,27 @@ def StmtD.inferN (n : Nat) (C : Ctx) {k : SCtx} (L : List (String × STy)) (s : 
         | Option.none => Option.none
       | _ => Option.none
     | _, _ => Option.none
+  | _, .tryStmt (.call (.member c f) (.positional args)) rets (.block okb)
+      (.catchSig (Option.some "Error") (.param (.elem .string) (Option.some .memory) name) .nil (.block cb)) .nil =>
+    (TypedArgs.infer (C.at L) ((C.at L).libraryArgs c args)).bind fun ⟨sigmas, da⟩ =>
+    match ho : (C.at L).libraryOverloads c f sigmas with
+    | [d] =>
+      match hs : d.fnSig C.env with
+      | Option.some (ps, rs) =>
+        if hf : argsFit C.isBase C.mapFree sigmas ps = true then
+          if hb : libraryBoundary ps rs = true then
+            match ht : rets.tys C.env C.scope .memory with
+            | Option.some tys =>
+              if same : (tys.isEmpty || STy.sameList tys rs) = true then
+                (ItemsD.inferN n C ((tryLocals rets.paramNames rs).reverse ++ L) okb).bind fun ⟨_, success⟩ =>
+                (ItemsD.inferN n C ((name.getD "", .string .memory) :: L) cb).map fun ⟨_, failure⟩ =>
+                  ⟨L, .tryLibrary da ho hs hf hb ht same success failure⟩
+              else Option.none
+            | Option.none => Option.none
+          else Option.none
+        else Option.none
+      | Option.none => Option.none
+    | _ => Option.none
   | _, .assembly false _ body =>
     if hb : isRethrow body = true then
       match hv : rethrowVar? body with

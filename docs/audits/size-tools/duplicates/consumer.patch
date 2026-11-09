@@ -1,0 +1,13 @@
+diff --git a/scripts/check-automatic.mjs b/scripts/check-automatic.mjs
+index 7a394db99..05467409f 100644
+--- a/scripts/check-automatic.mjs
++++ b/scripts/check-automatic.mjs
+@@ -129,0 +130,8 @@ export function proofs(src) {
++    if (head === "solkey_prove_batch") {
++      const rows = cmd.slice(1).map((l) => l.replace(/--.*$/, "").trim()).filter(Boolean);
++      if (!rows.length || rows.some((n) => !/^Solkey\.TestSuite\.[A-Za-z0-9_]+$/.test(n)))
++        throw new Error("invalid solkey_prove_batch row");
++      out.push(...rows.map((n) => ({ name: n.split(".").pop(), kind: "proved", body: ["sol_prove"], opts })));
++      opts = null;
++      continue;
++    }

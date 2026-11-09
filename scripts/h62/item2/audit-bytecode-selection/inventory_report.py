@@ -16,7 +16,7 @@ from elaborated_census import TEMPLATE, manifest_sha256
 from census import BASE, declarations, mapped_paths
 
 
-OWNERSHIP_SHA256 = '7f5d40d46d386ed17731db55ed87f0564f5c9e667bddee00c0f12b28772f9cce'
+OWNERSHIP_SHA256 = '49fa4e0ef45307428a026b414efc6a99efcbf4911dd23e9574e806be54dbfefe'
 
 
 def validate_pins(pins, mapped):
@@ -67,6 +67,35 @@ def owner_matches(path, items):
     return matches
 
 
+def source_links(rows, candidates):
+    """Require unique name+selection-position matches; preserve both gap directions."""
+    keys = [(c["name_candidate"], c["name_line"], c["name_column"]) for c in candidates]
+    if len(set(keys)) != len(keys):
+        raise ValueError("duplicate source candidate location")
+    for row in rows:
+        if row["kind"] == "theorem":
+            row["source_origin"] = "generated_or_private_unresolved"
+            row["source_match_count"] = 0
+            row.pop("source_signature_sha256", None)
+    result = []
+    for candidate in candidates:
+        matches = []
+        for row in rows:
+            position = row.get("declaration_range") or {}
+            if (row["kind"] == "theorem" and row.get("is_theorem")
+                    and row.get("user_name") == candidate["name_candidate"]
+                    and position.get("selection_line") == candidate["name_line"]
+                    and position.get("selection_column") == candidate["name_column"]):
+                matches.append(row)
+        status = "unique" if len(matches) == 1 else "ambiguous" if matches else "unmatched"
+        result.append(dict(candidate, kernel_names=sorted(row["name"] for row in matches), match_count=len(matches), mapping_status=status, mapping_method="module + normalized user name + original theorem + Unicode selection position"))
+        for row in matches:
+            row["source_origin"] = ("private_source_theorem" if row.get("private") else "named_source_theorem") if status == "unique" else "ambiguous_source_match"
+            row["source_signature_sha256"] = candidate["signature_sha256"]
+            row["source_match_count"] = len(matches)
+    return result
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--repo", type=Path, required=True)
@@ -88,7 +117,7 @@ def main():
         if hashlib.sha256(data).hexdigest() != expected or data != subprocess.check_output(["git", "show", BASE + ":" + path], cwd=repo):
             raise ValueError("changed frozen source: " + path)
         module = path[:-5].replace("/", ".")
-        source[module] = {row["name_candidate"] for row in declarations(data.decode())}
+        source[module] = declarations(data.decode())
     snapshot_data = args.ownership.read_bytes()
     if hashlib.sha256(snapshot_data).hexdigest() != OWNERSHIP_SHA256:
         raise ValueError("ownership snapshot checksum mismatch")
@@ -104,16 +133,19 @@ def main():
         row["owner_status"] = "explicit_snapshot_match" if len(owners) == 1 else "conflict" if owners else "unresolved"
         row["source_path"] = path
         row["type_expr_sha256"] = hashlib.sha256(row["type_expr"].encode()).hexdigest()
+        row["body_expr_sha256"] = hashlib.sha256(row["body_expr"].encode()).hexdigest() if row.get("body_expr") is not None else None
+        row["role"] = "proof_statement" if row["kind"] == "theorem" else "proof_valued_constant" if row["proof_type"] else "proposition_valued_constant" if row.get("predicate_valued") else "data_constant"
         if row["kind"] == "theorem":
-            row["source_origin"] = "named_source_theorem" if row["name"] in source[row["module"]] else "generated_or_private_unresolved"
+            row["source_origin"] = "generated_or_private_unresolved"
         row["witness"] = None
         row["coverage"] = "uncovered; linkage review required"
         rows.append(row)
     rows.sort(key=lambda row: (row["module"], row["name"]))
     if len({row["name"] for row in rows}) != len(rows):
         raise ValueError("empty or duplicate inventory")
+    source_mapping = {module: source_links([row for row in rows if row["module"] == module], candidates) for module, candidates in sorted(source.items())}
     missing = sorted(set(all_paths) - pins["source_sha256"].keys())
-    result = {"base": BASE, "boundary": "Elaborated direct fields and constants for selected core modules only; not flattened parent obligations or full-area coverage", "ownership_snapshot_sha256": hashlib.sha256(snapshot_data).hexdigest(), "inspected_modules": pins["modules"], "uninspected_paths": missing, "records": rows, "summary": {"records": len(rows), "direct_fields": sum(r["kind"] == "field" for r in rows), "proof_fields": sum(r["kind"] == "field" and r["proof_type"] for r in rows), "uninspected_files": len(missing), "unresolved_owner_records": sum(r["owner"] is None for r in rows), "mechanically_linked_witnesses": 0}}
+    result = {"base": BASE, "boundary": "Elaborated direct fields and constants for selected core modules only; not flattened parent obligations or full-area coverage", "ownership_snapshot_sha256": hashlib.sha256(snapshot_data).hexdigest(), "inspected_modules": pins["modules"], "uninspected_paths": missing, "source_mapping": source_mapping, "records": rows, "summary": {"records": len(rows), "proposition_valued_constants": sum(r.get("predicate_valued", False) for r in rows), "source_candidates": sum(len(v) for v in source_mapping.values()), "source_candidates_unique": sum(r["mapping_status"] == "unique" for values in source_mapping.values() for r in values), "source_candidates_unmatched": sum(r["mapping_status"] == "unmatched" for values in source_mapping.values() for r in values), "source_candidates_ambiguous": sum(r["mapping_status"] == "ambiguous" for values in source_mapping.values() for r in values), "direct_fields": sum(r["kind"] == "field" for r in rows), "proof_fields": sum(r["kind"] == "field" and r["proof_type"] for r in rows), "uninspected_files": len(missing), "unresolved_owner_records": sum(r["owner"] is None for r in rows), "mechanically_linked_witnesses": 0}}
     args.output.write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n")
     print(json.dumps(result["summary"], sort_keys=True))
 

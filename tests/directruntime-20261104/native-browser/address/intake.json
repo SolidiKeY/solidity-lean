@@ -1,0 +1,22 @@
+{
+  "guardedRegression": "H90 address locals must retain marker/identity/error order on the shared executable boundary",
+  "producerHead": "0834bc67b042a63a8c804162781802245ae59c98",
+  "packet": {
+    "path": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/address-handoff/address-api-packet.json",
+    "sha256": "c19c588e1ae27a39f39c410d2e3d2e7bf393a59c01a087d25aacf01fe2ec5dfb"
+  },
+  "sourceFiles": [
+    {
+      "path": "Solidity/Frontend/ExecutableAst/Shared/Translate.lean",
+      "sha256": "352b8caf7b4a070d9e5c77c0353d1edd47dadc5b4871d74f05b5600c37e2dae9"
+    },
+    {
+      "path": "Solidity/Frontend/ExecutableAst/Shared/Compose.lean",
+      "sha256": "81834803c899cea42d45fb11ce95888dddc2170e5000067d5c93aeb8d22d87ed"
+    }
+  ],
+  "scope": "Two exact reviewed producer files only;matching owner09bbconflict versions.No manual producer definition changes,no full branch/census/sourceproof claim.",
+  "publicationWait": "origin/master0b11b60aad4062697bd744eab26dea3201bc6445 still lacks owner09bb/0834;H71authorizes scoped exact intake now;coordinator merge wait retained.",
+  "controls": "16primary source-level diamond/box requests,unchanged expected10proved/2refuted/4unsupported;8sourceannotations eraseexactoriginal.Standalone guard prefix retains malformed/payable/state-reader/builtinID/error-order checks.",
+  "status": "Intake checkpoint;fresh source build,proof/diagnostic/runtime gates pending."
+}

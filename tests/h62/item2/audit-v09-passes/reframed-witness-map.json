@@ -1,0 +1,68 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface": "Solidity/Backend/Passes/ReframedControls.lean",
+  "interface_sha256": "f022285dab9d9207b7bbfa166704a9391960c9670fb9b13624bde160ee67e05a",
+  "joint_witness": "Solidity.Backend.Passes.AuditReframed.joint",
+  "exercised_public_namespace": "Solidity.Backend.Passes.AuditReframed",
+  "rows": [
+    {
+      "name": "Solidity.Backend.Passes.ReframedControls.frame_gap",
+      "signature_sha256": "b2f90a3316faad7c53266609e7d121a0b111e07c73c4ed0b02559e0db007ddc6",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReframedControls.prefix_refused_at_suffix_frame",
+      "signature_sha256": "4ddb1c7042210f731ceb99dcffc0ebb303f2d0dea785c0b0fec45aa94c062d47",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReframedControls.physical_link",
+      "signature_sha256": "8752b286e0d0e8e5699c4025338e11786b687f6b2456410a7af5dc00ca859fb0",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReframedControls.shared",
+      "signature_sha256": "dbe67f5f3ec2f8bc9bfedc094be52b72c93d220ecee0e470f81ada31b68d7097",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReframedControls.bad_source",
+      "signature_sha256": "27be876a559a0378dcf40a46632f3425c1a10210a47abff4cd15b3252f8fb0e5",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReframedControls.bad_link",
+      "signature_sha256": "d10b881193844ed8030c1aad42261db6fc25dcec63ff0fb4043ffcb99b8ec63f",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReframedControls.reached_revert",
+      "signature_sha256": "95972857d45b0b0ffa98797a56b1bad5cfa470674a0ab82d6259e17fb5bb6e33",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReframedControls.ordered_vectors",
+      "signature_sha256": "7d5ebe3b821a1a46f727bcd7f2ca2238be031dd4ca99fdd4ee81b7eb3ab10a5b",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReframedControls.skipped_consumer",
+      "signature_sha256": "9af920425aa02b5333c73aa3bab80d0619e8eff105ff999b50d24407b28d5de2",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReframedControls.corrupted_tail",
+      "signature_sha256": "2c6afa5126be59bd27de8bd613a2c0ce596d861cb3524993a7d82593f6f1c946",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReframedControls.short_suffix_frame",
+      "signature_sha256": "048976deb57f55af343aa19a07c6aa72958640827a01ad2a189e6ca233ff35ef",
+      "kind": "public-original-proof-reuse"
+    }
+  ],
+  "aggregate_selected": 406,
+  "aggregate_remaining": 853,
+  "auxiliary_definition_credit": 0,
+  "limits": "Eleven original model frame-release/control rows. Prefix Input stays indexed by 128, suffix Input by 5, and 4-slot suffix remains refused. No ABI/function-reference producer, external CALL/world, native ByteWorld/emission, session resource or full Source/G24 adequacy."
+}

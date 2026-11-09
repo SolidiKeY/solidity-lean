@@ -1,0 +1,33 @@
+{
+  "state": "development-not-frozen",
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "note": "Distinct conditional division-to-sub helper edit, inhabited signed minimum and zero divisor controls in one source-linked Boolean family.",
+  "cases": [
+    {
+      "id": "division.div-sub-helper-min-and-zero",
+      "kind": "mutant",
+      "family": "division-minimum",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  Tm.castV (BinOp.compound_ret hop p) (.app2 (.binop op (BinOp.compound_accepts hop hp)) a b)",
+      "new": "  if op = .div then\n    .app2 (.binop .sub (BinOp.compound_accepts (op := .sub) rfl hp)) a b\n  else\n    Tm.castV (BinOp.compound_ret hop p) (.app2 (.binop op (BinOp.compound_accepts hop hp)) a b)",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/DivisionBaseline.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/DivisionSubtractKill.lean",
+      "oracle_sha256": "fd1ec9bd8200c51823ea1ccb93dd92f5faef1ecd52cd993385cf4b4b77d369e6",
+      "witness_sha256": "1a70933ed6443f1c5554496d4b4b9f23656cca64485e3876d1dba5e04f8437d5",
+      "oracle_declarations": [
+        "H28.DivisionBaseline.source_link",
+        "H28.DivisionBaseline.input_inhabited",
+        "H28.DivisionBaseline.rejecting_run"
+      ],
+      "witness_declarations": [
+        "H28.DivisionSubtractKill.source_link",
+        "H28.DivisionSubtractKill.input_inhabited",
+        "H28.DivisionSubtractKill.checked_kill",
+        "H28.DivisionSubtractKill.checked_zero_kill",
+        "H28.DivisionSubtractKill.typed_landing"
+      ],
+      "source_symbol": "Tms.Term.binopC"
+    }
+  ]
+}

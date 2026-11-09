@@ -1,0 +1,144 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface": "Solidity/Backend/Passes/LoopReframedFailureControls.lean",
+  "interface_sha256": "96d3d98e65098eabb0cf4c3452bd8fa4129a8bf04e4517ac41df3caeadb792b3",
+  "joint_witness": "Solidity.Backend.Passes.AuditLoopReframedFailure.joint",
+  "exercised_public_namespace": "Solidity.Backend.Passes.AuditLoopReframedFailure",
+  "checked_private_names": [
+    "guard_code",
+    "before_value"
+  ],
+  "uncovered_private_names": [
+    "Solidity.Backend.Passes.LoopReframedFailureControls.stale_pointer"
+  ],
+  "rows": [
+    {
+      "name": "Solidity.Backend.Passes.LoopReframedFailureControls.before_source",
+      "signature_sha256": "d881ff21c08ba6d90742ab0cd827b6c8d710d6a94163d988820d7e118c9f24fc",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopReframedFailureControls.after_source",
+      "signature_sha256": "2cfea7bb5ee1e9f6b7f5d4fa9808d374c63ef1e75ca26cdb91de48e907e90739",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopReframedFailureControls.after_link",
+      "signature_sha256": "e2a4d862bbdf90f6f193a94cfaa1fcc2e167d3f85e16661e098ae6d55743c915",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopReframedFailureControls.reached_prefix_failure",
+      "signature_sha256": "ecca2d540e65edc6fe948f277a58e0443b3c3dd159f3f0127a129b791c8c13c1",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopReframedFailureControls.joined_source_failure",
+      "signature_sha256": "6e7ace7afd5387838b61ab421adf19da1788de18d4743cfabcbd5123edcc0907",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopReframedFailureControls.before_target",
+      "signature_sha256": "afff84104c25707d3027d096a20512fc391b1bc08b573a8e1918b7b092894c8b",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopReframedFailureControls.before_target_tail",
+      "signature_sha256": "357225b61fef11fafed03a5fd15476412392da01e4637e137b73d8b1c63533a7",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopReframedFailureControls.wrong_order_target",
+      "signature_sha256": "ea7d4fc7cb8142faaacc0d7741b86daaab5cfcf58ba275d5d0185fca498175bf",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopReframedFailureControls.wrong_order_source",
+      "signature_sha256": "f5b505b70c342ea3c92320a856df17fa9807649e66f77f819555b8f4758ac76d",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopReframedFailureControls.wrong_order_distinct",
+      "signature_sha256": "c196bf7167fa6f752097dfcca1bed8903e1dc31344224cc09f78c8851f0c9781",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopReframedFailureControls.complete_wrong_order_vector",
+      "signature_sha256": "e23db72eca48b9152f9b07e0ed2d96144719474a859677197e63107888c080dd",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopReframedFailureControls.corrupt_saved_tail",
+      "signature_sha256": "5eb6975515da181bf94ea94d55725572c7b15afb5bfcf276c51ac4ca00d66ee2",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopReframedFailureControls.insufficient_guard_frame",
+      "signature_sha256": "988483ef3fe5c14196f41913e75efd1f1c4844308c7d66cefbc3a57b6fb96fa1",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopReframedFailureControls.stale_guard_input_refused",
+      "signature_sha256": "d940cebc5354ea6644623b80565a91d56e5b4651d2c42e71816cc49fe4bd4894",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopReframedFailureControls.ordinary_revert_separate",
+      "signature_sha256": "d42eaf0e0e4cd543ac0bb800c15565eee57d700af88026557832da014b42c87d",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopReframedFailureControls.guard_code",
+      "signature_sha256": "a71d0b49ed817f36ecefb9bfe75ea04130c3e18f18ce3bfeee7c2a713a9881fa",
+      "kind": "private-exact-kernel-signature",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditLoopReframedFailure.joint"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopReframedFailureControls.before_value",
+      "signature_sha256": "da9e40d9289d28c85900f8f0d6725d3a02fc0d80be5a779660b37d9631682c35",
+      "kind": "private-exact-kernel-signature",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditLoopReframedFailure.joint"
+    }
+  ],
+  "aggregate_selected": 475,
+  "aggregate_remaining": 784,
+  "joint_contract": "actual-shared-loop-output-and-shrinking-suffix-input-at-five-with-source-before-after",
+  "limits": "Fifteen public and two exact private original positive controls. stale_pointer now has checked exact-kernel and joint-premise impossibility evidence, but remains uncovered by an inhabited witness with zero positive credit. Its pointer representation and observed pointer cannot hold simultaneously. No private definition/supplemental credit. No native ByteWorld/emission, gas/ABI or full Source/G24 adequacy.",
+  "checked_axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "private_kernel_prefix": "_private.Solidity.Backend.Passes.LoopReframedFailureControls.0.",
+  "private_axioms_by_name": {
+    "guard_code": [
+      "propext",
+      "Quot.sound",
+      "Classical.choice"
+    ],
+    "before_value": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "intentional_refutations": [
+    {
+      "name": "Solidity.Backend.Passes.LoopReframedFailureControls.stale_pointer",
+      "signature_sha256": "4221f4fad34ebe18e568ab3d48d3ab2afe444f9f41b9728ec8d72436ef63fa50",
+      "kernel_name": "_private.Solidity.Backend.Passes.LoopReframedFailureControls.0.Solidity.Backend.Passes.LoopReframedFailureControls.stale_pointer",
+      "classification": "checked-intentional-stale-pointer-refutation",
+      "premise_impossibility": "Solidity.Backend.Passes.AuditLoopReframedFailure.stale_pointer_premises_impossible",
+      "joint_witness": null,
+      "selected_witness_credit": 0,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  ],
+  "checked_refutation_names": [
+    "stale_pointer"
+  ]
+}

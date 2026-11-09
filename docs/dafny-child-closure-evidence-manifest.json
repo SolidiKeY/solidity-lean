@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "sourceParent": "769f15d24b56dc2700d96514fad0c0a5d833c444",
+  "status": "partial",
+  "fileCount": 98,
+  "uncompressedBytes": 917545,
+  "archive": {
+    "path": "/workspace/dafny-parity-child-closure-20261107/evidence/bulk.tar.gz",
+    "bytes": 67346,
+    "sha256": "a9f5c5feb8a046f6ad20dc859e13e458cefe7e5ef9932112ae664c6e374ec716"
+  },
+  "index": {
+    "path": "/workspace/dafny-parity-child-closure-20261107/evidence/files.json",
+    "bytes": 18827,
+    "sha256": "6610b742de5c315f3ae2939256b3e878fc17749b153b49865c45bfef8e8b5ce1"
+  },
+  "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-child-closure-evidence-manifest.json --restore",
+  "boundaries": [
+    "OriginalCIcauseunattributed; actualinjectedserver/nativeprocessfamilybefore1/after0. Physicalclose required/default1000ms unchanged; Zentries retained.",
+    "Kernel conditional typed split-slot foundation only, no canonicalsourceclause/span/originalobligation/entrypremise association.",
+    "All489orderedrows/frozen270/gate/judge/expectedobservations/budgets retained; zero complete rows."
+  ]
+}

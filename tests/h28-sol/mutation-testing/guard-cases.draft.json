@@ -1,0 +1,73 @@
+{
+  "state": "development-not-frozen",
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "note": "Selected guard/control probes only. Not the exhaustive assignment manifest, no score.",
+  "cases": [
+    {
+      "id": "guard.require-success-false",
+      "kind": "mutant",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | requireSimple :\n      dl{ \u27e8[ require(se); ]\u27e9 \u21dd \"Holds\": se = true",
+      "new": "  | requireSimple :\n      dl{ \u27e8[ require(se); ]\u27e9 \u21dd \"Holds\": se = false",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/GuardBaseline.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/GuardTruePolarityKill.lean",
+      "oracle_sha256": "c68bc5209bc77526b2b7fa43aa85a41f572de18c45d63901e1b69b9cef5a3d01",
+      "witness_sha256": "521891721ea8598866a1932044ec7e7ff41809197aa0585f30bd80cb9f840d40",
+      "oracle_declarations": [
+        "H28.GuardBaseline.source_link",
+        "H28.GuardBaseline.input_inhabited",
+        "H28.GuardBaseline.successful_run"
+      ],
+      "witness_declarations": [
+        "H28.GuardTruePolarityKill.source_link",
+        "H28.GuardTruePolarityKill.input_inhabited",
+        "H28.GuardTruePolarityKill.checked_kill"
+      ]
+    },
+    {
+      "id": "guard.require-revert-true",
+      "kind": "negative-control",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | requireSimple :\n      dl{ \u27e8[ require(se); ]\u27e9 \u21dd \"Holds\": se = true \u27f9 \u27e8[ ]\u27e9 ; \"Reverts\": se = false",
+      "new": "  | requireSimple :\n      dl{ \u27e8[ require(se); ]\u27e9 \u21dd \"Holds\": se = true \u27f9 \u27e8[ ]\u27e9 ; \"Reverts\": se = true",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/GuardFalseBaseline.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/GuardFalsePolarityKill.lean",
+      "oracle_sha256": "7bb5e129a4f46e189a1f0dfc4daf984a356cdb5caff0adafd9b0cec4cd5c593e",
+      "witness_sha256": "b16424fb02d3fc64319689a214a535fed821729d1194b185d5e6c996f0760f69",
+      "oracle_declarations": [
+        "H28.GuardFalseBaseline.source_link",
+        "H28.GuardFalseBaseline.input_inhabited",
+        "H28.GuardFalseBaseline.reverting_run"
+      ],
+      "witness_declarations": [
+        "H28.GuardFalsePolarityKill.source_link",
+        "H28.GuardFalsePolarityKill.input_inhabited",
+        "H28.GuardFalsePolarityKill.checked_kill"
+      ]
+    },
+    {
+      "id": "control.revert-diamond-true",
+      "kind": "known-kill",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | revertDiamond :\n      dl{ \u27e8 revert(); \u27e9 \u21dd false }",
+      "new": "  | revertDiamond :\n      dl{ \u27e8 revert(); \u27e9 \u21dd true }",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/RevertBaseline.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/RevertDiamondKill.lean",
+      "oracle_sha256": "2fab8e1f10a5bfaa206cabcbcd75de1db9fec8a12b0aeaf18e47c87a8403587c",
+      "witness_sha256": "120b7f53e487e5586f70bc036bd2f47433a5ecc1247e08c6de475afeaa68a2ea",
+      "oracle_declarations": [
+        "H28.RevertBaseline.source_link",
+        "H28.RevertBaseline.input_inhabited",
+        "H28.RevertBaseline.reverting_run"
+      ],
+      "witness_declarations": [
+        "H28.RevertDiamondKill.source_link",
+        "H28.RevertDiamondKill.input_inhabited",
+        "H28.RevertDiamondKill.checked_kill"
+      ]
+    }
+  ]
+}

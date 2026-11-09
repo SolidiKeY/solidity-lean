@@ -1,3 +1,4 @@
+import Solidity.Yul.Compilation.CompletionControls
 import Solidity.Yul.Compilation.SequenceCompilation
 import Solidity.Yul.Compilation.ScopedControlCompletion
 import Solidity.Yul.Compilation.MultiSwitchCompletion
@@ -48,8 +49,16 @@ theorem model_to_source {c n fuel} {stmt : Stmt [] [] c n}
      rw [actual,retired,frame] at whole
      change Evm.run qb {m with stack := mid.toList.map coreWord++caller} = .ok final skip at whole
      obtain ⟨hi,out,last,done,finalFrame⟩ := ihRight b qb hb sb mid m final caller skip whole
-     have firstH := evalStmt_stable (Nat.le_max_left lo hi) .nil True.intro _ left.profile (sourceLocals locals) first
-     have lastH := evalStmt_stable (Nat.le_max_right lo hi) .nil True.intro _ right.profile (sourceLocals mid) last
+     have firstH : evalStmt (max lo hi) .nil True.intro _ left.profile (sourceLocals locals) =
+       some ⟨sourceLocals mid,.normal⟩ := CompletionControls.completed_horizon
+       (fun fuel => evalStmt fuel .nil True.intro _ left.profile (sourceLocals locals))
+       (fun fuel extra => evalStmt_refines_add fuel extra .nil True.intro _ left.profile (sourceLocals locals))
+       (Nat.le_max_left lo hi) first
+     have lastH : evalStmt (max lo hi) .nil True.intro _ right.profile (sourceLocals mid) =
+       some ⟨sourceLocals out,.normal⟩ := CompletionControls.completed_horizon
+       (fun fuel => evalStmt fuel .nil True.intro _ right.profile (sourceLocals mid))
+       (fun fuel extra => evalStmt_refines_add fuel extra .nil True.intro _ right.profile (sourceLocals mid))
+       (Nat.le_max_right lo hi) last
      have source := LoopControlCompilation.sequence_source _ _ left.profile right.profile (max lo hi)
        (sourceLocals locals) (sourceLocals mid) (sourceLocals out) firstH lastH
      exact ⟨max lo hi+1,out,source,done,finalFrame⟩
@@ -70,19 +79,8 @@ theorem completion_iff {c n fuel} {stmt : Stmt [] [] c n}
    some ⟨sourceLocals out,.normal⟩) ↔
  Evm.run artifact.code {m with stack := locals.toList.map coreWord++caller} =
  .ok {m with stack := out.toList.map coreWord++caller} 0 := by
- constructor
- · rintro ⟨horizon,source⟩
-   exact artifact.normal_to_model horizon locals out source m caller
- · intro ran
-   obtain ⟨horizon,actual,source,_,frame⟩ := artifact_reflected artifact locals m
-     {m with stack := out.toList.map coreWord++caller} caller 0 ran
-   have stacks := congrArg Evm.Machine.stack frame
-   have mapped : out.toList.map coreWord = actual.toList.map coreWord := List.append_cancel_right stacks
-   have lists : out.toList = actual.toList :=
-     (List.map_inj_right (fun _ _ h => coreWord_injective h)).mp mapped
-   have equal : out = actual := Vector.toList_inj.mp lists
-   cases equal
-   exact ⟨horizon,source⟩
+ exact CompletionControls.completion_iff_zero stmt artifact.compiled.profile artifact.code
+   artifact.normal_to_model (artifact_reflected artifact) locals out m caller
 
 /-- info: 'Solidity.Yul.Compilation.SequenceCompletion.model_to_source' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in

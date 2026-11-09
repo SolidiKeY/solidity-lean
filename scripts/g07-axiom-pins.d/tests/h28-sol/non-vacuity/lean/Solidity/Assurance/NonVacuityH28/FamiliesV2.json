@@ -1,0 +1,22 @@
+{
+ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/FamiliesV2.lean:Solidity.Assurance.NonVacuityH28.actual_entry_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/FamiliesV2.lean:Solidity.Assurance.NonVacuityH28.checked_v2_family": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/FamiliesV2.lean:Solidity.Assurance.NonVacuityH28.closed_actual_entry_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/FamiliesV2.lean:Solidity.Assurance.NonVacuityH28.correct_v2_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

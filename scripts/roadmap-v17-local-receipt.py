@@ -109,7 +109,21 @@ BUDGET_FIELDS={"initialBudgetSeconds","initialConsumedSeconds","initialElapsedIn
 MISSING=["build.exit","postflight.exit","metadata.stdout","axioms.stdout","replay.stdout"]
 
 
-def account_members(members,request_raw):
+def toolchain_directory(explicit=None):
+    """Resolve a caller pin or elan selection; this does not authenticate historical execution."""
+    if explicit is None:
+        import subprocess
+        try:
+            selected=subprocess.check_output(["elan","which","lean"],cwd=ROOT,timeout=10,text=True)
+            lines=selected.splitlines()
+            p.require(len(lines)==1 and Path(lines[0]).is_absolute() and Path(lines[0]).name=="lean" and not any(ord(c)<32 for c in lines[0]),"invalid elan executable path")
+            explicit=str(Path(lines[0]).parent)
+        except (subprocess.CalledProcessError,subprocess.TimeoutExpired) as error:
+            raise ValueError("elan toolchain selection failed") from error
+    p.require(isinstance(explicit,str) and Path(explicit).is_absolute() and str(Path(explicit))==explicit and ".." not in Path(explicit).parts,"invalid toolchain directory")
+    return explicit
+
+def account_members(members,request_raw,toolchain_bin=None):
     """Pure consistency checks for this failure schema; does not authenticate bytes or a process.
 
     Production calls this only through normalize(), after fixed capsule authentication.
@@ -157,7 +171,7 @@ def account_members(members,request_raw):
     command=spec.get("command")
     expected=["/usr/bin/env","V17_TRUSTED_PYTHON=/usr/bin/python3","/bin/sh",
               root+"/v17-local-requests/request-a-final/payload.sh",root+"/compiler-pass-proofs",
-              "/home/guilherme/.elan/toolchains/leanprover--lean4---v4.24.0/bin",
+              toolchain_bin,
               root+"/v09-diagnostic-a-output",REQUEST_SHA]
     check(command==expected,"wrong payload/request/tool/output command path binding")
     check(prov.get("requestSha256")==intent.get("requestSha256")==REQUEST_SHA,"wrong provenance/intent request binding")
@@ -256,9 +270,9 @@ def account_members(members,request_raw):
         "boundary":"Checks raw capsule-field consistency, not historical process usage, successful proof, original runner identity, source/object selectors or independent Solidity Source adequacy",**FLAGS}
 
 
-def normalize(raw,request_raw):
+def normalize(raw,request_raw,toolchain_bin=None):
     integrity,members=capsule(raw)
-    result=account_members(members,request_raw)
+    result=account_members(members,request_raw,toolchain_directory(toolchain_bin))
     result["intake"]=integrity
     return result,members
 
@@ -274,6 +288,7 @@ def main():
     group.add_argument("--capsule",type=Path);group.add_argument("--base64",type=Path)
     parser.add_argument("--out",type=Path,required=True)
     parser.add_argument("--request",type=Path,help="Original request bytes; enables narrow actual-failure accounting")
+    parser.add_argument("--toolchain-bin",help="Explicit historical toolchain directory; otherwise resolve lean-toolchain through elan which lean")
     args=parser.parse_args()
     try:
         lock=open("/tmp/solidity-lean-feature-groups-20261025/writer.lock","a");fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
@@ -284,7 +299,7 @@ def main():
             raw=base64.b64decode(b"".join(text.split()),validate=True)
         else:raw=p.stable_read(args.capsule,LIMIT)
         if args.request:
-            receipt,members=normalize(raw,p.stable_read(args.request,32*1024**2))
+            receipt,members=normalize(raw,p.stable_read(args.request,32*1024**2),args.toolchain_bin)
         else:receipt,members=capsule(raw)  # Production has no self-derived expected hash.
         args.out.mkdir();payload=args.out/"payload";payload.mkdir()
         for name,body in members.items():

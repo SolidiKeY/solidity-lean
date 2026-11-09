@@ -1,7 +1,0 @@
-# Existing checked stack guard for byte materialization
-
-PhysicalByteStack proves the actual Failure.Slice.stackSafe/checkedRun behavior of the existing Environment.materialize code. A byteCode uses two transient stack slots. The arbitrary-list theorem transports the guard to the actual reached memory and suffix under that sufficient space premise. The REVERT client reserves those slots in addition to offset/length, returns the complete live payload and the unchanged caller tail, and stops before any suffix. Nonempty materialization with exactly1023 input words fails the existing transient guard, while its unchecked run remains a distinct operation. No evaluator or stack policy is changed.
-
-Populated clients retain the previous high-bit protected numeric word and complete byte vectors. They prove maximum-peak success with1022 input words, checked rejection with1023, and actual unchecked success for that same rejected input. Empty materialization succeeds with1024 input words and fails with1025. This is a target slice guard, not a new Source admission cap or a minimal-bound theorem for every suffix or empty input.
-
-The original Source/world/ABI/compiler, gas, active extent, allocation and concrete byte-world producer obligations remain open. Earlier materializer/overlap controls and vectors are preserved. Kernel checks and exact standard axiom guards do not establish external EVM execution or whole-lane closure.

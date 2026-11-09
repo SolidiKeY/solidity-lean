@@ -202,9 +202,38 @@
 | `Evm/MemoryLoopHorizonCostGrowthControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Compilation/NormalFramedTransport.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Compilation/NormalFramedTransportControls.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/World/LifecycleBalancesFit.lean` | BalancesFit through the EIP-6780 self-beneficiary burn, destruct transfer and finalization. |
+| `Yul/Views/SourceBalanceExact.lean` | The actual evaluator's `BALANCE` of an instance returns its exact Nat balance under BalancesFit; a `2 ^ 256` balance is observed as `0` without it. |
+| `Yul/Views/Generic/Plan.lean` | Intrinsic ownership preparation interface, checked Plan data and shared Plan laws; existing family APIs remain specialized abbreviations. |
+| `Yul/Views/GenericFlow/Following.lean` | Intrinsic checked preparation and following over existing typed Plan constructors; shared freshness, readiness and preparation equations. |
+| `Yul/Views/GenericFlow/FollowingLaws.lean` | Shared decoder-failure law for checked following; consumers avoid concrete dependent-match splitting. |
+| `Yul/Views/GenericFlow/FollowingPlan.lean` | Shared intrinsic Plan adapter for checked following, preserving lazy state and journal and an explicit effective checker. |
+| `Yul/Views/GenericFlow/Reads.lean` | Shared typed Plan read/preservation proofs and saved-header read equation; actual bank metadata remains explicit. |
+| `Yul/Views/GenericFlow/Batch.lean` | Shared intrinsic Plan preparation runner and batch laws; exact failure-prefix state and finite request recursion are preserved. |
+| `Yul/Views/GenericFlow/Banks.lean` | Shared typed Plan bank proofs for transaction finalization, transient cells and unchanged-word writeback; legacy Frame projections and static constructors remain compatible. |
 | `Yul/RawFrameLogic.lean` | Intrinsic raw-local frame logic and transport used by P16; retained typed frame obligations remain explicit. |
+| `Yul/Views/MemberDynamicLayout.lean` | Concrete member-dynamic environment, declarations and computed layout; serial elaboration piece. |
+| `Yul/Views/MemberDynamicInitial.lean` | Original concrete member coordinates, headers, initial state, views and encoding. |
+| `Yul/Views/MemberDynamicGrowth.lean` | Original checked first-growth operation and ownership plan. |
+| `Yul/Views/MemberDynamicControls.lean` | Compatibility import for the member-dynamic fixture, initial facts and growth controls. |
+| `Yul/Views/MemberDynamicSequencePrefix.lean` | Original signed and Boolean follow-up ownership-plan controls. |
+| `Yul/Views/MemberDynamicSequenceClear.lean` | Original zero-length follow-up ownership-plan controls. |
+| `Yul/Views/MemberDynamicSequenceRegrow.lean` | Original regrowth follow-up ownership-plan controls. |
+| `Yul/Views/MemberDynamicSequence.lean` | Original complete-sequence MemOK, recovery, rollback, static and end-transaction facts. |
+| `Yul/Views/DynamicJournalPrepare.lean` | Original dynamic journal registry, requests and preparation facts. |
+| `Yul/Views/DynamicJournalCaller.lean` | Original actual dynamic caller sequence and observations. |
+| `Yul/Views/DynamicJournalChild.lean` | Original actual child sequence, rollback, static, error and MemOK facts. |
+| `Yul/Views/DynamicJournalControls.lean` | Original dynamic journal reencoding, reset, account, padding and path-isolation facts. |
+| `Yul/Compilation/CompletionControls.lean` | General closed-normal completion from full transport, zero-prefix specialization and exact full-frame reasoning. |
+| `Yul/Compilation/Artifact.lean` | Shared intrinsic normal-completion and typed-result certificates, actual-total-run constructors and exact producer images. |
+| `Yul/Compilation/ArtifactPreparation.lean` | General certified one/two-stage and prefix selection, accepted-object totality and exact preparation-image laws preserving Some/None without runtime-failure semantics. |
+| `Yul/Views/SourceGraphEndpoints.lean` | Isolated ordinary Source recursive uint256 mapping path to public typed graph slot endpoint; no value or reached-state adequacy claim. |
 | `Yul/World/ReturndataByteLoad.lean`, `Yul/World/ReturndataByteLoadControls.lean` | Conditional published P6 load after actual function-level copy; exact byte framing and strict-bound controls, no concrete load producer. |
 | `Yul/World/CreationReturnWindow.lean`, `Yul/World/CreationReturnWindowControls.lean` | Conditional P14 returned-runtime linked-address windows with derived bounds and concrete constructor controls; not CREATE caller returndata. |
+
+| `Yul/World/LoadV2Port.lean` | H274 general word-image inverse and actual cell-indexed V2 PUSH/MLOAD execution; compiler origin and consumer freeze remain pending. |
 | `Yul/Composition/SourceCatchBinding.lean` | Actual Source raw-bytes try/catch allocation and canonical rethrow: complete-state all-byte/all-horizon≥3 proof, old/new heap readback and scoped controls; no native/physical/full-Yul adequacy. |
 
 | `Yul/Composition/MonetaryLifecycleControls.lean` | H19 whole-Nat lifecycle payment/rollback and wide-balance refusal/self-beneficiary controls with nonempty caller journal; no world adequacy claim. |
+| `Yul/DirtyReadback.lean` | Readback of dirty LOCAL words into Source locals (user decision H109): `cleanWord` cleans a dirty `uintN`/`intN`/`bool` word as solc 0.8.38 does in both pipelines (wrap into the width; `bool` = nonzero), `readbackFrom`/`frame` read a raw frame back against its clean backup (untouched locals keep their value; a dirty local of another type refuses). Evidence: `tests/evm-reference/dirty-locals.json`. |
+| `Yul/Checks/DirtyReadbackControls.lean` | Controls of `DirtyReadback`: one positive per type family and pipeline matching the recorded solc evidence, frame readback of `LocalBlock`'s `dirtyTwo`/`dirtyFalse`, a refused dirty `bytes1`, coherence refusals kept. |

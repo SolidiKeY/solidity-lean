@@ -1,4 +1,5 @@
 import Solidity.Calculus.DecideLang
+import Solidity.Calculus.ReadBoundsStack
 
 /-! Shared input bounds for demanded read elimination and the scoped closer.
 The tree-size and storage-depth counters retain their previous definitions. -/
@@ -31,6 +32,7 @@ def fitsNode (n : Nat) (k : Nat → Option Nat) : Option Nat :=
   | n + 1 => k n
 
 /-- `LTm.fits`' compiled twin. -/
+@[implemented_by LTm.fitsStack]
 def LTm.fitsM : {s : Srt} → LTm C s → Nat → Option Nat
   | _, .var _, n | _, .app0 _, n | _, .err, n => fitsNode n some
   | _, .app1 _ x, n | _, .obsW x, n | _, .obsL x, n | _, .obsH x, n => fitsNode n x.fitsM
@@ -72,6 +74,7 @@ theorem LTm.fits_eq_fitsM {s : Srt} (t : LTm C s) : t.fits = t.fitsM := by
     funext n; simp only [LTm.fitsM, ← iha, ← ihb, ← iht, ← ihe]; rfl
 
 /-- `LFml.fits`' compiled twin. -/
+@[implemented_by LFml.fitsStack]
 def LFml.fitsM : LFml C → Nat → Option Nat
   | .tt, n => fitsNode n some
   | .eq a b, n => fitsNode n fun m => (a.fits m).bind b.fits

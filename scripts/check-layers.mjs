@@ -10,8 +10,10 @@
 // Exit 0 = no core module reaches the elaborator, 1 = at least one does
 // (each printed with one import path down to it).
 import { loadGraph, findPath, reach } from "./import-fanout.mjs";
+import { loadAllowlist, closureViolations, closureGraph } from "./core-import-closure.mjs";
 
 const CORE = [
+  /^Solidity\.Hash\.(Bridge|CollisionBridge|CollisionBridgeCompiler|CollisionBridgeControls)$/, // H112 E4 additive hash-mode bridge.
   /^Solidity\.Yul\.(RawDoWhileHorizon|Checks\.RawDoWhileHorizon)$/, // Concrete body-first adapter completed-frame horizons.
   /^Solidity\.Yul\.(RawAdapterSequenceLoopHorizon|Checks\.RawAdapterSequenceLoopHorizon)$/, // Concrete P16 sequence-loop driver agreement and full-frame horizons.
   /^Solidity\.Yul\.(RawAdapterLoopHorizon|Checks\.RawAdapterLoopHorizon)$/, // Concrete body-factory P16 loop agreement and full-frame horizons.
@@ -224,4 +226,15 @@ for (const m of core) {
   console.log(`PARSER_LAYER  ${findPath(graph, m, hit).join(" → ")}`);
 }
 console.log(`${core.length} core modules, ${parserBad} reach the checked parser adapters`);
-process.exit(bad || parserBad ? 1 : 0);
+let closureBad = 0;
+try {
+  const allowed = loadAllowlist();
+  const violations = closureViolations(closureGraph(graph), isCore, allowed);
+  for (const path of violations) console.log(`CORE_CLOSURE  ${path.join(" → ")}`);
+  closureBad = violations.length;
+  console.log(`${core.length} core modules, ${closureBad} new core → non-core edges (${allowed.size} pinned allowances)`);
+} catch (error) {
+  console.error(`CORE_CLOSURE_BASELINE ${error.message}`);
+  closureBad = 1;
+}
+process.exit(bad || parserBad || closureBad ? 1 : 0);

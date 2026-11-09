@@ -562,13 +562,13 @@ private def callsLeftOut? (bad : List (String × String)) (calls : List String) 
     (Semantics.lookupBy g bad).map fun m => s!"it calls `{g}`, which is left out: {m}"
 
 /-- Keep source admission setup separate from command generation. -/
-private def readImportedContract (ast : Json) (name : String)
+private def readImportedContractWithNormalizationCoreV1 (ast : Json) (name : String)
     (ren : List (String × String)) (testing entrypoints : Bool)
     (env : Environment) (sourceNames : List String) (provenance : Source.Provenance)
     (compilerCode : List (Int × (String × String))) (namedErrorSourceOrder : Bool)
     (compilationUnits : List Json := []) :
-    Except String SolcContract :=
-  readContract ast name ren testing
+    Except String (SolcContract × List FunctionNormalizationRowV1) :=
+  readContractWithNormalizationV1 ast name ren testing
     (rewriteSpecBindings env sourceNames) (rewriteLoopBindings env sourceNames)
     (if provenance.legacyFixture then fun _ => default else fun request =>
       (Admission.scan (if compilationUnits.isEmpty then ast else .arr compilationUnits.toArray) provenance { request with
@@ -583,6 +583,109 @@ private def readImportedContract (ast : Json) (name : String)
         specifications := [(bound, "/// @custom:key " ++ text)] })
     (readsSpecification env sourceNames) entrypoints
     (!provenance.legacyFixture && provenance.pipeline == some .viaIR) compilerCode namedErrorSourceOrder compilationUnits
+
+private def readImportedContract (ast : Json) (name : String)
+    (ren : List (String × String)) (testing entrypoints : Bool)
+    (env : Environment) (sourceNames : List String) (provenance : Source.Provenance)
+    (compilerCode : List (Int × (String × String))) (namedErrorSourceOrder : Bool)
+    (compilationUnits : List Json := []) : Except String SolcContract :=
+  (readImportedContractWithNormalizationCoreV1 ast name ren testing entrypoints env sourceNames
+    provenance compilerCode namedErrorSourceOrder compilationUnits).map Prod.fst
+
+/-- Exact admission forwarding, with the ledger from the same reader invocation. -/
+def readImportedContractWithNormalizationV1 (ast : Json) (name : String)
+    (ren : List (String × String)) (testing entrypoints : Bool)
+    (env : Environment) (sourceNames : List String) (provenance : Source.Provenance)
+    (compilerCode : List (Int × (String × String))) (namedErrorSourceOrder : Bool)
+    (compilationUnits : List Json := []) :
+    Except String (SolcContract × List FunctionNormalizationRowV1) :=
+  readImportedContractWithNormalizationCoreV1 ast name ren testing entrypoints env sourceNames
+    provenance compilerCode namedErrorSourceOrder compilationUnits
+
+
+/-- Exact admitted import computation for versioned metadata consumers.
+Reusing this wrapper preserves private binding normalization instead of reproducing
+`readContract` with different defaults. Existing import outputs are unchanged. -/
+def readImportedContractV1 (ast : Json) (name : String)
+    (ren : List (String × String)) (testing entrypoints : Bool)
+    (env : Environment) (sourceNames : List String) (provenance : Source.Provenance)
+    (compilerCode : List (Int × (String × String))) (namedErrorSourceOrder : Bool)
+    (compilationUnits : List Json := []) : Except String SolcContract :=
+  readImportedContract ast name ren testing entrypoints env sourceNames provenance
+    compilerCode namedErrorSourceOrder compilationUnits
+
+/-- The versioned accessor is definitionally the original private computation. -/
+theorem readImportedContractV1_eq (ast : Json) (name : String)
+    (ren : List (String × String)) (testing entrypoints : Bool)
+    (env : Environment) (sourceNames : List String) (provenance : Source.Provenance)
+    (compilerCode : List (Int × (String × String))) (namedErrorSourceOrder : Bool)
+    (compilationUnits : List Json := []) :
+    readImportedContractV1 ast name ren testing entrypoints env sourceNames provenance
+      compilerCode namedErrorSourceOrder compilationUnits =
+    readImportedContract ast name ren testing entrypoints env sourceNames provenance
+      compilerCode namedErrorSourceOrder compilationUnits := rfl
+
+/-- The companion drops only its ledger; every forwarding argument is shared. -/
+theorem readImportedContractWithNormalizationV1_forget (ast : Json) (name : String)
+    (ren : List (String × String)) (testing entrypoints : Bool)
+    (env : Environment) (sourceNames : List String) (provenance : Source.Provenance)
+    (compilerCode : List (Int × (String × String))) (namedErrorSourceOrder : Bool)
+    (compilationUnits : List Json := []) :
+    (readImportedContractWithNormalizationV1 ast name ren testing entrypoints env sourceNames
+      provenance compilerCode namedErrorSourceOrder compilationUnits).map Prod.fst =
+    readImportedContractV1 ast name ren testing entrypoints env sourceNames provenance
+      compilerCode namedErrorSourceOrder compilationUnits := rfl
+
+
+/-- Process-local inputs taken at the importer's actual admission call. This
+carrier is not an external compiler or source-span certificate. -/
+structure ImportNormalizationContextV1 where
+  ast : Json
+  name : String
+  ren : List (String × String)
+  testing : Bool
+  entrypoints : Bool
+  env : Environment
+  sourceNames : List String
+  provenance : Source.Provenance
+  compilerCode : List (Int × (String × String))
+  namedErrorSourceOrder : Bool
+  compilationUnits : List Json
+
+def ImportNormalizationContextV1.read (input : ImportNormalizationContextV1) :
+    Except String (SolcContract × List FunctionNormalizationRowV1) :=
+  readImportedContractWithNormalizationV1 input.ast input.name input.ren input.testing
+    input.entrypoints input.env input.sourceNames input.provenance input.compilerCode
+    input.namedErrorSourceOrder input.compilationUnits
+
+/-- An opt-in capture of one actual reader result, with the exact fixture bytes
+and pre-import environment. The equation binds this result to those arguments;
+it does not certify a source span or failure of a particular postcondition. -/
+structure ImportedNormalizationCaptureV1 where
+  fixture : Json
+  bytes : ByteArray
+  context : ImportNormalizationContextV1
+  result : SolcContract × List FunctionNormalizationRowV1
+  equation : context.read = .ok result
+
+private structure ImportNormalizationStateV1 where
+  requested : List Lean.Name := []
+  captures : NameMap ImportedNormalizationCaptureV1 := {}
+  deriving Inhabited
+
+private initialize importNormalizationStateV1 : EnvExtension ImportNormalizationStateV1 ←
+  registerEnvExtension (pure {}) (asyncMode := .local)
+
+/-- Request capture before importing a fresh namespace. Existing imports cannot
+be reconstructed from a later environment or caller-supplied ledger. -/
+def requestImportNormalizationV1 (N : Lean.Name) : CommandElabM Unit := do
+  if (← getEnv).contains N then throwError "normalization capture requires a new namespace"
+  modifyEnv fun env => importNormalizationStateV1.modifyState env fun state =>
+    { state with requested := N :: state.requested }
+
+def importedNormalizationCaptureV1? (N : Lean.Name) : CommandElabM (Option ImportedNormalizationCaptureV1) := do
+  pure ((importNormalizationStateV1.getState (← getEnv)).captures.find? N)
+
 
 private structure ImportedMembers where
   members : List String
@@ -700,9 +803,20 @@ def elabSolcImport : CommandElab := fun stx => do
     else pure none
   let namedErrorSourceOrder := (legacyOrderOverride.map (·.binaryLeftToRight)).getD
     (provenance.pipeline == some .viaIR)
-  let c ← ofExcept (readImportedContract ast N.getString! ren (!stx[7].isNone)
-    (!stx[9].isNone) env sourceNames provenance compilerCode namedErrorSourceOrder
-    (if provenance.sources.isEmpty then [] else compilation.asts))
+  let context : ImportNormalizationContextV1 := {
+    ast, name := N.getString!, ren, testing := !stx[7].isNone,
+    entrypoints := !stx[9].isNone, env, sourceNames, provenance, compilerCode,
+    namedErrorSourceOrder,
+    compilationUnits := if provenance.sources.isEmpty then [] else compilation.asts }
+  let result ← match h : context.read with
+    | .error reason => throwError "{reason}"
+    | .ok result => do
+      if (importNormalizationStateV1.getState (← getEnv)).requested.contains N then
+        let capture : ImportedNormalizationCaptureV1 := ⟨j, bytes, context, result, h⟩
+        modifyEnv fun env => importNormalizationStateV1.modifyState env fun state =>
+          { state with captures := state.captures.insert N capture, requested := state.requested.filter (· != N) }
+      pure result
+  let c := result.1
   let parse (cat : Lean.Name) (s : String) : Except String Syntax :=
     (Parser.runParserCategory env cat s).map (atRef ref)
   if !stx[7].isNone then

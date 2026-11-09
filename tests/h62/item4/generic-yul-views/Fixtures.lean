@@ -47,6 +47,73 @@ example : boolBytes.decode (fun _ => 2) = none := dirty_bool_not_canonical
 example : readBytes (mstore zero 128 ⟨0x12345678, by decide⟩) 156 4 ≠
     [0x78, 0x56, 0x34, 0x12] := not_little_endian
 
+/-- Regression guard: the existing short and long unaligned rows share base 129
+but cannot share an image. This instantiates the semantic decoder law, rather
+than deciding equality of an enumerated byte table. -/
+theorem unaligned_images_distinct :
+    (fixtures[1]'(by decide)).view ≠ (fixtures[5]'(by decide)).view := by
+  intro same
+  have bytes := byteObjectBytes_injective
+    (fixtures[1]'(by decide)) (fixtures[5]'(by decide)) rfl same
+  have lengths : 2 = 33 := congrArg List.length bytes
+  omega
+
+/-- Joint inhabitance of the entire bytesObject_payload parameter telescope.
+The nonempty payload makes the live-index premise inhabited; this is neither
+per-input feasibility nor compiler totality. -/
+theorem byte_payload_joint :
+    ∃ (bs : List UInt8) (_hl : bs.length < 2 ^ 256) (_m : ByteView)
+      (_base i : Nat) (_hi : i < bs.length), True :=
+  ⟨[0], by decide, zero, 0, 0, by decide, True.intro⟩
+
+/-- Joint inhabitance of bytesObject_unchanged, including its coupled header
+and universally quantified payload agreement in one memory view. This audits
+premises, not writeback for every input or compiler success. -/
+theorem byte_unchanged_joint :
+    ∃ (bs : List UInt8) (hl : bs.length < 2 ^ 256) (m : ByteView) (base : Nat)
+      (_header : mload m base = ⟨bs.length, hl⟩)
+      (_payload : ∀ i (hi : i < bs.length), bs[i] = m (base + 32 + i)), True :=
+  ⟨unaligned.bytes, unaligned.length_bound, unaligned.view, unaligned.base,
+    (byteObjectFacts unaligned).header,
+    (fun i hi => ((byteObjectFacts unaligned).payload i hi).symm), True.intro⟩
+
+/-- One shared premise witness for header, payload-list and idempotence laws.
+It reuses the existing fixture rather than adding cases or memory carriers. -/
+theorem byte_object_joint :
+    ∃ (bs : List UInt8) (_hl : bs.length < 2 ^ 256) (_m : ByteView) (_base : Nat), True :=
+  ⟨unaligned.bytes, unaligned.length_bound, unaligned.residual, unaligned.base, True.intro⟩
+
+/-- Both intrinsically typed decoder laws share this complete telescope. -/
+theorem byte_decoder_joint :
+    ∃ (_D : Source.Layout) (bs : List UInt8) (_hl : bs.length < 2 ^ 256)
+      (_m : ByteView) (_base : Nat), True :=
+  ⟨layout, unaligned.bytes, unaligned.length_bound, unaligned.residual,
+    unaligned.base, True.intro⟩
+
+/-- Residual feasibility is witnessed outside the same nonempty object's region,
+not by assuming an independently inhabited disjunction. -/
+theorem byte_residual_joint :
+    ∃ (bs : List UInt8) (_hl : bs.length < 2 ^ 256) (_m : ByteView) (base a : Nat)
+      (_outside : a < base ∨ base + 32 + bs.length ≤ a), True :=
+  ⟨unaligned.bytes, unaligned.length_bound, unaligned.residual, unaligned.base,
+    128, Or.inl (by decide), True.intro⟩
+
+/-- A real intrinsic ObjectByte constructor jointly witnesses the source read,
+its byte list, offset and value. This does not establish physical execution. -/
+theorem byte_source_payload_joint :
+    ∃ (D : Source.Layout) (bs : List UInt8) (_hl : bs.length < 2 ^ 256)
+      (_m : ByteView) (_base off : Nat) (v : UInt8)
+      (_read : ObjectByte (Source.Data.bytes (D := D) (l := .memory) bs) off v), True :=
+  ⟨layout, unaligned.bytes, unaligned.length_bound, unaligned.residual, unaligned.base,
+    33, 0xbb, ObjectByte.bytes unaligned.bytes ⟨1, by decide⟩, True.intro⟩
+
+#print axioms byte_object_joint
+#print axioms byte_decoder_joint
+#print axioms byte_residual_joint
+#print axioms byte_source_payload_joint
+#print axioms byte_unchanged_joint
+#print axioms byte_payload_joint
+#print axioms unaligned_images_distinct
 #print axioms all_fixtures
 #print axioms original_byte_component
 #print axioms original_byte_component_decode

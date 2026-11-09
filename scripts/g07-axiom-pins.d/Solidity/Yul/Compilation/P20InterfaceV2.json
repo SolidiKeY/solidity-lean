@@ -1,0 +1,22 @@
+{
+ "Solidity/Yul/Compilation/P20InterfaceV2.lean:Solidity.Yul.Compilation.P20.InterfaceV2.CheckedLowering.of_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/P20InterfaceV2.lean:Solidity.Yul.Compilation.P20.InterfaceV2.PendingG24.represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/P20InterfaceV2.lean:Solidity.Yul.Compilation.P20.InterfaceV2.PendingG24.represented_toV1": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/P20InterfaceV2.lean:Solidity.Yul.Compilation.P20.InterfaceV2.PendingG24.toV1": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

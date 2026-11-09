@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "guarded_regression": "Cached dependency substitution and source/log metadata detached from freshly compiled intrinsic declarations.",
+  "sources": {
+    "scripts/h62/item1/duplication-scanner/bind_project_closure.py": "916eb4905a4c3e6d481ca84942db487249b0c75db2d5d724f2da6b57539a2607",
+    "tests/h62/item1/duplication-scanner/ASTSourceBinding.lean": "34a9d59d7f37c78678cd7fea3e4e50f984b90487d098fb5c7c1ee3193eedca03",
+    "tests/h62/item1/duplication-scanner/project-closure-pins.json": "2643e325a9d2f5b3541501014a2a536030d96d2e66912d8e607ee77c433415be",
+    "tests/h62/item1/duplication-scanner/test_project_closure.py": "7dcb2b4e9ec2650711787826368708677e05035537cf55108a718ff8e46c831f"
+  },
+  "metadata_sha256": "c08c7320398bf7eea4f3d9c66c421c2b602ca8d5e34ea8187d7530525071cd8c",
+  "bindings_sha256": "2fe9e225a3e363bf28686ee1700cbae58c8c79025a226b2d2c0a65c81932fe87",
+  "deterministic_final_captures": [
+    "accepted-two",
+    "accepted-three"
+  ],
+  "superseded_development": "accepted-one lacks final log/staged-source guards; preserved, not final acceptance",
+  "counts": {
+    "lexical_total": 135,
+    "linked": 98,
+    "unresolved": 37,
+    "visible_kernel_total": 781
+  },
+  "timing_boundary": "New workflow observations only; no changed production proof or matched proof timing comparison. Original +80.254966536% STOP remains.",
+  "tests": {
+    "scanner_controls": 140,
+    "new_closure_controls": 9
+  },
+  "boundary": "AST only visible constants; KeySort fresh checked dependency. Scanner CLI AST consumption, general closure admission, current live ownership, private/unloaded and body equality remain unfinished. No original792 obligation discharged."
+}

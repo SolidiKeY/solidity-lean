@@ -1,0 +1,27 @@
+{
+ "tests/v14-constructor/FreshnessAxioms.lean:Solidity.Backend.Executable.CreationFreshness.Controls.derived_identity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/v14-constructor/FreshnessAxioms.lean:Solidity.Backend.Executable.CreationFreshness.Controls.storage_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/v14-constructor/FreshnessAxioms.lean:Solidity.Backend.Executable.CreationFreshness.fresh": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/v14-constructor/FreshnessAxioms.lean:Solidity.Backend.Executable.CreationFreshness.other": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/v14-constructor/FreshnessAxioms.lean:Solidity.Backend.Executable.CreationFreshness.two": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

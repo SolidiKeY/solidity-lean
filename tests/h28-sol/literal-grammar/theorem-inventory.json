@@ -199,7 +199,26 @@
     "word_cases",
     "word_dite",
     "word_transport",
-    "solWordTable_nonliteral"
+    "solWordTable_nonliteral",
+    "Scan.deterministic",
+    "Scan.isSuffix",
+    "Scan.length_lt",
+    "Scan.length_eq",
+    "Plain.length_le",
+    "HexLiteral.length_bounds",
+    "UnicodeLiteral.length_le",
+    "Fragments.length_eq",
+    "Fragments.flatten_length_le",
+    "FragmentValue.plain_length_le",
+    "FragmentValue.hex_length_le",
+    "FragmentValue.unicode_length_le",
+    "CodepointBytes.shape",
+    "CodepointBytes.value",
+    "utf8_injective",
+    "uniEscape_shape",
+    "uniEscape_value",
+    "HexBody.length_tight",
+    "HexLiteral.length_le_tight"
   ],
   "source_modules": [
     "Body",
@@ -220,6 +239,8 @@
     "Scanner",
     "Split",
     "TaggedEncoding",
-    "WordTable"
+    "WordTable",
+    "Lengths",
+    "Utf8Shape"
   ]
 }

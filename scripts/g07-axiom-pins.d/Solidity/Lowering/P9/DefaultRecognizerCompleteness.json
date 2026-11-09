@@ -1,0 +1,32 @@
+{
+ "Solidity/Lowering/P9/DefaultRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.finiteDefaultB_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.finiteDefaultB_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.finiteDefaultB_mono": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.finiteDefaultB_step": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.finiteDefaultsB_exists": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P9/DefaultRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.zeroReadyB_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

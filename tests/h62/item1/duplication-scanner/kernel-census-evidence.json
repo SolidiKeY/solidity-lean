@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "guarded_regression": "Imported generated and same-spelling constants omitted by lexical/five-record fixture census",
+  "predecessor_head": "2767a7b66a2b0064a9e3d0b770512e1e75002e40",
+  "observed_origin_master": "f160e517fdccd6eb49197391f9efc75169c57c9c",
+  "accepted_census_sha256": "80982bdf3a2436f7e1005151efc9d6a488b97dbc2bfaa8e934a5faa0c6c3da44",
+  "accepted_receipts": {
+    "accepted-one": "620564e0e6b577fa9eb2c61a80b56f1ccb0f3211ce02a446d281c51f75a892be",
+    "accepted-two": "d3d1af3fa70667317d109b1fe211c0adba26a127e1e5aa8c0a8e56e4d6ff5be5"
+  },
+  "source_sha256": {
+    "scripts/h62/item1/duplication-scanner/census_fixture_kernel.py": "e8b7a53f722b4d52245627120d29431692a854f7e5691ca2992ad3f0191e2d77",
+    "tests/h62/item1/duplication-scanner/SignatureKernelCensus.lean": "40e964a287830ae5eba415d2069877e976fa39214788d2a9bc203b22c2cf34a2",
+    "tests/h62/item1/duplication-scanner/kernel-census-pins.json": "eefa0afe0e36269f26ec97af0fbd1209ce6f80318565f0c47cf33a631fee0c28",
+    "tests/h62/item1/duplication-scanner/test_kernel_census.py": "029d664640a8d04f09e354688b5bc8a289e6ce00cbab7f5d39cb432f8a8e234c"
+  },
+  "evidence_sha256": {
+    "evidence/acceptance.json": "94084f24066179fb09418179d4d7b09bab638000fd0d70468b3ad2790646f171",
+    "evidence/doc-paths.log": "9b9d1eeb362a394a3d960c0c3f6d76786217dd8cde0bd81d7345a051bdf769e0",
+    "evidence/gates.json": "a1e9c13f07e3c518d549912531efa31c2428bd97118fff84c9efb005bae481ce",
+    "evidence/lake-version.log": "c85e307da5a93d910b4e69f751e292f34737a4dda56f275387c4309c31fca131",
+    "evidence/lean-version.log": "36c0bbaf090c97bc8217c6ff497ff9144fd83d9003f12cd505162b943aaaee77",
+    "evidence/reviews.md": "2e0cb54b51b6b5d0f82c65c5fd49d82c9d6115947578d99cb19f1e9020804bd8",
+    "evidence/tests.log": "79c879df2011ab8bb14ea405154b98630c4b46c6f2e9e4b314161c46f849ae95"
+  },
+  "external_controls_passed": 82,
+  "new_probe_theorems_or_axioms": 0,
+  "frozen_statements_changed": 0,
+  "scope": "Only constants visible in imported pinned fixture module; no source-line mapping, unloaded/private artifact levels, general project binding, live ownership or remote attestation. Structural validator does not authenticate completeness.",
+  "original_timing_stop_retained": true,
+  "stopped_workload_rerun": false
+}

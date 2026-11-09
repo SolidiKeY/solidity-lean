@@ -1,7 +1,0 @@
-{
-  "acceptance": false,
-  "failed_iteration_exact_timing": "Not captured",
-  "error": "After list normalization, residual Option-bind some equality remained definitionally reflexive",
-  "repair": "Close only that observed residual goal with rfl; no statement or budget change",
-  "final": "mcp-ParserDynamicClosure.json; all20statements no errors/warnings; failed automatic recovery is not accepted as proof evidence"
-}

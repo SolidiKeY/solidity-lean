@@ -1,0 +1,37 @@
+{
+ "tests/h55/vectors-tables/TypingV2Controls.lean:Solidity.Source.envLocOK_implies_locOK": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h55/vectors-tables/TypingV2Controls.lean:Solidity.Source.envLocOK_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h55/vectors-tables/TypingV2Controls.lean:Solidity.Source.V2.checkItems_valid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h55/vectors-tables/TypingV2Controls.lean:Solidity.Source.V2.checkStmt_valid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h55/vectors-tables/TypingV2Controls.lean:Solidity.Source.V2.declaration_admissible": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h55/vectors-tables/TypingV2Controls.lean:Solidity.Source.V2.declaration_location": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h55/vectors-tables/TypingV2Controls.lean:Solidity.Source.V2.StmtD.ofV1": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

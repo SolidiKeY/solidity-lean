@@ -220,8 +220,20 @@ def audit_kernel_environment(modules, decls, axioms):
 
 def source_digest():
     """One sha256 over every area module, the library root and the mandatory inputs."""
-    names = sorted(p.relative_to(ROOT).as_posix() for p in AREA.rglob("*.lean"))
-    names += ["Solidity.lean"] + sorted(read("source-pins.json"))
+    names = {p.relative_to(ROOT).as_posix() for p in AREA.rglob("*.lean")}
+    pending = list(names)
+    while pending:
+        path = pending.pop()
+        for module in re.findall(r"^import\s+([\w.]+)", (ROOT/path).read_text(), re.M):
+            dependency = module.replace(".", "/")+".lean"
+            if (ROOT/dependency).is_file() and dependency not in names:
+                names.add(dependency)
+                pending.append(dependency)
+    names.update(read("source-pins.json"))
+    names.update(["Solidity.lean", "lean-toolchain", "lakefile.toml", "run-lean.sh",
+                  "tests/sol-expression-uniqueness/gate.sh",
+                  "scripts/check-sol-expression-uniqueness.py"])
+    names = sorted(names)
     lines = "".join(f"{digest(ROOT/name)}  {name}\n" for name in names)
     return hashlib.sha256(lines.encode()).hexdigest()
 
@@ -250,8 +262,59 @@ def audit_checkpoint(modules, decls, axioms, build_log):
           f"of {len(reported)} declarations in {len(modules)} modules")
 
 
+def observed_axiom_report():
+    runs = audit_runs()
+    path = DATA/"evidence"/runs["signature_gate_dir"]/"1.log"
+    require(path.is_file(), "actual axiom report missing")
+    pattern = r"^'([^'\n]+)' (?:does not depend on any axioms|depends on axioms: \[([^\]]*)\])$"
+    reported, messages = {}, {}
+    for match in re.finditer(pattern, path.read_text(), re.M):
+        require(match[1] not in reported, "duplicate actual axiom report")
+        messages[match[1]] = match[0]
+        reported[match[1]] = [x.strip() for x in match[2].split(",") if x.strip()] if match[2] else []
+    return reported, messages
+
+
+
+
 def audit_external(modules, decls, axioms):
     audit_kernel_environment(modules, decls, axioms)
+    observed, _ = observed_axiom_report()
+    require(observed == axioms, "observed external axioms differ from pins")
+    runs = audit_runs()
+    proof = read("evidence/"+runs["proof_stem"]+".inside.json")
+    outer = read("evidence/"+runs["proof_stem"]+".outer.json")
+    current = {name: digest(ROOT/name) for name in modules}
+    require(proof["exit"] == outer["exit"] == 0 and not outer["resource_stop"], "proof gate failed")
+    require(proof["source_hashes"] == current, "proof evidence is stale for current modules")
+    require(proof["memory_max"] == 12884901888 and proof["memory_swap_max"] == 0 and
+            proof["lean_num_threads"] == 1, "runtime bounds mismatch")
+    require(outer["minimum_parent_headroom_bytes"] >= 4294967296, "H1 reserve failed")
+    log = (DATA/"evidence"/(runs["proof_stem"]+".log")).read_text()
+    require("RUNTIME_GATE_PASS" in log and "377 taclets, 131 read-bearing" in log and
+            "diag: 0 errors" in log, "runtime/KeySort/MCP evidence missing")
+    require("Lean (version 4.24.0" in log and "Lake version 5.0.0-src+797c613" in log and
+            log.index("377 taclets, 131 read-bearing") < log.index("RUNTIME_GATE_PASS"),
+            "actual versions or KeySort-before-marker ordering differs")
+    gate = (DATA/"evidence"/runs["proof_gate_dir"]/"gates.tsv").read_text().splitlines()
+    require(len(gate) == 1 and gate[0].startswith("PASS\tlean:Solidity/Frontend/ExpressionUniqueness/AxiomPins.lean\t"),
+            "axiom pin kernel gate missing")
+    signature = read("evidence/"+runs["signature_stem"]+".inside.json")
+    signature_outer = read("evidence/"+runs["signature_stem"]+".outer.json")
+    require(signature["exit"] == signature_outer["exit"] == 0 and not signature_outer["resource_stop"],
+            "signature build/audit command failed")
+    require(signature["memory_max"] == 12884901888 and signature["memory_swap_max"] == 0 and
+            signature["lean_num_threads"] == 1 and
+            signature_outer["minimum_parent_headroom_bytes"] >= 4294967296,
+            "signature runtime/reserve mismatch")
+    signature_gate = (DATA/"evidence"/runs["signature_gate_dir"]/"gates.tsv").read_text().splitlines()
+    require(len(signature_gate) == 1 and signature_gate[0].startswith(
+        "PASS\tlean:tests/sol-expression-uniqueness/signatures.lean\t"), "signature kernel gate missing")
+    pin_path = "Solidity/Frontend/ExpressionUniqueness/AxiomPins.lean"
+    require({k:v for k,v in signature["source_hashes"].items() if k != pin_path} ==
+            {k:v for k,v in current.items() if k != pin_path}, "signature evidence is stale")
+    reported, _ = actual_axiom_report()
+    require(reported == axioms, "actual axiom report differs from pins")
     compiler = read("evidence/compiler-0.8.38.json")
     require(compiler["pin"]["sha256"] == "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390" and
             compiler["pin"]["version"] == "0.8.38+commit.1835d247.Emscripten.clang", "compiler pin mismatch")
@@ -270,7 +333,9 @@ def audit_external(modules, decls, axioms):
         require(row["actual"] == row["expected"], "compiler observation differs")
         require(not row["errors"] if row["expected"] is not None else
                 any(e["type"] == "ParserError" for e in row["errors"]), "compiler refusal stage differs")
-    print("EXTERNAL_EVIDENCE_PASS: kernel environment dumps and 130 external parsing controls")
+    require(read("evidence/compiler-pinned.inside.json")["exit"] == 0, "external compiler command failed")
+    print("CHECKPOINT_PASS: exact current proof sources, standard axiom pins, runtime and 130 external parsing controls")
+    print("Kernel proof scope is complete; registration-dependent full task gates remain OPEN.")
 
 
 

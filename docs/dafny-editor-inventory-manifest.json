@@ -1,29 +1,51 @@
 {
   "schemaVersion": 1,
   "decision": "H44 coordinator follow-up2026-11-06: full inventory is bulk; retain outside git with exact checksums",
-  "sourceHead": "5f7bb1441566aaad64a34436904afc61de762fd2",
+  "sourceHead": "812016dcdc436d652cdc4795d7cd63359cfdd886",
   "repository": "/workspace/solidity-lean",
   "fileCount": 1,
-  "uncompressedBytes": 682606,
-  "rowCount": 486,
+  "uncompressedBytes": 776611,
+  "rowCount": 491,
   "frozenRowCount": 270,
   "frozenSha256": "d2f7e40e0c4cd370d09f9feb04872ea81963524b48be8e46c9b98dba26f945f1",
   "archive": {
-    "path": "/workspace/dafny-parity-custom-build-20261106/bulk.tar.gz",
-    "bytes": 39901,
-    "sha256": "3a3a1eec54b339376866b1c3fc28923379bf9747e86a26a1beaa3ade7ccfc159"
+    "path": "/workspace/dafny-time-limit-20261107/inventory/bulk.tar.gz",
+    "bytes": 52910,
+    "sha256": "22dd1fad3f79b2284e2edd5d7207eab29576e7bc5ef5cb821ae61057418d3e99"
   },
   "index": {
-    "path": "/workspace/dafny-parity-custom-build-20261106/files.json",
+    "path": "/workspace/dafny-time-limit-20261107/inventory/files.json",
     "bytes": 186,
-    "sha256": "5f0c4807d4273527065da39e6cb698623954b608941dcb24d22e33b047793d74"
+    "sha256": "e44bf07a626c4f64a8b7bb6c43f50233836c43c78e7d96019978bb6092691e89"
   },
   "rawInventory": {
-    "path": "/workspace/dafny-parity-custom-build-20261106/inventory.json",
-    "bytes": 682606,
-    "sha256": "6f1048ae9ee78cf7ba8f7013c6d09495c59c7d4d9d8ee0a6e4e1b5ed0d4a1348"
+    "path": "/workspace/dafny-time-limit-20261107/inventory/inventory.json",
+    "bytes": 776611,
+    "sha256": "d891815fcf92a6bbdf9fb5806ce04ee150a8ccda5baa20970ae675f3498eda0e"
   },
   "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-editor-inventory-manifest.json --restore",
   "relocation": "Provision both bulk.tar.gz and files.json together, then pass --directory DIR; CI uses DAFNY_PARITY_INVENTORY_DIR. Existing evidence bundle is separately required.",
-  "gateBoundary": "Tracked docs/dafny-editor-features.json is a small digest descriptor. Every executable consumer verifies the restored full inventory against its sha256/size/counts. Missing/corrupt inventory fails explicitly; original484 rows and all gate/judge predicates unchanged."
+  "gateBoundary": "Tracked digest plus restored full489-row inventory. All original486 IDs/order/expected observations and original frozen270 unchanged;3additive original lifecycle/adversarial scenarios. Missing/corrupt full inputs still fail mandatoryinventory-check/parity-gate; offline --check is explicitlydigest-only when trulyabsent. No completedrow or gate/judge weakening.",
+  "evidenceRestoreManifest": "docs/dafny-proof-help-evidence-manifest.json",
+  "additionalEvidenceRestoreManifests": [
+    "docs/dafny-direct-retention-evidence-manifest.json",
+    "docs/dafny-hover-proof-evidence-manifest.json",
+    "docs/dafny-child-closure-evidence-manifest.json",
+    "docs/dafny-canonical-slot-evidence-manifest.json",
+    "docs/dafny-native-hover-evidence-manifest.json",
+    "docs/dafny-candidate-hook-evidence-manifest.json",
+    "docs/dafny-spec-origins-evidence-manifest.json",
+    "docs/dafny-custom-import-evidence-manifest.json",
+    "docs/dafny-output-lifecycle-evidence-manifest.json",
+    "docs/dafny-output-shutdown-evidence-manifest.json",
+    "docs/dafny-output-lifetime-evidence-manifest.json",
+    "docs/dafny-output-preparation-evidence-manifest.json",
+    "docs/dafny-f6-refusals-evidence-manifest.json",
+    "docs/dafny-output-settings-evidence-manifest.json",
+    "docs/dafny-upstream-output-evidence-manifest.json",
+    "docs/dafny-command-output-evidence-manifest.json",
+    "docs/dafny-trace-consumer-evidence-manifest.json",
+    "docs/dafny-native-trace-testing-evidence-manifest.json",
+    "docs/dafny-h126-evidence-manifest.json"
+  ]
 }

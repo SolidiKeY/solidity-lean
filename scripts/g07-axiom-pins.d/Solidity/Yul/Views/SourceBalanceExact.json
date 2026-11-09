@@ -1,0 +1,17 @@
+{
+ "Solidity/Yul/Views/SourceBalanceExact.lean:Solidity.Yul.Views.sourceBalanceLocal_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Views/SourceBalanceExact.lean:Solidity.Yul.Views.sourceBalanceLocal_exact_int": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Views/SourceBalanceExact.lean:Solidity.Yul.Views.sourceBalanceLocal_wide": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

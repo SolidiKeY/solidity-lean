@@ -21,8 +21,11 @@ theorem initial (b : Scalar.Word) : initializer.value #v[b] = b+dirty := by rfl
 theorem body_source (a b : Scalar.Word) :
  evalStmt 14 .nil True.intro body bodyArtifact.compiled.profile (sourceLocals #v[a,b]) =
  some ⟨sourceLocals #v[0,(~~~(~~~a+3)+3)+3],.normal⟩ := by
- have first := evalStmt_stable (show 2 ≤ 13 by omega) .nil True.intro copy copyCompiled.profile
-   (sourceLocals #v[a,b]) (copyCompiled.source #v[a,b])
+ have first := CompletionControls.completed_horizon
+   (fun fuel => evalStmt fuel .nil True.intro copy copyCompiled.profile (sourceLocals #v[a,b]))
+   (fun fuel extra => evalStmt_refines_add fuel extra .nil True.intro copy copyCompiled.profile
+     (sourceLocals #v[a,b]))
+   (show 2 ≤ 13 by omega) (copyCompiled.source #v[a,b])
  exact LoopControlCompilation.sequence_source copy ZeroLoopScope.Controls.mutatingBody copyCompiled.profile
    ZeroLoopScope.Controls.mutatingArtifact.compiled.profile 13 (sourceLocals #v[a,b])
    (sourceLocals #v[a,a]) (sourceLocals #v[0,(~~~(~~~a+3)+3)+3]) first

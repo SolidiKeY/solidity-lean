@@ -1,5 +1,5 @@
 """Supplemental wire controls; synthetic acceptance is never kernel evidence."""
-import copy,importlib.util,json,unittest
+import copy,importlib.util,json,unittest,os
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 s=importlib.util.spec_from_file_location('d',ROOT/'scripts/roadmap-v17-derived17.py');d=importlib.util.module_from_spec(s);s.loader.exec_module(d)
@@ -44,7 +44,10 @@ class SupplementalInputControls(unittest.TestCase):
  """Actual retained input data, mocked corruption; no current proof claim."""
  @classmethod
  def setUpClass(cls):
-  cls.producer=d.PRODUCER_ROOT;cls.current=d.e.load(cls.producer/'scoped-axioms/receipt/provenance.json')['before']
+  supplied=os.environ.get('V17_DERIVED17_PRODUCER_ROOT')
+  if not supplied:
+   raise unittest.SkipTest('off-tree inputs unavailable; set V17_DERIVED17_PRODUCER_ROOT')
+  cls.producer=Path(supplied);cls.current=d.e.load(cls.producer/'scoped-axioms/receipt/provenance.json')['before']
   cls.bound=d.inputs(cls.producer,cls.current)
  def changed_load(self,rel,mutate):
   from unittest.mock import patch
@@ -85,7 +88,10 @@ class ActualFailureControls(unittest.TestCase):
  """Actual checked discovery/raw failure data; never full metadata acceptance."""
  @classmethod
  def setUpClass(cls):
-  cls.raw=Path('/workspace/scratch/v17-derived17-structural/full-query/receipt/build.log').read_bytes()
+  supplied=os.environ.get('V17_DERIVED17_FAILURE_LOG')
+  if not supplied:
+   raise unittest.SkipTest('off-tree evidence unavailable; set V17_DERIVED17_FAILURE_LOG')
+  cls.raw=Path(supplied).read_bytes()
  def test_actual_failure_is_incomplete(self):
   catalog=d.incomplete_catalog(self.raw);self.assertEqual(len(catalog['rows']),10);self.assertTrue(all(row['structuralStatus']=='INCOMPLETE' for row in catalog['rows']));self.assertFalse(catalog['fullDeclarationMetadata']);self.assertFalse(catalog['replayVerified'])
   with self.assertRaises(ValueError):d.metadata(self.raw)

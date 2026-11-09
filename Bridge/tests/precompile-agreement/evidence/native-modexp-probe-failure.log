@@ -1,5 +1,0 @@
-COMMAND: /workspace/.setup/tools/lean-4.24.0-linux/bin/lake env lean -j1 -M11264 --tstack=131072 tests/precompile-agreement/BoundaryVectors.lean
-tests/precompile-agreement/BoundaryVectors.lean:47:0: error: Could not find native implementation of external declaration 'ffi.ByteArray.zeroes' (symbols 'l_ffi_ByteArray_zeroes___boxed' or 'l_ffi_ByteArray_zeroes').
-For declarations from `Init`, `Std`, or `Lean`, you need to set `supportInterpreter := true` in the relevant `lean_exe` statement in your `lakefile.lean`.
-"BOUNDARY_VECTORS_PASS"
-EXIT=1 SECONDS=5.322 PEAK_RSS=389959680 MIN_AVAILABLE=17033031680 RESOURCE_STOP=False

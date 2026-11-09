@@ -9,6 +9,14 @@ endpoint. This roadmap replaces the former 19-step feature-coverage plan.
 Existing integrated work is reused after checking its exact theorem and input
 coverage; the groups below are remaining obligations, not claims of missing code.
 
+The finished repository must also be **trustworthy despite its size** (a
+small readable trusted surface, an independent kernel re-check, continuous
+validation against solc and a reference EVM) and **usable on real contracts**
+(measured per-function budgets, a fast mode and a certified mode):
+[trust-usability.md](feature-work/trust-usability.md), 2026-11-07.
+
+Audit: [proof-coverage audit](audits/proof-coverage.md) (2026-11-06) traces each claimed row to its backing theorem and lists the open end-to-end links.
+
 ## Scope contract
 
 The versioned starting point is [solidity-scope.md](solidity-scope.md), the
@@ -34,6 +42,49 @@ solc's documented layout (decision D3), and the abstraction from EVM execution
 must be proved. Hash collisions cannot be dismissed by assuming global
 injectivity. Existing cryptographic/environment premises must be stated exactly;
 new premises require approval and cannot conceal a representation defect.
+
+### Manifest citation schema
+
+Each feature row in schema version 2 retains its existing fields and adds a
+`theorems` list. An entry has `name` (fully qualified Lean declaration),
+`module` (Lean import module), `class` (`a`, `b`, `c`, or `d`), `premises`
+(a list of named premises, required and nonempty for class b), and `direction`
+(`model` or `model-to-solc`). Classes follow F8: a is kernel-proved against
+repository semantics; b is proved modulo named premises; c is finite tested
+evidence; d is definition/table evidence. A resolvable declaration alone does
+not establish relevance, coverage, or agreement with solc. Empty lists record
+an uncited row, never proof of absence. The planned checker must reject a
+`present` row with no citation or only class d, and resolve names through an
+elaborated Lean environment rather than source-text matching.
+
+Optional `citationNotes` records the narrow meaning of a citation and its gap.
+The reader accepts versions 1 and 2; the compatibility test covers both.
+The [E3 citation map](feature-work/e3-feature-citations.md) distinguishes model
+proofs, explicit premises, finite observations and definition-only traces.
+Six definition-only original present rows become partial. Per-row
+`modelToSolcGap` text preserves the remaining agreement obligations.
+
+<!-- BEGIN_E3_MANIFEST_CITATIONS -->
+### Manifest citations
+
+Derived from source snapshot `a0a9ca15ba35fd6e8d9a9be10e4b6b45dbf45d3e`: 173 of 212 rows carry 196 citation entries; Cited present rows: 7/7; cited partial rows: 166/166. Uncited rows by current status: missing=2, notApplicable=37. Rows with class a/b/c/d citations: 19/8/11/139 (overlapping evidence tags, not counts of fully proved language features). Model-only rows: 172; model-to-solc rows: 1 (finite numeric fixtures, class c). Six definition-only original present rows were downgraded to partial; all 212 rows retain explicit general-agreement gaps. No universal solc-equivalence or full-source theorem is inferred from these counts. See [the citation map](feature-work/e3-feature-citations.md).
+
+| Current | Class | Direction | Rows |
+|---|---|---|---|
+| missing | uncited | none | 2 |
+| notApplicable | uncited | none | 37 |
+| partial | a | model | 18 |
+| partial | b | model | 7 |
+| partial | c | model | 4 |
+| partial | c | model-to-solc | 1 |
+| partial | d | model | 138 |
+| present | a | model | 1 |
+| present | b | model | 1 |
+| present | c | model | 6 |
+| present | d | model | 1 |
+
+Cells overlap when a row cites multiple classes/directions.
+<!-- END_E3_MANIFEST_CITATIONS -->
 
 ## Final proof obligations
 
@@ -96,6 +147,16 @@ correctness true merely by running the compiler to define source semantics.
    (T01–T08). This certifies solc's output contract by contract, not solc's
    source code.
 
+9. **Trusted surface:** one statements page whose definition closure is
+   measured and guarded in CI, an independent kernel re-check of the public
+   closure, every `implemented_by` linked to its proved definition, and a
+   published trust report (A01–A06 of
+   [trust-usability.md](feature-work/trust-usability.md)).
+10. **Usability:** end-to-end per-function time and memory budgets on real
+    contracts, approved by the user and enforced in CI, in fast mode (compiled
+    ⊢ with proved rules, a verdict and not a theorem) and certified mode
+    (kernel-checked), with the two modes agreeing (U01–U08).
+
 An optional external EVM integration stays in `Bridge/`; the core stays
 dependency-free.
 
@@ -116,8 +177,11 @@ obligations open until integrated. Splitting a proof into smaller lemmas does
 not automatically allocate another VM. Never replace an unfinished deliverable
 with a refusal, a new exclusion or a promise of a later proof.
 
-- Start with `LEAN_NUM_THREADS=1`, explicit `-j1`, a process-group
-  `MemoryMax=12G` and `MemorySwapMax=0`; leave the remaining RAM for the OS.
+- Start with `LEAN_NUM_THREADS=1` and explicit `-j1`. On the host, add a
+  process-group `MemoryMax=12G` and `MemorySwapMax=0`; on a cloud VM without
+  systemd, follow the cloud-VM rule in
+  [resource bounds](refactoring-progress.md#resource-bounds-and-resuming-work)
+  (H232). Leave the remaining RAM for the OS.
   Use disk-backed private caches, monitor aggregate RSS and available memory,
   and stop before exhausting the VM. Run Lean MCP or a build, not both.
 - Seed the build first: `bash scripts/ci/fetch-lake-cache.sh` installs
@@ -596,6 +660,18 @@ over four parallel waves: VX1, VO1 and VT1 start now, independent of the main
 chain; the rest follow their integrated prerequisites. G48–G55 (V16, V17)
 close only with X, O and T included.
 
+### Authorized extension: trust and usability (2026-11-07)
+
+The user asked that the finished repository be trustworthy although it is
+large, and usable on real contracts.
+[trust-usability.md](feature-work/trust-usability.md) plans groups A01–A06
+(assurance) and U01–U08 (usability) in seven lanes (VA1–VA3, VU1–VU4) over
+three waves. VA1, VA3 and VU1 start now, in parallel with VX1, VO1 and VT1 and
+with independent writes. It also sets a **priority**: A02, U01 and A05 first,
+then the T lanes (solc validation, the result users deploy) and the U lanes
+ahead of backfill. Scope is unchanged. G54/G55 close only with obligations 9
+and 10 met.
+
 ### Backfill queue
 
 These items are ready now, are independent of the lane order, and are owned
@@ -658,6 +734,9 @@ Completion requires **all** of the following on one integrated revision:
   is never a theorem.
 - The optimizer (O01–O05) is inside the public theorem, and `solc_validated`
   (T07) is kernel-checked with the T08 corpus run published.
+- The trusted surface (A01) is published with its size and re-checked by an
+  independent kernel (A04); U01's per-function budgets hold in both modes, and
+  the modes agree; `docs/trust.md` is published.
 - All child groups, review findings and scope questions are closed, with the
   revision, commands, theorem names, assumptions and measured resource costs
   published. A timeout or an unfinished proof keeps the roadmap open.

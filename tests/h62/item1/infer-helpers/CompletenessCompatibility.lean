@@ -24,7 +24,7 @@ theorem source_delete_res {Γ : Ctx} {a : Syn .expr} {τ : STy}
 theorem source_convElem_mem {Γ : Ctx} {el : Elem} {h : el ≠ .addressPayable}
     {x : Syn .expr} {σ : STy} {dx : Typed Γ x σ}
     (hx : Res.expr dx ∈ infer Γ x)
-    (he : σ.explicit Γ.isBase (el.ty σ.convLoc) = true) :
+    (he : σ.explicit Γ.isBase Γ.mapFree (el.ty σ.convLoc) = true) :
     Res.expr (Typed.convElem (h := h) dx rfl he) ∈
       infer Γ (.call (.elemType el h) (.positional (.cons x .nil))) :=
   convElem_mem hx he

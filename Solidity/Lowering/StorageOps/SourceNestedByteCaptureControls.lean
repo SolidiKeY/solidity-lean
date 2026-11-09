@@ -103,7 +103,13 @@ theorem journal_observations : runs.map (fun r=>journalRows r.2.2)=
  [oldJournal,oldJournal,oldJournal,oldJournal,successJournal,oldJournal] := by rfl
 theorem outcome_certificate : outcomes := by rfl
 theorem observations : ordered := by rfl
-theorem timeout_storage_unchanged : (run 6).2.2.ex=seed.ex := by rfl
+theorem timeout_storage_unchanged : (run 6).2.2.ex=seed.ex := by
+ have captured : run 6=(.error .timeout,(locals,after 1)) :=
+   copy_timeout_prefix frame left right (by decide) 1 locals seed rfl (by
+     intro j member
+     have cases : j=0 ∨ j=1 := by omega
+     rcases cases with rfl | rfl <;> rfl)
+ exact congrArg (fun result => result.2.2.ex) captured
 theorem timeout_heap_changed : (run 6).2.2.heap.next≠seed.heap.next := by decide
 /-- info: 'Solidity.Lowering.StorageOps.SourceNestedByteCaptureControls.prefix_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms prefix_client

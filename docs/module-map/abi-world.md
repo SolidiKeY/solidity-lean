@@ -34,3 +34,13 @@ See [ABI packet consumers](../feature-work/abi-world-packets.md) for proof bound
 
 | `Solidity.Backend.AbiWorld.MutatingWritePhysical` | Actual selected mutation prefix and P6 initial-frame physical byte-store consequence, with explicit scaled span. |
 | `Solidity.Backend.AbiWorld.MutatingWritePhysicalControls` | Populated initial physical frame, actual write/neighbor application and scale/bound negatives. |
+| `Correctness/Lowering/Checker/Contract.lean` | P1 inventory and unfrozen candidate checker contract. |
+| `Correctness/Lowering/Checker/IntrinsicProbe.lean` | Actual intrinsic elaboration capture for the bounded while/break probe. |
+| `Correctness/Lowering/Checker/MeasuredPilot.lean` | Exact singleton soundness/completeness and measured contract-body refusal. |
+| `Correctness/Lowering/Checker/RawProbe.lean` | Actual lowerLoops capture, total raw matcher and refusal controls. |
+| `Correctness/Lowering/Checker/SourceAssociation.lean` | Resolved Source conversion and horizon transport for the bounded probe. |
+| `Correctness/Lowering/Checker/WhileBreak.lean` | Actual-output mapped semantic leaf with explicit fixed-state boundary. |
+| `Backend/AbiWorld/PublicCompilerTotal.lean` | H62/H69 compiler-success theorem: the public `Compiler.compile` accepts every program of a stated subset of the core fragment (H87/H96: signed bitwise, plain and array-indexed aliases with a per-alias kind judgement, storage `op=`) through its core branch, and `Compilation.Agrees` holds there. |
+| `Backend/AbiWorld/PublicCompilerTotalControls.lean` | Inhabited alias/storage-`op=`/signed-`&`/loop/call program accepted by the theorem and by kernel evaluation; indexed-alias program with fresh-machine witness; self-balance, int-key, kind-change and unset-alias refusals. |
+| `Backend/AbiWorld/P1RevertBridge.lean` | H68 P1-REVERT: `p1_revert_bridge`, a `BridgeGoal` over V12's `RuntimeFrameP1LangV2` for the public compiler's output on every assert-free statement of the totality domain; frame agreement and version-2 bare-revert transport. |
+| `Backend/AbiWorld/P1RevertBridgeControls.lean` | Fresh-contract reverting entry and succeeding input through the bridge; `assert(false)` panic-data mismatch showing why `assert` is excluded. |

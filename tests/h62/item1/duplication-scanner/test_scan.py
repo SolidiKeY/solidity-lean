@@ -4,6 +4,7 @@ import hashlib
 import importlib.util
 import io
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -58,6 +59,249 @@ class ScannerControls(unittest.TestCase):
                          ["x?foo", "x!!", "x", "?", "Nat.x?", "1", "?"])
         self.assertIsNone(scanner.raw_literal('x?r#"s"#', 2))
         self.assertIsNone(scanner.char_literal("x?'a'", 2))
+
+    def test_lean_unicode_identifier_continuations(self):
+        for suffix in ("℘", "₀", "ₐ", "ᵢ", "𝒜"):
+            with self.subTest(suffix=suffix):
+                self.assertNotEqual(scanner.normalize("(x : Nat) : x" + suffix + " = x"),
+                                    scanner.normalize("(y : Nat) : y" + suffix + " = y"))
+                self.assertEqual(scanner.tokenize("x" + suffix), ["x" + suffix])
+                self.assertIsNone(scanner.raw_literal('x' + suffix + 'r#"a"#', 2))
+                self.assertIsNone(scanner.char_literal("x" + suffix + "'a'", 2))
+        self.assertEqual(scanner.normalize("(x℘ : Nat) : x℘ = x℘"),
+                         scanner.normalize("(y℘ : Nat) : y℘ = y℘"))
+
+    def test_lean_identifier_operator_boundaries(self):
+        for op in ("×", "÷", "λ", "Π", "Σ"):
+            with self.subTest(op=op):
+                self.assertEqual(scanner.tokenize("x" + op + "y"), ["x", op, "y"])
+        for op, literal in (("×", "'«'"), ("÷", "'»'")):
+            source = "def x := 2" + op + literal
+            self.assertEqual(scanner.mask(source), source)
+            self.assertEqual(len(scanner.hide_strings(source)), len(source))
+
+    def test_multiline_and_stacked_attribute_declarations_are_inventoried(self):
+        root = Path("/virtual")
+        source = ("@[simp,\n  inline] def target : Nat := 1\n"
+                  "@[foo [bar],\n  baz]\n@[other] theorem next : True := by trivial\n"
+                  "def visible : String := \"@[fake] def hidden\"\n")
+        rows = scanner.scan(root / "A.lean", root, source.encode())
+        self.assertEqual([(r["name"], r["line"]) for r in rows],
+                         [("target", 2), ("next", 5), ("visible", 6)])
+        self.assertEqual([r["reject_reason"] for r in rows], [None, None, None])
+        with_comment = "@[simp, /- nested [ comment ] -/\n  inline] def x : Nat := 1\n"
+        self.assertEqual(scanner.scan(root / "B.lean", root, with_comment.encode())[0]["name"], "x")
+        nested = "@[foo [[bar]]] def target : Nat := 1\ndef visible : Nat := 2\n"
+        self.assertEqual([r["name"] for r in scanner.scan(root / "C.lean", root, nested.encode())], ["target", "visible"])
+        rows = scanner.scan(root / "D.lean", root, b"@[unsafe] def a : Nat := 0\nunsafe def b : Nat := 0\n")
+        self.assertEqual(rows[0]["qualifiers"], [])
+        self.assertEqual(rows[1]["qualifiers"], ["unsafe"])
+        aligned = scanner.scan(root / "F.lean", root, b"@[simp] def first : Nat := 0\n  def inner : Nat := 1\n")
+        self.assertEqual(aligned[0]["body_reject_reason"], "nested-declaration-boundary")
+        following = ("def a : Nat := 1\n@[foo,\n bar] def b : Nat := 2\n"
+                     "def c : Nat := 1\n@[other,\n baz] def d : Nat := 3\n")
+        rows = scanner.scan(root / "G.lean", root, following.encode())
+        self.assertEqual(rows[0]["body"], rows[2]["body"])
+        self.assertEqual(rows[0]["body"], ["1"])
+        with self.assertRaisesRegex(ValueError, "unterminated attribute"):
+            scanner.scan(root / "E.lean", root, b"@[foo [bar]\ndef hidden := 0\n")
+
+    def test_lean_declaration_modifiers_and_candidate_distinctions(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = ("def before : Nat := 0\n"
+                      "public theorem first : True := by trivial\n"
+                      "meta def second : Nat := 0\n"
+                      "nonrec def third : Nat := 0\n"
+                      "@[foo,\n bar] public protected meta unsafe nonrec def combined : Nat := 0\n"
+                      "private def hidden : Nat := 0\n"
+                      "def visible : Nat := 0\n")
+            path = root / "A.lean"
+            path.write_text(source)
+            data = json.loads(subprocess.check_output([sys.executable, "-B", str(SCRIPT), str(root), "*.lean"]))
+            rows = {r["name"]: r for r in data["inventory"]}
+            self.assertEqual(set(rows), {"before", "first", "second", "third", "combined", "hidden", "visible"})
+            self.assertEqual(rows["first"]["qualifiers"], ["public"])
+            self.assertEqual(rows["second"]["qualifiers"], ["meta"])
+            self.assertEqual(rows["third"]["qualifiers"], ["nonrec"])
+            self.assertEqual(rows["combined"]["qualifiers"], ["meta", "nonrec", "protected", "public", "unsafe"])
+            self.assertEqual(rows["combined"]["line"], 6)
+            body = next(g for g in data["body_candidates"] if {"second", "third", "hidden", "visible"}.issubset({m["name"] for m in g["members"]}))
+            self.assertIn("different-or-unsupported-statements", body["reject_reasons"])
+            self.assertIn("intrinsic-signature-unresolved", body["reject_reasons"])
+            self.assertFalse(any({"second", "third"}.issubset({m["name"] for m in g["members"]}) for g in data["candidates"]))
+            parsed = scanner.scan(path, root)
+            self.assertEqual(parsed[0]["body"], ["0"])
+            split = ("def before : Nat := 0\npublic\n  def one : Nat := 0\n"
+                     "@[foo]\nprivate\n  nonrec\n  def two : Nat := 0\n")
+            split_rows = scanner.scan(path, root, split.encode())
+            self.assertEqual([r["name"] for r in split_rows], ["before", "one", "two"])
+            self.assertEqual(split_rows[1]["qualifiers"], ["public"])
+            self.assertEqual(split_rows[2]["qualifiers"], ["nonrec", "private"])
+            self.assertEqual(split_rows[1]["line"], 3)
+            self.assertEqual(split_rows[2]["line"], 7)
+            self.assertEqual(split_rows[0]["body"], ["0"])
+
+    def test_compound_class_declarations_keep_their_names_and_refusals(self):
+        root = Path("/virtual")
+        source = ("def before : Nat := 0\n"
+                  "class inductive Foo where\n  | mk : Foo\n"
+                  "@[foo] public class\n  abbrev Bar := Nat\n"
+                  "class Ordinary where\n  field : Nat\n"
+                  "def after : Nat := 1\n")
+        rows = scanner.scan(root / "A.lean", root, source.encode())
+        self.assertEqual([(r["kind"], r["name"]) for r in rows],
+                         [("def", "before"), ("class inductive", "Foo"),
+                          ("class abbrev", "Bar"), ("class", "Ordinary"), ("def", "after")])
+        self.assertEqual(rows[0]["body"], ["0"])
+        self.assertEqual(rows[-1]["body"], ["1"])
+        self.assertEqual(rows[2]["qualifiers"], ["public"])
+        for row in rows[1:4]:
+            self.assertEqual(row["reject_reason"], "unsupported-declaration-form")
+            self.assertIsNone(row["statement"])
+            self.assertEqual(row["body"], [])
+
+    def test_explicit_universe_suffix_does_not_change_declaration_name(self):
+        root = Path("/virtual")
+        source = ("def before : Nat := 0\n"
+                  "@[simp] public def Foo.{u} : Type u := Nat\n"
+                  "def N.Bar.{u,v} : Type u := Nat\n"
+                  "def after : Nat := 1\n")
+        rows = scanner.scan(root / "A.lean", root, source.encode())
+        self.assertEqual([r["name"] for r in rows], ["before", "Foo", "N.Bar", "after"])
+        self.assertEqual(rows[0]["body"], ["0"])
+        self.assertEqual(rows[-1]["body"], ["1"])
+        self.assertEqual(rows[1]["qualifiers"], ["public"])
+        for row in rows[1:3]:
+            self.assertEqual(row["reject_reason"], "unsupported-binder-syntax")
+            self.assertIsNone(row["statement"])
+        multiline = scanner.scan(root / "B.lean", root, b"def Multi.{\n u, v\n} : Type u := Nat\n")
+        self.assertEqual(multiline[0]["name"], "Multi")
+        self.assertIsNone(multiline[0]["statement"])
+        malformed = scanner.scan(root / "C.lean", root, b"def Broken.{u : Type := Nat\n")
+        self.assertEqual(malformed[0]["name"], "Broken")
+        self.assertIsNone(malformed[0]["statement"])
+        self.assertIsNotNone(malformed[0]["reject_reason"])
+
+    def test_escaped_declaration_names_are_lexical_spellings_only(self):
+        root = Path("/virtual")
+        source = ('def before : Nat := 0\n@[simp] public def «a.b» : Nat := 1\n'
+                  'def a.b : Nat := 1\ndef N.«b c» : Nat := 1\n'
+                  'def «a--b».part.{u} : Type u := Nat\n'
+                  'theorem «return» : True := by trivial\n'
+                  'example : True := by trivial\ndef after : Nat := 2\n')
+        rows = scanner.scan(root / "A.lean", root, source.encode())
+        self.assertEqual([r["name"] for r in rows],
+                         ["before", "«a.b»", "a.b", "N.«b c»", "«a--b».part", "«return»", "<anonymous>", "after"])
+        self.assertEqual(rows[0]["body"], ["0"])
+        self.assertEqual(rows[-1]["body"], ["2"])
+        for index in (1, 3, 4, 5):
+            self.assertEqual(rows[index]["reject_reason"], "unsupported-binder-syntax")
+            self.assertEqual(rows[index]["body_reject_reason"], "escaped-identifier-boundary")
+            self.assertIsNone(rows[index]["statement"])
+        self.assertNotEqual(rows[1]["name"], rows[2]["name"])
+        with self.assertRaises(ValueError):
+            scanner.scan(root / "B.lean", root, 'def «unclosed : Nat := 0\n'.encode())
+        unusual = ('def N.«a\nb» : Nat := 0\ndef N.«» : Nat := 0\n'
+                   'def «» : Nat := 0\ndef visible : Nat := 1\n')
+        unusual_rows = scanner.scan(root / "C.lean", root, unusual.encode())
+        self.assertEqual([r["name"] for r in unusual_rows], ["N.«a\nb»", "N.«»", "«»", "visible"])
+        for row in unusual_rows[:3]:
+            self.assertEqual(row["reject_reason"], "unsupported-binder-syntax")
+            self.assertEqual(row["body_reject_reason"], "escaped-identifier-boundary")
+
+    def test_named_and_anonymous_priority_instances_are_accounted(self):
+        root = Path("/virtual")
+        source = ("def before : Nat := 0\n"
+                  "instance (priority := 17) global17 : Marker Nat := foo\n"
+                  "private instance (priority := low) hidden : Marker Bool := foo\n"
+                  "scoped instance (priority := 41) scoped41 : Marker Int := foo\n"
+                  "instance (priority := 100) : Marker String := foo\n"
+                  "@[simp] instance (priority := (10)) «a.b» : Marker UInt64 := foo\n"
+                  "def after : Nat := 1\n")
+        rows = scanner.scan(root / "A.lean", root, source.encode())
+        self.assertEqual([r["name"] for r in rows], ["before", "global17", "hidden", "scoped41", "<anonymous>", "«a.b»", "after"])
+        self.assertEqual(rows[2]["qualifiers"], ["private"])
+        self.assertEqual(rows[3]["qualifiers"], ["scoped"])
+        self.assertEqual(rows[0]["body"], ["0"])
+        self.assertEqual(rows[-1]["body"], ["1"])
+        for row in rows[1:6]:
+            self.assertEqual(row["reject_reason"], "unsupported-instance-priority")
+            self.assertEqual(row["body_reject_reason"], "unsupported-instance-priority")
+            self.assertIsNone(row["statement"])
+        with self.assertRaisesRegex(ValueError, "unterminated instance priority"):
+            scanner.scan(root / "B.lean", root, b"instance (priority := 10\ndef after : Nat := 1\n")
+        split = ("instance (priority :=\n  17)\n  named : Marker Nat := foo\n"
+                 "instance (priority := 42) : Marker Bool := foo\ndef next : Nat := 1\n")
+        split_rows = scanner.scan(root / "C.lean", root, split.encode())
+        self.assertEqual([r["name"] for r in split_rows], ["named", "<anonymous>", "next"])
+        self.assertEqual(split_rows[0]["reject_reason"], "unsupported-instance-priority")
+        fixture = ROOT / "tests/h62/item6/migrate-yul/DeclarationMetadataFixture.lean"
+        fixture_rows = scanner.scan(fixture, ROOT)
+        names = {r["name"]: r for r in fixture_rows}
+        for name in ("global17", "global63", "private11", "scoped41", "local97"):
+            self.assertEqual(names[name]["reject_reason"], "unsupported-instance-priority")
+            self.assertEqual(names[name]["body_reject_reason"], "unsupported-instance-priority")
+
+    def test_initializer_inventory_is_rejected_and_bounded(self):
+        root = Path("/virtual")
+        source = ("def before : Nat := 0\n"
+                  "private initialize named : IO.Ref (Option Nat) ←\n  IO.mkRef none\n"
+                  "builtin_initialize other : IO.Ref Nat <- IO.mkRef 0\n"
+                  "initialize registerTraceClass `Foo\n"
+                  "def after : Nat := 1\n")
+        rows = scanner.scan(root / "A.lean", root, source.encode())
+        self.assertEqual([(r["kind"], r["name"]) for r in rows],
+                         [("def", "before"), ("initialize", "named"),
+                          ("builtin_initialize", "other"), ("initialize", "<anonymous>"), ("def", "after")])
+        self.assertEqual(rows[0]["body"], ["0"])
+        self.assertEqual(rows[-1]["body"], ["1"])
+        self.assertEqual(rows[1]["qualifiers"], ["private"])
+        for row in rows[1:4]:
+            self.assertEqual(row["reject_reason"], "unsupported-declaration-form")
+            self.assertIsNone(row["statement"])
+            self.assertEqual(row["body"], [])
+        fixture = ROOT / "Solidity/Frontend/Testing.lean"
+        names = {r["name"]: r for r in scanner.scan(fixture, ROOT)}
+        for name in ("nextAuditOrigin", "auditOrigin", "importedAudit"):
+            self.assertEqual(names[name]["reject_reason"], "unsupported-declaration-form")
+        for keyword in ("initialize", "builtin_initialize"):
+            for wrapper in ("open Nat", "set_option autoImplicit false"):
+                scoped = f"{wrapper} in {keyword} hidden : IO.Ref Nat <- IO.mkRef 0\ndef visible : Nat := 0\n"
+                with self.subTest(keyword=keyword, wrapper=wrapper):
+                    with self.assertRaisesRegex(ValueError, "unsupported same-line scoped"):
+                        scanner.scan(root / "B.lean", root, scoped.encode())
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            (temp / "A.lean").write_text("open Nat in initialize hidden : IO.Ref Nat <- IO.mkRef 0\n")
+            (temp / "B.lean").write_text("def visible : Nat := 0\n")
+            report = subprocess.run([sys.executable, "-B", str(SCRIPT), str(temp), "*.lean"], capture_output=True, text=True)
+            self.assertNotEqual(report.returncode, 0)
+            self.assertEqual(json.loads(report.stdout)["incremental"]["comparison_status"], "current-incomplete")
+
+    def test_examples_with_bare_binders_stay_anonymous_and_rejected(self):
+        root = Path("/virtual")
+        source = ("example x : x = (x : Nat) := rfl\n"
+                  "example y z : y = (y : Nat) := rfl\n"
+                  "example (x : Nat) y : y = x → y = x := id\n"
+                  "example {x : Nat} y : y = x → y = x := id\n"
+                  "example (x : Nat) : x = x := by rfl\n"
+                  "example : True := by trivial\ndef next : Nat := 0\n")
+        rows = scanner.scan(root / "A.lean", root, source.encode())
+        self.assertEqual([r["name"] for r in rows], ["<anonymous>"] * 6 + ["next"])
+        for row in rows[:4]:
+            self.assertEqual(row["reject_reason"], "unsupported-example-binder")
+            self.assertEqual(row["body_reject_reason"], "unsupported-example-binder")
+            self.assertIsNone(row["statement"])
+        self.assertIsNone(rows[4]["reject_reason"])
+        self.assertIsNone(rows[5]["reject_reason"])
+        self.assertEqual(rows[-1]["body"], ["0"])
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            (temp / "A.lean").write_text("example x : x = (x : Nat) := rfl\nexample y : y = (y : Nat) := rfl\nexample (x : Nat) y : y = x → y = x := id\n")
+            report = json.loads(subprocess.check_output([sys.executable, "-B", str(SCRIPT), str(temp), "*.lean"]))
+            self.assertEqual(report["candidates"], [])
+            self.assertEqual(report["body_candidates"], [])
 
     def test_definition_delimiter_scope(self):
         split = scanner.split_definition('(x : String := ":=") : String := x')
@@ -259,6 +503,191 @@ class ScannerControls(unittest.TestCase):
             self.assertEqual(data["candidates"], [])
             self.assertIn("different-or-unsupported-statements", data["body_candidates"][0]["reject_reasons"])
 
+    def test_multiline_context_and_literal_boundaries(self):
+        root = Path("/virtual")
+        def row(source):
+            return scanner.scan(root / "A.lean", root, source.encode())[0]
+        prefix = "namespace N\nvariable\n  (T : "
+        suffix = ")\ntheorem same (x : T) : x = x := by rfl\nend N\n"
+        a, b = row(prefix + "Type" + suffix), row(prefix + "Type 1" + suffix)
+        self.assertEqual(a["statement"], b["statement"])
+        self.assertNotEqual(a["context_hash"], b["context_hash"])
+        self.assertEqual(a["context_hash"], row(prefix + "Type" + suffix)["context_hash"])
+        open_a = 'open scoped\n  A\nvariable (T : Type)\ntheorem same (x : T) : x = x := by rfl\n'
+        open_b = open_a.replace("  A\n", "  B\n")
+        self.assertNotEqual(row(open_a)["context_hash"], row(open_b)["context_hash"])
+        literal_a = 'variable (s : String := "x\nnamespace Fake\ny")\ntheorem same : True := by trivial\n'
+        literal_b = literal_a.replace('namespace Fake', 'namespace Other')
+        self.assertNotEqual(row(literal_a)["context_hash"], row(literal_b)["context_hash"])
+        comment = '/- variable\nnamespace Fake -/\n'
+        self.assertEqual(row(comment + prefix + "Type" + suffix)["context_hash"], a["context_hash"])
+
+    def test_notation_after_declaration_contributes_to_context(self):
+        root = Path("/virtual")
+        template = ('namespace N\ndef marker : Nat := 0\n'
+                    'local notation \"MyT\" => {typ}\n'
+                    'theorem same ({binder} : MyT) : {binder} = {binder} := by rfl\nend N\n')
+        def theorem(typ, binder):
+            source = template.format(typ=typ, binder=binder).encode()
+            return scanner.scan(root / "A.lean", root, source)[1]
+        nat, integer, renamed = theorem("Nat", "x"), theorem("Int", "x"), theorem("Nat", "y")
+        self.assertEqual(nat["statement"], integer["statement"])
+        self.assertNotEqual(nat["context_hash"], integer["context_hash"])
+        self.assertEqual(nat["context_hash"], renamed["context_hash"])
+        self.assertEqual(nat["statement"], renamed["statement"])
+        full = scanner.scan(root / "A.lean", root, template.format(typ="Nat", binder="x").encode())
+        self.assertEqual(full[0]["body"], ["0"])
+        indented = ('def outer : Nat := by\n  local notation \"x\" => Nat\n'
+                    '  exact 0\ndef next : Nat := 1\n')
+        rows = scanner.scan(root / "C.lean", root, indented.encode())
+        self.assertEqual(rows[0]["body_reject_reason"], "indented-command-boundary")
+        for keyword in ("notation", "infixl", "infixr", "infix", "prefix", "postfix"):
+            source = f'def marker : Nat := 0\nscoped {keyword}:50 \"##\" => Nat\ntheorem same : True := by trivial\n'
+            changed = source.replace('=> Nat', '=> Int')
+            a = scanner.scan(root / "A.lean", root, source.encode())[1]
+            b = scanner.scan(root / "B.lean", root, changed.encode())[1]
+            self.assertNotEqual(a["context_hash"], b["context_hash"], keyword)
+
+    def test_set_option_context_and_body_boundaries(self):
+        root = Path("/virtual")
+        template = ("def marker : Nat := 0\nset_option autoImplicit {value}\n"
+                    "theorem same (x : Nat) : x = x := by rfl\n")
+        def rows(value):
+            return scanner.scan(root / "A.lean", root, template.format(value=value).encode())
+        a, b = rows("true"), rows("false")
+        self.assertEqual(a[0]["body"], ["0"])
+        self.assertNotEqual(a[1]["context_hash"], b[1]["context_hash"])
+        scoped = b"set_option autoImplicit false in\ntheorem next : True := by trivial\n"
+        self.assertEqual(scanner.scan(root / "B.lean", root, scoped)[0]["name"], "next")
+        nested = b"def outer : Nat := by\n  set_option autoImplicit false in\n  exact 0\ndef next : Nat := 1\n"
+        self.assertEqual(scanner.scan(root / "C.lean", root, nested)[0]["body_reject_reason"], "indented-command-boundary")
+        with self.assertRaisesRegex(ValueError, "unsupported same-line scoped set_option declaration"):
+            scanner.scan(root / "D.lean", root, b"set_option autoImplicit false in theorem hidden : True := by trivial\n")
+        multiline = b"set_option autoImplicit\n  false in theorem hidden : True := by trivial\ndef visible : Nat := 0\n"
+        with self.assertRaisesRegex(ValueError, "unsupported same-line scoped set_option declaration"):
+            scanner.scan(root / "F.lean", root, multiline)
+        modified = b"set_option autoImplicit\n  false in @[foo [bar]] public theorem hidden : True := by trivial\n"
+        with self.assertRaisesRegex(ValueError, "unsupported same-line scoped set_option declaration"):
+            scanner.scan(root / "H.lean", root, modified)
+        split_modifier = b"set_option autoImplicit false in public\n  theorem hidden : True := by trivial\n"
+        with self.assertRaisesRegex(ValueError, "unsupported same-line scoped set_option declaration"):
+            scanner.scan(root / "J.lean", root, split_modifier)
+        split_attribute = b"set_option autoImplicit false in @[foo]\n  private def hidden : Nat := 0\n"
+        with self.assertRaisesRegex(ValueError, "unsupported same-line scoped set_option declaration"):
+            scanner.scan(root / "K.lean", root, split_attribute)
+        other = b"set_option autoImplicit false\n#guard_msgs in #eval 1\ndef next : Nat := 0\n"
+        self.assertEqual(scanner.scan(root / "I.lean", root, other)[0]["name"], "next")
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            (temp / "A.lean").write_bytes(multiline)
+            (temp / "B.lean").write_text("def visible : Nat := 0\n")
+            report = subprocess.run([sys.executable, "-B", str(SCRIPT), str(temp), "*.lean"], capture_output=True, text=True)
+            self.assertNotEqual(report.returncode, 0)
+            self.assertEqual(json.loads(report.stdout)["incremental"]["comparison_status"], "current-incomplete")
+        clean = b'def a : String := "set_option x in theorem fake"\ndef b : Nat := 0\n'
+        self.assertEqual(len(scanner.scan(root / "E.lean", root, clean)), 2)
+
+    def test_outer_scoped_guard_declarations_fail_closed(self):
+        root = Path("/virtual")
+        for source in (b'open Nat in #guard_msgs in theorem hidden : True := by trivial\n', b'set_option autoImplicit false in #guard_msgs in theorem hidden : True := by trivial\n'):
+            with self.subTest(source=source), self.assertRaisesRegex(ValueError, "unsupported same-line scoped"):
+                scanner.scan(root / "A.lean", root, source)
+
+    def test_guard_msgs_inline_declarations_fail_closed(self):
+        root = Path("/virtual")
+        cases = (
+            b'#guard_msgs in@[simp] theorem hidden : True := by trivial\n',
+            b'#guard_msgs in@[simp]\n theorem hidden : True := by trivial\n',
+
+            b"#guard_msgs in theorem hidden : True := by trivial\ndef visible : Nat := 0\n",
+            b"#guard_msgs in #guard_msgs in theorem hidden : True := by trivial\n",
+            b"#guard_msgs in open Nat in theorem hidden : True := by trivial\n",
+            b"#guard_msgs in set_option autoImplicit false in\n theorem hidden : True := by trivial\n",
+            b"#guard_msgs (whitespace := lax) in private\n theorem hidden : True := by trivial\n",
+            b"#guard_msgs in @[simp]\n theorem hidden : True := by trivial\n",
+            b"#guard_msgs (whitespace :=\n lax) in theorem hidden : True := by trivial\n",
+            b"#guard_msgs (whitespace :=\n lax) in private\n theorem hidden : True := by trivial\n",
+        )
+        for source in cases:
+            with self.subTest(source=source), self.assertRaisesRegex(ValueError, "unsupported same-line guard_msgs declaration"):
+                scanner.scan(root / "A.lean", root, source)
+        for source in (b"#guard_msgs in\ntheorem visible : True := by trivial\n",
+                       b"#guard_msgs in #eval 1\ndef visible : Nat := 0\n",
+                       b"#guard_msgs (whitespace :=\n lax) in #eval 1\ndef visible : Nat := 0\n",
+                       b'-- #guard_msgs in theorem hidden\ndef visible : String := "#guard_msgs in theorem fake"\n'):
+            self.assertEqual(scanner.scan(root / "A.lean", root, source)[0]["name"], "visible")
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            (temp / "A.lean").write_bytes(cases[0])
+            (temp / "B.lean").write_text("def visible : Nat := 0\n")
+            report = subprocess.run([sys.executable, "-B", str(SCRIPT), str(temp), "*.lean"], capture_output=True, text=True)
+            self.assertNotEqual(report.returncode, 0)
+            value = json.loads(report.stdout)
+            self.assertEqual(value["incremental"]["comparison_status"], "current-incomplete")
+            self.assertIsNone(value["incremental"]["removed"])
+
+    def test_scoped_open_inline_declarations_fail_closed(self):
+        root = Path("/virtual")
+        cases = (
+            b"open Nat in theorem hidden : True := by trivial\ndef visible : Nat := 0\n",
+            b"open Nat\n  in private\n  def hidden : Nat := 0\ndef visible : Nat := 0\n",
+            b"open scoped Foo in @[simp]\n  theorem hidden : True := by trivial\n",
+        )
+        for source in cases:
+            with self.subTest(source=source):
+                with self.assertRaisesRegex(ValueError, "unsupported same-line scoped open declaration"):
+                    scanner.scan(root / "A.lean", root, source)
+        following = b"open Nat in\ntheorem visible : True := by trivial\n"
+        self.assertEqual(scanner.scan(root / "B.lean", root, following)[0]["name"], "visible")
+        ordinary = b'open Nat\ndef str : String := "open Nat in theorem fake"\n'
+        self.assertEqual(scanner.scan(root / "C.lean", root, ordinary)[0]["name"], "str")
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            (temp / "A.lean").write_bytes(cases[0])
+            (temp / "B.lean").write_bytes(following)
+            report = subprocess.run([sys.executable, "-B", str(SCRIPT), str(temp), "*.lean"], capture_output=True, text=True)
+            self.assertNotEqual(report.returncode, 0)
+            value = json.loads(report.stdout)
+            self.assertEqual(value["incremental"]["comparison_status"], "current-incomplete")
+            self.assertIsNone(value["incremental"]["removed"])
+
+    def test_include_omit_context_and_body_boundaries(self):
+        root = Path("/virtual")
+        template = ("variable (x : Nat)\ndef marker : Nat := 0\n{cmd}\n"
+                    "theorem target : True := by trivial\n")
+        def rows(command):
+            return scanner.scan(root / "A.lean", root, template.format(cmd=command).encode())
+        included, omitted, plain = rows("include x"), rows("omit x"), rows("")
+        self.assertEqual(included[0]["body"], ["0"])
+        self.assertEqual(omitted[0]["body"], ["0"])
+        self.assertNotEqual(included[1]["context_hash"], omitted[1]["context_hash"])
+        self.assertNotEqual(included[1]["context_hash"], plain[1]["context_hash"])
+        for command in ("include x", "omit x"):
+            inline = f"{command} in theorem hidden : True := by trivial\ndef visible : Nat := 0\n"
+            with self.subTest(command=command), self.assertRaisesRegex(ValueError, "unsupported same-line scoped"):
+                scanner.scan(root / "B.lean", root, inline.encode())
+            following = f"{command} in\ntheorem visible : True := by trivial\n"
+            self.assertEqual(scanner.scan(root / "C.lean", root, following.encode())[0]["name"], "visible")
+        nested = b"def outer : Nat := by\n  include x\n  exact 0\ndef next : Nat := 1\n"
+        self.assertEqual(scanner.scan(root / "D.lean", root, nested)[0]["body_reject_reason"], "indented-command-boundary")
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            (temp / "A.lean").write_text("include x in theorem hidden : True := by trivial\n")
+            (temp / "B.lean").write_text("def visible : Nat := 0\n")
+            report = subprocess.run([sys.executable, "-B", str(SCRIPT), str(temp), "*.lean"], capture_output=True, text=True)
+            self.assertNotEqual(report.returncode, 0)
+            self.assertEqual(json.loads(report.stdout)["incremental"]["comparison_status"], "current-incomplete")
+
+    def test_equal_context_does_not_prove_local_definition_equivalence(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name, typ in (("A.lean", "Nat"), ("B.lean", "Int")):
+                (root / name).write_text("namespace N\ndef T := " + typ + "\ntheorem same (x : T) : x = x := by rfl\nend N\n")
+            data = json.loads(subprocess.check_output([sys.executable, "-B", str(SCRIPT), str(root), "*.lean"]))
+            group = next(g for g in data["candidates"] if {m["path"] for m in g["members"]} == {"A.lean", "B.lean"} and all(m["name"] == "same" for m in g["members"]))
+            self.assertIn("intrinsic-signature-unresolved", group["reject_reasons"])
+            self.assertIn("ownership-requires-live-verification", group["reject_reasons"])
+
     def test_namespace_context_is_not_conflated(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -274,12 +703,12 @@ class ScannerControls(unittest.TestCase):
             root = Path(directory)
             source = root / "A.lean"
             source.write_text("def a : Nat := 0\n")
-            original = Path.read_bytes
-            def checked_read(path):
+            original = Path.open
+            def checked_open(path, *args, **kwargs):
                 if path == source: raise OSError("simulated read failure")
-                return original(path)
+                return original(path, *args, **kwargs)
             output = io.StringIO()
-            with mock.patch.object(Path, "read_bytes", checked_read), mock.patch.object(sys, "argv", [str(SCRIPT), str(root), "*.lean"]), contextlib.redirect_stdout(output):
+            with mock.patch.object(Path, "open", checked_open), mock.patch.object(sys, "argv", [str(SCRIPT), str(root), "*.lean"]), contextlib.redirect_stdout(output):
                 result = scanner.main()
             data = json.loads(output.getvalue())
             self.assertTrue(result)
@@ -308,6 +737,230 @@ class ScannerControls(unittest.TestCase):
             self.assertNotEqual(outcome.exception.code, 0)
             self.assertIn("previous candidate comparison", errors.getvalue())
             self.assertNotIn("Traceback", errors.getvalue())
+
+    def test_internal_aliases_keep_paths_owners_and_shared_source_warning(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "Target.lean").write_text("theorem same : True := by trivial\n")
+            for name in ("A.lean", "B.lean"):
+                (root / name).symlink_to("Target.lean")
+            owners = {name: name for name in ("A.lean", "B.lean", "Target.lean")}
+            config = root / "owners.json"
+            config.write_text(json.dumps(owners))
+            cmd = [sys.executable, "-B", str(SCRIPT), str(root), "*.lean", "A.*", "--owners", str(config)]
+            report = json.loads(subprocess.check_output(cmd))
+            self.assertEqual([x["path"] for x in report["inputs"]], sorted(owners))
+            self.assertEqual({row["path"]: row["owner"] for row in report["inventory"]}, owners)
+            self.assertEqual(report["input_aliases"], [{"path": name, "resolved_path": "Target.lean"} for name in ("A.lean", "B.lean")])
+            self.assertIn("shared-resolved-source", report["candidates"][0]["reject_reasons"])
+            self.assertIn("shared-resolved-source", report["body_candidates"][0]["reject_reasons"])
+            self.assertEqual(subprocess.check_output(cmd), subprocess.check_output(cmd))
+
+    def test_hard_links_are_flagged_without_losing_paths(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "A.lean").write_text("theorem same : True := by trivial\n")
+            os.link(root / "A.lean", root / "B.lean")
+            (root / "C.lean").write_text("theorem same : True := by trivial\n")
+            cmd = [sys.executable, "-B", str(SCRIPT), str(root), "*.lean"]
+            report = json.loads(subprocess.check_output(cmd))
+            self.assertEqual([row["path"] for row in report["inputs"]], ["A.lean", "B.lean", "C.lean"])
+            self.assertIn("shared-file-identity", report["candidates"][0]["reject_reasons"])
+            self.assertIn("shared-file-identity", report["body_candidates"][0]["reject_reasons"])
+            self.assertNotIn("shared-resolved-source", report["candidates"][0]["reject_reasons"])
+            self.assertEqual(subprocess.check_output(cmd), subprocess.check_output(cmd))
+            (root / "B.lean").unlink()
+            (root / "B.lean").write_text("theorem same : True := by trivial\n")
+            separate = json.loads(subprocess.check_output(cmd))
+            self.assertNotIn("shared-file-identity", separate["candidates"][0]["reject_reasons"])
+
+    def test_alias_selection_uses_alias_extension(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "Backing.txt").write_text("theorem actual : True := by trivial\n")
+            (root / "Selected.lean").symlink_to("Backing.txt")
+            report = json.loads(subprocess.check_output([sys.executable, "-B", str(SCRIPT), str(root), "*.lean"]))
+            self.assertEqual([row["path"] for row in report["inventory"]], ["Selected.lean"])
+            self.assertEqual(report["input_aliases"], [{"path": "Selected.lean", "resolved_path": "Backing.txt"}])
+
+    def test_bad_selected_links_are_errors_not_silent_omissions(self):
+        for kind in ("broken", "outside", "loop", "directory"):
+            with self.subTest(kind=kind), tempfile.TemporaryDirectory() as directory:
+                parent = Path(directory)
+                root = parent / "root"
+                root.mkdir()
+                (root / "Good.lean").write_text("theorem good : True := by trivial\n")
+                (parent / "Outside.lean").write_text("theorem outside : True := by trivial\n")
+                bad = root / "Bad.lean"
+                if kind == "directory":
+                    bad.mkdir()
+                else:
+                    target = {"broken": "Missing.lean", "outside": "../Outside.lean", "loop": "Bad.lean"}[kind]
+                    bad.symlink_to(target)
+                result = subprocess.run([sys.executable, "-B", str(SCRIPT), str(root), "*.lean"], capture_output=True)
+                self.assertNotEqual(result.returncode, 0)
+                report = json.loads(result.stdout)
+                self.assertEqual([row["path"] for row in report["inventory"]], ["Good.lean"])
+                self.assertEqual([row["path"] for row in report["errors"]], [str(bad)])
+                self.assertEqual(report["unmatched_patterns"], [])
+                self.assertEqual(report["incremental"]["comparison_status"], "current-incomplete")
+                self.assertIsNone(report["incremental"]["added"])
+
+    def test_explicit_directory_alias_keeps_selected_path(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "real").mkdir()
+            (root / "real" / "A.lean").write_text("theorem a : True := by trivial\n")
+            (root / "alias").symlink_to("real", target_is_directory=True)
+            report = json.loads(subprocess.check_output([sys.executable, "-B", str(SCRIPT), str(root), "alias/*.lean"]))
+            self.assertEqual([row["path"] for row in report["inputs"]], ["alias/A.lean"])
+            self.assertEqual(report["input_aliases"], [{"path": "alias/A.lean", "resolved_path": "real/A.lean"}])
+
+    def test_unreadable_selected_subtree_is_explicit_error(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "Good.lean").write_text("theorem good : True := by trivial\n")
+            locked = root / "locked"
+            locked.mkdir()
+            (locked / "Hidden.lean").write_text("theorem hidden : True := by trivial\n")
+            locked.chmod(0)
+            try:
+                result = subprocess.run([sys.executable, "-B", str(SCRIPT), str(root), "**/*.lean"], capture_output=True)
+            finally:
+                locked.chmod(0o700)
+            self.assertNotEqual(result.returncode, 0)
+            report = json.loads(result.stdout)
+            self.assertTrue(report["errors"])
+            self.assertEqual({row["path"] for row in report["errors"]}, {str(locked)})
+            self.assertEqual(report["incremental"]["comparison_status"], "current-incomplete")
+            self.assertIsNone(report["incremental"]["candidate_groups"])
+            self.assertEqual([row["path"] for row in report["inventory"]], ["Good.lean"])
+
+    def test_selector_matches_supported_path_globs(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name in ("A.lean", ".Hidden.lean", "sub/B.lean", "sub/deep/C.lean", "sub/Other.txt"):
+                path=root/name;path.parent.mkdir(parents=True,exist_ok=True);path.write_text("theorem ok : True := by trivial\n")
+            (root / "alias").symlink_to("sub", target_is_directory=True)
+            for pattern in ("*.lean", "**/*.lean", "sub/**/*.lean", "*/B.lean", "alias/*.lean", "[A-Z].lean", "missing/*.lean", "sub/**/C.lean"):
+                with self.subTest(pattern=pattern):
+                    errors=[]
+                    actual={p.relative_to(root).as_posix() for p in scanner.selected_paths(root,pattern,errors)}
+                    expected={p.relative_to(root).as_posix() for p in root.glob(pattern)}
+                    self.assertEqual(actual,expected)
+                    if pattern == "**/*.lean":
+                        self.assertEqual([e["path"] for e in errors], [str(root / "alias")])
+                        self.assertIn("skips directory symlink", errors[0]["reason"])
+                    else:
+                        self.assertEqual(errors,[])
+
+    def test_recursive_directory_alias_reports_incomplete(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "real").mkdir()
+            (root / "real" / "A.lean").write_text("def a : Nat := 0\n")
+            cmd = [sys.executable, "-B", str(SCRIPT), str(root), "**/*.lean"]
+            baseline = root / "prior.json"
+            baseline.write_bytes(subprocess.check_output(cmd))
+            (root / "alias").symlink_to("real", target_is_directory=True)
+            result = subprocess.run(cmd + pinned(baseline), capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            report = json.loads(result.stdout)
+            self.assertTrue(any("skips directory symlink" in e["reason"] for e in report["errors"]))
+            self.assertEqual(report["incremental"]["comparison_status"], "current-incomplete")
+            self.assertIsNone(report["incremental"]["removed"])
+            self.assertIsNone(report["incremental"]["candidate_groups"])
+            explicit = subprocess.check_output([sys.executable, "-B", str(SCRIPT), str(root), "alias/*.lean"])
+            self.assertEqual(json.loads(explicit)["inputs"][0]["path"], "alias/A.lean")
+            (root / "alias").unlink()
+            (root / "dangling").symlink_to("missing", target_is_directory=True)
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(json.loads(result.stdout)["incremental"]["comparison_status"], "current-incomplete")
+
+    def test_finite_dangling_directory_alias_is_incomplete(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "good").mkdir()
+            (root / "good" / "Target.lean").write_text("def good : Nat := 0\n")
+            cmd = [sys.executable, "-B", str(SCRIPT), str(root), "*/Target.lean"]
+            baseline = root / "prior.json"
+            baseline.write_bytes(subprocess.check_output(cmd))
+            (root / "dangling").symlink_to("missing", target_is_directory=True)
+            result = subprocess.run(cmd + pinned(baseline), capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            report = json.loads(result.stdout)
+            self.assertTrue(any(Path(e["path"]).name == "dangling" for e in report["errors"]))
+            self.assertEqual(report["incremental"]["comparison_status"], "current-incomplete")
+            self.assertIsNone(report["incremental"]["removed"])
+            explicit = subprocess.run([sys.executable, "-B", str(SCRIPT), str(root), "good/Target.lean", "dangling/*.lean"], capture_output=True, text=True)
+            self.assertNotEqual(explicit.returncode, 0)
+            self.assertTrue(any(Path(e["path"]).name == "dangling" for e in json.loads(explicit.stdout)["errors"]))
+
+    def test_external_directory_alias_is_not_enumerated(self):
+        with tempfile.TemporaryDirectory() as directory, tempfile.TemporaryDirectory() as outside:
+            root, foreign = Path(directory), Path(outside)
+            (root / "good").mkdir()
+            (root / "good" / "Target.lean").write_text("def good : Nat := 0\n")
+            (foreign / "Target.lean").write_text("def foreign : Nat := 0\n")
+            (root / "external").symlink_to(foreign, target_is_directory=True)
+            for pattern in ("external/*.lean", "*/Target.lean"):
+                result = subprocess.run([sys.executable, "-B", str(SCRIPT), str(root), pattern], capture_output=True, text=True)
+                self.assertNotEqual(result.returncode, 0)
+                report = json.loads(result.stdout)
+                self.assertTrue(any("resolves outside root" in e["reason"] for e in report["errors"]))
+                self.assertFalse(any(r["path"].startswith("external/") for r in report["inputs"]))
+                self.assertEqual(report["incremental"]["comparison_status"], "current-incomplete")
+            original = scanner.os.scandir
+            def guarded(path):
+                if Path(path) == root / "external":
+                    raise AssertionError("outside alias must not be enumerated")
+                return original(path)
+            errors = []
+            with mock.patch.object(scanner.os, "scandir", guarded):
+                list(scanner.selected_paths(root, "external/*.lean", errors))
+            self.assertTrue(any("resolves outside root" in e["reason"] for e in errors))
+
+    def test_nonrecursive_selection_does_not_read_unselected_subtree(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            (root / "Good.lean").write_text("theorem good : True := by trivial\n")
+            locked=root/"locked";locked.mkdir();locked.chmod(0)
+            try:
+                report=json.loads(subprocess.check_output([sys.executable,"-B",str(SCRIPT),str(root),"*.lean"]))
+            finally:
+                locked.chmod(0o700)
+            self.assertEqual(report["errors"],[])
+            self.assertEqual([row["path"] for row in report["inputs"]],["Good.lean"])
+
+    def test_trailing_separator_is_directory_only(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            (root / "File.lean").write_text("theorem file : True := by trivial\n")
+            (root / "Dir.lean").mkdir()
+            for pattern in ("*.lean/", "File.lean/", "Dir.lean/", "**/*.lean/"):
+                with self.subTest(pattern=pattern):
+                    errors=[]
+                    actual={p.relative_to(root).as_posix() for p in scanner.selected_paths(root,pattern,errors)}
+                    expected={p.relative_to(root).as_posix() for p in root.glob(pattern)}
+                    self.assertEqual(actual,expected)
+                    self.assertEqual(errors,[])
+
+    def test_exact_path_needs_execute_permission_not_directory_listing(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            locked=root/"execute-only";locked.mkdir()
+            source=locked/"A.lean";source.write_text("theorem a : True := by trivial\n")
+            locked.chmod(0o100)
+            try:
+                report=json.loads(subprocess.check_output([sys.executable,"-B",str(SCRIPT),str(root),"execute-only/A.lean"]))
+                wildcard=subprocess.run([sys.executable,"-B",str(SCRIPT),str(root),"execute-only/*.lean"],capture_output=True)
+            finally:
+                locked.chmod(0o700)
+            self.assertEqual(report["errors"],[])
+            self.assertEqual([row["path"] for row in report["inputs"]],["execute-only/A.lean"])
+            self.assertNotEqual(wildcard.returncode,0)
+            self.assertEqual(json.loads(wildcard.stdout)["incremental"]["comparison_status"],"current-incomplete")
 
     def test_report_and_incremental(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -1,0 +1,42 @@
+{
+ "Solidity/Lowering/P8/ResolvedGraphAdmissionV2.lean:Solidity.Lowering.P8.ResolvedGraphAdmissionV2.certified_output": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/ResolvedGraphAdmissionV2.lean:Solidity.Lowering.P8.ResolvedGraphAdmissionV2.certifyEnv": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/ResolvedGraphAdmissionV2.lean:Solidity.Lowering.P8.ResolvedGraphAdmissionV2.certifyEnv_success_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/ResolvedGraphAdmissionV2.lean:Solidity.Lowering.P8.ResolvedGraphAdmissionV2.conversion_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/ResolvedGraphAdmissionV2.lean:Solidity.Lowering.P8.ResolvedGraphAdmissionV2.conversion_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/ResolvedGraphAdmissionV2.lean:Solidity.Lowering.P8.ResolvedGraphAdmissionV2.output_resolution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/ResolvedGraphAdmissionV2.lean:Solidity.Lowering.P8.ResolvedGraphAdmissionV2.output_success_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/ResolvedGraphAdmissionV2.lean:Solidity.Lowering.P8.ResolvedGraphAdmissionV2.ready_iff_all": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

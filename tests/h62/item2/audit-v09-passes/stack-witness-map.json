@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface_path": "Solidity/Backend/Passes/Stack.lean",
+  "interface_sha256": "cd3bec154ccae4e104cf4846ca6e9bb1772ce22064f44cd3141dea22bb9dd740",
+  "witness_module": "tests/h62/item2/audit-v09-passes/StackJointWitness.lean",
+  "covered_premise_bundles": [
+    {
+      "name": "Solidity.Backend.Passes.compilation_input_stack",
+      "visibility": "public",
+      "kind": "theorem",
+      "path": "Solidity/Backend/Passes/Stack.lean",
+      "line": 43,
+      "character_span": [
+        1739,
+        1972
+      ],
+      "signature": "theorem compilation_input_stack (result : Compilation b F P)\n    {base : Nat \u2192 Fin W} {\u03c3 : State C \u0393} {m : Machine}\n    (hi : result.Input L frame base \u03c3 m) (tail : List Word) :\n    result.Input L frame base \u03c3 {m with stack := tail}",
+      "signature_sha256": "c8f2906fb6fc77ce6b125242fb66ab9ea88d663079a45bc0b11a50d243edf7a9",
+      "source_sha256": "cd3bec154ccae4e104cf4846ca6e9bb1772ce22064f44cd3141dea22bb9dd740",
+      "owner": "V09 (v07-v11/v09-compiler-passes)",
+      "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
+      "hypotheses": "pending-elaborated-classification",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditStack.premises",
+      "witness_status": "kernel_checked_concrete_joint_instance_arbitrary_tail",
+      "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
+      "original_census_membership": false
+    },
+    {
+      "name": "Solidity.Backend.Passes.compilation_input_stack_iff",
+      "visibility": "public",
+      "kind": "theorem",
+      "path": "Solidity/Backend/Passes/Stack.lean",
+      "line": 72,
+      "character_span": [
+        3132,
+        3366
+      ],
+      "signature": "theorem compilation_input_stack_iff (result : Compilation b F P)\n    {base : Nat \u2192 Fin W} {\u03c3 : State C \u0393} {m : Machine} (tail : List Word) :\n    result.Input L frame base \u03c3 {m with stack := tail} \u2194\n      result.Input L frame base \u03c3 m",
+      "signature_sha256": "9bc9c33a2194afb41787845d36f36479bedf392e49e4bf4d35a98bfdf2819ae1",
+      "source_sha256": "cd3bec154ccae4e104cf4846ca6e9bb1772ce22064f44cd3141dea22bb9dd740",
+      "owner": "V09 (v07-v11/v09-compiler-passes)",
+      "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
+      "hypotheses": "pending-elaborated-classification",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditStack.premises",
+      "witness_status": "kernel_checked_concrete_joint_instance_arbitrary_tail",
+      "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
+      "original_census_membership": false
+    },
+    {
+      "name": "Solidity.Backend.Passes.compilation_success_tail",
+      "visibility": "public",
+      "kind": "theorem",
+      "path": "Solidity/Backend/Passes/Stack.lean",
+      "line": 81,
+      "character_span": [
+        3632,
+        4071
+      ],
+      "signature": "theorem compilation_success_tail (result : Compilation b F P)\n    {base : Nat \u2192 Fin W} {\u03c3 : State C \u0393} {m : Machine}\n    (hi : result.Input L frame base \u03c3 m) (hpay : Evm.Prog.pays P = false)\n    {o : Solidity.Out C \u03c3.H \u0394} (hs : P.run \u03c3 = .ok o) (tail : List Word) :\n    \u2203 m', run result.code {m with stack := tail} = .ok m' 0 \u2227\n      m'.stack = tail \u2227 result.Rep (L + Evm.Prog.pushes P) frame base\n        \u03c3 {m with stack := tail} o.st m'",
+      "signature_sha256": "72dad99559776b2a484ec3198547f3bd25ecceabfeb525b456b26f3ab7c747ea",
+      "source_sha256": "cd3bec154ccae4e104cf4846ca6e9bb1772ce22064f44cd3141dea22bb9dd740",
+      "owner": "V09 (v07-v11/v09-compiler-passes)",
+      "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
+      "hypotheses": "pending-elaborated-classification",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditStack.premises",
+      "witness_status": "kernel_checked_concrete_joint_instance_arbitrary_tail",
+      "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
+      "original_census_membership": false
+    }
+  ],
+  "uncovered_private_helpers": [
+    "Solidity.Backend.Passes.allocation_stack",
+    "Solidity.Backend.Passes.object_allocation_stack",
+    "Solidity.Backend.Passes.object_state_stack"
+  ],
+  "scope": "Three public premise bundles on a concrete checked core-branch store and arbitrary saved tail. Other branch instances and the three private helpers remain uncovered. No gas/fork or whole-audit adequacy claim.",
+  "join": "Nineteen distinct supplemental interface rows across these maps. None belongs to the original179-file/1259-row selection; all1259 selected rows remain uncovered by these fixtures. Prior subtraction counts withdrawn.",
+  "original_census_accounting": {
+    "selected_files": 179,
+    "selected_rows": 1259,
+    "covered_selected_rows_by_this_map": 0,
+    "remaining_selected_rows": 1259,
+    "classification": "supplemental interfaces, not selected census members"
+  }
+}

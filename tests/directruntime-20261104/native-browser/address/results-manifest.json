@@ -1,0 +1,641 @@
+{
+  "guardedRegression": "H90 address locals must retain marker/identity/error order on the shared executable boundary",
+  "base": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
+  "sourceBuildHead": "4234b74778787f681ebb50f2890355d99f37731a",
+  "parentContext": "c4fb2acdf20d27d6c3cdde2d4b57e7a2361b6dfe",
+  "producerHead": "0834bc67b042a63a8c804162781802245ae59c98",
+  "reviewedOwnerHead": "09bb5b5e3b65a7df5e35aa8bffd3fbc41769dbbf",
+  "packet": {
+    "path": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/address-handoff/address-api-packet.json",
+    "sha256": "c19c588e1ae27a39f39c410d2e3d2e7bf393a59c01a087d25aacf01fe2ec5dfb"
+  },
+  "producerEvidence": {
+    "path": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/address-evidence.tar.zst",
+    "sha256": "0a96c06eb01deb54781449269fdbb9f6a4f41d0596825b4d950344d7f3a77dea",
+    "inspectedFiles": 55,
+    "inspectedDataBytes": 1386682,
+    "executedProducerEvidence": false
+  },
+  "sourceFiles": [
+    {
+      "path": "Solidity/Frontend/ExecutableAst/Shared/Translate.lean",
+      "sha256": "352b8caf7b4a070d9e5c77c0353d1edd47dadc5b4871d74f05b5600c37e2dae9"
+    },
+    {
+      "path": "Solidity/Frontend/ExecutableAst/Shared/Compose.lean",
+      "sha256": "81834803c899cea42d45fb11ce95888dddc2170e5000067d5c93aeb8d22d87ed"
+    }
+  ],
+  "runtimeSourceComparison": {
+    "sourceBuildHead": "4234b74778787f681ebb50f2890355d99f37731a",
+    "comparisons": [
+      {
+        "head": "0834bc67b042a63a8c804162781802245ae59c98",
+        "runtimeSourceFiles": 343,
+        "mismatches": [
+          "Solidity/Calculus/LinearCountermodel.lean"
+        ],
+        "missing": []
+      },
+      {
+        "head": "09bb5b5e3b65a7df5e35aa8bffd3fbc41769dbbf",
+        "runtimeSourceFiles": 343,
+        "mismatches": [],
+        "missing": []
+      }
+    ],
+    "boundary": "Exact Git source-byte inventory only;packet two-file source authority remains explicit. Not wholebranch adoption,source/ABI adequacy,causalperformance or fullparity."
+  },
+  "sourceBoundary": "Exact two-file0834increment in published parentc4fb context;all343runtime sourcefiles also byte-identical reviewed09bbtree. Only LinearCountermodel differs from full0834tree. Not wholebranch/source/ABI adequacy or causalperformance qualification.",
+  "binaries": {
+    "native": "79a5c531342207ec844e34f9766cf0119d6692de57a1b9a6cc03fa0a247901f3",
+    "wasm": "97e05db7b219ee38255ef69b626c386d8422435cadcfd35666f6027b16b6ec2c",
+    "nativeBytes": 21013560,
+    "wasmBytes": 16579437
+  },
+  "closure": {
+    "modules": 206,
+    "functions": 9985,
+    "closedValues": 5006,
+    "sourceModules": 1631,
+    "nativeRoots": [
+      "lean_array_to_list_impl",
+      "lean_io_cancel_token_is_set",
+      "lean_io_eprintln",
+      "lean_io_error_to_string",
+      "lean_list_to_array",
+      "lean_mk_io_error_already_exists",
+      "lean_mk_io_error_already_exists_file",
+      "lean_mk_io_error_hardware_fault",
+      "lean_mk_io_error_illegal_operation",
+      "lean_mk_io_error_inappropriate_type",
+      "lean_mk_io_error_inappropriate_type_file",
+      "lean_mk_io_error_interrupted",
+      "lean_mk_io_error_invalid_argument",
+      "lean_mk_io_error_invalid_argument_file",
+      "lean_mk_io_error_no_file_or_directory",
+      "lean_mk_io_error_no_such_thing",
+      "lean_mk_io_error_no_such_thing_file",
+      "lean_mk_io_error_other_error",
+      "lean_mk_io_error_permission_denied",
+      "lean_mk_io_error_permission_denied_file",
+      "lean_mk_io_error_protocol_error",
+      "lean_mk_io_error_resource_busy",
+      "lean_mk_io_error_resource_exhausted",
+      "lean_mk_io_error_resource_exhausted_file",
+      "lean_mk_io_error_resource_vanished",
+      "lean_mk_io_error_time_expired",
+      "lean_mk_io_error_unsatisfied_constraints",
+      "lean_mk_io_error_unsupported_operation",
+      "lean_mk_io_user_error",
+      "lean_stream_of_handle"
+    ]
+  },
+  "addressControlsPerBackend": {
+    "fixtureRequests": 16,
+    "proved": 10,
+    "refuted": 2,
+    "unsupported": 4,
+    "additionalPositiveHarnessGuards": 2,
+    "modalities": [
+      "diamond",
+      "box"
+    ],
+    "strictRefusal": "compact verifier: unsupported type address",
+    "actualSourceBoxAnnotations": 8,
+    "eraseRecoversExactDiamondSource": true,
+    "tagAndExactResultParity": true
+  },
+  "stateRefusalSupplement": {
+    "requestsPerBackend": 1,
+    "actualCompilerContract": "AddressStateRefusal",
+    "expectedGap": "compact verifier: unsupported type address",
+    "passedBoth": true,
+    "countedIn16Fixtures": false,
+    "positiveProof": false
+  },
+  "supplementaryHarness": {
+    "committed": "/workspace/solidity-lean/tests/directruntime-20261104/native-browser/address/state-refusal-controls.mjs",
+    "executed": "/workspace/solidity-lean/.lake/native-browser-address/state-refusal-controls.mjs",
+    "sha256": "141249484004442646bddc3bb7343d75d2e25b817166f89b28b7316ecea25bae",
+    "reviewFindingFixedBeforeExecution": "Bind fixture/source/compiler/suite to completed parent plus current binary/bridge/closure/sourcepins;check exactlyonepublicf;RPCtimeouts failclosed."
+  },
+  "retainedControlsPerBackend": {
+    "fixedByte20": {
+      "proved": 12,
+      "refuted": 4,
+      "unsupported": 4,
+      "additionalGuards": 2
+    },
+    "C13": {
+      "proved": 9,
+      "unsupported": 4,
+      "additionalGuard": 1
+    },
+    "A8": {
+      "proved": 6,
+      "refuted": 2,
+      "additionalGuard": 1
+    },
+    "B84": {
+      "proved": 64,
+      "refuted": 16,
+      "pending": 4,
+      "originalDeliveredJournal": true,
+      "positiveIdentityDiamondBothCompilerModes": true
+    },
+    "existing83": {
+      "proved": 83,
+      "rounds": 1,
+      "timingAcceptance": false
+    },
+    "nativeNegatives": {
+      "passed": 14,
+      "total": 14
+    },
+    "browserNegatives": {
+      "passed": 13,
+      "total": 14,
+      "failure": "invariantCountsToBound RangeError: Maximum call stack size exceeded"
+    },
+    "UI": "Edited-source/counterexample/disconnected fresh-edit controls pass"
+  },
+  "proofs": {
+    "newDecoderLemma": "localValueTypeName_of_address",
+    "otherPrintedLemmas": [
+      "localTypeName_of_narrow",
+      "localTypeName_of_fixedBytes"
+    ],
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "baseBoundary": "Shared.Translate/new address decoder absent at original b419base;exact new/current signatures andaxioms printed in marker-controls/1.log.No worker-authored producer theorem/definition changes.",
+    "shapeControls": [
+      "explicitnonpayable marker",
+      "payable/missing/invalidmutability refusal",
+      "strictparameter/state type reader",
+      "3builtinidentity negatives",
+      "base-first competingerror priority"
+    ],
+    "fixedByteSpellings": 32,
+    "finiteModalCases": 18,
+    "returnEffectCheck": 1,
+    "finiteRefusals": 2,
+    "intrinsicMemoryControls": 12,
+    "MCPfiles": 8,
+    "MCPerrors": 0,
+    "boundary": "Kernel decoder equations/model controls and trusted compiled-checker observations;not source/compiler/ABI/native preservation or exhaustive lexical/overload/world correctness."
+  },
+  "ordinaryRequests": "Actualnative/generated-c-wasm boot/binary/requestidentity andexact result parity,source/compiler pins,request-specific traces/assets no forbidden serializedenv/frontend loads.Static selected-C/import/export inventory andexactbodyclassification are not universalpurity/machinecorrectness;optional certificates stay separate.",
+  "toolchain": {
+    "lean": "4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b",
+    "lake": "5.0.0-src+797c613",
+    "emscripten": "4.0.15 explicit EM_CONFIG",
+    "keySort": "377taclets/131read-bearing/131table;annotations match",
+    "unitTests": 18
+  },
+  "resources": "Allheavy gates serial12GiB/swap0/CPU1,LEAN_NUM_THREADS1/-j1,writerlock,4GiBouterreserve;actualwall/RSS/headroomreceipts below.",
+  "costBoundary": "Native28.795s incremental/candidate objectreuse,newlink;WASM269.945s selectedCrecompile,newlink.Marker191.481s includes transitive rebuilds from published dependency changes.No matchedcold/performance recovery inferred.",
+  "retainedSTOPs": {
+    "nativeMedianPercent": 21.32,
+    "browserStartupPercent": 32.2,
+    "priorNativeBuildIncreasePercent": 26.13076760652298,
+    "priorNativeBuildWallSeconds": 371.14980405399547,
+    "comparisonNativeBuildWallSeconds": 294.2579444309995,
+    "status": "Investigation pending;causesunestablished.No unchanged stopped timing benchmark rerun."
+  },
+  "publication": "Scoped H71source consumption authorized;separate publishedmasterownermerge wait retained,no merge/adoption of unpublished master inferred.Conflict paths now byte-identical reviewedownerfiles.",
+  "runtimeGate": "pending",
+  "gates": [
+    {
+      "command": [
+        "node",
+        "tests/directruntime-20261104/native-browser/published-8495-controls.mjs"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address/A-controls-gate.json",
+      "sha256": "1f526266e961690018203cfc5157bb22d63b10154e565bce6dce59200b5f6418",
+      "exitCode": 0,
+      "wallSeconds": 13.57267177599715,
+      "sampledRssPeakBytes": 1534128128,
+      "minimumOuterHeadroomBytes": 8769269760,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "node",
+        "tests/directruntime-20261104/native-browser/h81-memory-controls.mjs"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address/B-controls-authenticated-gate.json",
+      "sha256": "bfa1b6b722ff51ae3a1695da0bcb6694655d271dee425946651a306a6c60c56b",
+      "exitCode": 0,
+      "wallSeconds": 143.07490022500133,
+      "sampledRssPeakBytes": 1374883840,
+      "minimumOuterHeadroomBytes": 8936017920,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "bash",
+        ".lake/native-browser-address/B-kernel-controls.sh"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address/B-kernel-gate.json",
+      "sha256": "fb02e77e133760d3592c7413c2ce30bba336697a5c911f149fe2fb517774b15c",
+      "exitCode": 0,
+      "wallSeconds": 11.086973254998156,
+      "sampledRssPeakBytes": 1351938048,
+      "minimumOuterHeadroomBytes": 9600614400,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "node",
+        "tests/directruntime-20261104/native-browser/published-8495-controls.mjs"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address/C-controls-gate.json",
+      "sha256": "8728c0213f37fad1f57bf6cd070b7a9dca2a892a8d3d1c2104cc34f9aadbf208",
+      "exitCode": 0,
+      "wallSeconds": 26.359946395001316,
+      "sampledRssPeakBytes": 1608478720,
+      "minimumOuterHeadroomBytes": 8695238656,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "node",
+        "tests/directruntime-20261104/native-browser/published-8495-controls.mjs"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address/box-controls-gate.json",
+      "sha256": "c8228474c9b169df8ca033c77b0676f598bcc6b836982060c49da42cd6d69bd9",
+      "exitCode": 0,
+      "wallSeconds": 12.104815815997426,
+      "sampledRssPeakBytes": 1477459968,
+      "minimumOuterHeadroomBytes": 8829792256,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "node",
+        "tests/directruntime-20261104/native-browser/browser-control-completion.cjs"
+      ],
+      "status": "fail",
+      "receipt": "/workspace/scratch/browser-chain/address/browser-negatives-gate.json",
+      "sha256": "fbe7e6e3067a75145d0fc5dcd4f6335bda2dfa47b82acaff1ef6e636de2acf9f",
+      "exitCode": 1,
+      "wallSeconds": 21.463982301000215,
+      "sampledRssPeakBytes": 1519521792,
+      "minimumOuterHeadroomBytes": 8781643776,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "python3",
+        ".lake/native-browser-address/closure-audit.py"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address/closure-gate.json",
+      "sha256": "cbae5dc1808f9a221280f8b618f7db7cb3e1042c2492c958f1e034a64191f7f2",
+      "exitCode": 0,
+      "wallSeconds": 24.456720043999667,
+      "sampledRssPeakBytes": 1274445824,
+      "minimumOuterHeadroomBytes": 8630755328,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "node",
+        "tests/directruntime-20261104/native-browser/published-8495-controls.mjs"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address/diamond-controls-gate.json",
+      "sha256": "b4e1438deb9c71a9385c754a6c4457edd9c8e8ac5299f7b514ab37d764a572b9",
+      "exitCode": 0,
+      "wallSeconds": 12.358587850998447,
+      "sampledRssPeakBytes": 1469411328,
+      "minimumOuterHeadroomBytes": 8838864896,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "bash",
+        ".lake/native-browser-address/finite-gate.sh"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address/finite-gate.json",
+      "sha256": "2a7118c4053ed350f4b0114678de769e6a6de6edf4495bea9b658f80d0a30a4f",
+      "exitCode": 0,
+      "wallSeconds": 2.2167962640014593,
+      "sampledRssPeakBytes": 1200406528,
+      "minimumOuterHeadroomBytes": 9678340096,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "node",
+        "tests/directruntime-20261104/native-browser/published-8495-controls.mjs"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address/fixed-byte-box-controls-gate.json",
+      "sha256": "9ca444613c782b54730547a8aa4611855882b50c0b8b9ed487dbcab14af4132e",
+      "exitCode": 0,
+      "wallSeconds": 14.772789271002694,
+      "sampledRssPeakBytes": 1376641024,
+      "minimumOuterHeadroomBytes": 8928493568,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "node",
+        "tests/directruntime-20261104/native-browser/published-8495-controls.mjs"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address/fixed-byte-diamond-controls-gate.json",
+      "sha256": "d1c5c45b972c6d3c7a35caff49edd9d5f3ad6b3606798bd8ed93139424fde207",
+      "exitCode": 0,
+      "wallSeconds": 15.5771771610016,
+      "sampledRssPeakBytes": 1347076096,
+      "minimumOuterHeadroomBytes": 8960430080,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "bash",
+        "/workspace/solidity-lean/.lake/native-browser-address/fixed-byte-gate.sh"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address/fixed-byte-marker-gate.json",
+      "sha256": "4c946c440b7f20161f613d772f87fdd8207599bdf1f4ab3db6400d68bce28383",
+      "exitCode": 0,
+      "wallSeconds": 1.1093503419979243,
+      "sampledRssPeakBytes": 1120940032,
+      "minimumOuterHeadroomBytes": 9860444160,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "node",
+        "tests/directruntime-20261104/native-browser/primitive-return/functional83.mjs"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address/functional83-gate.json",
+      "sha256": "db31c78c06ad568005a32168b543d4294868295ab57b8093e406c68f8fe510f2",
+      "exitCode": 0,
+      "wallSeconds": 145.25925884699973,
+      "sampledRssPeakBytes": 1538203648,
+      "minimumOuterHeadroomBytes": 8768462848,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "bash",
+        ".lake/native-browser-fixed-byte/keys.sh"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address/keys-gate.json",
+      "sha256": "5e2bdb9947fe7cdc4df200e2bcec50eb585b333c920de271d90df913fa62ef5e",
+      "exitCode": 0,
+      "wallSeconds": 0.30246867799723987,
+      "sampledRssPeakBytes": 109133824,
+      "minimumOuterHeadroomBytes": 9950326784,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "bash",
+        "/workspace/solidity-lean/.lake/native-browser-address/marker-gate.sh"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address/marker-gate.json",
+      "sha256": "b2120796f53135217f73ed4ff73b390ac889a5f878380843c66e81e22e395b91",
+      "exitCode": 0,
+      "wallSeconds": 191.48068853100267,
+      "sampledRssPeakBytes": 1540149248,
+      "minimumOuterHeadroomBytes": 9144721408,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "bash",
+        "/workspace/solidity-lean/.lake/native-browser-address/mcp.sh"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address/mcp-gate.json",
+      "sha256": "d4b6a18cd4f8f172b108adf9b3d2b3340cabf97d5f4fae3b9756ee108656b8f5",
+      "exitCode": 0,
+      "wallSeconds": 20.695970352993754,
+      "sampledRssPeakBytes": 1879080960,
+      "minimumOuterHeadroomBytes": 9040056320,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "bash",
+        "tests/directruntime-20261104/native-browser/hardening-native-build.sh"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address/native-build-gate.json",
+      "sha256": "683cf5b729733cb81469b7a4cd5cbe8f59a263c955784af7645428f9be98db92",
+      "exitCode": 0,
+      "wallSeconds": 28.795219380001072,
+      "sampledRssPeakBytes": 1275133952,
+      "minimumOuterHeadroomBytes": 8780976128,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "python3",
+        ".lake/native-browser-address/native-negatives.py"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address/native-negatives-gate.json",
+      "sha256": "bbee038c66556ecc37aa12084f2059b92402aec63eae405e4831c190e4c001c9",
+      "exitCode": 0,
+      "wallSeconds": 5.2446381019981345,
+      "sampledRssPeakBytes": 119537664,
+      "minimumOuterHeadroomBytes": 9797550080,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "bash",
+        ".lake/native-browser-address/browser-build.sh"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address/package-gate.json",
+      "sha256": "d5ca4b7eeeb975ad0dcee3b21bbc46f5da5afb4fc95eea6ab62840c6fe02bd28",
+      "exitCode": 0,
+      "wallSeconds": 2.365159417997347,
+      "sampledRssPeakBytes": 291573760,
+      "minimumOuterHeadroomBytes": 9640951808,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "node",
+        ".lake/native-browser-address/state-refusal-controls.mjs"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address/state-refusal-gate.json",
+      "sha256": "8931fdc60b1c733f8f1a45da0966e8f17e43551685dcb9fe28b50826ffbf0198",
+      "exitCode": 0,
+      "wallSeconds": 2.362318306993984,
+      "sampledRssPeakBytes": 748244992,
+      "minimumOuterHeadroomBytes": 9553276928,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "node",
+        "web/test/website.cjs",
+        "--single",
+        "--proofs"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address/ui-gate.json",
+      "sha256": "83a929b9bbc99d47fc0efa1d2b64fe768ffac7ac2ca229857f4afc293d8b028c",
+      "exitCode": 0,
+      "wallSeconds": 26.39886900300189,
+      "sampledRssPeakBytes": 1473798144,
+      "minimumOuterHeadroomBytes": 8798355456,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "bash",
+        "tests/directruntime-20261104/native-browser/hardening-validation.sh"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address/units-gate.json",
+      "sha256": "b8b61df3cd777834773904de7e015e3db96ac580d78ecc188422d777bfafef1b",
+      "exitCode": 0,
+      "wallSeconds": 0.9069932050042553,
+      "sampledRssPeakBytes": 43151360,
+      "minimumOuterHeadroomBytes": 9959403520,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    },
+    {
+      "command": [
+        "bash",
+        "/workspace/solidity-lean/.lake/native-browser-address/wasm-build.sh"
+      ],
+      "status": "pass",
+      "receipt": "/workspace/scratch/browser-chain/address/wasm-build-gate.json",
+      "sha256": "5488158aba9649b8ff761a348e1aa4f47a17026023df98682239a77289782938",
+      "exitCode": 0,
+      "wallSeconds": 269.94483429799584,
+      "sampledRssPeakBytes": 1462591488,
+      "minimumOuterHeadroomBytes": 9067843584,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      }
+    }
+  ],
+  "archives": [
+    {
+      "path": "/workspace/solidity-lean/.lake/native-browser-address/handoff-data/evidence.tar.gz",
+      "bytes": 779453,
+      "sha256": "c61a53e56d19bbd0b0913dfe65e3149c3080beefe696b9f7cd4a39e5c97cd8fa"
+    },
+    {
+      "path": "/workspace/solidity-lean/.lake/native-browser-address/handoff-data/runtime-artifacts.tar.gz",
+      "bytes": 9953382,
+      "sha256": "a9ed829b9a9100e6e04716493430a0bf697e103f64b1304aa716df36b5138228"
+    },
+    {
+      "path": "/workspace/solidity-lean/.lake/native-browser-address/handoff-data/incremental-cache.tar.gz",
+      "bytes": 887592,
+      "sha256": "308e71f122f83ddfc238d1ea698b4e4c190c08b40b54a8075189322f15ad23c9"
+    },
+    {
+      "path": "/workspace/solidity-lean/.lake/native-browser-address/handoff-data/evidence-files.json",
+      "bytes": 89874,
+      "sha256": "d2b9097690c5b73c3eab5b06ca77b448924b301e96e998a72496d86388a3e064"
+    },
+    {
+      "path": "/workspace/solidity-lean/.lake/native-browser-address/handoff-data/runtime-files.json",
+      "bytes": 727,
+      "sha256": "015c78266a4ab556722ab6f6b60faf29e5c5b0f8b9abe462f1715243e752cc32"
+    },
+    {
+      "path": "/workspace/solidity-lean/.lake/native-browser-address/handoff-data/cache-files.json",
+      "bytes": 5054,
+      "sha256": "29d05ee146d2f977e22e6dfb5a8a18fd6a8fc91bb6b95a7e46ecd4f3c7fd5089"
+    }
+  ],
+  "cache": "24incremental artifacts verifiedlocal/coordinatorpending;no ship-cache/noH88releaseorcross-cachecoherence success inferred.",
+  "reviews": "Independent read-only finder and skeptic PASS scoped intake/results/harness/provenance/STOP boundaries;both verified487evidencepayloads,5runtimepayloads and24cacheartifacts against exactindexes.Neither used Lean/server/builds.Confirmed provenancefinding fixed beforeexecution;wholegoal acceptance incomplete.",
+  "status": "Scoped16address functional qualification passes;wholeoriginalgoal incomplete."
+}

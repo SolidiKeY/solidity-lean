@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV4TrivialFamily.lean:Solidity.Backend.InternalFlow.RuntimeFrame.V4TrivialFamily.exhausting_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV4TrivialFamily.lean:Solidity.Backend.InternalFlow.RuntimeFrame.V4TrivialFamily.producer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV4TrivialFamily.lean:Solidity.Backend.InternalFlow.RuntimeFrame.V4TrivialFamily.satisfiable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV4TrivialFamily.lean:Solidity.Backend.InternalFlow.RuntimeFrame.V4TrivialFamily.v3_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -106,6 +106,8 @@ def declarations(text):
         rows.append({
             "name_candidate": (namespace + "." if namespace else "") + name,
             "kind": kind,
+            "name_line": text.count("\n", 0, event.start("name")) + 1,
+            "name_column": event.start("name") - (text.rfind("\n", 0, event.start("name")) + 1),
             "line": text.count("\n", 0, start) + 1,
             "byte_start": len(text[:start].encode()),
             "byte_end": len(text[:i].encode()),
@@ -120,19 +122,23 @@ def declarations(text):
     return rows
 
 
+def mapped_references(text):
+    """Normalize the frozen roster without treating imported dependencies as scope."""
+    refs = re.findall(r"`([^`]+\.lean)`", text)
+    paths = [ref if ref.startswith(("Solidity/", "Bridge/")) else "Solidity/" + ref for ref in refs]
+    return sorted(set(paths)), len(refs)
+
+
 def mapped_paths(repo):
     data = (repo / MAP).read_bytes()
     original = subprocess.check_output(["git", "show", BASE + ":" + MAP], cwd=repo)
     if data != original:
         raise ValueError("frozen module map differs from base")
-    refs = re.findall(r"`([^`]+\.lean)`", data.decode())
-    paths = []
-    for ref in refs:
-        path = ref if ref.startswith(("Solidity/", "Bridge/")) else "Solidity/" + ref
+    paths, count = mapped_references(data.decode())
+    for path in paths:
         if not (repo / path).is_file():
             raise ValueError("missing mapped file: " + path)
-        paths.append(path)
-    return sorted(set(paths)), len(refs)
+    return paths, count
 
 
 def main():

@@ -1,0 +1,500 @@
+[
+  {
+    "unit": "expression syntax",
+    "this_paths": [
+      "Solidity/Syntax/Raw.lean"
+    ],
+    "reference": "CompCert",
+    "reference_paths": [
+      "cfrontend/Csyntax.v"
+    ],
+    "comparability": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations.",
+    "outlier_reason": "expression syntax: Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "typed C-like syntax",
+    "this_paths": [
+      "Solidity/Source/Syntax.lean"
+    ],
+    "reference": "CompCert",
+    "reference_paths": [
+      "cfrontend/Clight.v"
+    ],
+    "comparability": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations.",
+    "outlier_reason": "typed C-like syntax: Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "expression operations",
+    "this_paths": [
+      "Solidity/Semantics/Ops.lean"
+    ],
+    "reference": "CompCert",
+    "reference_paths": [
+      "cfrontend/Cop.v"
+    ],
+    "comparability": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations.",
+    "outlier_reason": "expression operations: Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "value model",
+    "this_paths": [
+      "Solidity/Semantics/Value.lean"
+    ],
+    "reference": "CompCert",
+    "reference_paths": [
+      "common/Values.v"
+    ],
+    "comparability": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations.",
+    "outlier_reason": "value model: Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "state model",
+    "this_paths": [
+      "Solidity/Semantics/State.lean"
+    ],
+    "reference": "CompCert",
+    "reference_paths": [
+      "common/Memory.v"
+    ],
+    "comparability": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations.",
+    "outlier_reason": "state model: Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "storage model",
+    "this_paths": [
+      "Solidity/Semantics/Storage/Values.lean",
+      "Solidity/Semantics/Storage/Ops.lean",
+      "Solidity/Semantics/Storage/Anon.lean"
+    ],
+    "reference": "CompCert",
+    "reference_paths": [
+      "common/Memory.v"
+    ],
+    "comparability": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations.",
+    "outlier_reason": "storage model: Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "statement execution",
+    "this_paths": [
+      "Solidity/Semantics/Run.lean"
+    ],
+    "reference": "CompCert",
+    "reference_paths": [
+      "cfrontend/Csem.v"
+    ],
+    "comparability": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations.",
+    "outlier_reason": "statement execution: Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "big step execution",
+    "this_paths": [
+      "Solidity/Semantics/RunFuel.lean"
+    ],
+    "reference": "CompCert",
+    "reference_paths": [
+      "cfrontend/ClightBigstep.v"
+    ],
+    "comparability": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations.",
+    "outlier_reason": "big step execution: Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "type definitions",
+    "this_paths": [
+      "Solidity/Source/Types.lean"
+    ],
+    "reference": "CompCert",
+    "reference_paths": [
+      "cfrontend/Ctypes.v"
+    ],
+    "comparability": "Source type representations versus C type representations; Solidity reference types and C composite/pointer layouts differ.",
+    "outlier_reason": "type definitions: Source type representations versus C type representations; Solidity reference types and C composite/pointer layouts differ. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "loop lowering",
+    "this_paths": [
+      "Solidity/Syntax/Elab/Lower.lean"
+    ],
+    "reference": "CompCert",
+    "reference_paths": [
+      "cfrontend/Cminorgen.v"
+    ],
+    "comparability": "Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations.",
+    "outlier_reason": "loop lowering: Nearest file-level analogue; language and theorem coverage differ; not equivalent implementations. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "loop lowering correctness",
+    "this_paths": [
+      "Solidity/Lowering/G19/AssignmentWhileBreak.lean"
+    ],
+    "reference": "CompCert",
+    "reference_paths": [
+      "cfrontend/Cminorgenproof.v"
+    ],
+    "comparability": "One fixed assignment/while/break family proof versus CompCert general Cminor generation correctness; ratio measures radically different theorem coverage.",
+    "outlier_reason": "loop lowering correctness: One fixed assignment/while/break family proof versus CompCert general Cminor generation correctness; ratio measures radically different theorem coverage. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "integer operations",
+    "this_paths": [
+      "Solidity/Yul/EvmArithmetic.lean"
+    ],
+    "reference": "CompCert",
+    "reference_paths": [
+      "lib/Integers.v"
+    ],
+    "comparability": "Narrow EVM arithmetic lemmas versus full generic integer library; local word foundations are imported and excluded, so the small ratio is a component-boundary artifact.",
+    "outlier_reason": "integer operations: Narrow EVM arithmetic lemmas versus full generic integer library; local word foundations are imported and excluded, so the small ratio is a component-boundary artifact. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "Yul syntax",
+    "this_paths": [
+      "Solidity/Yul/ClosedSyntax.lean"
+    ],
+    "reference": "Clear",
+    "reference_paths": [
+      "Clear/Ast.lean"
+    ],
+    "comparability": "Yul versus intrinsic Solidity/EVM file; scope validation pending.",
+    "outlier_reason": "Yul syntax: Yul versus intrinsic Solidity/EVM file; scope validation pending. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "Yul interpreter",
+    "this_paths": [
+      "Solidity/Yul/ClosedRun.lean"
+    ],
+    "reference": "Clear",
+    "reference_paths": [
+      "Clear/Interpreter.lean"
+    ],
+    "comparability": "Yul versus intrinsic Solidity/EVM file; scope validation pending.",
+    "outlier_reason": "Yul interpreter: Yul versus intrinsic Solidity/EVM file; scope validation pending. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "EVM state",
+    "this_paths": [
+      "Solidity/Evm/Machine.lean"
+    ],
+    "reference": "Clear",
+    "reference_paths": [
+      "Clear/EVMState.lean"
+    ],
+    "comparability": "Yul versus intrinsic Solidity/EVM file; scope validation pending.",
+    "outlier_reason": "EVM state: Yul versus intrinsic Solidity/EVM file; scope validation pending. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "primitive operations",
+    "this_paths": [
+      "Solidity/Semantics/Ops.lean"
+    ],
+    "reference": "Clear",
+    "reference_paths": [
+      "Clear/PrimOps.lean"
+    ],
+    "comparability": "Yul versus intrinsic Solidity/EVM file; scope validation pending.",
+    "outlier_reason": "primitive operations: Yul versus intrinsic Solidity/EVM file; scope validation pending. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "word arithmetic",
+    "this_paths": [
+      "Solidity/Yul/EvmArithmetic.lean"
+    ],
+    "reference": "Clear",
+    "reference_paths": [
+      "Clear/UInt256.lean"
+    ],
+    "comparability": "Yul versus intrinsic Solidity/EVM file; scope validation pending.",
+    "outlier_reason": "word arithmetic: Yul versus intrinsic Solidity/EVM file; scope validation pending. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "fuel lemmas",
+    "this_paths": [
+      "Solidity/Semantics/RunFuel.lean"
+    ],
+    "reference": "Clear",
+    "reference_paths": [
+      "Clear/OutOfFuelLemmas.lean"
+    ],
+    "comparability": "Yul versus intrinsic Solidity/EVM file; scope validation pending.",
+    "outlier_reason": "fuel lemmas: Yul versus intrinsic Solidity/EVM file; scope validation pending. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "ML syntax analogue",
+    "this_paths": [
+      "Solidity/Syntax/Raw.lean"
+    ],
+    "reference": "CakeML",
+    "reference_paths": [
+      "semantics/astScript.sml"
+    ],
+    "comparability": "Different source languages; file-level size calibration only.",
+    "outlier_reason": "ML syntax analogue: Different source languages; file-level size calibration only. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "ML evaluation analogue",
+    "this_paths": [
+      "Solidity/Semantics/Run.lean"
+    ],
+    "reference": "CakeML",
+    "reference_paths": [
+      "semantics/evaluateScript.sml"
+    ],
+    "comparability": "Different source languages; file-level size calibration only.",
+    "outlier_reason": "ML evaluation analogue: Different source languages; file-level size calibration only. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "ML type system analogue",
+    "this_paths": [
+      "Solidity/Source/Typing.lean"
+    ],
+    "reference": "CakeML",
+    "reference_paths": [
+      "semantics/typeSystemScript.sml"
+    ],
+    "comparability": "Different source languages; file-level size calibration only.",
+    "outlier_reason": "ML type system analogue: Different source languages; file-level size calibration only. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "ML primitives analogue",
+    "this_paths": [
+      "Solidity/Semantics/Ops.lean"
+    ],
+    "reference": "CakeML",
+    "reference_paths": [
+      "semantics/semanticPrimitivesScript.sml"
+    ],
+    "comparability": "Different source languages; file-level size calibration only.",
+    "outlier_reason": "ML primitives analogue: Different source languages; file-level size calibration only. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "ML parser analogue",
+    "this_paths": [
+      "Solidity/Syntax/Grammar.lean"
+    ],
+    "reference": "CakeML",
+    "reference_paths": [
+      "semantics/gramScript.sml"
+    ],
+    "comparability": "Different source languages; file-level size calibration only.",
+    "outlier_reason": "ML parser analogue: Different source languages; file-level size calibration only. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "Yul AST",
+    "this_paths": [
+      "Solidity/Yul/ClosedSyntax.lean"
+    ],
+    "reference": "EvmYul",
+    "reference_paths": [
+      "EvmYul/Yul/Ast.lean"
+    ],
+    "comparability": "Different semantic profiles; local closed fragment versus upstream general semantics; size only.",
+    "outlier_reason": "Yul AST: Different semantic profiles; local closed fragment versus upstream general semantics; size only. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "Yul evaluation",
+    "this_paths": [
+      "Solidity/Yul/ClosedRun.lean"
+    ],
+    "reference": "EvmYul",
+    "reference_paths": [
+      "EvmYul/Yul/Interpreter.lean"
+    ],
+    "comparability": "Different semantic profiles; local closed fragment versus upstream general semantics; size only.",
+    "outlier_reason": "Yul evaluation: Different semantic profiles; local closed fragment versus upstream general semantics; size only. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "Yul primitive operations",
+    "this_paths": [
+      "Solidity/Yul/Builtins.lean"
+    ],
+    "reference": "EvmYul",
+    "reference_paths": [
+      "EvmYul/Yul/PrimOps.lean"
+    ],
+    "comparability": "Different semantic profiles; local closed fragment versus upstream general semantics; size only.",
+    "outlier_reason": "Yul primitive operations: Different semantic profiles; local closed fragment versus upstream general semantics; size only. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "EVM machine state",
+    "this_paths": [
+      "Solidity/Evm/Machine.lean"
+    ],
+    "reference": "EvmYul",
+    "reference_paths": [
+      "EvmYul/EVM/State.lean",
+      "EvmYul/State.lean",
+      "EvmYul/SharedState.lean"
+    ],
+    "comparability": "Local mini-solkey stack machine includes instructions and execution; upstream state records import Account and MachineState dependencies not included. This is a component-boundary size comparison only.",
+    "outlier_reason": "EVM machine state: Local mini-solkey stack machine includes instructions and execution; upstream state records import Account and MachineState dependencies not included. This is a component-boundary size comparison only. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "Solidity memory",
+    "this_paths": [
+      "Solidity/Semantics/Heap.lean"
+    ],
+    "reference": "Isabelle-Solidity",
+    "reference_paths": [
+      "thys/Isabelle-Solidity/Memory.thy"
+    ],
+    "comparability": "Isabelle entry models Solidity; local file is only one component, not an entry-wide proof comparison.",
+    "outlier_reason": "Solidity memory: Isabelle entry models Solidity; local file is only one component, not an entry-wide proof comparison. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "Solidity state",
+    "this_paths": [
+      "Solidity/Semantics/State.lean"
+    ],
+    "reference": "Isabelle-Solidity",
+    "reference_paths": [
+      "thys/Isabelle-Solidity/State.thy"
+    ],
+    "comparability": "Isabelle entry models Solidity; local file is only one component, not an entry-wide proof comparison.",
+    "outlier_reason": "Solidity state: Isabelle entry models Solidity; local file is only one component, not an entry-wide proof comparison. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "Solidity store",
+    "this_paths": [
+      "Solidity/Semantics/Storage/Values.lean",
+      "Solidity/Semantics/Storage/Ops.lean",
+      "Solidity/Semantics/Storage/Anon.lean"
+    ],
+    "reference": "Isabelle-Solidity",
+    "reference_paths": [
+      "thys/Isabelle-Solidity/Stores.thy"
+    ],
+    "comparability": "Isabelle entry models Solidity; local file is only one component, not an entry-wide proof comparison.",
+    "outlier_reason": "Solidity store: Isabelle entry models Solidity; local file is only one component, not an entry-wide proof comparison. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "Solidity language",
+    "this_paths": [
+      "Solidity/Source/Semantics.lean"
+    ],
+    "reference": "Isabelle-Solidity",
+    "reference_paths": [
+      "thys/Isabelle-Solidity/Solidity.thy"
+    ],
+    "comparability": "Isabelle entry models Solidity; local file is only one component, not an entry-wide proof comparison.",
+    "outlier_reason": "Solidity language: Isabelle entry models Solidity; local file is only one component, not an entry-wide proof comparison. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "ABI access",
+    "this_paths": [
+      "Solidity/Semantics/AbiAccess.lean"
+    ],
+    "reference": "KEVM",
+    "reference_paths": [
+      "kevm-pyk/src/kevm_pyk/kproj/evm-semantics/abi.md"
+    ],
+    "comparability": "K literate module versus Lean component; language/coverage mismatch; K code fences only counted.",
+    "outlier_reason": "ABI access: K literate module versus Lean component; language/coverage mismatch; K code fences only counted. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "EVM memory",
+    "this_paths": [
+      "Solidity/Evm/Memory.lean"
+    ],
+    "reference": "KEVM",
+    "reference_paths": [
+      "kevm-pyk/src/kevm_pyk/kproj/evm-semantics/buf.md"
+    ],
+    "comparability": "K literate module versus Lean component; language/coverage mismatch; K code fences only counted.",
+    "outlier_reason": "EVM memory: K literate module versus Lean component; language/coverage mismatch; K code fences only counted. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "EVM execution",
+    "this_paths": [
+      "Solidity/Evm/Interpreter.lean"
+    ],
+    "reference": "KEVM",
+    "reference_paths": [
+      "kevm-pyk/src/kevm_pyk/kproj/evm-semantics/evm.md"
+    ],
+    "comparability": "K literate module versus Lean component; language/coverage mismatch; K code fences only counted.",
+    "outlier_reason": "EVM execution: K literate module versus Lean component; language/coverage mismatch; K code fences only counted. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "EVM instruction syntax",
+    "this_paths": [
+      "Solidity/Evm/Expr.lean"
+    ],
+    "reference": "KEVM",
+    "reference_paths": [
+      "kevm-pyk/src/kevm_pyk/kproj/evm-semantics/evm-types.md"
+    ],
+    "comparability": "K literate module versus Lean component; language/coverage mismatch; K code fences only counted.",
+    "outlier_reason": "EVM instruction syntax: K literate module versus Lean component; language/coverage mismatch; K code fences only counted. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "Solidity parser",
+    "this_paths": [
+      "Solidity/Syntax/Grammar.lean"
+    ],
+    "reference": "solc",
+    "reference_paths": [
+      "libsolidity/parsing/Parser.cpp"
+    ],
+    "comparability": "Production C++ compiler implementation versus Lean syntax/semantics; no solc proof counterpart.",
+    "outlier_reason": "Solidity parser: Production C++ compiler implementation versus Lean syntax/semantics; no solc proof counterpart. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "Solidity AST",
+    "this_paths": [
+      "Solidity/Syntax/Raw.lean"
+    ],
+    "reference": "solc",
+    "reference_paths": [
+      "libsolidity/ast/AST.h"
+    ],
+    "comparability": "Production C++ compiler implementation versus Lean syntax/semantics; no solc proof counterpart.",
+    "outlier_reason": "Solidity AST: Production C++ compiler implementation versus Lean syntax/semantics; no solc proof counterpart. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "Solidity type representation",
+    "this_paths": [
+      "Solidity/Source/Types.lean"
+    ],
+    "reference": "solc",
+    "reference_paths": [
+      "libsolidity/ast/Types.h"
+    ],
+    "comparability": "Production C++ compiler implementation versus Lean syntax/semantics; no solc proof counterpart.",
+    "outlier_reason": "Solidity type representation: Production C++ compiler implementation versus Lean syntax/semantics; no solc proof counterpart. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "ABI coder",
+    "this_paths": [
+      "Solidity/Semantics/AbiEntry.lean"
+    ],
+    "reference": "solc",
+    "reference_paths": [
+      "libsolidity/codegen/ABIFunctions.cpp"
+    ],
+    "comparability": "Production C++ compiler implementation versus Lean syntax/semantics; no solc proof counterpart.",
+    "outlier_reason": "ABI coder: Production C++ compiler implementation versus Lean syntax/semantics; no solc proof counterpart. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "SolKey Solidity grammar",
+    "this_paths": [
+      "Solidity/Syntax/Grammar.lean"
+    ],
+    "reference": "SolKey",
+    "reference_paths": [
+      "keyext.solidity.core/src/main/antlr/SolidityRules.g4"
+    ],
+    "comparability": "ANTLR versus Lean parser grammar; proof machinery excluded.",
+    "outlier_reason": "SolKey Solidity grammar: ANTLR versus Lean parser grammar; proof machinery excluded. No redundancy or direction conclusion follows without matching the semantic obligations."
+  },
+  {
+    "unit": "SolKey specification grammar",
+    "this_paths": [
+      "Solidity/SpecSyntax.lean"
+    ],
+    "reference": "SolKey",
+    "reference_paths": [
+      "keyext.solidity.core/src/main/antlr/SolSpec.g4"
+    ],
+    "comparability": "Nearest parser component; different surface languages.",
+    "outlier_reason": "SolKey specification grammar: Nearest parser component; different surface languages. No redundancy or direction conclusion follows without matching the semantic obligations."
+  }
+]

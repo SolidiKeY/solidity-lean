@@ -1,0 +1,7 @@
+{
+ "Solidity/Lowering/G16/Comparisons.lean:Solidity.Lowering.G16.Comparisons.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

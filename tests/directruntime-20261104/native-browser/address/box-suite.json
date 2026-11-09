@@ -1,0 +1,44 @@
+{
+  "guardedRegression": "Exact owner address-local/identity support must complete on both fresh backends and preserve payable/parameter refusals.",
+  "source": ".lake/native-browser-address/AddressLocals.box.sol",
+  "sourceSha256": "906b9d04f07e30ff6682b53d3bf401471d10654483d40601768017847c882f0d",
+  "contract": "AddressLocals",
+  "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+  "expectedTag": "box",
+  "expected": [
+    {
+      "name": "zero",
+      "status": "proved"
+    },
+    {
+      "name": "sender",
+      "status": "proved"
+    },
+    {
+      "name": "repeated",
+      "status": "proved"
+    },
+    {
+      "name": "swap",
+      "status": "proved"
+    },
+    {
+      "name": "shadow",
+      "status": "proved"
+    },
+    {
+      "name": "wrong",
+      "status": "refuted"
+    },
+    {
+      "name": "parameter",
+      "status": "unsupported",
+      "reason": "compact verifier: unsupported type address"
+    },
+    {
+      "name": "payableLocal",
+      "status": "unsupported",
+      "reason": "compact verifier: unsupported type address"
+    }
+  ]
+}

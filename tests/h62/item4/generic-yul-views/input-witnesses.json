@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "source_module": "Solidity/Yul/Views/Inputs.lean",
+  "proof_module": "tests/h62/item2/audit-yul/DefaultWitnessControls.lean",
+  "boundary": "Four original input theorem telescopes; no global census or frontend/native/compiler admission.",
+  "statements": [
+    {
+      "source": "Solidity.Yul.Views.calldata_zero",
+      "proof": "Solidity.Yul.Views.H62.calldata_padding_joint",
+      "frozen_signature_sha256": "4a24d44f73ccb59af6fe10c5c7de2b0206801a96b11b18aa8d1cf3c39826fee8"
+    },
+    {
+      "source": "Solidity.Yul.Views.calldataload_zero",
+      "proof": "Solidity.Yul.Views.H62.calldata_padding_joint",
+      "frozen_signature_sha256": "275ebd3cb907bcb5acd34a4e5e84c77b906ec0ea5f1af84170949672e628b192"
+    },
+    {
+      "source": "Solidity.Yul.Views.keccak256_congr",
+      "proof": "Solidity.Yul.Views.H62.input_hash_joint",
+      "frozen_signature_sha256": "c8570c7add8924ff142112833ea16d86046c5d1537ca4d4cbad87d983c9b9e90"
+    },
+    {
+      "source": "Solidity.Yul.Views.environment_address_width",
+      "proof": "Solidity.Yul.Views.H62.input_environment_joint",
+      "frozen_signature_sha256": "33b6826da534fc0dcfbb9d1ccc9f147133dee7b54eeb280954f043444f5c0989"
+    }
+  ]
+}

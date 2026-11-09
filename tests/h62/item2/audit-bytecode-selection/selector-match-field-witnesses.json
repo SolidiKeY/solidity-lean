@@ -1,0 +1,14 @@
+{
+  "selector_match_numeric_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.SelectorMatchCertificate.numeric",
+    "proof": "\u27e8SelectorMatch.code,SelectorMatch.certificate,matchSelector,matchWord,matchSuffix,True.intro\u27e9"
+  },
+  "selector_match_raw_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.SelectorMatchCertificate.raw",
+    "proof": "\u27e8SelectorMatch.code,SelectorMatch.certificate,matchSelector,matchFrame,match_full_prefix,matchSuffix,True.intro\u27e9"
+  },
+  "selector_match_capacity_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.SelectorMatchCertificate.capacity",
+    "proof": "\u27e8SelectorMatch.code,SelectorMatch.certificate,matchSelector,capacitySuffix,selector_capacity_room,True.intro\u27e9"
+  }
+}

@@ -6,6 +6,27 @@ This header adds no source or model execution premise to a family theorem. -/
 namespace Solidity.Yul.Compilation.CompletionControls
 open Backend Scalar MachineAdapter Solidity.Yul.Closed ProducerExpressions
 
+/-- Turn an existing additive completion-refinement law into completion at a
+larger horizon. The operational function and its proved refinement law stay
+explicit; this says nothing about noncompletion or target execution. -/
+theorem completed_horizon {α : Type} (run : Nat → Option α)
+    (refineAdd : ∀ fuel extra, Refines (run fuel) (run (fuel + extra)))
+    {lo hi : Nat} (bound : lo ≤ hi) {value : α}
+    (done : run lo = some value) : run hi = some value := by
+  obtain ⟨extra, eq⟩ := Nat.exists_eq_add_of_le bound
+  rw [eq]
+  exact refineAdd lo extra value done
+
+/-- Refuse a positive pending skip only after an existing actual-run law has
+proved that every successful result has pending zero. This does not assert
+completion, classify failures, or identify relative skips with native PCs. -/
+theorem pending_refused {code : List Evm.Instr} {initial : Evm.Machine}
+    (normal : ∀ final pending, Evm.run code initial = .ok final pending → pending = 0)
+    (final : Evm.Machine) (pending : Nat) :
+    Evm.run code initial ≠ .ok final (pending + 1) := by
+  intro ran
+  exact Nat.noConfusion (normal final (pending + 1) ran)
+
 theorem sourceLocals_injective {n : Nat} : Function.Injective (@sourceLocals n) := by
   intro a b same
   apply Vector.ext
@@ -13,6 +34,19 @@ theorem sourceLocals_injective {n : Nat} : Function.Injective (@sourceLocals n) 
   have words := congrFun same (⟨i,hi⟩ : Fin n)
   apply BitVec.eq_of_toNat_eq
   exact congrArg Fin.val words
+
+/-- A reflected normal outcome determines its full-word output. This transports
+an arbitrary target postcondition, so callers keep their complete machine frame
+rather than repeating output extraction or assuming a chosen target result. -/
+theorem normal_output {c : Control} {n : Nat} (out : Vector Scalar.Word n)
+    (target : Vector Scalar.Word n → Prop)
+    (transport : ∃ actual : Vector Scalar.Word n,
+      (⟨sourceLocals out, .normal⟩ : Outcome c n) = ⟨sourceLocals actual, .normal⟩ ∧
+        target actual) : target out := by
+  obtain ⟨actual, same, done⟩ := transport
+  have equal : out = actual := sourceLocals_injective (congrArg Outcome.vars same)
+  cases equal
+  exact done
 
 theorem frame_locals_injective {n depth : Nat} (newer : Vector Scalar.Word depth)
     (out actual : Vector Scalar.Word n) (caller : List Evm.Word)
@@ -64,4 +98,75 @@ theorem completion_iff {c : Control} {n depth : Nat} (stmt : Stmt [] [] c n)
     have equal : out = actual := frame_locals_injective newer out actual caller (congrArg Evm.Machine.stack frame)
     cases equal
     exact ⟨horizon,source⟩
+/-- Empty-prefix specialization of the shared full-frame completion law.
+It retains every original source horizon and the whole machine/caller result. -/
+theorem completion_iff_zero {c : Control} {n : Nat} (stmt : Stmt [] [] c n)
+    (profile : StmtWordP stmt) (code : List Evm.Instr)
+    (forward : ∀ (horizon : Nat) (locals out : Vector Scalar.Word n),
+      evalStmt horizon .nil True.intro stmt profile (sourceLocals locals) =
+        some ⟨sourceLocals out, .normal⟩ → ∀ (m : Evm.Machine) (caller : List Evm.Word),
+      Evm.run code {m with stack := locals.toList.map coreWord ++ caller} =
+        .ok {m with stack := out.toList.map coreWord ++ caller} 0)
+    (backward : ∀ (locals : Vector Scalar.Word n) (m final : Evm.Machine)
+      (caller : List Evm.Word) (skip : Nat),
+      Evm.run code {m with stack := locals.toList.map coreWord ++ caller} = .ok final skip →
+      ∃ (horizon : Nat) (out : Vector Scalar.Word n),
+      evalStmt horizon .nil True.intro stmt profile (sourceLocals locals) =
+        some ⟨sourceLocals out, .normal⟩ ∧ skip = 0 ∧
+        final = {m with stack := out.toList.map coreWord ++ caller})
+    (locals out : Vector Scalar.Word n) (m : Evm.Machine) (caller : List Evm.Word) :
+    (∃ horizon, evalStmt horizon .nil True.intro stmt profile (sourceLocals locals) =
+      some ⟨sourceLocals out, .normal⟩) ↔
+    Evm.run code {m with stack := locals.toList.map coreWord ++ caller} =
+      .ok {m with stack := out.toList.map coreWord ++ caller} 0 := by
+  have forward' (horizon : Nat) (locals out : Vector Scalar.Word n)
+      (ran : evalStmt horizon .nil True.intro stmt profile (sourceLocals locals) =
+        some ⟨sourceLocals out, .normal⟩) (newer : Vector Scalar.Word 0)
+      (m : Evm.Machine) (caller : List Evm.Word) :
+      Evm.run code {m with stack := (newer.toList ++ locals.toList).map coreWord ++ caller} =
+        .ok {m with stack := (newer.toList ++ out.toList).map coreWord ++ caller} 0 := by
+    have empty : newer.toList = [] := List.length_eq_zero_iff.mp (by simp only [Vector.length_toList])
+    simpa only [empty, List.nil_append] using forward horizon locals out ran m caller
+  have backward' (locals : Vector Scalar.Word n) (newer : Vector Scalar.Word 0)
+      (m final : Evm.Machine) (caller : List Evm.Word) (skip : Nat)
+      (ran : Evm.run code {m with stack := (newer.toList ++ locals.toList).map coreWord ++ caller} =
+        .ok final skip) :
+      ∃ (horizon : Nat) (out : Vector Scalar.Word n),
+      evalStmt horizon .nil True.intro stmt profile (sourceLocals locals) =
+        some ⟨sourceLocals out, .normal⟩ ∧ skip = 0 ∧
+        final = {m with stack := (newer.toList ++ out.toList).map coreWord ++ caller} := by
+    have empty : newer.toList = [] := List.length_eq_zero_iff.mp (by simp only [Vector.length_toList])
+    simp only [empty, List.nil_append] at ran
+    simpa only [empty, List.nil_append] using backward locals m final caller skip ran
+  simpa only [Vector.toList_empty, List.nil_append] using
+    completion_iff stmt profile code forward' backward' locals out #v[] m caller
+/-- Full completed-source transport specializes to normal-success equivalence
+without repeating output/frame injectivity in each family. -/
+theorem completion_iff_of_transport {c : Control} {n depth : Nat} (stmt : Stmt [] [] c n)
+    (profile : StmtWordP stmt) (code : List Evm.Instr)
+    (forward : ∀ (horizon : Nat) (locals : Vector Scalar.Word n) (result : Outcome c n),
+      evalStmt horizon .nil True.intro stmt profile (sourceLocals locals) = some result →
+      ∀ (newer : Vector Scalar.Word depth) (m : Evm.Machine) (caller : List Evm.Word),
+      ∃ out : Vector Scalar.Word n, result = ⟨sourceLocals out, .normal⟩ ∧
+      Evm.run code {m with stack := (newer.toList ++ locals.toList).map coreWord ++ caller} =
+        .ok {m with stack := (newer.toList ++ out.toList).map coreWord ++ caller} 0)
+    (backward : ∀ (locals : Vector Scalar.Word n) (newer : Vector Scalar.Word depth)
+      (m final : Evm.Machine) (caller : List Evm.Word) (skip : Nat),
+      Evm.run code {m with stack := (newer.toList ++ locals.toList).map coreWord ++ caller} = .ok final skip →
+      ∃ (horizon : Nat) (out : Vector Scalar.Word n),
+      evalStmt horizon .nil True.intro stmt profile (sourceLocals locals) =
+        some ⟨sourceLocals out, .normal⟩ ∧ skip = 0 ∧
+        final = {m with stack := (newer.toList ++ out.toList).map coreWord ++ caller})
+    (locals out : Vector Scalar.Word n) (newer : Vector Scalar.Word depth)
+    (m : Evm.Machine) (caller : List Evm.Word) :
+    (∃ horizon, evalStmt horizon .nil True.intro stmt profile (sourceLocals locals) =
+      some ⟨sourceLocals out, .normal⟩) ↔
+    Evm.run code {m with stack := (newer.toList ++ locals.toList).map coreWord ++ caller} =
+      .ok {m with stack := (newer.toList ++ out.toList).map coreWord ++ caller} 0 := by
+  apply completion_iff stmt profile code ?_ backward locals out newer m caller
+  intro horizon locals out ran newer m caller
+  obtain ⟨actual, same, target⟩ := forward horizon locals ⟨sourceLocals out, .normal⟩ ran newer m caller
+  have equal : out = actual := sourceLocals_injective (congrArg Outcome.vars same)
+  cases equal
+  exact target
 end Solidity.Yul.Compilation.CompletionControls

@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "guarded_regression": "Fixture or cached artifact provenance promoted to unchanged real-project declarations without fresh source compilation",
+  "predecessor_head": "d413346ee7e7a06814c415ab3ff742fbc380dc7c",
+  "observed_origin_master": "33eb46304cdb536e6c8b686223c6d8e456b703ae",
+  "source_sha256": {
+    "scripts/h62/item1/duplication-scanner/bind_project_leaf.py": "1f43036fef053621a22ff57a5346f17aa6f432fd82364c2374ec669b90db751b",
+    "scripts/h62/item1/duplication-scanner/bind_source_locations.py": "53cecf3f8aab23311150198162afbbfb8371a5ea2ead5e8c37a6ade3ad2c703c",
+    "scripts/h62/item1/duplication-scanner/census_fixture_kernel.py": "c5457332f40005f90cac3695d741122458e5006ac995accfe7b98bb2223d0534",
+    "tests/h62/item1/duplication-scanner/KeySortSourceBinding.lean": "f1305dd5c37f465f13674b3cf05fe9b8dea919f0e37031a5c441ac80d7818231",
+    "tests/h62/item1/duplication-scanner/project-leaf-pins.json": "a50e2c48b64d110deb3f3734e5b5209bfa75bf0f119e36d9c627bb4ac3549789",
+    "tests/h62/item1/duplication-scanner/test_project_leaf.py": "4d010701424cd1d6e160b4c78246f27d400874bbc65ea541af391b84c496d65d"
+  },
+  "production_input_sha256": {
+    "Solidity/KeySort.lean": "d47ce39b0149d9701ac32ac36a72b535200ba1a25e59571203a1f4fa6be9f3b0"
+  },
+  "accepted": {
+    "accepted-one": {
+      "receipt_sha256": "40b8851f08b10aeb4c2cb91aeafbc9e85e4bc1ba0f44e9699f85e04982e588ca",
+      "bindings_sha256": "6d504cab25f8d05aa8b26e409baad927062a228ca17d64ac6fbc03571619fd1a"
+    },
+    "accepted-two": {
+      "receipt_sha256": "d69bba4ae4b45d738b5af4b23dac9a8caed2dcb6350b0c89944fa4333b81f987",
+      "bindings_sha256": "6d504cab25f8d05aa8b26e409baad927062a228ca17d64ac6fbc03571619fd1a"
+    },
+    "fixture-default": {
+      "receipt_sha256": "4afee13a2c91994151d459430419873d0d2394b8934adc66729de6376a3c1af5",
+      "bindings_sha256": "57d11bd4533cc67ac27d2b680effbda43d0e80c3ecfff48b700a3de5b172c26f"
+    }
+  },
+  "evidence_sha256": {
+    "evidence/acceptance.json": "e3bf8a4e619c6c416e3b3a980109c89c328bdd94d5a955c7a2db432a793ed156",
+    "evidence/doc-paths.log": "9b9d1eeb362a394a3d960c0c3f6d76786217dd8cde0bd81d7345a051bdf769e0",
+    "evidence/fixture-default.log": "356a1b3019a1321e6cedffd83b0d2fcfaa96c54c17d37b8c0ff5f566758c19bd",
+    "evidence/gates.json": "7ff813645ef6902b333a8db0db8a7eb93bbe25bc1b082b1aa53b5e44dbeb5136",
+    "evidence/lake-version.log": "c85e307da5a93d910b4e69f751e292f34737a4dda56f275387c4309c31fca131",
+    "evidence/lean-version.log": "36c0bbaf090c97bc8217c6ff497ff9144fd83d9003f12cd505162b943aaaee77",
+    "evidence/positive-gates.json": "d26503dcfb399196a47fb1dec5c6877c7c30711154b555cdbd15e84d49eff7a5",
+    "evidence/project-two.log": "9b9ad7e1979e2e4135f777e53d0529e8e270a96628af98cf82e61a8f180a1595",
+    "evidence/reviews.md": "2e5263d4587f9824068f6ebbe4916fa8f0215a1c55ec0c050cb66353ce59c304",
+    "evidence/tests.log": "504391c35b0b111dbb7803dd3b01ec408ac7e91fb2e35947add2c13229adb522"
+  },
+  "external_tests": 108,
+  "lexical_rows": 32,
+  "named_links": 16,
+  "anonymous_unresolved": 16,
+  "visible_kernel_constants": 161,
+  "new_theorems_axioms_sorry": 0,
+  "production_source_edits": 0,
+  "frozen_statements_changed": 0,
+  "KeySort_gate": "fresh bounded compile passed twice",
+  "original_Lean_timing_stop_retained": true,
+  "stopped_workload_rerun": false,
+  "boundary": "Only admitted unchanged KeySort source/name/type linkage. Anonymous rows unresolved; no general/private/unloaded, ownership, body-equivalence, owner compiler adequacy or full runtime acceptance claim."
+}

@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/Payments/EntrySuccess.lean:Solidity.Evm.Compiler.compile_core_some": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Payments/EntrySuccess.lean:Solidity.Evm.Compiler.compile_core_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

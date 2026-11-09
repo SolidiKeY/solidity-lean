@@ -1,0 +1,6 @@
+{
+ "Solidity/Backend/PrimitivePackets/Bitwise/Selected.lean:Solidity.Backend.PrimitivePackets.Bitwise.signed_accepted": [
+  "Quot.sound",
+  "propext"
+ ]
+}

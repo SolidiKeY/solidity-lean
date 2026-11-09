@@ -1,0 +1,102 @@
+[
+  {
+    "path": "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/ContextControls.lean",
+    "bytes": 4840,
+    "sha256": "913cf72f6a468c07861e6df403ea2714ae9bc5b7d45e9f3a22c08efe6360f7cf"
+  },
+  {
+    "path": "/workspace/solidity-lean/Solidity/Automation/H28/Context.lean",
+    "bytes": 1487,
+    "sha256": "3f084f71f8150f8fda7129da2aa92302324fc960c566b00b4e59f9b8a1ffdd6e"
+  },
+  {
+    "path": "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/evidence/h70-v435/provenance.json",
+    "bytes": 895,
+    "sha256": "59f03c6921b9288ebef13fbb9ae739be9c8d8964652dfefd8950fe65095cf190"
+  },
+  {
+    "path": "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/evidence/h70-baseline24-controls/run.json",
+    "bytes": 327440,
+    "sha256": "fc72651075df18363f5d0d02ed24a9aa482db0dbc36e3709d95bc0ac70352c7f"
+  },
+  {
+    "path": "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/evidence/h70-baseline24-controls/stdout.log",
+    "bytes": 29321,
+    "sha256": "da573cb0b4be347a01d5cf53532d19a9facb15d5890d32fd0832497803c82210"
+  },
+  {
+    "path": "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/evidence/h70-baseline24-controls/runtime.json",
+    "bytes": 5397,
+    "sha256": "ad442ce18b339a3a07e6a251db1350b9216c6323e8180d739ae297b0f8ef5e84"
+  },
+  {
+    "path": "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/evidence/h70-baseline35-controls/run.json",
+    "bytes": 327936,
+    "sha256": "4a204dbfb75210a462a240cd639f3c5374f1bbf8ad976f21ba0b9463d670f4cd"
+  },
+  {
+    "path": "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/evidence/h70-baseline35-controls/stdout.log",
+    "bytes": 108771,
+    "sha256": "98e53d155218d8d324892121127a250c96d2ced4cf0bf1ba5dd7a16c7590d189"
+  },
+  {
+    "path": "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/evidence/h70-baseline35-controls/runtime.json",
+    "bytes": 5397,
+    "sha256": "9f2c5dbfedbde29d544dfd213a947cf96aaba316b26d506ba8f8817135a8678e"
+  },
+  {
+    "path": "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/evidence/h70-baseline35-context-axioms/run.json",
+    "bytes": 326960,
+    "sha256": "0351acd34d1896d2f6fad80c3298e86c610ef8fe15b48a0a61786b136836385e"
+  },
+  {
+    "path": "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/evidence/h70-baseline35-context-axioms/stdout.log",
+    "bytes": 311,
+    "sha256": "ba5fbed9f23058d572c3fd8bbad85ef34bf4b20e3c403e9abf6c932bfeb9512e"
+  },
+  {
+    "path": "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/evidence/h70-baseline35-context-axioms/runtime.json",
+    "bytes": 5397,
+    "sha256": "9f2c5dbfedbde29d544dfd213a947cf96aaba316b26d506ba8f8817135a8678e"
+  },
+  {
+    "path": "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/evidence/h82-field-proof-kernel-decide-v1/run.json",
+    "bytes": 330729,
+    "sha256": "1a9a04248ccc4e10e13ebc395539eda47377f284a1e4f1a9eee75260b3216a9a"
+  },
+  {
+    "path": "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/evidence/h82-field-proof-kernel-decide-v1/stdout.log",
+    "bytes": 36570,
+    "sha256": "b6322ceeabda51329d02bf2c61e4139cbcdf59ee0ccff0ade49e0eced213aa2e"
+  },
+  {
+    "path": "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/evidence/h82-field-proof-kernel-decide-v1/runtime.json",
+    "bytes": 5295,
+    "sha256": "ee02b5967e2ebb64b08a8dd7440f3c2be3185a9fde0c861d7aace6b502156eb2"
+  },
+  {
+    "path": "/workspace/.setup/tools/lean-4.35.0-linux/src/lean/Lean/Declaration.lean",
+    "bytes": 21181,
+    "sha256": "1cf2f06d848086f165b3df0afe494924ae26aaea248d5e0135d5efc2d588948f"
+  },
+  {
+    "path": "/workspace/.setup/tools/lean-4.35.0-linux/src/lean/Lean/Data/Options.lean",
+    "bytes": 9557,
+    "sha256": "ea52d63ede2afb64ea83f199fbe8c778fdb5991683f98dccd2ff6e345dbaa1e9"
+  },
+  {
+    "path": "/workspace/.setup/tools/lean-4.35.0-linux/src/lean/Lean/Data/NameMap/Basic.lean",
+    "bytes": 4083,
+    "sha256": "c8a4e0ad72788db73c9c2d4d576f58c595498b5e9b8a45f21ce8c749f89fecc0"
+  },
+  {
+    "path": "/workspace/.setup/tools/lean-4.35.0-linux/src/lean/Lean/Data/Name.lean",
+    "bytes": 6176,
+    "sha256": "09e2a9e730fffe635daefd138aa11ccf3e29768d81434884bab799776fa12f84"
+  },
+  {
+    "path": "/workspace/.setup/tools/lean-4.35.0-linux/src/lean/Init/Prelude.lean",
+    "bytes": 241385,
+    "sha256": "390e6b57ead28cb821a65533b21357f2f02d0a1525602f5a1ce9ee3eeb81fd12"
+  }
+]

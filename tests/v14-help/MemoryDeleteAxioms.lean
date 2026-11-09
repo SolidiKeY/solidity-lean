@@ -1,0 +1,46 @@
+import Solidity.Backend.Aggregates.MemoryLocalDeleteControls
+
+#print axioms Solidity.Source.convRV_same_run
+#print axioms Solidity.Source.deleteLocal_array_run
+#print axioms Solidity.Source.deleteLocal_bytes_run
+#print axioms Solidity.Backend.Aggregates.MemoryLocalDeleteControls.delete_selected_local
+#print axioms Solidity.Backend.Aggregates.MemoryLocalDeleteControls.branch_success
+#print axioms Solidity.Backend.Aggregates.MemoryLocalDeleteControls.branch_timeout
+#print axioms Solidity.Backend.Aggregates.MemoryLocalDeleteControls.client_success
+#print axioms Solidity.Backend.Aggregates.MemoryLocalDeleteControls.client_timeout
+#print axioms Solidity.Backend.Aggregates.MemoryLocalDeleteControls.retained_copy_contents
+#print axioms Solidity.Backend.Aggregates.MemoryLocalDeleteControls.fresh_empty_contents
+#print axioms Solidity.Backend.Aggregates.MemoryLocalDeleteControls.protected_old_objects
+#print axioms Solidity.Backend.Aggregates.MemoryLocalDeleteControls.deleted_local_empty_length
+#print axioms Solidity.Backend.Aggregates.MemoryLocalDeleteControls.alias_old_length
+#print axioms Solidity.Backend.Aggregates.MemoryLocalDeleteControls.timeout_keeps_completed_copy
+#print axioms Solidity.Backend.Aggregates.MemoryLocalDeleteControls.success_grows_once_more
+#print axioms Solidity.Backend.Aggregates.MemoryLocalDeleteControls.wrong_timeout_rollback
+#print axioms Solidity.Backend.Aggregates.MemoryLocalDeleteControls.zero_budget_delete
+#print axioms Solidity.Backend.Aggregates.MemoryLocalDeleteControls.bytes_local_delete
+#print axioms Solidity.Backend.Aggregates.MemoryLocalDeleteControls.wrong_alias_clear
+#print axioms Solidity.Backend.Aggregates.MemoryLocalDeleteControls.wrong_timeout_fresh_delete
+#print axioms Solidity.Backend.Aggregates.MemoryLocalDeleteControls.typed_delete_success
+#print axioms Solidity.Backend.Aggregates.MemoryLocalDeleteControls.typed_delete_exhausted
+#check Solidity.Source.convRV_same_run
+#check Solidity.Source.deleteLocal_array_run
+#check Solidity.Source.deleteLocal_bytes_run
+#check Solidity.Backend.Aggregates.MemoryLocalDeleteControls.delete_selected_local
+#check Solidity.Backend.Aggregates.MemoryLocalDeleteControls.branch_success
+#check Solidity.Backend.Aggregates.MemoryLocalDeleteControls.branch_timeout
+#check Solidity.Backend.Aggregates.MemoryLocalDeleteControls.client_success
+#check Solidity.Backend.Aggregates.MemoryLocalDeleteControls.client_timeout
+#check Solidity.Backend.Aggregates.MemoryLocalDeleteControls.retained_copy_contents
+#check Solidity.Backend.Aggregates.MemoryLocalDeleteControls.fresh_empty_contents
+#check Solidity.Backend.Aggregates.MemoryLocalDeleteControls.protected_old_objects
+#check Solidity.Backend.Aggregates.MemoryLocalDeleteControls.deleted_local_empty_length
+#check Solidity.Backend.Aggregates.MemoryLocalDeleteControls.alias_old_length
+#check Solidity.Backend.Aggregates.MemoryLocalDeleteControls.timeout_keeps_completed_copy
+#check Solidity.Backend.Aggregates.MemoryLocalDeleteControls.success_grows_once_more
+#check Solidity.Backend.Aggregates.MemoryLocalDeleteControls.wrong_timeout_rollback
+#check Solidity.Backend.Aggregates.MemoryLocalDeleteControls.zero_budget_delete
+#check Solidity.Backend.Aggregates.MemoryLocalDeleteControls.bytes_local_delete
+#check Solidity.Backend.Aggregates.MemoryLocalDeleteControls.wrong_alias_clear
+#check Solidity.Backend.Aggregates.MemoryLocalDeleteControls.wrong_timeout_fresh_delete
+#check Solidity.Backend.Aggregates.MemoryLocalDeleteControls.typed_delete_success
+#check Solidity.Backend.Aggregates.MemoryLocalDeleteControls.typed_delete_exhausted

@@ -378,6 +378,31 @@
       "source_layout",
       "Member.in_owner_body"
     ],
+    "Solidity/Frontend/QualifiedUnits/Linearization.lean": [
+      "Routes",
+      "Bases",
+      "Linear",
+      "routes_iff",
+      "bases_iff",
+      "mapM_pairs",
+      "pairs_mapM",
+      "linearize_sound",
+      "Linear.head",
+      "routes_unique",
+      "bases_unique",
+      "pairs_snd_unique",
+      "Linear.unique",
+      "merged_in_base",
+      "base_in_merged",
+      "Linear.bounded",
+      "Linear.members",
+      "linearize_complete",
+      "order_iff",
+      "First.available",
+      "Merge.sublist",
+      "Linear.precedence",
+      "Linear.acyclic"
+    ],
     "Solidity/Frontend/QualifiedUnits/Lookup.lean": [
       "members",
       "step",
@@ -419,6 +444,24 @@
       "exact_budget_refused",
       "zero_fuel_refused",
       "empty_rows_accepted"
+    ],
+    "Solidity/Frontend/QualifiedUnits/NormalizationAdequacy.lean": [
+      "declName",
+      "erase",
+      "eraseList",
+      "eraseList_eq",
+      "elementary_erase",
+      "LeafSound",
+      "LeafComplete",
+      "root_refs",
+      "child_refs",
+      "keyType_sound",
+      "keyType_complete",
+      "types_sound",
+      "Supported",
+      "types_complete",
+      "types_adequate",
+      "fields_refused"
     ],
     "Solidity/Frontend/QualifiedUnits/NormalizationControls.lean": [
       "base_identity",
@@ -670,6 +713,51 @@
       "Admits.coherent",
       "local_shadows"
     ],
+    "Solidity/Frontend/QualifiedUnits/Target.lean": [
+      "Collected",
+      "SafeOwners",
+      "Member",
+      "Step",
+      "Head",
+      "Admits",
+      "Target",
+      "collected_iff",
+      "safeOwners_iff",
+      "member_iff",
+      "step_eq",
+      "head_eq",
+      "admits_iff",
+      "resolved_iff",
+      "target_iff",
+      "Target.noClash",
+      "Target.identity",
+      "refused_no_target"
+    ],
+    "Solidity/Frontend/QualifiedUnits/TargetControls.lean": [
+      "diamond_linear",
+      "diamond_shared_base_once",
+      "diamond_local_precedence",
+      "cycle_no_linear",
+      "missing_base_no_linear",
+      "inherited_overload_target",
+      "qualified_parameter_overload_target",
+      "multi_hop_target",
+      "missing_symbol_no_target",
+      "ambiguous_no_target",
+      "local_shadow_no_target",
+      "failed_signature_no_target",
+      "visible_barrier_no_target",
+      "callable_erases",
+      "struct_member_refused",
+      "adequacyInput",
+      "adequacyEnv",
+      "adequacySig",
+      "adequacy_references",
+      "adequacy_nominal",
+      "adequacy_leaf_sound",
+      "adequacy_leaf_complete",
+      "adequacy_instance"
+    ],
     "Solidity/Frontend/QualifiedUnits/TypePaths.lean": [
       "step",
       "head",
@@ -695,22 +783,22 @@
   "queue": [
     {
       "id": "inventory-relation",
-      "status": "partial"
+      "status": "done"
     },
     {
       "id": "lookup",
-      "status": "partial"
+      "status": "done"
     },
     {
       "id": "proofs-preservation",
-      "status": "partial"
+      "status": "done"
     },
     {
       "id": "fixtures-acceptance-handoff",
-      "status": "partial"
+      "status": "done"
     }
   ],
-  "acceptance_complete": false,
+  "acceptance_complete": true,
   "inductive_constructors": {
     "Solidity/Frontend/QualifiedUnits/Checked.lean": [
       "Failure.missing",
@@ -722,6 +810,11 @@
       "Base.intro",
       "InheritedFrom.here",
       "InheritedFrom.base"
+    ],
+    "Solidity/Frontend/QualifiedUnits/Linearization.lean": [
+      "Routes.nil",
+      "Routes.cons",
+      "Linear.mk"
     ],
     "Solidity/Frontend/QualifiedUnits/MergeSpecification.lean": [
       "First.take",
@@ -776,6 +869,16 @@
       "Admits.terminal",
       "Admits.next"
     ],
+    "Solidity/Frontend/QualifiedUnits/Target.lean": [
+      "Member.plain",
+      "Member.signature",
+      "Step.unit",
+      "Step.decl",
+      "Head.member",
+      "Head.global",
+      "Admits.terminal",
+      "Admits.next"
+    ],
     "Solidity/Frontend/QualifiedUnits/TypePaths.lean": [
       "Route.done",
       "Route.next"
@@ -805,5 +908,5 @@
     }
   ],
   "reflection_pins": "tests/sol-qualified-units/declaration-pins.json",
-  "h27_status": "Signature-aware checked resolver integrated; 17 direct queries agree; model adequacy and final validation remain open"
+  "h27_status": "Signature-aware checked resolver integrated; final Target relation, independent C3 judgment and normalization adequacy proved; fixture acceptance passed with the pinned solc 0.8.38 artifact (moved4 follow-up); repository-wide gate failures outside this branch are listed in the lane doc"
 }

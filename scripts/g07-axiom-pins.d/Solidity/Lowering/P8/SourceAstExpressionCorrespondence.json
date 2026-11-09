@@ -1,0 +1,50 @@
+{
+ "Solidity/Lowering/P8/SourceAstExpressionCorrespondence.lean:Solidity.Lowering.P8.SourceAstExpressionCorrespondence.assignment_left_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstExpressionCorrespondence.lean:Solidity.Lowering.P8.SourceAstExpressionCorrespondence.assignment_ok_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstExpressionCorrespondence.lean:Solidity.Lowering.P8.SourceAstExpressionCorrespondence.assignment_right_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstExpressionCorrespondence.lean:Solidity.Lowering.P8.SourceAstExpressionCorrespondence.call_arguments_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstExpressionCorrespondence.lean:Solidity.Lowering.P8.SourceAstExpressionCorrespondence.call_ok_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstExpressionCorrespondence.lean:Solidity.Lowering.P8.SourceAstExpressionCorrespondence.call_target_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstExpressionCorrespondence.lean:Solidity.Lowering.P8.SourceAstExpressionCorrespondence.identifier_exact": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstExpressionCorrespondence.lean:Solidity.Lowering.P8.SourceAstExpressionCorrespondence.member_ok_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstExpressionCorrespondence.lean:Solidity.Lowering.P8.SourceAstExpressionCorrespondence.member_receiver_failure": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstExpressionCorrespondence.lean:Solidity.Lowering.P8.SourceAstExpressionCorrespondence.named_call_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstExpressionCorrespondence.lean:Solidity.Lowering.P8.SourceAstExpressionCorrespondence.ok_bind": []
+}

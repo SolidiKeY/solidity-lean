@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "sourceHead": "65fc533e9d71fec0714b48de4d7b22e1b178747a",
+  "archive": {
+    "path": "/workspace/dafny-parity-direct-retention-20261106/native-validation.tar.gz",
+    "bytes": 1434687,
+    "sha256": "50793fa1164385665e76559ffd5249de75100912291d7f270f4b2d15820e7910"
+  },
+  "nativeOutcome": "exit0 completed-with-gaps; genuine current certified refutation and real Linux QuickPick/both project docs; no pairedDafny/macOS or fullparity.",
+  "resources": {
+    "peakRssBytes": 3775954944,
+    "memoryMaxMiB": 4096,
+    "reserveMiB": 12288,
+    "noCgroup": true
+  },
+  "boundaries": [
+    "All sampled normal Lean/Lake PIDbirth entries disappear; remaining known Electron zombies explicitly retained.",
+    "Full65fcNode suite fails one observer-clock assertion; production budget unchanged and test-only correction reviewed, targeted22pass2skip.",
+    "No fullbuild/TestSuite/timedstrict/metadata/solver/EVM or rowjudge pass."
+  ]
+}

@@ -56,6 +56,7 @@
 | `Frontend/Checked/Certificate.lean` | G11: G05's parse-stage instance: `Units`, `Parses`, `parseChecker` (`checkUnits_sound`), the producer (`produce_accepted`), `FrontendSpec.ofParse`. |
 | `Frontend/Checked/UnitExamples.lean` | G11 controls: statements, definitions and units, every S00 constructor covered (`allCtors_covered`, `profileCtors_covered`), out-of-profile refusals, the G05 checker on a two-unit input. |
 | `Source/Value.lean` | S02: run-time values `RVal`, `Halt`, decidable `STy` equality, wrapping (`wrapBits_mem`), checked/unchecked integer and fixed-point arithmetic, shifts, powers, comparisons, value conversions. |
+| `Source/PowerV2.lean`, `Source/PowerV2Correct.lean` | Additive modular-power operator/typed-dispatch pair with exact checked, non-power and non-integer V1 delegation: every natural exponent has its mathematical residue and unchecked signed/unsigned wrapping; checked behavior delegates to frozen V1. The 301-bit cutoff regression and conditional V1 comparison do not select an admission domain or migrate the live evaluator. |
 | `Source/Elaborated.lean` | S02 prerequisite: resolved bodies, modifier invocations, initializers and base arguments (`Program`), and `Elaborated` (a resolution carrying its program, every part tied to a derivation). |
 | `Source/Unique.lean` | Q1: uniqueness of meaning (`Typed.unique`, `StmtD.unique`, `ItemsD.unique`, `RBody.ofDerivation_unique`), solc's literal typing (`Typed.constShape`), `0.length` refused, literal-gap controls. |
 | `Source/Machine.lean` | S02: the logical storage layout (`Env.cellTy`), `Locals`, the machine state `St`, frames `Fr`, `Glob`, the monad `EM`, storage/memory reads, writes, copies and deletion. |
@@ -66,7 +67,9 @@
 | `Source/Infer.lean` | S02 item 1b: type inference computing derivations (`Typed.infer`, `StmtD.infer`, `ItemsD.infer`), sound by construction. |
 | `Source/Elaborate.lean` | S02 item 1b: the elaborator `elaborate : Resolution → Option Elaborated` (bodies, modifiers, initializers, constants, base arguments), coherent by construction. |
 | `Source/ElaborateExamples.lean` | Controls of the elaborator: a unit with inheritance, a base argument, a modifier and an initializer elaborated from syntax and run. |
-| `Source/Horizon.lean` | S05 item 2: the interpreter is monotone in its horizon (`belowAt`, horizon independence `runTx_stable`, `firstDone_runTx`), only appends events (`growAt`), and a timed-out run's events are a prefix of a larger horizon's (`approxAt`, `runTx_events_mono`). |
+| `Source/HorizonApproxExpressions.lean` | Event-prefix helper and expression proofs, split to keep each kernel check bounded; preserves qualified names exported by `Source/Horizon`. |
+| `Source/HorizonApproxStatements.lean` | Statement event-prefix proofs and the shared known-mode induction; re-exported through the unchanged public facade. |
+| `Source/Horizon.lean` | S05 item 2, last part of the `Horizon` split (imports `HorizonFuel`, `HorizonGrow`, `HorizonConst`): both calldata modes share the ordinary-plan event-prefix induction (`approxAtKnown`); the frozen `ApproxAt` specialization and transaction prefix law remain (`approxAt`, `runTx_events_mono`). |
 | `Source/HorizonDeploy.lean` | S05 item 2: a deployment not completed at a horizon shows a prefix of its events at every larger one (`deploy_events_mono`). |
 | `Source/Session.lean`, `Source/SessionExamples.lean` | Sessions showing the events of unfinished transactions (`sessionAtEvents`, `sourceLangEvents`), consistent, and their controls. |
 | `Source/Hoare.lean` | V04b: Hoare triples over the interpreter monad `EM` (`Hoare`, `NotStuck`), with a rule per combinator (`bind`, `sub'`, `attempt'`, `lift'`, …). |

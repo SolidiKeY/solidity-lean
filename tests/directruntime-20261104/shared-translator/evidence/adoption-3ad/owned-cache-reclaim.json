@@ -1,7 +1,0 @@
-{
-  "beforeMemoryCurrentBytes": 11303186432,
-  "afterMemoryCurrentBytes": 10077863936,
-  "ownedFilesHinted": 10346,
-  "ownedBytesHinted": 1159641524,
-  "action": "POSIX_FADV_DONTNEED on owned regular artifact files only;no data mutation,no symlink traversal,no global cache drop,no limit or reserve change"
-}

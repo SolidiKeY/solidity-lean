@@ -1,6 +1,0 @@
-{
-  "elapsedSeconds": 12.601619511999957,
-  "childrenMaxRssKiB": 604812,
-  "exit": 0,
-  "stderr": ""
-}

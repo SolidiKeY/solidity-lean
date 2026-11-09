@@ -1,0 +1,7 @@
+{
+ "Solidity/Lowering/G16/AddressLiterals.lean:Solidity.Lowering.G16.AddressLiterals.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

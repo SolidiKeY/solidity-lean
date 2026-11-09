@@ -1,0 +1,24 @@
+{
+ "tests/v14-constructor/PatchOrderAxioms.lean:Solidity.Backend.Executable.CreationPatchOrder.Controls.constructor_returns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/v14-constructor/PatchOrderAxioms.lean:Solidity.Backend.Executable.CreationPatchOrder.Controls.opposite_runtime": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/v14-constructor/PatchOrderAxioms.lean:Solidity.Backend.Executable.CreationPatchOrder.installs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/v14-constructor/PatchOrderAxioms.lean:Solidity.Backend.Executable.CreationPatchOrder.patch_links": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/v14-constructor/PatchOrderAxioms.lean:Solidity.Backend.Executable.CreationPatchOrder.tables": [
+  "Quot.sound",
+  "propext"
+ ]
+}

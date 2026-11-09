@@ -1,3 +1,4 @@
+import Solidity.Yul.Compilation.CompletionControls
 import Solidity.Yul.Compilation.ScopedForCompilation
 import Solidity.Yul.Compilation.ScopedLoopCompletion
 /-! Reverse normal-success correspondence for actual scoped FOR artifacts.
@@ -47,10 +48,12 @@ theorem model_to_source {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
      have started := evalStmt_stable (Nat.le_max_left hi hl) .nil True.intro pre initializer.compiled.profile (sourceLocals locals) initialSource
      have completed : evalLoop (max hi hl) .nil True.intro test condition.profile post step.compiled.profile
        body work.compiled.profile (sourceLocals mid) = some (⟨sourceLocals out,.normal⟩ : Outcome c n) := by
-       obtain ⟨extra,eq⟩ := Nat.exists_eq_add_of_le (Nat.le_max_right hi hl)
-       rw [eq]
-       exact evalLoop_refines_add hl extra .nil True.intro test condition.profile post step.compiled.profile
-         body work.compiled.profile (sourceLocals mid) _ loopSource
+       exact CompletionControls.completed_horizon
+         (fun fuel => evalLoop fuel .nil True.intro test condition.profile post step.compiled.profile
+           body work.compiled.profile (sourceLocals mid))
+         (fun fuel extra => evalLoop_refines_add fuel extra .nil True.intro test condition.profile
+           post step.compiled.profile body work.compiled.profile (sourceLocals mid))
+         (Nat.le_max_right hi hl) loopSource
      have source := ScopedForCompilation.source_for (c := c) (pre := pre) (test := test) (post := post) (body := body)
        initializer.compiled.profile condition.profile step.compiled.profile work.compiled.profile
        (max hi hl) locals mid out started completed
@@ -63,21 +66,8 @@ theorem completion_iff {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
    some ⟨sourceLocals out,.normal⟩) ↔
  Evm.run artifact.code {m with stack := locals.toList.map coreWord++caller} =
  .ok {m with stack := out.toList.map coreWord++caller} 0 := by
- constructor
- · rintro ⟨horizon,source⟩
-   exact artifact.normal_to_model horizon locals out source m caller
- · intro ran
-   obtain ⟨horizon,actual,source,_,frame⟩ := model_to_source artifact locals m
-     {m with stack := out.toList.map coreWord++caller} caller 0 ran
-   have stacks := congrArg Evm.Machine.stack frame
-   have mapped : out.toList.map coreWord = actual.toList.map coreWord := List.append_cancel_right stacks
-   have lists : out.toList = actual.toList :=
-     (List.map_inj_right (fun _ _ h => coreWord_injective h)).mp mapped
-   have equal : out = actual := Vector.toList_inj.mp lists
-   cases equal
-   exact ⟨horizon,source⟩
-
-
+ exact CompletionControls.completion_iff_zero stmt artifact.compiled.profile artifact.code
+   artifact.normal_to_model (model_to_source artifact) locals out m caller
 
 /-- info: 'Solidity.Yul.Compilation.ScopedForCompletion.model_to_source' depends on axioms: [propext,
  Classical.choice,

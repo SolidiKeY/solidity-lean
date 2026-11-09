@@ -1,0 +1,1 @@
+| `Source/MonetaryFit.lean` | BalancesFit writer inventory: initial state, `deploy`'s two account writes, generic fitting/same-balance account updates, `Authority.writeSource` under an explicit range premise and its guarded `writeSourceChecked?`; satisfiable transfer witness and unguarded/wide-authority negative controls. Per-writer laws, not whole-evaluator reachability. |

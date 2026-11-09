@@ -1,0 +1,115 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface": "Solidity/Backend/Passes/MemoryCallControls.lean",
+  "interface_sha256": "f9eef5ff626215e236f0ed11e05452f0105feac5f6a71be9c547c04d9245f5b7",
+  "joint_witness": "Solidity.Backend.Passes.AuditMemoryCall.joint",
+  "exercised_public_namespace": "Solidity.Backend.Passes.AuditMemoryCall",
+  "rows": [
+    {
+      "name": "Solidity.Backend.Passes.MemoryCallControls.push_free",
+      "signature_sha256": "6f35bad3f022b02ea2581851233d4a469fb8e38ce59bd5db0dc1c15fa49091fd",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryCallControls.public_recognizer",
+      "signature_sha256": "95bfe8968426b55ff88d1d65ea3bb386fd1f32350c5bdf24682a2a1e89008a8d",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryCallControls.actual_public",
+      "signature_sha256": "30144fc5095efe942dea898ad265fc1bcd8d87f5a02e6cf864f8584ee6a3368a",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryCallControls.initial_repr",
+      "signature_sha256": "0f14919222b9ba2d8df8161732c4e6653d955df78298dbc69003de98b2ae59ed",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryCallControls.first_source",
+      "signature_sha256": "076a9a6c2fcfa420fce6778ea4b04c9554212c40d7cd62c654854347ac4e21e1",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryCallControls.second_source",
+      "signature_sha256": "8810c5166b266c149b289eeb3fc5669a603107f79aa6f264593a1661cca9cfde",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryCallControls.final_source",
+      "signature_sha256": "be4ba132378535bae68e0e222ec7b14f658f54a5b415d8677126ec7391a756a3",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryCallControls.costs",
+      "signature_sha256": "c052079863d074d8653a7007e5d5a0520c10eaa14388bc4b8d38f93c6c4ae886",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryCallControls.frame_difference",
+      "signature_sha256": "e9c065378e1e5a22ef65ecab0e5496a7329399d36c14576a7853354d9c703828",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryCallControls.input",
+      "signature_sha256": "c2732175f9bb143f342b99392d6c8ba1a59d6b503c401beb8a8d3e87bca8499a",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryCallControls.first_some",
+      "signature_sha256": "24d045ccea28ba1049b02c9be55636909b57df7b7fec4952058162e916035888",
+      "kind": "private-exact-kernel-signature",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditMemoryCall.joint"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryCallControls.second_some",
+      "signature_sha256": "7f93026b61cfcd4c8269d8ed973ab24273f6d68a6a9b77a52c6332ee1477035c",
+      "kind": "private-exact-kernel-signature",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditMemoryCall.joint"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryCallControls.final_some",
+      "signature_sha256": "36616dd149046f151e594d22bcf4d33a749788e7d9523c3b3f52fc2566206b80",
+      "kind": "private-exact-kernel-signature",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditMemoryCall.joint"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryCallControls.source_get",
+      "signature_sha256": "c73092ca5e5bf31aad39d57e161f2b995fb9ef1bc8048d041d75fbc4a401ddb9",
+      "kind": "private-exact-kernel-signature",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditMemoryCall.source_get_joint"
+    }
+  ],
+  "uncovered_private_names": [
+    "Solidity.Backend.Passes.MemoryCallControls.noRefs"
+  ],
+  "aggregate_selected": 325,
+  "aggregate_remaining": 934,
+  "limits": "Fourteen selected joint-witness/original-proof rows; the noRefs private identity and premise impossibility are checked separately with zero witness credit. Literal all-premise witness remains impossible. No whole-pipeline target, independent Source lowering, external CALL/world, native ByteWorld/gas adequacy.",
+  "checked_private_names": [
+    "final_some",
+    "first_some",
+    "second_some",
+    "source_get"
+  ],
+  "private_kernel_prefix": "_private.Solidity.Backend.Passes.MemoryCallControls.0.",
+  "private_axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "intentional_refutations": [
+    {
+      "name": "Solidity.Backend.Passes.MemoryCallControls.noRefs",
+      "signature_sha256": "7a2e78878ce9b4593a62bbfeada3540afd167cb2f4d8ee3b8afdbf876c116c49",
+      "kernel_name": "_private.Solidity.Backend.Passes.MemoryCallControls.0.Solidity.Backend.Passes.MemoryCallControls.noRefs",
+      "classification": "checked-intentional-empty-heap-refutation",
+      "premise_impossibility": "Solidity.Backend.Passes.AuditMemoryCall.noRefs_premises_impossible",
+      "joint_witness": null,
+      "selected_witness_credit": 0,
+      "axioms": [
+        "propext"
+      ]
+    }
+  ]
+}

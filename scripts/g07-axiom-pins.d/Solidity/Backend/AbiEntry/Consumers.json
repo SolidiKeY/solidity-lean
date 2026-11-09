@@ -7,5 +7,66 @@
   "Classical.choice",
   "Quot.sound",
   "propext"
+ ],
+ "Solidity/Backend/AbiEntry/Consumers.lean:Solidity.Backend.AbiEntry.Consumers.UIntViews.coherent": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/Consumers.lean:Solidity.Backend.AbiEntry.Consumers.UIntViews.mixed_aliases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/Consumers.lean:Solidity.Backend.AbiEntry.Consumers.UIntViews.mixed_transfer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/Consumers.lean:Solidity.Backend.AbiEntry.Consumers.UIntViews.mixed_values": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/Consumers.lean:Solidity.Backend.AbiEntry.Consumers.UIntViews.semantic_uint_container_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/Consumers.lean:Solidity.Backend.AbiEntry.Consumers.UIntViews.semantic_uint_container_empty": [],
+ "Solidity/Backend/AbiEntry/Consumers.lean:Solidity.Backend.AbiEntry.Consumers.UIntViews.semantic_uint_containers": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/Consumers.lean:Solidity.Backend.AbiEntry.Consumers.UIntViews.semantic_uint_empty": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/Consumers.lean:Solidity.Backend.AbiEntry.Consumers.UIntViews.semantic_uint_fuel": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/Consumers.lean:Solidity.Backend.AbiEntry.Consumers.UIntViews.semantic_uint_sequence": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/Consumers.lean:Solidity.Backend.AbiEntry.Consumers.UIntViews.semantic_uint_unequal": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/Consumers.lean:Solidity.Backend.AbiEntry.Consumers.UIntViews.semantic_uint_zero_padding": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/Consumers.lean:Solidity.Backend.AbiEntry.Consumers.UIntViews.sequenceElements": [],
+ "Solidity/Backend/AbiEntry/Consumers.lean:Solidity.Backend.AbiEntry.Consumers.UIntViews.transfer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/Consumers.lean:Solidity.Backend.AbiEntry.Consumers.UIntViews.uints": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
  ]
 }

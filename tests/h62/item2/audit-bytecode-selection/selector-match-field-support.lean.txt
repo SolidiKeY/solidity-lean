@@ -1,0 +1,52 @@
+/-! Guards dropping the complete-prefix premise, accepting a stack overflow,
+and confusing padded numeric collisions with raw selector agreement. Reuse the
+actual numeric compiler and existing short-collision control. This does not prove
+short-input dispatch, Source/native/runtime, physical or gas adequacy. -/
+open Solidity Solidity.Backend.AbiEntry
+
+def matchSelector : Vector UInt8 4 := #v[0x12,0x34,0x56,0x78]
+def matchSuffix : Solidity.Backend.Scalar.Stack := [17,29]
+def selectorFrame (bytes : List UInt8) : Source.Fr :=
+  {this := ⟨0,by decide⟩,sender := ⟨0,by decide⟩,value := ⟨0,by decide⟩,
+   static := false,contract := "",cd := bytes}
+def matchFrame : Source.Fr := selectorFrame [0x12,0x34,0x56,0x78,0xaa,0xbb]
+def mismatchFrame : Source.Fr := selectorFrame [0x12,0x34,0x56,0x79,0xaa,0xbb]
+def matchWord : Solidity.Backend.Scalar.Word := BitVec.ofNat 256 (Solidity.AbiEntry.load matchFrame.cd 0)
+def capacitySuffix : Solidity.Backend.Scalar.Stack := matchSuffix
+
+theorem match_full_prefix : 4≤matchFrame.cd.length := by decide
+
+theorem selector_capacity_room : capacitySuffix.length+2≤1024 := by decide
+
+theorem selector_raw_match (suffix : Solidity.Backend.Scalar.Stack) :
+    Solidity.Backend.Scalar.run (SelectorMatch.code matchSelector) (matchWord::suffix)=some ((1 : Solidity.Backend.Scalar.Word)::suffix) := by
+  unfold matchWord
+  rw [SelectorMatch.raw matchSelector matchFrame match_full_prefix suffix]
+  rfl
+
+theorem selector_raw_mismatch (suffix : Solidity.Backend.Scalar.Stack) :
+    Solidity.Backend.Scalar.run (SelectorMatch.code matchSelector)
+      (BitVec.ofNat 256 (Solidity.AbiEntry.load mismatchFrame.cd 0)::suffix)=some ((0 : Solidity.Backend.Scalar.Word)::suffix) := by
+  rw [SelectorMatch.raw matchSelector mismatchFrame (by decide) suffix]
+  rfl
+
+theorem selector_capacity_at_limit : Solidity.Backend.Scalar.stackBound (SelectorMatch.code matchSelector) 1023=true := by decide
+
+theorem selector_capacity_overflow_refused : Solidity.Backend.Scalar.stackBound (SelectorMatch.code matchSelector) 1024=false := by decide
+
+theorem selector_existing_short_collision :
+    ∃ (selector : Vector UInt8 4) (frame : Source.Fr) (suffix : Solidity.Backend.Scalar.Stack),
+      frame.cd.length<4 ∧
+      Solidity.Backend.Scalar.run (SelectorMatch.code selector)
+        (BitVec.ofNat 256 (Solidity.AbiEntry.load frame.cd 0)::suffix)=some ((1 : Solidity.Backend.Scalar.Word)::suffix) ∧
+      (frame.cd.take 4==selector.toList)=false := by
+  exact ⟨#v[0x12,0x34,0,0],selectorFrame [0x12,0x34],[258,513],by decide,
+    SelectorMatchControls.padded_partial_collision⟩
+
+#print axioms match_full_prefix
+#print axioms selector_capacity_room
+#print axioms selector_raw_match
+#print axioms selector_raw_mismatch
+#print axioms selector_capacity_at_limit
+#print axioms selector_capacity_overflow_refused
+#print axioms selector_existing_short_collision
