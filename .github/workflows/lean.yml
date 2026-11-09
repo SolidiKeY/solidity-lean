@@ -79,7 +79,15 @@ jobs:
         with:
           node-version: '22'
       - name: Check editor parity inventory and integration
+        # Native integration tests compile through the pinned soljson.
+        env:
+          SOLKEY_ROOT: ${{ github.workspace }}/tests/migration/solkey
         run: |
+          mkdir -p "$SOLKEY_ROOT/keyext.solidity.core/build/soljson"
+          curl --fail --location --retry 3 \
+            https://raw.githubusercontent.com/ethereum/solc-bin/gh-pages/bin/soljson-v0.8.34+commit.80d5c536.js \
+            --output "$SOLKEY_ROOT/keyext.solidity.core/build/soljson/soljson-v0.8.34+commit.80d5c536.js"
+          echo "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8  $SOLKEY_ROOT/keyext.solidity.core/build/soljson/soljson-v0.8.34+commit.80d5c536.js" | sha256sum -c -
           node vscode/parity/discover.cjs --check
           node vscode/parity/audit.cjs --check
           node --test scripts/check-dafny-features.test.mjs scripts/source-locations.test.mjs vscode/test/*.test.cjs
@@ -210,6 +218,15 @@ jobs:
           node --test --test-concurrency=1 scripts/test-solidity.test.mjs scripts/aggregates.test.mjs scripts/declarations-metadata.test.mjs
       - name: Install real backend editor test launcher
         run: npm install --prefix /tmp/solidity-lean-editor-host --no-audit --no-fund @vscode/test-electron@2.5.2
+      # Direct-mode editor tests read verdicts from the compiled verifier
+      # (docs/compact-verifier.md); without it every direct row is unsupported.
+      # v4.24.0 is lean-toolchain's tag; the script checks its commit.
+      - name: Build compiled verifier for the editor tests
+        env:
+          LEAN_NUM_THREADS: '1'
+        run: |
+          git clone --depth 1 --branch v4.24.0 https://github.com/leanprover/lean4.git "$RUNNER_TEMP/lean4-source"
+          python3 scripts/build-direct-native.py "$(lean --print-prefix)" "$RUNNER_TEMP/lean4-source" .lake/direct-native
       - name: Test editor with solc and Lean
         env:
           NODE_PATH: /tmp/solidity-lean-editor-host/node_modules
