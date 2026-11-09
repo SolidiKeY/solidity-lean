@@ -269,4 +269,25 @@ theorem qualifier_diagnostics :
 /-- info: 'Solidity.Frontend.Admission.OccurrenceControls.qualifier_diagnostics' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms qualifier_diagnostics
 
+
+/-! Regression: the new whole-unit diagnostic must retain all three metadata refusals even when the frozen old candidate is silent. This raw syntax fixture asserts no initializer/write-once, override or transient-storage legality and is not an admitted program. -/
+def mixedMetadataState : Syn (.part false) :=
+  .stateVar (.elem .bool) none (some .constant) (some []) true "unused" .none
+
+def mixedMetadataUnit : Syn .unit :=
+  .unit (.cons (.contract false "C" .none .nil (.cons mixedMetadataState .nil)) .nil)
+
+def acceptsExceptMetadata (f : Solidity.Language.Feature) : Bool :=
+  decide (f ≠ .constants ∧ f ≠ .overrideDeclarations ∧ f ≠ .transientState)
+
+theorem metadata_v2_retains_all_refusals :
+    (sourceCandidateMetadataV2Refusals mixedMetadataUnit acceptsExceptMetadata).map Prod.snd =
+      [.constants,.overrideDeclarations,.transientState] ∧
+    sourceCandidateMetadataV2Refusal? mixedMetadataUnit acceptsExceptMetadata =
+      some (⟨.part false,mixedMetadataState⟩,.constants) ∧
+    sourceCandidateRefusal? mixedMetadataUnit acceptsExceptMetadata = none := ⟨rfl,rfl,rfl⟩
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.metadata_v2_retains_all_refusals' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms metadata_v2_retains_all_refusals
+
 end Solidity.Frontend.Admission.OccurrenceControls
