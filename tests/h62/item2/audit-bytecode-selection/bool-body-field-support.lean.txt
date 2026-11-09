@@ -20,8 +20,9 @@ theorem bodyBackFound : Compiler.compile 7 (Frag.init BoolBoundCtx) bodyNil=some
   BoolBindingBody.body_selected 7 bodyNil (Frag.init BoolBoundCtx) rfl
 
 def bodyMachine (word size : Fin W) : Machine :=
-  {Machine.init with mem := fun address => if address=7 then .val word
-    else if address=8 then .val size else .val (wmod 71),
+  {Machine.init with
+    mem := fun address => if address=7 then .val word
+      else if address=8 then .val size else .val (wmod 71)
     stack := [.val (wmod 11),.val (wmod 99)]}
 
 theorem body_nil_outcome (word size : Fin W) :
