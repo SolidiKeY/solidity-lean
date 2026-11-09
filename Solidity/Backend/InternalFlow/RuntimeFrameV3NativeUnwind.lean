@@ -63,7 +63,7 @@ theorem parent {C : Contract} {b lo L frame : Nat} {F : Frag (Parameters A)}
  have zeroCounter : τ.env.1=countValue 0 W_pos := by rw [zeroEnv]
  have zeroAt : ParentPrefixes.sourceAt τ 0 W_pos=τ := by
    change τ.withEnv (Δ:=Parameters A) (countValue 0 W_pos,τ.env.2)=τ
-   have data : (countValue 0 W_pos,τ.env.2)=τ.env := by rw [zeroEnv]
+   have data : (countValue 0 W_pos,τ.env.2)=τ.env := by rw [zeroEnv];rfl
    exact (congrArg (fun locals => τ.withEnv (Δ:=Parameters A) locals) data).trans rfl
  let full : Solidity.Out C σ.H (Parameters A) := AllocatingResume.reexport σ ef ⟨τ,List.prefix_refl _⟩
  have fullRun : (InterfaceV1.recursiveSource "allocatingCountdown" AllocatingEmission.args .none AllocatingActivation.step
