@@ -17,7 +17,7 @@ theorem image {C : Contract} {L b frame : Nat} {F : Frag (Parameters A)}
  run (AllocatingReturn.image (C:=C) b F pointer bottom) before=.ok before 0 := by
  have guard := guard_run σ 0 W_pos counter base before repr
  have checked : run (guardCompiled (C:=C) b F).code before=.ok (before.push w[0]) 0 := by
-   simpa only [bword] using guard
+   simpa only [show decide (0<(0:Nat))=false from rfl,bword,Bool.false_eq_true,ite_false] using guard
  have empty := empty_turn (run (guardCompiled (C:=C) b F).code) (run (AllocatingActivation.code (C:=C) b F pointer)) before checked
  have observed : loopIterN (run (guardCompiled (C:=C) b F).code) (run (AllocatingActivation.code (C:=C) b F pointer)) 1 before=.inr (.ok before 0) := by
    simp only [loopIterN,empty]
