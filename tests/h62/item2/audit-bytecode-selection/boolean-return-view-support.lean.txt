@@ -4,9 +4,6 @@ with a generic structure count. Uses the existing indexed Source statement/view
 and emitter; this is narrow view/selection evidence, not whole Source/EVM,
 physical, gas/fork or G01 operational correspondence. -/
 open Solidity Solidity.Backend
-namespace ReturnViewFixture
-abbrev BR := Solidity.Backend.FailurePaths.BooleanReturn.statement
-end ReturnViewFixture
 
 def boolReturnEnv : Source.Env := ⟨[]⟩
 def boolReturnStmt (value : Bool) : Source.RStmt boolReturnEnv [.bool] false .body [.bool] [.bool] :=
@@ -25,9 +22,10 @@ theorem bool_return_compiled (value : Bool) (offset : Nat) :
 theorem bool_return_wrong_statement_refused : ¬HEq (boolReturnStmt false) (boolReturnStmt true) := by
   intro same
   have syntaxEq : boolReturnStmt false=boolReturnStmt true := eq_of_heq same
-  have observed : (some false : Option Bool)=some true :=
-    congrArg (fun stmt : Source.RStmt boolReturnEnv [.bool] false .body [.bool] [.bool] =>
-      (FailurePaths.BooleanReturn.view stmt).map (fun selected => selected.value)) syntaxEq
+  let observe (stmt : Source.RStmt boolReturnEnv [.bool] false .body [.bool] [.bool]) : Option Bool :=
+    (FailurePaths.BooleanReturn.view stmt).map (fun selected : FailurePaths.BooleanReturn.View stmt => selected.value)
+  have observed : observe (boolReturnStmt false)=observe (boolReturnStmt true) := congrArg observe syntaxEq
+  change (some false : Option Bool)=some true at observed
   cases observed
 
 theorem bool_return_context_mismatch_refused {Γ Δ : Source.RCtx}
