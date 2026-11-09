@@ -343,4 +343,20 @@ theorem pragma_sites_and_frozen_gap :
 /-- info: 'Solidity.Frontend.Admission.OccurrenceControls.pragma_sites_and_frozen_gap' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms pragma_sites_and_frozen_gap
 
+
+/-! Regression: nested unused array types retain each typed site once in preorder, even with an unresolved written length. This is raw dimension presence, not constant evaluation, well-formedness, allocation or admission; frozen candidate silence remains explicit. -/
+def dynamicArrayType : Syn .typeName := .array (.elem .bool) .none
+def writtenArrayType : Syn .typeName := .array dynamicArrayType (.some (.ident "notConstant"))
+def arrayTypeUnit : Syn .unit := .unit (.cons (.contract false "C" .none .nil
+  (.cons (.stateVar writtenArrayType none none none false "unused" .none) .nil)) .nil)
+
+theorem array_type_sites_and_frozen_gap :
+    syntaxArrayTypeUses arrayTypeUnit =
+      [(⟨.typeName,writtenArrayType⟩,.fixedArrays),(⟨.typeName,dynamicArrayType⟩,.dynamicArrays)] ∧
+    sourceCandidateMetadataV2Refusal? arrayTypeUnit
+      (fun f => decide (f ≠ .fixedArrays)) = none := ⟨rfl,rfl⟩
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.array_type_sites_and_frozen_gap' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms array_type_sites_and_frozen_gap
+
 end Solidity.Frontend.Admission.OccurrenceControls
