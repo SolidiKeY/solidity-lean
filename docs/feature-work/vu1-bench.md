@@ -72,6 +72,10 @@ list is available until the actual suite has run.
   liveness protocol, rather than an unnamed-owner wait. This decision is
   acknowledged; the question is not reopened. H232 remains the later standing
   memory policy and removes the historical scope-provisioning requirement.
+- `VU1-T1` is an operational request to the coordinator to execute H191: return
+  a concrete producer lane/task with a publication wake condition, or the
+  already published telemetry commit/API and admitted fixture paths. It does
+  not reopen `VU1-I1`, request a new policy decision or extend this lease.
 - This lane takes source preparation and admission evidence inside
   `scripts/bench/**` itself. Exact representative inputs still require demonstrated
   frontend admission, rather than an unnamed-owner wait. The request to the
@@ -157,6 +161,21 @@ The topic-guide addition belongs in the existing trust/usability guide:
 +## Lanes
 ```
 
+## Native runtime preparation
+
+The existing `scripts/build-direct-native.py` requires both the installed Lean
+release and a Git checkout of its exact pinned commit, including
+`stage0/stdlib` generated C. Pass those directories and an owned output directory
+as its three arguments. Run under the writer lock with serial Lean and the
+unchanged replay budget. Keep the generated binary and its provenance manifest
+outside the code branch.
+
+The existing `scripts/testsuite-performance.mjs --reuse --native` accepts the
+prepared Velvet directory through `TESTSUITE_BENCH_DIR` and that binary through
+`DIRECT_NATIVE`. Its warm request latency excludes source compilation and
+process startup; even a passing run is neither a certified theorem nor the
+requested disjoint end-to-end U01 baseline. Missing phases remain unknown.
+
 ## Budget decision
 
 The plan proposes fast p50 ≤ 1 s, p95 ≤ 10 s, and certified ≤ 60 s and
@@ -206,6 +225,11 @@ an input/output alias that could overwrite source data; shared canonical output
 checks and regression controls now prevent it. The skeptic requested an exact
 name for the whole-declaration byte span; `declarationSpanBytes` and its control
 now distinguish it from the body-only statement metric. Both confirmed the fixes.
+
+Independent read-only finder and skeptic reviews of the runtime-preparation
+guidance found no issues. Both checked the existing builder/runner arguments,
+the warm-request versus end-to-end boundary, and that `VU1-T1` executes H191
+without reopening the decided question. Neither used a compiler or Lean server.
 
 ## Checkpoint handoff
 
