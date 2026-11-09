@@ -3,7 +3,9 @@
 TERM/INT handlers only record cancellation, including during spawn and cleanup.
 Polling unwinds safely. Successful return requires observed group quiescence.
 Cleanup uncertainty hands the lease to an acknowledged guardian before raising.
-An uncatchable wrapper death still leaves the direct child holding the lease.
+After uncatchable wrapper death, only a still-live direct child or acknowledged
+guardian retains the lease. Leader exit before guardian acknowledgement is not
+covered by that conditional guarantee.
 """
 if not __debug__: raise SystemExit('OPTIMIZED_PYTHON_UNSUPPORTED')
 import os,signal,subprocess,time,pathlib,runpy
