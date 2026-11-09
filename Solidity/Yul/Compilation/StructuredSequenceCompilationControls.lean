@@ -37,8 +37,11 @@ theorem inner_target (m : Evm.Machine) (caller : List Evm.Word) :
  innerArtifact.normal_to_model 19 #v[0] #v[9] inner_source m caller
 
 theorem target_done (m : Evm.Machine) (caller : List Evm.Word) :
- Evm.run artifact.code {m with stack := caller} = .ok {m with stack := caller} 0 :=
- artifact.normal_to_model 20 #v[] #v[] source_done m caller
+ Evm.run artifact.code {m with stack := caller} = .ok {m with stack := caller} 0 := by
+ exact CompletionControls.normal_output (c := root) (#v[] : Vector Scalar.Word 0)
+   (fun actual => Evm.run artifact.code {m with stack := caller} =
+     .ok {m with stack := actual.toList.map coreWord++caller} 0)
+   (artifact.source_to_model 20 #v[] ⟨sourceLocals #v[],.normal⟩ source_done m caller)
 
 def falseBranch : Solidity.Yul.Stmt [] [] root 2 := .if_ (.literal 0) ZeroSequenceCompilation.Controls.body
 def falseInner : Solidity.Yul.Stmt [] [] root 1 := .let_ 1 (.literal 0) falseBranch
