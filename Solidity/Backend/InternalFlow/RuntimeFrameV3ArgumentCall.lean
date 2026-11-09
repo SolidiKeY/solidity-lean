@@ -105,7 +105,7 @@ theorem growth : GrowsAllocator 1 16 4 caller P.base input output.st addresses l
  have prefixOwner := ArgumentEntry.Checks.specification.2.2.2.2 cursor positive owned
    (by rw [ArgumentEntry.Checks.cost_zero];omega)
  have reached : StructAllocatorRepr child.heap prefixAddresses 16 cursor prefixMachine := by
-   simpa only [ArgumentEntry.Checks.cost_zero,Nat.add_zero] using prefixOwner
+   simpa only [ArgumentEntry.Checks.cost_zero,Nat.add_zero,child,prefixAddresses,prefixMachine,MemoryArgument.child,State.withEnv] using prefixOwner
  exact body_spec.2.2.2.2.2.1 cursor (by decide) reached room
 
 theorem returned_owner : StructAllocatorRepr output.st.heap addresses 16 (⟨26,by decide⟩ : Fin W) last :=
@@ -234,8 +234,8 @@ theorem source_indices (depth : Nat) :
  (InterfaceV1.recursiveSource "allocatingCountdown" MemoryArgument.args .none AllocatingActivation.step depth).run caller=
  if 1<depth then .ok output else .error .exhausted := by
  by_cases enough : 1<depth
- · simpa only [if_pos enough] using source_all depth enough
- · simpa only [if_neg enough] using AllocatingSource.call_exhaustion "allocatingCountdown" MemoryArgument.args depth caller 1
+ · simpa only [ite_eq_left enough] using source_all depth enough
+ · simpa only [ite_eq_right enough] using AllocatingSource.call_exhaustion "allocatingCountdown" MemoryArgument.args depth caller 1
      (by decide) Evm.Memory.CompileExamples.r1 MemoryArgument.arguments MemoryArgument.read_bound (by omega)
 
 theorem indexed_endpoint (depth : Nat) (enough : 1<depth) :
