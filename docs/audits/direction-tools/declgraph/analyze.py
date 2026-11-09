@@ -18,8 +18,8 @@ def closure(edges,seeds):
     return seen
 def testpath(p):
     return '/Examples/' in p or '/Corpus/' in p or '/TestSuite/' in p or bool(re.search(r'(?:Controls|Checks|Pins|Coverage)\.lean$',p))
-def run(graph,view,out):
-    src=API['assert_sources'](); source_provenance={p:API["provenance"](p,t) for p,t in src.items()}; mask=runpy.run_path(str(HERE.parent/'statements/scan.py'))['mask']; goals=[p for p,t in src.items() if re.search(r'@\[[^\]]*\bgoal\b',mask(t))];assert not goals,'Goal attributes need explicit root mapping: '+str(goals); nodes={};edges={};spans={}; indexed={};commands=set();source_edges=0
+def load_graph(graph,view,src):
+    nodes={};edges={};spans={}; indexed={};commands=set();source_edges=0
     for line in graph.open():
         r=json.loads(line);n=r['name'];nodes[n]=r;edges[n]=set(r['refs'])
     for p in src:
@@ -59,6 +59,10 @@ def run(graph,view,out):
     # boundary nodes, not charged Solidity source lines.
     external=set().union(*edges.values())-nodes.keys()
     edges={n:{r for r in rs if r in nodes} for n,rs in edges.items()}
+    return nodes,edges,spans,indexed,commands,source_edges,external
+
+def run(graph,view,out,source_root=None):
+    src=API['assert_sources'](source_root); source_provenance={p:API["provenance"](p,t) for p,t in src.items()}; mask=runpy.run_path(str(HERE.parent/'statements/scan.py'))['mask']; goals=[p for p,t in src.items() if re.search(r'@\[[^\]]*\bgoal\b',mask(t))];assert not goals,'Goal attributes need explicit root mapping: '+str(goals); nodes,edges,spans,indexed,commands,source_edges,external=load_graph(graph,view,src)
     facade={n for n,r in nodes.items() if r['module']=='Solidity.Theorems' and r['kind']=='theorem'}
     tests={n for n,r in nodes.items() if n not in commands and testpath(indexed.get(r['module'],''))}
     main_used=closure(edges,facade);test_used=closure(edges,tests)-main_used
@@ -138,6 +142,9 @@ def run(graph,view,out):
         missing_files=len(missing),missing_physical_lines=sum(len(src[p].splitlines()) for p in missing),
         missing_by_area=dict(sorted(collections.Counter('/'.join(p.split('/')[:2]) for p in missing).items())),families=family,
         deletable_now_verified_lines=0,unused_but_planned_verified_lines=0,
+        semantic_certification='INVALID for semantic use: .ilean aliases can merge local binders and constants; earlier source-span and liveness fields are provisional index statistics pending native-range replay.',
+        constant_identity='Global imported constant Name, not necessarily unique source declaration: cached modules can define the same fully qualified theorem name.',
+        supplemental_measurements={'native_expression_graph':'native-summary.json','historical_candidates':'historical-summary.json','native_candidate_bindings':'candidate-summary.json','syntax_census':'syntax-census.json','compiler_overrides':'compiler-edges.json','effect_on_liveness':'Old fields are provisional index statistics. Native module expression measurements supersede their semantic/source-binding interpretation; full CI/test liveness is still unresolved.'},
         limitations=['No systemd scope on the cloud VM (H232).',
             'Unreached and zero-incoming are measured only inside the explicitly indexed universe; missing modules can be consumers.',
             'Unowned source references are preserved as incoming uses but are not rooted; exact CI/#eval/example root reconstruction remains outstanding.',
@@ -152,5 +159,5 @@ def run(graph,view,out):
     (out/'summary.json').write_text(json.dumps(summary,sort_keys=True,indent=2)+'\n')
     print('GRAPH_ANALYSIS_PASS',len(nodes),'nodes',len(indexed),'modules')
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--graph',type=pathlib.Path,required=True);p.add_argument('--view',type=pathlib.Path,required=True);p.add_argument('--out',type=pathlib.Path,required=True);a=p.parse_args();run(a.graph,a.view,a.out)
+    p=argparse.ArgumentParser();p.add_argument('--graph',type=pathlib.Path,required=True);p.add_argument('--view',type=pathlib.Path,required=True);p.add_argument('--out',type=pathlib.Path,required=True);p.add_argument('--source-root',type=pathlib.Path,help='Explicit frozen-source checkout; default verifies this checkout');a=p.parse_args();run(a.graph,a.view,a.out,a.source_root)
 if __name__=='__main__':main()

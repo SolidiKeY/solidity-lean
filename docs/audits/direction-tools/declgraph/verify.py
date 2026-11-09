@@ -7,11 +7,33 @@ import argparse,csv,json,pathlib,runpy
 HERE=pathlib.Path(__file__).resolve().parent
 
 def main():
- p=argparse.ArgumentParser();p.add_argument('--results',type=pathlib.Path,default=HERE);a=p.parse_args();d=a.results
- api=runpy.run_path(str(HERE/'audit.py'));api['assert_sources']()
+ p=argparse.ArgumentParser();p.add_argument('--results',type=pathlib.Path,default=HERE);p.add_argument('--source-root',type=pathlib.Path,help='Explicit frozen-source checkout; default verifies this checkout');a=p.parse_args();d=a.results
+ api=runpy.run_path(str(HERE/'audit.py'));api['assert_sources'](a.source_root)
  inv=json.loads((HERE/'inventory.json').read_text());s=json.loads((d/'summary.json').read_text())
  assert inv==api['inventory'](),'Frozen inventory differs'
  assert s['base']==api['BASE'] and s['status']=='partial'
+ assert s['semantic_certification'].startswith('INVALID'),'Legacy index fields require semantic retraction'
+ native=json.loads((d/'native-summary.json').read_text());historical=json.loads((d/'historical-summary.json').read_text());candidate=json.loads((d/'candidate-summary.json').read_text())
+ assert native['base']==historical['base']==candidate['base']==api['BASE']
+ assert native['selected_modules']==s['module_universe']
+ assert native['legacy_splitlines_indexed_lines']==s['indexed_physical_lines']
+ assert native['graph_sha256']==candidate['native_graph_sha256']
+ assert not native['unresolved_references'] and not native['facade_root_boundary']
+ assert native['deletable_now_verified_lines']==candidate['deletable_now_verified_lines']==0
+ for name in ('native-areas','native-directories'):
+  nr=list(csv.DictReader((d/(name+'.csv')).open()))
+  assert sum(int(r[c+'_serialized_constants']) for r in nr for c in ('facade_used','outside_facade_closure'))==native['serialized_constant_records']
+  assert sum(int(r[c+'_native_range_lines']) for r in nr for c in ('facade_used','outside_facade_closure'))+sum(int(r['unattributed_physical_lines']) for r in nr)==native['indexed_physical_lines']
+ for family,h in historical['families'].items():
+  stem=family.strip('/').replace('/','_');hr=json.loads((d/(stem+'-historical.json')).read_text());cr=json.loads((d/(stem+'-candidates.json')).read_text())
+  assert len(hr)==len(cr)==h['declarations']
+  assert sum(r['historical_masked_span_lines'] for r in hr)==h['historical_reported_lines']
+  assert sum(r['physical_span_lines'] for r in hr)==h['physical_span_lines']
+  assert [(r['path'],r['source_start_char'],r['source_end_char']) for r in hr]==[(r['path'],r['source_start_char'],r['source_end_char']) for r in cr]
+  cc=candidate['families'][family]
+  assert sum(v for k,v in cc.items() if k.endswith('_declarations'))==len(hr)
+  assert sum(v for k,v in cc.items() if k.endswith('_historical_reported_lines'))==h['historical_reported_lines']
+  assert sum(v for k,v in cc.items() if k.endswith('_physical_span_lines'))==h['physical_span_lines']
  assert s['module_universe']+s['missing_files']==inv['tracked_lean_files']
  assert s['indexed_physical_lines']+s['missing_physical_lines']==inv['physical_lines']
  assert s['deletable_now_verified_lines']==0

@@ -1,6 +1,6 @@
 import Solidity.Lowering.V07.P12ContextExtension
 
-/-! Execute an arbitrary effectful primitive operand and store its captured value before private locals are dropped; caller writes, heap growth and halts are retained. The existing Boolean API remains unchanged. This native helper asserts no Source admission or whole compiler pass. -/
+/-! Execute an arbitrary effectful primitive operand and store its captured value before private locals are dropped; caller writes, heap growth and halts are retained. The existing Boolean API remains unchanged. This native helper asserts no Source admission or whole compiler pass. storePrimitiveOperand_run: Universal primitive capture, including failed prefixes/reads; controls reject lost temporaries, caller effects and ignored halts. -/
 namespace Solidity.Lowering.G17
 
 variable {C : Contract} {Γ : Ctx}
@@ -22,7 +22,7 @@ def storePrimitiveOperand {p : PrimTy} (i : Idx Γ (.val p))
   match e.value with
   | .val v => .block (e.code.join (.cons (.assignLocal (i.ext e.code.ext) v) .nil))
 
-/-- Universal primitive capture, including failed prefixes/reads; controls reject lost temporaries, caller effects and ignored halts. -/
+
 theorem storePrimitiveOperand_run {p : PrimTy} (i : Idx Γ (.val p))
     (e : DeferredSource.Operand C Γ (.prim p)) (target : State C Γ) :
     (storePrimitiveOperand i e).run target = (e.run target).map (fun (out,value) =>

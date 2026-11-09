@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Regression checks for Lake's distinct split-object content hashes."""
-import pathlib,runpy,tempfile,unittest
+import pathlib,runpy,tempfile,unittest,subprocess
+from unittest import mock
 HERE=pathlib.Path(__file__).resolve().parent
-resolve=runpy.run_path(str(HERE/'prepare.py'))['recorded_artifacts']
+api=runpy.run_path(str(HERE/'prepare.py'));resolve=api['recorded_artifacts'];query=api['query_modules']
 class Artifacts(unittest.TestCase):
  def setUp(self):
   self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup);self.cache=pathlib.Path(self.tmp.name);(self.cache/'artifacts').mkdir()
@@ -24,4 +25,17 @@ class Artifacts(unittest.TestCase):
  def test_invalid_hash_array_fails(self):
   for hs in ([],['1','2','3','4']):
    with self.assertRaises(ValueError):resolve(self.cache,{'o':hs,'i':'44'})
+class QueryGuard(unittest.TestCase):
+ def test_all_excluded_never_queries_default_targets(self):
+  with tempfile.TemporaryDirectory() as d:
+   d=pathlib.Path(d)
+   failed=subprocess.CompletedProcess([],3,'','Building Missing\nerror: target is out-of-date and needs to be rebuilt\n')
+   with mock.patch.object(subprocess,'run',return_value=failed) as runner:
+    with self.assertRaisesRegex(RuntimeError,'refusing Lake default targets'):query(['Missing'],d,d/'modules.txt')
+    self.assertEqual(runner.call_count,1)
+    self.assertEqual(runner.call_args.args[0],['lake','--no-build','--json','query','+Missing:olean'])
+ def test_blank_universe_never_queries_defaults(self):
+  with tempfile.TemporaryDirectory() as d, mock.patch.object(subprocess,'run') as runner:
+   with self.assertRaisesRegex(RuntimeError,'refusing Lake default targets'):query(['','  '],pathlib.Path(d),pathlib.Path(d)/'modules.txt')
+   runner.assert_not_called()
 if __name__=='__main__':unittest.main()

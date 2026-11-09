@@ -34,8 +34,11 @@ theorem model_to_source (condition : Compiled fc test) (loop : ForCompilation.Ar
  · rw [if_neg zero] at target
    have bodyRun := target.symm.trans ran
    obtain ⟨fuel,out,source,done,frame⟩ := loop.reflected locals newer m final caller skip bodyRun
-   have stable := evalStmt_stable (Nat.le_max_right fc fuel) .nil True.intro body
-     loop.compiled.profile (sourceLocals locals) source
+   have stable : evalStmt (max fc fuel) .nil True.intro body loop.compiled.profile (sourceLocals locals) =
+     some ⟨sourceLocals out,.normal⟩ := CompletionControls.completed_horizon
+     (fun horizon => evalStmt horizon .nil True.intro body loop.compiled.profile (sourceLocals locals))
+     (fun horizon extra => evalStmt_refines_add horizon extra .nil True.intro body loop.compiled.profile (sourceLocals locals))
+     (Nat.le_max_right fc fuel) source
    exact ⟨max fc fuel+1,out,GuardedFor.source_nonzero condition loop (max fc fuel)
      (Nat.le_max_left fc fuel) locals _ zero stable,done,frame⟩
 

@@ -1,0 +1,24 @@
+{
+ "Solidity/Source/PowerV2Correct.lean:Solidity.Source.PowerV2.cutoff_repaired": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/PowerV2Correct.lean:Solidity.Source.PowerV2.intPow_checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/PowerV2Correct.lean:Solidity.Source.PowerV2.intPow_unchecked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/PowerV2Correct.lean:Solidity.Source.PowerV2.powMod_agrees_v1": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/PowerV2Correct.lean:Solidity.Source.PowerV2.powMod_residue": [
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -137,4 +137,63 @@ theorem sourceSubsetRefusal?_none_iff (unit : Syn .unit) (accepts : Feature → 
 /-- info: 'Solidity.Frontend.Admission.sourceSubsetRefusal?_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms sourceSubsetRefusal?_none_iff
 
+
+/-! Regression: newer payload/visibility/mutability channels must not remain disconnected from whole-unit diagnostics. This additive partial composition preserves old subsets, exclusions and the supplied predicate; it selects no profile and proves no lexical/typing/admission or execution adequacy. Fields concatenate per syntax site, not as globally concatenated scans; duplicate markers remain. -/
+def syntaxCandidateFeaturesAt {c : Cat} (s : Syn c) : List Feature :=
+  syntaxSubsetFeaturesAt s ++
+    (payloadFeaturesAt s ++ (visibilityFeaturesAt s ++ mutabilityFeaturesAt s))
+
+theorem syntaxCandidateFeaturesAt_iff {c : Cat} (s : Syn c) (f : Feature) :
+    f ∈ syntaxCandidateFeaturesAt s ↔
+      f ∈ syntaxSubsetFeaturesAt s ∨ f ∈ payloadFeaturesAt s ∨
+      (f = .visibility ∧ ∃ v, DirectVisibility s v) ∨
+      (f = .stateMutability ∧ ∃ state, DirectMutability s state) := by
+  simp only [syntaxCandidateFeaturesAt, List.mem_append, visibilityFeaturesAt_iff,
+    mutabilityFeaturesAt_iff]
+
+def sourceCandidateUses (unit : Syn .unit) : List (SyntaxOccurrence × Feature) :=
+  syntaxFieldUses unit syntaxCandidateFeaturesAt
+
+theorem sourceCandidateUses_iff (unit : Syn .unit) (site : SyntaxOccurrence) (f : Feature) :
+    (site,f) ∈ sourceCandidateUses unit ↔
+      Syn.Sub site ⟨.unit,unit⟩ ∧ f ∈ syntaxCandidateFeaturesAt site.2 :=
+  syntaxFieldUses_iff unit syntaxCandidateFeaturesAt site f
+
+def sourceCandidateRefusals (unit : Syn .unit) (accepts : Feature → Bool) :
+    List (SyntaxOccurrence × Feature) := syntaxFieldRefusals unit syntaxCandidateFeaturesAt accepts
+
+def sourceCandidateRefusal? (unit : Syn .unit) (accepts : Feature → Bool) :
+    Option (SyntaxOccurrence × Feature) := syntaxFieldRefusal? unit syntaxCandidateFeaturesAt accepts
+
+theorem sourceCandidateRefusals_iff (unit : Syn .unit) (accepts : Feature → Bool)
+    (site : SyntaxOccurrence) (f : Feature) :
+    (site,f) ∈ sourceCandidateRefusals unit accepts ↔
+      Syn.Sub site ⟨.unit,unit⟩ ∧ f ∈ syntaxCandidateFeaturesAt site.2 ∧ accepts f = false :=
+  syntaxFieldRefusals_iff unit syntaxCandidateFeaturesAt accepts site f
+
+theorem sourceCandidateRefusal?_none_iff (unit : Syn .unit) (accepts : Feature → Bool) :
+    sourceCandidateRefusal? unit accepts = none ↔
+      sourceSubsetRefusal? unit accepts = none ∧
+      syntaxFieldRefusal? unit payloadFeaturesAt accepts = none ∧
+      syntaxFieldRefusal? unit visibilityFeaturesAt accepts = none ∧
+      syntaxFieldRefusal? unit mutabilityFeaturesAt accepts = none := by
+  change syntaxFieldRefusal? unit
+    (fun s => syntaxSubsetFeaturesAt s ++
+      (payloadFeaturesAt s ++ (visibilityFeaturesAt s ++ mutabilityFeaturesAt s))) accepts = none ↔ _
+  rw [syntaxFieldRefusal?_append_none_iff unit syntaxSubsetFeaturesAt
+    (fun s => payloadFeaturesAt s ++ (visibilityFeaturesAt s ++ mutabilityFeaturesAt s)) accepts,
+    syntaxFieldRefusal?_append_none_iff unit payloadFeaturesAt
+      (fun s => visibilityFeaturesAt s ++ mutabilityFeaturesAt s) accepts,
+    syntaxFieldRefusal?_append_none_iff unit visibilityFeaturesAt mutabilityFeaturesAt accepts]
+  rfl
+
+/-- info: 'Solidity.Frontend.Admission.syntaxCandidateFeaturesAt_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxCandidateFeaturesAt_iff
+/-- info: 'Solidity.Frontend.Admission.sourceCandidateUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms sourceCandidateUses_iff
+/-- info: 'Solidity.Frontend.Admission.sourceCandidateRefusals_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms sourceCandidateRefusals_iff
+/-- info: 'Solidity.Frontend.Admission.sourceCandidateRefusal?_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms sourceCandidateRefusal?_none_iff
+
 end Solidity.Frontend.Admission
