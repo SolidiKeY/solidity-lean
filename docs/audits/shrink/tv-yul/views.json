@@ -1,11 +1,11 @@
 {
   "base": "381328f608032dd19c405373c2b265e83a969850",
-  "prototype_commit": "9d1088b7450a83dea259df26bcf7aae5fa190984",
+  "prototype_commit": "9e8e83ae97b466c01e9306fb8b2246ded6469462",
   "status": "provisional_unapproved",
   "covered_views_family": null,
   "verdict": null,
   "boundary": "Packing only; two word proofs rederived, every other declaration retained. Shared existing library imports are excluded symmetrically; this is not a full import-closure size. All new checker, soundness/completeness, bridge, program, algebra and facade sources count.",
-  "technique_boundary": "Restored word exports use BitVec algebra/refinement, not Artifact/checker as a proof dependency. Actual bidirectional checker-produced Artifacts are proved separately. No translation-validation family replacement or reduction is claimed.",
+  "technique_boundary": "Restored word exports now consume checker-produced Artifact run equalities and decode their equal first stack words. BitVec identities and refinement lemmas remain necessary and counted. Each helper executes one read or write code on a mathematically prepared input, not a concatenated two-code run. No owner-approved TV family coverage or reduction is claimed.",
   "before": {
     "commit": "381328f608032dd19c405373c2b265e83a969850",
     "path": "Solidity/Yul/Views/Packing.lean",
@@ -62,7 +62,7 @@
   "after": {
     "modules": [
       {
-        "commit": "9d1088b7450a83dea259df26bcf7aae5fa190984",
+        "commit": "9e8e83ae97b466c01e9306fb8b2246ded6469462",
         "path": "prototypes/TvYulBlock.lean",
         "sha256": "fcf181983c37b315e3d1b0987a2885ab696399163bf0cc8c4a84c3a4a19a9da3",
         "physical_lines": 508,
@@ -199,7 +199,7 @@
         ]
       },
       {
-        "commit": "9d1088b7450a83dea259df26bcf7aae5fa190984",
+        "commit": "9e8e83ae97b466c01e9306fb8b2246ded6469462",
         "path": "prototypes/ViewsPackingBase.lean",
         "sha256": "32c0a964af1e360d4308c91cf18f53f90474bfde13b4664157af524ea60ad7ba",
         "physical_lines": 142,
@@ -244,7 +244,7 @@
         ]
       },
       {
-        "commit": "9d1088b7450a83dea259df26bcf7aae5fa190984",
+        "commit": "9e8e83ae97b466c01e9306fb8b2246ded6469462",
         "path": "prototypes/ViewsPackingBridge.lean",
         "sha256": "5e29944b1b44bf77e4416413198bf63282cd6d130bdd36c96c08b0865ab9bb90",
         "physical_lines": 87,
@@ -293,7 +293,7 @@
         ]
       },
       {
-        "commit": "9d1088b7450a83dea259df26bcf7aae5fa190984",
+        "commit": "9e8e83ae97b466c01e9306fb8b2246ded6469462",
         "path": "prototypes/ViewsPackingProgram.lean",
         "sha256": "6e7f99d2bd8750ae7ca06c92774835f9bd49b9386f0323ef8b61d0628312e361",
         "physical_lines": 148,
@@ -342,11 +342,11 @@
         ]
       },
       {
-        "commit": "9d1088b7450a83dea259df26bcf7aae5fa190984",
+        "commit": "9e8e83ae97b466c01e9306fb8b2246ded6469462",
         "path": "prototypes/ViewsPackingLaws.lean",
-        "sha256": "5d63acc8f6820acf8261c7dfa1c3b95862ed434a2b284ccd3031e014baa1da16",
-        "physical_lines": 58,
-        "lexical_declarations": 4,
+        "sha256": "afc27d5338f4c421a0f0c81de0e8c305dd2957dff23251bfb71f775c90c50b28",
+        "physical_lines": 96,
+        "lexical_declarations": 6,
         "theorems": [
           {
             "name": "Solidity.Yul.Compilation.TvYulViews.read_write",
@@ -355,6 +355,14 @@
           {
             "name": "Solidity.Yul.Compilation.TvYulViews.write_read",
             "signature": "theorem write_read (f : Field) (w : BitVec 256) : writeField f w (readField f w) = w"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulViews.Program.read_after_write_run",
+            "signature": "theorem read_after_write_run (f : Field) (w : Roadmap.Word) (v : f.Value) (m : Evm.Machine) (caller : List Evm.Word) : Evm.run (readArtifact f).code {m with stack := [BitVec.ofFin (f.saveWord w v), BitVec.ofNat 256 v.val].map coreWord ++ caller} = .ok {m with stack := [BitVec.ofNat 256 v.val, BitVec.ofNat 256 v.val].map coreWord ++ caller} 0"
+          },
+          {
+            "name": "Solidity.Yul.Compilation.TvYulViews.Program.write_after_read_run",
+            "signature": "theorem write_after_read_run (f : Field) (w : Roadmap.Word) (m : Evm.Machine) (caller : List Evm.Word) : Evm.run (writeArtifact f).code {m with stack := [BitVec.ofFin w, BitVec.ofNat 256 (f.findWord w).val].map coreWord ++ caller} = .ok {m with stack := [BitVec.ofFin w, BitVec.ofNat 256 (f.findWord w).val].map coreWord ++ caller} 0"
           },
           {
             "name": "Solidity.Yul.Views.Field.find_saveWord",
@@ -367,7 +375,7 @@
         ]
       },
       {
-        "commit": "9d1088b7450a83dea259df26bcf7aae5fa190984",
+        "commit": "9e8e83ae97b466c01e9306fb8b2246ded6469462",
         "path": "prototypes/shadow/Solidity/Yul/Views/Packing.lean",
         "sha256": "28f0dfa6fdd0b8bef7e9b0e07ca5aaefa5628c1892fe6cb3c79c1f64065ce2c0",
         "physical_lines": 1,
@@ -375,8 +383,8 @@
         "theorems": []
       }
     ],
-    "physical_lines": 944,
-    "lexical_declarations": 119
+    "physical_lines": 982,
+    "lexical_declarations": 121
   },
   "statements_preserved": [
     "Solidity.Yul.Views.split_join",
@@ -436,5 +444,27 @@
       ]
     }
   ],
+  "implemented_footprint": {
+    "mapped_functions": [
+      "Solidity.Yul.Views.Field.findWord",
+      "Solidity.Yul.Views.Field.saveWord"
+    ],
+    "transferred_exports": [
+      "Solidity.Yul.Views.Field.find_saveWord",
+      "Solidity.Yul.Views.Field.saveWord_unchanged"
+    ],
+    "retained_theorems": [
+      "Solidity.Yul.Views.split_join",
+      "Solidity.Yul.Views.Field.save_unchanged",
+      "Solidity.Yul.Views.Field.find_save",
+      "Solidity.Yul.Views.Field.save_low",
+      "Solidity.Yul.Views.Field.save_high",
+      "Solidity.Yul.Views.Field.save_lt",
+      "Solidity.Yul.Views.Field.find_save_above",
+      "Solidity.Yul.Views.Field.find_save_below",
+      "Solidity.Yul.Views.Field.find_save_disjoint"
+    ],
+    "boundary": "Packing is the sole family with explicit operation/Artifact mappings in this prototype. Widths/Regions are compatibility consumers. No mappings for typed storage/world writeback or arbitrary heterogeneous aggregate/byte geometry are implemented; their existing proofs are not deleted or given word-sized premises. This is an implemented footprint, not global impossibility or approved coverage."
+  },
   "largest_covered_family": "Unestablished while owner-approved TV bridge/coverage is pending; Packing is a provisional candidate, not a largest-covered claim."
 }
