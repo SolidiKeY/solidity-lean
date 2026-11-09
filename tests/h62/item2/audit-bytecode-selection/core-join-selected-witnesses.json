@@ -1,0 +1,10 @@
+{
+  "core_join_selected_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.CoreJoinCertificate.selected",
+    "proof": "\u27e8CoreJoin.certificate,joinContract,[],[],7,Frag.init [],joinNil,Frag.init [],rfl,True.intro\u27e9"
+  },
+  "dispatch_body_admitted_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.DispatchBody.admitted",
+    "proof": "\u27e8joinContract,[],Frag.init [],joinBody,True.intro\u27e9"
+  }
+}

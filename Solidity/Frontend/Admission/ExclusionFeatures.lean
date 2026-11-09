@@ -250,4 +250,40 @@ theorem sourceCandidateMetadataV2Refusal?_none_iff (unit : Syn .unit) (accepts :
 /-- info: 'Solidity.Frontend.Admission.sourceCandidateMetadataV2Refusal?_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms sourceCandidateMetadataV2Refusal?_none_iff
 
+
+/-! Regression: a dedicated marker must be composable without silently changing a frozen candidate or adding per-feature candidate versions. The existing generic collector appends fields per site; these laws use only the supplied predicate and assert no canonical policy, typing or admission. -/
+theorem candidateMetadata_free_refusals_iff (unit : Syn .unit) (accepts : Feature → Bool)
+    (site : SyntaxOccurrence) (f : Feature) :
+    (site,f) ∈ syntaxFieldRefusals unit
+        (fun s => syntaxCandidateMetadataV2At s ++ freeFunctionFeaturesAt s) accepts ↔
+      Syn.Sub site ⟨.unit,unit⟩ ∧
+      (f ∈ syntaxCandidateMetadataV2At site.2 ∨ f = .freeFunctions ∧ DirectFreeFunction site.2) ∧
+      accepts f = false := by
+  rw [syntaxFieldRefusals_iff, List.mem_append, freeFunctionFeaturesAt_iff]
+
+theorem candidateMetadata_free_none_iff (unit : Syn .unit) (accepts : Feature → Bool) :
+    syntaxFieldRefusal? unit
+        (fun s => syntaxCandidateMetadataV2At s ++ freeFunctionFeaturesAt s) accepts = none ↔
+      sourceCandidateMetadataV2Refusal? unit accepts = none ∧
+      ∀ site : SyntaxOccurrence, Syn.Sub site ⟨.unit,unit⟩ →
+        DirectFreeFunction site.2 → accepts .freeFunctions = true := by
+  rw [syntaxFieldRefusal?_append_none_iff]
+  change (sourceCandidateMetadataV2Refusal? unit accepts = none ∧
+    syntaxFieldRefusal? unit freeFunctionFeaturesAt accepts = none) ↔ _
+  apply and_congr Iff.rfl
+  rw [syntaxFieldRefusal?_none_iff]
+  constructor
+  · intro allowed site subterm free
+    exact allowed site .freeFunctions subterm
+      ((freeFunctionFeaturesAt_iff site.2 .freeFunctions).mpr ⟨rfl,free⟩)
+  · intro allowed site f subterm present
+    obtain ⟨same,free⟩ := (freeFunctionFeaturesAt_iff site.2 f).mp present
+    cases same
+    exact allowed site subterm free
+
+/-- info: 'Solidity.Frontend.Admission.candidateMetadata_free_refusals_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms candidateMetadata_free_refusals_iff
+/-- info: 'Solidity.Frontend.Admission.candidateMetadata_free_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms candidateMetadata_free_none_iff
+
 end Solidity.Frontend.Admission

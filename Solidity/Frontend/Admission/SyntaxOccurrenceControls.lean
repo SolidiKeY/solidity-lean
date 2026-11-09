@@ -290,4 +290,160 @@ theorem metadata_v2_retains_all_refusals :
 /-- info: 'Solidity.Frontend.Admission.OccurrenceControls.metadata_v2_retains_all_refusals' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms metadata_v2_retains_all_refusals
 
+
+/-! Regression: top-level and contract functions must not acquire the same dedicated marker. This syntax control retains generic/body markers and the frozen metadata-V2 omission; no legality, admission or eligible execution is claimed. -/
+def functionCategoryNode (top : Bool) : Syn (.part top) :=
+  .function (.ident "f") .nil none none .nil false none .nil (.some (.block .nil))
+
+def freeFunctionUnit : Syn .unit := .unit (.cons (.topPart (functionCategoryNode true)) .nil)
+
+theorem free_function_category_and_gap :
+    freeFunctionFeaturesAt (functionCategoryNode true) = [.freeFunctions] ∧
+    freeFunctionFeaturesAt (functionCategoryNode false) = [] ∧
+    (syntaxFreeFunctionUses freeFunctionUnit).map Prod.snd = [.freeFunctions] ∧
+    freeFunctionUnit.decls.map (fun d => (d.kind,d.top)) = [(.function,true)] ∧
+    sourceCandidateMetadataV2Refusal? freeFunctionUnit
+      (fun f => decide (f ≠ .freeFunctions)) = none := ⟨rfl,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.free_function_category_and_gap' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms free_function_category_and_gap
+
+
+/-! Regression: caller composition must report a free-function marker that the frozen candidate omits, retaining the actual typed source site and complete refusal list. This raw syntax control supplies no typing, admission or execution witness. -/
+theorem free_function_composed_diagnostic :
+    syntaxFieldRefusal? freeFunctionUnit
+      (fun s => syntaxCandidateMetadataV2At s ++ freeFunctionFeaturesAt s)
+      (fun f => decide (f ≠ .freeFunctions)) =
+        some (⟨.part true,functionCategoryNode true⟩,.freeFunctions) ∧
+    (syntaxFieldRefusals freeFunctionUnit
+      (fun s => syntaxCandidateMetadataV2At s ++ freeFunctionFeaturesAt s)
+      (fun f => decide (f ≠ .freeFunctions))).map Prod.snd = [.freeFunctions] ∧
+    sourceCandidateMetadataV2Refusal? freeFunctionUnit
+      (fun f => decide (f ≠ .freeFunctions)) = none := ⟨rfl,rfl,rfl⟩
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.free_function_composed_diagnostic' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms free_function_composed_diagnostic
+
+
+/-! Regression: raw pragma words remain single typed-site occurrences, including duplicate coder tags and malformed/unknown spellings. Frozen candidates stay unchanged; this is no well-formedness, selected-coder, profile or admission witness. -/
+def pragmaUnit : Syn .unit := .unit (.cons (.pragma ["solidity","not-a-version"])
+  (.cons (.pragma ["abicoder","v1"]) (.cons (.pragma ["experimental","ABIEncoderV2"])
+    (.cons (.pragma ["abicoder","v3"]) (.cons (.pragma []) .nil)))))
+
+theorem pragma_sites_and_frozen_gap :
+    syntaxPragmaUses pragmaUnit =
+      [(⟨.top,.pragma ["solidity","not-a-version"]⟩,.pragmaVersion),
+       (⟨.top,.pragma ["abicoder","v1"]⟩,.pragmaAbicoder),
+       (⟨.top,.pragma ["experimental","ABIEncoderV2"]⟩,.pragmaAbicoder),
+       (⟨.top,.pragma ["abicoder","v3"]⟩,.pragmaOther),
+       (⟨.top,.pragma []⟩,.pragmaOther)] ∧
+    sourceCandidateMetadataV2Refusal? pragmaUnit
+      (fun f => decide (f ≠ .pragmaAbicoder)) = none := ⟨rfl,rfl⟩
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.pragma_sites_and_frozen_gap' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms pragma_sites_and_frozen_gap
+
+
+/-! Regression: nested unused array types retain each typed site once in preorder, even with an unresolved written length. This is raw dimension presence, not constant evaluation, well-formedness, allocation or admission; frozen candidate silence remains explicit. -/
+def dynamicArrayType : Syn .typeName := .array (.elem .bool) .none
+def writtenArrayType : Syn .typeName := .array dynamicArrayType (.some (.ident "notConstant"))
+def arrayTypeUnit : Syn .unit := .unit (.cons (.contract false "C" .none .nil
+  (.cons (.stateVar writtenArrayType none none none false "unused" .none) .nil)) .nil)
+
+theorem array_type_sites_and_frozen_gap :
+    syntaxArrayTypeUses arrayTypeUnit =
+      [(⟨.typeName,writtenArrayType⟩,.fixedArrays),(⟨.typeName,dynamicArrayType⟩,.dynamicArrays)] ∧
+    sourceCandidateMetadataV2Refusal? arrayTypeUnit
+      (fun f => decide (f ≠ .fixedArrays)) = none := ⟨rfl,rfl⟩
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.array_type_sites_and_frozen_gap' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms array_type_sites_and_frozen_gap
+
+
+/-! Regression: function-type markers retain their actual unused-declaration sites and distinguish all four visibility spellings plus omission. An external function declaration is not a function type; omitted/invalid type visibility stays an extraction gap, not an admission or default-inference claim. -/
+def functionTypeNode (visibility : Option Visibility) : Syn .typeName :=
+  .fnType .nil visibility (some .view) .nil
+def externalFunctionNode : Syn (.part false) :=
+  .function (.ident "f") .nil (some .external) none .nil false none .nil (.some (.block .nil))
+def functionTypeUnit : Syn .unit := .unit (.cons (.contract false "C" .none .nil
+  (.cons (.stateVar (functionTypeNode (some .internal)) none none none false "i" .none)
+    (.cons (.stateVar (functionTypeNode (some .external)) none none none false "e" .none) .nil))) .nil)
+
+theorem explicit_function_type_sites_and_gaps :
+    syntaxExplicitFunctionTypeUses functionTypeUnit =
+      [(⟨.typeName,functionTypeNode (some .internal)⟩,.internalFunctionTypes),
+       (⟨.typeName,functionTypeNode (some .external)⟩,.externalFunctionTypes)] ∧
+    explicitFunctionTypeFeaturesAt (functionTypeNode none) = [] ∧
+    explicitFunctionTypeFeaturesAt (functionTypeNode (some .priv)) = [] ∧
+    explicitFunctionTypeFeaturesAt (functionTypeNode (some .pub)) = [] ∧
+    explicitFunctionTypeFeaturesAt externalFunctionNode = [] ∧
+    sourceCandidateMetadataV2Refusal? functionTypeUnit
+      (fun f => decide (f ≠ .externalFunctionTypes)) = none := ⟨rfl,rfl,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.explicit_function_type_sites_and_gaps' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms explicit_function_type_sites_and_gaps
+
+
+/-! Regression: grouping inside a tuple keeps both actual sites in preorder; empty and holed shapes must not silently become grouping. These raw controls prove no typing, scheduling, lexical uniqueness or admission, and retain frozen candidate omission. -/
+def groupedBool : Syn .expr := .tuple (.some (.lit (.bool true))) .nil
+def tuplePair : Syn .expr := .tuple (.some groupedBool) (.cons (.some (.lit (.bool false))) .nil)
+def tupleShapeUnit : Syn .unit := .unit (.cons (.topPart
+  (.function (.ident "unused") .nil none none .nil false none
+    (.cons (.param (.elem .bool) none none) (.cons (.param (.elem .bool) none none) .nil))
+    (.some (.block (.cons (.stmtItem (.returnStmt (.some tuplePair))) .nil))))) .nil)
+
+theorem tuple_group_sites_and_gaps :
+    syntaxTupleShapeUses tupleShapeUnit =
+      [(⟨.expr,tuplePair⟩,.tupleExpressions),(⟨.expr,groupedBool⟩,.parentheses)] ∧
+    tupleShapeFeaturesAt (.tuple .none .nil) = [.tupleExpressions] ∧
+    tupleShapeFeaturesAt (.tuple .none (.cons .none .nil)) = [.tupleExpressions] ∧
+    tupleShapeFeaturesAt (.tuple (.some (.lit (.bool true))) (.cons .none .nil)) = [.tupleExpressions] ∧
+    sourceCandidateMetadataV2Refusal? tupleShapeUnit
+      (fun f => decide (f ≠ .parentheses)) = none := ⟨rfl,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.tuple_group_sites_and_gaps' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms tuple_group_sites_and_gaps
+
+
+/-! Regression: classifier families preserve site-first order and duplicates, while opt-in composition exposes a marker absent from a frozen candidate. String probes are not policy features; the real tuple control asserts syntax diagnostics only, not canonical selection, typing or admission. -/
+def probeA {c : Cat} (s : Syn c) : List String := if s.ctor = .ident then ["A","A"] else []
+def probeB {c : Cat} (s : Syn c) : List String := if s.ctor = .ident then ["B"] else []
+def probeClassifiers : List (SyntaxFieldClassifier String) := [probeA,probeB,probeA]
+
+theorem classifier_family_order_duplicates_and_gap :
+    (syntaxFieldUses (pairTree "x" "y") (combineSyntaxFields probeClassifiers)).map Prod.snd =
+      ["A","A","B","A","A","A","A","B","A","A"] ∧
+    syntaxFieldRefusals (pairTree "x" "y") (combineSyntaxFields probeClassifiers)
+      (fun value => decide (value ≠ "B")) =
+      [(⟨.expr,.ident "x"⟩,"B"),(⟨.expr,.ident "y"⟩,"B")] ∧
+    syntaxFieldRefusal? tupleShapeUnit
+      (combineSyntaxFields [syntaxCandidateMetadataV2At,tupleShapeFeaturesAt])
+      (fun f => decide (f ≠ .parentheses)) = some (⟨.expr,groupedBool⟩,.parentheses) ∧
+    sourceCandidateMetadataV2Refusal? tupleShapeUnit
+      (fun f => decide (f ≠ .parentheses)) = none := ⟨rfl,rfl,rfl,rfl⟩
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.classifier_family_order_duplicates_and_gap' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms classifier_family_order_duplicates_and_gap
+
+/-! Regression: bytes/string metadata on mapping keys must not identify memory creation; explicit creation heads remain opt-in syntax evidence, including arrays with unresolved dimensions, not allocation/panic or admission witnesses. -/
+def memoryHeadArray : Syn .expr := .new (.array (.userType ⟨"Unknown",[]⟩) (.some (.ident "n")))
+def memoryHeadMapping : Syn .expr :=
+  .new (.mapping (.elem .string (by intro h; cases h)) none (.elem .bool) none)
+
+theorem memory_creation_heads_and_refusals :
+    memoryCreationHeadFeaturesAt memoryHeadArray = [.newMemory] ∧
+    memoryCreationHeadFeaturesAt (.new (.elem .bytes)) = [.newMemory] ∧
+    memoryCreationHeadFeaturesAt (.new (.elem .string)) = [.newMemory] ∧
+    memoryCreationHeadFeaturesAt (.new (.userType ⟨"Unknown",[]⟩)) = [] ∧
+    memoryCreationHeadFeaturesAt (.new (.elem .bool)) = [] ∧
+    memoryCreationHeadFeaturesAt memoryHeadMapping = [] ∧
+    syntaxFieldRefusal? memoryHeadArray memoryCreationHeadFeaturesAt
+      (fun f => decide (f ≠ .newMemory)) = some (⟨.expr,memoryHeadArray⟩,.newMemory) ∧
+    syntaxFieldRefusal? memoryHeadArray syntaxCandidateMetadataV2At
+      (fun f => decide (f ≠ .newMemory)) = none :=
+  ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.memory_creation_heads_and_refusals' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms memory_creation_heads_and_refusals
+
 end Solidity.Frontend.Admission.OccurrenceControls

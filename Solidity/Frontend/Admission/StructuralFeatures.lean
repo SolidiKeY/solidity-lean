@@ -1381,4 +1381,321 @@ theorem syntaxDeclarationQualifierRefusals_iff {c : Cat} (root : Syn c)
 /-- info: 'Solidity.Frontend.Admission.syntaxDeclarationQualifierRefusals_iff' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms syntaxDeclarationQualifierRefusals_iff
 
+
+/-! Regression: a top-level function needs its dedicated freeFunctions marker as well as generic function detection. Reuse the existing constructor projection and intrinsic declaration category; no indexed match, representation rewrite, typing or admission claim is introduced. -/
+inductive DirectFreeFunction : {c : Cat} → Syn c → Prop where
+  | function (name params vis mutability mods virtual bases returns body) :
+      DirectFreeFunction (.function (t := true) name params vis mutability mods virtual bases returns body)
+
+def freeFunctionFeaturesAt {c : Cat} (s : Syn c) : List Feature :=
+  if c = .part true ∧ s.ctor = .function then [.freeFunctions] else []
+
+theorem DirectFreeFunction.tags {c : Cat} {s : Syn c} (observed : DirectFreeFunction s) :
+    c = .part true ∧ s.ctor = .function := by
+  cases observed
+  exact ⟨rfl,rfl⟩
+
+theorem directFreeFunction_of_tags {c : Cat} (s : Syn c)
+    (kind : c = .part true) (tag : s.ctor = .function) : DirectFreeFunction s := by
+  cases s with
+  | @function t name params vis mutability mods virtual bases returns body =>
+    cases t with
+    | false => cases kind
+    | true => exact .function name params vis mutability mods virtual bases returns body
+  | _ => cases tag
+
+theorem freeFunctionFeaturesAt_iff {c : Cat} (s : Syn c) (f : Feature) :
+    f ∈ freeFunctionFeaturesAt s ↔ f = .freeFunctions ∧ DirectFreeFunction s := by
+  unfold freeFunctionFeaturesAt
+  by_cases labels : c = .part true ∧ s.ctor = .function
+  · rw [if_pos labels]
+    exact ⟨fun present => ⟨List.mem_singleton.mp present,
+      directFreeFunction_of_tags s labels.1 labels.2⟩,
+      fun observed => List.mem_singleton.mpr observed.1⟩
+  · rw [if_neg labels]
+    exact ⟨fun impossible => False.elim (List.not_mem_nil impossible),
+      fun observed => False.elim (labels observed.2.tags)⟩
+
+def syntaxFreeFunctionUses {c : Cat} (root : Syn c) : List (SyntaxOccurrence × Feature) :=
+  syntaxFieldUses root freeFunctionFeaturesAt
+
+theorem syntaxFreeFunctionUses_iff {c : Cat} (root : Syn c) (site : SyntaxOccurrence) (f : Feature) :
+    (site,f) ∈ syntaxFreeFunctionUses root ↔
+      Syn.Sub site ⟨c,root⟩ ∧ f = .freeFunctions ∧ DirectFreeFunction site.2 := by
+  rw [syntaxFreeFunctionUses, syntaxFieldUses_iff, freeFunctionFeaturesAt_iff]
+
+/-- info: 'Solidity.Frontend.Admission.freeFunctionFeaturesAt_iff' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms freeFunctionFeaturesAt_iff
+/-- info: 'Solidity.Frontend.Admission.syntaxFreeFunctionUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxFreeFunctionUses_iff
+
+
+/-! Regression: unit-level pragma traversal must not duplicate markers at ancestor sites or erase raw words with the resolution environment. Reuse the existing intrinsic eliminator and generic visitor; tags assert neither lexical/version validity, coder selection, profile activation nor admission. -/
+inductive DirectPragma : {c : Cat} → Syn c → List String → Prop where
+  | pragma (words : List String) : DirectPragma (.pragma words) words
+
+def pragmaWordsAt {c : Cat} (s : Syn c) : List (List String) := by
+  apply Syn.casesOn (motive := fun _ _ => List (List String)) s
+  case pragma => intro words; exact [words]
+  all_goals (intros; exact [])
+
+def pragmaFeature : List String → Feature
+  | "solidity" :: _ => .pragmaVersion
+  | ["abicoder", "v1"] | ["abicoder", "v2"] | ["experimental", "ABIEncoderV2"] => .pragmaAbicoder
+  | _ => .pragmaOther
+
+theorem pragmaWordsAt_iff {c : Cat} (s : Syn c) (words : List String) :
+    words ∈ pragmaWordsAt s ↔ DirectPragma s words := by
+  cases s with
+  | pragma actual =>
+    simp only [pragmaWordsAt, List.mem_singleton]
+    constructor
+    · intro same; cases same; exact .pragma _
+    · intro direct; cases direct; rfl
+  | _ =>
+    simp only [pragmaWordsAt, List.not_mem_nil]
+    constructor <;> intro impossible <;> cases impossible
+
+def syntaxPragmaUses {c : Cat} (root : Syn c) : List (SyntaxOccurrence × Feature) :=
+  syntaxFieldUses root (fun s => (pragmaWordsAt s).map pragmaFeature)
+
+theorem syntaxPragmaUses_iff {c : Cat} (root : Syn c) (site : SyntaxOccurrence) (f : Feature) :
+    (site,f) ∈ syntaxPragmaUses root ↔
+      Syn.Sub site ⟨c,root⟩ ∧ ∃ words, DirectPragma site.2 words ∧ pragmaFeature words = f := by
+  rw [syntaxPragmaUses, syntaxFieldUses_iff]
+  constructor
+  · rintro ⟨subterm,present⟩
+    obtain ⟨words,present,same⟩ := List.mem_map.mp present
+    exact ⟨subterm,words,(pragmaWordsAt_iff _ _).mp present,same⟩
+  · rintro ⟨subterm,words,direct,same⟩
+    exact ⟨subterm,List.mem_map.mpr ⟨words,(pragmaWordsAt_iff _ _).mpr direct,same⟩⟩
+
+/-- info: 'Solidity.Frontend.Admission.pragmaWordsAt_iff' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms pragmaWordsAt_iff
+/-- info: 'Solidity.Frontend.Admission.syntaxPragmaUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxPragmaUses_iff
+
+
+/-! Regression: written array dimensions and nested unused types must survive extraction without inferring constant/positive bounds or validity. Reuse the intrinsic eliminator, constructor tag and generic visitor; old candidates and Source remain unchanged, with no profile/admission claim. -/
+inductive DirectArrayType : {c : Cat} → Syn c → Feature → Prop where
+  | dynamic (element : Syn .typeName) : DirectArrayType (.array element .none) .dynamicArrays
+  | fixed (element : Syn .typeName) (length : Syn .expr) :
+      DirectArrayType (.array element (.some length)) .fixedArrays
+
+def arrayTypeFeaturesAt {c : Cat} (s : Syn c) : List Feature := by
+  apply Syn.casesOn (motive := fun _ _ => List Feature) s
+  case array =>
+    intro element dimension
+    exact [if dimension.ctor = .none then .dynamicArrays else .fixedArrays]
+  all_goals (intros; exact [])
+
+theorem arrayTypeFeaturesAt_iff {c : Cat} (s : Syn c) (f : Feature) :
+    f ∈ arrayTypeFeaturesAt s ↔ DirectArrayType s f := by
+  cases s with
+  | array element dimension =>
+    cases dimension with
+    | none =>
+      simp only [arrayTypeFeaturesAt, Syn.ctor, if_true, List.mem_singleton]
+      constructor
+      · intro same; cases same; exact .dynamic _
+      · intro direct; cases direct; rfl
+    | some length =>
+      simp only [arrayTypeFeaturesAt, Syn.ctor, reduceCtorEq, if_false, List.mem_singleton]
+      constructor
+      · intro same; cases same; exact .fixed _ _
+      · intro direct; cases direct; rfl
+  | _ =>
+    simp only [arrayTypeFeaturesAt, List.not_mem_nil]
+    constructor <;> intro impossible <;> cases impossible
+
+def syntaxArrayTypeUses {c : Cat} (root : Syn c) : List (SyntaxOccurrence × Feature) :=
+  syntaxFieldUses root arrayTypeFeaturesAt
+
+theorem syntaxArrayTypeUses_iff {c : Cat} (root : Syn c) (site : SyntaxOccurrence) (f : Feature) :
+    (site,f) ∈ syntaxArrayTypeUses root ↔
+      Syn.Sub site ⟨c,root⟩ ∧ DirectArrayType site.2 f := by
+  rw [syntaxArrayTypeUses, syntaxFieldUses_iff, arrayTypeFeaturesAt_iff]
+
+/-- info: 'Solidity.Frontend.Admission.arrayTypeFeaturesAt_iff' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms arrayTypeFeaturesAt_iff
+/-- info: 'Solidity.Frontend.Admission.syntaxArrayTypeUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxArrayTypeUses_iff
+
+
+/-! Regression: a visibility field on a function declaration must not become a function-type marker. Reuse the existing direct visibility projection and constructor tag; only written internal/external type visibility is classified, without inferring omitted defaults, validating signatures or changing policy/admission. -/
+inductive DirectExplicitFunctionType : {c : Cat} → Syn c → Feature → Prop where
+  | internal (params mutability returns) :
+      DirectExplicitFunctionType (.fnType params (some .internal) mutability returns) .internalFunctionTypes
+  | external (params mutability returns) :
+      DirectExplicitFunctionType (.fnType params (some .external) mutability returns) .externalFunctionTypes
+
+def functionTypeVisibilityFeature? : Visibility → Option Feature
+  | .internal => some .internalFunctionTypes
+  | .external => some .externalFunctionTypes
+  | .priv | .pub => none
+
+def explicitFunctionTypeFeaturesAt {c : Cat} (s : Syn c) : List Feature :=
+  if s.ctor = .fnType then (visibilityFieldsAt s).filterMap functionTypeVisibilityFeature? else []
+
+theorem explicitFunctionTypeFeaturesAt_iff {c : Cat} (s : Syn c) (f : Feature) :
+    f ∈ explicitFunctionTypeFeaturesAt s ↔ DirectExplicitFunctionType s f := by
+  cases s with
+  | fnType params visibility mutability returns =>
+    cases visibility with
+    | none =>
+      change f ∈ ([] : List Feature) ↔ _
+      constructor <;> intro impossible <;> cases impossible
+    | some value =>
+      cases value with
+      | internal =>
+        change f ∈ [Feature.internalFunctionTypes] ↔ _
+        constructor
+        · intro same; cases List.mem_singleton.mp same; exact .internal _ _ _
+        · intro direct; cases direct; exact List.mem_singleton.mpr rfl
+      | external =>
+        change f ∈ [Feature.externalFunctionTypes] ↔ _
+        constructor
+        · intro same; cases List.mem_singleton.mp same; exact .external _ _ _
+        · intro direct; cases direct; exact List.mem_singleton.mpr rfl
+      | priv =>
+        change f ∈ ([] : List Feature) ↔ _
+        constructor <;> intro impossible <;> cases impossible
+      | pub =>
+        change f ∈ ([] : List Feature) ↔ _
+        constructor <;> intro impossible <;> cases impossible
+  | _ =>
+    simp only [explicitFunctionTypeFeaturesAt, Syn.ctor, reduceCtorEq, if_false, List.not_mem_nil]
+    constructor <;> intro impossible <;> cases impossible
+
+def syntaxExplicitFunctionTypeUses {c : Cat} (root : Syn c) : List (SyntaxOccurrence × Feature) :=
+  syntaxFieldUses root explicitFunctionTypeFeaturesAt
+
+theorem syntaxExplicitFunctionTypeUses_iff {c : Cat} (root : Syn c)
+    (site : SyntaxOccurrence) (f : Feature) :
+    (site,f) ∈ syntaxExplicitFunctionTypeUses root ↔
+      Syn.Sub site ⟨c,root⟩ ∧ DirectExplicitFunctionType site.2 f := by
+  rw [syntaxExplicitFunctionTypeUses, syntaxFieldUses_iff, explicitFunctionTypeFeaturesAt_iff]
+
+/-- info: 'Solidity.Frontend.Admission.explicitFunctionTypeFeaturesAt_iff' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms explicitFunctionTypeFeaturesAt_iff
+/-- info: 'Solidity.Frontend.Admission.syntaxExplicitFunctionTypeUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxExplicitFunctionTypeUses_iff
+
+
+/-! Regression: grouping and tuple slots share a constructor but must not share a marker. Reuse intrinsic tags/elimination and the generic visitor; raw empty/holed forms retain syntax evidence, not typing, tuple-value, capture/evaluation-order, profile or admission guarantees. -/
+inductive DirectTupleShape : {c : Cat} → Syn c → Feature → Prop where
+  | group (value : Syn .expr) : DirectTupleShape (.tuple (.some value) .nil) .parentheses
+  | empty : DirectTupleShape (.tuple .none .nil) .tupleExpressions
+  | multiple (first next : Syn (.opt .expr)) (rest : Syn (.list (.opt .expr))) :
+      DirectTupleShape (.tuple first (.cons next rest)) .tupleExpressions
+
+def tupleShapeFeature (first : Syn (.opt .expr)) (rest : Syn (.list (.opt .expr))) : Feature :=
+  if rest.ctor = .nil ∧ first.ctor = .some then .parentheses else .tupleExpressions
+
+def tupleShapeFeaturesAt {c : Cat} (s : Syn c) : List Feature := by
+  apply Syn.casesOn (motive := fun _ _ => List Feature) s
+  case tuple => intro first rest; exact [tupleShapeFeature first rest]
+  all_goals (intros; exact [])
+
+theorem tupleShapeFeaturesAt_iff {c : Cat} (s : Syn c) (f : Feature) :
+    f ∈ tupleShapeFeaturesAt s ↔ DirectTupleShape s f := by
+  cases s with
+  | tuple first rest =>
+    cases rest with
+    | nil =>
+      cases first with
+      | none =>
+        change f ∈ [Feature.tupleExpressions] ↔ _
+        constructor
+        · intro same; cases List.mem_singleton.mp same; exact .empty
+        · intro direct; cases direct; exact List.mem_singleton.mpr rfl
+      | some value =>
+        change f ∈ [Feature.parentheses] ↔ _
+        constructor
+        · intro same; cases List.mem_singleton.mp same; exact .group _
+        · intro direct; cases direct; exact List.mem_singleton.mpr rfl
+    | cons next tail =>
+      change f ∈ [Feature.tupleExpressions] ↔ _
+      constructor
+      · intro same; cases List.mem_singleton.mp same; exact .multiple _ _ _
+      · intro direct; cases direct; exact List.mem_singleton.mpr rfl
+  | _ =>
+    simp only [tupleShapeFeaturesAt, List.not_mem_nil]
+    constructor <;> intro impossible <;> cases impossible
+
+def syntaxTupleShapeUses {c : Cat} (root : Syn c) : List (SyntaxOccurrence × Feature) :=
+  syntaxFieldUses root tupleShapeFeaturesAt
+
+theorem syntaxTupleShapeUses_iff {c : Cat} (root : Syn c) (site : SyntaxOccurrence) (f : Feature) :
+    (site,f) ∈ syntaxTupleShapeUses root ↔
+      Syn.Sub site ⟨c,root⟩ ∧ DirectTupleShape site.2 f := by
+  rw [syntaxTupleShapeUses, syntaxFieldUses_iff, tupleShapeFeaturesAt_iff]
+
+/-- info: 'Solidity.Frontend.Admission.tupleShapeFeaturesAt_iff' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms tupleShapeFeaturesAt_iff
+/-- info: 'Solidity.Frontend.Admission.syntaxTupleShapeUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxTupleShapeUses_iff
+
+
+/-! Regression: only explicit array/bytes/string creation targets identify memory syntax; unresolved names and elementary metadata on other constructors must not masquerade as memory creation. This is head syntax, not allocation, typing, panic, profile or admission evidence. -/
+inductive DirectMemoryCreationHead : {c : Cat} → Syn c → Prop where
+  | array (element : Syn .typeName) (dimension : Syn (.opt .expr)) :
+      DirectMemoryCreationHead (.new (.array element dimension))
+  | bytes : DirectMemoryCreationHead (.new (.elem .bytes))
+  | string : DirectMemoryCreationHead (.new (.elem .string))
+
+def memoryCreationTarget (target : Syn .typeName) : Bool := by
+  apply Syn.casesOn (motive := fun _ _ => Bool) target
+  case array => intros; exact true
+  case elem => intro e; exact e == .bytes || e == .string
+  all_goals (intros; exact false)
+
+def memoryCreationHeadFeaturesAt {c : Cat} (s : Syn c) : List Feature := by
+  apply Syn.casesOn (motive := fun _ _ => List Feature) s
+  case new => intro target; exact if memoryCreationTarget target then [.newMemory] else []
+  all_goals (intros; exact [])
+
+theorem memoryCreationHeadFeaturesAt_iff {c : Cat} (s : Syn c) (f : Feature) :
+    f ∈ memoryCreationHeadFeaturesAt s ↔ DirectMemoryCreationHead s ∧ f = .newMemory := by
+  cases s with
+  | new target =>
+    cases target with
+    | array element dimension =>
+      change f ∈ [Feature.newMemory] ↔ _
+      exact ⟨fun h => ⟨.array _ _,List.mem_singleton.mp h⟩,
+        fun h => List.mem_singleton.mpr h.2⟩
+    | elem e =>
+      cases e
+      all_goals first
+        | (change f ∈ [Feature.newMemory] ↔ _
+           constructor
+           · intro h; exact ⟨.bytes,List.mem_singleton.mp h⟩
+           · intro h; exact List.mem_singleton.mpr h.2)
+        | (change f ∈ [Feature.newMemory] ↔ _
+           constructor
+           · intro h; exact ⟨.string,List.mem_singleton.mp h⟩
+           · intro h; exact List.mem_singleton.mpr h.2)
+        | (change f ∈ ([] : List Feature) ↔ _
+           constructor
+           · intro h; cases h
+           · intro h; cases h.1)
+    | _ =>
+      simp only [memoryCreationHeadFeaturesAt, memoryCreationTarget, Bool.false_eq_true,
+        ↓reduceIte, List.not_mem_nil, false_iff]
+      intro h; cases h.1
+  | _ =>
+    simp only [memoryCreationHeadFeaturesAt, List.not_mem_nil, false_iff]
+    intro h; cases h.1
+
+theorem syntaxMemoryCreationHeadUses_iff {c : Cat} (root : Syn c)
+    (site : SyntaxOccurrence) (f : Feature) :
+    (site,f) ∈ syntaxFieldUses root memoryCreationHeadFeaturesAt ↔
+      Syn.Sub site ⟨c,root⟩ ∧ DirectMemoryCreationHead site.2 ∧ f = .newMemory := by
+  rw [syntaxFieldUses_iff, memoryCreationHeadFeaturesAt_iff]
+
+/-- info: 'Solidity.Frontend.Admission.memoryCreationHeadFeaturesAt_iff' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms memoryCreationHeadFeaturesAt_iff
+/-- info: 'Solidity.Frontend.Admission.syntaxMemoryCreationHeadUses_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxMemoryCreationHeadUses_iff
+
 end Solidity.Frontend.Admission

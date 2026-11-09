@@ -1,0 +1,6 @@
+context,group,source_constants,without_native_source_range,native_range_lines
+SolidityLean,SolidityLean.lean,6,4,27
+SolkeyCheck,Solidity/AST.lean,33,4,19
+SolkeyCheck,Solidity/KeySort.lean,66,43,69
+SolkeyCheck,Solidity/SortCheck,157,69,480
+SolkeyCheck,SolkeyCheck.lean,13,4,70

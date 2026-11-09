@@ -1,0 +1,59 @@
+/-! Guards inconsistent whole/branch compilation witnesses and dropping the
+matched branch's trailing skip over the miss branch. Reuse the existing typed
+bodies and represented input. The interface's exact join remains in the outcome;
+Source association, native loading, physical and gas adequacy remain separate. -/
+def selectorLeft := SelectorBranches.selectedBranch 0 (Frag.init dispatchCtx)
+  dispatchHit.program dispatchHit.outFrag dispatchHit.admitted
+def selectorRight := SelectorBranches.selectedBranch 0 (Frag.init dispatchCtx)
+  dispatchFallback.program dispatchFallback.outFrag dispatchFallback.admitted
+def selectorWhole (tag : Fin W) := SelectorBranches.selectedWhole 0 (Frag.init dispatchCtx) .here tag
+  dispatchHit.program dispatchFallback.program dispatchHit.outFrag dispatchFallback.outFrag
+  dispatchHit.admitted dispatchFallback.admitted
+
+theorem selector_left_found : Compiler.compile 0 (Frag.init dispatchCtx) dispatchHit.program=some selectorLeft :=
+  SelectorBranches.branch_selected 0 (Frag.init dispatchCtx) dispatchHit.program dispatchHit.outFrag dispatchHit.admitted
+
+theorem selector_right_found : Compiler.compile 0 (Frag.init dispatchCtx) dispatchFallback.program=some selectorRight :=
+  SelectorBranches.branch_selected 0 (Frag.init dispatchCtx) dispatchFallback.program dispatchFallback.outFrag dispatchFallback.admitted
+
+theorem selector_whole_found (tag : Fin W) : Compiler.compile 0 (Frag.init dispatchCtx)
+    (SelectorBranches.program (.here : Idx dispatchCtx (.val .uint)) tag dispatchHit.program dispatchFallback.program)=some (selectorWhole tag) :=
+  SelectorBranches.whole_selected 0 (Frag.init dispatchCtx) .here tag dispatchHit.program dispatchFallback.program
+    dispatchHit.outFrag dispatchFallback.outFrag dispatchHit.admitted dispatchFallback.admitted
+
+theorem selector_branch_outcome (tag : Fin W) : run (selectorWhole tag).code dispatchMachine=
+    if tag.val=(wmod 5).val then run (selectorLeft.code++[.jump selectorRight.code.length]++selectorRight.code) dispatchMachine
+    else run selectorRight.code dispatchMachine :=
+  SelectorBranches.executed 0 (Frag.init dispatchCtx) .here tag dispatchHit.program dispatchFallback.program
+    dispatchHit.outFrag dispatchFallback.outFrag dispatchHit.admitted dispatchFallback.admitted
+    (selectorWhole tag) selectorLeft selectorRight (selector_whole_found tag) selector_left_found selector_right_found
+    dispatchMachine (wmod 5) rfl
+
+theorem selector_hit_returns_left : run (selectorWhole (wmod 5)).code dispatchMachine=.ok dispatchHitOut 0 := by
+  rw [selector_branch_outcome,if_pos (rfl : (wmod 5).val=(wmod 5).val)]
+  rw [CoreJoin.joined 1 0 (Frag.init dispatchCtx) dispatchHit.program dispatchHit.outFrag dispatchHit.admitted
+    selectorLeft selector_left_found dispatchState dispatchMachine dispatch_represented (by decide) selectorRight.code]
+  rfl
+
+theorem selector_miss_returns_right : run (selectorWhole (wmod 6)).code dispatchMachine=.ok dispatchFallbackOut 0 := by
+  rw [selector_branch_outcome,if_neg (by decide : (wmod 6).val≠(wmod 5).val)]
+  rfl
+
+theorem selector_missing_join_overwrites :
+    (match run (selectorLeft.code++selectorRight.code) dispatchMachine with
+      | .ok final _ => final.mem 0
+      | _ => .val (wmod 0))=.val (wmod 77) := rfl
+
+theorem selector_revert_all_refused : run (selectorWhole (wmod 5)).code dispatchMachine≠.revert := by
+  rw [selector_hit_returns_left]
+  intro impossible
+  cases impossible
+
+#print axioms selector_left_found
+#print axioms selector_right_found
+#print axioms selector_whole_found
+#print axioms selector_branch_outcome
+#print axioms selector_hit_returns_left
+#print axioms selector_miss_returns_right
+#print axioms selector_missing_join_overwrites
+#print axioms selector_revert_all_refused

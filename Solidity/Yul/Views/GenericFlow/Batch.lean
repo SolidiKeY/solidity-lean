@@ -84,4 +84,29 @@ theorem late_unsupported
   rw [nonstatic p ((q,v)::rest) static]
   exact unsupported F interface layout fixed check q v rest p.step.1.2 p.step.2 missing
 
+/-- Actual defining equations determine a typed finite preparation runner.
+The hypotheses are computation equations, not desired preservation laws. -/
+theorem eq_run_of_equations (F : Source.Fr)
+    (interface : Generic.OwnershipInterface E Γ F) (layout : interface.Layout)
+    (fixed : Roadmap.Evm.Fixed)
+    (check : List (ScalarPath E.layout (E.lay F.this)) → Bool)
+    (candidate : List (Roadmap.Word × Roadmap.Word) → Source.EMState E Γ →
+      ResidualJournal complementCarrierOwnership →
+      (Option (Except Source.Halt Unit) × Source.EMState E Γ × ResidualJournal complementCarrierOwnership))
+    (empty : ∀ s r, candidate [] s r = (some (.ok ()),s,r))
+    (stepEq : ∀ q v rest s r, candidate ((q,v)::rest) s r =
+      match Generic.prepareOwnership? F interface layout fixed q v s r check with
+      | none => (none,s,r)
+      | some p => match p.step.1.1 with
+        | .error e => (some (.error e),p.step.1.2,p.step.2)
+        | .ok () => candidate rest p.step.1.2 p.step.2)
+    (requests) (s : Source.EMState E Γ) (r) :
+    candidate requests s r = run? F interface layout fixed check requests s r := by
+  induction requests generalizing s r with
+  | nil => rw [empty,run?]
+  | cons request rest ih =>
+    obtain ⟨q,v⟩ := request
+    rw [stepEq,run?.eq_2]
+    split <;> grind
+
 end Solidity.Yul.Views.GenericFlow.Batch

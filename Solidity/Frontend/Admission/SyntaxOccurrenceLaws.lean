@@ -1396,4 +1396,52 @@ theorem syntaxFieldRefusals_map {α β : Type u} {c : Cat} (root : Syn c)
 /-- info: 'Solidity.Frontend.Admission.syntaxFieldRefusals_map' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms syntaxFieldRefusals_map
 
+
+/-! Regression: composing classifiers must concatenate their values per actual site, retain repeated classifiers, and test every supplied classifier after silence. This is caller-selected composition only, not classifier completeness, a canonical profile or admission. -/
+abbrev SyntaxFieldClassifier (α : Type u) := ∀ {c : Cat}, Syn c → List α
+
+def combineSyntaxFields {α : Type u} (classifiers : List (SyntaxFieldClassifier α))
+    {c : Cat} (site : Syn c) : List α := classifiers.flatMap (fun fields => fields site)
+
+theorem combineSyntaxFields_mem {α : Type u} (classifiers : List (SyntaxFieldClassifier α))
+    {c : Cat} (site : Syn c) (value : α) :
+    value ∈ combineSyntaxFields classifiers site ↔
+      ∃ fields ∈ classifiers, value ∈ fields site := by
+  simp only [combineSyntaxFields, List.mem_flatMap]
+
+theorem syntaxFieldUses_combine_iff {α : Type u} {c : Cat} (root : Syn c)
+    (classifiers : List (SyntaxFieldClassifier α)) (site : SyntaxOccurrence) (value : α) :
+    (site,value) ∈ syntaxFieldUses root (combineSyntaxFields classifiers) ↔
+      Syn.Sub site ⟨c,root⟩ ∧ ∃ fields ∈ classifiers, value ∈ fields site.2 := by
+  rw [syntaxFieldUses_iff, combineSyntaxFields_mem]
+
+theorem syntaxFieldRefusal?_combine_none_iff {α : Type u} {c : Cat} (root : Syn c)
+    (classifiers : List (SyntaxFieldClassifier α)) (accepts : α → Bool) :
+    syntaxFieldRefusal? root (combineSyntaxFields classifiers) accepts = none ↔
+      ∀ fields ∈ classifiers, syntaxFieldRefusal? root fields accepts = none := by
+  induction classifiers with
+  | nil =>
+    constructor
+    · intro _ fields absent; cases absent
+    · intro _; exact emptySyntaxClassifier_none root accepts
+  | cons head tail ih =>
+    change syntaxFieldRefusal? root
+      (fun site => head site ++ combineSyntaxFields tail site) accepts = none ↔ _
+    rw [syntaxFieldRefusal?_append_none_iff, ih]
+    constructor
+    · rintro ⟨first,rest⟩ fields member
+      rcases List.mem_cons.mp member with same | later
+      · cases same; exact first
+      · exact rest fields later
+    · intro all
+      exact ⟨all head List.mem_cons_self,
+        fun fields present => all fields (List.mem_cons_of_mem _ present)⟩
+
+/-- info: 'Solidity.Frontend.Admission.combineSyntaxFields_mem' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms combineSyntaxFields_mem
+/-- info: 'Solidity.Frontend.Admission.syntaxFieldUses_combine_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxFieldUses_combine_iff
+/-- info: 'Solidity.Frontend.Admission.syntaxFieldRefusal?_combine_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxFieldRefusal?_combine_none_iff
+
 end Solidity.Frontend.Admission
