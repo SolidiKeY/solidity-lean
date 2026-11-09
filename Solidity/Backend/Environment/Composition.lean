@@ -173,7 +173,7 @@ def consCertificate {C : Contract} {Γ : Ctx} {σ : State C Γ} {e : Val C Γ .u
   { values := head.value :: rest.values
     memoryOut := rest.memoryOut
     source := by
-      simp only [evalValues, head.source, rest.source, Except.bind, Except.instMonad, Except.pure]
+      simp only [evalValues, head.source, rest.source, bind, Except.bind, pure, Except.pure]
     target := fun tail => by
       rw [runSlice_append, head.target]
       change runSlice f b ⟨head.value :: tail, head.memoryOut⟩ = _
