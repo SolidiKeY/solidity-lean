@@ -28,7 +28,7 @@ def bodyMachine (word size : Fin W) : Machine :=
 theorem body_nil_outcome (word size : Fin W) :
     run bodyWhole.code (bodyMachine word size)=
       if size.val<36 then .revert else
-        if Solidity.AbiEntry.(Kind.uint 8).valid word.val then
+        if (Solidity.AbiEntry.Kind.uint 8).valid word.val then
           .ok (uintBoundMachine 7 bodyLabel word (bodyMachine word size)) 0 else .revert := by
   rw [UIntBindingBody.executed 7 8 bodyLabel bodyNil (Frag.init UIntBoundCtx) rfl
     bodyWhole bodyBack bodyWholeFound bodyBackFound (bodyMachine word size) word size rfl rfl]
