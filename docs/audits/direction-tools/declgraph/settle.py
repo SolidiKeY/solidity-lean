@@ -46,7 +46,7 @@ def measure(source_root,graph,view,historical):
    elif pos:
     r['external_source_edges']+=1
     witness=dict(from_symbol=a[1],source_module=a[0],to_symbol=b[1],target_module=b[0],source_path=pos[0],source_owner_definition_line=pos[1])
-    if 'witness' not in r or a<(r['witness']['source_module'],r['witness']['from_symbol']):r['witness']=witness
+    if 'witness' not in r or (a[0],a[1],b[0],b[1])<(r['witness']['source_module'],r['witness']['from_symbol'],r['witness']['target_module'],r['witness']['to_symbol']):r['witness']=witness
    else:r['unattributed_incoming_edges']+=1
  totals=collections.defaultdict(collections.Counter);provenance=collections.defaultdict(collections.Counter)
  for r in candidates:
