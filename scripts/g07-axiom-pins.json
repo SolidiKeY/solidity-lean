@@ -8336,6 +8336,41 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/Aggregates/G18ArrayAccessControls.lean:Solidity.Backend.Aggregates.SourceArray.Controls.Mapped.array_typed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18ArrayAccessControls.lean:Solidity.Backend.Aggregates.SourceArray.Controls.Mapped.element_typed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18ArrayAccessControls.lean:Solidity.Backend.Aggregates.SourceArray.Controls.Mapped.key_index_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18ArrayAccessControls.lean:Solidity.Backend.Aggregates.SourceArray.Controls.Mapped.mapping_array_type": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18ArrayAccessControls.lean:Solidity.Backend.Aggregates.SourceArray.Controls.Mapped.ordered_state_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18ArrayAccessControls.lean:Solidity.Backend.Aggregates.SourceArray.Controls.Mapped.read_one": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18ArrayAccessControls.lean:Solidity.Backend.Aggregates.SourceArray.Controls.Mapped.selected_and_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/Aggregates/G18ArrayAccessControls.lean:Solidity.Backend.Aggregates.SourceArray.Controls.ordered": [
   "Classical.choice",
   "Quot.sound",
