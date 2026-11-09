@@ -344,17 +344,7 @@ def comment_lines(source):
 
 PROCESS_ID = re.compile(r"\b[GH][0-9]+\b")
 _MODULE_NAME = r"[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)+"
-_COMMAND_NAME = re.compile(_MODULE_NAME)
 _IMPORT = re.compile(r"import[ \t]+(" + _MODULE_NAME + r")[ \t]*")
-_SCOPE = re.compile(r"(namespace|section|end)(?:[ \t]+([^\s]+))?[ \t]*")
-# Unknown command extensions may consume the next apparent command.
-_STANDARD_COMMAND = re.compile(
-    r"(?:@\[[^]]*\][ \t]*)*(?:(?:private|protected|noncomputable|unsafe|partial|public|meta|nonrec)[ \t]+)*"
-    r"(?:def|theorem|abbrev|opaque|axiom|example|instance|structure|class|inductive|"
-    r"universe|universes|variable|variables|open|export|attribute|set_option|"
-    r"initialize|builtin_initialize|syntax|macro|macro_rules|elab|elab_rules|"
-    r"infix|infixl|infixr|prefix|postfix|notation|deriving|termination_by|decreasing_by)\b"
-    r"|#(?:check|eval|print|reduce|synth)\b|@\[[^]]*\][ \t]*$")
 _REGISTRY_ROOTS = ("Solidity.lean", "SolidityExamples.lean", "SoliditySlowExamples.lean",
                    "Bridge/SolidityBridge.lean")
 
@@ -426,90 +416,42 @@ def _command_mask(scanner):
     return "".join(pieces)
 
 
-def module_prefixes(modules):
-    return {name[:m.start()] for name in modules for m in re.finditer(r"\.", name)} | modules
+def process_ids(source, modules, scanner=None):
+    """H290 partial checkpoint: only certain module-header import tokens.
 
-
-def process_ids(source, modules, scanner=None, prefixes=None):
-    """H290: subtract only certain registered command-name G components."""
+    Namespace/end classification awaits authoritative imported command context;
+    even an empty textual pair can be a redefined command production.
+    """
     matches = list(PROCESS_ID.finditer(source))
     if not matches or not modules:
         return len(matches)
     scanner = scanner or _Scanner(source)
-    # Also discovers interpolated strings for conservative lexical masking.
     if not getattr(scanner, "scanned", False):
         scanner.code()
     masked = _command_mask(scanner)
     if masked is None or scanner.unclosed:
         return len(matches)
-    prefixes = module_prefixes(modules) if prefixes is None else prefixes
-    exempt, paired, stack, groups = set(), set(), [], []
-    header, offset, uncertain = True, 0, False
+    exempt, offset = set(), 0
     saw_import, saw_prelude = False, False
-
-    def components(name, start):
-        return {start + m.start() for m in PROCESS_ID.finditer(name) if m[0].startswith("G")}
-
     for line in masked.splitlines(keepends=True):
         text = line.rstrip("\r\n")
-        stripped = text.lstrip()
-        if not groups and stripped:
-            if text[0].isspace():
-                header = False
-            if (re.match(r"in(?:\s|$)", stripped)
-                    or stripped.startswith(("#guard_msgs", "#with_exporting"))
-                    or re.search(r"(?:^|\s)in[ \t]*$", stripped)
-                    or (not stripped.startswith("section") and re.match(
-                        r"(?:@\[[^]]*\][ \t]+)?(?:(?:public|noncomputable)[ \t]+)*section\b", stripped))):
-                uncertain = True
-        # Only standalone, unindented commands outside lexical groups qualify.
-        if not groups and text and not text[0].isspace():
+        if text.strip():
             imported = _IMPORT.fullmatch(text)
-            scope = _SCOPE.fullmatch(text)
-            if imported and header and not stack:
+            if imported:
                 saw_import = True
                 if imported[1] in modules:
-                    exempt.update(components(imported[1], offset + imported.start(1)))
-            elif text.strip() == "prelude" and header:
-                uncertain |= saw_import or saw_prelude
+                    exempt.update(offset + imported.start(1) + m.start()
+                                  for m in PROCESS_ID.finditer(imported[1])
+                                  if m[0].startswith("G"))
+            elif text == "prelude":
+                if saw_import or saw_prelude:
+                    return len(matches)
                 saw_prelude = True
             else:
-                header = False
-                if scope:
-                    command, name = scope.groups()
-                    if command == "end":
-                        if not stack:
-                            uncertain = True
-                        else:
-                            kind, opening, positions, eligible = stack.pop()
-                            if name != opening:
-                                # Anonymous/mismatched ends never exempt a pair.
-                                uncertain = True
-                            elif eligible:
-                                paired.update(positions)
-                                paired.update(components(name, offset + scope.start(2)))
-                    else:
-                        if command == "namespace" and name is None:
-                            uncertain = True
-                        eligible = (command == "namespace" and not stack and name in prefixes
-                                    and _COMMAND_NAME.fullmatch(name or "") is not None)
-                        positions = components(name, offset + scope.start(2)) if name else set()
-                        stack.append((command, name, positions, eligible))
-                elif not _STANDARD_COMMAND.match(text):
-                    # Includes unknown wrappers and unsupported scope syntax.
-                    uncertain = True
-        elif text.strip() and not groups and re.match(r"\s+(?:namespace|section|end|mutual)\b", text):
-            uncertain = True
-        for char in text:
-            if char in _GROUPS:
-                groups.append(_GROUPS[char])
-            elif char in _GROUPS.values():
-                if not groups or groups.pop() != char:
-                    uncertain = True
+                break
         offset += len(line)
-    if uncertain or groups or stack:
-        return len(matches)
-    return len(matches) - len(exempt | paired)
+    # Imported command syntax cannot consume an already parsed module header.
+    return len(matches) - len(exempt)
 
 
 def counts(root):
@@ -518,7 +460,6 @@ def counts(root):
             raise ValueError(f"missing source directory: {root / tree}")
     result = {}
     modules = registered_modules(root)
-    prefixes = module_prefixes(modules)
     for tree in ("docs", "Solidity"):
         for path in sorted((root / tree).rglob("*")):
             if not path.is_file() or (tree == "Solidity" and path.suffix != ".lean"):
@@ -535,7 +476,7 @@ def counts(root):
                 scanner.scanned = True
                 row["comment_lines"] += len(scanner.comments)
                 row["docstring_lines"] += len(scanner.docs)
-                row["process_ids"] += process_ids(source, modules, scanner, prefixes)
+                row["process_ids"] += process_ids(source, modules, scanner)
     return result
 
 

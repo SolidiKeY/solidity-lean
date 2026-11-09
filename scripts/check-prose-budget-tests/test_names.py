@@ -42,14 +42,13 @@ class RegisteredNamesTests(unittest.TestCase):
             with self.subTest(source=source):
                 self.retained(source)
 
-    def test_complete_namespace_pairs(self):
+    def test_namespace_pairs_remain_pending(self):
         for name in ['Solidity.Lowering.G17', 'Solidity.Lowering.G17.Real',
                      'Solidity.G17.G18', 'Solidity.H290.G17']:
             with self.subTest(name=name):
-                self.assertEqual(self.count(f'namespace {name}\ndef x := 1\nend {name}\n'),
-                                 2 if 'H290' in name else 0)
+                self.retained(f'namespace {name}\nend {name}\n')
         self.assertEqual(self.count('namespace Solidity.Lowering.G17 -- H1 G1\n'
-                                    'end Solidity.Lowering.G17 /- G2 H2 -/\n'), 4)
+                                    'end Solidity.Lowering.G17 /- G2 H2 -/\n'), 6)
 
     def test_pair_retained_boundaries(self):
         for source in ['namespace Solidity.Lowering.G17\n',
@@ -76,7 +75,7 @@ class RegisteredNamesTests(unittest.TestCase):
                           'end Solidity.Lowering.G17\n' + closing + '\n')
         source = ('namespace Solidity.Lowering.G17\nnamespace Relative.G17\n'
                   'end Relative.G17\nend Solidity.Lowering.G17\n')
-        self.assertEqual(self.count(source), 2)
+        self.retained(source)
 
     def test_prose_literals_and_references_retained(self):
         for source in ['-- import Solidity.Lowering.G17.Real\n',
@@ -100,7 +99,17 @@ class RegisteredNamesTests(unittest.TestCase):
                        'def s := `(command| namespace Solidity.Lowering.G17)\n' + pair,
                        '#guard_msgs in\n' + pair,
                        '#with_exporting\n' + pair,
-                       'import ImportedMacros\nwrap\n' + pair,
+                       'import Imported.Macros\nwrap\n' + pair,
+                       'import Imported.Macros\n wrap\n' + pair,
+                       'import Imported.Macros\n\twrap\n' + pair,
+                       'import Imported.Macros\ndef x : Nat := by exact 1\n wrap\n' + pair,
+                       'import Imported.Macros\ndef x := (1)\n wrap\n' + pair,
+                       'import Imported.Macros\ndef!\n' + pair,
+                       'import Imported.Macros\ndef?\n' + pair,
+                       "import Imported.Macros\ndef'\n" + pair,
+                       'import Imported.Macros\n#print!\n' + pair,
+                       'import Imported.Macros\ndef.G17\n' + pair,
+                       'import Imported.Macros\n rw\n' + pair,
                        'include h in\n' + pair,
                        'omit h in\n' + pair,
                        ' #guard_msgs in\n' + pair,
@@ -123,12 +132,21 @@ class RegisteredNamesTests(unittest.TestCase):
             with self.subTest(source=source):
                 self.retained(source)
 
-    def test_known_declarations_stay_eligible(self):
+    def test_declaration_context_remains_conservative(self):
         pair = 'namespace Solidity.Lowering.G17\n{body}\nend Solidity.Lowering.G17\n'
         for body in ['def x := 1', 'private def x := 1', '@[simp] theorem t : True := by trivial',
                      'variable (x : Nat)', '#check Nat', 'open Nat', 'set_option pp.all true']:
             with self.subTest(body=body):
-                self.assertEqual(self.count(pair.format(body=body)), 0)
+                self.retained(pair.format(body=body))
+
+    def test_certain_header_import_and_uncertain_body(self):
+        source = ('import Solidity.Lowering.G17.Real\n'
+                  'namespace Solidity.Lowering.G17\n'
+                  'def x := unknownImportedTerm\n'
+                  'end Solidity.Lowering.G17\n')
+        self.assertEqual(self.count(source), 2)
+        self.retained(source.replace('import Solidity.Lowering.G17.Real',
+                                     'import Solidity.Lowering.G17.Unknown'))
 
     def test_registry_roots_only(self):
         with tempfile.TemporaryDirectory() as d:
@@ -148,7 +166,7 @@ class RegisteredNamesTests(unittest.TestCase):
                       '-- G17 H290\nend Solidity.Lowering.G17\n')
             lean.write_text(source)
             baseline = root / 'scripts/prose-baseline.json';baseline.parent.mkdir()
-            counts = M['counts'](root);self.assertEqual(counts['Solidity/Area']['process_ids'], 2)
+            counts = M['counts'](root);self.assertEqual(counts['Solidity/Area']['process_ids'], 4)
             self.assertEqual(counts['Solidity/Area']['comment_lines'], 1)
             self.assertEqual(counts['Solidity/Area']['docstring_lines'], 0)
             baseline.write_text(json.dumps(counts));before = baseline.read_bytes()
@@ -157,7 +175,7 @@ class RegisteredNamesTests(unittest.TestCase):
                 result = subprocess.run([sys.executable, '-B', str(SCRIPT), '--root', str(root), *flag],
                                         text=True, capture_output=True)
                 self.assertEqual(result.returncode, 1)
-                self.assertIn('process_ids: 3 > 2', result.stderr)
+                self.assertIn('process_ids: 5 > 4', result.stderr)
                 self.assertEqual(baseline.read_bytes(), before)
 
 
