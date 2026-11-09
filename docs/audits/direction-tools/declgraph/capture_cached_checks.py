@@ -3,7 +3,7 @@
 Each Lean capture holds the repository writer lock. Failed files are retained
 and skipped; integrity failures are hard errors. No full library rebuild runs.
 """
-import argparse,fcntl,hashlib,json,os,pathlib,re,runpy,signal,subprocess,time,tempfile
+import argparse,contextlib,fcntl,hashlib,json,os,pathlib,re,runpy,signal,subprocess,time,tempfile
 HERE=pathlib.Path(__file__).resolve().parent
 API=runpy.run_path(str(HERE/'audit.py'));SHA=runpy.run_path(str(HERE/'module_graph.py'))['sha']
 LOCK='/tmp/solidity-lean-feature-groups-20261025/writer.lock'
@@ -14,11 +14,24 @@ def atomic_json(path,data):
   json.dump(data,f,sort_keys=True);f.write('\n');f.flush();os.fsync(f.fileno());name=f.name
  os.replace(name,path)
 
-def timed_capture(cmd,output,*,lock_path=LOCK,timeout=660):
- # Lock contention is scheduling, not capture runtime. No child or timer exists
- # until this process owns the writer lease. Cancellation leaves no status.
+@contextlib.contextmanager
+def writer_lease(lock_path=LOCK):
  with open(lock_path,'a') as lease:
   fcntl.flock(lease,fcntl.LOCK_EX)
+  yield lease
+
+@contextlib.contextmanager
+def capture_transaction(directory,*,lock_path=LOCK):
+ # A surviving child may finish its receipt while the next owner waits.
+ # Inspect recovery state only after acquiring the lease, and retain it through
+ # recovery, capture, validation and status publication.
+ with writer_lease(lock_path) as lease:
+  yield lease,(directory/'receipt.json').exists()
+
+def timed_capture(cmd,output,*,lock_path=LOCK,timeout=660,lease=None):
+ # Lock contention is scheduling, not capture runtime. No child or timer exists
+ # until this process owns the writer lease. Cancellation leaves no status.
+ with (contextlib.nullcontext(lease) if lease is not None else writer_lease(lock_path)) as lease:
   proc=subprocess.Popen(cmd,stdout=output,stderr=subprocess.STDOUT,start_new_session=True,pass_fds=(lease.fileno(),))
   try:
    try:return proc.wait(timeout=timeout)
@@ -77,74 +90,76 @@ def main():
   assert producers=={n:SHA(HERE/n) for n in names},'Producer drift'
   assert SHA(graph_file)==graph_sha,'Graph receipt drift'
   assert SHA(a.source_root/path)==hashlib.sha256(API['sources']()[path].encode()).hexdigest(),'Source drift'
- if not a.check:a.captures.mkdir(parents=True,exist_ok=True)
+ if not a.check:
+  with writer_lease():a.captures.mkdir(parents=True,exist_ok=True)
  files=[];resource_wait=None
  for index,path in enumerate(queue):
   stem=hashlib.sha256(path.encode()).hexdigest()[:20];directory=a.captures/stem;status_file=a.captures/(stem+'.status.json');summary=a.captures/(stem+'.summary.json');log=a.captures/(stem+'.driver.log')
-  cmd=['python3','-I',str(HERE/'capture_compact.py'),'--source-root',str(a.source_root),'--view',str(a.view),'--capture',str(directory),'--file',path,'--out',str(summary)]
-  fixed=dict(path=path,command=cmd,source_sha256=SHA(a.source_root/path),producers=producers)
-  integrity(path)
-  if status_file.exists():
-   status=json.loads(status_file.read_text());validate_status(status,fixed,allowed_runner)
-   assert status['log_sha256']==SHA(log)
-  else:
-   assert not a.check,'Missing queue status: '+path
-   stats=os.statvfs(a.captures);free=stats.f_bavail*stats.f_frsize
-   if free<5*1024**3:resource_wait='VM disk free below5GiB; no new capture started';break
-   recovered=(directory/'receipt.json').exists()
-   if recovered:
-    assert a.recover_interrupted,'Complete receipt without status requires explicit recovery'
-    validate_capture(directory,a.source_root/path,path,a.view,version,graph_sha,producers)
-    compact=runpy.run_path(str(HERE/'compact_records.py'))
-    (metrics,imports,stage2),encoding=compact['measure'](directory/'roots.jsonl',directory/'capture.log',path)
-    data=dict(base=API['BASE'],status='partial',metrics=metrics,encoding=encoding,boundary='Actual saved-environment CI observations for this source only; compact pooling preserves every binding observation, not full root completeness or global liveness.')
-    body=json.dumps(data,sort_keys=True,indent=2)+'\n'
-    if summary.exists():assert summary.read_text()==body,'Interrupted summary drift'
-    else:
-     temporary=pathlib.Path(str(summary)+'.tmp');temporary.write_text(body);os.replace(temporary,summary)
-    if not log.exists():log.write_text('RECOVERED_VALIDATED_NATIVE_RECEIPT\n')
-    status=dict(fixed,exit_code=0,log_sha256=SHA(log),summary_sha256=SHA(summary),receipt_sha256=SHA(directory/'receipt.json'))
-    atomic_json(status_file,status)
+  with capture_transaction(directory) as (lease,recovered):
+   cmd=['python3','-I',str(HERE/'capture_compact.py'),'--source-root',str(a.source_root),'--view',str(a.view),'--capture',str(directory),'--file',path,'--out',str(summary)]
+   fixed=dict(path=path,command=cmd,source_sha256=SHA(a.source_root/path),producers=producers)
+   integrity(path)
+   if status_file.exists():
+    status=json.loads(status_file.read_text());validate_status(status,fixed,allowed_runner)
+    assert status['log_sha256']==SHA(log)
    else:
-    if directory.exists() or summary.exists():
-     assert a.recover_interrupted,'Unfinished capture requires explicit recovery: '+path
-     suffix='.interrupted-'+str(time.time_ns())
-     for item in (directory,summary,log):
-      if item.exists():item.rename(pathlib.Path(str(item)+suffix))
-    with log.open('w') as output:
-     code=timed_capture(cmd,output)
-    integrity(path)
-    if code!=0:
-     API['assert_sources'](a.source_root)
-     text=log.read_text(errors='replace')
-     ordinary=(code==124 or 'Compact capture failed; no measurement published' in text or 'subprocess.TimeoutExpired' in text)
-     assert ordinary,'Child integrity/validation failure: '+path+'; '+str(log)
-    receipt_sha=None
-    if code==0:
-     validate_capture(directory,a.source_root/path,path,a.view,version,graph_sha,producers);receipt_sha=SHA(directory/'receipt.json')
-    status=dict(fixed,exit_code=code,log_sha256=SHA(log),summary_sha256=SHA(summary) if summary.exists() else None,receipt_sha256=receipt_sha)
-    atomic_json(status_file,status)
-  row=dict(path=path,status='unavailable',exit_code=status['exit_code'])
-  if status['exit_code']==0:
-   assert status['summary_sha256']==SHA(summary)
-   data=json.loads(summary.read_text());assert data['base']==API['BASE'] and data['metrics']['path']==path
-   validate_capture(directory,a.source_root/path,path,a.view,version,graph_sha,producers)
-   actual_receipt_sha=SHA(directory/'receipt.json')
-   if 'receipt_sha256' not in status:
-    assert not a.check and a.prior_runner_commit,'Legacy status requires explicit validated migration'
-    status['receipt_sha256']=actual_receipt_sha;atomic_json(status_file,status)
-   assert status['receipt_sha256']==actual_receipt_sha,'Child receipt drift'
-   row.update(status='observed',metrics=data['metrics'],encoding=data['encoding'])
-  else:
-   text=log.read_text(errors='replace');row['failure_class']='timeout' if status['exit_code']==124 else 'capture_failed'
-  files.append(row)
-  if not a.check:print(index+1,len(queue),row['status'],path,flush=True)
-  # Durable progress is evidence on the VM, not a code-branch result.
-  if not a.check:atomic_json(a.captures/'progress.json',dict(processed=len(files),planned=len(queue),observed=sum(r['status']=='observed' for r in files),last=path))
+    assert not a.check,'Missing queue status: '+path
+    stats=os.statvfs(a.captures);free=stats.f_bavail*stats.f_frsize
+    if free<5*1024**3:resource_wait='VM disk free below5GiB; no new capture started';break
+    if recovered:
+     assert a.recover_interrupted,'Complete receipt without status requires explicit recovery'
+     validate_capture(directory,a.source_root/path,path,a.view,version,graph_sha,producers)
+     compact=runpy.run_path(str(HERE/'compact_records.py'))
+     (metrics,imports,stage2),encoding=compact['measure'](directory/'roots.jsonl',directory/'capture.log',path)
+     data=dict(base=API['BASE'],status='partial',metrics=metrics,encoding=encoding,boundary='Actual saved-environment CI observations for this source only; compact pooling preserves every binding observation, not full root completeness or global liveness.')
+     body=json.dumps(data,sort_keys=True,indent=2)+'\n'
+     if summary.exists():assert summary.read_text()==body,'Interrupted summary drift'
+     else:
+      temporary=pathlib.Path(str(summary)+'.tmp');temporary.write_text(body);os.replace(temporary,summary)
+     if not log.exists():log.write_text('RECOVERED_VALIDATED_NATIVE_RECEIPT\n')
+     status=dict(fixed,exit_code=0,log_sha256=SHA(log),summary_sha256=SHA(summary),receipt_sha256=SHA(directory/'receipt.json'))
+     atomic_json(status_file,status)
+    else:
+     if directory.exists() or summary.exists():
+      assert a.recover_interrupted,'Unfinished capture requires explicit recovery: '+path
+      suffix='.interrupted-'+str(time.time_ns())
+      for item in (directory,summary,log):
+       if item.exists():item.rename(pathlib.Path(str(item)+suffix))
+     with log.open('w') as output:
+      code=timed_capture(cmd,output,lease=lease)
+     integrity(path)
+     if code!=0:
+      API['assert_sources'](a.source_root)
+      text=log.read_text(errors='replace')
+      ordinary=(code==124 or 'Compact capture failed; no measurement published' in text or 'subprocess.TimeoutExpired' in text)
+      assert ordinary,'Child integrity/validation failure: '+path+'; '+str(log)
+     receipt_sha=None
+     if code==0:
+      validate_capture(directory,a.source_root/path,path,a.view,version,graph_sha,producers);receipt_sha=SHA(directory/'receipt.json')
+     status=dict(fixed,exit_code=code,log_sha256=SHA(log),summary_sha256=SHA(summary) if summary.exists() else None,receipt_sha256=receipt_sha)
+     atomic_json(status_file,status)
+   row=dict(path=path,status='unavailable',exit_code=status['exit_code'])
+   if status['exit_code']==0:
+    assert status['summary_sha256']==SHA(summary)
+    data=json.loads(summary.read_text());assert data['base']==API['BASE'] and data['metrics']['path']==path
+    validate_capture(directory,a.source_root/path,path,a.view,version,graph_sha,producers)
+    actual_receipt_sha=SHA(directory/'receipt.json')
+    if 'receipt_sha256' not in status:
+     assert not a.check and a.prior_runner_commit,'Legacy status requires explicit validated migration'
+     status['receipt_sha256']=actual_receipt_sha;atomic_json(status_file,status)
+    assert status['receipt_sha256']==actual_receipt_sha,'Child receipt drift'
+    row.update(status='observed',metrics=data['metrics'],encoding=data['encoding'])
+   else:
+    text=log.read_text(errors='replace');row['failure_class']='timeout' if status['exit_code']==124 else 'capture_failed'
+   files.append(row)
+   if not a.check:print(index+1,len(queue),row['status'],path,flush=True)
+   # Durable progress is evidence on the VM, not a code-branch result.
+   if not a.check:atomic_json(a.captures/'progress.json',dict(processed=len(files),planned=len(queue),observed=sum(r['status']=='observed' for r in files),last=path))
  assert producers=={n:SHA(HERE/n) for n in names};API['assert_sources'](a.source_root)
  result=dict(base=API['BASE'],status='partial',planned_files=len(queue),processed_files=len(files),observed_files=sum(r['status']=='observed' for r in files),reused_dense_files=reused,uncached_syntax_files=uncached,resource_wait=resource_wait,files=files,deletable_now_verified_lines=0,boundaries=['Selection is cached files with explicit native syntax-census checks; macro-only and uncached files remain outside this queue.','A successful source capture is observational; complete check roots, reflection, symbolic lookups and compiler/runtime dependencies are not certified.','Existing19dense files are reused rather than re-elaborated.','Failures contribute no observed metric counts; source/provenance integrity failures stop the queue.'])
  body=json.dumps(result,sort_keys=True,indent=2)+'\n';assert len(body.encode())<1000000
  if a.check:assert a.out.read_text()==body,'STALE queue summary'
- else:a.out.write_text(body)
+ else:
+  with writer_lease():a.out.write_text(body)
  print('CACHED_CHECK_QUEUE_PASS',len(files),len(queue),result['observed_files'])
 if __name__=='__main__':main()

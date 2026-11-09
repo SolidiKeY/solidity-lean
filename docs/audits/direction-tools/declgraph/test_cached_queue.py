@@ -50,8 +50,8 @@ def main():
   while stat.exists() and stat.read_text().split()[2]!='Z':
    assert time.monotonic()<deadline,'TERM-resistant owned descendant survived timeout';time.sleep(0.01)
   # SIGTERM of the queue parent must not release a still-running child's lease.
-  marker.unlink();release=root/'release';pidfile=root/'child.pid'
-  child="import os,time;from pathlib import Path;Path("+repr(str(pidfile))+").write_text(str(os.getpid()));Path("+repr(str(marker))+").write_text('started');exec(\"while not Path("+repr(str(release))+").exists(): time.sleep(0.01)\")"
+  marker.unlink();release=root/'release';pidfile=root/'child.pid';recovering=root/'recovering';recovering.mkdir();receipt=recovering/'receipt.json'
+  child="import os,time;from pathlib import Path;Path("+repr(str(pidfile))+").write_text(str(os.getpid()));Path("+repr(str(marker))+").write_text('started');exec(\"while not Path("+repr(str(release))+").exists(): time.sleep(0.01)\");Path("+repr(str(receipt))+").write_text('complete')"
   parent="import runpy,sys;M=runpy.run_path("+repr(str(H/'capture_cached_checks.py'))+");M['timed_capture']("+repr([sys.executable,'-c',child])+",sys.stdout,lock_path="+repr(str(lock))+",timeout=10)"
   with (root/'orphan.log').open('w') as output:
    owner=subprocess.Popen([sys.executable,'-c',parent],stdout=output,stderr=output)
@@ -64,15 +64,22 @@ def main():
      try:fcntl.flock(lease,fcntl.LOCK_EX|fcntl.LOCK_NB)
      except BlockingIOError:pass
      else:raise AssertionError('Queue termination released active child lease')
-     release.write_text('finish')
-     while True:
-      try:fcntl.flock(lease,fcntl.LOCK_EX|fcntl.LOCK_NB);break
-      except BlockingIOError:
-       assert time.monotonic()<deadline,'Child failed to release lease';time.sleep(0.01)
+    recovery=[];errors=[]
+    def restart_recovery():
+     try:
+      with M['capture_transaction'](recovering,lock_path=lock) as (_,complete):
+       if not complete:recovering.rename(root/'quarantined');recovery.append('quarantined')
+       else:recovery.append(receipt.read_text())
+     except BaseException as exc:errors.append(exc)
+    restart=threading.Thread(target=restart_recovery,daemon=True);restart.start()
+    time.sleep(0.15)
+    assert restart.is_alive() and not recovery and recovering.exists() and not receipt.exists(),'Recovery inspected or mutated active capture'
+    release.write_text('finish');restart.join(timeout=5)
+    assert not restart.is_alive() and not errors and recovery==['complete'] and recovering.exists(),'Recovery did not recheck completed receipt under lease'
    finally:
     if owner.poll() is None:owner.kill();owner.wait()
     if pidfile.exists():
      try:os.killpg(int(pidfile.read_text()),signal.SIGKILL)
      except ProcessLookupError:pass
- print('CACHED_QUEUE_FIXTURES_PASS native_recipe module version graph_receipt source atomic_replace lock_wait_excluded child_timeout legacy_command orphan_lease descendant_cleanup')
+ print('CACHED_QUEUE_FIXTURES_PASS native_recipe module version graph_receipt source atomic_replace lock_wait_excluded child_timeout legacy_command orphan_lease descendant_cleanup recovery_wait_recheck')
 if __name__=='__main__':main()
