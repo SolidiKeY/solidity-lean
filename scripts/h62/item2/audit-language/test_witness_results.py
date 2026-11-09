@@ -1,6 +1,9 @@
 """Guard false witness credit from incomplete logs, stale categories and failed runs."""
 import json
 import unittest
+import tempfile
+import hashlib
+from unittest.mock import patch
 from pathlib import Path
 from witness_results import reconcile, PREFIX, check_binding, audit_command
 
@@ -53,18 +56,29 @@ class WitnessResultsTests(unittest.TestCase):
                 reconcile(self.plan, log, self.receipt)
 
     def test_command_stale_input_and_output_substitution_refused(self):
-        path = Path("/tmp/probe.lean")
-        current = {"plan": "p", "sources": {"T.lean": "s"}}
-        binding = dict(before=current, after=current, command=audit_command(path),
-                       log_sha256="log", receipt_sha256="receipt")
-        receipt = dict(command=audit_command(path))
-        check_binding(binding, current, receipt, path, "log", "receipt")
-        for update in (dict(before={}), dict(after={}), dict(command=["true"]),
-                       dict(log_sha256="stale"), dict(receipt_sha256="stale")):
-            with self.subTest(update=update), self.assertRaises(ValueError):
-                check_binding(dict(binding, **update), current, receipt, path, "log", "receipt")
-        with self.assertRaises(ValueError):
-            check_binding(binding, current, dict(command=["true"]), path, "log", "receipt")
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "probe.lean"
+            compiled = Path(tmp) / "compiled.json"
+            compiled.write_text("{}")
+            current = {"plan": "p", "sources": {"T.lean": "s"}}
+            binding = dict(before=current, after=current, command=audit_command(path, compiled),
+                           compiled_record=str(compiled),
+                           compiled_sha256=hashlib.sha256(compiled.read_bytes()).hexdigest(),
+                           log_sha256="log", receipt_sha256="receipt")
+            receipt = dict(command=audit_command(path, compiled))
+            with patch("witness_results.validate_build"):
+                check_binding(binding, current, receipt, path, "log", "receipt")
+                for update in (dict(before={}), dict(after={}), dict(command=["true"]),
+                               dict(log_sha256="stale"), dict(receipt_sha256="stale"),
+                               dict(compiled_sha256="stale")):
+                    with self.subTest(update=update), self.assertRaises(ValueError):
+                        check_binding(dict(binding, **update), current, receipt, path, "log", "receipt")
+                with self.assertRaises(ValueError):
+                    check_binding(binding, current, dict(command=["true"]), path, "log", "receipt")
+            legacy = dict(binding)
+            del legacy["compiled_record"]
+            with self.assertRaises(ValueError):
+                check_binding(legacy, current, receipt, path, "log", "receipt")
 
     def test_non_source_plan_refused(self):
         for field in ("kernel_checked", "historical_replay", "meaning_checked"):

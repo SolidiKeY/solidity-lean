@@ -10,6 +10,7 @@ import hashlib
 import json
 from pathlib import Path
 from witness_plan import ROOT, code, unique
+from witness_build import closure, validate_build
 
 PREFIX = "H62_WITNESS_AUDIT "
 ALLOWED = {"propext", "Classical.choice", "Quot.sound"}
@@ -71,16 +72,27 @@ def snapshot(plan_path, generated):
     if generated.read_bytes() != code(plan).encode():
         raise ValueError("generated code differs from source plan")
     return {"plan": sha(plan_path), "generated": sha(generated), "planner": planner,
-            "sources": sources}
+            "sources": sources, "closure": closure(generated),
+            "execution_scripts": {name: sha(Path(__file__).with_name(name)) for name in
+                                  ("witness_build.py", "run_witness_results.py", "witness_results.py")}}
 
 
-def audit_command(generated):
-    return ["lake", "lean", str(generated.resolve()), "--", "--tstack=131072", "-j1"]
+def audit_command(generated, compiled):
+    return ["python3", str(Path(__file__).with_name("witness_build.py").resolve()),
+            "--generated", str(generated.resolve()), "--build", str(compiled.with_suffix(".build").resolve()),
+            "--record", str(compiled.resolve())]
 
 
 def check_binding(binding, current, receipt, generated, log_sha, receipt_sha):
+    if "compiled_record" not in binding or "compiled_sha256" not in binding:
+        raise ValueError("fresh compiled closure binding required")
+    compiled = Path(binding["compiled_record"])
+    if (compiled.is_symlink() or compiled.resolve().is_relative_to(ROOT) or
+            hashlib.sha256(compiled.read_bytes()).hexdigest() != binding["compiled_sha256"]):
+        raise ValueError("compiled closure record substitution")
+    validate_build(json.loads(compiled.read_text()), generated)
     if (binding["before"] != current or binding["after"] != current or
-            binding["command"] != audit_command(generated) or
+            binding["command"] != audit_command(generated, compiled) or
             receipt["command"] != binding["command"] or
             binding["log_sha256"] != log_sha or binding["receipt_sha256"] != receipt_sha):
         raise ValueError("execution inputs, command or outputs not bound")

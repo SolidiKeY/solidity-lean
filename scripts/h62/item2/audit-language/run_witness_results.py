@@ -28,7 +28,8 @@ def main():
         if path.exists() or path.is_symlink() or path.resolve().is_relative_to(ROOT):
             raise ValueError("new external evidence paths required")
     before = snapshot(args.plan, args.generated)
-    command = audit_command(args.generated)
+    compiled = args.binding.with_suffix(".compiled.json")
+    command = audit_command(args.generated, compiled)
     result = subprocess.run([sys.executable, str(ROOT / "tests/sol-numeric-literals/runtime/check.py"),
                              args.label] + command, cwd=ROOT)
     if result.returncode:
@@ -38,6 +39,7 @@ def main():
         raise ValueError("audit inputs changed during run")
     sha = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
     record = dict(before=before, after=after, command=command,
+                  compiled_record=str(compiled.resolve()), compiled_sha256=sha(compiled),
                   receipt_sha256=sha(receipt_path), log_sha256=sha(log_path))
     with args.binding.open("x") as out:
         out.write(json.dumps(record, sort_keys=True, indent=2) + "\n")
