@@ -7,8 +7,7 @@ import Solidity.Lowering.V07.SignedNarrowAddition
 import Solidity.Lowering.V07.SignedNarrowSubtraction
 import Solidity.Lowering.V07.SignedNarrowMultiplication
 
-/-! V07 ring programs and signed quotient/remainder guards.
-Whole-family composition remains separate; no frontend selection or admission claim. -/
+/-! V07 ring programs and signed quotient/remainder guards. Whole-family composition remains separate; no frontend selection or admission claim. -/
 namespace Solidity.Lowering.G16.Arithmetic
 open Solidity.Lowering.V07
 
@@ -35,8 +34,7 @@ def wrappingValue {C : Contract} {Γ : Ctx} (t : Source.IntTy) (op : RingOp) :
     | .sub => SignedNarrowSubtraction.subValue bits
     | .mul => SignedNarrowMultiplication.mulValue bits
 
-/-- All three ring operations, widths and signs in an explicit unchecked Source frame.
-Premises observe initial locals, never desired runs. -/
+/-- All three ring operations, widths and signs in an explicit unchecked Source frame. Premises observe initial locals, never desired runs. -/
 theorem wrapping_transport {E : Source.Env} {srcΓ : Source.RCtx}
     {C : Contract} {Γ : Ctx} {ι : Type}
     (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
@@ -82,8 +80,7 @@ def wrappingAssignmentOperand {C : Contract} {Γ : Ctx} (t : Source.IntTy)
     | .sub => SignedNarrowSubtraction.assignReadOperand bits pipeline
     | .mul => SignedNarrowMultiplication.assignReadOperand bits pipeline
 
-/-- Pipeline-sensitive assignment/read at all widths/signs, with derived caller update.
-Only initial alignment/reads are assumed; no frontend selection or held validator association. -/
+/-- Pipeline-sensitive assignment/read at all widths/signs, with derived caller update. Only initial alignment/reads are assumed; no frontend selection or held validator association. -/
 theorem wrapping_assignment_transport {E : Source.Env} {srcΓ : Source.RCtx}
     {C : Contract} {Γ : Ctx} {ι : Type}
     (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
@@ -227,8 +224,7 @@ private theorem condition_run {C : Contract} {Γ : Ctx} (target : State C Γ)
         simpa only [zero,false_or] using bounds
       simp only [reduced,RingOp.calculate]
 
-/-- Guard the existing unsigned ring program toward `Solidity.Goals.lowerLoopsCorrect`.
-No replacement of the held validator/scalar endpoint or frontend producer is asserted. -/
+/-- Guard the existing unsigned ring program toward `Solidity.Goals.lowerLoopsCorrect`. No replacement of the held validator/scalar endpoint or frontend producer is asserted. -/
 def operand {C : Contract} {Γ : Ctx} (bits : Nat)
     (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256) (op : RingOp)
     (checked : Bool) (a b : Idx Γ (.val .uint)) :
@@ -318,9 +314,7 @@ private theorem operand_run {C : Contract} {Γ : Ctx} (target : State C Γ)
     rw [value]
     rfl
 
-/-- All unsigned widths, three operators and both modes: success or arithmetic panic.
-Premises observe initial aligned locals, with no overflow exclusion or desired run.
-The final wrapped-value law does not assert observed success on failure. -/
+/-- All unsigned widths, three operators and both modes: success or arithmetic panic. Premises observe initial aligned locals, with no overflow exclusion or desired run. The final wrapped-value law does not assert observed success on failure. -/
 theorem transport {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} {Γ : Ctx} {ι : Type}
     (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
     (source : Source.EMState E srcΓ) (target : State C Γ)
@@ -760,8 +754,7 @@ private theorem operand_run {C : Contract} {Γ : Ctx} (target : State C Γ)
     (wrappingValue (ty bits valid) op (.simple (.local a)) (.simple (.local b))) _ _ test computed
   cases op <;> simpa only [operand,wrappingValue,ty,decide_eq_false_iff_not] using joined
 
-/-- Signed local ring arithmetic at every width and in both modes toward `Solidity.Goals.lowerLoopsCorrect`.
-Initial reads/alignment suffice; overflow, zero and minimum inputs are not excluded. No producer association is asserted. -/
+/-- Signed local ring arithmetic at every width and in both modes toward `Solidity.Goals.lowerLoopsCorrect`. Initial reads/alignment suffice; overflow, zero and minimum inputs are not excluded. No producer association is asserted. -/
 theorem transport {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} {Γ : Ctx} {ι : Type}
     (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
     (source : Source.EMState E srcΓ) (target : State C Γ)
