@@ -1,7 +1,0 @@
-# Key-preserving typed-view extension
-
-`Solidity/Backend/MemoryOps/CalldataViewExtension.lean` constructs the published V2 overlapping-view contract for arbitrary existing packed prefixes and coherent finite appended views. Existing captured keys need not be canonical, dense or ordered. The first exact typed raw-identity representative selects either the corresponding prior key or a fresh key above every prior captured key. The actual finite lookup table searches indices and transports the coherent typed payload. Prefix keys, exact alias equivalence, original bytes and raw references are proved.
-
-`Solidity/Backend/MemoryOps/CalldataViewExtensionControls.lean` uses a populated mixed Boolean/uint prefix with sparse keys100/101, a repeated old identity and new overlapping views including maximum uint and a shorter same-address view. It proves all ordered keys, captured objects, actual extraction results and raw references, an arbitrary runtime key offset, empty append, empty prior with nonempty repeated growth and failure of canonical repacking to preserve the old key.
-
-Only captured prior keys and their represented objects are preserved. Arbitrary uncaptured entries of the prior logical table are not promised unchanged by the published V2 contract. Coherence of supplied demanded views remains the decoder consumer's explicit premise. This result is structural packing, not a decoder, native path program, Source execution, byte/ABI admission or compiler/EVM evidence. General G34 and the full original assignment remain incomplete.

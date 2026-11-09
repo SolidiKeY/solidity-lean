@@ -122,7 +122,7 @@ def main():
     group.add_argument("--check", action="store_true")
     group.add_argument("--render", action="store_true")
     group.add_argument("--patch", action="store_true")
-    ap.add_argument("--migration", action="store_true", help="render the proposed owner-controlled generated marker")
+    ap.add_argument("--migration", action="store_true", help="include the generated marker used by the adopted file")
     args = ap.parse_args()
     nodes, expected = render()
     if args.migration:

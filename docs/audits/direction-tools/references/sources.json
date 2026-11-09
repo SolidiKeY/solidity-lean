@@ -1,0 +1,10 @@
+{
+  "CompCert": "AbsInt/CompCert",
+  "CakeML": "CakeML/cakeml",
+  "EvmYul": "NethermindEth/EVMYulLean",
+  "Clear": "NethermindEth/Clear",
+  "KEVM": "runtimeverification/evm-semantics",
+  "Isabelle-Solidity": "isabelle-prover/mirror-afp-devel",
+  "SolKey": "SolidiKeY/solkey",
+  "solc": "ethereum/solidity"
+}

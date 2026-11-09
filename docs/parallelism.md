@@ -62,7 +62,7 @@ its SHA256 is `880486dcbe8f1004449dc9f1d90f25a9964d0b2c5ea64dad3de3dd5cfc548b8d`
 Reproduce it with
 `node scripts/h62/item5/statement-graph/reproduce_core_baseline.mjs`.
 The original 95-edge snapshot remains immutable. The twelve are cleanup candidates,
-listed in [the tooling handoff section](feature-work/h62-5-statement-graph.md#authorized-current-master-import-baseline-and-merge-pre-gate),
+listed in [the tooling handoff section](../scripts/h62/item5/statement-graph),
 not a declaration that the package is closed under imports.
 
 `scripts/check-layers.mjs` now checks the Solidity-package import closure as well

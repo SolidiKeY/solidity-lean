@@ -1,0 +1,20 @@
+{
+  "guardedRegression": "RowsNine must belong to the exact slow-library partition while remaining absent from default examples.",
+  "proposedSlowMembers": [
+    "Solidity.Examples.DecisionAPF",
+    "Solidity.Examples.DecisionBlocks",
+    "Solidity.Examples.DecisionGapCore",
+    "Solidity.Examples.DecisionGapHashes",
+    "Solidity.Examples.DecisionGapKInt",
+    "Solidity.Examples.DecisionGaps",
+    "Solidity.Examples.DecisionLedger",
+    "Solidity.Examples.DecisionOperators",
+    "Solidity.Examples.DecisionRefutations",
+    "Solidity.Examples.DecisionResidue",
+    "Solidity.Examples.DecisionStorageArrays",
+    "Solidity.Examples.DecisionThreeKindCoverage",
+    "Solidity.Examples.Tactics.OpenLoops",
+    "Solidity.Examples.Tactics.OpenLoops.RowsNine",
+    "Solidity.Examples.Tactics.RevertData"
+  ]
+}

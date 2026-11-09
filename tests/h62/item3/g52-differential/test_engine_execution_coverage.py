@@ -1,0 +1,287 @@
+#!/usr/bin/env python3
+"""Guarded regression: resumed coverage must reject overlapping, input-only,
+stopped/truncated or forged native artifacts. Mutations are negative controls,
+not extra fixture passes; positive coverage uses only real captured runs.
+"""
+import hashlib
+import gzip
+import importlib.util
+import json
+import os
+import shutil
+import tempfile
+import unittest
+from unittest import mock
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parents[4]
+BULK = Path(os.environ['G52_BULK']).resolve()  # Missing corpus is an error, never a skip.
+SPEC = importlib.util.spec_from_file_location('coverage', REPO/'scripts/h62/item3/g52-differential/engine_execution_coverage.py')
+MODULE = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(MODULE)
+
+
+class CoverageControls(unittest.TestCase):
+    def test_real_disjoint_native_ranges(self):
+        result = MODULE.coverage(REPO, BULK, ['review-bound-0-20', 'review-bound-20-40', 'review-bound-40-60', 'review-bound-60-80'])
+        self.assertEqual(result['processed_unique_cases'], 80)
+        self.assertEqual(result['counts'], {'payload_reference_match': 80})
+        self.assertEqual(result['unprocessed_ranges'], [[80, 21124]])
+        self.assertFalse(result['differential_complete'])
+        self.assertEqual(result['source_matches'], 0)
+
+    def test_mixed_empty_and_reordered_ranges_keep_input_binding(self):
+        labels = ['review-bound-profile-856', 'review-bound-20-40', 'review-bound-0-20']
+        result = MODULE.coverage(REPO, BULK, labels)
+        self.assertEqual(result['processed_unique_cases'], 41)
+        self.assertEqual(result['counts'], {'unsupported': 1, 'payload_reference_match': 40})
+        self.assertEqual(result['validated_blocks'], 40)
+        self.assertEqual([run['label'] for run in result['runs']], labels)
+        self.assertEqual(result['source_matches'], 0)
+
+    def test_decoded_transaction_boundaries_refuse_corruption(self):
+        # Fault-inject decoder transport results, not corpus/native fixtures.
+        # Cardinality and run boundaries must still bind every observed identity.
+        labels = ['review-bound-0-20', 'review-bound-20-40']
+        first_rows = [json.loads(line) for line in
+                      (BULK/'evidence/review-bound-0-20.jsonl').read_text().splitlines()]
+        boundary = sum(len(block['transactions']) for row in first_rows for block in row['blocks'])
+        real_run = MODULE.subprocess.run
+        for mutation in ['not-list', 'truncated', 'extra', 'null-at-boundary', 'cross-range']:
+            def corrupt(command, *args, **kwargs):
+                result = real_run(command, *args, **kwargs)
+                if isinstance(command, list) and len(command) > 2 and str(command[2]).endswith('/engine_input_transactions.mjs'):
+                    decoded = json.loads(result.stdout)
+                    self.assertGreater(len(decoded), boundary)
+                    if mutation == 'not-list':
+                        decoded = {}
+                    elif mutation == 'truncated':
+                        decoded.pop()
+                    elif mutation == 'extra':
+                        decoded.append(decoded[-1])
+                    elif mutation == 'null-at-boundary':
+                        decoded[boundary] = None
+                    else:
+                        self.assertNotEqual(decoded[0], decoded[boundary])
+                        decoded[0], decoded[boundary] = decoded[boundary], decoded[0]
+                    return MODULE.subprocess.CompletedProcess(result.args, result.returncode,
+                                                              json.dumps(decoded), result.stderr)
+                return result
+            message = ('input transaction expectation count mismatch' if mutation in
+                       ['not-list', 'truncated', 'extra'] else 'transaction identity differs from pinned input')
+            with self.subTest(mutation=mutation), mock.patch.object(MODULE.subprocess, 'run', side_effect=corrupt):
+                with self.assertRaisesRegex(ValueError, message):
+                    MODULE.coverage(REPO, BULK, labels)
+
+    def test_duplicate_overlap_and_binding_only_rejected(self):
+        for labels, error in [(['review-bound-0-20', 'review-bound-0-20'], 'duplicate'),
+                              (['review-bound-0-20', 'review-bound-overlap'], 'overlapping'),
+                              (['engine-x-bindings'], 'not a native')]:
+            with self.subTest(labels=labels), self.assertRaisesRegex(ValueError, error):
+                MODULE.coverage(REPO, BULK, labels)
+
+    def test_known_rpc_profile_is_not_a_payload_pass(self):
+        result = MODULE.coverage(REPO, BULK, ['review-bound-profile-856'])
+        self.assertEqual(result['counts'], {'unsupported':1})
+        self.assertEqual(result['validated_blocks'], 0)
+        self.assertEqual(result['retryable_cases'], 0)
+        self.assertFalse(result['full_payload_match'])
+        with tempfile.TemporaryDirectory(prefix='profile-evidence-control-', dir=BULK) as temporary:
+            root = Path(temporary)
+            for name in ['evidence','reference','upstream']:(root/name).mkdir()
+            for name in ['engine-x-inputs.jsonl.gz','archive-inventory.jsonl.gz','engine-x-allocations.jsonl','engine-x-allocations-index.json','reference/package.json','reference/package-lock.json','reference/node_modules','upstream/fixtures_develop-v5.3.0.tar.gz']:(root/name).symlink_to(BULK/name)
+            for name in ['engine-x-export.json','archive-census.json']:shutil.copyfile(BULK/'evidence'/name,root/'evidence'/name)
+            summary=json.loads((BULK/'evidence/review-bound-profile-856-summary.json').read_text());command=json.loads((BULK/'evidence/review-bound-profile-856-command.json').read_text());row=json.loads((BULK/'evidence/review-bound-profile-856.jsonl').read_text());row['fields']=['state_root'];data=(json.dumps(row)+'\n').encode();summary['results_sha256']=hashlib.sha256(data).hexdigest();command['command'][3]=str(root);command['command'][5]='profile-evidence-control'
+            (root/'evidence/profile-evidence-control.jsonl').write_bytes(data);(root/'evidence/profile-evidence-control-summary.json').write_text(json.dumps(summary));(root/'evidence/profile-evidence-control-command.json').write_text(json.dumps(command))
+            with self.assertRaisesRegex(ValueError,'retains failure/execution evidence'):MODULE.coverage(REPO,root,['profile-evidence-control'])
+
+    def test_infrastructure_error_retains_retryable_gap(self):
+        with tempfile.TemporaryDirectory(prefix='retry-control-', dir=BULK) as temporary:
+            root = Path(temporary)
+            for name in ['evidence','reference','upstream']:(root/name).mkdir()
+            for name in ['engine-x-inputs.jsonl.gz','archive-inventory.jsonl.gz','engine-x-allocations.jsonl','engine-x-allocations-index.json','reference/package.json','reference/package-lock.json','reference/node_modules','upstream/fixtures_develop-v5.3.0.tar.gz']:(root/name).symlink_to(BULK/name)
+            for name in ['engine-x-export.json','archive-census.json']:shutil.copyfile(BULK/'evidence'/name,root/'evidence'/name)
+            summary=json.loads((BULK/'evidence/review-bound-0-20-summary.json').read_text());command=json.loads((BULK/'evidence/review-bound-0-20-command.json').read_text());rows=[json.loads(line) for line in (BULK/'evidence/review-bound-0-20.jsonl').read_text().splitlines()]
+            rows[0].update(status='engine_error',retryable=True,reason='native-worker-timeout');summary['counts']={'engine_error':1,'payload_reference_match':19};command['exit']=1;command['command'][3]=str(root);command['command'][5]='retry-control';data=''.join(json.dumps(row)+'\n' for row in rows).encode();summary['results_sha256']=hashlib.sha256(data).hexdigest()
+            (root/'evidence/retry-control.jsonl').write_bytes(data);(root/'evidence/retry-control-summary.json').write_text(json.dumps(summary));(root/'evidence/retry-control-command.json').write_text(json.dumps(command))
+            result=MODULE.coverage(REPO,root,['retry-control']);self.assertEqual(result['attempted_unique_cases'],20);self.assertEqual(result['processed_unique_cases'],19);self.assertEqual(result['retryable_ranges'],[[0,1]]);self.assertEqual(result['unprocessed_ranges'],[[0,1],[20,21124]])
+
+    def test_corrupt_artifact_controls(self):
+        # Only negative tests use this temporary copy. Large pinned inputs are
+        # linked read-only; original sealed results and receipts are never edited.
+        def other_allocation(summary, command, rows):
+            entries = json.loads((BULK/'engine-x-allocations-index.json').read_text())
+            current = rows[0]['allocation_binding']['pre_hash']
+            key = next(key for key in entries if key != current)
+            entry = entries[key]
+            rows[0]['allocation_binding'].update(pre_hash=key, allocation_path=entry['path'],
+                                                 allocation_source_sha256=entry['source_sha256'],
+                                                 allocation_record_sha256=entry['record_sha256'])
+        def fraction(field, block=False):
+            def mutate(summary, command, rows):
+                target = rows[0]['blocks'][0] if block else rows[0]['blocks'][0]['transactions'][0]
+                target[field] = int(target[field]) + 0.5
+            return mutate
+        def downgrade(summary, command, rows, mismatch=False):
+            rows[0].update(status='payload_reference_mismatch' if mismatch else 'engine_error');command['exit']=1
+            rows[0].update(status='unsupported', reason='engine-rpc-negative-or-version-profile-pending',
+                           **({'fields':['state_root']} if mismatch else {'error':'native-worker-timeout','retryable':True}))
+            summary['counts'] = {'payload_reference_match':19,'unsupported':1};command['exit']=2
+        mutations = [
+            ('error-downgrade', lambda s,c,r:downgrade(s,c,r), 'unsupported classification'),
+            ('mismatch-downgrade', lambda s,c,r:downgrade(s,c,r,True), 'unsupported classification'),
+            ('string-log-list', lambda s,c,r:next(tx for row in r for block in row['blocks'] for tx in block['transactions'] if tx['execution_exception'] is None).update(logs='garbage'), 'malformed native logs'),
+            ('malformed-log-data', lambda s,c,r:r[0]['blocks'][0]['transactions'][0].update(logs=[dict(address='0x'+'00'*20,topics=[],data='0x0')]), 'malformed native logs'),
+            ('bool-row-index', lambda s,c,r:r[0].update(index=False), 'range identity'),
+            ('float-selected', lambda s,c,r:s.update(selected=20.0), 'summary count'),
+            ('float-status-count', lambda s,c,r:s['counts'].update(payload_reference_match=20.0), 'status count'),
+            ('malformed-log-list', lambda s,c,r:r[0]['blocks'][0]['transactions'][0].update(logs={}), 'malformed native logs'),
+            ('malformed-log-address', lambda s,c,r:r[0]['blocks'][0]['transactions'][0].update(logs=[dict(address='0x00',topics=[],data='0x')]), 'malformed native logs'),
+            ('malformed-log-topic', lambda s,c,r:r[0]['blocks'][0]['transactions'][0].update(logs=[dict(address='0x'+'00'*20,topics=['0x00'],data='0x')]), 'malformed native logs'),
+            ('fraction-block-number', fraction('number', True), 'integer observation'),
+            ('fraction-block-gas', fraction('gas_used', True), 'integer observation'),
+            ('fraction-gas-limit', fraction('gas_limit'), 'integer observation'),
+            ('fraction-gas-spent', fraction('total_gas_spent'), 'integer observation'),
+            ('fraction-cumulative-gas', fraction('receipt_cumulative_gas_used'), 'integer observation'),
+            ('missing-external-guard', lambda s,c,r:c.pop('external_guard'), 'external resource guard'),
+            ('weakened-timeout', lambda s,c,r:c['external_guard'].update(timeout_seconds=301), 'external timeout'),
+            ('weakened-rss', lambda s,c,r:c['external_guard'].update(aggregate_rss_limit_bytes=13*1024**3), 'external resource guard settings'),
+            ('weakened-address-space', lambda s,c,r:c['external_guard'].update(address_space_hard_bytes=13*1024**3), 'external resource guard settings'),
+            ('weakened-reserve', lambda s,c,r:c['external_guard'].update(available_reserve_bytes=1024**3), 'external resource guard settings'),
+            ('swap-enabled', lambda s,c,r:c['external_guard'].update(swap_total_bytes=4096), 'external resource guard settings'),
+            ('missing-as-application', lambda s,c,r:c['external_guard'].update(rlimit_as_applied=False), 'external resource guard settings'),
+            ('wrong-external-runner', lambda s,c,r:c['external_guard'].update(runner_sha256='0'*64), 'external timeout/runner'),
+            ('bad-minimum-reserve', lambda s,c,r:c['external_guard'].update(minimum_available_bytes=1), 'external resource observations'),
+            ('coordinated-input-result', lambda s,c,r:r[0]['blocks'][0].update(state_root='0x'+'00'*32), 'pinned archive'),
+            ('missing-stop', lambda s, c, r: c.pop('stopped'), 'stopped/incomplete'),
+            ('stopped-job', lambda s, c, r: c.update(stopped='resource guard'), 'stopped/incomplete'),
+            ('missing-observation-pin', lambda s,c,r:s.pop('native_observation_sha256'), 'changed validator'),
+            ('wrong-observation-pin', lambda s,c,r:s.update(native_observation_sha256='0'*64), 'changed validator'),
+            ('wrong-validator', lambda s, c, r: s.update(native_worker_sha256='0'*64), 'changed validator'),
+            ('wrong-wrapper', lambda s, c, r: s.update(adapter_sha256='0'*64), 'unbound wrapper'),
+            ('truncated', lambda s, c, r: r.pop(), 'truncated native range'),
+            ('wrong-exit', lambda s, c, r: c.update(exit=0), 'wrong native exit'),
+            ('source-pass', lambda s, c, r: s.update(differential_complete=True), 'conflated'),
+            ('bind-row', lambda s, c, r: r[0].update(status='allocation_bound_input'), 'non-native result'),
+            ('wrong-index', lambda s, c, r: r[0].update(index=1), 'range identity'),
+            ('account-map', lambda s, c, r: r[0]['allocation_binding'].update(final_account_map_present=True), 'allocation mismatch'),
+            ('other-valid-allocation', other_allocation, 'pinned input'),
+            ('wrong-input-tx-hash', lambda s, c, r: r[0]['blocks'][0]['transactions'][0].update(hash='0x'+'00'*32), 'pinned input'),
+            ('wrong-input-tx-type', lambda s, c, r: r[0]['blocks'][0]['transactions'][0].update(type=99), 'pinned input'),
+            ('wrong-input-tx-limit', lambda s, c, r: r[0]['blocks'][0]['transactions'][0].update(gas_limit='1'), 'pinned input'),
+            ('negative-tx-spent', lambda s, c, r: r[0]['blocks'][0]['transactions'][0].update(total_gas_spent='-1'), 'integer observation'),
+            ('overspent-tx', lambda s, c, r: r[0]['blocks'][0]['transactions'][0].update(total_gas_spent=str(int(r[0]['blocks'][0]['transactions'][0]['gas_limit'])+1)), 'pinned input limit'),
+            ('empty-payload-evidence', lambda s, c, r: (r[0].update(blocks=[]), r[0]['binding'].update(payload_block_hashes=[])), 'pinned input'),
+            ('wrong-input-payload-hash', lambda s, c, r: (r[0]['blocks'][0].update(hash='0x'+'00'*32), r[0]['binding'].update(payload_block_hashes=['0x'+'00'*32])), 'pinned input'),
+            ('duplicated-input-block', lambda s, c, r: (r[0]['blocks'].append(r[0]['blocks'][0]), r[0]['binding']['payload_block_hashes'].append(r[0]['binding']['payload_block_hashes'][0])), 'pinned input'),
+            ('empty-tx-zero-gas', lambda s, c, r: r[0]['blocks'][0].update(transactions=[], gas_used='0'), 'pinned input'),
+            ('wrong-input-state-root', lambda s, c, r: r[0]['blocks'][0].update(state_root='0x'+'00'*32), 'pinned input'),
+            ('wrong-input-block-number', lambda s, c, r: r[0]['blocks'][0].update(number='999999'), 'pinned input'),
+        ]
+        for name, mutate, error in mutations:
+            with self.subTest(name=name), tempfile.TemporaryDirectory(prefix='range-control-', dir=BULK) as temporary:
+                root = Path(temporary)
+                (root/'evidence').mkdir()
+                (root/'reference').mkdir()
+                (root/'upstream').mkdir()
+                for p in ['engine-x-inputs.jsonl.gz', 'archive-inventory.jsonl.gz', 'engine-x-allocations.jsonl', 'engine-x-allocations-index.json', 'reference/package-lock.json', 'reference/package.json', 'reference/node_modules', 'upstream/fixtures_develop-v5.3.0.tar.gz']:
+                    (root/p).symlink_to(BULK/p)
+                for p in ['engine-x-export.json', 'archive-census.json']:
+                    shutil.copyfile(BULK/'evidence'/p, root/'evidence'/p)
+                summary = json.loads((BULK/'evidence/review-bound-0-20-summary.json').read_text())
+                command = json.loads((BULK/'evidence/review-bound-0-20-command.json').read_text())
+                rows = [json.loads(line) for line in (BULK/'evidence/review-bound-0-20.jsonl').read_text().splitlines()]
+                command['command'][3] = str(root)
+                command['command'][5] = 'negative-control'
+                mutate(summary, command, rows)
+                if name == 'coordinated-input-result':
+                    (root/'engine-x-inputs.jsonl.gz').unlink()
+                    with gzip.open(BULK/'engine-x-inputs.jsonl.gz', 'rt') as source, (root/'engine-x-inputs.jsonl.gz').open('wb') as raw:
+                        with gzip.GzipFile(filename='', fileobj=raw, mode='wb', mtime=0) as out:
+                            for line in source:
+                                record = json.loads(line)
+                                if record['index'] == 0:
+                                    record['fixture']['engineNewPayloads'][0]['params'][0]['stateRoot'] = rows[0]['blocks'][0]['state_root']
+                                out.write((json.dumps(record, sort_keys=True, separators=(',', ':'))+'\n').encode())
+                    receipt_path = root/'evidence/engine-x-export.json'
+                    receipt = json.loads(receipt_path.read_text())
+                    receipt['stream_sha256'] = MODULE.digest(root/'engine-x-inputs.jsonl.gz')
+                    receipt_path.write_text(json.dumps(receipt))
+                    summary['input_sha256'] = receipt['stream_sha256']
+                    summary['export_sha256'] = MODULE.digest(receipt_path)
+                data = ''.join(json.dumps(row)+'\n' for row in rows).encode()
+                summary['results_sha256'] = hashlib.sha256(data).hexdigest()
+                (root/'evidence/negative-control.jsonl').write_bytes(data)
+                (root/'evidence/negative-control-summary.json').write_text(json.dumps(summary))
+                (root/'evidence/negative-control-command.json').write_text(json.dumps(command))
+                with self.assertRaisesRegex(ValueError, error):
+                    MODULE.coverage(REPO, root, ['negative-control'])
+
+
+    def test_warm_inventory_cache_rejects_coordinated_byte_substitution(self):
+        # Changing only gzip metadata leaves decoded identities unchanged. A
+        # warm expected-metadata cache must still require archive-identical bytes.
+        with tempfile.TemporaryDirectory(prefix='inventory-cache-control-', dir=BULK) as temporary:
+            root = Path(temporary)
+            for name in ['evidence', 'reference', 'upstream']:
+                (root/name).mkdir()
+            for name in ['engine-x-inputs.jsonl.gz', 'engine-x-allocations.jsonl',
+                         'engine-x-allocations-index.json', 'reference/package.json',
+                         'reference/package-lock.json', 'reference/node_modules',
+                         'upstream/fixtures_develop-v5.3.0.tar.gz']:
+                (root/name).symlink_to(BULK/name)
+            shutil.copyfile(BULK/'archive-inventory.jsonl.gz', root/'archive-inventory.jsonl.gz')
+            for name in ['engine-x-export.json', 'archive-census.json',
+                         'review-bound-0-20.jsonl', 'review-bound-0-20-summary.json']:
+                shutil.copyfile(BULK/'evidence'/name, root/'evidence'/name)
+            command_path = root/'evidence/review-bound-0-20-command.json'
+            command = json.loads((BULK/'evidence/review-bound-0-20-command.json').read_text())
+            command['command'][3] = str(root)
+            command_path.write_text(json.dumps(command))
+            self.assertEqual(MODULE.coverage(REPO, root, ['review-bound-0-20'])['processed_unique_cases'], 20)
+            inventory = root/'archive-inventory.jsonl.gz'
+            original = inventory.read_bytes()
+            changed = bytearray(original)
+            self.assertEqual(changed[:3], b'\x1f\x8b\x08')
+            changed[4] ^= 1
+            self.assertEqual(gzip.decompress(changed), gzip.decompress(original))
+            inventory.write_bytes(changed)
+            census_path = root/'evidence/archive-census.json'
+            census = json.loads(census_path.read_text())
+            census['inventory_sha256'] = MODULE.digest(inventory)
+            census_path.write_text(json.dumps(census))
+            export_path = root/'evidence/engine-x-export.json'
+            export = json.loads(export_path.read_text())
+            export['census_sha256'] = MODULE.digest(census_path)
+            export_path.write_text(json.dumps(export))
+            summary_path = root/'evidence/review-bound-0-20-summary.json'
+            summary = json.loads(summary_path.read_text())
+            summary['inventory_sha256'] = census['inventory_sha256']
+            summary['export_sha256'] = MODULE.digest(export_path)
+            summary_path.write_text(json.dumps(summary))
+            with self.assertRaisesRegex(ValueError, 'pinned archive'):
+                MODULE.coverage(REPO, root, ['review-bound-0-20'])
+
+    def test_z_changed_observation_module_refuses_captures(self):
+        with tempfile.TemporaryDirectory(prefix='observation-source-control-', dir=BULK) as temporary:
+            repo = Path(temporary)
+            (repo/'.git').symlink_to(REPO/'.git', target_is_directory=True)
+            source = repo/'scripts/h62/item3/g52-differential'
+            source.mkdir(parents=True)
+            for original in (REPO/'scripts/h62/item3/g52-differential').iterdir():
+                if original.is_file():
+                    if original.name == 'eest_observation.mjs':
+                        text = original.read_text().replace("export function validateConfig(config) {", "export function validateConfig(config) { return false;")
+                        self.assertNotEqual(text, original.read_text())
+                        (source/original.name).write_text(text)
+                    else:
+                        (source/original.name).symlink_to(original)
+            lock = repo/'tests/h62/item3/g52-differential/package-lock.json'
+            lock.parent.mkdir(parents=True)
+            lock.symlink_to(REPO/'tests/h62/item3/g52-differential/package-lock.json')
+            with self.assertRaisesRegex(ValueError, 'changed validator'):
+                MODULE.coverage(repo, BULK, ['review-bound-0-20'])
+
+
+if __name__ == '__main__':
+    unittest.main()

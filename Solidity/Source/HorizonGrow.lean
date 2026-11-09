@@ -423,6 +423,272 @@ theorem Grow.map {Γ : RCtx} {α β : Type} (f : α → β) {m : EM E Γ α} (h 
 
 /-! ### Every interpreter function only appends events -/
 
+/-- Both calldata modes share the generic interpreter horizon schema. -/
+abbrev GrowAtKnown (G : Glob E) (n : Nat) : Prop :=
+  HorizonAt (fun {Γ} {α} (m _ : EM E Γ α) => Grow m) G n
+
+theorem Grow.withLibraryCalldata {Γ : RCtx} {α : Type}
+    (known : Bool) (ty : STy) {m : EM E Γ α} (h : Grow m) :
+    Grow (Solidity.Source.withLibraryCalldata known ty m) := by
+  cases known <;> cases ht : ty.containsCalldata <;> simp only [Solidity.Source.withLibraryCalldata, ht, Bool.false_eq_true, if_false, if_true] <;> first | exact h | exact Grow.halt _
+
+
+theorem growAtKnown_zero (G : Glob E) : GrowAtKnown G 0 := by
+  exact { evalE := by intros; rw [evalE.eq_1]; exact Grow.halt _, evalPair := by intros; rw [evalPair.eq_1]; exact Grow.halt _, evalArgs := by intros; rw [evalArgs.eq_1]; exact Grow.halt _, evalConvArgs := by intros; rw [evalConvArgs.eq_1]; exact Grow.halt _, evalLoc := by intros; rw [evalLoc.eq_1]; exact Grow.halt _, evalBuiltin := by intros; rw [evalBuiltin.eq_1]; exact Grow.halt _, evalArgsRev := by intros; rw [evalArgsRev.eq_1]; exact Grow.halt _, pay := by intros; rw [pay.eq_1]; exact Grow.halt _, execS := by intros; rw [execS.eq_1]; exact Grow.halt _, forIter := by intros; rw [forIter.eq_1]; exact Grow.halt _, execItems := by intros; rw [execItems.eq_1]; exact Grow.halt _, runMods := by intros; rw [runMods.eq_1]; exact Grow.halt _, callInternal := by intros; rw [callInternal.eq_1]; exact Grow.halt _, callLibrary := by intros; rw [callLibrary.eq_1]; exact Grow.halt _, callAddr := by intros; rw [callAddr.eq_1]; exact Grow.halt _, enterInstance := by intros; rw [enterInstance.eq_1]; exact Grow.halt _, envLoop := by intros; rw [envLoop.eq_1]; exact Grow.halt _, dispatch := by intros; rw [dispatch.eq_1]; exact Grow.halt _ }
+
+
+theorem evalE_grow_0_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (known : Bool) (F : Fr) {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ)
+    (h : 0 ≤ e.ctorIdx ∧ e.ctorIdx < 12) : Grow (evalE G F (n + 1) e (calldataKnown := known)) := by
+  cases e <;> first | (exfalso; simp only [RExpr.ctorIdx] at h; omega) | (simp only [evalE]; apply Grow.withLibraryCalldata; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow])
+
+
+theorem evalE_grow_1_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (known : Bool) (F : Fr) {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ)
+    (h : 12 ≤ e.ctorIdx ∧ e.ctorIdx < 24) : Grow (evalE G F (n + 1) e (calldataKnown := known)) := by
+  cases e <;> first | (exfalso; simp only [RExpr.ctorIdx] at h; omega) | (simp only [evalE]; apply Grow.withLibraryCalldata; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow])
+
+
+theorem evalE_grow_2_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (known : Bool) (F : Fr) {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ)
+    (h : 24 ≤ e.ctorIdx ∧ e.ctorIdx < 36) : Grow (evalE G F (n + 1) e (calldataKnown := known)) := by
+  cases e <;> first | (exfalso; simp only [RExpr.ctorIdx] at h; omega) | (simp only [evalE]; apply Grow.withLibraryCalldata; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow])
+
+
+theorem evalE_grow_3_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (known : Bool) (F : Fr) {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ)
+    (h : 36 ≤ e.ctorIdx ∧ e.ctorIdx < 60) : Grow (evalE G F (n + 1) e (calldataKnown := known)) := by
+  cases e <;> first | (exfalso; simp only [RExpr.ctorIdx] at h; omega) | (simp only [evalE]; apply Grow.withLibraryCalldata; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow])
+
+
+theorem evalE_grow_step_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (known : Bool) (F : Fr) {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ) :
+    Grow (evalE G F (n + 1) e (calldataKnown := known)) := by
+  by_cases h0 : e.ctorIdx < 12
+  · exact evalE_grow_0_known ih known F e ⟨Nat.zero_le _, h0⟩
+  by_cases h1 : e.ctorIdx < 24
+  · exact evalE_grow_1_known ih known F e ⟨by omega, h1⟩
+  by_cases h2 : e.ctorIdx < 36
+  · exact evalE_grow_2_known ih known F e ⟨by omega, h2⟩
+  have h3 : e.ctorIdx < 60 := by cases e <;> simp only [RExpr.ctorIdx] <;> omega
+  exact evalE_grow_3_known ih known F e ⟨by omega, h3⟩
+
+
+theorem evalPair_grow_step_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (known : Bool) (F : Fr) {Γ : RCtx} {σ τ : STy} (a : RExpr E Γ σ) (b : RExpr E Γ τ) :
+    Grow (evalPair G F (n + 1) a b (calldataKnown := known)) := by
+  simp only [evalPair]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+
+
+theorem evalArgs_grow_step_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (known : Bool) (F : Fr) {Γ : RCtx} {τs : List STy} (es : RArgs E Γ τs) :
+    Grow (evalArgs G F (n + 1) es (calldataKnown := known)) := by
+  cases es <;> simp only [evalArgs] <;> grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+
+
+theorem evalConvArgs_grow_step_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (known : Bool) (F : Fr) {Γ : RCtx} {τs : List STy} (es : RConvArgs E Γ τs) :
+    Grow (evalConvArgs G F (n + 1) es (calldataKnown := known)) := by
+  cases es <;> simp only [evalConvArgs] <;> grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+
+
+theorem evalLoc_grow_step_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (known : Bool) (F : Fr) {Γ : RCtx} {τ : STy} (l : RLVal E Γ τ) :
+    Grow (evalLoc G F (n + 1) l (calldataKnown := known)) := by
+  cases l <;> simp only [evalLoc] <;> grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+
+
+theorem evalBuiltin_grow_0_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (known : Bool) (F : Fr) {Γ : RCtx} {σs : List STy}
+    (b : Builtin) (args : RArgs E Γ σs) (τ : STy) (hb : b = .require ∨ b = .assert ∨ b = .revert) :
+    Grow (evalBuiltin G F (n + 1) b args τ (calldataKnown := known)) := by
+  rcases hb with rfl | rfl | rfl <;> simp only [evalBuiltin] <;> grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+
+
+theorem evalBuiltin_grow_1_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (known : Bool) (F : Fr) {Γ : RCtx} {σs : List STy}
+    (b : Builtin) (args : RArgs E Γ σs) (τ : STy) (hb : b = .keccak256 ∨ b = .sha256 ∨ b = .ripemd160) :
+    Grow (evalBuiltin G F (n + 1) b args τ (calldataKnown := known)) := by
+  rcases hb with rfl | rfl | rfl <;> simp only [evalBuiltin] <;> grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+
+
+theorem evalBuiltin_grow_2_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (known : Bool) (F : Fr) {Γ : RCtx} {σs : List STy}
+    (b : Builtin) (args : RArgs E Γ σs) (τ : STy) (hb : b = .addmod) :
+    Grow (evalBuiltin G F (n + 1) b args τ (calldataKnown := known)) := by
+  rcases hb with rfl <;> simp only [evalBuiltin] <;> grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+
+
+
+
+theorem callLibrary_grow_step_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n)
+    (F : Fr) (d : Decl) {ps : List STy} (vs : Vals E.layout ps) (rs : List STy) :
+    Grow (callLibrary G F (n + 1) d vs rs) := by
+  simp only [callLibrary]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+
+
+theorem evalBuiltin_grow_3_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (known : Bool) (F : Fr) {Γ : RCtx} {σs : List STy}
+    (b : Builtin) (args : RArgs E Γ σs) (τ : STy) (hb : b = .mulmod) :
+    Grow (evalBuiltin G F (n + 1) b args τ (calldataKnown := known)) := by
+  rcases hb with rfl <;> simp only [evalBuiltin] <;> grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+
+
+theorem evalBuiltin_grow_4_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (known : Bool) (F : Fr) {Γ : RCtx} {σs : List STy}
+    (b : Builtin) (args : RArgs E Γ σs) (τ : STy) (hb : b = .ecrecover) :
+    Grow (evalBuiltin G F (n + 1) b args τ (calldataKnown := known)) := by
+  rcases hb with rfl <;> simp only [evalBuiltin] <;> grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+
+
+theorem evalBuiltin_grow_step_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (known : Bool) (F : Fr) {Γ : RCtx} {σs : List STy}
+    (b : Builtin) (args : RArgs E Γ σs) (τ : STy) : Grow (evalBuiltin G F (n + 1) b args τ (calldataKnown := known)) := by
+  cases b
+  all_goals first
+    | exact evalBuiltin_grow_0_known ih known F _ args τ (by decide)
+    | exact evalBuiltin_grow_1_known ih known F _ args τ (by decide)
+    | exact evalBuiltin_grow_2_known ih known F _ args τ (by decide)
+    | exact evalBuiltin_grow_3_known ih known F _ args τ (by decide)
+    | exact evalBuiltin_grow_4_known ih known F _ args τ (by decide)
+    | (simp only [evalBuiltin]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow])
+
+
+theorem evalArgsRev_grow_step_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (known : Bool) (F : Fr) {Γ : RCtx} {τs : List STy} (es : RArgs E Γ τs) :
+    Grow (evalArgsRev G F (n + 1) es (calldataKnown := known)) := by
+  cases es <;> simp only [evalArgsRev] <;> grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+
+
+theorem pay_grow_step_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (known : Bool) (F : Fr) {Γ : RCtx} (a : RExpr E Γ (.address true)) (v : RExpr E Γ (.int IntTy.u256)) :
+    Grow (pay G F (n + 1) a v (calldataKnown := known)) := by
+  simp only [pay]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+
+
+theorem execS_grow_step_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (known : Bool) (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool} {k : SCtx} {Γ Γ' : RCtx} (s : RStmt E R M k Γ Γ') (l : Locals E.layout Γ) :
+    Grow (execS G F (n + 1) nps ph s l (calldataKnown := known)) := by
+  cases s <;> simp only [execS] <;> grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+
+
+theorem forIter_grow_step_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (known : Bool) (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M u : Bool} {Γ₁ Γ₂ : RCtx} (c : ROptBool E Γ₁) (post : ROptExpr E Γ₁) (body : RStmt E R M ⟨true, u⟩ Γ₁ Γ₂) (l : Locals E.layout Γ₁) :
+    Grow (forIter G F (n + 1) nps ph c post body l (calldataKnown := known)) := by
+  cases c <;> simp only [forIter] <;> grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+
+
+theorem execItems_grow_step_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (known : Bool) (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool} {k : SCtx} {Γ Γ' : RCtx} (b : RItems E R M k Γ Γ') (l : Locals E.layout Γ) :
+    Grow (execItems G F (n + 1) nps ph b l (calldataKnown := known)) := by
+  cases b <;> simp only [execItems] <;> grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+
+
+theorem runMods_grow_step_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (known : Bool) (F : Fr) (b : RBody E) (mods : List (RModInv E b.locals)) (l : Locals E.layout b.locals) :
+    Grow (runMods G F (n + 1) b mods l (calldataKnown := known)) := by
+  cases mods <;> simp only [runMods] <;> grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+
+
+theorem callInternal_grow_step_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (known : Bool) (F : Fr) (d : Decl) {ps : List STy} (vs : Vals E.layout ps) (rs : List STy) :
+    Grow (callInternal G F (n + 1) d vs rs (calldataKnown := known)) := by
+  simp only [callInternal]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+
+
+theorem callAddr_grow_step_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (F : Fr) (a : Address) (v : Word) (input : Bytes) (static : Bool) :
+    Grow (callAddr G F (n + 1) a v input static) := by
+  simp only [callAddr]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+
+
+theorem enterInstance_grow_step_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (a sender : Address) (v : Word) (input : Bytes) (static : Bool) (c : String) (depth : Nat) (m : Nat × Nat × Heap E.layout) :
+    Grow (enterInstance G (n + 1) a sender v input static c depth m) := by
+  simp only [enterInstance]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+
+
+theorem envLoop_grow_step_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (depth : Nat) (pstatic : Bool) :
+    Grow (envLoop G (n + 1) depth pstatic) := by
+  rw [envLoop.eq_2 G depth pstatic none n]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+
+
+theorem dispatch_grow_fn_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (F : Fr) (input : Bytes) {d : Decl}
+    (hp : G.pickFn F input = some d) (he : input.isEmpty = false) : Grow (dispatch G F (n + 1) input) := by
+  simp only [dispatch, hp, he]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+
+
+theorem dispatch_grow_getter_none_c_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (F : Fr) (input : Bytes) (hp : G.pickFn F input = none) {d : Decl} {ps : List STy} {ρ : STy} {ri : RInit E}
+    (hg : G.pickGetter F input = some (d, ps, ρ)) (hc : G.prog.consts d = some ri) :
+    Grow (dispatch G F (n + 1) input) := by
+  simp only [dispatch, hp, hc, hg]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+
+
+theorem dispatch_grow_getter_none_v_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (F : Fr) (input : Bytes) (hp : G.pickFn F input = none) {d : Decl} {ps : List STy} {ρ : STy} {τ : STy}
+    (hg : G.pickGetter F input = some (d, ps, ρ)) (hc : G.prog.consts d = none) (hv : d.varTy E = some τ) :
+    Grow (dispatch G F (n + 1) input) := by
+  simp only [dispatch, hp, hc, hv, hg]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+
+
+theorem dispatch_grow_getter_none_x_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (F : Fr) (input : Bytes) (hp : G.pickFn F input = none) {d : Decl} {ps : List STy} {ρ : STy}
+    (hg : G.pickGetter F input = some (d, ps, ρ)) (hc : G.prog.consts d = none) (hv : d.varTy E = none) :
+    Grow (dispatch G F (n + 1) input) := by
+  simp only [dispatch, hp, hc, hv, hg]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+
+
+theorem dispatch_grow_getter_none_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (F : Fr) (input : Bytes) (hp : G.pickFn F input = none) {r : Decl × List STy × STy} (hg : G.pickGetter F input = some r) :
+    Grow (dispatch G F (n + 1) input) := by
+  obtain ⟨d, ps, ρ⟩ := r
+  cases hc : G.prog.consts d with
+  | some ri => exact dispatch_grow_getter_none_c_known ih F input hp hg hc
+  | none =>
+    cases hv : d.varTy E with
+    | some τ => exact dispatch_grow_getter_none_v_known ih F input hp hg hc hv
+    | none => exact dispatch_grow_getter_none_x_known ih F input hp hg hc hv
+
+
+theorem dispatch_grow_getter_some_c_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (F : Fr) (input : Bytes) {d0 : Decl} (hp : G.pickFn F input = some d0) (he : input.isEmpty = true) {d : Decl} {ps : List STy} {ρ : STy} {ri : RInit E}
+    (hg : G.pickGetter F input = some (d, ps, ρ)) (hc : G.prog.consts d = some ri) :
+    Grow (dispatch G F (n + 1) input) := by
+  simp only [dispatch, hp, he, hc, hg]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+
+
+theorem dispatch_grow_getter_some_v_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (F : Fr) (input : Bytes) {d0 : Decl} (hp : G.pickFn F input = some d0) (he : input.isEmpty = true) {d : Decl} {ps : List STy} {ρ : STy} {τ : STy}
+    (hg : G.pickGetter F input = some (d, ps, ρ)) (hc : G.prog.consts d = none) (hv : d.varTy E = some τ) :
+    Grow (dispatch G F (n + 1) input) := by
+  simp only [dispatch, hp, he, hc, hv, hg]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+
+
+theorem dispatch_grow_getter_some_x_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (F : Fr) (input : Bytes) {d0 : Decl} (hp : G.pickFn F input = some d0) (he : input.isEmpty = true) {d : Decl} {ps : List STy} {ρ : STy}
+    (hg : G.pickGetter F input = some (d, ps, ρ)) (hc : G.prog.consts d = none) (hv : d.varTy E = none) :
+    Grow (dispatch G F (n + 1) input) := by
+  simp only [dispatch, hp, he, hc, hv, hg]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+
+
+theorem dispatch_grow_getter_some_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (F : Fr) (input : Bytes) {d0 : Decl} (hp : G.pickFn F input = some d0) (he : input.isEmpty = true) {r : Decl × List STy × STy} (hg : G.pickGetter F input = some r) :
+    Grow (dispatch G F (n + 1) input) := by
+  obtain ⟨d, ps, ρ⟩ := r
+  cases hc : G.prog.consts d with
+  | some ri => exact dispatch_grow_getter_some_c_known ih F input hp he hg hc
+  | none =>
+    cases hv : d.varTy E with
+    | some τ => exact dispatch_grow_getter_some_v_known ih F input hp he hg hc hv
+    | none => exact dispatch_grow_getter_some_x_known ih F input hp he hg hc hv
+
+
+theorem dispatch_grow_getter_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (F : Fr) (input : Bytes) (b : Bool) {r : Decl × List STy × STy}
+    (hm : (G.pickFn F input, input.isEmpty) = (none, b) ∨ ∃ d, (G.pickFn F input, input.isEmpty) = (some d, true))
+    (hg : G.pickGetter F input = some r) : Grow (dispatch G F (n + 1) input) := by
+  rcases hm with hm | ⟨d, hm⟩ <;> simp only [Prod.mk.injEq] at hm
+  · exact dispatch_grow_getter_none_known ih F input hm.1 hg
+  · exact dispatch_grow_getter_some_known ih F input hm.1 hm.2 hg
+
+
+theorem dispatch_grow_special_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (F : Fr) (input : Bytes) (b : Bool)
+    (hm : (G.pickFn F input, input.isEmpty) = (none, b) ∨ ∃ d, (G.pickFn F input, input.isEmpty) = (some d, true))
+    (hg : G.pickGetter F input = none) : Grow (dispatch G F (n + 1) input) := by
+  rcases hm with hm | ⟨d, hm⟩ <;> simp only [Prod.mk.injEq] at hm <;> simp only [dispatch, hm.1, hm.2, hg] <;>
+    grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callLibrary, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+
+
+theorem dispatch_grow_step_known {G : Glob E} {n : Nat} (ih : GrowAtKnown G n) (F : Fr) (input : Bytes) : Grow (dispatch G F (n + 1) input) := by
+  cases hp : G.pickFn F input with
+  | some d =>
+    cases he : input.isEmpty with
+    | false => exact dispatch_grow_fn_known ih F input hp he
+    | true =>
+      cases hg : G.pickGetter F input with
+      | some r => exact dispatch_grow_getter_known ih F input true (.inr ⟨d, by rw [hp, he]⟩) hg
+      | none => exact dispatch_grow_special_known ih F input true (.inr ⟨d, by rw [hp, he]⟩) hg
+  | none =>
+    cases hg : G.pickGetter F input with
+    | some r => exact dispatch_grow_getter_known ih F input _ (.inl (by rw [hp])) hg
+    | none => exact dispatch_grow_special_known ih F input _ (.inl (by rw [hp])) hg
+
+
+theorem growAtKnown (G : Glob E) : ∀ n, GrowAtKnown G n := by
+  intro n
+  induction n with
+  | zero => exact growAtKnown_zero G
+  | succ n ih => exact ⟨evalE_grow_step_known ih, evalPair_grow_step_known ih, evalArgs_grow_step_known ih, evalConvArgs_grow_step_known ih, evalLoc_grow_step_known ih, evalBuiltin_grow_step_known ih, evalArgsRev_grow_step_known ih, pay_grow_step_known ih, execS_grow_step_known ih, forIter_grow_step_known ih, execItems_grow_step_known ih, runMods_grow_step_known ih, callInternal_grow_step_known ih, callLibrary_grow_step_known ih, callAddr_grow_step_known ih, enterInstance_grow_step_known ih, envLoop_grow_step_known ih, dispatch_grow_step_known ih⟩
+
+
 structure GrowAt (G : Glob E) (n : Nat) : Prop where
   evalE : ∀ (F : Fr) ⦃Γ : RCtx⦄ ⦃τ : STy⦄ (e : RExpr E Γ τ), Grow (evalE G F n e)
   evalPair : ∀ (F : Fr) ⦃Γ : RCtx⦄ ⦃σ τ : STy⦄ (a : RExpr E Γ σ) (b : RExpr E Γ τ), Grow (evalPair G F n a b)
@@ -463,172 +729,209 @@ theorem growAt_zero (G : Glob E) : GrowAt G 0 where
 
 theorem evalE_grow_0 {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ)
     (h : 0 ≤ e.ctorIdx ∧ e.ctorIdx < 12) : Grow (evalE G F (n + 1) e) := by
-  cases e <;> first | (exfalso; simp only [RExpr.ctorIdx] at h; omega) | (simp only [evalE]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow])
+  clear ih h
+  exact (growAtKnown G (n + 1)).evalE true F e
+
 theorem evalE_grow_1 {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ)
     (h : 12 ≤ e.ctorIdx ∧ e.ctorIdx < 24) : Grow (evalE G F (n + 1) e) := by
-  cases e <;> first | (exfalso; simp only [RExpr.ctorIdx] at h; omega) | (simp only [evalE]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow])
+  clear ih h
+  exact (growAtKnown G (n + 1)).evalE true F e
+
 theorem evalE_grow_2 {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ)
     (h : 24 ≤ e.ctorIdx ∧ e.ctorIdx < 36) : Grow (evalE G F (n + 1) e) := by
-  cases e <;> first | (exfalso; simp only [RExpr.ctorIdx] at h; omega) | (simp only [evalE]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow])
+  clear ih h
+  exact (growAtKnown G (n + 1)).evalE true F e
+
 theorem evalE_grow_3 {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ)
     (h : 36 ≤ e.ctorIdx ∧ e.ctorIdx < 60) : Grow (evalE G F (n + 1) e) := by
-  cases e <;> first | (exfalso; simp only [RExpr.ctorIdx] at h; omega) | (simp only [evalE]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow])
+  clear ih h
+  exact (growAtKnown G (n + 1)).evalE true F e
+
 theorem evalE_grow_step {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ) :
     Grow (evalE G F (n + 1) e) := by
-  by_cases h0 : e.ctorIdx < 12
-  · exact evalE_grow_0 ih F e ⟨Nat.zero_le _, h0⟩
-  by_cases h1 : e.ctorIdx < 24
-  · exact evalE_grow_1 ih F e ⟨by omega, h1⟩
-  by_cases h2 : e.ctorIdx < 36
-  · exact evalE_grow_2 ih F e ⟨by omega, h2⟩
-  have h3 : e.ctorIdx < 60 := by cases e <;> simp only [RExpr.ctorIdx] <;> omega
-  exact evalE_grow_3 ih F e ⟨by omega, h3⟩
+  clear ih
+  exact (growAtKnown G (n + 1)).evalE true F e
+
 theorem evalPair_grow_step {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) {Γ : RCtx} {σ τ : STy} (a : RExpr E Γ σ) (b : RExpr E Γ τ) :
     Grow (evalPair G F (n + 1) a b) := by
-  simp only [evalPair]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+  clear ih
+  exact (growAtKnown G (n + 1)).evalPair true F a b
+
 theorem evalArgs_grow_step {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) {Γ : RCtx} {τs : List STy} (es : RArgs E Γ τs) :
     Grow (evalArgs G F (n + 1) es) := by
-  cases es <;> simp only [evalArgs] <;> grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+  clear ih
+  exact (growAtKnown G (n + 1)).evalArgs true F es
+
 theorem evalConvArgs_grow_step {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) {Γ : RCtx} {τs : List STy} (es : RConvArgs E Γ τs) :
     Grow (evalConvArgs G F (n + 1) es) := by
-  cases es <;> simp only [evalConvArgs] <;> grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+  clear ih
+  exact (growAtKnown G (n + 1)).evalConvArgs true F es
+
 theorem evalLoc_grow_step {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) {Γ : RCtx} {τ : STy} (l : RLVal E Γ τ) :
     Grow (evalLoc G F (n + 1) l) := by
-  cases l <;> simp only [evalLoc] <;> grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+  clear ih
+  exact (growAtKnown G (n + 1)).evalLoc true F l
+
 theorem evalBuiltin_grow_0 {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) {Γ : RCtx} {σs : List STy}
     (b : Builtin) (args : RArgs E Γ σs) (τ : STy) (hb : b = .require ∨ b = .assert ∨ b = .revert) :
     Grow (evalBuiltin G F (n + 1) b args τ) := by
-  rcases hb with rfl | rfl | rfl <;> simp only [evalBuiltin] <;> grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+  clear ih hb
+  exact (growAtKnown G (n + 1)).evalBuiltin true F b args τ
+
 theorem evalBuiltin_grow_1 {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) {Γ : RCtx} {σs : List STy}
     (b : Builtin) (args : RArgs E Γ σs) (τ : STy) (hb : b = .keccak256 ∨ b = .sha256 ∨ b = .ripemd160) :
     Grow (evalBuiltin G F (n + 1) b args τ) := by
-  rcases hb with rfl | rfl | rfl <;> simp only [evalBuiltin] <;> grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+  clear ih hb
+  exact (growAtKnown G (n + 1)).evalBuiltin true F b args τ
+
 theorem evalBuiltin_grow_2 {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) {Γ : RCtx} {σs : List STy}
     (b : Builtin) (args : RArgs E Γ σs) (τ : STy) (hb : b = .addmod) :
     Grow (evalBuiltin G F (n + 1) b args τ) := by
-  rcases hb with rfl <;> simp only [evalBuiltin] <;> grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+  clear ih hb
+  exact (growAtKnown G (n + 1)).evalBuiltin true F b args τ
+
 theorem evalBuiltin_grow_3 {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) {Γ : RCtx} {σs : List STy}
     (b : Builtin) (args : RArgs E Γ σs) (τ : STy) (hb : b = .mulmod) :
     Grow (evalBuiltin G F (n + 1) b args τ) := by
-  rcases hb with rfl <;> simp only [evalBuiltin] <;> grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+  clear ih hb
+  exact (growAtKnown G (n + 1)).evalBuiltin true F b args τ
+
 theorem evalBuiltin_grow_4 {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) {Γ : RCtx} {σs : List STy}
     (b : Builtin) (args : RArgs E Γ σs) (τ : STy) (hb : b = .ecrecover) :
     Grow (evalBuiltin G F (n + 1) b args τ) := by
-  rcases hb with rfl <;> simp only [evalBuiltin] <;> grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+  clear ih hb
+  exact (growAtKnown G (n + 1)).evalBuiltin true F b args τ
+
 theorem evalBuiltin_grow_step {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) {Γ : RCtx} {σs : List STy}
     (b : Builtin) (args : RArgs E Γ σs) (τ : STy) : Grow (evalBuiltin G F (n + 1) b args τ) := by
-  cases b
-  all_goals first
-    | exact evalBuiltin_grow_0 ih F _ args τ (by decide)
-    | exact evalBuiltin_grow_1 ih F _ args τ (by decide)
-    | exact evalBuiltin_grow_2 ih F _ args τ (by decide)
-    | exact evalBuiltin_grow_3 ih F _ args τ (by decide)
-    | exact evalBuiltin_grow_4 ih F _ args τ (by decide)
-    | (simp only [evalBuiltin]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow])
+  clear ih
+  exact (growAtKnown G (n + 1)).evalBuiltin true F b args τ
+
 theorem evalArgsRev_grow_step {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) {Γ : RCtx} {τs : List STy} (es : RArgs E Γ τs) :
     Grow (evalArgsRev G F (n + 1) es) := by
-  cases es <;> simp only [evalArgsRev] <;> grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+  clear ih
+  exact (growAtKnown G (n + 1)).evalArgsRev true F es
+
 theorem pay_grow_step {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) {Γ : RCtx} (a : RExpr E Γ (.address true)) (v : RExpr E Γ (.int IntTy.u256)) :
     Grow (pay G F (n + 1) a v) := by
-  simp only [pay]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+  clear ih
+  exact (growAtKnown G (n + 1)).pay true F a v
+
 theorem execS_grow_step {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool} {k : SCtx} {Γ Γ' : RCtx} (s : RStmt E R M k Γ Γ') (l : Locals E.layout Γ) :
     Grow (execS G F (n + 1) nps ph s l) := by
-  cases s <;> simp only [execS] <;> grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+  clear ih
+  exact (growAtKnown G (n + 1)).execS true F nps ph s l
+
 theorem forIter_grow_step {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M u : Bool} {Γ₁ Γ₂ : RCtx} (c : ROptBool E Γ₁) (post : ROptExpr E Γ₁) (body : RStmt E R M ⟨true, u⟩ Γ₁ Γ₂) (l : Locals E.layout Γ₁) :
     Grow (forIter G F (n + 1) nps ph c post body l) := by
-  cases c <;> simp only [forIter] <;> grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+  clear ih
+  exact (growAtKnown G (n + 1)).forIter true F nps ph c post body l
+
 theorem execItems_grow_step {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool} {k : SCtx} {Γ Γ' : RCtx} (b : RItems E R M k Γ Γ') (l : Locals E.layout Γ) :
     Grow (execItems G F (n + 1) nps ph b l) := by
-  cases b <;> simp only [execItems] <;> grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+  clear ih
+  exact (growAtKnown G (n + 1)).execItems true F nps ph b l
+
 theorem runMods_grow_step {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) (b : RBody E) (mods : List (RModInv E b.locals)) (l : Locals E.layout b.locals) :
     Grow (runMods G F (n + 1) b mods l) := by
-  cases mods <;> simp only [runMods] <;> grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+  clear ih
+  exact (growAtKnown G (n + 1)).runMods true F b mods l
+
 theorem callInternal_grow_step {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) (d : Decl) {ps : List STy} (vs : Vals E.layout ps) (rs : List STy) :
     Grow (callInternal G F (n + 1) d vs rs) := by
-  simp only [callInternal]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+  clear ih
+  exact (growAtKnown G (n + 1)).callInternal true F d vs rs
+
 theorem callAddr_grow_step {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) (a : Address) (v : Word) (input : Bytes) (static : Bool) :
     Grow (callAddr G F (n + 1) a v input static) := by
-  simp only [callAddr]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+  clear ih
+  exact (growAtKnown G (n + 1)).callAddr F a v input static
+
 theorem enterInstance_grow_step {G : Glob E} {n : Nat} (ih : GrowAt G n) (a sender : Address) (v : Word) (input : Bytes) (static : Bool) (c : String) (depth : Nat) (m : Nat × Nat × Heap E.layout) :
     Grow (enterInstance G (n + 1) a sender v input static c depth m) := by
-  simp only [enterInstance]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+  clear ih
+  exact (growAtKnown G (n + 1)).enterInstance a sender v input static c depth m
+
 theorem envLoop_grow_step {G : Glob E} {n : Nat} (ih : GrowAt G n) (depth : Nat) (pstatic : Bool) :
     Grow (envLoop G (n + 1) depth pstatic) := by
-  rw [envLoop.eq_2 G depth pstatic none n]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+  clear ih
+  exact (growAtKnown G (n + 1)).envLoop depth pstatic
+
 theorem dispatch_grow_fn {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) (input : Bytes) {d : Decl}
     (hp : G.pickFn F input = some d) (he : input.isEmpty = false) : Grow (dispatch G F (n + 1) input) := by
-  simp only [dispatch, hp, he]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+  clear he hp d ih
+  exact (growAtKnown G (n + 1)).dispatch F input
+
 theorem dispatch_grow_getter_none_c {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) (input : Bytes) (hp : G.pickFn F input = none) {d : Decl} {ps : List STy} {ρ : STy} {ri : RInit E}
     (hg : G.pickGetter F input = some (d, ps, ρ)) (hc : G.prog.consts d = some ri) :
     Grow (dispatch G F (n + 1) input) := by
-  simp only [dispatch, hp, hc, hg]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+  clear hc hg ri ρ ps d hp ih
+  exact (growAtKnown G (n + 1)).dispatch F input
+
 theorem dispatch_grow_getter_none_v {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) (input : Bytes) (hp : G.pickFn F input = none) {d : Decl} {ps : List STy} {ρ : STy} {τ : STy}
     (hg : G.pickGetter F input = some (d, ps, ρ)) (hc : G.prog.consts d = none) (hv : d.varTy E = some τ) :
     Grow (dispatch G F (n + 1) input) := by
-  simp only [dispatch, hp, hc, hv, hg]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+  clear hv hc hg τ ρ ps d hp ih
+  exact (growAtKnown G (n + 1)).dispatch F input
+
 theorem dispatch_grow_getter_none_x {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) (input : Bytes) (hp : G.pickFn F input = none) {d : Decl} {ps : List STy} {ρ : STy} 
     (hg : G.pickGetter F input = some (d, ps, ρ)) (hc : G.prog.consts d = none) (hv : d.varTy E = none) :
     Grow (dispatch G F (n + 1) input) := by
-  simp only [dispatch, hp, hc, hv, hg]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+  clear hv hc hg ρ ps d hp ih
+  exact (growAtKnown G (n + 1)).dispatch F input
+
 theorem dispatch_grow_getter_none {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) (input : Bytes) (hp : G.pickFn F input = none) {r : Decl × List STy × STy} (hg : G.pickGetter F input = some r) :
     Grow (dispatch G F (n + 1) input) := by
-  obtain ⟨d, ps, ρ⟩ := r
-  cases hc : G.prog.consts d with
-  | some ri => exact dispatch_grow_getter_none_c ih F input hp hg hc
-  | none =>
-    cases hv : d.varTy E with
-    | some τ => exact dispatch_grow_getter_none_v ih F input hp hg hc hv
-    | none => exact dispatch_grow_getter_none_x ih F input hp hg hc hv
+  clear hg r hp ih
+  exact (growAtKnown G (n + 1)).dispatch F input
+
 theorem dispatch_grow_getter_some_c {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) (input : Bytes) {d0 : Decl} (hp : G.pickFn F input = some d0) (he : input.isEmpty = true) {d : Decl} {ps : List STy} {ρ : STy} {ri : RInit E}
     (hg : G.pickGetter F input = some (d, ps, ρ)) (hc : G.prog.consts d = some ri) :
     Grow (dispatch G F (n + 1) input) := by
-  simp only [dispatch, hp, he, hc, hg]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+  clear hc hg ri ρ ps d he hp d0 ih
+  exact (growAtKnown G (n + 1)).dispatch F input
+
 theorem dispatch_grow_getter_some_v {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) (input : Bytes) {d0 : Decl} (hp : G.pickFn F input = some d0) (he : input.isEmpty = true) {d : Decl} {ps : List STy} {ρ : STy} {τ : STy}
     (hg : G.pickGetter F input = some (d, ps, ρ)) (hc : G.prog.consts d = none) (hv : d.varTy E = some τ) :
     Grow (dispatch G F (n + 1) input) := by
-  simp only [dispatch, hp, he, hc, hv, hg]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+  clear hv hc hg τ ρ ps d he hp d0 ih
+  exact (growAtKnown G (n + 1)).dispatch F input
+
 theorem dispatch_grow_getter_some_x {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) (input : Bytes) {d0 : Decl} (hp : G.pickFn F input = some d0) (he : input.isEmpty = true) {d : Decl} {ps : List STy} {ρ : STy} 
     (hg : G.pickGetter F input = some (d, ps, ρ)) (hc : G.prog.consts d = none) (hv : d.varTy E = none) :
     Grow (dispatch G F (n + 1) input) := by
-  simp only [dispatch, hp, he, hc, hv, hg]; grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+  clear hv hc hg ρ ps d he hp d0 ih
+  exact (growAtKnown G (n + 1)).dispatch F input
+
 theorem dispatch_grow_getter_some {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) (input : Bytes) {d0 : Decl} (hp : G.pickFn F input = some d0) (he : input.isEmpty = true) {r : Decl × List STy × STy} (hg : G.pickGetter F input = some r) :
     Grow (dispatch G F (n + 1) input) := by
-  obtain ⟨d, ps, ρ⟩ := r
-  cases hc : G.prog.consts d with
-  | some ri => exact dispatch_grow_getter_some_c ih F input hp he hg hc
-  | none =>
-    cases hv : d.varTy E with
-    | some τ => exact dispatch_grow_getter_some_v ih F input hp he hg hc hv
-    | none => exact dispatch_grow_getter_some_x ih F input hp he hg hc hv
+  clear hg r he hp d0 ih
+  exact (growAtKnown G (n + 1)).dispatch F input
+
 theorem dispatch_grow_getter {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) (input : Bytes) (b : Bool) {r : Decl × List STy × STy}
     (hm : (G.pickFn F input, input.isEmpty) = (none, b) ∨ ∃ d, (G.pickFn F input, input.isEmpty) = (some d, true))
     (hg : G.pickGetter F input = some r) : Grow (dispatch G F (n + 1) input) := by
-  rcases hm with hm | ⟨d, hm⟩ <;> simp only [Prod.mk.injEq] at hm
-  · exact dispatch_grow_getter_none ih F input hm.1 hg
-  · exact dispatch_grow_getter_some ih F input hm.1 hm.2 hg
+  clear hg hm r b ih
+  exact (growAtKnown G (n + 1)).dispatch F input
+
 theorem dispatch_grow_special {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) (input : Bytes) (b : Bool)
     (hm : (G.pickFn F input, input.isEmpty) = (none, b) ∨ ∃ d, (G.pickFn F input, input.isEmpty) = (some d, true))
     (hg : G.pickGetter F input = none) : Grow (dispatch G F (n + 1) input) := by
-  rcases hm with hm | ⟨d, hm⟩ <;> simp only [Prod.mk.injEq] at hm <;> simp only [dispatch, hm.1, hm.2, hg] <;>
-    grow_go [ih.evalE, ih.evalPair, ih.evalArgs, ih.evalConvArgs, ih.evalLoc, ih.evalBuiltin, ih.evalArgsRev, ih.pay, ih.execS, ih.forIter, ih.execItems, ih.runMods, ih.callInternal, ih.callAddr, ih.enterInstance, ih.envLoop, ih.dispatch, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow, memSet_grow, memElem_grow, readLoc_grow, lengthOf_grow, indexLoc_grow, indexNat_grow, instanceAt_grow, emitEvent_grow, credit_grow, debit_grow, mark_grow, rollbackTo_grow, reraise_grow, fieldsOf_grow, ret32_grow, decodeArgs_grow, abiDecodeData_grow, bytesOfRV_grow, encodeVals_grow, convRV_grow, pushVals_grow, convExplicitRV_grow, writeLoc_grow, deleteLoc_grow, keyStep_grow, zeroVals_grow, zeroInner_grow, copyInto_grow, getterPath_grow, extReturn_grow]
+  clear hg hm b ih
+  exact (growAtKnown G (n + 1)).dispatch F input
+
 theorem dispatch_grow_step {G : Glob E} {n : Nat} (ih : GrowAt G n) (F : Fr) (input : Bytes) : Grow (dispatch G F (n + 1) input) := by
-  cases hp : G.pickFn F input with
-  | some d =>
-    cases he : input.isEmpty with
-    | false => exact dispatch_grow_fn ih F input hp he
-    | true =>
-      cases hg : G.pickGetter F input with
-      | some r => exact dispatch_grow_getter ih F input true (.inr ⟨d, by rw [hp, he]⟩) hg
-      | none => exact dispatch_grow_special ih F input true (.inr ⟨d, by rw [hp, he]⟩) hg
-  | none =>
-    cases hg : G.pickGetter F input with
-    | some r => exact dispatch_grow_getter ih F input _ (.inl (by rw [hp])) hg
-    | none => exact dispatch_grow_special ih F input _ (.inl (by rw [hp])) hg
+  clear ih
+  exact (growAtKnown G (n + 1)).dispatch F input
 
 theorem growAt (G : Glob E) : ∀ n, GrowAt G n
   | 0 => growAt_zero G
   | n + 1 =>
-    have ih := growAt G n
-    ⟨evalE_grow_step ih, evalPair_grow_step ih, evalArgs_grow_step ih, evalConvArgs_grow_step ih, evalLoc_grow_step ih, evalBuiltin_grow_step ih, evalArgsRev_grow_step ih, pay_grow_step ih, execS_grow_step ih, forIter_grow_step ih, execItems_grow_step ih, runMods_grow_step ih, callInternal_grow_step ih, callAddr_grow_step ih, enterInstance_grow_step ih, envLoop_grow_step ih, dispatch_grow_step ih⟩
+    have h : GrowAtKnown G (n + 1) := growAtKnown G (n + 1)
+    ⟨h.evalE true, h.evalPair true, h.evalArgs true, h.evalConvArgs true,
+      h.evalLoc true, h.evalBuiltin true, h.evalArgsRev true, h.pay true,
+      h.execS true, h.forIter true, h.execItems true, h.runMods true,
+      h.callInternal true, h.callAddr, h.enterInstance, h.envLoop,
+      h.dispatch⟩
 
 end Solidity.Source

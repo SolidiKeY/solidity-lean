@@ -1,0 +1,25 @@
+{
+  "support_modules": [
+    "Solidity.Backend.Selection.InterfaceV2Controls",
+    "Solidity.Backend.Selection.LiteralSelection"
+  ],
+  "support_sources": [
+    "tests/h62/item2/audit-bytecode-selection/runtime-control-support.lean.txt",
+    "tests/h62/item2/audit-bytecode-selection/decoder-field-support.lean.txt",
+    "tests/h62/item2/audit-bytecode-selection/runtime-consumer-support.lean.txt"
+  ],
+  "witnesses": {
+    "runtime_v2_consume_joint_domain": {
+      "target": "Solidity.Backend.Selection.V2.RuntimeConsumer.consume",
+      "proof": "\u27e8Unit,(fun _ => ()),[],(fun _ initial final => final = initial),.code [],0,0,emptyComposition,(Solidity.Backend.LabelExec.step []),(fun count => Solidity.Backend.LabelExec.advance count []),(fun _ => True),emptyReferenceRuntime,Solidity.Backend.Selection.V2.Controls.identityCompiler,referenceDecoder [] 0,0,Solidity.Evm.Machine.init,[],[],rfl,rfl,rfl,True.intro\u27e9"
+    },
+    "runtime_v1_consume_joint_domain": {
+      "target": "Solidity.Backend.Selection.RuntimeConsumer.consume",
+      "proof": "\u27e8Unit,(fun _ => ()),[],(fun _ initial final => final = initial),.code [],0,0,emptyComposition,(Solidity.Backend.LabelExec.step []),(fun count => Solidity.Backend.LabelExec.advance count []),(fun _ => True),emptyReferenceRuntimeV1,emptyReferenceCompilerV1,referenceDecoder [] 0,0,Solidity.Evm.Machine.init,[],[],rfl,rfl,rfl,True.intro\u27e9"
+    },
+    "runtime_v2_inhabited_joint_domain": {
+      "target": "Solidity.Backend.Selection.V2.RuntimeConsumer.inhabited",
+      "proof": "\u27e8Unit,(fun _ => ()),[],(fun _ initial final => final = initial),.code [],0,0,emptyComposition,(Solidity.Backend.LabelExec.step []),(fun count => Solidity.Backend.LabelExec.advance count []),(fun _ => True),emptyReferenceRuntime,True.intro\u27e9"
+    }
+  }
+}

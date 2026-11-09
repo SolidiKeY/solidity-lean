@@ -1,0 +1,7 @@
+{
+ "Solidity/Lowering/Readonly/SourceKnownLibraryEffects.lean:Solidity.Lowering.Readonly.SourceHistory.callLibrary_succ_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
