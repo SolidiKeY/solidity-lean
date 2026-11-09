@@ -255,6 +255,82 @@ def signed_quotrem_zero (rem checked : Bool) (pipeline : Roadmap.Pipeline) (fuel
 def signed_quotrem_minimum (rem checked : Bool) (pipeline : Roadmap.Pipeline) (fuel : Nat) :=
   signed_quotrem_client 8 (by decide) rem checked (-128) (-1) (by decide) (by decide) pipeline fuel
 
+/-- Inhabited captured ring clients across all widths/signs, modes and pipelines. -/
+def checked_assignment_client (t : Source.IntTy) (op : RingOp) (checked : Bool) (x y : Int)
+    (hx : t.lo ≤ x ∧ x ≤ t.hi) (hy : t.lo ≤ y ∧ y ≤ t.hi)
+    (pipeline : Roadmap.Pipeline) (fuel : Nat) :=
+  CheckedAssignment.transport (MixedAssignmentControls.globals pipeline)
+    {Source.SemanticsExamples.F0 with checked := checked} fuel
+    (WordCastControls.source t x y hx hy) (WordCastControls.target t x y hx hy) t op
+    (WordCastControls.si t) (WordCastControls.ti t) (WordCastControls.initial t x y hx hy)
+    false true x y hx hy rfl rfl
+
+def checkedAssignmentObserved (t : Source.IntTy) (op : RingOp) (checked : Bool) (x y : Int)
+    (hx : t.lo ≤ x ∧ x ≤ t.hi) (hy : t.lo ≤ y ∧ y ≤ t.hi)
+    (pipeline : Roadmap.Pipeline) (fuel : Nat) : Source.R (Option Int) :=
+  ((Source.evalE (MixedAssignmentControls.globals pipeline)
+    {Source.SemanticsExamples.F0 with checked := checked} (fuel+4)
+    (.binary op.source (.assign (.local (WordCastControls.si t false)) (.local (WordCastControls.si t true)))
+      (.local (WordCastControls.si t false)))).run (WordCastControls.source t x y hx hy)).1.map
+        (fun result => match result with | .val value => value.key)
+
+def checkedAssignmentWritten (t : Source.IntTy) (op : RingOp) (checked : Bool) (x y : Int)
+    (hx : t.lo ≤ x ∧ x ≤ t.hi) (hy : t.lo ≤ y ∧ y ≤ t.hi)
+    (pipeline : Roadmap.Pipeline) (fuel : Nat) : Option Int :=
+  (((Source.evalE (MixedAssignmentControls.globals pipeline)
+    {Source.SemanticsExamples.F0 with checked := checked} (fuel+4)
+    (.binary op.source (.assign (.local (WordCastControls.si t false)) (.local (WordCastControls.si t true)))
+      (.local (WordCastControls.si t false)))).run (WordCastControls.source t x y hx hy)).2.1.get
+        (WordCastControls.si t false)).key
+
+private theorem assignment_observed_run (t : Source.IntTy) (op : RingOp) (checked : Bool) (x y : Int)
+    (hx : t.lo ≤ x ∧ x ≤ t.hi) (hy : t.lo ≤ y ∧ y ≤ t.hi)
+    (pipeline : Roadmap.Pipeline) (fuel : Nat) :
+    checkedAssignmentObserved t op checked x y hx hy pipeline fuel =
+      if checked = true ∧ ¬ (t.lo ≤ op.calculate x (if pipeline = .legacy then y else x) ∧
+          op.calculate x (if pipeline = .legacy then y else x) ≤ t.hi) then
+        .error (.revert (Source.panicData .arithmetic)) else
+        .ok (some (t.wrap (op.calculate x (if pipeline = .legacy then y else x)))) := by
+  have actual := (checked_assignment_client t op checked x y hx hy pipeline fuel).1
+  unfold checkedAssignmentObserved
+  rw [actual]
+  dsimp only [MixedAssignmentControls.globals]
+  by_cases failed : checked = true ∧ ¬ (t.lo ≤ op.calculate x (if pipeline = .legacy then y else x) ∧
+      op.calculate x (if pipeline = .legacy then y else x) ≤ t.hi)
+  · simp only [if_pos failed]
+    rfl
+  · simp only [if_neg failed]
+    rfl
+
+private theorem assignment_written_run (t : Source.IntTy) (op : RingOp) (checked : Bool) (x y : Int)
+    (hx : t.lo ≤ x ∧ x ≤ t.hi) (hy : t.lo ≤ y ∧ y ≤ t.hi)
+    (pipeline : Roadmap.Pipeline) (fuel : Nat) :
+    checkedAssignmentWritten t op checked x y hx hy pipeline fuel = some x := by
+  have actual := (checked_assignment_client t op checked x y hx hy pipeline fuel).1
+  unfold checkedAssignmentWritten
+  rw [actual,source_locals_get_set]
+  rfl
+
+/-- Reject pipeline order erasure for all three operators and both signs, and erasing a write before Source panic. -/
+theorem wrong_checked_capture_rejected (fuel : Nat) :
+    checkedAssignmentObserved .u8 .add true 200 0 (by decide) (by decide) .legacy fuel ≠
+      checkedAssignmentObserved .u8 .add true 200 0 (by decide) (by decide) .viaIR fuel ∧
+    checkedAssignmentObserved (SignedWidthCasts.ty 8 (by decide)) .add true 100 (-100) (by decide) (by decide) .legacy fuel ≠
+      checkedAssignmentObserved (SignedWidthCasts.ty 8 (by decide)) .add true 100 (-100) (by decide) (by decide) .viaIR fuel ∧
+    checkedAssignmentObserved .u8 .sub true 0 1 (by decide) (by decide) .legacy fuel ≠
+      checkedAssignmentObserved .u8 .sub true 0 1 (by decide) (by decide) .viaIR fuel ∧
+    checkedAssignmentObserved .u8 .mul true 16 0 (by decide) (by decide) .legacy fuel ≠
+      checkedAssignmentObserved .u8 .mul true 16 0 (by decide) (by decide) .viaIR fuel ∧
+    checkedAssignmentWritten .u8 .add true 200 0 (by decide) (by decide) .viaIR fuel ≠ some 0 := by
+  simp only [assignment_observed_run,assignment_written_run]
+  change ((Except.ok (some 200) : Source.R (Option Int)) ≠ .error (.revert (Source.panicData .arithmetic))) ∧
+    ((Except.ok (some 0) : Source.R (Option Int)) ≠ .error (.revert (Source.panicData .arithmetic))) ∧
+    ((Except.error (.revert (Source.panicData .arithmetic)) : Source.R (Option Int)) ≠ .ok (some 0)) ∧
+    ((Except.ok (some 0) : Source.R (Option Int)) ≠ .error (.revert (Source.panicData .arithmetic))) ∧
+    (some (200 : Int) ≠ some 0)
+  simp only [ne_eq,reduceCtorEq,not_false_eq_true,Option.some.injEq,true_and]
+  decide
+
 end Solidity.Lowering.G16.ArithmeticControls
 
 /-- info: 'Solidity.Lowering.G16.ArithmeticControls.wrong_wrapping_rejected' does not depend on any axioms -/
@@ -276,3 +352,7 @@ end Solidity.Lowering.G16.ArithmeticControls
 /-- info: 'Solidity.Lowering.G16.ArithmeticControls.wrong_signed_quotrem_rejected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Lowering.G16.ArithmeticControls.wrong_signed_quotrem_rejected
+
+/-- info: 'Solidity.Lowering.G16.ArithmeticControls.wrong_checked_capture_rejected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Lowering.G16.ArithmeticControls.wrong_checked_capture_rejected
