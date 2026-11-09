@@ -1,0 +1,9 @@
+/-! Guard omitted implicit widths or degenerate zero-width defaults in selection
+joint-domain witnesses. Concrete256-bit inputs stay distinct and nonzero;
+this is premise feasibility, not compiler or runtime correspondence. -/
+theorem selection_left_word_value : (BitVec.ofNat 256 23).toNat = 23 := by decide
+theorem selection_right_word_value : (BitVec.ofNat 256 37).toNat = 37 := by decide
+theorem selection_word_inputs_distinct : BitVec.ofNat 256 23 ≠ BitVec.ofNat 256 37 := by decide
+#print axioms selection_left_word_value
+#print axioms selection_right_word_value
+#print axioms selection_word_inputs_distinct

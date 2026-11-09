@@ -1,0 +1,6 @@
+{
+  "word_beq_implicit_width_domain": {
+    "target": "Solidity.Backend.Selection.word_beq_nat._simp_1_2",
+    "proof": "⟨256, BitVec.ofNat 256 23, BitVec.ofNat 256 37, True.intro⟩"
+  }
+}
