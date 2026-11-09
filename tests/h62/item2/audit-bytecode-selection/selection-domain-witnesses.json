@@ -2,5 +2,69 @@
   "word_beq_implicit_width_domain": {
     "target": "Solidity.Backend.Selection.word_beq_nat._simp_1_2",
     "proof": "⟨256, BitVec.ofNat 256 23, BitVec.ofNat 256 37, True.intro⟩"
+  },
+  "selection_add_step_joint_domain": {
+    "target": "Solidity.Backend.Selection.addCertificate._proof_1",
+    "proof": "⟨selectionOpcodeInput, selectionOpcodeMachine selectionOpcodeInput, selection_opcode_stack_coupled, True.intro⟩"
+  },
+  "selection_and_step_joint_domain": {
+    "target": "Solidity.Backend.Selection.andCertificate._proof_1",
+    "proof": "⟨selectionOpcodeInput, selectionOpcodeMachine selectionOpcodeInput, selection_opcode_stack_coupled, True.intro⟩"
+  },
+  "selection_div_step_joint_domain": {
+    "target": "Solidity.Backend.Selection.divCertificate._proof_1",
+    "proof": "⟨selectionOpcodeInput, selectionOpcodeMachine selectionOpcodeInput, selection_opcode_stack_coupled, True.intro⟩"
+  },
+  "selection_eq_step_joint_domain": {
+    "target": "Solidity.Backend.Selection.eqCertificate._proof_1",
+    "proof": "⟨selectionOpcodeInput, selectionOpcodeMachine selectionOpcodeInput, selection_opcode_stack_coupled, True.intro⟩"
+  },
+  "selection_exp_step_joint_domain": {
+    "target": "Solidity.Backend.Selection.expCertificate._proof_1",
+    "proof": "⟨selectionOpcodeInput, selectionOpcodeMachine selectionOpcodeInput, selection_opcode_stack_coupled, True.intro⟩"
+  },
+  "selection_gt_step_joint_domain": {
+    "target": "Solidity.Backend.Selection.gtCertificate._proof_1",
+    "proof": "⟨selectionOpcodeInput, selectionOpcodeMachine selectionOpcodeInput, selection_opcode_stack_coupled, True.intro⟩"
+  },
+  "selection_iszero_step_joint_domain": {
+    "target": "Solidity.Backend.Selection.iszeroCertificate._proof_1",
+    "proof": "⟨selectionOpcodeInput, selectionOpcodeMachine selectionOpcodeInput, selection_opcode_stack_coupled, True.intro⟩"
+  },
+  "selection_lt_step_joint_domain": {
+    "target": "Solidity.Backend.Selection.ltCertificate._proof_1",
+    "proof": "⟨selectionOpcodeInput, selectionOpcodeMachine selectionOpcodeInput, selection_opcode_stack_coupled, True.intro⟩"
+  },
+  "selection_mod_step_joint_domain": {
+    "target": "Solidity.Backend.Selection.modCertificate._proof_1",
+    "proof": "⟨selectionOpcodeInput, selectionOpcodeMachine selectionOpcodeInput, selection_opcode_stack_coupled, True.intro⟩"
+  },
+  "selection_mul_step_joint_domain": {
+    "target": "Solidity.Backend.Selection.mulCertificate._proof_1",
+    "proof": "⟨selectionOpcodeInput, selectionOpcodeMachine selectionOpcodeInput, selection_opcode_stack_coupled, True.intro⟩"
+  },
+  "selection_not_step_joint_domain": {
+    "target": "Solidity.Backend.Selection.notCertificate._proof_1",
+    "proof": "⟨selectionOpcodeInput, selectionOpcodeMachine selectionOpcodeInput, selection_opcode_stack_coupled, True.intro⟩"
+  },
+  "selection_or_step_joint_domain": {
+    "target": "Solidity.Backend.Selection.orCertificate._proof_1",
+    "proof": "⟨selectionOpcodeInput, selectionOpcodeMachine selectionOpcodeInput, selection_opcode_stack_coupled, True.intro⟩"
+  },
+  "selection_shl_step_joint_domain": {
+    "target": "Solidity.Backend.Selection.shlCertificate._proof_1",
+    "proof": "⟨selectionOpcodeInput, selectionOpcodeMachine selectionOpcodeInput, selection_opcode_stack_coupled, True.intro⟩"
+  },
+  "selection_shr_step_joint_domain": {
+    "target": "Solidity.Backend.Selection.shrCertificate._proof_1",
+    "proof": "⟨selectionOpcodeInput, selectionOpcodeMachine selectionOpcodeInput, selection_opcode_stack_coupled, True.intro⟩"
+  },
+  "selection_sub_step_joint_domain": {
+    "target": "Solidity.Backend.Selection.subCertificate._proof_1",
+    "proof": "⟨selectionOpcodeInput, selectionOpcodeMachine selectionOpcodeInput, selection_opcode_stack_coupled, True.intro⟩"
+  },
+  "selection_xor_step_joint_domain": {
+    "target": "Solidity.Backend.Selection.xorCertificate._proof_1",
+    "proof": "⟨selectionOpcodeInput, selectionOpcodeMachine selectionOpcodeInput, selection_opcode_stack_coupled, True.intro⟩"
   }
 }

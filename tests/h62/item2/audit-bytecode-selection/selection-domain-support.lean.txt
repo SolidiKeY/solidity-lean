@@ -1,9 +1,59 @@
 /-! Guard omitted implicit widths or degenerate zero-width defaults in selection
 joint-domain witnesses. Concrete256-bit inputs stay distinct and nonzero;
-this is premise feasibility, not compiler or runtime correspondence. -/
+Stack-coupling witnesses also retain a populated input and nonzero world frame;
+refuse a mismatched stack. This is model-level feasibility, not charged EVM,
+physical ByteWorld, source or full compiler correspondence. -/
 theorem selection_left_word_value : (BitVec.ofNat 256 23).toNat = 23 := by decide
 theorem selection_right_word_value : (BitVec.ofNat 256 37).toNat = 37 := by decide
 theorem selection_word_inputs_distinct : BitVec.ofNat 256 23 ≠ BitVec.ofNat 256 37 := by decide
 #print axioms selection_left_word_value
 #print axioms selection_right_word_value
 #print axioms selection_word_inputs_distinct
+
+open Solidity Solidity.Backend Solidity.Backend.Selection
+
+def selectionOpcodeInput : Scalar.Stack := [23,7,99]
+
+def selectionOpcodeMachine (input : Scalar.Stack) : Evm.Machine :=
+  { (Evm.Machine.init (fun _ => 17) ⟨9, by decide⟩) with
+    stack := irStack input
+    store := Evm.WordStore.ofFn (fun _ => 29)
+    mem := fun _ => .val ⟨31, by decide⟩
+    bal₀ := fun _ => 13
+    caller := ⟨3, by decide⟩
+    callvalue := ⟨2, by decide⟩
+    timestamp := ⟨11, by decide⟩
+    accepts := fun _ _ => false }
+
+theorem selection_opcode_stack_coupled :
+    (selectionOpcodeMachine selectionOpcodeInput).stack = irStack selectionOpcodeInput := rfl
+
+theorem selection_opcode_world_populated :
+    (selectionOpcodeMachine selectionOpcodeInput).bal ⟨9, by decide⟩ = 17 ∧
+    (selectionOpcodeMachine selectionOpcodeInput).bal₀ ⟨9, by decide⟩ = 13 ∧
+    (selectionOpcodeMachine selectionOpcodeInput).caller.val = 3 ∧
+    (selectionOpcodeMachine selectionOpcodeInput).callvalue.val = 2 ∧
+    (selectionOpcodeMachine selectionOpcodeInput).timestamp.val = 11 ∧
+    (selectionOpcodeMachine selectionOpcodeInput).accepts ⟨9, by decide⟩ ⟨2, by decide⟩ = false := by decide
+
+theorem selection_opcode_bad_stack_refused :
+    ¬ (selectionOpcodeMachine selectionOpcodeInput).stack = irStack [0] := by
+  intro wrong
+  have lengths : (3 : Nat) = 1 := congrArg List.length wrong
+  cases lengths
+
+theorem selection_add_fixture_executes :
+    Evm.Instr.add.step (selectionOpcodeMachine selectionOpcodeInput) =
+      .ok { selectionOpcodeMachine selectionOpcodeInput with stack := irStack [30,99] } 0 := by
+  exact (addCertificate.success selectionOpcodeInput [30,99]
+    (selectionOpcodeMachine selectionOpcodeInput) rfl).mpr (by decide)
+
+theorem selection_add_underflow_refused :
+    Evm.Instr.add.step (selectionOpcodeMachine [23]) = .fault := by
+  exact (addCertificate.refusal [23] (selectionOpcodeMachine [23]) rfl).mpr (by decide)
+
+#print axioms selection_opcode_stack_coupled
+#print axioms selection_opcode_world_populated
+#print axioms selection_opcode_bad_stack_refused
+#print axioms selection_add_fixture_executes
+#print axioms selection_add_underflow_refused
