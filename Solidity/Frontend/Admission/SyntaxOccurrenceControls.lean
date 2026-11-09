@@ -359,4 +359,28 @@ theorem array_type_sites_and_frozen_gap :
 /-- info: 'Solidity.Frontend.Admission.OccurrenceControls.array_type_sites_and_frozen_gap' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms array_type_sites_and_frozen_gap
 
+
+/-! Regression: function-type markers retain their actual unused-declaration sites and distinguish all four visibility spellings plus omission. An external function declaration is not a function type; omitted/invalid type visibility stays an extraction gap, not an admission or default-inference claim. -/
+def functionTypeNode (visibility : Option Visibility) : Syn .typeName :=
+  .fnType .nil visibility (some .view) .nil
+def externalFunctionNode : Syn (.part false) :=
+  .function (.ident "f") .nil (some .external) none .nil false none .nil (.some (.block .nil))
+def functionTypeUnit : Syn .unit := .unit (.cons (.contract false "C" .none .nil
+  (.cons (.stateVar (functionTypeNode (some .internal)) none none none false "i" .none)
+    (.cons (.stateVar (functionTypeNode (some .external)) none none none false "e" .none) .nil))) .nil)
+
+theorem explicit_function_type_sites_and_gaps :
+    syntaxExplicitFunctionTypeUses functionTypeUnit =
+      [(⟨.typeName,functionTypeNode (some .internal)⟩,.internalFunctionTypes),
+       (⟨.typeName,functionTypeNode (some .external)⟩,.externalFunctionTypes)] ∧
+    explicitFunctionTypeFeaturesAt (functionTypeNode none) = [] ∧
+    explicitFunctionTypeFeaturesAt (functionTypeNode (some .priv)) = [] ∧
+    explicitFunctionTypeFeaturesAt (functionTypeNode (some .pub)) = [] ∧
+    explicitFunctionTypeFeaturesAt externalFunctionNode = [] ∧
+    sourceCandidateMetadataV2Refusal? functionTypeUnit
+      (fun f => decide (f ≠ .externalFunctionTypes)) = none := ⟨rfl,rfl,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.explicit_function_type_sites_and_gaps' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms explicit_function_type_sites_and_gaps
+
 end Solidity.Frontend.Admission.OccurrenceControls
