@@ -290,4 +290,22 @@ theorem metadata_v2_retains_all_refusals :
 /-- info: 'Solidity.Frontend.Admission.OccurrenceControls.metadata_v2_retains_all_refusals' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms metadata_v2_retains_all_refusals
 
+
+/-! Regression: top-level and contract functions must not acquire the same dedicated marker. This syntax control retains generic/body markers and the frozen metadata-V2 omission; no legality, admission or eligible execution is claimed. -/
+def functionCategoryNode (top : Bool) : Syn (.part top) :=
+  .function (.ident "f") .nil none none .nil false none .nil (.some (.block .nil))
+
+def freeFunctionUnit : Syn .unit := .unit (.cons (.topPart (functionCategoryNode true)) .nil)
+
+theorem free_function_category_and_gap :
+    freeFunctionFeaturesAt (functionCategoryNode true) = [.freeFunctions] ∧
+    freeFunctionFeaturesAt (functionCategoryNode false) = [] ∧
+    (syntaxFreeFunctionUses freeFunctionUnit).map Prod.snd = [.freeFunctions] ∧
+    freeFunctionUnit.decls.map (fun d => (d.kind,d.top)) = [(.function,true)] ∧
+    sourceCandidateMetadataV2Refusal? freeFunctionUnit
+      (fun f => decide (f ≠ .freeFunctions)) = none := ⟨rfl,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.free_function_category_and_gap' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms free_function_category_and_gap
+
 end Solidity.Frontend.Admission.OccurrenceControls
