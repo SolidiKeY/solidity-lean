@@ -54,7 +54,7 @@ theorem lift_lower_word (word : Semantics.Word) : liftWord (lowerWord word) = wo
 /-- Account addresses retain the independent 160-bit account bound. -/
 def liftAddress (address : Roadmap.Address) : ContractWorld.Address :=
   ⟨liftWord ⟨address.val, Nat.lt_trans address.isLt (by decide +kernel)⟩, by
-    simpa only [Int.natCast_pow] using (Int.ofNat_lt.mpr address.isLt)⟩
+    simpa only [liftWord, Int.natCast_pow, show ((2 : Nat) : Int) = (2 : Int) from rfl] using (Int.ofNat_lt.mpr address.isLt)⟩
 
 def lowerAddress (address : ContractWorld.Address) : Roadmap.Address :=
   ⟨address.1.1.toNat, by
@@ -62,7 +62,7 @@ def lowerAddress (address : ContractWorld.Address) : Roadmap.Address :=
     have nonnegative := address.1.2
     simp only [PrimTy.inRange, decide_eq_true_eq] at nonnegative
     have boundCast : address.1.1 < ((2 ^ 160 : Nat) : Int) := by
-      simpa only [Int.natCast_pow] using bound
+      simpa only [Int.natCast_pow, show ((2 : Nat) : Int) = (2 : Int) from rfl] using bound
     omega⟩
 
 theorem lower_lift_address (address : Roadmap.Address) :
@@ -143,7 +143,7 @@ theorem session_funds_installed {D : Source.Layout}
   unfold sessionFunds
   dsimp only
   rw [lower_lift_address]
-  simp only [installed, if_true]
+  simp only [installed, ite_true]
 
 /-- A code-less account read uses the exact supplied G01 ledger, never the
 source instance-account field. This law does not certify a particular ledger. -/
@@ -156,7 +156,7 @@ theorem session_funds_external {D : Source.Layout}
   unfold sessionFunds
   dsimp only
   rw [lower_lift_address]
-  simp only [external, Option.isSome_none, Bool.false_eq_true, if_false]
+  simp only [external, Option.isSome_none, Bool.false_eq_true, ite_false]
 
 /-- Source endTx changes neither installed balance fields nor the supplied
 session ledger/history inputs. No history-rollback equation is assumed. -/
