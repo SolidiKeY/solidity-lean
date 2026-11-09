@@ -10,8 +10,7 @@ def bare : Decl := ⟨.modifier, "empty", some "C", false,
     (.some (.block (.cons (.stmtItem (.simpleStmt (.exprStmt (.ident "_")))) .nil)))⟩
 def bareEnv : Env := ⟨[bare]⟩
 
-/-- Both supported parameter forms are inhabited; qualification preserves the
-selected identity, while wrong kinds and deeper paths remain refused. -/
+/-- Both supported parameter forms are inhabited; qualification preserves the selected identity, while wrong kinds and deeper paths remain refused. -/
 theorem selector_controls :
     env.modifierAt (some "C") ⟨"guard", []⟩ = some (modifierDecl, [.int IntTy.u256]) ∧
     env.modifierAt none ⟨"C", ["guard"]⟩ = some (modifierDecl, [.int IntTy.u256]) ∧
