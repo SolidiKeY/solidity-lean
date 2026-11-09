@@ -1,3 +1,5 @@
+import Solidity.Lowering.G16.PanicGuard
+import Solidity.Syntax.CheckedExact
 import Solidity.Lowering.V07.UnsignedAddition
 import Solidity.Lowering.V07.UnsignedMultiplication
 import Solidity.Lowering.V07.SignedNarrowAddition
@@ -5,9 +7,9 @@ import Solidity.Lowering.V07.SignedNarrowSubtraction
 import Solidity.Lowering.V07.SignedNarrowMultiplication
 
 /-! Scalar arithmetic families built from the published V07 operational leaves.
-This module starts with wrapping addition, subtraction and multiplication at
-all valid widths and signs. Checked arithmetic and quotient/remainder remain
-separate obligations; no frontend selection or admission theorem is asserted. -/
+This module covers wrapping addition, subtraction and multiplication at
+all valid widths and signs, plus checked unsigned ring operations. Checked
+signed arithmetic and quotient/remainder remain separate obligations; no frontend selection or admission theorem is asserted. -/
 namespace Solidity.Lowering.G16.Arithmetic
 open Solidity.Lowering.V07
 
@@ -123,6 +125,254 @@ theorem wrapping_assignment_transport {E : Source.Env} {srcΓ : Source.RCtx}
     | sub => exact SignedNarrowSubtraction.assignment_transport bits valid G F fuel source target si ti family i a x y hx hy readA readI
     | mul => exact SignedNarrowMultiplication.assignment_transport bits valid G F fuel source target si ti family i a x y hx hy readA readI
 
+namespace CheckedUnsigned
+open UnsignedNarrowing (ty)
+
+/-- The narrow-width guard uses the same V07 modular result as the value
+program. Multiplication tests zero before executing the quotient. -/
+def condition {C : Contract} {Γ : Ctx} (bits : Nat)
+    (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256) (op : RingOp)
+    (a b : Val C Γ .uint) : Val C Γ .bool :=
+  match op with
+  | .add => .binop .le rfl rfl a (wrappingValue (ty bits valid) .add a b)
+  | .sub => .binop .le rfl rfl b a
+  | .mul => .ternary (.binop .eqB rfl rfl a (Checked.litU 0 (by decide)))
+      (.simple (.bool true))
+      (.binop .eqB rfl rfl
+        (UnsignedQuotRem.value false (wrappingValue (ty bits valid) .mul a b) a) b)
+
+private theorem value_run {C : Contract} {Γ : Ctx} (target : State C Γ)
+    (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256) (op : RingOp)
+    (a b : Val C Γ .uint) (x y : Int)
+    (hx : (ty bits valid).lo ≤ x ∧ x ≤ (ty bits valid).hi)
+    (hy : (ty bits valid).lo ≤ y ∧ y ≤ (ty bits valid).hi)
+    (left : a.evalT target = .ok (integerValue (ty bits valid) x hx))
+    (right : b.evalT target = .ok (integerValue (ty bits valid) y hy)) :
+    (wrappingValue (ty bits valid) op a b).evalT target =
+      .ok (integerValue (ty bits valid) ((ty bits valid).wrap (op.calculate x y))
+        ((ty bits valid).wrap_mem (op.calculate x y))) := by
+  cases op with
+  | add => exact UnsignedAddition.add_value_run target bits valid a b x y hx hy left right
+  | sub => exact UnsignedNarrowing.sub_value_run target bits valid a b x y hx hy left right
+  | mul => exact UnsignedMultiplication.mul_value_run target bits valid a b x y hx hy left right
+
+private theorem condition_run {C : Contract} {Γ : Ctx} (target : State C Γ)
+    (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256) (op : RingOp)
+    (a b : Val C Γ .uint) (x y : Int)
+    (hx : (ty bits valid).lo ≤ x ∧ x ≤ (ty bits valid).hi)
+    (hy : (ty bits valid).lo ≤ y ∧ y ≤ (ty bits valid).hi)
+    (left : a.evalT target = .ok (integerValue (ty bits valid) x hx))
+    (right : b.evalT target = .ok (integerValue (ty bits valid) y hy)) :
+    (condition bits valid op a b).evalT target =
+      .ok (decide ((ty bits valid).lo ≤ op.calculate x y ∧
+        op.calculate x y ≤ (ty bits valid).hi)) := by
+  have hp : (0 : Int) < ((2 ^ bits : Nat) : Int) := by
+    exact_mod_cast Source.two_pow_pos bits
+  have hx' : 0 ≤ x ∧ x < ((2 ^ bits : Nat) : Int) := by
+    have h := hx
+    simp only [ty,Source.IntTy.lo,Source.IntTy.hi,Bool.false_eq_true,if_false] at h
+    omega
+  have hy' : 0 ≤ y ∧ y < ((2 ^ bits : Nat) : Int) := by
+    have h := hy
+    simp only [ty,Source.IntTy.lo,Source.IntTy.hi,Bool.false_eq_true,if_false] at h
+    omega
+  cases op with
+  | add =>
+    have raw := value_run target bits valid .add a b x y hx hy left right
+    have exactGuard := Checked.add_uint_exact hx'.1 hx'.2 hy'.1 hy'.2
+    have bounds : (x ≤ (ty bits valid).wrap (x+y)) ↔
+        ((ty bits valid).lo ≤ x+y ∧ x+y ≤ (ty bits valid).hi) := by
+      rw [UnsignedNarrowing.wrap_eq,exactGuard]
+      simp only [ty,Source.IntTy.lo,Source.IntTy.hi,Bool.false_eq_true,if_false]
+      have positive := Source.two_pow_pos bits
+      omega
+    unfold condition
+    rw [Val.evalT,left,raw]
+    change Except.ok (decide (x ≤ (ty bits valid).wrap (x+y))) = _
+    simp only [bounds,RingOp.calculate]
+  | sub =>
+    have bounds : y ≤ x ↔
+        ((ty bits valid).lo ≤ x-y ∧ x-y ≤ (ty bits valid).hi) := by
+      change y ≤ x ↔ (0 ≤ x-y ∧ x-y ≤ _)
+      have upper := hx.2
+      omega
+    unfold condition
+    rw [Val.evalT,right,left]
+    change Except.ok (decide (y ≤ x)) = _
+    simp only [bounds,RingOp.calculate]
+  | mul =>
+    have raw := value_run target bits valid .mul a b x y hx hy left right
+    have exactGuard := Checked.mul_uint_exact hx'.1 hx'.2 hy'.1 hy'.2
+    have bounds : (x = 0 ∨ ((ty bits valid).wrap (x*y)).tdiv x = y) ↔
+        ((ty bits valid).lo ≤ x*y ∧ x*y ≤ (ty bits valid).hi) := by
+      rw [UnsignedNarrowing.wrap_eq,exactGuard]
+      have nonneg := Int.mul_nonneg hx'.1 hy'.1
+      simp only [ty,Source.IntTy.lo,Source.IntTy.hi,Bool.false_eq_true,if_false]
+      have positive := Source.two_pow_pos bits
+      omega
+    have zeroTest : (Val.binop .eqB rfl rfl a (Checked.litU 0 (by decide))).evalT target =
+        .ok (decide (x = 0)) := by
+      rw [Val.evalT,left]
+      rfl
+    change (Val.ternary _ _ _).evalT target = _
+    rw [Val.evalT,zeroTest]
+    by_cases zero : x = 0
+    · have inRange := bounds.mp (Or.inl zero)
+      simp only [zero,decide_true,ok_bind,if_true]
+      have fits : (ty bits valid).lo ≤ 0*y ∧ 0*y ≤ (ty bits valid).hi := by simpa only [zero] using inRange
+      simp only [RingOp.calculate,zero,fits,decide_true]
+      rfl
+    · have quotient := UnsignedQuotRem.value_run bits valid target false
+        (wrappingValue (ty bits valid) .mul a b) a ((ty bits valid).wrap (x*y)) x
+        ((ty bits valid).wrap_mem (x*y)) hx zero raw left
+      simp only [zero,decide_false,ok_bind,Bool.false_eq_true,if_false]
+      rw [Val.evalT,quotient,right]
+      change Except.ok (decide (((ty bits valid).wrap (x*y)).tdiv x = y)) = _
+      have reduced : (((ty bits valid).wrap (x*y)).tdiv x = y) ↔
+          ((ty bits valid).lo ≤ x*y ∧ x*y ≤ (ty bits valid).hi) := by
+        simpa only [zero,false_or] using bounds
+      simp only [reduced,RingOp.calculate]
+
+/-- Guarded reuse of the existing unsigned ring value program. This leaf
+advances `Solidity.Goals.lowerLoopsCorrect`; it does not replace the held
+validator/scalar endpoint or assert a frontend producer. -/
+def operand {C : Contract} {Γ : Ctx} (bits : Nat)
+    (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256) (op : RingOp)
+    (checked : Bool) (a b : Idx Γ (.val .uint)) :
+    DeferredSource.Operand C Γ (.prim .uint) :=
+  let x : Val C Γ .uint := .simple (.local a)
+  let y : Val C Γ .uint := .simple (.local b)
+  ⟨Γ,(if checked then .cons (PanicGuard.code .arithmetic (condition bits valid op x y)) .nil else .nil),
+    .val (wrappingValue (ty bits valid) op x y)⟩
+
+private theorem source_value {D : Source.Layout}
+    (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256)
+    (op : RingOp) (checked : Bool) (x y : Int)
+    (hx : (ty bits valid).lo ≤ x ∧ x ≤ (ty bits valid).hi)
+    (hy : (ty bits valid).lo ≤ y ∧ y ≤ (ty bits valid).hi) :
+    Source.binVal checked op.source
+      (.int x hx : Source.Val D (.int (ty bits valid))) (.int y hy) =
+      if checked = true ∧ ¬ ((ty bits valid).lo ≤ op.calculate x y ∧
+          op.calculate x y ≤ (ty bits valid).hi) then
+        .error (.revert (Source.panicData .arithmetic))
+      else .ok (Source.intWrap (ty bits valid) (op.calculate x y)) := by
+  have reduces : Source.binVal checked op.source
+      (.int x hx : Source.Val D (.int (ty bits valid))) (.int y hy) =
+        Source.intRes (ty bits valid) checked (op.calculate x y) := by
+    cases op <;> rfl
+  rw [reduces]
+  by_cases fits : (ty bits valid).lo ≤ op.calculate x y ∧ op.calculate x y ≤ (ty bits valid).hi
+  · have wrapped := UnsignedNarrowing.wrap_of_range bits valid (op.calculate x y) fits
+    rw [Source.intRes,dif_pos fits]
+    simp only [show ¬ (checked = true ∧ ¬ ((ty bits valid).lo ≤ op.calculate x y ∧ op.calculate x y ≤ (ty bits valid).hi)) from by intro h; exact h.2 fits,if_false,Source.intWrap,wrapped]
+    rfl
+  · rw [Source.intRes,dif_neg fits]
+    cases checked <;> simp only [fits,not_false_eq_true,and_true,Bool.false_eq_true,if_false,if_true,Source.panic]
+    all_goals rfl
+
+private theorem operand_run {C : Contract} {Γ : Ctx} (target : State C Γ)
+    (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256) (op : RingOp)
+    (checked : Bool) (a b : Idx Γ (.val .uint)) (x y : Int)
+    (hx : (ty bits valid).lo ≤ x ∧ x ≤ (ty bits valid).hi)
+    (hy : (ty bits valid).lo ≤ y ∧ y ≤ (ty bits valid).hi)
+    (readA : TEnv.get a target.env = integerValue (ty bits valid) x hx)
+    (readB : TEnv.get b target.env = integerValue (ty bits valid) y hy) :
+    (operand bits valid op checked a b).run target =
+      if checked = true ∧ ¬ ((ty bits valid).lo ≤ op.calculate x y ∧
+          op.calculate x y ≤ (ty bits valid).hi) then
+        .error (THalt.ofData (Source.panicData .arithmetic))
+      else .ok (⟨target,List.prefix_refl _⟩,
+        .prim (integerValue (ty bits valid) ((ty bits valid).wrap (op.calculate x y))
+          ((ty bits valid).wrap_mem (op.calculate x y)))) := by
+  have left : (Val.simple (.local a) : Val C Γ .uint).evalT target =
+      .ok (integerValue (ty bits valid) x hx) := congrArg Except.ok readA
+  have right : (Val.simple (.local b) : Val C Γ .uint).evalT target =
+      .ok (integerValue (ty bits valid) y hy) := congrArg Except.ok readB
+  have test := condition_run target bits valid op _ _ x y hx hy left right
+  have value := value_run target bits valid op _ _ x y hx hy left right
+  let gateCode : Prog C Γ Γ := if checked then
+    .cons (PanicGuard.code .arithmetic (condition bits valid op (.simple (.local a)) (.simple (.local b)))) .nil
+    else .nil
+  have prefixRun : gateCode.run target =
+      if checked = true ∧ ¬ ((ty bits valid).lo ≤ op.calculate x y ∧ op.calculate x y ≤ (ty bits valid).hi) then
+        .error (THalt.ofData (Source.panicData .arithmetic))
+      else .ok (⟨target,List.prefix_refl _⟩ : Out C target.H Γ) := by
+    cases checked with
+    | false => simp only [gateCode,Bool.false_eq_true,if_false,false_and,Prog.run_nil]
+    | true =>
+      by_cases fits : (ty bits valid).lo ≤ op.calculate x y ∧ op.calculate x y ≤ (ty bits valid).hi
+      · have passed := PanicGuard.run target .arithmetic _ true (by simpa only [fits,decide_true] using test)
+        simp only [if_true] at passed
+        change (Prog.cons _ Prog.nil).run target = _
+        rw [Prog.run_cons_ok passed,Prog.run_nil]
+        simp only [true_and,if_neg (show ¬ ¬ ((ty bits valid).lo ≤ op.calculate x y ∧ op.calculate x y ≤ (ty bits valid).hi) from by intro h; exact h fits)]
+        rfl
+      · have failed := PanicGuard.run target .arithmetic _ false (by simpa only [fits,decide_false] using test)
+        simp only [Bool.false_eq_true,if_false] at failed
+        change TRun.seq (PanicGuard.code .arithmetic _).runR _ target = _
+        simp only [TRun.seq,show (PanicGuard.code .arithmetic _).runR target =
+          .error (THalt.ofData (Source.panicData .arithmetic)) from failed,true_and,if_pos fits]
+  change (DeferredSource.Operand.run ⟨Γ,gateCode,.val (wrappingValue (ty bits valid) op
+    (.simple (.local a)) (.simple (.local b)))⟩ target) = _
+  unfold DeferredSource.Operand.run
+  rw [prefixRun]
+  by_cases failed : checked = true ∧ ¬ ((ty bits valid).lo ≤ op.calculate x y ∧ op.calculate x y ≤ (ty bits valid).hi)
+  · simp only [if_pos failed]
+    rfl
+  · simp only [if_neg failed]
+    rw [Ext.eq_of_depth gateCode.ext Ext.refl]
+    simp only [bind,Except.bind,Src.valueT]
+    rw [value]
+    rfl
+
+/-- One checked/wrapping unsigned ring clause includes every valid width,
+all three operators, success and arithmetic panic. The only premises observe
+initial aligned locals; no overflow exclusion or desired execution is assumed.
+The final relation is the wrapped-value law; on failure it does not describe
+an observed successful result. -/
+theorem transport {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} {Γ : Ctx} {ι : Type}
+    (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
+    (source : Source.EMState E srcΓ) (target : State C Γ)
+    (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256) (op : RingOp)
+    (si : ι → Source.Idx srcΓ (.int (ty bits valid))) (ti : ι → Idx Γ (.val .uint))
+    (family : IntegerLocalFamily (ty bits valid) si ti source.1 target.env)
+    (a b : ι) (x y : Int)
+    (hx : (ty bits valid).lo ≤ x ∧ x ≤ (ty bits valid).hi)
+    (hy : (ty bits valid).lo ≤ y ∧ y ≤ (ty bits valid).hi)
+    (readA : source.1.get (si a) = .int x hx) (readB : source.1.get (si b) = .int y hy) :
+    let failed := F.checked = true ∧ ¬ ((ty bits valid).lo ≤ op.calculate x y ∧
+      op.calculate x y ≤ (ty bits valid).hi)
+    (Source.evalE G F (fuel+3)
+      (.binary op.source (.local (si a)) (.local (si b)))).run source =
+      (if failed then (.error (.revert (Source.panicData .arithmetic)),source)
+        else (.ok (.val (Source.intWrap (ty bits valid) (op.calculate x y))),source)) ∧
+    (operand bits valid op F.checked (ti a) (ti b)).run target =
+      (if failed then .error (THalt.ofData (Source.panicData .arithmetic))
+        else .ok (⟨target,List.prefix_refl _⟩,
+          .prim (integerValue (ty bits valid) ((ty bits valid).wrap (op.calculate x y))
+            ((ty bits valid).wrap_mem (op.calculate x y))))) ∧
+    IntValueRel (ty bits valid)
+      (Source.intWrap (ty bits valid) (op.calculate x y) : Source.Val E.layout (.int (ty bits valid)))
+      (integerValue (ty bits valid) ((ty bits valid).wrap (op.calculate x y))
+        ((ty bits valid).wrap_mem (op.calculate x y))) := by
+  have left := family.read a x hx readA
+  have right := family.read b y hy readB
+  refine ⟨?_,operand_run target bits valid op F.checked (ti a) (ti b) x y hx hy left right,?_⟩
+  · have pair := source_local_pair G F fuel source (ty bits valid) (si a) (si b) x y hx hy readA readB
+    rw [Source.evalE,Source.withLibraryCalldata_known]
+    have nonspecial : (decide (op.source = .and) || decide (op.source = .or)) = false := by cases op <;> rfl
+    simp only [nonspecial,Bool.false_eq_true,if_false]
+    rw [Source.Hoare.run_bind,pair]
+    change (do
+      let value ← Source.EM.lift (Source.binVal F.checked op.source
+        (.int x hx : Source.Val E.layout (.int (ty bits valid))) (.int y hy))
+      pure (Source.RVal.val value)).run source = _
+    rw [source_value]
+    split <;> rfl
+  · exact integer_related _ _ _
+
+end CheckedUnsigned
+
 end Solidity.Lowering.G16.Arithmetic
 
 /-- info: 'Solidity.Lowering.G16.Arithmetic.wrapping_transport' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -132,3 +382,7 @@ end Solidity.Lowering.G16.Arithmetic
 /-- info: 'Solidity.Lowering.G16.Arithmetic.wrapping_assignment_transport' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Lowering.G16.Arithmetic.wrapping_assignment_transport
+
+/-- info: 'Solidity.Lowering.G16.Arithmetic.CheckedUnsigned.transport' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Lowering.G16.Arithmetic.CheckedUnsigned.transport
