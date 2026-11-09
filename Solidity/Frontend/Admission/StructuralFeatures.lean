@@ -1148,4 +1148,21 @@ theorem declarationConstnessUses_iff (E : Env) (site : DeclarationOccurrence) (q
 /-- info: 'Solidity.Frontend.Admission.declarationConstnessUses_iff' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms declarationConstnessUses_iff
 
+
+theorem syntaxConstnessFeatures_eq {c : Cat} (root : Syn c) :
+    syntaxFieldUses root constnessFeaturesAt =
+      (syntaxConstnessUses root).map (fun use => (use.1,constnessFeature use.2)) :=
+  syntaxFieldUses_map root constnessFieldsAt constnessFeature
+
+theorem syntaxConstnessRefusals_eq {c : Cat} (root : Syn c) (accepts : Feature → Bool) :
+    syntaxFieldRefusals root constnessFeaturesAt accepts =
+      (syntaxFieldRefusals root constnessFieldsAt (fun value => accepts (constnessFeature value))).map
+        (fun use => (use.1,constnessFeature use.2)) :=
+  syntaxFieldRefusals_map root constnessFieldsAt constnessFeature accepts
+
+/-- info: 'Solidity.Frontend.Admission.syntaxConstnessFeatures_eq' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxConstnessFeatures_eq
+/-- info: 'Solidity.Frontend.Admission.syntaxConstnessRefusals_eq' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxConstnessRefusals_eq
+
 end Solidity.Frontend.Admission

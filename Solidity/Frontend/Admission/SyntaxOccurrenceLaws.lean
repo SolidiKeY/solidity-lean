@@ -1375,4 +1375,25 @@ theorem syntaxFieldRefusal?_append_none_iff {α : Type u} {c : Cat} (root : Syn 
 /-- info: 'Solidity.Frontend.Admission.syntaxFieldRefusal?_append_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms syntaxFieldRefusal?_append_none_iff
 
+
+/-! Regression: converting inventoried metadata to feature IDs must preserve typed sites, order, duplicates and every refusal. Mapping does not establish classifier completeness or select an admission policy. -/
+theorem syntaxFieldUses_map {α β : Type u} {c : Cat} (root : Syn c)
+    (fields : ∀ {k : Cat}, Syn k → List α) (convert : α → β) :
+    syntaxFieldUses root (fun s => (fields s).map convert) =
+      (syntaxFieldUses root fields).map (fun use => (use.1,convert use.2)) := by
+  simp only [syntaxFieldUses, List.map_flatMap, List.map_map, Function.comp_def]
+
+theorem syntaxFieldRefusals_map {α β : Type u} {c : Cat} (root : Syn c)
+    (fields : ∀ {k : Cat}, Syn k → List α) (convert : α → β) (accepts : β → Bool) :
+    syntaxFieldRefusals root (fun s => (fields s).map convert) accepts =
+      (syntaxFieldRefusals root fields (fun value => accepts (convert value))).map
+        (fun use => (use.1,convert use.2)) := by
+  rw [syntaxFieldRefusals, syntaxFieldUses_map, List.filter_map]
+  rfl
+
+/-- info: 'Solidity.Frontend.Admission.syntaxFieldUses_map' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxFieldUses_map
+/-- info: 'Solidity.Frontend.Admission.syntaxFieldRefusals_map' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms syntaxFieldRefusals_map
+
 end Solidity.Frontend.Admission
