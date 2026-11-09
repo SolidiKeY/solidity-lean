@@ -1189,6 +1189,127 @@ theorem transport {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} {Γ : Ct
 
 end SignedQuotRem
 
+namespace CheckedAssignment
+
+def condition {C : Contract} {Γ : Ctx} (t : Source.IntTy) (op : RingOp)
+    (a b : Val C Γ (integerPrim t)) : Val C Γ .bool :=
+  match t with
+  | ⟨false,bits,valid⟩ => CheckedUnsigned.condition bits valid op a b
+  | ⟨true,bits,valid⟩ => CheckedSigned.condition bits valid op a b
+
+private theorem computations {C : Contract} {Γ : Ctx} (target : State C Γ)
+    (t : Source.IntTy) (op : RingOp) (a b : Val C Γ (integerPrim t)) (x y : Int)
+    (hx : t.lo ≤ x ∧ x ≤ t.hi) (hy : t.lo ≤ y ∧ y ≤ t.hi)
+    (left : a.evalT target = .ok (integerValue t x hx))
+    (right : b.evalT target = .ok (integerValue t y hy)) :
+    (condition t op a b).evalT target = .ok (decide (t.lo ≤ op.calculate x y ∧ op.calculate x y ≤ t.hi)) ∧
+    (wrappingValue t op a b).evalT target =
+      .ok (integerValue t (t.wrap (op.calculate x y)) (t.wrap_mem (op.calculate x y))) := by
+  obtain ⟨sign,bits,valid⟩ := t
+  cases sign with
+  | false => exact ⟨CheckedUnsigned.condition_run target bits valid op a b x y hx hy left right,
+      CheckedUnsigned.value_run target bits valid op a b x y hx hy left right⟩
+  | true => exact ⟨CheckedSigned.condition_run target bits valid op a b x y hx hy left right,
+      CheckedSigned.value_run target bits valid op a b x y hx hy left right⟩
+
+/-- The V07 capture prefix followed by the width/sign-specific ring guard and value. -/
+def operand {C : Contract} {Γ : Ctx} (t : Source.IntTy) (op : RingOp) (checked : Bool)
+    (pipeline : Roadmap.Pipeline) (i a : Idx Γ (.val (integerPrim t))) :
+    DeferredSource.Operand C Γ (.prim (integerPrim t)) :=
+  PanicGuard.afterPrefix (assignReadPrefix pipeline i a) .arithmetic checked
+    (condition t op (.simple (.local .here)) (.simple (.local (.there .here))))
+    (wrappingValue t op (.simple (.local .here)) (.simple (.local (.there .here))))
+
+private theorem target_run {C : Contract} {Γ : Ctx} (target : State C Γ)
+    (t : Source.IntTy) (op : RingOp) (checked : Bool) (pipeline : Roadmap.Pipeline)
+    (i a : Idx Γ (.val (integerPrim t))) (x y : Int)
+    (hx : t.lo ≤ x ∧ x ≤ t.hi) (hy : t.lo ≤ y ∧ y ≤ t.hi)
+    (readA : TEnv.get a target.env = integerValue t x hx)
+    (readI : TEnv.get i target.env = integerValue t y hy) :
+    (operand t op checked pipeline i a).run target =
+      if checked = true ∧ ¬ (t.lo ≤ op.calculate x (if pipeline = .legacy then y else x) ∧
+          op.calculate x (if pipeline = .legacy then y else x) ≤ t.hi) then
+        .error (THalt.ofData (Source.panicData .arithmetic)) else
+        .ok (⟨target.setLocal i (integerValue t x hx),List.prefix_refl _⟩,
+          .prim (integerValue t (t.wrap (op.calculate x (if pipeline = .legacy then y else x)))
+            (t.wrap_mem (op.calculate x (if pipeline = .legacy then y else x))))) := by
+  let z := if pipeline = .legacy then y else x
+  have hz : t.lo ≤ z ∧ z ≤ t.hi := by dsimp only [z]; split <;> assumption
+  let caller : State C Γ := target.setLocal i (integerValue t x hx)
+  let reached : State C (.val (integerPrim t) :: .val (integerPrim t) :: Γ) :=
+    (caller.push (integerValue t z hz)).push (integerValue t x hx)
+  have pref : (assignReadPrefix pipeline i a).run target = .ok ⟨reached,List.prefix_refl _⟩ := by
+    have actual := assign_read_prefix_run pipeline target i a _ _ readA readI
+    cases pipeline <;> simpa only [reached,caller,z,if_true,reduceCtorEq,if_false] using actual
+  have ready := computations reached t op (.simple (.local .here)) (.simple (.local (.there .here)))
+    x z hx hz rfl rfl
+  have joined := PanicGuard.afterPrefix_run target (assignReadPrefix pipeline i a) reached
+    (List.prefix_refl _) pref .arithmetic checked _ _ _ _ ready.1 ready.2
+  unfold operand
+  cases pipeline <;> simpa only [z,reached,caller,decide_eq_false_iff_not,
+    assignReadPrefix,Prog.ext,Stmt.ext,Ext.trans,State.drop,if_true,reduceCtorEq,if_false] using joined
+
+private theorem source_run {E : Source.Env} {srcΓ : Source.RCtx}
+    (G : Source.Glob E) (F : Source.Fr) (fuel : Nat) (source : Source.EMState E srcΓ)
+    (t : Source.IntTy) (op : RingOp) (i a : Source.Idx srcΓ (.int t)) (x y : Int)
+    (hx : t.lo ≤ x ∧ x ≤ t.hi) (hy : t.lo ≤ y ∧ y ≤ t.hi)
+    (readA : source.1.get a = .int x hx) (readI : source.1.get i = .int y hy) :
+    (Source.evalE G F (fuel+4) (.binary op.source (.assign (.local i) (.local a)) (.local i))).run source =
+      (if F.checked = true ∧ ¬ (t.lo ≤ op.calculate x (if G.pipeline = .legacy then y else x) ∧
+          op.calculate x (if G.pipeline = .legacy then y else x) ≤ t.hi) then
+        .error (.revert (Source.panicData .arithmetic)) else
+        .ok (.val (Source.intWrap t (op.calculate x (if G.pipeline = .legacy then y else x)))),
+        (source.1.set i (.int x hx),source.2)) := by
+  have pair := source_assign_read_pair G F fuel source i a (.int x hx) (.int y hy) readA readI
+  rw [Source.evalE,Source.withLibraryCalldata_known]
+  have nonspecial : (decide (op.source = .and) || decide (op.source = .or)) = false := by cases op <;> rfl
+  simp only [nonspecial,Bool.false_eq_true,if_false]
+  rw [Source.Hoare.run_bind,pair]
+  by_cases order : G.pipeline = .legacy
+  · simp only [if_pos order]
+    change (do let result ← Source.EM.lift (Source.binVal F.checked op.source
+                (.int x hx : Source.Val E.layout (.int t)) (.int y hy))
+               pure (Source.RVal.val result)).run (source.1.set i (.int x hx),source.2) = _
+    rw [CheckedSigned.source_value]
+    split <;> rfl
+  · simp only [if_neg order]
+    change (do let result ← Source.EM.lift (Source.binVal F.checked op.source
+                (.int x hx : Source.Val E.layout (.int t)) (.int x hx))
+               pure (Source.RVal.val result)).run (source.1.set i (.int x hx),source.2) = _
+    rw [CheckedSigned.source_value]
+    split <;> rfl
+
+/-- Checked/wrapping assignment-read ring arithmetic at every width/sign toward `Solidity.Goals.lowerLoopsCorrect`.
+Initial alignment/reads derive capture order, exact panic and the caller relation after operands; no rollback or producer association. -/
+theorem transport {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} {Γ : Ctx} {ι : Type}
+    (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
+    (source : Source.EMState E srcΓ) (target : State C Γ) (t : Source.IntTy) (op : RingOp)
+    (si : ι → Source.Idx srcΓ (.int t)) (ti : ι → Idx Γ (.val (integerPrim t)))
+    (family : IntegerLocalFamily t si ti source.1 target.env) (i a : ι) (x y : Int)
+    (hx : t.lo ≤ x ∧ x ≤ t.hi) (hy : t.lo ≤ y ∧ y ≤ t.hi)
+    (readA : source.1.get (si a) = .int x hx) (readI : source.1.get (si i) = .int y hy) :
+    let result := op.calculate x (if G.pipeline = .legacy then y else x)
+    let failed := F.checked = true ∧ ¬ (t.lo ≤ result ∧ result ≤ t.hi)
+    (Source.evalE G F (fuel+4)
+      (.binary op.source (.assign (.local (si i)) (.local (si a))) (.local (si i)))).run source =
+      (if failed then .error (.revert (Source.panicData .arithmetic))
+        else .ok (.val (Source.intWrap t result)),(source.1.set (si i) (.int x hx),source.2)) ∧
+    (operand t op F.checked G.pipeline (ti i) (ti a)).run target =
+      (if failed then .error (THalt.ofData (Source.panicData .arithmetic)) else
+        .ok (⟨target.setLocal (ti i) (integerValue t x hx),List.prefix_refl _⟩,
+          .prim (integerValue t (t.wrap result) (t.wrap_mem result)))) ∧
+    (¬ failed → IntValueRel t (Source.intWrap t result : Source.Val E.layout (.int t))
+      (integerValue t (t.wrap result) (t.wrap_mem result))) ∧
+    IntegerLocalFamily t si ti (source.1.set (si i) (.int x hx))
+      (TEnv.set (ti i) (integerValue t x hx) target.env) := by
+  have updated := family.write i a
+  rw [readA,family.read a x hx readA] at updated
+  exact ⟨source_run G F fuel source t op (si i) (si a) x y hx hy readA readI,
+    target_run target t op F.checked G.pipeline (ti i) (ti a) x y hx hy
+      (family.read a x hx readA) (family.read i y hy readI),fun _ => integer_related _ _ _,updated⟩
+
+end CheckedAssignment
+
 end Solidity.Lowering.G16.Arithmetic
 
 /-- info: 'Solidity.Lowering.G16.Arithmetic.wrapping_transport' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -1210,3 +1331,7 @@ end Solidity.Lowering.G16.Arithmetic
 /-- info: 'Solidity.Lowering.G16.Arithmetic.SignedQuotRem.transport' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Lowering.G16.Arithmetic.SignedQuotRem.transport
+
+/-- info: 'Solidity.Lowering.G16.Arithmetic.CheckedAssignment.transport' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Lowering.G16.Arithmetic.CheckedAssignment.transport
