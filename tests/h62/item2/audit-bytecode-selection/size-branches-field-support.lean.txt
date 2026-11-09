@@ -1,0 +1,86 @@
+/-! Guards removing a size-branch join without simultaneous simulation and
+allocation premises, or inverting the size-four boundary. Reuse existing typed
+bodies/compiler and Sim.init. Native calldata-size loading, Source association,
+physical realization and gas are not supplied by these represented model inputs. -/
+def sizeBranchState (size : Fin W) : State dispatchContract dispatchCtx :=
+  (freshT dispatchContract 0 W_pos (wmod 0)).push (t := .val .uint)
+    ⟨(size.val : Int),PrimTy.inRange_uint_of_lt size.isLt⟩
+def sizeBranchMachine (size : Fin W) : Machine :=
+  {dispatchMachine with mem := fun address => if address=0 then .val size else .val (wmod 0)}
+
+theorem size_branch_represented (size : Fin W) :
+    Sim dispatchContract 1 0 (Frag.init dispatchCtx) (sizeBranchState size) (sizeBranchMachine size) := by
+  have fresh : Sim dispatchContract 1 0 (Frag.init []) (freshT dispatchContract 0 W_pos (wmod 0))
+      (Machine.init (fun _ => 0) (wmod 0)) := Sim.init dispatchContract 0 W_pos (fun _ => 0) (wmod 0) rfl
+  refine ⟨fresh.store,?_,?_,fresh.net,fresh.netSelf,fresh.bound,?_,fresh.env,fresh.funds,fresh.oracle⟩
+  · intro p index
+    cases index with
+    | here => exact ReprV.uint_of rfl
+    | there index => nomatch index
+  · intro R index
+    cases index with | there index => nomatch index
+  · intro R index
+    cases index with | there index => nomatch index
+
+def sizeBranchLeft := SizeBranches.selectedBranch 0 (Frag.init dispatchCtx)
+  dispatchHit.program dispatchHit.outFrag dispatchHit.admitted
+def sizeBranchRight := SizeBranches.selectedBranch 0 (Frag.init dispatchCtx)
+  dispatchFallback.program dispatchFallback.outFrag dispatchFallback.admitted
+def sizeBranchWhole := SizeBranches.selectedWhole 0 (Frag.init dispatchCtx) .here
+  dispatchHit.program dispatchFallback.program dispatchHit.outFrag dispatchFallback.outFrag
+  dispatchHit.admitted dispatchFallback.admitted
+
+theorem size_branch_left_found : Compiler.compile 0 (Frag.init dispatchCtx) dispatchHit.program=some sizeBranchLeft :=
+  SizeBranches.branch_selected 0 (Frag.init dispatchCtx) dispatchHit.program dispatchHit.outFrag dispatchHit.admitted
+
+theorem size_branch_right_found : Compiler.compile 0 (Frag.init dispatchCtx) dispatchFallback.program=some sizeBranchRight :=
+  SizeBranches.branch_selected 0 (Frag.init dispatchCtx) dispatchFallback.program dispatchFallback.outFrag dispatchFallback.admitted
+
+theorem size_branch_whole_found : Compiler.compile 0 (Frag.init dispatchCtx)
+    (SizeBranches.program (.here : Idx dispatchCtx (.val .uint)) dispatchHit.program dispatchFallback.program)=some sizeBranchWhole :=
+  SizeBranches.whole_selected 0 (Frag.init dispatchCtx) .here dispatchHit.program dispatchFallback.program
+    dispatchHit.outFrag dispatchFallback.outFrag dispatchHit.admitted dispatchFallback.admitted
+
+theorem size_branch_room : 1+Prog.pushes dispatchHit.program≤Lmax := by decide
+
+theorem size_branch_raw_outcome (size : Fin W) : run sizeBranchWhole.code (sizeBranchMachine size)=
+    if size.val<4 then run (sizeBranchLeft.code++[.jump sizeBranchRight.code.length]++sizeBranchRight.code) (sizeBranchMachine size)
+    else run sizeBranchRight.code (sizeBranchMachine size) :=
+  SizeBranches.executed 0 (Frag.init dispatchCtx) .here dispatchHit.program dispatchFallback.program
+    dispatchHit.outFrag dispatchFallback.outFrag dispatchHit.admitted dispatchFallback.admitted
+    sizeBranchWhole sizeBranchLeft sizeBranchRight size_branch_whole_found size_branch_left_found size_branch_right_found
+    (sizeBranchMachine size) size rfl
+
+theorem size_branch_body_outcome (size : Fin W) : run sizeBranchWhole.code (sizeBranchMachine size)=
+    if size.val<4 then run sizeBranchLeft.code (sizeBranchMachine size) else run sizeBranchRight.code (sizeBranchMachine size) :=
+  SizeBranches.branch_outcome 1 0 (Frag.init dispatchCtx) .here dispatchHit.program dispatchFallback.program
+    dispatchHit.outFrag dispatchFallback.outFrag dispatchHit.admitted dispatchFallback.admitted
+    sizeBranchWhole sizeBranchLeft sizeBranchRight size_branch_whole_found size_branch_left_found size_branch_right_found
+    (sizeBranchState size) (sizeBranchMachine size) (size_branch_represented size) size_branch_room size rfl
+
+def sizeBranchWritten (size label : Fin W) : Machine :=
+  {sizeBranchMachine size with mem := upd (sizeBranchMachine size).mem 0 (.val label)}
+
+theorem size_branch_short_success (size : Fin W) (small : size.val<4) :
+    run sizeBranchWhole.code (sizeBranchMachine size)=.ok (sizeBranchWritten size (wmod 22)) 0 := by
+  rw [size_branch_body_outcome,if_pos small]
+  rfl
+
+theorem size_branch_full_success (size : Fin W) (full : ¬size.val<4) :
+    run sizeBranchWhole.code (sizeBranchMachine size)=.ok (sizeBranchWritten size (wmod 77)) 0 := by
+  rw [size_branch_body_outcome,if_neg full]
+  rfl
+
+theorem size_branch_preserves_caller (size label : Fin W) :
+    (sizeBranchWritten size label).stack=(sizeBranchMachine size).stack := rfl
+
+#print axioms size_branch_represented
+#print axioms size_branch_left_found
+#print axioms size_branch_right_found
+#print axioms size_branch_whole_found
+#print axioms size_branch_room
+#print axioms size_branch_raw_outcome
+#print axioms size_branch_body_outcome
+#print axioms size_branch_short_success
+#print axioms size_branch_full_success
+#print axioms size_branch_preserves_caller
