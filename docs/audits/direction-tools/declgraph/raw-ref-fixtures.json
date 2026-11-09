@@ -1,0 +1,26 @@
+{
+  "actual_example_command_events": 2,
+  "async_false_allowed": true,
+  "async_true_rejected": true,
+  "boundaries": [
+    "Observed native identifier-classifier events only; not exhaustive dependency or runtime tracing.",
+    "Reference identity is scoped to the captured context; event multiplicity and ancestry tags are not unique successful checks or roots.",
+    "Constants and fvars remain distinct; module hints name the first imported owner, not the selected proof-body origin.",
+    "Native coalescing is diagnostic only, using original references plus actual alias leaves; never used as graph edges.",
+    "Generated-origin events and typed name keys are retained separately; no lexical inference supplies use edges."
+  ],
+  "coalescing_changes": 17,
+  "finished_diagnostic_snapshots_consumed": true,
+  "generated_or_other_origin_identifier_events": 178,
+  "guarded_snapshot_error_consumed": true,
+  "lean": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)",
+  "literal_and_string_names_not_inferred": true,
+  "local_variable_events": 4,
+  "native_identifier_events": 247,
+  "native_original_identifier_events": 69,
+  "prefix_reference_not_attributed_to_example": true,
+  "producer_sha256": "7940f2b22ccb7732c7fb9f1c7a7b63f5969c98641beb9763e7220a399c90137c",
+  "resolved_quote_missing_from_kernel_refs_observed": true,
+  "snapshot_errors_preserved": true,
+  "source_sha256": "70603336189830f35b6113ddb561706914a5d59076b7a71ffa9d9d3974103c04"
+}

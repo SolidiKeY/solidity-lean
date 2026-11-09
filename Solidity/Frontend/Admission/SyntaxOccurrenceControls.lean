@@ -308,4 +308,20 @@ theorem free_function_category_and_gap :
 /-- info: 'Solidity.Frontend.Admission.OccurrenceControls.free_function_category_and_gap' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms free_function_category_and_gap
 
+
+/-! Regression: caller composition must report a free-function marker that the frozen candidate omits, retaining the actual typed source site and complete refusal list. This raw syntax control supplies no typing, admission or execution witness. -/
+theorem free_function_composed_diagnostic :
+    syntaxFieldRefusal? freeFunctionUnit
+      (fun s => syntaxCandidateMetadataV2At s ++ freeFunctionFeaturesAt s)
+      (fun f => decide (f ≠ .freeFunctions)) =
+        some (⟨.part true,functionCategoryNode true⟩,.freeFunctions) ∧
+    (syntaxFieldRefusals freeFunctionUnit
+      (fun s => syntaxCandidateMetadataV2At s ++ freeFunctionFeaturesAt s)
+      (fun f => decide (f ≠ .freeFunctions))).map Prod.snd = [.freeFunctions] ∧
+    sourceCandidateMetadataV2Refusal? freeFunctionUnit
+      (fun f => decide (f ≠ .freeFunctions)) = none := ⟨rfl,rfl,rfl⟩
+
+/-- info: 'Solidity.Frontend.Admission.OccurrenceControls.free_function_composed_diagnostic' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms free_function_composed_diagnostic
+
 end Solidity.Frontend.Admission.OccurrenceControls
