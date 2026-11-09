@@ -79,3 +79,5 @@
 | `Lowering/G19/AssignmentReturnFlagControls.lean` | Bounded v17-validation-release checkpoint; typed scope and retained obligations are stated in the module. |
 | `Lowering/G19/AssignmentWhileBreak.lean` | Fixed hand-written target for `while` with immediate break, checked against Source; not produced by a lowering function. |
 | `Lowering/G19/AssignmentWhileBreakControls.lean` | Bounded v17-validation-release checkpoint; typed scope and retained obligations are stated in the module. |
+
+| `Backend/Transient/PayloadV2.lean` | H273/H57 payload exits over existing transient/byte evaluators; actual one-byte store/revert and full caller-prefix rollback. General payload/MIC bridge and physical coherence remain open. |
