@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/Transient/PayloadV2Controls.lean:Solidity.Backend.Transient.PayloadV2Controls.actual_nonempty_rollback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Transient/PayloadV2Controls.lean:Solidity.Backend.Transient.PayloadV2Controls.static_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Transient/PayloadV2Controls.lean:Solidity.Backend.Transient.PayloadV2Controls.wrong_payload": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

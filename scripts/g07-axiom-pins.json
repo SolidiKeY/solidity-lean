@@ -39153,6 +39153,65 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/Transient/PayloadV2.lean:Solidity.Backend.Transient.PayloadV2.byte_revert_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Transient/PayloadV2.lean:Solidity.Backend.Transient.PayloadV2.callback_preserves_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Transient/PayloadV2.lean:Solidity.Backend.Transient.PayloadV2.callback_static_store_suffix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Transient/PayloadV2.lean:Solidity.Backend.Transient.PayloadV2.callback_store_byte_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Transient/PayloadV2.lean:Solidity.Backend.Transient.PayloadV2.finish_writes_revert": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Transient/PayloadV2.lean:Solidity.Backend.Transient.PayloadV2.push_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Transient/PayloadV2.lean:Solidity.Backend.Transient.PayloadV2.revert_actual": [
+  "propext"
+ ],
+ "Solidity/Backend/Transient/PayloadV2.lean:Solidity.Backend.Transient.PayloadV2.run_append": [],
+ "Solidity/Backend/Transient/PayloadV2.lean:Solidity.Backend.Transient.PayloadV2.static_store": [
+  "propext"
+ ],
+ "Solidity/Backend/Transient/PayloadV2.lean:Solidity.Backend.Transient.PayloadV2.store_byte_actual": [
+  "propext"
+ ],
+ "Solidity/Backend/Transient/PayloadV2.lean:Solidity.Backend.Transient.PayloadV2.store_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Transient/PayloadV2Controls.lean:Solidity.Backend.Transient.PayloadV2Controls.actual_nonempty_rollback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Transient/PayloadV2Controls.lean:Solidity.Backend.Transient.PayloadV2Controls.static_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Transient/PayloadV2Controls.lean:Solidity.Backend.Transient.PayloadV2Controls.wrong_payload": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Calculus/ArrayBlock.lean:Solidity.Decide.arrayBlockReduction?_isSome": [
   "Classical.choice",
   "Quot.sound",
