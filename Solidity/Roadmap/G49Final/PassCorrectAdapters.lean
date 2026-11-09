@@ -35,9 +35,9 @@ def cert_adapter {A B : Lang Event Outcome} (pass : Pass A B) (certificate : Cer
     exact ⟨⟨transported.1, transported.2.1, transported.2.2.1⟩, transported.2.2.2⟩
   back e r allowed admissible guard := by
     have originalGuard : B.Guard (pass.run program domain) e r := by
-      simpa only [agrees] using guard
+      simpa only [Behaviour.ofLang, agrees] using guard
     have transported := certificate.back program domain e r allowed admissible originalGuard
-    simpa only [agrees] using transported
+    simpa only [Behaviour.ofLang, agrees] using transported
 
 /-- Frozen Lowering carrier: no extra fragment/domain or no-failure premise. -/
 def lowering_adapter {S : SourceSpec} {I : IntrinsicSpec} (lowering : Lowering S I)
