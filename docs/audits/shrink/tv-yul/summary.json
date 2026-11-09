@@ -403,11 +403,12 @@
     "H299 A approves the operation basis. Both original word exports are restored through actual validated Artifact runs; all11Packing statements and retained Nat proofs are preserved/countable. This measured prototype is NO-GO, not family-reduction acceptance. Ordinary validation is incomplete.",
     "Auxiliary checker covers selected loop-free Backend.Block with a fixed total source horizon, not arbitrary raw EVM bytecode, loops or native/Source-G24 execution.",
     "get_goal is not exposed; the original persistent goal is retained without creating or resetting a goal. Ordinary validation remains incomplete.",
-    "No systemd scope on cloud VM(H232). Resource guard restores a12GiB RLIMIT_AS process cap, hard cgroup cap at most16GiB, no swap, and both4GiBOS/effective-free reserves. The16GiB bypass is removed; previous gates using it are withdrawn as current-policy validation and retained only as historical evidence. Strict-guard39-job measurements now pass; the earlier 37-record pin failure is historical and resolved upstream. Ordinary final validation remains pending; resource reserves remain mandatory."
+    "No systemd scope on cloud VM(H232). Resource guard restores a12GiB RLIMIT_AS process cap, hard cgroup cap at most16GiB, no swap, and both4GiBOS/effective-free reserves. The16GiB bypass is removed; previous gates using it are withdrawn as current-policy validation and retained only as historical evidence. Strict-guard39-job measurements now pass; the earlier 37-record pin failure is historical and resolved upstream. Ordinary final validation remains pending; resource reserves remain mandatory.",
+    "Latest resumed full gate has13 observed PASS and2 FAIL outcomes, but its aggregate resource-monitor receipt is missing after an environment reconnect. These per-gate logs do not certify uninterrupted resource monitoring. The isolated Derived19 retry has a complete strict receipt and exits134; its no-stop result is not generalized to the full run."
   ],
   "outstanding": [
-    "Complete ordinary repository validation and final handoff under unchanged resource limits. Pin registry is repaired upstream and generated roots are now consistent.",
-    "Do not mark the original goal complete until final validation is satisfied; NO-GO is the measured comparison verdict only."
+    "Ordinary validation at integrated master ea93028b5dc9411bb95c2ca979c5df2945f99ae2: run-lean and corpus fail with allocation/thread-creation aborts in existing modules under the unchanged resource policy; other gate outcomes pass. TVYUL-VALIDATE routes the concrete repair to coordinator. H232/no-systemd guidance is already applied and does not resolve these aborts.",
+    "Complete the same required gates and final handoff after matching validated artifacts or an owner repair becomes available. Do not mark the original goal complete or accept family reduction."
   ],
   "questions": [],
   "resource_guard": {
@@ -416,7 +417,7 @@
     "ownership": "Signals only the fresh child process group; pidfd/select observes exit without reaping, and waitid(WNOWAIT) retains the leader until single-threaded monitoring ends. No watcher thread, constant tag or /proc-wide signal loop. Trusted commands must wait for their workers; detached daemons are outside this runner contract.",
     "monitoring": "Sampling errors at initial, periodic or final sample mark refusal and terminate the owned group; no successful result after monitor failure.",
     "tests": "test_bounded.py covers actual virtual-address refusal without resident allocation, lower inherited cap preservation/reporting, both reserves, unrelated-process survival, initial/periodic/final sampling errors, pidfd monitoring errors, and removed bypass refusal.",
-    "validation": "Nine guard regressions,39auxiliary and25new9ePacking checks pass under12GiBAS/both4GiBreserves. Prior strict full gate14/15PASS with library6771jobs; soleFAIL axiom-pins24then28aftermerge. No complete full-gate pass claimed."
+    "validation": "Nine guard regressions,39auxiliary and25new9ePacking checks pass under12GiBAS/both4GiBreserves. Prior strict full gate14/15PASS with library6771jobs; soleFAIL axiom-pins24then28aftermerge. No complete full-gate pass claimed. Latest integrated-master run has13 observed gate passes and2 failures(run-lean/corpus), with no aggregate monitoring receipt after reconnect. No uninterrupted-monitoring or full-pass claim is made. Only the isolated Derived19 retry has a complete strict receipt for its failed outcome."
   },
   "prototype_source_access": {
     "commit": "2aa3a2a21a1e081be5a2a760f91c0d11a084c3e2",
@@ -427,11 +428,11 @@
     "review_instruction": "Fetch bundle ref codex/shrink-pilots-1108/tv-yul-prototype into a separate review ref if its Git object is unavailable. Requires published base381328f608; never merge prototype history."
   },
   "upstream_gate_dependency": {
-    "head": "257165a572cd87546da945c49ca18b6a000393cd",
-    "gate": "axiom-pins",
-    "status": "pass",
-    "decisive_output": "0 errors, 0 unrecorded changes, 0 baselined changes. Prior 37-record blocker resolved upstream.",
-    "scope": "No pin registry edited by this lane; no gate waiver."
+    "head": "ea93028b5dc9411bb95c2ca979c5df2945f99ae2",
+    "gate": "run-lean and corpus",
+    "status": "fail",
+    "decisive_output": "Existing modules abort with std::bad_alloc or failed to create thread, exit134; isolated Derived19 also aborts under explicit-j1 and unchanged12GiB cap. Pin registry and roots are repaired and pass.",
+    "scope": "No theorem, proof budget, process cap, reserve or gate changed. H232 applied; no systemd block. Coordinator repair routing requested under TVYUL-VALIDATE."
   },
   "provisional_views_comparison": {
     "status": "basis_approved_validation_pending",
