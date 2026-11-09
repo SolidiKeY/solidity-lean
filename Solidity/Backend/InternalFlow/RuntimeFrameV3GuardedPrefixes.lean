@@ -12,6 +12,7 @@ def ReadDomain {C : Contract} (σ : State C (Parameters A)) (ref : HRef σ.H A) 
  ∀ (k : Nat), 0<k → k≤count → ∀ (fit : k<W), ∃ v,
  ArrayProbe.value.evalT (σ.withEnv (Δ:=Parameters A) (countValue k fit,(some ref,())))=.ok v
 
+set_option backward.isDefEq.respectTransparency false in
 theorem environment {C : Contract} (σ : State C (Parameters A)) (count : Nat) (bound : count<W)
  (ref : HRef σ.H A)
  (counter : TEnv.get (.here : Idx (Parameters A) (.val .uint)) σ.env=countValue count bound)
@@ -32,13 +33,13 @@ theorem all_horizons {C : Contract} (depth : Nat) (σ : State C (Parameters A))
  (GuardedRecursion.body depth).run σ=
  if count<depth then .ok ⟨σ,List.prefix_refl _⟩ else .error .exhausted := by
  induction depth generalizing σ count with
- | zero => simp only [base_exhausts,Nat.not_lt_zero,if_false]
+ | zero => simp only [base_exhausts,Nat.not_lt_zero,ite_false]
  | succ depth ih =>
    have guard := guard_eval σ count (congrArg (fun v : PrimTy.uint.Denote => v.val) counter)
    cases count with
    | zero =>
      have stopped := source_zero σ depth guard
-     simpa only [Nat.zero_lt_succ,if_true] using stopped
+     simpa only [Nat.zero_lt_succ,ite_true] using stopped
    | succ count =>
      obtain ⟨v,evaluated⟩ := reads (count+1) (by omega) (by omega) bound
      rw [environment σ (count+1) bound ref counter alias] at evaluated
@@ -50,10 +51,10 @@ theorem all_horizons {C : Contract} (depth : Nat) (σ : State C (Parameters A))
        exact reads k hp (by omega) hf
      have nested := ih child count (by omega) ref rfl rfl childReads
      by_cases enough : count<depth
-     · have actual := child_returns σ count bound ref counter alias depth (by simpa only [if_pos enough] using nested)
-       simpa only [show count+1<depth+1 from by omega,if_true] using actual
-     · have actual := child_failure σ count bound ref counter alias depth .exhausted (by simpa only [if_neg enough] using nested)
-       simpa only [show ¬ count+1<depth+1 from by omega,if_false] using actual
+     · have actual := child_returns σ count bound ref counter alias depth (by simpa only [ite_eq_left enough] using nested)
+       simpa only [show count+1<depth+1 from by omega,ite_true] using actual
+     · have actual := child_failure σ count bound ref counter alias depth .exhausted (by simpa only [ite_eq_right enough] using nested)
+       simpa only [show ¬ count+1<depth+1 from by omega,ite_false] using actual
 
 /-- Every actual running horizon of the guarded image, derived from checked
 probe execution and capture/update. The capacity counts real saved contexts;
@@ -107,7 +108,7 @@ theorem reached_prefix {C : Contract} {L b frame : Nat} {F : Frag (Parameters A)
      refine ⟨after,finalAddresses,?_,?_,?_,finalStack.trans stack,?_,?_,?_⟩
      · simpa only [loopIterN,turn] using running
      · simpa only [loopIterN,oldTurn] using oldRunning
-     · simpa only [Nat.add_sub_add_right] using finalRepr
+     · simpa only [child,State.withEnv,Nat.add_sub_add_right] using finalRepr
      · exact extended.trans (List.prefix_refl _) finalExt
      · exact growth.comp finalGrowth
      · have arithmetic : start+2+2*steps=start+2*(steps+1) := by omega
@@ -175,7 +176,7 @@ theorem success_endpoint {C : Contract} {L b frame : Nat} {F : Frag (Parameters 
    (run_append_ok oldRun).symm.trans oldWhole
  refine ⟨last,?_,(run_append_ok newRun).trans returned,finalRepr,finalStack,finalCursor,low,high,saved⟩
  intro depth enough
- simpa only [if_pos enough] using all_horizons depth σ count bound ref counter alias reads
+ simpa only [ite_eq_left enough] using all_horizons depth σ count bound ref counter alias reads
 
 namespace Checks
 open CountdownWitness
@@ -250,7 +251,7 @@ theorem bad_domain : ¬ReadDomain ArrayProbe.Checks.bad P.r0 3 := by
 read succeeds. This control is derived from the full horizon classification. -/
 theorem shallow_not_return : (GuardedRecursion.body 2).run callee≠.ok ⟨callee,List.prefix_refl _⟩ := by
  rw [source_all]
- simp only [show ¬2<2 from by decide,if_false]
+ simp only [show ¬2<2 from by decide,ite_false]
  intro bad
  cases bad
 
