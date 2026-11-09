@@ -222,6 +222,8 @@ import Solidity.Backend.CalldataPackets.RawUint.Execution
 import Solidity.Backend.CalldataPackets.RawUintN.Controls
 import Solidity.Backend.CalldataPackets.RawUintN.Execution
 import Solidity.Backend.Checks
+import Solidity.Backend.CompilerEndpoint
+import Solidity.Backend.CompilerEndpointWitnesses
 import Solidity.Backend.Control
 import Solidity.Backend.Creation.Artifact
 import Solidity.Backend.Creation.ArtifactChecks
