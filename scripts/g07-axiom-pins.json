@@ -47001,7 +47001,17 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/G16/Arithmetic.lean:Solidity.Lowering.G16.Arithmetic.SignedQuotRem.assignment_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/G16/Arithmetic.lean:Solidity.Lowering.G16.Arithmetic.SignedQuotRem.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/Arithmetic.lean:Solidity.Lowering.G16.Arithmetic.TypedPower.transport": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -47031,6 +47041,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/G16/ArithmeticControls.lean:Solidity.Lowering.G16.ArithmeticControls.wrong_signed_assignment_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/G16/ArithmeticControls.lean:Solidity.Lowering.G16.ArithmeticControls.wrong_signed_quotrem_rejected": [
   "Classical.choice",
   "Quot.sound",
@@ -47041,8 +47056,23 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/G16/ArithmeticControls.lean:Solidity.Lowering.G16.ArithmeticControls.wrong_typed_power_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/G16/ArithmeticControls.lean:Solidity.Lowering.G16.ArithmeticControls.wrong_wrapping_rejected": [],
+ "Solidity/Lowering/G16/ComparisonControls.lean:Solidity.Lowering.G16.ComparisonControls.wrong_assignment_comparison_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/G16/ComparisonControls.lean:Solidity.Lowering.G16.ComparisonControls.wrong_comparison_rejected": [],
+ "Solidity/Lowering/G16/Comparisons.lean:Solidity.Lowering.G16.Comparisons.assignment_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/G16/Comparisons.lean:Solidity.Lowering.G16.Comparisons.transport": [
   "Classical.choice",
   "Quot.sound",
@@ -47053,7 +47083,17 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/G16/Complement.lean:Solidity.Lowering.G16.UnsignedBitwise.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/G16/ComplementControls.lean:Solidity.Lowering.G16.ComplementControls.wrong_complement_rejected": [],
+ "Solidity/Lowering/G16/ComplementControls.lean:Solidity.Lowering.G16.UnsignedBitwiseControls.wrong_bitwise_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/G16/PanicGuard.lean:Solidity.Lowering.G16.PanicGuard.afterPrefix_false_rejected": [
   "Classical.choice",
   "Quot.sound",
