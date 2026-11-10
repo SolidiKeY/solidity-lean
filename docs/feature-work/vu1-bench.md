@@ -57,6 +57,17 @@ list is available until the actual suite has run.
   regeneration on this branch. The link is in the trust/usability guide; the
   catalog is generated with the unchanged navigation script. Branch checks
   do not establish ordinary factory integration or a merge receipt.
+- `VU1-D2`: the merged master has an inherited catalog omission. The current
+  catalog and navigation-generator owner is
+  `plan-ci0-ci-green-1109/ci0-lean-checks`. Only that owner performs the unchanged
+  generator repair; VU1 must not write either file or edit audit content.
+  Coordinator delivery of the bounded repair remains pending under H418.
+  Keep the navigation failure explicit until the published repair passes checks.
+- `VU1-G2`: the merged master has a known unrecorded axiom pin for
+  `Solidity/Backend/Passes/CompilerWholeScopePins.lean`. Its repair is already
+  assigned outside VU1. Do not write the registries, baseline or theorem here;
+  preserve the failed gate until the published repair is validated. This is
+  inventory bookkeeping, not permission to add an axiom or weaken a proof.
 - Representative contracts: the frozen SolKeY snapshot contains benchmark
   ERC20 and wallet sources, but their presence is not evidence of frontend
   admission. No vault/multisig Solidity file was found in that snapshot.
@@ -143,9 +154,10 @@ steps, proof timings or a U01 baseline. Controls are
 ## Documentation integration
 
 The trust/usability topic guide links this inventory. After adding tracked
-Markdown, regenerate the catalog with
-`python3 scripts/check-doc-navigation.py --write`, then run the unchanged
-navigation, document-path and generator checks. Keep ordinary integration and
+Markdown, the current catalog owner regenerates it with
+`python3 scripts/check-doc-navigation.py --write`. VU1 runs only the unchanged
+read-only navigation, document-path and generator checks and reports inherited
+drift to that owner under VU1-D2. Keep ordinary integration and
 landing with factoryd; passing branch checks is not a merge receipt.
 
 ## Native runtime preparation
@@ -369,11 +381,18 @@ valid failed neighboring rows. Finder review removed a missing-status confound
 from the changed-identity controls so each tests its intended mutation.
 Independent read-only finder and skeptic confirmed the implementation fixes.
 
+Independent read-only finder and skeptic reviews of the merged-master catalog
+drift confirmed the one-row generator repair without audit-content changes.
+The VU1-D2 disposition assigns execution to the existing CI0 owner; the catalog
+remains unchanged in this lane while coordinator delivery is pending.
+The coordinator also assigned the inherited VU1-G2 pin-inventory repair outside
+this lane; no inventory, baseline or theorem edit is made here.
+
 ## Checkpoint handoff
 
-Inventory reviews and checkpoint checks pass. Documentation integration is
-included on this branch and requires its unchanged checks; factory landing
-remains separate. Suite, fresh baseline, calibrated
+The lane-owned inventory and documentation repairs are complete. Current
+merged-head validation inherits the catalog and axiom-inventory failures above;
+ordinary factory integration remains separate. Suite, fresh baseline, calibrated
 report, budget approval, CI regression thresholds,
 full lane-end validation and sealed handoff remain outstanding. No Lean file,
 public theorem, axiom pin, heartbeat setting or generated root is changed.
