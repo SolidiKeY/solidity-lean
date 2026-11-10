@@ -49,8 +49,93 @@ theorem wrong_comparison_rejected {D : Source.Layout} :
     (Except.ok false : Source.R Bool) ≠ .ok true
   exact ⟨(by intro h; cases h),(by intro h; cases h),(by intro h; cases h)⟩
 
+def assignment_integer_client (t : Source.IntTy) (op : BinOp)
+    (accepts : op.accepts .uint = true) (returns : op.ret .uint = .bool)
+    (x y : Int) (hx : t.lo ≤ x ∧ x ≤ t.hi) (hy : t.lo ≤ y ∧ y ≤ t.hi)
+    (checked : Bool) (pipeline : Roadmap.Pipeline) (fuel : Nat) :=
+  assignment_transport (MixedAssignmentControls.globals pipeline)
+    {Source.SemanticsExamples.F0 with checked := checked} fuel
+    (WordCastControls.source t x y hx hy) (WordCastControls.target t x y hx hy) t op accepts returns
+    (.there .here) .here (.there .here) .here (.int x hx) (.int y hy) x y hx hy
+    rfl rfl rfl rfl rfl rfl
+
+def assignment_address_client (a b : Roadmap.Address) (op : BinOp)
+    (accepts : op.accepts .uint = true) (returns : op.ret .uint = .bool)
+    (checked : Bool) (pipeline : Roadmap.Pipeline) (fuel : Nat) :=
+  let source : Source.EMState MixedAssignmentControls.E [.address false,.address false] :=
+    (.cons (.address a) (.cons (.address b) .nil),
+      (WordCastControls.source .u8 0 1 (by decide) (by decide)).2)
+  assignment_transport (MixedAssignmentControls.globals pipeline)
+    {Source.SemanticsExamples.F0 with checked := checked} fuel source
+    (WordCastControls.target AddressConversions.ty a.val b.val
+      (AddressConversions.address_range a) (AddressConversions.address_range b))
+    AddressConversions.ty op accepts returns (.there .here) .here (.there .here) .here
+    (.address a) (.address b) a.val b.val (AddressConversions.address_range a)
+    (AddressConversions.address_range b) rfl rfl rfl rfl rfl rfl
+
+def assignmentObserved (t : Source.IntTy) (op : BinOp) (x y : Int)
+    (hx : t.lo ≤ x ∧ x ≤ t.hi) (hy : t.lo ≤ y ∧ y ≤ t.hi)
+    (checked : Bool) (pipeline : Roadmap.Pipeline) (fuel : Nat) :
+    Source.R (Source.RVal MixedAssignmentControls.E.layout .bool) :=
+  ((Source.evalE (MixedAssignmentControls.globals pipeline)
+    {Source.SemanticsExamples.F0 with checked := checked} (fuel+4)
+    (.compare (NumericComparisons.sourceOp op)
+      (.assign (.local (.there .here)) (.local .here)) (.local (.there .here)))).run
+      (WordCastControls.source t x y hx hy)).1
+
+def assignmentWritten (t : Source.IntTy) (op : BinOp) (x y : Int)
+    (hx : t.lo ≤ x ∧ x ≤ t.hi) (hy : t.lo ≤ y ∧ y ≤ t.hi)
+    (checked : Bool) (pipeline : Roadmap.Pipeline) (fuel : Nat) : Option Int :=
+  (((Source.evalE (MixedAssignmentControls.globals pipeline)
+    {Source.SemanticsExamples.F0 with checked := checked} (fuel+4)
+    (.compare (NumericComparisons.sourceOp op)
+      (.assign (.local (.there .here)) (.local .here)) (.local (.there .here)))).run
+      (WordCastControls.source t x y hx hy)).2.1.get (.there .here)).key
+
+private theorem assignment_observed_run (t : Source.IntTy) (op : BinOp)
+    (accepts : op.accepts .uint = true) (returns : op.ret .uint = .bool)
+    (x y : Int) (hx : t.lo ≤ x ∧ x ≤ t.hi) (hy : t.lo ≤ y ∧ y ≤ t.hi)
+    (checked : Bool) (pipeline : Roadmap.Pipeline) (fuel : Nat) :
+    assignmentObserved t op x y hx hy checked pipeline fuel =
+      (Source.cmpVal (NumericComparisons.sourceOp op)
+        (.int x hx : Source.Val MixedAssignmentControls.E.layout (.int t))
+        (if pipeline = .legacy then .int y hy else .int x hx)).map (fun r => .val (.bool r)) := by
+  obtain ⟨result,computed,source,native⟩ :=
+    assignment_integer_client t op accepts returns x y hx hy checked pipeline fuel
+  unfold assignmentObserved
+  dsimp only [MixedAssignmentControls.globals] at computed
+  rw [source,computed]
+  rfl
+
+private theorem assignment_written_run (t : Source.IntTy) (op : BinOp)
+    (accepts : op.accepts .uint = true) (returns : op.ret .uint = .bool)
+    (x y : Int) (hx : t.lo ≤ x ∧ x ≤ t.hi) (hy : t.lo ≤ y ∧ y ≤ t.hi)
+    (checked : Bool) (pipeline : Roadmap.Pipeline) (fuel : Nat) :
+    assignmentWritten t op x y hx hy checked pipeline fuel = some x := by
+  obtain ⟨result,computed,source,native⟩ :=
+    assignment_integer_client t op accepts returns x y hx hy checked pipeline fuel
+  unfold assignmentWritten
+  rw [source,source_locals_get_set]
+  rfl
+
+/-- Reject erased capture order and dropped assignment writes on actual comparison executions in both modes. -/
+theorem wrong_assignment_comparison_rejected (checked : Bool) (fuel : Nat) :
+    assignmentObserved .u8 .gt 3 1 (by decide) (by decide) checked .legacy fuel ≠
+      assignmentObserved .u8 .gt 3 1 (by decide) (by decide) checked .viaIR fuel ∧
+    assignmentObserved .u8 .eqB 3 1 (by decide) (by decide) checked .legacy fuel ≠
+      assignmentObserved .u8 .eqB 3 1 (by decide) (by decide) checked .viaIR fuel ∧
+    assignmentWritten .u8 .gt 3 1 (by decide) (by decide) checked .legacy fuel ≠ some 1 := by
+  rw [assignment_observed_run .u8 .gt rfl rfl,assignment_observed_run .u8 .gt rfl rfl,
+    assignment_observed_run .u8 .eqB rfl rfl,assignment_observed_run .u8 .eqB rfl rfl,
+    assignment_written_run .u8 .gt rfl rfl]
+  refine ⟨?_,?_,?_⟩ <;> intro impossible <;> cases impossible
+
 end Solidity.Lowering.G16.ComparisonControls
 
 /-- info: 'Solidity.Lowering.G16.ComparisonControls.wrong_comparison_rejected' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Lowering.G16.ComparisonControls.wrong_comparison_rejected
+
+/-- info: 'Solidity.Lowering.G16.ComparisonControls.wrong_assignment_comparison_rejected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Lowering.G16.ComparisonControls.wrong_assignment_comparison_rejected

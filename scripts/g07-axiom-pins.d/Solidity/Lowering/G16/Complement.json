@@ -3,5 +3,10 @@
   "Classical.choice",
   "Quot.sound",
   "propext"
+ ],
+ "Solidity/Lowering/G16/Complement.lean:Solidity.Lowering.G16.UnsignedBitwise.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
  ]
 }
