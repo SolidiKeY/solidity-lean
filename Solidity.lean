@@ -1520,6 +1520,8 @@ import Solidity.Backend.Passes.ValueReflection
 import Solidity.Backend.Passes.ValueSequence
 import Solidity.Backend.Passes.ValueSequenceControls
 import Solidity.Backend.Passes.ValueSequencePins
+import Solidity.Backend.Passes.WholeProgram.Correct
+import Solidity.Backend.Passes.WholeProgram.Refusal
 import Solidity.Backend.Passes.WidthApplication
 import Solidity.Backend.Payments.CompilerExact
 import Solidity.Backend.Payments.CoreExact
