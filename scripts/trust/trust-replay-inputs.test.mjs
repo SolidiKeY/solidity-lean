@@ -2,9 +2,10 @@
 // physical .lake/build objects, and must fail closed on incomplete provenance.
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,rmSync,existsSync} from 'node:fs';
+import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,rmSync,existsSync,chmodSync} from 'node:fs';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
+import {spawnSync} from 'node:child_process';
 import {makeReplayInputs,currentReplayConfig} from './trust-replay-inputs.mjs';
 test('replay overlay selects current objects and rejects missing inputs',()=>{
  const root=mkdtempSync(join(tmpdir(),'trust-replay-control-'));
@@ -56,4 +57,33 @@ test('cached root cannot reuse an existing stale setup file',()=>{
   assert.equal(readFileSync(join(destination,'Solidity/Dependency.olean'),'utf8'),'new dependency');
   assert.match(manifest.provenance.setupOrigin,/lake setup-file/);
  }finally{rmSync(root,{recursive:true,force:true});}
+});
+
+// Regression: command substitution consumes the helper's stdout as one path.
+// Compiler build chatter must go to stderr even when the child writes stdout.
+test('build output cannot pollute the machine-readable replay path',()=>{
+ const root=mkdtempSync(join(tmpdir(),'trust-replay-stdout-'));
+ try {
+  mkdirSync(join(root,'Solidity'),{recursive:true});
+  mkdirSync(join(root,'.lake/build/lib/lean/Solidity'),{recursive:true});
+  writeFileSync(join(root,'Solidity/Theorems.lean'),'import Solidity.Dependency\n');
+  writeFileSync(join(root,'.lake/build/lib/lean/Solidity/Theorems.trace'),JSON.stringify({outputs:{o:['123']}}));
+  const fake=join(root,'lake');
+  writeFileSync(fake,`#!${process.execPath}
+if(process.argv[2]==='build'){
+ process.stdout.write('compiler build noise\\n');
+ process.stderr.write('compiler warning\\n');
+}else console.log(JSON.stringify({name:'Solidity.Theorems',importArts:{'Solidity.Dependency':['cache/artifacts/222.olean']}}));
+`);
+  chmodSync(fake,0o755);
+  const program=`import {execFileSync} from 'node:child_process';
+import {currentReplayConfig} from ${JSON.stringify(new URL('./trust-replay-inputs.mjs',import.meta.url).href)};
+currentReplayConfig({root:${JSON.stringify(root)},run:(_command,args,options)=>execFileSync(${JSON.stringify(fake)},args,options)});
+console.log('RESULT');`;
+  const result=spawnSync(process.execPath,['--input-type=module','-e',program],{encoding:'utf8'});
+  assert.equal(result.status,0,result.stderr);
+  assert.equal(result.stdout,'RESULT\n');
+  assert.match(result.stderr,/compiler build noise/);
+  assert.match(result.stderr,/compiler warning/);
+ } finally {rmSync(root,{recursive:true,force:true});}
 });

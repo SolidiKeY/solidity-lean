@@ -49,7 +49,8 @@ export function makeReplayInputs({setup,trace,cacheDir,destination,head='fixture
 // root trace and source; never read the persisted setup as provenance.
 export function currentReplayConfig({root=process.cwd(),run=execFileSync}={}) {
  const env={...process.env,LEAN_NUM_THREADS:'1'};
- run('lake',['build','Solidity.Theorems'],{cwd:root,env,stdio:['ignore','inherit','inherit'],timeout:3600000});
+ // The CLI reserves stdout for one directory; Lake also prints build summaries.
+ run('lake',['build','Solidity.Theorems'],{cwd:root,env,stdio:['ignore',2,2],timeout:3600000});
  const fresh=run('lake',['setup-file','Solidity/Theorems.lean'],{cwd:root,env,encoding:'utf8',timeout:300000,maxBuffer:64*1024*1024});
  const setup=JSON.parse(fresh);
  if(setup.name!=='Solidity.Theorems'||!setup.importArts)throw Error('fresh public setup unavailable');
