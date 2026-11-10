@@ -1,15 +1,13 @@
 import Solidity.Lowering.V07.UnsignedQuotRemGuard
 
-/-! Shared operational guard lemma for G16 scalar families. It preserves the
-published panic bytes, without asserting rollback or a session projection. -/
+/-! Shared operational guard lemma for G16 scalar families. It preserves the published panic bytes, without asserting rollback or a session projection. -/
 namespace Solidity.Lowering.G16.PanicGuard
 
 /-- The existing intrinsic panic statement at the existing Source panic code. -/
 def code {C : Contract} {Γ : Ctx} (panic : Source.PanicCode)
     (condition : Val C Γ .bool) : Stmt C Γ Γ := panicStmt panic.code condition
 
-/-- Compose an independently established guard test with the actual panic
-statement. Both successful and failing tests are included. -/
+/-- Compose an independently established guard test with the actual panic statement. Both successful and failing tests are included. -/
 theorem run {C : Contract} {Γ : Ctx} (target : State C Γ)
     (panic : Source.PanicCode) (condition : Val C Γ .bool) (answer : Bool)
     (computed : condition.evalT target = .ok answer) :
@@ -28,8 +26,7 @@ theorem run {C : Contract} {Γ : Ctx} (target : State C Γ)
     rw [Solidity.Lowering.V08.panicData_transport]
     rfl
 
-/-- Guards against making a false scalar panic test a successful no-op. The
-constant condition is inhabited and evaluated by the actual guard runner. -/
+/-- Guards against making a false scalar panic test a successful no-op. The constant condition is inhabited and evaluated by the actual guard runner. -/
 theorem false_guard_not_success {C : Contract} {Γ : Ctx} (target : State C Γ)
     (panic : Source.PanicCode) :
     (code panic (.simple (.bool false))).run target ≠
