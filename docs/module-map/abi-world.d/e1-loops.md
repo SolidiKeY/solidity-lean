@@ -3,3 +3,4 @@
 | `Correctness/Lowering/Loops/Correct.lean` | `lowerLoops_correct` and kernel acceptance of actual producer outputs. |
 | `Correctness/Lowering/Loops/ForBreak.lean` | For/break leaf: generic flag-loop target run with a never-run update, plus G19 Source half. |
 | `Correctness/Lowering/Loops/Capture.lean` | Actual `lowerLoops` + `elabStmtsP` outputs for the loop-family samples, quoted. |
+| `Correctness/Lowering/Loops/Horizon.lean` | An identity conversion in a `while` condition costs one Source horizon (monotonicity transport). |

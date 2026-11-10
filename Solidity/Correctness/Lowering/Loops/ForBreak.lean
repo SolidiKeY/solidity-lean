@@ -6,8 +6,8 @@ import Solidity.Lowering.G19.AssignmentForBreak
 # Loop lowering leaf: `for (i = a; ; post) break;`
 
 Target: `lowerLoop` keeps the initializer in front of the loop
-(`Lower.lean:485, 519, 533-539`), turns `break` into a flag write (`:452`),
-guards the update with the flag (`:516-517`) and the condition with it
+(`Lower.lean:486, 502, 522, 533-539`), turns `break` into a flag write (`:452`),
+guards the update with the flag (`:515-517`) and the condition with it
 (`:518`); elaboration flattens the outer block (`Family.forBreakProg`). The
 run is computed generically in the slots, the fresh names and the never-run
 update program.

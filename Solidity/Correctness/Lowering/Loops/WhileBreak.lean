@@ -6,8 +6,8 @@ import Solidity.Correctness.Lowering.Checker.SourceAssociation
 
 Target: the actual flag lowering (`Lower.lean:493-496` moves the effectful
 condition into the body as `if (!(i = a)) break;`, then `:452` turns `break`
-into a flag write, `:429-431` guards the suffix, `:516-519` guards the
-condition and declares the flag), as intrinsic elaboration emits it
+into a flag write, `:429-431` guards the suffix, `:518` guards the
+condition and `:522` declares the flag), as intrinsic elaboration emits it
 (`Family.whileBreakProg`). Its run is computed generically: one iteration sets
 the flag on both Boolean paths, the second guard test exits.
 

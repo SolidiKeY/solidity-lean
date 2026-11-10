@@ -24,12 +24,25 @@ def forBreakUpdateInput : List RawStmt :=
   [.forLoop {} [.assign (.name "i") (.name "a")] none [.assign (.name "a") (.bool false)] [.brk]]
 
 open Lean Elab Term Meta in
-/-- Run `lowerLoops` then `elabStmtsP` on `input` and quote the placed program. -/
+/-- Run `lowerLoops` then `elabStmtsP` on `input` and quote the placed program.
+Like the Checker probes, it refuses a changed caller context or a nonempty
+memo after either stage; the fresh counter is not otherwise checked. -/
 def captureProgram (input : List RawStmt) : TermElabM Expr := do
   let lowered := (((lowerLoops none input).run RawProbe.scope).run (RawProbe.inputLocals, 1)).run {}
   let .ok ((raw, st), memo) := lowered | throwError "actual lowerLoops refused the sample"
+  unless memo.starts.isEmpty && memo.bodies.isEmpty do
+    throwError "actual lowerLoops changed the expected empty memo"
+  match st.1 with
+  | [("i", .val .bool), ("a", .val .bool)] => pure ()
+  | _ => throwError "actual lowerLoops changed the caller context"
   let elaborated := (((elabStmtsP IntrinsicProbe.C raw).run RawProbe.scope).run st).run memo
-  let .ok ((ss, _), _) := elaborated | throwError "actual intrinsic elaboration refused the sample"
+  let .ok ((ss, st'), memo') := elaborated |
+    throwError "actual intrinsic elaboration refused the sample"
+  unless memo'.starts.isEmpty && memo'.bodies.isEmpty do
+    throwError "actual intrinsic elaboration changed the expected empty memo"
+  match st'.1 with
+  | [("i", .val .bool), ("a", .val .bool)] => pure ()
+  | _ => throwError "actual intrinsic elaboration did not restore the caller context"
   let .ok p := SProg.chain (ECtx.toNCtx RawProbe.inputLocals).names IntrinsicProbe.Γ ss |
     throwError "actual intrinsic placement refused the sample"
   let (pe, ge, de) := Prog.quoteShared (mkConst ``IntrinsicProbe.C) p.2

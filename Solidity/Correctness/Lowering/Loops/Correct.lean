@@ -15,8 +15,11 @@ family's Source statement. The producer itself is never unfolded.
 
 Partiality: theorems speak of accepted outputs only. Producer refusals
 (`break`/`continue` outside a loop, `return` outside a body, jumps in `try`
-inside a loop, Lower.lean:448-449, 455, 474) and non-family outputs are not
-covered; they are coverage gaps, not counterexamples.
+inside a loop, Lower.lean:448-449, 455, 474; `lowerReturn` refusals; refusals
+of `elabStmtsP` or `SProg.chain`) and non-family outputs are not covered; they
+are coverage gaps, not counterexamples. Only normal outcomes are stated. The
+producer link is per sample (three inputs); a raw-level check exists only for
+the while sample (`Checker.RawProbe.checkRaw`).
 -/
 namespace Solidity.Correctness.Lowering
 
@@ -81,12 +84,42 @@ def forBreakNames : Fresh := ⟨Var.fresh "brk" 1, Var.fresh "se" 2⟩
 theorem forBreak_accepts {E : Source.Env} :
     Accepts (E := E) .forBreak whileBreakPair (.none, none) forBreakNames Capture.forBreak := rfl
 
-/-- Kernel acceptance of the actual output for `for (i = a; ; a = false) break;`;
-the elaborated update is the family's never-run update program. -/
+/-- The lowered update `a = false` the actual elaborator emits. -/
+def updateProg : (Δ : Ctx) × Prog IntrinsicProbe.C (.val .bool :: IntrinsicProbe.Γ) Δ :=
+  ⟨_, .cons (.assignLocal (Idx.here.there.there) (.simple (.bool false))) .nil⟩
+
+/-- Kernel acceptance of the actual output for `for (i = a; ; a = false) break;`.
+The family accepts any Source update with this target update (the update never
+runs); `forBreakUpdate_actual` pins the Source update to its actual typing. -/
 theorem forBreakUpdate_accepts {E : Source.Env} (post : Source.ROptExpr E [.bool, .bool]) :
-    Accepts .forBreak whileBreakPair
-      (post, some ⟨_, .cons (.assignLocal (Idx.here.there.there) (.simple (.bool false))) .nil⟩)
-      forBreakNames Capture.forBreakUpdate := rfl
+    Accepts .forBreak whileBreakPair (post, some updateProg) forBreakNames
+      Capture.forBreakUpdate := rfl
+
+/-- Actual Source typing of `for (i = a; ; a = false) break;`. -/
+def forBreakUpdateTyping (E : Source.Env) :
+    Source.StmtD (SourceAssociation.typingContext E) SourceAssociation.names
+      (.forStmt (l := false) (u := false)
+        (.some (.exprStmt (.assign .assign (.ident "i") (.ident "a")))) .none
+        (.some (.assign .assign (.ident "a") (.lit (.bool false)))) .breakStmt)
+      SourceAssociation.names :=
+  .forInit (.expr (SourceAssociation.conditionTyping E) rfl) .none
+    (.some (.assign (.loc (i := 1) rfl rfl) (.bool false) rfl rfl)) rfl .brk
+
+/-- Its resolution is a family Source statement, with its actual update. -/
+theorem forBreakUpdate_source (E : Source.Env) :
+    ∃ post : Source.ROptExpr E [.bool, .bool], (forBreakUpdateTyping E).toR =
+      Shape.forBreak.source (C := IntrinsicProbe.C) (returns := []) (M := false) (l := false)
+        (u := false) whileBreakPair (post, some updateProg) := ⟨_, rfl⟩
+
+/-- End to end for the actual `for (i = a; ; a = false) break;` sample. -/
+theorem forBreakUpdate_actual (E : Source.Env) :
+    ∃ embedding : Thin IntrinsicProbe.Γ Capture.forBreakUpdate.1,
+      Endpoint (forBreakUpdateTyping E).toR Shape.forBreak.offset
+        Checker.WhileBreak.mapping Capture.forBreakUpdate.2 embedding := by
+  obtain ⟨post, eq⟩ := forBreakUpdate_source E
+  rw [eq]
+  exact lowerLoops_correct .forBreak Checker.WhileBreak.mapping whileBreakPair
+    (post, some updateProg) forBreakNames Capture.forBreakUpdate (forBreakUpdate_accepts post)
 
 /-- Actual Source typing of `for (i = a; ; ) break;`. -/
 def forBreakTyping (E : Source.Env) :
@@ -134,6 +167,8 @@ end Loops.Coverage
 #print axioms Loops.Coverage.whileBreak_actual
 #print axioms Loops.Coverage.forBreak_accepts
 #print axioms Loops.Coverage.forBreakUpdate_accepts
+#print axioms Loops.Coverage.forBreakUpdate_source
+#print axioms Loops.Coverage.forBreakUpdate_actual
 #print axioms Loops.Coverage.forBreak_source
 #print axioms Loops.Coverage.forBreak_actual
 #print axioms Loops.Coverage.whileBreak_refuses_for

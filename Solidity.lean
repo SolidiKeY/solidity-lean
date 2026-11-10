@@ -2431,6 +2431,7 @@ import Solidity.Correctness.Lowering.Loops.Capture
 import Solidity.Correctness.Lowering.Loops.Correct
 import Solidity.Correctness.Lowering.Loops.Family
 import Solidity.Correctness.Lowering.Loops.ForBreak
+import Solidity.Correctness.Lowering.Loops.Horizon
 import Solidity.Correctness.Lowering.Loops.WhileBreak
 import Solidity.Counterexamples.DeleteFamilyGenericOverlap
 import Solidity.Counterexamples.DiamondTry

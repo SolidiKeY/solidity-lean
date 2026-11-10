@@ -45,8 +45,11 @@ structure Fresh where
   capture : Var
 
 /-- The loop-shape family. Each constructor is one G19 loop leaf whose lowering
-has a proved target bridge; constructs without one are listed as uncovered in
-the lane result, not admitted here. -/
+has a proved target bridge. Not in the family (no theorem, not admitted):
+`continue`, `return` (Lower.lean:454-459, 536-538), `do … while` (:507-512),
+pure conditions, real bodies and suffix guards (:429-431), nested loops and
+shared return flags (:497-501), specifications (:526-530), non-Boolean or
+non-local operands. -/
 inductive Shape where
   /-- `while (i = a) break;` (G19 `AssignmentWhileBreak`). -/
   | whileBreak
@@ -67,7 +70,7 @@ def Shape.Extra (E : Source.Env) (srcΓ : Source.RCtx) (C : Contract) (Γ : Ctx)
 def notB {C : Contract} {Γ : Ctx} (v : Val C Γ .bool) : Val C Γ .bool := .unop .not rfl rfl v
 
 /-- `!flag && true`: the guard `notAny [brk]` puts before the synthetic `true`
-condition (Lower.lean:493-496, 516-518). -/
+condition (Lower.lean:493-496, 518). -/
 def flagGuard {C : Contract} {Γ : Ctx} : Val C (.val .bool :: Γ) .bool :=
   .binop .and rfl rfl (notB (.simple (.local .here))) (.simple (.bool true))
 
@@ -96,7 +99,7 @@ def whileBreakProg {C : Contract} {Γ : Ctx} (names : Fresh) (j b : Idx Γ (.val
 
 /-- Intrinsic image of the lowered
 `{ i = a; bool brk = false; while (!brk && true) { brk = true; if (!brk) { upd } } }`
-(Lower.lean:485-487, 515-519, 533-539; the outer block is flattened by
+(Lower.lean:485-487, 502, 515-518, 522, 533-539; the outer block is flattened by
 elaboration). -/
 def forBreakBody {C : Contract} {Γ : Ctx} :
     Option ((Δ : Ctx) × Prog C (.val .bool :: Γ) Δ) → Prog C (.val .bool :: Γ) (.val .bool :: Γ)
@@ -110,9 +113,10 @@ def forBreakProg {C : Contract} {Γ : Ctx} (names : Fresh) (j b : Idx Γ (.val .
     (.cons (.declLocal .bool names.flag (some (.simple (.bool false))))
       (.cons (.loop .auto flagGuard (forBreakBody upd)) .nil))
 
-/-- Resolved Source statement of each shape, as Source typing resolves it
-(the identity conversion on the right-hand side is retained,
-`Checker.SourceAssociation.resolved_eq`). -/
+/-- Resolved Source statement of each shape, in the form Source typing gives
+it (the identity conversion on the right-hand side is retained,
+`Checker.SourceAssociation.resolved_eq`). That typing produces this form is
+proved for the concrete samples in `Loops.Correct` only, not generically. -/
 def Shape.source {E : Source.Env} {srcΓ : Source.RCtx} {returns : List Source.STy}
     {M l u : Bool} {Γ : Ctx} {m : ContextMap srcΓ Γ} :
     {C : Contract} → (k : Shape) → Pair m → k.Extra E srcΓ C Γ →
@@ -169,9 +173,14 @@ def Endpoint {E : Source.Env} {srcΓ : Source.RCtx} {returns : List Source.STy} 
 Source context, control context and pipeline, every context map with Boolean
 destination/right-hand-side positions, every fresh-name choice and every
 intrinsic output the association accepts, the output reaches the endpoint
-against the resolved Source loop. One statement for the whole family (H112);
-the finish-line component `Solidity.Goals.lowerLoopsCorrect` is meant to be
-this proposition. -/
+against the family's Source loop. One statement for the whole family (H112).
+
+This is a family statement: it does not mention `lowerLoops`, raw input, the
+fresh counter or the memo, and only normal outcomes with an empty journal are
+stated (no return, revert, error or timeout outcomes). That the actual producer
+emits family members is shown per sample (`Loops.Correct`, `Loops.Capture`).
+Whether `Solidity.Goals.lowerLoopsCorrect` should be this proposition is an
+open owner decision; the goal is unchanged here. -/
 def LowerLoopsCorrect : Prop :=
   ∀ (k : Shape) {E : Source.Env} {srcΓ : Source.RCtx} {returns : List Source.STy}
     {M l u : Bool} {C : Contract} {Γ : Ctx}
