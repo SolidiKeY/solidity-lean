@@ -11,9 +11,9 @@ import Solidity.Correctness.Lowering.Loops.Capture
 import Solidity.Correctness.Lowering.Checker.WhileBreak
 
 /-!
-# `lowerLoops_correct`
+# `lowerLoopsFamily_correct`
 
-The generic family statement `Loops.LowerLoopsCorrect`, proved leaf by leaf
+The generic family statement `Loops.LoopFamilyCorrect`, proved leaf by leaf
 (one `Shape`/`RetShape` constructor per covered G19 leaf: nine of the eleven loop
 and return-flag leaves; `AssignmentForContinue` and `AssignmentForReturn` are
 refused by the pipeline, `Capture.#check_for_continue_refused`), and its connection to the actual
@@ -57,9 +57,10 @@ theorem returnFamily_correct : Loops.ReturnFamilyCorrect := by
   | returnFlag => exact Returns.returnFlag_endpoint m p x names
   | whileReturnThen => exact ReturnThen.endpoint m p x names
 
-/-- **Loop lowering correctness** on both accepted families (finish-line
-component `Solidity.Goals.lowerLoopsCorrect`, owner e1-loops). -/
-theorem lowerLoops_correct : Loops.LowerLoopsCorrect :=
+/-- **Loop lowering correctness on both accepted families.** Not the
+finish-line component: per H503(4), e2b-loops-producer composes this family
+theorem with its `LowersTo` producer theorem into `lowerLoops_correct`. -/
+theorem lowerLoopsFamily_correct : Loops.LoopFamilyCorrect :=
   ⟨normalFamily_correct, returnFamily_correct⟩
 
 namespace Loops.Coverage
@@ -449,7 +450,7 @@ theorem whileReturnThen_actual (E : Source.Env) :
 
 end Loops.Coverage
 
-#print axioms lowerLoops_correct
+#print axioms lowerLoopsFamily_correct
 #print axioms normalFamily_correct
 #print axioms returnFamily_correct
 #print axioms Loops.Coverage.whileReturn_accepts

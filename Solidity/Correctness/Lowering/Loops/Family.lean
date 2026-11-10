@@ -303,7 +303,7 @@ This is a family statement: it does not mention `lowerLoops`, raw input, the
 fresh counter or the memo, and only normal outcomes with an empty journal are
 stated (no revert, error or timeout outcomes; `return` is the function-level
 `ReturnFamilyCorrect`). That the actual producer emits family members is shown
-per sample (`Loops.Correct`, `Loops.Capture`). `Loops.LowerLoopsCorrect`
+per sample (`Loops.Correct`, `Loops.Capture`). `Loops.LoopFamilyCorrect`
 (`Loops.Statement`) is this proposition together with the return family. -/
 def NormalFamilyCorrect : Prop :=
   ∀ (k : Shape) {E : Source.Env} {srcΓ : Source.RCtx} {returns : List Source.STy}
