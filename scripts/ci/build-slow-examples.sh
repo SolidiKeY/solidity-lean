@@ -8,7 +8,7 @@
 #
 # Usage: scripts/ci/build-slow-examples.sh [--list]
 #   --list  print the modules in build order and exit
-# Environment: SLOW_EXAMPLE_BUDGET_S (default 600; values above 600 are refused).
+# Environment: SLOW_EXAMPLE_BUDGET_S (default 600; only 1..600 accepted).
 # Prints "PASS|FAIL|TIMEOUT <module> <seconds>s" per module, or SKIP for a module whose
 # slow import failed (it would only rebuild that import under its own budget); exit 0 all passed, 1 a build
 # failed or timed out, 2 usage error.
@@ -17,7 +17,10 @@ root=$(git rev-parse --show-toplevel) || exit 2
 cd "$root" || exit 2
 export PATH="$HOME/.elan/bin:$PATH"
 budget=${SLOW_EXAMPLE_BUDGET_S:-600}
+# 1..600 only: `timeout 0` would disable the deadline, and above 600 needs an ESCALATE (H134).
 case "$budget" in ''|*[!0-9]*) echo "build-slow-examples: bad budget" >&2; exit 2;; esac
+budget=$((10#$budget))
+[ "$budget" -ge 1 ] || { echo "build-slow-examples: budget must be at least 1 s (0 disables timeout)" >&2; exit 2; }
 [ "$budget" -le 600 ] || { echo "build-slow-examples: budget $budget s exceeds 600 s (H134); ESCALATE instead" >&2; exit 2; }
 list=0
 case "${1:-}" in
