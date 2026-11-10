@@ -59,7 +59,9 @@ async function execute(task){
       }
       if(!recheck.size)continue;
     }
-    const certified=options.certify===true||(directMode&&(!decided||recheck.size>0));
+    // Multi-file units always took the certified path; direct mode reaches
+    // here only to recheck rows the compiled verifier could not decide.
+    const certified=options.certify===true||allAsts.length>1||directMode;
     if(task.deferLegacyBuild)return {needsLegacyBuild:true};
     usedLegacy=true;session??=new LeanSession(root,directory);
     const output=join(directory,`result-${task.id}-${contract.id}.json`);
@@ -82,6 +84,11 @@ async function execute(task){
       ...(row.counterexample?{counterexample:locations.sourceWitness(primary,contract.name,row)}:{})});
     }
     else if(!errors.length)throw new Error('Lean completed without a verification checkpoint');
+    // A rechecked row Lean did not return keeps its compiled-verifier answer.
+    if(recheck)for(const row of decided.results)if(recheck.has(row.sourceId)&&!(checkpoint||[]).some(r=>r.sourceId===row.sourceId)){
+      const range=locate(contract.name,row);
+      results.push({...row,source,contract:contract.name,sourceHash:compiled.sourceHash??compiled.fixture.header.sourceSha256,...(range?{range}:{})});
+    }
   }
   if(!contracts.length)errors.push({source,stage:'discovery',reason:'No contracts selected'});
   return {results,errors,backend:{workerPid:process.pid,directChecks,...(!usedLegacy&&directChecks.length?{kind:directChecks.every(c=>c.backend==='generated-c-wasm')?'generated-c-wasm':directChecks.every(c=>c.backend==='generated-c-native')?'generated-c-native':'compiled-unknown',wasmBuild,native:{active:directChecks.every(c=>c.backend==='generated-c-native'),reason:directChecks.every(c=>c.backend==='generated-c-native')?'standalone-native':'standalone-wasm-or-unavailable'}}:{kind:directChecks.length?'mixed':'lean',leanServerPid:session?.child?.pid,leanDocumentVersion:session?.version,native:session?.native??{active:false,reason:'no-contracts'}}),...(options.benchmark?{benchmarkMessages:benchmarkLog,phases:[...benchmarkLog.join(String.fromCharCode(10)).matchAll(/SOLKEY_BENCH (\{[^\r\n]*\})/g)].map(m=>JSON.parse(m[1])),nativeDirectNanos:[...benchmarkLog.join(String.fromCharCode(10)).matchAll(/NATIVE_DIRECT_CHECK (\d+)/g)].map(m=>Number(m[1])),nativeWalkNanos:[...benchmarkLog.join(String.fromCharCode(10)).matchAll(/NATIVE_SPEC_WALK (\d+)/g)].map(m=>Number(m[1]))}:{})}};
