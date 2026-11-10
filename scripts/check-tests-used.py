@@ -170,6 +170,7 @@ class Graph:
         self.observed = []
         self.policy_scans = {}
         self.policy_targets = set()
+        self.uncertain_reads = collections.defaultdict(set)
         self.edges = collections.defaultdict(list)
 
     def root(self, p, kind, command, source, line, root_id=None):
@@ -177,10 +178,11 @@ class Graph:
             self.roots.setdefault(root_id or p, {'kind': kind, 'path': p, 'command': command,
                                      'location': f'{source}:{line}', 'cwd': '.'})
 
-    def edge(self, source, target, line, operation, validated_for=None, kind="consumes"):
+    def edge(self, source, target, line, operation, validated_for=None, kind="consumes", repository_lean=False):
         if target in self.repo.tree and not excluded(source) and not excluded(target):
             e = {'source': source, 'target': target, 'line': line, 'operation': operation, 'kind': kind}
             if validated_for is not None: e['validated_for'] = validated_for
+            if repository_lean: e['repository_lean'] = True
             if e not in self.edges[source]:
                 self.edges[source].append(e)
 
@@ -195,6 +197,7 @@ class Graph:
                 if not executing: continue
                 for edge in sorted(self.edges[source], key=lambda e: (e['target'], e['line'], e['operation'])):
                     if edge.get('validated_for', root_id) != root_id: continue
+                    if entry.get('lake_package') and edge.get('repository_lean'): continue
                     target = edge['target']
                     state = (target, edge['kind'] == 'executes')
                     if state not in found:
@@ -245,9 +248,11 @@ def lean_code(text):
 
 def add_lean(graph):
     repo = graph.repo
+    repo.lean_lex_cache = {}
     for p, text in repo.texts.items():
         if not p.endswith('.lean') or p.startswith('tests/h28-sol/non-vacuity/lean/'): continue
         code, literals = lean_lex(text)
+        repo.lean_lex_cache[p] = code
         starts = [0] + [m.end() for m in re.finditer('\n', code)]
         by_line = collections.defaultdict(list)
         for start, literal in literals:
@@ -258,14 +263,14 @@ def add_lean(graph):
                 match = re.match(r'\s*(?:(?:public|private|meta)\s+)*import(?:\s+all)?\s+(.+)', line)
                 if match:
                     for module in match[1].split():
-                        graph.edge(p, module.replace('.', '/') + '.lean', n, 'Lean import', kind='executes')
+                        graph.edge(p, module.replace('.', '/') + '.lean', n, 'Lean import', kind='executes', repository_lean=True)
                 for start, literal in by_line[n]:
                     if not re.fullmatch(r'\s*solc_import\s+', code[starts[n - 1]:start]): continue
                     try: argument = json.loads(literal)
                     except ValueError: continue
                     if not isinstance(argument, str): continue
                     target = clean(posixpath.join(posixpath.dirname(p), argument))
-                    graph.edge(p, target, n, 'solc_import reads hash-pinned AST')
+                    graph.edge(p, target, n, 'solc_import reads hash-pinned AST', repository_lean=True)
             depth += sum(line.count(c) for c in '([{') - sum(line.count(c) for c in ')]}')
 
 
@@ -415,6 +420,13 @@ def reviewed_routes(graph):
                                    kind='executes', validated_for=kernel)
 
 
+def entrypoint_lines(source):
+    """Actual top-level control/call statements; definitions alone are not roots."""
+    tree = ast.parse(source)
+    return {node.lineno for node in tree.body if isinstance(node, (ast.If, ast.For, ast.While, ast.With, ast.Try, ast.Assert))
+            or isinstance(node, ast.Expr) and isinstance(node.value, ast.Call)}
+
+
 def validated_routes(graph, catalog):
     """Reviewed validation definitions; raw run receipts live outside the branch.
 
@@ -429,6 +441,7 @@ def validated_routes(graph, catalog):
     for entry in catalog['standalone']:
         required = {'path', 'input_revision', 'source_blob', 'command', 'kind'}
         if entry.get('kind') == 'manual-reproducer': required.add('documentation')
+        if entry.get('kind') == 'runnable-entrypoint': required.update(('entry_line', 'purpose', 'input_scope', 'other_reads'))
         if set(entry) != required:
             raise ValueError('invalid standalone definition')
         p = entry['path']
@@ -438,7 +451,7 @@ def validated_routes(graph, catalog):
         command = entry['command']
         if entry['kind'] != 'manual-reproducer' and command not in (['python3', '-B', p], ['node', '--test', p]):
             raise ValueError('unsupported standalone invocation: ' + p)
-        if entry['kind'] not in ('unittest', 'node-test', 'manual-reproducer'):
+        if entry['kind'] not in ('unittest', 'node-test', 'manual-reproducer', 'runnable-entrypoint'):
             raise ValueError('unsupported standalone kind')
         if entry['kind'] == 'unittest':
             tree = ast.parse(repo.texts[p])
@@ -447,6 +460,15 @@ def validated_routes(graph, catalog):
         elif entry['kind'] == 'node-test':
             if command[0] != 'node' or not p.endswith(('.test.mjs', '.test.js', '.test.cjs')):
                 raise ValueError('not a Node test entry point: ' + p)
+        elif entry['kind'] == 'runnable-entrypoint':
+            if command != ['python3', '-B', p] or type(entry['entry_line']) is not int or entry['entry_line'] not in entrypoint_lines(repo.bytes(p)):
+                raise ValueError('unsupported default runnable entry point')
+            if not isinstance(entry['purpose'], str) or not entry['purpose'].strip(): raise ValueError('runnable entry point lacks purpose')
+            if entry['other_reads'] not in ('unresolved', 'secondary'): raise ValueError('invalid other-read eligibility')
+            scopes = entry['input_scope']
+            if not isinstance(scopes, list) or not all(isinstance(scope, str) and scope not in SCOPE and
+                    (scope in repo.tree or scope.endswith('/') and any(path.startswith(scope) for path in repo.tree)) for scope in scopes):
+                raise ValueError('invalid fixture-specific data scope')
         else:
             if not isinstance(command, list) or not command or not all(isinstance(a, str) for a in command):
                 raise ValueError('invalid manual reproducer command')
@@ -471,7 +493,10 @@ def validated_routes(graph, catalog):
                            and p.endswith(('.mjs', '.js', '.cjs')))
             else: matched = False
             if not matched: raise ValueError('manual reproducer arguments differ from documentation')
-        graph.root(p, 'validated standalone runner', shlex.join(command), p, 1, root_id='validated:' + p)
+        graph.root(p, 'validated standalone runner', shlex.join(command), p, entry.get('entry_line', 1), root_id='validated:' + p)
+        graph.roots['validated:' + p].update({'runner_kind': entry['kind'], 'source_blob': entry['source_blob']})
+        if entry['kind'] == 'runnable-entrypoint':
+            graph.roots['validated:' + p].update({'purpose': entry['purpose'], 'data_use_scope': entry['input_scope'], 'other_reads': entry['other_reads']})
         if entry['kind'] == 'manual-reproducer': graph.roots['validated:' + p]['documentation'] = entry['documentation']
     for route in catalog['reads']:
         if set(route) != {'runner', 'input_revision', 'frames', 'target', 'target_blob', 'operation'}:
@@ -496,6 +521,11 @@ def validated_routes(graph, catalog):
             if not isinstance(frame['line'], int) or not 1 <= frame['line'] <= len(repo.texts.get(source, '').splitlines()):
                 raise ValueError('validated read location mismatch')
         if any(excluded(f['path']) for f in frames) or excluded(target): continue
+        scopes = graph.roots[original].get('data_use_scope')
+        eligible = scopes is None or any(target == scope or scope.endswith('/') and target.startswith(scope) for scope in scopes)
+        if not eligible and graph.roots[original].get('other_reads') == 'unresolved':
+            graph.uncertain_reads[target].add(original)
+        if not eligible and all(frame['path'] == graph.roots[original]['path'] for frame in frames): continue
         identity = original + ':read:' + hashlib.sha256(canonical(route)).hexdigest()
         graph.roots[identity] = {**graph.roots[original], 'derived_from': original, 'observed_target': target}
         # Preserve the complete ordered stack, including repeated source paths.
@@ -511,7 +541,7 @@ def validated_routes(graph, catalog):
         chain = {**chain, 'edges': chain['edges'] + [{
             'source': reader['path'], 'target': target, 'line': reader['line'],
             'operation': route['operation'], 'kind': 'consumes', 'validated_for': identity}]}
-        graph.observed.append((target, chain))
+        if eligible: graph.observed.append((target, chain))
     generated = {}
     for entry in catalog['generators']:
         required = {'path', 'input_revision', 'output_blob', 'generator', 'generator_blob',
@@ -647,6 +677,9 @@ def inventory(repo, catalog=None):
     ci_spec = importlib.util.spec_from_file_location('tests_used_ci', Path(__file__).with_name('check-tests-used-ci.py'))
     ci_rules = importlib.util.module_from_spec(ci_spec); ci_spec.loader.exec_module(ci_rules)
     ci_rules.add(graph)
+    lake_spec = importlib.util.spec_from_file_location('tests_used_lake', Path(__file__).with_name('check-tests-used-lake.py'))
+    lake_rules = importlib.util.module_from_spec(lake_spec); lake_spec.loader.exec_module(lake_rules)
+    lake_rules.add(graph, lean_lex)
     chains = graph.chains()
     orphan_reviews = {}
     for entry in catalog['orphans']:
@@ -718,11 +751,15 @@ def inventory(repo, catalog=None):
             reason = 'No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.'
             unresolved.append('UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use')
             if p in orphan_reviews and candidates[p]: unresolved.append('UNSUPPORTED_ORPHAN_REVIEW: candidate matches remain unresolved')
+        if p in graph.uncertain_reads and classification != 'keep':
+            classification = None
+            reason = 'A passing entry point read this object; fixture-specific versus secondary-scan eligibility needs review. Independent historical/generated properties are retained.'
+            unresolved.append('UNRESOLVED_READ_ROLE: observed read eligibility is unreviewed; this is not established non-use')
         if recovery is None:
             unresolved.append(repo.pin_limitations.get(p, 'UNVERIFIABLE: ' + ('shallow history boundary prevents establishing last-touch provenance' if repo.shallow else 'no historical change introducing the measured object was recovered')))
         records.append({'path': p, 'class': classification, 'reason': reason,
                         'mode': mode, 'object_type': kind, 'blob': oid,
-                        'recovery': recovery, 'runner_chain': chain, 'secondary': {**graph.properties.get(p, {}), **({'historical_role': historical_role} if historical_role else {}), **({'policy_scans': ['private-paths']} if p in graph.policy_targets else {})},
+                        'recovery': recovery, 'runner_chain': chain, 'secondary': {**graph.properties.get(p, {}), **({'historical_role': historical_role} if historical_role else {}), **({'policy_scans': ['private-paths']} if p in graph.policy_targets else {}), **({'unreviewed_readers': sorted(graph.uncertain_reads[p])} if p in graph.uncertain_reads else {})},
                         'search_candidates': candidates[p], 'generator': generated.get(p),
                         'orphan_analysis': ({'review': orphan_reviews[p], 'search_matches': 0,
                                              'entry_points_reviewed': sorted(k for k, v in graph.roots.items() if 'derived_from' not in v)} if classification == 'orphan' else None),
@@ -782,6 +819,7 @@ def self_test():
             'tests/main-only.txt': 'main only\n',
             'tests/pass.py': 'import unittest\nclass T(unittest.TestCase):\n def test_value(self): import live; self.assertEqual(2 + 2, 4)\nif __name__ == "__main__": unittest.main()\n',
             'tests/fail.py': 'raise SystemExit(1)\n',
+            'tests/plain.py': 'from pathlib import Path\ndef main(): assert Path("tests/generated.txt").read_bytes() == b"generated\\n"; Path("tests/" + "mention" + ".txt").read_text()\nif __name__ == "__main__": main()\n',
             'tests/callback.py': 'import callback_helper as helper\ndef callback(): return helper.read()\nassert helper.invoke(callback) == "callback\\n"\n',
             'tests/callback_helper.py': 'from pathlib import Path\ndef invoke(f): return f()\ndef read(): return Path("tests/callback.txt").read_text()\n',
             'tests/callback.txt': 'callback\n',
@@ -805,6 +843,15 @@ def self_test():
             'tests/α.txt': 'unicode\n',
             'tests/unusual-reader.py': 'from pathlib import Path\nPath("tests/space name.txt").read_bytes()\nPath("tests/α.txt").read_bytes()\nPath("tests/line\\nname.txt").read_bytes()\n',
             'tests/line\nname.txt': 'newlines\n',
+            'tests/package/lakefile.toml': 'name = "control-package"\n[[lean_lib]]\nname = "Package"\nsrcDir = "src"\n',
+            'tests/package/lean-toolchain': 'leanprover/lean4:v4.24.0\n',
+            'tests/package/src/Package.lean': 'import Package.Leaf\n',
+            'tests/package/src/Package/Leaf.lean': 'import tests.foreign\n',
+            'tests/package/src/Package/Unused.lean': 'def unused := 1\n',
+            'tests/foreign.lean': 'def foreign := 1\n',
+            'tests/missing-package/lakefile.toml': 'name = "missing"\n[[lean_lib]]\nname = "Missing"\n',
+            'tests/missing-package/lean-toolchain': 'leanprover/lean4:v4.24.0\n',
+            'tests/missing-package/Unselected.lean': 'def unselected := 1\n',
             'scripts/h55/other': 'h55\n',
             'scripts/h62/other': 'h62\n',
         }
@@ -843,6 +890,13 @@ def self_test():
                            {'path': 'tests/live.py', 'blob': repo.tree['tests/live.py'][2], 'line': line}],
                 'target': target, 'target_blob': repo.tree[target][2],
                 'operation': 'validated Python read of measured bytes'})
+        assert subprocess.run(['python3', '-B', 'tests/plain.py'], cwd=root, capture_output=True).returncode == 0
+        catalog['standalone'].append({'path': 'tests/plain.py', 'input_revision': repo.ref, 'source_blob': repo.tree['tests/plain.py'][2], 'command': ['python3', '-B', 'tests/plain.py'], 'kind': 'runnable-entrypoint', 'entry_line': 3, 'purpose': 'Check the generated fixture in the default command', 'input_scope': ['tests/generated.txt'], 'other_reads': 'unresolved'})
+        catalog['reads'].append({'runner': 'validated:tests/plain.py', 'input_revision': repo.ref,
+            'frames': [{'path': 'tests/plain.py', 'blob': repo.tree['tests/plain.py'][2], 'line': 2}],
+            'target': 'tests/mention.txt', 'target_blob': repo.tree['tests/mention.txt'][2], 'operation': 'validated Python read of measured bytes'})
+        catalog['orphans'].append({'path': 'tests/mention.txt', 'input_revision': repo.ref, 'blob': repo.tree['tests/mention.txt'][2],
+            'reason': 'Unsupported negative claim despite an observed dynamic read', 'dynamic_review': 'Unsupported review'})
         callback_command = ['python3', '-B', 'tests/callback.py']
         assert subprocess.run(callback_command, cwd=root, capture_output=True).returncode == 0
         catalog['standalone'].append({'path': 'tests/callback.py', 'input_revision': repo.ref,
@@ -864,6 +918,10 @@ def self_test():
         for p in ('tests/live.py', 'tests/helper.py', 'tests/pass.py', 'tests/generated.txt'):
             assert rows[p]['class'] == 'keep', p
         assert rows['tests/generated.txt']['generator']
+        assert rows['tests/plain.py']['class'] == 'keep'
+        assert rows['tests/mention.txt']['class'] is None and rows['tests/mention.txt']['secondary']['unreviewed_readers']
+        for path in ('tests/package/lakefile.toml', 'tests/package/src/Package.lean', 'tests/package/src/Package/Leaf.lean'): assert rows[path]['class'] == 'keep', path
+        for path in ('tests/foreign.lean', 'tests/package/src/Package/Unused.lean', 'tests/missing-package/Unselected.lean'): assert rows[path]['class'] is None, path
         callback_chain = rows['tests/callback.txt']['runner_chain']
         assert [edge['source'] for edge in callback_chain['edges']] == [path for path, _ in callback_frames]
         assert [edge['line'] for edge in callback_chain['edges']] == [line for _, line in callback_frames]
