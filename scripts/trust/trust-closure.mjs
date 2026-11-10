@@ -210,9 +210,17 @@ function checkHistory(baseline) {
     } else throw Error('initial baseline must have a null predecessor');
   }
 }
+// Lake exports its effective directory, including the no-elan/XDG case.
+// The toolchain prefix is not always the active artifact cache.
+export function configuredCacheDir() {
+ const explicit=process.env.LAKE_CACHE_DIR;
+ const directory=explicit??execFileSync('lake',['env','printenv','LAKE_CACHE_DIR'],{encoding:'utf8'}).trim();
+ if(!directory)throw Error('Lake artifact cache is disabled or unavailable');
+ return directory;
+}
 // Use the traced artifact, since a fetched module can leave stale .ilean files
 // in .lake/build. The compiled source index must describe the audited objects.
-export function sourceIndex(toolchain,m,{root='.',cacheDir=process.env.LAKE_CACHE_DIR??`${toolchain}/lake/cache`}={}) {
+export function sourceIndex(toolchain,m,{root='.',cacheDir=configuredCacheDir()}={}) {
     const rel=m.replaceAll('.','/')+'.ilean';
     const tracePath=join(root,'.lake/build/lib/lean',m.replaceAll('.','/')+'.trace');
     let path=`${toolchain}/lib/lean/${rel}`;
