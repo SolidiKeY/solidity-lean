@@ -2139,4 +2139,80 @@ def powerDataNeeded (sc : ElabScope) (Γ : ECtx) (e : RawExpr) : Bool :=
 
 end Elab
 
+
+omit [FreshNames]
+
+/-- Typed v2 cache; entries retain their contract and actual payload. -/
+structure CallMemoV2 where
+  starts : List (String × Nat) := []
+  bodies : List ((String × Nat) × ((C : Contract) × (SProg C × Nat))) := []
+
+abbrev ElabMV2 := ReaderT ElabScope
+  (StateT (ECtx × Nat) (StateT CallMemoV2 (Except String)))
+
+namespace CallMemoV2
+
+def bodyImpl? (C : Contract) (key : String) (k₀ : Nat) :
+    ElabMV2 (Option (SProg C × Nat)) :=
+  letI := CheckedMemoV2.contractDecEqV2
+  fun _ locals memo =>
+    let value := match Semantics.lookupBy (key, k₀) memo.bodies with
+      | none => none
+      | some ⟨stored, payload⟩ =>
+        if h : stored = C then some (h ▸ payload) else none
+    .ok ((value, locals), memo)
+
+def body? (C : Contract) (key : String) (k₀ : Nat) :
+    ElabMV2 (Option (SProg C × Nat)) := bodyImpl? C key k₀
+
+def setBodyImpl (C : Contract) (key : String) (k₀ : Nat) (P : SProg C)
+    (kEnd : Nat) : ElabMV2 Unit :=
+  fun _ locals memo => .ok (((), locals),
+    { memo with bodies := ((key, k₀), ⟨C, (P, kEnd)⟩) :: memo.bodies })
+
+def setBody (C : Contract) (key : String) (k₀ : Nat) (P : SProg C)
+    (kEnd : Nat) : ElabMV2 Unit := setBodyImpl C key k₀ P kEnd
+
+theorem body_eq_impl (C : Contract) (key : String) (k₀ : Nat) :
+    body? C key k₀ = bodyImpl? C key k₀ := rfl
+
+theorem setBody_eq_impl (C : Contract) (key : String) (k₀ : Nat)
+    (P : SProg C) (kEnd : Nat) :
+    setBody C key k₀ P kEnd = setBodyImpl C key k₀ P kEnd := rfl
+
+theorem setBody_read (C : Contract) (key : String) (k₀ : Nat)
+    (P : SProg C) (kEnd : Nat) (scope : ElabScope) (locals : ECtx × Nat)
+    (memo : CallMemoV2) :
+    (((do setBody C key k₀ P kEnd; body? C key k₀).run scope).run locals).run memo =
+      .ok ((some (P, kEnd), locals),
+        { memo with bodies := ((key, k₀), ⟨C, (P, kEnd)⟩) :: memo.bodies }) := by
+  simp only [body?, setBody, bind, ReaderT.run, StateT.run, StateT.bind, ReaderT.bind,
+    Except.bind, setBodyImpl, bodyImpl?, Semantics.lookupBy, eq_self, ite_true, dite_true]
+
+/-- Guards against the v1 no-op logical insertion, even for an empty body. -/
+theorem setBody_state_control :
+    ((((setBody { vars := [] } "f" 0 [] 7).run { funs := [] }).run ([], 0)).run {}
+      |>.map (fun result => result.2.bodies.length)) = .ok 1 := by rfl
+
+/-- Guards against treating equal layouts as equal contracts during lookup. -/
+theorem body_contract_control :
+    ((((body? { vars := [] } "f" 0).run { funs := [] }).run ([], 0)).run
+      { bodies := [(("f", 0), ⟨{ vars := [], enums := [("Other", [])] }, ([], 7)⟩)] }
+      |>.map (fun result => result.1.1.isNone)) = .ok true := by rfl
+
+/-- Guards against cache lookup ignoring the captured initial index. -/
+theorem body_index_control :
+    ((((body? { vars := [] } "f" 1).run { funs := [] }).run ([], 0)).run
+      { bodies := [(("f", 0), ⟨{ vars := [] }, ([], 7)⟩)] }
+      |>.map (fun result => result.1.1.isNone)) = .ok true := by rfl
+
+/-- Guards against older entries shadowing the most recent insertion. -/
+theorem body_shadow_control :
+    ((((body? { vars := [] } "f" 0).run { funs := [] }).run ([], 0)).run
+      { bodies := [(("f", 0), ⟨{ vars := [] }, ([], 9)⟩),
+          (("f", 0), ⟨{ vars := [] }, ([], 7)⟩)] }
+      |>.map (fun result => result.1.1.map Prod.snd)) = .ok (some 9) := by rfl
+
+end CallMemoV2
+
 end Solidity

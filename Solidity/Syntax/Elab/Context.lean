@@ -63,9 +63,7 @@ def CodeBinder.ofOption : Option Var → (κ : Ctx) × CodeBinder κ
   | Option.none => ⟨[], .none⟩
   | Option.some x => ⟨[.val .uint], .some x⟩
 
-/-- A block read in a context equal to its own (an appended context `ρ ++ Γ`
-read as the named context built for it, equal to it but not by
-definition). -/
+/-- A block read in a context equal to its own (an appended context `ρ ++ Γ` read as the named context built for it, equal to it but not by definition). -/
 def Prog.castIn {C : Contract} {Γ₁ Γ₂ Δ : Ctx} (h : Γ₁ = Γ₂) (P : Prog C Γ₁ Δ) : Prog C Γ₂ Δ :=
   h ▸ P
 
@@ -75,20 +73,16 @@ inductive LocalTy where
   | val (p : PrimTy) (bits : Nat := 256) (shape : List (String × Nat) := [])
   | alias (R : RefTy) (shape : List (String × Nat) := [])
   | mem (R : RefTy) (shape : List (String × Nat) := [])
-  /-- A storage variable, `old`: only a formula binds one (`old := storage`),
-  and a program cannot read it. -/
+  /-- A storage variable, `old`: only a formula binds one (`old := storage`), and a program cannot read it. -/
   | store
-  /-- A logical variable of KeY's `int`: only a formula binds one (a
-  parameter read beside the ledger), and a program cannot read it. -/
+  /-- A logical variable of KeY's `int`: only a formula binds one (a parameter read beside the ledger), and a program cannot read it. -/
   | kint
   deriving DecidableEq, Repr
 
 /-- The locals in scope, most recent first. -/
 abbrev ECtx := List (Name × LocalTy)
 
-/-- The narrow positions below the key `k` of a width table, keyed by their
-path below it: `small[]` is `[]` under `small` (`Contract.widths`,
-`FunDecl.widths`, `structWidths`). -/
+/-- The narrow positions below the key `k` of a width table, keyed by their path below it: `small[]` is `[]` under `small` (`Contract.widths`, `FunDecl.widths`, `structWidths`). -/
 def shapeUnder (tb : List (String × Nat)) (k : String) : List (String × Nat) :=
   tb.filterMap fun (k', n) =>
     if k'.startsWith (k ++ "[") || k'.startsWith (k ++ "{") || k'.startsWith (k ++ "#") then
@@ -104,8 +98,7 @@ def sameShape (a b : List (String × Nat)) : Bool :=
   let b := b.filter (!abiOnly ·)
   a.all (b.contains ·) && b.all (a.contains ·)
 
-/-- Width and ABI metadata belongs to the binding it describes, including
-an empty shape on a local that shadows another binding. -/
+/-- Width and ABI metadata belongs to the binding it describes, including an empty shape on a local that shadows another binding. -/
 def LocalTy.shape : LocalTy → List (String × Nat)
   | .val _ _ ws | .alias _ ws | .mem _ ws => ws
   | .store | .kint => []
@@ -126,24 +119,21 @@ def LocalTy.toLTy : LocalTy → LTy
   | .store => .old
   | .kint => .kint
 
-/-- Attach inferred metadata to the nearest existing binding. An absent
-binding cannot acquire a detached metadata entry. -/
+/-- Attach inferred metadata to the nearest existing binding. An absent binding cannot acquire a detached metadata entry. -/
 def ECtx.setShape (x : Name) (ws : List (String × Nat)) : ECtx → Except String ECtx
   | [] => .error s!"cannot attach metadata to undeclared local {x}"
   | (y, t) :: Γ =>
     if x == y then .ok ((y, t.withShape ws) :: Γ)
     else ((y, t) :: ·) <$> ECtx.setShape x ws Γ
 
-/-- Refine a formula local's type, retaining metadata at the same scoped type.
-Unlike a declaration, a rebinding update does not introduce a shadowing local. -/
+/-- Refine a formula local's type, retaining metadata at the same scoped type. Unlike a declaration, a rebinding update does not introduce a shadowing local. -/
 def ECtx.refine (x : Name) (t : LocalTy) (Γ : ECtx) : ECtx :=
   let t := match lookupBy x Γ with
     | some old => if old.toLTy == t.toLTy then t.withShape old.shape else t
     | none => t
   setBy x t Γ
 
-/-- Parameters retain their declared data locations in the function frame; a
-reference one its narrow positions in the same binding. -/
+/-- Parameters retain their declared data locations in the function frame; a reference one its narrow positions in the same binding. -/
 def FunDecl.paramCtx (d : FunDecl) : Except String ECtx :=
   d.params.reverse.mapM fun (n, T) => match T with
     | .prim p =>
@@ -1542,5 +1532,399 @@ def MLoc.indexFree {Γ : Ctx} : {T : Ty} → MLoc C Γ T → Bool
   | _, .field b _ _ => b.indexFree
   | _, .index .. => false
 end
+
+omit [FreshNames]
+
+namespace CheckedMemoV2
+def rawTyDecEq (a b : RawTy) : Decidable (a = b) := by
+  cases a <;> cases b
+  all_goals try (solve | apply isFalse; intro h; cases h)
+  case named.named a0 b0 =>
+    exact decidable_of_iff (a0 = b0) (by simp only [RawTy.named.injEq])
+  case mapping.mapping a0 a1 b0 b1 =>
+    letI : Decidable (a0 = b0) := rawTyDecEq a0 b0
+    letI : Decidable (a1 = b1) := rawTyDecEq a1 b1
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1) (by simp only [RawTy.mapping.injEq])
+  case array.array a0 b0 =>
+    letI : Decidable (a0 = b0) := rawTyDecEq a0 b0
+    exact decidable_of_iff (a0 = b0) (by simp only [RawTy.array.injEq])
+  case fixed.fixed a0 a1 b0 b1 =>
+    letI : Decidable (a0 = b0) := rawTyDecEq a0 b0
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1) (by simp only [RawTy.fixed.injEq])
+termination_by sizeOf a
+local instance : DecidableEq RawTy := rawTyDecEq
+mutual
+def rawExprDecEq (a b : RawExpr) : Decidable (a = b) := by
+  cases a <;> cases b
+  all_goals try (solve | apply isFalse; intro h; cases h)
+  case num.num a0 b0 =>
+    exact decidable_of_iff (a0 = b0) (by simp only [RawExpr.num.injEq])
+  case name.name a0 b0 =>
+    exact decidable_of_iff (a0 = b0) (by simp only [RawExpr.name.injEq])
+  case bool.bool a0 b0 =>
+    exact decidable_of_iff (a0 = b0) (by simp only [RawExpr.bool.injEq])
+  case field.field a0 a1 b0 b1 =>
+    letI : Decidable (a0 = b0) := rawExprDecEq a0 b0
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1) (by simp only [RawExpr.field.injEq])
+  case index.index a0 a1 b0 b1 =>
+    letI : Decidable (a0 = b0) := rawExprDecEq a0 b0
+    letI : Decidable (a1 = b1) := rawExprDecEq a1 b1
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1) (by simp only [RawExpr.index.injEq])
+  case binop.binop a0 a1 a2 b0 b1 b2 =>
+    letI : Decidable (a1 = b1) := rawExprDecEq a1 b1
+    letI : Decidable (a2 = b2) := rawExprDecEq a2 b2
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2) (by simp only [RawExpr.binop.injEq])
+  case unop.unop a0 a1 b0 b1 =>
+    letI : Decidable (a1 = b1) := rawExprDecEq a1 b1
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1) (by simp only [RawExpr.unop.injEq])
+  case ternary.ternary a0 a1 a2 b0 b1 b2 =>
+    letI : Decidable (a0 = b0) := rawExprDecEq a0 b0
+    letI : Decidable (a1 = b1) := rawExprDecEq a1 b1
+    letI : Decidable (a2 = b2) := rawExprDecEq a2 b2
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2) (by simp only [RawExpr.ternary.injEq])
+  case incDec.incDec a0 a1 b0 b1 =>
+    letI : Decidable (a1 = b1) := rawExprDecEq a1 b1
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1) (by simp only [RawExpr.incDec.injEq])
+  case newArr.newArr a0 a1 b0 b1 =>
+    letI : Decidable (a1 = b1) := rawExprDecEq a1 b1
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1) (by simp only [RawExpr.newArr.injEq])
+  case call.call a0 a1 b0 b1 =>
+    letI : Decidable (a1 = b1) := rawExprDecEqList a1 b1
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1) (by simp only [RawExpr.call.injEq])
+  case modular.modular a0 a1 a2 a3 b0 b1 b2 b3 =>
+    letI : Decidable (a1 = b1) := rawExprDecEq a1 b1
+    letI : Decidable (a2 = b2) := rawExprDecEq a2 b2
+    letI : Decidable (a3 = b3) := rawExprDecEq a3 b3
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2 ∧ a3 = b3) (by simp only [RawExpr.modular.injEq])
+  case named.named a0 a1 a2 b0 b1 b2 =>
+    letI : Decidable (a2 = b2) := rawExprDecEqList a2 b2
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2) (by simp only [RawExpr.named.injEq])
+  case env.env a0 b0 =>
+    exact decidable_of_iff (a0 = b0) (by simp only [RawExpr.env.injEq])
+  case tuple.tuple a0 b0 =>
+    letI : Decidable (a0 = b0) := rawExprDecEqList a0 b0
+    exact decidable_of_iff (a0 = b0) (by simp only [RawExpr.tuple.injEq])
+  case assign.assign a0 a1 b0 b1 =>
+    letI : Decidable (a0 = b0) := rawExprDecEq a0 b0
+    letI : Decidable (a1 = b1) := rawExprDecEq a1 b1
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1) (by simp only [RawExpr.assign.injEq])
+  case opAssign.opAssign a0 a1 a2 b0 b1 b2 =>
+    letI : Decidable (a1 = b1) := rawExprDecEq a1 b1
+    letI : Decidable (a2 = b2) := rawExprDecEq a2 b2
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2) (by simp only [RawExpr.opAssign.injEq])
+termination_by sizeOf a
+def rawExprDecEqList (a b : List RawExpr) : Decidable (a = b) :=
+  match a, b with
+  | [], [] => isTrue rfl
+  | a :: as, b :: bs =>
+    letI : Decidable (a = b) := rawExprDecEq a b
+    letI : Decidable (as = bs) := rawExprDecEqList as bs
+    decidable_of_iff (a = b ∧ as = bs) (by simp only [List.cons.injEq])
+  | [], _ :: _ | _ :: _, [] => isFalse (by intro h; cases h)
+termination_by sizeOf a
+end
+local instance : DecidableEq RawExpr := rawExprDecEq
+def rawInvDecEq (a b : RawInv) : Decidable (a = b) := by
+  cases a <;> cases b
+  all_goals try (solve | apply isFalse; intro h; cases h)
+  case expr.expr a0 b0 =>
+    exact decidable_of_iff (a0 = b0) (by simp only [RawInv.expr.injEq])
+  case imp.imp a0 a1 b0 b1 =>
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1) (by simp only [RawInv.imp.injEq])
+  case all.all a0 a1 a2 b0 b1 b2 =>
+    letI : Decidable (a2 = b2) := rawInvDecEq a2 b2
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2) (by simp only [RawInv.all.injEq])
+termination_by sizeOf a
+local instance : DecidableEq RawInv := rawInvDecEq
+def rawLoopSpecDecEq (a b : RawLoopSpec) : Decidable (a = b) := by
+  cases a <;> cases b
+  all_goals try (solve | apply isFalse; intro h; cases h)
+  case mk.mk a0 a1 a2 a3 a4 b0 b1 b2 b3 b4 =>
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2 ∧ a3 = b3 ∧ a4 = b4) (by simp only [RawLoopSpec.mk.injEq])
+local instance : DecidableEq RawLoopSpec := rawLoopSpecDecEq
+mutual
+def rawStmtDecEq (a b : RawStmt) : Decidable (a = b) := by
+  cases a <;> cases b
+  all_goals try (solve | apply isFalse; intro h; cases h)
+  case assign.assign a0 a1 b0 b1 =>
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1) (by simp only [RawStmt.assign.injEq])
+  case decl.decl a0 a1 a2 b0 b1 b2 =>
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2) (by simp only [RawStmt.decl.injEq])
+  case declStorage.declStorage a0 a1 a2 b0 b1 b2 =>
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2) (by simp only [RawStmt.declStorage.injEq])
+  case declMemory.declMemory a0 a1 a2 b0 b1 b2 =>
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2) (by simp only [RawStmt.declMemory.injEq])
+  case delete.delete a0 b0 =>
+    exact decidable_of_iff (a0 = b0) (by simp only [RawStmt.delete.injEq])
+  case opAssign.opAssign a0 a1 a2 b0 b1 b2 =>
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2) (by simp only [RawStmt.opAssign.injEq])
+  case incDec.incDec a0 a1 b0 b1 =>
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1) (by simp only [RawStmt.incDec.injEq])
+  case pushOpAssign.pushOpAssign a0 a1 a2 b0 b1 b2 =>
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2) (by simp only [RawStmt.pushOpAssign.injEq])
+  case pushIncDec.pushIncDec a0 a1 b0 b1 =>
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1) (by simp only [RawStmt.pushIncDec.injEq])
+  case call.call a0 a1 b0 b1 =>
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1) (by simp only [RawStmt.call.injEq])
+  case assignIncDec.assignIncDec a0 a1 a2 b0 b1 b2 =>
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2) (by simp only [RawStmt.assignIncDec.injEq])
+  case assignPush.assignPush a0 a1 b0 b1 =>
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1) (by simp only [RawStmt.assignPush.injEq])
+  case declStoragePush.declStoragePush a0 a1 a2 b0 b1 b2 =>
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2) (by simp only [RawStmt.declStoragePush.injEq])
+  case declPush.declPush a0 a1 a2 b0 b1 b2 =>
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2) (by simp only [RawStmt.declPush.injEq])
+  case ite.ite a0 a1 a2 b0 b1 b2 =>
+    letI : Decidable (a1 = b1) := rawStmtDecEqList a1 b1
+    letI : Decidable (a2 = b2) := rawStmtDecEqList a2 b2
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2) (by simp only [RawStmt.ite.injEq])
+  case require.require a0 b0 =>
+    exact decidable_of_iff (a0 = b0) (by simp only [RawStmt.require.injEq])
+  case assert.assert a0 b0 =>
+    exact decidable_of_iff (a0 = b0) (by simp only [RawStmt.assert.injEq])
+  case revert.revert  =>
+    exact isTrue rfl
+  case revertMsg.revertMsg a0 b0 =>
+    exact decidable_of_iff (a0 = b0) (by simp only [RawStmt.revertMsg.injEq])
+  case requireMsg.requireMsg a0 a1 b0 b1 =>
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1) (by simp only [RawStmt.requireMsg.injEq])
+  case revertReason.revertReason a0 b0 =>
+    exact decidable_of_iff (a0 = b0) (by simp only [RawStmt.revertReason.injEq])
+  case requireReason.requireReason a0 a1 b0 b1 =>
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1) (by simp only [RawStmt.requireReason.injEq])
+  case revertRaw.revertRaw a0 b0 =>
+    exact decidable_of_iff (a0 = b0) (by simp only [RawStmt.revertRaw.injEq])
+  case revertErr.revertErr a0 a1 b0 b1 =>
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1) (by simp only [RawStmt.revertErr.injEq])
+  case requireErr.requireErr a0 a1 a2 b0 b1 b2 =>
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2) (by simp only [RawStmt.requireErr.injEq])
+  case assumeFalse.assumeFalse  =>
+    exact isTrue rfl
+  case ret.ret a0 b0 =>
+    exact decidable_of_iff (a0 = b0) (by simp only [RawStmt.ret.injEq])
+  case eval.eval a0 b0 =>
+    exact decidable_of_iff (a0 = b0) (by simp only [RawStmt.eval.injEq])
+  case unchecked.unchecked a0 b0 =>
+    letI : Decidable (a0 = b0) := rawStmtDecEqList a0 b0
+    exact decidable_of_iff (a0 = b0) (by simp only [RawStmt.unchecked.injEq])
+  case checked.checked a0 a1 b0 b1 =>
+    letI : Decidable (a1 = b1) := rawStmtDecEqList a1 b1
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1) (by simp only [RawStmt.checked.injEq])
+  case tryCall.tryCall a0 a1 a2 a3 a4 a5 a6 a7 a8 b0 b1 b2 b3 b4 b5 b6 b7 b8 =>
+    letI : Decidable (a4 = b4) := rawStmtDecEqList a4 b4
+    letI : Decidable (a5 = b5) := rawStmtDecEqList a5 b5
+    letI : Decidable (a7 = b7) := rawStmtDecEqList a7 b7
+    letI : Decidable (a8 = b8) := rawStmtDecEqList a8 b8
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2 ∧ a3 = b3 ∧ a4 = b4 ∧ a5 = b5 ∧ a6 = b6 ∧ a7 = b7 ∧ a8 = b8) (by simp only [RawStmt.tryCall.injEq])
+  case send.send a0 a1 a2 a3 a4 b0 b1 b2 b3 b4 =>
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2 ∧ a3 = b3 ∧ a4 = b4) (by simp only [RawStmt.send.injEq])
+  case tupleDecl.tupleDecl a0 a1 b0 b1 =>
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1) (by simp only [RawStmt.tupleDecl.injEq])
+  case tupleAssign.tupleAssign a0 a1 b0 b1 =>
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1) (by simp only [RawStmt.tupleAssign.injEq])
+  case block.block a0 b0 =>
+    letI : Decidable (a0 = b0) := rawStmtDecEqList a0 b0
+    exact decidable_of_iff (a0 = b0) (by simp only [RawStmt.block.injEq])
+  case whileLoop.whileLoop a0 a1 a2 b0 b1 b2 =>
+    letI : Decidable (a2 = b2) := rawStmtDecEqList a2 b2
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2) (by simp only [RawStmt.whileLoop.injEq])
+  case forLoop.forLoop a0 a1 a2 a3 a4 b0 b1 b2 b3 b4 =>
+    letI : Decidable (a1 = b1) := rawStmtDecEqList a1 b1
+    letI : Decidable (a3 = b3) := rawStmtDecEqList a3 b3
+    letI : Decidable (a4 = b4) := rawStmtDecEqList a4 b4
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2 ∧ a3 = b3 ∧ a4 = b4) (by simp only [RawStmt.forLoop.injEq])
+  case doWhile.doWhile a0 a1 a2 b0 b1 b2 =>
+    letI : Decidable (a1 = b1) := rawStmtDecEqList a1 b1
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2) (by simp only [RawStmt.doWhile.injEq])
+  case brk.brk  =>
+    exact isTrue rfl
+  case cont.cont  =>
+    exact isTrue rfl
+  case loop.loop a0 a1 a2 b0 b1 b2 =>
+    letI : Decidable (a2 = b2) := rawStmtDecEqList a2 b2
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2) (by simp only [RawStmt.loop.injEq])
+  case hole.hole  =>
+    exact isTrue rfl
+termination_by sizeOf a
+def rawStmtDecEqList (a b : List RawStmt) : Decidable (a = b) :=
+  match a, b with
+  | [], [] => isTrue rfl
+  | a :: as, b :: bs =>
+    letI : Decidable (a = b) := rawStmtDecEq a b
+    letI : Decidable (as = bs) := rawStmtDecEqList as bs
+    decidable_of_iff (a = b ∧ as = bs) (by simp only [List.cons.injEq])
+  | [], _ :: _ | _ :: _, [] => isFalse (by intro h; cases h)
+termination_by sizeOf a
+end
+local instance : DecidableEq RawStmt := rawStmtDecEq
+mutual
+def specExprDecEq (a b : SpecExpr) : Decidable (a = b) := by
+  cases a <;> cases b
+  all_goals try (solve | apply isFalse; intro h; cases h)
+  case num.num a0 b0 =>
+    exact decidable_of_iff (a0 = b0) (by simp only [SpecExpr.num.injEq])
+  case uintLit.uintLit a0 b0 =>
+    exact decidable_of_iff (a0 = b0) (by simp only [SpecExpr.uintLit.injEq])
+  case bool.bool a0 b0 =>
+    exact decidable_of_iff (a0 = b0) (by simp only [SpecExpr.bool.injEq])
+  case name.name a0 b0 =>
+    exact decidable_of_iff (a0 = b0) (by simp only [SpecExpr.name.injEq])
+  case result.result  =>
+    exact isTrue rfl
+  case old.old a0 b0 =>
+    letI : Decidable (a0 = b0) := specExprDecEq a0 b0
+    exact decidable_of_iff (a0 = b0) (by simp only [SpecExpr.old.injEq])
+  case net.net a0 b0 =>
+    letI : Decidable (a0 = b0) := specExprDecEq a0 b0
+    exact decidable_of_iff (a0 = b0) (by simp only [SpecExpr.net.injEq])
+  case field.field a0 a1 b0 b1 =>
+    letI : Decidable (a0 = b0) := specExprDecEq a0 b0
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1) (by simp only [SpecExpr.field.injEq])
+  case index.index a0 a1 b0 b1 =>
+    letI : Decidable (a0 = b0) := specExprDecEq a0 b0
+    letI : Decidable (a1 = b1) := specExprDecEq a1 b1
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1) (by simp only [SpecExpr.index.injEq])
+  case unop.unop a0 a1 b0 b1 =>
+    letI : Decidable (a1 = b1) := specExprDecEq a1 b1
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1) (by simp only [SpecExpr.unop.injEq])
+  case binop.binop a0 a1 a2 b0 b1 b2 =>
+    letI : Decidable (a1 = b1) := specExprDecEq a1 b1
+    letI : Decidable (a2 = b2) := specExprDecEq a2 b2
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2) (by simp only [SpecExpr.binop.injEq])
+  case imp.imp a0 a1 b0 b1 =>
+    letI : Decidable (a0 = b0) := specExprDecEq a0 b0
+    letI : Decidable (a1 = b1) := specExprDecEq a1 b1
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1) (by simp only [SpecExpr.imp.injEq])
+  case iff.iff a0 a1 b0 b1 =>
+    letI : Decidable (a0 = b0) := specExprDecEq a0 b0
+    letI : Decidable (a1 = b1) := specExprDecEq a1 b1
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1) (by simp only [SpecExpr.iff.injEq])
+  case all.all a0 a1 a2 b0 b1 b2 =>
+    letI : Decidable (a2 = b2) := specExprDecEq a2 b2
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2) (by simp only [SpecExpr.all.injEq])
+  case ex.ex a0 a1 a2 b0 b1 b2 =>
+    letI : Decidable (a2 = b2) := specExprDecEq a2 b2
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2) (by simp only [SpecExpr.ex.injEq])
+  case member.member a0 a1 a2 b0 b1 b2 =>
+    letI : Decidable (a1 = b1) := specExprDecEq a1 b1
+    letI : Decidable (a2 = b2) := specExprDecEqList a2 b2
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2) (by simp only [SpecExpr.member.injEq])
+  case memberFilter.memberFilter a0 a1 a2 a3 a4 b0 b1 b2 b3 b4 =>
+    letI : Decidable (a1 = b1) := specExprDecEq a1 b1
+    letI : Decidable (a3 = b3) := specExprDecEqList a3 b3
+    letI : Decidable (a4 = b4) := specExprDecEq a4 b4
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2 ∧ a3 = b3 ∧ a4 = b4) (by simp only [SpecExpr.memberFilter.injEq])
+termination_by sizeOf a
+def specExprDecEqList (a b : List SpecExpr) : Decidable (a = b) :=
+  match a, b with
+  | [], [] => isTrue rfl
+  | a :: as, b :: bs =>
+    letI : Decidable (a = b) := specExprDecEq a b
+    letI : Decidable (as = bs) := specExprDecEqList as bs
+    decidable_of_iff (a = b ∧ as = bs) (by simp only [List.cons.injEq])
+  | [], _ :: _ | _ :: _, [] => isFalse (by intro h; cases h)
+termination_by sizeOf a
+end
+local instance : DecidableEq SpecExpr := specExprDecEq
+def specLocDecEq (a b : SpecLoc) : Decidable (a = b) := by
+  cases a <;> cases b
+  all_goals try (solve | apply isFalse; intro h; cases h)
+  case root.root a0 b0 =>
+    exact decidable_of_iff (a0 = b0) (by simp only [SpecLoc.root.injEq])
+  case field.field a0 a1 b0 b1 =>
+    letI : Decidable (a0 = b0) := specLocDecEq a0 b0
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1) (by simp only [SpecLoc.field.injEq])
+  case index.index a0 a1 b0 b1 =>
+    letI : Decidable (a0 = b0) := specLocDecEq a0 b0
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1) (by simp only [SpecLoc.index.injEq])
+  case all.all a0 b0 =>
+    letI : Decidable (a0 = b0) := specLocDecEq a0 b0
+    exact decidable_of_iff (a0 = b0) (by simp only [SpecLoc.all.injEq])
+termination_by sizeOf a
+local instance : DecidableEq SpecLoc := specLocDecEq
+def funSpecDecEq (a b : FunSpec) : Decidable (a = b) := by
+  cases a <;> cases b
+  all_goals try (solve | apply isFalse; intro h; cases h)
+  case mk.mk a0 a1 a2 a3 b0 b1 b2 b3 =>
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2 ∧ a3 = b3) (by simp only [FunSpec.mk.injEq])
+local instance : DecidableEq FunSpec := funSpecDecEq
+def modAppDecEq (a b : ModApp) : Decidable (a = b) := by
+  cases a <;> cases b
+  all_goals try (solve | apply isFalse; intro h; cases h)
+  case mk.mk a0 a1 a2 a3 a4 a5 b0 b1 b2 b3 b4 b5 =>
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2 ∧ a3 = b3 ∧ a4 = b4 ∧ a5 = b5) (by simp only [ModApp.mk.injEq])
+local instance : DecidableEq ModApp := modAppDecEq
+def funDeclDecEq (a b : FunDecl) : Decidable (a = b) := by
+  cases a <;> cases b
+  all_goals try (solve | apply isFalse; intro h; cases h)
+  case mk.mk a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 b0 b1 b2 b3 b4 b5 b6 b7 b8 b9 b10 =>
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2 ∧ a3 = b3 ∧ a4 = b4 ∧ a5 = b5 ∧ a6 = b6 ∧ a7 = b7 ∧ a8 = b8 ∧ a9 = b9 ∧ a10 = b10) (by simp only [FunDecl.mk.injEq])
+local instance : DecidableEq FunDecl := funDeclDecEq
+def evalOrderDecEq (a b : EvalOrder) : Decidable (a = b) := by
+  cases a <;> cases b
+  all_goals try (solve | apply isFalse; intro h; cases h)
+  case mk.mk a0 a1 a2 b0 b1 b2 =>
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a2 = b2) (by simp only [EvalOrder.mk.injEq])
+local instance : DecidableEq EvalOrder := evalOrderDecEq
+def contractDecEq (a b : Contract) : Decidable (a = b) := by
+  cases a <;> cases b
+  all_goals try (solve | apply isFalse; intro h; cases h)
+  case mk.mk a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 b0 b1 b2 b3 b4 b5 b6 b7 b8 b9 b10 b11 b12 b13 =>
+    exact decidable_of_iff (a0 = b0 ∧ a1 = b1 ∧ a3 = b3 ∧ a4 = b4 ∧ a5 = b5 ∧ a6 = b6 ∧ a7 = b7 ∧ a8 = b8 ∧ a9 = b9 ∧ a10 = b10 ∧ a11 = b11) (by simp only [Contract.mk.injEq])
+local instance : DecidableEq Contract := contractDecEq
+
+/-- Total structural contract equality, including metadata and erased proof fields. -/
+def contractDecEqV2 : DecidableEq Contract := contractDecEq
+
+def contractEqV2 (a b : Contract) : Bool :=
+  @decide (a = b) (contractDecEqV2 a b)
+
+theorem contractEqV2_iff (a b : Contract) : contractEqV2 a b = true ↔ a = b := by
+  letI := contractDecEqV2
+  exact decide_eq_true_iff
+end CheckedMemoV2
+
+namespace RecThunk
+/-- Checked v2 transport rejects mismatched contracts or frames; v1 is unchanged. -/
+def getV2Impl (C : Contract) (F : Ctx) (r : RecThunk) :
+    Except String (Unit → Prog C F F) :=
+  letI := CheckedMemoV2.contractDecEqV2
+  if hc : r.ctr = C then
+    if hf : r.frame = F then .ok (hc ▸ hf ▸ r.thunk)
+    else .error "recursive thunk frame mismatch"
+  else .error "recursive thunk contract mismatch"
+
+def getV2 (C : Contract) (F : Ctx) (r : RecThunk) :
+    Except String (Unit → Prog C F F) := getV2Impl C F r
+
+theorem getV2_eq_impl (C : Contract) (F : Ctx) (r : RecThunk) :
+    getV2 C F r = getV2Impl C F r := rfl
+
+theorem getV2_matching (C : Contract) (F : Ctx) (body : Unit → Prog C F F) :
+    getV2 C F ⟨C, F, body⟩ = .ok body := by
+  simp only [getV2, getV2Impl, eq_self, dite_true]
+
+/-- Guards against accepting a matching layout from a different contract. -/
+theorem getV2_contract_control :
+    getV2 { vars := [] } []
+      ⟨{ vars := [], enums := [("Other", [])] }, [], fun _ => Prog.recBase⟩ =
+      .error "recursive thunk contract mismatch" := by rfl
+
+/-- Guards against unchecked frame transport of a correctly tagged contract. -/
+theorem getV2_frame_control :
+    getV2 { vars := [] } [.val .bool]
+      ⟨{ vars := [] }, [], fun _ => Prog.recBase⟩ =
+      .error "recursive thunk frame mismatch" := by rfl
+/-- Guards against replacing a supplied body with the default recursive base. -/
+theorem getV2_body_control :
+    (getV2 { vars := [] } []
+      ⟨{ vars := [] }, [], fun _ => Prog.nil⟩).map (fun body => body ()) ≠
+      .ok Prog.recBase := by
+  rw [getV2_matching]
+  intro h
+  have hp := Except.ok.inj h
+  cases hp
+end RecThunk
+
 
 end Solidity
