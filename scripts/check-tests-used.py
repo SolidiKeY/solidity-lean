@@ -37,6 +37,7 @@ import gzip
 import io
 import zlib
 import json
+import math
 import posixpath
 import re
 import subprocess
@@ -577,8 +578,67 @@ def command_receipt_rows(value):
         return (isinstance(row, dict) and {'command', 'exitCode', 'elapsedSeconds'} <= set(row)
                 and isinstance(row['command'], list) and bool(row['command'])
                 and all(isinstance(argument, str) for argument in row['command'])
-                and type(row['exitCode']) is int and isinstance(row['elapsedSeconds'], (int, float)))
+                and type(row['exitCode']) is int and nonnegative_number(row['elapsedSeconds']))
     return rows if all(valid(row) for row in rows) else []
+
+
+def nonnegative_number(value):
+    return (type(value) is int and value >= 0
+            or type(value) is float and math.isfinite(value) and value >= 0)
+
+
+def hex_pin(value, length=64):
+    return isinstance(value, str) and re.fullmatch('[0-9a-f]{' + str(length) + '}', value) is not None
+
+
+def historical_json_role(value):
+    """Reviewed observation schemas; expected vectors and policy maps do not match.
+
+    These establish an archived role, never the truth of an outcome or access
+    to a named external log/review. Keep and unresolved-read precedence remain
+    in inventory(). Producer schemas: solkey-migration.mjs summarize(),
+    evm-reference/generated.mjs report construction; explicit review/gate and
+    compiler/EVM receipts include measured observations and digest bindings.
+    """
+    if not isinstance(value, dict): return None
+    def counters(x):
+        return isinstance(x, dict) and bool(x) and all(isinstance(k, str) and k and type(v) is int and v >= 0 for k, v in x.items())
+    keys = set(value)
+    if keys == {'commit', 'mode', 'completedSources', 'totalSources', 'results', 'errors', 'suites'}:
+        if (hex_pin(value['commit'], 40) and value['mode'] in ('proof', 'parse', 'audit-with-focused-retries')
+                and all(type(value[k]) is int and value[k] >= 0 for k in ('completedSources', 'totalSources', 'errors'))
+                and value['completedSources'] <= value['totalSources'] and counters(value['results'])
+                and isinstance(value['suites'], dict) and value['suites'] and all(counters(v) for v in value['suites'].values())
+                and {k: sum(row.get(k, 0) for row in value['suites'].values()) for k in set().union(*value['suites'].values())} == value['results']):
+            return 'Historical migration summary: pinned source commit, completed/total counts and measured result counters by suite (solkey-migration.mjs summarize).'
+    reviews = value.get('reviews')
+    if isinstance(reviews, list) and reviews and all(isinstance(r, dict)
+            and {'area', 'role', 'agent', 'verdict', 'read_only', 'used_lean_server', 'artifact', 'sha256', 'reviewed_inputs_sha256', 'scope'} <= set(r)
+            and r['role'] in ('finder', 'skeptic') and all(isinstance(r[k], str) and r[k] for k in ('area', 'agent', 'verdict', 'artifact', 'scope'))
+            and type(r['read_only']) is bool and type(r['used_lean_server']) is bool
+            and hex_pin(r['sha256']) and hex_pin(r['reviewed_inputs_sha256']) for r in reviews):
+        return 'Historical independent review receipts: reviewer roles/verdicts, flags, artifact digests and reviewed-input digests; external artifacts not verified.'
+    observations = value.get('observations')
+    if (value.get('version') == 1 and type(value.get('version')) is int and hex_pin(value.get('compilerSha256'))
+            and hex_pin(value.get('archiveSha256')) and isinstance(value.get('compiler'), str)
+            and isinstance(value.get('scope'), str) and 'evidence' in value['scope'].lower()
+            and isinstance(observations, list) and observations and all(isinstance(r, dict)
+                and {'path', 'sourceSha256', 'pipeline', 'settings', 'signature', 'args', 'calldata', 'failure', 'expected', 'actual'} <= set(r)
+                and hex_pin(r['sourceSha256']) and type(r['failure']) is bool and isinstance(r['settings'], dict)
+                and isinstance(r['args'], list) and all(isinstance(r[k], str) for k in ('path', 'pipeline', 'signature', 'calldata', 'expected', 'actual'))
+                and re.fullmatch('0x[0-9a-fA-F]*', r['calldata']) for r in observations)):
+        return 'Historical compiler/EVM observations: compiler/archive/source digests and concrete calldata, failure, expected and actual results.'
+    gates = value.get('gates')
+    if hex_pin(value.get('upstream'), 40) and hex_pin(value.get('merge'), 40) and isinstance(gates, dict) and gates:
+        def measured(r):
+            return (isinstance(r, dict) and isinstance(r.get('command'), list) and bool(r['command'])
+                    and all(isinstance(a, str) for a in r['command']) and type(r.get('exit')) is int
+                    and nonnegative_number(r.get('elapsed_seconds')))
+        if all(measured(r) and hex_pin(r.get('git_head'), 40) and hex_pin(r.get('log_sha256'))
+                and measured(r.get('rusage')) and all(nonnegative_number(r['rusage'].get(k)) for k in
+                    ('children_user_seconds', 'children_system_seconds', 'children_max_rss_kib')) for r in gates.values()):
+            return 'Historical integration gate receipts: upstream/merge pins and commit-bound argv, exits, durations, resources and log digests; named logs not verified.'
+    return None
 
 
 def evidence_role(data):
@@ -596,24 +656,52 @@ def evidence_role(data):
         return 'Historical sequential command receipts: argv, exit codes and elapsed measurements.'
     if isinstance(value, dict):
         keys = set(value)
-        if {'recordedOn', 'startingCommit', 'implementationCommit'} <= keys:
+        reviewed = historical_json_role(value)
+        if reviewed: return reviewed
+        gate = value.get('combinedGate')
+        if ({'recordedOn', 'startingCommit', 'implementationCommit', 'branch', 'runtime', 'resourceBounds'} <= keys
+                and isinstance(value['recordedOn'], str) and re.fullmatch(r'\d{4}-\d{2}-\d{2}', value['recordedOn'])
+                and hex_pin(value['startingCommit'], 40) and hex_pin(value['implementationCommit'], 40)
+                and isinstance(value['branch'], str) and value['branch'] and isinstance(value['runtime'], dict)
+                and isinstance(value['resourceBounds'], dict) and isinstance(gate, dict)
+                and isinstance(gate.get('command'), str) and gate['command'] and type(gate.get('exitCode')) is int
+                and nonnegative_number(gate.get('elapsedSeconds')) and isinstance(gate.get('log'), str)
+                and hex_pin(gate.get('uncompressedLogSha256'))):
             return 'Historical validation record: recordedOn, startingCommit and implementationCommit provenance fields.'
-        if {'command', 'exit', 'elapsed_seconds'} <= keys:
+        if ({'command', 'exit', 'elapsed_seconds', 'resource_stop', 'peak_group_rss_bytes'} <= keys
+                and isinstance(value['command'], list) and value['command'] and all(isinstance(a, str) for a in value['command'])
+                and type(value['exit']) is int and nonnegative_number(value['elapsed_seconds'])
+                and type(value['resource_stop']) is bool and type(value['peak_group_rss_bytes']) is int and value['peak_group_rss_bytes'] >= 0):
             return 'Command receipt with command, exit and elapsed_seconds fields; no demonstrated active consumer.'
-        if ('recordedAt' in keys or 'recordedOn' in keys) and 'startingCommit' in keys and isinstance(value.get('commands'), list) and value['commands']:
+        if (isinstance(value.get('recordedAt', value.get('recordedOn')), str)
+                and hex_pin(value.get('startingCommit'), 40) and isinstance(value.get('commands'), list) and value['commands']):
             if all(isinstance(r, dict) and {'command', 'exitCode', 'elapsedSeconds'} <= set(r)
-                   and isinstance(r['command'], (list, str)) and isinstance(r['exitCode'], int)
-                   and isinstance(r['elapsedSeconds'], (int, float)) for r in value['commands']):
+                   and isinstance(r['command'], (list, str)) and bool(r['command']) and type(r['exitCode']) is int
+                   and nonnegative_number(r['elapsedSeconds']) for r in value['commands']):
                 return 'Historical validation receipt: recorded time, starting commit and command/exit/elapsed measurements.'
         metadata = value.get('metadata')
-        if isinstance(metadata, dict) and {'commit', 'compilerSha256', 'runnerSha256', 'modelSha256'} <= set(metadata):
+        if (isinstance(metadata, dict) and hex_pin(metadata.get('commit'), 40)
+                and all(hex_pin(metadata.get(k)) for k in ('compilerSha256', 'runnerSha256', 'modelSha256'))):
             results = value.get('results')
-            if isinstance(results, list) and all(isinstance(r, dict) and {'path', 'status'} <= set(r) for r in results):
+            if isinstance(results, list) and results and all(isinstance(r, dict) and isinstance(r.get('path'), str) and r['path']
+                    and isinstance(r.get('status'), str) and r['status'] for r in results):
                 return 'Historical upstream execution results with pinned commit/compiler/runner/model metadata and per-path statuses.'
         if {'commit', 'completed', 'errors', 'mode', 'results', 'sources', 'version'} <= keys:
-            if all(isinstance(value[k], list) for k in ('completed', 'errors', 'results', 'sources')) and all(isinstance(r, dict) and 'status' in r for r in value['results']):
+            if (hex_pin(value['commit'], 40) and type(value['version']) is int and value['version'] == 1
+                    and value['mode'] in ('proof', 'listing', 'audit-with-focused-retries')
+                    and all(isinstance(value[k], list) for k in ('completed', 'errors', 'results', 'sources'))
+                    and value['sources'] and value['results']
+                    and all(isinstance(p, str) and p for p in value['sources'] + value['completed'])
+                    and set(value['completed']) <= set(value['sources'])
+                    and all(isinstance(r, dict) and isinstance(r.get('status'), str) and r['status']
+                            and isinstance(r.get('source'), str) and r['source'] for r in value['results'])):
                 return 'Historical migration execution report: commit, mode, completed sources, errors and per-result statuses.'
-        if {'archiveSha256', 'runnerSha256', 'modelSha256', 'completedFixtureFiles', 'totalFixtureFiles', 'counts', 'complete'} <= keys:
+        if ({'archiveSha256', 'runnerSha256', 'modelSha256', 'completedFixtureFiles', 'totalFixtureFiles', 'counts', 'complete'} <= keys
+                and all(hex_pin(value[k]) for k in ('archiveSha256', 'runnerSha256', 'modelSha256'))
+                and type(value['complete']) is bool and type(value['completedFixtureFiles']) is int
+                and type(value['totalFixtureFiles']) is int and 0 <= value['completedFixtureFiles'] <= value['totalFixtureFiles']
+                and value['totalFixtureFiles'] > 0 and isinstance(value['counts'], dict) and value['counts']
+                and all(isinstance(k, str) and k and type(v) is int and v >= 0 for k, v in value['counts'].items())):
             return 'Historical upstream run summary: pinned archive/runner/model, completion counters and observed status counts.'
     # Require multiple nontrivial log markers; a source containing a string is not a log.
     lines = text.splitlines()
@@ -802,6 +890,7 @@ def verify(actual, expected, require_complete=True):
 
 
 def self_test():
+    if not __debug__: raise ValueError("self-test requires Python assertions; omit -O")
     import copy
     assert evidence_role(b'\x1f\x8b' + b'\0' * 40) is None
     transcript = b'....\n----------------------------------------------------------------------\nRan 4 tests in 0.001s\n\nOK\n'
@@ -809,6 +898,26 @@ def self_test():
     assert evidence_role(gzip.compress(b'import unittest\n', mtime=0)) is None
     quoted_log = b'\"\"\"\n' + b'PASS build 1s\n' * 5 + b'\"\"\"\n'
     assert evidence_role(quoted_log) is None
+    for placeholder in (
+            {'recordedOn': None, 'startingCommit': 'expected', 'implementationCommit': 'expected'},
+            {'command': None, 'exit': 'expected', 'elapsed_seconds': 'unrun'},
+            {'metadata': dict.fromkeys(('commit', 'compilerSha256', 'runnerSha256', 'modelSha256')), 'results': []},
+            {'reviews': []}, {'groups': [{'expected': '0x00'}]},
+            dict.fromkeys(('archiveSha256', 'runnerSha256', 'modelSha256', 'completedFixtureFiles', 'totalFixtureFiles', 'counts', 'complete')),
+            {'commit': None, 'completed': [], 'errors': [], 'mode': None, 'results': [], 'sources': [], 'version': None}):
+        assert evidence_role(json.dumps(placeholder).encode()) is None
+    assert nonnegative_number(10 ** 1000)
+    resource_receipt = {'command': ['archived-runner'], 'exit': 7, 'elapsed_seconds': 0.25,
+                        'resource_stop': False, 'peak_group_rss_bytes': 1024}
+    assert evidence_role(json.dumps(resource_receipt).encode())
+    for bad in (None, True, 'unrun', -1, float('nan'), float('inf')):
+        assert evidence_role(json.dumps(dict(resource_receipt, elapsed_seconds=bad)).encode()) is None
+    summary = {'commit': 'a' * 40, 'mode': 'proof', 'completedSources': 1, 'totalSources': 1,
+               'results': {'proved': 2, 'error': 1}, 'errors': 1, 'suites': {'suite': {'proved': 2, 'error': 1}}}
+    assert evidence_role(json.dumps(summary).encode())
+    assert evidence_role(json.dumps(dict(summary, commit='unrun')).encode()) is None
+    assert evidence_role(json.dumps(dict(summary, suites={'suite': {'proved': 1}})).encode()) is None
+    assert evidence_role(json.dumps(dict(summary, suites={'suite': {'proved': 2, 'error': 1, 'extra': 1}})).encode()) is None
     with tempfile.TemporaryDirectory(prefix='tests-used-controls-') as directory:
         root = Path(directory)
         git(root, 'init', '-q')
@@ -834,7 +943,7 @@ def self_test():
             'tests/mention.txt': 'A mention is not use.\n',
             'tests/dead.py': 'import cycle\n',
             'tests/cycle.py': 'import dead\n',
-            'tests/evidence.json': '{"recordedOn":"old","startingCommit":"a","implementationCommit":"b"}\n',
+            'tests/evidence.json': json.dumps({'command': ['old-runner'], 'exit': 7, 'elapsed_seconds': 1.0, 'resource_stop': False, 'peak_group_rss_bytes': 12}) + '\n',
             'tests/unknown.bin': b'\x00\x01',
             'tests/.hidden': 'hidden\n',
             'tests/history-empty.log': b'',
