@@ -6,6 +6,8 @@ import {createHash} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
 import {join} from 'node:path';
 import {blankLean} from '../check-trust.mjs';
+import {freshArtifactGraph,currentIleanPaths} from './trust-artifacts.mjs';
+export {configuredCacheDir} from './trust-artifacts.mjs';
 const baselinePath='scripts/trust/trust-closure-baseline.json';
 export const sha = s => createHash('sha256').update(s).digest('hex');
 
@@ -210,28 +212,12 @@ function checkHistory(baseline) {
     } else throw Error('initial baseline must have a null predecessor');
   }
 }
-// Lake exports its effective directory, including the no-elan/XDG case.
-// The toolchain prefix is not always the active artifact cache.
-export function configuredCacheDir() {
- const explicit=process.env.LAKE_CACHE_DIR;
- const directory=explicit??execFileSync('lake',['env','printenv','LAKE_CACHE_DIR'],{encoding:'utf8'}).trim();
- if(!directory)throw Error('Lake artifact cache is disabled or unavailable');
- return directory;
-}
-// Use the traced artifact, since a fetched module can leave stale .ilean files
-// in .lake/build. The compiled source index must describe the audited objects.
-export function sourceIndex(toolchain,m,{root='.',cacheDir=configuredCacheDir()}={}) {
+// The selected OLean graph and its cache mapping identify the source index.
+// Neither a physical .ilean nor its physical .trace is a freshness witness.
+export function sourceIndex(toolchain,m,{indexPaths=new Map()}={}) {
     const rel=m.replaceAll('.','/')+'.ilean';
-    const tracePath=join(root,'.lake/build/lib/lean',m.replaceAll('.','/')+'.trace');
-    let path=`${toolchain}/lib/lean/${rel}`;
-    if(existsSync(tracePath)) {
-      // Lake may keep old files in .lake/build while selecting current cached
-      // artifacts. Read the exact traced source-index artifact, never that old file.
-      const trace=JSON.parse(readFileSync(tracePath,'utf8'));
-      const hash=trace.outputs?.i;
-      if(typeof hash!=='string')throw Error(`source-index trace missing: ${m}`);
-      path=join(cacheDir,'artifacts',`${hash}.ilean`);
-    }
+    const path=indexPaths.get(m)??`${toolchain}/lib/lean/${rel}`;
+    if((m==='Solidity'||m.startsWith('Solidity.'))&&!indexPaths.has(m))throw Error(`current source index not resolved: ${m}`);
     if(!existsSync(path))throw Error(`current compiled source index unavailable: ${m}`);
     const index=JSON.parse(readFileSync(path,'utf8')), spans=new Map();
     for(const ref of Object.values(index.references??{}))for(const u of ref.usages??[]) {
@@ -257,14 +243,18 @@ function main() {
     throw Error('usage: trust-closure.mjs [--source-ceilings] [--write --reason REASON]');
   const toolchain=execFileSync('lean',['--print-prefix'],{encoding:'utf8'}).trim();
   const sourceCache=new Map();
-  const current=summarize(extract('scripts/trust/trust-closure.lean','TRUST_CLOSURE_JSON='),m=>{
+  const metadata=extract('scripts/trust/trust-closure.lean','TRUST_CLOSURE_JSON=');
+  const modules=[...new Set(metadata.declarations.map(d=>d.module).filter(m=>m==='Solidity'||m?.startsWith('Solidity.')))];
+  const graph=freshArtifactGraph('Solidity.Theorems');
+  const indexPaths=currentIleanPaths(graph.imports,modules);
+  const current=summarize(metadata,m=>{
     const rel=m.replaceAll('.','/')+'.lean';
     const path=existsSync(rel)?rel:`${toolchain}/src/lean/${rel}`;
     if(!existsSync(path))throw Error(`source unavailable: ${m}`);
     if(!sourceCache.has(m))sourceCache.set(m,readFileSync(path,'utf8'));
     return sourceCache.get(m);
   },{sourceCeilings,proofRangesFor:m=>{
-    return sourceIndex(toolchain,m);
+    return sourceIndex(toolchain,m,{indexPaths});
   }});
   if(writing){
     const old=committedBaseline();

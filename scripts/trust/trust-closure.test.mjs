@@ -104,7 +104,7 @@ test('class fields with binders and theorem where bodies have distinct spans',()
 test('generated deriving proofs have no independent source proof body',()=>{
  assert.equal(statementEnd('  deriving Inhabited, Nonempty',1,1),1);
 });
-test('source exclusions use current traced index rather than stale local positions',()=>{
+test('source exclusions use explicitly resolved index rather than stale trace/local positions',()=>{
  const root=mkdtempSync(join(tmpdir(),'trust-index-'));
  try{
   mkdirSync(join(root,'.lake/build/lib/lean'),{recursive:true});
@@ -113,7 +113,7 @@ test('source exclusions use current traced index rather than stale local positio
   writeFileSync(join(root,'.lake/build/lib/lean/Control.trace'),JSON.stringify({outputs:{i:'123'}}));
   writeFileSync(join(root,'.lake/build/lib/lean/Control.ilean'),JSON.stringify(index(8)));
   writeFileSync(join(root,'cache/artifacts/123.ilean'),JSON.stringify(index(1)));
-  assert.equal(sourceIndex(root,'Control',{root,cacheDir:join(root,'cache')}).get('proof').end,2);
+  assert.equal(sourceIndex(root,'Solidity.Control',{indexPaths:new Map([['Solidity.Control',join(root,'cache/artifacts/123.ilean')]])}).get('proof').end,2);
  }finally{rmSync(root,{recursive:true,force:true});}
 });
 
