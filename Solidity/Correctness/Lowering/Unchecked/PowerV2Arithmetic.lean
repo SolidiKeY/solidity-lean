@@ -96,6 +96,45 @@ theorem shift_value_power {D : Source.Layout} {C : Contract} {Γ : Ctx}
   | storRef h p => cases related
   | cdRef h o n => cases related
 
+/-- Static evidence about the actual supplied target value. This V2 checker
+carries operands and syntax equality only; it cannot accept an execution proof
+or silently substitute a separately constructed power expression. -/
+structure PowerOutputAssociation {C : Contract} {Γ : Ctx}
+    (value : Val C Γ .uint) where
+  base : Val C Γ .uint
+  exponent : Val C Γ .uint
+  output : value = .binop .powW rfl rfl base exponent
+
+/-- Total recognition of the supplied intrinsic wrapping power node. Checked
+power and every other node are refused at this leaf boundary. These refusals
+are coverage gaps, not exclusions from the production domain. -/
+def checkPowerOutput {C : Contract} {Γ : Ctx}
+    (value : Val C Γ .uint) : Option (PowerOutputAssociation value) :=
+  match value with
+  | .binop (p := .uint) .powW _ _ base exponent => some ⟨base, exponent, rfl⟩
+  | _ => none
+
+/-- Derive execution of the supplied value from its static association using
+one existing operator proof. Operand observations still belong to the future
+statement bridge; neither execution correctness nor a producer equation is a
+certificate field. This is not a whole-program endpoint or evaluator migration. -/
+theorem powerOutput_sound {D : Source.Layout} {C : Contract} {Γ : Ctx}
+    (target : State C Γ) (sourceBase : Source.Val D (.int Source.IntTy.u256))
+    (value : Val C Γ .uint) (association : PowerOutputAssociation value)
+    (x y : PrimTy.uint.Denote)
+    (related : IntValueRel Source.IntTy.u256 sourceBase x)
+    (left : association.base.evalT target = .ok x)
+    (right : association.exponent.evalT target = .ok y) :
+    ∃ (sourceResult : Source.Val D (.int Source.IntTy.u256))
+      (modelResult : PrimTy.uint.Denote),
+      Source.PowerV2.shiftVal false .exp y.val.toNat sourceBase = .ok sourceResult ∧
+      value.evalT target = .ok modelResult ∧
+      IntValueRel Source.IntTy.u256 sourceResult modelResult := by
+  rw [association.output]
+  exact shift_value_power target sourceBase association.base association.exponent x y related left right
+
+#print axioms powerOutput_sound
+
 #print axioms word_powW
 #print axioms value_power
 #print axioms shift_value_power

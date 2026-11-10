@@ -1,4 +1,4 @@
-import Solidity.Source.PowerV2Correct
+import Solidity.Correctness.Lowering.Unchecked.PowerV2Arithmetic
 
 /-!
 # V2 operator migration controls
@@ -39,6 +39,30 @@ theorem typed_checked_overflow {D : Source.Layout} :
     Source.PowerV2.shiftVal (D := D) true .exp 8 (Source.intWrap byteTy 2) =
       Source.panic .arithmetic := by
   exact checked_overflow
+
+/-- Guard nonvacuity: the recognizer accepts the actual supplied wrapping
+power value, with its original operand expressions. -/
+theorem supplied_power_accepted {C : Contract} {Γ : Ctx}
+    (base exponent : Val C Γ .uint) :
+    (PowerV2Arithmetic.checkPowerOutput (.binop .powW rfl rfl base exponent)).isSome = true := by
+  rfl
+
+/-- Guard confusing checked exponentiation with the explicitly V2 wrapping
+operator; this is a checker refusal, not a production-domain exclusion. -/
+theorem checked_power_refused {C : Contract} {Γ : Ctx}
+    (base exponent : Val C Γ .uint) :
+    (PowerV2Arithmetic.checkPowerOutput (.binop .pow rfl rfl base exponent)).isSome = false := by
+  rfl
+
+/-- Guard accepting a different arithmetic operator as a power certificate. -/
+theorem different_operator_refused {C : Contract} {Γ : Ctx}
+    (base exponent : Val C Γ .uint) :
+    (PowerV2Arithmetic.checkPowerOutput (.binop .mulW rfl rfl base exponent)).isSome = false := by
+  rfl
+
+#print axioms supplied_power_accepted
+#print axioms checked_power_refused
+#print axioms different_operator_refused
 
 #print axioms cutoff_value
 #print axioms checked_overflow
