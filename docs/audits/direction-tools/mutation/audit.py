@@ -169,5 +169,8 @@ def main():
     if projection.exists():
         summary["literal_vector_projection"]=json.loads(projection.read_text())
         assert summary["literal_vector_projection"]["base"]==BASE
+    summary["disposition"]={"decision":"H422","retirement_policy":"H399","audit_item":"finished-with-evidence-gaps","backfill":"none","missing_result_accepted":False,"required_timing_claim":"unproven"}
+    summary["evidence_gaps"]=[w for w in summary["waits"] if w["id"]=="QDATA-TIMINGS"]
+    summary["waits"]=[w for w in summary["waits"] if w["id"]!="QDATA-TIMINGS"]
     write("summary.json",summary)
 if __name__=="__main__":main()
