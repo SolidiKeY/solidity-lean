@@ -47001,6 +47001,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/G16/Arithmetic.lean:Solidity.Lowering.G16.Arithmetic.SignedQuotRem.assignment_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/G16/Arithmetic.lean:Solidity.Lowering.G16.Arithmetic.SignedQuotRem.transport": [
   "Classical.choice",
   "Quot.sound",
@@ -47027,6 +47032,11 @@
   "propext"
  ],
  "Solidity/Lowering/G16/ArithmeticControls.lean:Solidity.Lowering.G16.ArithmeticControls.wrong_checked_ring_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/ArithmeticControls.lean:Solidity.Lowering.G16.ArithmeticControls.wrong_signed_assignment_rejected": [
   "Classical.choice",
   "Quot.sound",
   "propext"

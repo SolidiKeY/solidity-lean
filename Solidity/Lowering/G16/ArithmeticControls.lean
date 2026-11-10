@@ -331,6 +331,163 @@ theorem wrong_checked_capture_rejected (fuel : Nat) :
   simp only [ne_eq,reduceCtorEq,not_false_eq_true,Option.some.injEq,true_and]
   decide
 
+def signed_assignment_client (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256)
+    (rem checked : Bool) (x y : Int)
+    (hx : (SignedWidthCasts.ty bits valid).lo ≤ x ∧ x ≤ (SignedWidthCasts.ty bits valid).hi)
+    (hy : (SignedWidthCasts.ty bits valid).lo ≤ y ∧ y ≤ (SignedWidthCasts.ty bits valid).hi)
+    (pipeline : Roadmap.Pipeline) (fuel : Nat) :=
+  SignedQuotRem.assignment_transport (MixedAssignmentControls.globals pipeline)
+    {Source.SemanticsExamples.F0 with checked := checked} fuel
+    (WordCastControls.source (SignedWidthCasts.ty bits valid) x y hx hy)
+    (WordCastControls.target (SignedWidthCasts.ty bits valid) x y hx hy)
+    bits valid rem (WordCastControls.si _) (WordCastControls.ti _)
+    (WordCastControls.initial _ x y hx hy) false true x y hx hy rfl rfl
+
+def signedAssignmentObserved (rem checked : Bool) (x y : Int)
+    (hx : (SignedWidthCasts.ty 8 (by decide)).lo ≤ x ∧ x ≤ (SignedWidthCasts.ty 8 (by decide)).hi)
+    (hy : (SignedWidthCasts.ty 8 (by decide)).lo ≤ y ∧ y ≤ (SignedWidthCasts.ty 8 (by decide)).hi)
+    (pipeline : Roadmap.Pipeline) (fuel : Nat) : Source.R (Option Int) :=
+  ((Source.evalE (MixedAssignmentControls.globals pipeline)
+    {Source.SemanticsExamples.F0 with checked := checked} (fuel+4)
+    (.binary (SignedQuotRem.sourceOp rem)
+      (.assign (.local (WordCastControls.si (SignedWidthCasts.ty 8 (by decide)) false))
+        (.local (WordCastControls.si (SignedWidthCasts.ty 8 (by decide)) true)))
+      (.local (WordCastControls.si (SignedWidthCasts.ty 8 (by decide)) false)))).run
+    (WordCastControls.source (SignedWidthCasts.ty 8 (by decide)) x y hx hy)).1.bind
+      (fun result => result.get.map (fun value => value.key))
+
+def signedAssignmentWritten (rem checked : Bool) (x y : Int)
+    (hx : (SignedWidthCasts.ty 8 (by decide)).lo ≤ x ∧ x ≤ (SignedWidthCasts.ty 8 (by decide)).hi)
+    (hy : (SignedWidthCasts.ty 8 (by decide)).lo ≤ y ∧ y ≤ (SignedWidthCasts.ty 8 (by decide)).hi)
+    (pipeline : Roadmap.Pipeline) (fuel : Nat) : Option Int :=
+  (((Source.evalE (MixedAssignmentControls.globals pipeline)
+    {Source.SemanticsExamples.F0 with checked := checked} (fuel+4)
+    (.binary (SignedQuotRem.sourceOp rem)
+      (.assign (.local (WordCastControls.si (SignedWidthCasts.ty 8 (by decide)) false))
+        (.local (WordCastControls.si (SignedWidthCasts.ty 8 (by decide)) true)))
+      (.local (WordCastControls.si (SignedWidthCasts.ty 8 (by decide)) false)))).run
+    (WordCastControls.source (SignedWidthCasts.ty 8 (by decide)) x y hx hy)).2.1.get
+      (WordCastControls.si (SignedWidthCasts.ty 8 (by decide)) false)).key
+
+private theorem signed_assignment_observed_run (rem checked : Bool) (x y : Int)
+    (hx : (SignedWidthCasts.ty 8 (by decide)).lo ≤ x ∧ x ≤ (SignedWidthCasts.ty 8 (by decide)).hi)
+    (hy : (SignedWidthCasts.ty 8 (by decide)).lo ≤ y ∧ y ≤ (SignedWidthCasts.ty 8 (by decide)).hi)
+    (pipeline : Roadmap.Pipeline) (fuel : Nat) :
+    signedAssignmentObserved rem checked x y hx hy pipeline fuel =
+      if (if pipeline = .legacy then y else x) = 0 then
+        .error (.revert (Source.panicData .divZero)) else
+      if checked = true ∧ rem = false ∧ x = (SignedWidthCasts.ty 8 (by decide)).lo ∧
+          (if pipeline = .legacy then y else x) = -1 then
+        .error (.revert (Source.panicData .arithmetic)) else
+        .ok (some ((SignedWidthCasts.ty 8 (by decide)).wrap
+          (SignedQuotRem.calculate rem x (if pipeline = .legacy then y else x)))) := by
+  have actual := (signed_assignment_client 8 (by decide) rem checked x y hx hy pipeline fuel).1
+  unfold signedAssignmentObserved
+  rw [actual]
+  dsimp only [MixedAssignmentControls.globals]
+  by_cases zero : (if pipeline = .legacy then y else x) = 0
+  · simp only [if_pos zero]; rfl
+  · simp only [if_neg zero]
+    by_cases overflow : checked = true ∧ rem = false ∧ x = (SignedWidthCasts.ty 8 (by decide)).lo ∧
+        (if pipeline = .legacy then y else x) = -1
+    · simp only [if_pos overflow]; rfl
+    · simp only [if_neg overflow]; rfl
+
+private theorem signed_assignment_written_run (rem checked : Bool) (x y : Int)
+    (hx : (SignedWidthCasts.ty 8 (by decide)).lo ≤ x ∧ x ≤ (SignedWidthCasts.ty 8 (by decide)).hi)
+    (hy : (SignedWidthCasts.ty 8 (by decide)).lo ≤ y ∧ y ≤ (SignedWidthCasts.ty 8 (by decide)).hi)
+    (pipeline : Roadmap.Pipeline) (fuel : Nat) :
+    signedAssignmentWritten rem checked x y hx hy pipeline fuel = some x := by
+  have actual := (signed_assignment_client 8 (by decide) rem checked x y hx hy pipeline fuel).1
+  unfold signedAssignmentWritten
+  rw [actual,source_locals_get_set]
+  rfl
+
+/-- Reject erased capture order, zero/overflow panics, wrapping and prepanic writes on actual Source runs. -/
+theorem wrong_signed_assignment_rejected (fuel : Nat) :
+    signedAssignmentObserved false true 3 0 (by decide) (by decide) .legacy fuel ≠
+      signedAssignmentObserved false true 3 0 (by decide) (by decide) .viaIR fuel ∧
+    signedAssignmentObserved true true 5 2 (by decide) (by decide) .legacy fuel ≠
+      signedAssignmentObserved true true 5 2 (by decide) (by decide) .viaIR fuel ∧
+    signedAssignmentObserved false true (-128) (-1) (by decide) (by decide) .legacy fuel ≠
+      signedAssignmentObserved false true (-128) (-1) (by decide) (by decide) .viaIR fuel ∧
+    signedAssignmentObserved false true (-128) (-1) (by decide) (by decide) .legacy fuel ≠
+      signedAssignmentObserved false false (-128) (-1) (by decide) (by decide) .legacy fuel ∧
+    signedAssignmentObserved false false (-128) (-1) (by decide) (by decide) .legacy fuel ≠ .ok (some 128) ∧
+    signedAssignmentWritten false true 3 0 (by decide) (by decide) .legacy fuel ≠ some 0 := by
+  simp only [signed_assignment_observed_run,signed_assignment_written_run]
+  change ((Except.error (.revert (Source.panicData .divZero)) : Source.R (Option Int)) ≠ .ok (some 1)) ∧
+    ((Except.ok (some 1) : Source.R (Option Int)) ≠ .ok (some 0)) ∧
+    ((Except.error (.revert (Source.panicData .arithmetic)) : Source.R (Option Int)) ≠ .ok (some 1)) ∧
+    ((Except.error (.revert (Source.panicData .arithmetic)) : Source.R (Option Int)) ≠ .ok (some (-128))) ∧
+    ((Except.ok (some (-128)) : Source.R (Option Int)) ≠ .ok (some 128)) ∧
+    ((some 3 : Option Int) ≠ some 0)
+  simp only [ne_eq,reduceCtorEq,not_false_eq_true,Except.ok.injEq,Option.some.injEq]
+  decide
+
+def powerSource (t : Source.IntTy) (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256)
+    (x y : Int) (hx : t.lo ≤ x ∧ x ≤ t.hi)
+    (hy : (UnsignedNarrowing.ty bits valid).lo ≤ y ∧ y ≤ (UnsignedNarrowing.ty bits valid).hi) :
+    Source.EMState MixedAssignmentControls.E
+      [.int t,.int (UnsignedNarrowing.ty bits valid),.bytes .memory,.bytes .storage] :=
+  (.cons (.int x hx) (.cons (.int y hy) (.cons (.memRef rfl 0)
+    (.cons (.storRef rfl MixedAssignmentControls.path) .nil))),
+    {Source.SemanticsExamples.s0 with heap := MixedAssignmentControls.heap})
+
+def powerTarget (t : Source.IntTy) (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256)
+    (x y : Int) (hx : t.lo ≤ x ∧ x ≤ t.hi)
+    (hy : (UnsignedNarrowing.ty bits valid).lo ≤ y ∧ y ≤ (UnsignedNarrowing.ty bits valid).hi) :
+    State MixedAssignmentControls.C [.val (integerPrim t),.val .uint,.mem bytesR,.alias bytesR] :=
+  (MixedAssignmentControls.memory.push (integerValue (UnsignedNarrowing.ty bits valid) y hy)).push
+    (integerValue t x hx)
+
+def power_client (t : Source.IntTy) (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256)
+    (x y : Int) (hx : t.lo ≤ x ∧ x ≤ t.hi)
+    (hy : (UnsignedNarrowing.ty bits valid).lo ≤ y ∧ y ≤ (UnsignedNarrowing.ty bits valid).hi)
+    (pipeline : Roadmap.Pipeline) (fuel : Nat) :=
+  TypedPower.transport (MixedAssignmentControls.globals pipeline) Source.SemanticsExamples.F0 fuel
+    (powerSource t bits valid x y hx hy) (powerTarget t bits valid x y hx hy) t bits valid
+    .here (.there .here) .here (.there .here) x y hx hy rfl rfl rfl rfl
+
+def powerObserved (t : Source.IntTy) (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256)
+    (x y : Int) (hx : t.lo ≤ x ∧ x ≤ t.hi)
+    (hy : (UnsignedNarrowing.ty bits valid).lo ≤ y ∧ y ≤ (UnsignedNarrowing.ty bits valid).hi)
+    (pipeline : Roadmap.Pipeline) (fuel : Nat) : Source.R (Option Int) :=
+  ((Source.evalE (MixedAssignmentControls.globals pipeline)
+    {Source.SemanticsExamples.F0 with checked := false} (fuel+3)
+    (.shiftLike .exp (.local .here) (.local (.there .here)) rfl)).run
+      (powerSource t bits valid x y hx hy)).1.bind (fun result => result.get.map (fun v => v.key))
+
+private theorem power_observed_run (t : Source.IntTy) (bits : Nat)
+    (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256) (x y : Int) (hx : t.lo ≤ x ∧ x ≤ t.hi)
+    (hy : (UnsignedNarrowing.ty bits valid).lo ≤ y ∧ y ≤ (UnsignedNarrowing.ty bits valid).hi)
+    (pipeline : Roadmap.Pipeline) (fuel : Nat) :
+    powerObserved t bits valid x y hx hy pipeline fuel = .ok (some (t.wrap (x^y.toNat))) := by
+  have actual := (power_client t bits valid x y hx hy pipeline fuel).1
+  unfold powerObserved
+  rw [actual]
+  rfl
+
+/-- Reject lost masks/signs, reversed operands, erased zero-to-zero, wrong parity and narrowed exponents on actual Source runs. -/
+theorem wrong_typed_power_rejected (pipeline : Roadmap.Pipeline) (fuel : Nat) :
+    powerObserved .u8 8 (by decide) 2 8 (by decide) (by decide) pipeline fuel ≠ .ok (some 256) ∧
+    powerObserved (SignedWidthCasts.ty 8 (by decide)) 8 (by decide) (-2) 3
+      (by decide) (by decide) pipeline fuel ≠ .ok (some 248) ∧
+    powerObserved .u8 8 (by decide) 2 3 (by decide) (by decide) pipeline fuel ≠
+      powerObserved .u8 8 (by decide) 3 2 (by decide) (by decide) pipeline fuel ∧
+    powerObserved .u8 8 (by decide) 0 0 (by decide) (by decide) pipeline fuel ≠ .ok (some 0) ∧
+    powerObserved (SignedWidthCasts.ty 8 (by decide)) 16 (by decide) (-1) 511
+      (by decide) (by decide) pipeline fuel ≠ .ok (some 1) ∧
+    powerObserved .u8 16 (by decide) 2 256 (by decide) (by decide) pipeline fuel ≠ .ok (some 1) := by
+  simp only [power_observed_run,ne_eq,Except.ok.injEq,Option.some.injEq]
+  have residue := Source.PowerV2.powMod_residue (-1) 511 256
+  have oddWrapped : (SignedWidthCasts.ty 8 (by decide)).wrap ((-1 : Int)^511) = -1 := by
+    rw [SignedWidthCasts.wrap_eq,← residue]
+    decide
+  have big : (2 : Int)^256 = ((2^256 : Nat) : Int) := (Int.natCast_pow 2 256).symm
+  rw [show (511 : Int).toNat = 511 from rfl,oddWrapped,show (256 : Int).toNat = 256 from rfl,big]
+  decide
+
 end Solidity.Lowering.G16.ArithmeticControls
 
 /-- info: 'Solidity.Lowering.G16.ArithmeticControls.wrong_wrapping_rejected' does not depend on any axioms -/
@@ -356,3 +513,11 @@ end Solidity.Lowering.G16.ArithmeticControls
 /-- info: 'Solidity.Lowering.G16.ArithmeticControls.wrong_checked_capture_rejected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Lowering.G16.ArithmeticControls.wrong_checked_capture_rejected
+
+/-- info: 'Solidity.Lowering.G16.ArithmeticControls.wrong_signed_assignment_rejected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Lowering.G16.ArithmeticControls.wrong_signed_assignment_rejected
+
+/-- info: 'Solidity.Lowering.G16.ArithmeticControls.wrong_typed_power_rejected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Lowering.G16.ArithmeticControls.wrong_typed_power_rejected

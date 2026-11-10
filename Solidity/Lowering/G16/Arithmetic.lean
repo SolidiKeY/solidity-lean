@@ -1,3 +1,4 @@
+import Solidity.Source.PowerV2Correct
 import Solidity.Lowering.V07.IntegerConstants
 import Solidity.Lowering.G16.PanicGuard
 import Solidity.Syntax.CheckedExact
@@ -1180,6 +1181,158 @@ theorem transport {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} {Γ : Ct
     · simp only [if_neg failed] at sr nr ⊢
       exact ⟨sr,nr,integer_related _ _ _⟩
 
+private theorem prefix_operand_run {C : Contract} {Γ Δ : Ctx} {T : Ty}
+    (target : State C Γ) (steps : Prog C Γ Δ) (reached : State C Δ)
+    (heap : List.IsPrefix target.H reached.H)
+    (prefixRun : steps.run target = .ok ⟨reached,heap⟩)
+    (next : DeferredSource.Operand C Δ T) :
+    (⟨next.tailCtx,steps.join next.code,next.value⟩ : DeferredSource.Operand C Γ T).run target =
+      (next.run reached).map (fun (out,value) =>
+        ((⟨out.st.drop steps.ext,List.IsPrefix.trans heap out.ext⟩ : Out C target.H Γ),value)) := by
+  unfold DeferredSource.Operand.run
+  rw [DeferredSource.join_run]
+  simp only [TRun.seq,show steps.runR target = .ok ⟨reached,heap⟩ from prefixRun]
+  rw [Ext.eq_of_depth (steps.join next.code).ext (Ext.trans steps.ext next.code.ext)]
+  simp only [Prog.run]
+  generalize next.code.runR reached = result
+  cases result with
+  | error failure => rfl
+  | ok out =>
+    dsimp only [Except.map,bind,Except.bind]
+    generalize next.value.valueT out.st = value
+    cases value with
+    | error failure => rfl
+    | ok value => simp only [State.drop,TEnv.drop_trans]; rfl
+
+/-- Capture assignment/read operands in V07 order before the existing signed guards. -/
+def assignmentOperand {C : Contract} {Γ : Ctx} (bits : Nat)
+    (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256) (rem checked : Bool)
+    (pipeline : Roadmap.Pipeline) (i a : Idx Γ (.val .int)) :
+    DeferredSource.Operand C Γ (.prim .int) :=
+  let next := operand bits valid rem checked (Γ := .val .int :: .val .int :: Γ) .here (.there .here)
+  ⟨next.tailCtx,(assignReadPrefix pipeline i a).join next.code,next.value⟩
+
+private theorem assignment_target_run {C : Contract} {Γ : Ctx} (target : State C Γ)
+    (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256) (rem checked : Bool)
+    (pipeline : Roadmap.Pipeline) (i a : Idx Γ (.val .int)) (x y : Int)
+    (hx : (ty bits valid).lo ≤ x ∧ x ≤ (ty bits valid).hi)
+    (hy : (ty bits valid).lo ≤ y ∧ y ≤ (ty bits valid).hi)
+    (readA : TEnv.get a target.env = integerValue (ty bits valid) x hx)
+    (readI : TEnv.get i target.env = integerValue (ty bits valid) y hy) :
+    (assignmentOperand bits valid rem checked pipeline i a).run target =
+      if (if pipeline = .legacy then y else x) = 0 then
+        .error (THalt.ofData (Source.panicData .divZero)) else
+      if checked = true ∧ rem = false ∧ x = (ty bits valid).lo ∧
+          (if pipeline = .legacy then y else x) = -1 then
+        .error (THalt.ofData (Source.panicData .arithmetic)) else
+        .ok (⟨target.setLocal i (integerValue (ty bits valid) x hx),List.prefix_refl _⟩,
+          .prim (integerValue (ty bits valid)
+            ((ty bits valid).wrap (calculate rem x (if pipeline = .legacy then y else x)))
+            ((ty bits valid).wrap_mem (calculate rem x (if pipeline = .legacy then y else x))))) := by
+  let z := if pipeline = .legacy then y else x
+  have hz : (ty bits valid).lo ≤ z ∧ z ≤ (ty bits valid).hi := by dsimp only [z]; split <;> assumption
+  let caller : State C Γ := target.setLocal i (integerValue (ty bits valid) x hx)
+  let reached : State C (.val .int :: .val .int :: Γ) := (caller.push (integerValue (ty bits valid) z hz)).push (integerValue (ty bits valid) x hx)
+  have pref : (assignReadPrefix pipeline i a).run target = .ok ⟨reached,List.prefix_refl _⟩ := by
+    have actual := assign_read_prefix_run pipeline target i a _ _ readA readI
+    cases pipeline <;> simpa only [reached,caller,z,if_true,reduceCtorEq,if_false] using actual
+  have tail := operand_run reached bits valid rem checked .here (.there .here) x z hx hz rfl rfl
+  have joined := prefix_operand_run target (assignReadPrefix pipeline i a) reached (List.prefix_refl _) pref
+    (operand bits valid rem checked .here (.there .here))
+  unfold assignmentOperand
+  rw [joined,tail]
+  change _ = (if z = 0 then .error (THalt.ofData (Source.panicData .divZero)) else
+    if checked = true ∧ rem = false ∧ x = (ty bits valid).lo ∧ z = -1 then
+      .error (THalt.ofData (Source.panicData .arithmetic)) else
+      .ok (⟨caller,List.prefix_refl _⟩,
+        .prim (integerValue (ty bits valid) ((ty bits valid).wrap (calculate rem x z))
+          ((ty bits valid).wrap_mem (calculate rem x z)))) : TRes (Out C target.H Γ × SVal (.prim .int)))
+  by_cases zero : z = 0
+  · simp only [if_pos zero]
+    rfl
+  · simp only [if_neg zero]
+    by_cases failed : checked = true ∧ rem = false ∧ x = (ty bits valid).lo ∧ z = -1
+    · simp only [if_pos failed]
+      rfl
+    · simp only [if_neg failed]
+      cases pipeline <;> rfl
+
+private theorem assignment_source_run {E : Source.Env} {srcΓ : Source.RCtx}
+    (G : Source.Glob E) (F : Source.Fr) (fuel : Nat) (source : Source.EMState E srcΓ)
+    (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256) (rem : Bool)
+    (i a : Source.Idx srcΓ (.int (ty bits valid))) (x y : Int)
+    (hx : (ty bits valid).lo ≤ x ∧ x ≤ (ty bits valid).hi)
+    (hy : (ty bits valid).lo ≤ y ∧ y ≤ (ty bits valid).hi)
+    (readA : source.1.get a = .int x hx) (readI : source.1.get i = .int y hy) :
+    (Source.evalE G F (fuel+4)
+      (.binary (sourceOp rem) (.assign (.local i) (.local a)) (.local i))).run source =
+      (if (if G.pipeline = .legacy then y else x) = 0 then
+        .error (.revert (Source.panicData .divZero)) else
+      if F.checked = true ∧ rem = false ∧ x = (ty bits valid).lo ∧
+          (if G.pipeline = .legacy then y else x) = -1 then
+        .error (.revert (Source.panicData .arithmetic)) else
+        .ok (.val (Source.intWrap (ty bits valid) (calculate rem x (if G.pipeline = .legacy then y else x)))),
+        (source.1.set i (.int x hx),source.2)) := by
+  have pair := source_assign_read_pair G F fuel source i a (.int x hx) (.int y hy) readA readI
+  rw [Source.evalE,Source.withLibraryCalldata_known]
+  have nonspecial : (decide (sourceOp rem = .and) || decide (sourceOp rem = .or)) = false := by cases rem <;> rfl
+  simp only [nonspecial,Bool.false_eq_true,if_false]
+  rw [Source.Hoare.run_bind,pair]
+  by_cases order : G.pipeline = .legacy
+  · simp only [if_pos order]
+    change (do let result ← Source.EM.lift (Source.binVal F.checked (sourceOp rem)
+                (.int x hx : Source.Val E.layout (.int (ty bits valid))) (.int y hy))
+               pure (Source.RVal.val result)).run (source.1.set i (.int x hx),source.2) = _
+    rw [source_value]
+    split
+    · rfl
+    · split <;> rfl
+  · simp only [if_neg order]
+    change (do let result ← Source.EM.lift (Source.binVal F.checked (sourceOp rem)
+                (.int x hx : Source.Val E.layout (.int (ty bits valid))) (.int x hx))
+               pure (Source.RVal.val result)).run (source.1.set i (.int x hx),source.2) = _
+    rw [source_value]
+    split
+    · rfl
+    · split <;> rfl
+
+/-- Both signed operators, modes, pipelines and widths with actual operand capture and exact panics;
+caller alignment follows operand writes, including Source writes before panic. No rollback or producer association. -/
+theorem assignment_transport {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} {Γ : Ctx} {ι : Type}
+    (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
+    (source : Source.EMState E srcΓ) (target : State C Γ)
+    (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256) (rem : Bool)
+    (si : ι → Source.Idx srcΓ (.int (ty bits valid))) (ti : ι → Idx Γ (.val .int))
+    (family : IntegerLocalFamily (ty bits valid) si ti source.1 target.env)
+    (i a : ι) (x y : Int)
+    (hx : (ty bits valid).lo ≤ x ∧ x ≤ (ty bits valid).hi)
+    (hy : (ty bits valid).lo ≤ y ∧ y ≤ (ty bits valid).hi)
+    (readA : source.1.get (si a) = .int x hx) (readI : source.1.get (si i) = .int y hy) :
+    let z := if G.pipeline = .legacy then y else x
+    let result := calculate rem x z
+    let zero := z = 0
+    let overflow := F.checked = true ∧ rem = false ∧ x = (ty bits valid).lo ∧ z = -1
+    (Source.evalE G F (fuel+4)
+      (.binary (sourceOp rem) (.assign (.local (si i)) (.local (si a))) (.local (si i)))).run source =
+      (if zero then .error (.revert (Source.panicData .divZero)) else
+        if overflow then .error (.revert (Source.panicData .arithmetic)) else
+        .ok (.val (Source.intWrap (ty bits valid) result)),(source.1.set (si i) (.int x hx),source.2)) ∧
+    (assignmentOperand bits valid rem F.checked G.pipeline (ti i) (ti a)).run target =
+      (if zero then .error (THalt.ofData (Source.panicData .divZero)) else
+        if overflow then .error (THalt.ofData (Source.panicData .arithmetic)) else
+        .ok (⟨target.setLocal (ti i) (integerValue (ty bits valid) x hx),List.prefix_refl _⟩,
+          .prim (integerValue (ty bits valid) ((ty bits valid).wrap result) ((ty bits valid).wrap_mem result)))) ∧
+    (¬ zero → ¬ overflow → IntValueRel (ty bits valid)
+      (Source.intWrap (ty bits valid) result : Source.Val E.layout (.int (ty bits valid)))
+      (integerValue (ty bits valid) ((ty bits valid).wrap result) ((ty bits valid).wrap_mem result))) ∧
+    IntegerLocalFamily (ty bits valid) si ti (source.1.set (si i) (.int x hx))
+      (TEnv.set (ti i) (integerValue (ty bits valid) x hx) target.env) := by
+  have updated := family.write i a
+  rw [readA,family.read a x hx readA] at updated
+  exact ⟨assignment_source_run G F fuel source bits valid rem (si i) (si a) x y hx hy readA readI,
+    assignment_target_run target bits valid rem F.checked G.pipeline (ti i) (ti a) x y hx hy
+      (family.read a x hx readA) (family.read i y hy readI),fun _ _ => integer_related _ _ _,updated⟩
+
 end SignedQuotRem
 
 namespace CheckedAssignment
@@ -1303,6 +1456,213 @@ theorem transport {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} {Γ : Ct
 
 end CheckedAssignment
 
+namespace TypedPower
+
+private theorem wrap_congr (t : Source.IntTy) (x y : Int)
+    (residue : x % ((2^t.bits : Nat) : Int) = y % ((2^t.bits : Nat) : Int)) :
+    t.wrap x = t.wrap y := by
+  simp only [Source.IntTy.wrap,Source.wrapBits]
+  rw [residue]
+
+private theorem word_then_wrap (t : Source.IntTy) (x : Int) :
+    t.wrap (Source.IntTy.u256.wrap x) = t.wrap x := by
+  apply wrap_congr
+  exact UnsignedNarrowing.word_then_narrow t.bits t.valid.2.2 x
+
+private theorem power_mod (x modulus : Int) (n : Nat) :
+    (x % modulus)^n % modulus = x^n % modulus := by
+  induction n with
+  | zero => rfl
+  | succ n ih =>
+    change ((x%modulus)^n * (x%modulus)) % modulus = (x^n*x) % modulus
+    rw [Int.mul_emod ((x%modulus)^n) (x%modulus) modulus,
+      Int.mul_emod (x^n) x modulus,ih,Int.emod_emod]
+
+private theorem minus_one_power (n : Nat) :
+    (-1 : Int)^n = if n%2 = 0 then 1 else -1 := by
+  induction n with
+  | zero => rfl
+  | succ n ih =>
+    by_cases even : n%2 = 0
+    · have odd : ¬ (n+1)%2 = 0 := by omega
+      simp only [Int.pow_succ,ih,if_pos even,if_neg odd]
+      rfl
+    · have next : (n+1)%2 = 0 := by omega
+      simp only [Int.pow_succ,ih,if_neg even,if_pos next]
+      rfl
+
+private theorem unchecked_result {D : Source.Layout} (t : Source.IntTy) (x : Int) :
+    Source.intRes (D := D) t false x = .ok (Source.intWrap t x) := by
+  unfold Source.intRes
+  split
+  · rename_i fits
+    simp only [Source.intWrap,CheckedSigned.wrap_self t x fits]
+    rfl
+  · rfl
+
+private theorem source_power {D : Source.Layout} (t : Source.IntTy) (x : Int) (n : Nat)
+    (bound : n < 2^300) :
+    Source.intPow (D := D) t false x n = .ok (Source.intWrap t (x^n)) := by
+  unfold Source.intPow
+  split
+  · exact unchecked_result t _
+  · split
+    · rename_i minus
+      rw [unchecked_result,minus,minus_one_power]
+    · change Except.ok (Source.intWrap t (Source.powMod x n (2^t.bits))) = _
+      have residue := (Source.PowerV2.powMod_agrees_v1 x n (2^t.bits) bound).symm.trans
+        (Source.PowerV2.powMod_residue x n (2^t.bits))
+      have wrapped := wrap_congr t _ _ residue
+      simp only [Source.intWrap,wrapped]
+
+private theorem amount_bound (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256)
+    (y : Int) (hy : (UnsignedNarrowing.ty bits valid).lo ≤ y ∧ y ≤ (UnsignedNarrowing.ty bits valid).hi) :
+    y.toNat < 2^300 := by
+  have wide := UnsignedWidthCasts.word_range bits valid y hy
+  change 0 ≤ y ∧ y ≤ ((2^256-1 : Nat) : Int) at wide
+  have positive := Source.two_pow_pos 256
+  have bounded : y.toNat < 2^256 := by omega
+  exact Nat.lt_trans bounded (Nat.pow_lt_pow_right (by decide) (by decide : 256 < 300))
+
+private def baseWord {C : Contract} {Γ : Ctx} (t : Source.IntTy) :
+    Val C Γ (integerPrim t) → Val C Γ .uint :=
+  match t with
+  | ⟨false,_,_⟩ => fun a => a
+  | ⟨true,_,_⟩ => fun a => .unop .toUint rfl rfl a
+
+private theorem base_run {C : Contract} {Γ : Ctx} (target : State C Γ)
+    (t : Source.IntTy) (a : Val C Γ (integerPrim t)) (x : Int) (hx : t.lo ≤ x ∧ x ≤ t.hi)
+    (read : a.evalT target = .ok (integerValue t x hx)) :
+    (baseWord t a).evalT target = .ok (integerValue .u256 (Source.IntTy.u256.wrap x) (Source.IntTy.u256.wrap_mem x)) := by
+  obtain ⟨sign,bits,valid⟩ := t
+  cases sign with
+  | false =>
+    have wide := UnsignedWidthCasts.word_range bits valid x hx
+    have wrapped : Source.IntTy.u256.wrap x = x := UnsignedNarrowing.wrap_of_range 256 (by decide) x wide
+    change a.evalT target = _
+    rw [read]
+    apply congrArg Except.ok
+    apply Subtype.ext
+    exact wrapped.symm
+  | true => exact WordCasts.to_uint_run target a x (SignedWidthCasts.word_range bits valid x hx) read
+
+private def restore {C : Contract} {Γ : Ctx} (t : Source.IntTy) (a : Val C Γ .uint) : Val C Γ (integerPrim t) :=
+  match t with
+  | ⟨false,bits,_⟩ => UnsignedCasts.castValue bits a
+  | ⟨true,bits,_⟩ => SignedWidthCasts.castValue bits (.unop .toInt rfl rfl a)
+
+private theorem restore_run {C : Contract} {Γ : Ctx} (target : State C Γ)
+    (t : Source.IntTy) (a : Val C Γ .uint) (x : Int)
+    (read : a.evalT target = .ok (integerValue .u256 (Source.IntTy.u256.wrap x) (Source.IntTy.u256.wrap_mem x))) :
+    (restore t a).evalT target = .ok (integerValue t (t.wrap x) (t.wrap_mem x)) := by
+  obtain ⟨sign,bits,valid⟩ := t
+  cases sign with
+  | false =>
+    have narrowed := UnsignedCasts.value_run target bits valid a _ (Source.IntTy.u256.wrap_mem x) read
+    simpa only [restore,word_then_wrap] using narrowed
+  | true =>
+    have signed := WordCasts.to_int_run target a _ (Source.IntTy.u256.wrap_mem x) read
+    have narrowed := SignedWidthCasts.value_run 256 (by decide) target bits valid _ _
+      (WordCasts.signed.wrap_mem (Source.IntTy.u256.wrap x)) signed
+    simpa only [restore,SignedNarrowing.wrap_word,word_then_wrap] using narrowed
+
+private theorem word_eval (x y : Int)
+    (hx : Source.IntTy.u256.lo ≤ x ∧ x ≤ Source.IntTy.u256.hi)
+    (hy : Source.IntTy.u256.lo ≤ y ∧ y ≤ Source.IntTy.u256.hi) :
+    BinOp.evalT .powW rfl (integerValue .u256 x hx) (integerValue .u256 y hy) =
+      some (integerValue .u256 (Source.IntTy.u256.wrap (x^y.toNat)) (Source.IntTy.u256.wrap_mem (x^y.toNat))) := by
+  have hr := integer_range Source.IntTy.u256 (Source.IntTy.u256.wrap (x^y.toNat)) (Source.IntTy.u256.wrap_mem (x^y.toNat))
+  change PrimTy.uint.inRange (x^y.toNat % Semantics.uintBound) = true at hr
+  change (BinOp.arithInt .powW x y).bind PrimTy.uint.ofInt? = some ⟨x^y.toNat % Semantics.uintBound,hr⟩
+  have nonnegative : ¬ y < 0 := by change 0 ≤ y ∧ y ≤ _ at hy; omega
+  simp only [BinOp.arithInt,if_neg nonnegative,Option.bind_some,PrimTy.ofInt?,dif_pos hr]
+
+/-- V07 width/sign restoration after native word power; exponent has its own unsigned type. -/
+def value {C : Contract} {Γ : Ctx} (t : Source.IntTy)
+    (a : Val C Γ (integerPrim t)) (b : Val C Γ .uint) : Val C Γ (integerPrim t) :=
+  restore t (.binop .powW rfl rfl (baseWord t a) b)
+
+private theorem value_run {C : Contract} {Γ : Ctx} (target : State C Γ)
+    (t : Source.IntTy) (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256)
+    (a : Val C Γ (integerPrim t)) (b : Val C Γ .uint) (x y : Int)
+    (hx : t.lo ≤ x ∧ x ≤ t.hi)
+    (hy : (UnsignedNarrowing.ty bits valid).lo ≤ y ∧ y ≤ (UnsignedNarrowing.ty bits valid).hi)
+    (left : a.evalT target = .ok (integerValue t x hx))
+    (right : b.evalT target = .ok (integerValue (UnsignedNarrowing.ty bits valid) y hy)) :
+    (value t a b).evalT target =
+      .ok (integerValue t (t.wrap (x^y.toNat)) (t.wrap_mem (x^y.toNat))) := by
+  have wide := UnsignedWidthCasts.word_range bits valid y hy
+  have casted := base_run target t a x hx left
+  have raw : (Val.binop .powW rfl rfl (baseWord t a) b).evalT target =
+      .ok (integerValue .u256 (Source.IntTy.u256.wrap ((Source.IntTy.u256.wrap x)^y.toNat))
+        (Source.IntTy.u256.wrap_mem ((Source.IntTy.u256.wrap x)^y.toNat))) := by
+    rw [Val.evalT,casted]
+    change (do let z ← b.evalT target
+               TRes.ofOpt (BinOp.evalT .powW rfl (integerValue .u256 (Source.IntTy.u256.wrap x) (Source.IntTy.u256.wrap_mem x)) z)) = _
+    rw [right]
+    change TRes.ofOpt (BinOp.evalT .powW rfl (integerValue .u256 (Source.IntTy.u256.wrap x) (Source.IntTy.u256.wrap_mem x))
+      (integerValue .u256 y wide)) = _
+    rw [word_eval]
+    rfl
+  have canonical : Source.IntTy.u256.wrap ((Source.IntTy.u256.wrap x)^y.toNat) = Source.IntTy.u256.wrap (x^y.toNat) :=
+    power_mod x Semantics.uintBound y.toNat
+  have normalized : (Val.binop .powW rfl rfl (baseWord t a) b).evalT target =
+      .ok (integerValue .u256 (Source.IntTy.u256.wrap (x^y.toNat)) (Source.IntTy.u256.wrap_mem (x^y.toNat))) := by
+    simpa only [canonical] using raw
+  exact restore_run target t _ _ normalized
+
+private theorem source_run {E : Source.Env} {srcΓ : Source.RCtx}
+    (G : Source.Glob E) (F : Source.Fr) (fuel : Nat) (source : Source.EMState E srcΓ)
+    (t : Source.IntTy) (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256)
+    (a : Source.Idx srcΓ (.int t)) (b : Source.Idx srcΓ (.int (UnsignedNarrowing.ty bits valid)))
+    (x y : Int) (hx : t.lo ≤ x ∧ x ≤ t.hi)
+    (hy : (UnsignedNarrowing.ty bits valid).lo ≤ y ∧ y ≤ (UnsignedNarrowing.ty bits valid).hi)
+    (left : source.1.get a = .int x hx) (right : source.1.get b = .int y hy) :
+    (Source.evalE G {F with checked := false} (fuel+3)
+      (.shiftLike .exp (.local a) (.local b) rfl)).run source =
+      (.ok (.val (Source.intWrap t (x^y.toNat))),source) := by
+  have leftRun : (Source.evalE G {F with checked := false} (fuel+1) (.local a)).run source =
+      (.ok (.val (.int x hx)),source) := by
+    change (Except.ok (Source.RVal.val (source.1.get a)),source) = _
+    rw [left]
+  have rightRun : (Source.evalE G {F with checked := false} (fuel+1) (.local b)).run source =
+      (.ok (.val (.int y hy)),source) := by
+    change (Except.ok (Source.RVal.val (source.1.get b)),source) = _
+    rw [right]
+  have pair := source_pure_pair G {F with checked := false} (fuel+1) source (.local a) (.local b)
+    (.val (.int x hx)) (.val (.int y hy)) leftRun rightRun
+  rw [Source.evalE,Source.Hoare.run_bind,pair]
+  change (do let result ← Source.EM.lift (Source.intPow t false x y.toNat)
+             pure (Source.RVal.val result)).run source = _
+  rw [source_power t x y.toNat (amount_bound bits valid y hy)]
+  rfl
+
+/-- Every base width/sign and typed unsigned exponent width, using V1 evaluation and V07 casts.
+The cutoff bound is derived; checked power, constants, effects and producer association remain separate. -/
+theorem transport {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} {Γ : Ctx}
+    (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
+    (source : Source.EMState E srcΓ) (target : State C Γ)
+    (t : Source.IntTy) (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256)
+    (a : Source.Idx srcΓ (.int t)) (b : Source.Idx srcΓ (.int (UnsignedNarrowing.ty bits valid)))
+    (c : Idx Γ (.val (integerPrim t))) (d : Idx Γ (.val .uint))
+    (x y : Int) (hx : t.lo ≤ x ∧ x ≤ t.hi)
+    (hy : (UnsignedNarrowing.ty bits valid).lo ≤ y ∧ y ≤ (UnsignedNarrowing.ty bits valid).hi)
+    (readA : source.1.get a = .int x hx) (readB : source.1.get b = .int y hy)
+    (nativeA : TEnv.get c target.env = integerValue t x hx)
+    (nativeB : TEnv.get d target.env = integerValue (UnsignedNarrowing.ty bits valid) y hy) :
+    (Source.evalE G {F with checked := false} (fuel+3)
+      (.shiftLike .exp (.local a) (.local b) rfl)).run source =
+      (.ok (.val (Source.intWrap t (x^y.toNat))),source) ∧
+    (value t (.simple (.local c)) (.simple (.local d))).evalT target =
+      .ok (integerValue t (t.wrap (x^y.toNat)) (t.wrap_mem (x^y.toNat))) ∧
+    IntValueRel t (Source.intWrap t (x^y.toNat) : Source.Val E.layout (.int t))
+      (integerValue t (t.wrap (x^y.toNat)) (t.wrap_mem (x^y.toNat))) := by
+  exact ⟨source_run G F fuel source t bits valid a b x y hx hy readA readB,
+    value_run target t bits valid _ _ x y hx hy (congrArg Except.ok nativeA) (congrArg Except.ok nativeB),
+    integer_related _ _ _⟩
+
+end TypedPower
+
 end Solidity.Lowering.G16.Arithmetic
 
 /-- info: 'Solidity.Lowering.G16.Arithmetic.wrapping_transport' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -1328,3 +1688,11 @@ end Solidity.Lowering.G16.Arithmetic
 /-- info: 'Solidity.Lowering.G16.Arithmetic.CheckedAssignment.transport' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Lowering.G16.Arithmetic.CheckedAssignment.transport
+
+/-- info: 'Solidity.Lowering.G16.Arithmetic.SignedQuotRem.assignment_transport' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Lowering.G16.Arithmetic.SignedQuotRem.assignment_transport
+
+/-- info: 'Solidity.Lowering.G16.Arithmetic.TypedPower.transport' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Lowering.G16.Arithmetic.TypedPower.transport
