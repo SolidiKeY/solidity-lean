@@ -20,6 +20,17 @@ open Solidity.Decide
 -- together overflow a command-line `lean`'s stack (exit 135).
 set_option Elab.async false
 
+/-- info: ["proved", "refuted"] -/
+#guard_msgs in #eval [payBalanceOk, payBalanceBad].map verdict
+
+-- The refuting state: the payee `0`, its entry `0`, the contract at `1`.
+/-- info: "[(0, 0), (0, 0), (0, 0), (0, 0)] self 1" -/
+#guard_msgs in
+#eval match decideGoal gapLedgerWrite with
+  | .refuted σ => toString (σ.net.map fun (e : PrimTy.uint.Denote × Int) => (e.1.1, e.2)) ++
+      " self " ++ toString σ.tx.selfAddress.1
+  | _ => "-"
+
 /-! Blocks over `int` keys and over the ledger (M7, features 20 and 21,
 2026-10-26): each former counterexample proved, a false variant refuted,
 the coverage kernel-checked.  An `int` block's index set has the type's

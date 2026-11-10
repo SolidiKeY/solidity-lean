@@ -13,16 +13,8 @@ set_option Elab.async false
 `gapLedgerWrite` refuted, its true variant proved, the balance a payment
 leaves read; the coverage kernel-checked. -/
 
-/-- info: ["proved", "refuted"] -/
-#guard_msgs in #eval [payBalanceOk, payBalanceBad].map verdict
-
--- The refuting state: the payee `0`, its entry `0`, the contract at `1`.
-/-- info: "[(0, 0), (0, 0), (0, 0), (0, 0)] self 1" -/
-#guard_msgs in
-#eval match decideGoal gapLedgerWrite with
-  | .refuted σ => toString (σ.net.map fun (e : PrimTy.uint.Denote × Int) => (e.1.1, e.2)) ++
-      " self " ++ toString σ.tx.selfAddress.1
-  | _ => "-"
+/-- info: "proved" -/
+#guard_msgs in #eval verdict ledgerWriteOk
 
 theorem gapLedgerWrite_covered : gapLedgerWrite.Covered = true := by decide +kernel
 theorem ledgerWriteOk_covered : ledgerWriteOk.Covered = true := by decide +kernel

@@ -64,7 +64,7 @@ theorem gapKIntBinder_answers : decideGoal gapKIntBinder ≠ .unknown :=
 theorem gapKIntBinder_iff : decideLeaf gapKIntBinder = .proved ↔ Fml.Valid gapKIntBinder :=
   decideLeaf_proved_iff gapKIntBinder_covered
 
-/-- info: ["refuted", "proved"] -/
-#guard_msgs in #eval [gapLedgerWrite, ledgerWriteOk].map verdict
+/-- info: "refuted" -/
+#guard_msgs in #eval verdict gapLedgerWrite
 
 end Solidity.Examples.Decision
