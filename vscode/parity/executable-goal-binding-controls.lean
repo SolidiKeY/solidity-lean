@@ -1,0 +1,95 @@
+import Solidity.Tools.ExecutableGoalBindingV2
+import Solidity.Frontend.ExecutableAst.Shared.ObligationCaptureV2
+
+/-! Structural V2 controls only. These are not the four original source imports,
+not source adequacy and not ordinary runtime evidence. Guard wrong target,
+wrong retained values, changed candidate arguments and unchecked proof types.
+-/
+open Lean Elab Command Meta Solidity Solidity.Tools
+namespace ExecutableBindingControls
+
+def C : Contract := { vars := [] }
+def candidate : Cand C := { st := .nil, args := [] }
+def pair : GoalPairV2 := ⟨C, C, .ff, .ff⟩
+def same : SameCandidateV2 pair :=
+  ⟨candidate, candidate, HEq.rfl, rfl, rfl, rfl, rfl⟩
+def failure : SelectedFailureV2 pair := ⟨same, rfl, rfl⟩
+theorem exactTarget : ¬ Fml.Valid pair.executableFormula := failure.refuted
+
+def truePair : GoalPairV2 := ⟨C, C, .ff, .tt⟩
+theorem trueTargetRefused (w : SelectedFailureV2 truePair) : False := by
+  have h := w.executableFailure
+  change Tri.tt = Tri.ff at h
+  cases h
+
+theorem wrongValuesRefused :
+    ¬ RetainedValuesBindingV2 C candidate [(Var.user "foreign", .bool true)] := by
+  intro h
+  have e := h.sourceValues
+  change [(Var.user "foreign", Semantics.CallValue.bool true)] = [] at e
+  cases e
+
+def foreignCandidate : Cand C := { candidate with args := [("foreign", .bool true)] }
+theorem changedArgumentsRefused (r : SameCandidateV2 pair)
+    (hi : r.imported = candidate) (he : r.executable = foreignCandidate) : False := by
+  have h := r.arguments
+  rw [hi, he] at h
+  change [] = [("foreign", Semantics.CallValue.bool true)] at h
+  cases h
+
+open Solidity.Frontend.ExecutableAst.Shared
+
+/-- Injected callbacks for a structural builder test; not runtime callbacks. -/
+def noLoops : BodyLoopLowerer := fun _ _ raw => pure raw
+def noPre : PlainEntryPre := fun _ _ => .tt
+
+example :
+    (obligationCaptureV2 noLoops noPre C "missing" false false).map (fun r => r.formula) =
+      .error "missing function" :=
+  obligationCaptureV2_forget noLoops noPre C "missing" false false
+
+run_cmd do
+  let emptyFunction : FunDecl := { params := [], body := [] }
+  let executable : Contract := { vars := [], funs := [("noop", emptyFunction)] }
+  match obligationCaptureV2 noLoops noPre executable "noop" false false with
+  | .error reason => throwError "structural positive capture refused: {reason}"
+  | .ok _ => logInfo "EXECUTABLE_V2 actual builder positive capture confirmed (injected callbacks)"
+
+run_cmd do
+  let some (.thmInfo certificate) := (← getEnv).find? ``exactTarget
+    | throwError "missing exact-target control"
+  let options ← getOptions
+  if options.getBool `debug.skipKernelTC false then
+    throwError "kernel checking must be enabled"
+  let target ← liftTermElabM <| mkAppM ``Fml.Valid #[mkApp (mkConst ``GoalPairV2.executableFormula)
+    (mkConst ``truePair)]
+  let declaration := Declaration.thmDecl {
+    name := `ExecutableBindingControls.wrongTargetCertificate
+    levelParams := [], type := mkNot target, value := certificate.value }
+  let limit := maxHeartbeats.get options
+  let options := maxHeartbeats.set options (if limit == 0 then 100000 else min limit 100000)
+  let environment := (← getEnv)
+  let positiveName := `ExecutableBindingControls.correctTargetCertificate
+  unless !(environment.contains positiveName) &&
+      !(environment.contains `ExecutableBindingControls.wrongTargetCertificate) do
+    throwError "kernel-control declaration name already present"
+  let positive := Declaration.thmDecl {
+    name := positiveName, levelParams := [],
+    type := certificate.type, value := certificate.value }
+  match Kernel.Environment.addDecl environment.toKernelEnv options positive with
+  | .error _ => throwError "correct-target replay failed under identical kernel ceiling"
+  | .ok checked =>
+    match Kernel.Environment.addDecl checked options declaration with
+    | .ok _ => throwError "wrong-target certificate accepted"
+    | .error (.declTypeMismatch ..) =>
+      logInfo "EXECUTABLE_V2 correct-target replay and wrong-target declaration-type mismatch confirmed"
+    | .error _ => throwError "wrong-target refusal was not a declaration-type mismatch"
+
+#print axioms Solidity.Tools.RetainedValuesBindingV2.failure
+#print axioms Solidity.Frontend.ExecutableAst.Shared.obligationCaptureV2_forget
+#print axioms Solidity.Tools.SelectedFailureV2.refuted
+#print axioms ExecutableBindingControls.exactTarget
+#print axioms ExecutableBindingControls.trueTargetRefused
+#print axioms ExecutableBindingControls.wrongValuesRefused
+#print axioms ExecutableBindingControls.changedArgumentsRefused
+end ExecutableBindingControls

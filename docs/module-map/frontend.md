@@ -183,6 +183,7 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | --- | --- |
 | `Frontend/SpecOriginsV1.lean` | Additive source-pinned NatSpec directive origins, exact legacy clause-field agreement and forget lemmas; unsupported layouts have no origin. |
 | `Frontend/CounterexampleMetadataV1.lean` | Opt-in exact-fixture importer companion and no-second-search retained-certificate ingress; canonical failed-clause attribution remains unimplemented. |
+| `Frontend/ExecutableAst/Shared/ObligationCaptureV2.lean` | Additive exact-output capture of the actual obligation callbacks and arguments, with unchanged error and forget equality; no source adequacy. |
 | `Frontend/ExpressionUniqueness/Accepted.lean` | Accepted expression trees equal every certified tree of their actual tokens The original parseCat_sound certificate supplies the lexical tokens, complete layout witness and precedence. |
 | `Frontend/ExpressionUniqueness/AddControls.lean` | Inhabited arbitrary prefix and additive-root controls The old raw-marker countercontrol is handled by the new unfinished-state scan. |
 | `Frontend/ExpressionUniqueness/AddFreeAlgebra.lean` | Operand-sensitive additive algebra Expression freedom starts unfinished. |

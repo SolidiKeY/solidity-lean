@@ -1,0 +1,1 @@
+| `Frontend/ExecutableAst/Shared/ObligationCaptureV2.lean` | Additive exact-output capture of the actual obligation callbacks and arguments, with unchanged error and forget equality; no source adequacy. |

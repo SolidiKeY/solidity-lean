@@ -27,3 +27,4 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Automation/H28/Context.lean` | Bounded automation-benchmark checkpoint; typed scope and retained obligations are stated in the module. |
 | `Automation/H28/Prove.lean` | Bounded automation-benchmark checkpoint; typed scope and retained obligations are stated in the module. |
 | `Tools/VerifierMetadata.lean` | Additive kernel facts tying each reported `postFails` index to the exact typed false postcondition clause and final run state; no source span, original-obligation or candidate association is inferred. |
+| `Tools/ExecutableGoalBindingV2.lean` | Exact executable-goal failure at a proved same candidate; retains distinct source-values equality obligations and makes no importer transport or source-authentication claim. |

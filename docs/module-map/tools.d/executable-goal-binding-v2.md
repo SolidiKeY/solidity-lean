@@ -1,0 +1,1 @@
+| `Tools/ExecutableGoalBindingV2.lean` | Exact executable-goal failure at a proved same candidate; retains distinct source-values equality obligations and makes no importer transport or source-authentication claim. |
