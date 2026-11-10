@@ -31,18 +31,25 @@ private theorem choice_run (yes no : DeferredSource.Operand C Γ (.prim .bool))
     (choiceCode yes no).runC (target.push (t := .val .bool) b) =
       ((if b = true then yes else no).run target).map (fun (out,value) => match value with
         | .prim c => (⟨out.st.push (t := .val .bool) c,out.ext⟩ : Out C target.H (.val .bool :: Γ))) := by
+  have single := V07.singleton_run (target.push (t := .val .bool) b)
+    (.ite (.simple (.local .here)) (selectedCode yes) (selectedCode no))
+  simp only [Prog.run,Stmt.run,Prog.runR_eq,Stmt.runR_eq] at single
+  change (choiceCode yes no).runC (target.push (t := .val .bool) b) = _ at single
+  rw [single]
+  change TRun.ite (.simple (.local .here)) (selectedCode yes).ext
+    (selectedCode yes).runC (selectedCode no).ext (selectedCode no).runC
+    (target.push (t := .val .bool) b) = _
+  have ys : (selectedCode yes).ext = .refl := Subsingleton.elim _ _
+  have ns : (selectedCode no).ext = .refl := Subsingleton.elim _ _
+  rw [ys,ns]
+  unfold TRun.ite
+  have read : (Val.simple (.local .here) : Val C (.val .bool :: Γ) .bool).evalT
+      (target.push (t := .val .bool) b) = .ok b := rfl
+  rw [read]
   cases b
   all_goals
-    change TRun.seq (TRun.ite (.simple (.local .here)) (selectedCode yes).ext
-      (selectedCode yes).runC (selectedCode no).ext (selectedCode no).runC)
-      TRun.nil (target.push (t := .val .bool) _) = _
-    unfold TRun.seq TRun.ite
-    simp only [Val.evalT,Simple.evalT,TEnv.get,boolT,
-      Bool.false_eq_true,if_false,if_true,bind,Except.bind]
-    have ys : (selectedCode yes).ext = .refl := Subsingleton.elim _ _
-    have ns : (selectedCode no).ext = .refl := Subsingleton.elim _ _
-    simp only [ys,ns,selected_run]
-    simp only [State.push,if_true,if_false,Bool.false_eq_true]
+    simp only [bind,Except.bind,boolT,Bool.false_eq_true,if_false,if_true]
+    rw [selected_run]
   case false =>
     cases run : no.run target with
     | error err => rfl
