@@ -59,6 +59,21 @@ theorem doWhile_below {E : Env} (G : Glob E) (F : Fr) (nps : Nat) (ph : Option (
     rw [execS, execS]
     below_go [hb, hw, hc, Below.sub]
 
+/-- An `if` without `else` whose condition is the bare one a horizon later. -/
+theorem ifThen_below {E : Env} (G : Glob E) (F : Fr) (nps : Nat) (ph : Option (Ph E))
+    {R : List STy} {M : Bool} {k : SCtx} {Γ Γ₁ : RCtx} (c d : RExpr E Γ .bool)
+    (s : RStmt E R M k Γ Γ₁)
+    (hcd : ∀ n, Below (evalE G F n c) (evalE G F (n + 1) d)) :
+    ∀ (n : Nat) (l : Locals E.layout Γ),
+      Below (execS G F n nps ph (.ifThen c s) l) (execS G F (n + 1) nps ph (.ifThen d s) l)
+  | 0, _ => Below.timeout _
+  | n + 1, l => by
+    have hs : ∀ l', Below (execS G F n nps ph s l') (execS G F (n + 1) nps ph s l') :=
+      fun l' => (belowAtKnown G n).execS true F nps ph s l'
+    have hc := hcd n
+    rw [execS, execS]
+    below_go [hs, hc, Below.sub]
+
 /-- Same body on both sides. -/
 theorem same_below {E : Env} (G : Glob E) (F : Fr) (nps : Nat) (ph : Option (Ph E))
     {R : List STy} {M : Bool} {k : SCtx} {Γ Γ₁ : RCtx} (s : RStmt E R M k Γ Γ₁) :

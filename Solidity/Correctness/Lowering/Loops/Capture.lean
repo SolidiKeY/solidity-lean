@@ -140,4 +140,69 @@ elab "#check_for_continue_refused" : command => liftTermElabM do
 
 #check_for_continue_refused
 
+/-! ### Function-level samples (H497)
+
+`calleeBody` (`Arms.lean:826-838`) is the actual callee-body pass: `lowerLoops`
+with the return variables, then `lowerReturns`, modifier wrapping (none here)
+and block freshening. Its output is elaborated by `elabStmtsP` in the callee
+frame, as `inlinedBody` does; here the frame is the caller pair `i, a`, with
+no parameters, no return values and no modifiers. -/
+
+/-- A body with no parameters, return values or modifiers. -/
+def bodyDecl (body : List RawStmt) : FunDecl := { params := [], body := body }
+
+open Lean Elab Term Meta in
+/-- Run `calleeBody` then `elabStmtsP` and quote the placed program. The
+elaborator may leave hidden capture locals in its named context (a statement
+capture, `se1`); the caller pair must remain its base. -/
+def captureFunction (body : List RawStmt) : TermElabM Expr := do
+  let lowered := (((calleeBody IntrinsicProbe.C (bodyDecl body) [] false false
+    RawProbe.inputLocals).run RawProbe.scope).run (RawProbe.inputLocals, 1)).run {}
+  let ((raw, st), memo) ← match lowered with
+    | .ok r => pure r
+    | .error e => throwError "actual calleeBody refused the sample: {e}"
+  unless memo.starts.isEmpty && memo.bodies.isEmpty do
+    throwError "actual calleeBody changed the expected empty memo"
+  match st.1 with
+  | [("i", .val .bool), ("a", .val .bool)] => pure ()
+  | _ => throwError "actual calleeBody changed the caller context"
+  let elaborated := (((elabStmtsP IntrinsicProbe.C raw).run RawProbe.scope).run st).run memo
+  let ((ss, st'), memo') ← match elaborated with
+    | .ok r => pure r
+    | .error e => throwError "actual intrinsic elaboration refused the sample: {e}"
+  unless memo'.starts.isEmpty && memo'.bodies.isEmpty do
+    throwError "actual intrinsic elaboration changed the expected empty memo"
+  unless (st'.1.drop (st'.1.length - 2)).map (·.1) == ["i", "a"] do
+    throwError "actual intrinsic elaboration lost the caller context"
+  let .ok p := SProg.chain (ECtx.toNCtx RawProbe.inputLocals).names IntrinsicProbe.Γ ss |
+    throwError "actual intrinsic placement refused the sample"
+  let (pe, ge, de) := Prog.quoteShared (mkConst ``IntrinsicProbe.C) p.2
+  let family := mkLambda `Δ BinderInfo.default (mkConst ``Ctx)
+    (mkAppN (mkConst ``Prog) #[mkConst ``IntrinsicProbe.C, ge, mkBVar 0])
+  return mkAppN (mkConst ``Sigma.mk [0,0]) #[mkConst ``Ctx, family, de, pe]
+
+/-- `while (i = a) return;` -/
+def whileReturnBody : List RawStmt := [.whileLoop {} (.assign (.name "i") (.name "a")) [.ret none]]
+
+/-- `do { i = a; return; } while (a);` -/
+def doReturnBody : List RawStmt :=
+  [.doWhile {} [.assign (.name "i") (.name "a"), .ret none] (.name "a")]
+
+/-- `if (i = a) return;` -/
+def returnFlagBody : List RawStmt := [.ite (.assign (.name "i") (.name "a")) [.ret none] []]
+
+open Lean Elab Term in
+elab "capture_fn_while_return%" : term => captureFunction whileReturnBody
+open Lean Elab Term in
+elab "capture_fn_do_return%" : term => captureFunction doReturnBody
+open Lean Elab Term in
+elab "capture_fn_return_flag%" : term => captureFunction returnFlagBody
+
+/-- Actual function-level output for `while (i = a) return;`. -/
+def whileReturn : Blk IntrinsicProbe.C IntrinsicProbe.Γ := capture_fn_while_return%
+/-- Actual function-level output for `do { i = a; return; } while (a);`. -/
+def doReturn : Blk IntrinsicProbe.C IntrinsicProbe.Γ := capture_fn_do_return%
+/-- Actual function-level output for `if (i = a) return;`. -/
+def returnFlag : Blk IntrinsicProbe.C IntrinsicProbe.Γ := capture_fn_return_flag%
+
 end Solidity.Correctness.Lowering.Loops.Capture

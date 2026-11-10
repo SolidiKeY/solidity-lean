@@ -1,4 +1,6 @@
 import Solidity.Correctness.Lowering.Loops.WhileBreak
+import Solidity.Correctness.Lowering.Loops.Statement
+import Solidity.Correctness.Lowering.Loops.Returns
 import Solidity.Correctness.Lowering.Loops.ForBreak
 import Solidity.Correctness.Lowering.Loops.WhileContinue
 import Solidity.Correctness.Lowering.Loops.DoBreak
@@ -11,7 +13,9 @@ import Solidity.Correctness.Lowering.Checker.WhileBreak
 # `lowerLoops_correct`
 
 The generic family statement `Loops.LowerLoopsCorrect`, proved leaf by leaf
-(one `Shape` constructor per covered G19 loop leaf; six of the ten), and its connection to the actual
+(one `Shape`/`RetShape` constructor per covered G19 leaf: nine of the eleven loop
+and return-flag leaves; `AssignmentForContinue` and `AssignmentForReturn` are
+refused by the pipeline, `Capture.#check_for_continue_refused`), and its connection to the actual
 producer: the quoted output of running the real `lowerLoops` and then the real
 intrinsic elaborator (`Checker.RawProbe.actual`, `Checker.IntrinsicProbe.actual`)
 is accepted by the kernel, and the actual Source typing of the same loop is the
@@ -22,7 +26,8 @@ Partiality: theorems speak of accepted outputs only. Producer refusals
 inside a loop, Lower.lean:448-449, 455, 474; `lowerReturn` refusals; refusals
 of `elabStmtsP` or `SProg.chain`) and non-family outputs are not covered; they
 are coverage gaps, not counterexamples. Only normal outcomes are stated. The
-producer link is per sample (seven inputs); a raw-level check exists only for
+producer link is per sample (ten inputs; the three `return` samples run the
+actual function-body pass `calleeBody`, Arms.lean:826-838); a raw-level check exists only for
 the while sample (`Checker.RawProbe.checkRaw`).
 -/
 namespace Solidity.Correctness.Lowering
@@ -30,9 +35,8 @@ namespace Solidity.Correctness.Lowering
 open Solidity.Lowering.V07
 open Loops
 
-/-- **Loop lowering correctness** on the accepted family (finish-line component
-`Solidity.Goals.lowerLoopsCorrect`, owner e1-loops). -/
-theorem lowerLoops_correct : Loops.LowerLoopsCorrect := by
+/-- The normal-outcome family, leaf by leaf. -/
+theorem normalFamily_correct : Loops.NormalFamilyCorrect := by
   intro k E srcΓ returns M l u C Γ m p x names output accepted
   cases accepted
   cases k with
@@ -42,6 +46,19 @@ theorem lowerLoops_correct : Loops.LowerLoopsCorrect := by
   | doBreak => exact ⟨.drop (.drop .refl), DoBreak.endpoint m p x names⟩
   | whileReset => exact ⟨.drop .refl, WhileReset.endpoint m p x names⟩
   | doContinue => exact ⟨.drop .refl, DoContinue.endpoint m p x names⟩
+
+/-- The function-level return family (H497). -/
+theorem returnFamily_correct : Loops.ReturnFamilyCorrect := by
+  intro k E srcΓ M l u C Γ m p x names
+  cases k with
+  | whileReturn => exact Returns.whileReturn_endpoint m p x names
+  | doReturn => exact Returns.doReturn_endpoint m p x names
+  | returnFlag => exact Returns.returnFlag_endpoint m p x names
+
+/-- **Loop lowering correctness** on both accepted families (finish-line
+component `Solidity.Goals.lowerLoopsCorrect`, owner e1-loops). -/
+theorem lowerLoops_correct : Loops.LowerLoopsCorrect :=
+  ⟨normalFamily_correct, returnFamily_correct⟩
 
 namespace Loops.Coverage
 
@@ -82,7 +99,7 @@ theorem whileBreak_actual (E : Source.Env) :
         Checker.WhileBreak.mapping IntrinsicProbe.actual.program.2 embedding := by
   refine ⟨RawProbe.accepts_actual, ?_⟩
   rw [whileBreak_source E]
-  exact lowerLoops_correct .whileBreak Checker.WhileBreak.mapping whileBreakPair ()
+  exact normalFamily_correct .whileBreak Checker.WhileBreak.mapping whileBreakPair ()
     whileBreakNames IntrinsicProbe.actual.program whileBreak_accepts
 
 /-- Fresh flag of the `for` samples (the initializer needs no capture). -/
@@ -127,7 +144,7 @@ theorem forBreakUpdate_actual (E : Source.Env) :
         Checker.WhileBreak.mapping Capture.forBreakUpdate.2 embedding := by
   obtain ⟨post, eq⟩ := forBreakUpdate_source E
   rw [eq]
-  exact lowerLoops_correct .forBreak Checker.WhileBreak.mapping whileBreakPair
+  exact normalFamily_correct .forBreak Checker.WhileBreak.mapping whileBreakPair
     (post, some updateProg) forBreakNames Capture.forBreakUpdate (forBreakUpdate_accepts post)
 
 /-- Actual Source typing of `for (i = a; ; ) break;`. -/
@@ -166,7 +183,7 @@ theorem forBreak_actual (E : Source.Env) :
       Endpoint (forBreakTyping E).toR Shape.forBreak.offset
         Checker.WhileBreak.mapping Capture.forBreak.2 embedding := by
   rw [forBreak_source E]
-  exact lowerLoops_correct .forBreak Checker.WhileBreak.mapping whileBreakPair (.none, none)
+  exact normalFamily_correct .forBreak Checker.WhileBreak.mapping whileBreakPair (.none, none)
     forBreakNames Capture.forBreak forBreak_accepts
 
 /-- Fresh names of the `while`/`continue` sample: break flag, capture
@@ -210,7 +227,7 @@ theorem whileContinue_actual (E : Source.Env) :
       Endpoint (whileContinueTyping E).toR Shape.whileContinue.offset
         Checker.WhileBreak.mapping Capture.whileContinue.2 embedding := by
   rw [whileContinue_source E]
-  exact lowerLoops_correct .whileContinue Checker.WhileBreak.mapping whileBreakPair
+  exact normalFamily_correct .whileContinue Checker.WhileBreak.mapping whileBreakPair
     (Var.fresh "cnt" 2, ⟨_, .nil⟩) whileContinueNames Capture.whileContinue whileContinue_accepts
 
 /-- The lowered condition `a` of the `do` sample, read past both flags. -/
@@ -248,7 +265,7 @@ theorem doBreak_actual (E : Source.Env) :
         Checker.WhileBreak.mapping Capture.doBreak.2 embedding := by
   obtain ⟨c, eq⟩ := doBreak_source E
   rw [eq]
-  exact lowerLoops_correct .doBreak Checker.WhileBreak.mapping whileBreakPair
+  exact normalFamily_correct .doBreak Checker.WhileBreak.mapping whileBreakPair
     (Var.fresh "first" 2, c, doCondition) whileBreakNames Capture.doBreak (doBreak_accepts c)
 
 /-- Kernel acceptance of the actual output for `while (i = a) a = false;`. -/
@@ -276,7 +293,7 @@ theorem whileReset_actual (E : Source.Env) :
       Endpoint (whileResetTyping E).toR Shape.whileReset.offset
         Checker.WhileBreak.mapping Capture.whileReset.2 embedding := by
   rw [whileReset_source E]
-  exact lowerLoops_correct .whileReset Checker.WhileBreak.mapping whileBreakPair ()
+  exact normalFamily_correct .whileReset Checker.WhileBreak.mapping whileBreakPair ()
     whileBreakNames Capture.whileReset whileReset_accepts
 
 /-- Fresh first-iteration flag of the `do`/`continue` sample. -/
@@ -309,12 +326,109 @@ theorem doContinue_actual (E : Source.Env) :
       Endpoint (doContinueTyping E).toR Shape.doContinue.offset
         Checker.WhileBreak.mapping Capture.doContinue.2 embedding := by
   rw [doContinue_source E]
-  exact lowerLoops_correct .doContinue Checker.WhileBreak.mapping whileBreakPair
+  exact normalFamily_correct .doContinue Checker.WhileBreak.mapping whileBreakPair
     (Var.fresh "cnt" 1, ⟨_, .nil⟩) doContinueNames Capture.doContinue doContinue_accepts
+
+/-! ### Function-level return samples (H497) -/
+
+def whileReturnNames : RetFresh := ⟨Var.fresh "brk" 1, Var.fresh "ret" 2, Var.fresh "se" 3⟩
+def doReturnNames : RetFresh := ⟨Var.fresh "first" 2, Var.fresh "ret" 1, Var.fresh "se" 0⟩
+def returnFlagNames : RetFresh := ⟨Var.fresh "se" 1, Var.fresh "se" 0, Var.fresh "se" 0⟩
+
+/-- Kernel acceptance of the actual `calleeBody` + `elabStmtsP` output for
+`while (i = a) return;`. -/
+theorem whileReturn_accepts {E : Source.Env} :
+    RetAccepts (E := E) .whileReturn whileBreakPair () whileReturnNames Capture.whileReturn := rfl
+
+theorem doReturn_accepts {E : Source.Env} (c : Source.RExpr E [.bool, .bool] .bool) :
+    RetAccepts .doReturn whileBreakPair (c, doCondition) doReturnNames Capture.doReturn := rfl
+
+theorem returnFlag_accepts {E : Source.Env} :
+    RetAccepts (E := E) .returnFlag whileBreakPair () returnFlagNames Capture.returnFlag := rfl
+
+/-- Actual Source typing of `while (i = a) return;`. -/
+def whileReturnTyping (E : Source.Env) :
+    Source.StmtD (SourceAssociation.typingContext E) SourceAssociation.names
+      (.whileStmt (l := false) (u := false) (.assign .assign (.ident "i") (.ident "a"))
+        (.returnStmt .none))
+      SourceAssociation.names :=
+  .whileLoop (SourceAssociation.conditionTyping E) rfl (.ret rfl)
+
+theorem whileReturn_source (E : Source.Env) :
+    (whileReturnTyping E).toR =
+      RetShape.whileReturn.source (C := IntrinsicProbe.C) (M := false) (l := false) (u := false)
+        whileBreakPair () := rfl
+
+/-- Actual Source typing of `do { i = a; return; } while (a);`. -/
+def doReturnTyping (E : Source.Env) :
+    Source.StmtD (SourceAssociation.typingContext E) SourceAssociation.names
+      (.doWhile (l := false) (u := false)
+        (.blockStmt (.block (.cons (.stmtItem (.simpleStmt (.exprStmt
+          (.assign .assign (.ident "i") (.ident "a")))))
+          (.cons (.stmtItem (.returnStmt .none)) .nil)))) (.ident "a"))
+      SourceAssociation.names :=
+  .doWhile rfl (.block (.stmt (.expr (SourceAssociation.conditionTyping E) rfl)
+    (.stmt (.ret rfl) .nil))) (.loc (i := 1) rfl rfl)
+
+theorem doReturn_source (E : Source.Env) :
+    ∃ c : Source.RExpr E [.bool, .bool] .bool, (doReturnTyping E).toR =
+      RetShape.doReturn.source (C := IntrinsicProbe.C) (M := false) (l := false) (u := false)
+        whileBreakPair (c, doCondition) := ⟨_, rfl⟩
+
+/-- Actual Source typing of `if (i = a) return;`. -/
+def returnFlagTyping (E : Source.Env) :
+    Source.StmtD (k := .body) (SourceAssociation.typingContext E) SourceAssociation.names
+      (.ifStmt (.assign .assign (.ident "i") (.ident "a")) (.returnStmt .none) .none)
+      SourceAssociation.names :=
+  .ifThen (SourceAssociation.conditionTyping E) rfl (.ret rfl)
+
+theorem returnFlag_source (E : Source.Env) :
+    (returnFlagTyping E).toR =
+      RetShape.returnFlag.source (C := IntrinsicProbe.C) (M := false) (l := false) (u := false)
+        whileBreakPair () := rfl
+
+/-- End to end, function level: `while (i = a) return;`. -/
+theorem whileReturn_actual (E : Source.Env) :
+    ∃ (embedding : Thin IntrinsicProbe.Γ Capture.whileReturn.1)
+      (witness : Idx Capture.whileReturn.1 (.val .bool)),
+      RetEndpoint (whileReturnTyping E).toR RetShape.whileReturn.offset
+        Checker.WhileBreak.mapping Capture.whileReturn.2 embedding witness := by
+  rw [whileReturn_source E]
+  exact ⟨_, _, returnFamily_correct .whileReturn Checker.WhileBreak.mapping whileBreakPair ()
+    whileReturnNames⟩
+
+/-- End to end, function level: `do { i = a; return; } while (a);`. -/
+theorem doReturn_actual (E : Source.Env) :
+    ∃ (embedding : Thin IntrinsicProbe.Γ Capture.doReturn.1)
+      (witness : Idx Capture.doReturn.1 (.val .bool)),
+      RetEndpoint (doReturnTyping E).toR RetShape.doReturn.offset
+        Checker.WhileBreak.mapping Capture.doReturn.2 embedding witness := by
+  obtain ⟨c, eq⟩ := doReturn_source E
+  rw [eq]
+  exact ⟨_, _, returnFamily_correct .doReturn Checker.WhileBreak.mapping whileBreakPair
+    (c, doCondition) doReturnNames⟩
+
+/-- End to end, function level: `if (i = a) return;`. -/
+theorem returnFlag_actual (E : Source.Env) :
+    ∃ (embedding : Thin IntrinsicProbe.Γ Capture.returnFlag.1)
+      (witness : Idx Capture.returnFlag.1 (.val .bool)),
+      RetEndpoint (returnFlagTyping E).toR RetShape.returnFlag.offset
+        Checker.WhileBreak.mapping Capture.returnFlag.2 embedding witness := by
+  rw [returnFlag_source E]
+  exact ⟨_, _, returnFamily_correct .returnFlag Checker.WhileBreak.mapping whileBreakPair ()
+    returnFlagNames⟩
 
 end Loops.Coverage
 
 #print axioms lowerLoops_correct
+#print axioms normalFamily_correct
+#print axioms returnFamily_correct
+#print axioms Loops.Coverage.whileReturn_accepts
+#print axioms Loops.Coverage.doReturn_accepts
+#print axioms Loops.Coverage.returnFlag_accepts
+#print axioms Loops.Coverage.whileReturn_actual
+#print axioms Loops.Coverage.doReturn_actual
+#print axioms Loops.Coverage.returnFlag_actual
 #print axioms Loops.Coverage.whileBreak_accepts
 #print axioms Loops.Coverage.whileBreak_source
 #print axioms Loops.Coverage.whileBreak_actual

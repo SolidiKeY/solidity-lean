@@ -2434,6 +2434,9 @@ import Solidity.Correctness.Lowering.Loops.DoContinue
 import Solidity.Correctness.Lowering.Loops.Family
 import Solidity.Correctness.Lowering.Loops.ForBreak
 import Solidity.Correctness.Lowering.Loops.Horizon
+import Solidity.Correctness.Lowering.Loops.ReturnFamily
+import Solidity.Correctness.Lowering.Loops.Returns
+import Solidity.Correctness.Lowering.Loops.Statement
 import Solidity.Correctness.Lowering.Loops.WhileBreak
 import Solidity.Correctness.Lowering.Loops.WhileContinue
 import Solidity.Correctness.Lowering.Loops.WhileReset

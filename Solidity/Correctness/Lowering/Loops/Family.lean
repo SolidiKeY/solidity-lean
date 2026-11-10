@@ -9,7 +9,7 @@ recursions: the kernel cannot unfold them, so no theorem can quantify over their
 successful results directly (prior-art-lowering, "Partial elaborator"). Following
 the adopted P1 route, the producer stays outside the trust boundary: a total
 syntactic association (`Accepts`) relates a resolved Source loop to an intrinsic
-output, and one generic statement (`LowerLoopsCorrect`) says that every accepted
+output, and one generic statement (`NormalFamilyCorrect`) says that every accepted
 output reaches the semantic endpoint of the checker contract
 (`Checker.SemanticSoundnessStatement`). Actual producer runs are connected by
 kernel acceptance of their quoted outputs (`Loops.Correct`).
@@ -47,7 +47,7 @@ structure Fresh where
 /-- The loop-shape family. Each constructor is one G19 loop leaf whose lowering
 has a proved target bridge. Not in the family (no theorem, not admitted):
 `continue` other than `whileContinue`/`doContinue`, `return` (Lower.lean:454-459,
-536-538), `do … while` other than `doBreak`/`doContinue` (:507-512),
+536-538; covered at function level by `ReturnFamily`), `do … while` other than `doBreak`/`doContinue` (:507-512),
 pure conditions, real bodies, suffix guards (:429-431) other than the one after
 the synthetic condition head, nested loops and
 shared return flags (:497-501), specifications (:530-532), non-Boolean or
@@ -293,7 +293,7 @@ def Endpoint {E : Source.Env} {srcΓ : Source.RCtx} {returns : List Source.STy} 
       (m.wk embedding).Related (R out.st.H) ls out.st.env ∧
       out.st.glob = target.glob
 
-/-- **Loop lowering is correct on its accepted family.** For every shape, every
+/-- **Loop lowering is correct on its accepted normal-outcome family.** For every shape, every
 Source context, control context and pipeline, every context map with Boolean
 destination/right-hand-side positions, every fresh-name choice and every
 intrinsic output the association accepts, the output reaches the endpoint
@@ -301,11 +301,11 @@ against the family's Source loop. One statement for the whole family (H112).
 
 This is a family statement: it does not mention `lowerLoops`, raw input, the
 fresh counter or the memo, and only normal outcomes with an empty journal are
-stated (no return, revert, error or timeout outcomes). That the actual producer
-emits family members is shown per sample (`Loops.Correct`, `Loops.Capture`).
-Whether `Solidity.Goals.lowerLoopsCorrect` should be this proposition is an
-open owner decision; the goal is unchanged here. -/
-def LowerLoopsCorrect : Prop :=
+stated (no revert, error or timeout outcomes; `return` is the function-level
+`ReturnFamilyCorrect`). That the actual producer emits family members is shown
+per sample (`Loops.Correct`, `Loops.Capture`). `Loops.LowerLoopsCorrect`
+(`Loops.Statement`) is this proposition together with the return family. -/
+def NormalFamilyCorrect : Prop :=
   ∀ (k : Shape) {E : Source.Env} {srcΓ : Source.RCtx} {returns : List Source.STy}
     {M l u : Bool} {C : Contract} {Γ : Ctx}
     (m : ContextMap srcΓ Γ) (p : Pair m) (x : k.Extra E returns M u srcΓ C Γ) (names : Fresh)
