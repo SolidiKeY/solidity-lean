@@ -1520,6 +1520,8 @@ import Solidity.Backend.Passes.ValueReflection
 import Solidity.Backend.Passes.ValueSequence
 import Solidity.Backend.Passes.ValueSequenceControls
 import Solidity.Backend.Passes.ValueSequencePins
+import Solidity.Backend.Passes.WholeProgram.Correct
+import Solidity.Backend.Passes.WholeProgram.Refusal
 import Solidity.Backend.Passes.WidthApplication
 import Solidity.Backend.Payments.CompilerExact
 import Solidity.Backend.Payments.CoreExact
@@ -3221,6 +3223,14 @@ import Solidity.Frontend.Yul.Parsing
 import Solidity.Frontend.Yul.ScopedParse
 import Solidity.Frontend.Yul.WordParse
 import Solidity.Goals
+import Solidity.Goals.Endpoint
+import Solidity.Goals.Finish
+import Solidity.Goals.Hash
+import Solidity.Goals.Headline
+import Solidity.Goals.Loops
+import Solidity.Goals.Panic
+import Solidity.Goals.Plan
+import Solidity.Goals.Taclets
 import Solidity.Hash.Adaptive
 import Solidity.Hash.Bridge
 import Solidity.Hash.CollisionBound
