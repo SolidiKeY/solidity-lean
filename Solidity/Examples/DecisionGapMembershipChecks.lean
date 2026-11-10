@@ -1,7 +1,7 @@
 import Solidity.Examples.Decision
 import Solidity.Examples.DecisionGapBinderChecks
 
-/-! Checks ledger verdicts and coverage, and re-exports the fragment-membership regressions. -/
+/-! Checks the positive ledger verdict and re-exports the preserved membership/coverage facts. -/
 
 namespace Solidity.Examples.Decision
 
@@ -15,17 +15,5 @@ leaves read; the coverage kernel-checked. -/
 
 /-- info: "proved" -/
 #guard_msgs in #eval verdict ledgerWriteOk
-
-theorem gapLedgerWrite_covered : gapLedgerWrite.Covered = true := by decide +kernel
-theorem ledgerWriteOk_covered : ledgerWriteOk.Covered = true := by decide +kernel
-theorem payBalanceOk_covered : payBalanceOk.Covered = true := by decide +kernel
-
-/-- `decideGoal_complete`, applied: no hash, so no premise. -/
-theorem gapLedgerWrite_answers : decideGoal gapLedgerWrite ≠ .unknown :=
-  decideGoal_complete gapLedgerWrite_covered rfl
-
-/-- `decideLeaf_proved_iff`, applied: the verdict on the true variant is exact. -/
-theorem ledgerWriteOk_iff : decideLeaf ledgerWriteOk = .proved ↔ Fml.Valid ledgerWriteOk :=
-  decideLeaf_proved_iff ledgerWriteOk_covered
 
 end Solidity.Examples.Decision

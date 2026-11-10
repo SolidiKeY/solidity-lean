@@ -67,4 +67,16 @@ theorem gapKIntBinder_iff : decideLeaf gapKIntBinder = .proved ↔ Fml.Valid gap
 /-- info: "refuted" -/
 #guard_msgs in #eval verdict gapLedgerWrite
 
+theorem gapLedgerWrite_covered : gapLedgerWrite.Covered = true := by decide +kernel
+theorem ledgerWriteOk_covered : ledgerWriteOk.Covered = true := by decide +kernel
+theorem payBalanceOk_covered : payBalanceOk.Covered = true := by decide +kernel
+
+/-- `decideGoal_complete`, applied: no hash, so no premise. -/
+theorem gapLedgerWrite_answers : decideGoal gapLedgerWrite ≠ .unknown :=
+  decideGoal_complete gapLedgerWrite_covered rfl
+
+/-- `decideLeaf_proved_iff`, applied: the verdict on the true variant is exact. -/
+theorem ledgerWriteOk_iff : decideLeaf ledgerWriteOk = .proved ↔ Fml.Valid ledgerWriteOk :=
+  decideLeaf_proved_iff ledgerWriteOk_covered
+
 end Solidity.Examples.Decision
