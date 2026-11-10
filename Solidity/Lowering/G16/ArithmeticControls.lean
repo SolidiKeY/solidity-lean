@@ -521,3 +521,82 @@ end Solidity.Lowering.G16.ArithmeticControls
 /-- info: 'Solidity.Lowering.G16.ArithmeticControls.wrong_typed_power_rejected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Lowering.G16.ArithmeticControls.wrong_typed_power_rejected
+
+namespace Solidity.Lowering.G16.ArithmeticControls.Modular
+open Solidity.Lowering.V07
+open Solidity.Lowering.G16.Arithmetic.Modular
+
+private def sampleSource (x y m : PrimTy.uint.Denote) :=
+  (Source.Locals.cons (sourceValue x) (Source.Locals.cons (sourceValue y)
+    (Source.Locals.cons (sourceValue m) MixedAssignmentControls.source.1)),
+    MixedAssignmentControls.source.2)
+private def sampleTarget (x y m : PrimTy.uint.Denote) :=
+  ((MixedAssignmentControls.target.push (t := .val .uint) m).push (t := .val .uint) y).push
+    (t := .val .uint) x
+private def sourceRun (op : ModOp) (checked : Bool) (pipeline : Roadmap.Pipeline) (fuel : Nat)
+    (x y m : PrimTy.uint.Denote) :=
+  (Source.evalE (MixedAssignmentControls.globals pipeline)
+    {Source.SemanticsExamples.F0 with checked := checked} (fuel+6)
+    (sourceExpr op .here (.there .here) (.there (.there .here)))).run (sampleSource x y m)
+private def nativeRun (op : ModOp) (x y m : PrimTy.uint.Denote) :=
+  (operand op .here (.there .here) (.there (.there .here))).run (sampleTarget x y m)
+private def sourceObserved (op : ModOp) (checked : Bool) (pipeline : Roadmap.Pipeline) (fuel : Nat)
+    (x y m : PrimTy.uint.Denote) : Option Int :=
+  match (sourceRun op checked pipeline fuel x y m).1 with
+  | .ok (.val v) => v.key
+  | _ => none
+private def nativeObserved (op : ModOp) (x y m : PrimTy.uint.Denote) : Option Int :=
+  match nativeRun op x y m with
+  | .ok (_, .prim v) => some v.val
+  | .error _ => none
+private def sampleTransport (op : ModOp) (checked : Bool) (pipeline : Roadmap.Pipeline) (fuel : Nat)
+    (x y m : PrimTy.uint.Denote) :=
+  transport (MixedAssignmentControls.globals pipeline)
+    {Source.SemanticsExamples.F0 with checked := checked} fuel (sampleSource x y m) (sampleTarget x y m)
+    op .here (.there .here) (.there (.there .here)) .here (.there .here) (.there (.there .here))
+    x y m rfl rfl rfl rfl rfl rfl
+
+private def maximum : PrimTy.uint.Denote := ⟨((2^256 : Nat) : Int)-1,by decide⟩
+private def half : PrimTy.uint.Denote := ⟨((2^128 : Nat) : Int),by decide⟩
+private def left : ModOp → PrimTy.uint.Denote
+  | .addmod => maximum | .mulmod => half
+private def right : ModOp → PrimTy.uint.Denote
+  | .addmod => ⟨1,by decide⟩ | .mulmod => half
+private def zero : PrimTy.uint.Denote := ⟨0,by decide⟩
+private def two : PrimTy.uint.Denote := ⟨2,by decide⟩
+private def three : PrimTy.uint.Denote := ⟨3,by decide⟩
+
+/-- Rejects word wrapping before modular reduction for both builtins, and rejects bare-revert zero-modulus output. Actual Source/native runs include either mode and pipeline. -/
+theorem regressions_rejected (op : ModOp) (checked : Bool) (pipeline : Roadmap.Pipeline) (fuel : Nat) :
+    sourceObserved op checked pipeline fuel (left op) (right op) maximum = some 1 ∧
+    nativeObserved op (left op) (right op) maximum = some 1 ∧
+    (op.wide (left op).val (right op).val % Semantics.uintBound) % maximum.val ≠ 1 ∧
+    (sourceRun op checked pipeline fuel two three zero).1 = .error (.revert (Source.panicData .divZero)) ∧
+    nativeRun op two three zero = .error (THalt.ofData (Source.panicData .divZero)) ∧
+    nativeRun op two three zero ≠ .error .revert := by
+  have good := sampleTransport op checked pipeline fuel (left op) (right op) maximum
+  have bad := sampleTransport op checked pipeline fuel two three zero
+  refine ⟨?_,?_,?_,?_,?_,?_⟩
+  · unfold sourceObserved sourceRun
+    rw [good.1]
+    cases op <;> decide
+  · unfold nativeObserved nativeRun
+    rw [good.2]
+    cases op <;> decide
+  · cases op <;> decide
+  · unfold sourceRun
+    rw [bad.1]
+    rfl
+  · unfold nativeRun
+    rw [bad.2]
+    rfl
+  · unfold nativeRun
+    rw [bad.2]
+    intro impossible
+    cases impossible
+
+end Solidity.Lowering.G16.ArithmeticControls.Modular
+
+/-- info: 'Solidity.Lowering.G16.ArithmeticControls.Modular.regressions_rejected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Lowering.G16.ArithmeticControls.Modular.regressions_rejected

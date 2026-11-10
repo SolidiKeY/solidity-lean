@@ -1696,3 +1696,182 @@ end Solidity.Lowering.G16.Arithmetic
 /-- info: 'Solidity.Lowering.G16.Arithmetic.TypedPower.transport' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Lowering.G16.Arithmetic.TypedPower.transport
+
+namespace Solidity.Lowering.G16.Arithmetic.Modular
+open Solidity.Lowering.V07
+private theorem source_range (x : PrimTy.uint.Denote) :
+    Source.IntTy.u256.lo ≤ x.val ∧ x.val ≤ Source.IntTy.u256.hi := by
+  have h := of_decide_eq_true x.property
+  change 0 ≤ x.val ∧ x.val < ((2^256 : Nat) : Int) at h
+  change 0 ≤ x.val ∧ x.val ≤ (((2^256 : Nat) : Int)-1)
+  omega
+def sourceValue {D : Source.Layout} (x : PrimTy.uint.Denote) : Source.Val D (.int Source.IntTy.u256) :=
+  .int x.val (source_range x)
+private def sourceOp : ModOp → Source.Builtin
+  | .addmod => .addmod | .mulmod => .mulmod
+def sourceExpr {E : Source.Env} {Γ : Source.RCtx} (op : ModOp)
+    (i j k : Source.Idx Γ (.int Source.IntTy.u256)) : Source.RExpr E Γ (.int Source.IntTy.u256) :=
+  .builtin (sourceOp op) (.cons (.local i) (.cons (.local j) (.cons (.local k) .nil)))
+    (by cases op <;> rfl)
+
+private theorem args_run {E : Source.Env} {Γ : Source.RCtx}
+    (G : Source.Glob E) (F : Source.Fr) (fuel : Nat) (s : Source.EMState E Γ)
+    (i j k : Source.Idx Γ (.int Source.IntTy.u256)) (x y m : PrimTy.uint.Denote)
+    (hx : s.1.get i = sourceValue x)
+    (hy : s.1.get j = sourceValue y)
+    (hm : s.1.get k = sourceValue m) :
+    let args : Source.RArgs E Γ [.int Source.IntTy.u256,.int Source.IntTy.u256,.int Source.IntTy.u256] :=
+      .cons (.local i) (.cons (.local j) (.cons (.local k) .nil))
+    let vals : Source.RVals E.layout [.int Source.IntTy.u256,.int Source.IntTy.u256,.int Source.IntTy.u256] :=
+      .cons (.val (sourceValue x))
+        (.cons (.val (sourceValue y)) (.cons (.val (sourceValue m)) .nil))
+    (Source.evalArgs G F (fuel+4) args).run s = (.ok vals,s) ∧
+    (Source.evalArgsRev G F (fuel+4) args).run s = (.ok vals,s) := by
+  have hi (n : Nat) : (Source.evalE G F (n+1) (.local i)).run s =
+      (.ok (.val (sourceValue x)),s) := by
+    change (Except.ok (Source.RVal.val (s.1.get i)),s) = _
+    rw [hx]
+  have hj (n : Nat) : (Source.evalE G F (n+1) (.local j)).run s =
+      (.ok (.val (sourceValue y)),s) := by
+    change (Except.ok (Source.RVal.val (s.1.get j)),s) = _
+    rw [hy]
+  have hk (n : Nat) : (Source.evalE G F (n+1) (.local k)).run s =
+      (.ok (.val (sourceValue m)),s) := by
+    change (Except.ok (Source.RVal.val (s.1.get k)),s) = _
+    rw [hm]
+  have hpure {α : Type} (a : α) : (pure a : Source.EM E Γ α).run s = (.ok a,s) := rfl
+  constructor
+  · simp only [Source.evalArgs,Source.Hoare.run_bind,hpure,hi,hj,hk]
+  · simp only [Source.evalArgsRev,Source.Hoare.run_bind,hpure,hi,hj,hk]
+
+private theorem source_run {E : Source.Env} {Γ : Source.RCtx}
+    (G : Source.Glob E) (F : Source.Fr) (fuel : Nat) (s : Source.EMState E Γ)
+    (op : ModOp) (i j k : Source.Idx Γ (.int Source.IntTy.u256))
+    (x y m : PrimTy.uint.Denote)
+    (hx : s.1.get i = sourceValue x)
+    (hy : s.1.get j = sourceValue y)
+    (hm : s.1.get k = sourceValue m) :
+    (Source.evalE G F (fuel+6) (sourceExpr op i j k)).run s =
+      (if m.val = 0 then .error (.revert (Source.panicData .divZero))
+       else .ok (.val (Source.intWrap Source.IntTy.u256 (op.wide x.val y.val % m.val))),s) := by
+  have args := args_run G F fuel s i j k x y m hx hy hm
+  cases op <;> cases hp : G.pipeline
+  all_goals
+    unfold sourceExpr
+    rw [Source.evalE,Source.evalBuiltin]
+    simp only [sourceOp,hp,Bool.true_or,Bool.false_or,Bool.and_true,
+      Bool.and_false,reduceCtorEq,decide_true,decide_false,Bool.false_eq_true,if_true,if_false]
+    rw [Source.Hoare.run_bind]
+    first | rw [args.1] | rw [args.2]
+    dsimp only
+    change ((if m.val = 0 then Source.EM.lift (Source.panic .divZero)
+      else pure (.val (Source.intWrap Source.IntTy.u256 (_ % m.val)))) :
+        Source.EM E Γ (Source.RVal E.layout (.int Source.IntTy.u256))).run s = _
+    by_cases zero : m.val = 0
+    · simp only [if_pos zero]
+      rfl
+    · simp only [if_neg zero]
+      rfl
+
+private def value {C : Contract} {Γ : Ctx} (op : ModOp) (i j k : Idx Γ (.val .uint)) : Val C Γ .uint :=
+  .modular op (.simple (.local i)) (.simple (.local j)) (.simple (.local k))
+private def condition {C : Contract} {Γ : Ctx} (k : Idx Γ (.val .uint)) : Val C Γ .bool :=
+  .binop .neB rfl rfl (.simple (.local k)) (Checked.litU 0 (by decide))
+def result (op : ModOp) (x y m : PrimTy.uint.Denote) : PrimTy.uint.Denote :=
+  integerValue Source.IntTy.u256
+    (Source.IntTy.u256.wrap (op.wide x.val y.val % m.val))
+    (Source.IntTy.u256.wrap_mem _)
+private theorem remainder_range (op : ModOp) (x y m : PrimTy.uint.Denote) (hn : m.val ≠ 0) :
+    Source.IntTy.u256.lo ≤ op.wide x.val y.val % m.val ∧
+      op.wide x.val y.val % m.val ≤ Source.IntTy.u256.hi := by
+  have hm := source_range m
+  have lowm : 0 ≤ m.val := hm.1
+  have positive : 0 < m.val := by omega
+  have low := Int.emod_nonneg (op.wide x.val y.val) hn
+  have high := Int.emod_lt_of_pos (op.wide x.val y.val) positive
+  exact ⟨low,by omega⟩
+private theorem value_run {C : Contract} {Γ : Ctx} (target : State C Γ)
+    (op : ModOp) (i j k : Idx Γ (.val .uint)) (x y m : PrimTy.uint.Denote)
+    (hx : TEnv.get i target.env = x) (hy : TEnv.get j target.env = y)
+    (hm : TEnv.get k target.env = m) (hn : m.val ≠ 0) :
+    (value op i j k).evalT target = .ok (result op x y m) := by
+  have hr := integer_range Source.IntTy.u256 (op.wide x.val y.val % m.val) (remainder_range op x y m hn)
+  change PrimTy.uint.inRange (op.wide x.val y.val % m.val) = true at hr
+  have wrapped := UnsignedNarrowing.wrap_of_range 256 (by decide)
+    (op.wide x.val y.val % m.val) (remainder_range op x y m hn)
+  change Source.IntTy.u256.wrap (op.wide x.val y.val % m.val) = _ at wrapped
+  change (do
+    let a ← (Except.ok (TEnv.get i target.env) : TRes PrimTy.uint.Denote)
+    let b ← (Except.ok (TEnv.get j target.env) : TRes PrimTy.uint.Denote)
+    let c ← (Except.ok (TEnv.get k target.env) : TRes PrimTy.uint.Denote)
+    TRes.ofOpt (op.evalT a b c)) = _
+  rw [hx,hy,hm]
+  simp only [ok_bind,ModOp.evalT,if_neg hn,PrimTy.ofInt?,dif_pos hr,TRes.ofOpt]
+  apply congrArg Except.ok
+  apply Subtype.ext
+  exact wrapped.symm
+private theorem condition_run {C : Contract} {Γ : Ctx} (target : State C Γ)
+    (k : Idx Γ (.val .uint)) (m : PrimTy.uint.Denote) (hm : TEnv.get k target.env = m) :
+    (condition k).evalT target = .ok (!decide (m.val = 0)) := by
+  change (TRes.ofOpt (BinOp.evalT .neB rfl (TEnv.get k target.env)
+    (⟨0,by decide⟩ : PrimTy.uint.Denote))) = _
+  rw [hm]
+  rfl
+
+def operand {C : Contract} {Γ : Ctx} (op : ModOp) (i j k : Idx Γ (.val .uint)) :
+    DeferredSource.Operand C Γ (.prim .uint) :=
+  PanicGuard.checkedOperand .divZero true (condition k) (value op i j k)
+private theorem operand_run {C : Contract} {Γ : Ctx} (target : State C Γ)
+    (op : ModOp) (i j k : Idx Γ (.val .uint)) (x y m : PrimTy.uint.Denote)
+    (hx : TEnv.get i target.env = x) (hy : TEnv.get j target.env = y)
+    (hm : TEnv.get k target.env = m) :
+    (operand op i j k).run target =
+      if m.val = 0 then .error (THalt.ofData (Source.panicData .divZero))
+      else .ok (⟨target,List.prefix_refl _⟩,.prim (result op x y m)) := by
+  have test := condition_run target k m hm
+  by_cases zero : m.val = 0
+  · rw [if_pos zero]
+    have tested : (condition k).evalT target = .ok false := by
+      simpa only [zero,decide_true,Bool.not_true] using test
+    have failed := PanicGuard.run target .divZero (condition k) false tested
+    simp only [Bool.false_eq_true,if_false] at failed
+    have stopped : (Prog.cons (PanicGuard.code .divZero (condition k)) .nil).run target =
+        .error (THalt.ofData (Source.panicData .divZero)) := by
+      change TRun.seq (PanicGuard.code .divZero (condition k)).runR _ target = _
+      simp only [TRun.seq,show (PanicGuard.code .divZero (condition k)).runR target =
+        .error (THalt.ofData (Source.panicData .divZero)) from failed]
+    unfold operand PanicGuard.checkedOperand DeferredSource.Operand.run
+    simp only [if_true]
+    rw [stopped]
+    rfl
+  · rw [if_neg zero]
+    have tested : (condition k).evalT target = .ok true := by
+      simpa only [show decide (m.val = 0) = false from decide_eq_false zero,Bool.not_false] using test
+    have computed := value_run target op i j k x y m hx hy hm zero
+    have ran := PanicGuard.checkedOperand_run target .divZero true (condition k) (value op i j k)
+      true (result op x y m) tested computed
+    simpa only [Bool.true_eq_false,and_false,if_false] using ran
+
+/-- Both modular builtins on uint256 locals: unbounded intermediates and exact zero-modulus panic in either mode/pipeline. Successful callers are unchanged; no frontend or effectful-operand association. -/
+theorem transport {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} {Γ : Ctx}
+    (G : Source.Glob E) (F : Source.Fr) (fuel : Nat) (source : Source.EMState E srcΓ)
+    (target : State C Γ) (op : ModOp)
+    (i j k : Source.Idx srcΓ (.int Source.IntTy.u256)) (a b c : Idx Γ (.val .uint))
+    (x y m : PrimTy.uint.Denote)
+    (readX : source.1.get i = sourceValue x) (readY : source.1.get j = sourceValue y)
+    (readM : source.1.get k = sourceValue m)
+    (nativeX : TEnv.get a target.env = x) (nativeY : TEnv.get b target.env = y)
+    (nativeM : TEnv.get c target.env = m) :
+    (Source.evalE G F (fuel+6) (sourceExpr op i j k)).run source =
+      (if m.val = 0 then .error (.revert (Source.panicData .divZero))
+       else .ok (.val (Source.intWrap Source.IntTy.u256 (op.wide x.val y.val % m.val))),source) ∧
+    (operand op a b c).run target =
+      if m.val = 0 then .error (THalt.ofData (Source.panicData .divZero))
+      else .ok (⟨target,List.prefix_refl _⟩,.prim (result op x y m)) := by
+  exact ⟨source_run G F fuel source op i j k x y m readX readY readM,
+    operand_run target op a b c x y m nativeX nativeY nativeM⟩
+end Solidity.Lowering.G16.Arithmetic.Modular
+
+/-- info: 'Solidity.Lowering.G16.Arithmetic.Modular.transport' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Lowering.G16.Arithmetic.Modular.transport
