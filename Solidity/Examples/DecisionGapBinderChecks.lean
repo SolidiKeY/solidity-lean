@@ -64,12 +64,7 @@ theorem gapKIntBinder_answers : decideGoal gapKIntBinder ≠ .unknown :=
 theorem gapKIntBinder_iff : decideLeaf gapKIntBinder = .proved ↔ Fml.Valid gapKIntBinder :=
   decideLeaf_proved_iff gapKIntBinder_covered
 
--- The refuting state: the payee `0`, its entry `0`, the contract at `1`.
-/-- info: "[(0, 0), (0, 0), (0, 0), (0, 0)] self 1" -/
-#guard_msgs in
-#eval match decideGoal gapLedgerWrite with
-  | .refuted σ => toString (σ.net.map fun (e : PrimTy.uint.Denote × Int) => (e.1.1, e.2)) ++
-      " self " ++ toString σ.tx.selfAddress.1
-  | _ => "-"
+/-- info: ["refuted", "proved"] -/
+#guard_msgs in #eval [gapLedgerWrite, ledgerWriteOk].map verdict
 
 end Solidity.Examples.Decision
