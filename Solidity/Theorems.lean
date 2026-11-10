@@ -7,6 +7,7 @@ import Solidity.Calculus.SolkeyProves
 import Solidity.Calculus.TailMode
 import Solidity.Roadmap.G49Final.FoldedPublic
 import Solidity.Semantics.CtxEquiv.Unify
+import Solidity.Backend.CompilerEndpoint
 
 /-!
 # The main theorems, in one page
@@ -460,7 +461,25 @@ theorem public_context_transfer {I : Roadmap.IntrinsicSpec} {S : Roadmap.SourceS
 /-- info: 'Solidity.Main.compiler_checked' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms compiler_checked
 
+open Evm Evm.Compiler in
+/-- Additive v2 endpoint surface: preserve both refusals and the accepted-world
+premise of the newly merged backend endpoint. The frozen earlier public
+end-to-end statement remains above. -/
+theorem public_compiler_endpoint_v2 :
+    ∀ {C : Contract} {Γ Δ : Ctx} (b : Nat) (F : Frag Γ) (P : Prog C Γ Δ),
+      Compiler.compile b F P = none ∨
+      ∃ r : Compilation b F P, Compiler.compile b F P = some r ∧
+        ∀ L frame : Nat,
+          (Backend.Passes.WholeProgram.staticRefused r L frame = true ∧
+            ∀ (base : Nat → Fin W) (σ : State C Γ) (m : Machine),
+              ¬ r.Input L frame base σ m) ∨
+          (Backend.Passes.WholeProgram.staticRefused r L frame = false ∧
+            ∀ (base : Nat → Fin W) (σ : State C Γ) (m : Machine),
+              r.Input L frame base σ m → r.AgreesExact L frame base σ m) :=
+  Backend.compiler_endpoint_correct
+
 -- New headline axioms are also validated by scripts/trust/trust-closure.lean.
+#print axioms public_compiler_endpoint_v2
 #print axioms compile_correct_full
 #print axioms public_end_to_end
 #print axioms public_g49_g50
