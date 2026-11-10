@@ -14,11 +14,11 @@ theorem store_fresh_run (e : DeferredSource.Operand C Γ (.prim .bool))
       (target.push (t := .val .bool) previous) =
     (e.run target).map (fun (out,value) => match value with
       | .prim b => (⟨out.st.push (t := .val .bool) b,out.ext⟩ : Out C target.H (.val .bool :: Γ))) := by
-  have same : storeOperand .here (e.wk (.drop .refl)) =
-      storePrimitiveOperand .here (e.wk (.drop .refl)) := by
-    cases e with
-    | mk Δ code value => cases value <;> rfl
-  rw [same,storePrimitive_fresh_run]
+  rw [storeOperand_run]
+  have weak := DeferredSource.Operand.run_wk e (.drop (t := .val .bool) .refl)
+    target (previous,target.env)
+  change (e.wk (.drop .refl)).run (target.push (t := .val .bool) previous) = _ at weak
+  rw [weak]
   cases run : e.run target with
   | error err => rfl
   | ok result =>
