@@ -9,6 +9,24 @@ open Solidity.Decide
 
 set_option Elab.async false
 
+/-- info: ["proved", "proved", "refuted", "refuted", "proved", "proved", "proved"] -/
+#guard_msgs in #eval [netOk, netSame, netNeg, netOther, netStore, netWrite, netDistinct].map verdict
+
+/-- info: true -/
+#guard_msgs in #eval [netOk, netSame, netNeg, netOther, netStore, netWrite, netDistinct].all Fml.Covered
+
+-- Four ledger reads: decided by the walk (M7, the running time).
+/-- info: "proved" -/
+#guard_msgs in #eval verdict netSwap
+
+theorem net_covered : netOk.Covered = true := by decide +kernel
+theorem netSame_covered : netSame.Covered = true := by decide +kernel
+theorem netSwap_covered : netSwap.Covered = true := by decide +kernel
+
+/-- `decideLeaf_proved_iff`, applied to a leaf that reads the ledger. -/
+theorem net_iff : decideLeaf netOk = .proved ↔ Fml.Valid netOk :=
+  decideLeaf_proved_iff net_covered
+
 /-- info: [true, false, false, false] -/
 #guard_msgs in #eval [apf, notApf, guardNe, guardArith].map (Fml.inTarget {})
 
