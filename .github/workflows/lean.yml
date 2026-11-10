@@ -226,6 +226,10 @@ jobs:
           LEAN_NUM_THREADS: '1'
         run: |
           git clone --depth 1 --branch v4.24.0 https://github.com/leanprover/lean4.git "$RUNNER_TEMP/lean4-source"
+          # A module fetched from Lake's cache has no .setup.json in .lake/build;
+          # ask Lake for it (as scripts/check-memory-loop-timing.py does).
+          setup=.lake/build/ir/Solidity/Tools/DirectRuntime.setup.json
+          [[ -f $setup ]] || lake setup-file Solidity/Tools/DirectRuntime.lean > "$setup"
           python3 scripts/build-direct-native.py "$(lean --print-prefix)" "$RUNNER_TEMP/lean4-source" .lake/direct-native
       - name: Test editor with solc and Lean
         env:
