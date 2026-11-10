@@ -356273,10 +356273,6 @@
       "entry_line": 61,
       "input_revision": "1bd89144b62adaaa4fd77f1b1f499625977113ac",
       "input_scope": [
-        "Lean/Elab/Attributes.lean",
-        "Lean/Elab/Deriving.lean",
-        "Lean/Elab/Tactic.lean",
-        "Lean/Meta/Eqns.lean",
         "Solidity/AST.lean",
         "Solidity/Calculus/Arms.lean",
         "Solidity/Calculus/Blocks.lean",
@@ -356371,10 +356367,6 @@
       "entry_line": 61,
       "input_revision": "dfd3be8574e062c8eebb7a7a3d6dcfd12682dcab",
       "input_scope": [
-        "Lean/Elab/Attributes.lean",
-        "Lean/Elab/Deriving.lean",
-        "Lean/Elab/Tactic.lean",
-        "Lean/Meta/Eqns.lean",
         "Solidity/AST.lean",
         "Solidity/Calculus/Arms.lean",
         "Solidity/Calculus/Blocks.lean",

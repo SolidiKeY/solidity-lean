@@ -547,7 +547,7 @@ def validated_routes(graph, catalog):
     for entry in catalog['generators']:
         required = {'path', 'input_revision', 'output_blob', 'generator', 'generator_blob',
                     'command', 'inputs', 'tools', 'comparison'}
-        if set(entry) != required: raise ValueError('invalid generator definition')
+        if set(entry) not in (required, required | {'consumption_review'}): raise ValueError('invalid generator definition')
         if entry['input_revision'] != repo.ref: continue
         p, generator = entry['path'], entry['generator']
         if entry['comparison'] != 'exact bytes': raise ValueError('unsupported generator comparison')
@@ -755,6 +755,38 @@ def historical_outputs(repo):
     return roles
 
 
+def reviewed_generated_consumption(entry, graph, candidate_sources):
+    """A reproduction receipt cannot establish absence of active consumers.
+
+    This optional, independently reviewed negative analysis is classifier input,
+    bound to the exact revision, reviewed source objects and the entire current
+    entry-point set. Missing/stale/incomplete reviews leave consumption open.
+    It is never synthesized from a missing graph edge or a successful generator.
+    """
+    review = entry.get('consumption_review')
+    if review is None: return False
+    required = {'verdict', 'input_revision', 'search_coverage', 'dynamic_analysis',
+                'reviewed_sources', 'entry_points_reviewed'}
+    if not isinstance(review, dict) or set(review) != required:
+        raise ValueError('invalid generated consumption review')
+    if review['verdict'] != 'no-active-consumer-found' or review['input_revision'] != graph.repo.ref:
+        raise ValueError('stale or unsupported generated consumption review')
+    if not all(isinstance(review[k], str) and review[k].strip() for k in ('search_coverage', 'dynamic_analysis')):
+        raise ValueError('generated consumption review lacks independent search/dynamic analysis')
+    sources = review['reviewed_sources']
+    if not isinstance(sources, dict) or not sources or entry['generator'] not in sources:
+        raise ValueError('generated consumption review lacks source bindings')
+    if any(p not in graph.repo.tree or graph.repo.tree[p][2] != oid for p, oid in sources.items()):
+        raise ValueError('generated consumption review source mismatch')
+    roots = {k: v for k, v in sorted(graph.roots.items()) if 'derived_from' not in v}
+    if review['entry_points_reviewed'] != roots:
+        raise ValueError('generated consumption review entry-point coverage mismatch')
+    required_sources = set(candidate_sources)
+    for root in roots.values():
+        required_sources.update((root['path'], root['location'].rsplit(':', 1)[0]))
+    return required_sources <= set(sources)
+
+
 def inventory(repo, catalog=None):
     graph = Graph(repo)
     if catalog is None:
@@ -787,6 +819,7 @@ def inventory(repo, catalog=None):
     names = collections.defaultdict(list)
     for p in repo.paths: names[posixpath.basename(p)].append(p)
     candidates = collections.defaultdict(list)
+    candidate_sources = collections.defaultdict(set)  # eligibility is never display-capped
     # Single indexed scan rather than one repository scan per inventoried file.
     token_re = re.compile(r'[A-Za-z0-9_.+@/-]+')
     for source, text in sorted(repo.texts.items()):
@@ -794,6 +827,7 @@ def inventory(repo, catalog=None):
             for token in dict.fromkeys(token_re.findall(line)):
                 key = token.rsplit('/', 1)[-1]
                 for p in names.get(key, ()):
+                    if source != p: candidate_sources[p].add(source)
                     if source != p and len(candidates[p]) < 8:
                         candidate = {'location': f'{source}:{n}', 'token': token if token in repo.tree else key}
                         if candidate not in candidates[p]: candidates[p].append(candidate)
@@ -812,7 +846,9 @@ def inventory(repo, catalog=None):
             if at < 0: continue
             line = text.count('\n', 0, at) + 1
             for path in sorted(paths):
-                if source == path or len(candidates[path]) >= 8: continue
+                if source == path: continue
+                candidate_sources[path].add(source)
+                if len(candidates[path]) >= 8: continue
                 candidate = {'location': f'{source}:{line}', 'token': path}
                 if candidate not in candidates[path]: candidates[path].append(candidate)
     records = []
@@ -827,16 +863,20 @@ def inventory(repo, catalog=None):
             reason = (chain['entry']['kind'] + ' entry point: ' + chain['entry']['command'] if not chain['edges'] else
                       chain['edges'][-1]['operation'] + ' at ' + chain['edges'][-1]['source'] + ':' + str(chain['edges'][-1]['line']))
         elif p in generated:
-            classification = 'regenerable'
-            reason = 'Committed generator reproduces this unconsumed artifact exactly; definition bound to input revision.'
+            if reviewed_generated_consumption(generated[p], graph, candidate_sources[p]):
+                classification = 'regenerable'
+                reason = 'Exact reproduction is verified and an independent source-bound consumer/search review found no active consumer.'
+            else:
+                reason = 'Exact reproduction is verified, but consumption remains unresolved; a missing edge in this incomplete graph is not non-use.'
+                unresolved.append('UNRESOLVED_GENERATED_CONSUMPTION: independent consumer/search review required')
         elif kind == 'blob' and mode != '120000':
             reason = historical_role
             if reason: classification = 'evidence'
-        if not classification and p in orphan_reviews and not candidates[p]:
+        if not classification and p not in generated and p in orphan_reviews and not candidates[p]:
             classification = 'orphan'
             reason = orphan_reviews[p]['reason']
         if not classification:
-            reason = 'No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.'
+            if reason is None: reason = 'No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.'
             unresolved.append('UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use')
             if p in orphan_reviews and candidates[p]: unresolved.append('UNSUPPORTED_ORPHAN_REVIEW: candidate matches remain unresolved')
         if p in graph.uncertain_reads and classification != 'keep':
@@ -854,6 +894,7 @@ def inventory(repo, catalog=None):
                         'unresolved': unresolved})
     counts = {c: sum(r['class'] == c for r in records) for c in CLASSES}
     return {'schema_version': SCHEMA, 'goal_decl': None, 'measured_revision': repo.ref,
+            'entry_points': {k: v for k, v in sorted(graph.roots.items()) if 'derived_from' not in v},
             'universe': list(SCOPE), 'policy_scans': graph.policy_scans, 'analysis_gaps': sorted(set(graph.notes)), 'totals': {**counts, 'paths': len(records),
                                               'unresolved': sum(bool(r['unresolved']) for r in records)},
             'search_coverage': {'inputs': 'All committed non-NUL blobs, excluding classifier and inventory outputs.',
@@ -964,6 +1005,7 @@ def self_test():
             'scripts/h55/other': 'h55\n',
             'scripts/h62/other': 'h62\n',
         }
+        for i in range(9): sources[f'tests/reference-{i}.txt'] = 'Historical mention of tests/spare.txt only.\n'
         for p, content in sources.items():
             target = root / p; target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(content if isinstance(content, bytes) else content.encode())
@@ -1046,7 +1088,42 @@ def self_test():
         try: inventory(repo, mismatched)
         except ValueError: pass
         else: raise AssertionError('same-runner different-arguments reproducer accepted')
+        assert rows['tests/spare.txt']['class'] is None
+        assert rows['tests/spare.txt']['generator']
+        assert 'UNRESOLVED_GENERATED_CONSUMPTION' in ' '.join(rows['tests/spare.txt']['unresolved'])
+        overclaimed = copy.deepcopy(expected)
+        next(r for r in overclaimed['records'] if r['path'] == 'tests/spare.txt')['class'] = 'regenerable'
+        try: verify(overclaimed, expected, require_complete=False)
+        except ValueError: pass
+        else: raise AssertionError('absent graph edge granted regenerable non-use')
+        catalog['generators'][-1]['consumption_review'] = {
+            'verdict': 'no-active-consumer-found', 'input_revision': repo.ref,
+            'search_coverage': 'Reviewed every committed control source and all references: spare.txt is only written by generator.py.',
+            'dynamic_analysis': 'Reviewed all fixture controls, imports and literal/default reads; none select spare.txt. No unresolved dynamic reference reaches this output.',
+            'reviewed_sources': {p: repo.tree[p][2] for p in repo.texts},
+            'entry_points_reviewed': copy.deepcopy(expected['entry_points'])}
+        expected = inventory(repo, catalog)
+        rows = {r['path']: r for r in expected['records']}
         assert rows['tests/spare.txt']['class'] == 'regenerable'
+        uncovered = copy.deepcopy(catalog)
+        del uncovered['generators'][-1]['consumption_review']['reviewed_sources']['tests/reference-8.txt']
+        assert next(r for r in inventory(repo, uncovered)['records'] if r['path'] == 'tests/spare.txt')['class'] is None
+        graph_control = Graph(repo)
+        graph_control.root('tests/live.py', 'control', 'runner --mode-a', 'tests/live.py', 1, root_id='same-id')
+        bound = copy.deepcopy(catalog['generators'][-1])
+        bound['consumption_review']['entry_points_reviewed'] = copy.deepcopy(graph_control.roots)
+        assert reviewed_generated_consumption(bound, graph_control, set())
+        for field, replacement in (('command', 'runner --mode-b'), ('cwd', 'other'), ('source_argument', 'other.txt')):
+            changed_graph = Graph(repo); changed_graph.roots = copy.deepcopy(graph_control.roots)
+            changed_graph.roots['same-id'][field] = replacement
+            try: reviewed_generated_consumption(bound, changed_graph, set())
+            except ValueError: pass
+            else: raise AssertionError('changed root definition preserved a negative consumption review')
+        unsupported_review = copy.deepcopy(catalog)
+        unsupported_review['generators'][-1]['consumption_review']['dynamic_analysis'] = ''
+        try: inventory(repo, unsupported_review)
+        except ValueError: pass
+        else: raise AssertionError('empty generated-consumption analysis accepted')
         assert rows['tests/unknown.bin']['class'] == 'orphan'
         assert rows['tests/dead.lean']['class'] == 'keep'
         assert rows['tests/secondary.json']['class'] is None  # a data read cannot elaborate Lean
