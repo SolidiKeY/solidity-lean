@@ -48,12 +48,12 @@ def canonicalOutcomes (fixture : String) : IO (List (String × String)) := do
         | .ok _ => "ok"
         | .error e => e)
 
--- Canonical reader: the narrow parameter and narrow local are refused with
--- the reader's unsupported-type diagnostic; the other four shapes are admitted.
+-- Canonical reader: the narrow parameter is refused with the reader's
+-- unsupported-type diagnostic; the other five shapes are admitted.
 /--
 info: [("wide", "ok"),
  ("narrowParam", "compact verifier: unsupported type uint8"),
- ("narrowLocal", "compact verifier: unsupported type uint8"),
+ ("narrowLocal", "ok"),
  ("signedWide", "ok"),
  ("flag", "ok"),
  ("memoryArray", "ok")]
