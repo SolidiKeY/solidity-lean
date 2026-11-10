@@ -1,5 +1,10 @@
 {
  "Solidity/Lowering/G16/ComplementControls.lean:Solidity.Lowering.G16.ComplementControls.wrong_complement_rejected": [],
+ "Solidity/Lowering/G16/ComplementControls.lean:Solidity.Lowering.G16.UnsignedBitwiseControls.wrong_assignment_bitwise_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/G16/ComplementControls.lean:Solidity.Lowering.G16.UnsignedBitwiseControls.wrong_bitwise_rejected": [
   "Classical.choice",
   "Quot.sound",
