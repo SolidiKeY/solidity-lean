@@ -68,7 +68,8 @@ theorem prog_run {C : Contract} {Γ : Ctx} (names : Fresh) (j b : Idx Γ (.val .
 theorem endpoint {E : Source.Env} {srcΓ : Source.RCtx} {returns : List Source.STy}
     {M l u : Bool} {C : Contract} {Γ : Ctx} (m : ContextMap srcΓ Γ) (p : Pair m)
     (names : Fresh) :
-    Endpoint (Shape.whileBreak.source (E := E) (returns := returns) (M := M) (l := l) (u := u) p)
+    Endpoint (Shape.whileBreak.source (E := E) (C := C) (returns := returns) (M := M) (l := l)
+        (u := u) p ())
       Shape.whileBreak.offset m
       (whileBreakProg (C := C) names (boolSlot m p.i p.hi) (boolSlot m p.a p.ha))
       (.drop .refl) := by

@@ -50,7 +50,18 @@ the lane result, not admitted here. -/
 inductive Shape where
   /-- `while (i = a) break;` (G19 `AssignmentWhileBreak`). -/
   | whileBreak
+  /-- `for (i = a; ; post) break;` (G19 `AssignmentForBreak`). -/
+  | forBreak
   deriving DecidableEq, Repr
+
+/-- Per-shape data beyond the Boolean pair. For `forBreak`: the Source update
+expression and the intrinsic image of the lowered update, absent when the raw
+update list is empty (Lower.lean:515). A present update is guarded by the
+break flag (Lower.lean:516-517) and never runs, so the two are not associated:
+the statement holds for every pair of them. -/
+def Shape.Extra (E : Source.Env) (srcΓ : Source.RCtx) (C : Contract) (Γ : Ctx) : Shape → Type
+  | .whileBreak => Unit
+  | .forBreak => Source.ROptExpr E srcΓ × Option ((Δ : Ctx) × Prog C (.val .bool :: Γ) Δ)
 
 /-- Boolean negation as the elaborator emits it. -/
 def notB {C : Contract} {Γ : Ctx} (v : Val C Γ .bool) : Val C Γ .bool := .unop .not rfl rfl v
@@ -83,29 +94,52 @@ def whileBreakProg {C : Contract} {Γ : Ctx} (names : Fresh) (j b : Idx Γ (.val
   .cons (.declLocal .bool names.flag (some (.simple (.bool false))))
     (.cons (.loop .auto flagGuard (whileBreakBody names.capture j b)) .nil)
 
+/-- Intrinsic image of the lowered
+`{ i = a; bool brk = false; while (!brk && true) { brk = true; if (!brk) { upd } } }`
+(Lower.lean:485-487, 515-519, 533-539; the outer block is flattened by
+elaboration). -/
+def forBreakBody {C : Contract} {Γ : Ctx} :
+    Option ((Δ : Ctx) × Prog C (.val .bool :: Γ) Δ) → Prog C (.val .bool :: Γ) (.val .bool :: Γ)
+  | none => .cons (.assignLocal .here (.simple (.bool true))) .nil
+  | some upd => .cons (.assignLocal .here (.simple (.bool true)))
+      (.cons (.ite (notB (.simple (.local .here))) upd.2 .nil) .nil)
+
+def forBreakProg {C : Contract} {Γ : Ctx} (names : Fresh) (j b : Idx Γ (.val .bool))
+    (upd : Option ((Δ : Ctx) × Prog C (.val .bool :: Γ) Δ)) : Prog C Γ (.val .bool :: Γ) :=
+  .cons (.assignLocal j (.simple (.local b)))
+    (.cons (.declLocal .bool names.flag (some (.simple (.bool false))))
+      (.cons (.loop .auto flagGuard (forBreakBody upd)) .nil))
+
 /-- Resolved Source statement of each shape, as Source typing resolves it
 (the identity conversion on the right-hand side is retained,
 `Checker.SourceAssociation.resolved_eq`). -/
 def Shape.source {E : Source.Env} {srcΓ : Source.RCtx} {returns : List Source.STy}
     {M l u : Bool} {Γ : Ctx} {m : ContextMap srcΓ Γ} :
-    Shape → Pair m → Source.RStmt E returns M ⟨l, u⟩ srcΓ srcΓ
-  | .whileBreak, p => .whileLoop (.assign (.local p.i) (.conv (.local p.a) (.inl rfl))) .brk
+    {C : Contract} → (k : Shape) → Pair m → k.Extra E srcΓ C Γ →
+      Source.RStmt E returns M ⟨l, u⟩ srcΓ srcΓ
+  | _, .whileBreak, p, _ => .whileLoop (.assign (.local p.i) (.conv (.local p.a) (.inl rfl))) .brk
+  | _, .forBreak, p, x =>
+    .forLoop (.expr (.assign (.local p.i) (.conv (.local p.a) (.inl rfl)))) .none x.1 .brk
 
 /-- Source horizon offset at which the shape's normal outcome is reached. A
 derived constant, not a fuel/gas equation. -/
 def Shape.offset : Shape → Nat
   | .whileBreak => 4
+  | .forBreak => 5
 
 /-- The intrinsic output each shape's lowering is associated with. -/
-def Shape.lowered {C : Contract} {srcΓ : Source.RCtx} {Γ : Ctx} {m : ContextMap srcΓ Γ} :
-    Shape → Pair m → Fresh → Blk C Γ
-  | .whileBreak, p, names => ⟨_, whileBreakProg names (boolSlot m p.i p.hi) (boolSlot m p.a p.ha)⟩
+def Shape.lowered {E : Source.Env} {C : Contract} {srcΓ : Source.RCtx} {Γ : Ctx}
+    {m : ContextMap srcΓ Γ} : (k : Shape) → Pair m → k.Extra E srcΓ C Γ → Fresh → Blk C Γ
+  | .whileBreak, p, _, names => ⟨_, whileBreakProg names (boolSlot m p.i p.hi) (boolSlot m p.a p.ha)⟩
+  | .forBreak, p, x, names =>
+    ⟨_, forBreakProg names (boolSlot m p.i p.hi) (boolSlot m p.a p.ha) x.2⟩
 
 /-- Total syntactic output association: the supplied intrinsic output is the
 family member. Decided for a closed quoted output by kernel reduction. -/
-def Accepts {C : Contract} {srcΓ : Source.RCtx} {Γ : Ctx} {m : ContextMap srcΓ Γ}
-    (k : Shape) (p : Pair m) (names : Fresh) (output : Blk C Γ) : Prop :=
-  output = k.lowered p names
+def Accepts {E : Source.Env} {C : Contract} {srcΓ : Source.RCtx} {Γ : Ctx}
+    {m : ContextMap srcΓ Γ} (k : Shape) (p : Pair m) (x : k.Extra E srcΓ C Γ) (names : Fresh)
+    (output : Blk C Γ) : Prop :=
+  output = k.lowered p x names
 
 /-- The semantic endpoint of the P1 contract (`Checker.SemanticSoundnessStatement`)
 for one resolved statement and one target program: from any aligned Source/target
@@ -141,10 +175,11 @@ this proposition. -/
 def LowerLoopsCorrect : Prop :=
   ∀ (k : Shape) {E : Source.Env} {srcΓ : Source.RCtx} {returns : List Source.STy}
     {M l u : Bool} {C : Contract} {Γ : Ctx}
-    (m : ContextMap srcΓ Γ) (p : Pair m) (names : Fresh) (output : Blk C Γ),
-    Accepts k p names output →
+    (m : ContextMap srcΓ Γ) (p : Pair m) (x : k.Extra E srcΓ C Γ) (names : Fresh)
+    (output : Blk C Γ),
+    Accepts k p x names output →
     ∃ embedding : Thin Γ output.1,
-      Endpoint (k.source (E := E) (returns := returns) (M := M) (l := l) (u := u) p)
+      Endpoint (k.source (returns := returns) (M := M) (l := l) (u := u) p x)
         k.offset m output.2 embedding
 
 end Solidity.Correctness.Lowering.Loops
