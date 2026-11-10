@@ -9,7 +9,7 @@ revision=da26eb05e9959402afcb9bd6dfe5dc4f700f70d6
 checker_dir=${TRUST_CHECKER_DIR:-"$PWD/.lake/trust-checker-$revision"}
 if [[ ! -d "$checker_dir/.git" ]]; then
   if [[ ${TRUST_INSTALL_CHECKER:-0} != 1 ]]; then
-    echo "A04 blocked: approved lean4checker v4.24.0 ($revision) dependency unavailable; set TRUST_INSTALL_CHECKER=1 only after dependency authorization" >&2
+    echo "A04 blocked: pinned lean4checker v4.24.0 ($revision) dependency unavailable; set TRUST_INSTALL_CHECKER=1 only after dependency authorization" >&2
     exit 2
   fi
   if [[ -e "$checker_dir" ]]; then echo 'refusing to overwrite an existing checker path' >&2; exit 2; fi
