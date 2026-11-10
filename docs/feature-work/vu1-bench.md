@@ -357,6 +357,11 @@ and pure controls now cover these cases. Invalid size provenance suppresses
 size comparisons without hiding timing data; interrupted receipts remain
 provisional. Neither reviewer executed Lean or a compiler.
 
+Final finder and skeptic handoff review caught an owner-diff export truncated
+at a heading inside a fenced patch. The private exporter now preserves the
+complete fenced owner-edit section; regenerated handoff and checksum artifacts
+retain the original measurement and reporting heads separately.
+
 ## Checkpoint handoff
 
 Inventory reviews and checkpoint checks pass; documentation navigation remains
