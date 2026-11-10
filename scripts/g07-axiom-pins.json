@@ -21176,6 +21176,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/Passes/CompilerWholeScopePins.lean:Solidity.Backend.Passes.CompilerWholeScope.lmax_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/Passes/CompilerWholeScopePins.lean:Solidity.Backend.Passes.CompilerWholeScope.resources": [
   "Classical.choice",
   "Quot.sound",
@@ -47011,6 +47016,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/G16/Arithmetic.lean:Solidity.Lowering.G16.Arithmetic.TypedPower.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/G16/Arithmetic.lean:Solidity.Lowering.G16.Arithmetic.wrapping_assignment_transport": [
   "Classical.choice",
   "Quot.sound",
@@ -47047,6 +47057,11 @@
   "propext"
  ],
  "Solidity/Lowering/G16/ArithmeticControls.lean:Solidity.Lowering.G16.ArithmeticControls.wrong_signed_ring_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/ArithmeticControls.lean:Solidity.Lowering.G16.ArithmeticControls.wrong_typed_power_rejected": [
   "Classical.choice",
   "Quot.sound",
   "propext"
