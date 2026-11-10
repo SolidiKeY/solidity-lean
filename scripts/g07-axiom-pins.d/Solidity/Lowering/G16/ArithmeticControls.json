@@ -1,4 +1,9 @@
 {
+ "Solidity/Lowering/G16/ArithmeticControls.lean:Solidity.Lowering.G16.ArithmeticControls.CheckedSignedPower.regressions_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/G16/ArithmeticControls.lean:Solidity.Lowering.G16.ArithmeticControls.Modular.regressions_rejected": [
   "Classical.choice",
   "Quot.sound",
