@@ -46,7 +46,8 @@ structure Fresh where
 
 /-- The loop-shape family. Each constructor is one G19 loop leaf whose lowering
 has a proved target bridge. Not in the family (no theorem, not admitted):
-`continue` other than `whileContinue`, `return` (Lower.lean:454-459, 536-538), `do … while` (:507-512),
+`continue` other than `whileContinue`, `return` (Lower.lean:454-459, 536-538),
+`do … while` other than `doBreak` (:507-512),
 pure conditions, real bodies and suffix guards (:429-431), nested loops and
 shared return flags (:497-501), specifications (:526-530), non-Boolean or
 non-local operands. -/
@@ -57,6 +58,8 @@ inductive Shape where
   | forBreak
   /-- `while (i = a) { a = false; continue; tail }` (G19 `AssignmentWhileContinue`). -/
   | whileContinue
+  /-- `do { i = a; break; } while (c);` (G19 `AssignmentDoWhileBreak`). -/
+  | doBreak
   deriving DecidableEq, Repr
 
 /-- Per-shape data beyond the Boolean pair. For `forBreak`: the Source update
@@ -65,12 +68,16 @@ update list is empty (Lower.lean:515). A present update is guarded by the
 break flag (Lower.lean:516-517) and never runs, so the two are not associated:
 the statement holds for every pair of them. For `whileContinue`: the fresh
 continue flag and the Source items after `continue`, which lowering drops
-(Lower.lean:427) and Source never runs. -/
+(Lower.lean:427) and Source never runs. For `doBreak`: the fresh first-iteration
+flag, and the Source and lowered conditions; the lowered test
+`!brk && (first || c)` short-circuits on both turns (Lower.lean:510, 518), so
+neither condition is evaluated and the two are not associated. -/
 def Shape.Extra (E : Source.Env) (returns : List Source.STy) (M u : Bool) (srcΓ : Source.RCtx)
     (C : Contract) (Γ : Ctx) : Shape → Type
   | .whileBreak => Unit
   | .forBreak => Source.ROptExpr E srcΓ × Option ((Δ : Ctx) × Prog C (.val .bool :: Γ) Δ)
   | .whileContinue => Var × ((tailΓ : Source.RCtx) × Source.RItems E returns M ⟨true, u⟩ srcΓ tailΓ)
+  | .doBreak => Var × Source.RExpr E srcΓ .bool × Val C (.val .bool :: .val .bool :: Γ) .bool
 
 /-- Boolean negation as the elaborator emits it. -/
 def notB {C : Contract} {Γ : Ctx} (v : Val C Γ .bool) : Val C Γ .bool := .unop .not rfl rfl v
@@ -146,6 +153,19 @@ def whileContinueProg {C : Contract} {Γ : Ctx} (brk cnt se : Var) (j b : Idx Γ
   .cons (.declLocal .bool brk (some (.simple (.bool false))))
     (.cons (.loop .auto flagGuard (whileContinueBody cnt se j b)) .nil)
 
+/-- Intrinsic image of the lowered `do { i = a; break; } while (c);`:
+`bool first = true; bool brk = false; while (!brk && (first || c)) { first = false; i = a; brk = true; }`
+(Lower.lean:507-512 first flag, :452 break flag, :518 guard, :522 declaration). -/
+def doBreakProg {C : Contract} {Γ : Ctx} (first brk : Var) (j b : Idx Γ (.val .bool))
+    (c : Val C (.val .bool :: .val .bool :: Γ) .bool) : Prog C Γ (.val .bool :: .val .bool :: Γ) :=
+  .cons (.declLocal .bool first (some (.simple (.bool true))))
+    (.cons (.declLocal .bool brk (some (.simple (.bool false))))
+      (.cons (.loop .auto (.binop .and rfl rfl (notB (.simple (.local .here)))
+          (.binop .or rfl rfl (.simple (.local Idx.here.there)) c))
+        (.cons (.assignLocal Idx.here.there (.simple (.bool false)))
+          (.cons (.assignLocal j.there.there (.simple (.local b.there.there)))
+            (.cons (.assignLocal .here (.simple (.bool true))) .nil)))) .nil))
+
 /-- Resolved Source statement of each shape, in the form Source typing gives
 it (the identity conversion on the right-hand side is retained,
 `Checker.SourceAssociation.resolved_eq`). That typing produces this form is
@@ -161,6 +181,9 @@ def Shape.source {E : Source.Env} {srcΓ : Source.RCtx} {returns : List Source.S
     .whileLoop (.assign (.local p.i) (.conv (.local p.a) (.inl rfl)))
       (.block (.stmt (.expr (.assign (.local p.a) (.conv (.bool false) (.inl rfl))))
         (.stmt .cont x.2.2)))
+  | _, .doBreak, p, x =>
+    .doWhile (.block (.stmt (.expr (.assign (.local p.i) (.conv (.local p.a) (.inl rfl))))
+      (.stmt .brk .nil))) x.2.1
 
 /-- Source horizon offset at which the shape's normal outcome is reached. A
 derived constant, not a fuel/gas equation. -/
@@ -168,6 +191,7 @@ def Shape.offset : Shape → Nat
   | .whileBreak => 4
   | .forBreak => 5
   | .whileContinue => 9
+  | .doBreak => 7
 
 /-- The intrinsic output each shape's lowering is associated with. -/
 def Shape.lowered {E : Source.Env} {returns : List Source.STy} {M u : Bool} {C : Contract}
@@ -178,6 +202,8 @@ def Shape.lowered {E : Source.Env} {returns : List Source.STy} {M u : Bool} {C :
     ⟨_, forBreakProg names (boolSlot m p.i p.hi) (boolSlot m p.a p.ha) x.2⟩
   | .whileContinue, p, x, names =>
     ⟨_, whileContinueProg names.flag x.1 names.capture (boolSlot m p.i p.hi) (boolSlot m p.a p.ha)⟩
+  | .doBreak, p, x, names =>
+    ⟨_, doBreakProg x.1 names.flag (boolSlot m p.i p.hi) (boolSlot m p.a p.ha) x.2.2⟩
 
 /-- Total syntactic output association: the supplied intrinsic output is the
 family member. Decided for a closed quoted output by kernel reduction. -/

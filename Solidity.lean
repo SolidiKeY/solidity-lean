@@ -2429,6 +2429,7 @@ import Solidity.Correctness.Lowering.Checker.SourceAssociation
 import Solidity.Correctness.Lowering.Checker.WhileBreak
 import Solidity.Correctness.Lowering.Loops.Capture
 import Solidity.Correctness.Lowering.Loops.Correct
+import Solidity.Correctness.Lowering.Loops.DoBreak
 import Solidity.Correctness.Lowering.Loops.Family
 import Solidity.Correctness.Lowering.Loops.ForBreak
 import Solidity.Correctness.Lowering.Loops.Horizon

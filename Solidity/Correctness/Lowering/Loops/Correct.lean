@@ -1,6 +1,7 @@
 import Solidity.Correctness.Lowering.Loops.WhileBreak
 import Solidity.Correctness.Lowering.Loops.ForBreak
 import Solidity.Correctness.Lowering.Loops.WhileContinue
+import Solidity.Correctness.Lowering.Loops.DoBreak
 import Solidity.Correctness.Lowering.Loops.Capture
 import Solidity.Correctness.Lowering.Checker.WhileBreak
 
@@ -19,7 +20,7 @@ Partiality: theorems speak of accepted outputs only. Producer refusals
 inside a loop, Lower.lean:448-449, 455, 474; `lowerReturn` refusals; refusals
 of `elabStmtsP` or `SProg.chain`) and non-family outputs are not covered; they
 are coverage gaps, not counterexamples. Only normal outcomes are stated. The
-producer link is per sample (four inputs); a raw-level check exists only for
+producer link is per sample (five inputs); a raw-level check exists only for
 the while sample (`Checker.RawProbe.checkRaw`).
 -/
 namespace Solidity.Correctness.Lowering
@@ -36,6 +37,7 @@ theorem lowerLoops_correct : Loops.LowerLoopsCorrect := by
   | whileBreak => exact ⟨.drop .refl, WhileBreak.endpoint m p names⟩
   | forBreak => exact ⟨.drop .refl, ForBreak.endpoint m p x names⟩
   | whileContinue => exact ⟨.drop .refl, WhileContinue.endpoint m p x names⟩
+  | doBreak => exact ⟨.drop (.drop .refl), DoBreak.endpoint m p x names⟩
 
 namespace Loops.Coverage
 
@@ -199,6 +201,44 @@ theorem whileContinue_actual (E : Source.Env) :
   exact lowerLoops_correct .whileContinue Checker.WhileBreak.mapping whileBreakPair
     (Var.fresh "cnt" 2, ⟨_, .nil⟩) whileContinueNames Capture.whileContinue whileContinue_accepts
 
+/-- The lowered condition `a` of the `do` sample, read past both flags. -/
+def doCondition : Val IntrinsicProbe.C (.val .bool :: .val .bool :: IntrinsicProbe.Γ) .bool :=
+  .simple (.local Idx.here.there.there.there)
+
+/-- Kernel acceptance of the actual output for `do { i = a; break; } while (a);`.
+The family accepts any Source condition with this lowered one (neither runs);
+`doBreak_actual` pins the Source condition to its actual typing. -/
+theorem doBreak_accepts {E : Source.Env} (c : Source.RExpr E [.bool, .bool] .bool) :
+    Accepts (returns := []) (M := false) (u := false) .doBreak whileBreakPair
+      (Var.fresh "first" 2, c, doCondition) whileBreakNames Capture.doBreak := rfl
+
+/-- Actual Source typing of `do { i = a; break; } while (a);`. -/
+def doBreakTyping (E : Source.Env) :
+    Source.StmtD (SourceAssociation.typingContext E) SourceAssociation.names
+      (.doWhile (l := false) (u := false)
+        (.blockStmt (.block (.cons (.stmtItem (.simpleStmt (.exprStmt
+          (.assign .assign (.ident "i") (.ident "a")))))
+          (.cons (.stmtItem .breakStmt) .nil)))) (.ident "a"))
+      SourceAssociation.names :=
+  .doWhile rfl (.block (.stmt (.expr (SourceAssociation.conditionTyping E) rfl) (.stmt .brk .nil)))
+    (.loc (i := 1) rfl rfl)
+
+/-- Its resolution is a family Source statement, with its actual condition. -/
+theorem doBreak_source (E : Source.Env) :
+    ∃ c : Source.RExpr E [.bool, .bool] .bool, (doBreakTyping E).toR =
+      Shape.doBreak.source (C := IntrinsicProbe.C) (returns := []) (M := false) (l := false)
+        (u := false) whileBreakPair (Var.fresh "first" 2, c, doCondition) := ⟨_, rfl⟩
+
+/-- End to end for the actual `do { i = a; break; } while (a);` sample. -/
+theorem doBreak_actual (E : Source.Env) :
+    ∃ embedding : Thin IntrinsicProbe.Γ Capture.doBreak.1,
+      Endpoint (doBreakTyping E).toR Shape.doBreak.offset
+        Checker.WhileBreak.mapping Capture.doBreak.2 embedding := by
+  obtain ⟨c, eq⟩ := doBreak_source E
+  rw [eq]
+  exact lowerLoops_correct .doBreak Checker.WhileBreak.mapping whileBreakPair
+    (Var.fresh "first" 2, c, doCondition) whileBreakNames Capture.doBreak (doBreak_accepts c)
+
 end Loops.Coverage
 
 #print axioms lowerLoops_correct
@@ -216,5 +256,8 @@ end Loops.Coverage
 #print axioms Loops.Coverage.whileContinue_accepts
 #print axioms Loops.Coverage.whileContinue_source
 #print axioms Loops.Coverage.whileContinue_actual
+#print axioms Loops.Coverage.doBreak_accepts
+#print axioms Loops.Coverage.doBreak_source
+#print axioms Loops.Coverage.doBreak_actual
 
 end Solidity.Correctness.Lowering

@@ -41,6 +41,24 @@ theorem while_below {E : Env} (G : Glob E) (F : Fr) (nps : Nat) (ph : Option (Ph
         | ret l2 => exact Below.refl _
       · exact Below.refl _
 
+/-- A `do … while` whose body is the bare body a horizon later is the bare
+loop a horizon later; the condition is the same on both sides. -/
+theorem doWhile_below {E : Env} (G : Glob E) (F : Fr) (nps : Nat) (ph : Option (Ph E))
+    {R : List STy} {M lp u : Bool} {Γ Γ₁ : RCtx} (c : RExpr E Γ .bool)
+    (s s' : RStmt E R M ⟨true, u⟩ Γ Γ₁)
+    (hs : ∀ n l, Below (execS G F n nps ph s l) (execS G F (n + 1) nps ph s' l)) :
+    ∀ (n : Nat) (l : Locals E.layout Γ),
+      Below (execS G F n nps ph (.doWhile (l := lp) s c) l)
+        (execS G F (n + 1) nps ph (.doWhile (l := lp) s' c) l)
+  | 0, _ => Below.timeout _
+  | n + 1, l => by
+    have hw := doWhile_below (lp := lp) G F nps ph c s s' hs n
+    have hb := hs n l
+    have hc : Below (evalE G F n c) (evalE G F (n + 1) c) :=
+      (belowAtKnown G n).evalE true F c
+    rw [execS, execS]
+    below_go [hb, hw, hc, Below.sub]
+
 /-- Same body on both sides. -/
 theorem same_below {E : Env} (G : Glob E) (F : Fr) (nps : Nat) (ph : Option (Ph E))
     {R : List STy} {M : Bool} {k : SCtx} {Γ Γ₁ : RCtx} (s : RStmt E R M k Γ Γ₁) :

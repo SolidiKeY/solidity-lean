@@ -5,3 +5,4 @@
 | `Correctness/Lowering/Loops/Capture.lean` | Actual `lowerLoops` + `elabStmtsP` outputs for the loop-family samples, quoted. |
 | `Correctness/Lowering/Loops/Horizon.lean` | An identity conversion in a `while` condition costs one Source horizon (monotonicity transport). |
 | `Correctness/Lowering/Loops/WhileContinue.lean` | While/continue leaf: two-path flag-loop target run plus G19 Source half through the horizon transport. |
+| `Correctness/Lowering/Loops/DoBreak.lean` | Do-while/break leaf: first-flag loop with short-circuited condition, plus G19 Source half. |
