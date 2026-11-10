@@ -102,4 +102,25 @@ def forBreak : Blk IntrinsicProbe.C IntrinsicProbe.Γ := capture_for_break%
 /-- Actual output for `for (i = a; ; a = false) break;`. -/
 def forBreakUpdate : Blk IntrinsicProbe.C IntrinsicProbe.Γ := capture_for_break_update%
 
+/-- `for (; i = a; a = false) { continue; }`, the source shape of G19
+`AssignmentForContinue`. -/
+def forContinueInput : List RawStmt :=
+  [.forLoop {} [] (some (.assign (.name "i") (.name "a"))) [.assign (.name "a") (.bool false)] [.cont]]
+
+open Lean Elab Command in
+/-- Refusal control: the pipeline refuses `forContinueInput`. `lowerLoops` keeps
+an effectful `for` condition in the loop head (the head rewrite of
+Lower.lean:493 is for `while` only) and `loopExpr` (Stmt.lean:794-802) refuses
+it, so G19 `AssignmentForContinue` has no producer counterpart. Fails if the
+pipeline starts accepting this input, so the coverage table is revisited. -/
+elab "#check_for_continue_refused" : command => liftTermElabM do
+  let accepted ← try
+      discard <| captureProgram forContinueInput
+      pure true
+    catch _ => pure false
+  if accepted then
+    throwError "the pipeline now accepts an effectful for condition; extend the loop family"
+
+#check_for_continue_refused
+
 end Solidity.Correctness.Lowering.Loops.Capture
