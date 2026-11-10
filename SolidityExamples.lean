@@ -48,6 +48,8 @@ import Solidity.Examples.DecisionCoefficientBoundary
 import Solidity.Examples.DecisionCompoundCertificate
 import Solidity.Examples.DecisionCompoundFieldReason
 import Solidity.Examples.DecisionCore
+import Solidity.Examples.DecisionFeatureMappings
+import Solidity.Examples.DecisionFeatureScalars
 import Solidity.Examples.DecisionFeatures
 import Solidity.Examples.DecisionFixedArrayPair
 import Solidity.Examples.DecisionFixedArrayPath
