@@ -223,6 +223,17 @@ steps and aggregate peak RSS remain `null`; these partial totals are never a
 complete baseline. Failed, ambiguous, native-marked or source-mismatched results
 cannot become certified successes. Partial checkpoints survive interruption.
 
+For a large inventory, `node scripts/bench/batch-checks.mjs --admission FILE
+--soljson DIR --work NEW_DIR` reuses the existing batched testing API and its
+original 32-row batches and 300-second per-tool supervisors. It retains a row
+for every admission entry even when a batch checkpoint omits unrun declarations.
+Missing or ambiguous observations cannot pass. Exit 135 retries once; both
+attempts remain visible. This wrapper reports the existing per-row `elapsedMs`
+as `functionReportedElapsedMs`, excluding source compilation and shared imports.
+Whole-call `apiWallMs` includes checkpoint logging; it is never apportioned to
+functions. Per-function source-to-verdict wall time, phases and RSS remain null.
+Isolated process totals and batched check timers must not be pooled.
+
 ## Budget decision
 
 The plan proposes fast p50 ≤ 1 s, p95 ≤ 10 s, and certified ≤ 60 s and
@@ -298,6 +309,11 @@ same byte buffer, with an end-of-run identity check and a replacement control.
 Runtime/toolchain identity and effective per-tool timeout are recorded. The
 reviewers confirmed that refused rows and failed attempts remain visible, and
 that the RSS metric is an individual-process maximum rather than a tree peak.
+
+Independent read-only batch-wrapper reviews found two cross-credit risks: equal
+bytes at different source paths, and duplicated inventory identities. Joins now
+include normalized source paths, duplicate inventory keys are rejected, and
+pure controls prevent either case from turning one observation into two checks.
 
 ## Checkpoint handoff
 
