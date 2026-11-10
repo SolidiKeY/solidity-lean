@@ -425,6 +425,69 @@ theorem wrong_signed_assignment_rejected (fuel : Nat) :
   simp only [ne_eq,reduceCtorEq,not_false_eq_true,Except.ok.injEq,Option.some.injEq]
   decide
 
+def powerSource (t : Source.IntTy) (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256)
+    (x y : Int) (hx : t.lo ≤ x ∧ x ≤ t.hi)
+    (hy : (UnsignedNarrowing.ty bits valid).lo ≤ y ∧ y ≤ (UnsignedNarrowing.ty bits valid).hi) :
+    Source.EMState MixedAssignmentControls.E
+      [.int t,.int (UnsignedNarrowing.ty bits valid),.bytes .memory,.bytes .storage] :=
+  (.cons (.int x hx) (.cons (.int y hy) (.cons (.memRef rfl 0)
+    (.cons (.storRef rfl MixedAssignmentControls.path) .nil))),
+    {Source.SemanticsExamples.s0 with heap := MixedAssignmentControls.heap})
+
+def powerTarget (t : Source.IntTy) (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256)
+    (x y : Int) (hx : t.lo ≤ x ∧ x ≤ t.hi)
+    (hy : (UnsignedNarrowing.ty bits valid).lo ≤ y ∧ y ≤ (UnsignedNarrowing.ty bits valid).hi) :
+    State MixedAssignmentControls.C [.val (integerPrim t),.val .uint,.mem bytesR,.alias bytesR] :=
+  (MixedAssignmentControls.memory.push (integerValue (UnsignedNarrowing.ty bits valid) y hy)).push
+    (integerValue t x hx)
+
+def power_client (t : Source.IntTy) (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256)
+    (x y : Int) (hx : t.lo ≤ x ∧ x ≤ t.hi)
+    (hy : (UnsignedNarrowing.ty bits valid).lo ≤ y ∧ y ≤ (UnsignedNarrowing.ty bits valid).hi)
+    (pipeline : Roadmap.Pipeline) (fuel : Nat) :=
+  TypedPower.transport (MixedAssignmentControls.globals pipeline) Source.SemanticsExamples.F0 fuel
+    (powerSource t bits valid x y hx hy) (powerTarget t bits valid x y hx hy) t bits valid
+    .here (.there .here) .here (.there .here) x y hx hy rfl rfl rfl rfl
+
+def powerObserved (t : Source.IntTy) (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256)
+    (x y : Int) (hx : t.lo ≤ x ∧ x ≤ t.hi)
+    (hy : (UnsignedNarrowing.ty bits valid).lo ≤ y ∧ y ≤ (UnsignedNarrowing.ty bits valid).hi)
+    (pipeline : Roadmap.Pipeline) (fuel : Nat) : Source.R (Option Int) :=
+  ((Source.evalE (MixedAssignmentControls.globals pipeline)
+    {Source.SemanticsExamples.F0 with checked := false} (fuel+3)
+    (.shiftLike .exp (.local .here) (.local (.there .here)) rfl)).run
+      (powerSource t bits valid x y hx hy)).1.bind (fun result => result.get.map (fun v => v.key))
+
+private theorem power_observed_run (t : Source.IntTy) (bits : Nat)
+    (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256) (x y : Int) (hx : t.lo ≤ x ∧ x ≤ t.hi)
+    (hy : (UnsignedNarrowing.ty bits valid).lo ≤ y ∧ y ≤ (UnsignedNarrowing.ty bits valid).hi)
+    (pipeline : Roadmap.Pipeline) (fuel : Nat) :
+    powerObserved t bits valid x y hx hy pipeline fuel = .ok (some (t.wrap (x^y.toNat))) := by
+  have actual := (power_client t bits valid x y hx hy pipeline fuel).1
+  unfold powerObserved
+  rw [actual]
+  rfl
+
+/-- Reject lost masks/signs, reversed operands, erased zero-to-zero, wrong parity and narrowed exponents on actual Source runs. -/
+theorem wrong_typed_power_rejected (pipeline : Roadmap.Pipeline) (fuel : Nat) :
+    powerObserved .u8 8 (by decide) 2 8 (by decide) (by decide) pipeline fuel ≠ .ok (some 256) ∧
+    powerObserved (SignedWidthCasts.ty 8 (by decide)) 8 (by decide) (-2) 3
+      (by decide) (by decide) pipeline fuel ≠ .ok (some 248) ∧
+    powerObserved .u8 8 (by decide) 2 3 (by decide) (by decide) pipeline fuel ≠
+      powerObserved .u8 8 (by decide) 3 2 (by decide) (by decide) pipeline fuel ∧
+    powerObserved .u8 8 (by decide) 0 0 (by decide) (by decide) pipeline fuel ≠ .ok (some 0) ∧
+    powerObserved (SignedWidthCasts.ty 8 (by decide)) 16 (by decide) (-1) 511
+      (by decide) (by decide) pipeline fuel ≠ .ok (some 1) ∧
+    powerObserved .u8 16 (by decide) 2 256 (by decide) (by decide) pipeline fuel ≠ .ok (some 1) := by
+  simp only [power_observed_run,ne_eq,Except.ok.injEq,Option.some.injEq]
+  have residue := Source.PowerV2.powMod_residue (-1) 511 256
+  have oddWrapped : (SignedWidthCasts.ty 8 (by decide)).wrap ((-1 : Int)^511) = -1 := by
+    rw [SignedWidthCasts.wrap_eq,← residue]
+    decide
+  have big : (2 : Int)^256 = ((2^256 : Nat) : Int) := (Int.natCast_pow 2 256).symm
+  rw [show (511 : Int).toNat = 511 from rfl,oddWrapped,show (256 : Int).toNat = 256 from rfl,big]
+  decide
+
 end Solidity.Lowering.G16.ArithmeticControls
 
 /-- info: 'Solidity.Lowering.G16.ArithmeticControls.wrong_wrapping_rejected' does not depend on any axioms -/
@@ -454,3 +517,7 @@ end Solidity.Lowering.G16.ArithmeticControls
 /-- info: 'Solidity.Lowering.G16.ArithmeticControls.wrong_signed_assignment_rejected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Lowering.G16.ArithmeticControls.wrong_signed_assignment_rejected
+
+/-- info: 'Solidity.Lowering.G16.ArithmeticControls.wrong_typed_power_rejected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Lowering.G16.ArithmeticControls.wrong_typed_power_rejected
