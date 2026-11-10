@@ -6,8 +6,7 @@ import Solidity.Lowering.V07.AliasRhsSubtraction
 namespace Solidity.Lowering.G16.ComplementControls
 open Solidity.Lowering.V07
 
-/-- Instantiate the actual transport with mixed local/memory/storage clients
-for every width, sign, checked mode and pipeline. -/
+/-- Instantiate the actual transport with mixed local/memory/storage clients for every width, sign, checked mode and pipeline. -/
 def client (t : Source.IntTy) (checked : Bool) (x : Int)
     (hx : t.lo ≤ x ∧ x ≤ t.hi) (pipeline : Roadmap.Pipeline) (fuel : Nat) :=
   Complement.transport (MixedAssignmentControls.globals pipeline)
@@ -17,8 +16,7 @@ def client (t : Source.IntTy) (checked : Bool) (x : Int)
     (WordCastControls.si t) (WordCastControls.ti t)
     (WordCastControls.initial t x 0 hx (integer_zero_range t)) true x hx rfl
 
-/-- Guards against forgetting unsigned width restoration and interpreting a
-signed complement as the nonnegative word bit pattern. -/
+/-- Guards against forgetting unsigned width restoration and interpreting a signed complement as the nonnegative word bit pattern. -/
 theorem wrong_complement_rejected :
     Source.IntTy.u8.wrap (-0-1) ≠ -1 ∧
     (SignedWidthCasts.ty 8 (by decide)).wrap (-0-1) ≠ 255 := by
@@ -99,3 +97,98 @@ end Solidity.Lowering.G16.UnsignedBitwiseControls
 /-- info: 'Solidity.Lowering.G16.UnsignedBitwiseControls.wrong_bitwise_rejected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Lowering.G16.UnsignedBitwiseControls.wrong_bitwise_rejected
+
+namespace Solidity.Lowering.G16.UnsignedBitwiseControls
+open Solidity.Lowering.V07
+open Solidity.Lowering.G16.UnsignedBitwise
+
+/-- Inhabited assignment/read callers at all unsigned widths, operators, modes and pipelines. -/
+def assignment_width_client (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256)
+    (op : Op) (checked : Bool) (pipeline : Roadmap.Pipeline) (fuel : Nat) :=
+  let t := UnsignedNarrowing.ty bits valid
+  assignment_transport (MixedAssignmentControls.globals pipeline)
+    {Source.SemanticsExamples.F0 with checked := checked} fuel
+    (WordCastControls.source t 0 0 (integer_zero_range t) (integer_zero_range t))
+    (WordCastControls.target t 0 0 (integer_zero_range t) (integer_zero_range t))
+    op bits valid (.there .here) .here (.there .here) .here 0 0
+    (Nat.two_pow_pos bits) (Nat.two_pow_pos bits) rfl rfl rfl rfl
+
+private def assignmentSource (op : Op) (checked : Bool) (pipeline : Roadmap.Pipeline) (fuel : Nat) :=
+  (Source.evalE (MixedAssignmentControls.globals pipeline)
+    {Source.SemanticsExamples.F0 with checked := checked} (fuel+4)
+    (.binary (sourceOp op) (.assign (.local (.there .here)) (.local .here))
+      (.local (.there .here)))).run sampleSource
+
+private def assignmentObserved (op : Op) (checked : Bool) (pipeline : Roadmap.Pipeline) (fuel : Nat) : Option Int :=
+  match (assignmentSource op checked pipeline fuel).1 with
+  | .ok (.val v) => v.key
+  | _ => none
+
+private def sourceWritten (op : Op) (checked : Bool) (pipeline : Roadmap.Pipeline) (fuel : Nat) : Option Int :=
+  ((assignmentSource op checked pipeline fuel).2.1.get (.there .here)).key
+
+private def nativeObserved (op : Op) (pipeline : Roadmap.Pipeline) : Option Int :=
+  match (assignmentOperand op pipeline (.there .here) .here).run sampleTarget with
+  | .ok (_, .prim v) => some v.val
+  | .error _ => none
+
+private def nativeWritten (op : Op) (pipeline : Roadmap.Pipeline) : Option Int :=
+  match (assignmentOperand op pipeline (.there .here) .here).run sampleTarget with
+  | .ok (out,_) => some (TEnv.get (.there .here) out.st.env).val
+  | .error _ => none
+
+private theorem assignment_sample_run (op : Op) (checked : Bool) (pipeline : Roadmap.Pipeline) (fuel : Nat) :
+    assignmentObserved op checked pipeline fuel = some (result op 12 (captureRight pipeline 12 10) : Int) ∧
+    nativeObserved op pipeline = some (result op 12 (captureRight pipeline 12 10) : Int) ∧
+    sourceWritten op checked pipeline fuel = some 12 ∧ nativeWritten op pipeline = some 12 := by
+  have runs := assignment_transport (MixedAssignmentControls.globals pipeline)
+    {Source.SemanticsExamples.F0 with checked := checked} fuel sampleSource sampleTarget
+    op 8 (by decide) (.there .here) .here (.there .here) .here 12 10
+    (by decide) (by decide) rfl rfl rfl rfl
+  have native := runs.2
+  dsimp only [MixedAssignmentControls.globals] at native
+  refine ⟨?_,?_,?_,?_⟩
+  · unfold assignmentObserved assignmentSource
+    rw [runs.1]
+    rfl
+  · unfold nativeObserved
+    rw [native]
+    rfl
+  · unfold sourceWritten assignmentSource
+    rw [runs.1,source_locals_get_set]
+    rfl
+  · unfold nativeWritten
+    rw [native]
+    change some (TEnv.get (.there .here) (TEnv.set (.there .here) _ sampleTarget.env)).val = some 12
+    rw [TEnv.get_set]
+    rfl
+
+/-- Actual evaluations reject erased operand order for every opcode and dropped named writes in either mode/pipeline. -/
+theorem wrong_assignment_bitwise_rejected (checked : Bool) (fuel : Nat) :
+    assignmentObserved .and checked .legacy fuel ≠ assignmentObserved .and checked .viaIR fuel ∧
+    assignmentObserved .or checked .legacy fuel ≠ assignmentObserved .or checked .viaIR fuel ∧
+    assignmentObserved .xor checked .legacy fuel ≠ assignmentObserved .xor checked .viaIR fuel ∧
+    (∀ op p, sourceWritten op checked p fuel = some 12 ∧ nativeWritten op p = some 12) ∧
+    (∀ op p, nativeObserved op p = assignmentObserved op checked p fuel) := by
+  have andLegacy := assignment_sample_run .and checked .legacy fuel
+  have andIR := assignment_sample_run .and checked .viaIR fuel
+  have orLegacy := assignment_sample_run .or checked .legacy fuel
+  have orIR := assignment_sample_run .or checked .viaIR fuel
+  have xorLegacy := assignment_sample_run .xor checked .legacy fuel
+  have xorIR := assignment_sample_run .xor checked .viaIR fuel
+  refine ⟨?_,?_,?_,?_,?_⟩
+  · rw [andLegacy.1,andIR.1]
+    decide
+  · rw [orLegacy.1,orIR.1]
+    decide
+  · rw [xorLegacy.1,xorIR.1]
+    decide
+  · intro op p
+    exact (assignment_sample_run op checked p fuel).2.2
+  · intro op p
+    rw [(assignment_sample_run op checked p fuel).1,(assignment_sample_run op checked p fuel).2.1]
+
+/-- info: 'Solidity.Lowering.G16.UnsignedBitwiseControls.wrong_assignment_bitwise_rejected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms wrong_assignment_bitwise_rejected
+end UnsignedBitwiseControls
