@@ -58,6 +58,42 @@ def provenance(report):
             ('provisional: incomplete run; end checks not complete' if not report['attemptFinished'] else
              'runner completed; execution failures retained')}
 
+def row_provenance(row):
+    """A retry total is comparable only when every attempt binds the same input."""
+    attempts = []
+    for index, attempt in enumerate(row['attempts']):
+        errors = attempt.get('errors', [])
+        issues = [e for e in errors if not (
+            e.get('stage') in {'lean', 'process', 'preconditions'} or
+            (e.get('stage') == 'verification' and e.get('reason') in ATTEMPTED))]
+        if attempt.get('attemptFinished') is not True:
+            issues = issues + [{'stage': 'report', 'reason': 'attempt incomplete'}]
+        results = attempt.get('results', [])
+        if len(results) != 1:
+            issues = issues + [{'stage': 'selection', 'reason': 'expected one returned identity'}]
+        else:
+            actual = results[0]
+            try:
+                expected_id = row['input'].get('sourceId')
+                actual_id = actual.get('sourceId')
+                matches = (type(expected_id) is int and type(actual_id) is int
+                    and all(isinstance(item.get(key), str) and item[key]
+                        for item in [row['input'], actual] for key in ['source','sourceHash','contract'])
+                    and identity(actual) == identity(row['input']))
+            except (KeyError, TypeError, ValueError):
+                matches = False
+            if not matches:
+                issues = issues + [{'stage': 'identity', 'reason': 'returned identity mismatch or missing'}]
+            if actual.get('status') not in ATTEMPTED:
+                issues = issues + [{'stage': 'verification', 'reason': 'not an attempted result status'}]
+            if actual.get('verification') not in [None, 'certified']:
+                issues = issues + [{'stage': 'verification', 'reason': 'not a certified result marker'}]
+        attempts.append({'attempt': index, 'errors': errors, 'identityErrors': issues,
+            'returnedIdentities': [{k: result.get(k) for k in
+                ['source','sourceHash','contract','sourceId','signature','verification']} for result in results]})
+    return {'input': row['input'], 'state': row['state'], 'statisticsAllowed': bool(attempts) and all(not a['identityErrors'] for a in attempts),
+        'attempts': attempts}
+
 def summarize(processes, batch=None, batch_sizes=None):
     summary = {'kind': 'u01-partial-observations', 'sourceToVerdictBaseline': False,
         'suiteComplete': False, 'percentiles': 'nearest rank ceil(p*n); failures retained; groups overlap and are not pooled',
@@ -77,8 +113,14 @@ def summarize(processes, batch=None, batch_sizes=None):
         if len(set(keys)) != len(keys):
             raise ValueError('duplicate process inventory identity')
         points = []
+        row_evidence = []
         for row in report['rows']:
-            if not validity['statisticsAllowed'] or row['state'] not in ['passed', 'failed']:
+            evidence = row_provenance(row)
+            evidence['completedState'] = row['state'] in ['passed', 'failed']
+            evidence['statisticsAllowed'] = (evidence['statisticsAllowed']
+                and validity['statisticsAllowed'] and evidence['completedState'])
+            row_evidence.append(evidence)
+            if not evidence['statisticsAllowed']:
                 continue
             attempts = row['attempts']
             wall = sum(a['wallMs'] for a in attempts) if attempts and all(number(a.get('wallMs')) for a in attempts) else None
@@ -92,10 +134,15 @@ def summarize(processes, batch=None, batch_sizes=None):
             previous = unique.get(identity(row['input']))
             if wall is not None and (previous is None or wall > previous['wallMs']):
                 unique[identity(row['input'])] = dict(point, group=group)
+        validity = dict(validity, statisticsAllowed=bool(points) and validity['statisticsAllowed'],
+            scope='individually validated completed rows only',
+            comparableRowsIncluded=len(points),
+            excludedComparableRows=sum(e['completedState'] and not e['statisticsAllowed'] for e in row_evidence),
+            rowsNotCompleted=sum(not e['completedState'] for e in row_evidence))
         summary['groups'].append({'group': group, 'toolHead': report.get('toolHead'),
             'driverSha256': report.get('driverSha256'), 'attemptFinished': report['attemptFinished'],
             'states': dict(collections.Counter(r['state'] for r in report['rows'])),
-            'provenance': validity, 'metric': 'per-function CLI wall total including retries; one point per completed inventory row',
+            'provenance': validity, 'rowProvenance': row_evidence, 'metric': 'per-function CLI wall total including retries; one point per completed inventory row',
             'wallMsAllCompletedFunctionTotals': stats([p['wallMs'] for p in points if p['wallMs'] is not None]),
             'wallMsPassedFunctionTotals': stats([p['wallMs'] for p in points if p['wallMs'] is not None and p['state']=='passed']),
             'wallMsFailedFunctionTotals': stats([p['wallMs'] for p in points if p['wallMs'] is not None and p['state']=='failed']),

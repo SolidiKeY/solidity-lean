@@ -227,7 +227,12 @@ Quantiles use nearest rank, retain failed completed functions, and include all
 retry wall time in each function's total. Overlapping groups are not pooled;
 the worst-function list selects the maximum observed total per exact identity.
 Static statement correlation is descriptive, with no linear-scaling claim.
-Provenance errors remain visible and suppress comparable statistics; interrupted
+Report and attempt provenance errors remain visible. Every retry must bind
+exactly one matching certified-mode identity; invalid attempts exclude the
+entire function retry total from timings, RSS, correlation and worst lists.
+Raw attempt errors and failure counts remain available. Valid failed outcomes
+with matching identities remain comparable. Report provenance errors suppress
+all comparable statistics; interrupted
 runs are provisional because final identity checks have not completed. Duplicate
 size/process identities are rejected, and batch identities/raw timers are checked
 again. This consumer never promotes partial receipts to a complete baseline.
@@ -351,6 +356,18 @@ link and stale generated catalog. The requested link is added and the catalog
 is regenerated through its unchanged script, without weakening checks.
 Independent read-only finder and skeptic reviews confirmed the exact edits and
 that branch validation does not grant producer ownership or U01 acceptance.
+
+Landing finder and skeptic review identified attempt-level identity errors
+bypassing the report-level provenance filter. The consumer now validates each
+returned identity and attempt error before including a complete retry total.
+Finder review additionally required rejecting matching malformed declaration
+IDs and retaining attempt evidence from unfinished rows. IDs must be integers
+(including synthesized constructor -1); all row evidence is retained while only
+completed valid rows enter statistics. Both cases have focused controls, along
+with mismatches, missing/ambiguous returns, native markers, mixed retries and
+valid failed neighboring rows. Finder review removed a missing-status confound
+from the changed-identity controls so each tests its intended mutation.
+Independent read-only finder and skeptic confirmed the implementation fixes.
 
 ## Checkpoint handoff
 
