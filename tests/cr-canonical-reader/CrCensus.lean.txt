@@ -1,0 +1,36 @@
+import Solidity.Frontend.Import
+import Solidity.Frontend.ExecutableAst.Shared.Compose
+open Lean Solidity Solidity.Frontend Solidity.Frontend.ExecutableAst
+
+def censusOne (path : System.FilePath) : IO (List (String × Bool × String)) := do
+  let some j := (Json.parse (← IO.FS.readFile path)).toOption | return []
+  let some cu := (Source.readCompilationUnit j).toOption | return []
+  let ast := cu.primary
+  let cs := (J.nodes ast).filter (fun n => J.kind n == "ContractDefinition")
+  let mut out := []
+  for c in cs do
+    let cname := (J.str? c "name").getD ""
+    let existing : List (String × Bool) := match readContract ast cname [] false with
+      | .ok sc => sc.funs.map (fun f => (f.sourceName, f.body.toBool))
+      | .error _ => []
+    for n in (J.arrD c "nodes").toList do
+      if J.kind n != "FunctionDefinition" then continue
+      let fname := (J.str? n "name").getD ""
+      let ex := (existing.find? (·.1 == fname)).map (·.2) |>.getD false
+      let can := match Shared.function Shared.executableReader n c.compress with
+        | .ok _ => "ok" | .error e => e
+      out := (s!"{path.fileName.getD ""}:{cname}.{fname}", ex, can) :: out
+  return out
+
+#eval show IO Unit from do
+  let files := (← System.FilePath.readDir "tests/solc").filter (·.fileName.endsWith ".ast.json")
+  let mut rows := []
+  for f in files do rows := rows ++ (← censusOne f.path)
+  let exOk := rows.filter (·.2.1)
+  let both := exOk.filter (·.2.2 == "ok")
+  IO.println s!"functions {rows.length} existingBodyOk {exOk.length} canonicalOk {(rows.filter (·.2.2 == "ok")).length} bothOk {both.length}"
+  -- diagnostics among existing-ok but canonical-refused, normalized to first 60 chars
+  let lost := exOk.filter (·.2.2 != "ok")
+  let keys := (lost.map (fun r => (r.2.2.take 60))).eraseDups
+  for k in keys do
+    IO.println s!"{(lost.filter (fun r => r.2.2.take 60 == k)).length}\t{k}"

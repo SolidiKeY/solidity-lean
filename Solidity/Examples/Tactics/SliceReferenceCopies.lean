@@ -3,9 +3,9 @@ import Solidity.Examples.Tactics.SliceCopies
 
 /-! Source-to-typed-run certificates for fixed primitive calldata slice rows.
 Compiler agreement is checked separately; these proofs certify emitted runs. -/
-solc_import "../../../tests/solc/SliceReferenceCopies.ast.json" hash 0xc21a01ff899d97c
+solc_import "../../../tests/solc/SliceReferenceCopies.ast.json" hash 0xb12642e7dfd4f2f3
   as Legacy.SliceReferenceCopies testing
-solc_import "../../../tests/solc/SliceReferenceCopies.viaIR.ast.json" hash 0x6db2cdeb5efe2177
+solc_import "../../../tests/solc/SliceReferenceCopies.viaIR.ast.json" hash 0x292a8aee9a2d3b24
   as ViaIR.SliceReferenceCopies testing
 
 namespace Solidity.Examples.Tactics.SliceReferenceCopies
