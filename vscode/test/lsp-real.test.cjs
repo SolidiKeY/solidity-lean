@@ -116,7 +116,9 @@ test('real Solidity LSP keeps Lean warm and verifies versioned in-memory snapsho
       rpc.notify('textDocument/didOpen',{textDocument:{uri:simpleUri,version:1,text:body}});
       const report=await rpc.request('solidityLean/verify',{textDocument:{uri:simpleUri,version:1},options:{function:'f()'}},{timeoutMs:60000});
       assert.deepEqual(report.errors,[]);assert.equal(report.results[0].status,'proved');
-      assert.equal(report.backend.kind,'generated-c-wasm');assert.equal(report.backend.leanServerPid,undefined);
+      // The loader prefers the native build when it exists (direct-runtime.cjs `candidates`).
+      const native=require('node:fs').existsSync(join(process.env.SOLIDITY_LEAN_DIRECT_DIR?resolve(process.env.SOLIDITY_LEAN_DIRECT_DIR):join(root,'.lake/direct-native'),'direct-check'));
+      assert.equal(report.backend.kind,native?'generated-c-native':'generated-c-wasm');assert.equal(report.backend.leanServerPid,undefined);
       assert.ok(report.backend.directChecks.every(c=>c.environmentImports===0));
     });
     await t.test('a crashed native Lean server reopens its document in the replacement session',async()=>{

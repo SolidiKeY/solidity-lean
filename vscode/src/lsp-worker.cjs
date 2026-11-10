@@ -43,8 +43,12 @@ async function execute(task){
   const locate=locations.sourceLocations(primary,Buffer.from(text));
   for(const contract of contracts){
     if(!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(contract.name))throw new Error('Unsupported contract name');
+    // The compiled verifier's request carries one contract node; a multi-file
+    // unit it cannot decide falls back to the certified Lean path (kernel proofs;
+    // false obligations stay pending without `counterexamples`) instead of
+    // `unsupported`.
     const direct=await checkDirect(root,contract,options) ||
-      (options.certify!==true&&!options.auditPreconditions&&process.env.SOLIDITY_LEAN_DIRECT!=='0'
+      (allAsts.length===1&&options.certify!==true&&!options.auditPreconditions&&process.env.SOLIDITY_LEAN_DIRECT!=='0'
         ? unknownResult(contract,options,'The compiled verifier is unavailable or does not support this input.',allContracts) : null);
     if(direct){
       directChecks.push({contract:contract.name,backend:'unavailable',environmentImports:0,...direct.timings});wasmBuild=direct.build;
@@ -61,7 +65,7 @@ async function execute(task){
     rmSync(output,{force:true});
     const name=`SolTests.«${contract.name}»`;
     const command=`#solkey_test ${name}${options.function?` only ${JSON.stringify(options.function)}`:''}${options.listing?' listing':''}${options.auditPreconditions&&!options.listing?' audit_preconditions':''}${options.counterexamples&&!options.listing?' counterexamples':''} to ${JSON.stringify(output)}`;
-    const wrapper=`import Solidity.Frontend.Testing\nset_option sol.testing.closedSpecs ${options.closedSpecs!==false}\nset_option sol.testing.direct ${options.certify!==true}\nset_option sol.benchmark ${options.benchmark===true}\nsolc_import "source.ast.json" hash ${compiled.hash} as ${name} testing\nsolc_scoped_problems ${name} decl\n${command}\n`;
+    const wrapper=`import Solidity.Frontend.Testing\nset_option sol.testing.closedSpecs ${options.closedSpecs!==false}\nset_option sol.testing.direct ${options.certify!==true&&allAsts.length===1}\nset_option sol.benchmark ${options.benchmark===true}\nsolc_import "source.ast.json" hash ${compiled.hash} as ${name} testing\nsolc_scoped_problems ${name} decl\n${command}\n`;
     if(options.benchmark)session.stderr='';
     const diagnostics=await session.check(wrapper,options.timeoutMs??60000);
     if(options.benchmark){await new Promise(setImmediate);benchmarkLog.push(session.stderr,...diagnostics.map(d=>d.message||''));}
