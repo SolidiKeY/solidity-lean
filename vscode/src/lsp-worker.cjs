@@ -44,10 +44,11 @@ async function execute(task){
   for(const contract of contracts){
     if(!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(contract.name))throw new Error('Unsupported contract name');
     // The compiled verifier's request carries one contract node; a multi-file
-    // unit it cannot decide falls back to the certified Lean path (kernel proofs;
-    // false obligations stay pending without `counterexamples`) instead of
-    // `unsupported`.
-    const direct=await checkDirect(root,contract,options) ||
+    // unit it cannot decide (a gap, or an `unsupported` row) falls back to the
+    // certified Lean path (kernel proofs; false obligations stay pending without
+    // `counterexamples`) instead of reporting `unsupported`.
+    const decided=await checkDirect(root,contract,options);
+    const direct=(allAsts.length>1&&decided?.results.some(r=>r.status==='unsupported')?null:decided) ||
       (allAsts.length===1&&options.certify!==true&&!options.auditPreconditions&&process.env.SOLIDITY_LEAN_DIRECT!=='0'
         ? unknownResult(contract,options,'The compiled verifier is unavailable or does not support this input.',allContracts) : null);
     if(direct){
