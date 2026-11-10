@@ -83,14 +83,15 @@ async function run() {
       const report = await api.verify(realDocument);
       assert.deepEqual(report.errors, []);
       assert.equal(report.results.find(row => row.function === 'passes').status, 'proved');
-      assert.equal(report.results.find(row => row.function === 'staysOpen').status, 'pending');
+      // The compiled verifier (the IDE default) decides `assert(false)` as refuted.
+      assert.equal(report.results.find(row => row.function === 'staysOpen').status, 'refuted');
       assert.equal(report.results.find(row => row.function === 'choice').status, 'proved');
       assert.ok(report.results.filter(row => row.sourceId >= 0).every(row => row.range && row.sourceHash));
       const realDiagnostics = vscode.languages.getDiagnostics(realDocument.uri).filter(d => d.source === 'Solidity Lean');
       assert.equal(realDiagnostics.length, 1);
-      assert.equal(realDiagnostics[0].severity, vscode.DiagnosticSeverity.Warning);
+      assert.equal(realDiagnostics[0].severity, vscode.DiagnosticSeverity.Error);
       assert.equal(realDiagnostics[0].range.start.line, 1);
-      checks.push('real solc + Lean proof', 'real pending obligation', 'real declaration ranges', 'real finite membership proof');
+      checks.push('real solc + Lean proof', 'real refuted obligation', 'real declaration ranges', 'real finite membership proof');
       const auditSource = join(root, 'EntryAudit.sol');
       writeFileSync(auditSource, 'pragma solidity ^0.8.34;\ncontract EntryAudit {\n/// @custom:key requires x > 10 && x < 3\n/// @custom:key ensures false\nfunction vacuous(uint x) public pure { assert(false); }\n/// @custom:key requires x > 0\n/// @custom:key ensures \\result == x\nfunction possible(uint x) public pure returns(uint) { return x; }\n}\n');
       await config.update('auditPreconditions', true, vscode.ConfigurationTarget.Global);
