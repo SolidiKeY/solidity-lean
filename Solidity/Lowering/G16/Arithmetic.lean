@@ -1,3 +1,4 @@
+import Solidity.Syntax.NumericV2Correct
 import Solidity.Source.PowerV2Correct
 import Solidity.Lowering.V07.IntegerConstants
 import Solidity.Lowering.G16.PanicGuard
@@ -1875,3 +1876,236 @@ end Solidity.Lowering.G16.Arithmetic.Modular
 /-- info: 'Solidity.Lowering.G16.Arithmetic.Modular.transport' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Lowering.G16.Arithmetic.Modular.transport
+
+namespace Solidity.Lowering.G16.Arithmetic.CheckedSignedPower
+open Solidity.Lowering.V07
+open SignedWidthCasts (ty)
+private theorem large_not_fit (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256)
+    (x : Int) (n : Nat) (zero : x ≠ 0) (one : x ≠ 1) (minus : x ≠ -1)
+    (large : bits < n) : ¬ ((ty bits valid).lo ≤ x^n ∧ x^n ≤ (ty bits valid).hi) := by
+  intro fits
+  have base : 2 ≤ x.natAbs := by
+    cases x with
+    | ofNat k =>
+      change (k : Int) ≠ 0 at zero
+      change (k : Int) ≠ 1 at one
+      change 2 ≤ k
+      omega
+    | negSucc k => change 2 ≤ k+1; omega
+  have positive := Source.two_pow_pos (bits-1)
+  have highCast : ((2^(bits-1)-1 : Nat) : Int) = ((2^(bits-1) : Nat) : Int)-1 := by omega
+  change -((2^(bits-1) : Nat) : Int) ≤ x^n ∧ x^n ≤ ((2^(bits-1)-1 : Nat) : Int) at fits
+  rw [highCast,NumericLowering.power_sign,←Int.natCast_pow] at fits
+  have upper : x.natAbs^n ≤ 2^(bits-1) := by
+    by_cases neg : x < 0 ∧ n%2 = 1
+    · simp only [neg] at fits
+      omega
+    · simp only [neg] at fits
+      omega
+  have growth : 2^(bits-1) < 2^n := Nat.pow_lt_pow_right (by decide) (by omega)
+  have low : 2^n ≤ x.natAbs^n := Nat.pow_le_pow_left base n
+  omega
+private theorem source_power {D : Source.Layout} (bits : Nat)
+    (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256) (x : Int) (n : Nat) :
+    Source.intPow (D := D) (ty bits valid) true x n =
+      Source.intRes (ty bits valid) true (x^n) := by
+  unfold Source.intPow
+  by_cases early : x = 0 ∨ x = 1 ∨ n ≤ (ty bits valid).bits
+  · rw [if_pos early]
+  · rw [if_neg early]
+    by_cases minus : x = -1
+    · rw [if_pos minus]
+      subst x
+      have sign := NumericLowering.neg_pow 1 n
+      simp only [Int.one_pow] at sign
+      rw [sign]
+    · rw [if_neg minus]
+      change ¬ (x = 0 ∨ x = 1 ∨ n ≤ bits) at early
+      have outside := large_not_fit bits valid x n (by omega) (by omega) minus (by omega)
+      simp only [Source.intRes,dif_neg outside,if_true]
+
+private def widthRange {C : Contract} {Γ : Ctx} (bits : Nat)
+    (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256) (v : Val C Γ .int) : Val C Γ .bool :=
+  Checked.andB
+    (.binop .le rfl rfl (IntegerConstants.value (ty bits valid) (ty bits valid).lo
+      ⟨Int.le_refl _,Int.le_trans (integer_zero_range _).1 (integer_zero_range _).2⟩) v)
+    (.binop .le rfl rfl v (IntegerConstants.value (ty bits valid) (ty bits valid).hi
+      ⟨Int.le_trans (integer_zero_range _).1 (integer_zero_range _).2,Int.le_refl _⟩))
+
+def condition {C : Contract} {Γ : Ctx} (bits : Nat)
+    (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256)
+    (av : Val C Γ .int) (bv : Val C Γ .uint) : Val C Γ .bool :=
+  Checked.andB (Val.NumericV2.powerFits av bv)
+    (widthRange bits valid (Val.NumericV2.powerValue av bv))
+
+private theorem and_eval {C : Contract} {Γ : Ctx} (σ : State C Γ)
+    (a b : Val C Γ .bool) (x y : Bool)
+    (left : a.evalT σ = .ok x) (right : b.evalT σ = .ok y) :
+    (Checked.andB a b).evalT σ = .ok (x && y) := by
+  cases x <;> rw [Checked.andB,Val.evalT,left] <;>
+    simp only [BinOp.shortT,bind,Except.bind] <;> first | rfl | rw [right]; rfl
+
+private theorem width_eval {C : Contract} {Γ : Ctx} (σ : State C Γ)
+    (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256)
+    (v : Val C Γ .int) (r : PrimTy.int.Denote) (computed : v.evalT σ = .ok r) :
+    (widthRange bits valid v).evalT σ =
+      .ok (decide ((ty bits valid).lo ≤ r.val ∧ r.val ≤ (ty bits valid).hi)) := by
+  have lo := IntegerConstants.value_run σ (ty bits valid) (ty bits valid).lo
+    ⟨Int.le_refl _,Int.le_trans (integer_zero_range _).1 (integer_zero_range _).2⟩
+  have hi := IntegerConstants.value_run σ (ty bits valid) (ty bits valid).hi
+    ⟨Int.le_trans (integer_zero_range _).1 (integer_zero_range _).2,Int.le_refl _⟩
+  have left : (Val.binop .le rfl rfl (IntegerConstants.value (ty bits valid) (ty bits valid).lo
+      ⟨Int.le_refl _,Int.le_trans (integer_zero_range _).1 (integer_zero_range _).2⟩) v).evalT σ =
+      .ok (decide ((ty bits valid).lo ≤ r.val)) := by
+    rw [Val.evalT,lo,computed]; rfl
+  have right : (Val.binop .le rfl rfl v (IntegerConstants.value (ty bits valid) (ty bits valid).hi
+      ⟨Int.le_trans (integer_zero_range _).1 (integer_zero_range _).2,Int.le_refl _⟩)).evalT σ =
+      .ok (decide (r.val ≤ (ty bits valid).hi)) := by
+    rw [Val.evalT,computed,hi]; rfl
+  simpa only [widthRange,Bool.decide_and] using and_eval σ _ _ _ _ left right
+
+private theorem condition_eval {C : Contract} {Γ : Ctx} (σ : State C Γ)
+    (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256)
+    (av : Val C Γ .int) (bv : Val C Γ .uint)
+    (a : PrimTy.int.Denote) (b : PrimTy.uint.Denote)
+    (ha : av.evalT σ = .ok a) (hb : bv.evalT σ = .ok b) :
+    (condition bits valid av bv).evalT σ =
+      .ok (decide ((ty bits valid).lo ≤ a.val^b.val.toNat ∧
+        a.val^b.val.toNat ≤ (ty bits valid).hi)) := by
+  have test := Val.NumericV2.powerFits_eval σ av bv a b ha hb
+  by_cases wide : -Semantics.intBound ≤ a.val^b.val.toNat ∧ a.val^b.val.toNat < Semantics.intBound
+  · have value := Val.NumericV2.powerValue_eval σ av bv a b ha hb wide
+    have narrow := width_eval σ bits valid _ _ value
+    simp only [wide] at test
+    simpa only [Bool.true_and] using and_eval σ _ _ _ _ test narrow
+  · have outside : ¬ ((ty bits valid).lo ≤ a.val^b.val.toNat ∧
+        a.val^b.val.toNat ≤ (ty bits valid).hi) := by
+      intro inside
+      have word := SignedWidthCasts.word_range bits valid _ inside
+      change -((2^255 : Nat) : Int) ≤ _ ∧ _ ≤ ((2^255-1 : Nat) : Int) at word
+      have castHigh : ((2^255-1 : Nat) : Int) = ((2^255 : Nat) : Int)-1 := by decide
+      rw [castHigh] at word
+      apply wide
+      change -((2^255 : Nat) : Int) ≤ _ ∧ _ < ((2^255 : Nat) : Int)
+      omega
+    simp only [wide,decide_false] at test
+    rw [condition,Checked.andB,Val.evalT,test]
+    simp only [BinOp.shortT,bind,Except.bind,boolT]
+    simp only [outside,decide_false]
+    rfl
+
+
+def operand {C : Contract} {Γ : Ctx} (bits : Nat)
+    (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256)
+    (av : Val C Γ .int) (bv : Val C Γ .uint) : DeferredSource.Operand C Γ (.prim .int) :=
+  Solidity.Lowering.G16.PanicGuard.checkedOperand .arithmetic true
+    (condition bits valid av bv) (Val.NumericV2.powerValue av bv)
+
+private theorem operand_run {C : Contract} {Γ : Ctx} (σ : State C Γ)
+    (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256)
+    (av : Val C Γ .int) (bv : Val C Γ .uint)
+    (a : PrimTy.int.Denote) (b : PrimTy.uint.Denote)
+    (ha : av.evalT σ = .ok a) (hb : bv.evalT σ = .ok b) :
+    (operand bits valid av bv).run σ =
+      if fits : (ty bits valid).lo ≤ a.val^b.val.toNat ∧ a.val^b.val.toNat ≤ (ty bits valid).hi
+      then .ok (⟨σ,List.prefix_refl _⟩,.prim (integerValue (ty bits valid) _ fits))
+      else .error (THalt.ofData (Source.panicData .arithmetic)) := by
+  have test := condition_eval σ bits valid av bv a b ha hb
+  by_cases fits : (ty bits valid).lo ≤ a.val^b.val.toNat ∧ a.val^b.val.toNat ≤ (ty bits valid).hi
+  · rw [dif_pos fits]
+    have word := SignedWidthCasts.word_range bits valid _ fits
+    have wide : -Semantics.intBound ≤ a.val^b.val.toNat ∧ a.val^b.val.toNat < Semantics.intBound := by
+      change -((2^255 : Nat) : Int) ≤ _ ∧ _ ≤ ((2^255-1 : Nat) : Int) at word
+      have castHigh : ((2^255-1 : Nat) : Int) = ((2^255 : Nat) : Int)-1 := by decide
+      rw [castHigh] at word
+      change -((2^255 : Nat) : Int) ≤ _ ∧ _ < ((2^255 : Nat) : Int)
+      omega
+    have computed := Val.NumericV2.powerValue_eval σ av bv a b ha hb wide
+    have canonical : (Val.NumericV2.powerValue av bv).evalT σ =
+        .ok (integerValue (ty bits valid) _ fits) := computed
+    simp only [fits] at test
+    have ran := Solidity.Lowering.G16.PanicGuard.checkedOperand_run σ .arithmetic true
+      (condition bits valid av bv) (Val.NumericV2.powerValue av bv) true _ test canonical
+    simpa only [operand,Bool.true_eq_false,and_false,if_false] using ran
+  · rw [dif_neg fits]
+    simp only [fits,decide_false] at test
+    have failed := Solidity.Lowering.G16.PanicGuard.run σ .arithmetic (condition bits valid av bv) false test
+    simp only [Bool.false_eq_true,if_false] at failed
+    have stopped : (Prog.cons (Solidity.Lowering.G16.PanicGuard.code .arithmetic
+        (condition bits valid av bv)) .nil).run σ =
+        .error (THalt.ofData (Source.panicData .arithmetic)) := by
+      change TRun.seq (Solidity.Lowering.G16.PanicGuard.code .arithmetic (condition bits valid av bv)).runR _ σ = _
+      simp only [TRun.seq,show (Solidity.Lowering.G16.PanicGuard.code .arithmetic
+        (condition bits valid av bv)).runR σ = .error (THalt.ofData (Source.panicData .arithmetic)) from failed]
+    unfold operand Solidity.Lowering.G16.PanicGuard.checkedOperand DeferredSource.Operand.run
+    simp only [if_true]
+    rw [stopped]
+    rfl
+
+private theorem source_run {E : Source.Env} {srcΓ : Source.RCtx}
+    (G : Source.Glob E) (F : Source.Fr) (fuel : Nat) (source : Source.EMState E srcΓ)
+    (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256)
+    (ebits : Nat) (evalid : ebits % 8 = 0 ∧ 8 ≤ ebits ∧ ebits ≤ 256)
+    (a : Source.Idx srcΓ (.int (ty bits valid)))
+    (b : Source.Idx srcΓ (.int (UnsignedNarrowing.ty ebits evalid))) (x y : Int)
+    (hx : (ty bits valid).lo ≤ x ∧ x ≤ (ty bits valid).hi)
+    (hy : (UnsignedNarrowing.ty ebits evalid).lo ≤ y ∧ y ≤ (UnsignedNarrowing.ty ebits evalid).hi)
+    (left : source.1.get a = .int x hx) (right : source.1.get b = .int y hy) :
+    (Source.evalE G {F with checked := true} (fuel+3)
+      (.shiftLike .exp (.local a) (.local b) rfl)).run source =
+      (if fits : (ty bits valid).lo ≤ x^y.toNat ∧ x^y.toNat ≤ (ty bits valid).hi
+       then .ok (.val (.int _ fits)) else .error (.revert (Source.panicData .arithmetic)),source) := by
+  have leftRun : (Source.evalE G {F with checked := true} (fuel+1) (.local a)).run source =
+      (.ok (.val (.int x hx)),source) := by
+    change (Except.ok (Source.RVal.val (source.1.get a)),source) = _
+    rw [left]
+  have rightRun : (Source.evalE G {F with checked := true} (fuel+1) (.local b)).run source =
+      (.ok (.val (.int y hy)),source) := by
+    change (Except.ok (Source.RVal.val (source.1.get b)),source) = _
+    rw [right]
+  have pair := source_pure_pair G {F with checked := true} (fuel+1) source (.local a) (.local b)
+    (.val (.int x hx)) (.val (.int y hy)) leftRun rightRun
+  rw [Source.evalE,Source.Hoare.run_bind,pair]
+  change (do let result ← Source.EM.lift (Source.intPow (ty bits valid) true x y.toNat)
+             pure (Source.RVal.val result)).run source = _
+  rw [source_power]
+  by_cases fits : (ty bits valid).lo ≤ x^y.toNat ∧ x^y.toNat ≤ (ty bits valid).hi
+  · simp only [Source.intRes,dif_pos fits]
+    rfl
+  · simp only [Source.intRes,dif_neg fits,if_true]
+    rfl
+
+/-- Checked signed power at every base and unsigned exponent width, from initial local reads.
+Lazy word and width guards preserve exact arithmetic panic bytes; successful callers are unchanged.
+No effectful operands, frontend association, or failure-state rollback is asserted. -/
+theorem transport {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} {Γ : Ctx}
+    (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
+    (source : Source.EMState E srcΓ) (target : State C Γ)
+    (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256)
+    (ebits : Nat) (evalid : ebits % 8 = 0 ∧ 8 ≤ ebits ∧ ebits ≤ 256)
+    (a : Source.Idx srcΓ (.int (ty bits valid)))
+    (b : Source.Idx srcΓ (.int (UnsignedNarrowing.ty ebits evalid)))
+    (c : Idx Γ (.val .int)) (d : Idx Γ (.val .uint)) (x y : Int)
+    (hx : (ty bits valid).lo ≤ x ∧ x ≤ (ty bits valid).hi)
+    (hy : (UnsignedNarrowing.ty ebits evalid).lo ≤ y ∧ y ≤ (UnsignedNarrowing.ty ebits evalid).hi)
+    (readA : source.1.get a = .int x hx) (readB : source.1.get b = .int y hy)
+    (nativeA : TEnv.get c target.env = integerValue (ty bits valid) x hx)
+    (nativeB : TEnv.get d target.env = integerValue (UnsignedNarrowing.ty ebits evalid) y hy) :
+    (Source.evalE G {F with checked := true} (fuel+3)
+      (.shiftLike .exp (.local a) (.local b) rfl)).run source =
+      (if fits : (ty bits valid).lo ≤ x^y.toNat ∧ x^y.toNat ≤ (ty bits valid).hi
+       then .ok (.val (.int _ fits)) else .error (.revert (Source.panicData .arithmetic)),source) ∧
+    (operand bits valid (.simple (.local c)) (.simple (.local d))).run target =
+      if fits : (ty bits valid).lo ≤ x^y.toNat ∧ x^y.toNat ≤ (ty bits valid).hi
+      then .ok (⟨target,List.prefix_refl _⟩,.prim (integerValue (ty bits valid) _ fits))
+      else .error (THalt.ofData (Source.panicData .arithmetic)) := by
+  exact ⟨source_run G F fuel source bits valid ebits evalid a b x y hx hy readA readB,
+    operand_run target bits valid (.simple (.local c)) (.simple (.local d))
+      (integerValue (ty bits valid) x hx) (integerValue (UnsignedNarrowing.ty ebits evalid) y hy)
+      (congrArg Except.ok nativeA) (congrArg Except.ok nativeB)⟩
+
+end Solidity.Lowering.G16.Arithmetic.CheckedSignedPower
+
+/-- info: 'Solidity.Lowering.G16.Arithmetic.CheckedSignedPower.transport' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Lowering.G16.Arithmetic.CheckedSignedPower.transport
