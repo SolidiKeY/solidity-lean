@@ -47067,12 +47067,22 @@
   "propext"
  ],
  "Solidity/Lowering/G16/ArithmeticControls.lean:Solidity.Lowering.G16.ArithmeticControls.wrong_wrapping_rejected": [],
+ "Solidity/Lowering/G16/ComparisonControls.lean:Solidity.Lowering.G16.BooleanComparisonControls.wrong_capture_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/G16/ComparisonControls.lean:Solidity.Lowering.G16.ComparisonControls.wrong_assignment_comparison_rejected": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
  "Solidity/Lowering/G16/ComparisonControls.lean:Solidity.Lowering.G16.ComparisonControls.wrong_comparison_rejected": [],
+ "Solidity/Lowering/G16/Comparisons.lean:Solidity.Lowering.G16.BooleanComparison.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/G16/Comparisons.lean:Solidity.Lowering.G16.Comparisons.assignment_transport": [
   "Classical.choice",
   "Quot.sound",
