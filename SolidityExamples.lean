@@ -121,6 +121,14 @@ import Solidity.Examples.ExampleNames
 import Solidity.Examples.FixedArrayFloor
 import Solidity.Examples.FixedArrayRoot
 import Solidity.Examples.Goals
+import Solidity.Examples.Goals.Endpoint
+import Solidity.Examples.Goals.Finish
+import Solidity.Examples.Goals.Hash
+import Solidity.Examples.Goals.Headline
+import Solidity.Examples.Goals.Loops
+import Solidity.Examples.Goals.Panic
+import Solidity.Examples.Goals.Plan
+import Solidity.Examples.Goals.Taclets
 import Solidity.Examples.InputReduction
 import Solidity.Examples.LexDiamond
 import Solidity.Examples.LexMetrics
