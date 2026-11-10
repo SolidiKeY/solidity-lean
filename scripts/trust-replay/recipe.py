@@ -9,7 +9,9 @@ wrapper (including its independent 298/300-second deadline) unchanged. This
 launcher adds one 300-second TOTAL budget, including its own validation; it
 never partitions or retries. Real-corpus validation and adoption belong to VA1.
 
-Optimization: retain `lake env env`, but give the checker LEAN_PATH=overlay and
+Optimization: inventory each immutable tree with one no-follow scandir walk,
+while retaining all pre/post object hashes and the same total deadline.
+Retain `lake env env`, but give the checker LEAN_PATH=overlay and
 LEAN_SYSROOT=the same toolchain prefix. Lean4.24 appends its builtin lib/lean;
 the reference redundantly supplies it too. The pinned checker scans every path.
 No checker source, binary, --fresh behavior, proof domain or exclusion changes.
@@ -146,7 +148,7 @@ def validate_inputs(profile, packet_path, manifest_path, objects, deadline):
             'manifest provenance mismatch')
     files = manifest['files']
     require(isinstance(files, list) and len(files) == profile.count, 'omitted/extra manifest row')
-    expected, size = set(), 0
+    expected, size = {}, 0
     for row in files:
         remaining(deadline)
         require(set(row) == {'path', 'source', 'sha256', 'bytes'}, 'invalid manifest row fields')
@@ -155,30 +157,38 @@ def validate_inputs(profile, packet_path, manifest_path, objects, deadline):
         require(path not in expected and type(row['bytes']) is int and row['bytes'] >= 0 and
                 isinstance(row['source'], str) and re.fullmatch('[0-9a-f]{64}', row['sha256']),
                 'duplicate or malformed object identity')
-        expected.add(path)
-        target = objects.joinpath(*PurePosixPath(path).parts)
-        for parent in (target, *target.parents):
-            if parent == objects:
-                break
-            require(not parent.is_symlink(), 'object symlink refused: ' + path)
-        require(target.is_file() and target.stat().st_size == row['bytes'], 'missing/wrong-size object: ' + path)
-        require(digest(target, deadline) == row['sha256'], 'corrupt object: ' + path)
+        expected[path] = row
         size += row['bytes']
     require(size == profile.total_bytes, 'object byte total mismatch')
     require(profile.root.replace('.', '/') + '.olean' in expected, 'public root omitted')
+    # One no-follow directory walk replaces repeated ancestor/stat/rglob probes.
+    # This is only metadata setup: every listed object is still hashed below,
+    # before replay AND after a successful replay, within the same deadline.
     actual = set()
-    for path in objects.rglob('*'):
+    pending = [objects]
+    while pending:
+        directory = pending.pop()
         remaining(deadline)
-        require(not path.is_symlink(), 'symlink in immutable object tree')
-        require(path.is_dir() or stat.S_ISREG(path.lstat().st_mode),
-                'special node in immutable object tree')
-        if path.is_file():
-            relative = path.relative_to(objects).as_posix()
-            require(relative in expected or path == manifest_path,
-                    'unlisted input or object companion: ' + relative)
-            if path.suffix == '.olean':
-                actual.add(relative)
-    require(actual == expected, 'unlisted/omitted object in replay tree')
+        with os.scandir(directory) as entries:
+            for entry in entries:
+                remaining(deadline)
+                target = Path(entry.path)
+                require(not entry.is_symlink(), 'symlink in immutable object tree')
+                if entry.is_dir(follow_symlinks=False):
+                    pending.append(target)
+                    continue
+                require(entry.is_file(follow_symlinks=False), 'special node in immutable object tree')
+                relative = target.relative_to(objects).as_posix()
+                require(relative in expected or target == manifest_path,
+                        'unlisted input or object companion: ' + relative)
+                if relative in expected:
+                    require(entry.stat(follow_symlinks=False).st_size == expected[relative]['bytes'],
+                            'missing/wrong-size object: ' + relative)
+                    actual.add(relative)
+    require(actual == set(expected), 'unlisted/omitted object in replay tree')
+    for path, row in expected.items():
+        target = objects.joinpath(*PurePosixPath(path).parts)
+        require(digest(target, deadline) == row['sha256'], 'corrupt object: ' + path)
     return manifest
 
 
@@ -298,7 +308,8 @@ def run(profile, config):
                 'ambient LEAN_SYSROOT differs from reference prefix')
         require('version 4.24.0,' in small([lean, '--version'], paths['source_root'], deadline), 'Lean version mismatch')
         require('4.24.0' in small([lake, '--version'], paths['source_root'], deadline), 'Lake version mismatch')
-        tools = {str(Path(tool).resolve()): digest(Path(tool).resolve(), deadline) for tool in (lean, lake)}
+        tools = {path: digest(Path(path), deadline) for path in
+                 sorted({str(Path(tool).resolve()) for tool in (lean, lake)})}
         context = lake_context(paths['source_root'], profile.head, deadline)
         require(context, 'Lake context unavailable')
         require(all(os.pathsep not in str(paths[k]) for k in ('objects', 'sysroot')), 'search-path separator in directory')
