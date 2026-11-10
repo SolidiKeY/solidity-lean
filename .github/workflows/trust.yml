@@ -52,7 +52,7 @@ jobs:
       - name: Existing transitive axiom and pin audits
         if: ${{ !cancelled() }}
         run: |
-          lake env lean --tstack=131072 scripts/AxiomAudit.lean
+          lake lean scripts/AxiomAudit.lean -- --tstack=131072
           node scripts/check-axiom-pins.mjs
       - name: Fresh public kernel replay
         if: ${{ !cancelled() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
