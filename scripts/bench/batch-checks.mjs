@@ -25,7 +25,11 @@ export function observations(inventory, raw) {
       && [undefined, 'certified'].includes(found[0].verification)
       && [undefined, 'possible', 'notApplicable'].includes(found[0].preconditions);
     return {input, observations: found, certifiedCheckPassed: proved,
-      functionReportedElapsedMs: found.length === 1 ? (found[0].elapsedMs ?? null) : null,
+      functionReportedElapsedMs: counts.get(key(input)) === 1 && found.length === 1
+        && ['proved','refuted','pending','error'].includes(found[0].status)
+        && [undefined,'certified'].includes(found[0].verification)
+        && Number.isSafeInteger(found[0].elapsedMs) && found[0].elapsedMs >= 0
+          ? found[0].elapsedMs : null,
       sourceToVerdictWallMs: null, maxRss: null, phases: null, walkSteps: null};
   });
   return {rows, unexpected, duplicateInventoryKeys,

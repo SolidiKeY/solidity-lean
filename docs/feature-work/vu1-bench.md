@@ -72,10 +72,13 @@ list is available until the actual suite has run.
   liveness protocol, rather than an unnamed-owner wait. This decision is
   acknowledged; the question is not reopened. H232 remains the later standing
   memory policy and removes the historical scope-provisioning requirement.
-- `VU1-T1` is an operational request to the coordinator to execute H191: return
-  a concrete producer lane/task with a publication wake condition, or the
-  already published telemetry commit/API and admitted fixture paths. It does
-  not reopen `VU1-I1`, request a new policy decision or extend this lease.
+- The explicit user decision H413 authorizes a bounded producer proposal with
+  owner review before implementation. `VU1-P1` routes proposal preparation to this existing lane,
+  handle `VU1-P1-proposal`; no implementation or source ownership is assigned.
+  The exact unapplied diff, minimized file map, acceptance contract and unresolved
+  owner-review tickets belong in private evidence. CI0 retains its existing
+  repair priority and receives no telemetry follow-up. Complete U01 still waits
+  for a validated publication; proposal review does not freeze an interface.
 - `VU1-G1` (#477) is resolved ownership: the existing producer is
   `plan-ci0-ci-green-1109/ci0-lean-checks`, branch
   `cloud/plan-ci0-ci-green-1109/ci0-lean-checks` (H383/H390, continued by H407).
@@ -232,7 +235,26 @@ attempts remain visible. This wrapper reports the existing per-row `elapsedMs`
 as `functionReportedElapsedMs`, excluding source compilation and shared imports.
 Whole-call `apiWallMs` includes checkpoint logging; it is never apportioned to
 functions. Per-function source-to-verdict wall time, phases and RSS remain null.
+Only unique certified-mode observations with attempted statuses (`proved`,
+`refuted`, `pending`, `error`) and nonnegative safe-integer milliseconds expose
+this derived timer. Import-only/unattempted placeholders, unknown statuses,
+native markers and ambiguous identities expose null, while raw observations
+remain unchanged. A genuine attempted zero is preserved. Correcting a derived
+projection does not rerun or change the original measurement's provenance.
 Isolated process totals and batched check timers must not be pooled.
+
+`python3 scripts/bench/partial-report.py --process GROUP REPORT SIZES`
+prints a partial JSON summary to stdout; repeat the three-argument option for
+additional groups. Optional `--batch REPORT --batch-sizes SIZES` adds the separate
+check-timer summary. Redirect stdout only to a new private evidence file.
+Quantiles use nearest rank, retain failed completed functions, and include all
+retry wall time in each function's total. Overlapping groups are not pooled;
+the worst-function list selects the maximum observed total per exact identity.
+Static statement correlation is descriptive, with no linear-scaling claim.
+Provenance errors remain visible and suppress comparable statistics; interrupted
+runs are provisional because final identity checks have not completed. Duplicate
+size/process identities are rejected, and batch identities/raw timers are checked
+again. This consumer never promotes partial receipts to a complete baseline.
 
 ## Budget decision
 
@@ -315,9 +337,30 @@ bytes at different source paths, and duplicated inventory identities. Joins now
 include normalized source paths, duplicate inventory keys are rejected, and
 pure controls prevent either case from turning one observation into two checks.
 
+Independent finder and skeptic reviews of the reporting correction identified
+the actual import-only `excluded` outcome missing from a proposed denylist.
+The final helper uses the exact attempted-status allowlist and safe-integer
+milliseconds. Regression controls distinguish unattempted placeholders from
+real attempted zero without changing proof-success classification.
+
+Independent read-only proposal reviews found cross-subject span parents and
+undetectable finish-event loss. The unapplied draft detaches subject-transition
+roots and keeps completeness unknown until owner-approved loss detection.
+Entry-condition auditing outside the function-check span is explicit. These
+preparation reviews grant no source ownership, implementation approval or
+coverage/type validation.
+
+Independent read-only report-consumer reviews required preserving provenance
+errors, rejecting duplicate/ambiguous size and observation identities, matching
+raw timers, and labeling summed retries as per-function totals. The consumer
+and pure controls now cover these cases. Invalid size provenance suppresses
+size comparisons without hiding timing data; interrupted receipts remain
+provisional. Neither reviewer executed Lean or a compiler.
+
 ## Checkpoint handoff
 
-Inventory is partial until its reviews and required gates pass. Suite, fresh
-baseline, calibrated report, budget approval, CI regression thresholds,
+Inventory reviews and checkpoint checks pass; documentation navigation remains
+pending the coordinator integration edit. Suite, fresh baseline, calibrated
+report, budget approval, CI regression thresholds,
 full lane-end validation and sealed handoff remain outstanding. No Lean file,
 public theorem, axiom pin, heartbeat setting or generated root is changed.

@@ -38,3 +38,29 @@ test('duplicate inventory identities cannot double-credit a single check',()=>{
  assert.equal(result.ambiguousRows,2);
  assert.ok(result.rows.every(r=>!r.certifiedCheckPassed));
 });
+
+test('unattempted and unknown statuses keep raw placeholders but expose no check timer',()=>{
+ for(const status of ['notRun','ready','internal','unsupported','excluded','elaborated','skip','skipped','future',undefined]) {
+  const result=observations([row],{results:[{...row,status,elapsedMs:0}]});
+  assert.equal(result.rows[0].functionReportedElapsedMs,null,status);
+  assert.equal(result.rows[0].observations[0].elapsedMs,0);
+ }
+ for(const verification of ['direct','native']) {
+  const result=observations([row],{results:[{...row,status:'proved',verification,elapsedMs:0}]});
+  assert.equal(result.rows[0].functionReportedElapsedMs,null);
+ }
+});
+test('attempted zero is real while invalid Nat timers and ambiguous identities remain unavailable',()=>{
+ for(const status of ['proved','refuted','pending','error']) {
+  const result=observations([row],{results:[{...row,status,elapsedMs:0}]});
+  assert.equal(result.rows[0].functionReportedElapsedMs,0);
+ }
+ for(const elapsedMs of [-1,0.5,NaN,Infinity,Number.MAX_SAFE_INTEGER+1,'0',null,undefined]) {
+  const result=observations([row],{results:[{...row,status:'proved',elapsedMs}]});
+  assert.equal(result.rows[0].functionReportedElapsedMs,null);
+  assert.equal(result.rows[0].certifiedCheckPassed,true);
+ }
+ for(const [inventory,results] of [[[row,row],[{...row,status:'proved',elapsedMs:2}]],[[row],[{...row,status:'proved',elapsedMs:2},{...row,status:'proved',elapsedMs:2}]]]) {
+  assert.ok(observations(inventory,{results}).rows.every(r=>r.functionReportedElapsedMs===null));
+ }
+});
