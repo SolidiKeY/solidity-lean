@@ -99,6 +99,32 @@ theorem cross_family_spelling_rejected (E : Source.Env) (t : Source.IntTy)
     (checkTypedSourceSpelling (.incDec .postInc (.name "x")) (compound E t fits)).isNone = true := by
   rfl
 
+private def byteType : Source.IntTy := ⟨false, 8, by decide⟩
+
+private def byteValues {D : Source.Layout} : Source.Locals D [.int byteType] :=
+  .cons (.int 255 (by decide)) .nil
+
+private def byteStep (E : Source.Env) (unchecked : Bool) :
+    Source.RStmt E [] false ⟨false, unchecked⟩ [.int byteType] [.int byteType] :=
+  .expr (.incDec true true (.local .here))
+
+/-- Guard losing checked panic bytes or the complete failure poststate in a
+production bridge. The checked frame panics at uint8 maximum; the unchecked
+frame wraps to zero. Both preserve the same complete interpreter state, and
+the static statement contexts agree with their runtime checkedness modes. -/
+theorem checked_panic_and_wrapping_poststate {E : Source.Env}
+    (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
+    (plan : Source.FailureExecution.RuntimePlan) (known : Bool) (st : Source.St E) :
+    (Source.execS G { F with checked := true } (fuel + 3) 0 none (byteStep E false)
+      byteValues (plan := plan) (calldataKnown := known)).run (.nil, st) =
+        (.error (.revert (Source.panicData .arithmetic)), (.nil, st)) ∧
+    (Source.execS G { F with checked := false } (fuel + 3) 0 none (byteStep E true)
+      byteValues (plan := plan) (calldataKnown := known)).run (.nil, st) =
+        (.ok (.normal (.cons (Source.intWrap byteType 0) .nil)), (.nil, st)) := by
+  cases known <;> exact ⟨rfl, rfl⟩
+
+#print axioms checked_panic_and_wrapping_poststate
+
 #print axioms typed_postfix_accepted
 #print axioms original_width_retained
 #print axioms typed_compound_accepted

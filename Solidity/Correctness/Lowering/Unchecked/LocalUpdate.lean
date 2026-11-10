@@ -138,6 +138,80 @@ theorem literalCompoundOne {E : Source.Env} {Γ : Source.RCtx}
   exact compoundOne_of_runs G F fuel plan known source t inc i (.const (Source.Q.ofInt 1))
     (.const (Source.Q.ofInt 1)) x range (integerOne_range t) read fits rhsRun convRun
 
+/-- Exact local-update evaluation at every horizon and in both checkedness
+modes. The operation itself selects success or its unchanged exact Halt;
+failures retain all locals and the complete interpreter state. This guards
+losing panic bytes or failure poststates in the production association. -/
+theorem localUpdate_evalV2 {E : Source.Env} {Γ : Source.RCtx}
+    (G : Source.Glob E) (F : Source.Fr) (horizon : Nat)
+    (plan : Source.FailureExecution.RuntimePlan) (known : Bool)
+    (ls : Source.Locals E.layout Γ) (st : Source.St E)
+    (t : Source.IntTy) (inc pre : Bool) (slot : Source.Idx Γ (.int t)) :
+    (Source.evalE G F horizon (.incDec inc pre (.local slot))
+      (plan := plan) (calldataKnown := known)).run (ls, st) =
+      match horizon with
+      | 0 | 1 => (.error .timeout, (ls, st))
+      | _ =>
+        match Source.incDecVal F.checked inc (ls.get slot) with
+        | .ok value => (.ok (.val (if pre then value else ls.get slot)),
+            (ls.set slot value, st))
+        | .error halt => (.error halt, (ls, st)) := by
+  cases horizon with
+  | zero => rfl
+  | succ n =>
+    cases n with
+    | zero => cases known <;> rfl
+    | succ fuel =>
+      have guard {α : Type} (action : Source.EM E Γ α) :
+          Source.withLibraryCalldata known (.int t) action = action := by
+        cases known <;> rfl
+      have location : (Source.evalLoc G F (fuel + 1) (.local slot)
+          (plan := plan) (calldataKnown := known)).run (ls, st) =
+          (.ok (.local slot), (ls, st)) := rfl
+      have old : (Source.readLoc F (.local slot)).run (ls, st) =
+          (.ok (ls.get slot), (ls, st)) := rfl
+      rw [Source.evalE]
+      simp only [guard]
+      rw [Source.Hoare.run_bind, location]
+      dsimp only
+      rw [Source.Hoare.run_bind, old]
+      dsimp only
+      cases Source.incDecVal F.checked inc (ls.get slot) <;> rfl
+
+/-- Exact statement boundary for the same family, including the small-horizon
+timeouts and complete outer journal state on failure. A positive horizon
+threshold describes interpreter depth, never physical gas. -/
+theorem localUpdate_statementV2 {E : Source.Env} {Γ : Source.RCtx}
+    {R : List Source.STy} {M : Bool} {k : Source.SCtx}
+    (G : Source.Glob E) (F : Source.Fr) (horizon nps : Nat)
+    (ph : Option (Source.Ph E)) (plan : Source.FailureExecution.RuntimePlan) (known : Bool)
+    (ls : Source.Locals E.layout Γ) (st : Source.St E)
+    (t : Source.IntTy) (inc pre : Bool) (slot : Source.Idx Γ (.int t)) :
+    (Source.execS G F horizon nps ph
+      (.expr (.incDec inc pre (.local slot)) : Source.RStmt E R M k Γ Γ)
+      ls (plan := plan) (calldataKnown := known)).run (.nil, st) =
+      match horizon with
+      | 0 | 1 | 2 => (.error .timeout, (.nil, st))
+      | _ =>
+        match Source.incDecVal F.checked inc (ls.get slot) with
+        | .ok value => (.ok (.normal (ls.set slot value)), (.nil, st))
+        | .error halt => (.error halt, (.nil, st)) := by
+  cases horizon with
+  | zero => rfl
+  | succ n =>
+    cases n with
+    | zero => rfl
+    | succ n =>
+      cases n with
+      | zero => cases known <;> rfl
+      | succ fuel =>
+        rw [Source.execS]
+        simp only [Source.Hoare.run_bind, Source.EM.sub, localUpdate_evalV2]
+        cases Source.incDecVal F.checked inc (ls.get slot) <;> rfl
+
+#print axioms localUpdate_evalV2
+#print axioms localUpdate_statementV2
+
 #print axioms localCompoundOne
 #print axioms literalCompoundOne
 
