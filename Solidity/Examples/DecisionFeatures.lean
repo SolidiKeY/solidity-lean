@@ -19,6 +19,24 @@ open Solidity.Decide
 -- together overflow a command-line `lean`'s stack (exit 135).
 set_option Elab.async false
 
+/-- info: ["proved", "proved", "refuted", "refuted", "proved", "proved", "proved"] -/
+#guard_msgs in #eval [netOk, netSame, netNeg, netOther, netStore, netWrite, netDistinct].map verdict
+
+/-- info: true -/
+#guard_msgs in #eval [netOk, netSame, netNeg, netOther, netStore, netWrite, netDistinct].all Fml.Covered
+
+-- Four ledger reads: decided by the walk (M7, the running time).
+/-- info: "proved" -/
+#guard_msgs in #eval verdict netSwap
+
+theorem net_covered : netOk.Covered = true := by decide +kernel
+theorem netSame_covered : netSame.Covered = true := by decide +kernel
+theorem netSwap_covered : netSwap.Covered = true := by decide +kernel
+
+/-- `decideLeaf_proved_iff`, applied to a leaf that reads the ledger. -/
+theorem net_iff : decideLeaf netOk = .proved ↔ Fml.Valid netOk :=
+  decideLeaf_proved_iff net_covered
+
 /-- info: [false, false, true, true] -/
 #guard_msgs in #eval [gridApf, strictSorted, sortedLe, columnApf].map (Fml.inTarget {})
 
