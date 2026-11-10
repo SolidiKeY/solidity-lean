@@ -46,64 +46,52 @@ RSS includes mapped imports and must identify cold/warm process and cache state.
 Historical measurements are context only; no current p50/p95/max or worst-ten
 list is available until the actual suite has run.
 
-## Waits and owner requests
+## Scope decisions and validation limitations
 
-- `VU1-R1` is resolved by standing user decision H232, which supersedes
-  systemd/delegated-cgroup provisioning. Run unchanged heavy gates serially
-  with `LEAN_NUM_THREADS=1`; do not wait for a systemd scope. The enforced
-  host pre-gate remains 16 GiB with no swap before any merge. Operational
-  limitation: no systemd scope on the cloud VM (H232).
-- `VU1-D1`: the landing review requested the topic-guide link and catalog
-  regeneration on this branch. The link is in the trust/usability guide; the
-  catalog is generated with the unchanged navigation script. Branch checks
-  do not establish ordinary factory integration or a merge receipt.
-- `VU1-D2`: the merged master has an inherited catalog omission. The current
-  catalog and navigation-generator owner is
-  `plan-ci0-ci-green-1109/ci0-lean-checks`. Only that owner performs the unchanged
-  generator repair; VU1 must not write either file or edit audit content.
-  Coordinator delivery of the bounded repair remains pending under H418.
-  Keep the navigation failure explicit until the published repair passes checks.
-- `VU1-G2`: the merged master has a known unrecorded axiom pin for
-  `Solidity/Backend/Passes/CompilerWholeScopePins.lean`. Its repair is already
-  assigned outside VU1. Do not write the registries, baseline or theorem here;
-  preserve the failed gate until the published repair is validated. This is
-  inventory bookkeeping, not permission to add an axiom or weaken a proof.
-- Representative contracts: the frozen SolKeY snapshot contains benchmark
-  ERC20 and wallet sources, but their presence is not evidence of frontend
-  admission. No vault/multisig Solidity file was found in that snapshot.
-  Upstream result records mark the old MultiSigWallet compilation suite as
-  lacking a harness adapter. No exclusion or replacement is authorized.
-- `VU1-I1` follows the coordinator-confirmed H191 option A: existing owners
-  provide exact admitted fixtures and complete disjoint telemetry; U01 waits
-  for their published inputs. No instrumentation lease extension is authorized.
-  The **coordinator remains the routing/publication waker** under the factory
-  liveness protocol, rather than an unnamed-owner wait. This decision is
-  acknowledged; the question is not reopened. H232 remains the later standing
-  memory policy and removes the historical scope-provisioning requirement.
-- The explicit user decision H413 authorizes a bounded producer proposal with
-  owner review before implementation. `VU1-P1` routes proposal preparation to this existing lane,
-  handle `VU1-P1-proposal`; no implementation or source ownership is assigned.
-  The exact unapplied diff, minimized file map, acceptance contract and unresolved
-  owner-review tickets belong in private evidence. CI0 retains its existing
-  repair priority and receives no telemetry follow-up. Complete U01 still waits
-  for a validated publication; proposal review does not freeze an interface.
-- `VU1-G1` (#477) is resolved ownership: the existing producer is
-  `plan-ci0-ci-green-1109/ci0-lean-checks`, branch
-  `cloud/plan-ci0-ci-green-1109/ci0-lean-checks` (H383/H390, continued by H407).
-  Its unchanged 600-second CI budget does not raise or satisfy this lane's
-  300-second VM guard. Wake only after its reviewed repair, ordinary gates and
-  landing, guarded cache publication, and exact-input compatibility for this
-  lane. Retrieve published caches only with
-  `scripts/ci/fetch-lake-cache.sh` (H88/H367); a different-master cache is not
-  proof of a hit. Full acceptance remains pending. Do not rerun unchanged
-  timed-out dependencies or infer delivery from this routing answer.
-- This lane takes source preparation and admission evidence inside
-  `scripts/bench/**` itself. Exact representative inputs still require demonstrated
-  frontend admission, rather than an unnamed-owner wait. The request to the
-  coordinator includes the required admitted token/vault/multisig paths.
-- The requested prior-art studies and Hard problems list were not located under
-  the named paths at this base; the coordinator request records the missing
-  producer/interface prerequisites. No new telemetry interface is frozen here.
+H470 supersedes coordinator and owner waits. Additive or statement-preserving
+changes inside this lane's lease are approved by the lane after independent
+finder and skeptic review, with every gate and budget preserved. Inherited
+master failures are limitations, not publication waits or permission to change
+the gate. Full U01 acceptance still requires the original measurements.
+
+- H232 resolves resource-scope provisioning: run heavy Lean work serially with
+  `LEAN_NUM_THREADS=1`. Operational limitation: no systemd scope on the cloud
+  VM (H232). The host 16 GiB/no-swap pre-gate remains required before merge.
+- D1's topic-guide link and catalog entry landed. The later D2 catalog omission
+  remains an inherited navigation limitation when reproduced on current master.
+  The catalog and generator are outside this lane's lease; neither is edited.
+- G2's historical unrecorded `lmax_refused` pin is not a producer wait. Current
+  master includes inventory repairs; report the unchanged check's actual result
+  instead of carrying forward an old failure. Do not edit registry policy here.
+- Current master changes RowsNine to chunks of 128. Its source documents a
+  531-second measurement under CI's 600-second allowance. This is no evidence
+  of passing VU1's unchanged 300-second per-module guard. Prior timeout receipts
+  apply to their recorded inputs; any new validation must identify its own head.
+  An inherited failure is a limitation, not a coordinator wait. Published caches
+  are fetched only with `scripts/ci/fetch-lake-cache.sh`; another head's cache
+  never proves an exact-input hit or a full-gate pass.
+- H191's exact admitted token/vault/multisig inputs have not been supplied in the
+  recorded evidence. Existing snapshot sources and legacy result records do not
+  establish admission. The lane can prepare and test fixtures under
+  `scripts/bench/**`, but cannot invent admission, exclude required functions or
+  call the partial suite complete. `VU1-H470-FIXTURES` asks whether this lane
+  may construct and demonstrate admission of representative fixtures instead of
+  H191's existing-owner input publication. Missing validated inputs remain explicit.
+- The H413 telemetry proposal is delivered and remains unapplied. Its exact
+  patch SHA256 is
+  `8b9b2e83290b05c89daa930ce8f07caecfc9461005f441855cd27cda36ede71e`.
+  H470 does not extend the lease to its four Lean/C producer files.
+  H439's exact-draft read-only review is complete. The single recorded user
+  follow-up is `VU1-H439-TELEMETRY-CONTRACT-20261110`; the overlapping
+  `VU1-H470-SCOPE` request is consolidated into it. No coordinator or owner
+  wait is retained. Review completion grants no producer scope, implementation,
+  signature freeze or complete U01 acceptance.
+- Dynamic attempted-versus-committed steps, loss detection, native finer-phase
+  boundaries and aggregate RSS remain unresolved design choices. Unknown fields
+  stay unknown. These require concrete design decisions before an interface is
+  frozen; partial observations grant no complete-baseline or acceptance credit.
+- Proposed budgets remain unapproved. No budget, proof statement, trust boundary,
+  gate, exclusion, heartbeat or time/memory limit is changed by H470.
 
 ## In-scope admission preparation
 
@@ -384,15 +372,38 @@ Independent read-only finder and skeptic confirmed the implementation fixes.
 Independent read-only finder and skeptic reviews of the merged-master catalog
 drift confirmed the one-row generator repair without audit-content changes.
 The VU1-D2 disposition assigns execution to the existing CI0 owner; the catalog
-remains unchanged in this lane while coordinator delivery is pending.
+remains unchanged in this lane. H470 subsequently classifies inherited failures
+as limitations and removes coordinator delivery waits.
 The coordinator also assigned the inherited VU1-G2 pin-inventory repair outside
 this lane; no inventory, baseline or theorem edit is made here.
 
+H439's independent exact-draft finder/skeptic contract reviews verified the
+proposal and historical base/draft hashes without applying or compiling it.
+Finish-only events do not detect loss; IDs lack run/process/attempt/outcome
+correlation, and escaped retry observations are attempted wall time, not
+committed-proof contributions. Dynamic steps remain null. Kernel submission
+includes bookkeeping; transitive coverage is unaudited and recursive/refutation
+paths preserve their existing async options. Native timing covers only the
+whole call and environment-variable presence enables it even for value `0`.
+Fresh-worker `ru_maxrss` is an individual-process maximum, never aggregate RSS.
+These findings fulfill the read-only draft review, not implementation approval.
+
+H470 documentation review: independent read-only finder and skeptic confirmed
+that the update removes coordinator waits without changing scope, statements,
+trust, gates or budgets. Finder caught a stale checkpoint sentence that still
+claimed the historical catalog/pin failures; it now records the actual current
+passes. The lane self-approves this in-scope documentation change using these
+reviews. Producer instrumentation remains unapplied; unknown fields stay unknown.
+
 ## Checkpoint handoff
 
-The lane-owned inventory and documentation repairs are complete. Current
-merged-head validation inherits the catalog and axiom-inventory failures above;
-ordinary factory integration remains separate. Suite, fresh baseline, calibrated
+The lane-owned inventory and documentation repairs are complete. On merged
+master `dfd3be8574e062c8eebb7a7a3d6dcfd12682dcab`, current fast checks pass,
+including navigation and axiom pins. The checkpoint library build also passes
+(6,386 jobs); these results do not establish a full-gate or U01 pass.
+Ordinary factory integration remains separate. Suite, fresh baseline, calibrated
 report, budget approval, CI regression thresholds,
 full lane-end validation and sealed handoff remain outstanding. No Lean file,
 public theorem, axiom pin, heartbeat setting or generated root is changed.
+H470 removes coordinator/owner waits; remaining out-of-scope implementation
+requires the recorded VU1-H439-TELEMETRY-CONTRACT-20261110 user decision.

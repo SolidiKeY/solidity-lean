@@ -3,7 +3,7 @@ import Solidity.Calculus.Close
 import Solidity.Calculus.Closers
 
 /-! Source-validated literal regressions, including a rejecting assertion. -/
-solc_import "../../../tests/solc/SourceLiterals.ast.json" hash 0x148b0e297850462c
+solc_import "../../../tests/solc/SourceLiterals.ast.json" hash 0xe96d230b15aee794
   as Imported.SourceLiterals testing
 
 

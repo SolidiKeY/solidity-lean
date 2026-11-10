@@ -3,7 +3,7 @@ import Solidity.Calculus.Close
 import Solidity.Calculus.Closers
 
 /-! Compiler-accepted names retain their declaration identity through import. -/
-solc_import "../../../tests/solc/SourceIdentifiers.ast.json" hash 0x7074a63990674247
+solc_import "../../../tests/solc/SourceIdentifiers.ast.json" hash 0x6f5c4d15f3186c0d
   as Imported.SourceIdentifiers testing
 
 

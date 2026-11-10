@@ -1,0 +1,1060 @@
+{
+ "allowDrift": [
+  "functionSelector"
+ ],
+ "applied": true,
+ "authority": "H68 option 1; drift keys functionSelector allowed (H102)",
+ "counts": {
+  "current": 35,
+  "drift": 7,
+  "exact": 4
+ },
+ "fixtures": [
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/CallExceptions.ast.json",
+   "leanPins": [
+    "Solidity/Examples/Tactics/CallExceptions.lean"
+   ],
+   "newSha256": "fe5dee22fab93b93ad6b2d0ae09fed6ce1bbcff5e1ee8e632e3341f80d0fc291",
+   "oldSha256": "fe5dee22fab93b93ad6b2d0ae09fed6ce1bbcff5e1ee8e632e3341f80d0fc291",
+   "otherReferences": [
+    "docs/feature-work/calls-exceptions.md",
+    "docs/feature-work/roadmap-g06-osaka.md",
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json",
+    "tests/upstream/revert-power/calls-exceptions-093819c1.md.txt"
+   ],
+   "solkeyCommit": "unknown",
+   "source": "tests/solc/CallExceptions.sol",
+   "status": "current",
+   "tryCallFlags": 129,
+   "typeIdentifiers": 1062
+  },
+  {
+   "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+   "fixture": "tests/solc/CalldataValidation.ast.json",
+   "leanPins": [
+    "tests/upstream/DeclarationSourceValidation.lean",
+    "web/test/CalldataImport.lean"
+   ],
+   "newSha256": "d10ec06ce7760f84d2667838fdaa59efe35399a07fb1f78220b2f6a883021b94",
+   "oldSha256": "d10ec06ce7760f84d2667838fdaa59efe35399a07fb1f78220b2f6a883021b94",
+   "otherReferences": [
+    "docs/feature-work/declarations-metadata.md",
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json",
+    "tests/upstream/group08-source-validation.json"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/Calldata.sol",
+   "status": "current",
+   "tryCallFlags": 25,
+   "typeIdentifiers": 333
+  },
+  {
+   "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+   "fixture": "tests/solc/CanonicalReaderContract.ast.json",
+   "leanPins": [
+    "Solidity/Frontend/Admission/CanonicalReaderContract.lean"
+   ],
+   "newSha256": "65a1a2a31162a520528dc38fa1cee44fd897b945080d6e10c119f29c986c42b9",
+   "oldSha256": "65a1a2a31162a520528dc38fa1cee44fd897b945080d6e10c119f29c986c42b9",
+   "otherReferences": [],
+   "solkeyCommit": "5c448df67f6fab14c5f9c1c5d0c63249b5fe78b8",
+   "source": "tests/solc/CanonicalReaderContract.sol",
+   "status": "current",
+   "tryCallFlags": 1,
+   "typeIdentifiers": 50
+  },
+  {
+   "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+   "fixture": "tests/solc/CloudIntegration.ast.json",
+   "leanPins": [
+    "tests/upstream/CloudIntegration.lean"
+   ],
+   "newSha256": "b88b373984f2dee18eb8a11440fdac99afa439e479dc2c5a305516410d810449",
+   "oldSha256": "b88b373984f2dee18eb8a11440fdac99afa439e479dc2c5a305516410d810449",
+   "otherReferences": [
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json"
+   ],
+   "solkeyCommit": "575d04ea8e44cc2648ef38a895b58fad9a3a2a97",
+   "source": "tests/solc/CloudIntegration.sol",
+   "status": "current",
+   "tryCallFlags": 3,
+   "typeIdentifiers": 43
+  },
+  {
+   "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+   "fixture": "tests/solc/CloudIntegrationIR.ast.json",
+   "leanPins": [
+    "tests/upstream/CloudIntegration.lean"
+   ],
+   "newSha256": "294715353e1601b68bba529c9a9718ae881d6e05e56d03666eb9dd25e8faa557",
+   "oldSha256": "294715353e1601b68bba529c9a9718ae881d6e05e56d03666eb9dd25e8faa557",
+   "otherReferences": [
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json"
+   ],
+   "solkeyCommit": "575d04ea8e44cc2648ef38a895b58fad9a3a2a97",
+   "source": "tests/solc/CloudIntegration.sol",
+   "status": "current",
+   "tryCallFlags": 3,
+   "typeIdentifiers": 43
+  },
+  {
+   "applied": true,
+   "applyApproved": [
+    "functionSelector"
+   ],
+   "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+   "driftKeys": {
+    "functionSelector": 19
+   },
+   "fixture": "tests/solc/ContractWorld.ast.json",
+   "leanPins": [
+    "Solidity/Examples/Tactics/ContractWorldSource.lean"
+   ],
+   "newSha256": "0d5e331ff62a01c14f4b822044aa4d5bea5ce1dcff4938dc6e06d39e70adb4eb",
+   "oldSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+   "otherReferences": [
+    "scripts/contract-world.test.mjs",
+    "tests/contract-world-certificates/replay-pipelines.mjs",
+    "tests/contract-world-certificates/validation.json",
+    "tests/contract-world-certificates/world-pipeline-legacy.log",
+    "tests/contract-world-certificates/world-pipeline-viaIR.log",
+    "tests/contract-world-certificates/world-pipelines.json",
+    "tests/directruntime-20261104/shared-translator/construct-reader-cases.json",
+    "tests/directruntime-20261104/shared-translator/coverage-inventory.json",
+    "tests/directruntime-20261104/shared-translator/fixture-census.json",
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json"
+   ],
+   "pathReaders": [],
+   "pinnedModules": [
+    "Solidity/Examples/Tactics/ContractWorldSource.lean"
+   ],
+   "solkeyCommit": "unknown",
+   "source": "tests/solc/ContractWorld.sol",
+   "status": "drift",
+   "tryCallFlags": 28,
+   "typeIdentifiers": 185
+  },
+  {
+   "applied": true,
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/CreationTry.ast.json",
+   "leanPins": [
+    "Solidity/Examples/Tactics/CreationTrySource.lean"
+   ],
+   "newSha256": "6c4707934e7bc8c3cf6e07bc28306bbc287bacae10eea6377e7110910837156e",
+   "oldSha256": "dc65764c54e4f98ee2672123a27db0ac95d17d14ee81393c0b4d8ff3c72feb88",
+   "otherReferences": [
+    "docs/feature-work/diamond-try-osaka-validation/plan.md",
+    "scripts/creation-try-adapter.test.mjs",
+    "scripts/roadmap-v17-creation-try.py",
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json",
+    "tests/roadmap-v17/test_creation_try.py"
+   ],
+   "pathReaders": [],
+   "pinnedModules": [
+    "Solidity/Examples/Tactics/CreationTrySource.lean"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": ".lake/upstream/solidity/test/libsolidity/semanticTests/tryCatch/create.sol",
+   "status": "exact",
+   "tryCallFlags": 7,
+   "typeIdentifiers": 71
+  },
+  {
+   "applied": true,
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/CreationTryIR.ast.json",
+   "leanPins": [
+    "Solidity/Examples/Tactics/CreationTrySourceIR.lean"
+   ],
+   "newSha256": "641caa63d3d8d606145f92f14c60bf7d416afa603045cbb3406c12cbe2d1599b",
+   "oldSha256": "40593c50257ce6c4e8968677d95afc0e54e4c14f938960c34cf84856874790bb",
+   "otherReferences": [
+    "scripts/roadmap-v17-creation-try.py",
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json",
+    "tests/roadmap-v17/test_creation_try.py"
+   ],
+   "pathReaders": [],
+   "pinnedModules": [
+    "Solidity/Examples/Tactics/CreationTrySourceIR.lean"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": ".lake/upstream/solidity/test/libsolidity/semanticTests/tryCatch/create.sol",
+   "status": "exact",
+   "tryCallFlags": 7,
+   "typeIdentifiers": 71
+  },
+  {
+   "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+   "fixture": "tests/solc/DeclarationMetadataAdmission.ast.json",
+   "leanPins": [
+    "Solidity/Examples/Tactics/DeclarationMetadata.lean"
+   ],
+   "newSha256": "252f6d6a48834873cf4c26e9d9ab3e44e7e7913990fad8e1f6cafdd23b21a242",
+   "oldSha256": "252f6d6a48834873cf4c26e9d9ab3e44e7e7913990fad8e1f6cafdd23b21a242",
+   "otherReferences": [
+    "docs/feature-work/declarations-metadata.md",
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json",
+    "tests/upstream/group08-source-validation.json"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/DeclarationMetadata.sol",
+   "status": "current",
+   "tryCallFlags": 49,
+   "typeIdentifiers": 308
+  },
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/DeclarationsLowering.ast.json",
+   "leanPins": [
+    "tests/upstream/Declarations.lean"
+   ],
+   "newSha256": "be429fc6ef2d21b10521d61330e3df3152d5a38f34257ffa9839089e514d4b7e",
+   "oldSha256": "be429fc6ef2d21b10521d61330e3df3152d5a38f34257ffa9839089e514d4b7e",
+   "otherReferences": [
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/DeclarationsLowering.sol",
+   "status": "current",
+   "tryCallFlags": 20,
+   "typeIdentifiers": 331
+  },
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/DeclarationsLoweringIR.ast.json",
+   "leanPins": [
+    "tests/upstream/Declarations.lean"
+   ],
+   "newSha256": "0eea3285b5e9c356cb249a77ffa1f5dd2e1d04b2318183134efb4608e178cb5a",
+   "oldSha256": "0eea3285b5e9c356cb249a77ffa1f5dd2e1d04b2318183134efb4608e178cb5a",
+   "otherReferences": [
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/DeclarationsLowering.sol",
+   "status": "current",
+   "tryCallFlags": 20,
+   "typeIdentifiers": 331
+  },
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/EntryPointsLeft.ast.json",
+   "leanPins": [
+    "tests/upstream/EntryPointsAdmission.lean",
+    "tests/upstream/EntryPointsLeft.lean"
+   ],
+   "newSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
+   "oldSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
+   "otherReferences": [
+    "tests/directruntime-20261104/shared-translator/construct-reader-cases.json",
+    "tests/directruntime-20261104/shared-translator/coverage-inventory.json",
+    "tests/directruntime-20261104/shared-translator/fixture-census.json",
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/directruntime-20261104/shared-translator/fresh/EntryPointsLeft.raw.json",
+    "tests/directruntime-20261104/shared-translator/reader-comparison.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json",
+    "tests/upstream/entry-points-left-proof-performance-validation.json",
+    "tests/upstream/entry-points-left-validation.json"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/EntryPointsLeft.sol",
+   "status": "current",
+   "tryCallFlags": 126,
+   "typeIdentifiers": 769
+  },
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/EntryPointsLeft.viaIR.ast.json",
+   "leanPins": [
+    "tests/upstream/EntryPointsLeft.lean"
+   ],
+   "newSha256": "91cadd1b7d98d29b53dd28cf71880de24f65039ee1c416551383e0cc36a01d32",
+   "oldSha256": "91cadd1b7d98d29b53dd28cf71880de24f65039ee1c416551383e0cc36a01d32",
+   "otherReferences": [
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json",
+    "tests/upstream/entry-points-left-proof-performance-validation.json",
+    "tests/upstream/entry-points-left-validation.json"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/EntryPointsLeft.sol",
+   "status": "current",
+   "tryCallFlags": 126,
+   "typeIdentifiers": 769
+  },
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/EntryPointsReceiverProfile.ast.json",
+   "leanPins": [
+    "tests/upstream/EntryPointsReceiverProfile.lean"
+   ],
+   "newSha256": "0bf3f4f0bd62bbf2ed1be18790f8af884d2623ce6e327d677857da3dee42472d",
+   "oldSha256": "0bf3f4f0bd62bbf2ed1be18790f8af884d2623ce6e327d677857da3dee42472d",
+   "otherReferences": [
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json",
+    "tests/upstream/entry-points-left-proof-performance-validation.json"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/EntryPointsReceiverProfile.sol",
+   "status": "current",
+   "tryCallFlags": 27,
+   "typeIdentifiers": 135
+  },
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/EntryPointsReceiverProfile.viaIR.ast.json",
+   "leanPins": [
+    "tests/upstream/EntryPointsReceiverProfile.lean"
+   ],
+   "newSha256": "226ddd62c90ffbaa50ccb7cba9e9af1466dc94dba3f35274c751aebf060c0649",
+   "oldSha256": "226ddd62c90ffbaa50ccb7cba9e9af1466dc94dba3f35274c751aebf060c0649",
+   "otherReferences": [
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json",
+    "tests/upstream/entry-points-left-proof-performance-validation.json"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/EntryPointsReceiverProfile.sol",
+   "status": "current",
+   "tryCallFlags": 27,
+   "typeIdentifiers": 135
+  },
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/EnumAbiRanges-viaIR.ast.json",
+   "leanPins": [
+    "tests/upstream/EnumAbiRanges.lean"
+   ],
+   "newSha256": "398fcc0d43fa7f3b36dfd46603464d7ba2a03aca47abf781ef9a9ae8003e698a",
+   "oldSha256": "398fcc0d43fa7f3b36dfd46603464d7ba2a03aca47abf781ef9a9ae8003e698a",
+   "otherReferences": [
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json",
+    "tests/upstream/group06.json"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/EnumAbiRanges.sol",
+   "status": "current",
+   "tryCallFlags": 4,
+   "typeIdentifiers": 29
+  },
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/EnumAbiRanges.ast.json",
+   "leanPins": [
+    "tests/upstream/EnumAbiRanges.lean"
+   ],
+   "newSha256": "3e4fb403c35591858812bf98253075962c7e13e6e2b68c602764063b42091423",
+   "oldSha256": "3e4fb403c35591858812bf98253075962c7e13e6e2b68c602764063b42091423",
+   "otherReferences": [
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json",
+    "tests/upstream/group06.json"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/EnumAbiRanges.sol",
+   "status": "current",
+   "tryCallFlags": 4,
+   "typeIdentifiers": 29
+  },
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/EnumDeclarationBounds-viaIR.ast.json",
+   "leanPins": [
+    "tests/upstream/EnumBounds.lean"
+   ],
+   "newSha256": "dd4d3c45a5aaf68941cfebae2ad80be048f9d183a067d01f9c95330805eb677b",
+   "oldSha256": "dd4d3c45a5aaf68941cfebae2ad80be048f9d183a067d01f9c95330805eb677b",
+   "otherReferences": [
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json",
+    "tests/upstream/group06.json"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/EnumDeclarationBounds.sol",
+   "status": "current",
+   "tryCallFlags": 4,
+   "typeIdentifiers": 22
+  },
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/EnumDeclarationBounds.ast.json",
+   "leanPins": [
+    "tests/upstream/EnumBounds.lean"
+   ],
+   "newSha256": "4dcbf0849ff28a15e1c2339126994e022de8dfaebe4bded141a8a055797271cc",
+   "oldSha256": "4dcbf0849ff28a15e1c2339126994e022de8dfaebe4bded141a8a055797271cc",
+   "otherReferences": [
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json",
+    "tests/upstream/group06.json"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/EnumDeclarationBounds.sol",
+   "status": "current",
+   "tryCallFlags": 4,
+   "typeIdentifiers": 22
+  },
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/Group07.ast.json",
+   "leanPins": [
+    "tests/upstream/Group07.lean"
+   ],
+   "newSha256": "a25753556cf3e91b88c943c4f69c9100f445874ff937526e3ebdd7fc5ca61063",
+   "oldSha256": "a25753556cf3e91b88c943c4f69c9100f445874ff937526e3ebdd7fc5ca61063",
+   "otherReferences": [
+    "tests/directruntime-20261104/shared-translator/construct-reader-cases.json",
+    "tests/directruntime-20261104/shared-translator/coverage-inventory.json",
+    "tests/directruntime-20261104/shared-translator/fixture-census.json",
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/directruntime-20261104/shared-translator/fresh/Group07.raw.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json",
+    "tests/upstream/group07-validation.json"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/Group07.sol",
+   "status": "current",
+   "tryCallFlags": 23,
+   "typeIdentifiers": 266
+  },
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/Group07Mixed.ast.json",
+   "leanPins": [
+    "tests/upstream/Group07Mixed.lean"
+   ],
+   "newSha256": "6dbf8dd9a6e4049380fc3829ff0498d9d4fca523fa7eccfca53291d11e3db0a5",
+   "oldSha256": "6dbf8dd9a6e4049380fc3829ff0498d9d4fca523fa7eccfca53291d11e3db0a5",
+   "otherReferences": [
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json",
+    "tests/upstream/group07-validation.json"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/Group07Mixed.sol",
+   "status": "current",
+   "tryCallFlags": 23,
+   "typeIdentifiers": 723
+  },
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/Group07MixedIR.ast.json",
+   "leanPins": [
+    "tests/upstream/Group07Mixed.lean"
+   ],
+   "newSha256": "47bfc83c901431024511c04e7e0e1f39822a28028b4e04b92c82cc68d81498a3",
+   "oldSha256": "47bfc83c901431024511c04e7e0e1f39822a28028b4e04b92c82cc68d81498a3",
+   "otherReferences": [
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json",
+    "tests/upstream/group07-validation.json"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/Group07Mixed.sol",
+   "status": "current",
+   "tryCallFlags": 23,
+   "typeIdentifiers": 723
+  },
+  {
+   "applied": true,
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/LibraryTry.ast.json",
+   "leanPins": [
+    "Solidity/Examples/Tactics/LibraryTrySource.lean"
+   ],
+   "newSha256": "cade63e177c757d8a26e4bd53cf431dfe022aac71235b617b408218bda16fb01",
+   "oldSha256": "7ce034177434e147b9768a6eb10b7be384864cb060161fc0b2546be0a9377784",
+   "otherReferences": [
+    "docs/feature-work/diamond-try-osaka-validation/plan.md",
+    "scripts/library-try-adapter.test.mjs",
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json"
+   ],
+   "pathReaders": [],
+   "pinnedModules": [
+    "Solidity/Examples/Tactics/LibraryTrySource.lean"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "/workspace/solidity-lean/.lake/upstream/solidity/test/libsolidity/semanticTests/tryCatch/try_catch_library_call.sol",
+   "status": "exact",
+   "tryCallFlags": 4,
+   "typeIdentifiers": 76
+  },
+  {
+   "applied": true,
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/LibraryTryIR.ast.json",
+   "leanPins": [
+    "Solidity/Examples/Tactics/LibraryTrySourceIR.lean"
+   ],
+   "newSha256": "8292a7633217026d686ee24bd3ca2a020d22457e2d67a7b35fdac324a12d2834",
+   "oldSha256": "205b02e0fd5a46728191a1b4da3e841bb6652f204ae5cfbb087817a793bd06b1",
+   "otherReferences": [
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json"
+   ],
+   "pathReaders": [],
+   "pinnedModules": [
+    "Solidity/Examples/Tactics/LibraryTrySourceIR.lean"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "/workspace/solidity-lean/.lake/upstream/solidity/test/libsolidity/semanticTests/tryCatch/try_catch_library_call.sol",
+   "status": "exact",
+   "tryCallFlags": 4,
+   "typeIdentifiers": 76
+  },
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/MappingAliases.ast.json",
+   "leanPins": [
+    "tests/upstream/MappingDeclarations.lean"
+   ],
+   "newSha256": "52773a33eb48b2e5ba73d9f36d583fac3997aba9702a7c3603b5c4aedc40a821",
+   "oldSha256": "52773a33eb48b2e5ba73d9f36d583fac3997aba9702a7c3603b5c4aedc40a821",
+   "otherReferences": [
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/MappingAliases.sol",
+   "status": "current",
+   "tryCallFlags": 0,
+   "typeIdentifiers": 135
+  },
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/MappingAliasesIR.ast.json",
+   "leanPins": [
+    "tests/upstream/MappingDeclarations.lean"
+   ],
+   "newSha256": "4978b52f5db9d0182bee5c5df78a4023ac5ec124ab887426a564596801e876d7",
+   "oldSha256": "4978b52f5db9d0182bee5c5df78a4023ac5ec124ab887426a564596801e876d7",
+   "otherReferences": [
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/MappingAliases.sol",
+   "status": "current",
+   "tryCallFlags": 0,
+   "typeIdentifiers": 135
+  },
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/PublicGetters.ast.json",
+   "leanPins": [
+    "Solidity/Examples/Tactics/PublicGetters.lean",
+    "tests/upstream/GetterEvaluationSharing.lean"
+   ],
+   "newSha256": "5dd4f02f871d60a76cfeeea02bdce72ef09a571259f17be1aa2f7429647caab2",
+   "oldSha256": "5dd4f02f871d60a76cfeeea02bdce72ef09a571259f17be1aa2f7429647caab2",
+   "otherReferences": [
+    "scripts/getter-plans.test.mjs",
+    "scripts/public-getters.test.mjs",
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json",
+    "tests/upstream/entry-points-left-sharing-validation.json"
+   ],
+   "solkeyCommit": "unknown",
+   "source": "tests/solc/PublicGetters.sol",
+   "status": "current",
+   "tryCallFlags": 109,
+   "typeIdentifiers": 710
+  },
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/QuantifiedDiamond.ast.json",
+   "leanPins": [
+    "Solidity/Solkey/QuantifiedDiamond.lean"
+   ],
+   "newSha256": "3eca9812dc18a2a68c4d660fff2de6f07a4018206163db5aa8e1d5b338164f4a",
+   "oldSha256": "3eca9812dc18a2a68c4d660fff2de6f07a4018206163db5aa8e1d5b338164f4a",
+   "otherReferences": [
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json",
+    "tests/upstream/step12-quantified-diamond/source-replay.mjs.txt"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/QuantifiedDiamond.sol",
+   "status": "current",
+   "tryCallFlags": 4,
+   "typeIdentifiers": 98
+  },
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/QuantifiedDiamond.viaIR.ast.json",
+   "leanPins": [
+    "Solidity/Solkey/QuantifiedDiamond.lean"
+   ],
+   "newSha256": "faf833c46024c1c9e1ff3b1b6e1908677e603fde9629a17b10bfd2a0e63f2b56",
+   "oldSha256": "faf833c46024c1c9e1ff3b1b6e1908677e603fde9629a17b10bfd2a0e63f2b56",
+   "otherReferences": [
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json",
+    "tests/upstream/step12-quantified-diamond/source-replay.mjs.txt"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/QuantifiedDiamond.sol",
+   "status": "current",
+   "tryCallFlags": 4,
+   "typeIdentifiers": 98
+  },
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/RemainingDeclarations.ast.json",
+   "leanPins": [
+    "tests/upstream/RemainingDeclarations.lean"
+   ],
+   "newSha256": "46e2f540dcaacaae277fae44e37c8a46faf539feff8a7881844fd307c3f93cf1",
+   "oldSha256": "46e2f540dcaacaae277fae44e37c8a46faf539feff8a7881844fd307c3f93cf1",
+   "otherReferences": [
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/RemainingDeclarations.sol",
+   "status": "current",
+   "tryCallFlags": 41,
+   "typeIdentifiers": 478
+  },
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/RemainingDeclarationsIR.ast.json",
+   "leanPins": [
+    "tests/upstream/RemainingDeclarations.lean"
+   ],
+   "newSha256": "8c2c63b604fa13d526e8978ed82798162ceb9553b349aaa97889dfafa113aee7",
+   "oldSha256": "8c2c63b604fa13d526e8978ed82798162ceb9553b349aaa97889dfafa113aee7",
+   "otherReferences": [
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/RemainingDeclarations.sol",
+   "status": "current",
+   "tryCallFlags": 41,
+   "typeIdentifiers": 478
+  },
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/SelfPowerData.legacy.ast.json",
+   "leanPins": [
+    "Solidity/Examples/Tactics/SelfPowerData.lean"
+   ],
+   "newSha256": "99447fd76fca2b8d70abdcefddd001e5910859d8a318da36880c8b2739115b71",
+   "oldSha256": "99447fd76fca2b8d70abdcefddd001e5910859d8a318da36880c8b2739115b71",
+   "otherReferences": [
+    "docs/feature-work/roadmap-g06-osaka.md",
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json",
+    "tests/upstream/revert-power/ConditionalBefore.lean.txt",
+    "tests/upstream/revert-power/validation.json"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/SelfPowerData.sol",
+   "status": "current",
+   "tryCallFlags": 121,
+   "typeIdentifiers": 1093
+  },
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/SelfPowerData.viaIR.ast.json",
+   "leanPins": [
+    "Solidity/Examples/Tactics/SelfPowerData.lean"
+   ],
+   "newSha256": "eb435329dca3464a60e7efb9e22594af34acdb94238bf02f68403d3099018917",
+   "oldSha256": "eb435329dca3464a60e7efb9e22594af34acdb94238bf02f68403d3099018917",
+   "otherReferences": [
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json",
+    "tests/upstream/revert-power/ConditionalBefore.lean.txt",
+    "tests/upstream/revert-power/validation.json"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/SelfPowerData.sol",
+   "status": "current",
+   "tryCallFlags": 121,
+   "typeIdentifiers": 1093
+  },
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/SignedNumeric.ast.json",
+   "leanPins": [
+    "Solidity/Examples/Tactics/SignedNumericImport.lean"
+   ],
+   "newSha256": "048585bc4058313e3dd06ef154abbb886d92c4496c563bded08eff68dbf1b68d",
+   "oldSha256": "048585bc4058313e3dd06ef154abbb886d92c4496c563bded08eff68dbf1b68d",
+   "otherReferences": [
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json",
+    "tests/upstream/group04/validation.json"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/SignedNumeric.sol",
+   "status": "current",
+   "tryCallFlags": 47,
+   "typeIdentifiers": 463
+  },
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/SignedNumericIR.ast.json",
+   "leanPins": [
+    "Solidity/Examples/Tactics/SignedNumericImport.lean"
+   ],
+   "newSha256": "2aa5bb47f927e124d9e51b883e7dcb867ee30e501ec7914cc508959ca47c7014",
+   "oldSha256": "2aa5bb47f927e124d9e51b883e7dcb867ee30e501ec7914cc508959ca47c7014",
+   "otherReferences": [
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json",
+    "tests/upstream/group04/validation.json"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/SignedNumeric.sol",
+   "status": "current",
+   "tryCallFlags": 47,
+   "typeIdentifiers": 463
+  },
+  {
+   "applied": true,
+   "applyApproved": [
+    "functionSelector"
+   ],
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "driftKeys": {
+    "functionSelector": 9
+   },
+   "fixture": "tests/solc/SliceCopies.ast.json",
+   "leanPins": [
+    "Solidity/Examples/Tactics/SliceCopiesImport.lean"
+   ],
+   "newSha256": "7dc8016d97778485159b8582c0e8f72bb77b219a916cb7378bf84aaef8a63abe",
+   "oldSha256": "12a7e8086d02aed8820d06b7efe989a7aa436a352b7baec38a859a068d4b3497",
+   "otherReferences": [
+    "docs/calldata-slice-copies.md",
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json"
+   ],
+   "pathReaders": [],
+   "pinnedModules": [
+    "Solidity/Examples/Tactics/SliceCopiesImport.lean"
+   ],
+   "solkeyCommit": "unknown",
+   "source": "tests/solc/SliceCopies.sol",
+   "status": "drift",
+   "tryCallFlags": 33,
+   "typeIdentifiers": 695
+  },
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/SliceReferenceCopies.ast.json",
+   "leanPins": [
+    "Solidity/Examples/Tactics/SliceReferenceCopies.lean"
+   ],
+   "newSha256": "b960c8c5e1bf9b60a1dedd29ea27e5734e06b9b1747c7fd13fecf9bb5fd7cc83",
+   "oldSha256": "b960c8c5e1bf9b60a1dedd29ea27e5734e06b9b1747c7fd13fecf9bb5fd7cc83",
+   "otherReferences": [
+    "tests/directruntime-20261104/shared-translator/construct-reader-cases.json",
+    "tests/directruntime-20261104/shared-translator/coverage-inventory.json",
+    "tests/directruntime-20261104/shared-translator/fixture-census.json",
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/directruntime-20261104/shared-translator/fresh/SliceReferenceCopies.raw.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json",
+    "tests/upstream/step03/validation.json"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/SliceReferenceCopies.sol",
+   "status": "current",
+   "tryCallFlags": 26,
+   "typeIdentifiers": 914
+  },
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/SliceReferenceCopies.viaIR.ast.json",
+   "leanPins": [
+    "Solidity/Examples/Tactics/SliceReferenceCopies.lean"
+   ],
+   "newSha256": "b7fd2fe73de1bce33c09987e1b5b48a740c8b2b00d4d84dd54936563b8eabc38",
+   "oldSha256": "b7fd2fe73de1bce33c09987e1b5b48a740c8b2b00d4d84dd54936563b8eabc38",
+   "otherReferences": [
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json",
+    "tests/upstream/step03/validation.json"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/SliceReferenceCopies.sol",
+   "status": "current",
+   "tryCallFlags": 26,
+   "typeIdentifiers": 914
+  },
+  {
+   "applied": true,
+   "applyApproved": [
+    "functionSelector"
+   ],
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "driftKeys": {
+    "functionSelector": 27
+   },
+   "fixture": "tests/solc/SourceAdmission.ast.json",
+   "leanPins": [
+    "Solidity/Examples/Tactics/SourceAdmissionImport.lean"
+   ],
+   "newSha256": "add99160d266b3286d010e47c0f55dcd21dbcfd186d6f76e69f39c55e04ac90f",
+   "oldSha256": "f1dfe7ce49adc72927a922333f55c950f1a37aa2964e3a41551e9bdc409c5338",
+   "otherReferences": [
+    "tests/directruntime-20261104/shared-translator/construct-reader-cases.json",
+    "tests/directruntime-20261104/shared-translator/coverage-inventory.json",
+    "tests/directruntime-20261104/shared-translator/fixture-census.json",
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/directruntime-20261104/shared-translator/fresh/SourceAdmission.raw.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json"
+   ],
+   "pathReaders": [],
+   "pinnedModules": [
+    "Solidity/Examples/Tactics/SourceAdmissionImport.lean"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/SourceAdmission.sol",
+   "status": "drift",
+   "tryCallFlags": 32,
+   "typeIdentifiers": 190
+  },
+  {
+   "applied": true,
+   "applyApproved": [
+    "functionSelector"
+   ],
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "driftKeys": {
+    "functionSelector": 1
+   },
+   "fixture": "tests/solc/SourceCoder.ast.json",
+   "leanPins": [
+    "Solidity/Examples/Tactics/SourceAdmissionImport.lean"
+   ],
+   "newSha256": "9a601f860ad327913fef84d156c73295b043e5643112760da5f542447092a5f8",
+   "oldSha256": "cb766a342c472fbdeb9d6d6928f745d868ff71d59607e9533ac4539df04a1597",
+   "otherReferences": [
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json"
+   ],
+   "pathReaders": [],
+   "pinnedModules": [
+    "Solidity/Examples/Tactics/SourceAdmissionImport.lean"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/SourceCoder.sol",
+   "status": "drift",
+   "tryCallFlags": 1,
+   "typeIdentifiers": 10
+  },
+  {
+   "applied": true,
+   "applyApproved": [
+    "functionSelector"
+   ],
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "driftKeys": {
+    "functionSelector": 1
+   },
+   "fixture": "tests/solc/SourceCoderIR.ast.json",
+   "leanPins": [
+    "Solidity/Examples/Tactics/SourceAdmissionImport.lean"
+   ],
+   "newSha256": "47a37bf6c828475221af3fd487a49040fd1a09df6f1bb9148014a928c64fb72c",
+   "oldSha256": "183868a9008e10e89e832751b0ab290c953e471309257d835374120cfeb7d8f4",
+   "otherReferences": [
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json"
+   ],
+   "pathReaders": [],
+   "pinnedModules": [
+    "Solidity/Examples/Tactics/SourceAdmissionImport.lean"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/SourceCoder.sol",
+   "status": "drift",
+   "tryCallFlags": 1,
+   "typeIdentifiers": 10
+  },
+  {
+   "applied": true,
+   "applyApproved": [
+    "functionSelector"
+   ],
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "driftKeys": {
+    "functionSelector": 4
+   },
+   "fixture": "tests/solc/SourceIdentifiers.ast.json",
+   "leanPins": [
+    "Solidity/Examples/Tactics/SourceIdentifiersImport.lean"
+   ],
+   "newSha256": "faef087a083780dcfa48ffc680e926ae92399036c1e786660440c17ce82096a2",
+   "oldSha256": "c70ff4922b53cad33cc435f59da3bbe33175a8d78f602f1861323bca0c73b4a9",
+   "otherReferences": [
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json"
+   ],
+   "pathReaders": [],
+   "pinnedModules": [
+    "Solidity/Examples/Tactics/SourceIdentifiersImport.lean"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/SourceIdentifiers.sol",
+   "status": "drift",
+   "tryCallFlags": 16,
+   "typeIdentifiers": 121
+  },
+  {
+   "applied": true,
+   "applyApproved": [
+    "functionSelector"
+   ],
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "driftKeys": {
+    "functionSelector": 8
+   },
+   "fixture": "tests/solc/SourceLiterals.ast.json",
+   "leanPins": [
+    "Solidity/Examples/Tactics/SourceLiteralsImport.lean"
+   ],
+   "newSha256": "0c2b916d2dc705e438178eed2e92374228f9e5ebda2b51ed07c218431ddf8fa9",
+   "oldSha256": "173b002587629cbcc77758a0996ca9453b4b5fe099638a7cb67225fc816fc494",
+   "otherReferences": [
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json"
+   ],
+   "pathReaders": [],
+   "pinnedModules": [
+    "Solidity/Examples/Tactics/SourceLiteralsImport.lean"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/SourceLiterals.sol",
+   "status": "drift",
+   "tryCallFlags": 37,
+   "typeIdentifiers": 641
+  },
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/TransientFactory.ast.json",
+   "leanPins": [
+    "Solidity/Examples/Tactics/TransientWorldSource.lean"
+   ],
+   "newSha256": "04b89aee40aa7106f1b67ec007baa3049fc28abf91c4212d00abd771f9627835",
+   "oldSha256": "04b89aee40aa7106f1b67ec007baa3049fc28abf91c4212d00abd771f9627835",
+   "otherReferences": [
+    "docs/feature-work/roadmap-g06-osaka.md",
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json",
+    "tests/upstream/step08-transient-world/baseline-probes.txt",
+    "tests/upstream/step08-transient-world/report.json"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/TransientFactory.sol",
+   "status": "current",
+   "tryCallFlags": 10,
+   "typeIdentifiers": 105
+  },
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/TransientFactory.viaIR.ast.json",
+   "leanPins": [
+    "Solidity/Examples/Tactics/TransientWorldSource.lean"
+   ],
+   "newSha256": "90e53a04d29281ff94311761e4c3ef9939837a4395f754e48df67adab57306de",
+   "oldSha256": "90e53a04d29281ff94311761e4c3ef9939837a4395f754e48df67adab57306de",
+   "otherReferences": [
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json",
+    "tests/upstream/step08-transient-world/baseline-probes.txt",
+    "tests/upstream/step08-transient-world/report.json"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/TransientFactory.sol",
+   "status": "current",
+   "tryCallFlags": 10,
+   "typeIdentifiers": 105
+  },
+  {
+   "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+   "fixture": "tests/solc/TransientSource.ast.json",
+   "leanPins": [
+    "Solidity/Examples/Tactics/TransientSourceImport.lean"
+   ],
+   "newSha256": "96e23c1debf4aa351a90d529dc18236d762cc072e860762c66710eb344ac0b9d",
+   "oldSha256": "96e23c1debf4aa351a90d529dc18236d762cc072e860762c66710eb344ac0b9d",
+   "otherReferences": [
+    "tests/directruntime-20261104/shared-translator/construct-reader-cases.json",
+    "tests/directruntime-20261104/shared-translator/coverage-inventory.json",
+    "tests/directruntime-20261104/shared-translator/fixture-census.json",
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/directruntime-20261104/shared-translator/fresh/TransientSource.raw.json",
+    "tests/h28-terra/drift-reports/evidence/item1-manifest.json",
+    "tests/h28-terra/proof-cleanup/manifest.json",
+    "tests/upstream/group09-transient-source-repair.json"
+   ],
+   "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+   "source": "tests/solc/TransientSource.sol",
+   "status": "current",
+   "tryCallFlags": 9,
+   "typeIdentifiers": 120
+  }
+ ],
+ "producer": "scripts/solc-ast.mjs"
+}
