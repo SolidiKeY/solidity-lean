@@ -82,7 +82,8 @@ jobs:
       # modules builds on one core under its own 600 s budget, in import order,
       # so a module that outgrows it is named (scripts/ci/build-slow-examples.sh).
       # The library step below then only checks the root file: the total is
-      # bounded per module (H134), no longer by one 600 s library budget.
+      # bounded per module (H134; user decision 2026-11-10: 600 s per module,
+      # the library as a whole may exceed 600 s), not by one library budget.
       - name: Build H109 slow examples, one budget per module
         run: bash scripts/ci/build-slow-examples.sh
       - name: Build H109 slow examples
