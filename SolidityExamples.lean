@@ -54,8 +54,13 @@ import Solidity.Examples.DecisionFeatures
 import Solidity.Examples.DecisionFixedArrayPair
 import Solidity.Examples.DecisionFixedArrayPath
 import Solidity.Examples.DecisionFixedArrayStorage
+import Solidity.Examples.DecisionGapBinderChecks
+import Solidity.Examples.DecisionGapBlockChecks
 import Solidity.Examples.DecisionGapCensus
 import Solidity.Examples.DecisionGapData
+import Solidity.Examples.DecisionGapLiteralChecks
+import Solidity.Examples.DecisionGapMembershipChecks
+import Solidity.Examples.DecisionGapModularChecks
 import Solidity.Examples.DecisionGapOperators
 import Solidity.Examples.DecisionGivenHeapComputedReason
 import Solidity.Examples.DecisionGivenHeapFixed
