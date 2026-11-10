@@ -1,0 +1,7 @@
+{
+ "Solidity/Examples/DecisionGapPartialOrSub.lean:Solidity.Examples.DecisionGapPartialOrSub.good_proved": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

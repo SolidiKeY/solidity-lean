@@ -1,0 +1,7 @@
+{
+ "Solidity/Examples/DecisionGapVoidBinder.lean:Solidity.Examples.DecisionGapVoidBinder.mappingOne_proved": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

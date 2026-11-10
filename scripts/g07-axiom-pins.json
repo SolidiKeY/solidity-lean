@@ -39839,6 +39839,36 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Examples/DecisionGapArrayNegatives.lean:Solidity.Examples.DecisionGapArrayNegatives.arrayOut_refuted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionGapPartialOrFloor.lean:Solidity.Examples.DecisionGapPartialOrFloor.atZero_refuted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionGapPartialOrFloor.lean:Solidity.Examples.DecisionGapPartialOrFloor.good_proved": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionGapPartialOrFloor.lean:Solidity.Examples.DecisionGapPartialOrFloor.wrongValue_countermodel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionGapPartialOrSub.lean:Solidity.Examples.DecisionGapPartialOrSub.good_proved": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionGapVoidBinder.lean:Solidity.Examples.DecisionGapVoidBinder.mappingOne_proved": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Examples/DecisionMemory.lean:Solidity.Examples.Decision.gapMemParam_countermodel": [
   "Classical.choice",
   "Quot.sound",

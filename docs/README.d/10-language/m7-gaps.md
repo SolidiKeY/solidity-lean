@@ -1,0 +1,1 @@
+| [feature-work/m7-gaps.md](feature-work/m7-gaps.md) | M7-next decision gaps (AU02): void fresh binders, the partial-OR floor family and false array blocks decided; what leaves `Fml.Residue` and what stays. |

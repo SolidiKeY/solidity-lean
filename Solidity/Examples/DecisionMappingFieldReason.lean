@@ -3,7 +3,7 @@ import Solidity.Examples.DecisionResidueReasons
 
 /-! # Inhabited mapping-bearing reversed-field reason controls
 Actual source recognition, target admission and producer-schema refusal remain
-separate from the observed global unknowns. No missing realization is assumed.
+separate from the global verdicts, which the void-binder route now proves. No missing realization is assumed.
 -/
 namespace Solidity.Examples.DecisionMappingFieldReason
 open Solidity.Decide Solidity.Decide.ResidueReason
@@ -42,9 +42,11 @@ theorem negative_and_combination_controls :
     memParamSame.freshStructMappingReversedPrimitiveEquation = false := by
   decide +kernel
 
-/-- These concrete global observations are separate from generic schema refusal. -/
-theorem actual_unknown_controls : decideGoal mappingReversed = .unknown ∧
-    decideGoal mappingOne = .unknown := by exact ⟨by rfl, by rfl⟩
+/-- These concrete global observations are separate from generic schema refusal:
+the producer schema refuses them, and the void-binder route proves them, since a
+`Wallet` has no memory object (`Calculus/DecisionMappingStruct.lean`). -/
+theorem actual_proved_controls : decideGoal mappingReversed = .proved ∧
+    decideGoal mappingOne = .proved := by exact ⟨by rfl, by rfl⟩
 
 /-- A specific existing schema refuses every body of this map-bearing binder. -/
 theorem original_schema_boundary (body : Fml StandardExample [.mem (.struct originalWitness.s)]) :

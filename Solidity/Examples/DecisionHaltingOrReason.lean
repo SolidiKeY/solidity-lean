@@ -84,11 +84,13 @@ theorem closed_proved : decideGoal closedOr = .proved := by
   | refuted σ => rw [hd] at h; cases h
   | unknown => rw [hd] at h; cases h
 
+/-- The original members are now covered and answered by the partial-OR floor family. -/
 theorem original_controls :
-    (floorClaim 1).inTarget {} = true ∧ (floorClaim 1).Covered = false ∧
-    decideGoal (floorClaim 1) = .unknown ∧ floorBad.inTarget {} = true ∧
-    floorBad.Covered = false ∧ decideGoal floorBad = .unknown :=
-  ⟨validAPF_target, validAPF_notCovered, validAPF_unknown,
-    falseAPF_target, falseAPF_notCovered, falseAPF_unknown⟩
+    (floorClaim 1).inTarget {} = true ∧ (floorClaim 1).Covered = true ∧
+    decideGoal (floorClaim 1) = .proved ∧ floorBad.inTarget {} = true ∧
+    floorBad.Covered = true ∧ ∃ σ : State FloorProbe [],
+      decideGoal floorBad = .refuted σ ∧ ¬ Fml.holdsH σ floorBad :=
+  ⟨validAPF_target, validAPF_covered, validAPF_proved, falseAPF_target, falseAPF_covered,
+    falseAPF_refuted⟩
 
 end Solidity.Examples.DecisionHaltingOrReason

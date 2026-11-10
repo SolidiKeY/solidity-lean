@@ -160,3 +160,8 @@ At the root, the notation's own tests:
 | Module | Its examples |
 |---|---|
 | `Examples/Tactics/OpenLoops/RowsNine.lean` | Existing `binomialRowsNine` obligation, checked with chunk 128 and preserved in the non-default H109 slow library and CI/full/lane-end/axiom-audit closure. Scoped CI acceptance uses 600 s; the 300 s default/VM STOP remains. |
+| `Examples/DecisionGapPartialOrFloor.lean` | The partial-OR floor family decided in both polarities over a contract with a second uint root: a valid member proved, key-zero and wrong-value members refuted at the region countermodel, a total-bound guard outside the family. |
+| `Examples/DecisionGapVoidBinder.lean` | Fresh binders of a mapping-bearing struct: the three former unknown pins and `∀ fresh Ledger l; l.nonce = 7` proved, the negated binder refuted (outside the target), a map-free control outside the family. |
+| `Examples/DecisionGapArrayNegatives.lean` | The false companions of the five array source shapes (past the bound, wrong value) refuted at threshold regions, covered, with certified states; the positive originals are not refuted. |
+| `Examples/DecisionGapPartialOrSub.lean` | The partial-OR family at `cap - 3`/`cap - 7`: proved, key-zero and wrong-value refuted; the guard with right disjunct `j ≤ i` pinned as in-target, uncovered Residue. |
+| `Examples/DecisionGapKIntResidue.lean` | KeY-`int` binders past the two-word encoding (`2^600` literals): in the target, refused by `Fml.kencB`, not covered; the small-literal control covered. |

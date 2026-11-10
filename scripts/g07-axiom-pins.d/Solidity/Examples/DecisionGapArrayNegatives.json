@@ -1,0 +1,7 @@
+{
+ "Solidity/Examples/DecisionGapArrayNegatives.lean:Solidity.Examples.DecisionGapArrayNegatives.arrayOut_refuted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
