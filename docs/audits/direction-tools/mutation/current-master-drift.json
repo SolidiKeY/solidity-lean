@@ -1,0 +1,328 @@
+{
+  "base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+  "boundary": "Literal source-anchor drift only; no Lean name resolution, mutation application, theorem/test execution, timing or semantic inference.",
+  "mutants": 32,
+  "revision": "2e9b6965a20d0ef7503e8848aa84fab66e4215d1",
+  "rows": [
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 53,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M01",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 54,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M02",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 55,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M03",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 56,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M04",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 57,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M05",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 58,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M06",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 59,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M07",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 60,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M08",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 61,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M09",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 62,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M10",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 64,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M11",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 64,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M12",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 65,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M13",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 66,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M14",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 67,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M15",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 68,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M16",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 91,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M17",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 92,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M18",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 93,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M19",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 94,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M20",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 105,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M21",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 106,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M22",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 125,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M23",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 126,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M24",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 131,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M25",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 140,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M26",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 141,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M27",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 142,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M28",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 145,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M29",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "current_line": 147,
+      "current_sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "file_changed": false,
+      "id": "M30",
+      "path": "Solidity/Semantics/Ops.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "92820e63eb62377e15269d9fae366a8003174e8c7b15ea0d3cf5b503891f9b89",
+      "current_line": 207,
+      "current_sha256": "92820e63eb62377e15269d9fae366a8003174e8c7b15ea0d3cf5b503891f9b89",
+      "file_changed": false,
+      "id": "M31",
+      "path": "Solidity/Calculus/Closers.lean"
+    },
+    {
+      "anchor_occurrences": 1,
+      "anchor_status": "unique",
+      "base_sha256": "92820e63eb62377e15269d9fae366a8003174e8c7b15ea0d3cf5b503891f9b89",
+      "current_line": 213,
+      "current_sha256": "92820e63eb62377e15269d9fae366a8003174e8c7b15ea0d3cf5b503891f9b89",
+      "file_changed": false,
+      "id": "M32",
+      "path": "Solidity/Calculus/Closers.lean"
+    }
+  ]
+}
