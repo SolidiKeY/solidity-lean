@@ -83,6 +83,7 @@ and open obligations. Test proposals remain proposals until applied.
 - [docs/feature-work/compiler-project-services.md](feature-work/compiler-project-services.md)
 - [docs/feature-work/compiler-transport-proofs.md](feature-work/compiler-transport-proofs.md)
 - [docs/feature-work/contract-world.md](feature-work/contract-world.md)
+- [docs/feature-work/cr-canonical-reader-contract.md](feature-work/cr-canonical-reader-contract.md)
 - [docs/feature-work/dafny-verification.md](feature-work/dafny-verification.md)
 - [docs/feature-work/decisions-20261106.md](feature-work/decisions-20261106.md)
 - [docs/feature-work/declarations-metadata.md](feature-work/declarations-metadata.md)
