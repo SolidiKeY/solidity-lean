@@ -6,7 +6,7 @@ import Solidity.Lowering.G19.AssignmentDoWhileContinue
 # Loop lowering leaf: `do { i = a; continue; tail } while (false);`
 
 Target: the first-iteration flag (`Lower.lean:507-512`), the per-iteration
-continue flag (`:514`), `continue` as a flag write (`:453`) and the dropped
+continue flag (`:513`), `continue` as a flag write (`:453`) and the dropped
 items after it (`:427`); with no break or return there is no guard (`:518`).
 `Family.doContinueProg` runs the body once, then the literal `false` ends it.
 

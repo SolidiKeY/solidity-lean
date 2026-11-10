@@ -7,7 +7,7 @@ import Solidity.Lowering.G19.AssignmentWhileContinue
 
 Target: the condition moves into the body (`Lower.lean:493-496`), `continue`
 becomes a flag write (`:453`), the items after it are dropped (`:427`), the
-continue flag is reset per iteration (`:514`) and the condition is guarded by
+continue flag is reset per iteration (`:513`) and the condition is guarded by
 the break flag (`:518`); `Family.whileContinueProg`. A true right-hand side
 runs two iterations (the reset makes the second test false), a false one runs
 one. Computed generically in the slots and fresh names.

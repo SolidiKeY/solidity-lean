@@ -52,8 +52,9 @@ def captureProgram (input : List RawStmt) : TermElabM Expr := do
   | [("i", .val .bool), ("a", .val .bool)] => pure ()
   | _ => throwError "actual lowerLoops changed the caller context"
   let elaborated := (((elabStmtsP IntrinsicProbe.C raw).run RawProbe.scope).run st).run memo
-  let .ok ((ss, st'), memo') := elaborated |
-    throwError "actual intrinsic elaboration refused the sample"
+  let ((ss, st'), memo') ← match elaborated with
+    | .ok r => pure r
+    | .error e => throwError "actual intrinsic elaboration refused the sample: {e}"
   unless memo'.starts.isEmpty && memo'.bodies.isEmpty do
     throwError "actual intrinsic elaboration changed the expected empty memo"
   match st'.1 with
@@ -102,6 +103,17 @@ def forBreak : Blk IntrinsicProbe.C IntrinsicProbe.Γ := capture_for_break%
 /-- Actual output for `for (i = a; ; a = false) break;`. -/
 def forBreakUpdate : Blk IntrinsicProbe.C IntrinsicProbe.Γ := capture_for_break_update%
 
+/-- `while (i = a) { a = false; continue; a = true; }`: a non-empty dropped tail. -/
+def whileContinueTailInput : List RawStmt :=
+  [.whileLoop {} (.assign (.name "i") (.name "a"))
+    [.assign (.name "a") (.bool false), .cont, .assign (.name "a") (.bool true)]]
+
+open Lean Elab Term in
+elab "capture_while_continue_tail%" : term => captureProgram whileContinueTailInput
+
+/-- Actual output for `while (i = a) { a = false; continue; a = true; }`. -/
+def whileContinueTail : Blk IntrinsicProbe.C IntrinsicProbe.Γ := capture_while_continue_tail%
+
 /-- `for (; i = a; a = false) { continue; }`, the source shape of G19
 `AssignmentForContinue`. -/
 def forContinueInput : List RawStmt :=
@@ -111,15 +123,20 @@ open Lean Elab Command in
 /-- Refusal control: the pipeline refuses `forContinueInput`. `lowerLoops` keeps
 an effectful `for` condition in the loop head (the head rewrite of
 Lower.lean:493 is for `while` only) and `loopExpr` (Stmt.lean:794-802) refuses
-it, so G19 `AssignmentForContinue` has no producer counterpart. Fails if the
-pipeline starts accepting this input, so the coverage table is revisited. -/
+it, so G19 `AssignmentForContinue` has no producer counterpart (G19
+`AssignmentForReturn` has the same effectful `for` head and is unreachable for
+the same reason). Fails if the pipeline starts accepting this input, or refuses
+it for any other reason (the expected `loopExpr` message is matched). -/
 elab "#check_for_continue_refused" : command => liftTermElabM do
-  let accepted ← try
+  let refusal ← try
       discard <| captureProgram forContinueInput
-      pure true
-    catch _ => pure false
-  if accepted then
-    throwError "the pipeline now accepts an effectful for condition; extend the loop family"
+      pure none
+    catch e => pure (some (← e.toMessageData.toString))
+  match refusal with
+  | none => throwError "the pipeline now accepts an effectful for condition; extend the loop family"
+  | some msg =>
+    unless (msg.splitOn "a loop's condition needs a statement before it").length > 1 do
+      throwError "the sample is refused for another reason: {msg}"
 
 #check_for_continue_refused
 

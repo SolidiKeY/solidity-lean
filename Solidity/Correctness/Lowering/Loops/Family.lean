@@ -48,8 +48,9 @@ structure Fresh where
 has a proved target bridge. Not in the family (no theorem, not admitted):
 `continue` other than `whileContinue`/`doContinue`, `return` (Lower.lean:454-459,
 536-538), `do … while` other than `doBreak`/`doContinue` (:507-512),
-pure conditions, real bodies and suffix guards (:429-431), nested loops and
-shared return flags (:497-501), specifications (:526-530), non-Boolean or
+pure conditions, real bodies, suffix guards (:429-431) other than the one after
+the synthetic condition head, nested loops and
+shared return flags (:497-501), specifications (:530-532), non-Boolean or
 non-local operands. -/
 inductive Shape where
   /-- `while (i = a) break;` (G19 `AssignmentWhileBreak`). -/
@@ -74,7 +75,7 @@ the statement holds for every pair of them. For `whileContinue`: the fresh
 continue flag and the Source items after `continue`, which lowering drops
 (Lower.lean:427) and Source never runs. For `doBreak`: the fresh first-iteration
 flag, and the Source and lowered conditions; the lowered test
-`!brk && (first || c)` short-circuits on both turns (Lower.lean:510, 518), so
+`!brk && (first || c)` short-circuits on both turns (Lower.lean:511, 518), so
 neither condition is evaluated and the two are not associated. For
 `doContinue`: the fresh continue flag and the dropped Source items after
 `continue`. -/
@@ -154,7 +155,7 @@ def whileContinueBody {C : Contract} {Γ : Ctx} (cnt se : Var) (j b : Idx Γ (.v
 
 /-- Intrinsic image of the lowered `while (i = a) { a = false; continue; … }`
 (Lower.lean:493-496 condition into the body, :453 `continue` to a flag, :427
-suffix after a jump dropped, :514 continue-flag reset, :518 condition guard,
+suffix after a jump dropped, :513 continue-flag reset, :518 condition guard,
 :522 break-flag declaration). -/
 def whileContinueProg {C : Contract} {Γ : Ctx} (brk cnt se : Var) (j b : Idx Γ (.val .bool)) :
     Prog C Γ (.val .bool :: Γ) :=
@@ -191,7 +192,7 @@ def whileResetProg {C : Contract} {Γ : Ctx} (brk se : Var) (j b : Idx Γ (.val 
 
 /-- Intrinsic image of the lowered `do { i = a; continue; … } while (false);`:
 `bool first = true; while (first || false) { first = false; bool cnt = false; i = a; cnt = true; }`
-(Lower.lean:507-512 first flag, :514 continue-flag reset, :453, :427; no break
+(Lower.lean:507-512 first flag, :513 continue-flag reset, :453, :427; no break
 or return exits, so no guard, :518). -/
 def doContinueProg {C : Contract} {Γ : Ctx} (first cnt : Var) (j b : Idx Γ (.val .bool)) :
     Prog C Γ (.val .bool :: Γ) :=
@@ -261,7 +262,7 @@ def Accepts {E : Source.Env} {returns : List Source.STy} {M u : Bool} {C : Contr
     (output : Blk C Γ) : Prop :=
   output = k.lowered p x names
 
-/-- The semantic endpoint of the P1 contract (`Checker.SemanticSoundnessStatement`)
+/-- The semantic endpoint modelled on the P1 contract (`Checker.SemanticSoundnessStatement`)
 for one resolved statement and one target program: from any aligned Source/target
 pair, Source reaches a normal outcome at the stated horizon offset, the target
 program runs to a state whose caller locals (through `embedding`) are related to
@@ -269,7 +270,10 @@ the Source locals, and target globals are unchanged. Both pipelines (`G`) and
 every Source state are covered. Source journal and target storage stay distinct.
 Initial facts on `R`: Boolean values are related only to their reflection, and
 `false` is related to `false` (both are G19's premises; the second is needed by
-the `continue` leaf). -/
+the `whileContinue` and `whileReset` leaves, whose Source writes a literal
+`false`). The second premise is not in `Checker.SemanticSoundnessStatement`, which
+has only the first: this endpoint is that contract's semantic conclusion under
+one additional initial fact, not an instance of it. -/
 def Endpoint {E : Source.Env} {srcΓ : Source.RCtx} {returns : List Source.STy} {M : Bool}
     {k : Source.SCtx} {C : Contract} {Γ Δ : Ctx}
     (statement : Source.RStmt E returns M k srcΓ srcΓ) (offset : Nat)

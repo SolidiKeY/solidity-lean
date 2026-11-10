@@ -11,7 +11,7 @@ import Solidity.Correctness.Lowering.Checker.WhileBreak
 # `lowerLoops_correct`
 
 The generic family statement `Loops.LowerLoopsCorrect`, proved leaf by leaf
-(one `Shape` constructor per G19 loop leaf), and its connection to the actual
+(one `Shape` constructor per covered G19 loop leaf; six of the ten), and its connection to the actual
 producer: the quoted output of running the real `lowerLoops` and then the real
 intrinsic elaborator (`Checker.RawProbe.actual`, `Checker.IntrinsicProbe.actual`)
 is accepted by the kernel, and the actual Source typing of the same loop is the
@@ -178,6 +178,14 @@ theorem whileContinue_accepts {E : Source.Env} :
     Accepts (E := E) (returns := []) (M := false) (u := false) .whileContinue whileBreakPair
       (Var.fresh "cnt" 2, ⟨_, .nil⟩) whileContinueNames Capture.whileContinue := rfl
 
+/-- The items after `continue` are dropped by the actual producer: with a
+non-empty tail `a = true;` the output is the same family member, for every
+Source tail (Lower.lean:427). -/
+theorem whileContinueTail_accepts {E : Source.Env} {tailΓ : Source.RCtx}
+    (tail : Source.RItems E [] false ⟨true, false⟩ [.bool, .bool] tailΓ) :
+    Accepts (returns := []) (M := false) (u := false) .whileContinue whileBreakPair
+      (Var.fresh "cnt" 2, ⟨_, tail⟩) whileContinueNames Capture.whileContinueTail := rfl
+
 /-- Actual Source typing of `while (i = a) { a = false; continue; }`. -/
 def whileContinueTyping (E : Source.Env) :
     Source.StmtD (SourceAssociation.typingContext E) SourceAssociation.names
@@ -321,6 +329,7 @@ end Loops.Coverage
 #print axioms Loops.Coverage.whileContinue_accepts
 #print axioms Loops.Coverage.whileContinue_source
 #print axioms Loops.Coverage.whileContinue_actual
+#print axioms Loops.Coverage.whileContinueTail_accepts
 #print axioms Loops.Coverage.doBreak_accepts
 #print axioms Loops.Coverage.doBreak_source
 #print axioms Loops.Coverage.doBreak_actual
