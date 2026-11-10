@@ -14,6 +14,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/G16/Arithmetic.lean:Solidity.Lowering.G16.Arithmetic.Modular.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/G16/Arithmetic.lean:Solidity.Lowering.G16.Arithmetic.SignedQuotRem.assignment_transport": [
   "Classical.choice",
   "Quot.sound",
