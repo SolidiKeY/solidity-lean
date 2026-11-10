@@ -15,6 +15,8 @@ their commands can write fixed paths. Normal write/check never executes them.
 
 The use graph is deliberately an under-approximation: explicit reviewed routes,
 Lean imports/solc_imports and validated Python reads of measured bytes.
+Unchanged demonstrated committed runners may be source-only roots with
+unavailable current validation, without fixture/child or passing-reproducer credit.
 Text matches are search candidates, never invocation edges. Shell expansion,
 Python eval/importlib, computed Node reads and producer environments need review;
 no static absence is sufficient to prune a candidate. Unresolved paths have a
@@ -442,6 +444,29 @@ def validated_routes(graph, catalog):
     if not isinstance(catalog, dict) or set(catalog) != {'schema_version', 'standalone', 'generators', 'reads', 'orphans'} or catalog['schema_version'] != 1:
         raise ValueError('invalid validation definition schema')
     current_runner_paths = {e.get('path') for e in catalog['standalone'] if e.get('input_revision') == repo.ref}
+    # Historical source-only eligibility needs a real commit and the exact
+    # recorded source object, not merely a matching current filename/blob.
+    historical_specs = {}
+    historical_revisions = set()
+    for entry in catalog['standalone']:
+        p = entry.get('path')
+        if (entry.get('input_revision') == repo.ref or entry.get('kind') not in ('unittest', 'node-test', 'runnable-entrypoint')
+                or p in current_runner_paths or p not in repo.tree or repo.tree[p][2] != entry.get('source_blob')): continue
+        revision = entry.get('input_revision')
+        if not hex_pin(revision, 40): raise ValueError('historical runner demonstration requires full commit revision')
+        historical_revisions.add(revision)
+        historical_specs[revision + ':' + p] = entry['source_blob']
+    requests = sorted(historical_revisions) + sorted(historical_specs)
+    if requests:
+        raw = git(repo.root, 'cat-file', '--batch-check', '-Z', data=b''.join(v.encode('utf-8', 'surrogateescape') + b'\0' for v in requests))
+        lines = raw.rstrip(b'\0').split(b'\0')
+        if len(lines) != len(requests): raise ValueError('historical runner object batch mismatch')
+        for request, line in zip(requests, lines):
+            fields = line.split()
+            expected_oid = request if request in historical_revisions else historical_specs[request]
+            expected_type = b'commit' if request in historical_revisions else b'blob'
+            if len(fields) != 3 or fields[0].decode() != expected_oid or fields[1] != expected_type:
+                raise ValueError('unverifiable historical runner demonstration: ' + request)
     for entry in catalog['standalone']:
         required = {'path', 'input_revision', 'source_blob', 'command', 'kind'}
         if entry.get('kind') == 'manual-reproducer': required.add('documentation')
@@ -474,7 +499,7 @@ def validated_routes(graph, catalog):
             if entry['other_reads'] not in ('unresolved', 'secondary'): raise ValueError('invalid other-read eligibility')
             scopes = entry['input_scope']
             if not isinstance(scopes, list) or not all(isinstance(scope, str) and scope not in SCOPE and
-                    (scope in repo.tree or scope.endswith('/') and any(path.startswith(scope) for path in repo.tree)) for scope in scopes):
+                    (historical_runner or scope in repo.tree or scope.endswith('/') and any(path.startswith(scope) for path in repo.tree)) for scope in scopes):
                 raise ValueError('invalid fixture-specific data scope')
         else:
             if not isinstance(command, list) or not command or not all(isinstance(a, str) for a in command):
@@ -1217,6 +1242,18 @@ def self_test():
         try: verify(expected, newer)
         except ValueError as error: assert 'revision' in str(error)
         else: raise AssertionError('genuine stale revision accepted')
+        git(root, 'rm', '-q', '--', 'tests/generated.txt')
+        git(root, '-c', 'user.name=Control', '-c', 'user.email=control@example.invalid', 'commit', '-qm', 'remove old fixture only')
+        removed_repo = Repository(root, 'HEAD')
+        removed = {r['path']: r for r in inventory(removed_repo, catalog)['records']}
+        assert removed['tests/plain.py']['class'] == 'keep'
+        assert removed['tests/plain.py']['runner_chain']['entry']['source_only']
+        assert 'tests/generated.txt' not in removed
+        fabricated_demonstration = copy.deepcopy(catalog)
+        fabricated_demonstration['standalone'][0]['input_revision'] = '0' * 40
+        try: inventory(removed_repo, fabricated_demonstration)
+        except ValueError as error: assert 'historical runner' in str(error)
+        else: raise AssertionError('fabricated historical demonstration revision accepted')
         shallow = root / 'shallow-clone'
         git(root, 'clone', '-q', '--depth=1', root.as_uri(), str(shallow))
         shallow_repo = Repository(shallow, 'HEAD')
