@@ -4465,6 +4465,9 @@ import Solidity.Syntax.Inlined
 import Solidity.Syntax.Join
 import Solidity.Syntax.LoopWarnings
 import Solidity.Syntax.Numeric
+import Solidity.Syntax.NumericV2
+import Solidity.Syntax.NumericV2Controls
+import Solidity.Syntax.NumericV2Correct
 import Solidity.Syntax.PushSource
 import Solidity.Syntax.Quote
 import Solidity.Syntax.Raw
