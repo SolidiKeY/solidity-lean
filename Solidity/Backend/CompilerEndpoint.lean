@@ -1,4 +1,5 @@
 import Solidity.Backend.Payments.CompilerExact
+import Solidity.Backend.Passes.WholeProgram.Refusal
 
 /-!
 # The compiler endpoint: typed program and world to `Evm.run`
@@ -7,7 +8,7 @@ import Solidity.Backend.Payments.CompilerExact
 with its exact agreement `Compilation.correct_exact` into one statement,
 `CompilerEndpoint`. The endpoint stops at `Evm.run` on the compiled
 `List Evm.Instr` (user decision H389); bytes are a separate later goal.
-Every place where the chain stops is a named, decidable refusal:
+It names two refusals, both decidable:
 
 * **R1** `compile b F P = none`: no checked branch accepts the program.
 * **R2** `refused r L frame = true`: a static resource check of the accepted
@@ -19,12 +20,16 @@ Past the refusals every accepted world agrees exactly with `Evm.run r.code m`
 (`AgreesExact`: both succeed in related states, both revert, or the typed run
 diverges and the machine faults; no payment disjunct).
 
-`CompilerEndpointWith refused` is the statement for any static check;
+R2 is sound, not complete: a world that passes the static check may still fail
+the dynamic part of `Input` (state and heap representation, allocation room,
+the copy bound), and then the agreement clause holds vacuously for it. The
+dynamic part is the endpoint's world premise, not a refusal.
+
+`CompilerEndpointWith refused` is the statement for any static check, and
 `compiler_endpoint_of_stages` proves it from `StaticStage refused`.
-`CompilerEndpoint` instantiates it with `Endpoint.frameRefused`, the bound that
-`Input` states literally per branch. The b1-intrinsic-stage check
-`Passes.WholeProgram.staticRefused` (also the locals bound) has the same type
-and, with its `staticRefused_input`, instantiates the same theorem.
+`CompilerEndpoint` instantiates it with `Passes.WholeProgram.staticRefused`
+(b1-intrinsic-stage: the array bound `L` against `Lmax`, the locals and the
+reserved frame on every branch), whose stage is `staticRefused_input`.
 -/
 namespace Solidity.Backend
 
@@ -69,42 +74,21 @@ theorem compiler_endpoint_of_stages (refused : StaticCheck) (stage : StaticStage
     · exact .inr ⟨check, fun base σ m h => r.correct_exact h⟩
     · exact .inl ⟨check, fun base σ m => stage r L frame base σ m check⟩
 
-namespace Endpoint
-
-/-- The static bound `Input` states literally in each branch (core:
-`L + pushes P ≤ Lmax`; memory branches: `b + requiredFrame ≤ frame`); the
-reference-array and fixed-memory branches state none. -/
-def frameRefused : StaticCheck := fun {_ b _ _ _ P} r L frame =>
-  match r with
-  | .core _ _ => decide (Lmax < L + Evm.Prog.pushes P)
-  | .referenceArrays _ | .fixedMemory _ => false
-  | r => decide (frame < b + r.requiredFrame)
-
-/-- Every accepted world passes `frameRefused`. -/
-theorem frameRefused_of_input {C : Contract} {b L frame : Nat} {Γ Δ : Ctx} {F : Frag Γ}
-    {P : Solidity.Prog C Γ Δ} (r : Compilation b F P) {base : Nat → Fin W}
-    {σ : State C Γ} {m : Machine} (h : r.Input L frame base σ m) :
-    frameRefused r L frame = false := by
-  cases r <;>
-    simp only [frameRefused, Compilation.requiredFrame, decide_eq_false_iff_not, Nat.not_lt] <;>
-    first | exact h.2 | exact h.2.1 | rfl
-
-theorem frame_stage : StaticStage frameRefused := by
-  intro C b Γ Δ F P r L frame base σ m check h
-  have passes : frameRefused r L frame = false := frameRefused_of_input r h
-  exact Bool.false_ne_true (passes.symm.trans check)
-
-end Endpoint
+/-- The R2 stage of b1-intrinsic-stage's static check. -/
+theorem static_stage : StaticStage Passes.WholeProgram.staticRefused :=
+  fun r _ _ _ _ _ h => Passes.WholeProgram.staticRefused_input r h
 
 /-- **The compiler endpoint**, typed program and world to `Evm.run`, with the
-refusals R1 (the checked entry refuses) and R2 (`frameRefused`). -/
-def CompilerEndpoint : Prop := CompilerEndpointWith Endpoint.frameRefused
+refusals R1 (the checked entry refuses) and R2 (`WholeProgram.staticRefused`). -/
+def CompilerEndpoint : Prop := CompilerEndpointWith Passes.WholeProgram.staticRefused
 
+/-- `CompilerEndpoint` holds: `correct_exact` past the refusals, and
+`staticRefused_input` for R2. No stage is assumed. -/
 theorem compiler_endpoint_correct : CompilerEndpoint :=
-  compiler_endpoint_of_stages Endpoint.frameRefused Endpoint.frame_stage
+  compiler_endpoint_of_stages Passes.WholeProgram.staticRefused static_stage
 
 end Solidity.Backend
 
 #print axioms Solidity.Backend.compiler_endpoint_correct
 #print axioms Solidity.Backend.compiler_endpoint_of_stages
-#print axioms Solidity.Backend.Endpoint.frame_stage
+#print axioms Solidity.Backend.static_stage

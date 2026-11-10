@@ -11,12 +11,13 @@ Kernel-checked instances of each case of `CompilerEndpoint`:
   world `L = 1`, `frame = 128`: the static check passes, the world is an
   `Input`, and the compiled code runs to success in the related state;
 * R1: `revertData []`, which no checked branch accepts;
-* R2: the same fixture at the source frame `1 + frameNeedProg program`, below
-  its call-frame need, and the empty program at `L = Lmax + 1` (core bound).
+* R2 (`WholeProgram.staticRefused`): the same fixture at the source frame
+  `1 + frameNeedProg program`, below its call-frame need, and at
+  `L = Lmax + 1`; the empty program at `L = Lmax + 1` (core bound).
 -/
 namespace Solidity.Backend.CompilerEndpointWitnesses
 
-open Evm Evm.Compiler Endpoint
+open Evm Evm.Compiler Passes.WholeProgram
 open Passes.MemoryCallControls (C)
 open Passes.CompilerWholeScope (program actual accepted initial_input source_run)
 
@@ -27,13 +28,13 @@ theorem scope_code_nonempty : actual.code.isEmpty = false := by
   with_unfolding_all decide +kernel
 
 /-- The fixture's world passes the static check. -/
-theorem scope_passes : frameRefused actual 1 128 = false :=
-  frameRefused_of_input actual initial_input
+theorem scope_passes : staticRefused actual 1 128 = false :=
+  staticRefused_of_input actual initial_input
 
 /-- The endpoint's agreement clause at the fixture's world. -/
 theorem scope_agrees :
     ∃ r : Compilation 1 (Frag.init []) program, Compiler.compile 1 (Frag.init []) program = some r ∧
-      frameRefused r 1 128 = false ∧
+      staticRefused r 1 128 = false ∧
       r.AgreesExact 1 128 Passes.MemoryCallControls.base Passes.MemoryCallControls.initial
         Passes.MemoryCallControls.machine :=
   ⟨actual, accepted, scope_passes, actual.correct_exact initial_input⟩
@@ -52,7 +53,7 @@ accepts it, and at `L = 1`, `frame = 128` the endpoint takes its agreement
 branch (not R2), so the fixture's world agrees exactly with `Evm.run`. -/
 theorem scope_endpoint :
     ∃ r : Compilation 1 (Frag.init []) program, Compiler.compile 1 (Frag.init []) program = some r ∧
-      frameRefused r 1 128 = false ∧
+      staticRefused r 1 128 = false ∧
       r.AgreesExact 1 128 Passes.MemoryCallControls.base Passes.MemoryCallControls.initial
         Passes.MemoryCallControls.machine := by
   rcases compiler_endpoint_correct 1 (Frag.init []) program with refused | ⟨r, hr, worlds⟩
@@ -61,7 +62,7 @@ theorem scope_endpoint :
   · rw [accepted] at hr
     cases hr
     rcases worlds 1 128 with ⟨check, -⟩ | ⟨check, agree⟩
-    · have passes : frameRefused actual 1 128 = false := scope_passes
+    · have passes : staticRefused actual 1 128 = false := scope_passes
       exact absurd (passes.symm.trans check) Bool.false_ne_true
     · exact ⟨actual, accepted, check, agree _ _ _ initial_input⟩
 
@@ -77,19 +78,23 @@ theorem unsupported_refused : Compiler.compile 0 (Frag.init []) unsupported = no
 
 /-- The fixture at the source frame, below its call-frame need. -/
 theorem scope_frame_refused :
-    frameRefused actual 1 (1 + Memory.frameNeedProg program) = true := by
+    staticRefused actual 1 (1 + Memory.frameNeedProg program) = true := by
   with_unfolding_all decide +kernel
 
 theorem scope_frame_no_world (base : Nat → Fin W) (σ : State C []) (m : Machine) :
     ¬ actual.Input 1 (1 + Memory.frameNeedProg program) base σ m :=
-  frame_stage actual 1 _ base σ m scope_frame_refused
+  static_stage actual 1 _ base σ m scope_frame_refused
+
+/-- The fixture with the array bound above `Lmax`: refused statically. -/
+theorem scope_lmax_refused : staticRefused actual (Lmax + 1) 128 = true := by
+  with_unfolding_all decide +kernel
 
 /-- The empty program. -/
 def empty : Solidity.Prog C [] [] := .nil
 
 /-- The core branch's bound: the empty program at `L = Lmax + 1`. -/
 theorem empty_lmax_refused :
-    (Compiler.compile 0 (Frag.init []) empty).map (fun r => frameRefused r (Lmax + 1) 0) =
+    (Compiler.compile 0 (Frag.init []) empty).map (fun r => staticRefused r (Lmax + 1) 0) =
       some true := by
   decide +kernel
 
@@ -102,3 +107,4 @@ end Solidity.Backend.CompilerEndpointWitnesses
 #print axioms Solidity.Backend.CompilerEndpointWitnesses.unsupported_refused
 #print axioms Solidity.Backend.CompilerEndpointWitnesses.scope_frame_no_world
 #print axioms Solidity.Backend.CompilerEndpointWitnesses.empty_lmax_refused
+#print axioms Solidity.Backend.CompilerEndpointWitnesses.scope_lmax_refused
