@@ -1,10 +1,15 @@
 {
- "Solidity/Examples/DecisionGapPartialOrFloor.lean:Solidity.Examples.DecisionGapPartialOrFloor.good_proved": [
+ "Solidity/Examples/DecisionGapPartialOrFloor.lean:Solidity.Decide.ResidueReason.PartialOrFloor.valid_iff": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
  "Solidity/Examples/DecisionGapPartialOrFloor.lean:Solidity.Examples.DecisionGapPartialOrFloor.atZero_refuted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionGapPartialOrFloor.lean:Solidity.Examples.DecisionGapPartialOrFloor.good_proved": [
   "Classical.choice",
   "Quot.sound",
   "propext"

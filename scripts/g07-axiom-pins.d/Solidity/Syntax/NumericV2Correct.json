@@ -18,17 +18,17 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.lookup_eval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.lookupResult_correct": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
  "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.lookupResult_large": [
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.lookup_eval": [
-  "Classical.choice",
   "Quot.sound",
   "propext"
  ],

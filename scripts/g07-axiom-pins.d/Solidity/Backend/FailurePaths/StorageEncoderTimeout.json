@@ -1,12 +1,12 @@
 {
-  "Solidity/Backend/FailurePaths/StorageEncoderTimeout.lean:Solidity.Backend.FailurePaths.StorageEncoderTimeout.incomplete": [
-    "Classical.choice",
-    "Quot.sound",
-    "propext"
-  ],
-  "Solidity/Backend/FailurePaths/StorageEncoderTimeout.lean:Solidity.Backend.FailurePaths.StorageEncoderTimeout.local_abi_timeout": [
-    "Classical.choice",
-    "Quot.sound",
-    "propext"
-  ]
+ "Solidity/Backend/FailurePaths/StorageEncoderTimeout.lean:Solidity.Backend.FailurePaths.StorageEncoderTimeout.incomplete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/StorageEncoderTimeout.lean:Solidity.Backend.FailurePaths.StorageEncoderTimeout.local_abi_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
 }

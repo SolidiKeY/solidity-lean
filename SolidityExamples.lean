@@ -55,15 +55,11 @@ import Solidity.Examples.DecisionFixedArrayStorage
 import Solidity.Examples.DecisionGapArrayNegatives
 import Solidity.Examples.DecisionGapCensus
 import Solidity.Examples.DecisionGapData
-import Solidity.Examples.DecisionGapOperators
-import Solidity.Examples.DecisionGapHashes
-import Solidity.Examples.DecisionGapKInt
 import Solidity.Examples.DecisionGapKIntResidue
 import Solidity.Examples.DecisionGapOperators
 import Solidity.Examples.DecisionGapPartialOrFloor
 import Solidity.Examples.DecisionGapPartialOrSub
 import Solidity.Examples.DecisionGapVoidBinder
-import Solidity.Examples.DecisionGaps
 import Solidity.Examples.DecisionGivenHeapComputedReason
 import Solidity.Examples.DecisionGivenHeapFixed
 import Solidity.Examples.DecisionGivenHeapNegative

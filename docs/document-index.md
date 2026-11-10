@@ -140,6 +140,7 @@ and open obligations. Test proposals remain proposals until applied.
 - [docs/feature-work/inline-assembly.md](feature-work/inline-assembly.md)
 - [docs/feature-work/integration.md](feature-work/integration.md)
 - [docs/feature-work/kint-two-anchors.md](feature-work/kint-two-anchors.md)
+- [docs/feature-work/m7-gaps.md](feature-work/m7-gaps.md)
 - [docs/feature-work/m7-next.md](feature-work/m7-next.md)
 - [docs/feature-work/memory-copies.md](feature-work/memory-copies.md)
 - [docs/feature-work/memory-negative-block.md](feature-work/memory-negative-block.md)
