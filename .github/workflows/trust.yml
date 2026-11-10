@@ -57,7 +57,8 @@ jobs:
       - name: Fresh public kernel replay
         if: ${{ !cancelled() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
         # The pinned checker is outside the core and uses the pinned Lean kernel.
-        # Dependency authorization is unresolved (H423); installation stays off.
+        # Installation is confined to this approved, revision-pinned integration;
+        # the runner verifies source revision and toolchain before building.
         env:
-          TRUST_INSTALL_CHECKER: '0'
+          TRUST_INSTALL_CHECKER: '1'
         run: bash scripts/trust/trust-recheck.sh
