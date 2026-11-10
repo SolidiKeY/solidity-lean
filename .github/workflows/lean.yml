@@ -78,13 +78,16 @@ jobs:
         run: bash scripts/ci/fetch-lake-cache.sh
       - name: Build
         run: lake build Solidity SolidityExamples
-      # H109/H134: the slow library stays out of default checkpoints. Each of its
-      # modules builds on one core under its own 600 s budget, in import order,
-      # so a module that outgrows it is named (scripts/ci/build-slow-examples.sh).
-      # The library step below then only checks the root file: the total is
-      # bounded per module (H134), no longer by one 600 s library budget.
-      - name: Build H109 slow examples, one budget per module
-        run: bash scripts/ci/build-slow-examples.sh
+      # H109/H436: the slow library stays out of default checkpoints and is
+      # partitioned into groups (scripts/ci/build-slow-examples.sh --list), each
+      # built cold on one core under one 600 s total; a group's modules build in
+      # import order, so the one that spends its budget is named. A new slow
+      # module joins `rest`. Every slow module is then built, so the library
+      # step below checks the root file.
+      - name: Build H109 slow examples, group rowsnine (600 s)
+        run: bash scripts/ci/build-slow-examples.sh --group rowsnine
+      - name: Build H109 slow examples, group rest (600 s)
+        run: bash scripts/ci/build-slow-examples.sh --group rest
       - name: Build H109 slow examples
         env:
           LEAN_NUM_THREADS: '1'
