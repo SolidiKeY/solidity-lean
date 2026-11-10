@@ -1,28 +1,32 @@
 import Solidity.Goals
 
+/-! The whole roadmap, unpinned: each goal module pins its own lines in
+`Solidity/Examples/Goals/<Name>.lean`, one `#guard_msgs` block per goal, so a lane
+flipping its goal edits only its own block. -/
+
+#roadmap
+
+-- `@[goal … ← deps]` registers its dependencies: an unproved one prints `blocked by`.
+-- The fixtures live only in a temporary environment: none is exported.
+open Lean Elab Command in
 /--
-info: proved Solidity.Goals.tacletsPartitioned ← Solidity.RuleShapes.taclets_partitioned
-proved Solidity.Goals.compilerCorrectNoPaymentRevert ← Solidity.Main.compiler_correct_v2
-mismatch Solidity.Goals.headlineIsNoPaymentRevert ← Solidity.Main.compiler_correct plan va2-honest-theorems
-unstated Solidity.Goals.lowerLoopsCorrect ← Solidity.Correctness.Lowering.lowerLoops_correct plan e1-lowering
-unstated Solidity.Goals.compilerCorrectCollisionFree ← Solidity.Hash.compiler_correct_collisionFree plan e4-hash-bridge
-unstated Solidity.Goals.runCarriesPanicCodes ← Solidity.Semantics.run_panic_codes plan w3-panic-codes
-open Solidity.Goals.loweringStudyTarget ← Solidity.Correctness.Lowering.lowerLoops_correct plan pa-lowering
-unstated Solidity.Goals.trustedSurfaceClosed ← Solidity.Main.trusted_surface_closed plan va1-trust-surface
-unstated Solidity.Goals.differentialAgreement ← Solidity.Validation.differential_agreement plan va3-semantic-validation
-unstated Solidity.Goals.benchmarkBudgetsMet ← Solidity.Bench.budgets_met plan vu1-benchmarks
-unstated Solidity.Goals.fastModeAgrees ← Solidity.Automation.fast_mode_agrees plan vu2-fast-mode
-unstated Solidity.Goals.certificateCheckSound ← Solidity.Automation.Certificate.check_sound plan vu3-certificates
-unstated Solidity.Goals.callSummarySound ← Solidity.Automation.Summary.call_summary_sound plan vu4-modular
-unstated Solidity.Goals.genericYulViewsPreserve ← Solidity.Yul.Views.generic_views_preserve plan t1-yul-views-generic
-unstated Solidity.Goals.controlsOffCriticalPath ← Solidity.Controls.off_critical_path plan t2-controls-off-path
-unstated Solidity.Goals.dedupStatementsPreserved ← Solidity.Dedup.statements_preserved plan t3-dedup-rollout
-unstated Solidity.Goals.docLintClean ← Solidity.Docs.lint_clean plan g2-doc-lint
-unstated Solidity.Goals.docHistoryPurged ← Solidity.Docs.history_purged plan g3-history-purge-docs
-unstated Solidity.Goals.commentsAsCode ← Solidity.Docs.comments_as_code plan g4-comments-to-code
+info: unstated Solidity.Goals.DepsRegression.base ← Solidity.Goals.DepsRegression.base_proof
+open Solidity.Goals.DepsRegression.top ← Solidity.Goals.DepsRegression.top_proof blocked by [Solidity.Goals.DepsRegression.base, Solidity.Goals.DepsRegression.other] plan dep-test
 -/
 #guard_msgs in
-#roadmap
+run_cmd withoutModifyingEnv do
+  for src in [
+      "@[goal Solidity.Goals.DepsRegression.base_proof] def Solidity.Goals.DepsRegression.base : Prop := Solidity.Goal.Unstated",
+      "@[goal Solidity.Goals.DepsRegression.other_proof] def Solidity.Goals.DepsRegression.other : Prop := True",
+      "@[goal Solidity.Goals.DepsRegression.top_proof \"dep-test\" ← Solidity.Goals.DepsRegression.base Solidity.Goals.DepsRegression.other] def Solidity.Goals.DepsRegression.top : Prop := True"] do
+    elabCommand (← ofExcept <| Parser.runParserCategory (← getEnv) `command src)
+  let es := Solidity.Goal.goalExt.getState (← getEnv)
+  let some top := es.find? (·.decl == `Solidity.Goals.DepsRegression.top)
+    | throwError "dependent fixture not registered"
+  unless top.deps == #[`Solidity.Goals.DepsRegression.base, `Solidity.Goals.DepsRegression.other] do
+    throwError "dependencies lost: {top.deps}"
+  elabCommand (← ofExcept <| Parser.runParserCategory (← getEnv) `command
+    "#roadmap_goal Solidity.Goals.DepsRegression.base Solidity.Goals.DepsRegression.top")
 
 -- Classifier fixtures live only in a temporary environment: none is exported.
 open Lean Elab Command Meta in

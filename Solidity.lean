@@ -3223,6 +3223,14 @@ import Solidity.Frontend.Yul.Parsing
 import Solidity.Frontend.Yul.ScopedParse
 import Solidity.Frontend.Yul.WordParse
 import Solidity.Goals
+import Solidity.Goals.Endpoint
+import Solidity.Goals.Finish
+import Solidity.Goals.Hash
+import Solidity.Goals.Headline
+import Solidity.Goals.Loops
+import Solidity.Goals.Panic
+import Solidity.Goals.Plan
+import Solidity.Goals.Taclets
 import Solidity.Hash.Adaptive
 import Solidity.Hash.Bridge
 import Solidity.Hash.CollisionBound
