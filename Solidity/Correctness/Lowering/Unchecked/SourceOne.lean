@@ -1,5 +1,6 @@
 import Solidity.Correctness.Lowering.Unchecked.RawOne
 import Solidity.Correctness.Lowering.Unchecked.Discarded
+import Solidity.Correctness.Lowering.Unchecked.LocalUpdate
 
 /-!
 # Supplied typed Source one-update boundary
@@ -121,6 +122,42 @@ theorem sourceOne_normalize {input : RawStmt} (context : Source.Ctx) (raw : RawO
       exact incDec_statement G F horizon nps ph plan known ls st raw.inc pre (.local slot)
     | compound fits =>
       exact compoundOne_statement G F horizon nps ph plan known ls st t raw.inc true (.local slot) fits
+
+/-- Exact V2 execution boundary for the supplied resolved statement accepted
+by the existing total recognizer. The shared normalization and local-update
+laws retain every horizon, checked arithmetic panic and complete poststate.
+This is the Source half of the new production association, not a model run,
+raw-producer linkage, whole-state correspondence or PassCorrect certificate. -/
+theorem sourceOne_runV2 {input : RawStmt} (context : Source.Ctx) (raw : RawOneInput input)
+    {k : Source.SCtx}
+    (statement : Source.RStmt context.env context.rets context.inModifier k context.tys context.tys)
+    (certificate : SourceOneAssociation context raw statement)
+    (G : Source.Glob context.env) (F : Source.Fr) (horizon nps : Nat)
+    (ph : Option (Source.Ph context.env)) (plan : Source.FailureExecution.RuntimePlan) (known : Bool)
+    (ls : Source.Locals context.env.layout context.tys) (st : Source.St context.env) :
+    (Source.execS G F horizon nps ph statement ls
+      (plan := plan) (calldataKnown := known)).run (.nil, st) =
+      match horizon with
+      | 0 | 1 | 2 => (.error .timeout, (.nil, st))
+      | _ =>
+        match Source.incDecVal F.checked raw.inc (ls.get certificate.slot) with
+        | .ok value => (.ok (.normal (ls.set certificate.slot value)), (.nil, st))
+        | .error halt => (.error halt, (.nil, st)) := by
+  rw [sourceOne_normalize context raw statement certificate G F horizon nps ph plan known ls st]
+  have run := localUpdate_statementV2 (R := context.rets) (M := context.inModifier) (k := k) G F horizon nps ph plan known ls st certificate.type raw.inc true certificate.slot
+  cases horizon with
+  | zero => exact run
+  | succ n =>
+    cases n with
+    | zero => exact run
+    | succ n =>
+      cases n with
+      | zero => exact run
+      | succ fuel =>
+        cases arithmetic : Source.incDecVal F.checked raw.inc (ls.get certificate.slot) <;>
+          simpa only [arithmetic] using run
+
+#print axioms sourceOne_runV2
 
 #print axioms sourceOne_normalize
 
