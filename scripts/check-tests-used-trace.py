@@ -343,12 +343,18 @@ def observed_routes(receipt, scratch, manifest, runner):
                 if selected and path == events[selected]['target']:
                     descriptors[(tid, fd)] = selected
         if re.search(r'= -1\b', line): continue
-        match = re.match(r'(?:read|pread64)\((\d+)<([^>]+)>.*\)\s+=\s+([1-9][0-9]*)\s*$', line)
+        match = re.match(r'(?:read|pread64)\((\d+)<([^>]+)>.*\)\s+=\s+([0-9]+)\s*$', line)
         if match:
-            actual = relative(match[2])
-            if actual in files: all_read_paths.add(actual)
-            event_id = descriptors.get((tid, int(match[1])))
-            if event_id and relative(match[2]) == events[event_id]['target']: reads.add(event_id)
+            actual = relative(match[2]); args = arguments(line)
+            attempted = len(args) >= 3 and bool(re.fullmatch(r'[1-9][0-9]*', args[2]))
+            # A real EOF read observes an empty fixture. Opening it, a native
+            # child's read, or a zero-length no-op read does not qualify.
+            consumed = (int(match[3]) > 0 or (attempted and actual in files and
+                        files[actual]['sha256'] == hashlib.sha256(b'').hexdigest()))
+            if consumed:
+                if actual in files: all_read_paths.add(actual)
+                event_id = descriptors.get((tid, int(match[1])))
+                if event_id and actual == events[event_id]['target']: reads.add(event_id)
         closed = re.match(r'close\((\d+).*\)\s+=\s+0\s*$', line)
         if closed: descriptors.pop((tid, int(closed[1])), None)
         path_change = bool(re.match(r'(?:creat|truncate|ftruncate|unlink|unlinkat|rmdir|rename|renameat|renameat2|link|linkat|symlink|symlinkat)\(', line))
@@ -409,6 +415,11 @@ def self_test():
             'tests/replace.py': 'import os, shutil\nfrom pathlib import Path\nos.rename("tests/input", "tests/saved")\nPath("tests/input").mkdir()\nPath("tests/input/data.txt").write_text("changed\\n")\nPath("tests/input/data.txt").read_text()\nshutil.rmtree("tests/input")\nos.rename("tests/saved", "tests/input")\n',
         }
         sources['tests/input/twin.txt'] = 'measured\n'
+        sources['tests/input/empty.txt'] = ''
+        sources['tests/input/empty-unread.txt'] = ''
+        sources['tests/empty.py'] = 'from pathlib import Path\nassert Path("tests/input/empty.txt").read_text() == ""\n'
+        sources['tests/empty_zero.py'] = 'import os\nwith open("tests/input/empty.txt") as stream: assert os.read(stream.fileno(), 0) == b""\n'
+        sources['tests/empty_native.py'] = 'import subprocess\nwith open("tests/input/empty-unread.txt"): pass\nsubprocess.run(["cat", "tests/input/empty-unread.txt"], check=True)\n'
         helper = 'VERSION="current"\ndef read_data():\n with open("tests/input/data.txt") as stream: return stream.read()\ndef open_without_read():\n stream = open("tests/input/data.txt")\n stream.close()\n'
         sources['tests/helper.py'] = helper
         historical = helper.replace('VERSION="current"', 'VERSION="historical"')
@@ -429,13 +440,15 @@ def self_test():
             'blob': git('rev-parse', revision + ':' + p).decode().strip(),
             'sha256': hashlib.sha256((root / p).read_bytes()).hexdigest()} for p in sources}}
         manifest_path = base / 'manifest.json'; manifest_path.write_text(json.dumps(manifest))
-        for scenario in ('direct', 'link', 'fake', 'native', 'replace', 'historical', 'historical_read'):
+        for scenario in ('direct', 'link', 'fake', 'native', 'replace', 'historical', 'historical_read', 'empty', 'empty_zero', 'empty_native'):
             runner = 'tests/' + scenario + '.py'
             receipt = run(['python3', '-B', runner], root, manifest_path, base / scenario, 15)
             assert receipt['exit'] == 0, (scenario, Path(receipt['stdout']).read_text())
             routes = observed_routes(receipt, root, manifest, runner)
             targets = {e['target'] for e in routes}
             assert ('tests/input/data.txt' in targets) == (scenario in ('direct', 'link')), (scenario, targets)
+            assert ('tests/input/empty.txt' in targets) == (scenario == 'empty'), (scenario, targets)
+            assert 'tests/input/empty-unread.txt' not in targets
             bad = dict(receipt, command=['python3', '-c', 'pass'])
             try: observed_routes(bad, root, manifest, runner)
             except ValueError: pass

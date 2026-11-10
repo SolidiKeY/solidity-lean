@@ -9,15 +9,28 @@ import hashlib
 import json
 import posixpath
 import re
+import shlex
 
 AUDITED = {'.github/workflows/editor-parity.yml': 'bff550f3fa4ae04972f9be9193142f6eca238755',
  '.github/workflows/lean.yml': '0a5f66b11664079ce46781d63119c6c4a201e4af',
  '.github/workflows/pages.yml': 'da4e027df7c1c68cfe6932b802ec09e9a086657a',
+ 'SolidityLean.lean': '08916603f7ede5699a763e4f2f80fa7471e92496',
  'scripts/aggregates.test.mjs': 'a768f5e74ba9d9f10a41d5fc7440bb11c7fccb4b',
+ 'scripts/check-private-paths.sh': 'c2aabdbdd068a861d13d382e337ee6937d911f03',
+ 'scripts/coord-tools/gate.sh': 'd60977c0abccb00ccaf1d5a4b777bee9fde34b98',
+ 'scripts/counterexamples.test.mjs': 'd56092b2d3b2b2f3ea03079cc2ca71fa6978cb6c',
  'scripts/declarations-metadata.test.mjs': '46f3d4d1c09ee9b3f1c46eb17f30766414f5513d',
+ 'scripts/filtered-spec-sets.test.mjs': 'dee22d06271b51db7c6f111f15037e23313bc02c',
+ 'scripts/finite-spec-sets.test.mjs': '4f5c59221a2faf88b244de6e19e5f02386bec128',
+ 'scripts/lex-metrics.test.mjs': '7863106bf02ba5a3f59d05c435a656a2eea4ba95',
+ 'scripts/preconditions.test.mjs': 'f535ed435c25f271dd5aecd1bf47fdef8423730d',
  'scripts/solc-ast.mjs': 'df8c4edb8e654038a9a916d97229de75ad5d6e4a',
+ 'scripts/solidity-lean.mjs': '8901f1cf67269d1deb785d45c63fafe728120acf',
  'scripts/solidity-lean.test.mjs': 'f636f487eadf4a1f3389a7f9a99379fa73c7d87d',
+ 'scripts/solidity-upstream.mjs': '664aef0b38ed4b6c62b58a2c8f6d114a4e9dc8b9',
  'scripts/solkey-migration.mjs': '5c0be020a4ca26cbdab46bf24850f7ef085cb6b2',
+ 'scripts/source-shadowing.test.mjs': 'f77fe036ec0757372891c423dd23816dac69efb3',
+ 'scripts/spec-hygiene.test.mjs': '61f93c59bbe0dba313552ef8ad5fbc8fe68f4b5b',
  'scripts/test-compiler.mjs': '72f956c7eb9ab68c8f5f85dff5788b6687886c1a',
  'scripts/test-solidity.mjs': 'b0c71c0b438aa38b19384fbf3e8920132dc4e172',
  'scripts/test-solidity.test.mjs': '15c0f09962ec59de89ccc355eeff93c7fbfc2817',
@@ -28,7 +41,6 @@ AUDITED = {'.github/workflows/editor-parity.yml': 'bff550f3fa4ae04972f9be9193142
  'vscode/parity/workloads.cjs': '4f68cf7b780140ca58e7a0c4374a27e1e5eae72e',
  'web/test/website.cjs': '6e3c4d1537a9e3454284e68e1c1528425d33916e'}
 
-AUDITED.update({'scripts/preconditions.test.mjs': 'f535ed435c25f271dd5aecd1bf47fdef8423730d', 'scripts/finite-spec-sets.test.mjs': '4f5c59221a2faf88b244de6e19e5f02386bec128', 'scripts/counterexamples.test.mjs': 'd56092b2d3b2b2f3ea03079cc2ca71fa6978cb6c', 'scripts/lex-metrics.test.mjs': '7863106bf02ba5a3f59d05c435a656a2eea4ba95', 'scripts/source-shadowing.test.mjs': 'f77fe036ec0757372891c423dd23816dac69efb3', 'scripts/spec-hygiene.test.mjs': '61f93c59bbe0dba313552ef8ad5fbc8fe68f4b5b', 'scripts/filtered-spec-sets.test.mjs': 'dee22d06271b51db7c6f111f15037e23313bc02c'})
 
 def add(graph):
     repo = graph.repo
@@ -185,3 +197,56 @@ def add(graph):
         ci(source, lean_workflow, 187, context, selected_call=f'{source}:{line}', source_argument=target)
         edge(source, runner, line, 'test callback calls runSolidityTests with selected committed source', context, True)
         edge(runner, target, 117, 'runSourceTests reads selected source bytes; source argument bound by selected_call', context)
+
+    cli_test = 'scripts/solidity-lean.test.mjs'
+    bootstrap = 'SolidityLean.lean'
+    cli_main = 'scripts/solidity-lean.mjs'
+    if approved([lean_workflow, cli_test, bootstrap, cli_main, runner]):
+        for line, name in ((161, 'Cli'), (177, 'CliClean')):
+            target = 'tests/solc/' + name + '.sol'
+            context = f'ci:native-cli-source:{line}'
+            ci(cli_test, lean_workflow, 222, context, selected_call=f'{cli_test}:{line}', source_argument=target)
+            edge(cli_test, bootstrap, line, 'cli helper at lines16-17 executes the native solidity-lean binary with verify/source arguments; cwd=ROOT', context, True)
+            edge(bootstrap, cli_main, 29, 'native bootstrap spawns Node with scripts/solidity-lean.mjs and inherited verify/source arguments and cwd', context, True)
+            edge(cli_main, runner, 210, 'verify dispatch calls runSolidityTests(paths, options)', context, True)
+            edge(runner, target, 117, 'runSourceTests reads selected source bytes; selected native CLI invocation binds the path', context)
+
+    upstream = 'scripts/solidity-upstream.mjs'
+    context = 'validated:' + upstream
+    if context in graph.roots and approved([upstream]):
+        manifest_path = 'tests/upstream/snapshot.json'
+        manifest = json.loads(repo.bytes(manifest_path))
+        archive = posixpath.normpath('tests/upstream/' + manifest['archive'])
+        valid = (manifest.get('version') == 1 and manifest.get('tag') == 'v0.8.38' and
+                 manifest.get('commit') == '1835d247de183f23e7b0e2bc4a50732af525b77c' and
+                 archive.startswith('tests/upstream/') and archive in repo.tree and
+                 hashlib.sha256(repo.bytes(archive)).hexdigest() == manifest.get('archiveSha256'))
+        if valid:
+            edge(upstream, manifest_path, 32, 'main verify dispatch at line551 calls verifySnapshot; json helper at line28 reads the named manifest', context)
+            edge(upstream, archive, 36, 'verifySnapshot reads pinned upstream source archive and validates SHA256 before scratch extraction', context)
+            graph.properties.setdefault(archive, {})['source_snapshot'] = {
+                'manifest': manifest_path, 'foreign_commit': manifest['commit']}
+        else:
+            graph.notes.append('UNVERIFIABLE_INPUT: upstream snapshot manifest/archive comparison failed')
+
+    gate = 'scripts/coord-tools/gate.sh'
+    scanner = 'scripts/check-private-paths.sh'
+    if gate in graph.roots and approved([gate, scanner]):
+        # This is a real active scanner, not a lexical reference. Whether a
+        # repository-wide policy read establishes test use is separate from
+        # fixture/runnable use. Blanket scans provide secondary coverage only;
+        # independent four-class justification remains necessary.
+        pattern = shlex.split(repo.texts[scanner].splitlines()[14].split('=', 1)[1])[0]
+        excluded = 'tests/solc/TestSuite.ast.json'
+        command = ['git', 'grep', '-naP', pattern, '--', '.', ':(exclude)' + excluded]
+        selected = [p for p in repo.paths if p != excluded and repo.tree[p][0] in ('100644', '100755')]
+        graph.policy_scans['private-paths'] = {
+            'entry': graph.roots[gate], 'modes': ['touched', 'checkpoint', 'full'],
+            'source_blobs': {gate: repo.tree[gate][2], scanner: repo.tree[scanner][2]},
+            'invocations': [{'source': gate, 'line': 98, 'target': scanner,
+                             'command': ['bash', scanner]},
+                            {'source': scanner, 'line': 19, 'command': command, 'cwd': '.'}],
+            'selection': 'All measured tracked regular blobs except the explicit path exclusion; Git grep -a treats binary bytes as text without unpacking archives.',
+            'exclusions': [excluded], 'selected_scoped_paths': len(selected),
+            'eligibility': 'Secondary coverage only; test, runnable entry point, Lean root or fixture-specific use is required for keep'}
+        graph.policy_targets.update(selected)

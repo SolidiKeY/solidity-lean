@@ -10,14 +10,17 @@ Inputs are Git objects, not working-tree fixture bytes. --write writes only
 scripts/tests-inventory.json. --check rebuilds the deterministic model, verifies
 recovery objects, and rejects unresolved classifications as well as tampering.
 A partial --write is useful for review but returns 1 and is NOT acceptance.
+Run recorded generators/reproducers only in disposable committed-byte copies;
+their commands can write fixed paths. Normal write/check never executes them.
 
 The use graph is deliberately an under-approximation: explicit reviewed routes,
 Lean imports/solc_imports and validated Python reads of measured bytes.
 Text matches are search candidates, never invocation edges. Shell expansion,
 Python eval/importlib, computed Node reads and producer environments need review;
 no static absence is sufficient to prune a candidate. Unresolved paths have a
-null class and make the completion check fail. The inventory cannot justify
-itself: classifier and inventory paths are excluded from candidate discovery.
+null class and make the completion check fail. Repository-wide policy scans
+are secondary coverage; keep requires independent test/runner/Lean/fixture use.
+The inventory cannot justify itself: classifier and inventory paths are excluded from candidate discovery.
 
 Recovery selects the first change in Git's topological history that introduced
 the measured blob at that path (no rename following). A unique merge resolution uses Git path-specific history. Every selected commit:path is checked against the measured object.
@@ -32,6 +35,7 @@ import collections
 import hashlib
 import gzip
 import io
+import zlib
 import json
 import posixpath
 import re
@@ -164,12 +168,14 @@ class Graph:
         self.properties = {}
         self.notes = []
         self.observed = []
+        self.policy_scans = {}
+        self.policy_targets = set()
         self.edges = collections.defaultdict(list)
 
     def root(self, p, kind, command, source, line, root_id=None):
         if p in self.repo.tree and not excluded(p):
             self.roots.setdefault(root_id or p, {'kind': kind, 'path': p, 'command': command,
-                                     'location': f'{source}:{line}'})
+                                     'location': f'{source}:{line}', 'cwd': '.'})
 
     def edge(self, source, target, line, operation, validated_for=None, kind="consumes"):
         if target in self.repo.tree and not excluded(source) and not excluded(target):
@@ -421,24 +427,52 @@ def validated_routes(graph, catalog):
     if not isinstance(catalog, dict) or set(catalog) != {'schema_version', 'standalone', 'generators', 'reads', 'orphans'} or catalog['schema_version'] != 1:
         raise ValueError('invalid validation definition schema')
     for entry in catalog['standalone']:
-        if set(entry) != {'path', 'input_revision', 'source_blob', 'command', 'kind'}:
+        required = {'path', 'input_revision', 'source_blob', 'command', 'kind'}
+        if entry.get('kind') == 'manual-reproducer': required.add('documentation')
+        if set(entry) != required:
             raise ValueError('invalid standalone definition')
         p = entry['path']
         if entry['input_revision'] != repo.ref: continue
         if p not in repo.tree or repo.tree[p][2] != entry['source_blob']:
             raise ValueError('standalone definition source mismatch: ' + p)
         command = entry['command']
-        if command not in (['python3', '-B', p], ['node', '--test', p]):
+        if entry['kind'] != 'manual-reproducer' and command not in (['python3', '-B', p], ['node', '--test', p]):
             raise ValueError('unsupported standalone invocation: ' + p)
-        if entry['kind'] not in ('unittest', 'node-test'):
+        if entry['kind'] not in ('unittest', 'node-test', 'manual-reproducer'):
             raise ValueError('unsupported standalone kind')
         if entry['kind'] == 'unittest':
             tree = ast.parse(repo.texts[p])
             if command[0] != 'python3' or not any(isinstance(n, ast.Call) and ast.unparse(n.func) == 'unittest.main' for n in ast.walk(tree)):
                 raise ValueError('not a unittest entry point: ' + p)
-        elif command[0] != 'node' or not p.endswith(('.test.mjs', '.test.js', '.test.cjs')):
-            raise ValueError('not a Node test entry point: ' + p)
+        elif entry['kind'] == 'node-test':
+            if command[0] != 'node' or not p.endswith(('.test.mjs', '.test.js', '.test.cjs')):
+                raise ValueError('not a Node test entry point: ' + p)
+        else:
+            if not isinstance(command, list) or not command or not all(isinstance(a, str) for a in command):
+                raise ValueError('invalid manual reproducer command')
+            prefixes = (['node', p], ['python3', '-B', p], ['bash', p])
+            if not any(command[:len(prefix)] == prefix for prefix in prefixes):
+                raise ValueError('unsupported manual reproducer invocation')
+            doc = entry['documentation']
+            if not isinstance(doc, dict) or set(doc) != {'path', 'blob', 'line', 'invocation', 'normalization'}:
+                raise ValueError('invalid manual reproducer documentation')
+            source = doc['path']; line = doc['line']
+            if source not in repo.texts or repo.tree[source][2] != doc['blob'] or not isinstance(line, int) or not 1 <= line <= len(repo.texts[source].splitlines()):
+                raise ValueError('manual reproducer documentation mismatch')
+            fragments = re.findall(r'`([^`]+)`', repo.texts[source].splitlines()[line - 1])
+            if not isinstance(doc['invocation'], str) or doc['invocation'] not in fragments:
+                raise ValueError('manual reproducer lacks its exact documented invocation')
+            if doc['normalization'] == 'verbatim':
+                matched = shlex.split(doc['invocation']) == command
+            elif doc['normalization'] == 'node-basename-no-arguments':
+                # A README naming only `check.mjs` documents its default check,
+                # never an invented --help/--dry-run or other argument mode.
+                matched = (doc['invocation'] == posixpath.basename(p) and command == ['node', p]
+                           and p.endswith(('.mjs', '.js', '.cjs')))
+            else: matched = False
+            if not matched: raise ValueError('manual reproducer arguments differ from documentation')
         graph.root(p, 'validated standalone runner', shlex.join(command), p, 1, root_id='validated:' + p)
+        if entry['kind'] == 'manual-reproducer': graph.roots['validated:' + p]['documentation'] = entry['documentation']
     for route in catalog['reads']:
         if set(route) != {'runner', 'input_revision', 'frames', 'target', 'target_blob', 'operation'}:
             raise ValueError('invalid validated read route')
@@ -506,13 +540,30 @@ def validated_routes(graph, catalog):
     return generated
 
 
+def command_receipt_rows(value):
+    rows = value if isinstance(value, list) else value.get('commands', []) if isinstance(value, dict) else []
+    if not isinstance(rows, list) or not rows: return []
+    def valid(row):
+        return (isinstance(row, dict) and {'command', 'exitCode', 'elapsedSeconds'} <= set(row)
+                and isinstance(row['command'], list) and bool(row['command'])
+                and all(isinstance(argument, str) for argument in row['command'])
+                and type(row['exitCode']) is int and isinstance(row['elapsedSeconds'], (int, float)))
+    return rows if all(valid(row) for row in rows) else []
+
+
 def evidence_role(data):
     """Content signatures, never extension or directory alone. Keep wins first."""
+    if data.startswith(b'\x1f\x8b'):
+        try:
+            with gzip.GzipFile(fileobj=io.BytesIO(data)) as stream: data = stream.read(8_000_001)
+        except (OSError, EOFError, zlib.error): return None
     if len(data) > 8_000_000: return None
     try: text = data.decode('utf-8')
     except UnicodeDecodeError: return None
     try: value = json.loads(text)
     except (ValueError, RecursionError): value = None
+    if isinstance(value, list) and command_receipt_rows(value):
+        return 'Historical sequential command receipts: argv, exit codes and elapsed measurements.'
     if isinstance(value, dict):
         keys = set(value)
         if {'recordedOn', 'startingCommit', 'implementationCommit'} <= keys:
@@ -537,8 +588,17 @@ def evidence_role(data):
     # Require multiple nontrivial log markers; a source containing a string is not a log.
     lines = text.splitlines()
     matches = sum(bool(re.match(r'^(?:[✔✖⚠] \[\d+/\d+\]|(?:info|warning|error): [^ ]+\.lean:\d+:|PASS [a-z][\w-]* \d+s|H28_MODULE_PASS \{)', l)) for l in lines)
-    if matches >= 3 and matches * 2 >= len(lines):
+    first = next((line for line in lines if line.strip()), '')
+    first_marker = bool(re.match(r'^(?:[✔✖⚠] \[\d+/\d+\]|(?:info|warning|error): [^ ]+\.lean:\d+:|PASS [a-z][\w-]* \d+s|H28_MODULE_PASS \{)', first))
+    if matches >= 3 and ((first_marker and matches * 2 >= len(lines)) or re.fullmatch(r'\d+ core modules, \d+ reach the elaborator', first)):
         return 'Historical process output: repeated structured build/diagnostic/test result lines.'
+    if first == 'TAP version 13' and re.search(r'^# tests \d+$', text, re.M) and re.search(r'^# pass \d+$', text, re.M) and re.search(r'^# fail \d+$', text, re.M):
+        return 'Historical Node TAP process transcript with explicit test/pass/fail summary.'
+    if re.fullmatch(r'[.sFxEux]+', first) and re.search(r'^Ran \d+ tests? in [0-9.]+s$', text, re.M) and re.search(r'^(?:OK(?: \(skipped=\d+\))?|FAILED \(.*\))$', text, re.M):
+        return 'Historical unittest process transcript with timed test count and outcome.'
+    diagnostics = sum(bool(re.match(r'^(?:missing|ambiguous): +[^ ]+ cites `', line)) for line in lines)
+    if diagnostics >= 3 and diagnostics * 2 >= len(lines) and re.match(r'^(?:missing|ambiguous): ', first):
+        return 'Historical documentation-path diagnostic transcript with repeated source/citation findings.'
     return None
 
 
@@ -553,21 +613,27 @@ def historical_outputs(repo):
     for source in sorted(repo.texts):
         try: value = json.loads(repo.texts[source])
         except (ValueError, RecursionError): continue
-        if not isinstance(value, dict) or not evidence_role(repo.bytes(source)): continue
-        rows = value.get('commands', [])
-        if not isinstance(rows, list): continue
+        if not evidence_role(repo.bytes(source)): continue
+        rows = command_receipt_rows(value)
         for i, row in enumerate(rows):
-            if not isinstance(row, dict) or not {'command', 'exitCode', 'elapsedSeconds', 'log', 'uncompressedLogSha256'} <= set(row): continue
-            if not isinstance(row['log'], str): continue
-            target = clean(posixpath.join(posixpath.dirname(source), row['log']))
-            if target not in repo.tree or repo.tree[target][1] != 'blob': continue
+            if not {'log'} <= set(row) or not isinstance(row['log'], str): continue
+            digest = row.get('uncompressedLogSha256', row.get('sha256'))
+            if not isinstance(digest, str) or not re.fullmatch('[0-9a-f]{64}', digest): continue
+            # Historical receipts use both repository-relative and sibling names.
+            direct = clean(row['log'])
+            sibling = clean(posixpath.join(posixpath.dirname(source), row['log']))
+            possibilities = {path for path in (direct, sibling) if path in repo.tree and repo.tree[path][1] == 'blob'}
+            if len(possibilities) != 1: continue  # ambiguous cwd is not provenance
+            target = possibilities.pop()
             data = repo.bytes(target)
-            if data.startswith(b'\x1f\x8b'):
+            if 'uncompressedLogSha256' in row and data.startswith(b'\x1f\x8b'):
                 try:
                     with gzip.GzipFile(fileobj=io.BytesIO(data)) as stream: data = stream.read(8_000_001)
-                except (OSError, EOFError): continue
-            if len(data) > 8_000_000 or hashlib.sha256(data).hexdigest() != row['uncompressedLogSha256']: continue
-            roles[target] = f'Historical command output: {source} /commands/{i} names this log; recorded uncompressed SHA256 matches measured bytes.'
+                except (OSError, EOFError, zlib.error): continue
+            if len(data) > 8_000_000 or hashlib.sha256(data).hexdigest() != digest: continue
+            pointer = f'/{i}' if isinstance(value, list) else f'/commands/{i}'
+            encoding = 'uncompressed' if 'uncompressedLogSha256' in row else 'stored-byte'
+            roles[target] = f'Historical command output: {source} {pointer} names this log; recorded {encoding} SHA256 matches measured bytes.'
     return roles
 
 
@@ -656,14 +722,14 @@ def inventory(repo, catalog=None):
             unresolved.append(repo.pin_limitations.get(p, 'UNVERIFIABLE: ' + ('shallow history boundary prevents establishing last-touch provenance' if repo.shallow else 'no historical change introducing the measured object was recovered')))
         records.append({'path': p, 'class': classification, 'reason': reason,
                         'mode': mode, 'object_type': kind, 'blob': oid,
-                        'recovery': recovery, 'runner_chain': chain, 'secondary': {**graph.properties.get(p, {}), **({'historical_role': historical_role} if historical_role else {})},
+                        'recovery': recovery, 'runner_chain': chain, 'secondary': {**graph.properties.get(p, {}), **({'historical_role': historical_role} if historical_role else {}), **({'policy_scans': ['private-paths']} if p in graph.policy_targets else {})},
                         'search_candidates': candidates[p], 'generator': generated.get(p),
                         'orphan_analysis': ({'review': orphan_reviews[p], 'search_matches': 0,
                                              'entry_points_reviewed': sorted(k for k, v in graph.roots.items() if 'derived_from' not in v)} if classification == 'orphan' else None),
                         'unresolved': unresolved})
     counts = {c: sum(r['class'] == c for r in records) for c in CLASSES}
     return {'schema_version': SCHEMA, 'goal_decl': None, 'measured_revision': repo.ref,
-            'universe': list(SCOPE), 'analysis_gaps': sorted(set(graph.notes)), 'totals': {**counts, 'paths': len(records),
+            'universe': list(SCOPE), 'policy_scans': graph.policy_scans, 'analysis_gaps': sorted(set(graph.notes)), 'totals': {**counts, 'paths': len(records),
                                               'unresolved': sum(bool(r['unresolved']) for r in records)},
             'search_coverage': {'inputs': 'All committed non-NUL blobs, excluding classifier and inventory outputs.',
                                 'candidates': 'Basename token search plus exact unusual-name and escaped-literal search, with source line locations; capped at eight samples per path.',
@@ -691,7 +757,7 @@ def verify(actual, expected, require_complete=True):
     # supplied by the same untrusted input. This also rejects extra fields.
     if actual != expected: raise ValueError('classification provenance, recovery pin, ordering or schema differs from rebuilt model')
     if require_complete and expected['analysis_gaps']:
-        raise ValueError('unreviewed CI recipe sources or inconsistent inputs: ' + '; '.join(expected['analysis_gaps']))
+        raise ValueError('unresolved analysis: ' + '; '.join(expected['analysis_gaps']))
     if require_complete and expected['totals']['unresolved']:
         raise ValueError(f"incomplete classification: {expected['totals']['unresolved']} unresolved paths")
     if sum(expected['totals'][c] for c in CLASSES) != len(wanted):
@@ -700,6 +766,12 @@ def verify(actual, expected, require_complete=True):
 
 def self_test():
     import copy
+    assert evidence_role(b'\x1f\x8b' + b'\0' * 40) is None
+    transcript = b'....\n----------------------------------------------------------------------\nRan 4 tests in 0.001s\n\nOK\n'
+    assert evidence_role(gzip.compress(transcript, mtime=0))
+    assert evidence_role(gzip.compress(b'import unittest\n', mtime=0)) is None
+    quoted_log = b'\"\"\"\n' + b'PASS build 1s\n' * 5 + b'\"\"\"\n'
+    assert evidence_role(quoted_log) is None
     with tempfile.TemporaryDirectory(prefix='tests-used-controls-') as directory:
         root = Path(directory)
         git(root, 'init', '-q')
@@ -710,6 +782,10 @@ def self_test():
             'tests/main-only.txt': 'main only\n',
             'tests/pass.py': 'import unittest\nclass T(unittest.TestCase):\n def test_value(self): import live; self.assertEqual(2 + 2, 4)\nif __name__ == "__main__": unittest.main()\n',
             'tests/fail.py': 'raise SystemExit(1)\n',
+            'tests/callback.py': 'import callback_helper as helper\ndef callback(): return helper.read()\nassert helper.invoke(callback) == "callback\\n"\n',
+            'tests/callback_helper.py': 'from pathlib import Path\ndef invoke(f): return f()\ndef read(): return Path("tests/callback.txt").read_text()\n',
+            'tests/callback.txt': 'callback\n',
+            'tests/callback.md': 'Run `python3 -B tests/callback.py` to check helper callback/read behavior.\n',
             'scripts/h62/generator.py': 'from pathlib import Path\nPath("tests/generated.txt").write_bytes(b"generated\\n")\nPath("tests/spare.txt").write_bytes(b"spare\\n")\n',
             'tests/generated.txt': 'generated\n',
             'tests/spare.txt': 'spare\n',
@@ -723,6 +799,8 @@ def self_test():
             'tests/evidence.json': '{"recordedOn":"old","startingCommit":"a","implementationCommit":"b"}\n',
             'tests/unknown.bin': b'\x00\x01',
             'tests/.hidden': 'hidden\n',
+            'tests/history-empty.log': b'',
+            'tests/history-receipts.json': json.dumps([{'command': ['python3', '-c', 'pass'], 'exitCode': 0, 'elapsedSeconds': 0.0, 'log': 'tests/history-empty.log', 'sha256': hashlib.sha256(b'').hexdigest()}]),
             'tests/space name.txt': 'spaces\n',
             'tests/α.txt': 'unicode\n',
             'tests/unusual-reader.py': 'from pathlib import Path\nPath("tests/space name.txt").read_bytes()\nPath("tests/α.txt").read_bytes()\nPath("tests/line\\nname.txt").read_bytes()\n',
@@ -736,6 +814,7 @@ def self_test():
         git(root, 'add', '.')
         git(root, '-c', 'user.name=Control', '-c', 'user.email=control@example.invalid', 'commit', '-qm', 'control')
         repo = Repository(root, 'HEAD')
+        assert repo.paths == sorted(p for p in sources if p.startswith(SCOPE))
         passed = subprocess.run([sys.executable, '-B', 'tests/pass.py'], cwd=root, capture_output=True)
         failed = subprocess.run([sys.executable, '-B', 'tests/fail.py'], cwd=root, capture_output=True)
         assert passed.returncode == 0 and failed.returncode == 1
@@ -764,6 +843,19 @@ def self_test():
                            {'path': 'tests/live.py', 'blob': repo.tree['tests/live.py'][2], 'line': line}],
                 'target': target, 'target_blob': repo.tree[target][2],
                 'operation': 'validated Python read of measured bytes'})
+        callback_command = ['python3', '-B', 'tests/callback.py']
+        assert subprocess.run(callback_command, cwd=root, capture_output=True).returncode == 0
+        catalog['standalone'].append({'path': 'tests/callback.py', 'input_revision': repo.ref,
+            'source_blob': repo.tree['tests/callback.py'][2], 'command': callback_command,
+            'kind': 'manual-reproducer', 'documentation': {'path': 'tests/callback.md',
+                'blob': repo.tree['tests/callback.md'][2], 'line': 1,
+                'invocation': 'python3 -B tests/callback.py', 'normalization': 'verbatim'}})
+        callback_frames = [('tests/callback.py', 3), ('tests/callback_helper.py', 2),
+                           ('tests/callback.py', 2), ('tests/callback_helper.py', 3)]
+        catalog['reads'].append({'runner': 'validated:tests/callback.py', 'input_revision': repo.ref,
+            'frames': [{'path': path, 'blob': repo.tree[path][2], 'line': line} for path, line in callback_frames],
+            'target': 'tests/callback.txt', 'target_blob': repo.tree['tests/callback.txt'][2],
+            'operation': 'validated Python read of measured bytes'})
         spare = copy.deepcopy(catalog['generators'][0]); spare.update(path='tests/spare.txt', output_blob=repo.tree['tests/spare.txt'][2])
         catalog['generators'].append(spare)
         assert (root / 'tests/spare.txt').read_bytes() == b'spare\n'
@@ -772,6 +864,21 @@ def self_test():
         for p in ('tests/live.py', 'tests/helper.py', 'tests/pass.py', 'tests/generated.txt'):
             assert rows[p]['class'] == 'keep', p
         assert rows['tests/generated.txt']['generator']
+        callback_chain = rows['tests/callback.txt']['runner_chain']
+        assert [edge['source'] for edge in callback_chain['edges']] == [path for path, _ in callback_frames]
+        assert [edge['line'] for edge in callback_chain['edges']] == [line for _, line in callback_frames]
+        assert rows['tests/callback.py']['class'] == 'keep'
+        assert rows['tests/callback.md']['class'] is None  # classifier definitions cannot keep documentation
+        unsupported = copy.deepcopy(catalog)
+        unsupported['standalone'][-1]['command'] = ['python3', '-c', 'pass', 'tests/callback.py']
+        try: inventory(repo, unsupported)
+        except ValueError: pass
+        else: raise AssertionError('unsupported manual invocation accepted')
+        mismatched = copy.deepcopy(catalog)
+        mismatched['standalone'][-1]['command'].append('--help')
+        try: inventory(repo, mismatched)
+        except ValueError: pass
+        else: raise AssertionError('same-runner different-arguments reproducer accepted')
         assert rows['tests/spare.txt']['class'] == 'regenerable'
         assert rows['tests/unknown.bin']['class'] == 'orphan'
         assert rows['tests/dead.lean']['class'] == 'keep'
@@ -779,6 +886,8 @@ def self_test():
         for p in ('tests/fail.py', 'tests/main-only.txt', 'tests/mention.py', 'tests/env-only.py', 'tests/dead.py', 'tests/cycle.py'):
             assert rows[p]['class'] is None, p
         assert rows['tests/evidence.json']['class'] == 'evidence'
+        assert rows['tests/history-empty.log']['class'] == 'evidence'
+        assert rows['tests/history-receipts.json']['class'] == 'evidence'
         assert all(r['recovery'] for r in rows.values())
         for path in ('tests/space name.txt', 'tests/α.txt', 'tests/line\nname.txt'):
             assert rows[path]['search_candidates'], path
