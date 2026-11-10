@@ -44,31 +44,62 @@ theorem body_prefix {C : Contract} {Γ : Ctx} (se : Var) (j b : Idx Γ (.val .bo
   cases (whileReturnTail j).run (((σ.push (t := .val .bool) false).push (t := .val .bool) false).push
     (t := .val .bool) (TEnv.get b σ.env)) <;> rfl
 
-theorem whileReturn_run {C : Contract} {Γ : Ctx} (names : RetFresh) (j b : Idx Γ (.val .bool))
+/-- The loop of the lowered `while (i = a) return;`: one iteration sets `ret`
+(true right-hand side) or `brk` (false). -/
+theorem whileReturn_loop {C : Contract} {Γ : Ctx} (names : RetFresh) (j b : Idx Γ (.val .bool))
     (σ : State C Γ) (v : Bool) (hv : TEnv.get b σ.env = v) :
-    (whileReturnProg names j b).run σ =
-      .ok ⟨((σ.setLocal j v).push (t := .val .bool) (!v)).push (t := .val .bool) v,
-        List.prefix_refl _⟩ := by
-  have enter : (brkRetGuard : Val C (.val .bool :: .val .bool :: Γ) .bool).evalT
-      ((σ.push (t := .val .bool) false).push (t := .val .bool) false) = .ok true := rfl
-  have d1 : (Stmt.declLocal .bool names.first (some (.simple (.bool false))) : Stmt C Γ _).run σ =
-      .ok ⟨σ.push (t := .val .bool) false, List.prefix_refl _⟩ := rfl
-  have d2 : (Stmt.declLocal .bool names.second (some (.simple (.bool false))) :
-      Stmt C (.val .bool :: Γ) _).run (σ.push (t := .val .bool) false) =
-      .ok ⟨(σ.push (t := .val .bool) false).push (t := .val .bool) false, List.prefix_refl _⟩ := rfl
-  have loop : (Stmt.loop .auto brkRetGuard
+    (Stmt.loop .auto brkRetGuard
       (.cons (.declLocal .bool names.third (some (.simple (.local b.there.there))))
         (whileReturnTail j)) : Stmt C (.val .bool :: .val .bool :: Γ) _).run
         ((σ.push (t := .val .bool) false).push (t := .val .bool) false) =
       .ok ⟨((σ.setLocal j v).push (t := .val .bool) (!v)).push (t := .val .bool) v,
         List.prefix_refl _⟩ := by
-    rw [Stmt.run_loop]
-    apply TLoop.run_of_iterN (n := 2)
-    simp only [TLoop.iterN, TLoop.step]
-    rw [enter, body_prefix, hv, tail_run]
-    cases v <;> rfl
-  rw [whileReturnProg, Prog.run_cons_ok d1, Prog.run_cons_ok d2, Prog.run_cons_ok loop]
+  have enter : (brkRetGuard : Val C (.val .bool :: .val .bool :: Γ) .bool).evalT
+      ((σ.push (t := .val .bool) false).push (t := .val .bool) false) = .ok true := rfl
+  rw [Stmt.run_loop]
+  apply TLoop.run_of_iterN (n := 2)
+  simp only [TLoop.iterN, TLoop.step]
+  rw [enter, body_prefix, hv, tail_run]
   cases v <;> rfl
+
+theorem whileReturn_run {C : Contract} {Γ : Ctx} (names : RetFresh) (j b : Idx Γ (.val .bool))
+    (σ : State C Γ) (v : Bool) (hv : TEnv.get b σ.env = v) :
+    (whileReturnProg names j b).run σ =
+      .ok ⟨((σ.setLocal j v).push (t := .val .bool) (!v)).push (t := .val .bool) v,
+        List.prefix_refl _⟩ := by
+  have d1 : (Stmt.declLocal .bool names.first (some (.simple (.bool false))) : Stmt C Γ _).run σ =
+      .ok ⟨σ.push (t := .val .bool) false, List.prefix_refl _⟩ := rfl
+  have d2 : (Stmt.declLocal .bool names.second (some (.simple (.bool false))) :
+      Stmt C (.val .bool :: Γ) _).run (σ.push (t := .val .bool) false) =
+      .ok ⟨(σ.push (t := .val .bool) false).push (t := .val .bool) false, List.prefix_refl _⟩ := rfl
+  rw [whileReturnProg, Prog.run_cons_ok d1, Prog.run_cons_ok d2,
+    Prog.run_cons_ok (whileReturn_loop names j b σ v hv)]
+  cases v <;> rfl
+
+/-- The converted Source loop runs as G19's bare `while (i = a) return;`. -/
+theorem whileReturn_source_run {E : Source.Env} {srcΓ : Source.RCtx} {M l u : Bool} {C : Contract}
+    {Γ : Ctx} (G : Source.Glob E) (F : Source.Fr) (fuel nps : Nat) (ph : Option (Source.Ph E))
+    (m : ContextMap srcΓ Γ) (p : Pair m) (source : Source.EMState E srcΓ) (target : State C Γ)
+    (R : (τ : Source.STy) → (u : LTy) → Source.Val E.layout τ → u.TDenote C target.H → Prop)
+    (aligned : m.Related R source.1 target.env)
+    (boolReflect : ∀ (v : Source.Val E.layout .bool) (b : Bool), R .bool (.val .bool) v b → v = .bool b) :
+    (Source.execS G F (fuel + 4) nps ph (R := []) (M := M)
+      (.whileLoop (l := l) (u := u) (.assign (.local p.i) (.conv (.local p.a) (.inl rfl))) (.ret rfl))
+        source.1).run (.nil, source.2) =
+      (.ok (if (TEnv.get (boolSlot m p.a p.ha) target.env : Bool) = true then
+        Source.Out.ret (source.1.set p.i (.bool (TEnv.get (boolSlot m p.a p.ha) target.env)))
+        else Source.Out.normal (source.1.set p.i (.bool (TEnv.get (boolSlot m p.a p.ha) target.env)))),
+        (.nil, source.2)) ∧
+    (m.wk (Thin.drop (t := .val .bool) .refl)).Related R
+      (source.1.set p.i (.bool (TEnv.get (boolSlot m p.a p.ha) target.env)))
+      (Solidity.Lowering.G19.AssignmentReturnFlag.reached m p.i p.a p.hi p.ha target).env := by
+  have leaf := Solidity.Lowering.G19.WhileReturn.correct G F fuel nps ph (M := M) (l := l) (u := u)
+    source target m R aligned boolReflect p.i p.a p.hi p.ha p.mapI p.mapA
+  obtain ⟨sourceRun, -, related, -, -⟩ := leaf
+  have below := Horizon.while_below (lp := l) (R := []) (M := M) (u := u) G F nps ph _ _ _ _
+    (Horizon.assign_below G F p.i p.a) (Horizon.same_below G F nps ph (.ret rfl)) (fuel + 3) source.1
+  exact ⟨(Source.Below.eq_of_done below (.nil, source.2)
+    (by rw [sourceRun]; intro h; cases h)).trans sourceRun, related⟩
 
 /-! ### `do { i = a; return; } while (c);` -/
 
@@ -116,15 +147,10 @@ theorem whileReturn_endpoint {E : Source.Env} {srcΓ : Source.RCtx} {M l u : Boo
     RetEndpoint (RetShape.whileReturn.source (M := M) (l := l) (u := u) p x)
       RetShape.whileReturn.offset m (RetShape.whileReturn.program p x names)
       (RetShape.whileReturn.embedding Γ) (RetShape.whileReturn.witness Γ) := by
-  intro G F fuel nps ph source target R aligned boolReflect
-  have leaf := Solidity.Lowering.G19.WhileReturn.correct G F fuel nps ph (M := M) (l := l) (u := u)
-    source target m (R target.H) aligned (boolReflect target.H) p.i p.a p.hi p.ha p.mapI p.mapA
-  obtain ⟨sourceRun, -, related, -, -⟩ := leaf
-  have below := Horizon.while_below (lp := l) (R := []) (M := M) (u := u) G F nps ph _ _ _ _
-    (Horizon.assign_below G F p.i p.a) (Horizon.same_below G F nps ph (.ret rfl)) (fuel + 3) source.1
-  have sourceRun' := (Source.Below.eq_of_done below (.nil, source.2)
-    (by rw [sourceRun]; intro h; cases h)).trans sourceRun
-  refine ⟨_, TEnv.get (boolSlot m p.a p.ha) target.env, _, sourceRun',
+  intro G F fuel nps ph source target R aligned boolReflect _
+  obtain ⟨sourceRun, related⟩ := whileReturn_source_run (M := M) (l := l) (u := u) G F fuel nps ph
+    m p source target (R target.H) aligned (boolReflect target.H)
+  refine ⟨_, TEnv.get (boolSlot m p.a p.ha) target.env, _, sourceRun,
     whileReturn_run names _ _ target _ rfl, rfl, ?_, rfl⟩
   intro τ k
   exact related k
@@ -135,7 +161,7 @@ theorem doReturn_endpoint {E : Source.Env} {srcΓ : Source.RCtx} {M l u : Bool} 
     RetEndpoint (RetShape.doReturn.source (M := M) (l := l) (u := u) p x)
       RetShape.doReturn.offset m (RetShape.doReturn.program p x names)
       (RetShape.doReturn.embedding Γ) (RetShape.doReturn.witness Γ) := by
-  intro G F fuel nps ph source target R aligned boolReflect
+  intro G F fuel nps ph source target R aligned boolReflect _
   have leaf := Solidity.Lowering.G19.AssignmentDoWhileReturn.correct G F fuel nps ph
     (M := M) (l := l) (u := u) source target m (R target.H) aligned (boolReflect target.H)
     p.i p.a p.hi p.ha p.mapI p.mapA x.1
@@ -158,7 +184,7 @@ theorem returnFlag_endpoint {E : Source.Env} {srcΓ : Source.RCtx} {M l u : Bool
     RetEndpoint (RetShape.returnFlag.source (M := M) (l := l) (u := u) p x)
       RetShape.returnFlag.offset m (RetShape.returnFlag.program p x names)
       (RetShape.returnFlag.embedding Γ) (RetShape.returnFlag.witness Γ) := by
-  intro G F fuel nps ph source target R aligned boolReflect
+  intro G F fuel nps ph source target R aligned boolReflect _
   have leaf := Solidity.Lowering.G19.AssignmentReturnFlag.correct G F fuel nps ph
     (M := M) (k := ⟨l, u⟩) source target m (R target.H) aligned (boolReflect target.H)
     p.i p.a p.hi p.ha p.mapI p.mapA

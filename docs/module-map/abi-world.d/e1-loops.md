@@ -11,3 +11,4 @@
 | `Correctness/Lowering/Loops/ReturnFamily.lean` | Function-level return family (H497): shapes, outputs, return-witness endpoint and statement. |
 | `Correctness/Lowering/Loops/Returns.lean` | While/do-while return and if-return leaves at function level, plus G19 Source halves. |
 | `Correctness/Lowering/Loops/Statement.lean` | `LowerLoopsCorrect`: the normal-outcome and return families together. |
+| `Correctness/Lowering/Loops/ReturnThen.lean` | While-return followed by a suffix: the ret flag skips the suffix exactly when Source returned. |

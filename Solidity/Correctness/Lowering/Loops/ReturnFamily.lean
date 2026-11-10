@@ -1,10 +1,10 @@
 import Solidity.Correctness.Lowering.Loops.Family
 
 /-!
-# Loop lowering with `return`: the function-level family (H497)
+# Loop lowering with `return`: the callee-body-pass family (H497)
 
 A `return` inside a loop is lowered in two passes on a callee body
-(`calleeBody`, `Solidity/Syntax/Elab/Arms.lean:828-829`): `lowerLoops` turns it
+(`calleeBody`, `Solidity/Syntax/Elab/Arms.lean:826-830`): `lowerLoops` turns it
 into a `ret` flag and an `if (ret) return;` after the outermost loop
 (`Lower.lean:454-459, 536-538`), then `lowerReturns` (`Lower.lean:287`) lowers that
 trailing `return` of a body with no return values to nothing. The endpoint is
@@ -13,8 +13,14 @@ Source observation of whether the statement returned: Source ends in
 `.ret ls` exactly when the target's return witness (the `ret` flag, or the
 condition capture for a plain `if`) is `true`, and in `.normal ls` otherwise.
 
-Only bodies without return values are in the family (`return;`, `R = []`);
-`return e;` (`lowerReturn`, Lower.lean:249) is not.
+Exact scope. The target is the elaborated output of the callee-body pass
+(`calleeBody`, then `elabStmtsP` under `inlinedBody`'s reader), not of the call:
+the frame switch, parameter binding, `CallMemo` and `CallRet` of `inlinedBody`
+and the Source call semantics (`callInternal`) are not covered. The Source side
+is the resolved body statement, whose `.ret` outcome is observed directly.
+Bodies are one statement (or `whileReturnThen`'s loop-then-suffix block) with
+no return values (`return;`, `R = []`), no parameters and no modifiers;
+`return e;` (`lowerReturn`, Lower.lean:249) is not in the family.
 -/
 namespace Solidity.Correctness.Lowering.Loops
 
@@ -30,6 +36,10 @@ inductive RetShape where
   /-- `if (i = a) return;` (G19 `AssignmentReturnFlag`; no loop, lowered by
   `lowerReturns` alone). -/
   | returnFlag
+  /-- `while (i = a) return; a = false;`: the statement after the loop runs
+  only when the loop did not return (`lowerReturns` moves it into the `else`
+  branch of the trailing `if (ret)`, Lower.lean:300-304). -/
+  | whileReturnThen
   deriving DecidableEq, Repr
 
 /-- Fresh names of a return shape's output: up to three flags/captures. -/
@@ -46,6 +56,7 @@ def RetShape.Extra (E : Source.Env) (srcΓ : Source.RCtx) (C : Contract) (Γ : C
   | .whileReturn => Unit
   | .doReturn => Source.RExpr E srcΓ .bool × Val C (.val .bool :: .val .bool :: Γ) .bool
   | .returnFlag => Unit
+  | .whileReturnThen => Unit
 
 /-- Iteration body of the lowered `while (i = a) return;` after its capture:
 `i = se; if (!se) brk = true; if (!brk) { ret = true; }`. -/
@@ -74,6 +85,18 @@ def whileReturnProg {C : Contract} {Γ : Ctx} (names : RetFresh) (j b : Idx Γ (
         (.cons (.declLocal .bool names.third (some (.simple (.local b.there.there))))
           (whileReturnTail j)))
         (.cons (.ite (.simple (.local .here)) .nil .nil) .nil)))
+
+/-- Function-level image of `while (i = a) return; a = false;`: as
+`whileReturnProg`, with the suffix in the `else` branch of `if (ret)`. -/
+def whileReturnThenProg {C : Contract} {Γ : Ctx} (names : RetFresh) (j b : Idx Γ (.val .bool)) :
+    Prog C Γ (.val .bool :: .val .bool :: Γ) :=
+  .cons (.declLocal .bool names.first (some (.simple (.bool false))))
+    (.cons (.declLocal .bool names.second (some (.simple (.bool false))))
+      (.cons (.loop .auto brkRetGuard
+        (.cons (.declLocal .bool names.third (some (.simple (.local b.there.there))))
+          (whileReturnTail j)))
+        (.cons (.ite (.simple (.local .here)) .nil
+          (.cons (.assignLocal b.there.there (.simple (.bool false))) .nil)) .nil)))
 
 /-- Function-level image of `do { i = a; return; } while (c);`:
 `bool first = true; bool ret = false; while (!ret && (first || c)) { first = false; i = a; ret = true; }; if (ret) {}`. -/
@@ -104,17 +127,22 @@ def RetShape.source {E : Source.Env} {srcΓ : Source.RCtx} {M l u : Bool} {Γ : 
     .doWhile (.block (.stmt (.expr (.assign (.local p.i) (.conv (.local p.a) (.inl rfl))))
       (.stmt (.ret rfl) .nil))) x.1
   | .returnFlag, p, _ => .ifThen (.assign (.local p.i) (.conv (.local p.a) (.inl rfl))) (.ret rfl)
+  | .whileReturnThen, p, _ =>
+    .block (.stmt (.whileLoop (.assign (.local p.i) (.conv (.local p.a) (.inl rfl))) (.ret rfl))
+      (.stmt (.expr (.assign (.local p.a) (.conv (.bool false) (.inl rfl)))) .nil))
 
 def RetShape.offset : RetShape → Nat
   | .whileReturn => 4
   | .doReturn => 7
   | .returnFlag => 4
+  | .whileReturnThen => 7
 
 /-- Output contexts: the flags/captures each shape leaves. -/
 def RetShape.out (Γ : Ctx) : RetShape → Ctx
   | .whileReturn => .val .bool :: .val .bool :: Γ
   | .doReturn => .val .bool :: .val .bool :: Γ
   | .returnFlag => .val .bool :: Γ
+  | .whileReturnThen => .val .bool :: .val .bool :: Γ
 
 def RetShape.program {C : Contract} {srcΓ : Source.RCtx} {Γ : Ctx} {m : ContextMap srcΓ Γ}
     {E : Source.Env} : (k : RetShape) → Pair m → k.Extra E srcΓ C Γ → RetFresh →
@@ -122,18 +150,21 @@ def RetShape.program {C : Contract} {srcΓ : Source.RCtx} {Γ : Ctx} {m : Contex
   | .whileReturn, p, _, n => whileReturnProg n (boolSlot m p.i p.hi) (boolSlot m p.a p.ha)
   | .doReturn, p, x, n => doReturnProg n (boolSlot m p.i p.hi) (boolSlot m p.a p.ha) x.2
   | .returnFlag, p, _, n => returnFlagProg n (boolSlot m p.i p.hi) (boolSlot m p.a p.ha)
+  | .whileReturnThen, p, _, n => whileReturnThenProg n (boolSlot m p.i p.hi) (boolSlot m p.a p.ha)
 
 /-- The target return witness: the `ret` flag, or the `if` capture. -/
 def RetShape.witness (Γ : Ctx) : (k : RetShape) → Idx (k.out Γ) (.val .bool)
   | .whileReturn => .here
   | .doReturn => .here
   | .returnFlag => .here
+  | .whileReturnThen => .here
 
 /-- Caller locals past the shape's hidden locals. -/
 def RetShape.embedding (Γ : Ctx) : (k : RetShape) → Thin Γ (k.out Γ)
   | .whileReturn => .drop (.drop .refl)
   | .doReturn => .drop (.drop .refl)
   | .returnFlag => .drop .refl
+  | .whileReturnThen => .drop (.drop .refl)
 
 /-- Association of a function-level output with a family member. -/
 def RetAccepts {E : Source.Env} {C : Contract} {srcΓ : Source.RCtx} {Γ : Ctx}
@@ -155,6 +186,7 @@ def RetEndpoint {E : Source.Env} {srcΓ : Source.RCtx} {M : Bool} {k : Source.SC
     m.Related (R target.H) source.1 target.env →
     (∀ (H : HTy) (v : Source.Val E.layout .bool) (b : Bool),
       R H .bool (.val .bool) v b → v = .bool b) →
+    (∀ H : HTy, R H .bool (.val .bool) (.bool false) false) →
     ∃ (ls : Source.Locals E.layout srcΓ) (returned : Bool) (out : Out C target.H Δ),
       (Source.execS G F (fuel + offset) nps ph statement source.1).run (.nil, source.2) =
         (.ok (if returned then Source.Out.ret ls else Source.Out.normal ls), (.nil, source.2)) ∧

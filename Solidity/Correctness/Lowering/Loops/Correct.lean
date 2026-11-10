@@ -1,6 +1,7 @@
 import Solidity.Correctness.Lowering.Loops.WhileBreak
 import Solidity.Correctness.Lowering.Loops.Statement
 import Solidity.Correctness.Lowering.Loops.Returns
+import Solidity.Correctness.Lowering.Loops.ReturnThen
 import Solidity.Correctness.Lowering.Loops.ForBreak
 import Solidity.Correctness.Lowering.Loops.WhileContinue
 import Solidity.Correctness.Lowering.Loops.DoBreak
@@ -26,8 +27,8 @@ Partiality: theorems speak of accepted outputs only. Producer refusals
 inside a loop, Lower.lean:448-449, 455, 474; `lowerReturn` refusals; refusals
 of `elabStmtsP` or `SProg.chain`) and non-family outputs are not covered; they
 are coverage gaps, not counterexamples. Only normal outcomes are stated. The
-producer link is per sample (ten inputs; the three `return` samples run the
-actual function-body pass `calleeBody`, Arms.lean:826-838); a raw-level check exists only for
+producer link is per sample (eleven inputs; the four `return` samples run the
+actual callee-body pass `calleeBody`, Arms.lean:826-838, not the call); a raw-level check exists only for
 the while sample (`Checker.RawProbe.checkRaw`).
 -/
 namespace Solidity.Correctness.Lowering
@@ -54,6 +55,7 @@ theorem returnFamily_correct : Loops.ReturnFamilyCorrect := by
   | whileReturn => exact Returns.whileReturn_endpoint m p x names
   | doReturn => exact Returns.doReturn_endpoint m p x names
   | returnFlag => exact Returns.returnFlag_endpoint m p x names
+  | whileReturnThen => exact ReturnThen.endpoint m p x names
 
 /-- **Loop lowering correctness** on both accepted families (finish-line
 component `Solidity.Goals.lowerLoopsCorrect`, owner e1-loops). -/
@@ -389,34 +391,61 @@ theorem returnFlag_source (E : Source.Env) :
 
 /-- End to end, function level: `while (i = a) return;`. -/
 theorem whileReturn_actual (E : Source.Env) :
-    ∃ (embedding : Thin IntrinsicProbe.Γ Capture.whileReturn.1)
-      (witness : Idx Capture.whileReturn.1 (.val .bool)),
-      RetEndpoint (whileReturnTyping E).toR RetShape.whileReturn.offset
-        Checker.WhileBreak.mapping Capture.whileReturn.2 embedding witness := by
+    RetEndpoint (whileReturnTyping E).toR RetShape.whileReturn.offset
+      Checker.WhileBreak.mapping Capture.whileReturn.2 (RetShape.whileReturn.embedding _)
+      (RetShape.whileReturn.witness _) := by
   rw [whileReturn_source E]
-  exact ⟨_, _, returnFamily_correct .whileReturn Checker.WhileBreak.mapping whileBreakPair ()
-    whileReturnNames⟩
+  exact returnFamily_correct .whileReturn Checker.WhileBreak.mapping whileBreakPair ()
+    whileReturnNames
 
 /-- End to end, function level: `do { i = a; return; } while (a);`. -/
 theorem doReturn_actual (E : Source.Env) :
-    ∃ (embedding : Thin IntrinsicProbe.Γ Capture.doReturn.1)
-      (witness : Idx Capture.doReturn.1 (.val .bool)),
-      RetEndpoint (doReturnTyping E).toR RetShape.doReturn.offset
-        Checker.WhileBreak.mapping Capture.doReturn.2 embedding witness := by
+    RetEndpoint (doReturnTyping E).toR RetShape.doReturn.offset
+      Checker.WhileBreak.mapping Capture.doReturn.2 (RetShape.doReturn.embedding _)
+      (RetShape.doReturn.witness _) := by
   obtain ⟨c, eq⟩ := doReturn_source E
   rw [eq]
-  exact ⟨_, _, returnFamily_correct .doReturn Checker.WhileBreak.mapping whileBreakPair
-    (c, doCondition) doReturnNames⟩
+  exact returnFamily_correct .doReturn Checker.WhileBreak.mapping whileBreakPair
+    (c, doCondition) doReturnNames
 
 /-- End to end, function level: `if (i = a) return;`. -/
 theorem returnFlag_actual (E : Source.Env) :
-    ∃ (embedding : Thin IntrinsicProbe.Γ Capture.returnFlag.1)
-      (witness : Idx Capture.returnFlag.1 (.val .bool)),
-      RetEndpoint (returnFlagTyping E).toR RetShape.returnFlag.offset
-        Checker.WhileBreak.mapping Capture.returnFlag.2 embedding witness := by
+    RetEndpoint (returnFlagTyping E).toR RetShape.returnFlag.offset
+      Checker.WhileBreak.mapping Capture.returnFlag.2 (RetShape.returnFlag.embedding _)
+      (RetShape.returnFlag.witness _) := by
   rw [returnFlag_source E]
-  exact ⟨_, _, returnFamily_correct .returnFlag Checker.WhileBreak.mapping whileBreakPair ()
-    returnFlagNames⟩
+  exact returnFamily_correct .returnFlag Checker.WhileBreak.mapping whileBreakPair ()
+    returnFlagNames
+
+theorem whileReturnThen_accepts {E : Source.Env} :
+    RetAccepts (E := E) .whileReturnThen whileBreakPair () whileReturnNames
+      Capture.whileReturnThen := rfl
+
+/-- Actual Source typing of the body `{ while (i = a) return; a = false; }`. -/
+def whileReturnThenTyping (E : Source.Env) :
+    Source.StmtD (k := .body) (SourceAssociation.typingContext E) SourceAssociation.names
+      (.blockStmt (.block (.cons (.stmtItem (.whileStmt (.assign .assign (.ident "i") (.ident "a"))
+          (.returnStmt .none)))
+        (.cons (.stmtItem (.simpleStmt (.exprStmt
+          (.assign .assign (.ident "a") (.lit (.bool false)))))) .nil))))
+      SourceAssociation.names :=
+  .block (.stmt (.whileLoop (SourceAssociation.conditionTyping E) rfl (.ret rfl))
+    (.stmt (.expr (.assign (.loc (i := 1) rfl rfl) (.bool false) rfl rfl) rfl) .nil))
+
+theorem whileReturnThen_source (E : Source.Env) :
+    (whileReturnThenTyping E).toR =
+      RetShape.whileReturnThen.source (C := IntrinsicProbe.C) (M := false) (l := false)
+        (u := false) whileBreakPair () := rfl
+
+/-- End to end, callee-body level: `while (i = a) return; a = false;`. The
+suffix runs exactly when Source did not return. -/
+theorem whileReturnThen_actual (E : Source.Env) :
+    RetEndpoint (whileReturnThenTyping E).toR RetShape.whileReturnThen.offset
+      Checker.WhileBreak.mapping Capture.whileReturnThen.2 (RetShape.whileReturnThen.embedding _)
+      (RetShape.whileReturnThen.witness _) := by
+  rw [whileReturnThen_source E]
+  exact returnFamily_correct .whileReturnThen Checker.WhileBreak.mapping whileBreakPair ()
+    whileReturnNames
 
 end Loops.Coverage
 
@@ -429,6 +458,9 @@ end Loops.Coverage
 #print axioms Loops.Coverage.whileReturn_actual
 #print axioms Loops.Coverage.doReturn_actual
 #print axioms Loops.Coverage.returnFlag_actual
+#print axioms Loops.Coverage.whileReturnThen_accepts
+#print axioms Loops.Coverage.whileReturnThen_source
+#print axioms Loops.Coverage.whileReturnThen_actual
 #print axioms Loops.Coverage.whileBreak_accepts
 #print axioms Loops.Coverage.whileBreak_source
 #print axioms Loops.Coverage.whileBreak_actual

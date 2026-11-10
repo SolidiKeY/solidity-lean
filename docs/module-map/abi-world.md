@@ -47,6 +47,7 @@ See [ABI packet consumers](../feature-work/abi-world-packets.md) for proof bound
 | `Correctness/Lowering/Loops/ReturnFamily.lean` | Function-level return family (H497): shapes, outputs, return-witness endpoint and statement. |
 | `Correctness/Lowering/Loops/Returns.lean` | While/do-while return and if-return leaves at function level, plus G19 Source halves. |
 | `Correctness/Lowering/Loops/Statement.lean` | `LowerLoopsCorrect`: the normal-outcome and return families together. |
+| `Correctness/Lowering/Loops/ReturnThen.lean` | While-return followed by a suffix: the ret flag skips the suffix exactly when Source returned. |
 | `Correctness/Lowering/Checker/Contract.lean` | P1 inventory and unfrozen candidate checker contract. |
 | `Correctness/Lowering/Checker/IntrinsicProbe.lean` | Actual intrinsic elaboration capture for the bounded while/break probe. |
 | `Correctness/Lowering/Checker/MeasuredPilot.lean` | Exact singleton soundness/completeness and measured contract-body refusal. |
