@@ -42,6 +42,8 @@ See [ABI packet consumers](../feature-work/abi-world-packets.md) for proof bound
 | `Correctness/Lowering/Loops/Horizon.lean` | An identity conversion in a `while` condition costs one Source horizon (monotonicity transport). |
 | `Correctness/Lowering/Loops/WhileContinue.lean` | While/continue leaf: two-path flag-loop target run plus G19 Source half through the horizon transport. |
 | `Correctness/Lowering/Loops/DoBreak.lean` | Do-while/break leaf: first-flag loop with short-circuited condition, plus G19 Source half. |
+| `Correctness/Lowering/Loops/WhileReset.lean` | While leaf with a resetting body: two-path flag-loop target run plus G19 Source half. |
+| `Correctness/Lowering/Loops/DoContinue.lean` | Do-while/continue leaf: one-turn first-flag loop plus G19 Source half. |
 | `Correctness/Lowering/Checker/Contract.lean` | P1 inventory and unfrozen candidate checker contract. |
 | `Correctness/Lowering/Checker/IntrinsicProbe.lean` | Actual intrinsic elaboration capture for the bounded while/break probe. |
 | `Correctness/Lowering/Checker/MeasuredPilot.lean` | Exact singleton soundness/completeness and measured contract-body refusal. |

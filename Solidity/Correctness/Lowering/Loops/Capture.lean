@@ -31,6 +31,14 @@ def whileContinueInput : List RawStmt :=
 def doBreakInput : List RawStmt :=
   [.doWhile {} [.assign (.name "i") (.name "a"), .brk] (.name "a")]
 
+/-- `while (i = a) a = false;` -/
+def whileResetInput : List RawStmt :=
+  [.whileLoop {} (.assign (.name "i") (.name "a")) [.assign (.name "a") (.bool false)]]
+
+/-- `do { i = a; continue; } while (false);` -/
+def doContinueInput : List RawStmt :=
+  [.doWhile {} [.assign (.name "i") (.name "a"), .cont] (.bool false)]
+
 open Lean Elab Term Meta in
 /-- Run `lowerLoops` then `elabStmtsP` on `input` and quote the placed program.
 Like the Checker probes, it refuses a changed caller context or a nonempty
@@ -75,6 +83,18 @@ elab "capture_do_break%" : term => captureProgram doBreakInput
 
 /-- Actual output for `do { i = a; break; } while (a);`. -/
 def doBreak : Blk IntrinsicProbe.C IntrinsicProbe.Γ := capture_do_break%
+
+open Lean Elab Term in
+elab "capture_while_reset%" : term => captureProgram whileResetInput
+
+open Lean Elab Term in
+elab "capture_do_continue%" : term => captureProgram doContinueInput
+
+/-- Actual output for `while (i = a) a = false;`. -/
+def whileReset : Blk IntrinsicProbe.C IntrinsicProbe.Γ := capture_while_reset%
+
+/-- Actual output for `do { i = a; continue; } while (false);`. -/
+def doContinue : Blk IntrinsicProbe.C IntrinsicProbe.Γ := capture_do_continue%
 
 /-- Actual output for `for (i = a; ; ) break;`. -/
 def forBreak : Blk IntrinsicProbe.C IntrinsicProbe.Γ := capture_for_break%

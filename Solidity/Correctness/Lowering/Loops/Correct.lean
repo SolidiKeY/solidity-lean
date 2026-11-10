@@ -2,6 +2,8 @@ import Solidity.Correctness.Lowering.Loops.WhileBreak
 import Solidity.Correctness.Lowering.Loops.ForBreak
 import Solidity.Correctness.Lowering.Loops.WhileContinue
 import Solidity.Correctness.Lowering.Loops.DoBreak
+import Solidity.Correctness.Lowering.Loops.WhileReset
+import Solidity.Correctness.Lowering.Loops.DoContinue
 import Solidity.Correctness.Lowering.Loops.Capture
 import Solidity.Correctness.Lowering.Checker.WhileBreak
 
@@ -20,7 +22,7 @@ Partiality: theorems speak of accepted outputs only. Producer refusals
 inside a loop, Lower.lean:448-449, 455, 474; `lowerReturn` refusals; refusals
 of `elabStmtsP` or `SProg.chain`) and non-family outputs are not covered; they
 are coverage gaps, not counterexamples. Only normal outcomes are stated. The
-producer link is per sample (five inputs); a raw-level check exists only for
+producer link is per sample (seven inputs); a raw-level check exists only for
 the while sample (`Checker.RawProbe.checkRaw`).
 -/
 namespace Solidity.Correctness.Lowering
@@ -38,6 +40,8 @@ theorem lowerLoops_correct : Loops.LowerLoopsCorrect := by
   | forBreak => exact ⟨.drop .refl, ForBreak.endpoint m p x names⟩
   | whileContinue => exact ⟨.drop .refl, WhileContinue.endpoint m p x names⟩
   | doBreak => exact ⟨.drop (.drop .refl), DoBreak.endpoint m p x names⟩
+  | whileReset => exact ⟨.drop .refl, WhileReset.endpoint m p x names⟩
+  | doContinue => exact ⟨.drop .refl, DoContinue.endpoint m p x names⟩
 
 namespace Loops.Coverage
 
@@ -239,6 +243,67 @@ theorem doBreak_actual (E : Source.Env) :
   exact lowerLoops_correct .doBreak Checker.WhileBreak.mapping whileBreakPair
     (Var.fresh "first" 2, c, doCondition) whileBreakNames Capture.doBreak (doBreak_accepts c)
 
+/-- Kernel acceptance of the actual output for `while (i = a) a = false;`. -/
+theorem whileReset_accepts {E : Source.Env} :
+    Accepts (E := E) (returns := []) (M := false) (u := false) .whileReset whileBreakPair ()
+      whileBreakNames Capture.whileReset := rfl
+
+/-- Actual Source typing of `while (i = a) a = false;`. -/
+def whileResetTyping (E : Source.Env) :
+    Source.StmtD (SourceAssociation.typingContext E) SourceAssociation.names
+      (.whileStmt (l := false) (u := false) (.assign .assign (.ident "i") (.ident "a"))
+        (.simpleStmt (.exprStmt (.assign .assign (.ident "a") (.lit (.bool false))))))
+      SourceAssociation.names :=
+  .whileLoop (SourceAssociation.conditionTyping E) rfl
+    (.expr (.assign (.loc (i := 1) rfl rfl) (.bool false) rfl rfl) rfl)
+
+theorem whileReset_source (E : Source.Env) :
+    (whileResetTyping E).toR =
+      Shape.whileReset.source (C := IntrinsicProbe.C) (returns := []) (M := false) (l := false)
+        (u := false) whileBreakPair () := rfl
+
+/-- End to end for the actual `while (i = a) a = false;` sample. -/
+theorem whileReset_actual (E : Source.Env) :
+    ∃ embedding : Thin IntrinsicProbe.Γ Capture.whileReset.1,
+      Endpoint (whileResetTyping E).toR Shape.whileReset.offset
+        Checker.WhileBreak.mapping Capture.whileReset.2 embedding := by
+  rw [whileReset_source E]
+  exact lowerLoops_correct .whileReset Checker.WhileBreak.mapping whileBreakPair ()
+    whileBreakNames Capture.whileReset whileReset_accepts
+
+/-- Fresh first-iteration flag of the `do`/`continue` sample. -/
+def doContinueNames : Fresh := ⟨Var.fresh "first" 2, Var.fresh "se" 0⟩
+
+/-- Kernel acceptance of the actual output for `do { i = a; continue; } while (false);`. -/
+theorem doContinue_accepts {E : Source.Env} :
+    Accepts (E := E) (returns := []) (M := false) (u := false) .doContinue whileBreakPair
+      (Var.fresh "cnt" 1, ⟨_, .nil⟩) doContinueNames Capture.doContinue := rfl
+
+/-- Actual Source typing of `do { i = a; continue; } while (false);`. -/
+def doContinueTyping (E : Source.Env) :
+    Source.StmtD (SourceAssociation.typingContext E) SourceAssociation.names
+      (.doWhile (l := false) (u := false)
+        (.blockStmt (.block (.cons (.stmtItem (.simpleStmt (.exprStmt
+          (.assign .assign (.ident "i") (.ident "a")))))
+          (.cons (.stmtItem .continueStmt) .nil)))) (.lit (.bool false)))
+      SourceAssociation.names :=
+  .doWhile rfl (.block (.stmt (.expr (SourceAssociation.conditionTyping E) rfl) (.stmt .cont .nil)))
+    (.bool false)
+
+theorem doContinue_source (E : Source.Env) :
+    (doContinueTyping E).toR =
+      Shape.doContinue.source (C := IntrinsicProbe.C) (returns := []) (M := false) (l := false)
+        (u := false) whileBreakPair (Var.fresh "cnt" 1, ⟨_, .nil⟩) := rfl
+
+/-- End to end for the actual `do { i = a; continue; } while (false);` sample. -/
+theorem doContinue_actual (E : Source.Env) :
+    ∃ embedding : Thin IntrinsicProbe.Γ Capture.doContinue.1,
+      Endpoint (doContinueTyping E).toR Shape.doContinue.offset
+        Checker.WhileBreak.mapping Capture.doContinue.2 embedding := by
+  rw [doContinue_source E]
+  exact lowerLoops_correct .doContinue Checker.WhileBreak.mapping whileBreakPair
+    (Var.fresh "cnt" 1, ⟨_, .nil⟩) doContinueNames Capture.doContinue doContinue_accepts
+
 end Loops.Coverage
 
 #print axioms lowerLoops_correct
@@ -259,5 +324,11 @@ end Loops.Coverage
 #print axioms Loops.Coverage.doBreak_accepts
 #print axioms Loops.Coverage.doBreak_source
 #print axioms Loops.Coverage.doBreak_actual
+#print axioms Loops.Coverage.whileReset_accepts
+#print axioms Loops.Coverage.whileReset_source
+#print axioms Loops.Coverage.whileReset_actual
+#print axioms Loops.Coverage.doContinue_accepts
+#print axioms Loops.Coverage.doContinue_source
+#print axioms Loops.Coverage.doContinue_actual
 
 end Solidity.Correctness.Lowering

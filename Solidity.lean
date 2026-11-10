@@ -2430,11 +2430,13 @@ import Solidity.Correctness.Lowering.Checker.WhileBreak
 import Solidity.Correctness.Lowering.Loops.Capture
 import Solidity.Correctness.Lowering.Loops.Correct
 import Solidity.Correctness.Lowering.Loops.DoBreak
+import Solidity.Correctness.Lowering.Loops.DoContinue
 import Solidity.Correctness.Lowering.Loops.Family
 import Solidity.Correctness.Lowering.Loops.ForBreak
 import Solidity.Correctness.Lowering.Loops.Horizon
 import Solidity.Correctness.Lowering.Loops.WhileBreak
 import Solidity.Correctness.Lowering.Loops.WhileContinue
+import Solidity.Correctness.Lowering.Loops.WhileReset
 import Solidity.Counterexamples.DeleteFamilyGenericOverlap
 import Solidity.Counterexamples.DiamondTry
 import Solidity.Counterexamples.PreFixSortAnnotations

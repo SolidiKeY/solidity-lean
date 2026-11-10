@@ -6,3 +6,5 @@
 | `Correctness/Lowering/Loops/Horizon.lean` | An identity conversion in a `while` condition costs one Source horizon (monotonicity transport). |
 | `Correctness/Lowering/Loops/WhileContinue.lean` | While/continue leaf: two-path flag-loop target run plus G19 Source half through the horizon transport. |
 | `Correctness/Lowering/Loops/DoBreak.lean` | Do-while/break leaf: first-flag loop with short-circuited condition, plus G19 Source half. |
+| `Correctness/Lowering/Loops/WhileReset.lean` | While leaf with a resetting body: two-path flag-loop target run plus G19 Source half. |
+| `Correctness/Lowering/Loops/DoContinue.lean` | Do-while/continue leaf: one-turn first-flag loop plus G19 Source half. |
