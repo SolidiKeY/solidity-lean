@@ -90,10 +90,14 @@ class SlowExamples(unittest.TestCase):
             gate.write_bytes((ROOT / "scripts/coord-tools/gate.sh").read_bytes())
             for name in ("scripts/check-trust.sh", "scripts/check-doc-paths.sh",
                          "scripts/check-private-paths.sh", "scripts/check-evidence-files.sh",
-                         "scripts/coord-tools/register.sh", "scripts/coord-tools/fragments.sh"):
+                         "scripts/coord-tools/register.sh", "scripts/coord-tools/fragments.sh",
+                         "scripts/ci/checks-fast.sh"):
                 file = root / name
                 file.parent.mkdir(parents=True, exist_ok=True)
                 file.write_text("#!/bin/bash\nexit 0\n")
+            p16 = root / "scripts/h62/item1/p16-generator/check.py"
+            p16.parent.mkdir(parents=True)
+            p16.write_text("raise SystemExit(0)\n")
             core = root / "Solidity/Syntax/Core.lean"
             slow = root / "Solidity/Examples/Tactics/OpenLoops.lean"
             core.parent.mkdir(parents=True)
