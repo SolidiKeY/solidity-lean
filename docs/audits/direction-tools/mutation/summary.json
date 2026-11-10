@@ -67,6 +67,20 @@
     "timing_evidence_status": "UNVERIFIABLE",
     "timing_policy": "H236 permits existing matched archive reuse only; no new timing run authorized; no missing-archive question under H252"
   },
+  "disposition": {
+    "audit_item": "finished-with-evidence-gaps",
+    "backfill": "none",
+    "decision": "H422",
+    "missing_result_accepted": false,
+    "required_timing_claim": "unproven",
+    "retirement_policy": "H399"
+  },
+  "evidence_gaps": [
+    {
+      "id": "QDATA-TIMINGS",
+      "reason": "UNVERIFIABLE historical timing-evidence gap (H151/H252): no matched per-input timings in delivered archive and no authenticated replacement supplied. Required timing claim remains unproven and ratios null. H236 authorizes existing archive reuse only; no rerun or missing-archive question authorized. No independent authorized work remains"
+    }
+  ],
   "execution_limitation": "no systemd scope on the cloud VM (H232)",
   "historical_capture": {
     "archive_sha256": "0389822b7ea06dbe7068896e38aa3abbdfe7c56376d631061efefea0bfd6a881",
@@ -870,10 +884,5 @@
     ],
     "with_explicit_code_mentions": 30
   },
-  "waits": [
-    {
-      "id": "QDATA-TIMINGS",
-      "reason": "UNVERIFIABLE historical timing-evidence gap (H151/H252): no matched per-input timings in delivered archive and no authenticated replacement supplied. Required timing claim remains unproven and ratios null. H236 authorizes existing archive reuse only; no rerun or missing-archive question authorized. No independent authorized work remains"
-    }
-  ]
+  "waits": []
 }
