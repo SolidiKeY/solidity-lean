@@ -1,7 +1,7 @@
 // Guard against missing batch checkpoints, wrong identities and false native successes.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {observations} from './batch-checks.mjs';
+import {observations, runAdmissionChecks} from './batch-checks.mjs';
 const row = {source:'/a.sol',sourceHash:'h',contract:'C',sourceId:1,signature:'f()',status:'ready'};
 test('a partial batch retains every unobserved and refused inventory row',()=>{
  const other={...row,sourceId:2,status:'unsupported'};
@@ -62,5 +62,29 @@ test('attempted zero is real while invalid Nat timers and ambiguous identities r
  }
  for(const [inventory,results] of [[[row,row],[{...row,status:'proved',elapsedMs:2}]],[[row],[{...row,status:'proved',elapsedMs:2},{...row,status:'proved',elapsedMs:2}]]]) {
   assert.ok(observations(inventory,{results}).rows.every(r=>r.functionReportedElapsedMs===null));
+ }
+});
+
+// Guard landing review F2: a selected inventory must not launch unrelated proofs.
+test('actual batch API call preserves exact admission selectors and smaller tool timeout',()=>{
+ const admission={inputs:[{path:'/a.sol'}],selection:{contract:'Only',function:'f(uint256)',timeoutMs:1234}};
+ let calls=0;
+ const result=runAdmissionChecks(admission,{soljson:'/compiler'},(paths,options)=>{
+  calls++;assert.deepEqual(paths,['/a.sol']);
+  assert.equal(options.contract,'Only');assert.equal(options.function,'f(uint256)');
+  assert.equal(options.timeoutMs,1234);assert.equal(options.build,false);assert.equal(options.batchSize,32);
+  return {results:[{contract:options.contract,signature:options.function}],errors:[]};
+ });
+ assert.equal(calls,1);assert.deepEqual(result.results,[{contract:'Only',signature:'f(uint256)'}]);
+});
+test('unselected snapshots remain unselected, timeouts stay capped and malformed selectors launch nothing',()=>{
+ for(const selection of [undefined,{}, {timeoutMs:400000}]) {
+  runAdmissionChecks({inputs:[],selection},{},(_paths,options)=>{
+   assert.equal(options.contract,undefined);assert.equal(options.function,undefined);
+   assert.equal(options.timeoutMs,300000);return {results:[],errors:[]};
+  });
+ }
+ for(const selection of [{contract:3},{function:''},{timeoutMs:0},{timeoutMs:1.5}]) {
+  assert.throws(()=>runAdmissionChecks({inputs:[],selection},{},()=>assert.fail('invalid selection launched checks')));
  }
 });

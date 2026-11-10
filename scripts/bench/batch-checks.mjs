@@ -37,6 +37,28 @@ export function observations(inventory, raw) {
     ambiguousRows: rows.filter(r => r.observations.length > 1 || counts.get(key(r.input)) > 1).length};
 }
 
+function admissionSelection(selection = {}) {
+  const result = {contract: selection.contract ?? null, function: selection.function ?? null,
+    timeoutMs: selection.timeoutMs ?? 300000};
+  for (const name of ['contract','function']) {
+    if (result[name] !== null && (typeof result[name] !== 'string' || !result[name].length))
+      throw new Error('invalid admission '+name+' selector');
+  }
+  if (!Number.isSafeInteger(result.timeoutMs) || result.timeoutMs < 1)
+    throw new Error('invalid admission timeout');
+  result.timeoutMs = Math.min(result.timeoutMs, 300000);
+  return result;
+}
+
+// Keep the actual API call injectable for no-Lean selector regression controls.
+export function runAdmissionChecks(admission, {soljson, onProgress}, run = runSolidityTests) {
+  const selection = admissionSelection(admission.selection);
+  return run(admission.inputs.map(i=>i.path), {build: false,
+    contract: selection.contract ?? undefined, function: selection.function ?? undefined,
+    timeoutMs: selection.timeoutMs, batchSize: 32, soljson,
+    solkey: path.join(root, 'tests/migration/solkey'), onProgress});
+}
+
 function main(args) {
   let admission, work, soljson;
   for (let i = 0; i < args.length; i++) {
@@ -65,6 +87,8 @@ function main(args) {
     if (data.kind !== 'u01-admission-only' || data.attemptFinished !== true)
       throw new Error('finished admission-only inventory required');
     inventory = data.results; inputs = data.inputs;
+    report.selection = admissionSelection(data.selection);
+    report.perToolTimeoutMs = report.selection.timeoutMs;
     report.admissionSha256 = sourceHash(bytes);
     report.toolHead = execFileSync('git', ['rev-parse', 'HEAD'], {cwd: root, encoding: 'utf8'}).trim();
     report.driverSha256 = sourceHash(fs.readFileSync(fileURLToPath(import.meta.url)));
@@ -83,8 +107,7 @@ function main(args) {
     process.env.LEAN_NUM_THREADS = '1';
     for (let attempt = 0; attempt < 2; attempt++) {
       const started = performance.now();
-      raw = runSolidityTests(inputs.map(i=>i.path), {build: false, timeoutMs: 300000,
-        batchSize: 32, soljson, solkey: path.join(root, 'tests/migration/solkey'),
+      raw = runAdmissionChecks(data, {soljson,
         onProgress: progress => {raw = {results: [...progress.results], errors: [...progress.errors]}; save();}});
       const apiWallMs = performance.now()-started;
       report.attempts.push({apiWallMs, results: raw.results, errors: [...raw.errors]});

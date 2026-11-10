@@ -228,7 +228,9 @@ cannot become certified successes. Partial checkpoints survive interruption.
 
 For a large inventory, `node scripts/bench/batch-checks.mjs --admission FILE
 --soljson DIR --work NEW_DIR` reuses the existing batched testing API and its
-original 32-row batches and 300-second per-tool supervisors. It retains a row
+original 32-row batches and per-tool supervisors capped at 300 seconds.
+The batch runner preserves admission contract/function selectors and any smaller
+admission timeout; effective selectors and timeout are recorded in its report. It retains a row
 for every admission entry even when a batch checkpoint omits unrun declarations.
 Missing or ambiguous observations cannot pass. Exit 135 retries once; both
 attempts remain visible. This wrapper reports the existing per-row `elapsedMs`
@@ -361,6 +363,12 @@ Final finder and skeptic handoff review caught an owner-diff export truncated
 at a heading inside a fenced patch. The private exporter now preserves the
 complete fenced owner-edit section; regenerated handoff and checksum artifacts
 retain the original measurement and reporting heads separately.
+
+Landing finder and skeptic review identified omitted admission selectors in
+the batched API call. The runner now forwards exact contract/function selectors
+and bounded timeout, records them, and has a no-Lean API-call regression
+control. Existing unselected measurements retain their original provenance.
+VU1-D1 catalog/topic-guide integration remains assigned to the coordinator.
 
 ## Checkpoint handoff
 
