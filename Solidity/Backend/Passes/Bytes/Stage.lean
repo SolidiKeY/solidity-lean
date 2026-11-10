@@ -11,7 +11,9 @@ their end PC with that stack. Fault: the composition needs a `CodeShape` at
 the input height, which excludes underflow, the only fault of selected code;
 so accepted code never faults (`Accepted.never_faults`) and `fault_iff` holds
 with both sides false. The faults of selected code are exactly the `height`
-refusals (`selected_fault_iff`): `Evm.run` faults iff the stage refuses it.
+refusals (`selected_fault_iff`): `Evm.run` faults iff the stage refuses it
+with `height`. Other refusals need not fault: a `capacity` refusal only means
+some prefix exceeds 1024 words, and `Evm.run` has no stack cap.
 
 Nothing here is a hypothesis about decoders, bridges or `Roadmap.Execution`:
 the bytes are `encode` of the assembled program built by `scalarComposition`,
