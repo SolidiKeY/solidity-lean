@@ -1,8 +1,7 @@
 import Solidity.Lowering.V07.UnsignedComplement
 import Solidity.Lowering.V07.SignedComplement
 
-/-! Integer complement at all widths and signs, through the published V07
-programs. This is a local-expression leaf, not a frontend selection theorem. -/
+/-! Integer complement at all widths and signs, through the published V07 programs. This is a local-expression leaf, not a frontend selection theorem. -/
 namespace Solidity.Lowering.G16.Complement
 open Solidity.Lowering.V07
 
@@ -12,8 +11,7 @@ def value {C : Contract} {Γ : Ctx} (t : Source.IntTy) :
   | ⟨false,bits,_⟩ => UnsignedComplement.complementValue bits
   | ⟨true,bits,_⟩ => SignedComplement.complementValue bits
 
-/-- One integer-complement statement includes all valid signs and widths in
-both checked and unchecked frames. Initial aligned locals supply the inputs. -/
+/-- One integer-complement statement includes all valid signs and widths in both checked and unchecked frames. Initial aligned locals supply the inputs. -/
 theorem transport {E : Source.Env} {srcΓ : Source.RCtx}
     {C : Contract} {Γ : Ctx} {ι : Type}
     (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
@@ -140,8 +138,7 @@ private theorem value_run {C : Contract} {Γ : Ctx} (target : State C Γ)
   rw [run]
   rfl
 
-/-- All three unsigned bitwise operators at every valid width, in either frame and pipeline.
-Only pure locals are covered; signed/bytes operands, effects and frontend association remain open. -/
+/-- All three unsigned bitwise operators at every valid width, in either frame and pipeline. Only pure locals are covered; signed/bytes operands, effects and frontend association remain open. -/
 theorem transport {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} {Γ : Ctx}
     (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
     (source : Source.EMState E srcΓ) (target : State C Γ) (op : Op)
@@ -178,3 +175,102 @@ end Solidity.Lowering.G16.UnsignedBitwise
 /-- info: 'Solidity.Lowering.G16.UnsignedBitwise.transport' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Lowering.G16.UnsignedBitwise.transport
+
+namespace Solidity.Lowering.G16.UnsignedBitwise
+open Solidity.Lowering.V07
+
+def captureRight (p : Roadmap.Pipeline) (x y : Nat) : Nat := if p = .legacy then y else x
+
+private theorem captureRight_lt (p : Roadmap.Pipeline) {bits x y : Nat}
+    (hx : x < 2^bits) (hy : y < 2^bits) : captureRight p x y < 2^bits := by
+  cases p
+  · exact hy
+  · exact hx
+
+def assignmentOperand {C : Contract} {Γ : Ctx} (op : Op) (p : Roadmap.Pipeline)
+    (i a : Idx Γ (.val .uint)) : DeferredSource.Operand C Γ (.prim .uint) :=
+  ⟨.val .uint :: .val .uint :: Γ,assignReadPrefix p i a,
+    .val (value op (.simple (.local .here)) (.simple (.local (.there .here))))⟩
+
+private theorem assignment_run {C : Contract} {Γ : Ctx} (target : State C Γ)
+    (op : Op) (p : Roadmap.Pipeline) (bits : Nat)
+    (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256) (i a : Idx Γ (.val .uint))
+    (x y : Nat) (hx : x < 2^bits) (hy : y < 2^bits)
+    (readA : TEnv.get a target.env = integerValue (UnsignedNarrowing.ty bits valid) (x : Int) (range bits valid x hx))
+    (readI : TEnv.get i target.env = integerValue (UnsignedNarrowing.ty bits valid) (y : Int) (range bits valid y hy)) :
+    (assignmentOperand op p i a).run target =
+      .ok (⟨target.setLocal i (integerValue (UnsignedNarrowing.ty bits valid) (x : Int) (range bits valid x hx)),List.prefix_refl _⟩,
+        .prim (integerValue (UnsignedNarrowing.ty bits valid) (result op x (captureRight p x y) : Int)
+          (range bits valid _ (result_lt op hx (captureRight_lt p hx hy))))) := by
+  let t := UnsignedNarrowing.ty bits valid
+  let assigned := integerValue t (x : Int) (range bits valid x hx)
+  let selected := integerValue t (captureRight p x y : Int) (range bits valid _ (captureRight_lt p hx hy))
+  let reached : State C (.val .uint :: .val .uint :: Γ) := ((target.setLocal i assigned).push selected).push assigned
+  have chosen : (if p = .legacy then integerValue t (y : Int) (range bits valid y hy) else assigned) = selected := by
+    cases p <;> rfl
+  have capturedRun := assign_read_prefix_run p target i a assigned
+    (integerValue t (y : Int) (range bits valid y hy)) readA readI
+  rw [chosen] at capturedRun
+  have evaluated := value_run reached op bits valid (.simple (.local .here))
+    (.simple (.local (.there .here))) x (captureRight p x y) hx (captureRight_lt p hx hy) rfl rfl
+  cases p <;> unfold assignmentOperand DeferredSource.Operand.run <;>
+    rw [capturedRun] <;>
+    change (do
+    let v ← (Src.val (value op (.simple (.local .here)) (.simple (.local (.there .here)))) :
+      Src C (.val .uint :: .val .uint :: Γ) (.prim .uint)).valueT reached
+    pure ((⟨target.setLocal i assigned,List.prefix_refl _⟩ : Out C target.H Γ),v)) = _ <;>
+    simp only [Src.valueT,evaluated] <;> rfl
+
+private theorem source_from_pair {E : Source.Env} {srcΓ : Source.RCtx}
+    (G : Source.Glob E) (F : Source.Fr) (fuel : Nat) (source mid : Source.EMState E srcΓ)
+    (op : Op) (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256)
+    (a b : Source.RExpr E srcΓ (.int (UnsignedNarrowing.ty bits valid)))
+    (x y : Nat) (hx : x < 2^bits) (hy : y < 2^bits)
+    (pair : (Source.evalPair G F fuel a b).run source =
+      (.ok (.val (.int (x : Int) (range bits valid x hx)),.val (.int (y : Int) (range bits valid y hy))),mid)) :
+    (Source.evalE G F (fuel+1) (.binary (sourceOp op) a b)).run source =
+      (.ok (.val (.int (result op x y : Int) (range bits valid _ (result_lt op hx hy)))),mid) := by
+  have notLogical : (decide (sourceOp op = .and) || decide (sourceOp op = .or)) = false := by
+    cases op <;> rfl
+  have computed := source_result (D := E.layout) F.checked op bits valid x y hx hy
+  rw [Source.evalE]
+  simp only [notLogical,Bool.false_eq_true,if_false]
+  rw [Source.Hoare.run_bind,pair]
+  change (do let v ← Source.EM.lift (Source.binVal F.checked (sourceOp op)
+                (.int (x : Int) (range bits valid x hx)) (.int (y : Int) (range bits valid y hy)))
+             pure (Source.RVal.val v)).run mid = _
+  rw [computed]
+  rfl
+
+/-- All unsigned bitwise assignment/read captures derive pipeline order and named writes; arbitrary effects and frontend association remain open. -/
+theorem assignment_transport {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} {Γ : Ctx}
+    (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
+    (source : Source.EMState E srcΓ) (target : State C Γ) (op : Op)
+    (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256)
+    (i a : Source.Idx srcΓ (.int (UnsignedNarrowing.ty bits valid)))
+    (c d : Idx Γ (.val .uint)) (x y : Nat) (hx : x < 2^bits) (hy : y < 2^bits)
+    (readA : source.1.get a = .int (x : Int) (range bits valid x hx))
+    (readI : source.1.get i = .int (y : Int) (range bits valid y hy))
+    (nativeA : TEnv.get d target.env = integerValue (UnsignedNarrowing.ty bits valid) (x : Int) (range bits valid x hx))
+    (nativeI : TEnv.get c target.env = integerValue (UnsignedNarrowing.ty bits valid) (y : Int) (range bits valid y hy)) :
+    (Source.evalE G F (fuel+4) (.binary (sourceOp op) (.assign (.local i) (.local a)) (.local i))).run source =
+      (.ok (.val (.int (result op x (captureRight G.pipeline x y) : Int)
+          (range bits valid _ (result_lt op hx (captureRight_lt G.pipeline hx hy))))),
+        (source.1.set i (.int (x : Int) (range bits valid x hx)),source.2)) ∧
+    (assignmentOperand op G.pipeline c d).run target =
+      .ok (⟨target.setLocal c (integerValue (UnsignedNarrowing.ty bits valid) (x : Int) (range bits valid x hx)),List.prefix_refl _⟩,
+        .prim (integerValue (UnsignedNarrowing.ty bits valid) (result op x (captureRight G.pipeline x y) : Int)
+          (range bits valid _ (result_lt op hx (captureRight_lt G.pipeline hx hy))))) := by
+  refine ⟨?_,assignment_run target op G.pipeline bits valid c d x y hx hy nativeA nativeI⟩
+  have pair := source_assign_read_pair G F fuel source i a
+    (.int (x : Int) (range bits valid x hx)) (.int (y : Int) (range bits valid y hy)) readA readI
+  by_cases order : G.pipeline = .legacy
+  · simp only [order,if_true,captureRight] at pair ⊢
+    exact source_from_pair G F (fuel+3) source _ op bits valid _ _ x y hx hy pair
+  · simp only [order,if_false,captureRight] at pair ⊢
+    exact source_from_pair G F (fuel+3) source _ op bits valid _ _ x x hx hx pair
+
+/-- info: 'Solidity.Lowering.G16.UnsignedBitwise.assignment_transport' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms assignment_transport
+end UnsignedBitwise

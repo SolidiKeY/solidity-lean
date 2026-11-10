@@ -14,7 +14,7 @@ between them where those writes provably land (`copyRes`,
 the allocations, not of the history.
 
 `binomialRowsNine` unrolls about two thousand steps of nested loops: its walk
-is checked in chunks of 64 steps (`sol_prove (chunk := n)`,
+is checked in chunks of 128 steps (`sol_prove (chunk := n)`,
 `Calculus/ProveChunked.lean`), each chunk and its leaf under the ordinary
 heartbeat budget.  It is the slowest proof here, so it is a module of its own
 (`Examples/Tactics/OpenLoops/RowsNine.lean`).
