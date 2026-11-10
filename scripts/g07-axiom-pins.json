@@ -63256,6 +63256,110 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Syntax/NumericV2Controls.lean:Solidity.Val.NumericV2.Controls.exact_magnitude_overflow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Controls.lean:Solidity.Val.NumericV2.Controls.exact_not_bare": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Controls.lean:Solidity.Val.NumericV2.Controls.magnitude_overflow_guard": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Controls.lean:Solidity.Val.NumericV2.Controls.signed_edges": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Controls.lean:Solidity.Val.NumericV2.Controls.successful_pair": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Controls.lean:Solidity.Val.NumericV2.Controls.unit_and_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Controls.lean:Solidity.Val.NumericV2.Controls.v1_bare_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.checkedSignedPower_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.checkedSignedPower_source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.fitsResult_correct": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.guard_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.lookup_eval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.lookupResult_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.lookupResult_large": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.overflow_payload_length": [],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.overflow_payload_source": [],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.powerFits_eval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.powerFits_eval_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.powerValue_eval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.root_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.signed_range_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.threshold_present": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.thresholds_indices": [
+  "propext"
+ ],
+ "Solidity/Syntax/NumericV2Correct.lean:Solidity.Val.NumericV2.thresholds_valid": [
+  "propext"
+ ],
  "Solidity/Theorems.lean:Solidity.Main.callback_soundness": [
   "Classical.choice",
   "Quot.sound",
