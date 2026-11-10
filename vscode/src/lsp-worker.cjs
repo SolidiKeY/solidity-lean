@@ -6,7 +6,6 @@ const {createHash}=require('node:crypto');
 const {LeanSession}=require('./lean-session.cjs');
 const projects=require('./project.cjs');
 const {checkDirect,disposeDirect}=require('./direct-runtime.cjs');
-const {unknownResult}=require('./direct-model.cjs');
 
 let session,compiler,locations;
 function checkpointRows(path,contract,contracts=[]){
@@ -43,37 +42,38 @@ async function execute(task){
   const locate=locations.sourceLocations(primary,Buffer.from(text));
   for(const contract of contracts){
     if(!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(contract.name))throw new Error('Unsupported contract name');
-    // The compiled verifier's request carries one contract node; a multi-file
-    // unit it cannot decide (a gap, or an `unsupported` row) falls back to the
-    // certified Lean path (kernel proofs; false obligations stay pending without
-    // `counterexamples`) instead of reporting `unsupported`.
+    // Rows the compiled verifier decides stay direct. Rows it reports
+    // `unsupported`, or every row when it cannot take the input (a gap, no
+    // runtime), are rechecked on the certified Lean path (kernel proofs; false
+    // obligations stay pending without `counterexamples`) instead of being
+    // reported `unsupported`.
     const decided=await checkDirect(root,contract,options);
-    const direct=(allAsts.length>1&&decided?.results.some(r=>r.status==='unsupported')?null:decided) ||
-      (allAsts.length===1&&options.certify!==true&&!options.auditPreconditions&&process.env.SOLIDITY_LEAN_DIRECT!=='0'
-        ? unknownResult(contract,options,'The compiled verifier is unavailable or does not support this input.',allContracts) : null);
-    if(direct){
-      directChecks.push({contract:contract.name,backend:'unavailable',environmentImports:0,...direct.timings});wasmBuild=direct.build;
-      errors.push(...(direct.errors||[]).map(error=>({source,contract:contract.name,...error})));
-      for(const row of direct.results){
+    const directMode=options.certify!==true&&!options.auditPreconditions&&process.env.SOLIDITY_LEAN_DIRECT!=='0';
+    const recheck=decided?new Set(decided.results.filter(r=>r.status==='unsupported').map(r=>r.sourceId)):null;
+    if(decided){
+      directChecks.push({contract:contract.name,backend:'unavailable',environmentImports:0,...decided.timings});wasmBuild=decided.build;
+      errors.push(...(decided.errors||[]).map(error=>({source,contract:contract.name,...error})));
+      for(const row of decided.results)if(!recheck.has(row.sourceId)){
         const range=locate(contract.name,row);
         results.push({...row,source,contract:contract.name,sourceHash:compiled.sourceHash??compiled.fixture.header.sourceSha256,...(range?{range}:{}),...(row.counterexample?{counterexample:locations.sourceWitness(primary,contract.name,row)}:{})});
       }
-      continue;
+      if(!recheck.size)continue;
     }
+    const certified=options.certify===true||(directMode&&(!decided||recheck.size>0));
     if(task.deferLegacyBuild)return {needsLegacyBuild:true};
     usedLegacy=true;session??=new LeanSession(root,directory);
     const output=join(directory,`result-${task.id}-${contract.id}.json`);
     rmSync(output,{force:true});
     const name=`SolTests.«${contract.name}»`;
     const command=`#solkey_test ${name}${options.function?` only ${JSON.stringify(options.function)}`:''}${options.listing?' listing':''}${options.auditPreconditions&&!options.listing?' audit_preconditions':''}${options.counterexamples&&!options.listing?' counterexamples':''} to ${JSON.stringify(output)}`;
-    const wrapper=`import Solidity.Frontend.Testing\nset_option sol.testing.closedSpecs ${options.closedSpecs!==false}\nset_option sol.testing.direct ${options.certify!==true&&allAsts.length===1}\nset_option sol.benchmark ${options.benchmark===true}\nsolc_import "source.ast.json" hash ${compiled.hash} as ${name} testing\nsolc_scoped_problems ${name} decl\n${command}\n`;
+    const wrapper=`import Solidity.Frontend.Testing\nset_option sol.testing.closedSpecs ${options.closedSpecs!==false}\nset_option sol.testing.direct ${!certified}\nset_option sol.benchmark ${options.benchmark===true}\nsolc_import "source.ast.json" hash ${compiled.hash} as ${name} testing\nsolc_scoped_problems ${name} decl\n${command}\n`;
     if(options.benchmark)session.stderr='';
     const diagnostics=await session.check(wrapper,options.timeoutMs??60000);
     if(options.benchmark){await new Promise(setImmediate);benchmarkLog.push(session.stderr,...diagnostics.map(d=>d.message||''));}
     for(const diagnostic of diagnostics)if(importDiagnostic(diagnostic))
       errors.push({source,contract:contract.name,stage:'lean',reason:diagnostic.message});
     const checkpoint=checkpointRows(output,contract,allContracts);
-    if(checkpoint)for(const row of checkpoint) {
+    if(checkpoint)for(const row of checkpoint.filter(r=>!recheck||recheck.has(r.sourceId))) {
       const inherited=allContracts.filter(n=>(contract.linearizedBaseContracts||[]).includes(n.id))
         .flatMap(n=>n.nodes).find(n=>n.nodeType==='FunctionDefinition'&&n.id===row.sourceId);
       const range=locate(contract.name,row)||(inherited?locations.sourceRange(Buffer.from(text),inherited.src,Number(primary.src.split(':').at(-1))):null);
