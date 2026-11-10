@@ -195,7 +195,7 @@ class Graph:
             queue = collections.deque([(first, True)])
             while queue:
                 source, executing = queue.popleft()
-                if not executing: continue
+                if not executing or entry.get('source_only'): continue
                 for edge in sorted(self.edges[source], key=lambda e: (e['target'], e['line'], e['operation'])):
                     if edge.get('validated_for', root_id) != root_id: continue
                     if entry.get('lake_package') and edge.get('repository_lean'): continue
@@ -431,7 +431,9 @@ def entrypoint_lines(source):
 def validated_routes(graph, catalog):
     """Reviewed validation definitions; raw run receipts live outside the branch.
 
-    A definition is bound to an exact input revision, command and source blob.
+    A passing-validation definition is bound to an exact input revision, command and source blob.
+    Identical demonstrated committed runner sources may remain source-only roots
+    at another revision, with explicit unavailable validation and no edge credit.
     Check/write do not execute it. Changes to the measured revision invalidate
     it until deliberate validation updates the definition. Definitions are part
     of the classifier, not evidence supplied by the inventory under test.
@@ -439,6 +441,7 @@ def validated_routes(graph, catalog):
     repo = graph.repo
     if not isinstance(catalog, dict) or set(catalog) != {'schema_version', 'standalone', 'generators', 'reads', 'orphans'} or catalog['schema_version'] != 1:
         raise ValueError('invalid validation definition schema')
+    current_runner_paths = {e.get('path') for e in catalog['standalone'] if e.get('input_revision') == repo.ref}
     for entry in catalog['standalone']:
         required = {'path', 'input_revision', 'source_blob', 'command', 'kind'}
         if entry.get('kind') == 'manual-reproducer': required.add('documentation')
@@ -446,7 +449,10 @@ def validated_routes(graph, catalog):
         if set(entry) != required:
             raise ValueError('invalid standalone definition')
         p = entry['path']
-        if entry['input_revision'] != repo.ref: continue
+        historical_runner = entry['input_revision'] != repo.ref
+        if historical_runner and (entry['kind'] not in ('unittest', 'node-test', 'runnable-entrypoint')
+                or p in current_runner_paths or p not in repo.tree or repo.tree[p][2] != entry['source_blob']):
+            continue
         if p not in repo.tree or repo.tree[p][2] != entry['source_blob']:
             raise ValueError('standalone definition source mismatch: ' + p)
         command = entry['command']
@@ -494,6 +500,18 @@ def validated_routes(graph, catalog):
                            and p.endswith(('.mjs', '.js', '.cjs')))
             else: matched = False
             if not matched: raise ValueError('manual reproducer arguments differ from documentation')
+        if historical_runner:
+            # H490 / X1-RUNNER-ROOT: the demonstrated committed runner source
+            # is a root independently of current passing-validation credit.
+            # It cannot propagate any fixture/child edge, even a shared edge.
+            identity = 'committed:' + p
+            graph.root(p, 'committed standalone runner', shlex.join(command), p,
+                       entry.get('entry_line', 1), root_id=identity)
+            graph.roots[identity].update({'runner_kind': entry['kind'], 'source_blob': entry['source_blob'],
+                'source_only': True, 'source_demonstration_revision': entry['input_revision'],
+                'validation_at_measured_revision': {'status': 'unavailable', 'command': command,
+                    'reason': 'Not executed at measured revision; source role and command established independently.'}})
+            continue
         graph.root(p, 'validated standalone runner', shlex.join(command), p, entry.get('entry_line', 1), root_id='validated:' + p)
         graph.roots['validated:' + p].update({'runner_kind': entry['kind'], 'source_blob': entry['source_blob']})
         if entry['kind'] == 'runnable-entrypoint':
@@ -1184,6 +1202,18 @@ def self_test():
         assert Repository(merge_root, 'HEAD').pins()['tests/restored.txt']['last_touch_commit'] == merged_ref
         git(root, '-c', 'user.name=Control', '-c', 'user.email=control@example.invalid', 'commit', '--allow-empty', '-qm', 'advance without touching inputs')
         newer = inventory(Repository(root, 'HEAD'), catalog)
+        later_rows = {r['path']: r for r in newer['records']}
+        entry = later_rows['tests/pass.py']['runner_chain']['entry']
+        assert later_rows['tests/pass.py']['class'] == 'keep' and entry['source_only']
+        assert entry['validation_at_measured_revision']['status'] == 'unavailable'
+        assert entry['command'] == 'python3 -B tests/pass.py'
+        assert later_rows['tests/callback.txt']['class'] is None  # old passing reproducer/read receives no current credit
+        source_graph = Graph(Repository(root, 'HEAD'))
+        source_graph.root('tests/pass.py', 'committed standalone runner', 'python3 -B tests/pass.py', 'tests/pass.py', 1)
+        source_graph.roots['tests/pass.py']['source_only'] = True
+        source_graph.edge('tests/pass.py', 'tests/cycle.py', 1, 'unrelated shared invocation', kind='executes')
+        source_graph.edge('tests/cycle.py', 'tests/callback.txt', 1, 'unrelated shared read')
+        assert 'tests/cycle.py' not in source_graph.chains() and 'tests/callback.txt' not in source_graph.chains()
         try: verify(expected, newer)
         except ValueError as error: assert 'revision' in str(error)
         else: raise AssertionError('genuine stale revision accepted')
