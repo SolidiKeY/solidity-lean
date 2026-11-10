@@ -95,12 +95,12 @@ theorem prog_run {C : Contract} {Γ : Ctx} (names : Fresh) (j b : Idx Γ (.val .
 /-- Leaf soundness: the family member reaches the endpoint. -/
 theorem endpoint {E : Source.Env} {srcΓ : Source.RCtx} {returns : List Source.STy}
     {M l u : Bool} {C : Contract} {Γ : Ctx} (m : ContextMap srcΓ Γ) (p : Pair m)
-    (x : Shape.forBreak.Extra E srcΓ C Γ) (names : Fresh) :
+    (x : Shape.forBreak.Extra E returns M u srcΓ C Γ) (names : Fresh) :
     Endpoint (Shape.forBreak.source (returns := returns) (M := M) (l := l) (u := u) p x)
       Shape.forBreak.offset m
       (forBreakProg names (boolSlot m p.i p.hi) (boolSlot m p.a p.ha) x.2)
       (.drop .refl) := by
-  intro G F fuel nps ph source target R aligned boolReflect
+  intro G F fuel nps ph source target R aligned boolReflect _
   have leaf := Solidity.Lowering.G19.AssignmentForBreak.correct G F fuel nps ph
     (returns := returns) (M := M) (l := l) (u := u) source target m (R target.H) aligned
     (boolReflect target.H) p.i p.a p.hi p.ha p.mapI p.mapA x.1

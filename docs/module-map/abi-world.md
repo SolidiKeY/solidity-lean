@@ -40,6 +40,7 @@ See [ABI packet consumers](../feature-work/abi-world-packets.md) for proof bound
 | `Correctness/Lowering/Loops/ForBreak.lean` | For/break leaf: generic flag-loop target run with a never-run update, plus G19 Source half. |
 | `Correctness/Lowering/Loops/Capture.lean` | Actual `lowerLoops` + `elabStmtsP` outputs for the loop-family samples, quoted. |
 | `Correctness/Lowering/Loops/Horizon.lean` | An identity conversion in a `while` condition costs one Source horizon (monotonicity transport). |
+| `Correctness/Lowering/Loops/WhileContinue.lean` | While/continue leaf: two-path flag-loop target run plus G19 Source half through the horizon transport. |
 | `Correctness/Lowering/Checker/Contract.lean` | P1 inventory and unfrozen candidate checker contract. |
 | `Correctness/Lowering/Checker/IntrinsicProbe.lean` | Actual intrinsic elaboration capture for the bounded while/break probe. |
 | `Correctness/Lowering/Checker/MeasuredPilot.lean` | Exact singleton soundness/completeness and measured contract-body refusal. |

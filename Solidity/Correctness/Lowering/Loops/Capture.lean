@@ -23,6 +23,10 @@ def forBreakInput : List RawStmt :=
 def forBreakUpdateInput : List RawStmt :=
   [.forLoop {} [.assign (.name "i") (.name "a")] none [.assign (.name "a") (.bool false)] [.brk]]
 
+/-- `while (i = a) { a = false; continue; }` -/
+def whileContinueInput : List RawStmt :=
+  [.whileLoop {} (.assign (.name "i") (.name "a")) [.assign (.name "a") (.bool false), .cont]]
+
 open Lean Elab Term Meta in
 /-- Run `lowerLoops` then `elabStmtsP` on `input` and quote the placed program.
 Like the Checker probes, it refuses a changed caller context or a nonempty
@@ -55,6 +59,12 @@ elab "capture_for_break%" : term => captureProgram forBreakInput
 
 open Lean Elab Term in
 elab "capture_for_break_update%" : term => captureProgram forBreakUpdateInput
+
+open Lean Elab Term in
+elab "capture_while_continue%" : term => captureProgram whileContinueInput
+
+/-- Actual output for `while (i = a) { a = false; continue; }`. -/
+def whileContinue : Blk IntrinsicProbe.C IntrinsicProbe.Γ := capture_while_continue%
 
 /-- Actual output for `for (i = a; ; ) break;`. -/
 def forBreak : Blk IntrinsicProbe.C IntrinsicProbe.Γ := capture_for_break%

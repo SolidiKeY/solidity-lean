@@ -73,7 +73,7 @@ theorem endpoint {E : Source.Env} {srcΓ : Source.RCtx} {returns : List Source.S
       Shape.whileBreak.offset m
       (whileBreakProg (C := C) names (boolSlot m p.i p.hi) (boolSlot m p.a p.ha))
       (.drop .refl) := by
-  intro G F fuel nps ph source target R aligned boolReflect
+  intro G F fuel nps ph source target R aligned boolReflect _
   have leaf := Solidity.Lowering.G19.AssignmentWhileBreak.correct G F fuel nps ph
     (returns := returns) (M := M) (l := l) (u := u) source target m (R target.H) aligned
     (boolReflect target.H) p.i p.a p.hi p.ha p.mapI p.mapA

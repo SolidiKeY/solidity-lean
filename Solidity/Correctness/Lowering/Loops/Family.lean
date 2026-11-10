@@ -46,7 +46,7 @@ structure Fresh where
 
 /-- The loop-shape family. Each constructor is one G19 loop leaf whose lowering
 has a proved target bridge. Not in the family (no theorem, not admitted):
-`continue`, `return` (Lower.lean:454-459, 536-538), `do … while` (:507-512),
+`continue` other than `whileContinue`, `return` (Lower.lean:454-459, 536-538), `do … while` (:507-512),
 pure conditions, real bodies and suffix guards (:429-431), nested loops and
 shared return flags (:497-501), specifications (:526-530), non-Boolean or
 non-local operands. -/
@@ -55,16 +55,22 @@ inductive Shape where
   | whileBreak
   /-- `for (i = a; ; post) break;` (G19 `AssignmentForBreak`). -/
   | forBreak
+  /-- `while (i = a) { a = false; continue; tail }` (G19 `AssignmentWhileContinue`). -/
+  | whileContinue
   deriving DecidableEq, Repr
 
 /-- Per-shape data beyond the Boolean pair. For `forBreak`: the Source update
 expression and the intrinsic image of the lowered update, absent when the raw
 update list is empty (Lower.lean:515). A present update is guarded by the
 break flag (Lower.lean:516-517) and never runs, so the two are not associated:
-the statement holds for every pair of them. -/
-def Shape.Extra (E : Source.Env) (srcΓ : Source.RCtx) (C : Contract) (Γ : Ctx) : Shape → Type
+the statement holds for every pair of them. For `whileContinue`: the fresh
+continue flag and the Source items after `continue`, which lowering drops
+(Lower.lean:427) and Source never runs. -/
+def Shape.Extra (E : Source.Env) (returns : List Source.STy) (M u : Bool) (srcΓ : Source.RCtx)
+    (C : Contract) (Γ : Ctx) : Shape → Type
   | .whileBreak => Unit
   | .forBreak => Source.ROptExpr E srcΓ × Option ((Δ : Ctx) × Prog C (.val .bool :: Γ) Δ)
+  | .whileContinue => Var × ((tailΓ : Source.RCtx) × Source.RItems E returns M ⟨true, u⟩ srcΓ tailΓ)
 
 /-- Boolean negation as the elaborator emits it. -/
 def notB {C : Contract} {Γ : Ctx} (v : Val C Γ .bool) : Val C Γ .bool := .unop .not rfl rfl v
@@ -113,35 +119,71 @@ def forBreakProg {C : Contract} {Γ : Ctx} (names : Fresh) (j b : Idx Γ (.val .
     (.cons (.declLocal .bool names.flag (some (.simple (.bool false))))
       (.cons (.loop .auto flagGuard (forBreakBody upd)) .nil))
 
+/-- Iteration body of the while/continue lowering after its two declarations
+(`se`, `cnt`): `i = se; if (!se) brk = true; if (!brk) { a = false; cnt = true; }`. -/
+def whileContinueTail {C : Contract} {Γ : Ctx} (j b : Idx Γ (.val .bool)) :
+    Prog C (.val .bool :: .val .bool :: .val .bool :: Γ) (.val .bool :: .val .bool :: .val .bool :: Γ) :=
+  .cons (.assignLocal j.there.there.there (.simple (.local .here)))
+    (.cons (.ite (notB (.simple (.local .here)))
+        (.cons (.assignLocal Idx.here.there.there (.simple (.bool true))) .nil) .nil)
+      (.cons (.ite (notB (.simple (.local Idx.here.there.there)))
+          (.cons (.assignLocal b.there.there.there (.simple (.bool false)))
+            (.cons (.assignLocal Idx.here.there (.simple (.bool true))) .nil)) .nil)
+        .nil))
+
+/-- Loop body: continue flag, condition capture, then the tail. -/
+def whileContinueBody {C : Contract} {Γ : Ctx} (cnt se : Var) (j b : Idx Γ (.val .bool)) :
+    Prog C (.val .bool :: Γ) (.val .bool :: .val .bool :: .val .bool :: Γ) :=
+  .cons (.declLocal .bool cnt (some (.simple (.bool false))))
+    (.cons (.declLocal .bool se (some (.simple (.local b.there.there)))) (whileContinueTail j b))
+
+/-- Intrinsic image of the lowered `while (i = a) { a = false; continue; … }`
+(Lower.lean:493-496 condition into the body, :453 `continue` to a flag, :427
+suffix after a jump dropped, :514 continue-flag reset, :518 condition guard,
+:522 break-flag declaration). -/
+def whileContinueProg {C : Contract} {Γ : Ctx} (brk cnt se : Var) (j b : Idx Γ (.val .bool)) :
+    Prog C Γ (.val .bool :: Γ) :=
+  .cons (.declLocal .bool brk (some (.simple (.bool false))))
+    (.cons (.loop .auto flagGuard (whileContinueBody cnt se j b)) .nil)
+
 /-- Resolved Source statement of each shape, in the form Source typing gives
 it (the identity conversion on the right-hand side is retained,
 `Checker.SourceAssociation.resolved_eq`). That typing produces this form is
 proved for the concrete samples in `Loops.Correct` only, not generically. -/
 def Shape.source {E : Source.Env} {srcΓ : Source.RCtx} {returns : List Source.STy}
     {M l u : Bool} {Γ : Ctx} {m : ContextMap srcΓ Γ} :
-    {C : Contract} → (k : Shape) → Pair m → k.Extra E srcΓ C Γ →
+    {C : Contract} → (k : Shape) → Pair m → k.Extra E returns M u srcΓ C Γ →
       Source.RStmt E returns M ⟨l, u⟩ srcΓ srcΓ
   | _, .whileBreak, p, _ => .whileLoop (.assign (.local p.i) (.conv (.local p.a) (.inl rfl))) .brk
   | _, .forBreak, p, x =>
     .forLoop (.expr (.assign (.local p.i) (.conv (.local p.a) (.inl rfl)))) .none x.1 .brk
+  | _, .whileContinue, p, x =>
+    .whileLoop (.assign (.local p.i) (.conv (.local p.a) (.inl rfl)))
+      (.block (.stmt (.expr (.assign (.local p.a) (.conv (.bool false) (.inl rfl))))
+        (.stmt .cont x.2.2)))
 
 /-- Source horizon offset at which the shape's normal outcome is reached. A
 derived constant, not a fuel/gas equation. -/
 def Shape.offset : Shape → Nat
   | .whileBreak => 4
   | .forBreak => 5
+  | .whileContinue => 9
 
 /-- The intrinsic output each shape's lowering is associated with. -/
-def Shape.lowered {E : Source.Env} {C : Contract} {srcΓ : Source.RCtx} {Γ : Ctx}
-    {m : ContextMap srcΓ Γ} : (k : Shape) → Pair m → k.Extra E srcΓ C Γ → Fresh → Blk C Γ
+def Shape.lowered {E : Source.Env} {returns : List Source.STy} {M u : Bool} {C : Contract}
+    {srcΓ : Source.RCtx} {Γ : Ctx} {m : ContextMap srcΓ Γ} :
+    (k : Shape) → Pair m → k.Extra E returns M u srcΓ C Γ → Fresh → Blk C Γ
   | .whileBreak, p, _, names => ⟨_, whileBreakProg names (boolSlot m p.i p.hi) (boolSlot m p.a p.ha)⟩
   | .forBreak, p, x, names =>
     ⟨_, forBreakProg names (boolSlot m p.i p.hi) (boolSlot m p.a p.ha) x.2⟩
+  | .whileContinue, p, x, names =>
+    ⟨_, whileContinueProg names.flag x.1 names.capture (boolSlot m p.i p.hi) (boolSlot m p.a p.ha)⟩
 
 /-- Total syntactic output association: the supplied intrinsic output is the
 family member. Decided for a closed quoted output by kernel reduction. -/
-def Accepts {E : Source.Env} {C : Contract} {srcΓ : Source.RCtx} {Γ : Ctx}
-    {m : ContextMap srcΓ Γ} (k : Shape) (p : Pair m) (x : k.Extra E srcΓ C Γ) (names : Fresh)
+def Accepts {E : Source.Env} {returns : List Source.STy} {M u : Bool} {C : Contract}
+    {srcΓ : Source.RCtx} {Γ : Ctx}
+    {m : ContextMap srcΓ Γ} (k : Shape) (p : Pair m) (x : k.Extra E returns M u srcΓ C Γ) (names : Fresh)
     (output : Blk C Γ) : Prop :=
   output = k.lowered p x names
 
@@ -150,7 +192,10 @@ for one resolved statement and one target program: from any aligned Source/targe
 pair, Source reaches a normal outcome at the stated horizon offset, the target
 program runs to a state whose caller locals (through `embedding`) are related to
 the Source locals, and target globals are unchanged. Both pipelines (`G`) and
-every Source state are covered. Source journal and target storage stay distinct. -/
+every Source state are covered. Source journal and target storage stay distinct.
+Initial facts on `R`: Boolean values are related only to their reflection, and
+`false` is related to `false` (both are G19's premises; the second is needed by
+the `continue` leaf). -/
 def Endpoint {E : Source.Env} {srcΓ : Source.RCtx} {returns : List Source.STy} {M : Bool}
     {k : Source.SCtx} {C : Contract} {Γ Δ : Ctx}
     (statement : Source.RStmt E returns M k srcΓ srcΓ) (offset : Nat)
@@ -162,6 +207,7 @@ def Endpoint {E : Source.Env} {srcΓ : Source.RCtx} {returns : List Source.STy} 
     m.Related (R target.H) source.1 target.env →
     (∀ (H : HTy) (v : Source.Val E.layout .bool) (b : Bool),
       R H .bool (.val .bool) v b → v = .bool b) →
+    (∀ H : HTy, R H .bool (.val .bool) (.bool false) false) →
     ∃ (ls : Source.Locals E.layout srcΓ) (out : Out C target.H Δ),
       (Source.execS G F (fuel + offset) nps ph statement source.1).run (.nil, source.2) =
         (.ok (Source.Out.normal ls), (.nil, source.2)) ∧
@@ -184,7 +230,7 @@ open owner decision; the goal is unchanged here. -/
 def LowerLoopsCorrect : Prop :=
   ∀ (k : Shape) {E : Source.Env} {srcΓ : Source.RCtx} {returns : List Source.STy}
     {M l u : Bool} {C : Contract} {Γ : Ctx}
-    (m : ContextMap srcΓ Γ) (p : Pair m) (x : k.Extra E srcΓ C Γ) (names : Fresh)
+    (m : ContextMap srcΓ Γ) (p : Pair m) (x : k.Extra E returns M u srcΓ C Γ) (names : Fresh)
     (output : Blk C Γ),
     Accepts k p x names output →
     ∃ embedding : Thin Γ output.1,

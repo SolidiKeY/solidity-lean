@@ -2433,6 +2433,7 @@ import Solidity.Correctness.Lowering.Loops.Family
 import Solidity.Correctness.Lowering.Loops.ForBreak
 import Solidity.Correctness.Lowering.Loops.Horizon
 import Solidity.Correctness.Lowering.Loops.WhileBreak
+import Solidity.Correctness.Lowering.Loops.WhileContinue
 import Solidity.Counterexamples.DeleteFamilyGenericOverlap
 import Solidity.Counterexamples.DiamondTry
 import Solidity.Counterexamples.PreFixSortAnnotations

@@ -1,5 +1,6 @@
 import Solidity.Correctness.Lowering.Loops.WhileBreak
 import Solidity.Correctness.Lowering.Loops.ForBreak
+import Solidity.Correctness.Lowering.Loops.WhileContinue
 import Solidity.Correctness.Lowering.Loops.Capture
 import Solidity.Correctness.Lowering.Checker.WhileBreak
 
@@ -18,7 +19,7 @@ Partiality: theorems speak of accepted outputs only. Producer refusals
 inside a loop, Lower.lean:448-449, 455, 474; `lowerReturn` refusals; refusals
 of `elabStmtsP` or `SProg.chain`) and non-family outputs are not covered; they
 are coverage gaps, not counterexamples. Only normal outcomes are stated. The
-producer link is per sample (three inputs); a raw-level check exists only for
+producer link is per sample (four inputs); a raw-level check exists only for
 the while sample (`Checker.RawProbe.checkRaw`).
 -/
 namespace Solidity.Correctness.Lowering
@@ -34,6 +35,7 @@ theorem lowerLoops_correct : Loops.LowerLoopsCorrect := by
   cases k with
   | whileBreak => exact ⟨.drop .refl, WhileBreak.endpoint m p names⟩
   | forBreak => exact ⟨.drop .refl, ForBreak.endpoint m p x names⟩
+  | whileContinue => exact ⟨.drop .refl, WhileContinue.endpoint m p x names⟩
 
 namespace Loops.Coverage
 
@@ -55,8 +57,8 @@ def whileBreakNames : Fresh := ⟨Var.fresh "brk" 1, Var.fresh "se" 2⟩
 `while (i = a) break;`. Guards against the family drifting from the producer:
 a changed lowering or elaboration makes this `rfl` fail. -/
 theorem whileBreak_accepts {E : Source.Env} :
-    Accepts (E := E) .whileBreak whileBreakPair () whileBreakNames
-      IntrinsicProbe.actual.program := rfl
+    Accepts (E := E) (returns := []) (M := false) (u := false) .whileBreak whileBreakPair ()
+      whileBreakNames IntrinsicProbe.actual.program := rfl
 
 /-- The actual Source typing of the same loop is the family's Source statement. -/
 theorem whileBreak_source (E : Source.Env) :
@@ -82,7 +84,8 @@ def forBreakNames : Fresh := ⟨Var.fresh "brk" 1, Var.fresh "se" 2⟩
 
 /-- Kernel acceptance of the actual output for `for (i = a; ; ) break;`. -/
 theorem forBreak_accepts {E : Source.Env} :
-    Accepts (E := E) .forBreak whileBreakPair (.none, none) forBreakNames Capture.forBreak := rfl
+    Accepts (E := E) (returns := []) (M := false) (u := false) .forBreak whileBreakPair
+      (.none, none) forBreakNames Capture.forBreak := rfl
 
 /-- The lowered update `a = false` the actual elaborator emits. -/
 def updateProg : (Δ : Ctx) × Prog IntrinsicProbe.C (.val .bool :: IntrinsicProbe.Γ) Δ :=
@@ -92,8 +95,8 @@ def updateProg : (Δ : Ctx) × Prog IntrinsicProbe.C (.val .bool :: IntrinsicPro
 The family accepts any Source update with this target update (the update never
 runs); `forBreakUpdate_actual` pins the Source update to its actual typing. -/
 theorem forBreakUpdate_accepts {E : Source.Env} (post : Source.ROptExpr E [.bool, .bool]) :
-    Accepts .forBreak whileBreakPair (post, some updateProg) forBreakNames
-      Capture.forBreakUpdate := rfl
+    Accepts (returns := []) (M := false) (u := false) .forBreak whileBreakPair
+      (post, some updateProg) forBreakNames Capture.forBreakUpdate := rfl
 
 /-- Actual Source typing of `for (i = a; ; a = false) break;`. -/
 def forBreakUpdateTyping (E : Source.Env) :
@@ -138,15 +141,16 @@ theorem forBreak_source (E : Source.Env) :
 /-- Negative control: the association is not trivial; the while family refuses
 the actual `for` output (it starts with the initializer, not the flag). -/
 theorem whileBreak_refuses_for {E : Source.Env} :
-    ¬ Accepts (E := E) .whileBreak whileBreakPair () whileBreakNames Capture.forBreak := by
+    ¬ Accepts (E := E) (returns := []) (M := false) (u := false) .whileBreak whileBreakPair ()
+      whileBreakNames Capture.forBreak := by
   intro h
   cases h
 
 /-- Negative control: the guarded-update variant is refused when no update is
 claimed, so the update guard of Lower.lean:515-517 is observed. -/
 theorem forBreak_refuses_missing_update {E : Source.Env} :
-    ¬ Accepts (E := E) .forBreak whileBreakPair (.none, none) forBreakNames
-      Capture.forBreakUpdate := by
+    ¬ Accepts (E := E) (returns := []) (M := false) (u := false) .forBreak whileBreakPair
+      (.none, none) forBreakNames Capture.forBreakUpdate := by
   intro h
   cases h
 
@@ -158,6 +162,42 @@ theorem forBreak_actual (E : Source.Env) :
   rw [forBreak_source E]
   exact lowerLoops_correct .forBreak Checker.WhileBreak.mapping whileBreakPair (.none, none)
     forBreakNames Capture.forBreak forBreak_accepts
+
+/-- Fresh names of the `while`/`continue` sample: break flag, capture
+(`cnt2` is the continue flag, carried in the shape's extra data). -/
+def whileContinueNames : Fresh := ⟨Var.fresh "brk" 1, Var.fresh "se" 3⟩
+
+/-- Kernel acceptance of the actual output for `while (i = a) { a = false; continue; }`. -/
+theorem whileContinue_accepts {E : Source.Env} :
+    Accepts (E := E) (returns := []) (M := false) (u := false) .whileContinue whileBreakPair
+      (Var.fresh "cnt" 2, ⟨_, .nil⟩) whileContinueNames Capture.whileContinue := rfl
+
+/-- Actual Source typing of `while (i = a) { a = false; continue; }`. -/
+def whileContinueTyping (E : Source.Env) :
+    Source.StmtD (SourceAssociation.typingContext E) SourceAssociation.names
+      (.whileStmt (l := false) (u := false) (.assign .assign (.ident "i") (.ident "a"))
+        (.blockStmt (.block (.cons (.stmtItem (.simpleStmt (.exprStmt
+          (.assign .assign (.ident "a") (.lit (.bool false))))))
+          (.cons (.stmtItem .continueStmt) .nil)))))
+      SourceAssociation.names :=
+  .whileLoop (SourceAssociation.conditionTyping E) rfl
+    (.block (.stmt (.expr (.assign (.loc (i := 1) rfl rfl) (.bool false) rfl rfl) rfl)
+      (.stmt .cont .nil)))
+
+/-- Its resolution is the family's Source statement (empty dropped tail). -/
+theorem whileContinue_source (E : Source.Env) :
+    (whileContinueTyping E).toR =
+      Shape.whileContinue.source (C := IntrinsicProbe.C) (returns := []) (M := false)
+        (l := false) (u := false) whileBreakPair (Var.fresh "cnt" 2, ⟨_, .nil⟩) := rfl
+
+/-- End to end for the actual `while (i = a) { a = false; continue; }` sample. -/
+theorem whileContinue_actual (E : Source.Env) :
+    ∃ embedding : Thin IntrinsicProbe.Γ Capture.whileContinue.1,
+      Endpoint (whileContinueTyping E).toR Shape.whileContinue.offset
+        Checker.WhileBreak.mapping Capture.whileContinue.2 embedding := by
+  rw [whileContinue_source E]
+  exact lowerLoops_correct .whileContinue Checker.WhileBreak.mapping whileBreakPair
+    (Var.fresh "cnt" 2, ⟨_, .nil⟩) whileContinueNames Capture.whileContinue whileContinue_accepts
 
 end Loops.Coverage
 
@@ -173,5 +213,8 @@ end Loops.Coverage
 #print axioms Loops.Coverage.forBreak_actual
 #print axioms Loops.Coverage.whileBreak_refuses_for
 #print axioms Loops.Coverage.forBreak_refuses_missing_update
+#print axioms Loops.Coverage.whileContinue_accepts
+#print axioms Loops.Coverage.whileContinue_source
+#print axioms Loops.Coverage.whileContinue_actual
 
 end Solidity.Correctness.Lowering
