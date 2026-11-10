@@ -732,3 +732,36 @@ theorem CallRet.summary?_isSome {Γ Γ' ps rs Γf : Ctx} (args : Args C Γ ps)
 end Sym
 
 end Solidity
+
+namespace Solidity
+mutual
+/-- Adding the head of `f() { { g(); } }` preserves the call flag when the tail does. -/
+private theorem Stmt.hasCall_cons_eq_hasCallM {C : Contract} :
+    {Γ Γ₁ : Ctx} → (s : Stmt C Γ Γ₁) → {Δ : Ctx} → (p : Prog C Γ₁ Δ) →
+      p.hasCall = p.hasCallM → (Prog.cons s p).hasCall = (Prog.cons s p).hasCallM
+  | _,_,.block body,_,p,h => by
+    change (body.hasCall || p.hasCall) = (body.hasCallM || p.hasCallM)
+    rw [Prog.hasCall_eq_hasCallM_pointwise body,h]
+  | _,_,.call ..,_,_,_ => rfl
+  | _,_,.assign ..,_,_,h | _,_,.rebind ..,_,_,h | _,_,.assignLocal ..,_,_,h
+  | _,_,.declLocal ..,_,_,h | _,_,.declStorage ..,_,_,h | _,_,.opAssign ..,_,_,h
+  | _,_,.incDec ..,_,_,h | _,_,.assignIncDec ..,_,_,h | _,_,.pushOpAssign ..,_,_,h
+  | _,_,.pushIncDec ..,_,_,h | _,_,.assignLocalPush ..,_,_,h | _,_,.push ..,_,_,h
+  | _,_,.pop ..,_,_,h | _,_,.transfer ..,_,_,h | _,_,.send ..,_,_,h | _,_,.declMem ..,_,_,h
+  | _,_,.rebindMem ..,_,_,h | _,_,.assignFromMem ..,_,_,h | _,_,.assignMem ..,_,_,h
+  | _,_,.delete ..,_,_,h | _,_,.deleteMem ..,_,_,h | _,_,.assignNew ..,_,_,h
+  | _,_,.ite ..,_,_,h | _,_,.require ..,_,_,h | _,_,.assert ..,_,_,h | _,_,.revert,_,_,h
+  | _,_,.assumeFalse,_,_,h | _,_,.tryCall ..,_,_,h | _,_,.loop ..,_,_,h
+  | _,_,.callReceiver ..,_,_,h | _,_,.callReceiverPush ..,_,_,h | _,_,.callRec ..,_,_,h
+  | _,_,.revertData ..,_,_,h | _,_,.catchData ..,_,_,h => h
+/-- Blocks in `f() { { g(); } }` retain the call flag in the actual compiled traversal. -/
+private theorem Prog.hasCall_eq_hasCallM_pointwise {C : Contract} :
+    {Γ Δ : Ctx} → (p : Prog C Γ Δ) → p.hasCall = p.hasCallM
+  | _,_,.nil => rfl
+  | _,_,.cons s p => Stmt.hasCall_cons_eq_hasCallM s p (Prog.hasCall_eq_hasCallM_pointwise p)
+end
+/-- Universal implementation equality for calls and blocks such as `f() { { g(); } }`. -/
+theorem Prog.hasCall_eq_hasCallM_universal : @Prog.hasCall = @Prog.hasCallM := by
+  funext C Γ Δ p
+  exact Prog.hasCall_eq_hasCallM_pointwise p
+end Solidity

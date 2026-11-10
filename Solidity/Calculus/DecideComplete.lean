@@ -1,3 +1,4 @@
+import Solidity.Calculus.ReadBoundsStackCorrect
 import Solidity.Calculus.DecideCleanTail
 import Solidity.Calculus.CondLift
 import Solidity.Calculus.Symex
@@ -26,8 +27,7 @@ namespace Decide
 
 variable {C : Contract}
 
-/-- The nesting depth to which `LFml.decideLift` lifts a leaf's
-conditionals. -/
+/-- The nesting depth to which `LFml.decideLift` lifts a leaf's conditionals. -/
 def liftFuel : Nat := 64
 
 /-- `1` at `ite`. -/
@@ -50,12 +50,10 @@ def LFml.iteCount : LFml C → Nat
   | .not φ | .all _ _ φ => φ.iteCount
   | .and φ ψ | .imp φ ψ => φ.iteCount + ψ.iteCount
 
-/-- The most conditional terms `LFml.decideLift` lifts: each splits the
-formula in three. -/
+/-- The most conditional terms `LFml.decideLift` lifts: each splits the formula in three. -/
 def liftConds : Nat := 6
 
-/-- **The closer, conditionals lifted where it does not close**: `decideMem`
-on the leaf, else, where it has at most `liftConds` conditional terms, on
+/-- **The closer, conditionals lifted where it does not close**: `decideMem` on the leaf, else, where it has at most `liftConds` conditional terms, on
 the leaf with them lifted into case splits (`LFml.liftCond`, exact):
 `{x := c ? x + 1 : x} (x <= 1)` is then `(c → x + 1 <= 1) ∧ (¬c → x <= 1)`,
 each case linear; else on the leaf with them lifted to its top
@@ -83,22 +81,19 @@ open Decide
 
 variable {C : Contract}
 
-/-- The most nodes the closer takes in a leaf's formula with its updates
-pushed in, counted as a tree (`LFml.fits`).  A storage written from a read
+/-- The most nodes the closer takes in a leaf's formula with its updates pushed in, counted as a tree (`LFml.fits`).  A storage written from a read
 of the one before it appears twice in the next, so this tree doubles with
 each such write.  It is the cheap first test: computing the reduction of a
 leaf far past it would itself be slow. -/
 def closeSize : Nat := normalizationSize
 
-/-- The most storage updates one term of a leaf stacks, with its updates
-pushed in and before the elimination (`LFml.stDepth`): the elimination
+/-- The most storage updates one term of a leaf stacks, with its updates pushed in and before the elimination (`LFml.stDepth`): the elimination
 reads each through the ones below it, so its size grows with each.  A
 bound on the stack, not on the elimination's nodes: the kernel would
 build the elimination twice to count it. -/
 def stackSize : Nat := normalizationDepth
 
-/-- **The scoped closer on a leaf `ψ` of no modality**: `none` where the
-reduction does not read it; else whether it closes it: within `closeSize`
+/-- **The scoped closer on a leaf `ψ` of no modality**: `none` where the reduction does not read it; else whether it closes it: within `closeSize`
 nodes and within `stackSize` storage updates on the same pushed-in leaf,
 or `concreteSize` and `concreteDepth` where its histories are concrete
 (`LFml.boundsOk`, tested before the elimination), and closed by
@@ -109,8 +104,7 @@ def checkCore (ψ : Fml C []) : Option Bool :=
   (ψ.toLS true SymS.init).map fun l =>
     l.boundsOk && bif ψ.assumesCT then l.decideMemCT || l.decideLift else l.decideLift
 
-/-- What `checkCore` closes is valid: `Fml.Valid.of_toLS` and
-`LFml.decideMem_valid`; under the premise `cleanTail(storage) = true`,
+/-- What `checkCore` closes is valid: `Fml.Valid.of_toLS` and `LFml.decideMem_valid`; under the premise `cleanTail(storage) = true`,
 `LFml.decideMemCT_holds` where the storage shows clean tails and
 `Fml.assumesCT_holds` where it does not. -/
 theorem checkCore_valid {ψ : Fml C []} (h : checkCore ψ = some true) : Fml.Valid ψ := by
@@ -128,8 +122,7 @@ theorem checkCore_valid {ψ : Fml C []} (h : checkCore ψ = some true) : Fml.Val
         SymS.Fresh.init).1 rfl (LFml.decideMemCT_holds hc τ AEnv.dflt hg)
     · exact Fml.assumesCT_holds ψ hct τ hg
 
-/-- `checkCore`'s bounds alone (`LFml.boundsOk`): `none` where the
-reduction does not read the leaf; else whether it is within `closeSize` and
+/-- `checkCore`'s bounds alone (`LFml.boundsOk`): `none` where the reduction does not read the leaf; else whether it is within `closeSize` and
 `stackSize`, or the concrete tier. -/
 def fitsCore (ψ : Fml C []) : Option Bool :=
   (ψ.toLS true SymS.init).map fun l => l.boundsOk
@@ -147,8 +140,7 @@ def LFml.quoteOpt (c : Expr) : Option (LFml C) → Option (Expr × String)
   | some ψ => some ((ψ.quote).go c, ψ.pp)
   | none => none
 
-/-- The reduction of the closed leaf `φ` of the contract `C` (a constant),
-computed by compiled code: quoted and printed, `none` outside the
+/-- The reduction of the closed leaf `φ` of the contract `C` (a constant), computed by compiled code: quoted and printed, `none` outside the
 fragment. -/
 def reduceExpr (C φ : Expr) : MetaM (Option (Expr × String)) := do
   let some n := C.constName? | throwError "sol_decide: the contract is not a constant"
@@ -157,8 +149,7 @@ def reduceExpr (C φ : Expr) : MetaM (Option (Expr × String)) := do
   unsafe evalExpr (Option (Expr × String))
     (mkApp (mkConst ``Option [0]) (mkApp2 (mkConst ``Prod [0, 0]) (mkConst ``Expr) (mkConst ``String))) e
 
-/-- The leaf `Fml.Valid φ` as `LFml.Valid ψ`, `ψ` its reduction computed and
-quoted: `Fml.Valid.of_reduceS (Eq.refl _)`, the kernel checking the
+/-- The leaf `Fml.Valid φ` as `LFml.Valid ψ`, `ψ` its reduction computed and quoted: `Fml.Valid.of_reduceS (Eq.refl _)`, the kernel checking the
 reduction. -/
 def reduceScoped (g : MVarId) (C φ : Expr) : MetaM (MVarId × String) := do
   if φ.hasFVar || φ.hasMVar then throwError "sol_decide: the leaf has free variables"
@@ -190,8 +181,7 @@ elab "sol_reduce?" : tactic => withMainContext do
   logInfo s
   replaceMainGoal [g']
 
-/-- `f C φ : Option Bool` of the leaf `φ` of the contract `C`, computed by
-compiled code. -/
+/-- `f C φ : Option Bool` of the leaf `φ` of the contract `C`, computed by compiled code. -/
 def evalCore (f : Lean.Name) (C φ : Expr) : MetaM (Option Bool) := do
   let φ ← Symex.evaluable φ
   unsafe evalExpr (Option Bool) (mkApp (mkConst ``Option [0]) (mkConst ``Bool))
@@ -254,3 +244,14 @@ elab "sol_decide_close" : tactic => withMainContext do
 end Decide
 
 end Solidity
+
+namespace Solidity.Decide
+/-- Universal term-counter implementation equality for a goal such as `a[i] == 0`. -/
+theorem LTm.fitsM_eq_fitsStack_universal : @LTm.fitsM = @LTm.fitsStack := by
+  funext C s t
+  exact LTm.fitsM_eq_fitsStack t
+/-- Universal formula-counter implementation equality for `a[i] == 0 && b[j] == 1`. -/
+theorem LFml.fitsM_eq_fitsStack_universal : @LFml.fitsM = @LFml.fitsStack := by
+  funext C φ
+  exact LFml.fitsM_eq_fitsStack φ
+end Solidity.Decide
