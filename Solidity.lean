@@ -2713,6 +2713,7 @@ import Solidity.Evm.TryPanicSourceExecution
 import Solidity.Evm.TryPanicSourceFrame
 import Solidity.Evm.TryPanicSourcePlan
 import Solidity.FreshNames
+import Solidity.Frontend.Admission.CanonicalReaderContract
 import Solidity.Frontend.Admission.Controls
 import Solidity.Frontend.Admission.DeclarationOccurrences
 import Solidity.Frontend.Admission.ElementaryFeatures
