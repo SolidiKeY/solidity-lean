@@ -34,6 +34,9 @@ See [ABI packet consumers](../feature-work/abi-world-packets.md) for proof bound
 
 | `Solidity.Backend.AbiWorld.MutatingWritePhysical` | Actual selected mutation prefix and P6 initial-frame physical byte-store consequence, with explicit scaled span. |
 | `Solidity.Backend.AbiWorld.MutatingWritePhysicalControls` | Populated initial physical frame, actual write/neighbor application and scale/bound negatives. |
+| `Correctness/Lowering/Loops/Family.lean` | Loop-lowering family: shapes, output association, endpoint and the `LowerLoopsCorrect` statement. |
+| `Correctness/Lowering/Loops/WhileBreak.lean` | While/break leaf: generic flag-loop target run plus G19 Source half. |
+| `Correctness/Lowering/Loops/Correct.lean` | `lowerLoops_correct` and kernel acceptance of actual producer outputs. |
 | `Correctness/Lowering/Checker/Contract.lean` | P1 inventory and unfrozen candidate checker contract. |
 | `Correctness/Lowering/Checker/IntrinsicProbe.lean` | Actual intrinsic elaboration capture for the bounded while/break probe. |
 | `Correctness/Lowering/Checker/MeasuredPilot.lean` | Exact singleton soundness/completeness and measured contract-body refusal. |

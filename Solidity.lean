@@ -2427,6 +2427,9 @@ import Solidity.Correctness.Lowering.Checker.MeasuredPilot
 import Solidity.Correctness.Lowering.Checker.RawProbe
 import Solidity.Correctness.Lowering.Checker.SourceAssociation
 import Solidity.Correctness.Lowering.Checker.WhileBreak
+import Solidity.Correctness.Lowering.Loops.Correct
+import Solidity.Correctness.Lowering.Loops.Family
+import Solidity.Correctness.Lowering.Loops.WhileBreak
 import Solidity.Counterexamples.DeleteFamilyGenericOverlap
 import Solidity.Counterexamples.DiamondTry
 import Solidity.Counterexamples.PreFixSortAnnotations
