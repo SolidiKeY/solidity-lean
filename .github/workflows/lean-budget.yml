@@ -22,11 +22,13 @@ jobs:
           REF: ${{ github.ref }}
         run: |
           set -euo pipefail
+          mode=
           zero=0000000000000000000000000000000000000000
           if [ "$EVENT" = pull_request ]; then
             base=$(git merge-base HEAD "$PR_BASE")
           elif [ "$REF" = refs/heads/master ]; then
-            # merge-base with origin/master is HEAD itself here; compare with the previous master head.
+            # Each merge of the push is checked against its first parent, never the push as a whole.
+            mode=--per-merge
             if [ -n "$BEFORE" ] && [ "$BEFORE" != "$zero" ] && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
               base=$BEFORE
             else
@@ -35,4 +37,4 @@ jobs:
           else
             base=$(git merge-base HEAD origin/master)
           fi
-          python3 -B scripts/lean-budget/check.py --base "$base"
+          python3 -B scripts/lean-budget/check.py --base "$base" $mode

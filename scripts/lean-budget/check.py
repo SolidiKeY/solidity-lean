@@ -16,7 +16,9 @@ Base (computed, never committed):
   default                      merge-base(HEAD, origin/master) (lane gate); on master
                                that is HEAD itself, so CI passes --base there
 Usage:
-  check.py [--base REV] [--head REV]      run the check (exit 0 pass, 1 fail, 2 error)
+  check.py [--base REV] [--head REV] [--per-merge]   run the check (exit 0 pass, 1 fail, 2 error);
+      --per-merge checks each first-parent commit of base..head on its own (a master push that
+      lands several merges is not aggregated). A trailer the factory adds to a merge commit counts.
   check.py measure [--days N] [--ref R]   per first-parent merge on R: net lines, p50/p75/p90
   check.py replay [--count N] [--ref R]   run the check on the last N first-parent merges of R
 """
@@ -224,6 +226,8 @@ def main(argv):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("mode", nargs="?", default="check", choices=["check", "measure", "replay"])
     ap.add_argument("--base"); ap.add_argument("--head", default="HEAD")
+    ap.add_argument("--per-merge", action="store_true",
+                    help="check each first-parent commit of base..head against its first parent (CI push to master)")
     ap.add_argument("--allow", default=ALLOW)
     ap.add_argument("--ref", default="origin/master"); ap.add_argument("--days", type=int, default=14)
     ap.add_argument("--count", type=int, default=20); ap.add_argument("-v", "--verbose", action="store_true")
@@ -234,9 +238,18 @@ def main(argv):
         cfg = load_allow(a.allow)
         base = a.base or default_base(a.head)
         base = git("rev-parse", base + "^{commit}").strip()
-        print(f"lean-budget: base {base[:12]} head {git('rev-parse', a.head).strip()[:12]}")
-        ok, rep = evaluate(base, a.head, cfg)
-        print("\n".join(rep))
+        if a.per_merge:
+            commits = git("rev-list", "--first-parent", "--reverse", f"{base}..{a.head}").split()
+            ok = True
+            for c in commits:
+                c_ok, rep = evaluate(f"{c}^1", c, cfg)
+                print(f"lean-budget: {'PASS' if c_ok else 'FAIL'} {c[:12]} vs its first parent")
+                print("\n".join("  " + l for l in rep))
+                ok = ok and c_ok
+        else:
+            print(f"lean-budget: base {base[:12]} head {git('rev-parse', a.head).strip()[:12]}")
+            ok, rep = evaluate(base, a.head, cfg)
+            print("\n".join(rep))
         print("lean-budget: PASS" if ok else "lean-budget: FAIL")
         return 0 if ok else 1
     except (RuntimeError, ValueError, OSError, subprocess.CalledProcessError) as e:

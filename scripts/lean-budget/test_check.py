@@ -109,6 +109,23 @@ class Fixture(unittest.TestCase):
         self.assertEqual(r.returncode, 1, r.stdout + r.stderr); self.assertIn("lean-budget: FAIL", r.stdout)
 
 
+    def test_per_merge_not_aggregated(self):
+        allow = os.path.join(self.d, "allow.json")
+        with open(allow, "w") as f: json.dump(CFG, f)
+        for i, n in ((1, 30), (2, 30)):  # two merges of +30 each: each under cap 50, sum 60 over it
+            g("checkout", "-q", "-b", f"l{i}", cwd=self.d); self.write(f"Solidity/T{i}.lean", n); self.commit(f"l{i}")
+            g("checkout", "-q", "master", cwd=self.d); g("merge", "-q", "--no-ff", f"l{i}", "-m", f"m{i}", cwd=self.d)
+        run = lambda *x: subprocess.run([sys.executable, "-B", os.path.join(HERE, "check.py"), "--base", self.base,
+                                         "--allow", allow, *x], capture_output=True, text=True, cwd=self.d)
+        self.assertEqual(run("--per-merge").returncode, 0)
+        self.assertEqual(run().returncode, 1)
+        # an oversized merge is not hidden by a later shrink in the same push
+        g("checkout", "-q", "-b", "l3", cwd=self.d); self.write("Solidity/Big.lean", 80); self.commit("l3")
+        g("checkout", "-q", "master", cwd=self.d); g("merge", "-q", "--no-ff", "l3", "-m", "m3", cwd=self.d)
+        g("rm", "-q", "Solidity/Big.lean", "Solidity/T1.lean", "Solidity/T2.lean", cwd=self.d); self.commit("shrink")
+        self.assertEqual(run().returncode, 0); self.assertEqual(run("--per-merge").returncode, 1)
+
+
 class Globs(unittest.TestCase):
     def test_globs(self):
         m = check.matches
