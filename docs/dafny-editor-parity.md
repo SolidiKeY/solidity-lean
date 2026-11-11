@@ -2325,3 +2325,14 @@ close, then a different document/synchronization lifetime on reopening the same
 URI and saved bytes. Tab disappearance alone never establishes closure. The
 original API-open close failure, trust-recovery predecessor, budgets and row
 judgments remain unchanged; this is not a native-key or rendered proof claim.
+
+
+The separate `--diagnostic-events public-v1` companion requires
+`--diagnostic-input public-eol-v1` without the close/reopen companion. It records
+actual public `languages.onDidChangeDiagnostics` callbacks and getter snapshots,
+including foreign/unavailable resources, under the existing phase deadlines.
+Current callback snapshots must agree with source/document/synchronization-owned
+compiler wire publications. This is observation-time correlation, not proof of
+which notification caused the callback. The pinned upstream test's failing
+postcondition fixture remains a distinct verification obligation; compiler
+errors cannot substitute for that test, rendered Problems or either row judge.
