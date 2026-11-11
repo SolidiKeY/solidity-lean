@@ -158,28 +158,11 @@ example {c : Yul.Control} {n : Nat} (test : Yul.Expr [] [] n 1) (body : Yul.Stmt
 
 end YulArtifact
 
-/-! The intrinsic session vocabulary: a resumed environment stays allowed, a
-world funded by opening balances shows them again, and a candidate that never
-observes an event satisfies the laws for no view. -/
+/-! The intrinsic session laws refuse a candidate that never observes an event:
+a resumed session whose first action is a credit must show it. -/
 namespace IntrinsicSession
 
 open Solidity.Roadmap
-open Solidity.Lowering.V08.EnvironmentProjection
-
-example (e : SessionEnv) (allowed : e.Allowed) (h : List Event) (n : Nat)
-    (balance : Address → Roadmap.Word) : (after e h n balance).Allowed :=
-  ⟨fun h' => allowed.1 (h ++ h'), fun h' a pre => allowed.2.1 (h ++ h') a pre,
-    fun h' a v i s code => by
-      show e.callee (h ++ (h' ++ [.call a v i s])) = .answer (.success [])
-      rw [← List.append_assoc]
-      exact allowed.2.2 (h ++ h') a v i s code⟩
-
-theorem balances_funds {K : Type} {contracts : K → Contract} (b : Address → Roadmap.Word)
-    (roles : K → ContractWorld.Role) :
-    balances (ContractWorld.World.empty contracts (funds b) roles) = b := by
-  funext a
-  show lowerWord (liftWord (b (lowerAddress (liftAddress a)))) = b a
-  rw [lower_lift_address, lower_lift_word]
 
 /-- The code of an empty compilation. -/
 def noCode : Code where
@@ -189,7 +172,7 @@ def noCode : Code where
   ctor := fun k => k.elim0
   entry := fun k => k.elim0
 
-/-- An allowed environment whose first action is a credit. -/
+/-- An allowed environment whose every action is a credit. -/
 def crediting : SessionEnv where
   deployer := Address.zero
   deployNonce := ⟨0, by decide⟩
@@ -200,19 +183,34 @@ def crediting : SessionEnv where
   requests := fun _ _ => some (.credit Address.zero ⟨1, by decide⟩)
   callee := fun _ => .answer (.success [])
 
-/-- A candidate without events is refused: the credit must be observed. -/
+example : crediting.Allowed := ⟨fun _ => rfl, fun _ _ _ => rfl, fun _ _ _ _ _ _ => rfl⟩
+
+/-- A candidate without events is refused, whatever its view. -/
 example (F : Fixed) (I : IntrinsicSpec) (V : View I)
     (silent : ∀ p e r, (I.lang.sem p e r).events = []) : ¬ Laws F I V := by
   intro laws
   have allowed : I.lang.Allowed (I.ofSession crediting) := by
     rw [I.allowed_iff, I.session_of]
     exact ⟨fun _ => rfl, fun _ _ _ => rfl, fun _ _ _ _ _ _ => rfl⟩
-  have observed := (laws.credited noCode
-    (ContractWorld.World.empty noCode.catalog (funds crediting.balance) noCode.roles)
-    (I.ofSession crediting) Address.zero ⟨1, by decide⟩ allowed
-    (by rw [I.session_of, balances_funds]) (by rw [I.session_of]; rfl)).1
-  obtain ⟨r, _, events⟩ := observed
-  exact events (silent _ _ r)
+  let start : TypedWorld :=
+    ⟨noCode, ContractWorld.World.empty noCode.catalog (funds crediting.balance) noCode.roles⟩
+  obtain ⟨r, _, shown⟩ := (laws.credited (V.resume start) (I.ofSession crediting) [] 0
+    noCode start.world Address.zero ⟨1, by decide⟩ allowed (laws.starts start _ allowed)
+    (by rw [I.session_of]; rfl)).1
+  rw [silent] at shown
+  exact absurd (List.prefix_nil.mp shown) (by simp)
+
+/-- A resource-failure classification that admits no bound is refused. -/
+example (F : Fixed) (I : IntrinsicSpec) (V : View I) (never : ∀ r, ¬ I.NoFail r) :
+    ¬ Laws F I V := by
+  intro laws
+  have allowed : I.lang.Allowed (I.ofSession crediting) := by
+    rw [I.allowed_iff, I.session_of]
+    exact ⟨fun _ => rfl, fun _ _ _ => rfl, fun _ _ _ _ _ _ => rfl⟩
+  let start : TypedWorld :=
+    ⟨noCode, ContractWorld.World.empty noCode.catalog (funds crediting.balance) noCode.roles⟩
+  obtain ⟨r, good, _⟩ := laws.boundary_observed _ _ _ _ _ (laws.starts start _ allowed)
+  exact never r good.2
 
 end IntrinsicSession
 
