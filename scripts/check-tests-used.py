@@ -1421,7 +1421,7 @@ def declared_configured_cli(repo, path):
             call = main_call(statement)
             if call is not None: calls.append(call)
     if not calls or calls[0].args or calls[0].keywords or function.lineno >= calls[0].lineno: return None
-    parsers = {}
+    parsers = {}; declared_options = {}
     for statement in function.body:
         if isinstance(statement, ast.Expr) and isinstance(statement.value, ast.Constant) and isinstance(statement.value.value, str): continue
         if isinstance(statement, ast.Assign) and len(statement.targets) == 1 and isinstance(statement.targets[0], ast.Name):
@@ -1429,7 +1429,7 @@ def declared_configured_cli(repo, path):
             if isinstance(value, ast.Call) and isinstance(value.func, ast.Attribute):
                 owner = value.func.value
                 if isinstance(owner, ast.Name) and owner.id in modules and value.func.attr == 'ArgumentParser':
-                    parsers[name] = set(); continue
+                    parsers[name] = set(); declared_options[name] = set(); continue
                 if isinstance(owner, ast.Name) and owner.id in parsers and value.func.attr == 'parse_args' and not value.args and not value.keywords:
                     if not parsers[owner.id]: return None
                     return {'kind': 'curated local argparse entry', 'revision': repo.ref,
@@ -1440,12 +1440,63 @@ def declared_configured_cli(repo, path):
             call = statement.value; target = call.func
             if (isinstance(target, ast.Attribute) and isinstance(target.value, ast.Name)
                     and target.value.id in parsers and target.attr == 'add_argument'):
+                literal_options = [a.value for a in call.args if isinstance(a, ast.Constant)
+                                   and isinstance(a.value, str) and a.value.startswith('-')]
+                if (len(set(literal_options)) != len(literal_options)
+                        or set(literal_options) & declared_options[target.value.id]): return None
+                declared_options[target.value.id].update(literal_options)
                 required = [k.value for k in call.keywords if k.arg == 'required']
                 if required and not (len(required) == 1 and isinstance(required[0], ast.Constant) and type(required[0].value) is bool): return None
                 if required and required[0].value is True:
                     if len(call.args) != 1 or not isinstance(call.args[0], ast.Constant) or not isinstance(call.args[0].value, str) or not re.fullmatch(r'--[A-Za-z][A-Za-z0-9-]*', call.args[0].value): return None
                     parsers[target.value.id].add(call.args[0].value)
                 continue
+        if isinstance(statement, ast.For):
+            # A finite literal option declaration, not general loop analysis.
+            # Only -- + the loop name may vary; no body/else side effects,
+            # dynamic iterable, parser rebinding or duplicate option is admitted.
+            if (statement.orelse or not isinstance(statement.target, ast.Name)
+                    or statement.target.id in protected | set(parsers) | {'Path'}
+                    or not isinstance(statement.iter, (ast.Tuple, ast.List))
+                    or not 1 <= len(statement.iter.elts) <= 16
+                    or len(statement.body) != 1
+                    or not isinstance(statement.body[0], ast.Expr)
+                    or not isinstance(statement.body[0].value, ast.Call)): return None
+            call = statement.body[0].value; target = call.func
+            if (not isinstance(target, ast.Attribute) or target.attr != 'add_argument'
+                    or not isinstance(target.value, ast.Name) or target.value.id not in parsers
+                    or len(call.args) != 1): return None
+            option = call.args[0]
+            if (not isinstance(option, ast.BinOp) or not isinstance(option.op, ast.Add)
+                    or not isinstance(option.left, ast.Constant) or option.left.value != '--'
+                    or not isinstance(option.right, ast.Name)
+                    or option.right.id != statement.target.id): return None
+            keys = {keyword.arg for keyword in call.keywords}
+            if keys not in ({'required'}, {'required', 'type'}) or len(keys) != len(call.keywords): return None
+            for keyword in call.keywords:
+                if keyword.arg == 'required':
+                    if not isinstance(keyword.value, ast.Constant) or keyword.value.value is not True: return None
+                elif not isinstance(keyword.value, ast.Name) or keyword.value.id != 'Path': return None
+                else:
+                    if not any(isinstance(n, ast.ImportFrom) and n.module == 'pathlib' and not n.level
+                               and n.lineno < function.lineno
+                               and any(a.name == 'Path' and a.asname in (None, 'Path') for a in n.names)
+                               for n in tree.body): return None
+                    for n in ast.walk(tree):
+                        if isinstance(n, ast.Name) and isinstance(n.ctx, (ast.Store, ast.Del)) and n.id == 'Path': return None
+                        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and n.name == 'Path': return None
+                        if isinstance(n, ast.Import) and any((a.asname or a.name.split('.')[0]) == 'Path' for a in n.names): return None
+                        if isinstance(n, ast.ImportFrom) and any((a.asname or a.name) == 'Path' for a in n.names):
+                            if n.module != 'pathlib' or n.level or any(a.name != 'Path' for a in n.names if (a.asname or a.name) == 'Path'): return None
+            options = []
+            for value in statement.iter.elts:
+                if (not isinstance(value, ast.Constant) or not isinstance(value.value, str)
+                        or not re.fullmatch(r'[A-Za-z][A-Za-z0-9-]*', value.value)): return None
+                options.append('--' + value.value)
+            if len(set(options)) != len(options) or set(options) & declared_options[target.value.id]: return None
+            parsers[target.value.id].update(options)
+            declared_options[target.value.id].update(options)
+            continue
         # No unreviewed setup call, control branch or parser mutation before
         # parse_args may silently alter the declared configuration contract.
         return None
@@ -1876,13 +1927,38 @@ def configured_cli_boundary_controls():
             'function-magic-name': text.replace('if __name__', 'def __name__(): pass\nif __name__'),
             'decorated-main': text.replace('def main():', '@replace_checker\ndef main():'),
         }
-        for name, source in variants.items():
+        loop = text.replace(' p.add_argument("--input", required=True)',
+                            ' for name in ("input", "out"): p.add_argument("--"+name, type=Path, required=True)')
+        loop_variants = {
+            'loop-dynamic': loop.replace('("input", "out")', 'get_options()'),
+            'loop-else': loop.replace(' a=p.parse_args()', ' else: p.add_argument("--extra", required=True)\n a=p.parse_args()'),
+            'loop-duplicate': loop.replace('("input", "out")', '("input", "input")'),
+            'loop-shadow-parser': loop.replace('for name in', 'for p in').replace('"--"+name', '"--"+p'),
+            'loop-shadow-main': loop.replace('for name in', 'for main in').replace('"--"+name', '"--"+main'),
+            'loop-extra-body': loop.replace(' a=p.parse_args()', '  mutate_parser(p)\n a=p.parse_args()').replace(': p.add_argument', ':\n  p.add_argument'),
+            'loop-not-required': loop.replace('required=True', 'required=False'),
+            'loop-type-call': loop.replace('type=Path', 'type=configure()'),
+            'loop-wrong-name': loop.replace('"--"+name', '"--"+other'),
+            'loop-empty': loop.replace('("input", "out")', '()'),
+            'loop-shadow-converter': loop.replace('for name in', 'for Path in').replace('"--"+name', '"--"+Path'),
+            'loop-optional-overlap': loop.replace(' for name in', ' p.add_argument("--input")\n for name in'),
+            'loop-converter-rebound': loop.replace('def main():', 'Path=str\ndef main():'),
+            'loop-converter-import': loop.replace('from pathlib import Path', 'from other import Path'),
+            'loop-converter-late': loop.replace('from pathlib import Path\n', '') + 'from pathlib import Path\n',
+        }
+        variants.update(loop_variants)
+        for name, source in dict(variants, **{'literal-loop': loop}).items():
             target = root/('scripts/h55/' + name + '.py'); target.parent.mkdir(parents=True, exist_ok=True); target.write_text(source)
         (root/'tests').mkdir(); (root/'tests/input.txt').write_text('fixture\n')
         git(root, 'init', '-q'); git(root, 'add', '.')
         git(root, '-c', 'user.name=Control', '-c', 'user.email=control@example.invalid', 'commit', '-qm', 'CLI controls')
         repo = Repository(root, 'HEAD'); path = 'scripts/h55/valid.py'; declaration = declared_configured_cli(repo, path)
         assert declaration and declaration['required_options'] == ['--input']
+        loop_path = 'scripts/h55/literal-loop.py'
+        loop_declaration = declared_configured_cli(repo, loop_path)
+        assert loop_declaration and loop_declaration['required_options'] == ['--input', '--out']
+        loop_refusal = subprocess.run(['python3', '-B', loop_path], cwd=root, capture_output=True)
+        assert loop_refusal.returncode == 2 and b'--input' in loop_refusal.stderr and b'--out' in loop_refusal.stderr
         refusal = subprocess.run(['python3', '-B', path], cwd=root, capture_output=True)
         assert refusal.returncode == 2 and b'--input' in refusal.stderr
         entry = {'path': path, 'input_revision': repo.ref, 'source_blob': repo.tree[path][2],
