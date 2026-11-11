@@ -6,6 +6,9 @@ omitting proof objects, or resetting the total comparison deadline. Owner review
 must bind the packet, binary and derived commit before one changed comparison.
 The external serial/no-swap/memory/pidfd guard remains required. Telemetry is a
 maximum of 128 dependency samples, not an exact in-flight kernel declaration.
+Reproduce only in a new clone of BASE: git apply --unidiff-zero the adjacent
+trust-checker-v2.patch, commit the two modified files, then build lean4checker
+with the pinned Lean 4.24 toolchain and LEAN_NUM_THREADS=1 under the guard.
 No performance or fresh-replay acceptance is implied by building this candidate.
 """
 import argparse
@@ -20,7 +23,7 @@ import time
 
 BASE = 'da26eb05e9959402afcb9bd6dfe5dc4f700f70d6'
 RECIPE_SHA = '623c5ca18746942891869f169b90a665ac66ba4f6dac1edcbe251fff7cc0d0b4'
-PATCH_SHA = '06309fdb9b6b786422d6a272d97aca57baa38e6efa6f8f53abee6f0ca846b0ac'
+PATCH_SHA = '33250bafb7fc396fdc1ca680cfd6d486f12ee58f3d78476c6294ba1c8a552fd9'
 DOMAIN_SHA = 'd02bb29d6157625e5e12bc2a53f878d3efa437daff8031f269a8ed1a0f167028'
 SOURCES = {
     'Main.lean': 'd73db540ff418bba732561502bda86b1ea3f853cef39ede62ed5b386d81007bd',

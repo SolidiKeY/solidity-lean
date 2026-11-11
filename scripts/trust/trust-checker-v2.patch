@@ -1,10 +1,27 @@
+diff --git a/Lean4Checker/Replay.lean b/Lean4Checker/Replay.lean
+index 93146a3..a3ea8aa 100644
+--- a/Lean4Checker/Replay.lean
++++ b/Lean4Checker/Replay.lean
+@@ -42,0 +43 @@ structure State where
++  telemetryCountV2 : Nat := 0
+@@ -80,0 +82,6 @@ partial def replayConstant (name : Name) : M Unit := do
++    let count := (← get).telemetryCountV2 + 1
++    modify fun state => { state with telemetryCountV2 := count }
++    if count % 1000 == 0 && count ≤ 128000 then
++      let stderr ← IO.getStderr
++      stderr.putStrLn s!"trust-checker-v2: dependency-sample {count} {name.toString.take 160}"
++      stderr.flush
+@@ -173,0 +181 @@ def replay' (newConstants : Std.HashMap Name ConstantInfo) (env : Environment) :
++      IO.eprintln "trust-checker-v2: postponed-constructors-start"
+@@ -174,0 +183 @@ def replay' (newConstants : Std.HashMap Name ConstantInfo) (env : Environment) :
++      IO.eprintln "trust-checker-v2: postponed-recursors-start"
+@@ -175,0 +185 @@ def replay' (newConstants : Std.HashMap Name ConstantInfo) (env : Environment) :
++      IO.eprintln "trust-checker-v2: postponed-checks-finished"
+diff --git a/Main.lean b/Main.lean
+index adcbc38..3e9a20c 100644
 --- a/Main.lean
 +++ b/Main.lean
-@@ -10,6 +10,38 @@
- import Lake.Load.Manifest
- 
- open Lean
-+
+@@ -13,0 +14,32 @@ open Lean
 +/-- Optional v2 metadata cache: successful canonicalizations only, scoped to one scan.
 +The full ordered-root walk and all kernel replay code remain unchanged. -/
 +def canonicalV2 (cache : IO.Ref (Std.HashMap String System.FilePath))
@@ -36,73 +53,19 @@
 +  let stderr ← IO.getStderr
 +  stderr.putStrLn s!"trust-checker-v2: {phase}"
 +  stderr.flush
- 
- unsafe def replayFromImports (module : Name) : IO Unit := do
-   let mFile ← findOLean module
-@@ -26,8 +58,11 @@
-   region.free
- 
- unsafe def replayFromFresh (module : Name) : IO Unit := do
++
+@@ -28,0 +61 @@ unsafe def replayFromFresh (module : Name) : IO Unit := do
 +  phaseV2 "import-start"
-   Lean.withImportModules #[{module}] {} fun env => do
+@@ -29,0 +63 @@ unsafe def replayFromFresh (module : Name) : IO Unit := do
 +    phaseV2 "kernel-replay-start"
-     discard <| (← mkEmptyEnvironment).replay' env.constants.map₁
+@@ -30,0 +65 @@ unsafe def replayFromFresh (module : Name) : IO Unit := do
 +    phaseV2 "kernel-replay-finished"
- 
- /-- Read the name of the main module from the `lake-manifest`. -/
- -- This has been copied from `ImportGraph.getCurrentModule` in the
-@@ -75,17 +110,20 @@
-         throw <| IO.userError s!"Could not resolve module: {arg}"
-       else
-         pure mod
+@@ -77,0 +113 @@ unsafe def main (args : List String) : IO UInt32 := do
 +  phaseV2 "discovery-start"
-   let mut targetModules := []
-   let sp ← searchPathRef.get
-   for target in targets do
+@@ -80,0 +117 @@ unsafe def main (args : List String) : IO UInt32 := do
 +    let cache ← IO.mkRef ({} : Std.HashMap String System.FilePath)
-     let mut found := false
-     for path in (← SearchPath.findAllWithExt sp "olean") do
+@@ -83 +120 @@ unsafe def main (args : List String) : IO UInt32 := do
 -      if let some m := (← searchModuleNameOfFileName path sp) then
 +      if let some m := (← searchModuleV2 cache path sp) then
-         if target.isPrefixOf m then
-           targetModules := targetModules.insert m
-           found := true
-     if not found then
-       throw <| IO.userError s!"Could not find any oleans for: {target}"
+@@ -88,0 +126 @@ unsafe def main (args : List String) : IO UInt32 := do
 +  phaseV2 "discovery-finished"
-   if "--fresh" ∈ flags then
-     if targetModules.length != 1 then
-       throw <| IO.userError s!"--fresh flag is only valid when specifying a single module:\n\
---- a/Lean4Checker/Replay.lean
-+++ b/Lean4Checker/Replay.lean
-@@ -40,6 +40,7 @@
- 
- structure State where
-   env : Kernel.Environment
-+  telemetryCountV2 : Nat := 0
-   remaining : NameSet := {}
-   pending : NameSet := {}
-   postponedConstructors : NameSet := {}
-@@ -78,6 +79,12 @@
- -/
- partial def replayConstant (name : Name) : M Unit := do
-   if ← isTodo name then
-+    let count := (← get).telemetryCountV2 + 1
-+    modify fun state => { state with telemetryCountV2 := count }
-+    if count % 1000 == 0 && count ≤ 128000 then
-+      let stderr ← IO.getStderr
-+      stderr.putStrLn s!"trust-checker-v2: dependency-sample {count} {name.toString.take 160}"
-+      stderr.flush
-     let some ci := (← read).newConstants[name]? | unreachable!
-     replayConstants ci.getUsedConstantsAsSet
-     -- Check that this name is still pending: a mutual block may have taken care of it.
-@@ -171,6 +178,9 @@
-     ReaderT.run (r := { newConstants }) do
-       for n in remaining do
-         replayConstant n
-+      IO.eprintln "trust-checker-v2: postponed-constructors-start"
-       checkPostponedConstructors
-+      IO.eprintln "trust-checker-v2: postponed-recursors-start"
-       checkPostponedRecursors
-+      IO.eprintln "trust-checker-v2: postponed-checks-finished"
-   return .ofKernelEnv s.env
