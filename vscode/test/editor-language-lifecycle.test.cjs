@@ -58,3 +58,9 @@ test('symbol owner requires observed preceding spawn and no retirement through q
  }
  const f=fixture();f.o.events.push({kind:'process.exit',data:{processSession:'foreign',pid:202,birth:'901',processSequence:3}});for(const row of f.o.rows)row.queryEventStart=row.queryEventEnd=2;assert.deepEqual(helper.errors(f.o,f.config),[]);
 });
+
+test('serialized failed native observations retain their original correlation refusal rather than a generic flag error',()=>{
+ for(const target of ['local','dafny']){const f=fixture(target),reasons=['original request multiplicity '+(target==='local'?'3 !== 1':'0 !== 1')];f.o.validationErrors=reasons;
+ const decoded=JSON.parse(JSON.stringify(f.o));assert.deepEqual(helper.errors(decoded,f.config),reasons);assert.deepEqual(decoded.validationErrors,reasons);assert.notEqual(helper.errors(decoded,f.config),decoded.validationErrors);
+ for(const invalid of [{},[null],[''],Array(1)]){decoded.validationErrors=invalid;assert.match(helper.errors(decoded,f.config)[0],/Malformed retained language validation errors/);}}
+});
