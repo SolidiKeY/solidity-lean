@@ -684,6 +684,55 @@ def historical_json_role(value):
     return None
 
 
+def reviewed_receipt_rows(value):
+    """Measured rows from three reviewed historical envelope schemas.
+
+    Not arbitrary recursive keys: native/probe resource envelopes contain
+    commands[]; pinned continuation reports contain checks[]. A commands dict
+    is a recipe table, never measured output. Missing commands get no credit.
+    No success, active-consumer or external-artifact claim follows from a row.
+    """
+    if not isinstance(value, dict): return []
+    recorded = value.get('recordedAt')
+    if not isinstance(recorded, str) or not re.fullmatch(r'\d{4}-\d{2}-\d{2}T[0-9:.+\-]+Z?', recorded): return []
+    def argv(v): return isinstance(v, list) and bool(v) and all(isinstance(x, str) for x in v)
+    def measured(row, resource, command_type):
+        return (isinstance(row, dict) and command_type(row.get('command'))
+                and type(row.get('exitCode')) is int and nonnegative_number(row.get('elapsedSeconds'))
+                and type(row.get(resource)) is int and row[resource] >= 0
+                and isinstance(row.get('log'), str) and bool(row['log']))
+    rows = value.get('commands')
+    native = (isinstance(value.get('historicalFiles'), list) and bool(value['historicalFiles'])
+              and all(isinstance(r, dict) and isinstance(r.get('path'), str) and r['path']
+                      and hex_pin(r.get('sha256')) and type(r.get('byteIdenticalToStartingCommit')) is bool
+                      for r in value['historicalFiles']) and type(value.get('nativeValidationComplete')) is bool
+              and all(isinstance(value.get(k), str) for k in ('remainingNativeCapability', 'historicalGeneratorNote')))
+    probes = all(isinstance(value.get(k), str) for k in ('nativeValidation', 'originalCoreAndCorpus', 'newTheoremAxiomAudit'))
+    if (isinstance(rows, list) and rows and (native or probes)
+            and nonnegative_number(value.get('elapsedSeconds')) and type(value.get('maxWait4JobRssKiB')) is int
+            and value['maxWait4JobRssKiB'] >= 0 and isinstance(value.get('resourceInterpretation'), str)
+            and all(measured(r, 'wait4MaxRssKiB', argv) and hex_pin(r.get('uncompressedLogSha256')) for r in rows)):
+        return [(f'/commands/{i}', r) for i, r in enumerate(rows)]
+    if (type(value.get('version')) is not int or value['version'] != 1
+            or not isinstance(value.get('runtime'), dict) or not isinstance(value.get('branch'), str)
+            or not hex_pin(value.get('implementationCommit'), 40)):
+        return []
+    rows = value.get('checks')
+    if not isinstance(rows, list) or not rows: return []
+    continuation = hex_pin(value.get('evidenceBaseCommit'), 40) and isinstance(value.get('historicalIntegrity'), dict)
+    validation = hex_pin(value.get('startingCommit'), 40) and isinstance(value.get('scope'), str)
+    if continuation:
+        if not all(measured(r, 'peakCgroupBytes', lambda v: isinstance(v, str) and bool(v))
+                and isinstance(r.get('runner'), str) and isinstance(r.get('status'), str)
+                and hex_pin(r.get('sha256')) for r in rows): return []
+        return [(f'/checks/{i}', r) for i, r in enumerate(rows)]
+    if validation:
+        return [(f'/checks/{i}', r) for i, r in enumerate(rows)
+                if measured(r, 'prototypePeakGroupRssBytes', argv)
+                and isinstance(r.get('status'), str) and hex_pin(r.get('sha256'))]
+    return []
+
+
 def evidence_role(data):
     """Content signatures, never extension or directory alone. Keep wins first."""
     if data.startswith(b'\x1f\x8b'):
@@ -699,6 +748,8 @@ def evidence_role(data):
         return 'Historical sequential command receipts: argv, exit codes and elapsed measurements.'
     if isinstance(value, dict):
         keys = set(value)
+        if reviewed_receipt_rows(value):
+            return 'Historical resource/validation command receipts: reviewed dated envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.'
         reviewed = historical_json_role(value)
         if reviewed: return reviewed
         gate = value.get('combinedGate')
@@ -775,15 +826,19 @@ def historical_outputs(repo):
         try: value = json.loads(repo.texts[source])
         except (ValueError, RecursionError): continue
         if not evidence_role(repo.bytes(source)): continue
-        rows = command_receipt_rows(value)
-        for i, row in enumerate(rows):
+        standard = command_receipt_rows(value)
+        rows = [(f'/{i}' if isinstance(value, list) else f'/commands/{i}', row) for i, row in enumerate(standard)]
+        rows += reviewed_receipt_rows(value)
+        for pointer, row in rows:
             if not {'log'} <= set(row) or not isinstance(row['log'], str): continue
             digest = row.get('uncompressedLogSha256', row.get('sha256'))
             if not isinstance(digest, str) or not re.fullmatch('[0-9a-f]{64}', digest): continue
+            # A basename is never a substitute for an external absolute path.
+            if row['log'].startswith('/') or '\0' in row['log'] or '..' in row['log'].split('/'): continue
             # Historical receipts use both repository-relative and sibling names.
             direct = clean(row['log'])
             sibling = clean(posixpath.join(posixpath.dirname(source), row['log']))
-            possibilities = {path for path in (direct, sibling) if path in repo.tree and repo.tree[path][1] == 'blob'}
+            possibilities = {path for path in (direct, sibling) if path in repo.tree and repo.tree[path][1] == 'blob' and repo.tree[path][0] in ('100644', '100755')}
             if len(possibilities) != 1: continue  # ambiguous cwd is not provenance
             target = possibilities.pop()
             data = repo.bytes(target)
@@ -792,10 +847,100 @@ def historical_outputs(repo):
                     with gzip.GzipFile(fileobj=io.BytesIO(data)) as stream: data = stream.read(8_000_001)
                 except (OSError, EOFError, zlib.error): continue
             if len(data) > 8_000_000 or hashlib.sha256(data).hexdigest() != digest: continue
-            pointer = f'/{i}' if isinstance(value, list) else f'/commands/{i}'
             encoding = 'uncompressed' if 'uncompressedLogSha256' in row else 'stored-byte'
             roles[target] = f'Historical command output: {source} {pointer} names this log; recorded {encoding} SHA256 matches measured bytes.'
     return roles
+
+
+def add_declared_test_runners(graph):
+    """H490 source-only roots from explicit unittest declarations.
+
+    Require an unshadowed unittest import, a real module-level TestCase with
+    test methods, and a direct unittest.main call under the literal __main__
+    guard. Text examples, dead guards, plain failing scripts and helpers are
+    not roots. This demonstrates the committed runner ROLE, never a current
+    pass or any fixture/child use. No code is executed.
+    """
+    repo = graph.repo
+    existing = {v['path'] for v in graph.roots.values()}
+    for path, text in sorted(repo.texts.items()):
+        if not path.endswith('.py') or path in existing or repo.tree[path][0] not in ('100644', '100755'): continue
+        try: tree = ast.parse(text)
+        except (SyntaxError, ValueError, RecursionError): continue
+        modules = set(); cases = set(); mains = set()
+        for node in tree.body:
+            if isinstance(node, ast.Import):
+                modules.update(a.asname or 'unittest' for a in node.names
+                               if a.name == 'unittest' or a.name.startswith('unittest.') and a.asname is None)
+            elif isinstance(node, ast.ImportFrom) and node.module == 'unittest' and not node.level:
+                cases.update(a.asname or a.name for a in node.names if a.name == 'TestCase')
+                mains.update(a.asname or a.name for a in node.names if a.name == 'main')
+        if not modules and not (cases and mains): continue
+        bindings = modules | cases | mains | {'__name__'}
+        shadowed = any(isinstance(n, ast.Name) and isinstance(n.ctx, (ast.Store, ast.Del)) and n.id in bindings
+                       or isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and n.name in bindings
+                       or isinstance(n, ast.Attribute) and isinstance(n.ctx, (ast.Store, ast.Del))
+                          and isinstance(n.value, ast.Name) and n.value.id in modules and n.attr in ('main', 'TestCase')
+                       for n in ast.walk(tree))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    bound = alias.asname or alias.name.split('.')[0]
+                    if bound == '__name__': shadowed = True
+                    if bound in bindings and not (bound in modules and
+                            (alias.name == 'unittest' or alias.name.startswith('unittest.') and alias.asname is None)):
+                        shadowed = True
+            elif isinstance(node, ast.ImportFrom):
+                for alias in node.names:
+                    bound = alias.asname or alias.name
+                    if bound == '__name__': shadowed = True
+                    if alias.name == '*': shadowed = True
+                    if bound in bindings and not (node.module == 'unittest' and not node.level
+                            and (alias.name == 'TestCase' and bound in cases or alias.name == 'main' and bound in mains)):
+                        shadowed = True
+        if modules & cases or modules & mains or cases & mains: shadowed = True
+        if shadowed: continue
+        def terminal(statement):
+            if isinstance(statement, ast.Raise): return True
+            if isinstance(statement, ast.Expr) and isinstance(statement.value, ast.Call):
+                func = statement.value.func
+                return (isinstance(func, ast.Name) and func.id in ('exit', 'quit')
+                        or isinstance(func, ast.Attribute) and func.attr in ('exit', '_exit'))
+            return False
+        def testcase(base):
+            return (isinstance(base, ast.Name) and base.id in cases
+                    or isinstance(base, ast.Attribute) and base.attr == 'TestCase'
+                    and isinstance(base.value, ast.Name) and base.value.id in modules)
+        classes = [n for n in tree.body if isinstance(n, ast.ClassDef) and any(testcase(b) for b in n.bases)
+                   and any(isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef)) and m.name.startswith('test_') for m in n.body)]
+        if not classes: continue
+        calls = []
+        for index, node in enumerate(tree.body):
+            if not isinstance(node, ast.If) or not isinstance(node.test, ast.Compare): continue
+            test = node.test
+            if len(test.ops) != 1 or not isinstance(test.ops[0], ast.Eq) or len(test.comparators) != 1: continue
+            pair = (test.left, test.comparators[0])
+            if not (any(isinstance(n, ast.Name) and n.id == '__name__' for n in pair)
+                    and any(isinstance(n, ast.Constant) and n.value == '__main__' for n in pair)): continue
+            if any(terminal(n) for n in tree.body[:index]): continue
+            for position, statement in enumerate(node.body):
+                if not isinstance(statement, ast.Expr) or not isinstance(statement.value, ast.Call): continue
+                call = statement.value; func = call.func
+                if not (isinstance(func, ast.Name) and func.id in mains or isinstance(func, ast.Attribute)
+                        and func.attr == 'main' and isinstance(func.value, ast.Name) and func.value.id in modules): continue
+                if any(terminal(n) for n in node.body[:position]): continue
+                calls.append(call)
+        if not calls: continue
+        try: compile(text, path, 'exec', dont_inherit=True)
+        except (SyntaxError, ValueError, RecursionError, OverflowError): continue
+        identity = 'committed:' + path
+        graph.root(path, 'committed standalone test runner', shlex.join(['python3', '-B', path]), path,
+                   calls[0].lineno, root_id=identity)
+        graph.roots[identity].update({'source_only': True, 'source_blob': repo.tree[path][2],
+            'role_provenance': {'kind': 'unittest declaration and explicit main entry', 'revision': repo.ref,
+                'class_lines': [c.lineno for c in classes], 'main_line': calls[0].lineno},
+            'validation_at_measured_revision': {'status': 'unavailable', 'command': ['python3', '-B', path],
+                'reason': 'Committed runner role audited from syntax; command not executed by inventory.'}})
 
 
 def reviewed_generated_consumption(entry, graph, candidate_sources):
@@ -837,6 +982,7 @@ def inventory(repo, catalog=None):
         catalog = json.loads(definitions.read_bytes()) if definitions.exists() else {'schema_version': 1, 'standalone': [], 'generators': [], 'reads': [], 'orphans': []}
     add_roots(graph); reviewed_routes(graph); add_lean(graph)
     generated = validated_routes(graph, catalog)
+    add_declared_test_runners(graph)
     ci_spec = importlib.util.spec_from_file_location('tests_used_ci', Path(__file__).with_name('check-tests-used-ci.py'))
     ci_rules = importlib.util.module_from_spec(ci_spec); ci_spec.loader.exec_module(ci_rules)
     ci_rules.add(graph)
@@ -1002,6 +1148,23 @@ def self_test():
     assert evidence_role(json.dumps(dict(summary, commit='unrun')).encode()) is None
     assert evidence_role(json.dumps(dict(summary, suites={'suite': {'proved': 1}})).encode()) is None
     assert evidence_role(json.dumps(dict(summary, suites={'suite': {'proved': 2, 'error': 1, 'extra': 1}})).encode()) is None
+    measured_row = {'command': ['old-runner'], 'exitCode': 7, 'elapsedSeconds': 0.25,
+                    'wait4MaxRssKiB': 1024, 'log': 'bound.log.gz', 'uncompressedLogSha256': 'a' * 64}
+    resource_envelope = {'recordedAt': '2026-01-01T00:00:00+00:00', 'elapsedSeconds': 0.5,
+        'maxWait4JobRssKiB': 1024, 'resourceInterpretation': 'Recorded child resources',
+        'nativeValidation': 'partial', 'originalCoreAndCorpus': 'recorded', 'newTheoremAxiomAudit': 'recorded',
+        'commands': [measured_row]}
+    assert reviewed_receipt_rows(resource_envelope) == [('/commands/0', measured_row)]
+    assert evidence_role(json.dumps(resource_envelope).encode())
+    for field, bad in (('elapsedSeconds', float('nan')), ('maxWait4JobRssKiB', True), ('commands', {})):
+        assert not reviewed_receipt_rows(dict(resource_envelope, **{field: bad}))
+    check_row = {'command': 'archived command', 'runner': 'old-wrapper', 'exitCode': 9, 'elapsedSeconds': 1,
+                 'peakCgroupBytes': 100, 'status': 'failed', 'log': 'tests/old.log', 'sha256': 'b' * 64}
+    continuation = {'version': 1, 'recordedAt': '2026-01-01T00:00:00Z', 'evidenceBaseCommit': 'a' * 40,
+                    'implementationCommit': 'b' * 40, 'branch': 'old', 'runtime': {},
+                    'historicalIntegrity': {}, 'checks': [check_row]}
+    assert reviewed_receipt_rows(continuation) == [('/checks/0', check_row)]
+    assert not reviewed_receipt_rows(dict(continuation, checks=[dict(check_row, command=None)]))
     with tempfile.TemporaryDirectory(prefix='tests-used-controls-') as directory:
         root = Path(directory)
         git(root, 'init', '-q')
@@ -1012,6 +1175,10 @@ def self_test():
             'tests/main-only.txt': 'main only\n',
             'tests/pass.py': 'import unittest\nclass T(unittest.TestCase):\n def test_value(self): import live; self.assertEqual(2 + 2, 4)\nif __name__ == "__main__": unittest.main()\n',
             'tests/fail.py': 'raise SystemExit(1)\n',
+            'tests/failing-unit.py': 'import unittest\nclass Failed(unittest.TestCase):\n def test_failure(self): self.fail("intentional control")\nif __name__ == "__main__": unittest.main()\n',
+            'tests/dead-unit.py': 'import unittest\nclass Dead(unittest.TestCase):\n def test_value(self): pass\nif False: unittest.main()\n',
+            'tests/quoted-unit.py': '"""import unittest\nclass Fake(unittest.TestCase):\n def test_value(self): pass\nif __name__ == "__main__": unittest.main()\n"""\n',
+            'tests/shadowed-unit.py': 'import unittest\nunittest = object()\nclass Fake(unittest.TestCase):\n def test_value(self): pass\nif __name__ == "__main__": unittest.main()\n',
             'tests/plain.py': 'from pathlib import Path\ndef main(): assert Path("tests/generated.txt").read_bytes() == b"generated\\n"; Path("tests/" + "mention" + ".txt").read_text()\nif __name__ == "__main__": main()\n',
             'tests/callback.py': 'import callback_helper as helper\ndef callback(): return helper.read()\nassert helper.invoke(callback) == "callback\\n"\n',
             'tests/callback_helper.py': 'from pathlib import Path\ndef invoke(f): return f()\ndef read(): return Path("tests/callback.txt").read_text()\n',
@@ -1048,6 +1215,15 @@ def self_test():
             'scripts/h55/other': 'h55\n',
             'scripts/h62/other': 'h62\n',
         }
+        bound_envelope = dict(resource_envelope, commands=[dict(measured_row, log='tests/bound-history.log', uncompressedLogSha256=hashlib.sha256(b'archived failure\n').hexdigest())])
+        sources['tests/bound-history.json'] = json.dumps(bound_envelope)
+        sources['tests/bound-history.log'] = 'archived failure\n'
+        sources['tests/unsafe-history.json'] = json.dumps(dict(resource_envelope, commands=[dict(measured_row, log='/tests/not-an-input.log', uncompressedLogSha256=hashlib.sha256(b'unused\n').hexdigest())]))
+        sources['tests/not-an-input.log'] = 'unused\n'
+        sources['tests/magic-name-unit.py'] = 'import unittest as u\nimport unittest as __name__\nclass T(u.TestCase):\n def test_value(self): pass\nif __name__ == "__main__": u.main()\n'
+        sources['tests/import-shadow-unit.py'] = 'import unittest\nimport json as unittest\nclass T(unittest.TestCase):\n def test_value(self): pass\nif __name__ == "__main__": unittest.main()\n'
+        sources['tests/from-shadow-unit.py'] = 'from unittest import TestCase, main\nfrom json import loads as main\nclass T(TestCase):\n def test_value(self): pass\nif __name__ == "__main__": main()\n'
+        sources['tests/exit-before-unit.py'] = 'import unittest,sys\nclass T(unittest.TestCase):\n def test_value(self): pass\nsys.exit(0)\nif __name__ == "__main__": unittest.main()\n'
         for i in range(9): sources[f'tests/reference-{i}.txt'] = 'Historical mention of tests/spare.txt only.\n'
         for p, content in sources.items():
             target = root / p; target.parent.mkdir(parents=True, exist_ok=True)
@@ -1112,6 +1288,11 @@ def self_test():
         for p in ('tests/live.py', 'tests/helper.py', 'tests/pass.py', 'tests/generated.txt'):
             assert rows[p]['class'] == 'keep', p
         assert rows['tests/generated.txt']['generator']
+        assert subprocess.run(['python3', '-B', 'tests/failing-unit.py'], cwd=root, capture_output=True).returncode == 1
+        assert rows['tests/failing-unit.py']['class'] == 'keep'
+        assert rows['tests/failing-unit.py']['runner_chain']['entry']['source_only']
+        assert rows['tests/failing-unit.py']['runner_chain']['entry']['validation_at_measured_revision']['status'] == 'unavailable'
+        for name in ('dead-unit.py', 'quoted-unit.py', 'shadowed-unit.py', 'import-shadow-unit.py', 'from-shadow-unit.py', 'exit-before-unit.py', 'magic-name-unit.py'): assert rows['tests/' + name]['class'] is None
         assert rows['tests/plain.py']['class'] == 'keep'
         assert rows['tests/mention.txt']['class'] is None and rows['tests/mention.txt']['secondary']['unreviewed_readers']
         for path in ('tests/package/lakefile.toml', 'tests/package/src/Package.lean', 'tests/package/src/Package/Leaf.lean'): assert rows[path]['class'] == 'keep', path
@@ -1174,6 +1355,9 @@ def self_test():
             assert rows[p]['class'] is None, p
         assert rows['tests/evidence.json']['class'] == 'evidence'
         assert rows['tests/history-empty.log']['class'] == 'evidence'
+        assert rows['tests/bound-history.log']['class'] == 'evidence'
+        assert '/commands/0' in rows['tests/bound-history.log']['reason']
+        assert rows['tests/not-an-input.log']['class'] is None
         assert rows['tests/history-receipts.json']['class'] == 'evidence'
         assert all(r['recovery'] for r in rows.values())
         for path in ('tests/space name.txt', 'tests/α.txt', 'tests/line\nname.txt'):
