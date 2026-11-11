@@ -581,6 +581,47 @@ structure LayoutView.Instances (V : LayoutView) : Prop where
         (V.geometry.cells P (memoryShapeLayout (p.shape b)) ⟨.memory, p.address b, 0⟩
           (m.withMemory image)))
 
+/-- **The Scalar pilot correspondence** (H517 measured pilot, before migration):
+the scalar leaf of the recursive view is the existing packed scalar family.
+`scalar` and `memoryScalar` restate `Geometric.scalar` and
+`Geometric.memoryScalar` verbatim; `scalarPathRead` and `scalarPathWrite` tie
+the recursive `Geometry.read`/`Geometry.write` at `.scalar f.width` to
+`scalarPathView` and `encodeScalarPath` (so `patchScalarSlot`) in both slot
+regions. Later shapes are `Geometric`/`Instances` work (yv2/yv3). -/
+structure LayoutView.ScalarPilot (V : LayoutView) : Prop where
+  /-- A packed field of a slot reads and writes as `Field.findWord`/`patchScalarSlot`. -/
+  scalar : ∀ (P : Params) (r : Region) (f : Field) (slot : Roadmap.Word) (m : Phys), r.slotted →
+    V.geometry.scalar P f.width ⟨r, slot.val, f.offset⟩ m = some (f.findWord (m.slots r slot)).val ∧
+    (∀ v : f.Value, V.geometry.writeScalar P f.width ⟨r, slot.val, f.offset⟩ v.val m =
+      some (m.withSlots r (patchScalarSlot (m.slots r) slot f v))) ∧
+    (∀ c, V.geometry.scalarCells P f.width ⟨r, slot.val, f.offset⟩ c ↔
+      ∃ b, c = .slot r slot b ∧ f.offset ≤ b ∧ b < f.offset + f.width)
+  /-- A memory word reads and writes as `mload`/`mstore`; a narrower memory
+  value is cleaned of its dirty high bits exactly when `cleanDirty`. -/
+  memoryScalar : ∀ (P : Params) (w a : Nat) (m : Phys), 0 < w → w ≤ 32 →
+    V.geometry.scalar P w ⟨.memory, a, 0⟩ m =
+      some (if P.cleanDirty then mloadNat m.memory a % 256 ^ w else mloadNat m.memory a) ∧
+    (∀ v, v < 256 ^ w → V.geometry.writeScalar P w ⟨.memory, a, 0⟩ v m =
+      some (m.withMemory (mstore m.memory a (toWord v)))) ∧
+    (∀ c, V.geometry.scalarCells P w ⟨.memory, a, 0⟩ c ↔ objectCells a 32 c)
+  /-- `scalarPathView`, at every path, codec, store, slot and slot region, is
+  the recursive view of `.scalar f.width` at the field's slot and offset. -/
+  scalarPathRead : ∀ (P : Params) {D : Source.Layout} {L : Source.SPath → Source.STy} {f : Field}
+    (p : Source.SPath) (c : ScalarCodec D (L p) f) (slot : Roadmap.Word)
+    (s : Source.Storage D L) (r : Region) (m : Phys), r.slotted →
+    (scalarPathView p c slot s (m.slots r) ↔
+      (s.read p).map (fun v => Tree.leaf (c.encode v).val) =
+        V.geometry.read P (.scalar f.width) ⟨r, slot.val, f.offset⟩ m)
+  /-- `encodeScalarPath` (so `patchScalarSlot`) is the recursive writer of the
+  path's encoded value: the region's slots patched, the other region and
+  memory kept; `none` exactly when the path holds no value. -/
+  scalarPathWrite : ∀ (P : Params) {D : Source.Layout} {L : Source.SPath → Source.STy} {f : Field}
+    (p : Source.SPath) (c : ScalarCodec D (L p) f) (slot : Roadmap.Word)
+    (s : Source.Storage D L) (r : Region) (m : Phys), r.slotted →
+    (s.read p).bind (fun v =>
+        V.geometry.write P (.scalar f.width) ⟨r, slot.val, f.offset⟩ (.leaf (c.encode v).val) m) =
+      (encodeScalarPath p c slot s (m.slots r)).map (m.withSlots r)
+
 /-! ## Lowering by simulation -/
 
 namespace Lowering
@@ -819,6 +860,13 @@ open Solidity.Goal
 @[goal Solidity.Yul.Layout.view_correct "yv1-yul-layout-view"]
 def yulLayoutView : Prop :=
   ∃ V : Shrink.LayoutView, V.Laws ∧ V.Geometric ∧ V.Instances
+
+/-- The Scalar pilot of `yulLayoutView` (H517): ONE recursive view and
+allocator with the general laws over every layout, and the Scalar
+correspondence of that same view. -/
+@[goal Solidity.Yul.Layout.pilot_correct "yv1-yul-layout-view"]
+def yulLayoutPilot : Prop :=
+  ∃ V : Shrink.LayoutView, V.Laws ∧ V.ScalarPilot
 
 /-- Production lowering on t0's fragment by one simulation diagram, under the
 production fresh-name policy; its session-level lift to `Lowering`/`PassCorrect`

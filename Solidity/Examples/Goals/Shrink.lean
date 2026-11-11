@@ -9,6 +9,12 @@ info: open Solidity.Goals.yulLayoutView ← Solidity.Yul.Layout.view_correct pla
 #roadmap_goal yulLayoutView
 
 /--
+info: open Solidity.Goals.yulLayoutPilot ← Solidity.Yul.Layout.pilot_correct plan yv1-yul-layout-view
+-/
+#guard_msgs in
+#roadmap_goal yulLayoutPilot
+
+/--
 info: open Solidity.Goals.loweringBySimulation ← Solidity.Correctness.Lowering.Sim.lowering_producer plan ls3-lowering-compose
 -/
 #guard_msgs in
