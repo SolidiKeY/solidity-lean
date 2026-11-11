@@ -19,3 +19,4 @@ Historical timings, integration reports and completed plans are in Git.
 
 [Generated module maps](module-map.md) and some reference documents are retained
 as checker inputs. They do not replace reading the source.
+| [feature-work/cr-canonical-reader-contract.md](feature-work/cr-canonical-reader-contract.md) | CR canonical-reader migration contract under H68: pinned uint8 support witness, H68 fixture migration dry run and existing-route row comparison, owner tickets. |
