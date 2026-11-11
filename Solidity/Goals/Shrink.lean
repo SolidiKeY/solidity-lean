@@ -2,8 +2,6 @@ import Solidity.Tools.Goal
 import Solidity.Correctness.Lowering.Checker.Contract
 import Solidity.Lowering.V07.Scalar
 import Solidity.Semantics.RunFuel
-import Solidity.Lowering.P8.FrozenInterface
-import Solidity.Roadmap.G49Final.PassCorrectAdapters
 import Solidity.Backend.AbiWorld.PublicCompilerTotal
 import Solidity.Yul.Views.FinitePaths
 import Solidity.Yul.Views.FiniteCellWrites
@@ -30,24 +28,20 @@ Neither replaces the historical `genericYulViewsPreserve` of `Goals/Plan.lean`.
   (`lowerLoops` then `lowerReturns`, as `calleeBody` sequences them, and the
   standalone `lowerLoops none` sites) followed by the actual elaborator
   (`elabStmtsP`, `SProg.chain`), with its fresh-name state, on t0's accepted
-  fragment (`PublicCompilerTotal.ProgOk []`); from that same diagram, for every
-  source/intrinsic pair bound to actual Source sessions, a frozen
-  `Roadmap.Lowering S I` and a `G49Final.PassCorrect` per program whose
-  environment map is the exact session environment and whose resource
-  transport is shared between the two carriers. The diagram enters the
-  session level through its association of every emitted unit; tying the
-  session resource transport to the diagram's statement fuel needs intrinsic
-  session resources and is part of the H556 restatement (sg1).
+  fragment (`PublicCompilerTotal.ProgOk []`), with initial/final matching,
+  stuttering, progress, source determinacy, a backward diagram, fresh-state
+  soundness and coverage of every fragment production run.
 
-Open scope point (not hidden, decided by H556): no intrinsic session
-semantics over emitted programs exists at the base, so `Binding.targetSession`
-is an explicit reference parameter, as P8a's `OperationalReference`.
-Universally quantified and unconstrained, it admits intrinsic specs no
-lowering refines, so `loweringBySimulation` is not provable as stated. H556:
-a separately scoped prerequisite defines the actual intrinsic session
-semantics; this conjunct is then restated against it (replacing
-`targetSession`/`target_exact` by that definition). Until then ls lanes must
-not attempt the session-level conjunct.
+Session level, deferred by H556 (not hidden): the lift of this diagram to a
+frozen `Roadmap.Lowering S I` and a `G49Final.PassCorrect` per program needs
+the actual intrinsic session semantics (Event/Outcome prefixes over the
+emitted programs), which does not exist at the base. Quantifying over every
+`IntrinsicSpec` with a free target-session reference would make the goal
+impossible, and an existential one would make it arbitrary, so this goal
+states no session-level conjunct. Plan step is0-intrinsic-session defines that
+semantics; sg1-restate-lowering-goal then adds the lift against it, with the
+program-to-body binding (every resolved function body of the actual Source
+program) and the resource transport tied to the diagram's fuel.
 
 ## Views inventory (per-shape view definitions, read at the launch base)
 
@@ -574,7 +568,6 @@ namespace Lowering
 
 open Solidity.Correctness.Lowering.Checker (Snapshot Input Output ElaborationReceipt)
 open Solidity.Lowering.V07 (ContextMap IntValueRel integerPrim)
-open Solidity.Roadmap (SourceSpec IntrinsicSpec Artifact Prefix Event Outcome SessionEnv)
 
 variable [FreshNames]
 
@@ -791,52 +784,6 @@ def Diagram.Total (D : Diagram) : Prop :=
   ∀ (b : Body) (u : Emitted), Production b u → Accepted u →
     ∃ b' : Body, b'.SameInput b ∧ ∃ m, D.Assoc b' u m
 
-/-- The binding of a source/intrinsic pair to the actual programs: a
-resolution's Source program (the frozen P8a origins) whose failure-free
-prefixes are actual `Source.sessionAt` sessions; its production bodies (the
-resolved-source association), each produced inside t0's fragment; and the
-emitted programs of a world, whose sessions the world's semantics reads
-through the intrinsic session reference `targetSession` (no actual intrinsic
-session semantics exists at the base: an explicit parameter, as P8a's
-`OperationalReference`). -/
-structure Binding (S : SourceSpec) (I : IntrinsicSpec) where
-  origins : Solidity.Lowering.P8.P8a.SourceOrigins S
-  program : S.lang.Prog → Solidity.Lowering.P8.P8a.SourceProgram
-  program_meaning : ∀ r w p art, program (S.meaning r w p art) = origins.meaning r w p art
-  horizon : S.lang.Res → Nat
-  source_exact : ∀ prog e res, S.NoFailure res →
-    S.lang.sem prog e res = Source.sessionAt (program prog).2 (S.session e) (horizon res)
-  bodies : S.Resolved → List Body
-  bodies_env : ∀ r w p art, ∀ b ∈ bodies r, b.E = (origins.meaning r w p art).1
-  produced : ∀ r, S.WellFormed r → S.InProfile r → ∀ b ∈ bodies r,
-    ∃ u : Emitted, Production b u ∧ Accepted u
-  units : I.World → List Emitted
-  targetSession : List Emitted → SessionEnv → I.lang.Res → Prefix Event Outcome
-  target_exact : ∀ w e res,
-    I.lang.sem (I.ofWorld w) e res = targetSession (units w) (I.session e) res
-
-/-- **Both carriers from the same diagram**: a frozen `Lowering S I` whose
-worlds are exactly the production outputs of the resolution's bodies, each
-associated by the diagram, whose environment map is the exact session
-environment; and, for every program, a `PassCorrect` between the actual
-behaviours with the SAME environment map and resource transport as the
-`Lowering`'s certificate (all `Cert`/`PassCorrect` fields, forward and back,
-are retained by their types). The diagram constrains the carriers through
-`D.Assoc` on every emitted unit only; relating `L.cert.need` to `D.fuel`
-awaits the intrinsic session resources of the H556 restatement. -/
-def Diagram.Lifts (D : Diagram) {S : SourceSpec} {I : IntrinsicSpec} (B : Binding S I) : Prop :=
-  ∃ L : Solidity.Roadmap.Lowering S I,
-    (∀ e, L.pass.envAbs e = S.ofSession (I.session e)) ∧
-    (∀ r w p art, (B.units (L.lower r w p art)).length = (B.bodies r).length ∧
-      ∀ bu ∈ (B.bodies r).zip (B.units (L.lower r w p art)),
-        Production bu.1 bu.2 ∧ ∃ b' : Body, b'.SameInput bu.1 ∧ ∃ m, D.Assoc b' bu.2 m) ∧
-    ∃ pc : (r : S.Resolved) → (w : S.WellFormed r) → (p : S.InProfile r) → (art : Artifact) →
-        Solidity.Roadmap.G49Final.PassCorrect
-          (Solidity.Roadmap.G49Final.Behaviour.ofLang S.lang (S.meaning r w p art))
-          (Solidity.Roadmap.G49Final.Behaviour.ofLang I.lang (I.ofWorld (L.lower r w p art))),
-      ∀ r w p art, (pc r w p art).envAbs = L.pass.envAbs ∧
-        (pc r w p art).need = L.cert.need (S.meaning r w p art) (L.dom r w p art)
-
 /-- A naming policy whose fresh names are distinct and parse back. -/
 def FreshNames.Lawful (N : FreshNames) : Prop :=
   (∀ s n, N.parse (N.name s n) = some (s, n)) ∧
@@ -855,13 +802,12 @@ open Solidity.Goal
 def yulLayoutView : Prop :=
   ∃ V : Shrink.LayoutView, V.Laws ∧ V.Geometric ∧ V.Instances
 
-/-- Production lowering on t0's fragment by one simulation, lifted to a frozen
-`Lowering` and a direct `PassCorrect` from the same diagram. -/
+/-- Production lowering on t0's fragment by one simulation diagram, for every
+lawful fresh-name policy; its session-level lift to `Lowering`/`PassCorrect`
+is added by sg1-restate-lowering-goal (H556). -/
 @[goal Solidity.Correctness.Lowering.Sim.lowering_producer "ls3-lowering-compose"]
 def loweringBySimulation : Prop :=
   ∀ [N : FreshNames], Shrink.Lowering.FreshNames.Lawful N → Shrink.Lowering.CallerBound ∧
-    ∃ D : Shrink.Lowering.Diagram, D.Simulates ∧ D.Total ∧
-      ∀ (S : Solidity.Roadmap.SourceSpec) (I : Solidity.Roadmap.IntrinsicSpec)
-        (B : Shrink.Lowering.Binding S I), D.Lifts B
+    ∃ D : Shrink.Lowering.Diagram, D.Simulates ∧ D.Total
 
 end Solidity.Goals
