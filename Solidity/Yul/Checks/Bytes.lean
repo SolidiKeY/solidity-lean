@@ -1,11 +1,14 @@
 import Solidity.Yul.Checks.Powers
-import Solidity.Goals.Plan
 
 /-! # BYTE, SIGNEXTEND, CLZ: universal meaning and literal vectors
 
 The universal statements cover every input word. `universal` assembles them with
-EXP's `Powers.exp_val` into the shared contract `Goals.opcodeBytesPowers`
-(the Bytes/Powers conjunct of `Goals.opcodeEvalUniversal`).
+EXP's `Powers.exp_val` into the statement of `Goals.opcodeBytesPowers` (the
+Bytes/Powers conjunct of `Goals.opcodeEvalUniversal`), with `OpcodeSpec.modulus`
+written as `2 ^ 256` and `OpcodeSpec.clz` unfolded: the two are definitionally
+equal, so a module importing `Goals.Plan` closes the conjunct by
+`exact Bytes.universal`. The core may not import `Goals.Plan`
+(`scripts/check-layers.mjs`, core import closure).
 
 `rows` keeps the integer-oracle vectors as literal data, checked by one kernel
 decision (`rows_fast`). They are finite tests, independent of the universal proofs; `rows[n]`
@@ -13,7 +16,6 @@ is the former declaration `vNNNN` with `n = NNNN`. -/
 namespace Solidity.Yul.Checks.Bytes
 
 open Solidity.Yul
-open Solidity.Goals
 
 /-- BYTE: operand 0 is a big-endian byte index (0 is most significant), operand 1
 the value; the byte is the value shifted right, i.e. divided by `2^(8*(31-i))`,
@@ -21,7 +23,7 @@ reduced mod 256. Every index at least 32 gives zero. -/
 theorem byte_val (xs : Fin 2 → Word) :
     (Pure.eval .«byte» xs).val =
       (if (xs 0).val ≥ 32 then 0 else
-        ((xs 1).val / 2 ^ (8 * (31 - (xs 0).val))) % 256) % OpcodeSpec.modulus := by
+        ((xs 1).val / 2 ^ (8 * (31 - (xs 0).val))) % 256) % (2 ^ 256) := by
   change (if (xs 0).val ≥ 32 then word 0
     else word (((xs 1).val >>> (8 * (31 - (xs 0).val))) % 256)).val = _
   split
@@ -36,7 +38,7 @@ theorem signextend_val (xs : Fin 2 → Word) :
         let bits := 8 * ((xs 0).val + 1)
         let low := (xs 1).val % (2 ^ bits)
         if low < 2 ^ (bits - 1) then low
-        else low + OpcodeSpec.modulus - 2 ^ bits) % OpcodeSpec.modulus := by
+        else low + (2 ^ 256) - 2 ^ bits) % (2 ^ 256) := by
   change (Solidity.Yul.signextend (xs 0) (xs 1)).val = _
   unfold Solidity.Yul.signextend
   split
@@ -45,10 +47,26 @@ theorem signextend_val (xs : Fin 2 → Word) :
     split <;> rfl
 
 /-- CLZ: zero has 256 leading zeros; a nonzero word has `255 - log2 x`. -/
-theorem clz_val : OpcodeSpec.clz := fun _ => rfl
+theorem clz_val (xs : Fin 1 → Word) :
+    (Pure.eval .«clz» xs).val =
+      (if (xs 0).val = 0 then 256 else 255 - (xs 0).val.log2) % (2 ^ 256) := rfl
 
-/-- The Bytes/Powers conjunct of `Goals.opcodeEvalUniversal`, for every input. -/
-theorem universal : Solidity.Goals.opcodeBytesPowers :=
+/-- `Goals.opcodeBytesPowers`, unfolded: the Bytes/Powers conjunct of
+`Goals.opcodeEvalUniversal`, for every input. -/
+theorem universal :
+    (∀ xs : Fin 2 → Word, (Pure.eval .«byte» xs).val =
+      (if (xs 0).val ≥ 32 then 0 else
+        ((xs 1).val / 2 ^ (8 * (31 - (xs 0).val))) % 256) % (2 ^ 256)) ∧
+    (∀ xs : Fin 2 → Word, (Pure.eval .«signextend» xs).val =
+      (if (xs 0).val ≥ 31 then (xs 1).val else
+        let bits := 8 * ((xs 0).val + 1)
+        let low := (xs 1).val % (2 ^ bits)
+        if low < 2 ^ (bits - 1) then low
+        else low + (2 ^ 256) - 2 ^ bits) % (2 ^ 256)) ∧
+    (∀ xs : Fin 1 → Word, (Pure.eval .«clz» xs).val =
+      (if (xs 0).val = 0 then 256 else 255 - (xs 0).val.log2) % (2 ^ 256)) ∧
+    (∀ xs : Fin 2 → Word, (Pure.eval .«exp» xs).val =
+      (xs 0).val ^ (xs 1).val % (2 ^ 256)) :=
   ⟨byte_val, signextend_val, clz_val, Powers.exp_val⟩
 
 /-- One literal vector: opcode, operands in source order, expected result. -/
@@ -1027,16 +1045,16 @@ def clzWindow (v r : Nat) : Bool :=
 theorem clz_of_window {v r : Nat} (h : clzWindow v r = true) :
     (Pure.eval .«clz» (fun _ => word v)).val = r := by
   rw [clz_val]
-  change (if v % 2 ^ 256 = 0 then 256 else 255 - (v % 2 ^ 256).log2) % OpcodeSpec.modulus = r
+  change (if v % 2 ^ 256 = 0 then 256 else 255 - (v % 2 ^ 256).log2) % (2 ^ 256) = r
   unfold clzWindow at h
   split at h
-  · next hz => rw [if_pos hz, eq_of_beq h]; rfl
+  · next hz => rw [if_pos hz, eq_of_beq h]
   · next hz =>
     simp only [Bool.and_eq_true, decide_eq_true_eq] at h
     obtain ⟨⟨h1, h2⟩, h3⟩ := h
     have hl : (v % 2 ^ 256).log2 = 255 - r :=
       (Nat.log2_eq_iff hz).2 ⟨h2, by rwa [show 255 - r + 1 = 256 - r by omega]⟩
-    rw [if_neg hz, hl, Nat.mod_eq_of_lt (by unfold OpcodeSpec.modulus; omega)]
+    rw [if_neg hz, hl, Nat.mod_eq_of_lt (by omega)]
     omega
 
 /-- Kernel-fast agreement: BYTE and SIGNEXTEND run the evaluator, CLZ checks
