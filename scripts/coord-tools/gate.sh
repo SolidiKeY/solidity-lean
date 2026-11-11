@@ -97,12 +97,13 @@ else
   run_gate layers node scripts/check-layers.mjs
   run_gate private-paths bash scripts/check-private-paths.sh
   run_gate evidence-files bash scripts/check-evidence-files.sh
-  # Every check CI runs without a full build (lean.yml `checks`, trust.yml,
-  # prose-budget.yml); CI's `checks` job runs this same script. What the gate
-  # does not run is listed with its reason in scripts/ci/ci-only.tsv.
-  run_gate checks-fast bash scripts/ci/checks-fast.sh
   [ "$failed" -eq 0 ] || exit "$failed"
   run_gate build-touched build_touched
+  # Every check CI runs without a full build (lean.yml `checks`, trust.yml,
+  # prose-budget.yml); CI's `checks` job runs this same script. What the gate
+  # does not run is listed with its reason in scripts/ci/ci-only.tsv. After the
+  # build, not a pre-gate: a check already red on master must not skip it.
+  run_gate checks-fast bash scripts/ci/checks-fast.sh
   if [ "$mode" != touched ]; then
     if [ "$mode" = full ]; then
       # H134: each slow example under its own 600 s one-core budget, as in CI
