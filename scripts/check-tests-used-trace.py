@@ -298,6 +298,18 @@ def run(command, scratch, manifest, output, timeout=30, observe_module_entry=Fal
         return receipt
 
 
+def null_sink_fd(line, scratch):
+    """Recognize only a complete successful absolute kernel-null open.
+
+    This avoids mutation taint, never supplies read or execution credit. Every
+    other unsupported descriptor annotation remains conservatively unknown.
+    """
+    if scratch == '/' or '/dev/null' == scratch or '/dev/null'.startswith(scratch.rstrip('/') + '/'): return None
+    start = r'(?:open\("/dev/null", |openat(?:2)?\((?:AT_FDCWD(?:<[^<>]+>)?|[0-9]+(?:<[^<>]+>)?), "/dev/null", )'
+    match = re.fullmatch(start + r'.*\)\s+= ([0-9]+)</dev/null<char 1:3>>\s*', line)
+    return int(match[1]) if match else None
+
+
 def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False, module_entries=False):
     """Match each actual read to its audited open by native thread and fd.
 
@@ -371,11 +383,14 @@ def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False, modul
         if not match: continue
         tid, line = int(match[1]), match[2]
         if '<unfinished ...>' in line:
+            if tid in unfinished: dirty.update(files)
             unfinished[tid] = line.split('<unfinished ...>', 1)[0]; continue
-        resumed = re.match(r'<[.][.][.] \w+ resumed>(.*)', line)
+        resumed = re.match(r'<[.][.][.] (\w+) resumed>(.*)', line)
         if resumed:
-            if tid not in unfinished: continue
-            line = unfinished.pop(tid) + resumed[1]
+            prefix = unfinished.pop(tid, None)
+            if prefix is None or not prefix.startswith(resumed[1] + '('):
+                dirty.update(files); continue
+            line = prefix + resumed[2]
         entry_marker = re.search(r'X1EXEC:[0-9]+:[0-9]+', line)
         if entry_marker and entry_marker[0] in events:
             entry = events[entry_marker[0]]
@@ -388,6 +403,7 @@ def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False, modul
         marker = re.search(r'X1AUDIT:[0-9]+:[0-9]+', line)
         if marker and marker[0] in events:
             pending.setdefault(tid, []).append(marker[0])
+        null_fd = null_sink_fd(line, scratch)
         # Every successful open resets descriptor attribution, including native opens.
         if re.match(r'(?:open|openat|openat2)\(', line):
             literals = re.findall(r'"(?:[^"\\]|\\.)*"', line)
@@ -398,12 +414,14 @@ def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False, modul
             choices = pending.get(tid, [])
             selected = next((e for e in reversed(choices) if events[e]['argument'] == argument), None)
             if selected: choices.remove(selected)
-            opened = re.search(r'= (\d+)<([^>]+)>\s*$', line)
+            opened = re.search(r'= (\d+)<([^<>]+)>\s*$', line)
             if opened:
                 fd, path = int(opened[1]), relative(opened[2])
                 descriptors.pop((tid, fd), None)
                 if selected and path == events[selected]['target']:
                     descriptors[(tid, fd)] = selected
+            elif null_fd is not None:
+                descriptors.pop((tid, null_fd), None)
         if re.search(r'= -1\b', line): continue
         match = re.match(r'(?:read|pread64)\((\d+)<([^>]+)>.*\)\s+=\s+([0-9]+)\s*$', line)
         if match:
@@ -453,9 +471,9 @@ def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False, modul
         modifies |= ('mmap(' in line and 'PROT_WRITE' in line and 'MAP_SHARED' in line)
         if not modifies: continue
         if re.match(r'(?:open|openat|openat2)\(', line):
-            target_fd = re.search(r'= \d+<([^>]+)>\s*$', line)
+            target_fd = re.search(r'= \d+<([^<>]+)>\s*$', line)
             if target_fd: taint(target_fd[1])
-            else: dirty.update(files)
+            elif null_fd is None: dirty.update(files)
         elif kernel_copy:
             # The input fd is read-only evidence, not a mutation. Destination
             # taint was handled above, including conservative unknown forms.
@@ -475,6 +493,7 @@ def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False, modul
                 path_argument(args[0]); path_argument(args[1])
             elif name != 'ftruncate':
                 path_argument(args[0])
+    if unfinished: dirty.update(files)
     routes = {}
     for event_id in sorted(entries if module_entries else reads):
         event = events[event_id]; target = event['target']
@@ -650,11 +669,16 @@ def kernel_copy_boundary_controls():
 
 def module_entry_boundary_controls():
     """Finite positive/negative controls; sources are committed in this helper."""
+    for call in ('open("/dev/null", O_RDWR)', 'openat(AT_FDCWD</owned>, "/dev/null", O_RDWR)',
+                 'openat2(3</owned>, "/dev/null", {flags=O_RDWR}, 24)'):
+        assert null_sink_fd(call + ' = 7</dev/null<char 1:3>>', '/owned') == 7
+        assert null_sink_fd(call + ' = 7</dev/null<char 1:3>>', '/') is None
     with tempfile.TemporaryDirectory(prefix='tests-used-entry-controls-') as directory:
         base = Path(directory); root = base / 'repo'; root.mkdir()
         helper = 'VALUE = 3\ndef function(): return VALUE\n'
         setup = 'from pathlib import Path\np=Path(__file__).with_name("helper.py")\n'
         sources = {'tests/helper.py': helper,
+            'tests/devnull.py': 'import os,subprocess,sys\nfd=os.open("/dev/null",getattr(os,"O_"+"RDWR"));os.close(fd)\nsubprocess.run([sys.executable,"-c","pass"],stdin=subprocess.DEVNULL,check=True)\nimport helper\nassert helper.function()==3\n',
             'tests/imported.py': 'import helper\nassert helper.function() == 3\n',
             'tests/read_only.py': setup + 'p.read_bytes()\n',
             'tests/compiled.py': setup + 'compile(p.read_bytes(), str(p), "exec")\n',
@@ -676,14 +700,56 @@ def module_entry_boundary_controls():
         manifest={'measured_revision':revision,'files':{p:{'blob':git('rev-parse',revision+':'+p).decode().strip(),
                   'sha256':hashlib.sha256((root/p).read_bytes()).hexdigest()} for p in sources}}
         manifest_path=base/'manifest.json';manifest_path.write_text(json.dumps(manifest))
-        for scenario in ('imported','read_only','compiled','dead','blocked','literal','read_after','wrong_bytes','replaced','restored','failed','profiler_removed'):
+        for scenario in ('devnull','imported','read_only','compiled','dead','blocked','literal','read_after','wrong_bytes','replaced','restored','failed','profiler_removed'):
             runner='tests/'+scenario+'.py';command=['python3','-B',runner]
             normal_process=subprocess.run(command,cwd=root,capture_output=True,timeout=15,env=dict(os.environ,PYTHONDONTWRITEBYTECODE='1'))
             normal={'command':command,'revision':revision,'timeout':False,'exit':normal_process.returncode}
             receipt=run(command,root,manifest_path,base/scenario,15,observe_module_entry=True)
             entries=observed_module_entries(receipt,normal,root,manifest,runner)
             targets={r['target'] for r in entries}
-            assert ('tests/helper.py' in targets)==(scenario=='imported'), (scenario, targets,Path(receipt['stdout']).read_text())
+            assert ('tests/helper.py' in targets)==(scenario in ('imported','devnull')), (scenario, targets,Path(receipt['stdout']).read_text())
+            if scenario=='devnull':
+                syscall_path=Path(str(receipt['events']).removesuffix('.events.jsonl')+'.syscalls')
+                original_trace=syscall_path.read_text();lines=original_trace.splitlines()
+                found=next(line for line in lines if null_sink_fd(line.split(None,1)[1],str(root)) is not None)
+                tid,body=found.split(None,1)
+                for known in (body.replace('<char 1:3>',''),body.replace('= '+str(null_sink_fd(body,str(root))), '= -1')):
+                    assert null_sink_fd(known,str(root)) is None
+                mutations=[body.replace('1:3','1:5'),body.replace('"/dev/null"','"null"'),
+                    body.replace('/dev/null',str(root/'tests/helper.py')),body[:-1],body+' trailing']
+                for bad in mutations:
+                    assert null_sink_fd(bad,str(root)) is None
+                    syscall_path.write_text(original_trace.replace(found,tid+' '+bad,1))
+                    assert not observed_module_entries(receipt,normal,root,manifest,runner), bad
+                # Mutation exclusion needs complete pairing, not event timing.
+                syscall=body.split('(',1)[0]
+                last=body.rfind(')');left=body[:last];right=body[last:]
+                pairs=[(left,right), (body.split('"/dev/null"',1)[0], '"/dev/null"'+body.split('"/dev/null"',1)[1])]
+                for left,right in pairs:
+                    start=tid+' '+left+'<unfinished ...>'
+                    finish=tid+' <... '+syscall+' resumed>'+right
+                    syscall_path.write_text(original_trace.replace(found,start+'\n'+finish,1))
+                    assert observed_module_entries(receipt,normal,root,manifest,runner), 'complete null reassembly rejected'
+                    for invalid in (finish.replace(syscall+' resumed','close resumed'),
+                                    str(int(tid)+1000000)+finish[len(tid):],finish[:-1]):
+                        syscall_path.write_text(original_trace.replace(found,start+'\n'+invalid,1))
+                        assert not observed_module_entries(receipt,normal,root,manifest,runner), 'ambiguous null reassembly admitted'
+                    for invalid in (finish,start,start+'\n'+start+'\n'+finish):
+                        syscall_path.write_text(original_trace.replace(found,invalid,1))
+                        assert not observed_module_entries(receipt,normal,root,manifest,runner), 'orphan/duplicate null reassembly admitted'
+                syscall_path.write_text(original_trace)
+                # A successful null open must reset prior audited FD identity.
+                # Even an inconsistent subsequent path annotation cannot reuse it.
+                audit_line=next(line for line in lines if 'X1AUDIT:' in line)
+                tid=audit_line.split(None,1)[0]
+                caller_read=next(line for line in lines if 'read(' in line and str(root/runner)+'>' in line)
+                synthetic=[caller_read,audit_line,
+                    tid+' openat(AT_FDCWD<'+str(root)+'>, "'+str(root/'tests/helper.py')+'", O_RDONLY) = 9<'+str(root/'tests/helper.py')+'>',
+                    tid+' openat(AT_FDCWD<'+str(root)+'>, "/dev/null", O_RDWR) = 9</dev/null<char 1:3>>',
+                    tid+' read(9<'+str(root/'tests/helper.py')+'>, "x", 1) = 1']
+                syscall_path.write_text('\n'.join(synthetic)+'\n')
+                assert not observed_routes(receipt,root,manifest,runner), 'stale audited FD survived null open'
+                syscall_path.write_text(original_trace)
             if scenario=='imported':
                 for bad in (dict(receipt,timeout=True),dict(receipt,observe_module_entry=False),dict(receipt,exit=1)):
                     assert not observed_module_entries(bad,normal,root,manifest,runner)
