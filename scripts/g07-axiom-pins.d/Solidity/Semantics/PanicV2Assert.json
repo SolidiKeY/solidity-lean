@@ -1,0 +1,40 @@
+{
+ "Solidity/Semantics/PanicV2Assert.lean:Solidity.PanicV2.Assertion.condition_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Assert.lean:Solidity.PanicV2.Assertion.condition_failure_erase": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Assert.lean:Solidity.PanicV2.Assertion.guard_codes": [
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Assert.lean:Solidity.PanicV2.Assertion.run_erase": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Assert.lean:Solidity.PanicV2.Assertion.run_erase_stmt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Assert.lean:Solidity.PanicV2.Assertion.run_false": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Assert.lean:Solidity.PanicV2.Assertion.run_true": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Assert.lean:Solidity.PanicV2.Assertion.source_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

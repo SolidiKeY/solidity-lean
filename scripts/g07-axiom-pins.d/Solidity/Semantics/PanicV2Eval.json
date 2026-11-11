@@ -1,0 +1,194 @@
+{
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.arithmetic_failed": [
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.assignIncDec_erase": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.binary_erase": [
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.binary_failed": [
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.bounds_code": [
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.bump_erase": [],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.bump_failed": [
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.bumpMem_erase": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.bumpStore_erase": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.compound_erase": [
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.compound_failed": [
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.division_nonzero_failed": [
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.division_zero": [
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.emptyPop_code": [
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.exhaustion_unclassified": [
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.incDec_erase": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.incDec_local_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.loc_erase": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.memoryRead_bounds": [
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.memoryRead_erase": [
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.mloc_erase": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.modular_erase": [
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.modular_zero": [
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.mpath_erase": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.negation_failed": [
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.opAssign_erase": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.opAssign_local_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.opAssign_rhs_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.opLocBump_erase": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.opLocStore_erase": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.opMem_erase": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.opStore_erase": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.path_erase": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.pop_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.pop_erase": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.power_failed": [
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.pushIncDec_erase": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.pushIncDec_full": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.pushOpAssign_erase": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.pushOpAssign_full": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.storageIndex_bounds": [
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.storageIndex_erase": [
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.storageIndex_missing": [
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.storagePop_empty": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.storagePop_erase": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.storagePop_missing": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.unary_erase": [
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.value_erase": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2Eval.lean:Solidity.PanicV2.Eval.value_of_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

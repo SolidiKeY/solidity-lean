@@ -1,0 +1,15 @@
+{
+ "Solidity/Semantics/PanicV2.lean:Solidity.PanicV2.erase_bind": [],
+ "Solidity/Semantics/PanicV2.lean:Solidity.PanicV2.erase_bind_congr": [
+  "Quot.sound"
+ ],
+ "Solidity/Semantics/PanicV2.lean:Solidity.PanicV2.erase_checked": [],
+ "Solidity/Semantics/PanicV2.lean:Solidity.PanicV2.erase_lift": [],
+ "Solidity/Semantics/PanicV2.lean:Solidity.PanicV2.erase_map": [],
+ "Solidity/Semantics/PanicV2.lean:Solidity.PanicV2.erase_ofOpt": [],
+ "Solidity/Semantics/PanicV2.lean:Solidity.PanicV2.legacy_panic_unclassified": [
+  "propext"
+ ],
+ "Solidity/Semantics/PanicV2.lean:Solidity.PanicV2.lift_error_erase": [],
+ "Solidity/Semantics/PanicV2.lean:Solidity.PanicV2.operation_erases_revert": []
+}
