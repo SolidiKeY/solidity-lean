@@ -86,35 +86,6 @@ theorem incDec_statement {E : Source.Env} {Γ : Source.RCtx} {τ : Source.STy}
     exact expr_of_discarded G F n nps ph plan known _ _ ls st
       (incDec_discarded G F n plan known (ls, st) inc pre l)
 
-/-- The actual Source expression statements for literal-one compound
-assignment and increment/decrement have equal outcomes and complete poststates.
-The increment may be prefix or postfix: its value is discarded by `execS`, not
-identified with the compound expression's value. No updated-value bound or
-no-panic premise is imposed. Raw/model association remains a separate proof. -/
-theorem literalCompound_statement {E : Source.Env} {Γ : Source.RCtx}
-    {R : List Source.STy} {M : Bool} {k : Source.SCtx}
-    (G : Source.Glob E) (F : Source.Fr) (fuel nps : Nat) (ph : Option (Source.Ph E))
-    (plan : Source.FailureExecution.RuntimePlan) (known : Bool)
-    (ls : Source.Locals E.layout Γ) (st : Source.St E)
-    (t : Source.IntTy) (inc pre : Bool) (i : Source.Idx Γ (.int t))
-    (x : Int) (range : t.lo ≤ x ∧ x ≤ t.hi) (read : ls.get i = .int x range)
-    (fits : (if inc then Source.AssignOp.add else .sub).fits E.isBase E.mapFree
-      (.rational (Source.Q.ofInt 1)) (.int t) = true) :
-    (Source.execS G F (fuel + 3) nps ph
-      (.expr (.compound (if inc then .add else .sub) (.local i) (.const (Source.Q.ofInt 1)) fits)
-        : Source.RStmt E R M k Γ Γ) ls (plan := plan) (calldataKnown := known)).run (.nil, st) =
-    (Source.execS G F (fuel + 3) nps ph
-      (.expr (.incDec inc pre (.local i)) : Source.RStmt E R M k Γ Γ) ls
-      (plan := plan) (calldataKnown := known)).run (.nil, st) := by
-  have expressions := literalCompoundOne G F fuel plan known (ls, st) t inc i x range read fits
-  have discarded : ((Source.evalE G F (fuel + 2)
-      (.compound (if inc then .add else .sub) (.local i) (.const (Source.Q.ofInt 1)) fits)
-      (plan := plan) (calldataKnown := known)) >>= fun _ => pure ()).run (ls, st) =
-    ((Source.evalE G F (fuel + 2) (.incDec inc true (.local i))
-      (plan := plan) (calldataKnown := known)) >>= fun _ => pure ()).run (ls, st) := by
-    simp only [Source.Hoare.run_bind, expressions]
-  exact (expr_of_discarded G F (fuel + 2) nps ph plan known _ _ ls st discarded).trans
-    (incDec_statement G F (fuel + 3) nps ph plan known ls st inc pre (.local i)).symm
 
 /-- One Source statement law for literal-one compound assignment and every
 prefix/postfix increment/decrement form, at arbitrary integer lvalues and all
@@ -145,6 +116,29 @@ theorem compoundOne_statement {E : Source.Env} {Γ : Source.RCtx}
       rw [compoundOne_eval G F n plan known t inc l fits]
     exact (expr_of_discarded G F n nps ph plan known _ _ ls st discarded).trans
       (incDec_statement G F (n + 1) nps ph plan known ls st inc pre l).symm
+
+/-- The actual Source expression statements for literal-one compound
+assignment and increment/decrement have equal outcomes and complete poststates.
+The increment may be prefix or postfix: its value is discarded by `execS`, not
+identified with the compound expression's value. No updated-value bound or
+no-panic premise is imposed. Raw/model association remains a separate proof. -/
+theorem literalCompound_statement {E : Source.Env} {Γ : Source.RCtx}
+    {R : List Source.STy} {M : Bool} {k : Source.SCtx}
+    (G : Source.Glob E) (F : Source.Fr) (fuel nps : Nat) (ph : Option (Source.Ph E))
+    (plan : Source.FailureExecution.RuntimePlan) (known : Bool)
+    (ls : Source.Locals E.layout Γ) (st : Source.St E)
+    (t : Source.IntTy) (inc pre : Bool) (i : Source.Idx Γ (.int t))
+    (x : Int) (range : t.lo ≤ x ∧ x ≤ t.hi) (read : ls.get i = .int x range)
+    (fits : (if inc then Source.AssignOp.add else .sub).fits E.isBase E.mapFree
+      (.rational (Source.Q.ofInt 1)) (.int t) = true) :
+    (Source.execS G F (fuel + 3) nps ph
+      (.expr (.compound (if inc then .add else .sub) (.local i) (.const (Source.Q.ofInt 1)) fits)
+        : Source.RStmt E R M k Γ Γ) ls (plan := plan) (calldataKnown := known)).run (.nil, st) =
+    (Source.execS G F (fuel + 3) nps ph
+      (.expr (.incDec inc pre (.local i)) : Source.RStmt E R M k Γ Γ) ls
+      (plan := plan) (calldataKnown := known)).run (.nil, st) := by
+  have _legacyRead := read
+  exact compoundOne_statement G F (fuel + 3) nps ph plan known ls st t inc pre (.local i) fits
 
 #print axioms incDec_discarded
 #print axioms incDec_statement
