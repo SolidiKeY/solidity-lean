@@ -40,15 +40,6 @@ private theorem intRes_wrap {D : Source.Layout} (t : Source.IntTy) (v : Int) :
     rfl
   · rfl
 
-private theorem wrap_mod {D : Source.Layout} (t : Source.IntTy) (a b : Int)
-    (residue : a % ((2 ^ t.bits : Nat) : Int) = b % ((2 ^ t.bits : Nat) : Int)) :
-    Source.intWrap (D := D) t a = Source.intWrap t b := by
-  have wrapped : t.wrap a = t.wrap b := by
-    simp only [Source.IntTy.wrap, Source.wrapBits]
-    rw [residue]
-  unfold Source.intWrap
-  congr 1
-
 private theorem negative_one_power (n : Nat) :
     (-1 : Int) ^ n = (if n % 2 = 0 then 1 else -1) := by
   induction n with
@@ -90,9 +81,8 @@ theorem unchecked_word_value {D : Source.Layout} (t : Source.IntTy) (base : Int)
     · subst base
       rw [intRes_wrap, negative_one_power]
     · simp only [Bool.false_eq_true, if_false]
-      exact congrArg Except.ok (wrap_mod t
-        (Source.powMod base word.val.toNat (2 ^ t.bits)) (base ^ word.val.toNat)
-        (word_powMod base word (2 ^ t.bits)))
+      simp only [Source.intWrap, Source.IntTy.wrap, Source.wrapBits, word_powMod]
+      rfl
 
 #print axioms word_powMod
 #print axioms word_powW

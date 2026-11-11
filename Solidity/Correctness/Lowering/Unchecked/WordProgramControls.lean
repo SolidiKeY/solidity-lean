@@ -41,26 +41,26 @@ private def sourceIncrement (E : Source.Env) (inc prefixResult : Bool) :
 /-- Guards a vacuous paired checker: both Source token-result conventions
 associate with the actual quotation's emitted update. -/
 theorem paired_actual_output_accepted (E : Source.Env) (prefixResult : Bool) :
-    (checkPairedIncrementV2 [] [] (sourceIncrement E true prefixResult)
+    (checkPairedUpdateV3 [] [] (sourceIncrement E true prefixResult)
       (body increment)).isSome = true := by
   rfl
 
 /-- Guards mismatching Source decrement with an otherwise accepted target increment. -/
 theorem paired_direction_rejected (E : Source.Env) :
-    (checkPairedIncrementV2 [] [] (sourceIncrement E false false)
+    (checkPairedUpdateV3 [] [] (sourceIncrement E false false)
       (body increment)).isNone = true := by
   rfl
 
 /-- Guards loss of the target's actual checkedness in paired association. -/
 theorem paired_checked_target_rejected (E : Source.Env) :
-    (checkPairedIncrementV2 [] [] (sourceIncrement E true false)
+    (checkPairedUpdateV3 [] [] (sourceIncrement E true false)
       (body checking)).isNone = true := by
   rfl
 
 /-- Guards accepting a different Source expression merely because the target
 is a valid increment. -/
 theorem paired_nonupdate_rejected (E : Source.Env) :
-    (checkPairedIncrementV2 [] []
+    (checkPairedUpdateV3 [] []
       (.expr (.local .here) : Source.RStmt E [] false ⟨false, true⟩
         (Source.Agreement.sourceContext [.uint]) (Source.Agreement.sourceContext [.uint]))
       (body increment)).isNone = true := by
@@ -69,7 +69,7 @@ theorem paired_nonupdate_rejected (E : Source.Env) :
 /-- Guards silently redirecting the Source slot while retaining an otherwise
 valid target update at the selected second slot. -/
 theorem paired_source_slot_rejected (E : Source.Env) :
-    (checkPairedIncrementV2 [.uint] []
+    (checkPairedUpdateV3 [.uint] []
       (.expr (.incDec true false (.local .here)) : Source.RStmt E [] false ⟨false, true⟩
         (Source.Agreement.sourceContext [.uint, .uint])
         (Source.Agreement.sourceContext [.uint, .uint]))

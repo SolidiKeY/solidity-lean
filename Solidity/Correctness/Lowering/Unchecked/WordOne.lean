@@ -90,42 +90,6 @@ structure PairedIncrementV2 {E : Source.Env} {C : Contract}
   model : WordOneAssociation inc program
   modelSlot : model.target.slot = modelPrimitiveSlot .uint tail pre
 
-private def checkPairedExpressionV2 {E : Source.Env} {C : Contract}
-    {R : List Source.STy} {M loop : Bool} (pre tail : List PrimTy) {τ : Source.STy}
-    (expression : Source.RExpr E (sourceContext (pre ++ .uint :: tail)) τ)
-    (program : Prog C (modelContext (pre ++ .uint :: tail))
-      (modelContext (pre ++ .uint :: tail))) :
-    Option (PairedIncrementV2 (R := R) (M := M) (loop := loop) pre tail (.expr expression) program) :=
-  match expression with
-  | .incDec inc prefixResult location =>
-    match location with
-    | .local slot =>
-      match τ with
-      | .int ⟨false, 256, _⟩ => do
-        if position : slot.toNat = (sourcePrimitiveSlot .uint tail pre).toNat then
-          let model ← checkWordOne inc program
-          if same : model.target.slot = modelPrimitiveSlot .uint tail pre then
-            some ⟨inc, prefixResult,
-              by rw [source_idx_injective _ _ position]; exact .matched, model, same⟩
-          else none
-        else none
-      | _ => none
-    | _ => none
-  | _ => none
-
-/-- Total supplied-pair checking. The actual Source type is matched before
-its typed index is compared; integer positions alone cannot erase a width.
-Wrong directions, slots and model shapes are refused, without accepting
-semantic proof arguments. Raw/name and unchecked-entry linkage remain. -/
-def checkPairedIncrementV2 {E : Source.Env} {C : Contract}
-    {R : List Source.STy} {M loop : Bool} {Δ : Source.RCtx} (pre tail : List PrimTy)
-    (source : Source.RStmt E R M ⟨loop, true⟩ (sourceContext (pre ++ .uint :: tail)) Δ)
-    (program : Prog C (modelContext (pre ++ .uint :: tail))
-      (modelContext (pre ++ .uint :: tail))) : Option (PairedIncrementV2 pre tail source program) :=
-  match source with
-  | .expr expression => checkPairedExpressionV2 pre tail expression program
-  | _ => none
-
 private theorem primitiveUInt_of_integerRelationV2 {D : Source.Layout}
     (source : Source.Val D (.int Source.IntTy.u256)) (target : PrimTy.uint.Denote)
     (related : IntValueRel Source.IntTy.u256 source target) :
@@ -195,7 +159,8 @@ theorem pairedIncrementV2_run {E : Source.Env} {C : Contract}
       (primitiveUInt_of_integerRelationV2 sourceResult modelResult valueRelated) initial
 
 /-- One syntax-only family for compound-one and increment statements.
-V2 stays unchanged; V3 reuses SourceOneShape and the paired V2 execution law. -/
+Recognition uses this shared family; V3 reuses SourceOneShape and the paired
+V2 execution law. -/
 structure PairedUpdateV3 {E : Source.Env} {C : Contract}
     {R : List Source.STy} {M loop : Bool} {Δ : Source.RCtx} (pre tail : List PrimTy)
     (source : Source.RStmt E R M ⟨loop, true⟩
