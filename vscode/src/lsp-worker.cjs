@@ -76,7 +76,10 @@ async function execute(task){
     let diagnostics;
     // A recheck that times out keeps the compiled verifier's answers (decided
     // rows above, `unsupported` rows restored below) and reports the timeout.
-    try{diagnostics=await session.check(wrapper,options.timeoutMs??60000);}
+    // It must finish before the pool's request deadline (worker-pool.cjs),
+    // which would otherwise retire this worker and discard those answers, so
+    // it stops a reply margin (20% of the time left, at most 1 s) earlier.
+    try{diagnostics=await session.check(wrapper,recheck?recheckBudget(options.timeoutMs??60000,task.requestDeadline):options.timeoutMs??60000);}
     catch(error){if(!recheck||!/timed out/i.test(error?.message||''))throw error;errors.push({source,contract:contract.name,stage:'lean',reason:'Certified recheck did not finish; compiled-verifier answers kept: '+error.message});diagnostics=null;}
     if(diagnostics&&options.benchmark){await new Promise(setImmediate);benchmarkLog.push(session.stderr,...diagnostics.map(d=>d.message||''));}
     for(const diagnostic of diagnostics||[])if(importDiagnostic(diagnostic))
@@ -116,4 +119,10 @@ process.on('message',async task=>{
 process.on('disconnect',()=>{session?.dispose();process.exit(0);});
 for(const signal of ['SIGTERM','SIGINT'])process.on(signal,()=>{session?.dispose();process.exit(0);});
 }
-module.exports={checkpointRows,importDiagnostic};
+// The certified recheck's Lean budget: the request timeout, capped so it ends a
+// reply margin (20% of the time left, at most 1 s) before the pool's deadline.
+function recheckBudget(timeoutMs,requestDeadline,now=Date.now()){
+  if(!Number.isFinite(requestDeadline))return timeoutMs;
+  const left=requestDeadline-now;return Math.max(1,Math.min(timeoutMs,left-Math.min(1000,Math.max(1,Math.floor(left/5)))));
+}
+module.exports={checkpointRows,importDiagnostic,recheckBudget};

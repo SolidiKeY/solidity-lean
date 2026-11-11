@@ -254,3 +254,27 @@ test('frontend dependency fingerprints track imported models and keep owned buil
     const updated=fingerprint(root);writeFileSync(join(root,'Solidity/NewDependency.lean'),'-- new model changed');assert.notEqual(fingerprint(root),updated);
   }finally{if(previous===undefined)delete process.env.SOLKEY_ROOT;else process.env.SOLKEY_ROOT=previous;rmSync(base,{recursive:true,force:true});}
 });
+
+// Regression (landing review): a certified recheck must end before the pool's
+// request deadline, or the pool retires the worker and its kept direct answers
+// are lost. The budget keeps a reply margin of 20% of the time left (at most 1 s).
+test('certified recheck budget ends before the request deadline',()=>{
+  const {recheckBudget}=require('../src/lsp-worker.cjs'),now=1_000_000;
+  assert.equal(recheckBudget(60000,now+10000,now),9000,"margin capped at 1 s");
+  assert.equal(recheckBudget(60000,now+500,now),400);
+  assert.equal(recheckBudget(5000,now+60000,now),5000,'a shorter request timeout is kept');
+  assert.equal(recheckBudget(60000,undefined,now),60000,'no deadline: unchanged');
+  assert.equal(recheckBudget(60000,now-5,now),1,'an expired deadline leaves a minimal budget');
+  for(const left of [2,50,999,5000,120000])assert.ok(recheckBudget(1e9,now+left,now)<left||left<=1,`budget below ${left} ms`);
+});
+test('the worker pool sends each task its request deadline',async()=>{
+  const fs=require('node:fs'),path=require('node:path'),{WorkerPool}=require('../src/worker-pool.cjs'),root=path.resolve(__dirname,'../..');
+  const directory=fs.mkdtempSync(path.join(root,'.lake/pool-deadline-')),pool=new WorkerPool(root,directory,1),sent=[],spawn=pool.spawn.bind(pool);
+  pool.spawn=()=>{const worker=spawn(),send=worker.child.send.bind(worker.child);worker.child.send=(message,...rest)=>{sent.push(message);return send(message,...rest);};return worker;};
+  try{
+    const before=Date.now(),source=path.join(root,'tests/editor-parity/constant.sol');
+    await pool.run({action:'analyze',source,text:fs.readFileSync(source,'utf8')},{timeoutMs:120000});
+    const task=sent.find(message=>message.action==='analyze');assert.ok(task);
+    assert.ok(task.requestDeadline>=before+120000&&task.requestDeadline<=Date.now()+120000,'deadline = admission time + timeout');
+  }finally{await pool.dispose();fs.rmSync(directory,{recursive:true,force:true});}
+});
