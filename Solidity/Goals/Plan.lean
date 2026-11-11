@@ -3,6 +3,10 @@ import Solidity.Yul.OpcodeSpec
 import Solidity.Yul.Compilation.Artifact
 import Solidity.Yul.Compilation.ProducerStatements
 import Solidity.Yul.Compilation.WordMachine
+import Solidity.Roadmap.Contracts
+import Solidity.Semantics.Callback
+import Solidity.Semantics.TransientWorld
+import Solidity.Lowering.V08.EnvironmentProjection
 
 /-! Plan steps outside the finish line: each goal names the theorem expected to close
 it; all await vocabulary. -/
@@ -553,5 +557,275 @@ def yulAcceptedCompilesWithArtifact : Prop :=
         compiled.lowered.code depth = some p ∧
         Yul.Compilation.WordMachine.selectCode p = some code ∧
         ∃ artifact : Yul.Compilation.Artifact depth stmt, artifact.code = code
+
+/-! Concrete intrinsic session semantics (plan step is0-intrinsic-session). The
+obligation is a concrete `Roadmap.IntrinsicSpec` whose worlds are read as actual
+typed contract worlds (`ContractWorld.World` over a catalog of `Contract`s, with
+the `Prog`s it runs) and whose sessions are tied, step by step, to the existing
+frame semantics:
+
+* a session is its first step followed by the session resumed from the world that
+  step reaches (`Continues`), so every later transaction is bound by the same laws;
+* a deployment or transaction whose body never leaves its contract
+  (`Prog.callsBack true = false`) is exactly `World.transact` of `World.create` /
+  `World.call`: the logical `Prog.run`, with no fuel in the statement. Exhaustion
+  and divergence yield no event at a bound without resource failure
+  (`ContractWorld.catchable`), and a completed run is observed at some such bound;
+* dropped requests, credits, the final observation, `Forward`, `Guard` and the
+  environment maps are those of `Roadmap/Contracts.lean`.
+
+Not determined by the definitions this reads, and therefore not chosen here: how
+the callee strategy answers the calls of a body that leaves its contract
+(`TTx.ext` is a table, a strategy reads the history), the revert data of a
+`THalt.panic` (it carries no code), the constructor's timestamp, requests whose
+target or input the code does not resolve, and the slot preimages of the keys a
+typed storage holds (`View.stored` is only required to be accounted for). -/
+namespace IntrinsicSession
+
+open Solidity.Roadmap
+open Solidity.Lowering.V08.EnvironmentProjection
+  (liftWord lowerWord liftAddress lowerAddress requestContext)
+
+/-- The code of a compilation: its contracts by position (as `Artifact.contracts`
+and `Event.create` number them), the selected one, their roles, and the programs a
+deployment or a request runs. `ctor` and `entry` resolve constructor arguments and
+calldata to actual typed programs; an entry's `result` gives its return data. -/
+structure Code where
+  contracts : List Contract
+  main : Nat
+  roles : Fin contracts.length → ContractWorld.Role
+  ctor : (k : Fin contracts.length) → Bytes → Option (Prog contracts[k] [] [])
+  entry : (k : Fin contracts.length) → Bytes → Option (ContractWorld.Entry contracts[k] Bytes)
+
+/-- The catalog `ContractWorld` indexes instances by. -/
+abbrev Code.catalog (c : Code) (k : Fin c.contracts.length) : Contract := c.contracts[k]
+
+/-- An actual typed contract world together with its code. -/
+structure TypedWorld where
+  code : Code
+  world : ContractWorld.World code.catalog
+
+/-- A world's balances as session opening balances. -/
+def balances {K : Type} {contracts : K → Contract} (w : ContractWorld.World contracts) :
+    Address → Roadmap.Word :=
+  fun a => lowerWord (w.funds (liftAddress a))
+
+/-- Session opening balances as a world's funds. -/
+def funds (b : Address → Roadmap.Word) : ContractWorld.Address → ContractWorld.Word :=
+  fun a => liftWord (b (lowerAddress a))
+
+/-- Two worlds agree at a transaction boundary: instances and storage up to the
+transaction-local cells, funds and roles. The timestamp is each request's own. -/
+def Same {K : Type} {contracts : K → Contract} (a b : ContractWorld.World contracts) : Prop :=
+  a.resetTransient.accounts = b.resetTransient.accounts ∧ a.funds = b.funds ∧ a.roles = b.roles
+
+/-- `t` is the world `w` of `code`, at a transaction boundary. -/
+def TypedWorld.Shows (t : TypedWorld) (code : Code) (w : ContractWorld.World code.catalog) :
+    Prop :=
+  ∃ w' : ContractWorld.World code.catalog, t = ⟨code, w'⟩ ∧ Same w' w
+
+/-- `b` is `a` after `value` is credited to `target` without running code. -/
+def Credited {K : Type} {contracts : K → Contract} (a : ContractWorld.World contracts)
+    (target : ContractWorld.Address) (value : ContractWorld.Word)
+    (b : ContractWorld.World contracts) : Prop :=
+  a.resetTransient.accounts = b.resetTransient.accounts ∧ a.roles = b.roles ∧
+  (∀ x, x ≠ target → b.funds x = a.funds x) ∧
+  ∀ s, PrimTy.ofInt? .uint ((a.funds target).1 + value.1) = some s → b.funds target = s
+
+/-- The environment after the history `h` and `n` issued actions, opening with
+`balance`: what a session resumed at that boundary reads. -/
+def after (e : SessionEnv) (h : List Event) (n : Nat) (balance : Address → Roadmap.Word) :
+    SessionEnv :=
+  { e with
+    balance := balance
+    hasCode := fun h' => e.hasCode (h ++ h')
+    requests := fun h' i => e.requests (h ++ h') (n + i)
+    callee := fun h' => e.callee (h ++ h') }
+
+/-- The first request is affordable (`Lang.Affordable`); otherwise it is dropped. -/
+def Funded (F : Fixed) (e : SessionEnv) (q : Request) : Prop :=
+  q.value.val ≤ (F.ledger e.balance [] q.sender).val
+
+/-- A frame result that completed: a return, or a failure a caller can observe.
+Divergence and exhaustion are not completions. -/
+def Ends {α : Type} : TRes α → Prop
+  | .ok _ => True
+  | .error h => ContractWorld.catchable h = true
+
+/-- A completed failure as an outcome: a revert with the halt's data. A panic's
+data is not read off `THalt.panic`, which carries no code. -/
+def RevertMatches (h : THalt) (out : Outcome) : Prop :=
+  ContractWorld.catchable h = true ∧ ∃ d, out = .revert d ∧ (h ≠ .panic → d = h.data)
+
+/-- A transaction's frame result as its outcome. -/
+def Matches : TRes Bytes → Outcome → Prop
+  | .ok d, out => out = .success d
+  | .error h, out => RevertMatches h out
+
+/-- The outcomes of the completed deployments and transactions of a history. -/
+def outcomes (h : List Event) : List Outcome :=
+  h.filterMap fun
+    | .deploy _ _ _ o _ => some o
+    | .tx _ _ _ _ _ o => some o
+    | _ => none
+
+/-- A completed transaction. -/
+def IsTx : Event → Prop
+  | .tx .. => True
+  | _ => False
+
+/-- How a candidate's worlds are typed worlds: the typed world of each world, the
+world a compilation starts from (nothing deployed), the world resumed at a typed
+world, and the slot preimages of the keys a typed world stores. -/
+structure View (I : IntrinsicSpec) where
+  typed : I.World → TypedWorld
+  initial : Code → I.World
+  resume : TypedWorld → I.World
+  stored : TypedWorld → List Bytes
+
+/-- A bound the laws speak of: admissible and without resource failure. -/
+def Good (I : IntrinsicSpec) (r : I.lang.Res) : Prop := I.lang.Admissible r ∧ I.NoFail r
+
+/-- The session of `p` in `en` is the history `pre` followed by the session of `p'`
+in `en'`: each side's prefixes are below the other's, and the worlds `p` lists are
+those `early` allows or those `p'` lists, which `p` lists too. -/
+def Continues (I : IntrinsicSpec) (V : View I) (pre : List Event) (early : TypedWorld → Prop)
+    (p p' : I.lang.Prog) (en en' : I.lang.Env) : Prop :=
+  (∀ r, Good I r → pre <+: (I.lang.sem p en r).events → ∃ r', Good I r' ∧
+    (I.lang.sem p en r).events <+: pre ++ (I.lang.sem p' en' r').events ∧
+    ∀ ω ∈ I.worlds p en r, early (V.typed ω) ∨ ∃ ω' ∈ I.worlds p' en' r', V.typed ω' = V.typed ω) ∧
+  ∀ r', Good I r' → ∃ r, Good I r ∧
+    pre ++ (I.lang.sem p' en' r').events <+: (I.lang.sem p en r).events ∧
+    ∀ ω' ∈ I.worlds p' en' r', ∃ ω ∈ I.worlds p en r, V.typed ω = V.typed ω'
+
+/-- The laws of the concrete intrinsic session semantics `I`, read through `V`,
+over the fixed parameters `F`. -/
+structure Laws (F : Fixed) (I : IntrinsicSpec) (V : View I) : Prop where
+  /-- The fixed parameters are the given ones. -/
+  fixed : I.fixed = F
+  /-- The shared readings of every layer's events. -/
+  precompiles : I.lang.PrecompilesFixed
+  this : I.lang.ThisFromDeployment F I.session
+  affordable : I.lang.Affordable F I.session
+  /-- Larger bounds extend the listed worlds and the preimages. -/
+  worlds_consistent : ∀ p e r r', I.lang.resLE.le r r' → I.worlds p e r <+: I.worlds p e r'
+  hashed_consistent : ∀ p e r r', I.lang.resLE.le r r' → I.hashed p e r <+: I.hashed p e r'
+  slotHashed_sub : ∀ p e r b, b ∈ I.slotHashed p e r → b ∈ I.hashed p e r
+  /-- A final observation is the last completed outcome. -/
+  final_last : ∀ p e r o, (I.lang.sem p e r).final = some o →
+    outcomes (I.lang.sem p e r).events = [] ∨
+      (outcomes (I.lang.sem p e r).events).getLast? = some o
+  /-- Worlds keep their code. -/
+  typed_resume : ∀ t, V.typed (V.resume t) = t
+  initial_code : ∀ c, (V.typed (V.initial c)).code = c
+  worlds_code : ∀ x e r, ∀ ω ∈ I.worlds (I.ofWorld x) e r, (V.typed ω).code = (V.typed x).code
+  /-- A listed world runs as the world resumed at its typed world. -/
+  listed_resumes : ∀ x e r, ∀ ω ∈ I.worlds (I.ofWorld x) e r,
+    let p := I.ofWorld ω
+    let p' := I.ofWorld (V.resume (V.typed ω))
+    I.lang.sem p = I.lang.sem p' ∧ I.worlds p = I.worlds p' ∧ I.hashed p = I.hashed p' ∧
+      I.slotHashed p = I.slotHashed p'
+  /-- A run resumed from a world accounts for the keys the world stores. -/
+  stored_hashed : ∀ t e r, ∀ b ∈ V.stored t, b ∈ I.slotHashed (I.ofWorld (V.resume t)) e r
+  /-- No action: no event. -/
+  idle : ∀ (code : Code) (cw : ContractWorld.World code.catalog) (en : I.lang.Env),
+    I.lang.Allowed en → (I.session en).balance = balances cw →
+    (I.session en).requests [] 0 = none →
+    ∀ r, (I.lang.sem (I.ofWorld (V.resume ⟨code, cw⟩)) en r).events = []
+  /-- An unaffordable request is dropped: the session is that of the next action. -/
+  dropped : ∀ (code : Code) (cw : ContractWorld.World code.catalog) (en : I.lang.Env)
+      (q : Request),
+    I.lang.Allowed en → (I.session en).balance = balances cw →
+    (I.session en).requests [] 0 = some (.request q) → ¬ Funded F (I.session en) q →
+    let p := I.ofWorld (V.resume ⟨code, cw⟩)
+    Continues I V [] (fun t => t.Shows code cw) p p en
+      (I.ofSession (after (I.session en) [] 1 (I.session en).balance))
+  /-- A credit is observed, changes funds alone, and the session resumes after it. -/
+  credited : ∀ (code : Code) (cw : ContractWorld.World code.catalog) (en : I.lang.Env)
+      (target : Address) (value : Roadmap.Word),
+    I.lang.Allowed en → (I.session en).balance = balances cw →
+    (I.session en).requests [] 0 = some (.credit target value) →
+    let p := I.ofWorld (V.resume ⟨code, cw⟩)
+    (∃ r, Good I r ∧ (I.lang.sem p en r).events ≠ []) ∧
+    ∀ r, Good I r → (I.lang.sem p en r).events ≠ [] →
+      [Event.credit target value] <+: (I.lang.sem p en r).events ∧
+      ∃ w' : ContractWorld.World code.catalog,
+        Credited cw (liftAddress target) (liftWord value) w' ∧
+        Continues I V [Event.credit target value]
+          (fun t => t.Shows code cw ∨ t.Shows code w') p (I.ofWorld (V.resume ⟨code, w'⟩)) en
+          (I.ofSession (after (I.session en) [Event.credit target value] 1 (balances w')))
+  /-- **A transaction that never leaves its contract is the actual frame**: the
+  first affordable request, to an instance whose code resolves its input to a body
+  without external interaction, is observed exactly when `World.transact` of the
+  actual `World.call` completes, with that outcome; the world it reaches is listed
+  and the session resumes from it. -/
+  transacts : ∀ (code : Code) (cw : ContractWorld.World code.catalog) (en : I.lang.Env)
+      (q : Request) (k : Fin code.contracts.length) (st : Storage (code.catalog k))
+      (entry : ContractWorld.Entry (code.catalog k) Bytes),
+    I.lang.Allowed en → (I.session en).balance = balances cw →
+    (I.session en).requests [] 0 = some (.request q) → Funded F (I.session en) q →
+    cw.accounts (liftAddress q.target) = some ⟨k, st⟩ → code.entry k q.input = some entry →
+    Prog.callsBack true entry.body = false →
+    let p := I.ofWorld (V.resume ⟨code, cw⟩)
+    let res := (cw.atTime (liftWord q.timestamp)).transact fun w =>
+      w.call (⟨liftAddress q.target⟩ : ContractWorld.Handle k) entry (requestContext q [])
+    (Ends res.2 → ∃ r, Good I r ∧ (I.lang.sem p en r).events ≠ []) ∧
+    ∀ r, Good I r → (I.lang.sem p en r).events ≠ [] → ∃ out,
+      let done := Event.tx q.sender q.target q.value q.timestamp q.input out
+      [done] <+: (I.lang.sem p en r).events ∧ Matches res.2 out ∧
+      ∃ ω ∈ I.worlds p en r, (V.typed ω).Shows code res.1 ∧
+        Continues I V [done] (fun t => t.Shows code cw ∨ t.Shows code res.1) p
+          (I.ofWorld (V.resume (V.typed ω))) en
+          (I.ofSession (after (I.session en) [done] 1 (balances res.1)))
+  /-- Every completed first transaction, whatever its body does, reaches a listed
+  world of the same code from which the session resumes. -/
+  resumes : ∀ (code : Code) (cw : ContractWorld.World code.catalog) (en : I.lang.Env)
+      (q : Request),
+    I.lang.Allowed en → (I.session en).balance = balances cw →
+    (I.session en).requests [] 0 = some (.request q) → Funded F (I.session en) q →
+    let p := I.ofWorld (V.resume ⟨code, cw⟩)
+    ∀ r, Good I r → ∀ (seg : List Event) (ev : Event), IsTx ev → (∀ x ∈ seg, ¬ IsTx x) →
+      seg ++ [ev] <+: (I.lang.sem p en r).events →
+      (∃ out, ev = Event.tx q.sender q.target q.value q.timestamp q.input out) ∧
+      ∃ ω ∈ I.worlds p en r, (V.typed ω).code = code ∧
+        Continues I V (seg ++ [ev]) (fun t => t.code = code) p
+          (I.ofWorld (V.resume (V.typed ω))) en
+          (I.ofSession (after (I.session en) (seg ++ [ev]) 1 (balances (V.typed ω).world)))
+  /-- **A deployment that never leaves its contract is the actual creation**: from
+  the initial world of a compilation, funded by the opening balances, the selected
+  contract's constructor runs as `World.transact` of the actual `World.create` at
+  the address `Fixed.createAddress` gives; it is observed exactly when that
+  completes, and on success the session resumes from the world it installs. -/
+  deploys : ∀ (code : Code) (en : I.lang.Env) (k : Fin code.contracts.length)
+      (body : Prog (code.catalog k) [] []),
+    I.lang.Allowed en → k.val = code.main →
+    code.ctor k (I.session en).deployArgs = some body → Prog.callsBack true body = false →
+    let e := I.session en
+    let p := I.ofWorld (V.initial code)
+    let this := F.createAddress e.deployer e.deployNonce
+    ∃ timestamp : ContractWorld.Word,
+    let res := ((ContractWorld.World.empty code.catalog (funds e.balance) code.roles).atTime
+      timestamp).transact fun w => w.create k (liftAddress this) body
+        { sender := liftAddress e.deployer, mode := .ordinary (liftWord e.deployValue) }
+    (Ends res.2 → ∃ r, Good I r ∧ (I.lang.sem p en r).events ≠ []) ∧
+    ∀ r, Good I r → (I.lang.sem p en r).events ≠ [] → ∃ out address,
+      let done := Event.deploy e.deployer e.deployValue e.deployArgs out address
+      [done] <+: (I.lang.sem p en r).events ∧
+      match res.2 with
+      | .ok _ => (∃ d, out = .success d) ∧ address = some this ∧
+        Continues I V [done] (fun t => t.code = code) p (I.ofWorld (V.resume ⟨code, res.1⟩)) en
+          (I.ofSession (after e [done] 0 (balances res.1)))
+      | .error h => RevertMatches h out ∧ address = none
+
+end IntrinsicSession
+
+/-- For every fixed parameters there is a concrete intrinsic session semantics: an
+`IntrinsicSpec` (exact session environment, pinned `Forward` and `Guard`, consistent
+prefixes, by its type) whose worlds are actual typed contract worlds and whose
+sessions satisfy `IntrinsicSession.Laws`. -/
+@[goal Solidity.Semantics.IntrinsicSession.session_semantics_correct "is0-intrinsic-session"]
+def intrinsicSessionSemantics : Prop :=
+  ∀ F : Solidity.Roadmap.Fixed, ∃ (I : Solidity.Roadmap.IntrinsicSpec)
+    (V : IntrinsicSession.View I), IntrinsicSession.Laws F I V
 
 end Solidity.Goals

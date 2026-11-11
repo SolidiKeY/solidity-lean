@@ -92,6 +92,12 @@ info: open Solidity.Goals.yulAcceptedCompilesWithArtifact ← Solidity.Yul.accep
 #guard_msgs in
 #roadmap_goal yulAcceptedCompilesWithArtifact
 
+/--
+info: open Solidity.Goals.intrinsicSessionSemantics ← Solidity.Semantics.IntrinsicSession.session_semantics_correct plan is0-intrinsic-session
+-/
+#guard_msgs in
+#roadmap_goal intrinsicSessionSemantics
+
 /-! The accepted Yul language is inhabited at every local count and control, is
 closed under arbitrarily deep composition and arithmetic nesting, admits
 nonzero newer-prefix depths, and refuses constructors the producer does not
@@ -151,5 +157,63 @@ example {c : Yul.Control} {n : Nat} (test : Yul.Expr [] [] n 1) (body : Yul.Stmt
     ¬ Accepted (.if_ test body) := nofun
 
 end YulArtifact
+
+/-! The intrinsic session vocabulary: a resumed environment stays allowed, a
+world funded by opening balances shows them again, and a candidate that never
+observes an event satisfies the laws for no view. -/
+namespace IntrinsicSession
+
+open Solidity.Roadmap
+open Solidity.Lowering.V08.EnvironmentProjection
+
+example (e : SessionEnv) (allowed : e.Allowed) (h : List Event) (n : Nat)
+    (balance : Address → Roadmap.Word) : (after e h n balance).Allowed :=
+  ⟨fun h' => allowed.1 (h ++ h'), fun h' a pre => allowed.2.1 (h ++ h') a pre,
+    fun h' a v i s code => by
+      show e.callee (h ++ (h' ++ [.call a v i s])) = .answer (.success [])
+      rw [← List.append_assoc]
+      exact allowed.2.2 (h ++ h') a v i s code⟩
+
+theorem balances_funds {K : Type} {contracts : K → Contract} (b : Address → Roadmap.Word)
+    (roles : K → ContractWorld.Role) :
+    balances (ContractWorld.World.empty contracts (funds b) roles) = b := by
+  funext a
+  show lowerWord (liftWord (b (lowerAddress (liftAddress a)))) = b a
+  rw [lower_lift_address, lower_lift_word]
+
+/-- The code of an empty compilation. -/
+def noCode : Code where
+  contracts := []
+  main := 0
+  roles := fun k => k.elim0
+  ctor := fun k => k.elim0
+  entry := fun k => k.elim0
+
+/-- An allowed environment whose first action is a credit. -/
+def crediting : SessionEnv where
+  deployer := Address.zero
+  deployNonce := ⟨0, by decide⟩
+  deployValue := ⟨0, by decide⟩
+  deployArgs := []
+  balance := fun _ => ⟨0, by decide⟩
+  hasCode := fun _ _ => false
+  requests := fun _ _ => some (.credit Address.zero ⟨1, by decide⟩)
+  callee := fun _ => .answer (.success [])
+
+/-- A candidate without events is refused: the credit must be observed. -/
+example (F : Fixed) (I : IntrinsicSpec) (V : View I)
+    (silent : ∀ p e r, (I.lang.sem p e r).events = []) : ¬ Laws F I V := by
+  intro laws
+  have allowed : I.lang.Allowed (I.ofSession crediting) := by
+    rw [I.allowed_iff, I.session_of]
+    exact ⟨fun _ => rfl, fun _ _ _ => rfl, fun _ _ _ _ _ _ => rfl⟩
+  have observed := (laws.credited noCode
+    (ContractWorld.World.empty noCode.catalog (funds crediting.balance) noCode.roles)
+    (I.ofSession crediting) Address.zero ⟨1, by decide⟩ allowed
+    (by rw [I.session_of, balances_funds]) (by rw [I.session_of]; rfl)).1
+  obtain ⟨r, _, events⟩ := observed
+  exact events (silent _ _ r)
+
+end IntrinsicSession
 
 end Solidity.Goals
