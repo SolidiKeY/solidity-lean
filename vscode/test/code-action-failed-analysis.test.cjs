@@ -68,3 +68,11 @@ test('empty and malformed kind filters preserve refusal and do not reuse a faile
   const bad=s.request();bad.context.only=[7];
   await assert.rejects(s.service.language('textDocument/codeAction',bad),e=>e.code===-32602);
 });
+
+test('an explicitly empty diagnostic request returns no fixes without republishing a current failure',async t=>{
+  const s=setup(t);await assert.rejects(s.service.analyze(s.doc));const batch=s.doc.publishedDiagnostics,count=s.events.length;
+  const params=s.request();params.context.diagnostics=[];
+  assert.deepEqual(await s.service.language('textDocument/codeAction',params),[]);
+  assert.equal(s.state.calls,1);assert.equal(s.doc.publishedDiagnostics,batch);assert.equal(s.events.length,count);
+  delete params.context.diagnostics;await s.service.language('textDocument/codeAction',params);assert.equal(s.state.calls,2);
+});

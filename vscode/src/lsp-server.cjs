@@ -373,7 +373,8 @@ class SolidityService {
       this.refresh();
       if(this.currentFailedAnalysis(doc)){
         const facts=this.codeActionFacts(doc,params);
-        if(facts.diagnostics.length&&facts.diagnostics.every(d=>!this.codeActionKind(d.code))){doc.codeActionSet=null;return [];}
+        const emptyRequest=Array.isArray(params.context?.diagnostics)&&params.context.diagnostics.length===0;
+        if(emptyRequest||facts.diagnostics.length&&facts.diagnostics.every(d=>!this.codeActionKind(d.code))){doc.codeActionSet=null;return [];}
       }
     }
     try{await cancellable(this.analyze(doc,{refresh:!codeAction}),signal);}catch(error){if([-32800,-32801].includes(error.code))throw error;}
