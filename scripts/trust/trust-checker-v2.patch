@@ -1,0 +1,71 @@
+diff --git a/Lean4Checker/Replay.lean b/Lean4Checker/Replay.lean
+index 93146a3..a3ea8aa 100644
+--- a/Lean4Checker/Replay.lean
++++ b/Lean4Checker/Replay.lean
+@@ -42,0 +43 @@ structure State where
++  telemetryCountV2 : Nat := 0
+@@ -80,0 +82,6 @@ partial def replayConstant (name : Name) : M Unit := do
++    let count := (← get).telemetryCountV2 + 1
++    modify fun state => { state with telemetryCountV2 := count }
++    if count % 1000 == 0 && count ≤ 128000 then
++      let stderr ← IO.getStderr
++      stderr.putStrLn s!"trust-checker-v2: dependency-sample {count} {name.toString.take 160}"
++      stderr.flush
+@@ -173,0 +181 @@ def replay' (newConstants : Std.HashMap Name ConstantInfo) (env : Environment) :
++      IO.eprintln "trust-checker-v2: postponed-constructors-start"
+@@ -174,0 +183 @@ def replay' (newConstants : Std.HashMap Name ConstantInfo) (env : Environment) :
++      IO.eprintln "trust-checker-v2: postponed-recursors-start"
+@@ -175,0 +185 @@ def replay' (newConstants : Std.HashMap Name ConstantInfo) (env : Environment) :
++      IO.eprintln "trust-checker-v2: postponed-checks-finished"
+diff --git a/Main.lean b/Main.lean
+index adcbc38..3e9a20c 100644
+--- a/Main.lean
++++ b/Main.lean
+@@ -13,0 +14,32 @@ open Lean
++/-- Optional v2 metadata cache: successful canonicalizations only, scoped to one scan.
++The full ordered-root walk and all kernel replay code remain unchanged. -/
++def canonicalV2 (cache : IO.Ref (Std.HashMap String System.FilePath))
++    (path : System.FilePath) : IO System.FilePath := do
++  if let some canonical := (← cache.get)[path.toString]? then
++    return canonical
++  let canonical ← IO.FS.realPath path
++  cache.modify (·.insert path.toString canonical)
++  return canonical
++
++def searchModuleV2 (cache : IO.Ref (Std.HashMap String System.FilePath))
++    (fname : System.FilePath) (roots : SearchPath) : IO (Option Name) := do
++  for root in roots do
++    try
++      let file ← canonicalV2 cache fname
++      let mut dir := (← canonicalV2 cache root).normalize
++      if !dir.toString.endsWith System.FilePath.pathSeparator.toString then
++        dir := ⟨dir.toString ++ System.FilePath.pathSeparator.toString⟩
++      if !dir.toString.isPrefixOf file.normalize.toString then
++        throw <| IO.userError "v2 root does not contain file"
++      let suffix := file.toString.drop dir.toString.length
++      return some <| (System.FilePath.mk suffix).withExtension ""
++        |>.components.foldl Name.mkStr Name.anonymous
++    catch
++      | _ => pure ()
++  return none
++
++def phaseV2 (phase : String) : IO Unit := do
++  let stderr ← IO.getStderr
++  stderr.putStrLn s!"trust-checker-v2: {phase}"
++  stderr.flush
++
+@@ -28,0 +61 @@ unsafe def replayFromFresh (module : Name) : IO Unit := do
++  phaseV2 "import-start"
+@@ -29,0 +63 @@ unsafe def replayFromFresh (module : Name) : IO Unit := do
++    phaseV2 "kernel-replay-start"
+@@ -30,0 +65 @@ unsafe def replayFromFresh (module : Name) : IO Unit := do
++    phaseV2 "kernel-replay-finished"
+@@ -77,0 +113 @@ unsafe def main (args : List String) : IO UInt32 := do
++  phaseV2 "discovery-start"
+@@ -80,0 +117 @@ unsafe def main (args : List String) : IO UInt32 := do
++    let cache ← IO.mkRef ({} : Std.HashMap String System.FilePath)
+@@ -83 +120 @@ unsafe def main (args : List String) : IO UInt32 := do
+-      if let some m := (← searchModuleNameOfFileName path sp) then
++      if let some m := (← searchModuleV2 cache path sp) then
+@@ -88,0 +126 @@ unsafe def main (args : List String) : IO UInt32 := do
++  phaseV2 "discovery-finished"
