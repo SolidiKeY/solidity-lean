@@ -33,7 +33,11 @@ Neither replaces the historical `genericYulViewsPreserve` of `Goals/Plan.lean`.
   fragment (`PublicCompilerTotal.ProgOk []`); from that same diagram, for every
   source/intrinsic pair bound to actual Source sessions, a frozen
   `Roadmap.Lowering S I` and a `G49Final.PassCorrect` per program whose
-  data fields (environment map, resource transport) are the diagram's.
+  environment map is the exact session environment and whose resource
+  transport is shared between the two carriers. The diagram enters the
+  session level through its association of every emitted unit; tying the
+  session resource transport to the diagram's statement fuel needs intrinsic
+  session resources and is part of the H556 restatement (sg1).
 
 Open scope point (not hidden, decided by H556): no intrinsic session
 semantics over emitted programs exists at the base, so `Binding.targetSession`
@@ -352,8 +356,11 @@ structure LayoutView.Laws (V : LayoutView) : Prop where
     (∀ c, V.geometry.cells P L ⟨.memory, a, 0⟩ m' c → ∃ x, c = .mem x ∧ m.free ≤ x ∧ x < m'.free) ∧
     m'.storage = m.storage ∧ m'.transient = m.transient ∧
     (∀ x, x < m.free → (x < 64 ∨ 96 ≤ x) → m'.memory x = m.memory x)
-  /-- A fitting mapping-free allocation whose size fits the address space succeeds. -/
-  alloc_total : ∀ P L t m, L.NoMapping → L.Fits t → m.free + 64 * t.weight < 2 ^ 256 →
+  /-- A fitting mapping-free allocation whose size fits the address space
+  succeeds from a free pointer past the reserved words (`[0,128)`: scratch,
+  free pointer, zero slot; `ReservedOK`, `Placement.free_start`). -/
+  alloc_total : ∀ P L t m, L.NoMapping → L.Fits t → 128 ≤ m.free →
+    m.free + 64 * t.weight < 2 ^ 256 →
     ∃ a m', V.alloc P L t m = some (a, m')
 
 /-- The shape of an existing heap object, as a layout: memory objects hold
@@ -509,7 +516,7 @@ structure LayoutView.Instances (V : LayoutView) : Prop where
   pointer is exactly the existing allocation image. -/
   byteAllocation : ∀ (P : Params) (bs : List UInt8) (base : Nat) (free : Roadmap.Word)
     (fits : base + (MemoryShape.bytes bs.length).size ≤ free.val) (m : Phys),
-    m.free = base → free.val = base + (MemoryShape.bytes bs.length).size →
+    128 ≤ base → m.free = base → free.val = base + (MemoryShape.bytes bs.length).size →
     V.alloc P .bytes (.blob bs) m = some (base, m.withMemory (byteAllocationView bs base free fits m.memory))
   /-- `objectAllocationView`: every existing object allocation is a generic
   allocation of its shape's layout, at the same base and to the same image. -/
@@ -787,8 +794,11 @@ structure Binding (S : SourceSpec) (I : IntrinsicSpec) where
 worlds are exactly the production outputs of the resolution's bodies, each
 associated by the diagram, whose environment map is the exact session
 environment; and, for every program, a `PassCorrect` between the actual
-behaviours with the SAME environment map and resource transport (all
-`Cert`/`PassCorrect` fields, forward and back, are retained by their types). -/
+behaviours with the SAME environment map and resource transport as the
+`Lowering`'s certificate (all `Cert`/`PassCorrect` fields, forward and back,
+are retained by their types). The diagram constrains the carriers through
+`D.Assoc` on every emitted unit only; relating `L.cert.need` to `D.fuel`
+awaits the intrinsic session resources of the H556 restatement. -/
 def Diagram.Lifts (D : Diagram) {S : SourceSpec} {I : IntrinsicSpec} (B : Binding S I) : Prop :=
   ∃ L : Solidity.Roadmap.Lowering S I,
     (∀ e, L.pass.envAbs e = S.ofSession (I.session e)) ∧
