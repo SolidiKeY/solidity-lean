@@ -249,10 +249,13 @@ def check(repo, inv):
     tokens = set()
     for p in lean_paths:
         tokens |= S.attribute_commands(texts[blob[p]])
+    last_tokens = {}
+    for t in tokens:
+        last_tokens.setdefault(t.rsplit('.', 1)[-1], set()).add(t)
     for n in nodes:
-        parts = n.split('.')
-        if any('.'.join(parts[i:]) in tokens for i in range(len(parts))):
-            attributed.add(n)
+        for t in last_tokens.get(n.rsplit('.', 1)[-1], ()):
+            if n == t or n.endswith('.' + t):
+                attributed.add(n)
     built = S.closure(imports, list(S.LIB_ROOTS) + list(S.EXE_ROOTS))
     blanket = {b['path'] for b in inv['roots']['blanket']}
     reached = set()

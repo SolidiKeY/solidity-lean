@@ -96,7 +96,7 @@ def run_gate(repo, lean_file, env_extra, logs):
 
 def extract(repo, rev):
     repo = Path(repo).resolve()
-    if subprocess.run(['git', '-C', str(repo), 'diff', '--quiet', rev, '--', '*.lean']).returncode:
+    if subprocess.run(['git', '-C', str(repo), 'diff', '--quiet', rev, '--', '*.lean', ':(exclude)scripts/lean-inventory/**']).returncode:
         sys.exit('extract: tracked Lean sources differ from ' + rev)
     untracked = S.git(repo, 'ls-files', '--others', '--exclude-standard', '--', '*.lean').decode()
     if untracked.strip():
@@ -114,7 +114,10 @@ def extract(repo, rev):
         if code:
             sys.exit(f'extract: build of {g} failed; see {log}')
         build_logs[g] = log.read_text()
-    (out / 'build.log').write_text(build_logs['lib'])
+    # Earlier runs of the same build (an interrupted build resumed by this one) keep the
+    # times of the modules they compiled; .lake/lean-inventory/timing/*.log holds them.
+    earlier = sorted((repo / CACHE_ROOT / 'timing').glob('*.log'))
+    (out / 'build.log').write_text(''.join(p.read_text() for p in earlier) + build_logs['lib'])
     subprocess.run([sys.executable, 'scripts/ci/restore-lake-artifacts.py'], cwd=repo, check=True)
     listing = work / 'modules.tsv'
     listing.write_text(''.join(f'{g}\t{m}\n' for g, mods in groups for m in mods))
@@ -398,13 +401,12 @@ def build(inp):
         a, b = c['range']
         if any(a <= h <= b for h in heads_cache[m]):
             attributed.add(d)
-    suffix_index = {}
+    by_last = {}
     for d in node_module:
-        parts = d.split('.')
-        for i in range(len(parts)):
-            suffix_index.setdefault('.'.join(parts[i:]), set()).add(d)
+        by_last.setdefault(d.rsplit('.', 1)[-1], []).append(d)
     for tok in attr_cmd_tokens:
-        attributed |= suffix_index.get(tok, set())
+        attributed.update(d for d in by_last.get(tok.rsplit('.', 1)[-1], ())
+                          if d == tok or d.endswith('.' + tok))
     meta = {fold[n] for n, c in consts.items() if c.get('meta')}
     implicit = {fold[n] for n, c in consts.items() if c.get('inst') or c.get('simp')}
     add_gap('elaborator-time', 'use', meta,
