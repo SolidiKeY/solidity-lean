@@ -1,7 +1,7 @@
 import Solidity.Semantics.PanicV2
 
 /-!
-# Expression and path evaluation through the exact V2 result interface
+# Expression, path and pop evaluation through the exact V2 result interface
 
 This structural evaluator uses the same typed state and the same operand
 order/short circuit as V1. Each path/value constructor has an unconditional
@@ -320,6 +320,81 @@ theorem value_of_ok (σ : State C Γ) {p : PrimTy} (v : Val C Γ p) (a : p.Denot
   | ok b => rw [hv] at he; cases he; rfl
   | error halt => rw [hv] at he; cases he
 
+/-- Classify only the empty-array branch of `pop`. A missing receiver
+and a failed write-back of a nonempty array retain their unknown V1 cause. -/
+def storagePop {E : Ty} (st : Storage C) (keep : Bool)
+    (r : SRef C (.ref (.array E))) : Result (Storage C) :=
+  match st.find r with
+  | none => ofOpt (st.pop keep r)
+  | some receiver =>
+    match (SVal.view receiver : ArrView E).elems.toList.reverse with
+    | [] => checked .emptyPop (st.pop keep r)
+    | _ :: _ => ofOpt (st.pop keep r)
+
+/-- Pop diagnostics preserve every V1 storage outcome, including invalid
+receiver or write-back failure; no state invariant is an added premise. -/
+theorem storagePop_erase {E : Ty} (st : Storage C) (keep : Bool)
+    (r : SRef C (.ref (.array E))) : erase (storagePop st keep r) = TRes.ofOpt (st.pop keep r) := by
+  unfold storagePop
+  split
+  · exact erase_ofOpt _
+  · split
+    · exact erase_checked _ _
+    · exact erase_ofOpt _
+
+/-- Gap control for0x31: an actual empty-array pop reports its own cause,
+not a code guessed from every failed `Storage.pop` option. -/
+theorem storagePop_empty {E : Ty} (st : Storage C) (keep : Bool)
+    (r : SRef C (.ref (.array E))) (receiver : SVal (.ref (.array E)))
+    (found : st.find r = some receiver)
+    (empty : (SVal.view receiver : ArrView E).elems.toList.reverse = []) :
+    storagePop st keep r = .error (.operation .emptyPop) := by
+  have failed : st.pop keep r = none := by
+    simp only [Storage.pop, found]
+    change (match (SVal.view receiver : ArrView E).elems.toList.reverse with
+      | [] => none
+      | _ :: _ => _) = none
+    rw [empty]
+  simp only [storagePop, found, empty, failed, checked]
+
+/-- Missing pop receivers stay unknown rather than acquiring0x31. -/
+theorem storagePop_missing {E : Ty} (st : Storage C) (keep : Bool)
+    (r : SRef C (.ref (.array E))) (missing : st.find r = none) :
+    storagePop st keep r = .error (.legacy .revert) := by
+  simp only [storagePop, missing]
+  have failed : st.pop keep r = none := by rw [Storage.pop, missing]; rfl
+  rw [failed]
+  rfl
+
+/-- A typed V2 pop step: receiver once, then the actual storage operation. -/
+def pop {E : Ty} (b : SPath C Γ (.array E)) (σ : State C Γ) : Result (Out C σ.H Γ) := do
+  let receiver ← path σ b
+  let st ← storagePop σ.storage E.isMapping receiver
+  pure ⟨σ.withStorage st, List.prefix_refl _⟩
+
+/-- Exact whole-state projection of the V2 pop step to the frozen V1 step. -/
+theorem pop_erase {E : Ty} (b : SPath C Γ (.array E)) (σ : State C Γ) :
+    erase (pop b σ) = TRun.pop b σ :=
+  erase_bind_congr (path_erase σ b) fun _ =>
+    erase_bind_congr (storagePop_erase _ _ _) fun _ => rfl
+
+/-- Gap control at the typed statement site: after resolving the receiver,
+popping its actual empty array emits0x31 rather than losing the cause. -/
+theorem pop_empty {E : Ty} (b : SPath C Γ (.array E)) (σ : State C Γ)
+    (r : SRef C (.ref (.array E))) (receiver : SVal (.ref (.array E)))
+    (resolved : path σ b = .ok r) (found : σ.storage.find r = some receiver)
+    (empty : (SVal.view receiver : ArrView E).elems.toList.reverse = []) :
+    pop b σ = .error (.operation .emptyPop) := by
+  unfold pop
+  rw [resolved]
+  change (storagePop σ.storage E.isMapping r >>= _) = _
+  rw [storagePop_empty σ.storage E.isMapping r receiver found empty]
+  rfl
+
+/-- Empty-pop diagnostics use solc0x31 and preserve the V1 revert halt. -/
+theorem emptyPop_code : (Halt.operation .emptyPop).panicCode? = some 0x31 ∧
+    (Halt.operation .emptyPop).erase = .revert := by constructor <;> rfl
+
 /-- info: 'Solidity.PanicV2.Eval.path_erase' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms path_erase
 /-- info: 'Solidity.PanicV2.Eval.loc_erase' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -366,5 +441,18 @@ theorem value_of_ok (σ : State C Γ) {p : PrimTy} (v : Val C Γ p) (a : p.Denot
 #guard_msgs (whitespace := lax) in #print axioms memoryRead_bounds
 /-- info: 'Solidity.PanicV2.Eval.bounds_code' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms bounds_code
+
+/-- info: 'Solidity.PanicV2.Eval.storagePop_erase' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms storagePop_erase
+/-- info: 'Solidity.PanicV2.Eval.storagePop_empty' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms storagePop_empty
+/-- info: 'Solidity.PanicV2.Eval.storagePop_missing' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms storagePop_missing
+/-- info: 'Solidity.PanicV2.Eval.pop_erase' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms pop_erase
+/-- info: 'Solidity.PanicV2.Eval.pop_empty' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms pop_empty
+/-- info: 'Solidity.PanicV2.Eval.emptyPop_code' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms emptyPop_code
 
 end Solidity.PanicV2.Eval
