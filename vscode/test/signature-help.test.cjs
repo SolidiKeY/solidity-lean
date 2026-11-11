@@ -17,3 +17,9 @@ test('function declaration parameters cannot masquerade as a call signature',()=
  for(const newline of ['\n','\r\n','\r'])for(const prefix of ['function f(', 'function /* declaration */ f(', 'function'+newline+'f('])assert.equal(hint(prefix+'uint arg0, uint arg1'),null,prefix);
  assert.ok(hint('f(1, 2'));assert.ok(hint('return f(1, 2'));assert.ok(hint('object.f(1, 2'));
 });
+
+test('grouping parentheses retain the enclosing named-call argument',()=>{
+ for(const [text,argument]of [['f((1+2',0],['f(1,(2+3',1],['f(1, /* comma , ( */ (2+3',1],['f((1 // comma ,'+String.fromCharCode(13)+'+2',0]]){const result=hint(text);assert.ok(result,text);assert.match(result.signatures[0].label,/^f\(/);assert.equal(result.activeParameter,argument);}
+ for(const text of ['f((g)(1','f(array[0](1','f(g{gas:100}(1,2','f(object.g{gas:100}(1,2'])assert.equal(hint(text),null,'Unresolved indirect callee must not borrow f signature');
+ const analysis={nodes:[],declarations:new Map([[1,fn(1,'f')],[2,fn(2,'g')]])},result=hint('f(g((1+2',analysis);assert.match(result.signatures[0].label,/^g\(/);assert.equal(result.activeParameter,0);
+});

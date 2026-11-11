@@ -159,7 +159,12 @@ function completion(text,point,analysis){
 }
 function signatureHelp(text,point,analysis){
   const before=text.slice(0,offset(text,point)),ts=require('./solidity-text.cjs').tokens(before).filter(t=>t.kind!=='comment'&&t.kind!=='string');let depth=0,open=-1;
-  for(let i=ts.length-1;i>=0;i--){if(ts[i].text===')')depth++;if(ts[i].text==='('){if(depth===0){open=i;break;}depth--;}}
+  for(let i=ts.length-1;i>=0;i--){if(ts[i].text===')')depth++;if(ts[i].text==='('){
+    if(depth>0){depth--;continue;}
+    if(ts[i-1]?.kind==='word'){open=i;break;}
+    // Grouping has no callee; expression/index/call-options callees stay unsupported.
+    if([')',']','}'].includes(ts[i-1]?.text))return null;
+  }}
   if(open<0||ts[open-1]?.kind!=='word')return null;
   // A named function declaration is not an invocation of that function.
   if(ts[open-2]?.text==='function')return null;

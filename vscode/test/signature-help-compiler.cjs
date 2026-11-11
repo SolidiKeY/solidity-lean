@@ -13,3 +13,18 @@ test('pinned compiler declaration parameters produce no call signature while act
  t.diagnostic(JSON.stringify({boundary:'compiler/JavaScript only; no native UI/kernel/EVM parity',compiler:compiled.compiler,sourceHash:compiled.sourceHash}));
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
+
+test('pinned compiler grouping expressions retain the actual enclosing call signature',async t=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'signature-grouping-')),source=path.join(dir,'Grouping.sol'),text='pragma solidity ^0.8.34; contract Grouping { function target(uint first,uint second) internal pure returns(uint){return first+second;} function use() public pure returns(uint){return target((1+2),(3+4));} }';fs.writeFileSync(source,text);
+ try{const {compileFixture}=await import('../../scripts/solc-ast.mjs'),compiled=compileFixture({args:['--source',source,'--out',path.join(dir,'out.json'),'--no-wrapper'],sourceBytes:Buffer.from(text),analysisOnly:true,quiet:true}),analysis=lang.index(text,compiled.rawAst);
+ for(const [needle,argument]of [['1+2',0],['3+4',1]]){const result=lang.signatureHelp(text,lang.position(text,text.indexOf(needle)+2),analysis);assert.ok(result,needle);assert.match(result.signatures[0].label,/^target\(/);assert.equal(result.activeParameter,argument);}
+ t.diagnostic(JSON.stringify({boundary:'compiler/JavaScript only; no native UI/kernel/EVM parity',compiler:compiled.compiler,sourceHash:compiled.sourceHash}));
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test('pinned compiler inner call-options cannot borrow the outer signature argument origin',async t=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'signature-options-')),source=path.join(dir,'Options.sol'),text='pragma solidity ^0.8.34; contract Options { function target(uint first,uint second) internal pure returns(uint){return first+second;} function externalTarget(uint first,uint second) external pure returns(uint){return first+second;} function use() public view returns(uint){return target(10,this.externalTarget{gas:100000}(20,30));} }';fs.writeFileSync(source,text);
+ try{const {compileFixture}=await import('../../scripts/solc-ast.mjs'),compiled=compileFixture({args:['--source',source,'--out',path.join(dir,'out.json'),'--no-wrapper'],sourceBytes:Buffer.from(text),analysisOnly:true,quiet:true}),analysis=lang.index(text,compiled.rawAst);assert.equal(lang.signatureHelp(text,lang.position(text,text.indexOf('20,30')+4),analysis),null);
+ t.diagnostic(JSON.stringify({boundary:'compiler/JavaScript unsupported-boundary refusal only',compiler:compiled.compiler,sourceHash:compiled.sourceHash}));
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
