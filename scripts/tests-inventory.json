@@ -11356,6 +11356,126 @@
       "location": ".github/workflows/trust.yml:68",
       "path": "scripts/trust/trust-recheck.sh"
     },
+    "skipped:tests/roadmap-v17/test_diagnostic_request.py": {
+      "command": "python3 -B tests/roadmap-v17/test_diagnostic_request.py",
+      "cwd": ".",
+      "kind": "unavailable committed unittest runner",
+      "location": "tests/roadmap-v17/test_diagnostic_request.py:149",
+      "path": "tests/roadmap-v17/test_diagnostic_request.py",
+      "purpose": "The normal command exited zero with all 12 reported cases skipped. Preserve the committed test runner source only; no exercised-test, fixture or child credit.",
+      "role_provenance": {
+        "class_lines": [
+          31
+        ],
+        "kind": "unittest declaration and explicit main entry",
+        "main_line": 149,
+        "revision": "23ba92a3efbc73dce04ad0483294d42757375a0d",
+        "test_contexts": [
+          {
+            "code_firstlineno": 32,
+            "first": 34,
+            "last": 40,
+            "name": "setUpClass",
+            "qualname": "ReviewedRequests.setUpClass"
+          },
+          {
+            "code_firstlineno": 51,
+            "first": 52,
+            "last": 64,
+            "name": "test_actual_reviewed_both",
+            "qualname": "ReviewedRequests.test_actual_reviewed_both"
+          },
+          {
+            "code_firstlineno": 66,
+            "first": 67,
+            "last": 68,
+            "name": "test_missing_reviewed_pair",
+            "qualname": "ReviewedRequests.test_missing_reviewed_pair"
+          },
+          {
+            "code_firstlineno": 70,
+            "first": 71,
+            "last": 73,
+            "name": "test_wrong_final_head",
+            "qualname": "ReviewedRequests.test_wrong_final_head"
+          },
+          {
+            "code_firstlineno": 75,
+            "first": 76,
+            "last": 79,
+            "name": "test_truncated_signature_document",
+            "qualname": "ReviewedRequests.test_truncated_signature_document"
+          },
+          {
+            "code_firstlineno": 81,
+            "first": 82,
+            "last": 88,
+            "name": "test_coherent_truncation_of_nested_record_header",
+            "qualname": "ReviewedRequests.test_coherent_truncation_of_nested_record_header"
+          },
+          {
+            "code_firstlineno": 90,
+            "first": 91,
+            "last": 98,
+            "name": "test_wrong_module_and_duplicate_names",
+            "qualname": "ReviewedRequests.test_wrong_module_and_duplicate_names"
+          },
+          {
+            "code_firstlineno": 100,
+            "first": 101,
+            "last": 103,
+            "name": "test_wrong_tool_version",
+            "qualname": "ReviewedRequests.test_wrong_tool_version"
+          },
+          {
+            "code_firstlineno": 105,
+            "first": 106,
+            "last": 108,
+            "name": "test_missing_installed_inputs",
+            "qualname": "ReviewedRequests.test_missing_installed_inputs"
+          },
+          {
+            "code_firstlineno": 110,
+            "first": 111,
+            "last": 113,
+            "name": "test_missing_source_provider",
+            "qualname": "ReviewedRequests.test_missing_source_provider"
+          },
+          {
+            "code_firstlineno": 115,
+            "first": 116,
+            "last": 126,
+            "name": "test_sidecar_missing_output_remains_nonpass",
+            "qualname": "ReviewedRequests.test_sidecar_missing_output_remains_nonpass"
+          },
+          {
+            "code_firstlineno": 128,
+            "first": 129,
+            "last": 135,
+            "name": "test_finalizer_write_failure_preserves_original_exit",
+            "qualname": "ReviewedRequests.test_finalizer_write_failure_preserves_original_exit"
+          },
+          {
+            "code_firstlineno": 137,
+            "first": 138,
+            "last": 146,
+            "name": "test_payload_is_unexecuted_outer_scope_contract",
+            "qualname": "ReviewedRequests.test_payload_is_unexecuted_outer_scope_contract"
+          }
+        ]
+      },
+      "source_blob": "b07465e564f8342f21910f1849b60dc8f78792f6",
+      "source_only": true,
+      "validation_at_measured_revision": {
+        "command": [
+          "python3",
+          "-B",
+          "tests/roadmap-v17/test_diagnostic_request.py"
+        ],
+        "reason": "All reported cases were skipped; zero exit does not establish test execution. No fixture or child credit.",
+        "status": "unavailable"
+      }
+    },
     "tests/automation/ClosedSpecProposal.lean": {
       "command": "lake env lean -j1 --tstack=131072 tests/automation/ClosedSpecProposal.lean",
       "cwd": ".",
@@ -17526,18 +17646,6 @@
       "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
       "runner_kind": "unittest",
       "source_blob": "61415d236f13fba93500f5165e9ba9ba633b40ad"
-    },
-    "validated:tests/roadmap-v17/test_diagnostic_request.py": {
-      "command": "python3 -B tests/roadmap-v17/test_diagnostic_request.py",
-      "cwd": ".",
-      "data_use_scope": [],
-      "kind": "validated standalone runner",
-      "location": "tests/roadmap-v17/test_diagnostic_request.py:1",
-      "other_reads": "unresolved",
-      "path": "tests/roadmap-v17/test_diagnostic_request.py",
-      "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
-      "runner_kind": "unittest",
-      "source_blob": "b07465e564f8342f21910f1849b60dc8f78792f6"
     },
     "validated:tests/roadmap-v17/test_drafts.py": {
       "command": "python3 -B tests/roadmap-v17/test_drafts.py",
@@ -220610,7 +220718,7 @@
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/roadmap-v17/test_diagnostic_request.py",
-      "reason": "validated standalone runner entry point: python3 -B tests/roadmap-v17/test_diagnostic_request.py",
+      "reason": "unavailable committed unittest runner entry point: python3 -B tests/roadmap-v17/test_diagnostic_request.py",
       "recovery": {
         "blob": "b07465e564f8342f21910f1849b60dc8f78792f6",
         "command": "git show 4067ecf42ca020726861e6088e32a7ec519c0cc5:tests/roadmap-v17/test_diagnostic_request.py",
@@ -220621,16 +220729,124 @@
         "entry": {
           "command": "python3 -B tests/roadmap-v17/test_diagnostic_request.py",
           "cwd": ".",
-          "data_use_scope": [],
-          "kind": "validated standalone runner",
-          "location": "tests/roadmap-v17/test_diagnostic_request.py:1",
-          "other_reads": "unresolved",
+          "kind": "unavailable committed unittest runner",
+          "location": "tests/roadmap-v17/test_diagnostic_request.py:149",
           "path": "tests/roadmap-v17/test_diagnostic_request.py",
-          "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
-          "runner_kind": "unittest",
-          "source_blob": "b07465e564f8342f21910f1849b60dc8f78792f6"
+          "purpose": "The normal command exited zero with all 12 reported cases skipped. Preserve the committed test runner source only; no exercised-test, fixture or child credit.",
+          "role_provenance": {
+            "class_lines": [
+              31
+            ],
+            "kind": "unittest declaration and explicit main entry",
+            "main_line": 149,
+            "revision": "23ba92a3efbc73dce04ad0483294d42757375a0d",
+            "test_contexts": [
+              {
+                "code_firstlineno": 32,
+                "first": 34,
+                "last": 40,
+                "name": "setUpClass",
+                "qualname": "ReviewedRequests.setUpClass"
+              },
+              {
+                "code_firstlineno": 51,
+                "first": 52,
+                "last": 64,
+                "name": "test_actual_reviewed_both",
+                "qualname": "ReviewedRequests.test_actual_reviewed_both"
+              },
+              {
+                "code_firstlineno": 66,
+                "first": 67,
+                "last": 68,
+                "name": "test_missing_reviewed_pair",
+                "qualname": "ReviewedRequests.test_missing_reviewed_pair"
+              },
+              {
+                "code_firstlineno": 70,
+                "first": 71,
+                "last": 73,
+                "name": "test_wrong_final_head",
+                "qualname": "ReviewedRequests.test_wrong_final_head"
+              },
+              {
+                "code_firstlineno": 75,
+                "first": 76,
+                "last": 79,
+                "name": "test_truncated_signature_document",
+                "qualname": "ReviewedRequests.test_truncated_signature_document"
+              },
+              {
+                "code_firstlineno": 81,
+                "first": 82,
+                "last": 88,
+                "name": "test_coherent_truncation_of_nested_record_header",
+                "qualname": "ReviewedRequests.test_coherent_truncation_of_nested_record_header"
+              },
+              {
+                "code_firstlineno": 90,
+                "first": 91,
+                "last": 98,
+                "name": "test_wrong_module_and_duplicate_names",
+                "qualname": "ReviewedRequests.test_wrong_module_and_duplicate_names"
+              },
+              {
+                "code_firstlineno": 100,
+                "first": 101,
+                "last": 103,
+                "name": "test_wrong_tool_version",
+                "qualname": "ReviewedRequests.test_wrong_tool_version"
+              },
+              {
+                "code_firstlineno": 105,
+                "first": 106,
+                "last": 108,
+                "name": "test_missing_installed_inputs",
+                "qualname": "ReviewedRequests.test_missing_installed_inputs"
+              },
+              {
+                "code_firstlineno": 110,
+                "first": 111,
+                "last": 113,
+                "name": "test_missing_source_provider",
+                "qualname": "ReviewedRequests.test_missing_source_provider"
+              },
+              {
+                "code_firstlineno": 115,
+                "first": 116,
+                "last": 126,
+                "name": "test_sidecar_missing_output_remains_nonpass",
+                "qualname": "ReviewedRequests.test_sidecar_missing_output_remains_nonpass"
+              },
+              {
+                "code_firstlineno": 128,
+                "first": 129,
+                "last": 135,
+                "name": "test_finalizer_write_failure_preserves_original_exit",
+                "qualname": "ReviewedRequests.test_finalizer_write_failure_preserves_original_exit"
+              },
+              {
+                "code_firstlineno": 137,
+                "first": 138,
+                "last": 146,
+                "name": "test_payload_is_unexecuted_outer_scope_contract",
+                "qualname": "ReviewedRequests.test_payload_is_unexecuted_outer_scope_contract"
+              }
+            ]
+          },
+          "source_blob": "b07465e564f8342f21910f1849b60dc8f78792f6",
+          "source_only": true,
+          "validation_at_measured_revision": {
+            "command": [
+              "python3",
+              "-B",
+              "tests/roadmap-v17/test_diagnostic_request.py"
+            ],
+            "reason": "All reported cases were skipped; zero exit does not establish test execution. No fixture or child credit.",
+            "status": "unavailable"
+          }
         },
-        "root": "validated:tests/roadmap-v17/test_diagnostic_request.py"
+        "root": "skipped:tests/roadmap-v17/test_diagnostic_request.py"
       },
       "search_candidates": [],
       "secondary": {

@@ -526,6 +526,7 @@ def validated_routes(graph, catalog):
         if entry.get('kind') == 'manual-reproducer': required.add('documentation')
         if entry.get('kind') == 'runnable-entrypoint': required.update(('entry_line', 'purpose', 'input_scope', 'other_reads'))
         if entry.get('kind') == 'nonpassing-unittest': required.update(('purpose', 'input_scope'))
+        if entry.get('kind') == 'skipped-unittest': required.add('purpose')
         allowed = (required, required | {'purpose', 'input_scope', 'other_reads'}) if entry.get('kind') in ('unittest', 'node-test') else (required,)
         if set(entry) not in allowed:
             raise ValueError('invalid standalone definition')
@@ -539,8 +540,21 @@ def validated_routes(graph, catalog):
         command = entry['command']
         if entry['kind'] != 'manual-reproducer' and command not in (['python3', '-B', p], ['node', '--test', p]):
             raise ValueError('unsupported standalone invocation: ' + p)
-        if entry['kind'] not in ('unittest', 'node-test', 'manual-reproducer', 'runnable-entrypoint', 'nonpassing-unittest'):
+        if entry['kind'] not in ('unittest', 'node-test', 'manual-reproducer', 'runnable-entrypoint', 'nonpassing-unittest', 'skipped-unittest'):
             raise ValueError('unsupported standalone kind')
+        if entry['kind'] == 'skipped-unittest':
+            declaration = declared_unittest(repo, p)
+            if (declaration is None or command != ['python3', '-B', p]
+                    or not isinstance(entry['purpose'], str) or not entry['purpose'].strip()):
+                raise ValueError('skipped source lacks a declared unittest role/purpose')
+            identity = 'skipped:' + p
+            graph.root(p, 'unavailable committed unittest runner', shlex.join(command), p,
+                       declaration['main_line'], root_id=identity)
+            graph.roots[identity].update({'source_only': True, 'source_blob': entry['source_blob'],
+                'role_provenance': declaration, 'purpose': entry['purpose'],
+                'validation_at_measured_revision': {'status': 'unavailable', 'command': command,
+                    'reason': 'All reported cases were skipped; zero exit does not establish test execution. No fixture or child credit.'}})
+            continue
         if entry['kind'] == 'nonpassing-unittest':
             declaration = declared_unittest(repo, p)
             if declaration is None or command != ['python3', '-B', p]:
@@ -1424,9 +1438,65 @@ def passing_scan_boundary_controls():
         assert rows[target]['class'] == 'evidence' and not rows[target]['runner_chain']
 
 
+def skipped_runner_boundary_controls():
+    import copy
+    with tempfile.TemporaryDirectory(prefix='tests-used-skipped-controls-') as directory:
+        root = Path(directory)
+        programs = {
+            'tests/skipped.py': 'import unittest\n@unittest.skip("optional backend unavailable")\nclass T(unittest.TestCase):\n def test_value(self): self.fail("must not execute")\nif __name__ == "__main__": unittest.main()\n',
+            'tests/partial.py': 'import unittest\nclass T(unittest.TestCase):\n def test_active(self): self.assertEqual(1 + 1, 2)\n @unittest.skip("optional backend unavailable")\n def test_skipped(self): self.fail("must not execute")\nif __name__ == "__main__": unittest.main()\n',
+            'tests/helper.py': 'def helper(): return 1\n',
+            'tests/input.txt': 'fixture\n',
+        }
+        for path, source in programs.items():
+            target = root/path; target.parent.mkdir(parents=True, exist_ok=True); target.write_text(source)
+        git(root, 'init', '-q'); git(root, 'add', '.')
+        git(root, '-c', 'user.name=Control', '-c', 'user.email=control@example.invalid', 'commit', '-qm', 'skip controls')
+        repo = Repository(root, 'HEAD')
+        for path, count in (('tests/skipped.py', 1), ('tests/partial.py', 2)):
+            run = subprocess.run(['python3', '-B', path], cwd=root, capture_output=True)
+            assert run.returncode == 0 and b'skipped=1' in run.stderr
+            assert re.search(rb'Ran ' + str(count).encode() + rb' tests? in ', run.stderr)
+        path = 'tests/skipped.py'
+        entry = {'path': path, 'input_revision': repo.ref, 'source_blob': repo.tree[path][2],
+                 'command': ['python3', '-B', path], 'kind': 'skipped-unittest',
+                 'purpose': 'All cases skipped; committed runner source only, no exercised test validation.'}
+        catalog = {'schema_version': 1, 'standalone': [entry], 'generators': [], 'reads': [], 'orphans': []}
+        model = inventory(repo, catalog); rows = {r['path']: r for r in model['records']}
+        source = rows[path]['runner_chain']['entry']
+        assert rows[path]['class'] == 'keep' and source['source_only']
+        assert source['validation_at_measured_revision']['status'] == 'unavailable'
+        graph = Graph(repo); validated_routes(graph, catalog)
+        graph.edge(path, 'tests/helper.py', 5, 'unrelated static invocation', kind='executes')
+        assert 'tests/helper.py' not in graph.chains()
+        for identity in ('skipped:' + path, 'validated:' + path):
+            bad = copy.deepcopy(catalog)
+            bad['reads'] = [{'runner': identity, 'input_revision': repo.ref,
+                'frames': [{'path': path, 'blob': repo.tree[path][2], 'line': 5}],
+                'target': 'tests/input.txt', 'target_blob': repo.tree['tests/input.txt'][2],
+                'operation': 'validated Python read of measured bytes'}]
+            try: inventory(repo, bad)
+            except ValueError as error: assert 'no validated runner' in str(error)
+            else: raise AssertionError('all-skipped root granted read credit')
+        for field, value in (('source_blob', '0' * 40), ('kind', 'invented-skipped-kind')):
+            bad = copy.deepcopy(catalog); bad['standalone'][0][field] = value
+            try: inventory(repo, bad)
+            except ValueError: pass
+            else: raise AssertionError('unsupported skipped definition accepted')
+        stale = copy.deepcopy(catalog); stale['standalone'][0]['input_revision'] = '0' * 40
+        graph = Graph(repo); validated_routes(graph, stale); assert not graph.roots
+        partial = 'tests/partial.py'
+        catalog['standalone'].append({'path': partial, 'input_revision': repo.ref,
+            'source_blob': repo.tree[partial][2], 'command': ['python3', '-B', partial], 'kind': 'unittest'})
+        rows = {r['path']: r for r in inventory(repo, catalog)['records']}
+        assert rows[partial]['runner_chain']['entry']['kind'] == 'validated standalone runner'
+        assert not rows[partial]['runner_chain']['entry'].get('source_only')
+
+
 def self_test():
     if not __debug__: raise ValueError("self-test requires Python assertions; omit -O")
     import copy
+    skipped_runner_boundary_controls()
     assert evidence_role(b'\x1f\x8b' + b'\0' * 40) is None
     transcript = b'....\n----------------------------------------------------------------------\nRan 4 tests in 0.001s\n\nOK\n'
     assert evidence_role(gzip.compress(transcript, mtime=0))
