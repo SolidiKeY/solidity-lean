@@ -8,8 +8,9 @@ import Solidity.Yul.Checks.Bytes
 
 The 20 clause theorems state each opcode's exact meaning over arbitrary
 operands; `universal` is `OpcodeSpec.arithmetic`, and
-`Solidity.Yul.opcode_eval_universal` joins it with the Shifts and Bytes proofs. The 2,008 literal vectors of `Part00`–`Part02` form one
-table checked by one aggregate kernel decision. -/
+`Solidity.Yul.opcode_eval_universal` joins it with the Shifts and Bytes proofs.
+The 2,008 literal vectors of `Part00`–`Part02` form one table checked by one
+aggregate kernel decision. -/
 
 namespace Solidity.Yul.Checks.Arithmetic
 
@@ -28,7 +29,8 @@ theorem table_holds : ∀ r ∈ table, (Pure.eval r.op (operands r.args)).val = 
 /-! ## Universal clauses
 
 One theorem per clause of `OpcodeSpec.arithmetic`, in its order (`OpcodeSpec.modulus`
-and `OpcodeSpec.residue` unfolded); each is definitionally that clause, and `universal` is their conjunction. -/
+and `OpcodeSpec.residue` unfolded); each is definitionally that clause, and
+`universal` is their conjunction. -/
 
 theorem word_val (n : Nat) : (word n).val = n % 2 ^ 256 := rfl
 
