@@ -38,3 +38,5 @@
 | `Roadmap/G49Final/BridgeGoal.lean` | H68 owner-bridge target type `BridgeGoal` (the existing `PassCorrect` with prescribed map, bound and the entire original local conclusion), its projections and the full-`Cert` positive control `cert_bridge`; no bridge is assumed. |
 | `Roadmap/G49Final/PassChain.lean` | Frozen G01 certificate-chain backfill: composes the existing Lowering, Compilation and Execution certificates at the lowered world and assembled artifact; constructs no producer. |
 | `Goals.lean`, `Tools/Goal.lean`, `Examples/Goals.lean` | Roadmap `@[goal]` definitions, the attribute and `#roadmap`, and pinned output, respectively. |
+| `Goals/Shrink.lean` | The two H517 shrink goals, open: `yulLayoutView` (one view recursive over `Shrink.Layout`, with laws, pinned geometry and per-shape instances) and `loweringBySimulation` (one simulation over the actual production lowering on t0's fragment, lifted to `Lowering S I` and `PassCorrect` from the same diagram; its session level awaits the intrinsic session semantics, H556). |
+| `Examples/Goals/Shrink.lean` | Pinned `#roadmap_goal` open checks for both shrink goals. |
