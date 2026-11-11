@@ -96,3 +96,11 @@ test('direct result cannot publish after terminal disposal (injected Wasm bounda
  const f=fixture(),control=isolatedRuntime(),previous=globalThis.__directRetirementControl;try{const script="module.exports=async()=>({ccall:name=>name==='direct_init'?0:(globalThis.__directRetirementControl(),JSON.stringify({results:[{sourceId:1,function:'f',status:'pending',verification:'direct'}]}))});";fs.writeFileSync(path.join(f.dir,'direct.js'),script);const manifest=JSON.parse(fs.readFileSync(path.join(f.dir,'build.json'),'utf8'));manifest.javascript=sha(script);fs.writeFileSync(path.join(f.dir,'build.json'),JSON.stringify(manifest));globalThis.__directRetirementControl=()=>{control.api.disposeDirect();};await assert.rejects(control.api.checkDirect(f.root,f.contract,{}),/retiring|superseded/);}
  finally{await control.api.disposeDirect();if(previous===undefined)delete globalThis.__directRetirementControl;else globalThis.__directRetirementControl=previous;control.restore();fs.rmSync(f.root,{recursive:true,force:true});}
 });
+
+// Requested audits and counterexamples are certified evidence: the compiled
+// verifier is not asked, so the worker takes the certified Lean path.
+test('certified requests bypass the compiled verifier (audits, counterexamples, certify)',()=>{
+ const contract={nodes:[{id:1,name:'f',nodeType:'FunctionDefinition',parameters:{parameters:[]}}]};
+ for(const options of [{certify:true},{auditPreconditions:true},{counterexamples:true}])assert.equal(requestFor(contract,options),null,JSON.stringify(options));
+ assert.ok(requestFor(contract,{}));assert.ok(requestFor(contract,{counterexamples:false,auditPreconditions:false}));
+});

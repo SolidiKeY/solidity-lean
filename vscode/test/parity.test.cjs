@@ -10,6 +10,10 @@ const {parse,launch}=require('../parity/run.cjs');
 const {workload,verificationOutcomes,servicesWorkload,assertServiceResponse}=require('../parity/workloads.cjs');
 const {observe}=require('../parity/observe.cjs');
 const {activity}=require('../parity/analyze.cjs');
+// Injected editors exercise the launcher, not the host: they launch under an
+// admitted snapshot. resourcesAllowed is tested in proof-help.test.cjs; the
+// launcher's refusal under an injected swap snapshot is tested below.
+const admitted=()=>({availableBytes:16*1024**3,swapTotalBytes:0});
 
 test('LSP recorder reconstructs multibyte fragmented and coalesced messages',()=>{
   const messages=[{id:1,result:'é🦀'},{method:'textDocument/publishDiagnostics',params:{version:4,diagnostics:[]}}];
@@ -148,7 +152,7 @@ for(const stale of [false,true])test(`offline parity launcher rejects ${stale?'s
     const trial=join(dir,'trial');mkdirSync(trial);
     const config={dir:trial,target:'local',workers:1,cache:'none',trial:0,warmup:false,workspace:join(trial,'workspace'),result:join(trial,'result.json'),events:join(trial,'events.jsonl'),trace:join(trial,'lsp.jsonl')};
     if(stale)writeFileSync(config.result,JSON.stringify({schemaVersion:1,runId:'old-launch',target:'local',status:'passed',scenarios:[{id:'initial-verification',status:'passed'}],checks:['initial-verification']}));
-    const run=await launch(config,{code,operationTimeoutMs:1000,timeoutMs:2000,obligations:1});
+    const run=await launch(config,{code,operationTimeoutMs:1000,timeoutMs:2000,obligations:1,resourceState:admitted});
     assert.equal(run.status,'broken');assert.match(run.error,stale?/stale/:/No fresh/);
   }finally{rmSync(dir,{recursive:true,force:true});}
 });
@@ -160,7 +164,7 @@ test('a scenario timeout survives a successful editor exit in machine summaries'
     writeFileSync(code,`#!${process.execPath}\nconst fs=require('node:fs');const c=JSON.parse(fs.readFileSync(process.env.PARITY_HOST_CONFIG,'utf8'));fs.writeFileSync(c.result,JSON.stringify({schemaVersion:1,runId:c.runId,target:c.target,status:'timeout',checks:['initial-verification'],scenarios:[{id:'initial-verification',status:'passed'},{id:'rapid-edits-stale-results',status:'timeout'}]}));\n`,{mode:0o700});
     const trial=join(dir,'trial');
     const config={dir:trial,target:'local',workers:1,cache:'none',trial:0,warmup:false,workspace:join(trial,'workspace'),result:join(trial,'result.json'),events:join(trial,'events.jsonl'),trace:join(trial,'lsp.jsonl')};
-    const run=await launch(config,{code,operationTimeoutMs:1000,timeoutMs:2000,obligations:1});
+    const run=await launch(config,{code,operationTimeoutMs:1000,timeoutMs:2000,obligations:1,resourceState:admitted});
     assert.equal(run.status,'timeout');assert.equal(summarize([run])[0].timeoutRate,1);
   }finally{rmSync(dir,{recursive:true,force:true});}
 });
@@ -172,11 +176,26 @@ test('a normal editor exit cannot leave a sampled detached verifier in the next 
     writeFileSync(code,`#!${process.execPath}\nconst fs=require('node:fs');const c=JSON.parse(fs.readFileSync(process.env.PARITY_HOST_CONFIG,'utf8'));const child=require('node:child_process').spawn(process.execPath,['-e','setInterval(()=>{},1000)'],{detached:true,stdio:'ignore'});child.unref();fs.writeFileSync(${JSON.stringify(pidfile)},String(child.pid));setTimeout(()=>fs.writeFileSync(c.result,JSON.stringify({schemaVersion:1,runId:c.runId,target:c.target,status:'passed',checks:['initial-verification'],scenarios:[{id:'initial-verification',status:'passed'}]})),350);\n`,{mode:0o700});
     const trial=join(dir,'trial');
     const config={dir:trial,target:'local',workers:1,cache:'none',trial:0,warmup:false,workspace:join(trial,'workspace'),result:join(trial,'result.json'),events:join(trial,'events.jsonl'),trace:join(trial,'lsp.jsonl')};
-    const run=await launch(config,{code,operationTimeoutMs:1000,timeoutMs:3000,obligations:1});
+    const run=await launch(config,{code,operationTimeoutMs:1000,timeoutMs:3000,obligations:1,resourceState:admitted});
     pid=Number(readFileSync(pidfile,'utf8'));
     assert.ok(run.resources.cleanup.terminatedOwnedSurvivors.some(p=>p.pid===pid));
     assert.deepEqual(run.resources.cleanup.remaining,[]);assert.equal(run.status,'passed');
   }finally{if(pid)try{process.kill(pid,'SIGKILL');}catch{}rmSync(dir,{recursive:true,force:true});}
+});
+test('the launcher refuses before spawning when the injected snapshot has swap or too little memory',async()=>{
+  if(process.platform!=='linux')return;
+  for(const snapshot of [{availableBytes:16*1024**3,swapTotalBytes:1024},{availableBytes:12*1024**3-1,swapTotalBytes:0}]){
+    const dir=mkdtempSync(join(tmpdir(),'parity-admission-'));
+    try {
+      const code=join(dir,'code'),marker=join(dir,'spawned');
+      writeFileSync(code,`#!/bin/sh\ntouch ${JSON.stringify(marker)}\n`,{mode:0o700});
+      const trial=join(dir,'trial');
+      const config={dir:trial,target:'local',workers:1,cache:'none',trial:0,warmup:false,workspace:join(trial,'workspace'),result:join(trial,'result.json'),events:join(trial,'events.jsonl'),trace:join(trial,'lsp.jsonl')};
+      await assert.rejects(launch(config,{code,operationTimeoutMs:1000,timeoutMs:2000,obligations:1,resourceState:()=>snapshot}),/resource admission denied before launch/);
+      assert.equal(require('node:fs').existsSync(marker),false,'no editor spawned');
+      assert.deepEqual(JSON.parse(readFileSync(join(trial,'resource-admission.json'),'utf8')).snapshot,snapshot);
+    }finally{rmSync(dir,{recursive:true,force:true});}
+  }
 });
 test('long artifact paths do not become long editor IPC/profile paths',async()=>{
   if(process.platform==='win32')return;
@@ -186,7 +205,7 @@ test('long artifact paths do not become long editor IPC/profile paths',async()=>
     writeFileSync(code,`#!${process.execPath}\nrequire('node:fs').writeFileSync(${JSON.stringify(record)},JSON.stringify({portable:process.env.VSCODE_PORTABLE,args:process.argv}));\n`,{mode:0o700});
     const trial=join(dir,'long-artifacts-'.repeat(12));
     const config={dir:trial,target:'local',workers:1,cache:'none',trial:0,warmup:false,workspace:join(trial,'workspace'),result:join(trial,'result.json'),events:join(trial,'events.jsonl'),trace:join(trial,'lsp.jsonl')};
-    await launch(config,{code,operationTimeoutMs:1000,timeoutMs:2000,obligations:1});
+    await launch(config,{code,operationTimeoutMs:1000,timeoutMs:2000,obligations:1,resourceState:admitted});
     const data=JSON.parse(readFileSync(record,'utf8'));
     assert.ok(join(data.portable,'user-data/1.10-main.sock').length<107);
     assert.equal(data.portable.startsWith(trial),false);
@@ -217,7 +236,7 @@ test('visual launcher passes suite identity to report validation (injected edito
     writeFileSync(code,`#!${process.execPath}\nconst fs=require('node:fs');const c=JSON.parse(fs.readFileSync(process.env.PARITY_HOST_CONFIG,'utf8'));fs.writeFileSync(c.result,JSON.stringify({schemaVersion:1,runId:c.runId,target:c.target,status:'passed-with-gaps',checks:[],scenarios:['visual-open','visual-first-feedback','visual-verified','visual-proof-broken','visual-proof-fixed'].map(id=>({id,status:'missing'}))}));\n`,{mode:0o700});
     const trial=join(dir,'trial');
     const config={dir:trial,target:'local',workers:1,cache:'basic',trial:0,warmup:false,workspace:join(trial,'workspace'),result:join(trial,'result.json'),events:join(trial,'events.jsonl'),trace:join(trial,'lsp.jsonl')};
-    const run=await launch(config,{code,suite:'visual',operationTimeoutMs:1000,timeoutMs:2000,obligations:1});
+    const run=await launch(config,{code,suite:'visual',operationTimeoutMs:1000,timeoutMs:2000,obligations:1,resourceState:admitted});
     assert.equal(run.status,'passed-with-gaps');assert.equal(run.result.scenarios.every(s=>s.status==='missing'),true);assert.deepEqual(run.result.checks,[]);
   }finally{rmSync(dir,{recursive:true,force:true});}
 });

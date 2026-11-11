@@ -116,7 +116,9 @@ async function launch(config,options) {
   if(options.suite==='verification-time-limit'&&config.target==='dafny')hostConfig.timeLimitReferenceImages=require('./verification-limit.cjs').referenceImages(resolve(options.dafny));
   const configPath=join(config.dir,'config.json');writeFileSync(configPath,JSON.stringify(hostConfig));
   const extension=config.target==='local'?resolve(repo,'vscode'):resolve(options.dafnyExtension);
-  const resource=require('./resource-state.cjs'),admission=process.platform==='linux'?resource.resourceState():null;
+  // `options.resourceState` replaces the /proc/meminfo reader for injected-editor
+  // tests only; the command line cannot set it.
+  const resource=require('./resource-state.cjs'),readResources=options.resourceState??resource.resourceState,admission=process.platform==='linux'?readResources():null;
   writeFileSync(join(config.dir,'resource-admission.json'),JSON.stringify({snapshot:admission,options:{memoryMaxMiB:options.memoryMaxMiB??4096,memoryReserveMiB:options.memoryReserveMiB??12288},scope:'Native process-tree RSS sampling, no aggregate cgroup'}));
   if(admission&&!resource.resourcesAllowed(admission,options))throw Error('Native editor resource admission denied before launch');
   const logfile=openSync(join(config.dir,'editor.log'),'w');
@@ -138,7 +140,7 @@ async function launch(config,options) {
   process.once('SIGINT',stop);process.once('SIGTERM',stop);
   const resourceTimer=setInterval(()=>{
     if(process.platform!=='linux')return;
-    try{const last=sampler.samples.at(-1),state=resource.resourceState();
+    try{const last=sampler.samples.at(-1),state=readResources();
       if(!resource.resourcesAllowed(state,options,last?.rssBytes??0)){resourceStop=true;resourceStopDetails={...state,rssBytes:last?.rssBytes??0};terminateTree(child);}
     }catch(error){resourceStop=true;resourceStopDetails={error:error.message};terminateTree(child);}
   },500);
