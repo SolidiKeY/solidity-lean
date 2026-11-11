@@ -3,7 +3,7 @@ import Solidity.Frontend.LibraryTryImport
 /-! Kernel executions of the unchanged original linked-library try source. -/
 namespace Solidity.Examples.Tactics.LibraryTrySource
 open Solidity.ContractWorld Semantics
-solc_library_try "../../../tests/solc/LibraryTry.ast.json" hash 0x0358fb18516ff9b5
+solc_library_try "../../../tests/solc/LibraryTry.ast.json" hash 0x47c7eddf3739d495
   from_contract "C" as Original
 
 def sender : Address := ⟨⟨103164821458651970696730694074090566093359944210, by decide +kernel⟩, by decide +kernel⟩

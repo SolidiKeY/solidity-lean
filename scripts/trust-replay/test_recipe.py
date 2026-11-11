@@ -155,6 +155,28 @@ os.execve(args[0],args,env)
         target.symlink_to(outside)
         self.assertFalse(self.run_recipe(2)['checker_started'])
 
+    def test_nested_directory_symlink_is_refused(self):
+        original = self.objects / 'Test'
+        moved = self.root / 'moved-objects'
+        original.rename(moved)
+        original.symlink_to(moved, target_is_directory=True)
+        self.assertFalse(self.run_recipe(2)['checker_started'])
+
+    def test_omitted_public_root_is_refused(self):
+        (self.objects / 'Test/Public.olean').unlink()
+        self.assertFalse(self.run_recipe(2)['checker_started'])
+
+    def test_each_object_is_hashed_in_both_validation_phases(self):
+        original = R.digest
+        calls = []
+        def tracked(path, deadline):
+            calls.append(Path(path))
+            return original(path, deadline)
+        with patch.object(R, 'digest', tracked):
+            self.run_recipe(0)
+        for row in self.files:
+            self.assertEqual(calls.count(self.objects / row['path']), 2)
+
     def test_stale_source_head_and_root_are_refused(self):
         (self.source / 'Test/Public.lean').write_text('-- changed root\n')
         self.assertFalse(self.run_recipe(2)['checker_started'])
