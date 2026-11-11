@@ -329,6 +329,7 @@ and open obligations. Test proposals remain proposals until applied.
 - [tests/editor-parity/compiler-project-baseline.md](../tests/editor-parity/compiler-project-baseline.md)
 - [tests/editor-parity/lsp-baseline.md](../tests/editor-parity/lsp-baseline.md)
 - [tests/failure-emission/README.md](../tests/failure-emission/README.md)
+- [tests/fullscope-20261104/vo1/unused-functions-registration.md](../tests/fullscope-20261104/vo1/unused-functions-registration.md)
 - [tests/h28-sol/automation-benchmark/README.md](../tests/h28-sol/automation-benchmark/README.md)
 - [tests/h28-sol/mutation-testing/tools/README.md](../tests/h28-sol/mutation-testing/tools/README.md)
 - [tests/h28-sol/type-grammar/README.md](../tests/h28-sol/type-grammar/README.md)
