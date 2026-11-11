@@ -158,3 +158,24 @@ test('idle native protocol child retires before worker success (injected pending
  const report=await pool.run({action:'verify',source,text,compiled,options:{certify:false,function:'f0()'}});assert.equal(report.backend.kind,'generated-c-native');assert.ok(report.results.every(r=>r.status==='pending'));owned=processState(Number(fs.readFileSync(marker,'utf8')));assert.ok(owned);assert.equal(owned.ppid,pool.workers[0].child.pid);observations.before=owned;observations.report=report;await pool.dispose();const after=processState(owned.pid);observations.after=after;assert.notEqual(after?.birth,owned.birth,'successful normal retirement left an owned process entry');
  }finally{await pool.dispose();if(owned){const current=processState(owned.pid);if(current?.birth===owned.birth&&!['Z','X'].includes(current.state))require('../src/backend.cjs').terminateTree({pid:owned.pid,processBirth:owned.birth});}if(previous===undefined)delete process.env.SOLIDITY_LEAN_DIRECT_DIR;else process.env.SOLIDITY_LEAN_DIRECT_DIR=previous;if(enabled===undefined)delete process.env.SOLIDITY_LEAN_DIRECT;else process.env.SOLIDITY_LEAN_DIRECT=enabled;if(process.env.DAFNY_NATIVE_RETENTION_EVIDENCE){fs.mkdirSync(process.env.DAFNY_NATIVE_RETENTION_EVIDENCE,{recursive:true});fs.writeFileSync(path.join(process.env.DAFNY_NATIVE_RETENTION_EVIDENCE,'observation.json'),JSON.stringify(observations,null,2)+'\n');}fs.rmSync(directory,{recursive:true,force:true});}
 });
+
+// Regression (H550): a Lean server busy at retirement cannot spend the whole
+// window on graceful LSP shutdown. The graceful phase gets at most half of the
+// original deadline; termination and close confirmation fit in the rest.
+// The child is an injected LSP fixture, not Lean.
+for(const mode of ['busy','graceful'])test(`Lean session retirement within its deadline: ${mode} server (injected LSP child)`,{skip:process.platform==='win32'},async()=>{
+ const directory=fs.mkdtempSync(path.join(root,'.lake/retention-split-')),fixture=path.join(directory,'lean.cjs');
+ fs.writeFileSync(fixture,`const {RpcPeer}=require(${JSON.stringify(path.join(root,'vscode/src/rpc.cjs'))});const peer=new RpcPeer(process.stdin,process.stdout);peer.onRequest('shutdown',()=>${mode==='busy'?'new Promise(()=>{})':'null'});peer.onNotification('exit',()=>process.exit(0));setInterval(()=>{},1000);`);
+ const {spawn}=require('node:child_process'),{RpcPeer}=require('../src/rpc.cjs'),{trackChild}=require('../src/child-lifetime.cjs'),{LeanSession}=require('../src/lean-session.cjs');
+ const child=spawn(process.execPath,[fixture],{stdio:['pipe','pipe','pipe']}),closed=trackChild(child),session=new LeanSession(directory,path.join(directory,'worker'));
+ let signal=null;child.once('exit',(code,sig)=>{signal=sig;});
+ Object.assign(session,{child,peer:new RpcPeer(child.stdout,child.stdin),closed});
+ try{
+  await once(child,'spawn');const start=Date.now(),deadline=start+1000;
+  await session.finishDispose({deadline});
+  const elapsed=Date.now()-start;
+  assert.ok(elapsed<1000,`retirement finished inside the original deadline (${elapsed} ms)`);
+  await closed;assert.notEqual(child.exitCode===null&&child.signalCode===null,true,'the child is closed');
+  if(mode==='busy')assert.ok(signal,'a busy server is terminated after the graceful half');else assert.equal(child.exitCode,0,'a responsive server takes the graceful path');
+ }finally{try{child.kill('SIGKILL');}catch{}fs.rmSync(directory,{recursive:true,force:true});}
+});
