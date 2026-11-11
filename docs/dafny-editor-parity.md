@@ -2295,3 +2295,15 @@ refusals. No terminal command executes; simulated Windows is not native Windows
 coverage. Existing quoting and unquoted cwd text remain observable differences.
 Local terminal-prefix support and full native/lifecycle/judgment evidence remain
 unavailable. Failed receipts stay failed after serialization.
+
+
+For compiler-only native diagnostic API observations, run the existing Linux
+native supervisor/display with
+`node vscode/parity/run.cjs --code PINNED_CODE --suite related-diagnostics --targets local --workers 1 --cache none --trials 1 --warmups 0 --obligations 1 --trace on --output NEW_OUTPUT`.
+The companion keeps the existing60s operation/300s outer budgets and4GiB
+sampledRSS/no-swap/12GiB host-reserve guards. It copies public diagnostic getters
+through duplicate, UTF16/CRLF-shift and fixed phases, binding current document
+and process epochs to the actual recorded compiler wire. This is not a native
+key/menu dispatch, rendered Problems/underline capture, postcondition proof,
+Dafny comparison or either independent row judgment. Missing or failed captures
+retain their full partial observation; original suites and predicates remain.

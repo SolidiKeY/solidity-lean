@@ -1,0 +1,71 @@
+'use strict';
+const {test}=require('node:test'),assert=require('node:assert/strict'),{createHash}=require('node:crypto'),path=require('node:path'),{pathToFileURL}=require('node:url');
+const {source,textFor,phases,diagnosticSnapshot,wireSnapshot,errors}=require('../parity/related-diagnostics.cjs');
+const digest=s=>createHash('sha256').update(s).digest('hex');
+const config={target:'local',runId:'run',sourceHead:'a'.repeat(40),workspace:'/workspace/owned',operationTimeoutMs:60000,suite:'related-diagnostics'};
+function fixture(){
+ const uri=pathToFileURL(path.join(config.workspace,'related-diagnostics.sol')).href,owner={processSession:'process-epoch',pid:123,birth:'456'},protocol=[],steps=[],events=[{kind:'process.spawn',data:{...owner,args:[path.resolve(__dirname,'../src/lsp-server.cjs')],cwd:path.resolve(__dirname,'../..')}}];
+ for(let i=0;i<phases.length;i++){const phase=phases[i],text=textFor(phase),b={uri,version:i+1,sourceHash:digest(text),session:'document-epoch',trusted:true,closed:false,language:'solidity',scheme:'file'},n=phase==='shifted'?1:0;
+  protocol.push({...owner,direction:'client',message:{method:i?'textDocument/didChange':'textDocument/didOpen',params:i?{textDocument:{uri,version:b.version},contentChanges:[{text}]}:{textDocument:{uri,version:b.version,text,synchronizationId:'sync-epoch'}}}});
+  const diagnostics=phase==='fixed'?[]:[{severity:1,source:'solc',code:1686,message:'duplicate',range:{start:{line:4+n,character:2},end:{line:4+n,character:27}},relatedInformation:[{message:'other declaration',location:{uri,range:{start:{line:5+n,character:2},end:{line:5+n,character:27}}}}]}];
+  const publicationIndex=protocol.length;protocol.push({...owner,direction:'server',message:{method:'textDocument/publishDiagnostics',params:{uri,version:b.version,sourceHash:b.sourceHash,synchronizationId:'sync-epoch',diagnostics}}});
+  if(phase==='fixed')protocol.push({...owner,direction:'server',message:{method:'solidityLean/status',params:{uri,version:b.version,sourceHash:b.sourceHash,state:'ready'}}});
+  steps.push({phase,status:'observed',before:b,after:structuredClone(b),diagnostics:wireSnapshot(diagnostics),publicationIndex,wireEnd:protocol.length,eventEnd:events.length,process:{...owner},elapsedMs:1});
+ }
+ return{runId:config.runId,target:'local',sourceHead:config.sourceHead,status:'partial',captureStatus:'observed',steps,protocol,events};
+}
+test('diagnostic getters survive JSON and later API mutation without using toJSON',()=>{
+ let line=1,text='other';const point={get line(){return line;},get character(){return 2;},toJSON(){throw Error('must not invoke');}},value={get severity(){return 0;},get message(){return'duplicate';},get range(){return{start:point,end:point};},get code(){return{value:1686,target:{toString:()=> 'https://example.invalid/code'}};},get relatedInformation(){return[{get message(){return text;},location:{uri:{toString:()=> 'file:///owned.sol'},range:{start:point,end:point}}}];}};
+ const snapshot=diagnosticSnapshot([value]);line=7;text='mutated';const roundtrip=JSON.parse(JSON.stringify(snapshot));assert.equal(roundtrip[0].relatedInformation[0].message,'other');assert.deepEqual(roundtrip[0].range.start,{line:1,character:2});assert.equal(roundtrip[0].code.target,'https://example.invalid/code');
+});
+test('invalid getter positions, severity and oversized data refuse rather than disappear',()=>{
+ const base={severity:0,message:'m',range:{start:{line:0,character:0},end:{line:0,character:1}}};for(const changed of [{...base,severity:9},{...base,message:'x'.repeat(65537)},{...base,range:{start:{line:-1,character:0},end:{line:0,character:1}}},{...base,relatedInformation:new Array(257).fill({})}])assert.throws(()=>diagnosticSnapshot([changed]));
+ assert.throws(()=>diagnosticSnapshot([{...base,get relatedInformation(){throw Error('getter failed');}}]),/getter failed/);
+});
+test('injected complete API/wire fixture survives JSON only as partial evidence',()=>assert.deepEqual(errors(JSON.parse(JSON.stringify(fixture())),config),[]));
+const mutations={
+ 'same-byte/version reopened lifetime':o=>{const b=o.steps[0].before,owner=o.steps[0].process;o.protocol.splice(2,0,{...owner,direction:'client',message:{method:'textDocument/didClose',params:{textDocument:{uri:b.uri}}}},{...owner,direction:'client',message:{method:'textDocument/didOpen',params:{textDocument:{uri:b.uri,version:b.version,text:source,synchronizationId:'new-sync'}}}});for(const row of o.steps){if(row.publicationIndex>=2)row.publicationIndex+=2;row.wireEnd+=2;}for(let n=4;n<o.protocol.length;n++){const m=o.protocol[n].message;if(m.method==='textDocument/publishDiagnostics')m.params.synchronizationId='new-sync';}},
+ 'future process birth':o=>o.events.unshift({kind:'unrelated',data:{}}),
+ 'exact deadline':o=>o.steps[1].elapsedMs=60000,
+ 'wrong target':o=>o.target='dafny',
+ 'wrong head':o=>o.sourceHead='b'.repeat(40),
+ 'wrong URI':o=>o.steps[1].before.uri='file:///foreign.sol',
+ 'wrong version':o=>o.steps[1].before.version=1,
+ 'wrong source hash':o=>o.steps[1].before.sourceHash='c'.repeat(64),
+ 'changed session':o=>o.steps[1].before.session='new',
+ 'owner changed during capture':o=>o.steps[0].after.closed=true,
+ 'late capture':o=>o.steps[1].elapsedMs=60001,
+ 'missing phase':o=>o.steps.splice(1,1),
+ 'missing related API location':o=>o.steps[0].diagnostics[0].relatedInformation=[],
+ 'foreign related wire and API':o=>{o.steps[0].diagnostics[0].relatedInformation[0].location.uri='file:///foreign.sol';o.protocol[1].message.params.diagnostics[0].relatedInformation[0].location.uri='file:///foreign.sol';},
+ 'missing diagnostic publication':o=>o.protocol[1].message.method='unrelated',
+ 'foreign server birth':o=>o.events[0].data.birth='999',
+ 'foreign wire document owner':o=>o.protocol[0].processSession='foreign',
+ 'late wire document change':o=>{o.protocol.push({...o.steps[2].process,direction:'client',message:{method:'textDocument/didChange',params:{textDocument:{uri:o.steps[2].before.uri,version:4},contentChanges:[{text:'changed'}]}}});o.steps[2].wireEnd=o.protocol.length;},
+ 'retired server':o=>{o.events.push({kind:'process.close',data:{...o.steps[0].process}});o.steps[0].eventEnd=2;},
+ 'wrong executable script':o=>o.events[0].data.args=['/other/lsp-server.cjs'],
+ 'missing synchronization':o=>delete o.protocol[0].message.params.textDocument.synchronizationId,
+ 'wrong synchronization':o=>o.protocol[1].message.params.synchronizationId='other',
+ 'missing ready barrier':o=>o.protocol.at(-1).message.method='unrelated',
+ 'unrelated ready barrier':o=>o.protocol.at(-1).message.params.uri='file:///foreign.sol',
+ 'proof side effect':o=>o.protocol.push({direction:'client',message:{method:'solidityLean/verify'}}),
+ 'failed capture':o=>o.status='failed',
+ 'reporting failure':o=>o.reportingError='disk',
+ 'missing API field':o=>delete o.steps[0].diagnostics[0].range
+};
+for(const [name,change]of Object.entries(mutations))test('injected receipt refuses '+name,()=>{const o=fixture();change(o);assert.ok(errors(o,config).length);});
+test('aggregate target binding and rejection retain the failed observation',()=>{
+ const {validateHostResult}=require('../parity/core.cjs'),observation=fixture(),outer={schemaVersion:1,runId:config.runId,target:'local',status:'passed-with-gaps',scenarios:[{id:'native-related-diagnostics',status:'partial',observation}],checks:[]};
+ assert.ok(!validateHostResult(outer,config).error);observation.steps[0].diagnostics=[];const rejected=validateHostResult(outer,config);assert.ok(rejected.error);assert.equal(rejected.rejectedResult,outer);assert.equal(rejected.rejectedResult.scenarios[0].observation.steps.length,3);
+});
+test('existing launcher requires bounded serial local recording',()=>{
+ const {parse}=require('../parity/run.cjs'),args=['--suite','related-diagnostics','--targets','local','--workers','1','--cache','none','--trials','1','--warmups','0','--obligations','1'];assert.equal(parse(args).suite,'related-diagnostics');for(const extra of [['--targets','dafny'],['--trace','off'],['--operation-timeout-ms','60001'],['--workers','1,2'],['--memory-max-mib','8192'],['--memory-reserve-mib','12000']])assert.throws(()=>parse([...args,...extra]));
+});
+
+test('phase deadline refuses synchronous late reads and late promise completion without timer race',async()=>{
+ const {withinDeadline,elapsedBeforeDeadline}=require('../parity/related-diagnostics.cjs');let clock=0,called=false,cleared=0;
+ const options={now:()=>clock,setTimer:()=>1,clearTimer:()=>cleared++};
+ await assert.rejects(withinDeadline(()=>{called=true;clock=10;return 'late';},10,options),e=>e.code==='TIMEOUT');assert.equal(called,true);assert.equal(cleared,1);
+ called=false;await assert.rejects(withinDeadline(()=>{called=true;},10,options),e=>e.code==='TIMEOUT');assert.equal(called,false);
+ assert.throws(()=>elapsedBeforeDeadline(0,10,()=>10),e=>e.code==='TIMEOUT');assert.equal(elapsedBeforeDeadline(0,10,()=>9),9);
+});

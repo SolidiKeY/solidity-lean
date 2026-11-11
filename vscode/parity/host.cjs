@@ -124,6 +124,8 @@ async function run() {
       await scenario('native-workspace-symbols',()=>require('./workspace-symbol-lifecycle.cjs').run({vscode,config,events,sessionFor,bounded}));
     }else if(config.suite==='editor-language-scope'){
       await scenario('native-editor-language-scope',()=>require('./editor-language-lifecycle.cjs').run({vscode,config,events,sessionFor}));
+    }else if(config.suite==='related-diagnostics'){
+      await scenario('native-related-diagnostics',()=>require('./related-diagnostics.cjs').run({vscode,config,events,sessionFor}));
     }else if(config.suite==='compiler-code-actions'){
       await scenario('native-compiler-code-actions',()=>require('./code-action-lifecycle.cjs').run({vscode,config,api,events,sessionFor}));
     }else if(config.suite==='verification-time-limit'){
