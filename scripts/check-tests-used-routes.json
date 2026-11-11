@@ -421678,10 +421678,326 @@
           "path": "Solidity/Source/FailureEvaluatorApprox.lean"
         }
       ]
+    },
+    {
+      "frames": [
+        {
+          "blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926",
+          "line": 5,
+          "path": "scripts/h62/item2/audit-language/test_source_roles.py"
+        }
+      ],
+      "input_revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+      "operation": "validated Python read of measured bytes",
+      "runner": "validated:scripts/h62/item2/audit-language/test_source_roles.py",
+      "targets": [
+        {
+          "blob": "6cb2604529e8d5249ce907890d85071ea92112db",
+          "path": "scripts/h62/item2/audit-language/census.py"
+        }
+      ]
+    },
+    {
+      "frames": [
+        {
+          "blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926",
+          "line": 6,
+          "path": "scripts/h62/item2/audit-language/test_source_roles.py"
+        },
+        {
+          "blob": "fbc2eb5bc17f91adabf886d22058615d640dd20d",
+          "line": 13,
+          "path": "scripts/h62/item2/audit-language/source_roles.py"
+        }
+      ],
+      "input_revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+      "operation": "validated Python read of measured bytes",
+      "runner": "validated:scripts/h62/item2/audit-language/test_source_roles.py",
+      "targets": [
+        {
+          "blob": "c83b17a257020515a2491be5b3c489a93428ffd2",
+          "path": "scripts/h62/item2/audit-language/classify.py"
+        }
+      ]
+    },
+    {
+      "frames": [
+        {
+          "blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926",
+          "line": 6,
+          "path": "scripts/h62/item2/audit-language/test_source_roles.py"
+        },
+        {
+          "blob": "fbc2eb5bc17f91adabf886d22058615d640dd20d",
+          "line": 14,
+          "path": "scripts/h62/item2/audit-language/source_roles.py"
+        }
+      ],
+      "input_revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+      "operation": "validated Python read of measured bytes",
+      "runner": "validated:scripts/h62/item2/audit-language/test_source_roles.py",
+      "targets": [
+        {
+          "blob": "5fbc100e83b26fb0bd9f4bfe408cfab0e108aef4",
+          "path": "scripts/h62/item2/audit-language/source_only.py"
+        }
+      ]
+    },
+    {
+      "frames": [
+        {
+          "blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926",
+          "line": 6,
+          "path": "scripts/h62/item2/audit-language/test_source_roles.py"
+        }
+      ],
+      "input_revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+      "operation": "validated Python read of measured bytes",
+      "runner": "validated:scripts/h62/item2/audit-language/test_source_roles.py",
+      "targets": [
+        {
+          "blob": "fbc2eb5bc17f91adabf886d22058615d640dd20d",
+          "path": "scripts/h62/item2/audit-language/source_roles.py"
+        }
+      ]
+    },
+    {
+      "frames": [
+        {
+          "blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926",
+          "line": 89,
+          "path": "scripts/h62/item2/audit-language/test_source_roles.py"
+        },
+        {
+          "blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926",
+          "line": 73,
+          "path": "scripts/h62/item2/audit-language/test_source_roles.py"
+        },
+        {
+          "blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926",
+          "line": 65,
+          "path": "scripts/h62/item2/audit-language/test_source_roles.py"
+        }
+      ],
+      "input_revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+      "operation": "validated Python read of measured bytes",
+      "runner": "validated:scripts/h62/item2/audit-language/test_source_roles.py",
+      "targets": [
+        {
+          "blob": "257831d3a34991bfe5939d065bbb0891d836a092",
+          "path": "scripts/h62/item2/audit-language/refine_remaining.py"
+        }
+      ]
+    },
+    {
+      "frames": [
+        {
+          "blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b",
+          "line": 9,
+          "path": "tests/h28-sol/mutation-testing/tools/test_runner.py"
+        }
+      ],
+      "input_revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+      "operation": "validated Python read of measured bytes",
+      "runner": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py",
+      "targets": [
+        {
+          "blob": "7fad642144fd1d2d2afc519e5deaa87a643ff0db",
+          "path": "tests/h28-sol/mutation-testing/tools/runner.py"
+        }
+      ]
+    },
+    {
+      "frames": [
+        {
+          "blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b",
+          "line": 91,
+          "path": "tests/h28-sol/mutation-testing/tools/test_runner.py"
+        },
+        {
+          "blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b",
+          "line": 59,
+          "path": "tests/h28-sol/mutation-testing/tools/test_runner.py"
+        },
+        {
+          "blob": "7fad642144fd1d2d2afc519e5deaa87a643ff0db",
+          "line": 76,
+          "path": "tests/h28-sol/mutation-testing/tools/runner.py"
+        },
+        {
+          "blob": "c1578c4b34c88c7e16ed09d1091b223a0406033e",
+          "line": 13,
+          "path": "tests/h28-sol/mutation-testing/tools/engine.py"
+        }
+      ],
+      "input_revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+      "operation": "validated Python read of measured bytes",
+      "runner": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py",
+      "targets": [
+        {
+          "blob": "2d36256b0def09f09a71b020f2c1fe87d1f2f092",
+          "path": "tests/h28-sol/mutation-testing/tools/bulk_inputs.py"
+        }
+      ]
+    },
+    {
+      "frames": [
+        {
+          "blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b",
+          "line": 91,
+          "path": "tests/h28-sol/mutation-testing/tools/test_runner.py"
+        },
+        {
+          "blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b",
+          "line": 59,
+          "path": "tests/h28-sol/mutation-testing/tools/test_runner.py"
+        },
+        {
+          "blob": "7fad642144fd1d2d2afc519e5deaa87a643ff0db",
+          "line": 76,
+          "path": "tests/h28-sol/mutation-testing/tools/runner.py"
+        },
+        {
+          "blob": "c1578c4b34c88c7e16ed09d1091b223a0406033e",
+          "line": 14,
+          "path": "tests/h28-sol/mutation-testing/tools/engine.py"
+        }
+      ],
+      "input_revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+      "operation": "validated Python read of measured bytes",
+      "runner": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py",
+      "targets": [
+        {
+          "blob": "05a9887298923a0c864eb1e62184eac1ea859bdb",
+          "path": "tests/h28-sol/mutation-testing/tools/bounded.py"
+        }
+      ]
+    },
+    {
+      "frames": [
+        {
+          "blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b",
+          "line": 91,
+          "path": "tests/h28-sol/mutation-testing/tools/test_runner.py"
+        },
+        {
+          "blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b",
+          "line": 59,
+          "path": "tests/h28-sol/mutation-testing/tools/test_runner.py"
+        },
+        {
+          "blob": "7fad642144fd1d2d2afc519e5deaa87a643ff0db",
+          "line": 76,
+          "path": "tests/h28-sol/mutation-testing/tools/runner.py"
+        },
+        {
+          "blob": "c1578c4b34c88c7e16ed09d1091b223a0406033e",
+          "line": 15,
+          "path": "tests/h28-sol/mutation-testing/tools/engine.py"
+        }
+      ],
+      "input_revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+      "operation": "validated Python read of measured bytes",
+      "runner": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py",
+      "targets": [
+        {
+          "blob": "82f46353a66eae3ccd479e76b8fa352488069286",
+          "path": "tests/h28-sol/mutation-testing/tools/checked.py"
+        }
+      ]
+    },
+    {
+      "frames": [
+        {
+          "blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b",
+          "line": 91,
+          "path": "tests/h28-sol/mutation-testing/tools/test_runner.py"
+        },
+        {
+          "blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b",
+          "line": 59,
+          "path": "tests/h28-sol/mutation-testing/tools/test_runner.py"
+        },
+        {
+          "blob": "7fad642144fd1d2d2afc519e5deaa87a643ff0db",
+          "line": 76,
+          "path": "tests/h28-sol/mutation-testing/tools/runner.py"
+        },
+        {
+          "blob": "c1578c4b34c88c7e16ed09d1091b223a0406033e",
+          "line": 16,
+          "path": "tests/h28-sol/mutation-testing/tools/engine.py"
+        }
+      ],
+      "input_revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+      "operation": "validated Python read of measured bytes",
+      "runner": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py",
+      "targets": [
+        {
+          "blob": "7fad642144fd1d2d2afc519e5deaa87a643ff0db",
+          "path": "tests/h28-sol/mutation-testing/tools/runner.py"
+        }
+      ]
+    },
+    {
+      "frames": [
+        {
+          "blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b",
+          "line": 91,
+          "path": "tests/h28-sol/mutation-testing/tools/test_runner.py"
+        },
+        {
+          "blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b",
+          "line": 59,
+          "path": "tests/h28-sol/mutation-testing/tools/test_runner.py"
+        },
+        {
+          "blob": "7fad642144fd1d2d2afc519e5deaa87a643ff0db",
+          "line": 76,
+          "path": "tests/h28-sol/mutation-testing/tools/runner.py"
+        }
+      ],
+      "input_revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+      "operation": "validated Python read of measured bytes",
+      "runner": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py",
+      "targets": [
+        {
+          "blob": "c1578c4b34c88c7e16ed09d1091b223a0406033e",
+          "path": "tests/h28-sol/mutation-testing/tools/engine.py"
+        }
+      ]
     }
   ],
   "schema_version": 2,
   "standalone": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item2/audit-language/test_source_roles.py"
+      ],
+      "input_revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+      "input_scope": [],
+      "kind": "unittest",
+      "other_reads": "unresolved",
+      "path": "scripts/h62/item2/audit-language/test_source_roles.py",
+      "purpose": "Fresh ordinary/instrumented unittest command; only separately entered measured frames qualify as helper execution. Source-loader targets have no reviewed data-fixture role.",
+      "source_blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "tests/h28-sol/mutation-testing/tools/test_runner.py"
+      ],
+      "input_revision": "5b78e2313ed50233a7a8373354b0e4586fd75c9e",
+      "input_scope": [],
+      "kind": "unittest",
+      "other_reads": "unresolved",
+      "path": "tests/h28-sol/mutation-testing/tools/test_runner.py",
+      "purpose": "Fresh ordinary/instrumented unittest command; only separately entered measured frames qualify as helper execution. Source-loader targets have no reviewed data-fixture role.",
+      "source_blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b"
+    },
     {
       "command": [
         "python3",

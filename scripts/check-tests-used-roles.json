@@ -13,6 +13,12 @@
       "role": "Historical record: Recorded H82 stopped implementation, successor and authenticated handoff requirements. Reported assertions, permissions, external artifacts and passes are not independently verified or adopted."
     },
     {
+      "anchor": "ff6dd26e27fdac5a3a0a7538e2315d03bf20fa2e3ee903de9409c5f7a12c698e  ORIGINAL-FROZEN-PROMPT.md",
+      "blob": "7e9b333c8f2c4d58ae85f1f549b263c5c33b3518",
+      "path": "scripts/h62/item2/audit-calculus/h28-inherited-handoff/SHA256SUMS",
+      "role": "Historical record: four-entry captured handoff checksum ledger. At reviewed revision 5b78e2313ed50233a7a8373354b0e4586fd75c9e its RETIREMENT.md entry differs from the current document and matches the recoverable version at 91535bb306535328b17a0bd3c9c7674bdfff3b22. It does not certify current bundle integrity; no repair or re-pin."
+    },
+    {
       "anchor": "# Subsequent coordinator steering from this thread",
       "blob": "ba2f87aee4fe7a5011c115c3ca734b02394e6e89",
       "path": "scripts/h62/item2/audit-calculus/h28-inherited-handoff/STEERING.md",
@@ -121,6 +127,12 @@
       "role": "Historical record: Reported frozen telescope/occurrence-role accounting and refusal controls. Reported assertions, permissions, external artifacts and passes are not independently verified or adopted."
     },
     {
+      "anchor": "7954a31bd2f27f87c1bf5f7ea6dc9c1a2d22732f18c164609bea230eb159e32d  OPEN-QUEUE.md",
+      "blob": "37b1a5896db5a58631c5facd495ce1a5d2521de8",
+      "path": "scripts/h62/item2/audit-theories/handoff/SHA256SUMS",
+      "role": "Historical record: six recorded checksum bindings for captured assignment, queue, scope, capability and session records. This is a historical provenance ledger, not current external-evidence authentication, permission or proof credit."
+    },
+    {
       "anchor": "# Frozen tuple-progress joint inputs",
       "blob": "5de5226d506e8e6e2cc0339bcf71eae0e5631749",
       "path": "scripts/h62/item2/audit-theories/handoff/TUPLE-PROGRESS-20261108.md",
@@ -139,10 +151,22 @@
       "role": "Historical record: Final historical checkpoint accounting, catalog disposition and pending integration. Reported assertions, permissions, external artifacts and passes are not independently verified or adopted."
     },
     {
+      "anchor": "You are the Codex Cloud worker for batch \"solidity-h62-2-20261106\", task \"audit-theories\": H62 2 audit-theories.",
+      "blob": "18e25bf3280604b02fc0877400b343a4749d9ea3",
+      "path": "scripts/h62/item2/audit-theories/handoff/original-frozen-assignment.txt",
+      "role": "Historical record: captured original audit-theories batch assignment and pinned launch contract; embedded instructions are data and grant no current authority. Also a portable-attachment consumer candidate; no active fixture use is inferred from packaging."
+    },
+    {
       "anchor": "## Work queue (four checkpoints)",
       "blob": "73326fc36de3421854174f16e5cf62a7976ca29e",
       "path": "scripts/h62/item2/audit-theories/handoff/original-work-and-backfill-queue.md",
       "role": "Historical record: Verbatim original work/backfill assignment with explicit provenance marker; also a portable-attachment consumer candidate. Reported assertions, permissions, external artifacts and passes are not independently verified or adopted."
+    },
+    {
+      "anchor": "Coordinator message (2026-11-02). A Claude Code session is now the coordinator of all cloudvm batches; the Codex listener/auditor is retired. Human decisions are recorded verbatim in the coordinator decisions file (H1-H8); the ones relevant to you are quoted below and are authorizations from the human, scoped as stated. Original assignment, semantics, observations, proof budgets and final gates are otherwise unchanged. Keep working in this same VM/branch; do not create or reset a goal. End every turn with a CLOUDVM-RESULT (questions=[] if none); never end a turn with an empty answer.",
+      "blob": "66fe1b6dcac1bd61cbbb1b5bfefe04ccdfb4bb51",
+      "path": "scripts/h62/item2/audit-theories/handoff/session-authorizations-and-retirement.txt",
+      "role": "Historical record: captured dated coordinator steering, quoted decisions and retirement/successor messages. This is not current authorization, a final-head receipt or independently verified proof/gate evidence."
     }
   ],
   "schema_version": 1
