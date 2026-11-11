@@ -74,22 +74,27 @@ the gate. Full U01 acceptance still requires the original measurements.
   recorded evidence. Existing snapshot sources and legacy result records do not
   establish admission. The lane can prepare and test fixtures under
   `scripts/bench/**`, but cannot invent admission, exclude required functions or
-  call the partial suite complete. `VU1-H470-FIXTURES` asks whether this lane
-  may construct and demonstrate admission of representative fixtures instead of
-  H191's existing-owner input publication. Missing validated inputs remain explicit.
+  call the partial suite complete. H484 answers `VU1-H470-FIXTURES` with B:
+  retain H191 and supply concrete existing-owner source paths and hashes.
+  This decision supplied no actual paths/hashes. No lane-authored replacement
+  is approved; missing validated inputs remain explicit, not an owner wait.
 - The H413 telemetry proposal is delivered and remains unapplied. Its exact
   patch SHA256 is
   `8b9b2e83290b05c89daa930ce8f07caecfc9461005f441855cd27cda36ede71e`.
   H470 does not extend the lease to its four Lean/C producer files.
-  H439's exact-draft read-only review is complete. The single recorded user
-  follow-up is `VU1-H439-TELEMETRY-CONTRACT-20261110`; the overlapping
-  `VU1-H470-SCOPE` request is consolidated into it. No coordinator or owner
-  wait is retained. Review completion grants no producer scope, implementation,
-  signature freeze or complete U01 acceptance.
-- Dynamic attempted-versus-committed steps, loss detection, native finer-phase
-  boundaries and aggregate RSS remain unresolved design choices. Unknown fields
-  stay unknown. These require concrete design decisions before an interface is
-  frozen; partial observations grant no complete-baseline or acceptance credit.
+  H439's exact-draft read-only review is complete. H488 answers the consolidated
+  `VU1-H439-TELEMETRY-CONTRACT-20261110` decision: revise the full proposal in
+  existing proposal scope, then return exact signatures and write paths for
+  approval before implementation. Attempted/committed counts, correlation,
+  loss, kernel coverage and aggregate RSS must be specified. This grants no
+  producer/toolchain scope, implementation, signature freeze or U01 acceptance.
+  No coordinator or owner wait is retained.
+- The H488 revision specifies proposed attempted/retained/committed vectors,
+  run/process/attempt/outcome identity, loss detection, proposed scoped kernel/IR/native
+  observation boundaries and RSS precision. The exact proposed interfaces and
+  path set still require user approval; no runtime field becomes available from
+  design review. Unknown fields stay unknown. Partial observations grant no
+  complete-baseline or acceptance credit.
 - Proposed budgets remain unapproved. No budget, proof statement, trust boundary,
   gate, exclusion, heartbeat or time/memory limit is changed by H470.
 
@@ -395,6 +400,17 @@ claimed the historical catalog/pin failures; it now records the actual current
 passes. The lane self-approves this in-scope documentation change using these
 reviews. Producer instrumentation remains unapplied; unknown fields stay unknown.
 
+H488 revision review: finder required a concrete stock-linking strategy and
+separate coverage for stock validation. The revised design uses ordinary
+stock-safe IO fallback definitions and an explicit diagnostic-only binding map;
+observation-worker, stock-loop and delivery coverage remain distinct. Skeptic
+required counted-twin operational units and separate count-correctness controls,
+plus independent target polarity for certified refutations. These are specified;
+result projection alone is not a counter-correctness claim. Both independent
+read-only reviewers confirmed the corrections at design level. No producer or
+toolchain source was applied or compiled. Exact interfaces and write paths still
+require user approval before implementation; full U01 remains incomplete.
+
 ## Checkpoint handoff
 
 The lane-owned inventory and documentation repairs are complete. On merged
@@ -406,4 +422,5 @@ report, budget approval, CI regression thresholds,
 full lane-end validation and sealed handoff remain outstanding. No Lean file,
 public theorem, axiom pin, heartbeat setting or generated root is changed.
 H470 removes coordinator/owner waits; remaining out-of-scope implementation
-requires the recorded VU1-H439-TELEMETRY-CONTRACT-20261110 user decision.
+requires approval of the H488 revised interfaces and exact write paths. H484
+retains the original fixture-provenance requirement; no substitute is approved.

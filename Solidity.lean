@@ -3250,6 +3250,7 @@ import Solidity.Goals.Loops
 import Solidity.Goals.Panic
 import Solidity.Goals.Plan
 import Solidity.Goals.Taclets
+import Solidity.Goals.Total
 import Solidity.Hash.Adaptive
 import Solidity.Hash.Bridge
 import Solidity.Hash.CollisionBound
@@ -4012,6 +4013,7 @@ import Solidity.Optimizer.Propagate
 import Solidity.Optimizer.RoadmapComposition
 import Solidity.Optimizer.Simplify
 import Solidity.Optimizer.StmtFold
+import Solidity.Optimizer.UnusedFunctions
 import Solidity.Optimizer.UnusedVar
 import Solidity.Precompiles.Basic
 import Solidity.Precompiles.Blake2f
@@ -4166,6 +4168,7 @@ import Solidity.SolcValidation.IrHelperSim
 import Solidity.SolcValidation.IrHelperSource
 import Solidity.SolcValidation.IrHelperSteps
 import Solidity.SolcValidation.IrHelpers
+import Solidity.SolcValidation.IrHex
 import Solidity.SolcValidation.IrLinkedCode
 import Solidity.SolcValidation.IrParse
 import Solidity.SolcValidation.IrPushHelpers
@@ -5301,6 +5304,7 @@ import Solidity.Yul.LocalWordWrite
 import Solidity.Yul.LocalWriteback
 import Solidity.Yul.OccurrenceCheck
 import Solidity.Yul.OccurrenceSyntax
+import Solidity.Yul.OpcodeSpec
 import Solidity.Yul.OpenAgreement
 import Solidity.Yul.OpenCalculus
 import Solidity.Yul.OpenCasesAgreement
