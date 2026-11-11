@@ -727,6 +727,56 @@ def historical_json_role(value):
     return None
 
 
+def reviewed_archive_report(value):
+    """Two historical report shapes, independently traced to committed producers.
+
+    shared-translator/verify-sourcebuild-intake.py:60-75 emits archive intake
+    observations, not execution/source qualification. occurrence-integrity-
+    controls.py:14-42 emits six control outcomes; its surrounding manifest is
+    documented in docs/feature-work/directruntime-shared-translator.md:827.
+    External paths/digests are recorded provenance only, never verified here.
+    """
+    if not isinstance(value, dict): return None
+    def text(v): return isinstance(v, str) and bool(v.strip())
+    def sized_digest(v):
+        return (isinstance(v, dict) and set(v) == {'sha256', 'bytes'}
+                and hex_pin(v['sha256']) and type(v['bytes']) is int and v['bytes'] > 0)
+    intake = {'guardedRegression', 'inputDirectory', 'inputs', 'evidenceFiles',
+              'recordedSourceModules', 'recordedSourceArraysEqual', 'binaries',
+              'gitSourceIdentityVerified', 'execution', 'extraction', 'boundary'}
+    if set(value) == intake:
+        inputs, binaries = value['inputs'], value['binaries']
+        if (all(text(value[k]) for k in ('guardedRegression', 'inputDirectory', 'boundary'))
+                and value['guardedRegression'] == 'Historical sourceBuild1e8 intake is not current H90 qualification'
+                and isinstance(inputs, dict) and set(inputs) == {'evidence.tar.gz', 'runtime-artifacts.tar.gz', 'files.json'}
+                and all(hex_pin(v) for v in inputs.values())
+                and all(type(value[k]) is int and value[k] > 0 for k in ('evidenceFiles', 'recordedSourceModules'))
+                and value['recordedSourceArraysEqual'] is True
+                and all(value[k] is False for k in ('gitSourceIdentityVerified', 'execution', 'extraction'))
+                and isinstance(binaries, dict) and set(binaries) == {'native/direct-check', 'direct/direct.wasm', 'direct/direct.js'}
+                and all(sized_digest(v) for v in binaries.values())):
+            return 'Historical archive intake report (shared-translator/verify-sourcebuild-intake.py:60-75): archive/binary pins and recorded source-array observations; no current execution, Git identity or external-artifact verification.'
+    occurrence = {'checkpoint', 'command', 'exit', 'wallSeconds', 'results', 'boundary', 'bulk'}
+    if set(value) == occurrence:
+        results, bulk = value['results'], value['bulk']
+        names = ['healthy', 'missing-occurrence', 'case-identity', 'pointer', 'node-hash', 'route']
+        if (all(text(value[k]) for k in ('checkpoint', 'boundary'))
+                and value['command'] == 'PYTHONDONTWRITEBYTECODE=1 python3 tests/directruntime-20261104/shared-translator/occurrence-integrity-controls.py'
+                and type(value['exit']) is int and nonnegative_number(value['wallSeconds'])
+                and isinstance(results, dict) and set(results) == {'controls', 'boundary'} and text(results['boundary'])
+                and isinstance(results['controls'], list) and len(results['controls']) == len(names)
+                and all(isinstance(row, dict) and row.get('case') == name
+                        and (set(row) == {'case', 'result'} and row['result'] == 'accepted' if index == 0 else
+                             set(row) == {'case', 'result', 'line'} and row['result'] == 'rejected'
+                             and type(row['line']) is int and row['line'] > 0)
+                        for index, (name, row) in enumerate(zip(names, results['controls'])))
+                and isinstance(bulk, list) and bulk and all(isinstance(row, dict)
+                    and set(row) == {'path', 'bytes', 'sha256'} and text(row['path'])
+                    and type(row['bytes']) is int and row['bytes'] >= 0 and hex_pin(row['sha256']) for row in bulk)):
+            return 'Historical occurrence-integrity control report (shared-translator/occurrence-integrity-controls.py:14-42): recorded six-case outcomes, exit/timing and external bulk pins; no current pass, Lean proof or external-artifact verification.'
+    return None
+
+
 def reviewed_receipt_rows(value):
     """Measured rows from three reviewed historical envelope schemas.
 
@@ -736,6 +786,35 @@ def reviewed_receipt_rows(value):
     No success, active-consumer or external-artifact claim follows from a row.
     """
     if not isinstance(value, dict): return []
+    # Frozen baseline producer schemas: value-entry/gates-runner.py:6,
+    # value-entry/capped-gates.py:6 and value-runtime/final-gates.py:6.
+    # These date-free reports record cumulative child RSS, not aggregate peak.
+    fields = set(value)
+    baseline_envelopes = (
+        {'commands', 'memoryMetric', 'noLeanNoBuild'},
+        {'commands', 'environment', 'cgroupMemoryPeakBytes', 'cgroupMemoryMaxBytes', 'cgroupSwapMaxBytes', 'memoryEvents', 'noLeanNoBuild'},
+        {'commands', 'archiveRegularFilesVerified', 'docPathOutputUnchanged', 'noLeanOrBuildInFinalGates', 'cgroupPeakBytes', 'memoryMaxBytes', 'swapMaxBytes', 'memoryEvents'},
+    )
+    baseline = False
+    if fields == baseline_envelopes[0]:
+        baseline = value['noLeanNoBuild'] is True and isinstance(value['memoryMetric'], str) and bool(value['memoryMetric'])
+    elif fields == baseline_envelopes[1]:
+        baseline = (value['noLeanNoBuild'] is True and value['environment'] == {'LEAN_NUM_THREADS': '1'}
+                    and isinstance(value['memoryEvents'], str) and all(type(value[k]) is int and value[k] >= 0
+                        for k in ('cgroupMemoryPeakBytes', 'cgroupMemoryMaxBytes', 'cgroupSwapMaxBytes')))
+    elif fields == baseline_envelopes[2]:
+        baseline = (value['docPathOutputUnchanged'] is True and value['noLeanOrBuildInFinalGates'] is True
+                    and isinstance(value['memoryEvents'], str) and all(type(value[k]) is int and value[k] >= 0
+                        for k in ('archiveRegularFilesVerified', 'cgroupPeakBytes', 'memoryMaxBytes', 'swapMaxBytes')))
+    if baseline:
+        rows = command_receipt_rows(value)
+        required = {'command', 'exitCode', 'elapsedSeconds', 'cumulativeChildrenMaxRssKiB', 'log', 'uncompressedSha256'}
+        if rows and all(set(row) in (required, required | {'expectedExitCode'})
+                and type(row['cumulativeChildrenMaxRssKiB']) is int and row['cumulativeChildrenMaxRssKiB'] >= 0
+                and isinstance(row['log'], str) and row['log'] and hex_pin(row['uncompressedSha256'])
+                and ('expectedExitCode' not in row or type(row['expectedExitCode']) is int) for row in rows):
+            return [(f'/commands/{i}', row) for i, row in enumerate(rows)]
+        return []
     recorded = value.get('recordedAt')
     if not isinstance(recorded, str) or not re.fullmatch(r'\d{4}-\d{2}-\d{2}T[0-9:.+\-]+Z?', recorded): return []
     def argv(v): return isinstance(v, list) and bool(v) and all(isinstance(x, str) for x in v)
@@ -792,8 +871,8 @@ def evidence_role(data):
     if isinstance(value, dict):
         keys = set(value)
         if reviewed_receipt_rows(value):
-            return 'Historical resource/validation command receipts: reviewed dated envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.'
-        reviewed = historical_json_role(value)
+            return 'Historical resource/validation command receipts: reviewed envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.'
+        reviewed = historical_json_role(value) or reviewed_archive_report(value)
         if reviewed: return reviewed
         gate = value.get('combinedGate')
         if ({'recordedOn', 'startingCommit', 'implementationCommit', 'branch', 'runtime', 'resourceBounds'} <= keys
@@ -874,7 +953,7 @@ def historical_outputs(repo):
         rows += reviewed_receipt_rows(value)
         for pointer, row in rows:
             if not {'log'} <= set(row) or not isinstance(row['log'], str): continue
-            digest = row.get('uncompressedLogSha256', row.get('sha256'))
+            digest = row.get('uncompressedLogSha256', row.get('uncompressedSha256', row.get('sha256')))
             if not isinstance(digest, str) or not re.fullmatch('[0-9a-f]{64}', digest): continue
             # A basename is never a substitute for an external absolute path.
             if row['log'].startswith('/') or '\0' in row['log'] or '..' in row['log'].split('/'): continue
@@ -885,12 +964,12 @@ def historical_outputs(repo):
             if len(possibilities) != 1: continue  # ambiguous cwd is not provenance
             target = possibilities.pop()
             data = repo.bytes(target)
-            if 'uncompressedLogSha256' in row and data.startswith(b'\x1f\x8b'):
+            if ('uncompressedLogSha256' in row or 'uncompressedSha256' in row) and data.startswith(b'\x1f\x8b'):
                 try:
                     with gzip.GzipFile(fileobj=io.BytesIO(data)) as stream: data = stream.read(8_000_001)
                 except (OSError, EOFError, zlib.error): continue
             if len(data) > 8_000_000 or hashlib.sha256(data).hexdigest() != digest: continue
-            encoding = 'uncompressed' if 'uncompressedLogSha256' in row else 'stored-byte'
+            encoding = 'uncompressed' if 'uncompressedLogSha256' in row or 'uncompressedSha256' in row else 'stored-byte'
             roles[target] = f'Historical command output: {source} {pointer} names this log; recorded {encoding} SHA256 matches measured bytes.'
     return roles
 
@@ -1283,6 +1362,27 @@ def self_test():
             dict.fromkeys(('archiveSha256', 'runnerSha256', 'modelSha256', 'completedFixtureFiles', 'totalFixtureFiles', 'counts', 'complete')),
             {'commit': None, 'completed': [], 'errors': [], 'mode': None, 'results': [], 'sources': [], 'version': None}):
         assert evidence_role(json.dumps(placeholder).encode()) is None
+    intake = {'guardedRegression': 'Historical sourceBuild1e8 intake is not current H90 qualification',
+              'inputDirectory': '/external/archive', 'inputs': {k: 'a' * 64 for k in ('evidence.tar.gz', 'runtime-artifacts.tar.gz', 'files.json')},
+              'evidenceFiles': 505, 'recordedSourceModules': 343, 'recordedSourceArraysEqual': True,
+              'binaries': {k: {'sha256': 'b' * 64, 'bytes': 10} for k in ('native/direct-check', 'direct/direct.wasm', 'direct/direct.js')},
+              'gitSourceIdentityVerified': False, 'execution': False, 'extraction': False, 'boundary': 'Archive consistency only.'}
+    assert reviewed_archive_report(intake)
+    for key, bad in (('execution', True), ('evidenceFiles', True), ('inputs', {'files.json': 'a' * 64}), ('binaries', {})):
+        assert reviewed_archive_report(dict(intake, **{key: bad})) is None
+    occurrence = {'checkpoint': 'Historical control observation',
+                  'command': 'PYTHONDONTWRITEBYTECODE=1 python3 tests/directruntime-20261104/shared-translator/occurrence-integrity-controls.py',
+                  'exit': 0, 'wallSeconds': 1.25, 'boundary': 'No Lean proof.',
+                  'results': {'boundary': 'External controls only.', 'controls': [{'case': 'healthy', 'result': 'accepted'}]
+                      + [{'case': name, 'result': 'rejected', 'line': 14} for name in ('missing-occurrence', 'case-identity', 'pointer', 'node-hash', 'route')]},
+                  'bulk': [{'path': '/external/controls.json', 'bytes': 20, 'sha256': 'c' * 64}]}
+    assert reviewed_archive_report(occurrence)
+    for key, bad in (('exit', False), ('wallSeconds', float('nan')), ('bulk', []), ('command', 'echo expected')):
+        assert reviewed_archive_report(dict(occurrence, **{key: bad})) is None
+    expected_cases = copy.deepcopy(occurrence); expected_cases['results']['controls'][1]['result'] = 'expected'
+    assert reviewed_archive_report(expected_cases) is None
+    duplicate_case = copy.deepcopy(occurrence); duplicate_case['results']['controls'][2]['case'] = 'healthy'
+    assert reviewed_archive_report(duplicate_case) is None
     assert nonnegative_number(10 ** 1000)
     resource_receipt = {'command': ['archived-runner'], 'exit': 7, 'elapsed_seconds': 0.25,
                         'resource_stop': False, 'peak_group_rss_bytes': 1024}
@@ -1297,6 +1397,14 @@ def self_test():
     assert evidence_role(json.dumps(dict(summary, suites={'suite': {'proved': 2, 'error': 1, 'extra': 1}})).encode()) is None
     measured_row = {'command': ['old-runner'], 'exitCode': 7, 'elapsedSeconds': 0.25,
                     'wait4MaxRssKiB': 1024, 'log': 'bound.log.gz', 'uncompressedLogSha256': 'a' * 64}
+    baseline_row = {'command': ['archived-check'], 'exitCode': 2, 'elapsedSeconds': 1.5,
+                    'cumulativeChildrenMaxRssKiB': 100, 'log': 'gate-00.log.gz', 'uncompressedSha256': 'a' * 64}
+    baseline_report = {'commands': [baseline_row], 'memoryMetric': 'Cumulative children RSS; not aggregate peak', 'noLeanNoBuild': True}
+    assert reviewed_receipt_rows(baseline_report) == [('/commands/0', baseline_row)]
+    assert evidence_role(json.dumps(baseline_report).encode())
+    for key, bad in (('uncompressedSha256', 'missing'), ('cumulativeChildrenMaxRssKiB', True), ('command', 'unrun')):
+        assert not reviewed_receipt_rows(dict(baseline_report, commands=[dict(baseline_row, **{key: bad})]))
+    assert not reviewed_receipt_rows(dict(baseline_report, noLeanNoBuild=False))
     resource_envelope = {'recordedAt': '2026-01-01T00:00:00+00:00', 'elapsedSeconds': 0.5,
         'maxWait4JobRssKiB': 1024, 'resourceInterpretation': 'Recorded child resources',
         'nativeValidation': 'partial', 'originalCoreAndCorpus': 'recorded', 'newTheoremAxiomAudit': 'recorded',
@@ -1367,6 +1475,12 @@ def self_test():
         sources['tests/bound-history.log'] = 'archived failure\n'
         sources['tests/unsafe-history.json'] = json.dumps(dict(resource_envelope, commands=[dict(measured_row, log='/tests/not-an-input.log', uncompressedLogSha256=hashlib.sha256(b'unused\n').hexdigest())]))
         sources['tests/not-an-input.log'] = 'unused\n'
+        sources['tests/cumulative-history.json'] = json.dumps(dict(baseline_report, commands=[
+            dict(baseline_row, log='compressed-history.gz', uncompressedSha256=hashlib.sha256(b'').hexdigest()),
+            dict(baseline_row, log='wrong-history.gz', uncompressedSha256=hashlib.sha256(b'other').hexdigest()),
+            dict(baseline_row, log='/external/absolute-history.gz', uncompressedSha256=hashlib.sha256(b'').hexdigest())]))
+        for target in ('compressed-history.gz', 'wrong-history.gz', 'absolute-history.gz'):
+            sources['tests/' + target] = gzip.compress(b'', mtime=0)
         sources['tests/magic-name-unit.py'] = 'import unittest as u\nimport unittest as __name__\nclass T(u.TestCase):\n def test_value(self): pass\nif __name__ == "__main__": u.main()\n'
         sources['tests/import-shadow-unit.py'] = 'import unittest\nimport json as unittest\nclass T(unittest.TestCase):\n def test_value(self): pass\nif __name__ == "__main__": unittest.main()\n'
         sources['tests/from-shadow-unit.py'] = 'from unittest import TestCase, main\nfrom json import loads as main\nclass T(TestCase):\n def test_value(self): pass\nif __name__ == "__main__": main()\n'
@@ -1512,6 +1626,10 @@ def self_test():
         assert rows['tests/history-empty.log']['class'] == 'evidence'
         assert rows['tests/bound-history.log']['class'] == 'evidence'
         assert '/commands/0' in rows['tests/bound-history.log']['reason']
+        assert rows['tests/compressed-history.gz']['class'] == 'evidence'
+        assert 'uncompressed SHA256' in rows['tests/compressed-history.gz']['reason']
+        assert rows['tests/wrong-history.gz']['class'] is None
+        assert rows['tests/absolute-history.gz']['class'] is None
         assert rows['tests/not-an-input.log']['class'] is None
         assert rows['tests/history-receipts.json']['class'] == 'evidence'
         assert all(r['recovery'] for r in rows.values())

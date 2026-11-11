@@ -103422,13 +103422,13 @@
     },
     {
       "blob": "7329c9b6505faaee7462424e6fc7c20a542db32a",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/directruntime-20261104/shared-translator/occurrence-integrity-manifest.json",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical occurrence-integrity control report (shared-translator/occurrence-integrity-controls.py:14-42): recorded six-case outcomes, exit/timing and external bulk pins; no current pass, Lean proof or external-artifact verification.",
       "recovery": {
         "blob": "7329c9b6505faaee7462424e6fc7c20a542db32a",
         "command": "git show 29fb6b551b84ed761642d9d1dad25838df2c076c:tests/directruntime-20261104/shared-translator/occurrence-integrity-manifest.json",
@@ -103442,13 +103442,12 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical occurrence-integrity control report (shared-translator/occurrence-integrity-controls.py:14-42): recorded six-case outcomes, exit/timing and external bulk pins; no current pass, Lean proof or external-artifact verification.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "1e3d661530050d556a4664b5aa3614051dcc6ca1",
@@ -104223,13 +104222,13 @@
     },
     {
       "blob": "a6ce5132b7335b12b4ab72ad47ff81e8ea796d35",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/directruntime-20261104/shared-translator/sourcebuild-1e8-intake.json",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical archive intake report (shared-translator/verify-sourcebuild-intake.py:60-75): archive/binary pins and recorded source-array observations; no current execution, Git identity or external-artifact verification.",
       "recovery": {
         "blob": "a6ce5132b7335b12b4ab72ad47ff81e8ea796d35",
         "command": "git show 7dbcd84b575247b4d9c6cef977921091424ead16:tests/directruntime-20261104/shared-translator/sourcebuild-1e8-intake.json",
@@ -104243,13 +104242,12 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical archive intake report (shared-translator/verify-sourcebuild-intake.py:60-75): archive/binary pins and recorded source-array observations; no current execution, Git identity or external-artifact verification.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "637187acf16f581e5a8403c10533b8a96b449466",
@@ -255687,7 +255685,7 @@
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/native-cache/validation.json",
-      "reason": "Historical resource/validation command receipts: reviewed dated envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.",
+      "reason": "Historical resource/validation command receipts: reviewed envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.",
       "recovery": {
         "blob": "387fc6f4a6c77d3a265bd2b45a7f30740c9eaf45",
         "command": "git show 38871aee752a24e37c2ac6196e9539ea3fd2c03a:tests/upstream/baseline-20261028/native-cache/validation.json",
@@ -255729,7 +255727,7 @@
         }
       ],
       "secondary": {
-        "historical_role": "Historical resource/validation command receipts: reviewed dated envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.",
+        "historical_role": "Historical resource/validation command receipts: reviewed envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.",
         "policy_scans": [
           "private-paths"
         ]
@@ -259239,7 +259237,7 @@
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/probes/validation.json",
-      "reason": "Historical resource/validation command receipts: reviewed dated envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.",
+      "reason": "Historical resource/validation command receipts: reviewed envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.",
       "recovery": {
         "blob": "32bc1de6a8fbf1285ce353339bfcb9203cfdfb9a",
         "command": "git show c4a5a2f1e90887fa86df4df39b48a791a679b09d:tests/upstream/baseline-20261028/probes/validation.json",
@@ -259281,7 +259279,7 @@
         }
       ],
       "secondary": {
-        "historical_role": "Historical resource/validation command receipts: reviewed dated envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.",
+        "historical_role": "Historical resource/validation command receipts: reviewed envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.",
         "policy_scans": [
           "private-paths"
         ]
@@ -259735,13 +259733,13 @@
     },
     {
       "blob": "b78dfaa91b4ec7b5dd36ce3d3c3edeef484f05bc",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-entry/audit-final.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-entry/commands.json /commands/12 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "b78dfaa91b4ec7b5dd36ce3d3c3edeef484f05bc",
         "command": "git show 29b73d0ec4534d8fd6ca4e74f11e8008803bfc24:tests/upstream/baseline-20261028/value-entry/audit-final.log.gz",
@@ -259759,13 +259757,12 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-entry/commands.json /commands/12 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "e2b146fd22d4a550d42bb9048f2d2350e728ca0b",
@@ -259919,13 +259916,13 @@
     },
     {
       "blob": "d6283ac60654dc4e90660af0381fc9c9708e1025",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-entry/capped/commands.json",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical resource/validation command receipts: reviewed envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.",
       "recovery": {
         "blob": "d6283ac60654dc4e90660af0381fc9c9708e1025",
         "command": "git show 29b73d0ec4534d8fd6ca4e74f11e8008803bfc24:tests/upstream/baseline-20261028/value-entry/capped/commands.json",
@@ -259967,23 +259964,22 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical resource/validation command receipts: reviewed envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "a71bd8136518ce25f23dc67c9bbbee6213090324",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-entry/capped/gate-00.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-entry/capped/commands.json /commands/0 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "a71bd8136518ce25f23dc67c9bbbee6213090324",
         "command": "git show 29b73d0ec4534d8fd6ca4e74f11e8008803bfc24:tests/upstream/baseline-20261028/value-entry/capped/gate-00.log.gz",
@@ -260025,23 +260021,22 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-entry/capped/commands.json /commands/0 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "6c4710a45d9490880a3e4700e22341492edbe80a",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-entry/capped/gate-01.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-entry/capped/commands.json /commands/1 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "6c4710a45d9490880a3e4700e22341492edbe80a",
         "command": "git show 29b73d0ec4534d8fd6ca4e74f11e8008803bfc24:tests/upstream/baseline-20261028/value-entry/capped/gate-01.log.gz",
@@ -260083,23 +260078,22 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-entry/capped/commands.json /commands/1 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "0d2f9626bc35be0a7236d9d5df5f7b5be903d830",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-entry/capped/gate-02.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-entry/capped/commands.json /commands/2 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "0d2f9626bc35be0a7236d9d5df5f7b5be903d830",
         "command": "git show 29b73d0ec4534d8fd6ca4e74f11e8008803bfc24:tests/upstream/baseline-20261028/value-entry/capped/gate-02.log.gz",
@@ -260141,13 +260135,12 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-entry/capped/commands.json /commands/2 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "d509dd53d82d9f1ba5a419f4823f712a2ee7f2c2",
@@ -260157,7 +260150,7 @@
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-entry/capped/gate-03.log.gz",
-      "reason": "Historical unittest process transcript with timed test count and outcome.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-entry/capped/commands.json /commands/3 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "d509dd53d82d9f1ba5a419f4823f712a2ee7f2c2",
         "command": "git show 29b73d0ec4534d8fd6ca4e74f11e8008803bfc24:tests/upstream/baseline-20261028/value-entry/capped/gate-03.log.gz",
@@ -260199,7 +260192,7 @@
         }
       ],
       "secondary": {
-        "historical_role": "Historical unittest process transcript with timed test count and outcome.",
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-entry/capped/commands.json /commands/3 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
@@ -260208,13 +260201,13 @@
     },
     {
       "blob": "0b123444116795111516c65b1261c1ea855fa5dd",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-entry/capped/gate-04.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-entry/capped/commands.json /commands/4 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "0b123444116795111516c65b1261c1ea855fa5dd",
         "command": "git show 29b73d0ec4534d8fd6ca4e74f11e8008803bfc24:tests/upstream/baseline-20261028/value-entry/capped/gate-04.log.gz",
@@ -260256,23 +260249,22 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-entry/capped/commands.json /commands/4 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "fa2cbeafbe87861a6a0a6369fab2c29d44f54581",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-entry/capped/gate-05.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-entry/capped/commands.json /commands/5 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "fa2cbeafbe87861a6a0a6369fab2c29d44f54581",
         "command": "git show 29b73d0ec4534d8fd6ca4e74f11e8008803bfc24:tests/upstream/baseline-20261028/value-entry/capped/gate-05.log.gz",
@@ -260314,23 +260306,22 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-entry/capped/commands.json /commands/5 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "6264868e1ad72434725eefbd5e81a6d46e6be37f",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-entry/capped/gate-06.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-entry/capped/commands.json /commands/6 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "6264868e1ad72434725eefbd5e81a6d46e6be37f",
         "command": "git show 29b73d0ec4534d8fd6ca4e74f11e8008803bfc24:tests/upstream/baseline-20261028/value-entry/capped/gate-06.log.gz",
@@ -260372,23 +260363,22 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-entry/capped/commands.json /commands/6 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "d5cffdfa4cc273970f252d8b4a1afd24ba6138e3",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-entry/capped/gate-07.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-entry/capped/commands.json /commands/7 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "d5cffdfa4cc273970f252d8b4a1afd24ba6138e3",
         "command": "git show 29b73d0ec4534d8fd6ca4e74f11e8008803bfc24:tests/upstream/baseline-20261028/value-entry/capped/gate-07.log.gz",
@@ -260430,23 +260420,22 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-entry/capped/commands.json /commands/7 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "f31c710a26a21326f699f88da26a788437884175",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-entry/capped/gate-08.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-entry/capped/commands.json /commands/8 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "f31c710a26a21326f699f88da26a788437884175",
         "command": "git show 29b73d0ec4534d8fd6ca4e74f11e8008803bfc24:tests/upstream/baseline-20261028/value-entry/capped/gate-08.log.gz",
@@ -260488,23 +260477,22 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-entry/capped/commands.json /commands/8 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "c3efe49c6317356ce31585972f6752fb21ea5d63",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-entry/capped/gate-09.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-entry/capped/commands.json /commands/9 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "c3efe49c6317356ce31585972f6752fb21ea5d63",
         "command": "git show 29b73d0ec4534d8fd6ca4e74f11e8008803bfc24:tests/upstream/baseline-20261028/value-entry/capped/gate-09.log.gz",
@@ -260546,23 +260534,22 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-entry/capped/commands.json /commands/9 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "772317ee55be18fc6de302b80c4f8694b38b8473",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-entry/capped/gate-10.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-entry/capped/commands.json /commands/10 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "772317ee55be18fc6de302b80c4f8694b38b8473",
         "command": "git show 29b73d0ec4534d8fd6ca4e74f11e8008803bfc24:tests/upstream/baseline-20261028/value-entry/capped/gate-10.log.gz",
@@ -260604,13 +260591,12 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-entry/capped/commands.json /commands/10 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "5eb702364dc1c625bd8a29b764236f84b3303fc1",
@@ -260620,7 +260606,7 @@
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-entry/capped/gate-11.log.gz",
-      "reason": "Historical documentation-path diagnostic transcript with repeated source/citation findings.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-entry/capped/commands.json /commands/11 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "5eb702364dc1c625bd8a29b764236f84b3303fc1",
         "command": "git show 29b73d0ec4534d8fd6ca4e74f11e8008803bfc24:tests/upstream/baseline-20261028/value-entry/capped/gate-11.log.gz",
@@ -260662,7 +260648,7 @@
         }
       ],
       "secondary": {
-        "historical_role": "Historical documentation-path diagnostic transcript with repeated source/citation findings.",
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-entry/capped/commands.json /commands/11 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
@@ -260671,13 +260657,13 @@
     },
     {
       "blob": "86e43ea3218b5890302b754bbf8927f94e79f7ee",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-entry/capped/gate-12.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-entry/capped/commands.json /commands/12 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "86e43ea3218b5890302b754bbf8927f94e79f7ee",
         "command": "git show 29b73d0ec4534d8fd6ca4e74f11e8008803bfc24:tests/upstream/baseline-20261028/value-entry/capped/gate-12.log.gz",
@@ -260719,23 +260705,22 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-entry/capped/commands.json /commands/12 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "0753b14fc1eda69f5bb9b83787700052fdf4ba7c",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-entry/commands.json",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical resource/validation command receipts: reviewed envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.",
       "recovery": {
         "blob": "0753b14fc1eda69f5bb9b83787700052fdf4ba7c",
         "command": "git show 29b73d0ec4534d8fd6ca4e74f11e8008803bfc24:tests/upstream/baseline-20261028/value-entry/commands.json",
@@ -260777,13 +260762,12 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical resource/validation command receipts: reviewed envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "a735b217a95316dac6609677d07ec01717b371b4",
@@ -260937,13 +260921,13 @@
     },
     {
       "blob": "8ef9debbd401c8d22216cf17e58d6ed6f59cb1b7",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-entry/gate-00.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-entry/commands.json /commands/0 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "8ef9debbd401c8d22216cf17e58d6ed6f59cb1b7",
         "command": "git show 29b73d0ec4534d8fd6ca4e74f11e8008803bfc24:tests/upstream/baseline-20261028/value-entry/gate-00.log.gz",
@@ -260985,23 +260969,22 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-entry/commands.json /commands/0 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "2cccfe822a131367fb6fa4ec76b5831c9992861e",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-entry/gate-01.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-entry/commands.json /commands/1 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "2cccfe822a131367fb6fa4ec76b5831c9992861e",
         "command": "git show 29b73d0ec4534d8fd6ca4e74f11e8008803bfc24:tests/upstream/baseline-20261028/value-entry/gate-01.log.gz",
@@ -261043,13 +261026,12 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-entry/commands.json /commands/1 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "eeed37adf243bbd0a518479cd129a7501d5a74ae",
@@ -261059,7 +261041,7 @@
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-entry/gate-02.log.gz",
-      "reason": "Historical unittest process transcript with timed test count and outcome.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-entry/commands.json /commands/2 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "eeed37adf243bbd0a518479cd129a7501d5a74ae",
         "command": "git show 29b73d0ec4534d8fd6ca4e74f11e8008803bfc24:tests/upstream/baseline-20261028/value-entry/gate-02.log.gz",
@@ -261101,7 +261083,7 @@
         }
       ],
       "secondary": {
-        "historical_role": "Historical unittest process transcript with timed test count and outcome.",
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-entry/commands.json /commands/2 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
@@ -261110,13 +261092,13 @@
     },
     {
       "blob": "6fdd940da85bd6f36e797f9a693c0116f3ec780c",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-entry/gate-03.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-entry/commands.json /commands/3 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "6fdd940da85bd6f36e797f9a693c0116f3ec780c",
         "command": "git show 29b73d0ec4534d8fd6ca4e74f11e8008803bfc24:tests/upstream/baseline-20261028/value-entry/gate-03.log.gz",
@@ -261158,23 +261140,22 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-entry/commands.json /commands/3 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "fb0debf3cdb6411284e9a16c643eb85681f988c0",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-entry/gate-04.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-entry/commands.json /commands/4 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "fb0debf3cdb6411284e9a16c643eb85681f988c0",
         "command": "git show 29b73d0ec4534d8fd6ca4e74f11e8008803bfc24:tests/upstream/baseline-20261028/value-entry/gate-04.log.gz",
@@ -261216,23 +261197,22 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-entry/commands.json /commands/4 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "7fd0e70e24b2bc1efec74da26617a527bd972465",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-entry/gate-05.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-entry/commands.json /commands/5 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "7fd0e70e24b2bc1efec74da26617a527bd972465",
         "command": "git show 29b73d0ec4534d8fd6ca4e74f11e8008803bfc24:tests/upstream/baseline-20261028/value-entry/gate-05.log.gz",
@@ -261274,23 +261254,22 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-entry/commands.json /commands/5 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "1fc619437cb87120514946efab588156cf77e6f9",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-entry/gate-06.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-entry/commands.json /commands/6 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "1fc619437cb87120514946efab588156cf77e6f9",
         "command": "git show 29b73d0ec4534d8fd6ca4e74f11e8008803bfc24:tests/upstream/baseline-20261028/value-entry/gate-06.log.gz",
@@ -261332,23 +261311,22 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-entry/commands.json /commands/6 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "ec7fe38a24e19c64b9de654d773bbbe74b78bc32",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-entry/gate-07.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-entry/commands.json /commands/7 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "ec7fe38a24e19c64b9de654d773bbbe74b78bc32",
         "command": "git show 29b73d0ec4534d8fd6ca4e74f11e8008803bfc24:tests/upstream/baseline-20261028/value-entry/gate-07.log.gz",
@@ -261390,23 +261368,22 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-entry/commands.json /commands/7 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "91f7f2fb2120889acfff3289bdd8a02842d23c38",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-entry/gate-08.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-entry/commands.json /commands/8 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "91f7f2fb2120889acfff3289bdd8a02842d23c38",
         "command": "git show 29b73d0ec4534d8fd6ca4e74f11e8008803bfc24:tests/upstream/baseline-20261028/value-entry/gate-08.log.gz",
@@ -261448,23 +261425,22 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-entry/commands.json /commands/8 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "85bf490e58c535924e4a4d1ddb1ba55ebf3dc732",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-entry/gate-09.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-entry/commands.json /commands/9 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "85bf490e58c535924e4a4d1ddb1ba55ebf3dc732",
         "command": "git show 29b73d0ec4534d8fd6ca4e74f11e8008803bfc24:tests/upstream/baseline-20261028/value-entry/gate-09.log.gz",
@@ -261506,13 +261482,12 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-entry/commands.json /commands/9 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "7339f2dcfb81bf405f987e5e0e18677146d9ac2c",
@@ -261522,7 +261497,7 @@
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-entry/gate-10.log.gz",
-      "reason": "Historical documentation-path diagnostic transcript with repeated source/citation findings.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-entry/commands.json /commands/10 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "7339f2dcfb81bf405f987e5e0e18677146d9ac2c",
         "command": "git show 29b73d0ec4534d8fd6ca4e74f11e8008803bfc24:tests/upstream/baseline-20261028/value-entry/gate-10.log.gz",
@@ -261564,7 +261539,7 @@
         }
       ],
       "secondary": {
-        "historical_role": "Historical documentation-path diagnostic transcript with repeated source/citation findings.",
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-entry/commands.json /commands/10 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
@@ -261573,13 +261548,13 @@
     },
     {
       "blob": "d4b9926df0b7defceb6caf0b474c4a190c5ca8f0",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-entry/gate-11.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-entry/commands.json /commands/11 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "d4b9926df0b7defceb6caf0b474c4a190c5ca8f0",
         "command": "git show 29b73d0ec4534d8fd6ca4e74f11e8008803bfc24:tests/upstream/baseline-20261028/value-entry/gate-11.log.gz",
@@ -261621,13 +261596,12 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-entry/commands.json /commands/11 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "67fe2b4379665643da3c0b54453287dd5c4f1381",
@@ -261665,13 +261639,13 @@
     },
     {
       "blob": "ec926a07edaf6a1e7b06b1ee3ea614c2015040a0",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-entry/refuse-overwrite.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-entry/commands.json /commands/13 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "ec926a07edaf6a1e7b06b1ee3ea614c2015040a0",
         "command": "git show 29b73d0ec4534d8fd6ca4e74f11e8008803bfc24:tests/upstream/baseline-20261028/value-entry/refuse-overwrite.log.gz",
@@ -261689,13 +261663,12 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-entry/commands.json /commands/13 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "1fb05b8cb3eba1ff5a8160840bf6be9a23ae0034",
@@ -261964,13 +261937,13 @@
     },
     {
       "blob": "77153d2d33736f9ce97e13c2c8ae934a729b8325",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-runtime/checks/gate-00.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/0 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "77153d2d33736f9ce97e13c2c8ae934a729b8325",
         "command": "git show 0211be734f2bee9bd15e63c6534314e7acf72078:tests/upstream/baseline-20261028/value-runtime/checks/gate-00.log.gz",
@@ -262012,23 +261985,22 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/0 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "dea363e4ff7e419852a4b94269989d6da79cf28c",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-runtime/checks/gate-01.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/1 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "dea363e4ff7e419852a4b94269989d6da79cf28c",
         "command": "git show 0211be734f2bee9bd15e63c6534314e7acf72078:tests/upstream/baseline-20261028/value-runtime/checks/gate-01.log.gz",
@@ -262070,23 +262042,22 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/1 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "86e43ea3218b5890302b754bbf8927f94e79f7ee",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-runtime/checks/gate-02.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/2 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "86e43ea3218b5890302b754bbf8927f94e79f7ee",
         "command": "git show 0211be734f2bee9bd15e63c6534314e7acf72078:tests/upstream/baseline-20261028/value-runtime/checks/gate-02.log.gz",
@@ -262128,23 +262099,22 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/2 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "0d2f9626bc35be0a7236d9d5df5f7b5be903d830",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-runtime/checks/gate-03.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/3 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "0d2f9626bc35be0a7236d9d5df5f7b5be903d830",
         "command": "git show 0211be734f2bee9bd15e63c6534314e7acf72078:tests/upstream/baseline-20261028/value-runtime/checks/gate-03.log.gz",
@@ -262186,13 +262156,12 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/3 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "175bd2fc9f5f1597a39a4261712b0805a8dad715",
@@ -262202,7 +262171,7 @@
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-runtime/checks/gate-04.log.gz",
-      "reason": "Historical unittest process transcript with timed test count and outcome.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/4 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "175bd2fc9f5f1597a39a4261712b0805a8dad715",
         "command": "git show 0211be734f2bee9bd15e63c6534314e7acf72078:tests/upstream/baseline-20261028/value-runtime/checks/gate-04.log.gz",
@@ -262244,7 +262213,7 @@
         }
       ],
       "secondary": {
-        "historical_role": "Historical unittest process transcript with timed test count and outcome.",
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/4 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
@@ -262253,13 +262222,13 @@
     },
     {
       "blob": "0b123444116795111516c65b1261c1ea855fa5dd",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-runtime/checks/gate-05.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/5 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "0b123444116795111516c65b1261c1ea855fa5dd",
         "command": "git show 0211be734f2bee9bd15e63c6534314e7acf72078:tests/upstream/baseline-20261028/value-runtime/checks/gate-05.log.gz",
@@ -262301,23 +262270,22 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/5 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "4fadd946e60f946fe04d6f3d45aee8ae51943ce8",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-runtime/checks/gate-06.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/6 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "4fadd946e60f946fe04d6f3d45aee8ae51943ce8",
         "command": "git show 0211be734f2bee9bd15e63c6534314e7acf72078:tests/upstream/baseline-20261028/value-runtime/checks/gate-06.log.gz",
@@ -262359,23 +262327,22 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/6 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "6264868e1ad72434725eefbd5e81a6d46e6be37f",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-runtime/checks/gate-07.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/7 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "6264868e1ad72434725eefbd5e81a6d46e6be37f",
         "command": "git show 0211be734f2bee9bd15e63c6534314e7acf72078:tests/upstream/baseline-20261028/value-runtime/checks/gate-07.log.gz",
@@ -262417,23 +262384,22 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/7 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "d5cffdfa4cc273970f252d8b4a1afd24ba6138e3",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-runtime/checks/gate-08.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/8 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "d5cffdfa4cc273970f252d8b4a1afd24ba6138e3",
         "command": "git show 0211be734f2bee9bd15e63c6534314e7acf72078:tests/upstream/baseline-20261028/value-runtime/checks/gate-08.log.gz",
@@ -262475,23 +262441,22 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/8 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "f31c710a26a21326f699f88da26a788437884175",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-runtime/checks/gate-09.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/9 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "f31c710a26a21326f699f88da26a788437884175",
         "command": "git show 0211be734f2bee9bd15e63c6534314e7acf72078:tests/upstream/baseline-20261028/value-runtime/checks/gate-09.log.gz",
@@ -262533,23 +262498,22 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/9 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "c3efe49c6317356ce31585972f6752fb21ea5d63",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-runtime/checks/gate-10.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/10 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "c3efe49c6317356ce31585972f6752fb21ea5d63",
         "command": "git show 0211be734f2bee9bd15e63c6534314e7acf72078:tests/upstream/baseline-20261028/value-runtime/checks/gate-10.log.gz",
@@ -262591,23 +262555,22 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/10 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "772317ee55be18fc6de302b80c4f8694b38b8473",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-runtime/checks/gate-11.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/11 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "772317ee55be18fc6de302b80c4f8694b38b8473",
         "command": "git show 0211be734f2bee9bd15e63c6534314e7acf72078:tests/upstream/baseline-20261028/value-runtime/checks/gate-11.log.gz",
@@ -262649,13 +262612,12 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/11 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "5eb702364dc1c625bd8a29b764236f84b3303fc1",
@@ -262665,7 +262627,7 @@
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-runtime/checks/gate-12.log.gz",
-      "reason": "Historical documentation-path diagnostic transcript with repeated source/citation findings.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/12 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "5eb702364dc1c625bd8a29b764236f84b3303fc1",
         "command": "git show 0211be734f2bee9bd15e63c6534314e7acf72078:tests/upstream/baseline-20261028/value-runtime/checks/gate-12.log.gz",
@@ -262707,7 +262669,7 @@
         }
       ],
       "secondary": {
-        "historical_role": "Historical documentation-path diagnostic transcript with repeated source/citation findings.",
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/12 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
@@ -262716,13 +262678,13 @@
     },
     {
       "blob": "86e43ea3218b5890302b754bbf8927f94e79f7ee",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-runtime/checks/gate-13.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/13 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "86e43ea3218b5890302b754bbf8927f94e79f7ee",
         "command": "git show 0211be734f2bee9bd15e63c6534314e7acf72078:tests/upstream/baseline-20261028/value-runtime/checks/gate-13.log.gz",
@@ -262740,23 +262702,22 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/13 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "86e43ea3218b5890302b754bbf8927f94e79f7ee",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-runtime/checks/gate-14.log.gz",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/14 names this log; recorded uncompressed SHA256 matches measured bytes.",
       "recovery": {
         "blob": "86e43ea3218b5890302b754bbf8927f94e79f7ee",
         "command": "git show 0211be734f2bee9bd15e63c6534314e7acf72078:tests/upstream/baseline-20261028/value-runtime/checks/gate-14.log.gz",
@@ -262774,13 +262735,12 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical command output: tests/upstream/baseline-20261028/value-runtime/validation.json /commands/14 names this log; recorded uncompressed SHA256 matches measured bytes.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "d9d721899ea308bca79c87dab54a5202f75d9591",
@@ -263207,13 +263167,13 @@
     },
     {
       "blob": "1bbce472f9abeaa8313983678f64ad5698878989",
-      "class": null,
+      "class": "evidence",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/baseline-20261028/value-runtime/validation.json",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "Historical resource/validation command receipts: reviewed envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.",
       "recovery": {
         "blob": "1bbce472f9abeaa8313983678f64ad5698878989",
         "command": "git show 0211be734f2bee9bd15e63c6534314e7acf72078:tests/upstream/baseline-20261028/value-runtime/validation.json",
@@ -263255,13 +263215,12 @@
         }
       ],
       "secondary": {
+        "historical_role": "Historical resource/validation command receipts: reviewed envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.",
         "policy_scans": [
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "d9d721899ea308bca79c87dab54a5202f75d9591",
@@ -271634,7 +271593,7 @@
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/revert-power/independent-gates.json",
-      "reason": "Historical resource/validation command receipts: reviewed dated envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.",
+      "reason": "Historical resource/validation command receipts: reviewed envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.",
       "recovery": {
         "blob": "7f6393c290791b45c72ca0742b541053b1d560c3",
         "command": "git show 093819c1b50d792a43c0596d09730d38a92a47eb:tests/upstream/revert-power/independent-gates.json",
@@ -271652,7 +271611,7 @@
         }
       ],
       "secondary": {
-        "historical_role": "Historical resource/validation command receipts: reviewed dated envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.",
+        "historical_role": "Historical resource/validation command receipts: reviewed envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.",
         "policy_scans": [
           "private-paths"
         ]
@@ -271692,7 +271651,7 @@
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/revert-power/library-continuation.json",
-      "reason": "Historical resource/validation command receipts: reviewed dated envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.",
+      "reason": "Historical resource/validation command receipts: reviewed envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.",
       "recovery": {
         "blob": "85d0df5a4c105c570758d3d59440e40c0d85c963",
         "command": "git show 968c7f35462ad239b33e1dbd2f37af0fa5784524:tests/upstream/revert-power/library-continuation.json",
@@ -271714,7 +271673,7 @@
         }
       ],
       "secondary": {
-        "historical_role": "Historical resource/validation command receipts: reviewed dated envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.",
+        "historical_role": "Historical resource/validation command receipts: reviewed envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.",
         "policy_scans": [
           "private-paths"
         ]
@@ -274655,7 +274614,7 @@
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/upstream/revert-power/validation.json",
-      "reason": "Historical resource/validation command receipts: reviewed dated envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.",
+      "reason": "Historical resource/validation command receipts: reviewed envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.",
       "recovery": {
         "blob": "0078f315260f96f9d3e66d2576edc4714274efc7",
         "command": "git show e26679e37319743795f334edb51b8733ad4ae024:tests/upstream/revert-power/validation.json",
@@ -274697,7 +274656,7 @@
         }
       ],
       "secondary": {
-        "historical_role": "Historical resource/validation command receipts: reviewed dated envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.",
+        "historical_role": "Historical resource/validation command receipts: reviewed envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.",
         "policy_scans": [
           "private-paths"
         ]
@@ -290215,12 +290174,12 @@
     ]
   },
   "totals": {
-    "evidence": 271,
+    "evidence": 312,
     "keep": 1316,
     "orphan": 0,
     "paths": 5596,
     "regenerable": 0,
-    "unresolved": 4009
+    "unresolved": 3968
   },
   "universe": [
     "tests/",
