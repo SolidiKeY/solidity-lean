@@ -235,7 +235,7 @@ class SolidityService {
     return diagnostics.filter(d=>['error','warning'].includes(d.severity)).map(d=>{
       const primary=locate(d.sourceLocation),foreign=primary.file?projects.identity(primary.file.path)!==projects.identity(doc.path):!!d.sourceLocation?.file&&d.sourceLocation.file!==doc.path;
       const related=[];
-      if(foreign&&primary.file)related.push({location:{uri:pathToFileURL(primary.file.path).href,range:primary.range||model.rangeOf({})},message:d.message});
+      if(foreign&&primary.file&&primary.range)related.push({location:{uri:pathToFileURL(primary.file.path).href,range:primary.range},message:d.message});
       for(const secondary of d.secondarySourceLocations||[]){
         const {file,range}=locate(secondary);if(!file||!range)continue;
         related.push({location:{uri:pathToFileURL(file.path).href,range},message:secondary.message||d.message});

@@ -54,6 +54,29 @@ test('compiler secondary locations retain individual file text, UTF8 offsets, me
     assert.equal(rows[0].relatedInformation.length,2);assert.deepEqual(rows[0].relatedInformation[0],{location:{uri:pathToFileURL(foreign).href,range:range(1,0,1,3)},message:'other declaration'});assert.equal(rows[0].relatedInformation[1].location.uri,s.uri);
   }finally{s.dispose();}
 });
+test('foreign compiler primary links require real UTF8 and CRLF boundaries, not a zero fallback',()=>{
+  const s=setup();try{
+    const foreign=path.join(s.root,'Lib.sol'),foreignUri=pathToFileURL(foreign).href;
+    const source='// 😀\r\nxyz';
+    s.doc.projectSnapshot={files:{'Lib.sol':{path:foreign,text:source}}};
+    const diagnostic=(start,end)=>({severity:'error',message:'foreign failure',errorCode:42,
+      sourceLocation:{file:'Lib.sol',start,end}});
+    for(const [start,end] of [[4,7],[3,4],[8,9],[-1,2],[0,100],[5,3],[0.5,2],[0,Number.MAX_SAFE_INTEGER+1]]){
+      const rows=s.service.compilerDiagnostics(s.doc,[diagnostic(start,end)]);
+      assert.equal(rows.length,1);assert.equal(rows[0].severity,1);assert.equal(rows[0].code,'import:42');
+      assert.equal(rows[0].message,'foreign failure');assert.deepEqual(rows[0].range,range(0,0,0,0));
+      assert.equal(rows[0].relatedInformation,undefined,'invalid foreign span must not invent a navigation target: '+start+':'+end);
+    }
+    for(const [start,end,expected] of [[0,0,range(0,0,0,0)],[3,7,range(0,3,0,5)],[9,12,range(1,0,1,3)]]){
+      const rows=s.service.compilerDiagnostics(s.doc,[diagnostic(start,end)]);
+      assert.deepEqual(rows[0].relatedInformation,[{location:{uri:foreignUri,range:expected},message:'foreign failure'}]);
+    }
+    const rows=s.service.compilerDiagnostics(s.doc,[{...diagnostic(4,7),secondarySourceLocations:[
+      {file:'Lib.sol',start:9,end:12,message:'valid secondary'},
+      {file:'Lib.sol',start:8,end:9,message:'invalid secondary'}]}]);
+    assert.deepEqual(rows[0].relatedInformation,[{location:{uri:foreignUri,range:range(1,0,1,3)},message:'valid secondary'}]);
+  }finally{s.dispose();}
+});
 test('hover returns a declaration while verification remains pending',async()=>{
   const gate=deferred(),started=deferred();let done=false;
   const s=setup({verify:async()=>{started.resolve();await gate.promise;return{results:[],errors:[]};}});
