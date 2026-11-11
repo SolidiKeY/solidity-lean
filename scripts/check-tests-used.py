@@ -76,7 +76,30 @@ def decode(b):
 
 
 def canonical(value):
+    """Stable semantic identity bytes; presentation changes must not rekey uses."""
     return (json.dumps(value, ensure_ascii=True, indent=2, sort_keys=True) + '\n').encode()
+
+
+def output_json(value):
+    """Lossless JSON with one top-level collection member per physical line.
+
+    Full path records and claim definitions remain explicit and individually
+    searchable. Compact nested values avoid repeating indentation in bulk data;
+    neither schema, list ordering nor classification provenance is changed.
+    """
+    def compact(item):
+        return json.dumps(item, ensure_ascii=True, sort_keys=True, separators=(',', ':'))
+    if not isinstance(value, dict): return (compact(value) + '\n').encode()
+    members = []
+    for key, item in sorted(value.items()):
+        if isinstance(item, list) and item:
+            encoded = '[\n' + ',\n'.join('  ' + compact(row) for row in item) + '\n ]'
+        elif isinstance(item, dict) and item:
+            encoded = '{\n' + ',\n'.join('  ' + compact(k) + ':' + compact(v)
+                                          for k, v in sorted(item.items())) + '\n }'
+        else: encoded = compact(item)
+        members.append(' ' + compact(key) + ':' + encoded)
+    return ('{\n' + ',\n'.join(members) + '\n}\n').encode()
 
 
 
@@ -371,7 +394,7 @@ def reviewed_routes(graph):
     routes deliberately do not infer entire H55/H62 trees from the gate.
     """
     repo = graph.repo
-    audited_blobs = {'scripts/coord-tools/gate.sh': 'd60977c0abccb00ccaf1d5a4b777bee9fde34b98', 'scripts/ci/checks-fast.sh': '26f69ccebe922861919519bce0316858f69d179c', 'scripts/check-trust.sh': '7c93af4335a60c0def576b35d78f1d07a84cfca4', 'scripts/check-trust.mjs': '9a4e8eb53b3a1fb68d7ef8ac8c439600475b7e2d', 'scripts/check-testsuite.sh': '312daf403db3c45a7c26a0d3704febd0099ea2a9', 'scripts/h62/item1/p16-generator/check.py': '1222082617c3db1ba6df27c083ae8ebd71f3d86c', 'scripts/h62/item1/p16-generator/generate.py': 'c79d2fc8a61162f192e5e549f272ee1745c4c3d3', 'tests/h28-sol/non-vacuity/kernel.py': '7190d611d05931e9aebe509685fbc16fbc6a686d'}
+    audited_blobs = {'scripts/coord-tools/gate.sh': 'd60977c0abccb00ccaf1d5a4b777bee9fde34b98', 'scripts/ci/checks-fast.sh': '5a12a3702d2677758c31d77028123df2e033ed93', 'scripts/check-trust.sh': '7c93af4335a60c0def576b35d78f1d07a84cfca4', 'scripts/check-trust.mjs': '9a4e8eb53b3a1fb68d7ef8ac8c439600475b7e2d', 'scripts/check-testsuite.sh': '312daf403db3c45a7c26a0d3704febd0099ea2a9', 'scripts/h62/item1/p16-generator/check.py': '1222082617c3db1ba6df27c083ae8ebd71f3d86c', 'scripts/h62/item1/p16-generator/generate.py': 'c79d2fc8a61162f192e5e549f272ee1745c4c3d3', 'tests/h28-sol/non-vacuity/kernel.py': '7190d611d05931e9aebe509685fbc16fbc6a686d'}
     def audited(path):
         return path in repo.tree and repo.tree[path][2] == audited_blobs.get(path)
     routes = [
@@ -2101,6 +2124,16 @@ def module_entry_schema_controls():
 
 
 def self_test():
+    # Formatting must preserve nested provenance and awkward path/string bytes.
+    payload = {'records': [{'path': 'tests/\u03b1\n".py', 'class': None,
+                            'reason': 'braces{},comma,\nline', 'pins': {'b': [True, 0], 'a': {}}},
+                           {'path': 'tests/z.py', 'class': 'keep'}],
+               'entry_points': {'z': {'command': ['python3', '-B']}, 'a': []}}
+    encoded = output_json(payload)
+    assert json.loads(encoded) == payload
+    assert canonical(payload) == (json.dumps(payload, ensure_ascii=True, indent=2, sort_keys=True) + '\n').encode()
+    assert encoded == output_json(dict(reversed(list(payload.items()))))
+    assert sum('"path":' in line for line in encoded.decode().splitlines()) == 2
     module_entry_schema_controls()
     if not __debug__: raise ValueError("self-test requires Python assertions; omit -O")
     import copy
@@ -2680,11 +2713,11 @@ def main():
         root = decode(git(Path.cwd(), 'rev-parse', '--show-toplevel')).strip()
         expected = inventory(Repository(root, args.ref))
         target = Path(root) / OUTPUT
-        if args.write: target.write_bytes(canonical(expected))
+        if args.write: target.write_bytes(output_json(expected))
         else:
             actual = json.loads(target.read_bytes(), object_pairs_hook=unique_json_object)
             verify(actual, expected)
-            if target.read_bytes() != canonical(expected): raise ValueError('noncanonical inventory bytes')
+            if target.read_bytes() != output_json(expected): raise ValueError('noncanonical inventory bytes')
         print(json.dumps(expected['totals'], sort_keys=True))
         if expected['totals']['unresolved'] or expected['analysis_gaps']:
             print('INCOMPLETE: unresolved paths are not justified classes; no pruning authorization.', file=sys.stderr)
