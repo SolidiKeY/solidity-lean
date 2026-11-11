@@ -2503,6 +2503,1105 @@
       "runner": "validated:tests/h62/item2/audit-calculus/test_packet_transition.py",
       "target": "scripts/h62/item2/audit-calculus/verify_packet_transition.py",
       "target_blob": "38a0992822fb39c0d01463862069cb4de5f9e055"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926",
+          "line": 5,
+          "path": "scripts/h62/item2/audit-language/test_source_roles.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "3c9dab57f2b08e4b1c1ef7ae59a1642c25c41d47d0b2686eca7329eb5249e64c",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:scripts/h62/item2/audit-language/test_source_roles.py",
+      "target": "scripts/h62/item2/audit-language/census.py",
+      "target_blob": "6cb2604529e8d5249ce907890d85071ea92112db"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926",
+          "line": 6,
+          "path": "scripts/h62/item2/audit-language/test_source_roles.py"
+        },
+        {
+          "blob": "fbc2eb5bc17f91adabf886d22058615d640dd20d",
+          "line": 13,
+          "path": "scripts/h62/item2/audit-language/source_roles.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "8acba24c7c56cb172436b3f4fe76d154345f55d91c051b45041445bf0a5f2c9a",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:scripts/h62/item2/audit-language/test_source_roles.py",
+      "target": "scripts/h62/item2/audit-language/classify.py",
+      "target_blob": "c83b17a257020515a2491be5b3c489a93428ffd2"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926",
+          "line": 6,
+          "path": "scripts/h62/item2/audit-language/test_source_roles.py"
+        },
+        {
+          "blob": "fbc2eb5bc17f91adabf886d22058615d640dd20d",
+          "line": 14,
+          "path": "scripts/h62/item2/audit-language/source_roles.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "9f12554fc73a2fb7ceeff79ac873f2554a1c307bcd07861ce4b9e61e1179f7ea",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:scripts/h62/item2/audit-language/test_source_roles.py",
+      "target": "scripts/h62/item2/audit-language/source_only.py",
+      "target_blob": "5fbc100e83b26fb0bd9f4bfe408cfab0e108aef4"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926",
+          "line": 6,
+          "path": "scripts/h62/item2/audit-language/test_source_roles.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "c594243841c23498b284fd99507029c0514ef313ad18c697363fe48cd3f85371",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:scripts/h62/item2/audit-language/test_source_roles.py",
+      "target": "scripts/h62/item2/audit-language/source_roles.py",
+      "target_blob": "fbc2eb5bc17f91adabf886d22058615d640dd20d"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926",
+          "line": 89,
+          "path": "scripts/h62/item2/audit-language/test_source_roles.py"
+        },
+        {
+          "blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926",
+          "line": 73,
+          "path": "scripts/h62/item2/audit-language/test_source_roles.py"
+        },
+        {
+          "blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926",
+          "line": 65,
+          "path": "scripts/h62/item2/audit-language/test_source_roles.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "519d68966a1881a691cbc26c44ad28ab9ff1051400da5e82d6db5acba2b8bb0b",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:scripts/h62/item2/audit-language/test_source_roles.py",
+      "target": "scripts/h62/item2/audit-language/refine_remaining.py",
+      "target_blob": "257831d3a34991bfe5939d065bbb0891d836a092"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b",
+          "line": 9,
+          "path": "tests/h28-sol/mutation-testing/tools/test_runner.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "601bd9fefd2ae435488aa7bff9e1b6328d888eadf076586269d8c17d4af74e4a",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py",
+      "target": "tests/h28-sol/mutation-testing/tools/runner.py",
+      "target_blob": "7fad642144fd1d2d2afc519e5deaa87a643ff0db"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b",
+          "line": 91,
+          "path": "tests/h28-sol/mutation-testing/tools/test_runner.py"
+        },
+        {
+          "blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b",
+          "line": 59,
+          "path": "tests/h28-sol/mutation-testing/tools/test_runner.py"
+        },
+        {
+          "blob": "7fad642144fd1d2d2afc519e5deaa87a643ff0db",
+          "line": 76,
+          "path": "tests/h28-sol/mutation-testing/tools/runner.py"
+        },
+        {
+          "blob": "c1578c4b34c88c7e16ed09d1091b223a0406033e",
+          "line": 13,
+          "path": "tests/h28-sol/mutation-testing/tools/engine.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "a396c3a66e1107de068565d8ec41c562455a583fa0112356138e2e46df2fe365",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py",
+      "target": "tests/h28-sol/mutation-testing/tools/bulk_inputs.py",
+      "target_blob": "2d36256b0def09f09a71b020f2c1fe87d1f2f092"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b",
+          "line": 91,
+          "path": "tests/h28-sol/mutation-testing/tools/test_runner.py"
+        },
+        {
+          "blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b",
+          "line": 59,
+          "path": "tests/h28-sol/mutation-testing/tools/test_runner.py"
+        },
+        {
+          "blob": "7fad642144fd1d2d2afc519e5deaa87a643ff0db",
+          "line": 76,
+          "path": "tests/h28-sol/mutation-testing/tools/runner.py"
+        },
+        {
+          "blob": "c1578c4b34c88c7e16ed09d1091b223a0406033e",
+          "line": 14,
+          "path": "tests/h28-sol/mutation-testing/tools/engine.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "d3db9845891f91c12418fef91b46c1311ea7838b272d6472668a879e86ca1613",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py",
+      "target": "tests/h28-sol/mutation-testing/tools/bounded.py",
+      "target_blob": "05a9887298923a0c864eb1e62184eac1ea859bdb"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b",
+          "line": 91,
+          "path": "tests/h28-sol/mutation-testing/tools/test_runner.py"
+        },
+        {
+          "blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b",
+          "line": 59,
+          "path": "tests/h28-sol/mutation-testing/tools/test_runner.py"
+        },
+        {
+          "blob": "7fad642144fd1d2d2afc519e5deaa87a643ff0db",
+          "line": 76,
+          "path": "tests/h28-sol/mutation-testing/tools/runner.py"
+        },
+        {
+          "blob": "c1578c4b34c88c7e16ed09d1091b223a0406033e",
+          "line": 15,
+          "path": "tests/h28-sol/mutation-testing/tools/engine.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "331208f5ac291e382f76585bd634032b670c0904e7a4bd89a3bc49009a5c0523",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py",
+      "target": "tests/h28-sol/mutation-testing/tools/checked.py",
+      "target_blob": "82f46353a66eae3ccd479e76b8fa352488069286"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b",
+          "line": 91,
+          "path": "tests/h28-sol/mutation-testing/tools/test_runner.py"
+        },
+        {
+          "blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b",
+          "line": 59,
+          "path": "tests/h28-sol/mutation-testing/tools/test_runner.py"
+        },
+        {
+          "blob": "7fad642144fd1d2d2afc519e5deaa87a643ff0db",
+          "line": 76,
+          "path": "tests/h28-sol/mutation-testing/tools/runner.py"
+        },
+        {
+          "blob": "c1578c4b34c88c7e16ed09d1091b223a0406033e",
+          "line": 16,
+          "path": "tests/h28-sol/mutation-testing/tools/engine.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "601bd9fefd2ae435488aa7bff9e1b6328d888eadf076586269d8c17d4af74e4a",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py",
+      "target": "tests/h28-sol/mutation-testing/tools/runner.py",
+      "target_blob": "7fad642144fd1d2d2afc519e5deaa87a643ff0db"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b",
+          "line": 91,
+          "path": "tests/h28-sol/mutation-testing/tools/test_runner.py"
+        },
+        {
+          "blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b",
+          "line": 59,
+          "path": "tests/h28-sol/mutation-testing/tools/test_runner.py"
+        },
+        {
+          "blob": "7fad642144fd1d2d2afc519e5deaa87a643ff0db",
+          "line": 76,
+          "path": "tests/h28-sol/mutation-testing/tools/runner.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "f6c55d3aa08fe00083e06f750d98b0fa217346383465cf707cc560ddb74eaf3b",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py",
+      "target": "tests/h28-sol/mutation-testing/tools/engine.py",
+      "target_blob": "c1578c4b34c88c7e16ed09d1091b223a0406033e"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "e966c7b99f53e997430aa99ca965db3b33940447",
+          "line": 10,
+          "path": "tests/h62/item2/audit-calculus/test_bulk_inputs.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "7135b3f38e6bc07c59c6f995a53fc1ac87becf52fa52ed6d79a2fc83cde8a428",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:tests/h62/item2/audit-calculus/test_bulk_inputs.py",
+      "target": "scripts/h62/item2/audit-calculus/bulk_inputs.py",
+      "target_blob": "455b16030ed40dce95c200c1df86ec4f23916c35"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "049292b3e1f72cd6f5ba59bb01ac4933bb5c1dd7",
+          "line": 9,
+          "path": "tests/h62/item2/audit-calculus/test_census.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "a43bc5dc67966270f91e34ec752aa7799a8dedf2d9145af472e7d29526b7575c",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:tests/h62/item2/audit-calculus/test_census.py",
+      "target": "scripts/h62/item2/audit-calculus/census.py",
+      "target_blob": "1e1ddc8d397522e3e60074bfb4d50cc323b50124"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "68da1e61d3c0abb61e12398ef9bb0240da55df58",
+          "line": 11,
+          "path": "tests/h62/item2/audit-calculus/test_receipts.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "425908f61a6cefd46cdac04167b2650fdacb03e2a91fd42798e5e1e1e17bb099",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:tests/h62/item2/audit-calculus/test_receipts.py",
+      "target": "scripts/h62/item2/audit-calculus/receipts.py",
+      "target_blob": "133d53e56e924f86609fa98451cac11e25d46632"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "873df01e20af8815478c9bd3ffd5550f69624ad2",
+          "line": 12,
+          "path": "tests/h62/item2/audit-calculus/test_handoff_index.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "d0f2ada9fe4de9a2cd59096d45d19f75750e85b349309b1c0d13f0ae6b3af1ad",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:tests/h62/item2/audit-calculus/test_handoff_index.py",
+      "target": "scripts/h62/item2/audit-calculus/handoff_index.py",
+      "target_blob": "db6b945340c15546194c227b25f8924e334b0ddf"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "a10452c60df5311a27fef8722bb5e06e3f40f488",
+          "line": 10,
+          "path": "tests/h62/item2/audit-calculus/test_reconcile.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "338b780ab69d443aeb5a7063c6f70dc6f4b423a496c31a8c02a457c25c3912c2",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:tests/h62/item2/audit-calculus/test_reconcile.py",
+      "target": "scripts/h62/item2/audit-calculus/reconcile.py",
+      "target_blob": "07a6e65fd652db2b8fb6f310c881ed6a6003d1c1"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "767d10cb27be5c6f5504627a07ac8ded1a3b0806",
+          "line": 13,
+          "path": "tests/h62/item2/audit-calculus/test_semantic_classification.py"
+        },
+        {
+          "blob": "c30794fac6a0ed8a4d1e3226e52018e4ad607a21",
+          "line": 15,
+          "path": "scripts/h62/item2/audit-calculus/classify_frozen_signatures.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "7135b3f38e6bc07c59c6f995a53fc1ac87becf52fa52ed6d79a2fc83cde8a428",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:tests/h62/item2/audit-calculus/test_semantic_classification.py",
+      "target": "scripts/h62/item2/audit-calculus/bulk_inputs.py",
+      "target_blob": "455b16030ed40dce95c200c1df86ec4f23916c35"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "767d10cb27be5c6f5504627a07ac8ded1a3b0806",
+          "line": 13,
+          "path": "tests/h62/item2/audit-calculus/test_semantic_classification.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "ee29b57bfda62dffa2856f13b8e9c78bf60ee3fede41ea8fa298d261691d571f",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:tests/h62/item2/audit-calculus/test_semantic_classification.py",
+      "target": "scripts/h62/item2/audit-calculus/classify_frozen_signatures.py",
+      "target_blob": "c30794fac6a0ed8a4d1e3226e52018e4ad607a21"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "212536e7cdcc6a043cd61a43978dea06d78d9065",
+          "line": 10,
+          "path": "tests/h62/item2/audit-calculus/test_guarded_acceptance.py"
+        },
+        {
+          "blob": "a519914954e079db83a2d9e0461c2dee38b75096",
+          "line": 18,
+          "path": "scripts/h62/item2/audit-calculus/guarded_acceptance.py"
+        },
+        {
+          "blob": "c30794fac6a0ed8a4d1e3226e52018e4ad607a21",
+          "line": 15,
+          "path": "scripts/h62/item2/audit-calculus/classify_frozen_signatures.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "7135b3f38e6bc07c59c6f995a53fc1ac87becf52fa52ed6d79a2fc83cde8a428",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:tests/h62/item2/audit-calculus/test_guarded_acceptance.py",
+      "target": "scripts/h62/item2/audit-calculus/bulk_inputs.py",
+      "target_blob": "455b16030ed40dce95c200c1df86ec4f23916c35"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "212536e7cdcc6a043cd61a43978dea06d78d9065",
+          "line": 10,
+          "path": "tests/h62/item2/audit-calculus/test_guarded_acceptance.py"
+        },
+        {
+          "blob": "a519914954e079db83a2d9e0461c2dee38b75096",
+          "line": 18,
+          "path": "scripts/h62/item2/audit-calculus/guarded_acceptance.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "ee29b57bfda62dffa2856f13b8e9c78bf60ee3fede41ea8fa298d261691d571f",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:tests/h62/item2/audit-calculus/test_guarded_acceptance.py",
+      "target": "scripts/h62/item2/audit-calculus/classify_frozen_signatures.py",
+      "target_blob": "c30794fac6a0ed8a4d1e3226e52018e4ad607a21"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "212536e7cdcc6a043cd61a43978dea06d78d9065",
+          "line": 10,
+          "path": "tests/h62/item2/audit-calculus/test_guarded_acceptance.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "32e1e57bfdbc64971d0b4f973cf04e94dea354fb6e1ce21a4e430aceab27fcb8",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:tests/h62/item2/audit-calculus/test_guarded_acceptance.py",
+      "target": "scripts/h62/item2/audit-calculus/guarded_acceptance.py",
+      "target_blob": "a519914954e079db83a2d9e0461c2dee38b75096"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "41f94bcaabe51e9b6afb9d2e043aff2a370c208b",
+          "line": 10,
+          "path": "tests/h62/item2/audit-calculus/test_frozen_recovery.py"
+        },
+        {
+          "blob": "7a2921eb598fec62e51556b369de1c6292fa83d6",
+          "line": 17,
+          "path": "scripts/h62/item2/audit-calculus/recover_frozen_census.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "a43bc5dc67966270f91e34ec752aa7799a8dedf2d9145af472e7d29526b7575c",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:tests/h62/item2/audit-calculus/test_frozen_recovery.py",
+      "target": "scripts/h62/item2/audit-calculus/census.py",
+      "target_blob": "1e1ddc8d397522e3e60074bfb4d50cc323b50124"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "41f94bcaabe51e9b6afb9d2e043aff2a370c208b",
+          "line": 10,
+          "path": "tests/h62/item2/audit-calculus/test_frozen_recovery.py"
+        },
+        {
+          "blob": "7a2921eb598fec62e51556b369de1c6292fa83d6",
+          "line": 18,
+          "path": "scripts/h62/item2/audit-calculus/recover_frozen_census.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "7135b3f38e6bc07c59c6f995a53fc1ac87becf52fa52ed6d79a2fc83cde8a428",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:tests/h62/item2/audit-calculus/test_frozen_recovery.py",
+      "target": "scripts/h62/item2/audit-calculus/bulk_inputs.py",
+      "target_blob": "455b16030ed40dce95c200c1df86ec4f23916c35"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "41f94bcaabe51e9b6afb9d2e043aff2a370c208b",
+          "line": 10,
+          "path": "tests/h62/item2/audit-calculus/test_frozen_recovery.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "2da55c442ae4ef2931b5c3847c5619f47484db01de129e293cb23dfc469d4ba2",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:tests/h62/item2/audit-calculus/test_frozen_recovery.py",
+      "target": "scripts/h62/item2/audit-calculus/recover_frozen_census.py",
+      "target_blob": "7a2921eb598fec62e51556b369de1c6292fa83d6"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "55e3837cbb78a61206ba4b4b0416a0c95b4f5b58",
+          "line": 5,
+          "path": "tests/h62/item2/audit-calculus/test_standing_owners.py"
+        },
+        {
+          "blob": "59ae8fd76982386eb353ac42eeb423fa9e068427",
+          "line": 12,
+          "path": "scripts/h62/item2/audit-calculus/standing_owners.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "a43bc5dc67966270f91e34ec752aa7799a8dedf2d9145af472e7d29526b7575c",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:tests/h62/item2/audit-calculus/test_standing_owners.py",
+      "target": "scripts/h62/item2/audit-calculus/census.py",
+      "target_blob": "1e1ddc8d397522e3e60074bfb4d50cc323b50124"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "55e3837cbb78a61206ba4b4b0416a0c95b4f5b58",
+          "line": 5,
+          "path": "tests/h62/item2/audit-calculus/test_standing_owners.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "a02f8b8622fb6e4b1e4ad80c43bc74b2ba11a97489e9271bed9a20b7a01dd17f",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:tests/h62/item2/audit-calculus/test_standing_owners.py",
+      "target": "scripts/h62/item2/audit-calculus/standing_owners.py",
+      "target_blob": "59ae8fd76982386eb353ac42eeb423fa9e068427"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "135dcd08d9b6489268377602011de0dcebd83838",
+          "line": 7,
+          "path": "tests/h62/item2/audit-calculus/test_packet_transition.py"
+        },
+        {
+          "blob": "38a0992822fb39c0d01463862069cb4de5f9e055",
+          "line": 12,
+          "path": "scripts/h62/item2/audit-calculus/verify_packet_transition.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "7135b3f38e6bc07c59c6f995a53fc1ac87becf52fa52ed6d79a2fc83cde8a428",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:tests/h62/item2/audit-calculus/test_packet_transition.py",
+      "target": "scripts/h62/item2/audit-calculus/bulk_inputs.py",
+      "target_blob": "455b16030ed40dce95c200c1df86ec4f23916c35"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "135dcd08d9b6489268377602011de0dcebd83838",
+          "line": 7,
+          "path": "tests/h62/item2/audit-calculus/test_packet_transition.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "c9d8daea94daf691d19de5bb114f672af61adf1eb954e6aa09b3a773e5877db2",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:tests/h62/item2/audit-calculus/test_packet_transition.py",
+      "target": "scripts/h62/item2/audit-calculus/verify_packet_transition.py",
+      "target_blob": "38a0992822fb39c0d01463862069cb4de5f9e055"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "47b57700fab39cc2c99fe8bb701dc78b514a7d17",
+          "line": 6,
+          "path": "scripts/h62/item2/audit-theories/test_census.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "1cfae766e6224d866fef72d6a84647b7fef5f6de06b294a86eec342578a9d112",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:scripts/h62/item2/audit-theories/test_census.py",
+      "target": "scripts/h62/item2/audit-theories/census.py",
+      "target_blob": "8ef3f915ffb53d06a115d3dd4394befd96b5e3ca"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "b3b629db83c041f96fcf9d4d37fde2f48f126cde",
+          "line": 5,
+          "path": "scripts/h62/item2/audit-theories/test_import_paths.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "1cfae766e6224d866fef72d6a84647b7fef5f6de06b294a86eec342578a9d112",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:scripts/h62/item2/audit-theories/test_import_paths.py",
+      "target": "scripts/h62/item2/audit-theories/census.py",
+      "target_blob": "8ef3f915ffb53d06a115d3dd4394befd96b5e3ca"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "b3b629db83c041f96fcf9d4d37fde2f48f126cde",
+          "line": 6,
+          "path": "scripts/h62/item2/audit-theories/test_import_paths.py"
+        },
+        {
+          "blob": "3946f3e5a45c7532327d84e30c989edd024a9057",
+          "line": 35,
+          "path": "scripts/h62/item2/audit-theories/verify_census.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "6c144f1e3128f5a94d2501b7c0a37716406e516973b9e2814ec141d9bc6f4afb",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:scripts/h62/item2/audit-theories/test_import_paths.py",
+      "target": "scripts/h62/item2/audit-theories/witness_registry.py",
+      "target_blob": "5de98fed742742a82f59628fe4716b6ca38f8ed3"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "b3b629db83c041f96fcf9d4d37fde2f48f126cde",
+          "line": 6,
+          "path": "scripts/h62/item2/audit-theories/test_import_paths.py"
+        },
+        {
+          "blob": "3946f3e5a45c7532327d84e30c989edd024a9057",
+          "line": 41,
+          "path": "scripts/h62/item2/audit-theories/verify_census.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "5f45770326ad74dc6db4c882e292171d0a00df9d2f7d4af3914eee4e94514bc6",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:scripts/h62/item2/audit-theories/test_import_paths.py",
+      "target": "scripts/h62/item2/audit-theories/audit_dispositions.py",
+      "target_blob": "6fbc1ebcdd5f235d5b670241cfbac2a9f801722f"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "b3b629db83c041f96fcf9d4d37fde2f48f126cde",
+          "line": 6,
+          "path": "scripts/h62/item2/audit-theories/test_import_paths.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "0fa70b97f410e28f6f679e58cab7a23ffca8920281c09ce6b43b22a065f545cd",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:scripts/h62/item2/audit-theories/test_import_paths.py",
+      "target": "scripts/h62/item2/audit-theories/verify_census.py",
+      "target_blob": "3946f3e5a45c7532327d84e30c989edd024a9057"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "0d96e7b54ccf6f8baf5ffe63a98d0ee62e368f13",
+          "line": 3,
+          "path": "scripts/h62/item2/audit-theories/test_indexed_roles.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "346922c5c5098d67d374470991207702cca8914a8fa3b8ea35e3e53e349e1eba",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:scripts/h62/item2/audit-theories/test_indexed_roles.py",
+      "target": "scripts/h62/item2/audit-theories/indexed_roles.py",
+      "target_blob": "59a4fe20ce0efdc170f1e2a5dd20965282382c41"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "e508c29d26673be869aea5f045710a4946948789",
+          "line": 3,
+          "path": "scripts/h62/item2/audit-theories/test_input_roles.py"
+        },
+        {
+          "blob": "4a5d55e08c156e2df54346078ae93119ae631fb9",
+          "line": 9,
+          "path": "scripts/h62/item2/audit-theories/input_roles.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "1cfae766e6224d866fef72d6a84647b7fef5f6de06b294a86eec342578a9d112",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:scripts/h62/item2/audit-theories/test_input_roles.py",
+      "target": "scripts/h62/item2/audit-theories/census.py",
+      "target_blob": "8ef3f915ffb53d06a115d3dd4394befd96b5e3ca"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "e508c29d26673be869aea5f045710a4946948789",
+          "line": 3,
+          "path": "scripts/h62/item2/audit-theories/test_input_roles.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "4f1d5500d5580b6744ceab8593d136e88ff498dd70bb0824992ca905d2a28574",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:scripts/h62/item2/audit-theories/test_input_roles.py",
+      "target": "scripts/h62/item2/audit-theories/input_roles.py",
+      "target_blob": "4a5d55e08c156e2df54346078ae93119ae631fb9"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "425ce6d432ce3b45b8a92d05d5db79007d63e33d",
+          "line": 3,
+          "path": "scripts/h62/item2/audit-theories/test_pair_sources.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "1cfae766e6224d866fef72d6a84647b7fef5f6de06b294a86eec342578a9d112",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:scripts/h62/item2/audit-theories/test_pair_sources.py",
+      "target": "scripts/h62/item2/audit-theories/census.py",
+      "target_blob": "8ef3f915ffb53d06a115d3dd4394befd96b5e3ca"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "425ce6d432ce3b45b8a92d05d5db79007d63e33d",
+          "line": 4,
+          "path": "scripts/h62/item2/audit-theories/test_pair_sources.py"
+        },
+        {
+          "blob": "4b02cdfa59af8c8bbf7eedd2da6daa02d0a08055",
+          "line": 10,
+          "path": "scripts/h62/item2/audit-theories/measure_census_pair.py"
+        },
+        {
+          "blob": "3946f3e5a45c7532327d84e30c989edd024a9057",
+          "line": 35,
+          "path": "scripts/h62/item2/audit-theories/verify_census.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "6c144f1e3128f5a94d2501b7c0a37716406e516973b9e2814ec141d9bc6f4afb",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:scripts/h62/item2/audit-theories/test_pair_sources.py",
+      "target": "scripts/h62/item2/audit-theories/witness_registry.py",
+      "target_blob": "5de98fed742742a82f59628fe4716b6ca38f8ed3"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "425ce6d432ce3b45b8a92d05d5db79007d63e33d",
+          "line": 4,
+          "path": "scripts/h62/item2/audit-theories/test_pair_sources.py"
+        },
+        {
+          "blob": "4b02cdfa59af8c8bbf7eedd2da6daa02d0a08055",
+          "line": 10,
+          "path": "scripts/h62/item2/audit-theories/measure_census_pair.py"
+        },
+        {
+          "blob": "3946f3e5a45c7532327d84e30c989edd024a9057",
+          "line": 41,
+          "path": "scripts/h62/item2/audit-theories/verify_census.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "5f45770326ad74dc6db4c882e292171d0a00df9d2f7d4af3914eee4e94514bc6",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:scripts/h62/item2/audit-theories/test_pair_sources.py",
+      "target": "scripts/h62/item2/audit-theories/audit_dispositions.py",
+      "target_blob": "6fbc1ebcdd5f235d5b670241cfbac2a9f801722f"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "425ce6d432ce3b45b8a92d05d5db79007d63e33d",
+          "line": 4,
+          "path": "scripts/h62/item2/audit-theories/test_pair_sources.py"
+        },
+        {
+          "blob": "4b02cdfa59af8c8bbf7eedd2da6daa02d0a08055",
+          "line": 10,
+          "path": "scripts/h62/item2/audit-theories/measure_census_pair.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "0fa70b97f410e28f6f679e58cab7a23ffca8920281c09ce6b43b22a065f545cd",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:scripts/h62/item2/audit-theories/test_pair_sources.py",
+      "target": "scripts/h62/item2/audit-theories/verify_census.py",
+      "target_blob": "3946f3e5a45c7532327d84e30c989edd024a9057"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "425ce6d432ce3b45b8a92d05d5db79007d63e33d",
+          "line": 4,
+          "path": "scripts/h62/item2/audit-theories/test_pair_sources.py"
+        },
+        {
+          "blob": "4b02cdfa59af8c8bbf7eedd2da6daa02d0a08055",
+          "line": 12,
+          "path": "scripts/h62/item2/audit-theories/measure_census_pair.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "dd43cf933ed0d18974852cbfc17f0f1b6e295e04209587e30baecb8009350d74",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:scripts/h62/item2/audit-theories/test_pair_sources.py",
+      "target": "scripts/h62/item2/audit-theories/serial_check.py",
+      "target_blob": "766c1e39caab15fa028423e025bf4c7e0661fdd9"
+    },
+    {
+      "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+      "frames": [
+        {
+          "blob": "425ce6d432ce3b45b8a92d05d5db79007d63e33d",
+          "line": 4,
+          "path": "scripts/h62/item2/audit-theories/test_pair_sources.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "module_code_sha256": "d71b14594f480d809298120888503f148898893b6f5bba253abb7613f3073061",
+      "module_frame_line": 0,
+      "operation": "entered measured Python module; no fixture consumption credit",
+      "python": [
+        3,
+        12,
+        14
+      ],
+      "runner": "validated:scripts/h62/item2/audit-theories/test_pair_sources.py",
+      "target": "scripts/h62/item2/audit-theories/measure_census_pair.py",
+      "target_blob": "4b02cdfa59af8c8bbf7eedd2da6daa02d0a08055"
     }
   ],
   "orphans": [],
@@ -423820,6 +424919,151 @@
           "path": "tests/h28-sol/mutation-testing/tools/engine.py"
         }
       ]
+    },
+    {
+      "frames": [
+        {
+          "blob": "425ce6d432ce3b45b8a92d05d5db79007d63e33d",
+          "line": 15,
+          "path": "scripts/h62/item2/audit-theories/test_pair_sources.py"
+        },
+        {
+          "blob": "425ce6d432ce3b45b8a92d05d5db79007d63e33d",
+          "line": 11,
+          "path": "scripts/h62/item2/audit-theories/test_pair_sources.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "operation": "validated Python read of measured bytes",
+      "runner": "validated:scripts/h62/item2/audit-theories/test_pair_sources.py",
+      "targets": [
+        {
+          "blob": "2ecc1479b59032768876001bc272efc61a2b6f77",
+          "path": "tests/h62/item2/audit-theories/ElaboratedCensus.lean"
+        }
+      ]
+    },
+    {
+      "frames": [
+        {
+          "blob": "b3b629db83c041f96fcf9d4d37fde2f48f126cde",
+          "line": 6,
+          "path": "scripts/h62/item2/audit-theories/test_import_paths.py"
+        },
+        {
+          "blob": "3946f3e5a45c7532327d84e30c989edd024a9057",
+          "line": 41,
+          "path": "scripts/h62/item2/audit-theories/verify_census.py"
+        },
+        {
+          "blob": "6fbc1ebcdd5f235d5b670241cfbac2a9f801722f",
+          "line": 5,
+          "path": "scripts/h62/item2/audit-theories/audit_dispositions.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "operation": "validated Python read of measured bytes",
+      "runner": "validated:scripts/h62/item2/audit-theories/test_import_paths.py",
+      "targets": [
+        {
+          "blob": "391ee8ba9494cd39762e8f0014308be77a611f59",
+          "path": "scripts/h62/item2/audit-theories/handoff/COORDINATOR-ANSWERS-20261107.json"
+        }
+      ]
+    },
+    {
+      "frames": [
+        {
+          "blob": "b3b629db83c041f96fcf9d4d37fde2f48f126cde",
+          "line": 6,
+          "path": "scripts/h62/item2/audit-theories/test_import_paths.py"
+        },
+        {
+          "blob": "3946f3e5a45c7532327d84e30c989edd024a9057",
+          "line": 41,
+          "path": "scripts/h62/item2/audit-theories/verify_census.py"
+        },
+        {
+          "blob": "6fbc1ebcdd5f235d5b670241cfbac2a9f801722f",
+          "line": 6,
+          "path": "scripts/h62/item2/audit-theories/audit_dispositions.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "operation": "validated Python read of measured bytes",
+      "runner": "validated:scripts/h62/item2/audit-theories/test_import_paths.py",
+      "targets": [
+        {
+          "blob": "391ee8ba9494cd39762e8f0014308be77a611f59",
+          "path": "scripts/h62/item2/audit-theories/handoff/COORDINATOR-ANSWERS-20261107.json"
+        }
+      ]
+    },
+    {
+      "frames": [
+        {
+          "blob": "425ce6d432ce3b45b8a92d05d5db79007d63e33d",
+          "line": 4,
+          "path": "scripts/h62/item2/audit-theories/test_pair_sources.py"
+        },
+        {
+          "blob": "4b02cdfa59af8c8bbf7eedd2da6daa02d0a08055",
+          "line": 10,
+          "path": "scripts/h62/item2/audit-theories/measure_census_pair.py"
+        },
+        {
+          "blob": "3946f3e5a45c7532327d84e30c989edd024a9057",
+          "line": 41,
+          "path": "scripts/h62/item2/audit-theories/verify_census.py"
+        },
+        {
+          "blob": "6fbc1ebcdd5f235d5b670241cfbac2a9f801722f",
+          "line": 5,
+          "path": "scripts/h62/item2/audit-theories/audit_dispositions.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "operation": "validated Python read of measured bytes",
+      "runner": "validated:scripts/h62/item2/audit-theories/test_pair_sources.py",
+      "targets": [
+        {
+          "blob": "391ee8ba9494cd39762e8f0014308be77a611f59",
+          "path": "scripts/h62/item2/audit-theories/handoff/COORDINATOR-ANSWERS-20261107.json"
+        }
+      ]
+    },
+    {
+      "frames": [
+        {
+          "blob": "425ce6d432ce3b45b8a92d05d5db79007d63e33d",
+          "line": 4,
+          "path": "scripts/h62/item2/audit-theories/test_pair_sources.py"
+        },
+        {
+          "blob": "4b02cdfa59af8c8bbf7eedd2da6daa02d0a08055",
+          "line": 10,
+          "path": "scripts/h62/item2/audit-theories/measure_census_pair.py"
+        },
+        {
+          "blob": "3946f3e5a45c7532327d84e30c989edd024a9057",
+          "line": 41,
+          "path": "scripts/h62/item2/audit-theories/verify_census.py"
+        },
+        {
+          "blob": "6fbc1ebcdd5f235d5b670241cfbac2a9f801722f",
+          "line": 6,
+          "path": "scripts/h62/item2/audit-theories/audit_dispositions.py"
+        }
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "operation": "validated Python read of measured bytes",
+      "runner": "validated:scripts/h62/item2/audit-theories/test_pair_sources.py",
+      "targets": [
+        {
+          "blob": "391ee8ba9494cd39762e8f0014308be77a611f59",
+          "path": "scripts/h62/item2/audit-theories/handoff/COORDINATOR-ANSWERS-20261107.json"
+        }
+      ]
     }
   ],
   "schema_version": 3,
@@ -459397,6 +460641,204 @@
       "kind": "unittest",
       "path": "tests/h62/item2/audit-calculus/test_packet_transition.py",
       "source_blob": "135dcd08d9b6489268377602011de0dcebd83838"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item2/audit-language/test_source_roles.py"
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "kind": "unittest",
+      "path": "scripts/h62/item2/audit-language/test_source_roles.py",
+      "source_blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "tests/h28-sol/mutation-testing/tools/test_runner.py"
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "kind": "unittest",
+      "path": "tests/h28-sol/mutation-testing/tools/test_runner.py",
+      "source_blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "tests/h62/item2/audit-calculus/test_bulk_inputs.py"
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "kind": "unittest",
+      "path": "tests/h62/item2/audit-calculus/test_bulk_inputs.py",
+      "source_blob": "e966c7b99f53e997430aa99ca965db3b33940447"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "tests/h62/item2/audit-calculus/test_census.py"
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "kind": "unittest",
+      "path": "tests/h62/item2/audit-calculus/test_census.py",
+      "source_blob": "049292b3e1f72cd6f5ba59bb01ac4933bb5c1dd7"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "tests/h62/item2/audit-calculus/test_receipts.py"
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "kind": "unittest",
+      "path": "tests/h62/item2/audit-calculus/test_receipts.py",
+      "source_blob": "68da1e61d3c0abb61e12398ef9bb0240da55df58"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "tests/h62/item2/audit-calculus/test_handoff_index.py"
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "kind": "unittest",
+      "path": "tests/h62/item2/audit-calculus/test_handoff_index.py",
+      "source_blob": "873df01e20af8815478c9bd3ffd5550f69624ad2"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "tests/h62/item2/audit-calculus/test_reconcile.py"
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "kind": "unittest",
+      "path": "tests/h62/item2/audit-calculus/test_reconcile.py",
+      "source_blob": "a10452c60df5311a27fef8722bb5e06e3f40f488"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "tests/h62/item2/audit-calculus/test_semantic_classification.py"
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "kind": "unittest",
+      "path": "tests/h62/item2/audit-calculus/test_semantic_classification.py",
+      "source_blob": "767d10cb27be5c6f5504627a07ac8ded1a3b0806"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "tests/h62/item2/audit-calculus/test_guarded_acceptance.py"
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "kind": "unittest",
+      "path": "tests/h62/item2/audit-calculus/test_guarded_acceptance.py",
+      "source_blob": "212536e7cdcc6a043cd61a43978dea06d78d9065"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "tests/h62/item2/audit-calculus/test_frozen_recovery.py"
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "kind": "unittest",
+      "path": "tests/h62/item2/audit-calculus/test_frozen_recovery.py",
+      "source_blob": "41f94bcaabe51e9b6afb9d2e043aff2a370c208b"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "tests/h62/item2/audit-calculus/test_standing_owners.py"
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "kind": "unittest",
+      "path": "tests/h62/item2/audit-calculus/test_standing_owners.py",
+      "source_blob": "55e3837cbb78a61206ba4b4b0416a0c95b4f5b58"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "tests/h62/item2/audit-calculus/test_packet_transition.py"
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "kind": "unittest",
+      "path": "tests/h62/item2/audit-calculus/test_packet_transition.py",
+      "source_blob": "135dcd08d9b6489268377602011de0dcebd83838"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item2/audit-theories/test_census.py"
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "kind": "unittest",
+      "path": "scripts/h62/item2/audit-theories/test_census.py",
+      "source_blob": "47b57700fab39cc2c99fe8bb701dc78b514a7d17"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item2/audit-theories/test_import_paths.py"
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "input_scope": [
+        "scripts/h62/item2/audit-theories/handoff/COORDINATOR-ANSWERS-20261107.json"
+      ],
+      "kind": "unittest",
+      "other_reads": "unresolved",
+      "path": "scripts/h62/item2/audit-theories/test_import_paths.py",
+      "purpose": "Exercise quoted import-path and transitive-fingerprint controls with temporary sources. Imported audit_dispositions parses and hashes its exact stored historical decision JSON at module initialization. This is a runtime-input dependency, not current authority, exclusion adoption, kernel validation or proof acceptance.",
+      "source_blob": "b3b629db83c041f96fcf9d4d37fde2f48f126cde"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item2/audit-theories/test_indexed_roles.py"
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "kind": "unittest",
+      "path": "scripts/h62/item2/audit-theories/test_indexed_roles.py",
+      "source_blob": "0d96e7b54ccf6f8baf5ffe63a98d0ee62e368f13"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item2/audit-theories/test_input_roles.py"
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "kind": "unittest",
+      "path": "scripts/h62/item2/audit-theories/test_input_roles.py",
+      "source_blob": "e508c29d26673be869aea5f045710a4946948789"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "scripts/h62/item2/audit-theories/test_pair_sources.py"
+      ],
+      "input_revision": "34e467aefeedb6f38ed1367a30c9d845a49b38c0",
+      "input_scope": [
+        "tests/h62/item2/audit-theories/ElaboratedCensus.lean",
+        "scripts/h62/item2/audit-theories/handoff/COORDINATOR-ANSWERS-20261107.json"
+      ],
+      "kind": "unittest",
+      "other_reads": "unresolved",
+      "path": "scripts/h62/item2/audit-theories/test_pair_sources.py",
+      "purpose": "Compare one committed current collector source text with the exact pure pretty-to-compress transformation of a pinned historical Git source, retaining expression-field markers. Text regression only; no byte regeneration, timing experiment, Lean elaboration or proof acceptance. Imported audit_dispositions also parses and hashes the exact stored historical decision packet during initialization; no embedded authorization or proof conclusion is adopted.",
+      "source_blob": "425ce6d432ce3b45b8a92d05d5db79007d63e33d"
     }
   ]
 }

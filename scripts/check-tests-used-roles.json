@@ -61,6 +61,12 @@
       "role": "Historical record: Named historical ancestor/merge repair and external evidence availability report; also a portable-attachment consumer candidate. Reported assertions, permissions, external artifacts and passes are not independently verified or adopted."
     },
     {
+      "anchor": "  \"answers\": {",
+      "blob": "391ee8ba9494cd39762e8f0014308be77a611f59",
+      "path": "scripts/h62/item2/audit-theories/handoff/COORDINATOR-ANSWERS-20261107.json",
+      "role": "Historical record: Stored coordinator-answer packet for Q-FROZEN-REBASE and Q-STATIC-VALUE. Captured directives, authority claims, exclusion rationale and proof conclusions are historical data, not current authorization or independently verified acceptance. Live parsing/hash consumption is justified separately by the admitted runner chain."
+    },
+    {
       "anchor": "# Frozen evidence reconstruction",
       "blob": "427f3a7f92f11e731cdb140320d731deb45a51fa",
       "path": "scripts/h62/item2/audit-theories/handoff/FROZEN-REBUILD-20261108.md",
