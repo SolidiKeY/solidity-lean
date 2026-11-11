@@ -1,15 +1,12 @@
-import Solidity.Lowering.V07.UnsignedAddition
-import Solidity.Lowering.V07.UnsignedMultiplication
-import Solidity.Lowering.V07.SignedNarrowAddition
-import Solidity.Lowering.V07.SignedNarrowSubtraction
-import Solidity.Lowering.V07.SignedNarrowMultiplication
+import Solidity.Lowering.G16.Arithmetic
 
 /-!
 # Shared typed wrapping arithmetic
 
 Guards width/signedness transport for the three compound arithmetic operators
-rewritten by `uncheckStmts`. This total value-template selector reuses existing
-V07 operations. It is not the supplied-output validator: an actual checker
+rewritten by `uncheckStmts`. This total value-template selector reuses the
+G16 selector and its V07 operations. It is not the supplied-output validator:
+an actual checker
 must associate the raw/Source input and exact emitted code with these values.
 Unsupported value operators return `none`; this is not a final source-language
 exclusion or a claim of complete arithmetic coverage.
@@ -18,19 +15,14 @@ namespace Solidity.Correctness.Lowering.Unchecked
 open Solidity.Lowering.V07
 
 /-- Select an existing typed wrapping operation, without a new value carrier. -/
-def wrappingValue {C : Contract} {Γ : Ctx} (op : Source.BinOp) :
-    (t : Source.IntTy) → Val C Γ (integerPrim t) → Val C Γ (integerPrim t) →
-      Option (Val C Γ (integerPrim t))
-  | ⟨false, bits, _⟩, a, b => match op with
-    | .add => some (UnsignedAddition.addValue bits a b)
-    | .sub => some (UnsignedNarrowing.subValue bits a b)
-    | .mul => some (UnsignedMultiplication.mulValue bits a b)
-    | _ => none
-  | ⟨true, bits, _⟩, a, b => match op with
-    | .add => some (SignedNarrowAddition.addValue bits a b)
-    | .sub => some (SignedNarrowSubtraction.subValue bits a b)
-    | .mul => some (SignedNarrowMultiplication.mulValue bits a b)
-    | _ => none
+def wrappingValue {C : Contract} {Γ : Ctx} (op : Source.BinOp)
+    (t : Source.IntTy) (a b : Val C Γ (integerPrim t)) :
+    Option (Val C Γ (integerPrim t)) :=
+  match op with
+  | .add => some (Solidity.Lowering.G16.Arithmetic.wrappingValue t .add a b)
+  | .sub => some (Solidity.Lowering.G16.Arithmetic.wrappingValue t .sub a b)
+  | .mul => some (Solidity.Lowering.G16.Arithmetic.wrappingValue t .mul a b)
+  | _ => none
 
 /-- Every selected numeric template agrees with actual unchecked Source
 arithmetic. Operand observations are local value-lemma inputs, not execution
@@ -57,7 +49,7 @@ theorem wrappingValue_sound {D : Source.Layout} {C : Contract} {Γ : Ctx}
     exact ⟨Source.intWrap t z, integerValue t (t.wrap z) (t.wrap_mem z),
       source, model, integer_related t (t.wrap z) (t.wrap_mem z)⟩
   rcases t with ⟨sign, bits, valid⟩
-  cases sign <;> cases op <;> simp only [wrappingValue] at accepted <;> cases accepted
+  cases sign <;> cases op <;> simp only [wrappingValue, Solidity.Lowering.G16.Arithmetic.wrappingValue] at accepted <;> cases accepted
   all_goals first
   | exact finish (x + y) (UnsignedAddition.source_add_unchecked bits valid x y hx hy)
       (UnsignedAddition.add_value_run target bits valid a b x y hx hy left right)
