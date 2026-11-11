@@ -952,12 +952,6 @@ test("solkey's solc/open ports close except where the model says why not", () =>
     // false on the EVM: `t ? 63 : 255` is a `uint8`, so `63 + 255` panics
     // (`0x11`); the model reverts there (`SolcOpen.ternaryLiteralOverflow`)
     ternaryLiteralOverflow: "pending",
-    // the authorized target is `proved` (static/readonly call model,
-    // docs/solidity-upstream-tests.md); until that correction lands the
-    // callback reading havocs storage across the pure external call
-    // (`ExecS.tryOk`), so the row is pending. The claim stays in the todo
-    // test below.
-    tryArgumentSideEffect: "pending",
   };
   // `functionsRecursiveUnbounded` proves: its recursive call by the contract
   // true/true over the 1024 frames of the unrolling (`rec_auto`, kernel-port.md
@@ -972,15 +966,6 @@ test("solkey's solc/open ports close except where the model says why not", () =>
   assert.equal(rows.length, 51);
   const expected = new Map(Object.entries(open));
   for (const r of rows) assert.equal(r.status, expected.get(r.function) ?? "proved", r.function);
-});
-
-test("solc/open tryArgumentSideEffect proves under the static call model",
-  {todo: "authorized static/readonly model correction (docs/solidity-upstream-tests.md)"}, () => {
-  const report = runSolidityTests(["tests/solc/open/SolcPaymentsOpen.sol"],
-    {build:false, function:"tryArgumentSideEffect"});
-  assert.deepEqual(report.errors, []);
-  assert.deepEqual(report.results.map(r => [r.function, r.status]),
-    [["tryArgumentSideEffect", "proved"]]);
 });
 
 test("solc/open self-calls prove at the harness address (--self-address)", () => {
