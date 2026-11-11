@@ -80,4 +80,10 @@ info: open Solidity.Goals.opcodeEvalUniversal ← Solidity.Yul.opcode_eval_unive
 #guard_msgs in
 #roadmap_goal opcodeEvalUniversal
 
+/--
+info: open Solidity.Goals.leanInventorySound ← Solidity.LeanInventory.inventory_sound plan k1-lean-inventory
+-/
+#guard_msgs in
+#roadmap_goal leanInventorySound
+
 end Solidity.Goals
