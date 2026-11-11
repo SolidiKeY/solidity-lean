@@ -479,9 +479,10 @@ y1-yul-artifact-producers). Three separate layers:
   assignment whose right side is built from literals, locals and
   `add`/`sub`/`mul`. Nesting and composition are arbitrary. These are exactly the
   constructors `ProducerStatements.compile` and `ProducerExpressions.compile`
-  visit; any other constructor (`let`, `if`, `switch`, `for`, calls, other
-  builtins, early control, function groups) is outside this language, not a
-  certificate failure.
+  visit; any other constructor (`discard`, `let`, `zero`, `if`, `switch`, `for`,
+  multi-target assignment, other builtins, early control, function groups) is
+  outside this language, not a certificate failure. Calls and externals cannot
+  occur in a closed statement.
 * `YulArtifact.Fits depth`: the representation limit of the emitted code. Local
   reads use DUP and writes use SWAP, whose Backend index is `Fin 16`; a read at
   stack height `h` above the locals (counting the `depth` newer words) needs `h + i < 16`, and a

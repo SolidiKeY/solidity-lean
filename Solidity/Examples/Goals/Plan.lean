@@ -139,6 +139,14 @@ example {c : Yul.Control} (w : Yul.Word) :
     (.assign _ (fun i same => by cases same; decide)
       (.local (height := 3) (0 : Fin 2) (by decide)))
 
+/-- `Fits` is a real limit: a write to local 0 under sixteen newer words has no
+SWAP reach. -/
+example {c : Yul.Control} (w : Yul.Word) :
+    ¬ Fits 16 (.assign (c := c) (fun _ => .local (0 : Fin 1)) (.literal w)) := by
+  intro fits
+  cases fits with
+  | assign _ reach _ => exact absurd (reach 0 rfl) (by decide)
+
 example {c : Yul.Control} {n : Nat} (test : Yul.Expr [] [] n 1) (body : Yul.Stmt [] [] c n) :
     ¬ Accepted (.if_ test body) := nofun
 
