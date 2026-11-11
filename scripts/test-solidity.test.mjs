@@ -483,18 +483,29 @@ test("nested enums in abi.decode are admitted at their carriers (tests/solc/Enum
 test("calldata: read-only memory parameters, a written copy refused, slices as views", () => {
   // docs/semantic-gaps.md, "Bytes and strings": a `calldata` parameter is a
   // memory parameter the body does not write (`calldataCheck`)
-  const report = runSolidityTests(["tests/solc/Calldata.sol"], {build:false, batchSize:1});
-  assert.deepEqual(report.errors, []);
-  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  const source = "tests/solc/Calldata.sol";
+  const listed = runSolidityTests([source], {build:false, list:true});
+  assert.deepEqual(listed.errors, []);
+  const admitted = Object.fromEntries(listed.results.map(r => [r.function, r.status]));
+  // Ordinary whole-calldata writable copies remain a separate interface.
+  assert.equal(admitted.writesCopy, 'unsupported');
+  // Slice hashing is admitted. Its obligation is false: an empty `bytes`
+  // reverts at `b[4:]` (`tests/upstream/DeclarationSourceValidation.lean`,
+  // `sliceHashed_notValid`, `sliceHashed_notDerivable`), so no proof run can
+  // close it. The run spends the declaration's heartbeats in the compiled
+  // walk after its 16384-step stage (`Calculus/ProvesDerive.lean`), reports
+  // `error`, and took 294.5 s locally at one thread and past the 300 s
+  // per-tool bound (`runTool`) on CI runners; only admission is checked here.
+  assert.equal(admitted.sliceHashed, 'ready');
   for (const name of ['first', 'sumTwo', 'byteLength', 'hashOf', 'strLength', 'member', 'passes',
     'readAlias', 'localAlias',
     // a slice is a view: its offset and length (`RawStmt.sliceViews`)
-    'tail', 'sliceLength', 'sliceRead', 'sliceOfSlice', 'slicePast', 'decodeShortView'])
-    assert.equal(status[name], 'proved', name);
-  // Ordinary whole-calldata writable copies remain a separate interface.
-  assert.equal(status.writesCopy, 'unsupported');
-  // Slice hashing is admitted. Symbolic copy-loop proof search may stay open.
-  assert.match(status.sliceHashed, /^(proved|pending)$/);
+    'tail', 'sliceLength', 'sliceRead', 'sliceOfSlice', 'slicePast', 'decodeShortView']) {
+    assert.equal(admitted[name], 'ready', name);
+    const report = runSolidityTests([source], {build:false, function:name});
+    assert.deepEqual(report.errors, [], name);
+    assert.deepEqual(report.results.map(r => [r.function, r.status]), [[name, 'proved']]);
+  }
 });
 
 test("hashing: keccak256, sha256, ripemd160, ecrecover, abi.encode/encodePacked/decode, selectors, string keys, concat", () => {

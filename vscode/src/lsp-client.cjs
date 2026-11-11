@@ -88,8 +88,11 @@ class LanguageClient extends EventEmitter {
   }
   async finishDispose(){
     if(!this.child){await this.ready.catch(()=>{});this.peer?.close();return;}
-    try{if(!this.peer.closed){await this.peer.request('shutdown',null,{timeoutMs:3000});this.peer.notify('exit',null);}}catch{}
-    const deadline=Date.now()+1000;try{if(this.peer.closed)for(const child of this.ownedProcesses.values())await waitForGroup(child,{deadline,kill:true});await waitForClose(this.child,{closed:this.closed,kill:this.peer.closed,deadline});for(const child of this.ownedProcesses.values())await waitForGroup(child,{deadline});this.ownedProcesses.clear();}catch(error){for(const child of this.ownedProcesses.values())try{terminateTree(child);}catch{}terminateTree(this.child);throw error;}finally{this.peer.close();}
+    // Diagnostics for a failed retirement: how the shutdown request ended.
+    const shutdownStart=Date.now();let shutdownOutcome='peer already closed';
+    try{if(!this.peer.closed){shutdownOutcome='pending';await this.peer.request('shutdown',null,{timeoutMs:3000});shutdownOutcome='replied';this.peer.notify('exit',null);}}catch(error){shutdownOutcome='failed: '+error.message;}
+    const shutdownMs=Date.now()-shutdownStart;
+    const deadline=Date.now()+1000;try{if(this.peer.closed)for(const child of this.ownedProcesses.values())await waitForGroup(child,{deadline,kill:true});await waitForClose(this.child,{closed:this.closed,kill:this.peer.closed,deadline});for(const child of this.ownedProcesses.values())await waitForGroup(child,{deadline});this.ownedProcesses.clear();}catch(error){for(const child of this.ownedProcesses.values())try{terminateTree(child);}catch{}terminateTree(this.child);error.message+=` [shutdown request ${shutdownOutcome} after ${shutdownMs} ms; server stderr tail: ${JSON.stringify(String(this.stderr||'').slice(-600))}]`;throw error;}finally{this.peer.close();}
   }
   resourcesQuiescent(){try{return this.childClosureConfirmed&&!groupMembers(this.child).some(running)&&![...this.ownedProcesses.values()].some(child=>groupMembers(child).some(running));}catch{return false;}}
 }

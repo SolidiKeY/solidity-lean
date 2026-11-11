@@ -1,7 +1,8 @@
 'use strict';
 function signature(n,short=false){return (n.name||n.kind)+'('+n.parameters.parameters.map(p=>{const t=p.typeDescriptions.typeString;return short?t.replace(/\buint256\b/g,'uint').replace(/\bint256\b/g,'int'):t;}).join(',')+')';}
 function requestFor(contract,options){
-  if(options.certify===true||options.auditPreconditions)return null;
+  // Requested audits and model prestates are certified evidence (Lean path).
+  if(options.certify===true||options.auditPreconditions||options.counterexamples)return null;
   let selected,sourceId;
   if(options.function){
     const candidates=contract.nodes.filter(n=>n.nodeType==='FunctionDefinition'&&(n.name===options.function||signature(n)===options.function||signature(n,true)===options.function));
