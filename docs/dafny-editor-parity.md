@@ -2315,3 +2315,13 @@ expectations remain unchanged; its failed native receipt remains failed. Input
 profiles are checked against trusted launch configuration, not inferred from
 observed text or normalized during validation. All budgets and missing aspects
 above remain.
+
+A separate `--diagnostic-lifecycle ui-open-close-v1` companion, together with
+`--diagnostic-input public-eol-v1`, uses registered `vscode.open` rather than
+acquiring an API-open model reference. The pinned editor source gives that
+API reference a three-minute default lifetime. The companion still requires an
+actual owned document-close event, typed public tab/model endpoints and LSP
+close, then a different document/synchronization lifetime on reopening the same
+URI and saved bytes. Tab disappearance alone never establishes closure. The
+original API-open close failure, trust-recovery predecessor, budgets and row
+judgments remain unchanged; this is not a native-key or rendered proof claim.

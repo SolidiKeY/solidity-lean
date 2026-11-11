@@ -39,7 +39,7 @@ function parse(args) {
   const options={trials:5,warmups:1,workers:[1,2,4],obligations:8,timeoutMs:300000,operationTimeoutMs:60000,targets:['dafny','local'],cache:['none','basic'],trace:'on',suite:'full'};
   const keys={'--code':'code','--dafny':'dafny','--dafny-extension':'dafnyExtension','--dotnet':'dotnet','--output':'output',
     '--trials':'trials','--warmups':'warmups','--workers':'workers','--obligations':'obligations','--timeout-ms':'timeoutMs','--operation-timeout-ms':'operationTimeoutMs','--targets':'targets','--cache':'cache','--trace':'trace',
-    '--memory-reserve-mib':'memoryReserveMiB','--memory-max-mib':'memoryMaxMiB','--suite':'suite','--menu-trust':'menuTrust','--menu-recovery-from':'menuRecoveryFrom','--menu-anchor':'menuAnchor','--diagnostic-input':'diagnosticInput'};
+    '--memory-reserve-mib':'memoryReserveMiB','--memory-max-mib':'memoryMaxMiB','--suite':'suite','--menu-trust':'menuTrust','--menu-recovery-from':'menuRecoveryFrom','--menu-anchor':'menuAnchor','--diagnostic-input':'diagnosticInput','--diagnostic-lifecycle':'diagnosticLifecycle'};
   for(let i=0;i<args.length;i++) {
     if(args[i]==='--help') return {help:true};
     const key=keys[args[i]];if(!key||!args[i+1]||args[i+1].startsWith('--')) throw new Error('Invalid option '+args[i]);
@@ -57,6 +57,7 @@ function parse(args) {
   if(options.obligations>1000||options.trials>100||options.warmups>10)throw new Error('Excessive benchmark dimensions');
   if(!['on','off'].includes(options.trace))throw new Error('Invalid trace');
   if(!['related-diagnostics','workspace-symbols-resolved','workspace-symbols','editor-language-scope','contribution-menus','compiler-code-actions','verification-time-limit','full','benchmark','visual','commands','custom-commands','custom-default-commands','custom-import-actions','compiler-output','dafny-compiler-output','dafny-command-output','output-lifecycle','testing-symbols','trace-unavailable','trace-visibility','trace-light-show','proof-help','proof-hover'].includes(options.suite))throw new Error('Invalid suite');
+  if(options.diagnosticLifecycle!==undefined&&(options.suite!=='related-diagnostics'||options.diagnosticLifecycle!=='ui-open-close-v1'||options.diagnosticInput!=='public-eol-v1'))throw Error('Diagnostic lifecycle requires related-diagnostics public-eol-v1 ui-open-close-v1');
   if(options.diagnosticInput!==undefined&&(options.suite!=='related-diagnostics'||options.diagnosticInput!=='public-eol-v1'))throw Error('Explicit diagnostic input requires related-diagnostics public-eol-v1');
   if(options.menuTrust!==undefined&&(!['transitions','recovery'].includes(options.menuTrust)||options.suite!=='contribution-menus'))throw Error('Native trust transitions require contribution-menus');
   if(options.menuAnchor!==undefined&&(options.menuAnchor!=='visible-scrollport-v1'||options.suite!=='contribution-menus'||options.menuTrust!==undefined))throw Error('Versioned menu anchor requires ordinary contribution-menus only');
@@ -99,7 +100,7 @@ function shortSummary(report) {
   return lines.join('\n');
 }
 async function launch(config,options) {
-  config={...config,...(options.diagnosticInput?{diagnosticInput:options.diagnosticInput}:{}),operationTimeoutMs:options.operationTimeoutMs,suite:options.suite||'full',menuTrust:options.menuTrust,...(options.menuAnchor?{menuAnchor:options.menuAnchor}:{}),runId:randomUUID(),sourceHead:git(repo)};
+  config={...config,...(options.diagnosticLifecycle?{diagnosticLifecycle:options.diagnosticLifecycle}:{}),...(options.diagnosticInput?{diagnosticInput:options.diagnosticInput}:{}),operationTimeoutMs:options.operationTimeoutMs,suite:options.suite||'full',menuTrust:options.menuTrust,...(options.menuAnchor?{menuAnchor:options.menuAnchor}:{}),runId:randomUUID(),sourceHead:git(repo)};
   mkdirSync(config.dir,{recursive:true});mkdirSync(config.workspace,{recursive:true});config.filesystemCapability=require('./filesystem.cjs').recursiveCapability(config.dir);
   const cache={'none':'No caching',basic:'Basic caching',advanced:'Advanced caching'}[config.cache];
   const settings= config.target==='dafny' ? {'dafny.version':'custom','dafny.cliPath':resolve(options.dafny),'dafny.dotnetExecutablePath':resolve(options.dotnet),
