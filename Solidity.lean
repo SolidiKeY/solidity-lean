@@ -4164,6 +4164,7 @@ import Solidity.SolcValidation.IrHelperSim
 import Solidity.SolcValidation.IrHelperSource
 import Solidity.SolcValidation.IrHelperSteps
 import Solidity.SolcValidation.IrHelpers
+import Solidity.SolcValidation.IrHex
 import Solidity.SolcValidation.IrLinkedCode
 import Solidity.SolcValidation.IrParse
 import Solidity.SolcValidation.IrPushHelpers
