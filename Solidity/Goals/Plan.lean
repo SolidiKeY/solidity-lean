@@ -158,9 +158,12 @@ def opcodeEvalUniversal : Prop :=
 k1-lean-inventory). The vocabulary is abstract and dependency-free: modules `M`,
 declarations `D`, consumers `C` and families `F` are any types.
 
-* `World` is what is actually true of the repository: areas, declaration owners,
-  every use between declarations (explicit, elaborator-generated, instance, macro or
-  otherwise implicit) and every consumer's uses.
+* `World` is what is actually true of the repository: areas, the directory or
+  X/XControls/XPins grouping, declaration owners, every use between declarations
+  (explicit, elaborator-generated, instance, macro or otherwise implicit), including
+  uses through declarations outside the seven areas, and every consumer's uses and
+  kind. `D` is the census's declaration identity: auxiliary constants may be folded
+  into their parent, provided uses are folded the same way.
 * `Census` is the explicit extracted input: listed modules, declarations, consumers,
   root uses, use edges and the unresolved gaps, plus the grouping and metadata.
 * `Certificate` is the claimed classification with a witness per declaration.
@@ -177,7 +180,9 @@ still owes its evidence and the accounting of every unresolved gap. `Adequate` f
 the real repository is not established by any proof here: discharging a gap needs
 the resolved edges from the elaborated environment (constants used by every compiled
 declaration, auxiliary and instance constants included) or a separately verified
-bridge from it; reporting a gap does not prove completeness.
+bridge from it; reporting a gap does not prove completeness. `unresolved` is the
+conservative verdict: it is never forced into orphan, and it is precise only as far
+as the listed gaps are.
 
 The expected proof `Solidity.LeanInventory.inventory_sound` belongs to a standalone
 file under `scripts/lean-inventory/` that imports this module, so no library root,
@@ -199,15 +204,17 @@ inductive Role where
 deriving DecidableEq
 
 /-- A consumer. Only the first four are independent roots; `blanket` (a root importing
-everything, or a whole-tree scan) is secondary coverage, and `ownControls f` is a
-consumer that only exercises family `f`'s own Controls/Pins. -/
+everything, or a whole-tree scan) is secondary coverage, and `ownControls` (such as a
+runner of every Controls/Pins file) demands each used declaration for that
+declaration's own family only. A consumer's kind is a fact of `World`, so a runner of
+Controls labelled `test` violates `Adequate`. -/
 inductive ConsumerKind (F : Type) where
-  | goalProof | test | runner | cli | blanket | ownControls (owner : F)
+  | goalProof | test | runner | cli | blanket | ownControls
 deriving DecidableEq
 
 def ConsumerKind.primary {F : Type} : ConsumerKind F → Bool
   | .goalProof | .test | .runner | .cli => true
-  | .blanket | .ownControls _ => false
+  | .blanket | .ownControls => false
 
 /-- Every kind except `blanket` can demand a declaration. -/
 def ConsumerKind.demands {F : Type} : ConsumerKind F → Bool
@@ -258,6 +265,8 @@ structure Pin (M : Type) where
 /-- The repository as it is. -/
 structure World (M D C F : Type) where
   area : M → Option Area
+  family : M → F
+  role : M → Role
   moduleOf : D → M
   uses : D → D → Prop
   rootUse : C → D → Prop
@@ -287,8 +296,8 @@ inductive Verdict where
 deriving DecidableEq
 
 /-- A classification with its witness. `keep`: a root use and a path. `ownerNeeded`:
-a Controls/Pins seed of `owner` (a control declaration, or the root of an
-`ownControls owner` consumer via `via`), a path, and a set refuting independent
+a Controls/Pins seed of `owner` (a Controls/Pins declaration, which is thus its own
+seed, or the root of an `ownControls` consumer `via`), a path, and a set refuting independent
 reachability; `owner` is normally the declaration's own family, and names the other
 family when only that family's Controls/Pins demand it. `orphan`: a set refuting all
 demand. `unresolved`: a gap that can reach the declaration, and a set refuting
@@ -297,7 +306,7 @@ inductive Evidence (D C F : Type) where
   | keep (consumer : C) (root : D) (path : List D)
   | ownerNeeded (owner : F) (via : Option C) (seed : D) (path : List D) (indep : List D)
   | orphan (live : List D)
-  | unresolved (gap : Gap D C) (path : List D) (recorded : List D)
+  | unresolved (gap : Gap D C) (lead : D × List D) (path : List D) (recorded : List D)
 
 def Evidence.verdict {D C F : Type} : Evidence D C F → Verdict
   | .keep .. => .keep
@@ -310,12 +319,14 @@ def Evidence.owner {D C F : Type} : Evidence D C F → Option F
   | .ownerNeeded f .. => some f
   | _ => none
 
-structure Entry (D C F : Type) where
+/-- `unresolved` also names the live source of its gap: unknown, a demanding consumer,
+or a declaration reached by `lead` (a demand seed and a recorded path to it). -/
+structure Row (D C F : Type) where
   evidence : Evidence D C F
   reason : String
 
 structure Certificate (D C F : Type) where
-  entry : D → Entry D C F
+  entry : D → Row D C F
   family : F → Verdict
 
 /-- Reflexive-transitive closure. -/
@@ -337,21 +348,20 @@ def World.IndepReach (W : World M D C F) (d : D) : Prop :=
   ∃ c e, (W.kind c).primary ∧ W.rootUse c e ∧ Reach W.uses e d
 
 /-- A seed of family `f`'s own demand: a declaration of an in-scope Controls/Pins
-module of `f`, or a use by an `ownControls f` consumer. -/
-def World.ControlSeed (W : World M D C F) (K : Census M D C F) (f : F) (s : D) : Prop :=
-  (W.InScope (W.moduleOf s) ∧ K.family (W.moduleOf s) = f ∧
-    K.role (W.moduleOf s) ≠ .member) ∨
-  ∃ c, W.kind c = .ownControls f ∧ W.rootUse c s
+module of `f`, or an in-scope declaration of `f` used by an `ownControls` consumer. -/
+def World.ControlSeed (W : World M D C F) (f : F) (s : D) : Prop :=
+  W.InScope (W.moduleOf s) ∧ W.family (W.moduleOf s) = f ∧
+    (W.role (W.moduleOf s) ≠ .member ∨ ∃ c, W.kind c = .ownControls ∧ W.rootUse c s)
 
-def World.DemandBy (W : World M D C F) (K : Census M D C F) (f : F) (d : D) : Prop :=
-  ∃ s, W.ControlSeed K f s ∧ Reach W.uses s d
+def World.DemandBy (W : World M D C F) (f : F) (d : D) : Prop :=
+  ∃ s, W.ControlSeed f s ∧ Reach W.uses s d
 
-def World.ControlDemand (W : World M D C F) (K : Census M D C F) (d : D) : Prop :=
-  ∃ f, W.DemandBy K f d
+def World.ControlDemand (W : World M D C F) (d : D) : Prop :=
+  ∃ f, W.DemandBy f d
 
 /-- `d` is an in-scope declaration of family `f`. -/
-def World.Member (W : World M D C F) (K : Census M D C F) (f : F) (d : D) : Prop :=
-  W.InScope (W.moduleOf d) ∧ K.family (W.moduleOf d) = f
+def World.Member (W : World M D C F) (f : F) (d : D) : Prop :=
+  W.InScope (W.moduleOf d) ∧ W.family (W.moduleOf d) = f
 
 def Census.Edge (K : Census M D C F) (x y : D) : Prop := (x, y) ∈ K.edges
 
@@ -392,7 +402,22 @@ def Census.Closed (K : Census M D C F) (p : ConsumerKind F → Bool) (S : List D
 def Census.Seed (K : Census M D C F) (f : F) (via : Option C) (s : D) : Prop :=
   match via with
   | none => s ∈ K.decls ∧ K.family (K.declModule s) = f ∧ K.role (K.declModule s) ≠ .member
-  | some c => c ∈ K.consumers ∧ K.kind c = .ownControls f ∧ (c, s) ∈ K.roots
+  | some c => s ∈ K.decls ∧ K.family (K.declModule s) = f ∧
+      c ∈ K.consumers ∧ K.kind c = .ownControls ∧ (c, s) ∈ K.roots
+
+/-- A demand seed in the census: a listed Controls/Pins declaration, or a root of a
+demanding (non-blanket) consumer. -/
+def Census.DemandSeed (K : Census M D C F) (s : D) : Prop :=
+  (s ∈ K.decls ∧ K.role (K.declModule s) ≠ .member) ∨
+  ∃ r ∈ K.roots, r.2 = s ∧ (K.kind r.1).demands
+
+/-- The gap's source could be live: unknown, a demanding consumer, or a declaration
+reached from a demand seed `lead.1` along the recorded path `lead.2`. -/
+def Census.GapSourceLive (K : Census M D C F) (g : Gap D C) (lead : D × List D) : Prop :=
+  match g.source with
+  | .use none | .root none => True
+  | .root (some c) => (K.kind c).demands
+  | .use (some x) => K.DemandSeed lead.1 ∧ Chain K.Edge lead.1 lead.2 x
 
 /-- The local check of one witness for declaration `d`. -/
 def Census.EvidenceOk (K : Census M D C F) (d : D) : Evidence D C F → Prop
@@ -403,8 +428,8 @@ def Census.EvidenceOk (K : Census M D C F) (d : D) : Evidence D C F → Prop
   | .orphan S =>
       K.Closed ConsumerKind.demands S ∧
       (∀ s ∈ K.decls, K.role (K.declModule s) ≠ .member → s ∈ S) ∧ d ∉ S
-  | .unresolved g path S =>
-      g ∈ K.gaps ∧
+  | .unresolved g lead path S =>
+      g ∈ K.gaps ∧ K.GapSourceLive g lead ∧
       (g.target = none ∨ ∃ y, g.target = some y ∧ Chain K.PossStep y path d) ∧
       K.RecClosed ConsumerKind.primary S ∧ d ∉ S
 
@@ -445,7 +470,8 @@ consumer kinds, root coverage and dependency-edge adequacy, where every unrecord
 actual use or non-blanket root must be covered by a listed gap. -/
 def Adequate (W : World M D C F) (K : Census M D C F) : Prop :=
   (∀ m, W.InScope m ↔ m ∈ K.modules) ∧
-  (∀ m ∈ K.modules, W.area m = some (K.area m)) ∧
+  (∀ m ∈ K.modules, W.area m = some (K.area m) ∧ W.family m = K.family m ∧
+    W.role m = K.role m) ∧
   (∀ d, W.InScope (W.moduleOf d) → d ∈ K.decls) ∧
   (∀ d ∈ K.decls, K.declModule d = W.moduleOf d) ∧
   (∀ c ∈ K.consumers, K.kind c = W.kind c) ∧
@@ -458,9 +484,9 @@ def Adequate (W : World M D C F) (K : Census M D C F) : Prop :=
 /-- What a certified declaration means in the world. -/
 def Meaning (W : World M D C F) (K : Census M D C F) (d : D) : Evidence D C F → Prop
   | .keep .. => W.IndepReach d
-  | .ownerNeeded f .. => ¬ W.IndepReach d ∧ W.DemandBy K f d
-  | .orphan .. => ¬ W.IndepReach d ∧ ¬ W.ControlDemand K d
-  | .unresolved .. => K.gaps ≠ [] ∧ ¬ K.RecordedKeep d
+  | .ownerNeeded f .. => ¬ W.IndepReach d ∧ W.DemandBy f d
+  | .orphan .. => ¬ W.IndepReach d ∧ ¬ W.ControlDemand d
+  | .unresolved g lead .. => g ∈ K.gaps ∧ K.GapSourceLive g lead ∧ ¬ K.RecordedKeep d
 
 /-- The conclusions: per-declaration meaning, no unresolved verdict without a gap,
 family verdicts that cannot hide an independently reachable member, and complete
@@ -470,30 +496,36 @@ def Sound (W : World M D C F) (K : Census M D C F) (X : Certificate D C F) : Pro
   (K.gaps = [] → ∀ d, W.InScope (W.moduleOf d) →
     (X.entry d).evidence.verdict ≠ .unresolved) ∧
   (∀ f ∈ K.families,
-    (X.family f = .keep → ∃ d, W.Member K f d ∧ W.IndepReach d) ∧
+    (X.family f = .keep → ∃ d, W.Member f d ∧ W.IndepReach d) ∧
     (X.family f = .ownerNeeded →
-      (∀ d, W.Member K f d → ¬ W.IndepReach d) ∧
-      ∃ d, W.Member K f d ∧ W.ControlDemand K d) ∧
-    (X.family f = .orphan → (∃ d, W.Member K f d) ∧
-      ∀ d, W.Member K f d → ¬ W.IndepReach d ∧ ¬ W.ControlDemand K d) ∧
-    ∀ d, W.Member K f d → W.IndepReach d →
+      (∀ d, W.Member f d → ¬ W.IndepReach d) ∧
+      ∃ d, W.Member f d ∧ W.ControlDemand d) ∧
+    (X.family f = .orphan → (∃ d, W.Member f d) ∧
+      ∀ d, W.Member f d → ¬ W.IndepReach d ∧ ¬ W.ControlDemand d) ∧
+    (X.family f = .unresolved → K.gaps ≠ [] ∨ ¬ ∃ d, W.Member f d) ∧
+    ∀ d, W.Member f d → W.IndepReach d →
       X.family f = .keep ∨ X.family f = .unresolved) ∧
   ∀ m, W.InScope m → m ∈ K.modules ∧ K.family m ∈ K.families ∧ K.lineBasis ≠ "" ∧
     (K.checkTime m).Recorded ∧ m ∈ (K.pin (K.family m)).modules
 
 /-- Boundary cases a satisfying instance must show at once: all seven areas, a keep
-member in a family with a non-keep member, an own-controls cycle that stays
-owner-needed, an orphan cycle reached by a blanket consumer, an unresolved
-declaration behind a gap, and both a measured and an unavailable check time. -/
+member in a family with a non-keep member, an own-controls cycle whose family stays
+owner-needed and is also used by an `ownControls` consumer, an orphan family with a
+cycle reached by a blanket consumer, an unresolved declaration behind a gap, and
+both a measured and an unavailable check time. -/
 def Exhibits (K : Census M D C F) (X : Certificate D C F) : Prop :=
   (∀ a ∈ Area.all, ∃ m ∈ K.modules, K.area m = a) ∧
   (∃ d ∈ K.decls, ∃ d' ∈ K.decls, K.family (K.declModule d) = K.family (K.declModule d') ∧
     (X.entry d).evidence.verdict = .keep ∧ (X.entry d').evidence.verdict ≠ .keep) ∧
   (∃ x ∈ K.decls, ∃ y ∈ K.decls, K.family (K.declModule x) = K.family (K.declModule y) ∧
     K.role (K.declModule x) = .member ∧ K.role (K.declModule y) ≠ .member ∧
-    K.Edge x y ∧ K.Edge y x ∧ (X.entry x).evidence.owner = some (K.family (K.declModule x))) ∧
-  (∃ x ∈ K.decls, ∃ y ∈ K.decls, K.Edge x y ∧ K.Edge y x ∧
+    K.Edge x y ∧ K.Edge y x ∧ (X.entry x).evidence.owner = some (K.family (K.declModule x)) ∧
+    X.family (K.family (K.declModule x)) = .ownerNeeded ∧
+    ∃ r ∈ K.roots, K.kind r.1 = .ownControls ∧
+      K.family (K.declModule r.2) = K.family (K.declModule x)) ∧
+  (∃ x ∈ K.decls, ∃ y ∈ K.decls, x ≠ y ∧ K.Edge x y ∧ K.Edge y x ∧
     (X.entry x).evidence.verdict = .orphan ∧ (X.entry y).evidence.verdict = .orphan ∧
+    X.family (K.family (K.declModule x)) = .orphan ∧
     ∃ c ∈ K.consumers, K.kind c = .blanket ∧ (c, x) ∈ K.roots) ∧
   (∃ d ∈ K.decls, (X.entry d).evidence.verdict = .unresolved) ∧
   (∃ m ∈ K.modules, (K.checkTime m).isMeasured) ∧
