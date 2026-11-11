@@ -2307,3 +2307,11 @@ and process epochs to the actual recorded compiler wire. This is not a native
 key/menu dispatch, rendered Problems/underline capture, postcondition proof,
 Dafny comparison or either independent row judgment. Missing or failed captures
 retain their full partial observation; original suites and predicates remain.
+
+The separate `--diagnostic-input public-eol-v1` companion uses the public
+`TextEdit.setEndOfLine` API to establish exact CRLF shifted bytes and restore LF
+for the fixed phase. The original implicit mixed-ending path and its strict
+expectations remain unchanged; its failed native receipt remains failed. Input
+profiles are checked against trusted launch configuration, not inferred from
+observed text or normalized during validation. All budgets and missing aspects
+above remain.

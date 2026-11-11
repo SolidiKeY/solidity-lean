@@ -1,18 +1,18 @@
 'use strict';
 const {test}=require('node:test'),assert=require('node:assert/strict'),{createHash}=require('node:crypto'),path=require('node:path'),{pathToFileURL}=require('node:url');
-const {source,textFor,phases,diagnosticSnapshot,wireSnapshot,errors}=require('../parity/related-diagnostics.cjs');
+const {source,textFor,phases,diagnosticSnapshot,wireSnapshot,errors,textForInput,phaseEdit}=require('../parity/related-diagnostics.cjs');
 const digest=s=>createHash('sha256').update(s).digest('hex');
 const config={target:'local',runId:'run',sourceHead:'a'.repeat(40),workspace:'/workspace/owned',operationTimeoutMs:60000,suite:'related-diagnostics'};
-function fixture(){
+function fixture(input){
  const uri=pathToFileURL(path.join(config.workspace,'related-diagnostics.sol')).href,owner={processSession:'process-epoch',pid:123,birth:'456'},protocol=[],steps=[],events=[{kind:'process.spawn',data:{...owner,args:[path.resolve(__dirname,'../src/lsp-server.cjs')],cwd:path.resolve(__dirname,'../..')}}];
- for(let i=0;i<phases.length;i++){const phase=phases[i],text=textFor(phase),b={uri,version:i+1,sourceHash:digest(text),session:'document-epoch',trusted:true,closed:false,language:'solidity',scheme:'file'},n=phase==='shifted'?1:0;
+ for(let i=0;i<phases.length;i++){const phase=phases[i],text=textForInput(phase,input),b={uri,version:i+1,sourceHash:digest(text),session:'document-epoch',trusted:true,closed:false,language:'solidity',scheme:'file'},n=phase==='shifted'?1:0;
   protocol.push({...owner,direction:'client',message:{method:i?'textDocument/didChange':'textDocument/didOpen',params:i?{textDocument:{uri,version:b.version},contentChanges:[{text}]}:{textDocument:{uri,version:b.version,text,synchronizationId:'sync-epoch'}}}});
   const diagnostics=phase==='fixed'?[]:[{severity:1,source:'solc',code:1686,message:'duplicate',range:{start:{line:4+n,character:2},end:{line:4+n,character:27}},relatedInformation:[{message:'other declaration',location:{uri,range:{start:{line:5+n,character:2},end:{line:5+n,character:27}}}}]}];
   const publicationIndex=protocol.length;protocol.push({...owner,direction:'server',message:{method:'textDocument/publishDiagnostics',params:{uri,version:b.version,sourceHash:b.sourceHash,synchronizationId:'sync-epoch',diagnostics}}});
   if(phase==='fixed')protocol.push({...owner,direction:'server',message:{method:'solidityLean/status',params:{uri,version:b.version,sourceHash:b.sourceHash,state:'ready'}}});
   steps.push({phase,status:'observed',before:b,after:structuredClone(b),diagnostics:wireSnapshot(diagnostics),publicationIndex,wireEnd:protocol.length,eventEnd:events.length,process:{...owner},elapsedMs:1});
  }
- return{runId:config.runId,target:'local',sourceHead:config.sourceHead,status:'partial',captureStatus:'observed',steps,protocol,events};
+ return{...(input?{inputProfile:input}:{}),runId:config.runId,target:'local',sourceHead:config.sourceHead,status:'partial',captureStatus:'observed',steps,protocol,events};
 }
 test('diagnostic getters survive JSON and later API mutation without using toJSON',()=>{
  let line=1,text='other';const point={get line(){return line;},get character(){return 2;},toJSON(){throw Error('must not invoke');}},value={get severity(){return 0;},get message(){return'duplicate';},get range(){return{start:point,end:point};},get code(){return{value:1686,target:{toString:()=> 'https://example.invalid/code'}};},get relatedInformation(){return[{get message(){return text;},location:{uri:{toString:()=> 'file:///owned.sol'},range:{start:point,end:point}}}];}};
@@ -68,4 +68,17 @@ test('phase deadline refuses synchronous late reads and late promise completion 
  await assert.rejects(withinDeadline(()=>{called=true;clock=10;return 'late';},10,options),e=>e.code==='TIMEOUT');assert.equal(called,true);assert.equal(cleared,1);
  called=false;await assert.rejects(withinDeadline(()=>{called=true;},10,options),e=>e.code==='TIMEOUT');assert.equal(called,false);
  assert.throws(()=>elapsedBeforeDeadline(0,10,()=>10),e=>e.code==='TIMEOUT');assert.equal(elapsedBeforeDeadline(0,10,()=>9),9);
+});
+
+test('public EOL companion is separate: exact CRLF bytes and trusted input identity required',()=>{
+ const c={...config,diagnosticInput:'public-eol-v1'},value=fixture(c.diagnosticInput);
+ assert.deepEqual(errors(value,c),[]);assert.ok(errors(value,config).length);assert.ok(errors(fixture(),c).length);
+ assert.equal(textFor('shifted'),'// 😀 shift\r\n'+source);assert.ok(textForInput('shifted','public-eol-v1').split('\r\n').length>3);
+});
+test('public EOL edit uses the actual dedicated API; default path keeps the original replace operation',()=>{
+ const doc={uri:'uri',getText:()=>source,positionAt:n=>n},edits=[];
+ class Edit{set(...args){edits.push(['set',...args]);}replace(...args){edits.push(['replace',...args]);}}
+ const api={WorkspaceEdit:Edit,Range:class{constructor(a,b){this.start=a;this.end=b;}},EndOfLine:{LF:1,CRLF:2},TextEdit:{replace:(range,text)=>({range,text}),setEndOfLine:eol=>({eol})}};
+ phaseEdit(api,doc,textForInput('shifted','public-eol-v1'),'shifted','public-eol-v1');assert.equal(edits[0][0],'set');assert.equal(edits[0][2][1].eol,2);
+ phaseEdit(api,doc,textFor('shifted'),'shifted');assert.equal(edits[1][0],'replace');
 });
