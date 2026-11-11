@@ -43,14 +43,19 @@ class MetadataControls(unittest.TestCase):
                        cwd=CHECKER, check=True, capture_output=True)
 
     def test_only_one_replay_call_and_one_import_change_from_v2(self):
-        # The parent is the frozen reviewed v2, not a caller-provided baseline.
-        old = subprocess.check_output(['git', 'show', 'f9dc58fcbe3b7b90b030d7a73288309139bea8be:Lean4Checker/Replay.lean'],
-                                      cwd=CHECKER, text=True)
-        expected = old.replace('import Lean.Util.FoldConsts', 'import Lean.Util.FoldConsts\nimport Lean4Checker.FusedDepsV3')
-        self.assertEqual(old.count('replayConstants ci.getUsedConstantsAsSet'), 1)
-        expected = expected.replace('replayConstants ci.getUsedConstantsAsSet', 'replayConstants (getUsedConstantsFusedV3 ci)')
-        self.assertEqual((CHECKER / 'Lean4Checker/Replay.lean').read_text(), expected)
-        self.assertIn('replayConstants ctor.getUsedConstantsAsSet', expected)
+        # Reconstruct the frozen reviewed v2 bytes by reversing the exact two
+        # edits. Do not require VA1's local v2 commit object: BASE plus the
+        # committed self-contained patch is sufficient for reproduction.
+        actual = (CHECKER / 'Lean4Checker/Replay.lean').read_text()
+        added_import = 'import Lean.Util.FoldConsts\nimport Lean4Checker.FusedDepsV3'
+        new_call = 'replayConstants (getUsedConstantsFusedV3 ci)'
+        self.assertEqual(actual.count(added_import), 1)
+        self.assertEqual(actual.count(new_call), 1)
+        recovered = actual.replace(added_import, 'import Lean.Util.FoldConsts')
+        recovered = recovered.replace(new_call, 'replayConstants ci.getUsedConstantsAsSet')
+        self.assertEqual(hashlib.sha256(recovered.encode()).hexdigest(),
+                         '4a04f64b19afd9ec36c268fbbd2ea81f293e9e64cb9bd7e63101fb6c8a01e245')
+        self.assertIn('replayConstants ctor.getUsedConstantsAsSet', actual)
         self.assertEqual(V.digest(CHECKER / 'Main.lean'),
                          'd73db540ff418bba732561502bda86b1ea3f853cef39ede62ed5b386d81007bd')
 
