@@ -9,8 +9,8 @@ projection theorem. Site classifiers are refined by family; unclassified
 failed options remain unknown rather than receiving guessed panic codes.
 Arithmetic options now retain 0x11/0x12 at their actual failure branches;
 Storage/memory read bounds tests retain 0x32 after receiver resolution;
-Ordinary compound-assignment and pop steps are refined below; push-compound,
-increment, plain-write and whole-program dispatch are not yet migrated.
+Ordinary compound-assignment, increment/decrement and pop steps are refined
+below; push arithmetic, plain writes and whole-program dispatch remain pending.
 -/
 
 namespace Solidity.PanicV2.Eval
@@ -510,6 +510,115 @@ theorem opAssign_local_failure {p : PrimTy} (op : BinOp) (i : Idx Γ (.val p))
   rw [compound_failed op p (TEnv.get i σ.env) v numeric site failed]
   rfl
 
+/-- Increment/decrement range checks classify only actual numeric
+failures; a nonnumeric helper invocation stays unclassified. -/
+def bump (op : IncDec) (p : PrimTy) (old : p.Denote) : Result p.Denote :=
+  if p.isNumeric then checked .arithmetic (Solidity.bumpT op p (PrimTy.key old))
+  else ofOpt (Solidity.bumpT op p (PrimTy.key old))
+
+theorem bump_erase (op : IncDec) (p : PrimTy) (old : p.Denote) :
+    erase (bump op p old) = TRes.ofOpt (Solidity.bumpT op p (PrimTy.key old)) := by
+  unfold bump
+  split
+  · exact erase_checked _ _
+  · exact erase_ofOpt _
+
+/-- Gap control: actual numeric increment/decrement range failure carries
+0x11, with no distinction between discarded prefix/postfix values. -/
+theorem bump_failed (op : IncDec) (p : PrimTy) (old : p.Denote)
+    (numeric : p.isNumeric = true) (failed : Solidity.bumpT op p (PrimTy.key old) = none) :
+    bump op p old = .error (.operation .arithmetic) := by
+  simp only [bump, numeric, ↓reduceIte, failed, checked]
+
+/-- Storage increment/decrement retains both the updated state and the
+prefix/postfix result; lookup/write failure does not acquire0x11. -/
+def bumpStore (σ : State C Γ) (op : IncDec) {p : PrimTy} (r : SRef C (.prim p)) :
+    Result (Out C σ.H Γ × p.Denote) := do
+  let old ← ofOpt (σ.storage.find r)
+  let new ← bump op p (SVal.view old)
+  let st ← ofOpt (σ.storage.save r (.prim new))
+  pure (⟨σ.withStorage st, List.prefix_refl _⟩, if op.isPre then new else SVal.view old)
+
+theorem bumpStore_erase (σ : State C Γ) (op : IncDec) {p : PrimTy} (r : SRef C (.prim p)) :
+    erase (bumpStore σ op r) = bumpStoreT σ op r :=
+  erase_bind_congr (erase_ofOpt _) fun old =>
+    erase_bind_congr (bump_erase op p (SVal.view old)) fun _ =>
+      erase_bind_congr (erase_ofOpt _) fun _ => rfl
+
+/-- A memory bounds failure occurs before the increment arithmetic. -/
+def bumpMem (σ : State C Γ) (op : IncDec) {p : PrimTy} (addr : MAddr σ.H (.prim p)) :
+    Result (Out C σ.H Γ × p.Denote) := do
+  let old ← memoryRead σ.heap addr
+  let new ← bump op p old
+  let hp ← ofOpt (σ.heap.writeAddr addr new)
+  pure (⟨σ.withHeap hp, List.prefix_refl _⟩, if op.isPre then new else old)
+
+theorem bumpMem_erase (σ : State C Γ) (op : IncDec) {p : PrimTy} (addr : MAddr σ.H (.prim p)) :
+    erase (bumpMem σ op addr) = bumpMemT σ op addr :=
+  erase_bind_congr (memoryRead_erase _ _) fun old =>
+    erase_bind_congr (bump_erase op p old) fun _ =>
+      erase_bind_congr (erase_ofOpt _) fun _ => rfl
+
+/-- All increment/decrement targets preserve V1 receiver resolution and
+prefix/postfix values, while retaining a classified intrinsic failure. -/
+def opLocBump (σ : State C Γ) (op : IncDec) : {p : PrimTy} → OpLoc C Γ p →
+    Result (Out C σ.H Γ × p.Denote)
+  | p, .local i => do
+    let old : p.Denote := TEnv.get i σ.env
+    let new ← bump op p old
+    pure (⟨σ.setLocal i new, List.prefix_refl _⟩, if op.isPre then new else old)
+  | _, .root r h => bumpStore σ op (SRef.ofRoot r h)
+  | _, .field b f h => do bumpStore σ op (← loc σ (Loc.field b f h))
+  | _, .index it b i => do bumpStore σ op (← loc σ (Loc.index it b (.simple i)))
+  | _, .mfield b f h => do bumpMem σ op (← mloc σ (MLoc.field b f h))
+  | _, .mindex a b i => do bumpMem σ op (← mloc σ (MLoc.index a b (.simple i)))
+
+theorem opLocBump_erase (σ : State C Γ) (op : IncDec) : {p : PrimTy} → (l : OpLoc C Γ p) →
+    erase (opLocBump σ op l) = l.bumpT σ op
+  | p, .local i => erase_bind_congr (bump_erase op p (TEnv.get i σ.env)) fun _ => rfl
+  | _, .root _ _ => bumpStore_erase σ op _
+  | _, .field b f h => erase_bind_congr (loc_erase σ (Loc.field b f h)) fun _ =>
+      bumpStore_erase σ op _
+  | _, .index it b i => erase_bind_congr (loc_erase σ (Loc.index it b (.simple i))) fun _ =>
+      bumpStore_erase σ op _
+  | _, .mfield b f h => erase_bind_congr (mloc_erase σ (MLoc.field b f h)) fun _ =>
+      bumpMem_erase σ op _
+  | _, .mindex a b i => erase_bind_congr (mloc_erase σ (MLoc.index a b (.simple i))) fun _ =>
+      bumpMem_erase σ op _
+
+/-- An increment/decrement statement discards only the expression result. -/
+def incDec {p : PrimTy} (op : IncDec) (l : OpLoc C Γ p) (σ : State C Γ) :
+    Result (Out C σ.H Γ) := do pure (← opLocBump σ op l).1
+
+theorem incDec_erase {p : PrimTy} (op : IncDec) (l : OpLoc C Γ p) (σ : State C Γ) :
+    erase (incDec op l σ) = TRun.incDec op l σ :=
+  erase_bind_congr (opLocBump_erase σ op l) fun _ => rfl
+
+/-- The prefix/postfix result is assigned after the target update, just
+as in V1, including when the assigned variable is the target itself. -/
+def assignIncDec {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec) (l : OpLoc C Γ p)
+    (σ : State C Γ) : Result (Out C σ.H Γ) := do
+  let (out, result) ← opLocBump σ op l
+  pure ⟨out.st.setLocal i result, out.ext⟩
+
+theorem assignIncDec_erase {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec) (l : OpLoc C Γ p)
+    (σ : State C Γ) : erase (assignIncDec i op l σ) = TRun.assignIncDec i op l σ :=
+  erase_bind_congr (opLocBump_erase σ op l) fun _ => rfl
+
+/-- Gap control at the typed statement: an actual local numeric bump
+failure emits0x11 before any assignment of the result can occur. -/
+theorem incDec_local_failure {p : PrimTy} (op : IncDec) (i : Idx Γ (.val p)) (σ : State C Γ)
+    (numeric : p.isNumeric = true)
+    (failed : Solidity.bumpT op p (PrimTy.key (TEnv.get i σ.env)) = none) :
+    incDec op (.local i) σ = .error (.operation .arithmetic) := by
+  have target : opLocBump σ op (.local i) = .error (.operation .arithmetic) := by
+    change (bump op p (TEnv.get i σ.env) >>= _) = _
+    rw [bump_failed op p (TEnv.get i σ.env) numeric failed]
+    rfl
+  unfold incDec
+  rw [target]
+  rfl
+
 /-- info: 'Solidity.PanicV2.Eval.path_erase' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms path_erase
 /-- info: 'Solidity.PanicV2.Eval.loc_erase' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -586,5 +695,22 @@ theorem opAssign_local_failure {p : PrimTy} (op : BinOp) (i : Idx Γ (.val p))
 #guard_msgs (whitespace := lax) in #print axioms opAssign_rhs_failure
 /-- info: 'Solidity.PanicV2.Eval.opAssign_local_failure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms opAssign_local_failure
+
+/-- info: 'Solidity.PanicV2.Eval.bump_erase' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms bump_erase
+/-- info: 'Solidity.PanicV2.Eval.bump_failed' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms bump_failed
+/-- info: 'Solidity.PanicV2.Eval.bumpStore_erase' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms bumpStore_erase
+/-- info: 'Solidity.PanicV2.Eval.bumpMem_erase' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms bumpMem_erase
+/-- info: 'Solidity.PanicV2.Eval.opLocBump_erase' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms opLocBump_erase
+/-- info: 'Solidity.PanicV2.Eval.incDec_erase' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms incDec_erase
+/-- info: 'Solidity.PanicV2.Eval.assignIncDec_erase' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms assignIncDec_erase
+/-- info: 'Solidity.PanicV2.Eval.incDec_local_failure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms incDec_local_failure
 
 end Solidity.PanicV2.Eval
