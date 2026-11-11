@@ -21,7 +21,7 @@ root = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else ".")
 def steps(path):
     """Yield (job, label, run_lines, uses, with_build) for each step of each job."""
     lines = path.read_text().splitlines()
-    job, in_jobs, step, out = None, False, None, []
+    job, in_jobs, step, out, in_steps = None, False, None, [], False
     i = 0
     def flush():
         if step is not None:
@@ -30,15 +30,19 @@ def steps(path):
         line = lines[i]
         if re.match(r"^jobs:\s*$", line):
             in_jobs = True; i += 1; continue
-        if in_jobs and re.match(r"^\S", line):
+        if in_jobs and re.match(r"^[^\s#]", line):
             in_jobs = False
         if not in_jobs:
             i += 1; continue
         m = re.match(r"^  ([A-Za-z0-9_-]+):\s*$", line)
         if m:
-            flush(); step = None; job = m.group(1); i += 1; continue
+            flush(); step = None; job = m.group(1); in_steps = False; i += 1; continue
+        m = re.match(r"^    (\w[\w-]*):", line)
+        if m and job:
+            if step is not None: flush(); step = None
+            in_steps = m.group(1) == "steps"; i += 1; continue
         m = re.match(r"^(\s*)- (\w[\w-]*):\s*(.*)$", line)
-        if m and job and len(m.group(1)) >= 4 and step_list_indent.get(job) in (None, len(m.group(1))):
+        if m and job and in_steps and step_list_indent.get(job) in (None, len(m.group(1))):
             step_list_indent[job] = len(m.group(1))
             flush(); step = {"name": None, "run": [], "uses": None, "build": None}
             key_indent = len(m.group(1)) + 2
@@ -55,6 +59,9 @@ def steps(path):
                         block = lines[i + 1:j]
                         step["run"] = [l.strip() for l in block if l.strip()]
                         i = j; continue
+                    nxt = lines[i + 1] if i + 1 < len(lines) else ""
+                    if nxt.strip() and len(nxt) - len(nxt.lstrip()) > ind and not re.match(r"^\s*(\w[\w-]*):", nxt):
+                        sys.exit(f"ci-coverage: {path.name}: multi-line plain run: at line {i + 1}; use a | block")
                     step["run"] = [val]
                 elif key == "name" and step["name"] is None and ind > step_list_indent[job]:
                     step["name"] = val.strip("'\"")
@@ -103,8 +110,7 @@ def main():
                 if not (uses or "").startswith("leanprover/lean-action") or build == "false":
                     continue  # setup only
             key = (wf, job, label)
-            covered = bool(run) and (any("scripts/ci/checks-fast.sh" in l for l in run)
-                                     or all(l in cmds for l in run))
+            covered = bool(run) and all("scripts/ci/checks-fast.sh" in l or l in cmds for l in run)
             if key in listed:
                 seen.add(key)
                 if covered:
