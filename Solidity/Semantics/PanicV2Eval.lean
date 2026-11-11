@@ -10,7 +10,8 @@ failed options remain unknown rather than receiving guessed panic codes.
 Arithmetic options now retain 0x11/0x12 at their actual failure branches;
 Storage/memory read bounds tests retain 0x32 after receiver resolution;
 Ordinary compound-assignment, increment/decrement and pop steps are refined
-below; push arithmetic, plain writes and whole-program dispatch remain pending.
+below, including push arithmetic; plain writes and whole-program dispatch
+remain pending. Capacity exhaustion retains its V1 resource meaning.
 -/
 
 namespace Solidity.PanicV2.Eval
@@ -619,6 +620,81 @@ theorem incDec_local_failure {p : PrimTy} (op : IncDec) (i : Idx Γ (.val p)) (�
   rw [target]
   rfl
 
+/-- `values.push() op= rhs` retains V1 RHS-first order, checks capacity
+before appending/resetting, then applies the classified arithmetic step. -/
+def pushOpAssign {p : PrimTy} (op : BinOp) (b : SPath C Γ (.array (.prim p)))
+    (rhs : Val C Γ p) (σ : State C Γ) : Result (Out C σ.H Γ) := do
+  let v ← value σ rhs
+  let receiver ← path σ b
+  if σ.storage.full receiver then .error (.legacy .exhausted) else
+  let (st, index) ← ofOpt (σ.storage.pushPlace receiver)
+  opStore (σ.withStorage st) op (receiver.index (.arr .dyn) index) v
+
+/-- Exact push-compound projection preserves the intermediate reset/append
+and every subsequent state update or failure; no capacity premise is added. -/
+theorem pushOpAssign_erase {p : PrimTy} (op : BinOp) (b : SPath C Γ (.array (.prim p)))
+    (rhs : Val C Γ p) (σ : State C Γ) :
+    erase (pushOpAssign op b rhs σ) = TRun.pushOpAssign op b rhs σ := by
+  refine erase_bind_congr (value_erase σ rhs) fun v => ?_
+  refine erase_bind_congr (path_erase σ b) fun receiver => ?_
+  cases capacity : σ.storage.full receiver with
+  | false =>
+    simp only [Bool.false_eq_true, ↓reduceIte]
+    exact erase_bind_congr (erase_ofOpt _) fun slot => opStore_erase _ op _ v
+  | true => simp only [↓reduceIte]; rfl
+
+/-- Prefix/postfix increment/decrement of a pushed slot as a statement
+discards its value and follows V1 capacity, reset/append, read, bump/write order. -/
+def pushIncDec {p : PrimTy} (op : IncDec) (b : SPath C Γ (.array (.prim p)))
+    (σ : State C Γ) : Result (Out C σ.H Γ) := do
+  let receiver ← path σ b
+  if σ.storage.full receiver then .error (.legacy .exhausted) else
+  let (st, index) ← ofOpt (σ.storage.pushPlace receiver)
+  pure (← bumpStore (σ.withStorage st) op (receiver.index (.arr .dyn) index)).1
+
+theorem pushIncDec_erase {p : PrimTy} (op : IncDec) (b : SPath C Γ (.array (.prim p)))
+    (σ : State C Γ) : erase (pushIncDec op b σ) = TRun.pushIncDec op b σ := by
+  refine erase_bind_congr (path_erase σ b) fun receiver => ?_
+  cases capacity : σ.storage.full receiver with
+  | false =>
+    simp only [Bool.false_eq_true, ↓reduceIte]
+    exact erase_bind_congr (erase_ofOpt _) fun slot =>
+      erase_bind_congr (bumpStore_erase _ op _) fun _ => rfl
+  | true => simp only [↓reduceIte]; rfl
+
+/-- Gap control: capacity exhaustion after RHS/receiver success precedes
+push-compound arithmetic, retaining V1 exhausted rather than inventing0x41. -/
+theorem pushOpAssign_full {p : PrimTy} (op : BinOp) (b : SPath C Γ (.array (.prim p)))
+    (rhs : Val C Γ p) (σ : State C Γ) (v : p.Denote)
+    (receiver : SRef C (.ref (.array (.prim p)))) (right : value σ rhs = .ok v)
+    (resolved : path σ b = .ok receiver) (full : σ.storage.full receiver = true) :
+    pushOpAssign op b rhs σ = .error (.legacy .exhausted) := by
+  unfold pushOpAssign
+  rw [right]
+  change (path σ b >>= _) = _
+  rw [resolved]
+  change (if σ.storage.full receiver then
+    (Except.error (Halt.legacy THalt.exhausted) : Result (Out C σ.H Γ)) else _) = _
+  rw [full]
+  rfl
+
+/-- Gap control: pushed-slot bump arithmetic cannot override an earlier
+capacity exhaustion. Its unknown resource cause is preserved. -/
+theorem pushIncDec_full {p : PrimTy} (op : IncDec) (b : SPath C Γ (.array (.prim p)))
+    (σ : State C Γ) (receiver : SRef C (.ref (.array (.prim p))))
+    (resolved : path σ b = .ok receiver) (full : σ.storage.full receiver = true) :
+    pushIncDec op b σ = .error (.legacy .exhausted) := by
+  unfold pushIncDec
+  rw [resolved]
+  change (if σ.storage.full receiver then
+    (Except.error (Halt.legacy THalt.exhausted) : Result (Out C σ.H Γ)) else _) = _
+  rw [full]
+  rfl
+
+/-- Allocation-gap control: the intrinsic V1 resource-exhaustion halt has
+no certified solc allocation0x41 observation. -/
+theorem exhaustion_unclassified : (Halt.legacy .exhausted).panicCode? = none := rfl
+
 /-- info: 'Solidity.PanicV2.Eval.path_erase' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms path_erase
 /-- info: 'Solidity.PanicV2.Eval.loc_erase' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -712,5 +788,16 @@ theorem incDec_local_failure {p : PrimTy} (op : IncDec) (i : Idx Γ (.val p)) (�
 #guard_msgs (whitespace := lax) in #print axioms assignIncDec_erase
 /-- info: 'Solidity.PanicV2.Eval.incDec_local_failure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms incDec_local_failure
+
+/-- info: 'Solidity.PanicV2.Eval.pushOpAssign_erase' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms pushOpAssign_erase
+/-- info: 'Solidity.PanicV2.Eval.pushIncDec_erase' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms pushIncDec_erase
+/-- info: 'Solidity.PanicV2.Eval.pushOpAssign_full' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms pushOpAssign_full
+/-- info: 'Solidity.PanicV2.Eval.pushIncDec_full' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms pushIncDec_full
+/-- info: 'Solidity.PanicV2.Eval.exhaustion_unclassified' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms exhaustion_unclassified
 
 end Solidity.PanicV2.Eval
