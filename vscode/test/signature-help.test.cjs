@@ -12,3 +12,8 @@ test('nested call selection uses real range width rather than src-string width',
 test('zero parameters and invalid positions retain their existing contracts',()=>{const analysis={nodes:[],declarations:new Map([[1,fn(1,'f',0)]])};assert.equal(hint('f(',analysis).activeParameter,0);assert.throws(()=>lang.signatureHelp('f(',{line:99,character:0},analysis),/outside/);assert.equal(lang.signatureHelp('f(',{line:0,character:2},undefined),null);});
 
 test('CR-only comments terminate consistently with LSP lines and Solidity imports',()=>{const syntax=require('../src/solidity-text.cjs');for(const newline of [String.fromCharCode(10),String.fromCharCode(13,10),String.fromCharCode(13)]){assert.equal(hint('f(1 // comment'+newline+', 2').activeParameter,1);assert.deepEqual(syntax.imports('// comment'+newline+'import "./Dep.sol";'),['./Dep.sol']);assert.equal(syntax.tokens('// comment'+newline+'x')[0].text,'// comment');}});
+
+test('function declaration parameters cannot masquerade as a call signature',()=>{
+ for(const newline of ['\n','\r\n','\r'])for(const prefix of ['function f(', 'function /* declaration */ f(', 'function'+newline+'f('])assert.equal(hint(prefix+'uint arg0, uint arg1'),null,prefix);
+ assert.ok(hint('f(1, 2'));assert.ok(hint('return f(1, 2'));assert.ok(hint('object.f(1, 2'));
+});
