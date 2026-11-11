@@ -30,7 +30,8 @@ function descendants(root){
  catch{return [];}
 }
 function describe(child,started){
- const own=processState(child.pid);
- return `pid ${child.pid} (${child.spawnfile||'?'}${own?`, state ${own.state}`:', gone'}), exit ${child.exitCode??'none'}/${child.signalCode??'none'}, waited ${Date.now()-started} ms, live descendants [${descendants(child.pid).join('; ')||'none'}]`;
+ try{const own=processState(child.pid);
+ return `pid ${child.pid} (${child.spawnfile||'?'}${own?`, state ${own.state}`:', gone'}), exit ${child.exitCode??'none'}/${child.signalCode??'none'}, waited ${Date.now()-started} ms, live descendants [${descendants(child.pid).join('; ')||'none'}]`;}
+ catch(error){return `pid ${child.pid} (description unavailable: ${error?.message})`;}
 }
 module.exports={trackChild,waitForClose,waitForGroup,describe};

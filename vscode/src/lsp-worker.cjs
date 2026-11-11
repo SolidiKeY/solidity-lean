@@ -73,11 +73,15 @@ async function execute(task){
     const command=`#solkey_test ${name}${options.function?` only ${JSON.stringify(options.function)}`:''}${options.listing?' listing':''}${options.auditPreconditions&&!options.listing?' audit_preconditions':''}${options.counterexamples&&!options.listing?' counterexamples':''} to ${JSON.stringify(output)}`;
     const wrapper=`import Solidity.Frontend.Testing\nset_option sol.testing.closedSpecs ${options.closedSpecs!==false}\nset_option sol.testing.direct ${!certified}\nset_option sol.benchmark ${options.benchmark===true}\nsolc_import "source.ast.json" hash ${compiled.hash} as ${name} testing\nsolc_scoped_problems ${name} decl\n${command}\n`;
     if(options.benchmark)session.stderr='';
-    const diagnostics=await session.check(wrapper,options.timeoutMs??60000);
-    if(options.benchmark){await new Promise(setImmediate);benchmarkLog.push(session.stderr,...diagnostics.map(d=>d.message||''));}
-    for(const diagnostic of diagnostics)if(importDiagnostic(diagnostic))
+    let diagnostics;
+    // A recheck that times out keeps the compiled verifier's answers (decided
+    // rows above, `unsupported` rows restored below) and reports the timeout.
+    try{diagnostics=await session.check(wrapper,options.timeoutMs??60000);}
+    catch(error){if(!recheck||!/timed out/i.test(error?.message||''))throw error;errors.push({source,contract:contract.name,stage:'lean',reason:'Certified recheck did not finish; compiled-verifier answers kept: '+error.message});diagnostics=null;}
+    if(diagnostics&&options.benchmark){await new Promise(setImmediate);benchmarkLog.push(session.stderr,...diagnostics.map(d=>d.message||''));}
+    for(const diagnostic of diagnostics||[])if(importDiagnostic(diagnostic))
       errors.push({source,contract:contract.name,stage:'lean',reason:diagnostic.message});
-    const checkpoint=checkpointRows(output,contract,allContracts);
+    const checkpoint=diagnostics?checkpointRows(output,contract,allContracts):null;
     if(checkpoint)for(const row of checkpoint.filter(r=>!recheck||recheck.has(r.sourceId))) {
       const inherited=allContracts.filter(n=>(contract.linearizedBaseContracts||[]).includes(n.id))
         .flatMap(n=>n.nodes).find(n=>n.nodeType==='FunctionDefinition'&&n.id===row.sourceId);

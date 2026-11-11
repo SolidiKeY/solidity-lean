@@ -165,13 +165,13 @@ test('idle native protocol child retires before worker success (injected pending
 // The child is an injected LSP fixture, not Lean.
 for(const mode of ['busy','graceful'])test(`Lean session retirement within its deadline: ${mode} server (injected LSP child)`,{skip:process.platform==='win32'},async()=>{
  const directory=fs.mkdtempSync(path.join(root,'.lake/retention-split-')),fixture=path.join(directory,'lean.cjs');
- fs.writeFileSync(fixture,`const {RpcPeer}=require(${JSON.stringify(path.join(root,'vscode/src/rpc.cjs'))});const peer=new RpcPeer(process.stdin,process.stdout);peer.onRequest('shutdown',()=>${mode==='busy'?'new Promise(()=>{})':'null'});peer.onNotification('exit',()=>process.exit(0));setInterval(()=>{},1000);`);
+ fs.writeFileSync(fixture,`const {RpcPeer}=require(${JSON.stringify(path.join(root,'vscode/src/rpc.cjs'))});const peer=new RpcPeer(process.stdin,process.stdout);peer.onRequest('shutdown',()=>${mode==='busy'?'new Promise(()=>{})':'null'});peer.onNotification('exit',()=>process.exit(0));process.stderr.write('ready\\n');setInterval(()=>{},1000);`);
  const {spawn}=require('node:child_process'),{RpcPeer}=require('../src/rpc.cjs'),{trackChild}=require('../src/child-lifetime.cjs'),{LeanSession}=require('../src/lean-session.cjs');
  const child=spawn(process.execPath,[fixture],{stdio:['pipe','pipe','pipe']}),closed=trackChild(child),session=new LeanSession(directory,path.join(directory,'worker'));
  let signal=null;child.once('exit',(code,sig)=>{signal=sig;});
  Object.assign(session,{child,peer:new RpcPeer(child.stdout,child.stdin),closed});
  try{
-  await once(child,'spawn');const start=Date.now(),deadline=start+1000;
+  await once(child,'spawn');await new Promise(resolve=>{let seen='';child.stderr.on('data',chunk=>{seen+=chunk;if(seen.includes('ready'))resolve();});});const start=Date.now(),deadline=start+1000;
   await session.finishDispose({deadline});
   const elapsed=Date.now()-start;
   assert.ok(elapsed<1000,`retirement finished inside the original deadline (${elapsed} ms)`);
