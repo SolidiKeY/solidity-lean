@@ -43,6 +43,25 @@ semantics; sg1-restate-lowering-goal then adds the lift against it, with the
 program-to-body binding (every resolved function body of the actual Source
 program) and the resource transport tied to the diagram's fuel.
 
+## Limitations (stated, not hidden)
+
+* No function from the raw input to its resolved Source statement exists at
+  the base. `Diagram.Total` therefore asks, for every fragment production
+  run, for SOME resolved Source statement with the same production input
+  (`Body.SameInput`: site, raw input, return slots, scope and state) that the
+  diagram simulates; the source context, environment and statement are
+  existential. The goal so says "every emitted fragment program is simulated
+  by some Source statement", not "by the statement its raw input means": a
+  lowering that miscompiles into another Source-expressible behaviour is not
+  excluded here. Binding the raw input to its resolved statement is part of
+  sg1-restate-lowering-goal, with the program-to-body binding.
+* The diagram's value and global relations are its own invariant, bound only
+  by Boolean/integer reflection and total initial matching; storage and event
+  agreement is a session-level obligation (sg1).
+* The goal is stated for the production fresh-name policy
+  (`productionNames`), not for the per-file `FreshNames.ofTable` instances of
+  chain examples.
+
 ## Views inventory (per-shape view definitions, read at the launch base)
 
 | Shape | Declaration | Pinned by |
@@ -779,15 +798,14 @@ def Body.SameInput (b' b : Body) : Prop :=
 /-- **Coverage of t0's fragment**: every actual production run whose emitted
 program is in the fragment has a resolved source, at the same site and with
 the same raw input, slots, scope and state, that the diagram associates with
-it. (No raw-to-resolved function exists at the base; see the limitations.) -/
+it. See "Limitations" in the module docstring: the source is existential. -/
 def Diagram.Total (D : Diagram) : Prop :=
   ∀ (b : Body) (u : Emitted), Production b u → Accepted u →
     ∃ b' : Body, b'.SameInput b ∧ ∃ m, D.Assoc b' u m
 
-/-- A naming policy whose fresh names are distinct and parse back. -/
-def FreshNames.Lawful (N : FreshNames) : Prop :=
-  (∀ s n, N.parse (N.name s n) = some (s, n)) ∧
-  ∀ s n s' n', N.name s n = N.name s' n' → s = s' ∧ n = n'
+/-- The production fresh-name policy: the default instance (AST.lean,
+`.ofPrefixes "se" "sp" "ie" "mv"`), which every file without its own uses. -/
+def productionNames : FreshNames := .ofPrefixes "se" "sp" "ie" "mv"
 
 end Lowering
 
@@ -802,12 +820,13 @@ open Solidity.Goal
 def yulLayoutView : Prop :=
   ∃ V : Shrink.LayoutView, V.Laws ∧ V.Geometric ∧ V.Instances
 
-/-- Production lowering on t0's fragment by one simulation diagram, for every
-lawful fresh-name policy; its session-level lift to `Lowering`/`PassCorrect`
+/-- Production lowering on t0's fragment by one simulation diagram, under the
+production fresh-name policy; its session-level lift to `Lowering`/`PassCorrect`
 is added by sg1-restate-lowering-goal (H556). -/
 @[goal Solidity.Correctness.Lowering.Sim.lowering_producer "ls3-lowering-compose"]
 def loweringBySimulation : Prop :=
-  ∀ [N : FreshNames], Shrink.Lowering.FreshNames.Lawful N → Shrink.Lowering.CallerBound ∧
+  letI : FreshNames := Shrink.Lowering.productionNames
+  Shrink.Lowering.CallerBound ∧
     ∃ D : Shrink.Lowering.Diagram, D.Simulates ∧ D.Total
 
 end Solidity.Goals
