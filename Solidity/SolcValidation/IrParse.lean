@@ -17,7 +17,7 @@ structural functions. Numeric spellings are compared by value (`0x80` and `128` 
 alike); comments and whitespace are not part of the provenance. Object data
 must be a `hex"…"` literal (what solc 0.8.38 emits); a plain-string data
 section is refused. Refused although solc accepts them: single-quoted strings,
-unescaped non-ASCII characters, hex literals as expressions, `_` in numbers.
+unescaped non-ASCII characters and `_` in numbers.
 Object names and operation labels are compared by their raw text (escapes are
 not decoded); whether a label exists is checked when it is evaluated.
 This tree is evaluated by compiled code, not by the kernel on a hot path:
@@ -131,6 +131,7 @@ def mkLit (t : LitTok) : Except String Lit :=
 def litTok? : Tok → Option LitTok
   | .num n => some (.num n)
   | .str raw => some (.str raw)
+  | .hex bytes => some (.hex bytes)
   | .ident "true" => some (.bool true)
   | .ident "false" => some (.bool false)
   | _ => none
