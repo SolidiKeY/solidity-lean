@@ -587,9 +587,9 @@ whose sum is not a word; deployments and requests the code does not resolve;
 a request or deployment whose value the sender's funds in the world do not cover
 (the frame reverts there, the ledger may call it affordable); the final
 observation of a session without outcomes; whether the world after a deployment
-or a credit is listed; bounds with resource failures, beyond the outcome of a
-determined step there (its own, or a revert with empty data); environments that
-are not allowed; and the preimages a run hashes and the slot preimages of the keys a typed
+or a credit is listed; bounds with resource failures, beyond an upper bound on
+the outcome a determined first step shows there (its own, or a revert with empty
+data: no failing bound is required to exist); environments that are not allowed; and the preimages a run hashes and the slot preimages of the keys a typed
 storage holds (`View.stored` is only required to be accounted for, so this goal
 does not pin `Forward` and `Guard` beyond their definitions). Within a determined
 step the frame's own accounting is the typed world's: global funds, debited from
@@ -778,8 +778,9 @@ structure Laws (F : Fixed) (I : IntrinsicSpec) (V : View I) : Prop where
   whose result no response table changes, is
   the next event exactly when `World.transact` of the actual `World.call`
   completes, with that outcome; the world it reaches is listed and is the next
-  boundary. At a bound with resource failures its outcome is that one or a revert
-  with empty data. -/
+  boundary. As the first event of a session, at any admissible bound (resource
+  failures included), its outcome if shown is that one or a revert with empty
+  data; past the first step a failing bound may have reached another world. -/
   transacts : ∀ x en h n (code : Code) (cw : ContractWorld.World code.catalog)
       (q : Request) (k : Fin code.contracts.length) (st : Storage (code.catalog k))
       (entry : ContractWorld.Entry (code.catalog k) Bytes),
@@ -801,8 +802,8 @@ structure Laws (F : Fixed) (I : IntrinsicSpec) (V : View I) : Prop where
         h ++ [done] <+: (I.lang.sem p en r).events ∧ Matches res.2 out ∧
         ∃ ω ∈ I.worlds p en r, (V.typed ω).Shows code res.1 ∧
           V.Boundary x en (h ++ [done]) (n + 1) (V.typed ω)) ∧
-    ∀ r, I.lang.Admissible r → ∀ out,
-      h ++ [Event.tx q.sender q.target q.value q.timestamp q.input out] <+:
+    ∀ r, I.lang.Admissible r → h = [] → ∀ out,
+      [Event.tx q.sender q.target q.value q.timestamp q.input out] <+:
         (I.lang.sem p en r).events →
       Matches res.2 out ∨ out = .revert []
   /-- Every completed transaction of an affordable request, whatever its body
@@ -820,8 +821,8 @@ structure Laws (F : Fixed) (I : IntrinsicSpec) (V : View I) : Prop where
   covered by a deployer other than the new address, runs as `World.transact` of
   the actual `World.create` at the address `Fixed.createAddress` gives; it is the
   first event exactly when that completes, and on success the world it installs is
-  the first boundary. At a bound with resource failures its outcome is that one or
-  a revert with empty data. -/
+  the first boundary. At any admissible bound (resource failures included) its
+  outcome if shown is that one or a revert with empty data and no address. -/
   deploys : ∀ (code : Code) (en : I.lang.Env) (k : Fin code.contracts.length)
       (body : Prog (code.catalog k) [] []),
     I.lang.Allowed en → k.val = code.main →
