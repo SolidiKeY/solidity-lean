@@ -578,15 +578,23 @@ existing frame semantics:
   history), credits, the end of the session, the callee strategy's moves,
   `Forward`, `Guard` and the environment maps are those of `Roadmap/Contracts.lean`.
 
-Not determined by the definitions this reads, and therefore not chosen here: how
-the strategy's answers reach a body that leaves its contract (`TTx.ext` is a
-table, a strategy reads the history), the revert data of a `THalt.panic` (it
-carries no code), the data of a successful deployment, what follows a reverted
-deployment or a credit that overflows, requests whose target or input the code
-does not resolve, bounds with resource failures, and the slot preimages of the
-keys a typed storage holds (`View.stored` is only required to be accounted for).
-`Lang.Affordable` over a whole history is not required: `Fixed.ledger` is an
-arbitrary function and the history of a transaction includes its inner events. -/
+Not determined by the typed definitions this reads, and therefore not chosen
+here: how the strategy's answers reach a body that leaves its contract (`TTx.ext`
+is a table, a strategy reads the history) and every event of such a body past the
+move after a call; the revert data of a `THalt.panic` (it carries no code); the
+data of a successful deployment; what follows a reverted deployment or a credit
+whose sum is not a word; deployments and requests the code does not resolve;
+a request or deployment whose value the sender's funds in the world do not cover
+(the frame reverts there, the ledger may call it affordable); the final
+observation of a session without outcomes; whether the world after a deployment
+or a credit is listed; bounds with resource failures; environments that are not
+allowed; and the preimages a run hashes and the slot preimages of the keys a typed
+storage holds (`View.stored` is only required to be accounted for, so this goal
+does not pin `Forward` and `Guard` beyond their definitions). Within a determined
+step the frame's own accounting is the typed world's: global funds, debited from
+the sender on success. `Lang.Affordable` over a whole history is not required:
+`Fixed.ledger` is an arbitrary function and the history of a transaction includes
+its inner events. -/
 namespace IntrinsicSession
 
 open Solidity.Roadmap
@@ -764,8 +772,9 @@ structure Laws (F : Fixed) (I : IntrinsicSpec) (V : View I) : Prop where
       ∃ cw' : ContractWorld.World code.catalog, Credited cw (liftAddress target) sum cw' ∧
         V.Boundary x en (h ++ [done]) (n + 1) ⟨code, cw'⟩
   /-- **A transaction that never leaves its contract is the actual frame**: at a
-  boundary, an affordable request to an instance whose code resolves its input to a
-  body without external interaction, whose result no response table changes, is
+  boundary, an affordable request, covered by its sender's funds in the world, to an
+  instance whose code resolves its input to a body without external interaction,
+  whose result no response table changes, is
   the next event exactly when `World.transact` of the actual `World.call`
   completes, with that outcome; the world it reaches is listed and is the next
   boundary. -/
@@ -776,6 +785,7 @@ structure Laws (F : Fixed) (I : IntrinsicSpec) (V : View I) : Prop where
     (I.session en).requests h n = some (.request q) → Funded F (I.session en) h q →
     cw.accounts (liftAddress q.target) = some ⟨k, st⟩ → code.entry k q.input = some entry →
     Prog.callsBack true entry.body = false →
+    (liftWord q.value).1 ≤ (cw.funds (liftAddress q.sender)).1 →
     let p := I.ofWorld x
     let frame := fun ext => (cw.atTime (liftWord q.timestamp)).transact fun w =>
       w.call (⟨liftAddress q.target⟩ : ContractWorld.Handle k) entry (requestContext q ext)
@@ -800,7 +810,8 @@ structure Laws (F : Fixed) (I : IntrinsicSpec) (V : View I) : Prop where
       ∃ ω ∈ I.worlds p en r, V.Boundary x en (h ++ seg ++ [ev]) (n + 1) (V.typed ω)
   /-- **A deployment that never leaves its contract is the actual creation**: from
   the initial world of a compilation, funded by the opening balances, the selected
-  contract's constructor, under the same conditions, runs as `World.transact` of
+  contract's constructor, under the same conditions and with the deployment value
+  covered by a deployer other than the new address, runs as `World.transact` of
   the actual `World.create` at the address `Fixed.createAddress` gives; it is the
   first event exactly when that completes, and on success the world it installs is
   the first boundary. -/
@@ -811,6 +822,7 @@ structure Laws (F : Fixed) (I : IntrinsicSpec) (V : View I) : Prop where
     let e := I.session en
     let p := I.ofWorld (V.initial code)
     let this := F.createAddress e.deployer e.deployNonce
+    e.deployValue.val ≤ (e.balance e.deployer).val → this ≠ e.deployer →
     let frame := fun ext =>
       (ContractWorld.World.empty code.catalog (funds e.balance) code.roles).transact fun w =>
         w.create k (liftAddress this) body
