@@ -14,4 +14,10 @@ info: open Solidity.Goals.loweringStudyTarget ← Solidity.Correctness.Lowering.
 #guard_msgs in
 #roadmap_goal loweringStudyTarget
 
+/--
+info: open Solidity.Goals.loweringKernelTotal ← Solidity.lowerKernel_total plan e2a-lower-total
+-/
+#guard_msgs in
+#roadmap_goal loweringKernelTotal
+
 end Solidity.Goals
