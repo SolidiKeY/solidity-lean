@@ -4,6 +4,11 @@ import Solidity.Yul.Words
 Integer-oracle vectors are finite tests, not universal opcode agreement proofs. -/
 namespace Solidity.Yul.Checks.Powers
 
+/-- EXP with operand 0 as base and operand 1 as exponent, for every word input. -/
+theorem exp_val (xs : Fin 2 → Word) :
+    (Pure.eval .«exp» xs).val = (xs 0).val ^ (xs 1).val % (2 ^ 256) :=
+  powWord_correct (xs 0) (xs 1).val
+
 theorem v0000 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 0 else word 0)).val = 1 := by decide +kernel
 theorem v0001 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 0 else word 1)).val = 0 := by decide +kernel
 theorem v0002 : (Pure.eval .«exp» (fun i => if i.val = 0 then word 0 else word 2)).val = 0 := by decide +kernel
