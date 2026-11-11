@@ -8,7 +8,8 @@ order/short circuit as V1. Each path/value constructor has an unconditional
 projection theorem. Site classifiers are refined by family; unclassified
 failed options remain unknown rather than receiving guessed panic codes.
 Arithmetic options now retain 0x11/0x12 at their actual failure branches;
-statement-level compound assignments and increments are not yet migrated.
+Storage/memory read bounds tests retain 0x32 after receiver resolution;
+statement-level compound assignments, increments and writes are not yet migrated.
 -/
 
 namespace Solidity.PanicV2.Eval
@@ -119,6 +120,69 @@ theorem modular_zero (op : ModOp) (x y k : PrimTy.uint.Denote) (zero : k.val = 0
     modular op x y k = .error (.operation .zeroDivisor) := by
   simp only [modular, zero, ↓reduceIte, ModOp.evalT, checked]
 
+/-- Resolve the storage receiver before classifying the index test.
+A missing/dangling receiver is not evidence of an out-of-bounds index. -/
+def storageIndex {R : RefTy} {k : PrimTy} {V : Ty} (st : Storage C)
+    (r : SRef C (.ref R)) (it : IndexTy R k V) (i : k.Denote) : Result Unit := do
+  let receiver ← ofOpt (st.find r)
+  checked .bounds (Storage.inBounds it i receiver)
+
+/-- The receiver/index split preserves V1 for every storage, including
+states whose receiver reference no longer resolves. -/
+theorem storageIndex_erase {R : RefTy} {k : PrimTy} {V : Ty} (st : Storage C)
+    (r : SRef C (.ref R)) (it : IndexTy R k V) (i : k.Denote) :
+    erase (storageIndex st r it i) = TRes.ofOpt (st.checkIndex r it i) := by
+  cases found : st.find r with
+  | none => simp only [storageIndex, found, ofOpt, erase, Halt.erase, Storage.checkIndex,
+      TRes.ofOpt]; rfl
+  | some receiver =>
+    simp only [storageIndex, found, ofOpt, Storage.checkIndex]
+    exact erase_checked _ _
+
+/-- Gap control for 0x32: classify an actual failed bounds test after a
+successful receiver lookup; this does not classify arbitrary storage failures. -/
+theorem storageIndex_bounds {R : RefTy} {k : PrimTy} {V : Ty} (st : Storage C)
+    (r : SRef C (.ref R)) (it : IndexTy R k V) (i : k.Denote) (receiver : SVal (.ref R))
+    (found : st.find r = some receiver) (failed : Storage.inBounds it i receiver = none) :
+    storageIndex st r it i = .error (.operation .bounds) := by
+  unfold storageIndex
+  rw [found]
+  change checked .bounds (Storage.inBounds it i receiver) = _
+  rw [failed]
+  rfl
+
+/-- Gap control: a failed receiver lookup stays unclassified rather than
+manufacturing code0x32 from the combined V1 `checkIndex` option. -/
+theorem storageIndex_missing {R : RefTy} {k : PrimTy} {V : Ty} (st : Storage C)
+    (r : SRef C (.ref R)) (it : IndexTy R k V) (i : k.Denote) (missing : st.find r = none) :
+    storageIndex st r it i = .error (.legacy .revert) := by
+  unfold storageIndex
+  rw [missing]
+  rfl
+
+/-- Typed memory field access always succeeds; only an array index's
+failed read carries the bounds cause. -/
+def memoryRead {H : HTy} (hp : Heap H) {T : Ty} : MAddr H T → Result (MVal H T)
+  | .field r h => .ok (hp.field r h)
+  | .index r a i => checked .bounds (hp.index r a i)
+
+theorem memoryRead_erase {H : HTy} (hp : Heap H) {T : Ty} (addr : MAddr H T) :
+    erase (memoryRead hp addr) = TRes.ofOpt (hp.readAddr addr) := by
+  cases addr with
+  | field => rfl
+  | index => exact erase_checked _ _
+
+/-- Gap control for memory0x32: an actual failed array read retains its
+cause at the index site, without changing the resolved memory address. -/
+theorem memoryRead_bounds {H : HTy} (hp : Heap H) {R : RefTy} {E : Ty}
+    (r : HRef H R) (a : ArrTy R E) (i : PrimTy.uint.Denote) (failed : hp.index r a i = none) :
+    memoryRead hp (.index r a i) = .error (.operation .bounds) := by
+  simp only [memoryRead, failed, checked]
+
+/-- Bounds diagnostics use solc's index code0x32 and erase to V1 revert. -/
+theorem bounds_code : (Halt.operation .bounds).panicCode? = some 0x32 ∧
+    (Halt.operation .bounds).erase = .revert := by constructor <;> rfl
+
 mutual
 
 def path (σ : State C Γ) : {T : Ty} → SPath C Γ T → Result (SRef C T)
@@ -133,12 +197,12 @@ def loc (σ : State C Γ) : {T : Ty} → Loc C Γ T → Result (SRef C T)
   | _, .index it b i => do
     let r ← path σ b
     let k ← value σ i
-    let _ ← ofOpt (σ.storage.checkIndex r it k)
+    let _ ← storageIndex σ.storage r it k
     pure (r.index it k)
 
 def mpath (σ : State C Γ) : {T : Ty} → MPath C Γ T → Result (MVal σ.H T)
   | _, .var i _ => ofOpt (TEnv.get i σ.env)
-  | _, .loc l => do ofOpt (σ.heap.readAddr (← mloc σ l))
+  | _, .loc l => do memoryRead σ.heap (← mloc σ l)
 
 def mloc (σ : State C Γ) : {T : Ty} → MLoc C Γ T → Result (MAddr σ.H T)
   | _, .field b _ h => do
@@ -168,7 +232,7 @@ def value (σ : State C Γ) : {p : PrimTy} → Val C Γ p → Result p.Denote
   | _, .ternary c a b => do
     let test ← value σ c
     if boolT test then value σ a else value σ b
-  | _, .readMem l => do ofOpt (σ.heap.readAddr (← mloc σ l))
+  | _, .readMem l => do memoryRead σ.heap (← mloc σ l)
   | _, .len b hp => do
     let r ← path σ b
     let n ← ofOpt (σ.storage.len r)
@@ -202,14 +266,14 @@ theorem loc_erase (σ : State C Γ) : {T : Ty} → (l : Loc C Γ T) →
   | _, .field b _ _ => erase_bind_congr (path_erase σ b) fun _ => rfl
   | _, .index _ b i => erase_bind_congr (path_erase σ b) fun _ =>
       erase_bind_congr (value_erase σ i) fun _ =>
-        erase_bind_congr (erase_ofOpt _) fun _ => rfl
+        erase_bind_congr (storageIndex_erase _ _ _ _) fun _ => rfl
 
 theorem mpath_erase (σ : State C Γ) : {T : Ty} → (b : MPath C Γ T) →
     erase (mpath σ b) = b.mvalT σ
   | _, .var i _ => by
       simp only [mpath, MPath.mvalT, erase_ofOpt, TRes.ofOpt]
       cases TEnv.get i σ.env <;> rfl
-  | _, .loc l => erase_bind_congr (mloc_erase σ l) fun _ => erase_ofOpt _
+  | _, .loc l => erase_bind_congr (mloc_erase σ l) fun _ => memoryRead_erase _ _
 
 theorem mloc_erase (σ : State C Γ) : {T : Ty} → (l : MLoc C Γ T) →
     erase (mloc σ l) = l.addrT σ
@@ -235,7 +299,7 @@ theorem value_erase (σ : State C Γ) : {p : PrimTy} → (v : Val C Γ p) →
       cases test with
       | false => exact value_erase σ b
       | true => exact value_erase σ a
-  | _, .readMem l => erase_bind_congr (mloc_erase σ l) fun _ => erase_ofOpt _
+  | _, .readMem l => erase_bind_congr (mloc_erase σ l) fun _ => memoryRead_erase _ _
   | _, .len b _ => erase_bind_congr (path_erase σ b) fun _ =>
       erase_bind_congr (erase_ofOpt _) fun _ => rfl
   | _, .mlen b _ => erase_bind_congr (mpath_erase σ b) fun _ => rfl
@@ -289,5 +353,18 @@ theorem value_of_ok (σ : State C Γ) {p : PrimTy} (v : Val C Γ p) (a : p.Denot
 #guard_msgs (whitespace := lax) in #print axioms negation_failed
 /-- info: 'Solidity.PanicV2.Eval.modular_zero' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms modular_zero
+
+/-- info: 'Solidity.PanicV2.Eval.storageIndex_erase' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms storageIndex_erase
+/-- info: 'Solidity.PanicV2.Eval.storageIndex_bounds' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms storageIndex_bounds
+/-- info: 'Solidity.PanicV2.Eval.storageIndex_missing' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms storageIndex_missing
+/-- info: 'Solidity.PanicV2.Eval.memoryRead_erase' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms memoryRead_erase
+/-- info: 'Solidity.PanicV2.Eval.memoryRead_bounds' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms memoryRead_bounds
+/-- info: 'Solidity.PanicV2.Eval.bounds_code' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms bounds_code
 
 end Solidity.PanicV2.Eval
