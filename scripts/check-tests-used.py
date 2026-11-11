@@ -433,6 +433,57 @@ def entrypoint_lines(source):
             or isinstance(node, ast.Expr) and isinstance(node.value, ast.Call)}
 
 
+def compact_read_routes(routes):
+    """Lossless family representation: identical full stacks share target pins.
+
+    Only contiguous, path-ordered contexts are compactable. Exact ordered
+    expansion must equal the input, preserving all equal-length chain ties.
+    Every path/blob pair remains explicit; no glob or inferred target is added.
+    """
+    groups = {}
+    for route in routes:
+        if not isinstance(route, dict) or set(route) != {'runner', 'input_revision', 'frames', 'target', 'target_blob', 'operation'}:
+            raise ValueError('invalid validated read route')
+        base = {key: route[key] for key in ('runner', 'input_revision', 'frames', 'operation')}
+        key = json.dumps(base, sort_keys=True, separators=(',', ':'))
+        if key not in groups: groups[key] = (base, {})
+        targets = groups[key][1]; target = route['target']; blob = route['target_blob']
+        if not isinstance(target, str) or not isinstance(blob, str): raise ValueError('invalid target pin')
+        if target in targets and targets[target] != blob: raise ValueError('conflicting grouped target pins')
+        targets[target] = blob
+    result = [{**base, 'targets': [{'path': path, 'blob': targets[path]} for path in sorted(targets)]}
+              for base, targets in groups.values()]
+    if list(read_routes({'schema_version': 2, 'reads': result})) != routes:
+        raise ValueError('route order is not losslessly compactable')
+    return result
+
+
+def read_routes(catalog):
+    """Expand compact definitions only; ordinary runs never execute commands."""
+    rows = catalog['reads']
+    if not isinstance(rows, list): raise ValueError('read definitions must be a list')
+    if catalog['schema_version'] == 1:
+        yield from rows
+        return
+    contexts = set()
+    for group in rows:
+        if not isinstance(group, dict) or set(group) != {'runner', 'input_revision', 'frames', 'operation', 'targets'}:
+            raise ValueError('invalid grouped read definition')
+        base = {key: group[key] for key in ('runner', 'input_revision', 'frames', 'operation')}
+        key = json.dumps(base, sort_keys=True, separators=(',', ':'))
+        if key in contexts: raise ValueError('duplicate grouped read context')
+        contexts.add(key)
+        targets = group['targets']
+        if not isinstance(targets, list) or not targets: raise ValueError('empty or invalid grouped targets')
+        if any(not isinstance(row, dict) or set(row) != {'path', 'blob'}
+               or not isinstance(row['path'], str) or not isinstance(row['blob'], str) for row in targets):
+            raise ValueError('invalid grouped target pin')
+        paths = [row['path'] for row in targets]
+        if paths != sorted(set(paths)): raise ValueError('duplicate or unordered grouped targets')
+        for row in targets:
+            yield {**base, 'target': row['path'], 'target_blob': row['blob']}
+
+
 def validated_routes(graph, catalog):
     """Reviewed validation definitions; raw run receipts live outside the branch.
 
@@ -444,7 +495,7 @@ def validated_routes(graph, catalog):
     of the classifier, not evidence supplied by the inventory under test.
     """
     repo = graph.repo
-    if not isinstance(catalog, dict) or set(catalog) != {'schema_version', 'standalone', 'generators', 'reads', 'orphans'} or catalog['schema_version'] != 1:
+    if not isinstance(catalog, dict) or set(catalog) != {'schema_version', 'standalone', 'generators', 'reads', 'orphans'} or type(catalog['schema_version']) is not int or catalog['schema_version'] not in (1, 2):
         raise ValueError('invalid validation definition schema')
     current_runner_paths = {e.get('path') for e in catalog['standalone'] if e.get('input_revision') == repo.ref}
     # Historical source-only eligibility needs a real commit and the exact
@@ -508,9 +559,8 @@ def validated_routes(graph, catalog):
                     'command': command, 'reason': 'Normal run failed; only separately observed test-context reads qualify. No passing-reproducer credit.'}})
             continue
         if entry['kind'] == 'unittest':
-            tree = ast.parse(repo.texts[p])
-            if command[0] != 'python3' or not any(isinstance(n, ast.Call) and ast.unparse(n.func) == 'unittest.main' for n in ast.walk(tree)):
-                raise ValueError('not a unittest entry point: ' + p)
+            if command != ['python3', '-B', p] or declared_unittest(repo, p) is None:
+                raise ValueError('not a declared unittest entry point: ' + p)
         elif entry['kind'] == 'node-test':
             if command[0] != 'node' or not p.endswith(('.test.mjs', '.test.js', '.test.cjs')):
                 raise ValueError('not a Node test entry point: ' + p)
@@ -577,7 +627,7 @@ def validated_routes(graph, catalog):
                 purpose = 'Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.'
             graph.roots['validated:' + p].update({'purpose': purpose, 'data_use_scope': scopes, 'other_reads': other})
         if entry['kind'] == 'manual-reproducer': graph.roots['validated:' + p]['documentation'] = entry['documentation']
-    for route in catalog['reads']:
+    for route in read_routes(catalog):
         if set(route) != {'runner', 'input_revision', 'frames', 'target', 'target_blob', 'operation'}:
             raise ValueError('invalid validated read route')
         if route['input_revision'] != repo.ref: continue
@@ -974,6 +1024,26 @@ def historical_outputs(repo):
     return roles
 
 
+def reviewed_unittest_wildcard(repo, path, node):
+    """One reviewed import, bound to BOTH exact committed source objects.
+
+    The test's line5 inserts this precise helper directory; line6 imports the
+    helper, then line9 explicitly imports unittest. The pinned helper has no
+    __all__, magic-name assignments or top-level calls: only ordinary imports,
+    a FIELDS constant and function declarations. This establishes runner-source
+    structure, never passing validation, helper execution or fixture use.
+    All other wildcard imports remain unresolved; changing either blob revokes
+    this exception. Git object/content identity is established by Repository.
+    """
+    test = 'tests/h62/item2/audit-bytecode-selection/test_kernel_metadata.py'
+    helper = 'scripts/h62/item2/audit-bytecode-selection/kernel_metadata.py'
+    return (path == test and repo.tree.get(path) == ('100644', 'blob', 'a259a155420d7f88a902cee9745c7ee2942ae87d')
+            and repo.tree.get(helper) == ('100644', 'blob', '2d86485ff102d8bf983e89a315a565d5cf05275d')
+            and isinstance(node, ast.ImportFrom) and node.module == 'kernel_metadata'
+            and node.level == 0 and node.lineno == 6 and len(node.names) == 1
+            and node.names[0].name == '*' and node.names[0].asname is None)
+
+
 def declared_unittest(repo, path):
     """Recognize a committed runner role without executing it or granting reads."""
     if path not in repo.texts or not path.endswith('.py') or repo.tree[path][0] not in ('100644', '100755'): return None
@@ -1007,7 +1077,7 @@ def declared_unittest(repo, path):
             for alias in node.names:
                 bound = alias.asname or alias.name
                 if bound == '__name__': shadowed = True
-                if alias.name == '*': shadowed = True
+                if alias.name == '*' and not reviewed_unittest_wildcard(repo, path, node): shadowed = True
                 if bound in bindings and not (node.module == 'unittest' and not node.level
                         and (alias.name == 'TestCase' and bound in cases or alias.name == 'main' and bound in mains)):
                     shadowed = True
@@ -1027,8 +1097,17 @@ def declared_unittest(repo, path):
     classes = [n for n in tree.body if isinstance(n, ast.ClassDef) and any(testcase(b) for b in n.bases)
                and any(isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef)) and m.name.startswith('test_') for m in n.body)]
     if not classes: return None
+    def main_call(statement):
+        if not isinstance(statement, ast.Expr) or not isinstance(statement.value, ast.Call): return None
+        func = statement.value.func
+        return statement.value if (isinstance(func, ast.Name) and func.id in mains or isinstance(func, ast.Attribute)
+                and func.attr == 'main' and isinstance(func.value, ast.Name) and func.value.id in modules) else None
     calls = []
     for index, node in enumerate(tree.body):
+        direct = main_call(node)
+        if direct is not None:
+            if not any(terminal(n) for n in tree.body[:index]): calls.append(direct)
+            continue
         if not isinstance(node, ast.If) or not isinstance(node.test, ast.Compare): continue
         test = node.test
         if len(test.ops) != 1 or not isinstance(test.ops[0], ast.Eq) or len(test.comparators) != 1: continue
@@ -1037,13 +1116,13 @@ def declared_unittest(repo, path):
                 and any(isinstance(n, ast.Constant) and n.value == '__main__' for n in pair)): continue
         if any(terminal(n) for n in tree.body[:index]): continue
         for position, statement in enumerate(node.body):
-            if not isinstance(statement, ast.Expr) or not isinstance(statement.value, ast.Call): continue
-            call = statement.value; func = call.func
-            if not (isinstance(func, ast.Name) and func.id in mains or isinstance(func, ast.Attribute)
-                    and func.attr == 'main' and isinstance(func.value, ast.Name) and func.value.id in modules): continue
-            if any(terminal(n) for n in node.body[:position]): continue
+            call = main_call(statement)
+            if call is None or any(terminal(n) for n in node.body[:position]): continue
             calls.append(call)
-    if not calls: return None
+    # The first recognized main is a boundary: its default exit prevents a
+    # later call from rescuing classes that have not yet been declared.
+    if not calls or not any(c.lineno < calls[0].lineno for c in classes): return None
+    classes = [c for c in classes if c.lineno < calls[0].lineno]
     try: compile(text, path, 'exec', dont_inherit=True)
     except (SyntaxError, ValueError, RecursionError, OverflowError): return None
     methods = [m for c in classes for m in c.body if isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef))
@@ -1383,6 +1462,20 @@ def self_test():
     assert reviewed_archive_report(expected_cases) is None
     duplicate_case = copy.deepcopy(occurrence); duplicate_case['results']['controls'][2]['case'] = 'healthy'
     assert reviewed_archive_report(duplicate_case) is None
+    # Exercise the narrow exception's revocation boundary without executing
+    # either real source. Repository's object/content binding is tested below.
+    import types
+    wildcard_test = 'tests/h62/item2/audit-bytecode-selection/test_kernel_metadata.py'
+    wildcard_helper = 'scripts/h62/item2/audit-bytecode-selection/kernel_metadata.py'
+    wildcard_tree = {wildcard_test: ('100644', 'blob', 'a259a155420d7f88a902cee9745c7ee2942ae87d'),
+                     wildcard_helper: ('100644', 'blob', '2d86485ff102d8bf983e89a315a565d5cf05275d')}
+    wildcard_node = ast.parse('\n' * 5 + 'from kernel_metadata import *').body[0]
+    assert reviewed_unittest_wildcard(types.SimpleNamespace(tree=wildcard_tree), wildcard_test, wildcard_node)
+    for path in (wildcard_test, wildcard_helper):
+        changed = dict(wildcard_tree); changed[path] = ('100644', 'blob', '0' * 40)
+        assert not reviewed_unittest_wildcard(types.SimpleNamespace(tree=changed), wildcard_test, wildcard_node)
+    assert not reviewed_unittest_wildcard(types.SimpleNamespace(tree=wildcard_tree), wildcard_test,
+                                         ast.parse('from kernel_metadata import *').body[0])
     assert nonnegative_number(10 ** 1000)
     resource_receipt = {'command': ['archived-runner'], 'exit': 7, 'elapsed_seconds': 0.25,
                         'resource_stop': False, 'peak_group_rss_bytes': 1024}
@@ -1485,6 +1578,13 @@ def self_test():
         sources['tests/import-shadow-unit.py'] = 'import unittest\nimport json as unittest\nclass T(unittest.TestCase):\n def test_value(self): pass\nif __name__ == "__main__": unittest.main()\n'
         sources['tests/from-shadow-unit.py'] = 'from unittest import TestCase, main\nfrom json import loads as main\nclass T(TestCase):\n def test_value(self): pass\nif __name__ == "__main__": main()\n'
         sources['tests/exit-before-unit.py'] = 'import unittest,sys\nclass T(unittest.TestCase):\n def test_value(self): pass\nsys.exit(0)\nif __name__ == "__main__": unittest.main()\n'
+        sources['tests/direct-unit.py'] = 'import unittest\nclass T(unittest.TestCase):\n def test_value(self): pass\nunittest.main()\n'
+        sources['tests/nested-unit.py'] = 'import unittest\nclass T(unittest.TestCase):\n def test_value(self): pass\ndef never(): unittest.main()\n'
+        sources['tests/early-main-unit.py'] = 'import unittest\nunittest.main()\nclass T(unittest.TestCase):\n def test_value(self): pass\n'
+        sources['tests/double-main-unit.py'] = 'import unittest\nunittest.main()\nclass T(unittest.TestCase):\n def test_value(self): pass\nunittest.main()\n'
+        sources['tests/guarded-early-main-unit.py'] = 'import unittest\nif __name__ == "__main__": unittest.main()\nclass T(unittest.TestCase):\n def test_value(self): pass\nunittest.main()\n'
+        sources['tests/wildcard-unit.py'] = 'from exports import *\nimport unittest\nclass T(unittest.TestCase):\n def test_value(self): pass\nif __name__ == "__main__": unittest.main()\n'
+        sources['tests/exports.py'] = '__all__=["__name__"]\n__name__="foreign"\n'
         for i in range(9): sources[f'tests/reference-{i}.txt'] = 'Historical mention of tests/spare.txt only.\n'
         for p, content in sources.items():
             target = root / p; target.parent.mkdir(parents=True, exist_ok=True)
@@ -1554,14 +1654,58 @@ def self_test():
         assert unreviewed_rows['tests/live.py']['class'] == 'keep'  # actually observed helper frame
         expected = inventory(repo, catalog)
         rows = {r['path']: r for r in expected['records']}
+        ordered = copy.deepcopy(catalog)
+        ordered['reads'] = sorted(ordered['reads'], key=lambda r: json.dumps(r, sort_keys=True))
+        grouped = copy.deepcopy(ordered)
+        grouped['schema_version'] = 2; grouped['reads'] = compact_read_routes(ordered['reads'])
+        assert list(read_routes(grouped)) == ordered['reads']
+        assert inventory(repo, grouped) == inventory(repo, ordered)
+        context = copy.deepcopy(ordered['reads'][0])
+        context['frames'] = [{'path': 'tests/pass.py', 'blob': repo.tree['tests/pass.py'][2], 'line': 3},
+                             {'path': 'tests/helper.py', 'blob': repo.tree['tests/helper.py'][2], 'line': 1}]
+        def ordered_target(path):
+            return {**context, 'target': path, 'target_blob': repo.tree[path][2]}
+        reverse = [ordered_target('tests/helper.py'), ordered_target('tests/generated.txt')]
+        alternate = copy.deepcopy(ordered_target('tests/generated.txt')); alternate['frames'][-1]['line'] = 2
+        interleaved = [ordered_target('tests/mention.txt'), alternate, ordered_target('tests/dead.lean')]
+        for routes in (reverse, interleaved):
+            try: compact_read_routes(routes)
+            except ValueError as error: assert 'route order' in str(error)
+            else: raise AssertionError('compaction reordered equal-length helper provenance')
+        for scenario in ('duplicate-target', 'unordered-target', 'empty-targets', 'bad-pin', 'extra-field', 'duplicate-context', 'forged-pin'):
+            bad = copy.deepcopy(grouped); group = bad['reads'][0]
+            if scenario == 'duplicate-target': group['targets'].append(copy.deepcopy(group['targets'][0]))
+            elif scenario == 'unordered-target': group['targets'].append({'path': '', 'blob': 'a' * 40})
+            elif scenario == 'empty-targets': group['targets'] = []
+            elif scenario == 'bad-pin': group['targets'][0]['blob'] = None
+            elif scenario == 'extra-field': group['targets'][0]['invented'] = True
+            elif scenario == 'duplicate-context': bad['reads'].append(copy.deepcopy(group))
+            else: group['targets'][0]['blob'] = '0' * 40
+            try: inventory(repo, bad)
+            except ValueError: pass
+            else: raise AssertionError('unsupported grouped provenance accepted: ' + scenario)
         for p in ('tests/live.py', 'tests/helper.py', 'tests/pass.py', 'tests/generated.txt'):
             assert rows[p]['class'] == 'keep', p
         assert rows['tests/generated.txt']['generator']
         assert subprocess.run(['python3', '-B', 'tests/failing-unit.py'], cwd=root, capture_output=True).returncode == 1
         assert rows['tests/failing-unit.py']['class'] == 'keep'
+        assert rows['tests/direct-unit.py']['class'] == 'keep' and rows['tests/direct-unit.py']['runner_chain']['entry']['source_only']
         assert rows['tests/failing-unit.py']['runner_chain']['entry']['source_only']
         assert rows['tests/failing-unit.py']['runner_chain']['entry']['validation_at_measured_revision']['status'] == 'unavailable'
-        for name in ('dead-unit.py', 'quoted-unit.py', 'shadowed-unit.py', 'import-shadow-unit.py', 'from-shadow-unit.py', 'exit-before-unit.py', 'magic-name-unit.py'): assert rows['tests/' + name]['class'] is None
+        for name in ('dead-unit.py', 'quoted-unit.py', 'shadowed-unit.py', 'import-shadow-unit.py', 'from-shadow-unit.py', 'exit-before-unit.py', 'magic-name-unit.py', 'nested-unit.py', 'early-main-unit.py', 'double-main-unit.py', 'guarded-early-main-unit.py', 'wildcard-unit.py'): assert rows['tests/' + name]['class'] is None
+        # Even a zero-exit dead/nested/early-main command cannot certify a
+        # unittest root. Ordinary success is not proof that a test entry ran.
+        for name in ('dead-unit.py', 'nested-unit.py', 'early-main-unit.py', 'import-shadow-unit.py', 'exit-before-unit.py', 'wildcard-unit.py', 'double-main-unit.py', 'guarded-early-main-unit.py'):
+            path = 'tests/' + name
+            bad = copy.deepcopy(catalog)
+            bad['standalone'].append({'path': path, 'input_revision': repo.ref, 'source_blob': repo.tree[path][2],
+                                      'command': ['python3', '-B', path], 'kind': 'unittest'})
+            try: inventory(repo, bad)
+            except ValueError as error: assert 'declared unittest entry point' in str(error)
+            else: raise AssertionError('unsupported unittest root accepted: ' + name)
+        for name in ('dead-unit.py', 'nested-unit.py'):
+            assert subprocess.run(['python3', '-B', 'tests/' + name], cwd=root, capture_output=True).returncode == 0
+        assert subprocess.run(['python3', '-B', 'tests/direct-unit.py'], cwd=root, capture_output=True).returncode == 0
         assert rows['tests/plain.py']['class'] == 'keep'
         assert rows['tests/mention.txt']['class'] is None and rows['tests/mention.txt']['secondary']['unreviewed_readers']
         for path in ('tests/package/lakefile.toml', 'tests/package/src/Package.lean', 'tests/package/src/Package/Leaf.lean'): assert rows[path]['class'] == 'keep', path
