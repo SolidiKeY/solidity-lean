@@ -60,8 +60,10 @@ async function execute(task){
       if(!recheck.size)continue;
     }
     // Multi-file units always took the certified path; direct mode reaches
-    // here only to recheck rows the compiled verifier could not decide.
-    const certified=options.certify===true||allAsts.length>1||directMode;
+    // here only to recheck rows the compiled verifier could not decide; the
+    // entry-certificate audit runs only on the certified path
+    // (Frontend/Testing.lean reports `unknown` in direct mode).
+    const certified=options.certify===true||!!options.auditPreconditions||allAsts.length>1||directMode;
     if(task.deferLegacyBuild)return {needsLegacyBuild:true};
     usedLegacy=true;session??=new LeanSession(root,directory);
     const output=join(directory,`result-${task.id}-${contract.id}.json`);
