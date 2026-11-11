@@ -1,0 +1,21 @@
+{
+  "v1_base": "4d3790eadb8a5212233bc7d5e345817476b2f590",
+  "families": {
+    "shifts": {
+      "count": 3885,
+      "sha256": "e35c39be539418c1c7c03c9f73c123b7fab1bca37eaafa9257110d9d7952d05a"
+    },
+    "arithmetic": {
+      "count": 2008,
+      "sha256": "16b9742ba116855ee1f069c10e1b78d8c3d656e4d70fabbb3ac590d97cd67fa9"
+    },
+    "bytes": {
+      "count": 947,
+      "sha256": "4f84dfee45022a34d8cda8d9afa9825a68570f03fb09026e5b6bca446189d2b5"
+    },
+    "powers": {
+      "count": 63,
+      "sha256": "0dc0b681a29f25298c9200295bffc4d1537869c3c01dfa3a717e0bb68eac9f78"
+    }
+  }
+}
