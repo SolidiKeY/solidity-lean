@@ -1,0 +1,1101 @@
+{
+ "areas_absent_from_calibration": [],
+ "areas_new_in_calibration": [],
+ "calibration": {
+  "Solidity/Automation": {
+   "comment_lines": {
+    "denominator": 38,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 28,
+    "ratio": "14/19"
+   },
+   "docs_lines": {
+    "denominator": 38,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docstring_lines": {
+    "denominator": 38,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 28,
+    "ratio": "14/19"
+   },
+   "process_ids": {
+    "denominator": 38,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 8,
+    "ratio": "4/19"
+   }
+  },
+  "Solidity/Backend": {
+   "comment_lines": {
+    "denominator": 224570,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 28268,
+    "ratio": "14134/112285"
+   },
+   "docs_lines": {
+    "denominator": 224570,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docstring_lines": {
+    "denominator": 224570,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 28226,
+    "ratio": "14113/112285"
+   },
+   "process_ids": {
+    "denominator": 224570,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 1201,
+    "ratio": "1201/224570"
+   }
+  },
+  "Solidity/Calculus": {
+   "comment_lines": {
+    "denominator": 129287,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 22846,
+    "ratio": "22846/129287"
+   },
+   "docs_lines": {
+    "denominator": 129287,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docstring_lines": {
+    "denominator": 129287,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 21989,
+    "ratio": "21989/129287"
+   },
+   "process_ids": {
+    "denominator": 129287,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 56,
+    "ratio": "56/129287"
+   }
+  },
+  "Solidity/Corpus": {
+   "comment_lines": {
+    "denominator": 88,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 138,
+    "ratio": "69/44"
+   },
+   "docs_lines": {
+    "denominator": 88,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docstring_lines": {
+    "denominator": 88,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 138,
+    "ratio": "69/44"
+   },
+   "process_ids": {
+    "denominator": 88,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   }
+  },
+  "Solidity/Counterexamples": {
+   "comment_lines": {
+    "denominator": 180,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 194,
+    "ratio": "97/90"
+   },
+   "docs_lines": {
+    "denominator": 180,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docstring_lines": {
+    "denominator": 180,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 174,
+    "ratio": "29/30"
+   },
+   "process_ids": {
+    "denominator": 180,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   }
+  },
+  "Solidity/Evm": {
+   "comment_lines": {
+    "denominator": 37758,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 3788,
+    "ratio": "1894/18879"
+   },
+   "docs_lines": {
+    "denominator": 37758,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docstring_lines": {
+    "denominator": 37758,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 3734,
+    "ratio": "1867/18879"
+   },
+   "process_ids": {
+    "denominator": 37758,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 9,
+    "ratio": "3/12586"
+   }
+  },
+  "Solidity/Examples": {
+   "comment_lines": {
+    "denominator": 36459,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 15906,
+    "ratio": "5302/12153"
+   },
+   "docs_lines": {
+    "denominator": 36459,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docstring_lines": {
+    "denominator": 36459,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 15336,
+    "ratio": "1704/4051"
+   },
+   "process_ids": {
+    "denominator": 36459,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 18,
+    "ratio": "2/4051"
+   }
+  },
+  "Solidity/Frontend": {
+   "comment_lines": {
+    "denominator": 82637,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 9314,
+    "ratio": "9314/82637"
+   },
+   "docs_lines": {
+    "denominator": 82637,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docstring_lines": {
+    "denominator": 82637,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 8436,
+    "ratio": "8436/82637"
+   },
+   "process_ids": {
+    "denominator": 82637,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 170,
+    "ratio": "10/4861"
+   }
+  },
+  "Solidity/Hash": {
+   "comment_lines": {
+    "denominator": 1649,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 371,
+    "ratio": "371/1649"
+   },
+   "docs_lines": {
+    "denominator": 1649,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docstring_lines": {
+    "denominator": 1649,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 371,
+    "ratio": "371/1649"
+   },
+   "process_ids": {
+    "denominator": 1649,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 5,
+    "ratio": "5/1649"
+   }
+  },
+  "Solidity/Language": {
+   "comment_lines": {
+    "denominator": 4608,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 838,
+    "ratio": "419/2304"
+   },
+   "docs_lines": {
+    "denominator": 4608,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docstring_lines": {
+    "denominator": 4608,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 829,
+    "ratio": "829/4608"
+   },
+   "process_ids": {
+    "denominator": 4608,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 8,
+    "ratio": "1/576"
+   }
+  },
+  "Solidity/Lowering": {
+   "comment_lines": {
+    "denominator": 82606,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 10183,
+    "ratio": "10183/82606"
+   },
+   "docs_lines": {
+    "denominator": 82606,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docstring_lines": {
+    "denominator": 82606,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 10021,
+    "ratio": "10021/82606"
+   },
+   "process_ids": {
+    "denominator": 82606,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 369,
+    "ratio": "369/82606"
+   }
+  },
+  "Solidity/Optimizer": {
+   "comment_lines": {
+    "denominator": 5379,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 709,
+    "ratio": "709/5379"
+   },
+   "docs_lines": {
+    "denominator": 5379,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docstring_lines": {
+    "denominator": 5379,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 707,
+    "ratio": "707/5379"
+   },
+   "process_ids": {
+    "denominator": 5379,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 1,
+    "ratio": "1/5379"
+   }
+  },
+  "Solidity/Precompiles": {
+   "comment_lines": {
+    "denominator": 1313,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 443,
+    "ratio": "443/1313"
+   },
+   "docs_lines": {
+    "denominator": 1313,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docstring_lines": {
+    "denominator": 1313,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 439,
+    "ratio": "439/1313"
+   },
+   "process_ids": {
+    "denominator": 1313,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 47,
+    "ratio": "47/1313"
+   }
+  },
+  "Solidity/Roadmap": {
+   "comment_lines": {
+    "denominator": 2864,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 1238,
+    "ratio": "619/1432"
+   },
+   "docs_lines": {
+    "denominator": 2864,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docstring_lines": {
+    "denominator": 2864,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 1236,
+    "ratio": "309/716"
+   },
+   "process_ids": {
+    "denominator": 2864,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 74,
+    "ratio": "37/1432"
+   }
+  },
+  "Solidity/Semantics": {
+   "comment_lines": {
+    "denominator": 19034,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 3846,
+    "ratio": "1923/9517"
+   },
+   "docs_lines": {
+    "denominator": 19034,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docstring_lines": {
+    "denominator": 19034,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 3816,
+    "ratio": "1908/9517"
+   },
+   "process_ids": {
+    "denominator": 19034,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 108,
+    "ratio": "54/9517"
+   }
+  },
+  "Solidity/SolcValidation": {
+   "comment_lines": {
+    "denominator": 5135,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 780,
+    "ratio": "12/79"
+   },
+   "docs_lines": {
+    "denominator": 5135,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docstring_lines": {
+    "denominator": 5135,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 780,
+    "ratio": "12/79"
+   },
+   "process_ids": {
+    "denominator": 5135,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 8,
+    "ratio": "8/5135"
+   }
+  },
+  "Solidity/Solkey": {
+   "comment_lines": {
+    "denominator": 78,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 142,
+    "ratio": "71/39"
+   },
+   "docs_lines": {
+    "denominator": 78,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docstring_lines": {
+    "denominator": 78,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 140,
+    "ratio": "70/39"
+   },
+   "process_ids": {
+    "denominator": 78,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   }
+  },
+  "Solidity/SortCheck": {
+   "comment_lines": {
+    "denominator": 797,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 359,
+    "ratio": "359/797"
+   },
+   "docs_lines": {
+    "denominator": 797,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docstring_lines": {
+    "denominator": 797,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 310,
+    "ratio": "310/797"
+   },
+   "process_ids": {
+    "denominator": 797,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   }
+  },
+  "Solidity/Source": {
+   "comment_lines": {
+    "denominator": 37237,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 6537,
+    "ratio": "6537/37237"
+   },
+   "docs_lines": {
+    "denominator": 37237,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docstring_lines": {
+    "denominator": 37237,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 6373,
+    "ratio": "6373/37237"
+   },
+   "process_ids": {
+    "denominator": 37237,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 126,
+    "ratio": "126/37237"
+   }
+  },
+  "Solidity/Stipend": {
+   "comment_lines": {
+    "denominator": 140,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 90,
+    "ratio": "9/14"
+   },
+   "docs_lines": {
+    "denominator": 140,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docstring_lines": {
+    "denominator": 140,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 88,
+    "ratio": "22/35"
+   },
+   "process_ids": {
+    "denominator": 140,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 6,
+    "ratio": "3/70"
+   }
+  },
+  "Solidity/Storage": {
+   "comment_lines": {
+    "denominator": 3144,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 501,
+    "ratio": "167/1048"
+   },
+   "docs_lines": {
+    "denominator": 3144,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docstring_lines": {
+    "denominator": 3144,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 487,
+    "ratio": "487/3144"
+   },
+   "process_ids": {
+    "denominator": 3144,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 10,
+    "ratio": "5/1572"
+   }
+  },
+  "Solidity/Syntax": {
+   "comment_lines": {
+    "denominator": 10276,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 3096,
+    "ratio": "774/2569"
+   },
+   "docs_lines": {
+    "denominator": 10276,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docstring_lines": {
+    "denominator": 10276,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 2532,
+    "ratio": "633/2569"
+   },
+   "process_ids": {
+    "denominator": 10276,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 3,
+    "ratio": "3/10276"
+   }
+  },
+  "Solidity/TestSuite": {
+   "comment_lines": {
+    "denominator": 3673,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 386,
+    "ratio": "386/3673"
+   },
+   "docs_lines": {
+    "denominator": 3673,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docstring_lines": {
+    "denominator": 3673,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 374,
+    "ratio": "374/3673"
+   },
+   "process_ids": {
+    "denominator": 3673,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   }
+  },
+  "Solidity/Theory": {
+   "comment_lines": {
+    "denominator": 6473,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 1481,
+    "ratio": "1481/6473"
+   },
+   "docs_lines": {
+    "denominator": 6473,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docstring_lines": {
+    "denominator": 6473,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 1481,
+    "ratio": "1481/6473"
+   },
+   "process_ids": {
+    "denominator": 6473,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 14,
+    "ratio": "14/6473"
+   }
+  },
+  "Solidity/Tools": {
+   "comment_lines": {
+    "denominator": 6091,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 1693,
+    "ratio": "1693/6091"
+   },
+   "docs_lines": {
+    "denominator": 6091,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docstring_lines": {
+    "denominator": 6091,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 1585,
+    "ratio": "1585/6091"
+   },
+   "process_ids": {
+    "denominator": 6091,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 3,
+    "ratio": "3/6091"
+   }
+  },
+  "Solidity/Typing": {
+   "comment_lines": {
+    "denominator": 5352,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 713,
+    "ratio": "713/5352"
+   },
+   "docs_lines": {
+    "denominator": 5352,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docstring_lines": {
+    "denominator": 5352,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 713,
+    "ratio": "713/5352"
+   },
+   "process_ids": {
+    "denominator": 5352,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   }
+  },
+  "Solidity/Yul": {
+   "comment_lines": {
+    "denominator": 163990,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 12475,
+    "ratio": "2495/32798"
+   },
+   "docs_lines": {
+    "denominator": 163990,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docstring_lines": {
+    "denominator": 163990,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 12327,
+    "ratio": "12327/163990"
+   },
+   "process_ids": {
+    "denominator": 163990,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 294,
+    "ratio": "147/81995"
+   }
+  },
+  "Solidity/_root": {
+   "comment_lines": {
+    "denominator": 2542,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 1217,
+    "ratio": "1217/2542"
+   },
+   "docs_lines": {
+    "denominator": 2542,
+    "denominator_source": "self",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docstring_lines": {
+    "denominator": 2542,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 1149,
+    "ratio": "1149/2542"
+   },
+   "process_ids": {
+    "denominator": 2542,
+    "denominator_source": "self",
+    "null_reason": null,
+    "numerator": 3,
+    "ratio": "3/2542"
+   }
+  },
+  "docs/README.d": {
+   "comment_lines": {
+    "denominator": 873398,
+    "denominator_source": "repository-solidity",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docs_lines": {
+    "denominator": 873398,
+    "denominator_source": "repository-solidity",
+    "null_reason": null,
+    "numerator": 19,
+    "ratio": "19/873398"
+   },
+   "docstring_lines": {
+    "denominator": 873398,
+    "denominator_source": "repository-solidity",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "process_ids": {
+    "denominator": 873398,
+    "denominator_source": "repository-solidity",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   }
+  },
+  "docs/_root": {
+   "comment_lines": {
+    "denominator": 873398,
+    "denominator_source": "repository-solidity",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docs_lines": {
+    "denominator": 873398,
+    "denominator_source": "repository-solidity",
+    "null_reason": null,
+    "numerator": 29445,
+    "ratio": "29445/873398"
+   },
+   "docstring_lines": {
+    "denominator": 873398,
+    "denominator_source": "repository-solidity",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "process_ids": {
+    "denominator": 873398,
+    "denominator_source": "repository-solidity",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   }
+  },
+  "docs/audits": {
+   "comment_lines": {
+    "denominator": 873398,
+    "denominator_source": "repository-solidity",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docs_lines": {
+    "denominator": 873398,
+    "denominator_source": "repository-solidity",
+    "null_reason": null,
+    "numerator": 231740,
+    "ratio": "115870/436699"
+   },
+   "docstring_lines": {
+    "denominator": 873398,
+    "denominator_source": "repository-solidity",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "process_ids": {
+    "denominator": 873398,
+    "denominator_source": "repository-solidity",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   }
+  },
+  "docs/benchmarks": {
+   "comment_lines": {
+    "denominator": 873398,
+    "denominator_source": "repository-solidity",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docs_lines": {
+    "denominator": 873398,
+    "denominator_source": "repository-solidity",
+    "null_reason": null,
+    "numerator": 96119,
+    "ratio": "96119/873398"
+   },
+   "docstring_lines": {
+    "denominator": 873398,
+    "denominator_source": "repository-solidity",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "process_ids": {
+    "denominator": 873398,
+    "denominator_source": "repository-solidity",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   }
+  },
+  "docs/feature-work": {
+   "comment_lines": {
+    "denominator": 873398,
+    "denominator_source": "repository-solidity",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docs_lines": {
+    "denominator": 873398,
+    "denominator_source": "repository-solidity",
+    "null_reason": null,
+    "numerator": 111662,
+    "ratio": "55831/436699"
+   },
+   "docstring_lines": {
+    "denominator": 873398,
+    "denominator_source": "repository-solidity",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "process_ids": {
+    "denominator": 873398,
+    "denominator_source": "repository-solidity",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   }
+  },
+  "docs/module-map": {
+   "comment_lines": {
+    "denominator": 873398,
+    "denominator_source": "repository-solidity",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docs_lines": {
+    "denominator": 873398,
+    "denominator_source": "repository-solidity",
+    "null_reason": null,
+    "numerator": 9582,
+    "ratio": "4791/436699"
+   },
+   "docstring_lines": {
+    "denominator": 873398,
+    "denominator_source": "repository-solidity",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "process_ids": {
+    "denominator": 873398,
+    "denominator_source": "repository-solidity",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   }
+  },
+  "docs/module-map.d": {
+   "comment_lines": {
+    "denominator": 873398,
+    "denominator_source": "repository-solidity",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "docs_lines": {
+    "denominator": 873398,
+    "denominator_source": "repository-solidity",
+    "null_reason": null,
+    "numerator": 103,
+    "ratio": "103/873398"
+   },
+   "docstring_lines": {
+    "denominator": 873398,
+    "denominator_source": "repository-solidity",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   },
+   "process_ids": {
+    "denominator": 873398,
+    "denominator_source": "repository-solidity",
+    "null_reason": "zero numerator",
+    "numerator": 0,
+    "ratio": null
+   }
+  }
+ },
+ "calibration_commit": "33e91288c226c7055b1dc212d709024d6730b04d",
+ "calibration_generated_exclusions": 28,
+ "calibration_tree": "6cd384309420059e3758240c5a37ae7b58d59fe8",
+ "calibration_unknown": 12,
+ "classifier": {
+  "checker_blob": "8c7cdbb9544b8e40defb2eeb34d66334ac794493",
+  "checker_path": "scripts/check-prose-budget",
+  "generated_rules": "generated-rule/1"
+ },
+ "denominator_mapping": {
+  "docs/README.d": "repository-solidity",
+  "docs/_root": "repository-solidity",
+  "docs/audits": "repository-solidity",
+  "docs/benchmarks": "repository-solidity",
+  "docs/feature-work": "repository-solidity",
+  "docs/module-map": "repository-solidity",
+  "docs/module-map.d": "repository-solidity"
+ },
+ "enforcement_exclusions": [
+  "docs/audits"
+ ],
+ "legacy_semantics": {
+  "checker_versions": {
+   "1dc25b103913e0a04b203c7fcef21960e7fc952e": "v1",
+   "38c0263a467b8d3e675661ec5848e34d3e0ae495": "v2",
+   "8c7cdbb9544b8e40defb2eeb34d66334ac794493": "v3"
+  }
+ },
+ "margin": {
+  "formula": "pass iff n * cal_d * q <= cal_n * (p + q) * d, margin = p/q; cal_n == 0 or cal_d == 0 or d == 0 permits only n == 0",
+  "sensitivity": [
+   "0",
+   "1/20",
+   "1/10"
+  ],
+  "value": "1/20"
+ },
+ "reviewed_baseline": {
+  "blob": "93a344e0d318319ce78323c98db6f2bbbe3792ed",
+  "calibration_label": "provisional",
+  "commit": "87d3d3c95be4e4cfd6cf41173ea5d7fc4d0f7ca0",
+  "review_provenance": "UNVERIFIABLE: no review record for 87d3d3c9 or merge dfdfa238b is reachable in repository history; its commit subject is not review evidence"
+ },
+ "schema": "pb1-prose-backtest/1",
+ "status": "PROPOSAL ONLY - not an active budget"
+}
