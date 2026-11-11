@@ -1463,5 +1463,10 @@
     "file": "Solidity/Frontend/CounterexampleMetadataV1.lean",
     "kind": "kernel-option",
     "code": "withScope (fun scope => { scope with opts := debug.skipKernelTC.set scope.opts false }) do"
+  },
+  {
+    "file": "Solidity/Frontend/ExecutableCounterexampleMetadataV2.lean",
+    "kind": "kernel-option",
+    "code": "return debug.skipKernelTC.set (Elab.async.set (maxHeartbeats.set options limit) false) false"
   }
 ]
