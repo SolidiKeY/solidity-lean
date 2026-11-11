@@ -456,7 +456,11 @@ class SolidityService {
     for(const doc of this.docs.values())this.cancel(doc);
     for(const controller of this.requests.values())controller.abort();
     this.closed=true;this.buildEpoch=(this.buildEpoch||0)+1;const build=this.buildChild;this.buildChild=null;
-    this.disposal=Promise.all([this.retirement,this.pool.dispose(),this.analysisPool.dispose(),...(build?[waitForClose(build,{kill:true})]:[])]).then(()=>{rmSync(this.directory,{recursive:true,force:true});});this.disposal.catch(()=>{});return this.disposal;
+    const parts={retirement:this.retirement,proofPool:this.pool.dispose(),analysisPool:this.analysisPool.dispose(),...(build?{build:waitForClose(build,{kill:true})}:{})};
+    // Diagnostics only: a dispose still running after 1.5 s names its pending parts on stderr.
+    const pending=new Set(Object.keys(parts)),started=Date.now();for(const [name,part] of Object.entries(parts))Promise.resolve(part).then(()=>pending.delete(name),error=>{pending.delete(name);process.stderr.write(`Server dispose part ${name} failed after ${Date.now()-started} ms: ${error?.message}\n`);});
+    const watchdog=setTimeout(()=>{if(pending.size)process.stderr.write(`Server dispose still pending after ${Date.now()-started} ms: ${[...pending].join(', ')}\n`);},1500);watchdog.unref?.();
+    this.disposal=Promise.all(Object.values(parts)).then(()=>{rmSync(this.directory,{recursive:true,force:true});}).finally(()=>clearTimeout(watchdog));this.disposal.catch(()=>{});return this.disposal;
   }
 }
 
