@@ -33,7 +33,7 @@ theorem require_false {E : Env} {Γ : RCtx} (G : Glob E) (F : Fr) (n : Nat)
     (heap : state.heap.get next = some ⟨.string .memory,.string bs⟩) :
     (evalE G F (n+8) requireAssigned).run (caller false current next older,state) =
       (.error (.revert (errorData bs)),(caller false next next older,state)) := by
-  dsimp [requireAssigned,assignMessage,caller,evalE,evalBuiltin,evalArgs,evalLoc,writeLoc,
+  dsimp [requireAssigned,assignMessage,caller,evalE,withLibraryCalldata,evalBuiltin,evalArgs,evalLoc,writeLoc,
     getV,RVal.get,bytesOfRV,heapBytes,heapObj,EM.st,EM.locals,EM.lift,EM.setLocals]
   dsimp [bind,pure,ExceptT.bind,ExceptT.pure,ExceptT.bindCont,ExceptT.run,ExceptT.mk,
     StateT.bind,StateT.pure,StateT.get,get,getThe,MonadStateOf.get,

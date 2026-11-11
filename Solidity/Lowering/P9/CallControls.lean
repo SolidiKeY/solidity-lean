@@ -65,7 +65,7 @@ theorem protected_success (fixed : Roadmap.Fixed) (s : Source.St resolution.env)
       (.ok (.val (.bool true)), (.cons (.bool false) .nil, s)) := by
   unfold protectedCall
   rw [Source.evalE]
-  simp only [Source.evalConvArgs, pure_bind]
+  simp only [Source.withLibraryCalldata, Source.evalConvArgs, pure_bind]
   unfold Source.EM.sub
   dsimp only [Bind.bind, Pure.pure, ExceptT.run, ExceptT.mk, ExceptT.bind, ExceptT.bindCont,
     ExceptT.pure, StateT.bind, StateT.pure]

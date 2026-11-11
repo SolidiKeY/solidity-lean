@@ -1,4 +1,5 @@
 import Solidity.Yul.Views.PrimitiveDynamicWriteControls
+import Solidity.Yul.Views.GenericFlow.FollowingLaws
 
 namespace Solidity.Yul.Views.Controls
 
@@ -57,18 +58,11 @@ theorem pc_dirty_decode_none : finiteAccountWrite? (T := pcEnv.lay) account
   | some op => have bad := pc_dirty_decode_false; rw [found] at bad; cases bad
 
 theorem pc_dirty_following_none : pcSignedWrite.following? rfl 3 4 = none := by
+  have bad : finiteAccountWrite? (T := pcEnv.lay) account (pcLayout.primitiveSnapshot pcFixed (saveSlot pcSignedWrite.nextRaw 3 4)) (saveSlot pcSignedWrite.nextRaw 3 4) = none := by
+    rw [pcsignedwrite_next]
+    exact pc_dirty_decode_none
   unfold PrimitiveOwnershipPlan.following?
-  split
-  · have bad : finiteAccountWrite? (T := pcEnv.lay) account (pcLayout.primitiveSnapshot pcFixed (saveSlot pcSignedWrite.nextRaw 3 4)) (saveSlot pcSignedWrite.nextRaw 3 4) = none := by
-      rw [pcsignedwrite_next]
-      exact pc_dirty_decode_none
-    dsimp only
-    split
-    · rfl
-    · rename_i op found
-      have impossible : none = some op := bad.symm.trans found
-      cases impossible
-  · rfl
+  exact GenericFlow.Following.none_of_write_none _ bad
 
 theorem pc_dirty_fresh_none : preparePrimitiveOwnership? packedStepFrame pcLayout pcFixed 3 4 pcSignedWrite.step.1.2 pcSignedWrite.step.2 = none :=
   (pcSignedWrite.following_fresh rfl 3 4).symm.trans pc_dirty_following_none

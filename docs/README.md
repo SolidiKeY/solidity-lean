@@ -14,7 +14,9 @@ Historical timings, integration reports and completed plans are in Git.
 | External assumptions and remaining scope | [options.md](options.md), [semantic-gaps.md](semantic-gaps.md) |
 | Outstanding design and acceptance decisions | [coverage-plan.md](coverage-plan.md) |
 | Interface design | [audits](document-index.md#guides-audits-and-performance) |
+| Direction and size | [direction audit](audits/direction.md), [size reduction](audits/size-reduction.md) |
 | Find another retained document | [document-index.md](document-index.md) |
 
 [Generated module maps](module-map.md) and some reference documents are retained
 as checker inputs. They do not replace reading the source.
+| [feature-work/cr-canonical-reader-contract.md](feature-work/cr-canonical-reader-contract.md) | CR canonical-reader migration contract under H68: pinned uint8 support witness, H68 fixture migration dry run and existing-route row comparison, owner tickets. |

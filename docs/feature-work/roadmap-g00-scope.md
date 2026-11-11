@@ -481,7 +481,7 @@ Manifest pin: `argotorg/solidity` `v0.8.38` `1835d247de183f23e7b0e2bc4a50732af52
 | upstream-rejected | upstream | 7 |
 | **total** | | **212** |
 
-Current implementation statuses (informative; G00 changes only `fixedPoint`, from upstream/notApplicable to model/missing, by the G00 Q6 decision): abstract/partial 21, abstract/present 2, exclude/notApplicable 30, model/missing 2, model/partial 139, model/present 11, upstream/notApplicable 7.
+Current implementation statuses (informative; G00 changes only `fixedPoint`, from upstream/notApplicable to model/missing, by the G00 Q6 decision): abstract/partial 23, exclude/notApplicable 30, model/missing 2, model/partial 143, model/present 7, upstream/notApplicable 7.
 
 | upstream symbols | count |
 |---|---|

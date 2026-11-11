@@ -1,4 +1,5 @@
 import Solidity.Yul.Compilation.MultiSwitchCompilation
+import Solidity.Yul.Compilation.CompletionControls
 /-! Composition of two actual finite-switch compilations at an original seq
 node. The second selector observes the updated first frame. Source runtime
 horizons and compiler search fuel remain separate. No Source/G24, admission,
@@ -61,8 +62,16 @@ theorem Artifact.join_source {c n f g} {a b : Stmt [] [] c n}
  (last : evalStmt hb .nil True.intro b artifact.right.compiled.profile (sourceLocals mid) = some ⟨sourceLocals out,.normal⟩) :
  evalStmt (max ha hb+1) .nil True.intro (.seq a b) artifact.profile (sourceLocals locals) =
  some ⟨sourceLocals out,.normal⟩ := by
- have first' := evalStmt_stable (Nat.le_max_left ha hb) .nil True.intro a artifact.left.compiled.profile (sourceLocals locals) first
- have last' := evalStmt_stable (Nat.le_max_right ha hb) .nil True.intro b artifact.right.compiled.profile (sourceLocals mid) last
+ have first' : evalStmt (max ha hb) .nil True.intro a artifact.left.compiled.profile (sourceLocals locals) =
+   some ⟨sourceLocals mid,.normal⟩ := CompletionControls.completed_horizon
+   (fun fuel => evalStmt fuel .nil True.intro a artifact.left.compiled.profile (sourceLocals locals))
+   (fun fuel extra => evalStmt_refines_add fuel extra .nil True.intro a artifact.left.compiled.profile (sourceLocals locals))
+   (Nat.le_max_left ha hb) first
+ have last' : evalStmt (max ha hb) .nil True.intro b artifact.right.compiled.profile (sourceLocals mid) =
+   some ⟨sourceLocals out,.normal⟩ := CompletionControls.completed_horizon
+   (fun fuel => evalStmt fuel .nil True.intro b artifact.right.compiled.profile (sourceLocals mid))
+   (fun fuel extra => evalStmt_refines_add fuel extra .nil True.intro b artifact.right.compiled.profile (sourceLocals mid))
+   (Nat.le_max_right ha hb) last
  change Option.bind (evalStmt (max ha hb) .nil True.intro a artifact.left.compiled.profile (sourceLocals locals)) _ = _
  rw [first']
  exact last'
@@ -73,10 +82,10 @@ theorem Artifact.normal_to_model {c n f g} {a b : Stmt [] [] c n}
    some ⟨sourceLocals out,.normal⟩) (m : Evm.Machine) (caller : List Evm.Word) :
  Evm.run artifact.code {m with stack := locals.toList.map coreWord++caller} =
  .ok {m with stack := out.toList.map coreWord++caller} 0 := by
- obtain ⟨actual,same,target⟩ := artifact.source_to_model horizon locals ⟨sourceLocals out,.normal⟩ ran m caller
- have equal : out = actual := SourceLoopCompletion.sourceLocals_injective (congrArg Outcome.vars same)
- cases equal
- exact target
+ exact CompletionControls.normal_output (c := c) out
+   (fun actual => Evm.run artifact.code {m with stack := locals.toList.map coreWord++caller} =
+     .ok {m with stack := actual.toList.map coreWord++caller} 0)
+   (artifact.source_to_model horizon locals ⟨sourceLocals out,.normal⟩ ran m caller)
 
 /-- info: 'Solidity.Yul.Compilation.SwitchSequence.Artifact.source_to_model' depends on axioms: [propext,
  Classical.choice,

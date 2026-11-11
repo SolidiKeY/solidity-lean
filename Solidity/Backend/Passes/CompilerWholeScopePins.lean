@@ -66,3 +66,6 @@ import Solidity.Backend.Passes.CompilerWholeScopeControls
 /-- info: 'Solidity.Backend.Passes.CompilerWholeScope.Controls.corrupted_tail_refused' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.Passes.CompilerWholeScope.Controls.corrupted_tail_refused
 
+
+/-- info: 'Solidity.Backend.Passes.CompilerWholeScope.lmax_refused' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.Passes.CompilerWholeScope.lmax_refused

@@ -59,6 +59,8 @@ and starts with an inventory of existing tools, so it does not rebuild them.
 | U07 | **Tool surface.** One CLI and editor entry point: `verify file.sol --mode fast\|certified`, readable failures (branch, source line, counterexample from a refuted leaf), certified mode running in the background or in CI after a fast pass. A disagreement between the modes is reported as a bug. | U02 |
 | U08 | **Validation budgets.** `sol_validate` (T07) under U01-style budgets on the T08 corpus, incremental per contract; this is the user-facing check of solc output. | U01, VT4 |
 
+U01 measurement inventory and prerequisites: [benchmark lane](vu1-bench.md).
+
 ## Lanes
 
 Sized by the [sizing rules](../coverage-plan.md#sizing-rules): one 16 GiB VM,

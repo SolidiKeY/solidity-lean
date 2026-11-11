@@ -1,0 +1,1970 @@
+{
+  "identifiers": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.nameOf",
+        "module": "Solidity.Frontend.SolcJson.Body",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Importer name lookup; general declaration identity, scope and shadowing preservation remain unproved."
+  },
+  "comments": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.Checked.trivia",
+        "module": "Solidity.Frontend.Checked.Lexer",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Trivia recognition implementation; source-span and specification-annotation preservation remain separate."
+  },
+  "numericLiterals": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.parseRational",
+        "module": "Solidity.Frontend.SolcJson.Body",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Exact rational parser implementation, not universal importer correspondence or contextual-width preservation."
+  },
+  "stringLiterals": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.byteLiteralText",
+        "module": "Solidity.Frontend.SolcJson.Body",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Compiler-supplied literal bytes validation/rendering; not a source-decoder theorem."
+  },
+  "unicodeLiterals": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.byteLiteralText",
+        "module": "Solidity.Frontend.SolcJson.Body",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Supplied UTF-8 byte validation; no general source correspondence theorem."
+  },
+  "hexLiterals": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.validHexBytes",
+        "module": "Solidity.Frontend.SolcJson.Body",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Even-length hexadecimal predicate; not complete source byte-string decoding."
+  },
+  "addressLiterals": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.expr",
+        "module": "Solidity.Frontend.SolcJson.Body",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Numeric/address literal importer branch; checksum and source-admission parity remain open."
+  },
+  "pragmaVersion": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.Source.readPragmas",
+        "module": "Solidity.Frontend.Source",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Records constraints; not a general compiler-version-range decision theorem."
+  },
+  "pragmaAbicoder": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.Source.readPragmas",
+        "module": "Solidity.Frontend.Source",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Coder selection and conflicting-directive refusals by implementation."
+  },
+  "pragmaOther": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.Source.readPragmas",
+        "module": "Solidity.Frontend.Source",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Recognized mode directives/refusals by implementation; no compiler agreement theorem."
+  },
+  "sourceUnits": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.Source.readCompilationUnit",
+        "module": "Solidity.Frontend.SourceUnits",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Compilation-unit reader; cross-file declaration identity preservation unproved here."
+  },
+  "imports": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.Source.readCompilationUnit",
+        "module": "Solidity.Frontend.SourceUnits",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Consumes compiler-resolved units; does not prove solc import/remapping resolution."
+  },
+  "contracts": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.readContract",
+        "module": "Solidity.Frontend.SolcJson.Contract",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Importer implementation; no all-contract source correspondence theorem."
+  },
+  "interfaces": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.readContract",
+        "module": "Solidity.Frontend.SolcJson.Contract",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Interface importer paths; no general inheritance/signature preservation theorem."
+  },
+  "libraries": {
+    "theorems": [
+      {
+        "name": "Solidity.ContractWorld.LibraryTryFrame.library_frame",
+        "module": "Solidity.Semantics.LibraryTryFrame",
+        "class": "b",
+        "premises": [
+          "role: library kind enabled",
+          "callerRole: caller is ordinary",
+          "static: context is nonstatic",
+          "installed: library address has declared storage",
+          "callerInstalled: caller handle has caller storage"
+        ],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Explicit installed-world library-call frame equation; no general source linking or delegatecall correspondence."
+  },
+  "inheritance": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.contractLineage",
+        "module": "Solidity.Frontend.SolcJson.Contract",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Checks/consumes C3 metadata; general source inheritance preservation remains open."
+  },
+  "overrideDeclarations": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.overrideAliases",
+        "module": "Solidity.Frontend.SolcJson.Contract",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Declaration-identity aliases; full override validation is delegated to solc."
+  },
+  "functions": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.SolcFun.member",
+        "module": "Solidity.Frontend.SolcJson.Contract",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Selected function rendering; no general calling-semantics theorem."
+  },
+  "freeFunctions": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.callees",
+        "module": "Solidity.Frontend.SolcJson.Contract",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Declaration-ID call discovery; complete resolution unproved."
+  },
+  "constructors": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.SolcFun.ctorMember",
+        "module": "Solidity.Frontend.SolcJson.Contract",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Constructor rendering only; exactly-once initialization, payment and rollback remain separate."
+  },
+  "modifiers": {
+    "theorems": [
+      {
+        "name": "Solidity.wrapMods",
+        "module": "Solidity.Syntax.Elab.Lower",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Modifier lowering implementation; order and return/revert preservation unproved."
+  },
+  "modifierPlaceholder": {
+    "theorems": [
+      {
+        "name": "Solidity.RawStmt.fillHole",
+        "module": "Solidity.Syntax.Elab.Lower",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Placeholder substitution; no generic continuation-preservation theorem."
+  },
+  "receiveFunction": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.readContract",
+        "module": "Solidity.Frontend.SolcJson.Contract",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Selected receive paths/refusals; no general raw-call correctness theorem."
+  },
+  "fallbackFunction": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.readContract",
+        "module": "Solidity.Frontend.SolcJson.Contract",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Selected fallback paths/refusals; arbitrary calldata dispatch not established."
+  },
+  "visibility": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.readContract",
+        "module": "Solidity.Frontend.SolcJson.Contract",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Visibility-dependent dispatch implementation; access-control preservation unproved."
+  },
+  "stateMutability": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.readContract",
+        "module": "Solidity.Frontend.SolcJson.Contract",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Mutability mode handling/refusals; no general static/payment-entry preservation theorem."
+  },
+  "stateVariables": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.renderInitializers",
+        "module": "Solidity.Frontend.SolcJson.Contract",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Initializer rendering, not complete declaration-order correctness."
+  },
+  "constants": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.constVal",
+        "module": "Solidity.Frontend.SolcJson.Body",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Supported constant evaluator; contextual/mobile-width completeness unproved."
+  },
+  "immutables": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.renderInitializers",
+        "module": "Solidity.Frontend.SolcJson.Contract",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Phased substitution implementation, not a general immutable-lifetime theorem."
+  },
+  "publicGetters": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.publicGetterPlan",
+        "module": "Solidity.Frontend.SolcJson.Getters",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Getter plan construction/refusals; general correspondence unproved."
+  },
+  "structDeclarations": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.readStructs",
+        "module": "Solidity.Frontend.SolcJson.Body",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Struct schema construction; recursive source legality remains open."
+  },
+  "enumDeclarations": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.specEnumValues",
+        "module": "Solidity.Frontend.SolcJson.Contract",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Declaration-based specification values; runtime conversion/range correctness separate."
+  },
+  "valueTypeDeclarations": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.valueTypeExpr",
+        "module": "Solidity.Frontend.SolcJson.Body",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Supported UDVT expression recognition; nominal preservation unproved."
+  },
+  "errorDeclarations": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.checkErrorAggregateParams",
+        "module": "Solidity.Frontend.SolcJson.Body",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Aggregate parameter checks only; full selector/evaluation/encoding correspondence open."
+  },
+  "eventDeclarations": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.readContract",
+        "module": "Solidity.Frontend.SolcJson.Contract",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Declaration importer only, not observable log preservation."
+  },
+  "usingFor": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.call",
+        "module": "Solidity.Frontend.SolcJson.Body",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Supported extension-call branches; complete applicability/evaluation preservation unproved."
+  },
+  "operatorAliases": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.operatorAlias?",
+        "module": "Solidity.Frontend.SolcJson.Body",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Compiler-selected alias recognition; nominal/operator correspondence unproved."
+  },
+  "integerTypes": {
+    "theorems": [
+      {
+        "name": "Solidity.Source.IntTy",
+        "module": "Solidity.Source.Const",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Independent source signedness/valid-width representation; no compiler preservation claim."
+  },
+  "addressTypes": {
+    "theorems": [
+      {
+        "name": "Solidity.Source.Val.address",
+        "module": "Solidity.Source.State",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Independent source address carries Fin(2^160); payable conversion correspondence remains separate."
+  },
+  "fixedBytesTypes": {
+    "theorems": [
+      {
+        "name": "Solidity.Source.Val.fixedBytes",
+        "module": "Solidity.Source.State",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Source fixed-byte value enforces length; operation/conversion preservation unproved here."
+  },
+  "dynamicBytesType": {
+    "theorems": [
+      {
+        "name": "Solidity.Source.Data.bytes",
+        "module": "Solidity.Source.State",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Source byte-content representation; copying/location rules need separate evidence."
+  },
+  "stringType": {
+    "theorems": [
+      {
+        "name": "Solidity.Source.Data.string",
+        "module": "Solidity.Source.State",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Source byte-content representation; member/conversion admission separate."
+  },
+  "dynamicArrays": {
+    "theorems": [
+      {
+        "name": "Solidity.Source.Data.array",
+        "module": "Solidity.Source.State",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Source length/indexed-content representation; no generic assignment/copy theorem."
+  },
+  "fixedArrays": {
+    "theorems": [
+      {
+        "name": "Solidity.Source.Data.array",
+        "module": "Solidity.Source.State",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Static length equals runtime length by representation; length evaluation/ABI preservation separate."
+  },
+  "mappings": {
+    "theorems": [
+      {
+        "name": "Solidity.Source.Data.mapping",
+        "module": "Solidity.Source.State",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Total function keyed representation; source-key admission/default/copy correctness separate."
+  },
+  "structTypes": {
+    "theorems": [
+      {
+        "name": "Solidity.structDef_nodup",
+        "module": "Solidity.AST",
+        "class": "a",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Only distinct keys in the repository struct table, not recursive source identity/layout correctness."
+  },
+  "enumTypes": {
+    "theorems": [
+      {
+        "name": "Solidity.Source.Val.enum",
+        "module": "Solidity.Source.State",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Source enum value carries Fin(layout size); ABI/conversion preservation separate."
+  },
+  "valueTypes": {
+    "theorems": [
+      {
+        "name": "Solidity.Source.Val.udvt",
+        "module": "Solidity.Source.State",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Source UDVT retains declaration identity and underlying value; erasure/operator correspondence unproved."
+  },
+  "internalFunctionTypes": {
+    "theorems": [
+      {
+        "name": "Solidity.Source.Val.internalFn",
+        "module": "Solidity.Source.State",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Source declaration identity representation; dispatch/uninitialized failure needs separate evidence."
+  },
+  "externalFunctionTypes": {
+    "theorems": [
+      {
+        "name": "Solidity.Source.Val.externalFn",
+        "module": "Solidity.Source.State",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Source bounded address/four-byte selector representation; external-call/compiler agreement separate."
+  },
+  "tupleTypes": {
+    "theorems": [
+      {
+        "name": "Solidity.Source.STy.tuple",
+        "module": "Solidity.Source.Types",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Source tuple representation; simultaneous scheduling not proved by constructor."
+  },
+  "storageLocation": {
+    "theorems": [
+      {
+        "name": "Solidity.Source.Val.storRef",
+        "module": "Solidity.Source.State",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Source typed logical storage reference; binding/copy correspondence separate."
+  },
+  "memoryLocation": {
+    "theorems": [
+      {
+        "name": "Solidity.Source.Val.memRef",
+        "module": "Solidity.Source.State",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Source memory address representation; allocation/alias/copy preservation unproved."
+  },
+  "calldataLocation": {
+    "theorems": [
+      {
+        "name": "Solidity.Source.Val.cdRef",
+        "module": "Solidity.Source.State",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Source calldata offset/length representation; immutability/bounds/compiler agreement separate."
+  },
+  "names": {
+    "theorems": [
+      {
+        "name": "Solidity.expandIdent",
+        "module": "Solidity.Syntax.Grammar",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Embedded-language name expansion; complete source declaration resolution unproved."
+  },
+  "tupleExpressions": {
+    "theorems": [
+      {
+        "name": "Solidity.expandExpr",
+        "module": "Solidity.Syntax.Grammar",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Tuple syntax expansion; capture/assignment timing needs semantic proof."
+  },
+  "inlineArrays": {
+    "theorems": [
+      {
+        "name": "Solidity.inlineArrayTy",
+        "module": "Solidity.Syntax.Elab.Lower",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Mobile/common-type inference implementation; no generic source-preservation theorem."
+  },
+  "memberAccess": {
+    "theorems": [
+      {
+        "name": "Solidity.fieldChain",
+        "module": "Solidity.Syntax.Grammar",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Member-chain construction, not resolved-type/member correctness."
+  },
+  "indexAccess": {
+    "theorems": [
+      {
+        "name": "Solidity.expandExpr",
+        "module": "Solidity.Syntax.Grammar",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Index syntax expansion; bounds/key conversion/once-only effects not proved here."
+  },
+  "rangeAccess": {
+    "theorems": [
+      {
+        "name": "Solidity.sliceElementCopy",
+        "module": "Solidity.Syntax.Elab.SliceCopy",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Slice-copy construction; general endpoint/view correctness separate."
+  },
+  "unaryArithmetic": {
+    "theorems": [
+      {
+        "name": "Solidity.expandExpr",
+        "module": "Solidity.Syntax.Grammar",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Unary syntax expansion; checked arithmetic/type preservation separate."
+  },
+  "increments": {
+    "theorems": [
+      {
+        "name": "Solidity.incDecParts?",
+        "module": "Solidity.Syntax.Grammar",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Syntax decomposition, not once-only lvalue/overflow correctness."
+  },
+  "deleteExpression": {
+    "theorems": [
+      {
+        "name": "Solidity.expandStmt",
+        "module": "Solidity.Syntax.Grammar",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Delete syntax expansion; type defaults/mapping retention require separate theorem."
+  },
+  "arithmetic": {
+    "theorems": [
+      {
+        "name": "Solidity.binParts?",
+        "module": "Solidity.Syntax.Grammar",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Operator decomposition, not arithmetic/overflow/division correspondence."
+  },
+  "bitwise": {
+    "theorems": [
+      {
+        "name": "Solidity.binParts?",
+        "module": "Solidity.Syntax.Grammar",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Operator decomposition; finite-width source meaning separate."
+  },
+  "shifts": {
+    "theorems": [
+      {
+        "name": "Solidity.binParts?",
+        "module": "Solidity.Syntax.Grammar",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Shift decomposition; signedness and width preservation unproved."
+  },
+  "comparisons": {
+    "theorems": [
+      {
+        "name": "Solidity.binParts?",
+        "module": "Solidity.Syntax.Grammar",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Comparison decomposition; source admissibility/meaning separate."
+  },
+  "shortCircuit": {
+    "theorems": [
+      {
+        "name": "Solidity.expandExpr",
+        "module": "Solidity.Syntax.Grammar",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Syntax expansion; skipped effects preservation unproved."
+  },
+  "conditional": {
+    "theorems": [
+      {
+        "name": "Solidity.expandExpr",
+        "module": "Solidity.Syntax.Grammar",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Syntax expansion; inferred/mobile type and lazy arms preservation separate."
+  },
+  "assignment": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.assignText",
+        "module": "Solidity.Frontend.SolcJson.Body",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Importer rendering; scheduling/reference-versus-copy preservation separate."
+  },
+  "compoundAssignment": {
+    "theorems": [
+      {
+        "name": "Solidity.pushCompoundParts?",
+        "module": "Solidity.Syntax.Grammar",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Syntax decomposition; target capture and arithmetic width correctness unproved."
+  },
+  "explicitConversions": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.sourceCast",
+        "module": "Solidity.Frontend.SolcJson.Body",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Cast rendering; legality/truncation/sign/enum preservation separate."
+  },
+  "implicitConversions": {
+    "theorems": [
+      {
+        "name": "Solidity.Source.implicit_int_range",
+        "module": "Solidity.Source.Types",
+        "class": "a",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Range inclusion for accepted independent-source integer widening only, not all source/compiler conversions."
+  },
+  "structConstruction": {
+    "theorems": [
+      {
+        "name": "Solidity.expandExpr",
+        "module": "Solidity.Syntax.Grammar",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Construction syntax expansion; allocation/order preservation unproved."
+  },
+  "namedArguments": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.call",
+        "module": "Solidity.Frontend.SolcJson.Body",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Named-call importer paths; complete binding/evaluation-order correctness unproved."
+  },
+  "newMemory": {
+    "theorems": [
+      {
+        "name": "Solidity.expandExpr",
+        "module": "Solidity.Syntax.Grammar",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "New-memory syntax expansion; freshness/default/failure proof separate."
+  },
+  "functionCalls": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.call",
+        "module": "Solidity.Frontend.SolcJson.Body",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Call importer; receiver/argument capture and fresh-frame preservation unproved here."
+  },
+  "callOptions": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.call",
+        "module": "Solidity.Frontend.SolcJson.Body",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Implemented option branches/refusals, not general gas/salt/value correctness."
+  },
+  "metaTypeExpression": {
+    "theorems": [
+      {
+        "name": "Solidity.typeBoundExpr",
+        "module": "Solidity.Syntax.Grammar",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Recognized metatype-bound construction; general upstream admission separate."
+  },
+  "blocks": {
+    "theorems": [
+      {
+        "name": "Solidity.sound_block",
+        "module": "Solidity.Calculus.SoundControl",
+        "class": "a",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Intrinsic block unfolding pops locals; source shadowing/admission preservation separate."
+  },
+  "uncheckedBlock": {
+    "theorems": [
+      {
+        "name": "Solidity.uncheckStmts",
+        "module": "Solidity.Syntax.Elab.Lower",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Unchecked syntax rewriting, not preservation."
+  },
+  "variableDeclarations": {
+    "theorems": [
+      {
+        "name": "Solidity.TRun.declLocal",
+        "module": "Solidity.Semantics.Run",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Intrinsic local initialization definition."
+  },
+  "expressionStatements": {
+    "theorems": [
+      {
+        "name": "Solidity.RawStmt.eval",
+        "module": "Solidity.Syntax.Raw",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Argument-evaluation constructor, not source correspondence."
+  },
+  "whileStatement": {
+    "theorems": [
+      {
+        "name": "Solidity.Stmt.sound_loop",
+        "module": "Solidity.Calculus.SoundLoops",
+        "class": "a",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Intrinsic loop rule soundness, including its invariant/unwind alternatives. This does not prove source while lowering or unconditional termination (F2/F3)."
+  },
+  "forStatement": {
+    "theorems": [
+      {
+        "name": "Solidity.lowerLoops",
+        "module": "Solidity.Syntax.Elab.Lower",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Source loop lowering; intrinsic loop soundness does not prove this transformation."
+  },
+  "doWhileStatement": {
+    "theorems": [
+      {
+        "name": "Solidity.lowerLoops",
+        "module": "Solidity.Syntax.Elab.Lower",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Source loop lowering implementation only."
+  },
+  "continueStatement": {
+    "theorems": [
+      {
+        "name": "Solidity.lowerLoops",
+        "module": "Solidity.Syntax.Elab.Lower",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Flag-based abrupt-control lowering; preservation unproved."
+  },
+  "returnStatement": {
+    "theorems": [
+      {
+        "name": "Solidity.lowerReturns",
+        "module": "Solidity.Syntax.Elab.Lower",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Return lowering used during inlining, not general correctness."
+  },
+  "tryStatement": {
+    "theorems": [
+      {
+        "name": "Solidity.Stmt.sound_tryCall",
+        "module": "Solidity.Calculus.SoundCalls",
+        "class": "b",
+        "premises": [
+          "hp: exact Stmt.step result",
+          "sigma.tx.ext: supplied typed external-outcome table"
+        ],
+        "direction": "model"
+      },
+      {
+        "name": "Solidity.holdsC_tryCb",
+        "module": "Solidity.Calculus.CallbackSound.Rules",
+        "class": "b",
+        "premises": [
+          "hI: I.FO = true",
+          "hT: I.hasTransfer = false",
+          "hx: closed invariant at caller",
+          "hok: invariant-preserving success continuation",
+          "herr: Error continuation",
+          "hpnc: panic-code continuation",
+          "hoth: other-error continuation"
+        ],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Ordinary typed call outcomes use sigma.tx.ext; the callback rule separately assumes a first-order transfer-free invariant and all named continuation obligations. No arbitrary external-code, source-lowering or solc correspondence proof (F3/F10)."
+  },
+  "catchClauses": {
+    "theorems": [
+      {
+        "name": "Solidity.CatchKind.decode_reason",
+        "module": "Solidity.Semantics.Run",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Definitional reason-decoding identity, not full catch correctness."
+  },
+  "revertStatement": {
+    "theorems": [
+      {
+        "name": "Solidity.TRun.revertData",
+        "module": "Solidity.Semantics.Run",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Model payload execution definition, not full source/solc agreement."
+  },
+  "emitStatement": {
+    "theorems": [
+      {
+        "name": "Solidity.RawStmt.eval",
+        "module": "Solidity.Syntax.Raw",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Definition-level trace: emit arguments are evaluated for effects/failure and the log is dropped. No log-observation theorem; this is class d, not proof of the full row."
+  },
+  "canonicalRethrow": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.memoryRethrow?",
+        "module": "Solidity.Frontend.SolcJson.Body",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Canonical memory-rethrow recognizer, not preservation proof."
+  },
+  "assertBuiltin": {
+    "theorems": [
+      {
+        "name": "Solidity.assertStep_sound",
+        "module": "Solidity.Calculus.SoundControl",
+        "class": "a",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Intrinsic assert rule soundness; the proof does not establish exact Solidity panic-byte observations (F5)."
+  },
+  "requireBuiltin": {
+    "theorems": [
+      {
+        "name": "Solidity.requireStep_sound",
+        "module": "Solidity.Calculus.SoundControl",
+        "class": "a",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Intrinsic require rule soundness; exact source error payload encoding and all lowering contexts remain separate (F3/F5)."
+  },
+  "revertBuiltin": {
+    "theorems": [
+      {
+        "name": "Solidity.TRun.revertData",
+        "module": "Solidity.Semantics.Run",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Own-model failure/payload execution only."
+  },
+  "addmodBuiltin": {
+    "theorems": [
+      {
+        "name": "Solidity.ModOp.evalT",
+        "module": "Solidity.Semantics.Ops",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Wide addition then reduction by definition."
+  },
+  "mulmodBuiltin": {
+    "theorems": [
+      {
+        "name": "Solidity.ModOp.evalT",
+        "module": "Solidity.Semantics.Ops",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Wide multiplication then reduction by definition."
+  },
+  "keccakBuiltin": {
+    "theorems": [
+      {
+        "name": "Solidity.keccakBytes",
+        "module": "Solidity.Semantics.Heap",
+        "class": "c",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Computed model Keccak is backed by five fixed guards in Solidity/Keccak.lean. Finite vectors do not prove cryptographic or solc agreement or injectivity (F4)."
+  },
+  "sha256Builtin": {
+    "theorems": [
+      {
+        "name": "Solidity.sha256Bytes",
+        "module": "Solidity.Semantics.Heap",
+        "class": "c",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Computed implementation with fixed hash vectors, not universal precompile agreement."
+  },
+  "ripemd160Builtin": {
+    "theorems": [
+      {
+        "name": "Solidity.ripemd160Bytes",
+        "module": "Solidity.Semantics.Heap",
+        "class": "c",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Computed implementation with fixed hash vectors, not universal precompile agreement."
+  },
+  "ecrecoverBuiltin": {
+    "theorems": [
+      {
+        "name": "Solidity.ecrecoverBytes",
+        "module": "Solidity.Semantics.Heap",
+        "class": "c",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Computed recovery with finite controls; group-law/precompile correctness still open."
+  },
+  "wrapUnwrap": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.call",
+        "module": "Solidity.Frontend.SolcJson.Body",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Importer wrap/unwrap branch only; complete nominal preservation unproved."
+  },
+  "bytesConcat": {
+    "theorems": [
+      {
+        "name": "Solidity.abiEncodeWith",
+        "module": "Solidity.Syntax.Elab.Arms",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Shared concatenation encoder implementation, not a general correctness theorem."
+  },
+  "stringConcat": {
+    "theorems": [
+      {
+        "name": "Solidity.abiEncodeWith",
+        "module": "Solidity.Syntax.Elab.Arms",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Shared concatenation encoder implementation, not a general correctness theorem."
+  },
+  "msgValue": {
+    "theorems": [
+      {
+        "name": "Solidity.TTx.msgValue",
+        "module": "Solidity.Semantics.State",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Context value field; payment/frame validity requires separate assumptions."
+  },
+  "thisAddress": {
+    "theorems": [
+      {
+        "name": "Solidity.TTx.selfAddress",
+        "module": "Solidity.Semantics.State",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "uint256 model field, not address160/compiler-dispatch correspondence."
+  },
+  "addressBalance": {
+    "theorems": [
+      {
+        "name": "Solidity.State.selfBalance",
+        "module": "Solidity.Semantics.State",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Own-model balance field, not arbitrary chain-account execution proof."
+  },
+  "internalCalls": {
+    "theorems": [
+      {
+        "name": "Solidity.Stmt.sound_call",
+        "module": "Solidity.Calculus.SoundCalls",
+        "class": "a",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Intrinsic call-rule soundness after lowering; no importer correctness claim."
+  },
+  "recursiveCalls": {
+    "theorems": [
+      {
+        "name": "Solidity.sound_recursiveCallUnfold",
+        "module": "Solidity.Calculus.SoundControl",
+        "class": "a",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Depth-indexed unfolding, not unconditional termination."
+  },
+  "externalTypedCalls": {
+    "theorems": [
+      {
+        "name": "Solidity.Stmt.sound_tryCall",
+        "module": "Solidity.Calculus.SoundCalls",
+        "class": "b",
+        "premises": [
+          "hp: exact Stmt.step result",
+          "sigma.tx.ext: supplied typed external-outcome table"
+        ],
+        "direction": "model"
+      },
+      {
+        "name": "Solidity.holdsC_tryCb",
+        "module": "Solidity.Calculus.CallbackSound.Rules",
+        "class": "b",
+        "premises": [
+          "hI: I.FO = true",
+          "hT: I.hasTransfer = false",
+          "hx: closed invariant at caller",
+          "hok: invariant-preserving success continuation",
+          "herr: Error continuation",
+          "hpnc: panic-code continuation",
+          "hoth: other-error continuation"
+        ],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Ordinary typed call outcomes use sigma.tx.ext; the callback rule separately assumes a first-order transfer-free invariant and all named continuation obligations. No arbitrary external-code, source-lowering or solc correspondence proof (F3/F10)."
+  },
+  "externalSelfCalls": {
+    "theorems": [
+      {
+        "name": "Solidity.Premise.sound_trySelfBox",
+        "module": "Solidity.Calculus.SoundCalls",
+        "class": "a",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Intrinsic self=true boxed-call rule executes the supplied modeled self body. It is distinct from the ordinary external oracle branch; no source lowering, complete caller-frame or solc correspondence claim."
+  },
+  "extensionCalls": {
+    "theorems": [
+      {
+        "name": "Solidity.Stmt.sound_call",
+        "module": "Solidity.Calculus.SoundCalls",
+        "class": "a",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Intrinsic internal call after lowering; extension resolution not proved."
+  },
+  "functionValues": {
+    "theorems": [
+      {
+        "name": "Solidity.fnTag",
+        "module": "Solidity.Syntax.Elab.Values",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Finite function-tag implementation, not machine-address equality."
+  },
+  "valueOption": {
+    "theorems": [
+      {
+        "name": "Solidity.ExtCall.keyT",
+        "module": "Solidity.Semantics.Run",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Call-key construction, not payment/rollback refinement."
+  },
+  "sendTransfer": {
+    "theorems": [
+      {
+        "name": "Solidity.holdsC_transferCb",
+        "module": "Solidity.Calculus.CallbackSound.Rules",
+        "class": "b",
+        "premises": [
+          "hI: I.FO = true",
+          "hT: I.hasTransfer = false",
+          "hx: invariant after booked payment",
+          "hr: continuation after invariant-preserving havoc"
+        ],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Callback invariant and continuation obligations, not a gas-based no-callback theorem."
+  },
+  "emptyDataValueCall": {
+    "theorems": [
+      {
+        "name": "Solidity.ContractWorld.World.call_empty",
+        "module": "Solidity.Semantics.ContractWorldCertificates",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Existing operation equation/packaging, not new source correspondence."
+  },
+  "newContract": {
+    "theorems": [
+      {
+        "name": "Solidity.ContractWorld.World.create_installs",
+        "module": "Solidity.Semantics.ContractWorld",
+        "class": "a",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Successful model creation installs storage; no complete dynamic source creation proof."
+  },
+  "creationTry": {
+    "theorems": [
+      {
+        "name": "Solidity.ContractWorld.CreationTryFrame.atomic_tail_failure",
+        "module": "Solidity.Semantics.CreationTryFrame",
+        "class": "a",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Model creation-frame failure atomicity only."
+  },
+  "callbackSemantics": {
+    "theorems": [
+      {
+        "name": "Solidity.holdsC_tryCb",
+        "module": "Solidity.Calculus.CallbackSound.Rules",
+        "class": "b",
+        "premises": [
+          "hI: I.FO = true",
+          "hT: I.hasTransfer = false",
+          "hx: invariant at external exit",
+          "hok: success continuation",
+          "herr: error continuation",
+          "hpnc: panic continuation",
+          "hoth: other-error continuation"
+        ],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Invariant-based callback abstraction, not execution of arbitrary external code."
+  },
+  "externalLibraryCalls": {
+    "theorems": [
+      {
+        "name": "Solidity.ContractWorld.Operation.libraryCall_certificate",
+        "module": "Solidity.Semantics.ContractWorldCertificates",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Definition-level operation/result-erasure packaging."
+  },
+  "abiEncode": {
+    "theorems": [
+      {
+        "name": "Solidity.abiEncodeNested?",
+        "module": "Solidity.Syntax.Elab.Lower",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Nested encoder lowering, not general source correctness."
+  },
+  "abiEncodePacked": {
+    "theorems": [
+      {
+        "name": "Solidity.abiEncodeWith",
+        "module": "Solidity.Syntax.Elab.Arms",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Packed encoder implementation branch, not proof of complete shape coverage."
+  },
+  "abiEncodeWithSelector": {
+    "theorems": [
+      {
+        "name": "Solidity.encodeSelector?",
+        "module": "Solidity.Syntax.Elab.Lower",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Selector-prefix construction implementation."
+  },
+  "abiEncodeWithSignature": {
+    "theorems": [
+      {
+        "name": "Solidity.encodeSelector?",
+        "module": "Solidity.Syntax.Elab.Lower",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Signature-selector construction implementation."
+  },
+  "abiEncodeCall": {
+    "theorems": [
+      {
+        "name": "Solidity.encodeCallTypes?",
+        "module": "Solidity.Syntax.Elab.Values",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Parameter-type lookup only, not complete encodeCall correctness."
+  },
+  "abiDecode": {
+    "theorems": [
+      {
+        "name": "Solidity.abiDecodeWith",
+        "module": "Solidity.Syntax.Elab.Lower",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Decoder lowering implementation, not all recursive ABI shapes."
+  },
+  "typeBounds": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.typeBound?",
+        "module": "Solidity.Frontend.SolcJson.Body",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Compiler metadata bound extraction, not universal source agreement."
+  },
+  "functionSelector": {
+    "theorems": [
+      {
+        "name": "Solidity.fnSelector?",
+        "module": "Solidity.Syntax.Elab.Values",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Function selector metadata computation; general signature agreement unproved."
+  },
+  "functionAddress": {
+    "theorems": [
+      {
+        "name": "Solidity.fnPure",
+        "module": "Solidity.Syntax.Elab.Values",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Packed external-function address projection by implementation."
+  },
+  "arrayLength": {
+    "theorems": [
+      {
+        "name": "Solidity.Storage.len",
+        "module": "Solidity.Semantics.Storage.Ops",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Logical array length by definition."
+  },
+  "arrayPush": {
+    "theorems": [
+      {
+        "name": "Solidity.pushStep_sound",
+        "module": "Solidity.Calculus.SoundStore",
+        "class": "a",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Intrinsic typed storage push rule soundness, not complete source evaluation-order or physical layout agreement."
+  },
+  "arrayPushReference": {
+    "theorems": [
+      {
+        "name": "Solidity.Storage.pushPlace_len",
+        "module": "Solidity.Semantics.Storage.Ops",
+        "class": "a",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Successful logical push-place grows length; no full source-copy/order theorem."
+  },
+  "arrayPop": {
+    "theorems": [
+      {
+        "name": "Solidity.popStep_sound",
+        "module": "Solidity.Calculus.SoundStore",
+        "class": "a",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Intrinsic typed storage pop rule soundness, not complete source mapping-tail or physical slot agreement."
+  },
+  "storageCopy": {
+    "theorems": [
+      {
+        "name": "Solidity.TRun.assign",
+        "module": "Solidity.Semantics.Run",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Assignment evaluates source value and writes logical storage; full deep-copy/source agreement unproved."
+  },
+  "memoryAliasing": {
+    "theorems": [
+      {
+        "name": "Solidity.Heap.readAddr",
+        "module": "Solidity.Semantics.Run",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Logical heap-address lookup implementation."
+  },
+  "storageAliasing": {
+    "theorems": [
+      {
+        "name": "Solidity.Storage.findLive",
+        "module": "Solidity.Semantics.Storage.Ops",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Live logical storage path lookup, not reference-copy correctness."
+  },
+  "deleteMappingTails": {
+    "theorems": [
+      {
+        "name": "Solidity.SVal.defaultOf",
+        "module": "Solidity.Semantics.Storage.Ops",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Model defaulting/mapping-tail behavior by definition."
+  },
+  "danglingReferences": {
+    "theorems": [
+      {
+        "name": "Solidity.Storage.findLive",
+        "module": "Solidity.Semantics.Storage.Ops",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Live-path behavior; general Solidity dangling-reference agreement open."
+  },
+  "transientState": {
+    "theorems": [
+      {
+        "name": "Solidity.ContractWorld.World.resetTransient_persistent",
+        "module": "Solidity.Semantics.TransientWorld",
+        "class": "a",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Persistent state survives transient reset; remaining world/source/layout obligations separate."
+  },
+  "uncheckedArithmetic": {
+    "theorems": [
+      {
+        "name": "Solidity.uncheckStmts",
+        "module": "Solidity.Syntax.Elab.Lower",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Unchecked syntax rewriting only. No theorem that every intermediate source width/mode, called function lexical mode, division or indexing is preserved (F3/F6)."
+  },
+  "evaluationOrder": {
+    "theorems": [
+      {
+        "name": "Solidity.Args.evalT",
+        "module": "Solidity.Semantics.Run",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Model argument traversal definition only. It does not impose a universal source order or prove the selected compiler pipeline preserves scheduling (F3)."
+  },
+  "exactConstants": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.constVal",
+        "module": "Solidity.Frontend.SolcJson.Body",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Supported exact constant evaluation implementation, not complete contextual/mobile typing correspondence."
+  },
+  "defaultInitialization": {
+    "theorems": [
+      {
+        "name": "Solidity.Storage.init",
+        "module": "Solidity.Semantics.Storage.Ops",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Logical storage defaults by definition; location/function defaults separate."
+  },
+  "referenceCopyRules": {
+    "theorems": [
+      {
+        "name": "Solidity.State.copyStToM",
+        "module": "Solidity.Semantics.State",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Storage-to-memory copy implementation only; baseline examples/tests are not a general proof."
+  },
+  "panicCodes": {
+    "theorems": [
+      {
+        "name": "Solidity.TRun.selfPanicCode",
+        "module": "Solidity.Semantics.Run",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Model self-call panic-code table; baseline examples/tests do not establish all panic-byte agreement."
+  },
+  "revertPayloads": {
+    "theorems": [
+      {
+        "name": "Solidity.TRun.revertData",
+        "module": "Solidity.Semantics.Run",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Model payload assembly; baseline examples/tests do not prove arbitrary payload correspondence."
+  },
+  "rollback": {
+    "theorems": [
+      {
+        "name": "Solidity.StaticInvocation.Frame.rollback",
+        "module": "Solidity.Semantics.StaticInvocation",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Definitional checkpoint equality stored by the Frame relation; not a substantive operational/source rollback theorem."
+  },
+  "abiEntryValidation": {
+    "theorems": [
+      {
+        "name": "Solidity.AbiEntry.verdict_revert_iff",
+        "module": "Solidity.Semantics.AbiEntryProofs",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Definitional classification of the entry checker result; this wrapper identity does not establish decoder validity, source acceptance or complete shape/range checks."
+  },
+  "constructorLifetime": {
+    "theorems": [
+      {
+        "name": "Solidity.Lifetime.System.Init",
+        "module": "Solidity.Semantics.Lifetime",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Initial lifetime states require successful admitted deployment by definition, not arbitrary typed states."
+  },
+  "nonpayableEntry": {
+    "theorems": [
+      {
+        "name": "Solidity.Lifetime.System.run",
+        "module": "Solidity.Semantics.Lifetime",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "External entry rejects nonzero value when not payable; internal calls use separate semantics."
+  },
+  "staticCallRestriction": {
+    "theorems": [
+      {
+        "name": "Solidity.StaticInvocation.Exec.storage",
+        "module": "Solidity.Semantics.StaticInvocation",
+        "class": "a",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Static model execution preserves storage; other resource/observable restrictions separate."
+  },
+  "termination": {
+    "theorems": [
+      {
+        "name": "Solidity.TLoop.run_measure",
+        "module": "Solidity.Semantics.Termination",
+        "class": "b",
+        "premises": [
+          "keep: invariant preserved",
+          "decreases: rank strictly decreases",
+          "stop: terminal postcondition",
+          "hI: initial invariant"
+        ],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Natural-rank conditional termination; no totality claim for all source programs."
+  },
+  "worldAssumptions": {
+    "theorems": [
+      {
+        "name": "Solidity.TTx.ext",
+        "module": "Solidity.Semantics.State",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Supplied typed external-outcome table, not derived chain behavior."
+  },
+  "typeValidation": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.Admission.scan",
+        "module": "Solidity.Frontend.SolcJson.Admission",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Admission scanner, not a replacement source typechecker/correspondence theorem."
+  },
+  "featureDetection": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.Source.ScopeScan.within",
+        "module": "Solidity.Frontend.Source",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Stored feature-list contract follows admitted constructor; not extractor completeness."
+  },
+  "creationCode": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.Source.readCompilerCode",
+        "module": "Solidity.Frontend.Source",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Reads supplied compiler bytes; source/settings identity and deployed-code agreement separate."
+  },
+  "runtimeCode": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.Source.readCompilerCode",
+        "module": "Solidity.Frontend.Source",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "Reads supplied compiler bytes; deployed account-code agreement unproved."
+  },
+  "logicalStorageBase": {
+    "theorems": [
+      {
+        "name": "Solidity.Frontend.Admission.scan",
+        "module": "Solidity.Frontend.SolcJson.Admission",
+        "class": "d",
+        "premises": [],
+        "direction": "model"
+      }
+    ],
+    "citationNotes": "In-range literal-base admission only, not physical slot/layout correspondence."
+  }
+}

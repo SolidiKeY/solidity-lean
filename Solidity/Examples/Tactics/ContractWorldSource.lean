@@ -32,17 +32,17 @@ private structure Snapshot where
   outcome : Bool
   deriving DecidableEq
 
-solc_world_factory "../../../tests/solc/ContractWorld.ast.json" hash 0x7e8caacffff380a9
+solc_world_factory "../../../tests/solc/ContractWorld.ast.json" hash 0x5fd9f4ed2aa83db0
   contract "WorldFactory" function "make" as Direct
-solc_world_factory "../../../tests/solc/ContractWorld.ast.json" hash 0x7e8caacffff380a9
+solc_world_factory "../../../tests/solc/ContractWorld.ast.json" hash 0x5fd9f4ed2aa83db0
   contract "WorldFactory" function "tryMake" as Tried
-solc_world_factory "../../../tests/solc/ContractWorld.ast.json" hash 0x7e8caacffff380a9
+solc_world_factory "../../../tests/solc/ContractWorld.ast.json" hash 0x5fd9f4ed2aa83db0
   contract "WorldFactory" function "trySuccess" as Succeeded
-solc_world_factory "../../../tests/solc/ContractWorld.ast.json" hash 0x7e8caacffff380a9
+solc_world_factory "../../../tests/solc/ContractWorld.ast.json" hash 0x5fd9f4ed2aa83db0
   contract "WorldFactory" function "failMake" as Failed
-solc_world_factory "../../../tests/solc/ContractWorld.ast.json" hash 0x7e8caacffff380a9
+solc_world_factory "../../../tests/solc/ContractWorld.ast.json" hash 0x5fd9f4ed2aa83db0
   contract "WorldFactory" function "implicitMake" as Implicit
-solc_world_library "../../../tests/solc/ContractWorld.ast.json" hash 0x7e8caacffff380a9
+solc_world_library "../../../tests/solc/ContractWorld.ast.json" hash 0x5fd9f4ed2aa83db0
   contract "WorldLibraryUser" function "mutate" as Linked
 
 private def zero : Word := ⟨0, by decide +kernel⟩
@@ -299,27 +299,27 @@ theorem source_operation_argument_exhaustion (w : World Tried.contracts) :
 
 /-- error: solidity.worldFactory.body: expected exactly one creation return or creation try -/
 #guard_msgs in
-solc_world_factory "../../../tests/solc/ContractWorld.ast.json" hash 0x7e8caacffff380a9
+solc_world_factory "../../../tests/solc/ContractWorld.ast.json" hash 0x5fd9f4ed2aa83db0
   contract "WorldFactory" function "extra" as Extra
 
 /-- error: solidity.worldFactory.arguments: factory parameters are not lowered yet -/
 #guard_msgs in
-solc_world_factory "../../../tests/solc/ContractWorld.ast.json" hash 0x7e8caacffff380a9
+solc_world_factory "../../../tests/solc/ContractWorld.ast.json" hash 0x5fd9f4ed2aa83db0
   contract "WorldFactory" function "dynamicArgument" as Dynamic
 
 /-- error: solidity.worldLibrary.body: exactly one direct library call required -/
 #guard_msgs in
-solc_world_library "../../../tests/solc/ContractWorld.ast.json" hash 0x7e8caacffff380a9
+solc_world_library "../../../tests/solc/ContractWorld.ast.json" hash 0x5fd9f4ed2aa83db0
   contract "WorldLibraryUser" function "extra" as ExtraLibrary
 
 /-- error: solidity.worldFactory.constructor: external contract/library calls need world-aware statements -/
 #guard_msgs in
-solc_world_factory "../../../tests/solc/ContractWorld.ast.json" hash 0x7e8caacffff380a9
+solc_world_factory "../../../tests/solc/ContractWorld.ast.json" hash 0x5fd9f4ed2aa83db0
   contract "WorldFactory" function "callsExternal" as ExternalConstructor
 
 /-- error: solidity.worldFactory.constructor: balance observations need the global world expression interface -/
 #guard_msgs in
-solc_world_factory "../../../tests/solc/ContractWorld.ast.json" hash 0x7e8caacffff380a9
+solc_world_factory "../../../tests/solc/ContractWorld.ast.json" hash 0x5fd9f4ed2aa83db0
   contract "WorldFactory" function "readsBalance" as BalanceConstructor
 
 #print axioms source_factory

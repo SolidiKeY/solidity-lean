@@ -1,0 +1,42 @@
+{
+ "Solidity/Lowering/G16/Arithmetic.lean:Solidity.Lowering.G16.Arithmetic.CheckedAssignment.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/Arithmetic.lean:Solidity.Lowering.G16.Arithmetic.CheckedSigned.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/Arithmetic.lean:Solidity.Lowering.G16.Arithmetic.CheckedUnsigned.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/Arithmetic.lean:Solidity.Lowering.G16.Arithmetic.SignedQuotRem.assignment_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/Arithmetic.lean:Solidity.Lowering.G16.Arithmetic.SignedQuotRem.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/Arithmetic.lean:Solidity.Lowering.G16.Arithmetic.TypedPower.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/Arithmetic.lean:Solidity.Lowering.G16.Arithmetic.wrapping_assignment_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/Arithmetic.lean:Solidity.Lowering.G16.Arithmetic.wrapping_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

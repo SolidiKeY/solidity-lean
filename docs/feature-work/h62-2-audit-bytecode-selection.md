@@ -1930,6 +1930,22 @@ Checkpoint static exception: doc-paths exits1 for newly adopted master's
 as an upstream documentation wait, not counted as a passing gate.
 
 
+A fresh selector-only revalidation uses the existing generic field extractor
+for four of these already-listed certificate targets. It retains the actual
+certificate, a nonempty caller tail, capacity and representation premises, and
+checks three-byte refusal versus four-byte selector acceptance. All four fields
+and five boundary controls passed one bounded native check in 9.516 seconds
+(container peak 196,513,792 bytes), with standard-only axioms and 70 exact frozen
+import bindings. This is **zero new domain/census credit**; the earlier 103-target
+capture is not revalidated by this packet. No native loading, gas, Source/runtime,
+G01 or whole-lane acceptance follows. Redundant public fixture copies were
+removed; exact regenerated inputs and the reconciliation verifier are private:
+
+```text
+evidence: 1f259a17b20a242d2756db6a17c53eccd01e2d7e evidence/solidity-parallel-20261103/executable-bytecode/head-check-revalidation-df7396f9.json
+```
+
+
 ### Ordered binder/head accounting (2026-11-07)
 
 The generic metadata helper now preserves each supplied declaration's ordered
@@ -3070,3 +3086,59 @@ These gasless intrinsic IR controls do not establish arbitrary-body completion,
 Source/runtime/G01 correspondence, physical byte loading, charged/fork behavior,
 full Bridge/package/performance validation or original census closure. The
 703-source/190-core/37-Bridge obligations and all existing STOPs remain open.
+
+
+### Source-range replay constraints
+
+`source_range_bindings` requires pinned UTF-8 snapshots and retains missing
+ranges explicitly. Selection columns are Unicode codepoint offsets on LF-based
+lines; line slices can extend beyond a declaration. Binding those bytes must
+not be treated as matching a statement, identifying its owner, instantiating
+inherited obligations or supplying a witness. Replay inputs, recipe, raw-output
+reassembly and oversized-input retention details are indexed privately:
+
+```text
+evidence: 3985e3705bf522bddefcf6a653698320ce690600 evidence/solidity-parallel-20261103/executable-bytecode/source-range-accounting-77ed8f61/INDEX.json
+```
+
+
+### Projection report slices
+
+Keep original kernel kind independent of presentation kind: proof projections
+in this frozen snapshot are original theorem constants even when displayed as
+`field`. Neither label supplies a lexical source-candidate match. A
+`reported_proof` entry points to separately validated native receipts; it does
+not make the pure index a proof checker. `Unreported` is relative to the supplied
+artifact slice, not an assertion that a statement lacks a witness. Replay and
+native-packet identities for the field-report slice are indexed privately:
+
+```text
+evidence: 30264d332317fbc05cc9719da0ccd2e5982fa945 evidence/solidity-parallel-20261103/executable-bytecode/proof-field-report-links-1d683ac4/INDEX.json
+```
+
+
+### Disjoint inspection slices
+
+Never flatten inspection fingerprints to feed a single-snapshot report join.
+`federated_hypothesis_reports` applies that join independently and refuses
+shared declaration names or module scopes. Keep each slice's fingerprint,
+module roster (including empty entries), report pointers and unresolved records.
+Union counts do not establish a coherent kernel environment or proof/source
+acceptance. Retain unsupported attempts beside successful report pointers;
+unsupported is neither refutation nor additional domain credit.
+
+Before scheduling an apparently unreported target, reconcile all available
+policy reports and the existing manual target roster. Missing from one slice
+means no pointer in that slice, not that the target has never been treated.
+The current-code reconciliation retains 564 distinct reported proof targets,
+518 unsupported-only targets and 2,221 no-report records across 3,303 supplied
+records in two separate inspection slices. It also retains the 103-entry manual
+roster as non-proof metadata. These are pointer counts with **zero new witness
+or census credit**; 38 core and 37 Bridge modules remain uninspected. The old
+capture is preserved: recomputation differs only in the collector hash, rather
+than relabelling that capture as current-code validation. Exact consumed
+historical inputs, current recipe/output and all gaps are indexed privately:
+
+```text
+evidence: 8a25f378a0c0cead2ab4f55ac2b9d69d935ad939 evidence/solidity-parallel-20261103/executable-bytecode/report-reconciliation-3b91707b/INDEX.json
+```

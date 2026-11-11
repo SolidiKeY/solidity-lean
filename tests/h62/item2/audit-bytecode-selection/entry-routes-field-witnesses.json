@@ -1,0 +1,10 @@
+{
+  "entry_routes_selected_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.EntryRoutesCertificate.selected",
+    "proof": "\u27e8EntryRoutes.route,EntryRoutes.certificate,payableContract,3,payableTable,entryReceive,entryFallback,True.intro\u27e9"
+  },
+  "entry_routes_executed_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.EntryRoutesCertificate.executed",
+    "proof": "\u27e8EntryRoutes.route,EntryRoutes.certificate,payableContract,3,payableTable,entryReceive,entryFallback,entryCompilation,entry_found,entryMachine (wmod 5) (wmod 4) (wmod 0),wmod 5,wmod 4,rfl,rfl,True.intro\u27e9"
+  }
+}

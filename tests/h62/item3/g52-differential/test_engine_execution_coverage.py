@@ -11,6 +11,7 @@ import os
 import shutil
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[4]
@@ -28,6 +29,49 @@ class CoverageControls(unittest.TestCase):
         self.assertEqual(result['unprocessed_ranges'], [[80, 21124]])
         self.assertFalse(result['differential_complete'])
         self.assertEqual(result['source_matches'], 0)
+
+    def test_mixed_empty_and_reordered_ranges_keep_input_binding(self):
+        labels = ['review-bound-profile-856', 'review-bound-20-40', 'review-bound-0-20']
+        result = MODULE.coverage(REPO, BULK, labels)
+        self.assertEqual(result['processed_unique_cases'], 41)
+        self.assertEqual(result['counts'], {'unsupported': 1, 'payload_reference_match': 40})
+        self.assertEqual(result['validated_blocks'], 40)
+        self.assertEqual([run['label'] for run in result['runs']], labels)
+        self.assertEqual(result['source_matches'], 0)
+
+    def test_decoded_transaction_boundaries_refuse_corruption(self):
+        # Fault-inject decoder transport results, not corpus/native fixtures.
+        # Cardinality and run boundaries must still bind every observed identity.
+        labels = ['review-bound-0-20', 'review-bound-20-40']
+        first_rows = [json.loads(line) for line in
+                      (BULK/'evidence/review-bound-0-20.jsonl').read_text().splitlines()]
+        boundary = sum(len(block['transactions']) for row in first_rows for block in row['blocks'])
+        real_run = MODULE.subprocess.run
+        for mutation in ['not-list', 'truncated', 'extra', 'null-at-boundary', 'cross-range']:
+            def corrupt(command, *args, **kwargs):
+                result = real_run(command, *args, **kwargs)
+                if isinstance(command, list) and len(command) > 2 and str(command[2]).endswith('/engine_input_transactions.mjs'):
+                    decoded = json.loads(result.stdout)
+                    self.assertGreater(len(decoded), boundary)
+                    if mutation == 'not-list':
+                        decoded = {}
+                    elif mutation == 'truncated':
+                        decoded.pop()
+                    elif mutation == 'extra':
+                        decoded.append(decoded[-1])
+                    elif mutation == 'null-at-boundary':
+                        decoded[boundary] = None
+                    else:
+                        self.assertNotEqual(decoded[0], decoded[boundary])
+                        decoded[0], decoded[boundary] = decoded[boundary], decoded[0]
+                    return MODULE.subprocess.CompletedProcess(result.args, result.returncode,
+                                                              json.dumps(decoded), result.stderr)
+                return result
+            message = ('input transaction expectation count mismatch' if mutation in
+                       ['not-list', 'truncated', 'extra'] else 'transaction identity differs from pinned input')
+            with self.subTest(mutation=mutation), mock.patch.object(MODULE.subprocess, 'run', side_effect=corrupt):
+                with self.assertRaisesRegex(ValueError, message):
+                    MODULE.coverage(REPO, BULK, labels)
 
     def test_duplicate_overlap_and_binding_only_rejected(self):
         for labels, error in [(['review-bound-0-20', 'review-bound-0-20'], 'duplicate'),
@@ -173,6 +217,50 @@ class CoverageControls(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, error):
                     MODULE.coverage(REPO, root, ['negative-control'])
 
+
+    def test_warm_inventory_cache_rejects_coordinated_byte_substitution(self):
+        # Changing only gzip metadata leaves decoded identities unchanged. A
+        # warm expected-metadata cache must still require archive-identical bytes.
+        with tempfile.TemporaryDirectory(prefix='inventory-cache-control-', dir=BULK) as temporary:
+            root = Path(temporary)
+            for name in ['evidence', 'reference', 'upstream']:
+                (root/name).mkdir()
+            for name in ['engine-x-inputs.jsonl.gz', 'engine-x-allocations.jsonl',
+                         'engine-x-allocations-index.json', 'reference/package.json',
+                         'reference/package-lock.json', 'reference/node_modules',
+                         'upstream/fixtures_develop-v5.3.0.tar.gz']:
+                (root/name).symlink_to(BULK/name)
+            shutil.copyfile(BULK/'archive-inventory.jsonl.gz', root/'archive-inventory.jsonl.gz')
+            for name in ['engine-x-export.json', 'archive-census.json',
+                         'review-bound-0-20.jsonl', 'review-bound-0-20-summary.json']:
+                shutil.copyfile(BULK/'evidence'/name, root/'evidence'/name)
+            command_path = root/'evidence/review-bound-0-20-command.json'
+            command = json.loads((BULK/'evidence/review-bound-0-20-command.json').read_text())
+            command['command'][3] = str(root)
+            command_path.write_text(json.dumps(command))
+            self.assertEqual(MODULE.coverage(REPO, root, ['review-bound-0-20'])['processed_unique_cases'], 20)
+            inventory = root/'archive-inventory.jsonl.gz'
+            original = inventory.read_bytes()
+            changed = bytearray(original)
+            self.assertEqual(changed[:3], b'\x1f\x8b\x08')
+            changed[4] ^= 1
+            self.assertEqual(gzip.decompress(changed), gzip.decompress(original))
+            inventory.write_bytes(changed)
+            census_path = root/'evidence/archive-census.json'
+            census = json.loads(census_path.read_text())
+            census['inventory_sha256'] = MODULE.digest(inventory)
+            census_path.write_text(json.dumps(census))
+            export_path = root/'evidence/engine-x-export.json'
+            export = json.loads(export_path.read_text())
+            export['census_sha256'] = MODULE.digest(census_path)
+            export_path.write_text(json.dumps(export))
+            summary_path = root/'evidence/review-bound-0-20-summary.json'
+            summary = json.loads(summary_path.read_text())
+            summary['inventory_sha256'] = census['inventory_sha256']
+            summary['export_sha256'] = MODULE.digest(export_path)
+            summary_path.write_text(json.dumps(summary))
+            with self.assertRaisesRegex(ValueError, 'pinned archive'):
+                MODULE.coverage(REPO, root, ['review-bound-0-20'])
 
     def test_z_changed_observation_module_refuses_captures(self):
         with tempfile.TemporaryDirectory(prefix='observation-source-control-', dir=BULK) as temporary:

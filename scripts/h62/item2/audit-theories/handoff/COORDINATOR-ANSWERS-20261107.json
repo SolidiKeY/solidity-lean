@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "authority": "Coordinator answers under H69 and H57, supplied by user 2026-11-07",
+  "answers": {
+    "Q-FROZEN-REBASE": "option 1. Audit the original frozen obligations against their frozen statements at the original commit, recorded by history, and report coverage on the rebased tree separately. Do not create versioned pairs yourself; an auditor makes no statement changes (H69). The fidelity item is then closed by the history-based audit, not left blocked.",
+    "Q-STATIC-VALUE": "option 3. A static call with nonzero value is excluded on purpose, as the EVM forbids it, so classify enter_static as an intentional H69 separation boundary. Your checked impossibility proof is the audit result. Claim no operational refusal coverage."
+  }
+}

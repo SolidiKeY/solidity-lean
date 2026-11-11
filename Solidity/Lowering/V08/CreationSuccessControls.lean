@@ -1,3 +1,4 @@
+import Solidity.Lowering.V08.SharedFailureFixture
 import Solidity.Lowering.V08.LibraryHandlerControls
 
 /-! Successful nonempty creation, then actual caller-typed library work in the
@@ -23,21 +24,13 @@ private theorem extract_success {α : Type} (run : TRes (World Catalog × α)) (
       have same : result = value := Option.some.inj checked
       cases same
       rfl
-private theorem extract_failure {α : Type} (run : TRes α) (halt : THalt)
-    (checked : run.halt? = some halt) : run = .error halt := by
-  cases run with
-  | ok value => cases checked
-  | error actual =>
-    have same : actual = halt := Option.some.inj checked
-    cases same
-    rfl
 
 theorem creation_reached : outer.create false candidate goodCtor ctorCtx = .ok (created, ⟨candidate⟩) :=
   extract_success _ _ (by decide +kernel)
 theorem library_reached : delegated created = .ok (linked, expected) :=
   extract_success _ _ (by decide +kernel)
 theorem later_reached : later linked expected = .error laterHalt :=
-  extract_failure _ _ (by decide +kernel)
+  Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
 
 def successWork (w : World Catalog) (_ : Handle false) : TRes (World Catalog × Unit) := do
   let (next, output) ← delegated w
@@ -113,7 +106,7 @@ theorem double_payment_run : doublePay.toOption.map (fun pair => (extended pair.
       ([0xb1, 0xb2], [1, 7, 2, 14, 12345])) := by decide +kernel
 
 theorem wrong_role : created.libraryCall (⟨self⟩ : Handle false) wrongRole paidCtx = .error .revert :=
-  extract_failure _ _ (by decide +kernel)
+  Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
 
 -- Successful counterpart: actual library result, not a constant world stand-in.
 def keep (w : World Catalog) : TRes (World Catalog × Result) :=
@@ -224,7 +217,7 @@ theorem observed_failure_application : observedFailure outer = .error laterHalt 
     laterHalt rfl creation_reached linkedObserved failed
 
 theorem wrong_runtime_identity : created.libraryCall (⟨self⟩ : Handle false) wrongIdentity paidCtx = .error .revert :=
-  extract_failure _ _ (by decide +kernel)
+  Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
 
 theorem wrong_payload : (attempt outer).halt? ≠ some (.revertWith (Semantics.encodeError [0x6c, 0, 0xfe, 0x48])) := by
   rw [combined_application]; decide +kernel
@@ -238,7 +231,7 @@ def wrongContinuation (w : World Catalog) : TRes (World Catalog × Unit) :=
       later after output) caught
 
 theorem wrong_continuation_run : wrongContinuation outer = .error .panic :=
-  extract_failure _ _ (by decide +kernel)
+  Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
 
 /-- Full listed observations after actual repeated reads, with both statuses. -/
 theorem repeat_vector_statuses :
@@ -257,7 +250,7 @@ theorem repeat_vector_statuses :
 /-- The same actual read procedure fails at the rolled-back missing candidate. -/
 theorem rollback_candidate_read_fails : readCandidate (base.transact frame).1 = .error .revert := by
   rw [transaction_application]
-  exact extract_failure _ _ (by decide +kernel)
+  exact Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
 
 #print axioms creation_reached
 #print axioms library_reached

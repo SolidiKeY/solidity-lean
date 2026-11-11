@@ -1,0 +1,160 @@
+{
+  "base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+  "baseline": {
+    "disagreements": 0,
+    "rows": [
+      {
+        "actual": 1,
+        "agrees": true,
+        "expected": 1,
+        "k": 7,
+        "line": 24,
+        "op": "addmod",
+        "x": 10,
+        "y": 5
+      },
+      {
+        "actual": 1,
+        "agrees": true,
+        "expected": 1,
+        "k": 7,
+        "line": 25,
+        "op": "mulmod",
+        "x": 3,
+        "y": 5
+      },
+      {
+        "actual": 1,
+        "agrees": true,
+        "expected": 1,
+        "k": 3,
+        "line": 26,
+        "op": "addmod",
+        "x": 115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        "y": 1
+      },
+      {
+        "actual": 1,
+        "agrees": true,
+        "expected": 1,
+        "k": 3,
+        "line": 27,
+        "op": "mulmod",
+        "x": 57896044618658097711785492504343953926634992332820282019728792003956564819968,
+        "y": 2
+      }
+    ],
+    "rules": {
+      "addmod": "+",
+      "mulmod": "*"
+    }
+  },
+  "boundary": "Exact existing basic literal assertions, positive uint256 operands/moduli, recognized unbounded integer +,-,* and positive remainder only. Tests whether these output vectors distinguish expressions; no Lean/DSL/interpreter execution, no project mutation kill or survival claim.",
+  "mutants": [
+    {
+      "disagreements": 2,
+      "id": "M23",
+      "outcome": "literal-arithmetic-projection-discriminated",
+      "rows": [
+        {
+          "actual": 5,
+          "agrees": false,
+          "expected": 1,
+          "k": 7,
+          "line": 24,
+          "op": "addmod",
+          "x": 10,
+          "y": 5
+        },
+        {
+          "actual": 1,
+          "agrees": true,
+          "expected": 1,
+          "k": 7,
+          "line": 25,
+          "op": "mulmod",
+          "x": 3,
+          "y": 5
+        },
+        {
+          "actual": 2,
+          "agrees": false,
+          "expected": 1,
+          "k": 3,
+          "line": 26,
+          "op": "addmod",
+          "x": 115792089237316195423570985008687907853269984665640564039457584007913129639935,
+          "y": 1
+        },
+        {
+          "actual": 1,
+          "agrees": true,
+          "expected": 1,
+          "k": 3,
+          "line": 27,
+          "op": "mulmod",
+          "x": 57896044618658097711785492504343953926634992332820282019728792003956564819968,
+          "y": 2
+        }
+      ],
+      "rules": {
+        "addmod": "-",
+        "mulmod": "*"
+      }
+    },
+    {
+      "disagreements": 0,
+      "id": "M24",
+      "outcome": "literal-arithmetic-projection-undiscriminated",
+      "rows": [
+        {
+          "actual": 1,
+          "agrees": true,
+          "expected": 1,
+          "k": 7,
+          "line": 24,
+          "op": "addmod",
+          "x": 10,
+          "y": 5
+        },
+        {
+          "actual": 1,
+          "agrees": true,
+          "expected": 1,
+          "k": 7,
+          "line": 25,
+          "op": "mulmod",
+          "x": 3,
+          "y": 5
+        },
+        {
+          "actual": 1,
+          "agrees": true,
+          "expected": 1,
+          "k": 3,
+          "line": 26,
+          "op": "addmod",
+          "x": 115792089237316195423570985008687907853269984665640564039457584007913129639935,
+          "y": 1
+        },
+        {
+          "actual": 1,
+          "agrees": true,
+          "expected": 1,
+          "k": 3,
+          "line": 27,
+          "op": "mulmod",
+          "x": 57896044618658097711785492504343953926634992332820282019728792003956564819968,
+          "y": 2
+        }
+      ],
+      "rules": {
+        "addmod": "+",
+        "mulmod": "+"
+      }
+    }
+  ],
+  "source": "Solidity/Examples/Tactics/ModularArithmetic.lean",
+  "source_sha256": "00acd8594834fa8fdd4bbc336757b685adecfe52f5712668003a87cc6df1a679",
+  "source_vectors": 4
+}

@@ -1,8 +1,7 @@
 import Solidity.Frontend.Admission.NameResolutionRoots
 import Solidity.Source.Elaborated
 
-/-! Initial modifier target registration from the actual Source selector.
-No dispatch, complete execution-root or SourceSpec inhabitant is supplied. -/
+/-! Initial modifier target registration from the actual Source selector. No dispatch, complete execution-root or SourceSpec inhabitant is supplied. -/
 namespace Solidity.Frontend.Admission.ModifierRoots
 open Solidity.Source
 open NameResolutionRoots

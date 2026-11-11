@@ -65,7 +65,7 @@ theorem same_slot (pipeline : Roadmap.Pipeline) (fuel : Nat) {tailΓ : Source.RC
 /-- The skipped suffix would overwrite the body's true value if run. -/
 theorem suffix_is_effectful :
     Source.evalE (MixedAssignmentControls.globals .legacy) F0 2
-      (.assign (.local .here) (.bool false)) (plan := none) P12Controls.sourcePost =
+      (.assign (.local .here) (.bool false)) (plan := none) (calldataKnown := true) P12Controls.sourcePost =
       (.ok (.val (.bool false)),P.source) := by rfl
 
 /-- Continue cannot be replaced by normal fallthrough into this suffix. -/

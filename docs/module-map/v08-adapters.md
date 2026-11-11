@@ -377,7 +377,7 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Lowering/P9/OverrideControls.lean` | An elaborated inherited override: dispatch of the base declaration selects the derived body, and an abstract bodyless base dispatched to a concrete override. |
 | `Source/Preservation/Frames.lean`, `Source/Preservation/LocalFrames.lean`, `Source/Preservation/StatementFrames.lean`, `Source/Preservation/CallFrames.lean` | `MemOK` across `EM.sub`, scope and call frames; caller locals restored. |
 | `Source/Preservation/Reads.lean`, `Source/Preservation/ValueConversions.lean`, `Source/Preservation/ResultValidity.lean` | Reads, implicit conversions and result references preserve the invariant. |
-| `Source/Preservation/AllocationSites.lean`, `Source/Preservation/MemberPacking.lean`, `Source/Preservation/Encoding.lean`, `Source/Preservation/ArrayLiterals.lean` | Allocating string, struct, `abi.encode` and inline-array arms. |
+| `Source/Preservation/AllocationSites.lean`, `Source/Preservation/MemberPacking.lean`, `Source/Preservation/Encoding.lean`, `Source/Preservation/ArrayLiterals.lean` | Allocating string, struct, `abi.encode` and inline-array arms; generic storage-byte encoder timeout from actual reads, with complete-state preservation (not compiler/production admission). |
 | `Source/Preservation/Combinators.lean`, `Source/Preservation/Expressions.lean`, `Source/Preservation/Statements.lean`, `Source/Preservation/Fragment.lean` | Joint all-horizon memory preservation (`fragMemAt`) for the existing call value fragment under `CallsOK`. |
 | `Source/Preservation/EncodingVariants.lean` | Preservation for every `abi.encode*` kind (`evalE_abiKind_mem`). |
 | `Source/Preservation/Controls.lean` and its `*Controls.lean` | Allocation, frame, caller-reference, storage-copy, array-literal and fragment controls. |
@@ -394,7 +394,7 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 |---|---|
 | `Lowering/P8/FrozenInterface.lean` | Frozen P8a producer obligations (`FailureProjection`, `SourceRealization`, `Producer`); inhabited only by the model witness `P8/PlanWitness.lean`. |
 | `Frontend/Admission/Profile.lean` | Exact classification of extracted uses; features and failures kept. |
-| `Frontend/Admission/RootObservations.lean` | Typed traversal of local observation sites over supplied roots; no callee closure. |
+| `Frontend/Admission/RootObservations.lean` | Typed traversal of local observation sites, including delegated-library arguments and both continuations under the existing abstract library feature; no callee closure or ABI/linkage adequacy. |
 | `Frontend/Admission/Controls.lean` | Root, refusal, combination and `NoFail` controls. |
 | `Frontend/Admission/ProgramObservations.lean` | Container scan of a `Program` (`program_observation_iff`), modifier declarations and written base names. |
 | `Frontend/Admission/ProgramObservationControls.lean` | Seven-site container and omission controls; function host and modifier declaration/carried frame parameter checks. |
@@ -419,7 +419,7 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Lowering/P8b/Controls.lean` | Toy identity certificate, wrong-emitter refusal, loop divergence. |
 | `Lowering/P8/ResourceContractLaw1.lean` | `nat_encodable_resource_impossible`: the frozen V1 failure projection has no inhabitant over a `Nat`-encodable resource (P8-SPEC-LAW1). |
 | `Lowering/P8/FailureContractV2.lean` | V2 rebundling: `Projection` and `FullPlanCoverage` separated, `toV1`/`ofV1` roundtrips; still uninhabited over `Nat`. |
-| `Frontend/Admission/SyntaxOccurrences.lean`, `SyntaxOccurrenceLaws.lean`, `SyntaxOccurrenceControls.lean` | Typed syntax subtree inventory, `syntaxOccurrences_iff` against `Source.Syn.Sub`, order/multiplicity controls; not semantic-root extraction. |
+| `Frontend/Admission/SyntaxOccurrences.lean`, `SyntaxOccurrenceLaws.lean`, `SyntaxOccurrenceControls.lean` | Typed syntax subtree inventory, `syntaxOccurrences_iff` against `Source.Syn.Sub`, order/multiplicity controls and generic whole-syntax refusal diagnostics with classifier-relative silence, composition laws and real typed sites; arbitrary caller-supplied classifier lists compose per site with exact provenance and all-classifier silence, preserving order/duplicates without selecting a canonical family; not semantic-root extraction or Source admission. |
 | `Frontend/Admission/ProgramRoots.lean`, `ProgramRootControls.lean` | Typed carried-field inventory and exact observation flattening; independent finite-roster lookup relation and refusal controls. |
 | `Frontend/Admission/NameResolutionRoots.lean`, `NameResolutionControls.lean` | Initial target registration from actual source lookup/Resolves/function selection, with local-shadowing and refusal controls; not full runtime-root closure. |
 | `Frontend/Admission/ModifierRoots.lean`, `ModifierRootControls.lean` | Initial modifier selection registration through actual typed paths and parameter forms, with qualified/wrong-kind/deep-path controls; not runtime closure. |
@@ -824,6 +824,7 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Backend/InternalFlow/RuntimeFrameP1BridgeV2.lean` | `p1_frame_bridge` (V2) for the guarded revert-with-data family: actual source/target runs, full `PassCorrect`, per-input `Local`. |
 | `Backend/InternalFlow/RuntimeFrameP1BridgeV2Controls.lean` | Admitted witnesses of both classes, observed payload, refused mismatch, other-payload disagreement, call events, satisfiability. |
 | `Backend/InternalFlow/RuntimeFrameP1LangV2Migration.lean` | V2 → V12 `P1Lang` migration: `coarse` (forget events/data), `source_coarse`, `target_coarse`, `lift_coarse`, input conversions. |
+| `Frontend/Admission/CanonicalReaderContract.lean` | CR/H68 control: one fixture through the existing `solc_import` route (all six rows elaborated) and `Shared.executableReader` (two `uint8` shapes refused with exact diagnostics); observation, no migration or fallback. |
 | `Backend/PrimitivePackets/SignedCheckedMul/Source.lean` | Checked int256 `*` Source evaluation on arbitrary locals: exact value or `Panic(0x11)`. |
 | `Backend/PrimitivePackets/SignedCheckedMul/Selected.lean` | The public compiler selects `binaryCode .int .mul`, with the literal `sTail .mul` guard. |
 | `Backend/PrimitivePackets/SignedCheckedMul/Target.lean` | Selected checked int256 `*` execution on any represented machine and saved stack: product or coarse revert. |
@@ -902,6 +903,8 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Lowering/P9/BodyRecognizerCompleteness.lean` | Existing readiness certificates imply their Boolean body checks; no new syntax admitted. |
 | `Lowering/P9/CatalogueRecognizerCompleteness.lean` | Entry/catalogue fuel monotonicity and relative completeness up to existential recognizer fuel, with original converse premises. |
 | `Lowering/P9/CatalogueCompletenessControls.lean` | Reference/unchecked and existing elaborated-unit controls, checked calls, inadequate-fuel distinction and all-fuel refusal. |
+| `Backend/FailurePaths/StorageEncoderTimeout.lean` | Storage-read encoder/local ABI timeout with complete state; no admitted custom-error/compiler claim. |
+| `Backend/FailurePaths/StorageEncoderTimeoutControls.lean` | Seeded timeout/completion, both pipelines, memory error signature and storage refusal. |
 
 ### P8 Producer merge (H57, H60)
 

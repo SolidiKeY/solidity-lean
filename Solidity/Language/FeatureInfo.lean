@@ -31,7 +31,7 @@ def Feature.info : Feature → FeatureInfo
       upstream := [{ path := "docs/grammar/SolidityLexer.g4", line := 240 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean", "Solidity/Frontend/Source.lean", "Solidity/Frontend/SolcJson/Admission.lean", "Solidity/Examples/Tactics/SourceAdmissionImport.lean", "Solidity/Examples/Tactics/SourceLiteralsImport.lean", "Solidity/Examples/Tactics/SourceIdentifiersImport.lean", "docs/feature-work/source-admission.md"] }
   | .booleanLiterals =>
     { category := "lexical", spelling := "true; false",
-      scope := .model, current := .present,
+      scope := .model, current := .limited,
       requirement := r#"Produce Boolean values, without numeric implicit coercion."#,
       upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 434 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean"] }
   | .stringLiterals =>
@@ -61,7 +61,7 @@ def Feature.info : Feature → FeatureInfo
       upstream := [{ path := "docs/grammar/SolidityLexer.g4", line := 67 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean"] }
   | .timeUnits =>
     { category := "lexical", spelling := "seconds; minutes; hours; days; weeks",
-      scope := .model, current := .present,
+      scope := .model, current := .limited,
       requirement := r#"Fold literal unit factors; do not infer real-world clock guarantees or calendar arithmetic."#,
       upstream := [{ path := "docs/grammar/SolidityLexer.g4", line := 67 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean"] }
   | .pragmaVersion =>
@@ -216,7 +216,7 @@ def Feature.info : Feature → FeatureInfo
       upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 325 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean", "Solidity/Examples/Tactics/OperatorAliasesImport.lean", "docs/feature-work/numeric-operators.md"] }
   | .boolType =>
     { category := "types", spelling := "bool",
-      scope := .model, current := .present,
+      scope := .model, current := .limited,
       requirement := r#"Keep Boolean typing distinct from integers and ABI words."#,
       upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 359 }], localEvidence := ["Solidity/AST.lean"] }
   | .integerTypes =>
@@ -316,7 +316,7 @@ def Feature.info : Feature → FeatureInfo
       upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 115 }], localEvidence := ["Solidity/Syntax/Grammar.lean"] }
   | .parentheses =>
     { category := "expressions", spelling := "(e)",
-      scope := .model, current := .present,
+      scope := .model, current := .limited,
       requirement := r#"Preserve grouping without introducing a tuple or changing evaluation."#,
       upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 419 }], localEvidence := ["Solidity/Syntax/Grammar.lean"] }
   | .tupleExpressions =>
@@ -586,7 +586,7 @@ def Feature.info : Feature → FeatureInfo
       upstream := [{ path := "libsolidity/ast/Types.cpp", line := 3930 }], localEvidence := ["Solidity/Syntax/Elab.lean", "Solidity/Examples/Tactics/AbiFeatures.lean", "Solidity/Examples/Tactics/AbiFeaturesImport.lean", "docs/feature-work/abi-hashes.md"] }
   | .msgSender =>
     { category := "environment", spelling := "msg.sender",
-      scope := .abstract, current := .present,
+      scope := .abstract, current := .limited,
       requirement := r#"Supply a bounded caller identity per call frame; external self-calls change sender."#,
       upstream := [{ path := "libsolidity/ast/Types.cpp", line := 4199 }], localEvidence := ["Solidity/Semantics/State.lean"] }
   | .msgValue =>
@@ -606,7 +606,7 @@ def Feature.info : Feature → FeatureInfo
       upstream := [{ path := "libsolidity/ast/Types.cpp", line := 554 }], localEvidence := ["Solidity/Semantics/State.lean"] }
   | .blockTimestamp =>
     { category := "environment", spelling := "block.timestamp",
-      scope := .abstract, current := .present,
+      scope := .abstract, current := .limited,
       requirement := r#"Read the environment timestamp; monotonicity, accuracy and miner constraints require explicit premises."#,
       upstream := [{ path := "libsolidity/ast/Types.cpp", line := 4186 }], localEvidence := ["Solidity/Semantics/State.lean"] }
   | .blockCoinbase =>
