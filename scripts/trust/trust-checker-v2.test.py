@@ -32,6 +32,19 @@ class CandidateControls(unittest.TestCase):
     def test_patch_identity(self):
         self.assertEqual(R.digest(HERE / 'trust-checker-v2.patch', R.clock() + 5), V.PATCH_SHA)
 
+    def test_patch_reconstructs_reviewed_sources(self):
+        import hashlib
+        if CHECKER is None: self.fail('built candidate required')
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name in V.SOURCES:
+                target = root / name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(subprocess.check_output(['git', 'show', V.BASE + ':' + name], cwd=CHECKER))
+            subprocess.run(['git', 'apply', '--unidiff-zero', str(HERE / 'trust-checker-v2.patch')], cwd=root, check=True)
+            for name, sha in V.SOURCES.items():
+                self.assertEqual(hashlib.sha256((root / name).read_bytes()).hexdigest(), sha)
+
     def test_binding_rejects_wrong_schema_or_revision(self):
         from argparse import Namespace
         binding = dict(schema=1, base=V.BASE, patch_sha256=V.PATCH_SHA,
