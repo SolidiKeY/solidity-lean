@@ -101,7 +101,7 @@ function shortSummary(report) {
   return lines.join('\n');
 }
 async function launch(config,options) {
-  config={...config,...(options.diagnosticEvents?{diagnosticEvents:options.diagnosticEvents}:{}),...(options.diagnosticLifecycle?{diagnosticLifecycle:options.diagnosticLifecycle}:{}),...(options.diagnosticInput?{diagnosticInput:options.diagnosticInput}:{}),operationTimeoutMs:options.operationTimeoutMs,suite:options.suite||'full',menuTrust:options.menuTrust,...(options.menuAnchor?{menuAnchor:options.menuAnchor}:{}),runId:randomUUID(),sourceHead:git(repo)};
+  config={...config,...(options.diagnosticEvents?{diagnosticEvents:options.diagnosticEvents,diagnosticEventSource:'shared-public-observer'}:{}),...(options.diagnosticLifecycle?{diagnosticLifecycle:options.diagnosticLifecycle}:{}),...(options.diagnosticInput?{diagnosticInput:options.diagnosticInput}:{}),operationTimeoutMs:options.operationTimeoutMs,suite:options.suite||'full',menuTrust:options.menuTrust,...(options.menuAnchor?{menuAnchor:options.menuAnchor}:{}),runId:randomUUID(),sourceHead:git(repo)};
   mkdirSync(config.dir,{recursive:true});mkdirSync(config.workspace,{recursive:true});config.filesystemCapability=require('./filesystem.cjs').recursiveCapability(config.dir);
   const cache={'none':'No caching',basic:'Basic caching',advanced:'Advanced caching'}[config.cache];
   const settings= config.target==='dafny' ? {'dafny.version':'custom','dafny.cliPath':resolve(options.dafny),'dafny.dotnetExecutablePath':resolve(options.dotnet),

@@ -9,7 +9,7 @@ const {createHash,randomUUID}=require('node:crypto');
 
 /** Observe calls on real VS Code objects. No mocked renderer or verifier. */
 function observe(vscode, record, extensionPath, tracePath,workspacePath,options={}) {
-  const controllers = [], profiles = [], decorations = [], outputs=[], finalizers=[];
+  const controllers = [], profiles = [], decorations = [], outputs=[], finalizers=[], diagnosticListeners=new Set();
   function instrument(object, handlers) {
     return new Proxy(object, {get(target,key) {
       if (handlers[key]) return handlers[key];
@@ -119,7 +119,8 @@ function observe(vscode, record, extensionPath, tracePath,workspacePath,options=
   };
   const registration = vscode.languages.onDidChangeDiagnostics(event => {
     for (const uri of event.uris) record('diagnostics',{uri:uri.toString(),diagnostics:vscode.languages.getDiagnostics(uri)});
+    for(const entry of [...diagnosticListeners])if(diagnosticListeners.has(entry))try{entry.listener(event);}catch(error){record('diagnostics.subscriberError',{message:diagnostic(error)});}
   });
-  return {controllers,profiles,decorations,outputs,symbolProviderFailures:symbolProviders?.failures,terminalSupported,ownTerminal:terminal=>ownedTerminals.add(terminal),restore() { restored=true;symbolProviders?.dispose();for(const subscription of terminalSubscriptions)subscription.dispose(); finalizers.forEach(f=>f());Module._load = original; registration.dispose(); }};
+  return {subscribeDiagnosticEvents(listener){if(restored||typeof listener!=='function')throw Error('Invalid diagnostic observation subscription');const entry={listener};diagnosticListeners.add(entry);return{dispose(){diagnosticListeners.delete(entry);}};},controllers,profiles,decorations,outputs,symbolProviderFailures:symbolProviders?.failures,terminalSupported,ownTerminal:terminal=>ownedTerminals.add(terminal),restore() { restored=true;diagnosticListeners.clear();symbolProviders?.dispose();for(const subscription of terminalSubscriptions)subscription.dispose(); finalizers.forEach(f=>f());Module._load = original; registration.dispose(); }};
 }
 module.exports = {observe};

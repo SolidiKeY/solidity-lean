@@ -125,7 +125,7 @@ async function run() {
     }else if(config.suite==='editor-language-scope'){
       await scenario('native-editor-language-scope',()=>require('./editor-language-lifecycle.cjs').run({vscode,config,events,sessionFor}));
     }else if(config.suite==='related-diagnostics'){
-      if(config.diagnosticLifecycle)await scenario('native-related-diagnostic-lifecycle',()=>require('./related-diagnostic-lifecycle.cjs').run({vscode,config,events,sessionFor}));else await scenario('native-related-diagnostics',()=>require('./related-diagnostics.cjs').run({vscode,config,events,sessionFor}));
+      if(config.diagnosticLifecycle)await scenario('native-related-diagnostic-lifecycle',()=>require('./related-diagnostic-lifecycle.cjs').run({vscode,config,events,sessionFor}));else await scenario('native-related-diagnostics',()=>require('./related-diagnostics.cjs').run({vscode,config,events,sessionFor,diagnosticSubscribe:config.diagnosticEvents?listener=>observation.subscribeDiagnosticEvents(listener):undefined}));
     }else if(config.suite==='compiler-code-actions'){
       await scenario('native-compiler-code-actions',()=>require('./code-action-lifecycle.cjs').run({vscode,config,api,events,sessionFor}));
     }else if(config.suite==='verification-time-limit'){
