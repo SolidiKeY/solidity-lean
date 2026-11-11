@@ -254,8 +254,8 @@ example : accepts pol [lean 4 3, ⟨["Solidity", "C.lean"], [[.code "z"], [.code
     true := by decide
 example : accepts (pol.shrink [(("Solidity", .comment), ⟨⟨1, 1, by decide⟩, 9⟩)])
     [lean 4 4] = false := by decide
-example : accepts (pol.shrink [(("Solidity", .comment), ⟨⟨2, 4, by decide⟩, 1⟩)])
-    [lean 4 3] = true := by decide
+example : accepts ((⟨scope, [(("Solidity", .comment), ⟨⟨2, 4, by decide⟩, 1⟩)]⟩ :
+    Policy String).shrink [(("Solidity", .comment), half)]) [lean 4 3] = true := by decide
 example : accepts (pol.shrink []) [lean 4 1] = false := by decide
 
 end ProseRatio

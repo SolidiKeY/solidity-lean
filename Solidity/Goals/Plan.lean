@@ -868,7 +868,8 @@ def intrinsicSessionSemantics : Prop :=
     (V : IntrinsicSession.View I), IntrinsicSession.Laws F I V
 
 /-! Code-relative prose ratchet (plan step pb2-prose-ratio-rule). Each area `a` and
-prose category `k` may carry at most `r * C + m` prose lines, where `C` counts the
+prose category `k` may carry at most `r * C + m` prose lines (process-id tokens),
+where `C` counts the
 area's eligible code lines and the allowance `(r, m)` comes from a frozen policy.
 
 * `Scope` and `Entries` form the trusted policy, frozen before the candidate is
@@ -884,20 +885,24 @@ area's eligible code lines and the allowance `(r, m)` comes from a frozen policy
   prose categories and never make a line code. Docs files contribute their lines as
   `docs` prose and no code. Generated files, `docs/audits` (until
   r1-regen-out-of-git, through its own `Exclusion` constructor) and `outside` paths
-  contribute neither.
+  contribute neither. A docs area holds no code, so its bound is its margin alone.
 * A missing entry is the zero allowance, never an unbounded one.
 
 Boundary: a proof of `proseRatioRuleSound` certifies only this arithmetic over
 classified lines. The lexer producing `Segment`s, the Python checker, Git
-provenance of the frozen policy, the history-calibrated ratios and margins, and CI
-on the merged head remain separate obligations; a line count says nothing about the
-usefulness of added code. -/
+provenance of the frozen policy (its generated list and path kinds included), the
+check that generated files equal their generator's output, the process-id exemption
+for registered module names, Unicode blankness in the lexer, the history-calibrated
+ratios and margins, and CI on the merged head remain separate obligations. A line
+count says nothing about the usefulness of added code, and splitting existing code
+over more lines raises `C`. -/
 namespace ProseRatio
 
 /-- A repository path by components, e.g. `["docs", "audits", "x.md"]`. -/
 abbrev Path := List String
 
-/-- The four existing prose metrics of `scripts/check-prose-budget`. -/
+/-- The four existing prose metrics of `scripts/check-prose-budget`; as there, a
+docstring line is also a comment line. -/
 inductive Category where
   | docs | comment | docstring | processId
 deriving DecidableEq
@@ -942,7 +947,7 @@ def Line.code (l : Line) : Nat := if l.hasCode then 1 else 0
 prose. -/
 def Line.prose (l : Line) : Category → Nat
   | .docs => 0
-  | .comment => if l.any Segment.isComment then 1 else 0
+  | .comment => if l.any fun s => s.isComment || s.isDocstring then 1 else 0
   | .docstring => if l.any Segment.isDocstring then 1 else 0
   | .processId => (l.filter Segment.isProcessId).length
 
