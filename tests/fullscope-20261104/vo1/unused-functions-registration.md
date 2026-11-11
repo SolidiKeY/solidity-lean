@@ -1,4 +1,6 @@
-# COORD registration request: VO1 idle-group pruning
+# VO1 idle-group pruning: registration (done)
+
+Historical request: the root import and module-map row below are now on master. Remaining work is the general reachability, D6 and compiler/physical integration listed at the end.
 
 Source: `Solidity/Optimizer/UnusedFunctions.lean`; consumer: future Yul optimizer composition. This is a bounded first O03 unused-function pruning slice, not D6 or whole-lane closure.
 
