@@ -35,12 +35,15 @@ Neither replaces the historical `genericYulViewsPreserve` of `Goals/Plan.lean`.
   `Roadmap.Lowering S I` and a `G49Final.PassCorrect` per program whose
   data fields (environment map, resource transport) are the diagram's.
 
-Open scope point (not hidden): no intrinsic session semantics over emitted
-programs exists at the base, so `Binding.targetSession` is an explicit
-reference parameter, as P8a's `OperationalReference`. Universally quantified
-and unconstrained, it admits intrinsic specs no lowering refines; the
-session-level conjunct is to be restated against an actual intrinsic session
-semantics once one is chosen.
+Open scope point (not hidden, decided by H556): no intrinsic session
+semantics over emitted programs exists at the base, so `Binding.targetSession`
+is an explicit reference parameter, as P8a's `OperationalReference`.
+Universally quantified and unconstrained, it admits intrinsic specs no
+lowering refines, so `loweringBySimulation` is not provable as stated. H556:
+a separately scoped prerequisite defines the actual intrinsic session
+semantics; this conjunct is then restated against it (replacing
+`targetSession`/`target_exact` by that definition). Until then ls lanes must
+not attempt the session-level conjunct.
 
 ## Views inventory (per-shape view definitions, read at the launch base)
 
