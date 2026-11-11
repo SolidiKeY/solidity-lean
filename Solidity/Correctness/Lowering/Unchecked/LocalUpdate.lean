@@ -1,3 +1,4 @@
+import Solidity.Correctness.Lowering.Unchecked.CompoundOne
 import Solidity.Correctness.Lowering.Unchecked.IntegerUpdate
 import Solidity.Correctness.Lowering.Unchecked.IntegerOne
 import Solidity.Source.Eval
@@ -15,7 +16,7 @@ expression. These ingredients do not certify raw spelling, target code, or a pas
 namespace Solidity.Correctness.Lowering.Unchecked
 
 /-- Private evaluator-step factorization. Its two evaluation equations are
-proved by the public concrete specializations below, never accepted as a
+proved by `localCompoundOne` below, never accepted as a
 validator's semantic-correctness oracle. -/
 private theorem compoundOne_of_runs {E : Source.Env} {Γ : Source.RCtx} {σ : Source.STy}
     (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
@@ -106,8 +107,8 @@ theorem localCompoundOne {E : Source.Env} {Γ : Source.RCtx}
     (.val (.int 1 oneRange)) x range oneRange read fits rhsRun convRun
 
 /-- A literal-one compound update and prefix increment/decrement have the
-same complete Source result/poststate. This specialization proves both
-literal evaluation and exact conversion; it accepts no execution equation.
+same complete Source result/poststate. This specialization inherits literal
+evaluation and exact conversion from `compoundOne_eval`; it accepts no execution equation.
 The static `fits` proof is precisely the resolved constructor's field. This
 is still a Source law, not certification of raw or emitted intrinsic syntax. -/
 theorem literalCompoundOne {E : Source.Env} {Γ : Source.RCtx}
@@ -123,20 +124,10 @@ theorem literalCompoundOne {E : Source.Env} {Γ : Source.RCtx}
       (plan := plan) (calldataKnown := known)).run source =
     (Source.evalE G F (fuel + 2) (.incDec inc true (.local i))
       (plan := plan) (calldataKnown := known)).run source := by
-  have rhsRun : (Source.evalE G F (fuel + 1) (.const (Source.Q.ofInt 1))
-      (plan := plan) (calldataKnown := known)).run source =
-      (.ok (.const (Source.Q.ofInt 1)), source) := by
-    cases known <;> rfl
-  have convRun : (Source.convRV F (fuel + 1) (.int t) (.const (Source.Q.ofInt 1))).run source =
-      (.ok (.val (.int 1 (integerOne_range t))), source) := by
-    change (do
-      let value ← Source.EM.lift (E := E) (Γ := Γ)
-        (Source.constVal (D := E.layout) (Source.Q.ofInt 1) (.int t))
-      pure (Source.RVal.val value)).run source = _
-    rw [constantOne]
-    rfl
-  exact compoundOne_of_runs G F fuel plan known source t inc i (.const (Source.Q.ofInt 1))
-    (.const (Source.Q.ofInt 1)) x range (integerOne_range t) read fits rhsRun convRun
+  have _legacyRead := read
+  exact congrArg
+    (fun action : Source.EM E Γ (Source.RVal E.layout (.int t)) => action.run source)
+    (compoundOne_eval G F (fuel + 2) plan known t inc (.local i) fits)
 
 /-- Exact local-update evaluation at every horizon and in both checkedness
 modes. The operation itself selects success or its unchanged exact Halt;
