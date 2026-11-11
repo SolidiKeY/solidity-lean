@@ -715,6 +715,11 @@
     "code": "let shown \u2190 unsafe Lean.Meta.evalExpr String (Lean.mkConst ``String) shownExpr"
   },
   {
+    "file": "Solidity/Frontend/ExecutableCounterexampleMetadataV2.lean",
+    "kind": "kernel-option",
+    "code": "return debug.skipKernelTC.set (Elab.async.set (maxHeartbeats.set options limit) false) false"
+  },
+  {
     "file": "Solidity/Frontend/Import.lean",
     "kind": "unsafe",
     "code": "let (C, bodies) \u2190 liftTermElabM <| unsafe evalExpr (Contract \u00d7 List (List RawStmt)) pairTy val"
@@ -1463,10 +1468,5 @@
     "file": "Solidity/Frontend/CounterexampleMetadataV1.lean",
     "kind": "kernel-option",
     "code": "withScope (fun scope => { scope with opts := debug.skipKernelTC.set scope.opts false }) do"
-  },
-  {
-    "file": "Solidity/Frontend/ExecutableCounterexampleMetadataV2.lean",
-    "kind": "kernel-option",
-    "code": "return debug.skipKernelTC.set (Elab.async.set (maxHeartbeats.set options limit) false) false"
   }
 ]
