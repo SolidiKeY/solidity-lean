@@ -1,31 +1,31 @@
 {
   "schemaVersion": 1,
   "decision": "H44 coordinator follow-up2026-11-06: full inventory is bulk; retain outside git with exact checksums",
-  "sourceHead": "1a3ea447e51ec058eb736f01ca0a372d792e072f",
+  "sourceHead": "40ab46e7c90ab7ffc77de1f19630e08440da4c04",
   "repository": "/workspace/solidity-lean",
   "fileCount": 1,
-  "uncompressedBytes": 776997,
+  "uncompressedBytes": 778412,
   "rowCount": 491,
   "frozenRowCount": 270,
   "frozenSha256": "d2f7e40e0c4cd370d09f9feb04872ea81963524b48be8e46c9b98dba26f945f1",
   "archive": {
-    "path": "/workspace/dafny-custom-command-assessment-20261109/inventory/bulk.tar.gz",
-    "bytes": 52851,
-    "sha256": "1a1941d8cbd99ebe1c4d6f367dd550f3072c588a974d689ec7bb4b12bc02e9db"
+    "path": "/workspace/dafny-related-location-20261111/inventory/bulk.tar.gz",
+    "bytes": 53285,
+    "sha256": "b40f010ab871812347b17ca97823390dacf0b129c90450688ac48ba5d4977087"
   },
   "index": {
-    "path": "/workspace/dafny-custom-command-assessment-20261109/inventory/files.json",
+    "path": "/workspace/dafny-related-location-20261111/inventory/files.json",
     "bytes": 186,
-    "sha256": "5c2b02c9842185b9056f1891abc81ef259bf07195ee66916c37d49b1264d6176"
+    "sha256": "462139392d4ac9507979bc2aec7de412a345eb2f15109b0e64073a955ee27405"
   },
   "rawInventory": {
-    "path": "/workspace/dafny-custom-command-assessment-20261109/inventory/inventory.json",
-    "bytes": 776997,
-    "sha256": "2e7c5d1b61d7e3e350b8122e4db08f5e14cce4ef774d8f2b2eb910d0843c39fc"
+    "path": "/workspace/dafny-related-location-20261111/inventory/inventory.json",
+    "bytes": 778412,
+    "sha256": "1ddacb717df5751afe6865856f6980904a78be40a1cc95873fbca72ea2ae6dce"
   },
   "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-editor-inventory-manifest.json --restore",
   "relocation": "Provision both bulk.tar.gz and files.json together, then pass --directory DIR; CI uses DAFNY_PARITY_INVENTORY_DIR. Existing evidence bundle is separately required.",
-  "gateBoundary": "All491 ordered row IDs, expected observations and frozen270 unchanged. One evidenced missing command assessment corrected to partial; no completed row, predicate or judge change.",
+  "gateBoundary": "All491 ordered IDs, first270 hash, reference discovery/predicates and judge contract unchanged. Only behavior:related-errors unexamined to partial, explicitly compiler/LSP groundwork; no complete row.",
   "evidenceRestoreManifest": "docs/dafny-proof-help-evidence-manifest.json",
   "additionalEvidenceRestoreManifests": [
     "docs/dafny-direct-retention-evidence-manifest.json",
@@ -46,6 +46,7 @@
     "docs/dafny-command-output-evidence-manifest.json",
     "docs/dafny-trace-consumer-evidence-manifest.json",
     "docs/dafny-native-trace-testing-evidence-manifest.json",
-    "docs/dafny-h126-evidence-manifest.json"
+    "docs/dafny-h126-evidence-manifest.json",
+    "docs/dafny-related-locations-evidence-manifest.json"
   ]
 }
