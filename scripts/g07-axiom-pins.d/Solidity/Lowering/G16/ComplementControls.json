@@ -9,5 +9,10 @@
   "Classical.choice",
   "Quot.sound",
   "propext"
+ ],
+ "Solidity/Lowering/G16/ComplementControls.lean:Solidity.Lowering.G16.UnsignedShiftControls.regressions_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
  ]
 }

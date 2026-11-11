@@ -13,5 +13,10 @@
   "Classical.choice",
   "Quot.sound",
   "propext"
+ ],
+ "Solidity/Lowering/G16/Complement.lean:Solidity.Lowering.G16.UnsignedShifts.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
  ]
 }
