@@ -77,9 +77,18 @@ four modes, deliberate mismatches and nonempty-log refusal. No executed Lean
 agreement numbers or disagreement classifications are available yet.
 The corpus and 10k runs follow per-file and checkpoint validation.
 
-Input snapshots include the installed dependency tree and lock versions; any
-changed execution input prevents a passing report. This records runtime trust,
-not a kernel proof or V17 provenance certification.
+Input snapshots cover the selected source files listed in `sourceFiles`, the
+installed npm dependency tree and lock versions, compiler-file and Node binary
+hashes, Git state, and Lean/Lake version strings. The before/after comparison
+rejects differing recorded endpoint snapshots; it does not enforce immutability
+throughout execution.
+
+Compiled Lean imports consumed by the driver, including `.olean` files under
+`.lake/` or an artifact cache, are not hashed. Lean/Lake executable bytes are
+also not bound by their version strings. Changes to these unrecorded inputs can
+escape the comparison. Complete Lean execution-input binding remains unfinished;
+a passing report is not a complete input-integrity or reproducibility guarantee,
+a kernel proof, or V17 provenance certification.
 
 ## Cloud execution policy
 
@@ -109,6 +118,12 @@ Pre-gate navigation repair: regenerated the catalog and removed its stale
 proposal. Independent read-only finder/skeptic checks found no issue; the
 navigation checker remains unchanged.
 
+Landing review confirmed that compiled Lean inputs were omitted from the
+snapshots. The integrity claim now names the recorded endpoint fields and
+explicitly excludes compiled Lean artifacts and Lean/Lake executable bytes.
+Independent read-only finder/skeptic reviews confirmed the narrowed scope; no
+stronger input binding or runtime validation is claimed.
+
 ## Handoff
 
 H568 retires this lane and replans unfinished work. Inventory, source harness,
@@ -117,8 +132,9 @@ diagnostics and passes the per-file gate; the inventory checkpoint gate passes,
 including the library build. Independent finder/skeptic reviews found no new
 blocking issue in the H232 update.
 
-The 20-program Lean/EVM corpus, 10k generator run and benchmark, disagreement
-triage, CI owner integration and full lane-end gate were not completed. No
+Complete Lean execution-input binding, the 20-program Lean/EVM corpus, the
+10k generator run and benchmark, disagreement triage, CI owner integration and
+full lane-end gate were not completed. No
 successful RUNTIME_GATE_PASS or Lean differential agreement number is claimed.
 Fixed external adapter controls remain separate from Lean differential results.
 The approved CI/navigation owner diffs below remain proposals. No new axioms,
