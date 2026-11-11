@@ -9,7 +9,17 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/G16/Arithmetic.lean:Solidity.Lowering.G16.Arithmetic.CheckedSignedPower.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/G16/Arithmetic.lean:Solidity.Lowering.G16.Arithmetic.CheckedUnsigned.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/G16/Arithmetic.lean:Solidity.Lowering.G16.Arithmetic.Modular.transport": [
   "Classical.choice",
   "Quot.sound",
   "propext"

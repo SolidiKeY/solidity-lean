@@ -496,6 +496,21 @@ def read_routes(catalog):
             yield {**base, 'target': row['path'], 'target_blob': row['blob']}
 
 
+def reviewed_module_collector(repo, pin, current):
+    """Keep already reviewed historical claims verifiable after collector fixes."""
+    if pin == current: return True
+    reviewed = {
+        '42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32':
+            'e6d215dff997377f70e17ce50d04b8eb12284b16',
+    }
+    if not isinstance(pin, str) or pin not in reviewed: return False
+    try: source = git(repo.root, 'show', reviewed[pin] + ':scripts/check-tests-used-trace.py')
+    except ValueError as error:
+        raise ValueError('UNVERIFIABLE reviewed module collector source: ' + pin) from error
+    if hashlib.sha256(source).hexdigest() != pin: raise ValueError('reviewed module collector source mismatch')
+    return True
+
+
 def validated_module_entries(graph, entries):
     """Reviewed positive execution claims, never static imports or data edges.
 
@@ -526,7 +541,7 @@ def validated_module_entries(graph, entries):
         target = entry['target']
         if target not in repo.tree or not target.endswith('.py') or repo.tree[target][2] != entry['target_blob']:
             raise ValueError('entered module source pin mismatch')
-        if entry['collector_sha256'] != collector: raise ValueError('unreviewed module entry collector')
+        if not reviewed_module_collector(repo, entry['collector_sha256'], collector): raise ValueError('unreviewed module entry collector')
         if (entry['python'] != list(sys.version_info[:3]) or any(type(n) is not int for n in entry['python'])
                 or sys.implementation.name != 'cpython'):
             raise ValueError('UNVERIFIABLE module code identity: exact CPython version required')
@@ -1985,7 +2000,7 @@ def module_entry_schema_controls():
         rows={r['path']:r for r in inventory(repo,catalog)['records']}
         assert rows[target]['class']=='keep' and rows['tests/data.txt']['class'] is None
         assert all(e['kind']=='executes' for e in rows[target]['runner_chain']['edges'])
-        mutations=[('collector_sha256','0'*64),('module_code_sha256','0'*64),('target_blob','0'*40),
+        mutations=[('collector_sha256','42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32'),('collector_sha256','0'*64),('module_code_sha256','0'*64),('target_blob','0'*40),
                    ('python',[0,0,0]),('module_frame_line',True),('operation','validated Python read of measured bytes'),('runner','nonpassing:'+runner)]
         for key,value in mutations:
             invalid=copy.deepcopy(catalog);invalid['module_entries'][0][key]=value

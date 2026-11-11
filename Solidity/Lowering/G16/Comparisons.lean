@@ -1,3 +1,4 @@
+import Solidity.Lowering.V07.BooleanComparisons
 import Solidity.Lowering.V07.NumericComparisons
 
 /-! Scalar comparisons through the existing numeric-key observation and V07's
@@ -93,3 +94,29 @@ end Solidity.Lowering.G16.Comparisons
 /-- info: 'Solidity.Lowering.G16.Comparisons.assignment_transport' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Lowering.G16.Comparisons.assignment_transport
+
+namespace Solidity.Lowering.G16.BooleanComparison
+
+/-- Boolean equality/inequality from initial reads, including pipeline-dependent assignment capture and exact writes. This leaf does not associate frontend output or arbitrary effects. -/
+theorem transport {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} {Γ : Ctx}
+    (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
+    (source : Source.EMState E srcΓ) (target : State C Γ) (ne : Bool)
+    (i a : Source.Idx srcΓ .bool) (j b : Idx Γ (.val .bool)) (x y : Bool)
+    (readA : source.1.get a = .bool x) (readI : source.1.get i = .bool y)
+    (nativeA : TEnv.get b target.env = x) (nativeI : TEnv.get j target.env = y) :
+    (Source.evalE G F (fuel+4)
+      (.compare (V07.BooleanComparisons.sourceOp ne)
+        (.assign (.local i) (.local a)) (.local i))).run source =
+      (.ok (.val (.bool (V07.BooleanComparisons.answer ne x
+        (if G.pipeline = .legacy then y else x)))),(source.1.set i (.bool x),source.2)) ∧
+    (V07.BooleanComparisons.operand ne G.pipeline j b).run target =
+      .ok (⟨target.setLocal j x,List.prefix_refl _⟩,
+        .prim (V07.BooleanComparisons.answer ne x (if G.pipeline = .legacy then y else x))) := by
+  exact ⟨V07.BooleanComparisons.source_assignment G F fuel source ne i a x y readA readI,
+    V07.BooleanComparisons.operand_run target ne G.pipeline j b x y nativeA nativeI⟩
+
+end Solidity.Lowering.G16.BooleanComparison
+
+/-- info: 'Solidity.Lowering.G16.BooleanComparison.transport' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Lowering.G16.BooleanComparison.transport
