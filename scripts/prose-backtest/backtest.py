@@ -254,23 +254,38 @@ class Analyzer:
             info.update(comments=scanner.comments, docs=scanner.docs, code=code,
                         raw_pids=[bisect_left(scanner.newlines, m.start()) + 1
                                   for m in CHECK.PROCESS_ID.finditer(text)],
-                        pid_import=[CHECK._HEADER_IMPORT.fullmatch(text.split("\n")[
-                            bisect_left(scanner.newlines, m.start())]) is not None
-                            for m in CHECK.PROCESS_ID.finditer(text)],
                         g_names=frozenset(n for n in _ID_DOTTED.findall(text) if _G_ID.search(n)))
             if info["raw_pids"]:
+                info["newlines"] = scanner.newlines
                 info["text"] = text   # kept only where registry-dependent IDs need a rescan
         else:
             spans = []
         header, blocks, problems = generated_claims(text, spans, is_lean)
         info.update(header=header, blocks=blocks, block_problems=problems)
-        if not is_lean:
-            block_lines = set()
-            for b, e, _ in blocks:
-                block_lines.update(range(b, e + 1))
-            info["block_line_count"] = len(block_lines & set(range(1, info["physical"] + 1)))
         self.cache[key] = info
         return info
+
+    def counted_in_lines(self, sha, info, modules, lines):
+        """IDs the checker actually counts on LINES (exempt header IDs excluded).
+
+        Lowercasing those IDs (same length, no longer IDs, and their import names
+        no longer registered) removes exactly the counted ones from the total.
+        """
+        if not info["raw_pids"]:
+            return 0
+        hits = [m for m in CHECK.PROCESS_ID.finditer(info["text"])
+                if bisect_left(info["newlines"], m.start()) + 1 in lines]
+        if not hits:
+            return 0
+        key = (sha, bool(modules), info["g_names"] & modules, tuple(sorted(lines)))
+        if key not in self.pid_cache:
+            chars = list(info["text"])
+            for m in hits:
+                chars[m.start()] = chars[m.start()].lower()
+            altered = "".join(chars)
+            self.pid_cache[key] = (self.process_ids(sha, info, modules)
+                                   - CHECK.process_ids(altered, modules, CHECK._Scanner(altered)))
+        return self.pid_cache[key]
 
     def process_ids(self, sha, info, modules):
         """Current (v3) semantics; result depends only on modules among G-bearing names."""
@@ -281,10 +296,6 @@ class Analyzer:
             scanner = CHECK._Scanner(info["text"])
             self.pid_cache[key] = CHECK.process_ids(info["text"], modules, scanner)
         return self.pid_cache[key]
-
-
-def checker_version(blob_id, known):
-    return known.get(blob_id)
 
 
 def area_of(path):
@@ -370,9 +381,9 @@ def measure_commit(repo, analyzer, commit, estimate):
         if is_lean:
             nrow["comment_lines"] += len(info["comments"] - blocked)
             nrow["docstring_lines"] += len(info["docs"] - blocked)
-            # IDs on header-import lines may already be exempt: never subtract them twice
-            nrow["process_ids"] += pids - sum(1 for line, imp in zip(info["raw_pids"], info["pid_import"])
-                                              if line in blocked and not imp)
+            # subtract only the IDs the checker counted inside generated blocks
+            nrow["process_ids"] += pids - (analyzer.counted_in_lines(sha, info, modules, blocked)
+                                           if blocked else 0)
             code[area] += len(info["code"] - blocked)
         else:
             inside = len(blocked & set(range(1, info["physical"] + 1)))
@@ -584,6 +595,7 @@ def replay(args):
                         "reason": reason,
                         "causes": classify(numerator, d, prior_n, row["prior_denominator"], rule,
                                            ratio_ok, reason)})
+        prev_status = {}   # areas absent at this commit carry no status forward
         for (area, metric), row in current.items():
             for rule in ("legacy", "normalized_absolute", "ratio"):
                 prev_status[(rule, area, metric)] = row[rule]["status"]
