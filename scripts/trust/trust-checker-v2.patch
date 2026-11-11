@@ -1,0 +1,108 @@
+--- a/Main.lean
++++ b/Main.lean
+@@ -10,6 +10,38 @@
+ import Lake.Load.Manifest
+ 
+ open Lean
++
++/-- Optional v2 metadata cache: successful canonicalizations only, scoped to one scan.
++The full ordered-root walk and all kernel replay code remain unchanged. -/
++def canonicalV2 (cache : IO.Ref (Std.HashMap String System.FilePath))
++    (path : System.FilePath) : IO System.FilePath := do
++  if let some canonical := (← cache.get)[path.toString]? then
++    return canonical
++  let canonical ← IO.FS.realPath path
++  cache.modify (·.insert path.toString canonical)
++  return canonical
++
++def searchModuleV2 (cache : IO.Ref (Std.HashMap String System.FilePath))
++    (fname : System.FilePath) (roots : SearchPath) : IO (Option Name) := do
++  for root in roots do
++    try
++      let file ← canonicalV2 cache fname
++      let mut dir := (← canonicalV2 cache root).normalize
++      if !dir.toString.endsWith System.FilePath.pathSeparator.toString then
++        dir := ⟨dir.toString ++ System.FilePath.pathSeparator.toString⟩
++      if !dir.toString.isPrefixOf file.normalize.toString then
++        throw <| IO.userError "v2 root does not contain file"
++      let suffix := file.toString.drop dir.toString.length
++      return some <| (System.FilePath.mk suffix).withExtension ""
++        |>.components.foldl Name.mkStr Name.anonymous
++    catch
++      | _ => pure ()
++  return none
++
++def phaseV2 (phase : String) : IO Unit := do
++  let stderr ← IO.getStderr
++  stderr.putStrLn s!"trust-checker-v2: {phase}"
++  stderr.flush
+ 
+ unsafe def replayFromImports (module : Name) : IO Unit := do
+   let mFile ← findOLean module
+@@ -26,8 +58,11 @@
+   region.free
+ 
+ unsafe def replayFromFresh (module : Name) : IO Unit := do
++  phaseV2 "import-start"
+   Lean.withImportModules #[{module}] {} fun env => do
++    phaseV2 "kernel-replay-start"
+     discard <| (← mkEmptyEnvironment).replay' env.constants.map₁
++    phaseV2 "kernel-replay-finished"
+ 
+ /-- Read the name of the main module from the `lake-manifest`. -/
+ -- This has been copied from `ImportGraph.getCurrentModule` in the
+@@ -75,17 +110,20 @@
+         throw <| IO.userError s!"Could not resolve module: {arg}"
+       else
+         pure mod
++  phaseV2 "discovery-start"
+   let mut targetModules := []
+   let sp ← searchPathRef.get
+   for target in targets do
++    let cache ← IO.mkRef ({} : Std.HashMap String System.FilePath)
+     let mut found := false
+     for path in (← SearchPath.findAllWithExt sp "olean") do
+-      if let some m := (← searchModuleNameOfFileName path sp) then
++      if let some m := (← searchModuleV2 cache path sp) then
+         if target.isPrefixOf m then
+           targetModules := targetModules.insert m
+           found := true
+     if not found then
+       throw <| IO.userError s!"Could not find any oleans for: {target}"
++  phaseV2 "discovery-finished"
+   if "--fresh" ∈ flags then
+     if targetModules.length != 1 then
+       throw <| IO.userError s!"--fresh flag is only valid when specifying a single module:\n\
+--- a/Lean4Checker/Replay.lean
++++ b/Lean4Checker/Replay.lean
+@@ -40,6 +40,7 @@
+ 
+ structure State where
+   env : Kernel.Environment
++  telemetryCountV2 : Nat := 0
+   remaining : NameSet := {}
+   pending : NameSet := {}
+   postponedConstructors : NameSet := {}
+@@ -78,6 +79,12 @@
+ -/
+ partial def replayConstant (name : Name) : M Unit := do
+   if ← isTodo name then
++    let count := (← get).telemetryCountV2 + 1
++    modify fun state => { state with telemetryCountV2 := count }
++    if count % 1000 == 0 && count ≤ 128000 then
++      let stderr ← IO.getStderr
++      stderr.putStrLn s!"trust-checker-v2: dependency-sample {count} {name.toString.take 160}"
++      stderr.flush
+     let some ci := (← read).newConstants[name]? | unreachable!
+     replayConstants ci.getUsedConstantsAsSet
+     -- Check that this name is still pending: a mutual block may have taken care of it.
+@@ -171,6 +178,9 @@
+     ReaderT.run (r := { newConstants }) do
+       for n in remaining do
+         replayConstant n
++      IO.eprintln "trust-checker-v2: postponed-constructors-start"
+       checkPostponedConstructors
++      IO.eprintln "trust-checker-v2: postponed-recursors-start"
+       checkPostponedRecursors
++      IO.eprintln "trust-checker-v2: postponed-checks-finished"
+   return .ofKernelEnv s.env
