@@ -30,7 +30,7 @@ empty revert and transaction rollback are observed, including both storage roots
 
 ## Reproduction and admission
 
-Use the repository's writer lock and resource policy before Lean execution.
+Use the repository's writer lock and the H232 cloud execution policy below.
 The standalone `scripts/differential/Driver.lean` imports the existing SolCases
 adapter; it adds no library module or public theorem. Generated roots and module
 maps therefore require no new rows. Restore fetched artifacts as documented in
@@ -75,24 +75,20 @@ label them expected deviations. New alignment rows are proposals here, because
 Fixed external adapter controls (not Lean differential results) exercise all
 four modes, deliberate mismatches and nonempty-log refusal. No executed Lean
 agreement numbers or disagreement classifications are available yet.
-The corpus and 10k runs are pending the Lean resource gate.
+The corpus and 10k runs follow per-file and checkpoint validation.
 
 Input snapshots include the installed dependency tree and lock versions; any
 changed execution input prevents a passing report. This records runtime trust,
 not a kernel proof or V17 provenance certification.
 
-## Waits and owner questions
+## Cloud execution policy
 
-`VA3-R1` [AGENTS.md; resource policy; launch H137]: required systemd user scope
-cannot start on this VM (no user bus). Choose either provision the required
-scope/reserve, or explicitly authorize an equivalent bounded no-swap runner
-with a compatible reserve. Required Lean diagnostics, checkpoint/full gates,
-corpus and random execution remain pending; lightweight work continues.
-Question sent through `scripts/coord-tools/coord-ask`. H183 selected provisioning
-the unchanged scope/reserve. Provisioning checks found PID 1 is `tail`, no systemd
-manager or user runtime, no sudo, and an undelegated root-owned cgroup. Local
-unprivileged setup cannot provision the required host reserve; provider or
-coordinator action remains necessary. No alternative resource policy is used.
+No systemd scope on the cloud VM (H232). The VM provides isolation. Run heavy
+Lean gates one at a time with `LEAN_NUM_THREADS=1` and `-j1` for direct Lean
+commands, with no other heavy job alongside. H232 resolves `VA3-R1`; no memory
+scope or provisioning wait remains. The unchanged host pre-merge gate enforces
+the 16 GiB cap and no swap for every head. Certified/fast trust boundaries and
+all required validation gates remain unchanged.
 
 ## Review log
 
@@ -111,21 +107,27 @@ No milestone is complete before its required gate and review.
 
 ## Handoff
 
-Inventory and harness source prepared; required Lean checks and execution are
-pending. Generator execution, triage and lane-end validation are not complete.
-The CI owner proposal is prepared but not applied or execution-validated. No successful RUNTIME_GATE_PASS is claimed. Lightweight trust, path, generated
-root/fragment and axiom-pin checks pass. Navigation correctly fails until the
-CI/documentation owner applies the exact catalog diff below; this lane does not
-modify the leased catalog. No new axioms, theorem declarations or `sorry` are
-introduced.
+H568 retires this lane and replans unfinished work. Inventory, source harness,
+generator and owner proposals are saved. The driver has clean per-file MCP
+diagnostics and passes the per-file gate; the inventory checkpoint gate passes,
+including the library build. Independent finder/skeptic reviews found no new
+blocking issue in the H232 update.
+
+The 20-program Lean/EVM corpus, 10k generator run and benchmark, disagreement
+triage, CI owner integration and full lane-end gate were not completed. No
+successful RUNTIME_GATE_PASS or Lean differential agreement number is claimed.
+Fixed external adapter controls remain separate from Lean differential results.
+The approved CI/navigation owner diffs below remain proposals. No new axioms,
+theorem declarations or `sorry` are introduced.
 
 ## CI and documentation owner proposal
 
 The following is an exact proposed diff, not applied outside this lane's scope.
-The CI owner must provision the proposed `lean-bounded` self-hosted runner label
-with the repository's systemd memory/no-swap limits and reserve, and enforce
-those limits for the build and test command. This is a prerequisite, not a
-claim that an ordinary hosted runner meets those constraints. The job's hard
+H187 approved this proposed workflow and its time budgets, with owner
+integration after validation. H232 removes cloud-VM systemd provisioning as a
+prerequisite: serial VM execution applies here, and the unchanged host pre-merge
+16 GiB/no-swap gate remains mandatory. The CI owner manages the runner label in
+the approved proposal. The job's hard
 15-minute timeout includes setup/build; incomplete runs fail. The bounded
 entry point limits the test child to 14 minutes independently.
 
