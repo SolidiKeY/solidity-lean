@@ -1,4 +1,5 @@
 import Solidity.Correctness.Lowering.Unchecked.SourceSpelling
+import Solidity.Syntax.Splice
 
 /-!
 # Typed Source association controls
@@ -7,7 +8,8 @@ Guards losing original Source widths, replacing the actual StmtD.toR result,
 accepting a different local or operation direction, and confusing initial
 prefix/postfix or compound spellings. Positive controls
 supply real production typing derivations at every legal integer type; they
-are structural checks, not sampled semantic runs or a Source/model bridge.
+are structural checks, not sampled semantic runs. V4 controls also check the
+combined typed Source/raw/model boundary; the full producer pass remains open.
 -/
 namespace Solidity.Correctness.Lowering.Unchecked.SourceOneControls
 
@@ -122,6 +124,172 @@ theorem checked_panic_and_wrapping_poststate {E : Source.Env}
       byteValues (plan := plan) (calldataKnown := known)).run (.nil, st) =
         (.ok (.normal (.cons (Source.intWrap byteType 0) .nil)), (.nil, st)) := by
   cases known <;> exact ⟨rfl, rfl⟩
+
+private theorem production_x_parses_as_user : FreshNames.parse "x" = none := by
+  have scan : Substring.takeWhileAux "x" ⟨1⟩ (!·.isDigit) ⟨0⟩ = ⟨1⟩ := by
+    rw [Substring.takeWhileAux]
+    change Substring.takeWhileAux "x" ⟨1⟩ (!·.isDigit) ⟨1⟩ = ⟨1⟩
+    rw [Substring.takeWhileAux]
+    rfl
+  have scannedStem : "x".takeWhile (!·.isDigit) = "x" := by
+    change String.extract "x" ⟨0⟩ (Substring.takeWhileAux "x" ⟨1⟩ (!·.isDigit) ⟨0⟩) = "x"
+    rw [scan]
+    rfl
+  change (FreshNames.ofPrefixes "se" "sp" "ie" "mv").parse "x" = none
+  dsimp only [FreshNames.ofPrefixes]
+  rw [scannedStem]
+  rfl
+
+private theorem production_x_name : Var.ofName "x" = .user "x" := by
+  unfold Var.ofName
+  rw [production_x_parses_as_user]
+
+private theorem named_fixture {C : Contract} (ctx : NCtx) (input output : RawStmt)
+    (program : Prog C ctx.ctx ctx.ctx) (raw : RawOneAssociation input output)
+    (word : WordOneAssociation raw.source.inc program)
+    (rawCheck : checkRawOne input output = some raw)
+    (wordCheck : checkWordOne raw.source.inc program = some word)
+    (binding : ((ctx.find (Var.ofName raw.source.name) (.val .uint)).toOption.map Subtype.val) =
+      some word.target.slot) :
+    checkNamedOne ctx input output program = some ⟨raw, word, binding⟩ := by
+  unfold checkNamedOne
+  simp only [rawCheck, wordCheck, bind, Option.bind, dif_pos binding]
+
+private def ModelExample : Contract := contract!{}
+private def emittedIncrement := sol[ModelExample]{ uint x = 0; unchecked { x++; }; }
+private def emittedCompound := sol[ModelExample]{ uint x = 0; unchecked { x += 1; }; }
+private def emittedChecked := sol[ModelExample]{ uint x = 0; x += 1; }
+
+private def emittedBody (program : Prog ModelExample [] [.val .uint]) :
+    Prog ModelExample [.val .uint] [.val .uint] :=
+  match program with
+  | .cons (.declLocal .uint _ _) rest => rest
+  | _ => .nil
+
+private def modelContext : NCtx := [(.user "x", .val .uint)]
+private def rawInput : RawStmt := .incDec .postInc (.name "x")
+private def rawOutput : RawStmt := .opAssign .addW (.name "x") (.num 1)
+
+/-- Guards a vacuous typed boundary: a real Source typing derivation, actual
+raw rewrite shape and actual quotation output all pass with the default
+production FreshNames instance. This is a supplied-output control, not a
+proof of the opaque producer pipeline. -/
+theorem typed_pair_v4_increment_accepted (E : Source.Env) :
+    (checkTypedPairV4 [] [] modelContext rawInput rawOutput
+      (postfixDerivation E Source.IntTy.u256) (emittedBody emittedIncrement)).isSome = true := by
+  let raw := (checkRawOne rawInput rawOutput).get (by rfl)
+  let word := (checkWordOne raw.source.inc (emittedBody emittedIncrement)).get (by rfl)
+  have binding : ((modelContext.find (Var.ofName raw.source.name) (.val .uint)).toOption.map Subtype.val) =
+      some word.target.slot := by
+    change ((modelContext.find (Var.ofName "x") (.val .uint)).toOption.map Subtype.val) = some .here
+    rw [production_x_name]
+    rfl
+  have checked := named_fixture modelContext rawInput rawOutput
+    (emittedBody emittedIncrement) raw word rfl rfl binding
+  dsimp only [checkTypedPairV4]
+  rw [checked]
+  rfl
+
+/-- Guards losing the compound arm while composing typed spelling and model
+output. Both Source and target are the actual supplied objects. -/
+theorem typed_pair_v4_compound_accepted (E : Source.Env) :
+    (checkTypedPairV4 [] [] modelContext (.opAssign .add (.name "x") (.num 1)) rawOutput
+      (compound E Source.IntTy.u256 rfl) (emittedBody emittedCompound)).isSome = true := by
+  let raw := (checkRawOne (.opAssign .add (.name "x") (.num 1)) rawOutput).get (by rfl)
+  let word := (checkWordOne raw.source.inc (emittedBody emittedCompound)).get (by rfl)
+  have binding : ((modelContext.find (Var.ofName raw.source.name) (.val .uint)).toOption.map Subtype.val) =
+      some word.target.slot := by
+    change ((modelContext.find (Var.ofName "x") (.val .uint)).toOption.map Subtype.val) = some .here
+    rw [production_x_name]
+    rfl
+  have checked := named_fixture modelContext (.opAssign .add (.name "x") (.num 1)) rawOutput
+    (emittedBody emittedCompound) raw word rfl rfl binding
+  dsimp only [checkTypedPairV4]
+  rw [checked]
+  rfl
+
+/-- Guards accepting a narrow Source integer after erasing its original width. -/
+theorem typed_pair_v4_width_rejected (E : Source.Env) :
+    (checkTypedPairV4 [] [] modelContext rawInput rawOutput
+      (postfixDerivation E byteType) (emittedBody emittedIncrement)).isNone = true := by
+  rfl
+
+/-- Guards associating the input name with a different actual Source identifier. -/
+theorem typed_pair_v4_source_name_rejected (E : Source.Env) :
+    (checkTypedPairV4 [] [] modelContext (.incDec .postInc (.name "y")) rawOutput
+      (postfixDerivation E Source.IntTy.u256) (emittedBody emittedIncrement)).isNone = true := by
+  rfl
+
+/-- Guards accepting a model context where the actual input name is absent. -/
+theorem typed_pair_v4_model_name_rejected (E : Source.Env) :
+    (checkTypedPairV4 [] [] [(.user "y", .val .uint)] rawInput rawOutput
+      (postfixDerivation E Source.IntTy.u256) (emittedBody emittedIncrement)).isNone = true := by
+  let raw := (checkRawOne rawInput rawOutput).get (by rfl)
+  let word := (checkWordOne raw.source.inc (emittedBody emittedIncrement)).get (by rfl)
+  have missing : ¬((NCtx.find (Var.ofName raw.source.name) (.val .uint)
+      [(.user "y", .val .uint)]).toOption.map Subtype.val) = some word.target.slot := by
+    change ¬((NCtx.find (Var.ofName "x") (.val .uint)
+      [(.user "y", .val .uint)]).toOption.map Subtype.val) = some .here
+    rw [production_x_name]
+    decide
+  have rejected : checkNamedOne [(.user "y", .val .uint)] rawInput rawOutput
+      (emittedBody emittedIncrement) = none := by
+    unfold checkNamedOne
+    have rawCheck : checkRawOne rawInput rawOutput = some raw := rfl
+    have wordCheck : checkWordOne raw.source.inc (emittedBody emittedIncrement) = some word := rfl
+    simp only [rawCheck, wordCheck, bind, Option.bind, dif_neg missing]
+  dsimp only [checkTypedPairV4]
+  rw [rejected]
+  rfl
+
+/-- Guards dropping the raw output's wrapping operation during composition. -/
+theorem typed_pair_v4_rewrite_rejected (E : Source.Env) :
+    (checkTypedPairV4 [] [] modelContext rawInput (.opAssign .add (.name "x") (.num 1))
+      (postfixDerivation E Source.IntTy.u256) (emittedBody emittedIncrement)).isNone = true := by
+  rfl
+
+/-- Guards certifying a checked actual target despite a valid wrapping raw output. -/
+theorem typed_pair_v4_checked_target_rejected (E : Source.Env) :
+    (checkTypedPairV4 [] [] modelContext rawInput rawOutput
+      (postfixDerivation E Source.IntTy.u256) (emittedBody emittedChecked)).isNone = true := by
+  rfl
+
+private def emittedExtra := sol[ModelExample]{ bool flag = false; uint x = 0; unchecked { x++; }; }
+private def extraContext : NCtx := [(.user "x", .val .uint), (.user "flag", .val .bool)]
+
+private def extraBody (program : Prog ModelExample [] [.val .uint, .val .bool]) :
+    Prog ModelExample [.val .uint, .val .bool] [.val .uint, .val .bool] :=
+  match program with
+  | .cons (.declLocal .bool _ _) (.cons (.declLocal .uint _ _) rest) => rest
+  | _ => .nil
+
+/-- Guards ignoring model context alignment: the actual larger-context output
+passes the named update check, but cannot pair with a one-local Source input. -/
+theorem typed_pair_v4_context_alignment (E : Source.Env) :
+    (checkNamedOne extraContext rawInput rawOutput (extraBody emittedExtra)).isSome = true ∧
+    (checkTypedPairV4 [] [] extraContext rawInput rawOutput
+      (postfixDerivation E Source.IntTy.u256) (extraBody emittedExtra)).isNone = true := by
+  constructor
+  · let raw := (checkRawOne rawInput rawOutput).get (by rfl)
+    let word := (checkWordOne raw.source.inc (extraBody emittedExtra)).get (by rfl)
+    have binding : ((extraContext.find (Var.ofName raw.source.name) (.val .uint)).toOption.map Subtype.val) =
+        some word.target.slot := by
+      change ((extraContext.find (Var.ofName "x") (.val .uint)).toOption.map Subtype.val) = some .here
+      rw [production_x_name]
+      rfl
+    rw [named_fixture extraContext rawInput rawOutput (extraBody emittedExtra) raw word rfl rfl binding]
+    rfl
+  · rfl
+
+#print axioms typed_pair_v4_context_alignment
+
+#print axioms typed_pair_v4_increment_accepted
+#print axioms typed_pair_v4_compound_accepted
+#print axioms typed_pair_v4_width_rejected
+#print axioms typed_pair_v4_source_name_rejected
+#print axioms typed_pair_v4_model_name_rejected
+#print axioms typed_pair_v4_rewrite_rejected
+#print axioms typed_pair_v4_checked_target_rejected
 
 #print axioms checked_panic_and_wrapping_poststate
 
