@@ -1463,5 +1463,10 @@
     "file": "Solidity/Frontend/CounterexampleMetadataV1.lean",
     "kind": "kernel-option",
     "code": "withScope (fun scope => { scope with opts := debug.skipKernelTC.set scope.opts false }) do"
+  },
+  {
+    "file": "Solidity/Tools/Goal.lean",
+    "kind": "opaque",
+    "code": "opaque Unstated : Prop"
   }
 ]

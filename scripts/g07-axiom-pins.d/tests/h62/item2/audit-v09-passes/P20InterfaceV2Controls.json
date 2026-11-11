@@ -9,6 +9,16 @@
   "Quot.sound",
   "propext"
  ],
+ "tests/h62/item2/audit-v09-passes/P20InterfaceV2Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV2.Controls.consumerV2": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/P20InterfaceV2Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV2.Controls.consumerV2_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "tests/h62/item2/audit-v09-passes/P20InterfaceV2Controls.lean:Solidity.Yul.Compilation.P20.InterfaceV2.Controls.joint_input": [
   "Classical.choice",
   "Quot.sound",

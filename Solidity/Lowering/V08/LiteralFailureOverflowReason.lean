@@ -24,7 +24,7 @@ theorem checked_overflow {E : Env} {Γ : RCtx} (G : Glob E) (F : Fr) (n : Nat)
  (evalE G {F with checked:=true} (n+5) (addition t)).run (caller t x y hx hy older,state)=
  (.error (.revert (panicData .arithmetic)),(caller t x y hx hy older,state)) := by
  cases order : G.pipeline <;>
-  simp only [addition,caller,evalE,evalPair,order,Bool.false_eq_true,↓reduceIte] <;>
+  simp only [addition,caller,evalE,evalPair,withLibraryCalldata,order,Bool.false_eq_true,↓reduceIte] <;>
   dsimp [EM.lift,EM.locals,getV,RVal.get,bind,pure,ExceptT.bind,ExceptT.pure,ExceptT.bindCont,
    ExceptT.run,ExceptT.mk,StateT.bind,StateT.pure,StateT.get,get,getThe,MonadStateOf.get,
    liftM,monadLift,MonadLift.monadLift,ExceptT.lift,Functor.map,StateT.map,
@@ -37,7 +37,7 @@ theorem unchecked_overflow {E : Env} {Γ : RCtx} (G : Glob E) (F : Fr) (n : Nat)
  (evalE G {F with checked:=false} (n+5) (addition t)).run (caller t x y hx hy older,state)=
  (.ok (.val (intWrap t (x+y))),(caller t x y hx hy older,state)) := by
  cases order : G.pipeline <;>
-  simp only [addition,caller,evalE,evalPair,order,Bool.false_eq_true,↓reduceIte] <;>
+  simp only [addition,caller,evalE,evalPair,withLibraryCalldata,order,Bool.false_eq_true,↓reduceIte] <;>
   dsimp [EM.lift,EM.locals,getV,RVal.get,bind,pure,ExceptT.bind,ExceptT.pure,ExceptT.bindCont,
    ExceptT.run,ExceptT.mk,StateT.bind,StateT.pure,StateT.get,get,getThe,MonadStateOf.get,
    liftM,monadLift,MonadLift.monadLift,ExceptT.lift,Functor.map,StateT.map,
@@ -50,7 +50,7 @@ theorem in_range {E : Env} {Γ : RCtx} (G : Glob E) (F : Fr) (n : Nat)
  (evalE G F (n+5) (addition t)).run (caller t x y hx hy older,state)=
  (.ok (.val (.int (x+y) within)),(caller t x y hx hy older,state)) := by
  cases order : G.pipeline <;>
-  simp only [addition,caller,evalE,evalPair,order,Bool.false_eq_true,↓reduceIte] <;>
+  simp only [addition,caller,evalE,evalPair,withLibraryCalldata,order,Bool.false_eq_true,↓reduceIte] <;>
   dsimp [EM.lift,EM.locals,getV,RVal.get,bind,pure,ExceptT.bind,ExceptT.pure,ExceptT.bindCont,
    ExceptT.run,ExceptT.mk,StateT.bind,StateT.pure,StateT.get,get,getThe,MonadStateOf.get,
    liftM,monadLift,MonadLift.monadLift,ExceptT.lift,Functor.map,StateT.map,

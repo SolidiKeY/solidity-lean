@@ -1,0 +1,7 @@
+{
+ "Solidity/Lowering/G16/UnsignedQuotRem.lean:Solidity.Lowering.G16.UnsignedQuotRem.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

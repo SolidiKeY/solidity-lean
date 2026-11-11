@@ -1,0 +1,10 @@
+{
+  "calldata_window_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.CalldataWordCertificate.window",
+    "proof": "\u27e8CalldataWord.certificate,[17,34,51],1,4,True.intro\u27e9"
+  },
+  "calldata_load_joint_domain": {
+    "target": "Solidity.Backend.AbiEntry.Interface.CalldataWordCertificate.load",
+    "proof": "\u27e8CalldataWord.certificate,rawCalldataFrame,1,True.intro\u27e9"
+  }
+}

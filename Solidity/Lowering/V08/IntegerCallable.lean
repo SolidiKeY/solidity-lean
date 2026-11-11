@@ -59,7 +59,7 @@ theorem source_call {E : Source.Env} (g : Source.Glob E) (f : Source.Fr)
     (body E t) inputs.selected (.cons (.int 0 t.zero_mem) .nil) rfl
     (.cons (.int n h) (.cons (.int n h) .nil)) (.cons (.val (.int n h)) .nil)
     state state state (by rfl) (by
-      simp only [Source.runMods, body, Source.execItems, Source.execS, Source.evalE, conversion_identity, Source.EM.sub, Source.getV, Source.RVal.get, Source.EM.locals, bind, pure, ExceptT.run, ExceptT.bind, ExceptT.pure, get, getThe, MonadStateOf.get, liftM, monadLift, MonadLift.monadLift, ExceptT.lift, Functor.map, Source.EM.lift]
+      simp only [Source.runMods, body, Source.execItems, Source.execS, Source.evalE, Source.withLibraryCalldata, conversion_identity, Source.EM.sub, Source.getV, Source.RVal.get, Source.EM.locals, bind, pure, ExceptT.run, ExceptT.bind, ExceptT.pure, get, getThe, MonadStateOf.get, liftM, monadLift, MonadLift.monadLift, ExceptT.lift, Functor.map, Source.EM.lift]
       dsimp only [ExceptT.mk,StateT.bind,StateT.pure,StateT.get,StateT.map,ExceptT.bindCont,
         Source.Vals.onto,Source.Locals.get,Source.RVal.get]
       simp only [bind, pure, StateT.bind, StateT.pure, Except.pure, ExceptT.bindCont, Source.L0, Source.Locals.get, List.length_cons, List.length_nil, Nat.sub_self, slot_write_same]) (by

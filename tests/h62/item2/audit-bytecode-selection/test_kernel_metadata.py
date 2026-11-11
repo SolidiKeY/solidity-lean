@@ -25,6 +25,86 @@ class MetadataSchemaTests(unittest.TestCase):
             ("artifact_manifest_sha256","source_sha256","output_sha256","native_result_sha256","seal_sha256")},
             "entries":[{"target":observed_type(row),"helper":"Audit.h","status":status,
                         "reason":"" if status=="proved" else "no supported default"}]}
+    def projection_report_fixture(self):
+        row=self.row();row.update(name="N.Cert.ok",user_name="N.Cert.ok",private=False,
+            original_kind="Lean.ConstantKind.thm",is_theorem=True,is_projection=True,kind="field",
+            body_status="proof body intentionally omitted; declaration retained")
+        return row,self.report_fixture(row)
+    def test_hypothesis_reports_keep_checked_field_reports_without_theorem_source_credit(self):
+        row,artifact=self.projection_report_fixture();other=self.row();other['name']='unreported'
+        result=hypothesis_report_index([row,other],{"M":[]},[artifact]);entry=next(v for v in result['declarations'] if v['name']==row['name'])
+        self.assertTrue(entry['is_projection']);self.assertEqual(entry['record_kind'],'field')
+        self.assertTrue(entry['original_theorem']);self.assertEqual(entry['report_status'],'reported_proof')
+        self.assertEqual(entry['source_ids'],[]);self.assertEqual(entry['accounting_status'],'unmatched')
+        self.assertEqual(result['summary']['distinct_reported_proof_targets'],1)
+        self.assertEqual(result['summary']['unreported_records'],1)
+        for flag in ['proof_acceptance_established','joint_witness_established','statement_correspondence_established','inherited_obligations_established','global_witness_ledger_linked']:
+            self.assertFalse(entry[flag])
+    def test_hypothesis_reports_still_reject_data_projections_and_unrelated_proof_constants(self):
+        row,artifact=self.projection_report_fixture()
+        for changes in [{'original_kind':'Lean.ConstantKind.defn','is_theorem':False,'proof_type':False,'body_status':'no available value'},
+                        {'original_kind':'Lean.ConstantKind.defn','is_theorem':False,'is_projection':False,'kind':'constant'}]:
+            bad=copy.deepcopy(row);bad.update(changes);a=self.report_fixture(bad)
+            with self.subTest(changes=changes),self.assertRaises(ValueError):hypothesis_report_index([bad],{'M':[]},[a])
+    def test_hypothesis_field_reports_deduplicate_and_refuse_stale_snapshots(self):
+        row,a=self.projection_report_fixture();b=copy.deepcopy(a);b['id']='repeat'
+        result=hypothesis_report_index([row],{'M':[]},[a,b])
+        self.assertEqual(result['summary']['artifact_reports'],2);self.assertEqual(result['summary']['distinct_reported_proof_targets'],1)
+        self.assertEqual(result,hypothesis_report_index([row],{'M':[]},[b,a]))
+        for change in [{'type_expr':'stale'},{'private':True},{'level_params':['u']}]:
+            bad=copy.deepcopy(a);bad['entries'][0]['target'].update(change)
+            with self.subTest(change=change),self.assertRaises(ValueError):hypothesis_report_index([row],{'M':[]},[bad])
+        saved=copy.deepcopy(result);a['entries'][0]['target']['type_expr']='mutation';self.assertEqual(result,saved)
+
+    def federation_fixture(self):
+        base=self.ranged_row();field,_=self.projection_report_fixture()
+        field.update(module='Supplement',name='Supplement.Cert.ok',manifest_sha256='supplement-fingerprint')
+        return [dict(id='base',rows=[base],mapping={'M':[self.source_candidate(base)]},artifacts=[]),
+                dict(id='supplement',rows=[field],mapping={'Supplement':[]},artifacts=[self.report_fixture(field,'supplement')])]
+    def test_federation_preserves_fingerprints_reports_and_base_gaps(self):
+        parts=self.federation_fixture();result=federated_hypothesis_reports(parts)
+        self.assertEqual(result['summary'],{'slices':2,'disjoint_records':2,'disjoint_module_scopes':2,'reported_proof_targets':1,'unreported_records':1})
+        self.assertEqual([p['inspection_fingerprint'] for p in result['inspection_slices']],['fingerprint','supplement-fingerprint'])
+        first,second=[p['index']['declarations'][0] for p in result['inspection_slices']]
+        self.assertEqual(first['report_status'],'no_report');self.assertEqual(second['report_status'],'reported_proof')
+        self.assertEqual(second['source_ids'],[])
+        for key in ['coherent_environment_established','proof_acceptance_established','source_correspondence_established','full_census_accepted','global_witness_ledger_linked']:
+            self.assertFalse(result[key])
+        self.assertEqual(result,federated_hypothesis_reports(list(reversed(parts))))
+        for part,packet in zip(parts,result['inspection_slices']):
+            self.assertEqual(packet['index']['declarations'][0]['record_sha256'],observed_type(part['rows'][0])['record_sha256'])
+        with_empty=copy.deepcopy(parts);with_empty[0]['mapping']['Empty']=[]
+        empty_result=federated_hypothesis_reports(with_empty)
+        self.assertEqual(empty_result['inspection_slices'][0]['module_scope'],['Empty','M'])
+        self.assertEqual(empty_result['summary']['disjoint_module_scopes'],3)
+        saved=copy.deepcopy(result);parts[1]['rows'][0]['type_expr']='changed';self.assertEqual(result,saved)
+    def test_federation_retains_failed_attempt_beside_proof_without_duplicate_credit(self):
+        parts=self.federation_fixture();earlier=copy.deepcopy(parts[1]['artifacts'][0]);earlier['id']='earlier'
+        earlier['entries'][0].update(status='unsupported-default',reason='no supported fixture')
+        parts[1]['artifacts'].append(earlier);result=federated_hypothesis_reports(parts)
+        self.assertEqual(result['summary']['reported_proof_targets'],1)
+        packet=result['inspection_slices'][1]['index'];self.assertEqual(packet['summary']['artifact_reports'],2)
+        declaration=packet['declarations'][0]
+        self.assertEqual({r['reported_status'] for r in declaration['hypothesis_reports']},{'proved','unsupported-default'})
+        self.assertFalse(declaration['proof_acceptance_established'])
+        self.assertFalse(result['global_witness_ledger_linked'])
+
+    def test_federation_refuses_overlap_ids_empty_and_mixed_contexts(self):
+        parts=self.federation_fixture()
+        for change in ['id','name','module','mapping']:
+            bad=copy.deepcopy(parts)
+            if change=='id':bad[1]['id']=bad[0]['id']
+            elif change=='name':bad[1]['rows'][0]['name']=bad[0]['rows'][0]['name']
+            elif change=='module':bad[1]['rows'][0]['module']='M'
+            else:bad[1]['mapping']['M']=[]
+            if change in ('name','module'):
+                bad[1]['artifacts']=[self.report_fixture(bad[1]['rows'][0],'supplement')]
+            with self.subTest(change=change),self.assertRaises(ValueError):federated_hypothesis_reports(bad)
+        with self.assertRaises(ValueError):federated_hypothesis_reports([])
+        with self.assertRaises(ValueError):federated_hypothesis_reports([dict(id='empty',rows=[],mapping={},artifacts=[])])
+        mixed=dict(id='mixed',rows=parts[0]['rows']+parts[1]['rows'],mapping=dict(parts[0]['mapping'],**parts[1]['mapping']),artifacts=[])
+        with self.assertRaises(ValueError):federated_hypothesis_reports([mixed])
+
     def test_hypothesis_reports_deduplicate_successes_and_retain_failures_and_gaps(self):
         row=self.ranged_row();other=self.row();other.update(name="unreported",user_name="unreported",declaration_range=None)
         mapping={"M":[self.source_candidate(row)]}
@@ -452,6 +532,53 @@ class RecordPartitionTests(unittest.TestCase):
         self.assertEqual([e["record"]["name"] for e in groups["direct_field"]],["field"])
         self.assertEqual([e["record"]["name"] for e in groups["unattributed_no_range"]],["odd_auxiliary_name"])
 
+
+
+class SourceRangeBindingTests(unittest.TestCase):
+    def fixture(self, raw="α theorem 名 : True := by\n  trivial\n"):
+        row=MetadataSchemaTests().ranged_row()
+        row["declaration_range"].update(selection_column=10,selection_end_column=11)
+        sources={"M":raw.encode()}
+        return row,sources,{"M":hashlib.sha256(raw.encode()).hexdigest()}
+    def test_unicode_selection_is_utf8_bytes_and_keeps_raw_type(self):
+        row,sources,pins=self.fixture();packet=source_range_bindings([row],sources,pins)
+        entry=packet["records"][0];selection=entry["range_bytes"]["selection"]
+        self.assertEqual(selection["text"],"名")
+        self.assertEqual(sources["M"][selection["byte_start"]:selection["byte_end"]],"名".encode())
+        self.assertEqual(selection["byte_start"],11);self.assertEqual(selection["byte_end"],14)
+        self.assertEqual(entry["observed_type"],observed_type(row))
+        self.assertFalse(any(entry[k] for k in ["source_identity_established","statement_correspondence_established","inherited_obligations_established","joint_witness_established"]))
+    def test_missing_and_legacy_ranges_are_not_selection_bindings(self):
+        row,sources,pins=self.fixture();missing=copy.deepcopy(row);missing.update(name="missing",declaration_range=None)
+        legacy=copy.deepcopy(row);legacy.update(name="legacy",declaration_range={"start_line":1,"end_line":2,"selection_line":1})
+        packet=source_range_bindings([row,missing,legacy],sources,pins);by={r["observed_type"]["name"]:r for r in packet["records"]}
+        self.assertEqual(by["missing"]["binding_status"],"no_declaration_range");self.assertIsNone(by["missing"]["range_bytes"])
+        self.assertEqual(by["legacy"]["binding_status"],"line_range_only");self.assertIsNone(by["legacy"]["range_bytes"]["selection"])
+        self.assertEqual(len(packet["records"]),3)
+    def test_invalid_positions_pins_and_scope_fail_closed(self):
+        row,sources,pins=self.fixture()
+        for change in [{"end_line":99},{"selection_column":999,"selection_end_column":999}]:
+            bad=copy.deepcopy(row);bad["declaration_range"].update(change)
+            with self.subTest(change=change),self.assertRaises(ValueError):source_range_bindings([bad],sources,pins)
+        with self.assertRaises(ValueError):source_range_bindings([row],{"M":sources["M"]+b"drift"},pins)
+        with self.assertRaises(ValueError):source_range_bindings([row],sources,{"M":"g"*64})
+        with self.assertRaises(ValueError):source_range_bindings([row],{"N":sources["M"]},{"N":pins["M"]})
+    def test_multiline_crlf_unicode_separator_and_eof_positions(self):
+        row,sources,pins=self.fixture("α\r\n名\u2028x\n")
+        row["declaration_range"].update(start_line=1,end_line=3,selection_line=1,selection_column=1,selection_end_line=2,selection_end_column=2)
+        entry=source_range_bindings([row],sources,pins)["records"][0]
+        self.assertEqual(entry["range_bytes"]["selection"]["text"],"\r\n名\u2028")
+        self.assertEqual(entry["range_bytes"]["line_byte_end"],len(sources["M"]))
+        row["declaration_range"].update(selection_line=3,selection_column=0,selection_end_line=3,selection_end_column=0)
+        self.assertEqual(source_range_bindings([row],sources,pins)["records"][0]["range_bytes"]["selection"]["text"],"")
+    def test_ordering_uninspected_modules_and_mutation_isolation(self):
+        row,sources,pins=self.fixture();other=copy.deepcopy(row);other["name"]="other";sources["Unseen"]=b"";pins["Unseen"]=hashlib.sha256(b"").hexdigest()
+        packet=source_range_bindings([row,other],sources,pins)
+        self.assertEqual(packet,source_range_bindings([other,row],dict(reversed(list(sources.items()))),dict(reversed(list(pins.items())))))
+        self.assertEqual(packet["sources"][1]["supplied_records"],0)
+        saved=copy.deepcopy(packet);row["binders"].append({"external":"mutation"});self.assertEqual(packet,saved)
+        packet["records"][0]["observed_type"]["declaration_range"]["start_line"]=99
+        self.assertEqual(other["declaration_range"]["start_line"],1)
 
 if __name__ == "__main__":
     unittest.main()

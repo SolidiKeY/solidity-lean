@@ -1,0 +1,184 @@
+diff --git a/Lean4Checker/FusedDepsV3.lean b/Lean4Checker/FusedDepsV3.lean
+new file mode 100644
+index 0000000..89645e8
+--- /dev/null
++++ b/Lean4Checker/FusedDepsV3.lean
+@@ -0,0 +1,25 @@
++/-
++Copyright (c) 2026. Released under Apache 2.0 license; see LICENSE.
++-/
++prelude
++import Lean.Util.FoldConsts
++
++namespace Lean.Environment.Replay'
++
++/-- Metadata-only carrier for one existing native fold over type and value.
++The temporary application need not be well typed and never enters a declaration
++or kernel check. Reuses the existing fold's pointer/name deduplication; no new
++unsafe implementation or proof reduction hook is introduced. -/
++def fusedExprConstantsV3 (typeExpr valueExpr : Lean.Expr) : Lean.NameSet :=
++  (Lean.Expr.app typeExpr valueExpr).getUsedConstantsAsSet
++
++/-- Preserve the original collector's opaque body and inductive/ctor/recursor
++metadata cases. Only body-bearing cases share a single fold state. -/
++def getUsedConstantsFusedV3 (ci : Lean.ConstantInfo) : Lean.NameSet :=
++  match ci with
++  | .defnInfo info => fusedExprConstantsV3 ci.type info.value
++  | .thmInfo info => fusedExprConstantsV3 ci.type info.value
++  | .opaqueInfo info => fusedExprConstantsV3 ci.type info.value
++  | _ => ci.getUsedConstantsAsSet
++
++end Lean.Environment.Replay'
+diff --git a/Lean4Checker/FusedDepsV3Controls.lean b/Lean4Checker/FusedDepsV3Controls.lean
+new file mode 100644
+index 0000000..a34326f
+--- /dev/null
++++ b/Lean4Checker/FusedDepsV3Controls.lean
+@@ -0,0 +1,71 @@
++/-
++Copyright (c) 2026. Released under Apache 2.0 license; see LICENSE.
++-/
++import Lean4Checker.FusedDepsV3
++
++namespace Lean.Environment.Replay'.FusedDepsV3Controls
++
++/-- Compare actual ascending Name.quickCmp enumeration, not TreeSet shape. -/
++def orderedNames (deps : NameSet) : Array Name := Id.run do
++  let mut names := #[]
++  for name in deps do names := names.push name
++  return names
++
++/-- Guards omitted native dependencies, opaque bodies, metadata exceptions and
++order drift. Independent expected nonempty names prevent the logical opaque
++fold initializer (empty set) from passing both sides vacuously. These records
++are synthetic metadata, never declarations submitted to any kernel. -/
++def checkCase (label : String) (ci : ConstantInfo) (expectedNames : Array Name) : IO Unit := do
++  let expected := orderedNames (NameSet.ofList expectedNames.toList)
++  let original := orderedNames ci.getUsedConstantsAsSet
++  let fused := orderedNames (getUsedConstantsFusedV3 ci)
++  unless original == expected && fused == expected do
++    throw <| IO.userError s!"{label}: expected {expected}, original {original}, fused {fused}"
++
++def bodyInfo (kind : Nat) (type value : Expr) : ConstantInfo :=
++  match kind with
++  | 0 => .defnInfo { name := `fixtureDef, levelParams := [], type := type, value := value, hints := .opaque, safety := .safe, all := [`ignoredDefMetadata] }
++  | 1 => .thmInfo { name := `fixtureThm, levelParams := [], type := type, value := value, all := [`ignoredThmMetadata] }
++  | _ => .opaqueInfo { name := `fixtureOpaque, levelParams := [], type := type, value := value, isUnsafe := false, all := [`ignoredOpaqueMetadata] }
++
++/-- Guards the actual compiled collector on all eight ConstantInfo variants,
++shared/disjoint/nested expression roots and ignored labels. No environment is
++imported or replayed; even the synthetic expressions may be ill typed. -/
++def runSynthetic : IO Unit := do
++  let a := Expr.const `typeOnly []
++  let b := Expr.const `valueOnly []
++  let shared := Expr.app a b
++  let ignored : MData := ({} : MData).setName `ignoredKey `ignoredPayload
++  let mut count := 0
++  for kind in [0:3] do
++    let cases : Array (String × Expr × Expr × Array Name) := #[
++      ("disjoint", a, b, #[`typeOnly, `valueOnly]),
++      ("shared", shared, shared, #[`typeOnly, `valueOnly]),
++      ("nested", shared, .app shared (.const `nestedOnly []), #[`typeOnly, `valueOnly, `nestedOnly]),
++      ("repeated-universes", a, .const `typeOnly [.succ .zero], #[`typeOnly]),
++      ("ignored-labels", .mdata ignored a, .proj `ignoredStructure 0 b, #[`typeOnly, `valueOnly]),
++      ("empty-type", .sort .zero, b, #[`valueOnly]),
++      ("empty-value", a, .sort .zero, #[`typeOnly]),
++      ("binders", .forallE `ignoredBinder a (.lam `ignoredBinder b (.bvar 0) .default) .default,
++       .letE `ignoredLet a b (.const `letBody []) false, #[`typeOnly, `valueOnly, `letBody])]
++    for (label, type, value, expected) in cases do
++      checkCase s!"body-{kind}-{label}" (bodyInfo kind type value) expected
++      count := count + 1
++  checkCase "axiom" (.axiomInfo { name := `ignoredAxiomName, levelParams := [], type := a, isUnsafe := false }) #[`typeOnly]
++  checkCase "inductive" (.inductInfo { name := `ignoredInductName, levelParams := [], type := a, numParams := 0, numIndices := 0, all := [`ignoredMutualInduct], ctors := [`ctorA, `ctorB], numNested := 0, isRec := false, isUnsafe := false, isReflexive := false }) #[`typeOnly, `ctorA, `ctorB]
++  checkCase "constructor" (.ctorInfo { name := `constructorSelf, levelParams := [], type := a, induct := `ignoredParent, cidx := 0, numParams := 0, numFields := 0, isUnsafe := false })
++    #[`typeOnly, `constructorSelf]
++  checkCase "recursor" (.recInfo { name := `ignoredRecName, levelParams := [], type := a, all := [`mutualA, `mutualB], numParams := 0, numIndices := 0, numMotives := 0, numMinors := 0, rules := [{ ctor := `ignoredRuleCtor, nfields := 0, rhs := .const `ignoredRuleBody [] }], k := false, isUnsafe := false }) #[`typeOnly, `mutualA, `mutualB]
++  checkCase "quotient" (.quotInfo { name := `ignoredQuotName, levelParams := [], type := a, kind := .type }) #[`typeOnly]
++  -- A deliberately wrong independent oracle must fail, rather than silently
++  -- reporting differential agreement between two empty native fallbacks.
++  let rejected ← try
++    checkCase "negative-oracle" (bodyInfo 2 a b) #[`typeOnly]
++    pure false
++  catch _ => pure true
++  unless rejected do throw <| IO.userError "negative oracle was not rejected"
++  IO.println s!"V3_METADATA_CONTROLS_PASS {count + 5} cases; negative oracle rejected; no replay"
++
++end Lean.Environment.Replay'.FusedDepsV3Controls
++
++def main : IO Unit := Lean.Environment.Replay'.FusedDepsV3Controls.runSynthetic
+diff --git a/Lean4Checker/Replay.lean b/Lean4Checker/Replay.lean
+index 93146a3..5840818 100644
+--- a/Lean4Checker/Replay.lean
++++ b/Lean4Checker/Replay.lean
+@@ -9,0 +10 @@ import Lean.Util.FoldConsts
++import Lean4Checker.FusedDepsV3
+@@ -42,0 +44 @@ structure State where
++  telemetryCountV2 : Nat := 0
+@@ -80,0 +83,6 @@ partial def replayConstant (name : Name) : M Unit := do
++    let count := (← get).telemetryCountV2 + 1
++    modify fun state => { state with telemetryCountV2 := count }
++    if count % 1000 == 0 && count ≤ 128000 then
++      let stderr ← IO.getStderr
++      stderr.putStrLn s!"trust-checker-v2: dependency-sample {count} {name.toString.take 160}"
++      stderr.flush
+@@ -82 +90 @@ partial def replayConstant (name : Name) : M Unit := do
+-    replayConstants ci.getUsedConstantsAsSet
++    replayConstants (getUsedConstantsFusedV3 ci)
+@@ -173,0 +182 @@ def replay' (newConstants : Std.HashMap Name ConstantInfo) (env : Environment) :
++      IO.eprintln "trust-checker-v2: postponed-constructors-start"
+@@ -174,0 +184 @@ def replay' (newConstants : Std.HashMap Name ConstantInfo) (env : Environment) :
++      IO.eprintln "trust-checker-v2: postponed-recursors-start"
+@@ -175,0 +186 @@ def replay' (newConstants : Std.HashMap Name ConstantInfo) (env : Environment) :
++      IO.eprintln "trust-checker-v2: postponed-checks-finished"
+diff --git a/Main.lean b/Main.lean
+index adcbc38..3e9a20c 100644
+--- a/Main.lean
++++ b/Main.lean
+@@ -13,0 +14,32 @@ open Lean
++/-- Optional v2 metadata cache: successful canonicalizations only, scoped to one scan.
++The full ordered-root walk and all kernel replay code remain unchanged. -/
++def canonicalV2 (cache : IO.Ref (Std.HashMap String System.FilePath))
++    (path : System.FilePath) : IO System.FilePath := do
++  if let some canonical := (← cache.get)[path.toString]? then
++    return canonical
++  let canonical ← IO.FS.realPath path
++  cache.modify (·.insert path.toString canonical)
++  return canonical
++
++def searchModuleV2 (cache : IO.Ref (Std.HashMap String System.FilePath))
++    (fname : System.FilePath) (roots : SearchPath) : IO (Option Name) := do
++  for root in roots do
++    try
++      let file ← canonicalV2 cache fname
++      let mut dir := (← canonicalV2 cache root).normalize
++      if !dir.toString.endsWith System.FilePath.pathSeparator.toString then
++        dir := ⟨dir.toString ++ System.FilePath.pathSeparator.toString⟩
++      if !dir.toString.isPrefixOf file.normalize.toString then
++        throw <| IO.userError "v2 root does not contain file"
++      let suffix := file.toString.drop dir.toString.length
++      return some <| (System.FilePath.mk suffix).withExtension ""
++        |>.components.foldl Name.mkStr Name.anonymous
++    catch
++      | _ => pure ()
++  return none
++
++def phaseV2 (phase : String) : IO Unit := do
++  let stderr ← IO.getStderr
++  stderr.putStrLn s!"trust-checker-v2: {phase}"
++  stderr.flush
++
+@@ -28,0 +61 @@ unsafe def replayFromFresh (module : Name) : IO Unit := do
++  phaseV2 "import-start"
+@@ -29,0 +63 @@ unsafe def replayFromFresh (module : Name) : IO Unit := do
++    phaseV2 "kernel-replay-start"
+@@ -30,0 +65 @@ unsafe def replayFromFresh (module : Name) : IO Unit := do
++    phaseV2 "kernel-replay-finished"
+@@ -77,0 +113 @@ unsafe def main (args : List String) : IO UInt32 := do
++  phaseV2 "discovery-start"
+@@ -80,0 +117 @@ unsafe def main (args : List String) : IO UInt32 := do
++    let cache ← IO.mkRef ({} : Std.HashMap String System.FilePath)
+@@ -83 +120 @@ unsafe def main (args : List String) : IO UInt32 := do
+-      if let some m := (← searchModuleNameOfFileName path sp) then
++      if let some m := (← searchModuleV2 cache path sp) then
+@@ -88,0 +126 @@ unsafe def main (args : List String) : IO UInt32 := do
++  phaseV2 "discovery-finished"

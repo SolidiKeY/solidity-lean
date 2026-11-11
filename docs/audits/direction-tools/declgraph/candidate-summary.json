@@ -1,0 +1,104 @@
+{
+  "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+  "boundaries": [
+    "Bindings use per-module native declaration selection ranges in unchanged historical files; no editor-reference positions or edges are used.",
+    "Native module/name identities preserve repeated theorem names. Each expression edge resolves in its defining module compilation context, not a downstream root context.",
+    "Witness source_owner_definition_line is a declaration name location, not the use site. Incoming uses do not establish root reachability or deletion failure.",
+    "Range-less native auxiliary owners remain conservative incoming uses.",
+    "Historical reported lines are masked-text units; physical_span_lines and binding positions come from raw LF-based source offsets. Neither is a deletion budget.",
+    "Compiler attributes, anonymous check proofs, missing consumers and dynamic effects remain unmeasured by this native-expression graph."
+  ],
+  "deletable_now_verified_lines": 0,
+  "families": {
+    "Solidity/Backend/InternalFlow/": {
+      "native_auxiliary_incoming_declarations": 8,
+      "native_auxiliary_incoming_historical_reported_lines": 70,
+      "native_auxiliary_incoming_physical_span_lines": 70,
+      "native_compile_use_witness_declarations": 346,
+      "native_compile_use_witness_historical_reported_lines": 3226,
+      "native_compile_use_witness_physical_span_lines": 3226,
+      "no_external_incoming_in_native_compile_graph_declarations": 405,
+      "no_external_incoming_in_native_compile_graph_historical_reported_lines": 2804,
+      "no_external_incoming_in_native_compile_graph_physical_span_lines": 2804
+    },
+    "Solidity/Frontend/SolcJson/": {
+      "native_auxiliary_incoming_declarations": 5,
+      "native_auxiliary_incoming_historical_reported_lines": 59,
+      "native_auxiliary_incoming_physical_span_lines": 60,
+      "native_compile_use_witness_declarations": 195,
+      "native_compile_use_witness_historical_reported_lines": 3339,
+      "native_compile_use_witness_physical_span_lines": 3339,
+      "no_external_incoming_in_native_compile_graph_declarations": 107,
+      "no_external_incoming_in_native_compile_graph_historical_reported_lines": 1042,
+      "no_external_incoming_in_native_compile_graph_physical_span_lines": 1042
+    },
+    "Solidity/SolcValidation/": {
+      "native_auxiliary_incoming_declarations": 5,
+      "native_auxiliary_incoming_historical_reported_lines": 36,
+      "native_auxiliary_incoming_physical_span_lines": 36,
+      "native_compile_use_witness_declarations": 521,
+      "native_compile_use_witness_historical_reported_lines": 4102,
+      "native_compile_use_witness_physical_span_lines": 4102,
+      "no_external_incoming_in_native_compile_graph_declarations": 101,
+      "no_external_incoming_in_native_compile_graph_historical_reported_lines": 740,
+      "no_external_incoming_in_native_compile_graph_physical_span_lines": 740
+    },
+    "Solidity/Yul/Views/": {
+      "native_auxiliary_incoming_declarations": 7,
+      "native_auxiliary_incoming_historical_reported_lines": 50,
+      "native_auxiliary_incoming_physical_span_lines": 50,
+      "native_compile_use_witness_declarations": 606,
+      "native_compile_use_witness_historical_reported_lines": 4029,
+      "native_compile_use_witness_physical_span_lines": 4029,
+      "no_external_incoming_in_native_compile_graph_declarations": 726,
+      "no_external_incoming_in_native_compile_graph_historical_reported_lines": 6056,
+      "no_external_incoming_in_native_compile_graph_physical_span_lines": 6056,
+      "source_file_changed_declarations": 2,
+      "source_file_changed_historical_reported_lines": 11,
+      "source_file_changed_physical_span_lines": 11
+    }
+  },
+  "historical_base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+  "indexed_modules": 6717,
+  "native_graph_sha256": "8f0934d9bd78964146422cef24d84fceaeb498751cd19b66d5441bb11532f05b",
+  "provenance": {
+    "marked_generated": {
+      "native_auxiliary_incoming_declarations": 4,
+      "native_auxiliary_incoming_historical_reported_lines": 27,
+      "native_auxiliary_incoming_physical_span_lines": 27,
+      "native_compile_use_witness_declarations": 193,
+      "native_compile_use_witness_historical_reported_lines": 877,
+      "native_compile_use_witness_physical_span_lines": 877,
+      "no_external_incoming_in_native_compile_graph_declarations": 4,
+      "no_external_incoming_in_native_compile_graph_historical_reported_lines": 15,
+      "no_external_incoming_in_native_compile_graph_physical_span_lines": 15
+    },
+    "unresolved_chain_agreement": {
+      "native_compile_use_witness_declarations": 5,
+      "native_compile_use_witness_historical_reported_lines": 64,
+      "native_compile_use_witness_physical_span_lines": 64,
+      "no_external_incoming_in_native_compile_graph_declarations": 9,
+      "no_external_incoming_in_native_compile_graph_historical_reported_lines": 66,
+      "no_external_incoming_in_native_compile_graph_physical_span_lines": 66
+    },
+    "untraced": {
+      "native_auxiliary_incoming_declarations": 21,
+      "native_auxiliary_incoming_historical_reported_lines": 188,
+      "native_auxiliary_incoming_physical_span_lines": 189,
+      "native_compile_use_witness_declarations": 1470,
+      "native_compile_use_witness_historical_reported_lines": 13755,
+      "native_compile_use_witness_physical_span_lines": 13755,
+      "no_external_incoming_in_native_compile_graph_declarations": 1326,
+      "no_external_incoming_in_native_compile_graph_historical_reported_lines": 10561,
+      "no_external_incoming_in_native_compile_graph_physical_span_lines": 10561,
+      "source_file_changed_declarations": 2,
+      "source_file_changed_historical_reported_lines": 11,
+      "source_file_changed_physical_span_lines": 11
+    }
+  },
+  "serialized_constant_records": 317822,
+  "settling_measurement": "Complete affected-root elaboration on the pinned source, recording macro/extension effects and missing-module references, followed by isolated removal builds for candidates without uses.",
+  "status": "partial",
+  "unresolved_native_references": {},
+  "verdict": "Native compile-use witnesses refute zero incoming uses for witnessed candidates. ALL candidates remain unresolved for full semantic-root liveness and deletion."
+}

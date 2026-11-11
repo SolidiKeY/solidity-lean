@@ -1,0 +1,888 @@
+{
+  "axioms_added": 0,
+  "base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+  "bounded_conclusion": "M32 is rejected by the existing exhausted-case theorem. M31 passes the helper module alone via a vacuous premise, but the existing underflowChecked consumer proof rejects it. Both selected mutants are detected; the other mutants and project-wide score remain unassessed.",
+  "bounded_lean_assessment": {
+    "boundary": "Whole-module stage counts are retained here; the existing underflowChecked consumer is also checked separately. Other unselected consumers remain untested.",
+    "checked_ids": [
+      "M31",
+      "M32"
+    ],
+    "full_project_survivors": null,
+    "not_assessed_by_Lean": [
+      "M01",
+      "M02",
+      "M03",
+      "M04",
+      "M05",
+      "M06",
+      "M07",
+      "M08",
+      "M09",
+      "M10",
+      "M11",
+      "M12",
+      "M13",
+      "M14",
+      "M15",
+      "M16",
+      "M17",
+      "M18",
+      "M19",
+      "M20",
+      "M21",
+      "M22",
+      "M23",
+      "M24",
+      "M25",
+      "M26",
+      "M27",
+      "M28",
+      "M29",
+      "M30"
+    ],
+    "whole_module_counts": {
+      "inconclusive": 0,
+      "proof_failed": 1,
+      "survived": 1
+    }
+  },
+  "cheap_checker_survivors": 32,
+  "conclusion": "Cheap structural checks alone do not assess proof coupling. Bounded module outcomes are reported separately; remaining mutants and project-wide survivor claims are unassessed.",
+  "differential": {
+    "agreement_including_unsupported": null,
+    "disagreed": 0,
+    "disagreement_boundary": "No mismatches reported for admitted primitive fragment; unsupported rows are not agreements",
+    "disagreement_classes": [],
+    "matched": 320,
+    "matched_subset_agreement": 1.0,
+    "pending_eest": 19093,
+    "per_input_time_ratios": null,
+    "provenance": "cited committed report, not replayed",
+    "reference_only_unsupported": 732,
+    "source": "docs/feature-work/h62-3-g52-differential.md",
+    "source_sha256": "4110f3923608d46d7955dd4fe0a555313ac59f6e168e3afa8f06c5753a607c18",
+    "time_boundary": "UNVERIFIABLE historical-evidence gap under H151/H252: matched per-input repository and solc compile/run timings absent; required timing claim unproven",
+    "timing_claim": "unproven",
+    "timing_evidence_status": "UNVERIFIABLE",
+    "timing_policy": "H236 permits existing matched archive reuse only; no new timing run authorized; no missing-archive question under H252"
+  },
+  "disposition": {
+    "audit_item": "finished-with-evidence-gaps",
+    "backfill": "none",
+    "decision": "H422",
+    "missing_result_accepted": false,
+    "required_timing_claim": "unproven",
+    "retirement_policy": "H399"
+  },
+  "evidence_gaps": [
+    {
+      "id": "QDATA-TIMINGS",
+      "reason": "UNVERIFIABLE historical timing-evidence gap (H151/H252): no matched per-input timings in delivered archive and no authenticated replacement supplied. Required timing claim remains unproven and ratios null. H236 authorizes existing archive reuse only; no rerun or missing-archive question authorized. No independent authorized work remains"
+    }
+  ],
+  "execution_limitation": "no systemd scope on the cloud VM (H232)",
+  "historical_capture": {
+    "archive_sha256": "0389822b7ea06dbe7068896e38aa3abbdfe7c56376d631061efefea0bfd6a881",
+    "audit_base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+    "captured_agreement": 1.0,
+    "captured_comparisons": 320,
+    "captured_halts": {
+      "return": 192,
+      "revert": 128
+    },
+    "counts": {
+      "match": 320
+    },
+    "delivery_limitations": [
+      "Historical captured comparisons only; not fresh execution or full G52 qualification.",
+      "No matched per-input compile/run timings.",
+      "Historical reference lock not recovered from inspected owner/reproduction/handoff copies; current lock differs and is excluded. Reference-environment reproducibility is UNVERIFIABLE pending exact archived bytes."
+    ],
+    "disagreement_classes": {},
+    "excluded_current_reference_lock_sha256": "39b1ce55d3978f318323dfbcf1c094b734507d1483e92c586d5e58c8d0e304f4",
+    "expected_adapter_boundary": "Halt and return/revert bytes reconstructed from bound producer records; logs/rollback pins checked. Hashed storage trie adapter not independently reconstructed; serialized expected/actual storage compared only",
+    "families": {
+      "0": 32,
+      "1": 32,
+      "2": 32,
+      "3": 32,
+      "4": 32,
+      "5": 32,
+      "6": 32,
+      "7": 32,
+      "8": 32,
+      "9": 32
+    },
+    "historical_reference_lock_sha256": "e42c4cf3acece9d74a08ecbd41171b3c7b7c5494c39a87debcefecda9beff397",
+    "limitations": [
+      "Historical captured comparisons only; not fresh execution or full G52 qualification.",
+      "No matched per-input compile/run timings.",
+      "Exact historical lock recovered from Git; dependencies and runtime have not been installed or replayed"
+    ],
+    "manifest_files_verified": 644,
+    "modes": {
+      "legacy": 160,
+      "via-ir": 160
+    },
+    "per_input_time_ratios": null,
+    "producer_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+    "producer_manifest_files_checked": 29,
+    "producer_source_drift_boundary": "Only archived producer-manifest files compared to pinned audit BASE Git blobs; not live checkout, all dependencies, or reference environment",
+    "producer_sources_changed_vs_audit_base": [],
+    "reference_environment_reproduction": "NOT_REPLAYED",
+    "reference_lock_recovery": {
+      "boundary": "Exact Git blob hash matches captured report pin. No lock reconstruction, dependency installation, compiler/EVM execution or timing experiment performed.",
+      "bytes": 14997,
+      "candidates": [
+        {
+          "bytes": 15732,
+          "git_blob": "7c8245cadd41b90572f2592d00bf6a6646e45d9a",
+          "sha256": "39b1ce55d3978f318323dfbcf1c094b734507d1483e92c586d5e58c8d0e304f4"
+        },
+        {
+          "bytes": 14997,
+          "git_blob": "bed119b29135f7c4a27c53337c7106fc6a78f962",
+          "sha256": "e42c4cf3acece9d74a08ecbd41171b3c7b7c5494c39a87debcefecda9beff397"
+        },
+        {
+          "bytes": 12773,
+          "git_blob": "efde8ca859ce1d0e23abf092070c1604ce25af50",
+          "sha256": "c9356aa4f1c318001d49b80a72586c6691a064515af24a770556c02efdf6b6b7"
+        }
+      ],
+      "citation": "https://github.com/SolidiKeY/solidity-lean/blob/9ef06bbbef4f19018c05eccb8477b5d5156619a4/tests/h62/item3/g52-differential/package-lock.json",
+      "environment_reproduction": "NOT_REPLAYED",
+      "git_blob": "bed119b29135f7c4a27c53337c7106fc6a78f962",
+      "historical_path": "tests/h62/item3/g52-differential/package-lock.json",
+      "history_base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+      "sha256": "e42c4cf3acece9d74a08ecbd41171b3c7b7c5494c39a87debcefecda9beff397",
+      "source_commit": "9ef06bbbef4f19018c05eccb8477b5d5156619a4",
+      "status": "exact-archived-bytes-recovered"
+    },
+    "report_bindings_verified": 3,
+    "scope": "Historical captured observation analysis only; no fresh execution, theorem validation, source runtime rebuild or full G52 qualification",
+    "source_inputs": 160
+  },
+  "import_cache_provenance": {
+    "archive_sha256": "cf045686365b3f1dab6769dd022e91a296c08f4750291e46dbd5a8b2269961ad",
+    "artifacts_verified": 264,
+    "base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+    "boundary": "Reuse of existing published compiled imports with BASE source/trace/artifact bindings; no new kernel replay, build, differential execution or elaboration performed",
+    "cache_root": "/workspace/coordinator-inputs/qlean-cache-20261108/extracted/lib",
+    "manifest_sha256": "0cb1002b98cf15ef2dfda9654370d4e9f036cea78b56a485085925e98a5b567e",
+    "modules_verified": 264,
+    "publisher_build_sha256": "ecc51d77af0bd73d219eb94f2257edcbe3884ec53f3906a4299e0d70c4e00c6a",
+    "publisher_head": "71175a9a62cbb2440d5acd5d5d28ab0a7d5f34be",
+    "sources_verified": 264,
+    "status": "pass",
+    "traces_verified": 264
+  },
+  "lean_elaborations": 10,
+  "lean_existing_consumer": {
+    "base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+    "baseline": {
+      "command": [
+        "prlimit",
+        "--as=12884901888",
+        "--",
+        "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+        "-j1",
+        "-M11000",
+        "--tstack=131072",
+        "--root=/workspace/da-mutation-consumer-evidence",
+        "-o",
+        "/workspace/da-mutation-consumer-evidence/Attempt9_ConsumerBaseline.olean",
+        "/workspace/da-mutation-consumer-evidence/Attempt9_ConsumerBaseline.lean"
+      ],
+      "log": "/workspace/da-mutation-consumer-evidence/Attempt9_ConsumerBaseline.log",
+      "name": "ConsumerBaseline",
+      "output": "",
+      "returncode": 0,
+      "source_path": "/workspace/da-mutation-consumer-evidence/Attempt9_ConsumerBaseline.lean",
+      "source_sha256": "c475887fafd9e320f7147a752ec236e16376142a0e5478a4bce50007fc617bf3"
+    },
+    "boundary": "Exact existing underflowChecked declaration and its local instance/scoped-notation context appended to exact full BASE Closers source; no new theorem statement or premise. Only this consumer proof-script coupling is checked; no claim its final statement became false, no project-wide score, and no fresh differential run.",
+    "cache_receipt_sha256": "1ca49ed735a4f2378c37af71bc5ef9e33f5e76e931c94c4f790685db5f9cbd34",
+    "effective_lean_path": "/workspace/coordinator-inputs/qlean-cache-20261108/extracted/lib",
+    "keysort": {
+      "command": [
+        "prlimit",
+        "--as=12884901888",
+        "--",
+        "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+        "-j1",
+        "-M11000",
+        "--tstack=131072",
+        "--root=/workspace/da-mutation-lean-evidence",
+        "-o",
+        "/workspace/da-mutation-lean-evidence/KeySort.olean",
+        "/workspace/da-mutation-lean-evidence/KeySort.lean"
+      ],
+      "log": "/workspace/da-mutation-lean-evidence/KeySort.log",
+      "name": "KeySort",
+      "output": "",
+      "returncode": 0,
+      "source_sha256": "d47ce39b0149d9701ac32ac36a72b535200ba1a25e59571203a1f4fa6be9f3b0"
+    },
+    "limitation": "no systemd scope on the cloud VM (H232)",
+    "mutant": {
+      "command": [
+        "prlimit",
+        "--as=12884901888",
+        "--",
+        "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+        "-j1",
+        "-M11000",
+        "--tstack=131072",
+        "--root=/workspace/da-mutation-consumer-evidence",
+        "-o",
+        "/workspace/da-mutation-consumer-evidence/Attempt10_ConsumerM31.olean",
+        "/workspace/da-mutation-consumer-evidence/Attempt10_ConsumerM31.lean"
+      ],
+      "log": "/workspace/da-mutation-consumer-evidence/Attempt10_ConsumerM31.log",
+      "name": "ConsumerM31",
+      "output": "/workspace/da-mutation-consumer-evidence/Attempt10_ConsumerM31.lean:244:64: error: Tactic `decide` proved that the proposition\n  (Prog.runFrames (State.init StandardExample)\n        (Prog.cons (Stmt.declLocal PrimTy.uint (Var.user \"x\") (some (Val.simple (Simple.lit 0 \u22ef))))\n          (Prog.cons\n            (Stmt.assert (Val.binop BinOp.le \u22ef \u22ef (Val.simple (Simple.lit 1 \u22ef)) (Val.simple (Simple.local Idx.here))))\n            (Prog.cons (Stmt.opAssign BinOp.sub \u22ef \u22ef (OpLoc.local Idx.here) (Val.simple (Simple.lit 1 \u22ef))) Prog.nil)))\n        Frames.nil).isPanic =\n    true\nis false\n",
+      "returncode": 1,
+      "source_path": "/workspace/da-mutation-consumer-evidence/Attempt10_ConsumerM31.lean",
+      "source_sha256": "91d20d4293027e63682fee32b3b0c9522c730c954a7d2e2b3752c73ed61947cc"
+    },
+    "outcome": "existing-consumer-proof-failed",
+    "policy_commit": "1d35d15f5e585bee177aa841e28638f16d9a44f0",
+    "source_bindings": [
+      {
+        "end": "/-! ## 1",
+        "line": 24,
+        "path": "Solidity/Examples/Tactics/CheckedBlock.lean",
+        "sha256": "1ea08ed454fddfa9d9364071cecc6bace3b1ae5619c09db8e43f63d0b940f62f",
+        "start": "namespace Solidity.Examples.Tactics.CheckedBlock"
+      },
+      {
+        "end": "/-! What the block writes",
+        "line": 38,
+        "path": "Solidity/Examples/Tactics/CheckedBlock.lean",
+        "sha256": "ef9b70a3deda059d5579cb963a596a0f7bbe69e65fd00696e365bf3ee382e5f5",
+        "start": "theorem underflowChecked"
+      }
+    ],
+    "total_elaborations": 10,
+    "versions": {
+      "lean": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)"
+    }
+  },
+  "lean_source_slice": {
+    "base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+    "boundary": "Unmodified theorem/definition source blocks copied from BASE into standalone Lean-import fixtures; only local source-slice proof coupling measured. Original module uses existing import cache and may be unavailable. No project build, whole-project survivor claim, fresh differential run, or full source/cache validation.",
+    "keysort": {
+      "command": [
+        "prlimit",
+        "--as=12884901888",
+        "--",
+        "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+        "-j1",
+        "-M11000",
+        "--tstack=131072",
+        "--root=/workspace/da-mutation-lean-evidence",
+        "-o",
+        "/workspace/da-mutation-lean-evidence/KeySort.olean",
+        "/workspace/da-mutation-lean-evidence/KeySort.lean"
+      ],
+      "log": "/workspace/da-mutation-lean-evidence/KeySort.log",
+      "name": "KeySort",
+      "output": "",
+      "returncode": 0,
+      "source_sha256": "d47ce39b0149d9701ac32ac36a72b535200ba1a25e59571203a1f4fa6be9f3b0"
+    },
+    "memory_address_space_cap_bytes": 12884901888,
+    "original_module_baseline": {
+      "command": [
+        "prlimit",
+        "--as=12884901888",
+        "--",
+        "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+        "-j1",
+        "-M11000",
+        "--tstack=131072",
+        "--root=/workspace/da-mutation-lean-evidence",
+        "-o",
+        "/workspace/da-mutation-lean-evidence/ClosersOriginal.olean",
+        "/workspace/da-mutation-lean-evidence/ClosersOriginal.lean"
+      ],
+      "log": "/workspace/da-mutation-lean-evidence/ClosersOriginal.log",
+      "name": "ClosersOriginal",
+      "output": "/workspace/da-mutation-lean-evidence/ClosersOriginal.lean:1:0: error: object file '/workspace/solidity-lean/.lake/build/lib/lean/Solidity/Calculus/CloseCallSharing.olean' of module Solidity.Calculus.CloseCallSharing does not exist\n",
+      "returncode": 1,
+      "source_sha256": "92820e63eb62377e15269d9fae366a8003174e8c7b15ea0d3cf5b503891f9b89"
+    },
+    "policy": {
+      "commit": "b6617a90ff530d4b6e588f0b5ca95859743970b5",
+      "id": "H232",
+      "limitation": "no systemd scope on the cloud VM (H232)",
+      "path": "docs/refactoring-progress.md",
+      "sha256": "8dd05565f948f3e52df87979937844086c05285fc6ad6b7e3d7a501c364e888d"
+    },
+    "runtime_gate_pass": false,
+    "source_slice_baseline": {
+      "command": [
+        "prlimit",
+        "--as=12884901888",
+        "--",
+        "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+        "-j1",
+        "-M11000",
+        "--tstack=131072",
+        "--root=/workspace/da-mutation-lean-evidence",
+        "-o",
+        "/workspace/da-mutation-lean-evidence/CloserSliceBaseline.olean",
+        "/workspace/da-mutation-lean-evidence/CloserSliceBaseline.lean"
+      ],
+      "log": "/workspace/da-mutation-lean-evidence/CloserSliceBaseline.log",
+      "name": "CloserSliceBaseline",
+      "output": "",
+      "returncode": 0,
+      "source_sha256": "257c2a3df01e53b2d006ebf93c0e30ab410baaaf92848c6a6ef6ca73578b9f59"
+    },
+    "source_slice_bindings": [
+      {
+        "end": "/-- What a modality",
+        "line": 30,
+        "path": "Solidity/Update.lean",
+        "sha256": "d623408f06c8bda7ad2900d8da90b4a19fb6bcb04a2d8e37771d9216afccae00",
+        "start": "inductive Modality where"
+      },
+      {
+        "end": "/-- A revert with the data",
+        "line": 58,
+        "path": "Solidity/Semantics/Run.lean",
+        "sha256": "922191c55a274609a1903869b4a1ba0f55e68537ea942ae280cfa1a2221c6161",
+        "start": "inductive THalt where"
+      },
+      {
+        "path": "Solidity/Semantics/Run.lean",
+        "sha256": "ac29a050e48e0e6e218eb65735c173e86c55ff652c6ebb541efbd1a01c28d6d7",
+        "text": "abbrev TRes (\u03b1 : Type) := Except THalt \u03b1"
+      },
+      {
+        "end": "theorem tbind_ok_inv",
+        "line": 34,
+        "path": "Solidity/Semantics/RunFrame.lean",
+        "sha256": "cd678799efd11753c70673f93ba7c8713deed257d3e0c160b8d447c5fd31eb40",
+        "start": "def _root_.Solidity.Modality.onTHalt"
+      },
+      {
+        "end": "/-- The state a modality",
+        "line": 63,
+        "path": "Solidity/Calculus/Logic.lean",
+        "sha256": "ab7ffc95afed255cdf5e9d8d6b73ac5f5575e16ad3125bafa99359855ad03ebf",
+        "start": "def _root_.Solidity.Modality.afterRunTR"
+      },
+      {
+        "end": "end Solidity",
+        "line": 205,
+        "path": "Solidity/Calculus/Closers.lean",
+        "sha256": "9cb7daa238e4b4960f800d0cce90f84b5f77a8ceb7df615492bdc747ff33b7df",
+        "start": "/-- The typed outcome is a panic."
+      }
+    ],
+    "source_slice_counts": {
+      "inconclusive": 0,
+      "proof_failed": 1,
+      "survived": 1
+    },
+    "source_slice_mutants": [
+      {
+        "id": "M31",
+        "interpretation": "vacuous-premise: isPanic becomes always false, so hp cannot hold; no global panic-coverage conclusion",
+        "probe": {
+          "command": [
+            "prlimit",
+            "--as=12884901888",
+            "--",
+            "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+            "-j1",
+            "-M11000",
+            "--tstack=131072",
+            "--root=/workspace/da-mutation-lean-evidence",
+            "-o",
+            "/workspace/da-mutation-lean-evidence/CloserSliceM31.olean",
+            "/workspace/da-mutation-lean-evidence/CloserSliceM31.lean"
+          ],
+          "log": "/workspace/da-mutation-lean-evidence/CloserSliceM31.log",
+          "name": "CloserSliceM31",
+          "output": "",
+          "returncode": 0,
+          "source_sha256": "5a10737549caf790d48d89127534c376ecaa1bddaf00d7bffb37c557ed6a40fd"
+        },
+        "status": "selected-source-slice-survived"
+      },
+      {
+        "id": "M32",
+        "interpretation": "local exhausted-case theorem constraint: changed isFail makes the copied theorem proof fail",
+        "probe": {
+          "command": [
+            "prlimit",
+            "--as=12884901888",
+            "--",
+            "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+            "-j1",
+            "-M11000",
+            "--tstack=131072",
+            "--root=/workspace/da-mutation-lean-evidence",
+            "-o",
+            "/workspace/da-mutation-lean-evidence/CloserSliceM32.olean",
+            "/workspace/da-mutation-lean-evidence/CloserSliceM32.lean"
+          ],
+          "log": "/workspace/da-mutation-lean-evidence/CloserSliceM32.log",
+          "name": "CloserSliceM32",
+          "output": "/workspace/da-mutation-lean-evidence/CloserSliceM32.lean:56:16: error: unsolved goals\ncase error.exhausted.refl\n\u03b1 : Type\np : \u03b1 \u2192 Prop\nh : Modality.diamond.afterRunTR p (Except.error THalt.exhausted)\n\u22a2 False\n",
+          "returncode": 1,
+          "source_sha256": "32114e25a53616c0ad0f980728b8e0eb65459efe39be46d304763856df554cef"
+        },
+        "status": "selected-source-slice-proof-failed"
+      }
+    ],
+    "swap_total_kib": 0,
+    "total_elaborations": 5,
+    "versions": {
+      "lake": "Lake version 5.0.0-src+797c613 (Lean version 4.24.0)",
+      "lean": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)"
+    }
+  },
+  "lean_whole_module": {
+    "base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+    "boundary": "Exact full Closers source from BASE elaborated against the supplied existing import cache; only selected-module mutation outcomes measured, not whole-project survivors or differential conformance",
+    "cache_receipt": {
+      "archive_sha256": "cf045686365b3f1dab6769dd022e91a296c08f4750291e46dbd5a8b2269961ad",
+      "manifest_sha256": "0cb1002b98cf15ef2dfda9654370d4e9f036cea78b56a485085925e98a5b567e",
+      "path": "/workspace/solidity-lean/docs/audits/direction-tools/mutation/cache-verification.json",
+      "sha256": "1ca49ed735a4f2378c37af71bc5ef9e33f5e76e931c94c4f790685db5f9cbd34"
+    },
+    "effective_lean_path": "/workspace/coordinator-inputs/qlean-cache-20261108/extracted/lib",
+    "keysort": {
+      "command": [
+        "prlimit",
+        "--as=12884901888",
+        "--",
+        "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+        "-j1",
+        "-M11000",
+        "--tstack=131072",
+        "--root=/workspace/da-mutation-lean-evidence",
+        "-o",
+        "/workspace/da-mutation-lean-evidence/KeySort.olean",
+        "/workspace/da-mutation-lean-evidence/KeySort.lean"
+      ],
+      "log": "/workspace/da-mutation-lean-evidence/KeySort.log",
+      "name": "KeySort",
+      "output": "",
+      "returncode": 0,
+      "source_sha256": "d47ce39b0149d9701ac32ac36a72b535200ba1a25e59571203a1f4fa6be9f3b0"
+    },
+    "memory_address_space_cap_bytes": 12884901888,
+    "original_module_baseline": {
+      "command": [
+        "prlimit",
+        "--as=12884901888",
+        "--",
+        "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+        "-j1",
+        "-M11000",
+        "--tstack=131072",
+        "--root=/workspace/da-mutation-whole-evidence",
+        "-o",
+        "/workspace/da-mutation-whole-evidence/Attempt6_ClosersOriginal.olean",
+        "/workspace/da-mutation-whole-evidence/Attempt6_ClosersOriginal.lean"
+      ],
+      "log": "/workspace/da-mutation-whole-evidence/Attempt6_ClosersOriginal.log",
+      "name": "ClosersOriginal",
+      "output": "",
+      "returncode": 0,
+      "source_path": "/workspace/da-mutation-whole-evidence/Attempt6_ClosersOriginal.lean",
+      "source_sha256": "92820e63eb62377e15269d9fae366a8003174e8c7b15ea0d3cf5b503891f9b89"
+    },
+    "policy": {
+      "commit": "1d35d15f5e585bee177aa841e28638f16d9a44f0",
+      "id": "H232",
+      "limitation": "no systemd scope on the cloud VM (H232)",
+      "path": "docs/refactoring-progress.md",
+      "sha256": "8dd05565f948f3e52df87979937844086c05285fc6ad6b7e3d7a501c364e888d"
+    },
+    "runtime_gate_pass": false,
+    "source_slice_bindings": [
+      {
+        "end": "/-- What a modality",
+        "line": 30,
+        "path": "Solidity/Update.lean",
+        "sha256": "d623408f06c8bda7ad2900d8da90b4a19fb6bcb04a2d8e37771d9216afccae00",
+        "start": "inductive Modality where"
+      },
+      {
+        "end": "/-- A revert with the data",
+        "line": 58,
+        "path": "Solidity/Semantics/Run.lean",
+        "sha256": "922191c55a274609a1903869b4a1ba0f55e68537ea942ae280cfa1a2221c6161",
+        "start": "inductive THalt where"
+      },
+      {
+        "path": "Solidity/Semantics/Run.lean",
+        "sha256": "ac29a050e48e0e6e218eb65735c173e86c55ff652c6ebb541efbd1a01c28d6d7",
+        "text": "abbrev TRes (\u03b1 : Type) := Except THalt \u03b1"
+      },
+      {
+        "end": "theorem tbind_ok_inv",
+        "line": 34,
+        "path": "Solidity/Semantics/RunFrame.lean",
+        "sha256": "cd678799efd11753c70673f93ba7c8713deed257d3e0c160b8d447c5fd31eb40",
+        "start": "def _root_.Solidity.Modality.onTHalt"
+      },
+      {
+        "end": "/-- The state a modality",
+        "line": 63,
+        "path": "Solidity/Calculus/Logic.lean",
+        "sha256": "ab7ffc95afed255cdf5e9d8d6b73ac5f5575e16ad3125bafa99359855ad03ebf",
+        "start": "def _root_.Solidity.Modality.afterRunTR"
+      },
+      {
+        "end": "end Solidity",
+        "line": 205,
+        "path": "Solidity/Calculus/Closers.lean",
+        "sha256": "9cb7daa238e4b4960f800d0cce90f84b5f77a8ceb7df615492bdc747ff33b7df",
+        "start": "/-- The typed outcome is a panic."
+      }
+    ],
+    "swap_total_kib": 0,
+    "total_elaborations": 8,
+    "versions": {
+      "lake": "Lake version 5.0.0-src+797c613 (Lean version 4.24.0)",
+      "lean": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)"
+    },
+    "whole_module_baseline": {
+      "command": [
+        "prlimit",
+        "--as=12884901888",
+        "--",
+        "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+        "-j1",
+        "-M11000",
+        "--tstack=131072",
+        "--root=/workspace/da-mutation-whole-evidence",
+        "-o",
+        "/workspace/da-mutation-whole-evidence/Attempt6_ClosersOriginal.olean",
+        "/workspace/da-mutation-whole-evidence/Attempt6_ClosersOriginal.lean"
+      ],
+      "log": "/workspace/da-mutation-whole-evidence/Attempt6_ClosersOriginal.log",
+      "name": "ClosersOriginal",
+      "output": "",
+      "returncode": 0,
+      "source_path": "/workspace/da-mutation-whole-evidence/Attempt6_ClosersOriginal.lean",
+      "source_sha256": "92820e63eb62377e15269d9fae366a8003174e8c7b15ea0d3cf5b503891f9b89"
+    },
+    "whole_module_counts": {
+      "inconclusive": 0,
+      "proof_failed": 1,
+      "survived": 1
+    },
+    "whole_module_mutants": [
+      {
+        "id": "M31",
+        "interpretation": "vacuous-premise: isPanic becomes always false, so hp cannot hold; no global panic-coverage conclusion",
+        "probe": {
+          "command": [
+            "prlimit",
+            "--as=12884901888",
+            "--",
+            "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+            "-j1",
+            "-M11000",
+            "--tstack=131072",
+            "--root=/workspace/da-mutation-whole-evidence",
+            "-o",
+            "/workspace/da-mutation-whole-evidence/Attempt7_ClosersM31.olean",
+            "/workspace/da-mutation-whole-evidence/Attempt7_ClosersM31.lean"
+          ],
+          "log": "/workspace/da-mutation-whole-evidence/Attempt7_ClosersM31.log",
+          "name": "ClosersM31",
+          "output": "",
+          "returncode": 0,
+          "source_path": "/workspace/da-mutation-whole-evidence/Attempt7_ClosersM31.lean",
+          "source_sha256": "25fe43a11071e1ba822f5e9a4eaac3abfbe28e3c7deb6fe940ce244f1c020f7d"
+        },
+        "status": "selected-whole-module-survived"
+      },
+      {
+        "id": "M32",
+        "interpretation": "local exhausted-case theorem constraint: changed isFail makes the copied theorem proof fail",
+        "probe": {
+          "command": [
+            "prlimit",
+            "--as=12884901888",
+            "--",
+            "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+            "-j1",
+            "-M11000",
+            "--tstack=131072",
+            "--root=/workspace/da-mutation-whole-evidence",
+            "-o",
+            "/workspace/da-mutation-whole-evidence/Attempt8_ClosersM32.olean",
+            "/workspace/da-mutation-whole-evidence/Attempt8_ClosersM32.lean"
+          ],
+          "log": "/workspace/da-mutation-whole-evidence/Attempt8_ClosersM32.log",
+          "name": "ClosersM32",
+          "output": "/workspace/da-mutation-whole-evidence/Attempt8_ClosersM32.lean:231:16: error: unsolved goals\ncase error.exhausted.refl\n\u03b1 : Type\np : \u03b1 \u2192 Prop\nh : Modality.diamond.afterRunTR p (Except.error THalt.exhausted)\n\u22a2 False\n",
+          "returncode": 1,
+          "source_path": "/workspace/da-mutation-whole-evidence/Attempt8_ClosersM32.lean",
+          "source_sha256": "f0b25ffa53071cc4e4e8cf0ebe2125cdf6c283e8bd998098e437175871303afc"
+        },
+        "status": "selected-whole-module-proof-failed"
+      }
+    ]
+  },
+  "literal_vector_projection": {
+    "base": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+    "baseline": {
+      "disagreements": 0,
+      "rows": [
+        {
+          "actual": 1,
+          "agrees": true,
+          "expected": 1,
+          "k": 7,
+          "line": 24,
+          "op": "addmod",
+          "x": 10,
+          "y": 5
+        },
+        {
+          "actual": 1,
+          "agrees": true,
+          "expected": 1,
+          "k": 7,
+          "line": 25,
+          "op": "mulmod",
+          "x": 3,
+          "y": 5
+        },
+        {
+          "actual": 1,
+          "agrees": true,
+          "expected": 1,
+          "k": 3,
+          "line": 26,
+          "op": "addmod",
+          "x": 115792089237316195423570985008687907853269984665640564039457584007913129639935,
+          "y": 1
+        },
+        {
+          "actual": 1,
+          "agrees": true,
+          "expected": 1,
+          "k": 3,
+          "line": 27,
+          "op": "mulmod",
+          "x": 57896044618658097711785492504343953926634992332820282019728792003956564819968,
+          "y": 2
+        }
+      ],
+      "rules": {
+        "addmod": "+",
+        "mulmod": "*"
+      }
+    },
+    "boundary": "Exact existing basic literal assertions, positive uint256 operands/moduli, recognized unbounded integer +,-,* and positive remainder only. Tests whether these output vectors distinguish expressions; no Lean/DSL/interpreter execution, no project mutation kill or survival claim.",
+    "mutants": [
+      {
+        "disagreements": 2,
+        "id": "M23",
+        "outcome": "literal-arithmetic-projection-discriminated",
+        "rows": [
+          {
+            "actual": 5,
+            "agrees": false,
+            "expected": 1,
+            "k": 7,
+            "line": 24,
+            "op": "addmod",
+            "x": 10,
+            "y": 5
+          },
+          {
+            "actual": 1,
+            "agrees": true,
+            "expected": 1,
+            "k": 7,
+            "line": 25,
+            "op": "mulmod",
+            "x": 3,
+            "y": 5
+          },
+          {
+            "actual": 2,
+            "agrees": false,
+            "expected": 1,
+            "k": 3,
+            "line": 26,
+            "op": "addmod",
+            "x": 115792089237316195423570985008687907853269984665640564039457584007913129639935,
+            "y": 1
+          },
+          {
+            "actual": 1,
+            "agrees": true,
+            "expected": 1,
+            "k": 3,
+            "line": 27,
+            "op": "mulmod",
+            "x": 57896044618658097711785492504343953926634992332820282019728792003956564819968,
+            "y": 2
+          }
+        ],
+        "rules": {
+          "addmod": "-",
+          "mulmod": "*"
+        }
+      },
+      {
+        "disagreements": 0,
+        "id": "M24",
+        "outcome": "literal-arithmetic-projection-undiscriminated",
+        "rows": [
+          {
+            "actual": 1,
+            "agrees": true,
+            "expected": 1,
+            "k": 7,
+            "line": 24,
+            "op": "addmod",
+            "x": 10,
+            "y": 5
+          },
+          {
+            "actual": 1,
+            "agrees": true,
+            "expected": 1,
+            "k": 7,
+            "line": 25,
+            "op": "mulmod",
+            "x": 3,
+            "y": 5
+          },
+          {
+            "actual": 1,
+            "agrees": true,
+            "expected": 1,
+            "k": 3,
+            "line": 26,
+            "op": "addmod",
+            "x": 115792089237316195423570985008687907853269984665640564039457584007913129639935,
+            "y": 1
+          },
+          {
+            "actual": 1,
+            "agrees": true,
+            "expected": 1,
+            "k": 3,
+            "line": 27,
+            "op": "mulmod",
+            "x": 57896044618658097711785492504343953926634992332820282019728792003956564819968,
+            "y": 2
+          }
+        ],
+        "rules": {
+          "addmod": "+",
+          "mulmod": "+"
+        }
+      }
+    ],
+    "source": "Solidity/Examples/Tactics/ModularArithmetic.lean",
+    "source_sha256": "00acd8594834fa8fdd4bbc336757b685adecfe52f5712668003a87cc6df1a679",
+    "source_vectors": 4
+  },
+  "mutants": 32,
+  "mutation_selection": {
+    "basis": "Both selected source files inspected; broad inventory classification remains heuristic",
+    "files": [
+      "Solidity/Calculus/Closers.lean",
+      "Solidity/Semantics/Ops.lean"
+    ],
+    "generated": 0,
+    "handwritten": 32
+  },
+  "remaining_elaboration_allowance": 0,
+  "reproduce": "python3 docs/audits/direction-tools/mutation/audit.py --scratch ABSOLUTE_BASE_WORKTREE",
+  "selected_existing_check_outcomes": {
+    "boundary": "Selected original module and copied existing consumer proof checks, not an exhaustive project mutation score",
+    "checked_ids": [
+      "M31",
+      "M32"
+    ],
+    "proof_rejected_ids": [
+      "M31",
+      "M32"
+    ],
+    "surviving_ids_in_selected_checks": [],
+    "unassessed_by_Lean": [
+      "M01",
+      "M02",
+      "M03",
+      "M04",
+      "M05",
+      "M06",
+      "M07",
+      "M08",
+      "M09",
+      "M10",
+      "M11",
+      "M12",
+      "M13",
+      "M14",
+      "M15",
+      "M16",
+      "M17",
+      "M18",
+      "M19",
+      "M20",
+      "M21",
+      "M22",
+      "M23",
+      "M24",
+      "M25",
+      "M26",
+      "M27",
+      "M28",
+      "M29",
+      "M30"
+    ]
+  },
+  "semantic_kills": null,
+  "semantic_survivors": null,
+  "sorry_added": 0,
+  "source_revision": {
+    "commit": "d4ad633a9624263a59b14fd2c520b9bc602f88f3",
+    "read_method": "git archive of pinned commit; no live source reads",
+    "tree": "276a7b4573d6c7a26f4b81317c997365993bd596"
+  },
+  "static_constraints": {
+    "boundary": "Candidate existence and source spelling only; no Lean name resolution or elaboration",
+    "lexical_limitations": "Interpolated strings with nested quoted expressions may leak apparent code references; neither tokenizer nor qualified-name search is Lean name resolution",
+    "method": "heuristic offset-preserving nested-comment/string/character stripping and explicit qualified token search",
+    "mutants": 32,
+    "semantic_kills": null,
+    "semantic_survivors": null,
+    "strong_candidates_updated": [
+      "M06",
+      "M17",
+      "M18",
+      "M19",
+      "M20",
+      "M21",
+      "M22",
+      "M26",
+      "M27",
+      "M29",
+      "M30",
+      "M31"
+    ],
+    "with_explicit_code_mentions": 30
+  },
+  "waits": []
+}

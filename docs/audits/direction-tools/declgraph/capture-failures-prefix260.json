@@ -1,0 +1,1929 @@
+{
+  "areas": {
+    "Solidity/Backend": {
+      "driver_exit_zero_unreplayed_here": 58
+    },
+    "Solidity/Calculus": {
+      "driver_exit_zero_unreplayed_here": 8,
+      "explicit_unsupported_info_context": 1
+    },
+    "Solidity/Counterexamples": {
+      "driver_exit_zero_unreplayed_here": 2
+    },
+    "Solidity/Evm": {
+      "driver_exit_zero_unreplayed_here": 34
+    },
+    "Solidity/Examples": {
+      "driver_exit_zero_unreplayed_here": 138,
+      "explicit_bounded_search_stop": 1,
+      "explicit_unsupported_info_context": 18
+    }
+  },
+  "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+  "boundaries": [
+    "Driver exit-zero rows are not semantically replayed by this inventory; accepted replay/join outputs remain separate.",
+    "Unsupported context is an exporter diagnostic, not proof failure or evidence of unused declarations. Timeout and bounded-search categories report explicit diagnostics only; they do not establish false theorems.",
+    "Partial native output from unsuccessful captures is excluded; no dependencies are recovered or certified here. Receipt existence is not validated native success.",
+    "Source-file line counts describe coverage inventory only, not declaration spans, used/unused lines or removable code.",
+    "Provenance labels distinguish marked-generated and unresolved generators; untraced does not mean handwritten.",
+    "H347 pinned baseline retained; verification blocked, additive v2 unadopted, zero deletion certifications."
+  ],
+  "categories": {
+    "driver_exit_zero_unreplayed_here": 240,
+    "explicit_bounded_search_stop": 1,
+    "explicit_unsupported_info_context": 19
+  },
+  "deletable_now_verified_lines": 0,
+  "directories": {
+    "Solidity/Backend/AbiWorld": {
+      "driver_exit_zero_unreplayed_here": 12
+    },
+    "Solidity/Backend/Creation": {
+      "driver_exit_zero_unreplayed_here": 8
+    },
+    "Solidity/Backend/Failure": {
+      "driver_exit_zero_unreplayed_here": 1
+    },
+    "Solidity/Backend/FailurePaths": {
+      "driver_exit_zero_unreplayed_here": 6
+    },
+    "Solidity/Backend/PrimitivePackets/BitNot": {
+      "driver_exit_zero_unreplayed_here": 1
+    },
+    "Solidity/Backend/Scalar": {
+      "driver_exit_zero_unreplayed_here": 27
+    },
+    "Solidity/Backend/Selection": {
+      "driver_exit_zero_unreplayed_here": 2
+    },
+    "Solidity/Backend/StructuredFlow": {
+      "driver_exit_zero_unreplayed_here": 1
+    },
+    "Solidity/Calculus": {
+      "driver_exit_zero_unreplayed_here": 7,
+      "explicit_unsupported_info_context": 1
+    },
+    "Solidity/Calculus/TermLaws": {
+      "driver_exit_zero_unreplayed_here": 1
+    },
+    "Solidity/Counterexamples": {
+      "driver_exit_zero_unreplayed_here": 2
+    },
+    "Solidity/Evm": {
+      "driver_exit_zero_unreplayed_here": 34
+    },
+    "Solidity/Examples": {
+      "driver_exit_zero_unreplayed_here": 65,
+      "explicit_unsupported_info_context": 2
+    },
+    "Solidity/Examples/Benchmark": {
+      "driver_exit_zero_unreplayed_here": 2
+    },
+    "Solidity/Examples/Chains": {
+      "driver_exit_zero_unreplayed_here": 4
+    },
+    "Solidity/Examples/Tactics": {
+      "driver_exit_zero_unreplayed_here": 67,
+      "explicit_bounded_search_stop": 1,
+      "explicit_unsupported_info_context": 16
+    }
+  },
+  "files": [
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/AbiWorld/CallerWordBytesControls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 100
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/AbiWorld/CheckedAddArtifactControls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 47
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/AbiWorld/ErrorOffsetWindowControls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 75
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/AbiWorld/ErrorReadWindowControls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 92
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/AbiWorld/MutatingByteLoadControls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 94
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/AbiWorld/MutatingEntryWordsControls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 67
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/AbiWorld/MutatingWritePhysicalControls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 73
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/AbiWorld/NativeParentWordControls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 99
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/AbiWorld/PacketPrefixControls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 129
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/AbiWorld/PanicCallFrameControls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 106
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/AbiWorld/ReturnWordTransportControls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 77
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/AbiWorld/TypedPacketMaterializeControls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 51
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Creation/Artifact.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 126
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Creation/ArtifactChecks.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 46
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Creation/ConstructorChecks.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 90
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Creation/ExecutionChecks.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 68
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Creation/ImmutableChecks.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 86
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Creation/LawChecks.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 63
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Creation/LinkingChecks.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 101
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Creation/PlacementChecks.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 45
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Failure/Gap.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 12
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/FailurePaths/BooleanReturnControls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 68
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/FailurePaths/Controls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 183
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/FailurePaths/ParametricControls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 83
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/FailurePaths/ReasonCodecControls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 32
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/FailurePaths/TransientControls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 108
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/FailurePaths/TransientSharingControls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 85
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/PrimitivePackets/BitNot/Controls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 288
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Scalar/ArithmeticWidths.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 219
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Scalar/Bitwise.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 104
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Scalar/Capacity.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 95
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Scalar/CastChains.lean",
+      "provenance": "unresolved_chain_agreement",
+      "source_raw_lf_lines": 139
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Scalar/Casts.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 125
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Scalar/Checked.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 153
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Scalar/Combinations.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 57
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Scalar/Comparisons.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 178
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Scalar/Exponentiation.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 30
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Scalar/FixedBytes.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 139
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Scalar/Guards.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 58
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Scalar/Heights.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 204
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Scalar/Modular.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 109
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Scalar/Negation.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 82
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Scalar/Shifts.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 77
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Scalar/SignedBits.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 117
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Scalar/SignedChecked.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 137
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Scalar/SignedDivision.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 82
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Scalar/SignedGuards.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 131
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Scalar/SignedMul.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 124
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Scalar/SignedShift.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 95
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Scalar/Slice.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 313
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Scalar/Typed.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 180
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Scalar/UnsignedMul.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 107
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Scalar/WidthGuards.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 122
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Scalar/Widths.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 86
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Scalar/Wrapping.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 86
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Selection/InterfaceV2Controls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 123
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/Selection/ScalarSequenceControls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 143
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Backend/StructuredFlow/BranchControls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 90
+    },
+    {
+      "category": "explicit_unsupported_info_context",
+      "exit_code": 1,
+      "path": "Solidity/Calculus/CloseTests.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 187
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Calculus/Correct.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 182
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Calculus/Lands.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 1469
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Calculus/Print.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 293
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Calculus/Proves.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 570
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Calculus/TermEq.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 452
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Calculus/TermEval.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 178
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Calculus/TermLaws/Fresh.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 983
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Calculus/TermLib.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 262
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Counterexamples/DeleteFamilyGenericOverlap.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 188
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Counterexamples/StaticRuntimeSort.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 71
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/Examples.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 481
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryAllocExamples.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 95
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryAllocSourceExamples.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 960
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryCallExamples.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 612
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryCompileExamples.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 339
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryExamples.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 87
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryExprExamples.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 436
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryFixedCopyExamples.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 246
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryFixedMixedExamples.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 178
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryLoopAllocExamples.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 146
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryLoopExamples.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 151
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryLoopFiniteHorizonControls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 144
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryLoopHorizonAllocControls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 115
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryLoopHorizonControls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 66
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryLoopScopeAllocExamples.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 366
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryLoopScopeDivergenceExamples.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 177
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryLoopScopeExamples.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 119
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryLoopScopeSourceExamples.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 142
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryLoopSourceExamples.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 141
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryMixedLoopAllocation.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 78
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryMixedLoopControls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 116
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryPathExamples.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 661
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryRecursiveAllocation.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 105
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryRecursiveBranchRoomControls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 75
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryRecursiveCompositionControls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 80
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryRecursiveControls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 127
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryRecursiveDispatchControls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 74
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryStorageCopyExamples.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 339
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryStorageLifecycleExamples.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 128
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryStructCopyExamples.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 173
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryStructDefaultExamples.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 565
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryStructExamples.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 480
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryStructReferenceDefaultBoundaries.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 127
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Evm/MemoryStructReferenceDefaultExamples.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 179
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/AliasConstraints.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 205
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/AutoComplete.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 130
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Benchmark/Purchase.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 329
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Benchmark/Syntax.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 268
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/BooleanLinear.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 145
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/CallReduction.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 146
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/ChainExpand.lean",
+      "provenance": "unresolved_chain_agreement",
+      "source_raw_lf_lines": 111
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/ChainNotation.lean",
+      "provenance": "unresolved_chain_agreement",
+      "source_raw_lf_lines": 675
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/ChainRewrites.lean",
+      "provenance": "unresolved_chain_agreement",
+      "source_raw_lf_lines": 700
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/ChainRewritesOpen.lean",
+      "provenance": "unresolved_chain_agreement",
+      "source_raw_lf_lines": 353
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Chains/EvaluationOrder.lean",
+      "provenance": "unresolved_chain_agreement",
+      "source_raw_lf_lines": 81
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Chains/Memory.lean",
+      "provenance": "unresolved_chain_agreement",
+      "source_raw_lf_lines": 493
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Chains/MemoryCoverage.lean",
+      "provenance": "unresolved_chain_agreement",
+      "source_raw_lf_lines": 690
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Chains/StorageCoverage.lean",
+      "provenance": "unresolved_chain_agreement",
+      "source_raw_lf_lines": 955
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/CheckedLinear.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 133
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/CompleteVerification.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 140
+    },
+    {
+      "category": "explicit_unsupported_info_context",
+      "exit_code": 1,
+      "path": "Solidity/Examples/ContractTypes.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 97
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Decision.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 579
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/DecisionArrayGaps.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 231
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/DecisionArrayReplay.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 230
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/DecisionCoefficientBoundary.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 119
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/DecisionFeatures.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 249
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/DecisionGapOperators.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 95
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/DecisionHaltingOrCertificate.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 96
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/DecisionHaltingOrGaps.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 199
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/DecisionHashCore.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 68
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/DecisionHashFamilies.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 33
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/DecisionHashKeys.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 38
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/DecisionHashMixed.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 50
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/DecisionHashQuantifiers.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 36
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/DecisionHashThreeKinds.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 44
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/DecisionHashUpdates.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 40
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/DecisionKInt.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 329
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/DecisionMemory.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 533
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/DecisionNormalizationResidue.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 109
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/DecisionNumericBounds.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 166
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/DecisionNumericFuel.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 78
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/DecisionNumericLogic.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 134
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/DecisionNumericNormalization.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 167
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/DecisionNumericTwoPrefix.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 58
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/DecisionNumericTwoPrefixFormula.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 45
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/DecisionPrefixNormalizationResidue.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 88
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/DecisionUIntFormulaRecognizer.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 47
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/DecisionWrittenMemory.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 340
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/DeclarationReduction.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 87
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/DependentReduction.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 118
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/ExactReduction.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 40
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/ExactUpdates.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 116
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/ExampleNames.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 131
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/InputReduction.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 130
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/LexDiamond.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 194
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/LexMetrics.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 195
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/LexRuleSyntax.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 110
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/LexTermSize.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 57
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/LinearDecision.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 114
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/MemoryInstantiation.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 174
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/MemoryNegativeDecision.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 171
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/MemoryStructWitness.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 77
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Notation.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 421
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/ParameterReduction.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 155
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Preconditions.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 69
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/ProgramReduction.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 223
+    },
+    {
+      "category": "explicit_unsupported_info_context",
+      "exit_code": 1,
+      "path": "Solidity/Examples/ProofTree.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 1195
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/QueryArithmetic.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 225
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/QueryReduction.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 128
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/ReadFlattening.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 137
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/ReadRealization.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 78
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/ReadTrace.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 154
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/RecursiveCopy.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 217
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/RecursiveStorage.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 196
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/ScopedRuns.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 54
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/SourceCounterexample.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 133
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/StaticLinear.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 121
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/Aggregates.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 153
+    },
+    {
+      "category": "explicit_bounded_search_stop",
+      "exit_code": 1,
+      "path": "Solidity/Examples/Tactics/AllLeftLater.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 89
+    },
+    {
+      "category": "explicit_unsupported_info_context",
+      "exit_code": 1,
+      "path": "Solidity/Examples/Tactics/ApplySteps.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 119
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/ArrayShapeCopy.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 139
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/Assumptions.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 203
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/AuditRepairs.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 124
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/Boundaries.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 64
+    },
+    {
+      "category": "explicit_unsupported_info_context",
+      "exit_code": 1,
+      "path": "Solidity/Examples/Tactics/Branch.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 255
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/Bytes.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 322
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/CallExceptions.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 278
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/CallOperands.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 317
+    },
+    {
+      "category": "explicit_unsupported_info_context",
+      "exit_code": 1,
+      "path": "Solidity/Examples/Tactics/CallSummary.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 543
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/CallbackRuns.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 128
+    },
+    {
+      "category": "explicit_unsupported_info_context",
+      "exit_code": 1,
+      "path": "Solidity/Examples/Tactics/CallbackStrategy.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 442
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/CallbackWk.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 65
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/CallerModel.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 251
+    },
+    {
+      "category": "explicit_unsupported_info_context",
+      "exit_code": 1,
+      "path": "Solidity/Examples/Tactics/Calls.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 655
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/Chains.lean",
+      "provenance": "unresolved_chain_agreement",
+      "source_raw_lf_lines": 493
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/Checked.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 470
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/ComputedRevert.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 163
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/Constructors.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 444
+    },
+    {
+      "category": "explicit_unsupported_info_context",
+      "exit_code": 1,
+      "path": "Solidity/Examples/Tactics/Contracts.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 196
+    },
+    {
+      "category": "explicit_unsupported_info_context",
+      "exit_code": 1,
+      "path": "Solidity/Examples/Tactics/CrossDomain.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 272
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/Decide.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 599
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/DeclarationMetadata.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 139
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/DeferredCallback.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 134
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/DeferredSource.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 162
+    },
+    {
+      "category": "explicit_unsupported_info_context",
+      "exit_code": 1,
+      "path": "Solidity/Examples/Tactics/Derive.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 317
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/DlNotation.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 275
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/EntryReturn.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 177
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/EntryReturnFunction.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 65
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/EvaluationOrder.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 113
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/ExternalTryFormula.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 205
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/ExternalTryWitness.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 82
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/FunctionTypes.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 798
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/Hashing.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 660
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/Inheritance.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 134
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/InheritedSelectorsImport.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 61
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/Join.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 230
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/JoinSequence.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 213
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/Latex.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 355
+    },
+    {
+      "category": "explicit_unsupported_info_context",
+      "exit_code": 1,
+      "path": "Solidity/Examples/Tactics/LedgerDelete.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 211
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/LexAnnotations.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 72
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/LexDiamond.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 154
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/Lifetime.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 252
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/LongContext.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 49
+    },
+    {
+      "category": "explicit_unsupported_info_context",
+      "exit_code": 1,
+      "path": "Solidity/Examples/Tactics/Loops.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 839
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/LoopsImport.lean",
+      "provenance": "marked_generated",
+      "source_raw_lf_lines": 121
+    },
+    {
+      "category": "explicit_unsupported_info_context",
+      "exit_code": 1,
+      "path": "Solidity/Examples/Tactics/Memory.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 718
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/MemoryPush.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 70
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/MemoryReturns.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 323
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/ModularArithmetic.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 136
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/Mutability.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 270
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/NativeDeferred.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 98
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/NativeDeferredSource.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 108
+    },
+    {
+      "category": "explicit_unsupported_info_context",
+      "exit_code": 1,
+      "path": "Solidity/Examples/Tactics/Net.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 285
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/Nonlinear.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 95
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/Nonvacuity.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 81
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/Operators.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 180
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/OwnStructs.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 91
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/Print.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 344
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/PublicGetters.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 411
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/PushSource.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 89
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/PushSuffixGuards.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 79
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/PushSuffixRules.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 172
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/PushSuffixRun.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 96
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/PushSuffixSource.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 112
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/QuantifiedDiamond.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 152
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/Reachable.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 380
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/Recursion.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 556
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/ReferenceParameters.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 153
+    },
+    {
+      "category": "explicit_unsupported_info_context",
+      "exit_code": 1,
+      "path": "Solidity/Examples/Tactics/Revert.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 306
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/RevertFormulas.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 124
+    },
+    {
+      "category": "explicit_unsupported_info_context",
+      "exit_code": 1,
+      "path": "Solidity/Examples/Tactics/RunnerAudit.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 30
+    },
+    {
+      "category": "explicit_unsupported_info_context",
+      "exit_code": 1,
+      "path": "Solidity/Examples/Tactics/SelectOnSaveConsr.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 151
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/SelfPowerData.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 265
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/Sequents.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 57
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/SignedCasts.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 148
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/SignedNumericImport.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 72
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/SolcOpen.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 119
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/SourceAdmissionImport.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 306
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/Spec.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 86
+    },
+    {
+      "category": "driver_exit_zero_unreplayed_here",
+      "exit_code": 0,
+      "path": "Solidity/Examples/Tactics/Specs.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 244
+    },
+    {
+      "category": "explicit_unsupported_info_context",
+      "exit_code": 1,
+      "path": "Solidity/Examples/Tactics/StorageDelete.lean",
+      "provenance": "untraced",
+      "source_raw_lf_lines": 403
+    }
+  ],
+  "planned_queue_files": 550,
+  "provenance": {
+    "marked_generated": {
+      "driver_exit_zero_unreplayed_here": 1
+    },
+    "unresolved_chain_agreement": {
+      "driver_exit_zero_unreplayed_here": 10
+    },
+    "untraced": {
+      "driver_exit_zero_unreplayed_here": 229,
+      "explicit_bounded_search_stop": 1,
+      "explicit_unsupported_info_context": 19
+    }
+  },
+  "selected_files": 260,
+  "status": "partial"
+}

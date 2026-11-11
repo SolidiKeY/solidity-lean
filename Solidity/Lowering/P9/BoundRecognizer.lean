@@ -127,7 +127,7 @@ def stmtB : {k : SCtx} → {Γ Δ : RCtx} → RStmt E R M k Γ Δ → Bool
   | _, _, _, .block b => itemsB b
   | _, _, _, .whileLoop .. | _, _, _, .doWhile .. | _, _, _, .forLoop .. | _, _, _, .skip
   | _, _, _, .brk | _, _, _, .cont | _, _, _, .ret .. | _, _, _, .placeholder .. | _, _, _, .emit ..
-  | _, _, _, .revertError .. | _, _, _, .rethrow .. | _, _, _, .declTuple .. | _, _, _, .tryCall .. => false
+  | _, _, _, .revertError .. | _, _, _, .rethrow .. | _, _, _, .declTuple .. | _, _, _, .tryCall .. | _, _, _, .tryLibrary .. => false
 
 def itemsB : {k : SCtx} → {Γ Δ : RCtx} → RItems E R M k Γ Δ → Bool
   | _, _, _, .nil => true
@@ -141,7 +141,7 @@ def initB {k : SCtx} {Γ Ξ : RCtx} : RStmt E R M k Γ Ξ → Bool → Bool
   | .expr .., _ | .declVar .., _ | .retVal .., _ | .retTuple .., _ | .ifThen .., _ | .ifElse .., _
   | .block .., _ | .whileLoop .., _ | .doWhile .., _ | .forLoop .., _ | .skip, _ | .brk, _ | .cont, _
   | .ret .., _ | .placeholder .., _ | .emit .., _ | .revertError .., _ | .rethrow .., _
-  | .declTuple .., _ | .tryCall .., _ => false
+  | .declTuple .., _ | .tryCall .., _ | .tryLibrary .., _ => false
 
 /-- `BoundParentItems`: initialized allocation-parent prefixes, then ready items. -/
 def boundB : {k : SCtx} → {Γ Δ : RCtx} → RItems E R M k Γ Δ → Bool
@@ -255,7 +255,7 @@ theorem stmtB_sound : ∀ {k : SCtx} {Γ Δ : RCtx} (s : RStmt E R M k Γ Δ),
   | _, _, _, .whileLoop .., ok, _ | _, _, _, .doWhile .., ok, _ | _, _, _, .forLoop .., ok, _
   | _, _, _, .skip, ok, _ | _, _, _, .brk, ok, _ | _, _, _, .cont, ok, _ | _, _, _, .ret .., ok, _
   | _, _, _, .placeholder .., ok, _ | _, _, _, .emit .., ok, _ | _, _, _, .revertError .., ok, _
-  | _, _, _, .rethrow .., ok, _ | _, _, _, .declTuple .., ok, _ | _, _, _, .tryCall .., ok, _ =>
+  | _, _, _, .rethrow .., ok, _ | _, _, _, .declTuple .., ok, _ | _, _, _, .tryCall .., ok, _ | _, _, _, .tryLibrary .., ok, _ =>
     by simp only [stmtB, Bool.false_eq_true] at ok
 
 theorem itemsB_sound : ∀ {k : SCtx} {Γ Δ : RCtx} (items : RItems E R M k Γ Δ),
@@ -285,7 +285,7 @@ theorem initB_sound {k : SCtx} {Γ Ξ Δ : RCtx} :
   | .forLoop .., _, _, _, ok, _ | .skip, _, _, _, ok, _ | .brk, _, _, _, ok, _
   | .cont, _, _, _, ok, _ | .ret .., _, _, _, ok, _ | .placeholder .., _, _, _, ok, _
   | .emit .., _, _, _, ok, _ | .revertError .., _, _, _, ok, _ | .rethrow .., _, _, _, ok, _
-  | .declTuple .., _, _, _, ok, _ | .tryCall .., _, _, _, ok, _ => by simp only [initB, Bool.false_eq_true] at ok
+  | .declTuple .., _, _, _, ok, _ | .tryCall .., _, _, _, ok, _ | .tryLibrary .., _, _, _, ok, _ => by simp only [initB, Bool.false_eq_true] at ok
 
 theorem boundB_sound : ∀ {k : SCtx} {Γ Δ : RCtx} (items : RItems E R M k Γ Δ),
     boundB vs items = true → items.OpsOK → BoundParentItems (· ∈ vs) R M items

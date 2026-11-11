@@ -1,9 +1,7 @@
 import Solidity.Frontend.Admission.RootObservations
 import Solidity.Source.Elaborated
 
-/-! Finite observation scanning of the actual carried Program. This closes
-container enumeration, not semantic reachability or all-feature extraction.
-No program, source relation, profile or evaluator representation is changed. -/
+/-! Finite observation scanning of the actual carried Program. This closes container enumeration, not semantic reachability or all-feature extraction. No program, source relation, profile or evaluator representation is changed. -/
 namespace Solidity.Frontend.Admission
 open Solidity.Source
 
@@ -19,15 +17,11 @@ def contractObservations {E : Env} (P : Program E) (c : String) : List Observati
     (P.inits c).flatMap (fun i => observations i.e) ++
     (P.baseArgs c).flatMap (fun a => convObservations a.args)
 
-/-- Every environment declaration and every carried contract is scanned,
-including unused bodies. Calls are not recursively unfolded: scanning all
-carried declarations handles cycles without a fuel bound. This does not prove
-that an arbitrary target queried by the evaluator belongs to the roster. -/
+/-- Every environment declaration and every carried contract is scanned, including unused bodies. Calls are not recursively unfolded: scanning all carried declarations handles cycles without a fuel bound. This does not prove that an arbitrary target queried by the evaluator belongs to the roster. -/
 def programObservations {E : Env} (P : Program E) : List ObservationSite :=
   E.decls.flatMap (declarationObservations P) ++ P.contracts.flatMap (contractObservations P)
 
-/-- Independent container-level occurrence relation on the actual Program
-fields. Inner expression occurrence remains the existing typed visitor. -/
+/-- Independent container-level occurrence relation on the actual Program fields. Inner expression occurrence remains the existing typed visitor. -/
 def ProgramSite {E : Env} (P : Program E) (site : ObservationSite) : Prop :=
   (∃ d ∈ E.decls, (∃ b, P.body d = some b ∧ site ∈ bodyObservations b) ∨
     (∃ i, P.consts d = some i ∧ site ∈ observations i.e)) ∨
@@ -73,9 +67,7 @@ theorem base_argument_in_program {E : Env} (P : Program E) {c : String}
     site ∈ programObservations P :=
   (program_observation_iff P site).mpr (.inr ⟨c, hc, .inr (.inr ⟨a, ha, hs⟩)⟩)
 
-/-- No executed-call assumption is smuggled into the scan. Once its actual
-lookup target is in the roster, every observation in that target body is
-covered, including mutually/self recursive targets, without unfolding calls. -/
+/-- No executed-call assumption is smuggled into the scan. Once its actual lookup target is in the roster, every observation in that target body is covered, including mutually/self recursive targets, without unfolding calls. -/
 theorem target_body_covered {E : Env} (P : Program E)
     (accepted : (programObservations P).all ObservationSite.allowed = true)
     {d : Decl} {b : RBody E} (hd : d ∈ E.decls) (hb : P.body d = some b) :
@@ -92,8 +84,7 @@ theorem accepted_program_iff {E : Env} (P : Program E) :
   · intro h
     exact List.all_eq_true.mpr (fun site hs => h site ((program_observation_iff P site).mp hs))
 
-/-- The source elaboration already ties constructor bodies to real environment
-members. Their observations therefore also occur in the declaration scan. -/
+/-- The source elaboration already ties constructor bodies to real environment members. Their observations therefore also occur in the declaration scan. -/
 theorem elaborated_constructor_in_declarations (a : Elaborated) {c : String} {b : RBody a.res.env}
     (hb : a.prog.ctor c = some b) {site : ObservationSite} (hs : site ∈ bodyObservations b) :
     site ∈ a.res.env.decls.flatMap (declarationObservations a.prog) := by
@@ -103,8 +94,7 @@ theorem elaborated_constructor_in_declarations (a : Elaborated) {c : String} {b 
   apply List.mem_append_left
   apply List.mem_flatMap.mpr
   exact ⟨b, by simpa only [Option.mem_toList] using hbody, hs⟩
-/-- Modifier target identity is retained separately from observation arguments;
-its profile feature and executed-target roster obligations remain separate. -/
+/-- Modifier target identity is retained separately from observation arguments; its profile feature and executed-target roster obligations remain separate. -/
 def programModifierTargets {E : Env} (P : Program E) : List Decl :=
   E.decls.flatMap (fun d => (P.body d).toList.flatMap (fun b => b.mods.map (·.modifier))) ++
     P.contracts.flatMap (fun c => (P.ctor c).toList.flatMap (fun b => b.mods.map (·.modifier)))

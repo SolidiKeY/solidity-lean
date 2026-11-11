@@ -1,0 +1,6 @@
+path,facade_native_range_lines,facade_serialized_constants,facade_without_source_range_units,native_key_bound_imported_units,observed_imported_outside_facade_native_range_lines,observed_imported_without_source_range_units,outside_both_observed_footprints_lines
+axiom_pins,0,0,0,0,0,0,4054
+generated_root,0,0,0,0,0,0,6663
+marked_generated,0,0,0,375,905,257,13424
+unresolved_chain_agreement,0,0,0,137,493,52,21202
+untraced,53330,11089,4898,28213,80489,13414,945556

@@ -1,4 +1,5 @@
 import Solidity.Yul.Compilation.SequenceCompilation
+import Solidity.Yul.Compilation.CompletionControls
 /-! Recursive original-AST sequence/if/zero/single-result-let lowering around
 actual accepted sequence/switch leaves. Original context indices change under
 binders; no new syntax, state, layout or runtime convention is introduced.
@@ -297,10 +298,8 @@ theorem Artifact.normal_to_model {c : Control} {n fuel : Nat} {stmt : Stmt [] []
    some ⟨sourceLocals out,.normal⟩) (m : Evm.Machine) (caller : List Evm.Word) :
  Evm.run artifact.code {m with stack := locals.toList.map coreWord++caller} =
  .ok {m with stack := out.toList.map coreWord++caller} 0 := by
- obtain ⟨actual,same,target⟩ := artifact.source_to_model horizon locals ⟨sourceLocals out,.normal⟩ ran m caller
- have equal : out = actual := SourceLoopCompletion.sourceLocals_injective (congrArg Outcome.vars same)
- cases equal
- exact target
+ exact CompletionControls.normal_output out _
+   (artifact.source_to_model horizon locals ⟨sourceLocals out,.normal⟩ ran m caller)
 
 /-- info: 'Solidity.Yul.Compilation.StructuredSequenceCompilation.source_to_model' depends on axioms: [propext,
  Classical.choice,

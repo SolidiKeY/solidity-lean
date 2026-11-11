@@ -38,7 +38,7 @@ theorem current_statement {E : Env} {Γ : RCtx} (G : Glob E) (F : Fr) (n : Nat)
  (execS G F (n+9) 0 none (.expr revertCurrent : RStmt E [] false .body (context Γ) (context Γ))
  (caller b current next older)).run (L0 E,state)=(.error (.revert (errorData bs)),(L0 E,state)) := by
  apply expression_error G F (n+8) revertCurrent _ (caller b current next older) state state
- dsimp [revertCurrent,caller,evalE,evalBuiltin,evalArgs,evalLoc,getV,RVal.get,
+ dsimp [revertCurrent,caller,evalE,withLibraryCalldata,evalBuiltin,evalArgs,evalLoc,getV,RVal.get,
    bytesOfRV,heapBytes,heapObj,EM.st,EM.locals,EM.lift]
  dsimp [bind,pure,ExceptT.bind,ExceptT.pure,ExceptT.bindCont,ExceptT.run,ExceptT.mk,
    StateT.bind,StateT.pure,StateT.get,get,getThe,MonadStateOf.get,

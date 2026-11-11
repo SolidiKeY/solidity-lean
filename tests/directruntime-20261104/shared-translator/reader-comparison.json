@@ -105,7 +105,7 @@
           },
           "sourceIdentity": {
             "fixture": "tests/solc/EntryPointsLeft.ast.json",
-            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "fixtureSha256": "266eb3c87bc7a3abfda8dd0278d657b8097ed2d0c75bade413d5029796e42850",
             "pointer": "/ast/nodes/3/nodes/0/body/statements/1",
             "nodeId": null,
             "src": "1306:53:0",

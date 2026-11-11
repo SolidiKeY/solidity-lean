@@ -1,0 +1,112 @@
+{
+  "base": "d6fd95f0886775d7c286813fa9b993a40ba7a777",
+  "timing_boundary": "seconds are mutant Lean command elapsed times; one-time pristine checks, cache fetching and orchestration overhead are excluded",
+  "budget_seconds": 3600,
+  "verdict": "no survivors in executed selected slices",
+  "execution_order": [
+    "M32",
+    "M33",
+    "M34",
+    "M35",
+    "M36",
+    "M37",
+    "M38",
+    "M39",
+    "M01",
+    "M02",
+    "M03",
+    "M04",
+    "M05",
+    "M06",
+    "M07",
+    "M08",
+    "M09",
+    "M10",
+    "M11",
+    "M12",
+    "M13",
+    "M14",
+    "M15",
+    "M16",
+    "M17",
+    "M18",
+    "M19",
+    "M20",
+    "M21",
+    "M22",
+    "M31",
+    "M23",
+    "M24",
+    "M25",
+    "M26",
+    "M27",
+    "M28",
+    "M29",
+    "M30"
+  ],
+  "score_label": "sampled selected-dependent-slice mutation score, not area-wide assurance",
+  "complete_catalogue_executed": true,
+  "candidates": 39,
+  "ran": 39,
+  "areas": {
+    "Backend": {
+      "candidates": 2,
+      "ran": 2,
+      "killed": 2,
+      "survivors": 0,
+      "blocked": 0,
+      "score": 1.0
+    },
+    "Calculus": {
+      "candidates": 2,
+      "ran": 2,
+      "killed": 2,
+      "survivors": 0,
+      "blocked": 0,
+      "score": 1.0
+    },
+    "Evm": {
+      "candidates": 2,
+      "ran": 2,
+      "killed": 2,
+      "survivors": 0,
+      "blocked": 0,
+      "score": 1.0
+    },
+    "Lowering": {
+      "candidates": 1,
+      "ran": 1,
+      "killed": 1,
+      "survivors": 0,
+      "blocked": 0,
+      "score": 1.0
+    },
+    "Semantics": {
+      "candidates": 30,
+      "ran": 30,
+      "killed": 30,
+      "survivors": 0,
+      "blocked": 0,
+      "score": 1.0
+    },
+    "Yul": {
+      "candidates": 2,
+      "ran": 2,
+      "killed": 2,
+      "survivors": 0,
+      "blocked": 0,
+      "score": 1.0
+    }
+  },
+  "generated_candidates": 0,
+  "unmarked_candidates": 39,
+  "survivors": [],
+  "boundary": "Kernel elaboration of pinned source and selected dependent paths; first failure stops each mutant. Not external EVM/solc conformance, exhaustive dependency coverage, or a reference-class ratio.",
+  "limitations": [
+    "no systemd scope on the cloud VM (H232)",
+    "No full rebuild from scratch; published cache and baseline selected builds required.",
+    "Unmarked is not proven handwritten.",
+    "Kills measure existing proof recheck failures, including tactic dependence on definitional form; they do not alone prove a theorem statement semantically distinguishes the mutant.",
+    "M31 passes the local recognizer theorem vacuously but is killed by the positive checked-block consumer; local-only survival would understate existing coverage."
+  ]
+}

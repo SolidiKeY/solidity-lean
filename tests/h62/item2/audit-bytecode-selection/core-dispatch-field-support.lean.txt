@@ -1,0 +1,85 @@
+/-! Guards incompatible dispatch certificate/compiler/representation witnesses,
+last-match handling of duplicate selectors, and reject-all routing. Reuse the
+existing represented input proof and actual CoreDispatch compiler. Source table
+provenance, native binding, physical realization and gas adequacy stay separate. -/
+open Solidity Solidity.Evm Solidity.Backend.AbiEntry
+open Solidity.Backend.AbiEntry.Interface
+
+def dispatchContract : Contract := {vars := []}
+abbrev dispatchCtx : Ctx := [.val .uint]
+def dispatchState : State dispatchContract dispatchCtx :=
+  (freshT dispatchContract 0 W_pos (wmod 0)).push (t := .val .uint) ⟨5,by decide⟩
+def dispatchMachine : Machine :=
+  {Machine.init with
+    mem := fun address => if address=0 then .val (wmod 5) else .val (wmod 0)
+    stack := [.val (wmod 258),.val (wmod 513)]}
+
+theorem dispatch_represented : Sim dispatchContract 1 0 (Frag.init dispatchCtx) dispatchState dispatchMachine :=
+  CoreJoinControls.initial_representation
+
+abbrev DispatchTarget := DispatchBody dispatchContract dispatchCtx (Frag.init dispatchCtx)
+abbrev DispatchFixtureRow := DispatchRow dispatchContract dispatchCtx (Frag.init dispatchCtx)
+def dispatchHit : DispatchTarget :=
+  {outCtx := dispatchCtx
+   program := .cons (.assignLocal .here (.simple (.lit 22 (by decide)))) .nil
+   outFrag := Frag.init dispatchCtx
+   admitted := rfl}
+def dispatchFallback : DispatchTarget :=
+  {outCtx := dispatchCtx
+   program := .cons (.assignLocal .here (.simple (.lit 77 (by decide)))) .nil
+   outFrag := Frag.init dispatchCtx
+   admitted := rfl}
+def dispatchRows : List DispatchFixtureRow := [⟨wmod 5,dispatchHit⟩,⟨wmod 5,dispatchFallback⟩]
+def dispatchMissRows : List DispatchFixtureRow := [⟨wmod 6,dispatchHit⟩]
+def dispatchBuilt (rows : List DispatchFixtureRow) := CoreDispatch.compiled 0 (Frag.init dispatchCtx) .here rows dispatchFallback
+
+theorem dispatch_found (rows : List DispatchFixtureRow) :
+    Compiler.compile 0 (Frag.init dispatchCtx) (CoreDispatch.route (Frag.init dispatchCtx) .here rows dispatchFallback)=some (dispatchBuilt rows) :=
+  CoreDispatch.selected 0 (Frag.init dispatchCtx) .here rows dispatchFallback
+
+theorem dispatch_room : ∀ row ∈ dispatchRows,1+Prog.pushes row.target.program≤Lmax := by
+  intro row member
+  simp only [dispatchRows,List.mem_cons,List.not_mem_nil,or_false] at member
+  rcases member with rfl | rfl <;> decide
+
+theorem dispatch_miss_room : ∀ row ∈ dispatchMissRows,1+Prog.pushes row.target.program≤Lmax := by
+  intro row member
+  simp only [dispatchMissRows,List.mem_cons,List.not_mem_nil,or_false] at member
+  rcases member with rfl
+  decide
+
+theorem dispatch_outcome (rows : List DispatchFixtureRow)
+    (room : ∀ row ∈ rows,1+Prog.pushes row.target.program≤Lmax) :
+    run (dispatchBuilt rows).code dispatchMachine=
+      run (compileProg 0 (dispatchTarget rows dispatchFallback (wmod 5)).program) dispatchMachine :=
+  CoreDispatch.executed 1 0 (Frag.init dispatchCtx) .here rows dispatchFallback
+    (dispatchBuilt rows) (dispatch_found rows) dispatchState dispatchMachine dispatch_represented room (wmod 5) rfl
+
+def dispatchHitOut : Machine := {dispatchMachine with mem := upd dispatchMachine.mem 0 (.val (wmod 22))}
+def dispatchFallbackOut : Machine := {dispatchMachine with mem := upd dispatchMachine.mem 0 (.val (wmod 77))}
+
+theorem dispatch_first_collision_wins : run (dispatchBuilt dispatchRows).code dispatchMachine=.ok dispatchHitOut 0 := by
+  rw [dispatch_outcome dispatchRows dispatch_room]
+  rfl
+
+theorem dispatch_missing_uses_fallback : run (dispatchBuilt dispatchMissRows).code dispatchMachine=.ok dispatchFallbackOut 0 := by
+  rw [dispatch_outcome dispatchMissRows dispatch_miss_room]
+  rfl
+
+theorem dispatch_revert_all_refused : run (dispatchBuilt dispatchRows).code dispatchMachine≠.revert := by
+  rw [dispatch_first_collision_wins]
+  intro impossible
+  cases impossible
+
+theorem dispatch_caller_stack_preserved : dispatchHitOut.stack=dispatchMachine.stack ∧
+    dispatchFallbackOut.stack=dispatchMachine.stack := ⟨rfl,rfl⟩
+
+#print axioms dispatch_represented
+#print axioms dispatch_found
+#print axioms dispatch_room
+#print axioms dispatch_miss_room
+#print axioms dispatch_outcome
+#print axioms dispatch_first_collision_wins
+#print axioms dispatch_missing_uses_fallback
+#print axioms dispatch_revert_all_refused
+#print axioms dispatch_caller_stack_preserved
