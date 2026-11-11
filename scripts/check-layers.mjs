@@ -171,7 +171,7 @@ const CORE = [
   /^Solidity\.Yul\.(ClosedFunctions|Checks\.ClosedFunctions)$/, // VY1 finite lexical environments.
   /^Solidity\.Yul\.(BlockHeaders|Checks\.Headers)$/, // VY1 direct syntax-to-header collection.
   /^Solidity\.Yul\.(ExternalCheck|GlobalExternal|Checks\.External|Checks\.GlobalExternal)$/, // VY1 checked external resolution.
-  /^Solidity\.Yul(?:$|\.(?:Builtins|Words|WordLaws|Syntax|Static|CatalogLaws|ExpressionCheck|LocalScope|FunctionScope)$|\.Checks\.(?:(?:Arithmetic|Shifts)(?:\.Part[0-9][0-9])?|Bytes|Powers|Static|Contracts|Expressions|Scope)$)/, // Intrinsic assembly core; frontend adapters stay separate.
+  /^Solidity\.Yul(?:$|\.(?:Builtins|Words|OpcodeSpec|WordLaws|Syntax|Static|CatalogLaws|ExpressionCheck|LocalScope|FunctionScope)$|\.Checks\.(?:(?:Arithmetic|Shifts)(?:\.Part[0-9][0-9])?|Bytes|Powers|Static|Contracts|Expressions|Scope)$)/, // Intrinsic assembly core; frontend adapters stay separate.
   /^Solidity\.Yul\.Composition\./, // VY5 intrinsic producer-bound consumer proofs.
   /^Solidity\.(KeySort|Eqns|AST|TypeGraph|Scope|SpecSyntax|Hashes|Keccak|ERC7201|Secp256k1|RevertBytes|Syntax|Semantics|Signature|Update)$/,
   /^Solidity\.Syntax\.(Raw|Grammar|Contract|Scoped|Checked|Inlined|PushSource|Join)$/,

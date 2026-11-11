@@ -5301,6 +5301,7 @@ import Solidity.Yul.LocalWordWrite
 import Solidity.Yul.LocalWriteback
 import Solidity.Yul.OccurrenceCheck
 import Solidity.Yul.OccurrenceSyntax
+import Solidity.Yul.OpcodeSpec
 import Solidity.Yul.OpenAgreement
 import Solidity.Yul.OpenCalculus
 import Solidity.Yul.OpenCasesAgreement
