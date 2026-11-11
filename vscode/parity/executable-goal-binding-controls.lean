@@ -359,4 +359,36 @@ run_cmd do
   unless negatives.all Option.isNone do throwError "incomplete or foreign branch protocol accepted"
   logInfo "EXECUTABLE_V2 injected complete-branch controls: 2 positive, 14 negative"
 
+/- The four original fixtures are not present here. These are refusal controls,
+not a fabricated positive source-admission or four-case executable result. -/
+run_cmd do
+  let namespaces := [`V1Storage.storageAlias_legacy.Identity, `V1Storage.storageAlias_ir.Identity,
+    `V1Storage.storageCopy_legacy.Identity, `V1Storage.storageCopy_ir.Identity]
+  for (namespaceName, sourceId) in namespaces.zip ([29, 29, 44, 44] : List Int) do
+    unless (Solidity.Frontend.ExecutableMetadataV2.Internal.fourCasePinsV2? namespaceName).map (·.1) == some sourceId do
+      throwError "reviewed exact namespace pin missing"
+  let impostors := [Lean.Name.str .anonymous "V1Storage.storageAlias_legacy.Identity",
+    Lean.Name.str (Lean.Name.str .anonymous "V1Storage.storageAlias_legacy") "Identity",
+    Lean.Name.num `V1Storage.storageAlias_legacy.Identity 0,
+    `Foreign.storageAlias_legacy.Identity]
+  for namespaceName in impostors do
+    if (Solidity.Frontend.ExecutableMetadataV2.Internal.fourCasePinsV2? namespaceName).isSome then
+      throwError "nonidentical Lean namespace accepted"
+  let empty := ByteArray.empty
+  for namespaceName in namespaces do
+    if (Solidity.Frontend.ExecutableMetadataV2.Internal.fourCaseSourceIdV2?
+        namespaceName empty empty).isSome then throwError "missing original fixture/source accepted"
+    if (← Solidity.Frontend.ExecutableMetadataV2.Internal.admittedInvocationSourceV2?
+        `ExecutableBindingControls.invocationPrimary namespaceName Json.null "foreign.sol" empty empty).isSome then
+      throwError "unbound source admitted"
+  if (Solidity.Frontend.ExecutableMetadataV2.Internal.fourCaseSourceIdV2?
+      `Foreign.storageAlias_legacy.Identity empty empty).isSome then throwError "foreign namespace accepted"
+  -- Correct sizes are insufficient: immutable independent digests are mandatory.
+  let wrongFixture := ByteArray.mk (Array.replicate 5479 (0 : UInt8))
+  let wrongSource := ByteArray.mk (Array.replicate 153 (0 : UInt8))
+  if (Solidity.Frontend.ExecutableMetadataV2.Internal.fourCaseSourceIdV2?
+      `V1Storage.storageAlias_legacy.Identity wrongFixture wrongSource).isSome then
+    throwError "same-sized modified raw bytes accepted"
+  logInfo "EXECUTABLE_V2 four-case source pin refusal controls passed; original positive inputs unavailable"
+
 end ExecutableBindingControls

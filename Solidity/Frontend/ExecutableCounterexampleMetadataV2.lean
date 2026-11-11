@@ -1,4 +1,5 @@
 import Std.Sync.Mutex
+import Solidity.Frontend.SpecOriginsV1
 import Solidity.Tools.DirectRuntime
 
 /-! # Internal executable invocation retention and reification for V2 intake
@@ -267,6 +268,61 @@ def selectedInvocationGoalV2? (name : Lean.Name) (request : Json)
   let some offset := terminalBranchOffsetV2? needsRetry status facts | return none
   let some (goal, index) := captures[offset]? | return none
   return some ⟨invocation, row, goal, index⟩
+
+/-- Exact four-case H487 pins. These are byte admission requirements, not
+proofs of compiler adequacy or executable failure. No path/basename fallback. -/
+def fourCasePinsV2? (namespaceName : Lean.Name) : Option (Int × Nat × Nat × Nat × Nat) :=
+  if namespaceName == `V1Storage.storageAlias_legacy.Identity then some (29, 5479,
+      0x926b3e49ebbe45933487d9ada9adc241e3e093e9abfe7900f6170d2fad9a7cec, 153,
+      0xe2e7fead4a20d89703f7eaa12bfcdf2fc026c792053fa57f14e9ec124c4b43db)
+  else if namespaceName == `V1Storage.storageAlias_ir.Identity then some (29, 5478,
+      0x41dc2c28a27351bb1ca1091570c0404412b02008a444a75eff7b9d6487c45454, 153,
+      0xe2e7fead4a20d89703f7eaa12bfcdf2fc026c792053fa57f14e9ec124c4b43db)
+  else if namespaceName == `V1Storage.storageCopy_legacy.Identity then some (44, 8140,
+      0xc1c7d612064a16e3d279c69d46598cf366b30b7310b93ac92a58b733905e2724, 210,
+      0x4556136ab59c607cd8aec1c135bf098fe38c8ed4cea0886312f506a545b9804c)
+  else if namespaceName == `V1Storage.storageCopy_ir.Identity then some (44, 8139,
+      0x30728082aa5fd58436e7e3ef8baf6b5f4cffc99b42fbe02919d6a0dc9c560ab6, 210,
+      0x4556136ab59c607cd8aec1c135bf098fe38c8ed4cea0886312f506a545b9804c)
+  else none
+
+/-- Check original raw fixture bytes, not a digest computed from the same
+caller's JSON and then trusted as an independent pin. No metadata is emitted. -/
+def fourCaseSourceIdV2? (namespaceName : Lean.Name) (fixtureBytes sourceBytes : ByteArray) : Option Int := do
+  let (sourceId, fixtureSize, fixtureHash, sourceSize, sourceHash) ← fourCasePinsV2? namespaceName
+  guard (fixtureBytes.size == fixtureSize && sourceBytes.size == sourceSize)
+  guard (Hashes.sha256Nat (fixtureBytes.data.toList.map UInt8.toNat) == fixtureHash)
+  guard (Hashes.sha256Nat (sourceBytes.data.toList.map UInt8.toNat) == sourceHash)
+  pure sourceId
+
+/-- Private construction joins byte-pinned source admission to an actual
+retained executable target. It is not a candidate/failure or span certificate. -/
+structure AdmittedInvocationSourceV2 where
+  private mk ::
+  namespaceName : Lean.Name
+  fixtureBytes : ByteArray
+  fixture : Json
+  selection : SelectedInvocationGoalV2
+  origins : AdmittedSpecOriginsV1
+
+/-- Reuse existing compilation-unit/source admission and node traversal.
+Exact member and containing contract must occur in the pinned fixture; merely
+sharing an id, name, location, status or JSON claim cannot establish this join.
+No importer, verifier or candidate search is rerun. -/
+def admittedInvocationSourceV2? (captureDeclaration namespaceName : Lean.Name)
+    (request : Json) (sourceName : String) (sourceBytes fixtureBytes : ByteArray) :
+    CommandElabM (Option AdmittedInvocationSourceV2) := do
+  let some sourceId := fourCaseSourceIdV2? namespaceName fixtureBytes sourceBytes | return none
+  let some text := String.fromUTF8? fixtureBytes | return none
+  let some fixture := (Json.parse text).toOption | return none
+  let some selected ← selectedInvocationGoalV2? captureDeclaration request sourceId "identity" | return none
+  let some unit := (Source.readCompilationUnit fixture).toOption | return none
+  let some origins := admittedSpecOriginsV1? fixture sourceName sourceBytes sourceId | return none
+  unless origins.owner.compress == selected.goal.member.compress do return none
+  let contracts := (unit.asts.flatMap J.nodes).filter fun node =>
+    J.kind node == "ContractDefinition" && node.compress == selected.goal.source.compress
+  unless contracts.length == 1 do return none
+  return some ⟨namespaceName, fixtureBytes, fixture, selected, origins⟩
 
 /-- Diagnostic receipt only, never certificate admission. -/
 def invocationReceiptV2? (name : Lean.Name) : CommandElabM (Option Json) := do
