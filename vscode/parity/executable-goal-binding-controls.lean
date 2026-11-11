@@ -255,6 +255,18 @@ theorem preparationOtherLayout : ¬ Fml.Valid (.ff : Fml quotationContract []) :
       (otherLayoutCandidate.tstate quotationContract) (.ff : Fml quotationContract []) = .ff from rfl)
 theorem preparationWrongShape : True := True.intro
 
+def freshSpellingCandidate : Cand C := { candidate with args := [("se1", .bool true)] }
+theorem preparationFreshSpelling : ¬ Fml.Valid (.ff : Fml C []) :=
+  Fml.not_valid_of_eval3Peel freshSpellingCandidate.sourceValuesV1 (freshSpellingCandidate.tstate C)
+    (show Fml.eval3Peel (poolDom freshSpellingCandidate.argInts) freshSpellingCandidate.sourceValuesV1
+      (freshSpellingCandidate.tstate C) (.ff : Fml C []) = .ff from rfl)
+-- Explicit injected table: this proof does not claim default string-parser reduction.
+def foreignProofNames : FreshNames :=
+  { name := fun _ _ => "foreign", parse := fun _ => some ("foreign", 0) }
+theorem freshSpellingBridgeFalse : freshSpellingCandidate.sourceValuesV1 ≠
+    (letI : FreshNames := foreignProofNames; freshSpellingCandidate.vals) := by
+  decide
+
 /- A distinct injected first invocation; lookups must never rerun it. -/
 run_cmd do
   let .ok fixture := Json.parse r#"{"contract":{"nodeType":"ContractDefinition","contractKind":"contract","nodes":[{"nodeType":"FunctionDefinition","id":1,"name":"first","kind":"function","visibility":"public","stateMutability":"pure","modifiers":[],"parameters":{"parameters":[]},"returnParameters":{"parameters":[]},"body":{"nodeType":"Block","statements":[]},"documentation":""},{"nodeType":"FunctionDefinition","id":2,"name":"second","kind":"function","visibility":"public","stateMutability":"pure","modifiers":[],"parameters":{"parameters":[]},"returnParameters":{"parameters":[]},"body":{"nodeType":"Block","statements":[]},"documentation":""}]},"listing":true}"# | throwError "invocation fixture JSON"
@@ -296,6 +308,93 @@ run_cmd do
     root fixture 1 "first" ``preparationCertificate Json.null
     | throwError "changed request admitted to candidate preparation"
   unless wrongRequestReason == "actual invocation unavailable" do throwError "wrong preparation refusal stage"
+  -- The empty executable target is independently checked as TRUE at this candidate.
+  liftTermElabM do
+    let evaluated ← Solidity.Frontend.ExecutableMetadataV2.Internal.preparedExecutableEvaluationV2 prepared
+    let type ← mkEq evaluated (mkConst ``Tri.tt)
+    let proof ← mkEqRefl (mkConst ``Tri.tt)
+    let base ← getEnv
+    let name ← mkFreshUserName `_executable_v2_true_control
+    let checked ← Solidity.Frontend.ExecutableMetadataV2.Internal.installDeclarationsV2 #[(name, type, proof)]
+    setEnv base
+    unless checked.isOk do throwError "true executable evaluation control failed"
+  let trueResult ← Solidity.Frontend.ExecutableMetadataV2.Internal.checkRetainedExecutableFailureV2
+    root request 1 "first" ``preparationCertificate Json.null
+  match trueResult with
+  | .error reason => unless reason.startsWith "executable failure proof refused:" do
+      throwError "true target failed at an unrelated stage: {reason}"
+  | .ok _ => throwError "true executable target refuted"
+  let .ok source := request.getObjVal? "contract" | throwError "missing injected source"
+  let .ok members := source.getObjValAs? (Array Json) "nodes" | throwError "missing injected members"
+  let some first := members[0]? | throwError "missing injected member"
+  let falseMember := first.setObjVal! "documentation"
+    (Json.mkObj [("nodeType", toJson "StructuredDocumentation"), ("text", toJson "@custom:key ensures false;")])
+  let falseRequest := request.setObjVal! "contract" (source.setObjVal! "nodes" (toJson #[falseMember]))
+  let falseRoot := `ExecutableBindingControls.invocationFalsePost
+  let .ok falseReport ← Solidity.Frontend.ExecutableMetadataV2.Internal.retainInvocationV2 falseRoot falseRequest
+    | throwError "injected false-post first invocation refused"
+  logInfo m!"EXECUTABLE_V2 before proof: injected false-post report: {falseReport.compress}"
+  let falseReceipt ← Solidity.Frontend.ExecutableMetadataV2.Internal.invocationReceiptV2? falseRoot
+  logInfo m!"EXECUTABLE_V2 before proof: injected false-post capture: {(falseReceipt.map Json.compress).getD "missing"}"
+  -- Preserve the unsupported semicolon observation. Do not normalize its input.
+  let suffixResult ← Solidity.Frontend.ExecutableMetadataV2.Internal.checkRetainedExecutableFailureV2
+    falseRoot falseRequest 1 "first" ``preparationCertificate Json.null
+  match suffixResult with
+  | .error reason => unless reason == "actual invocation unavailable" do
+      throwError "unsupported suffix had unrelated refusal: {reason}"
+  | .ok _ => throwError "unsupported suffix acquired a certificate"
+  let .ok suffixRows := falseReport.getArr? | throwError "missing unsupported suffix report"
+  let some suffixRow := suffixRows[0]? | throwError "missing unsupported suffix row"
+  unless (suffixRow.getObjValAs? String "status").toOption == some "unsupported" &&
+      (suffixRow.getObjValAs? String "reason").toOption == some "unsupported specification suffix" do
+    throwError "unsupported suffix observation changed"
+  -- A SEPARATE fixture in the existing parser's grammar, not an adapter or edit
+  -- to any original compiler fixture. The failed earlier positive remains archived.
+  let supportedMember := first.setObjVal! "documentation"
+    (Json.mkObj [("nodeType", toJson "StructuredDocumentation"), ("text", toJson "@custom:key ensures false")])
+  let supportedRequest := request.setObjVal! "contract" (source.setObjVal! "nodes" (toJson #[supportedMember]))
+  let supportedRoot := `ExecutableBindingControls.invocationFalsePostSupportedGrammar
+  let .ok supportedReport ← Solidity.Frontend.ExecutableMetadataV2.Internal.retainInvocationV2 supportedRoot supportedRequest
+    | throwError "supported-grammar first invocation failed"
+  logInfo m!"EXECUTABLE_V2 before proof: separate supported-grammar report: {supportedReport.compress}"
+  let proofBase ← getEnv
+  let checked ← Solidity.Frontend.ExecutableMetadataV2.Internal.checkRetainedExecutableFailureV2
+    supportedRoot supportedRequest 1 "first" ``preparationCertificate Json.null
+  let checked ← match checked with
+    | .ok value => pure value
+    | .error reason => throwError "actual injected false-post refutation unavailable: {reason}"
+  unless (← getEnv).constants.toList.map Prod.fst == proofBase.constants.toList.map Prod.fst do
+    throwError "executable refutation scratch declarations leaked"
+  liftTermElabM do
+    let formula := mkApp (mkConst ``GoalPairV2.executableFormula) checked.prepared.goalPair
+    let target ← mkAppM ``Fml.Valid #[formula]
+    let name ← mkFreshUserName `_executable_v2_actual_refutation_replay
+    let base ← getEnv
+    let .ok () ← Solidity.Frontend.ExecutableMetadataV2.Internal.installDeclarationsV2
+      #[(name, mkNot target, checked.refutation)]
+      | throwError "actual refutation positive replay refused"
+    let dependencies ← collectAxioms name
+    logInfo m!"EXECUTABLE_V2 actual captured-target refutation dependencies: {dependencies}"
+    let otherFormula := mkApp (mkConst ``GoalPairV2.executableFormula) prepared.goalPair
+    let otherTarget ← mkAppM ``Fml.Valid #[otherFormula]
+    let wrongName ← mkFreshUserName `_executable_v2_wrong_captured_target
+    match ← Solidity.Frontend.ExecutableMetadataV2.Internal.validateDeclarationsV2
+        #[(wrongName, mkNot otherTarget, checked.refutation)] with
+    | .error (.declTypeMismatch ..) => pure ()
+    | .error _ => throwError "wrong captured target failed for unrelated kernel reason"
+    | .ok () => throwError "refutation accepted for another captured target"
+    setEnv base
+
+  let bridgeResult ← Solidity.Frontend.ExecutableMetadataV2.Internal.checkRetainedExecutableFailureV2
+    supportedRoot supportedRequest 1 "first" ``preparationFreshSpelling Json.null
+  match bridgeResult with
+  | .error reason =>
+    unless reason.startsWith "retained values bridge refused:" do
+      throwError "wrong values bridge failed at unrelated stage: {reason}"
+    logInfo m!"EXECUTABLE_V2 default-name bridge unavailable (not a false-equation proof): {reason}"
+  | .ok _ => throwError "source-values equality silently substituted for candidate-values equality"
+  logInfo m!"EXECUTABLE_V2 actual injected false-post report retained: {falseReport.compress}"
+  logInfo "EXECUTABLE_V2 checked executable failure, true-target refusal and unavailable default-name bridge controls passed"
   let receipt? ← Solidity.Frontend.ExecutableMetadataV2.Internal.invocationReceiptV2? root
   logInfo m!"EXECUTABLE_V2 first invocation outcome: {(receipt?.map Json.compress).getD "missing receipt"}"
   let some retained ← Solidity.Frontend.ExecutableMetadataV2.Internal.retainedInvocationV2? root request
@@ -363,6 +462,29 @@ run_cmd do
     throwError "retention failure detail was lost"
   logInfo m!"EXECUTABLE_V2 actual injected invocation receipt: {receiptBefore.compress}"
   logInfo "EXECUTABLE_V2 no-search lookup, rollback replay, coherent forgery, synchronous rejection and atomic-failure controls passed"
+
+section ForeignProofNameControl
+local instance : FreshNames := foreignProofNames
+-- A separate explicit wrong-name table control; no production instance changes.
+run_cmd do
+  let .ok request := Json.parse r#"{"contract":{"nodeType":"ContractDefinition","contractKind":"contract","nodes":[{"nodeType":"FunctionDefinition","id":1,"name":"first","kind":"function","visibility":"public","stateMutability":"pure","modifiers":[],"parameters":{"parameters":[]},"returnParameters":{"parameters":[]},"body":{"nodeType":"Block","statements":[]},"documentation":""}]},"listing":false}"#
+    | throwError "foreign-name control request malformed"
+  let root := `ExecutableBindingControls.invocationForeignProofNames
+  let .ok _ ← Solidity.Frontend.ExecutableMetadataV2.Internal.retainInvocationV2 root request
+    | throwError "foreign-name first invocation failed"
+  let result ← Solidity.Frontend.ExecutableMetadataV2.Internal.checkRetainedExecutableFailureV2
+    root request 1 "first" ``preparationFreshSpelling Json.null
+  match result with
+  | .error reason =>
+    unless reason.startsWith "retained values bridge refused:" do
+      throwError "foreign-name bridge failed at unrelated stage: {reason}"
+    logInfo m!"EXECUTABLE_V2 explicit foreign-name bridge refusal: {reason}"
+  | .ok _ => throwError "provably different source/candidate name table accepted"
+  let dependencies ← collectAxioms ``freshSpellingBridgeFalse
+  unless dependencies.all ([``propext, ``Classical.choice, ``Quot.sound].contains ·) do
+    throwError "foreign-name control dependencies refused"
+  logInfo "EXECUTABLE_V2 explicit foreign-name bridge false proof and refusal passed"
+end ForeignProofNameControl
 
 /- Injected protocol negatives, not actual annotated-loop or source evidence. -/
 run_cmd do
