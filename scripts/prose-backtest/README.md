@@ -106,7 +106,7 @@ The calibration has no areas that the baseline lacks, and the baseline has none
 that the calibration lacks. Areas created during the window, such as
 `Solidity/Correctness`, `Scratch` and `Goals`, appear as unseen.
 
-**Margin.** 1/20 was chosen before any replay. It is a small headroom for
+**Margin.** 1/20 was chosen before any replay. This is the author's statement; the branch history cannot prove the order, because the study was committed after the runs. It is a small headroom for
 commit-level noise in the prose/code mix and stays well below the ratio spread
 between areas. It was not tuned. Sensitivity at 0 and 1/10 was declared in
 advance and is only reported below.
@@ -148,15 +148,15 @@ Its failure lines match the replay exactly.
 
 - **Master has failed its own prose ratchet at every commit since the one that
   added it.** The baseline was never lowered or refreshed, and growth accumulated
-  unchecked. In the legacy failures after calibration, 2833 cells are failures
-  carried over with unchanged counts and 527 are areas missing from the baseline.
+  unchecked. Among the 3261 legacy failure cells after calibration, 2833 carry the
+  `unchanged_counts` label and 527 the `area_absent_from_baseline` label. The labels overlap, so these are not a partition.
 - **The ratio rule absorbs proportional growth.** For example, `71175a9a6` added
   32 Lowering comment lines alongside new code: the absolute rules fail, the ratio
   passes, and the cause is `code_rose_with_normal_prose`.
 - **The ratio rule still catches real prose increases:**
   - `9f2dcae6b`: Lowering process IDs went from 376 to 440 while code went from
     83877 to 84542 lines, against a limit of 396.
-  - `7098bb1fe`: Examples process IDs went from 19 to 20 with no code change.
+  - `7098bb1fe`: Examples process IDs went from 19 to 20 with no code change. This is one added `(H134)` citation: a correct catch, but a small one.
   - `4e023e56e`: `docs/README.d` went from 19 to 20 lines.
 - **Most of the ratio failures after calibration are carried over from new areas.**
   `Solidity/Correctness` was first failed at `d07fc9844` (336 comment lines over
@@ -170,7 +170,8 @@ Its failure lines match the replay exactly.
 
 Each failure carries its cause labels: `prose_rose_without_code`,
 `code_rose_with_normal_prose`, `code_and_prose_rose`, `denominator_shrank`,
-`unseen_area`, `zero_code`, `area_absent_from_baseline`, `unchanged_counts`, or
+`unseen_area`, `zero_code`, `absolute_limit_exceeded`, `ratio_exceeded_frozen_allowance`,
+`prose_where_calibration_had_none`, `area_absent_from_baseline`, `unchanged_counts`, or
 `prose_fell_still_over`. A failure can have more than one cause. Each one is also
 marked as introduced or carried over, together with the prior status.
 
@@ -201,7 +202,9 @@ change is recommended in this step.
   It is also retrospective, because the calibration commit lies inside the window.
 - Legacy process IDs are unavailable for the 23 v2 commits. Legacy results are
   unavailable for the 1084 commits that predate the checker.
-- The docs denominator is repository-wide; no narrower mapping was defensible.
+- The docs denominator is repository-wide (about 875k code lines). That is an author judgment, not a proof that no narrower mapping exists, and it makes docs ratios behave almost like absolute limits.
+- The generated rule trusts a header that names any existing script; it does not check that the script writes the file. A false header could remove a handwritten file from both prose and code. At the end commit the rule removes 28 items, none of them in docs/audits.
+- Process IDs inside a generated block that sit on header-import lines are not subtracted, so they cannot be removed twice. Symlinks and undecodable registry roots mark legacy as a checker error (none occurred). A first-parent ancestor stamped before the window start ends the walk; later in-window stamps beyond it would only be listed (none occurred).
 - The generated rule keeps 15 claimed-generated paths with no in-tree generator
   as handwritten, which may overstate prose in Backend.
 - docs/audits regenerability is unverified.
@@ -209,5 +212,6 @@ change is recommended in this step.
 
 Full outputs are archived privately and are not stored in this branch. They
 contain the replay JSON for every row, the complete failure index, the commit
-summaries, the audits inventory, the checker spot-check, and run logs. The archive
-reference is in the lane result.
+summaries, the audits inventory, the checker spot-check, and run logs. Pushing
+them to the private evidence repository was refused (no credentials), so they
+remain on the lane VM with a SHA256SUMS manifest cited in the lane result.

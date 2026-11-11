@@ -182,7 +182,8 @@ def generated_claims(text, comment_spans, lean):
             header = path[1] if path else ""
             break
     blocks, problems, open_block = [], [], None
-    for number, line in enumerate(lines, 1):
+    # docs count physical lines with splitlines(); Lean lines are newline-based
+    for number, line in enumerate(lines if lean else text.splitlines(), 1):
         if (begin := BLOCK_BEGIN.match(line)):
             if open_block:
                 problems.append(f"nested BEGIN at line {number}")
@@ -253,6 +254,9 @@ class Analyzer:
             info.update(comments=scanner.comments, docs=scanner.docs, code=code,
                         raw_pids=[bisect_left(scanner.newlines, m.start()) + 1
                                   for m in CHECK.PROCESS_ID.finditer(text)],
+                        pid_import=[CHECK._HEADER_IMPORT.fullmatch(text.split("\n")[
+                            bisect_left(scanner.newlines, m.start())]) is not None
+                            for m in CHECK.PROCESS_ID.finditer(text)],
                         g_names=frozenset(n for n in _ID_DOTTED.findall(text) if _G_ID.search(n)))
             if info["raw_pids"]:
                 info["text"] = text   # kept only where registry-dependent IDs need a rescan
@@ -293,6 +297,7 @@ def measure_commit(repo, analyzer, commit, estimate):
     """Legacy (historical semantics) and normalized counts for one commit."""
     entries = repo.tree(commit)
     byp = {p: (m, k, s) for m, k, s, p in entries}
+    legacy_error = None
     modules = set()
     for root in REGISTRY_ROOTS:
         if root in byp:
@@ -301,20 +306,22 @@ def measure_commit(repo, analyzer, commit, estimate):
                     if token := CHECK._IMPORT.fullmatch(line):
                         modules.add(token[1])
             except UnicodeDecodeError:
-                pass
+                legacy_error = "undecodable registry root " + root
     modules = frozenset(modules)
     legacy, legacy_v1_pids = {}, {}
     norm, code = {}, {}
     exclusions, unknown, unsupported = [], [], []
     has_docs = any(p.startswith("docs/") for p in byp)
     has_sol = any(p.startswith("Solidity/") for p in byp)
-    legacy_error = None if has_docs and has_sol else "missing source directory"
+    legacy_error = legacy_error or (None if has_docs and has_sol else "missing source directory")
     for mode, kind, sha, path in sorted(entries, key=lambda e: e[3]):
         tree = path.split("/", 1)[0]
         if tree not in ("docs", "Solidity") or "/" not in path:
             continue
         if kind != "blob" or mode not in ("100644", "100755"):
             unsupported.append({"path": path, "mode": mode, "kind": kind})
+            if mode == "120000":   # the checker follows symlinks; this replay cannot
+                legacy_error = legacy_error or f"symlink not replayable {path}"
             continue
         is_lean = tree == "Solidity"
         if is_lean and not path.endswith(".lean"):
@@ -363,7 +370,9 @@ def measure_commit(repo, analyzer, commit, estimate):
         if is_lean:
             nrow["comment_lines"] += len(info["comments"] - blocked)
             nrow["docstring_lines"] += len(info["docs"] - blocked)
-            nrow["process_ids"] += pids - sum(1 for line in info["raw_pids"] if line in blocked)
+            # IDs on header-import lines may already be exempt: never subtract them twice
+            nrow["process_ids"] += pids - sum(1 for line, imp in zip(info["raw_pids"], info["pid_import"])
+                                              if line in blocked and not imp)
             code[area] += len(info["code"] - blocked)
         else:
             inside = len(blocked & set(range(1, info["physical"] + 1)))
@@ -492,7 +501,7 @@ def replay(args):
                    "unsupported_entries": m["unsupported_entries"],
                    "fail": {"legacy": 0, "normalized_absolute": 0, "ratio": 0, "ratio_enforced": 0},
                    "unavailable": {"legacy": 0}}
-        if index == 0 or args.full_details:
+        if index in (0, len(commits) - 1) or args.full_details:
             summary["exclusions"] = m["exclusions"]
             summary["unknown"] = m["unknown"]
         else:
@@ -506,6 +515,8 @@ def replay(args):
             for metric in METRICS:
                 n = nrow[metric]
                 lv = lrow[metric]
+                if version == "v1" and metric == "process_ids":
+                    lv = m["legacy_v1_process_ids"].get(area, 0)   # keep deltas within one semantics
                 c = cal.get(area, {}).get(metric)
                 row = {"commit": commit, "area": area, "metric": metric,
                        "in_window": in_window, "position": position,
