@@ -1,6 +1,7 @@
 import Solidity.Tools.ExecutableGoalBindingV2
 import Solidity.Frontend.ExecutableAst.Shared.ObligationCaptureV2
 import Solidity.Tools.DirectRuntime
+import Solidity.Frontend.ExecutableCounterexampleMetadataV2
 
 /-! Structural V2 controls only. These are not the four original source imports,
 not source adequacy and not ordinary runtime evidence. Guard wrong target,
@@ -132,6 +133,22 @@ run_cmd do
     unless rowId == goal.sourceId && memberId == goal.sourceId &&
         rowName == expectedName && memberName == expectedName && goal.functionName == expectedName do
       throwError "capture/report/member identity mismatch"
+    let (contractExpression, formulaExpression) :=
+      Solidity.Frontend.ExecutableMetadataV2.Internal.quoteGoal goal
+    if [contractExpression, formulaExpression].any (fun e =>
+        e.hasFVar || e.hasMVar || e.hasLevelMVar || e.hasSorry) then
+      throwError "captured goal quotation is not closed"
+    let options ← getOptions
+    let current := maxHeartbeats.get options
+    let options := maxHeartbeats.set options (if current == 0 then 100000 else min current 100000)
+    let declaration := Declaration.defnDecl {
+      name := Name.num `ExecutableBindingControls.injectedCapturedGoal i,
+      levelParams := [],
+      type := mkApp2 (mkConst ``Fml) contractExpression (toExpr ([] : Ctx)),
+      value := formulaExpression, hints := .regular 0, safety := .safe }
+    match Kernel.Environment.addDecl (← getEnv).toKernelEnv options declaration with
+    | .ok _ => logInfo m!"EXECUTABLE_V2 injected captured goal typed: {goal.sourceId}"
+    | .error _ => throwError "actual injected captured-goal quotation failed kernel checking"
   let foreign := request.setObjVal! "sourceId" (toJson (99 : Int))
   if (DirectRuntime.checkWithGoalsV2 foreign).isOk then
     throwError "foreign selection admitted"
@@ -141,4 +158,86 @@ run_cmd do
   logInfo "EXECUTABLE_V2 injected actual-dispatch listing/evaluation/order/ownership/refusal controls passed"
 
 #print axioms DirectRuntime.checkWithGoalsV2_forget
+
+/- Deliberately nondefault raw data exercises quotation, not source admission.
+Some location/return flags here are not an admitted Solidity signature. -/
+def quotationFunction : FunDecl := {
+  sourceDecl := some { declaration := some 29, name := "declared", signature := some "declared(uint256)", mutability := .viewFn, callable := .abi .publicFn .selected (some ⟨17, by decide⟩) }
+  params := [("a", .prim .uint)]
+  paramLocs := [("a", .memory)]
+  rets := [("r", .prim .uint)]
+  retMem := true
+  retStorage := true
+  body := [.assign (.name "x") (.num 7), .whileLoop
+    { inv := [.bool true], dec := some (.num 4), unwind := some 2, brk := true,
+      qinv := [.all .bool "b" (.expr (.name "b"))] } (.bool false) []]
+  mods := [{ name := "m", params := [("p", .prim .bool)], args := [.bool true], body := [.hole], widths := [("p", 1)], locs := [("p", .calldata)] }]
+  spec := { requires := [.bool true], ensures := [.bool false], assignable := some [.root "x"], skip := true }
+  payable := true
+  widths := [("a", 8)] }
+
+def quotationContract : Contract := {
+  vars := [("x", .prim .uint)]
+  transientRoots := ["x"]
+  funs := [("model", quotationFunction)]
+  enums := [("E", ["A", "B"])]
+  inv := [.bool true]
+  widths := [("x", 8)]
+  ctor := some quotationFunction
+  inits := [("x", .num 9)]
+  structs := [("S", "encoded")]
+  errors := [("Oops", quotationFunction)]
+  evalOrder := .viaIR }
+
+run_cmd do
+  for type in [``RawTy, ``RawExpr, ``RawInv, ``RawLoopSpec, ``OFMode,
+      ``RawStmt, ``SpecExpr, ``SpecLoc, ``FunSpec, ``ModApp, ``FunDecl, ``EvalOrder] do
+    let provider? ← liftTermElabM <| synthInstance? (mkApp (mkConst ``ToExpr [0]) (mkConst type))
+    if provider?.isSome then throwError "raw quotation instance leaked after import"
+  let expected := mkConst ``quotationContract
+  let quoted := Solidity.Frontend.ExecutableMetadataV2.Internal.quoteContract quotationContract
+  if quoted.hasFVar || quoted.hasMVar || quoted.hasLevelMVar || quoted.hasSorry then
+    throwError "unclosed quotation"
+  let options ← getOptions
+  let current := maxHeartbeats.get options
+  let options := maxHeartbeats.set options (if current == 0 then 100000 else min current 100000)
+  let positive := Declaration.thmDecl {
+    name := `ExecutableBindingControls.quotationRoundTrip,
+    levelParams := [], type := mkApp3 (mkConst ``Eq [1]) (mkConst ``Contract) expected quoted,
+    value := quoteRefl (mkConst ``Contract) expected }
+  let .ok checked := Kernel.Environment.addDecl (← getEnv).toKernelEnv options positive
+    | throwError "full quotation failed kernel round trip"
+  let axioms ← liftTermElabM do
+    addDecl positive
+    let dependencies ← collectAxioms `ExecutableBindingControls.quotationRoundTrip
+    pure dependencies
+  unless axioms.all ([``propext, ``Classical.choice, ``Quot.sound].contains ·) do
+    throwError "quotation control has nonstandard axioms"
+  logInfo m!"EXECUTABLE_V2 quotation control axioms: {axioms}"
+  let changedSource := { quotationFunction with sourceDecl := none }
+  let mutants : List (String × Contract) := [
+    ("sourceDecl", { quotationContract with funs := [("model", changedSource)] }),
+    ("binaryOrder", { quotationContract with evalOrder := { EvalOrder.viaIR with binaryLeftToRight := false } }),
+    ("modularOrder", { quotationContract with evalOrder := { EvalOrder.viaIR with modularLeftToRight := false } }),
+    ("modifierFrames", { quotationContract with evalOrder := { EvalOrder.viaIR with modifierFrames := false } }),
+    ("transientRoots", { quotationContract with transientRoots := [] }),
+    ("funs", { quotationContract with funs := [] }),
+    ("enums", { quotationContract with enums := [] }),
+    ("invariants", { quotationContract with inv := [] }),
+    ("widths", { quotationContract with widths := [] }),
+    ("constructor", { quotationContract with ctor := none }),
+    ("initializers", { quotationContract with inits := [] }),
+    ("structs", { quotationContract with structs := [] }),
+    ("errors", { quotationContract with errors := [] })]
+  for (label, mutant) in mutants do
+    let changed := Solidity.Frontend.ExecutableMetadataV2.Internal.quoteContract mutant
+    let declaration := Declaration.thmDecl {
+      name := Name.str `ExecutableBindingControls.quotationWrong label,
+      levelParams := [], type := mkApp3 (mkConst ``Eq [1]) (mkConst ``Contract) expected changed,
+      value := quoteRefl (mkConst ``Contract) expected }
+    match Kernel.Environment.addDecl checked options declaration with
+    | .ok _ => throwError m!"changed {label} accepted as original quotation"
+    | .error (.declTypeMismatch ..) => logInfo m!"EXECUTABLE_V2 quotation mismatch refused: {label}"
+    | .error _ => throwError m!"changed {label} failed for an unrelated reason"
+
 end ExecutableBindingControls

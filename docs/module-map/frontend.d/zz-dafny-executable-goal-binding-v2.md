@@ -1,1 +1,2 @@
 | `Frontend/ExecutableAst/Shared/ObligationCaptureV2.lean` | Additive exact-output capture of the actual obligation callbacks and arguments, with unchanged error and forget equality; no source adequacy. |
+| `Frontend/ExecutableCounterexampleMetadataV2.lean` | Internal literal reification of actual executable captures; preserves every contract field and keeps derived quote instances local. No authenticated metadata or certificate publication. |
