@@ -94,8 +94,9 @@ function fallbackMembers(text,point){
   let type=match[1],storage=false;
   if(type==='this'||type==='super'){const scope=scopes.find(s=>['contract','library','interface'].includes(s.kind)&&s.start<match.index&&s.end>match.index);type=scope?.name;}
   else{
-    const declarations=[...before.slice(0,match.index).matchAll(new RegExp('([A-Za-z_$][\\w$]*(?:\\[\\])?)(?:\\s+(storage|memory|calldata))?\\s+'+match[1]+'\\b','g'))];
-    const declaration=declarations.at(-1);if(declaration){type=declaration[1];storage=declaration[2]==='storage'||declaration[2]===undefined&&before.slice(0,declaration.index).lastIndexOf('function')<0;}
+    const receiver=match[1].replace(/\$/g,'\\$');
+    const declarations=[...before.slice(0,match.index).matchAll(new RegExp('([A-Za-z_$][\\w$]*(?:\\s*\\[\\s*\\])?)(?:\\s+(storage|memory|calldata))?\\s+'+receiver+'(?![\\w$])','g'))];
+    const declaration=declarations.at(-1);if(declaration){type=declaration[1].replace(/\s+/g,'');storage=declaration[2]==='storage'||declaration[2]===undefined&&before.slice(0,declaration.index).lastIndexOf('function')<0;}
   }
   if(/\[\]$/.test(type||'')||type==='bytes')return [{name:'length'},...(storage?[{name:'push',nodeType:'FunctionDefinition'},{name:'pop',nodeType:'FunctionDefinition'}]:[])];
   const scope=scopes.find(s=>s.name===type);if(!scope)return [];

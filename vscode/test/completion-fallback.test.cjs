@@ -18,3 +18,16 @@ test('CR LF CRLF and unicode masking preserve following declarations and live re
  for(const newline of ['\r','\n','\r\n'])assert.ok(names('uint[] array; // 😀 bool array;'+newline+'array.').includes('length'));
  assert.deepEqual(names('uint[] array; bool array; array.'),[],'real latest declaration behavior retained');
 });
+
+test('dynamic array fallback accepts token whitespace without changing storage rules',()=>{
+ const expected=names('uint[] items; items.');
+ for(const type of ['uint []','uint[ ]','uint [ ]','uint\t[\t]','uint\n[\n]','uint\r\n[\r\n]','uint\r[\r]'])assert.deepEqual(names(type+' items; items.'),expected,type);
+ for(const location of ['memory','calldata'])assert.deepEqual(names('function use(){ uint [ ] '+location+' items; items.'),['length']);
+ assert.deepEqual(names('function use(){ uint [ ] storage items; items.'),['length','push','pop']);
+ for(const type of ['uint[2]','uint[][]'])assert.deepEqual(names(type+' items; items.'),[],'Existing unsupported fallback shape: '+type);
+});
+test('fallback receivers preserve dollar identifiers and cannot borrow longer names',()=>{
+ for(const name of ['$items','items$','$'])assert.deepEqual(names('uint[] '+name+'; '+name+'.'),['length','push','pop'],name);
+ assert.deepEqual(names('bool items; uint[] items$; items.'),[],'items$ cannot masquerade as items');
+ assert.deepEqual(names('uint[] $items; bool $items; $items.'),[],'Actual same-name shadowing still wins');
+});
