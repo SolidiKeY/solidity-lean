@@ -23,6 +23,8 @@ Neither replaces the historical `genericYulViewsPreserve` of `Goals/Plan.lean`.
   with read-after-write, frame, failure and allocation laws proved once, and
   an instance relation that pins the view to every existing per-shape view
   definition of `Solidity/Yul/Views` (inventory below).
+  Its Scalar pilot `yulLayoutPilot` (`Solidity.Yul.Layout.pilot_correct`)
+  asks for the same laws and only the scalar correspondence (`ScalarPilot`).
 * `loweringBySimulation` (`Solidity.Correctness.Lowering.Sim.lowering_producer`):
   ONE forward simulation diagram over the actual production lowering
   (`lowerLoops` then `lowerReturns`, as `calleeBody` sequences them, and the
@@ -587,7 +589,10 @@ the scalar leaf of the recursive view is the existing packed scalar family.
 `Geometric.memoryScalar` verbatim; `scalarPathRead` and `scalarPathWrite` tie
 the recursive `Geometry.read`/`Geometry.write` at `.scalar f.width` to
 `scalarPathView` and `encodeScalarPath` (so `patchScalarSlot`) in both slot
-regions. Later shapes are `Geometric`/`Instances` work (yv2/yv3). -/
+regions. Those two follow from `scalar`; they are stated so a consumer of the
+existing family needs no unfolding. Element, field, key and data placements
+are not pinned here, so the `Laws` alone do not exclude aliased storage
+aggregates; later shapes are `Geometric`/`Instances` work (yv2/yv3). -/
 structure LayoutView.ScalarPilot (V : LayoutView) : Prop where
   /-- A packed field of a slot reads and writes as `Field.findWord`/`patchScalarSlot`. -/
   scalar : ∀ (P : Params) (r : Region) (f : Field) (slot : Roadmap.Word) (m : Phys), r.slotted →
