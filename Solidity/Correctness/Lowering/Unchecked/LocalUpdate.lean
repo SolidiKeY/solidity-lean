@@ -1,4 +1,3 @@
-import Solidity.Correctness.Lowering.Unchecked.CompoundOne
 import Solidity.Correctness.Lowering.Unchecked.IntegerUpdate
 import Solidity.Correctness.Lowering.Unchecked.IntegerOne
 import Solidity.Source.Eval
@@ -10,8 +9,7 @@ import Solidity.Source.Hoare
 Guards a discrepancy between compound-one and increment/decrement at the
 actual Source evaluation boundary, including checked arithmetic failures and
 their poststates. Both expressions use local lvalues; the right operand is a
-local containing one or the exact literal one, not an arbitrary effectful
-expression. These ingredients do not certify raw spelling, target code, or a pass.
+local containing one, not an arbitrary effectful expression. These ingredients do not certify raw spelling, target code, or a pass.
 -/
 namespace Solidity.Correctness.Lowering.Unchecked
 
@@ -106,29 +104,6 @@ theorem localCompoundOne {E : Source.Env} {Γ : Source.RCtx}
   exact compoundOne_of_runs G F fuel plan known source t inc i (.local j)
     (.val (.int 1 oneRange)) x range oneRange read fits rhsRun convRun
 
-/-- A literal-one compound update and prefix increment/decrement have the
-same complete Source result/poststate. This specialization inherits literal
-evaluation and exact conversion from `compoundOne_eval`; it accepts no execution equation.
-The static `fits` proof is precisely the resolved constructor's field. This
-is still a Source law, not certification of raw or emitted intrinsic syntax. -/
-theorem literalCompoundOne {E : Source.Env} {Γ : Source.RCtx}
-    (G : Source.Glob E) (F : Source.Fr) (fuel : Nat)
-    (plan : Source.FailureExecution.RuntimePlan) (known : Bool)
-    (source : Source.EMState E Γ) (t : Source.IntTy) (inc : Bool)
-    (i : Source.Idx Γ (.int t)) (x : Int) (range : t.lo ≤ x ∧ x ≤ t.hi)
-    (read : source.1.get i = .int x range)
-    (fits : (if inc then Source.AssignOp.add else .sub).fits E.isBase E.mapFree
-      (.rational (Source.Q.ofInt 1)) (.int t) = true) :
-    (Source.evalE G F (fuel + 2)
-      (.compound (if inc then .add else .sub) (.local i) (.const (Source.Q.ofInt 1)) fits)
-      (plan := plan) (calldataKnown := known)).run source =
-    (Source.evalE G F (fuel + 2) (.incDec inc true (.local i))
-      (plan := plan) (calldataKnown := known)).run source := by
-  have _legacyRead := read
-  exact congrArg
-    (fun action : Source.EM E Γ (Source.RVal E.layout (.int t)) => action.run source)
-    (compoundOne_eval G F (fuel + 2) plan known t inc (.local i) fits)
-
 /-- Exact local-update evaluation at every horizon and in both checkedness
 modes. The operation itself selects success or its unchanged exact Halt;
 failures retain all locals and the complete interpreter state. This guards
@@ -204,6 +179,5 @@ theorem localUpdate_statementV2 {E : Source.Env} {Γ : Source.RCtx}
 #print axioms localUpdate_statementV2
 
 #print axioms localCompoundOne
-#print axioms literalCompoundOne
 
 end Solidity.Correctness.Lowering.Unchecked
