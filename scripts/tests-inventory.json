@@ -1284,7 +1284,7 @@
           "--evidence",
           "--lean"
         ],
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e"
       },
       "source_blob": "422b13e5bc7bc987e87c86cbd709078eefd0cfb3",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1320,7 +1320,7 @@
           "--evidence",
           "--lean"
         ],
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e"
       },
       "source_blob": "682be2da2571b069f46bb3f0ae29e1f1fe03caae",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1356,7 +1356,7 @@
           "--archive",
           "--commit"
         ],
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e"
       },
       "source_blob": "223e96d3fa285f4e838393e9e9afad342bc1d1fc",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1390,7 +1390,7 @@
         "required_options": [
           "--lean"
         ],
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e"
       },
       "source_blob": "ca23eb7d445d4c99f560c70a6c5cb8b6748985c5",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1432,7 +1432,7 @@
           "--repo",
           "--source-census"
         ],
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e"
       },
       "source_blob": "7745ef63eb65f01e5dfe9835ac84bf84f1841c9d",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1470,7 +1470,7 @@
           "--lean",
           "--repo"
         ],
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e"
       },
       "source_blob": "26a9ed6ed79d6252dbb1299b3336d8e9ad8d8fb0",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1504,7 +1504,7 @@
         "required_options": [
           "--evidence"
         ],
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e"
       },
       "source_blob": "675133d51e0202e01e5cf4532a26996debb4371e",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1540,7 +1540,7 @@
           "--evidence",
           "--lean"
         ],
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e"
       },
       "source_blob": "35b0e13c4ed30a28724f454e3d110ea33217b0ed",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1574,7 +1574,7 @@
         "required_options": [
           "--evidence"
         ],
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e"
       },
       "source_blob": "a50f657e2df51efe2d0049a0c944d47cebce4bb3",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1610,7 +1610,7 @@
           "--archive",
           "--out"
         ],
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e"
       },
       "source_blob": "b4d93269d25d1effa9e943a6cba3f63c88ffd4a6",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1644,7 +1644,7 @@
         "required_options": [
           "--evidence"
         ],
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e"
       },
       "source_blob": "a264dd0c7435a8b5f6e2a1c4bb37a34abafbe980",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1680,7 +1680,7 @@
           "--lean",
           "--out"
         ],
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e"
       },
       "source_blob": "766c1e39caab15fa028423e025bf4c7e0661fdd9",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1714,7 +1714,7 @@
         "required_options": [
           "--evidence"
         ],
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e"
       },
       "source_blob": "a725519cebe318902b7caf85768063fb0b8c191a",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1748,7 +1748,7 @@
         "required_options": [
           "--evidence"
         ],
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e"
       },
       "source_blob": "73b309b26c3d796f34be8f9476421d7f1dfcac62",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1784,7 +1784,7 @@
           "--evidence",
           "--module"
         ],
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e"
       },
       "source_blob": "90e9500177b9bbd54633f0fef42e3caf165a429d",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1818,7 +1818,7 @@
         "required_options": [
           "--evidence"
         ],
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e"
       },
       "source_blob": "d377f90debd83512fd4fc3f0a94400fffdf67f12",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1854,7 +1854,7 @@
           "--output",
           "--toolchain"
         ],
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e"
       },
       "source_blob": "40b7b173d0f683039f55497c1d36b20dcfd70116",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1892,7 +1892,7 @@
           "--frozen",
           "--output"
         ],
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e"
       },
       "source_blob": "2d795e6b300c40e1fe4924f04ad7a9e4b2ba4df8",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1928,7 +1928,7 @@
           "--evidence",
           "--toolchain"
         ],
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e"
       },
       "source_blob": "51652ca513e21150f4c49c49505dc64a5bb8c12d",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1962,7 +1962,7 @@
         "required_options": [
           "--inventory"
         ],
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e"
       },
       "source_blob": "b0d1b50765bf744a5a53cd026695999fb3e6f1c3",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -1996,7 +1996,7 @@
         "required_options": [
           "--evidence"
         ],
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e"
       },
       "source_blob": "f08074788981d2635375dcd531c34621ab29faa8",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -2032,7 +2032,7 @@
           "--inventory",
           "--output"
         ],
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e"
       },
       "source_blob": "5524cbec706ee5732ddcb15feb808a66cfd13421",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -2068,7 +2068,7 @@
           "--inventory",
           "--output"
         ],
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e"
       },
       "source_blob": "35a5868915fc8b3b1818e2e042a5748df899b9f3",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -2102,7 +2102,7 @@
         "required_options": [
           "--output"
         ],
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e"
       },
       "source_blob": "fc0b06fef2af5c7db8bf451b5b61ae7314ff3343",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -2136,7 +2136,7 @@
         "required_options": [
           "--output"
         ],
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e"
       },
       "source_blob": "5416c212d266a6105db8ac41b4f8d3af26de26ee",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -2176,7 +2176,7 @@
           "--lean-bin",
           "--pin"
         ],
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e"
       },
       "source_blob": "15143c90ceead4c5d8f57c1cfa95bed521650358",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -2216,7 +2216,7 @@
           "--lean-bin",
           "--pin"
         ],
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e"
       },
       "source_blob": "5568f8e28a28f5daf777efa0c5c7976f2b413a54",
       "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -2244,7 +2244,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 179,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 15,
@@ -2572,7 +2572,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 138,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 20,
@@ -2931,7 +2931,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 107,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 35,
@@ -3677,7 +3677,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 61,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 15,
@@ -3872,7 +3872,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 75,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 37,
@@ -3954,7 +3954,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 48,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 13,
@@ -4469,7 +4469,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 34,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -4718,7 +4718,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 45,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 7,
@@ -4802,7 +4802,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 31,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 7,
@@ -4886,7 +4886,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 94,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 8,
@@ -5040,7 +5040,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 78,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 7,
@@ -5504,7 +5504,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 101,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 17,
@@ -5663,7 +5663,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 49,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 13,
@@ -5726,7 +5726,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 38,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 11,
@@ -5882,7 +5882,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 49,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 13,
@@ -5946,7 +5946,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 89,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 16,
@@ -6124,7 +6124,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 27,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 9,
@@ -6213,7 +6213,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 77,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 18,
@@ -6757,7 +6757,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 77,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -6926,7 +6926,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 21,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 6,
@@ -7135,7 +7135,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 87,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 13,
@@ -7606,7 +7606,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 181,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 108,
@@ -7760,7 +7760,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 274,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 197,
@@ -7921,7 +7921,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 126,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 58,
@@ -8054,7 +8054,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 191,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 119,
@@ -8229,7 +8229,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 283,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 206,
@@ -8684,7 +8684,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 249,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 62,
@@ -8918,7 +8918,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 195,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 27,
@@ -9002,7 +9002,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 137,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 32,
@@ -9107,7 +9107,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 20,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 6,
@@ -9709,7 +9709,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 44,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -9785,7 +9785,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 60,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 16,
@@ -9841,7 +9841,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 39,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 11,
@@ -9945,7 +9945,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 19,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 10,
@@ -9994,7 +9994,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 71,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 21,
@@ -10084,7 +10084,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 51,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 35,
@@ -10193,7 +10193,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 233,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 11,
@@ -10656,7 +10656,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 92,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 18,
@@ -10719,7 +10719,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 118,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 16,
@@ -12223,7 +12223,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 47,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 25,
@@ -12312,7 +12312,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 41,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -12374,7 +12374,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 42,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -12476,7 +12476,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 33,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 10,
@@ -12511,7 +12511,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 28,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 10,
@@ -12560,7 +12560,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 28,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 9,
@@ -13162,7 +13162,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 551,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 26,
@@ -13344,7 +13344,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 119,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 21,
@@ -13386,7 +13386,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 195,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 35,
@@ -13638,7 +13638,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 444,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 41,
@@ -13988,46 +13988,6 @@
         "status": "unavailable"
       }
     },
-    "committed:tests/h62/item2/audit-calculus/test_bulk_inputs.py": {
-      "command": "python3 -B tests/h62/item2/audit-calculus/test_bulk_inputs.py",
-      "cwd": ".",
-      "kind": "committed standalone runner",
-      "location": "tests/h62/item2/audit-calculus/test_bulk_inputs.py:1",
-      "path": "tests/h62/item2/audit-calculus/test_bulk_inputs.py",
-      "runner_kind": "unittest",
-      "source_blob": "e966c7b99f53e997430aa99ca965db3b33940447",
-      "source_demonstration_revision": "dfd3be8574e062c8eebb7a7a3d6dcfd12682dcab",
-      "source_only": true,
-      "validation_at_measured_revision": {
-        "command": [
-          "python3",
-          "-B",
-          "tests/h62/item2/audit-calculus/test_bulk_inputs.py"
-        ],
-        "reason": "No successful current validation is certified by this historical source-only definition; source role and command are established independently.",
-        "status": "unavailable"
-      }
-    },
-    "committed:tests/h62/item2/audit-calculus/test_census.py": {
-      "command": "python3 -B tests/h62/item2/audit-calculus/test_census.py",
-      "cwd": ".",
-      "kind": "committed standalone runner",
-      "location": "tests/h62/item2/audit-calculus/test_census.py:1",
-      "path": "tests/h62/item2/audit-calculus/test_census.py",
-      "runner_kind": "unittest",
-      "source_blob": "049292b3e1f72cd6f5ba59bb01ac4933bb5c1dd7",
-      "source_demonstration_revision": "dfd3be8574e062c8eebb7a7a3d6dcfd12682dcab",
-      "source_only": true,
-      "validation_at_measured_revision": {
-        "command": [
-          "python3",
-          "-B",
-          "tests/h62/item2/audit-calculus/test_census.py"
-        ],
-        "reason": "No successful current validation is certified by this historical source-only definition; source role and command are established independently.",
-        "status": "unavailable"
-      }
-    },
     "committed:tests/h62/item2/audit-calculus/test_frozen_recovery.py": {
       "command": "python3 -B tests/h62/item2/audit-calculus/test_frozen_recovery.py",
       "cwd": ".",
@@ -14068,26 +14028,6 @@
         "status": "unavailable"
       }
     },
-    "committed:tests/h62/item2/audit-calculus/test_handoff_index.py": {
-      "command": "python3 -B tests/h62/item2/audit-calculus/test_handoff_index.py",
-      "cwd": ".",
-      "kind": "committed standalone runner",
-      "location": "tests/h62/item2/audit-calculus/test_handoff_index.py:1",
-      "path": "tests/h62/item2/audit-calculus/test_handoff_index.py",
-      "runner_kind": "unittest",
-      "source_blob": "873df01e20af8815478c9bd3ffd5550f69624ad2",
-      "source_demonstration_revision": "dfd3be8574e062c8eebb7a7a3d6dcfd12682dcab",
-      "source_only": true,
-      "validation_at_measured_revision": {
-        "command": [
-          "python3",
-          "-B",
-          "tests/h62/item2/audit-calculus/test_handoff_index.py"
-        ],
-        "reason": "No successful current validation is certified by this historical source-only definition; source role and command are established independently.",
-        "status": "unavailable"
-      }
-    },
     "committed:tests/h62/item2/audit-calculus/test_packet_relocation.py": {
       "command": "python3 -B tests/h62/item2/audit-calculus/test_packet_relocation.py",
       "cwd": ".",
@@ -14123,46 +14063,6 @@
           "python3",
           "-B",
           "tests/h62/item2/audit-calculus/test_packet_transition.py"
-        ],
-        "reason": "No successful current validation is certified by this historical source-only definition; source role and command are established independently.",
-        "status": "unavailable"
-      }
-    },
-    "committed:tests/h62/item2/audit-calculus/test_receipts.py": {
-      "command": "python3 -B tests/h62/item2/audit-calculus/test_receipts.py",
-      "cwd": ".",
-      "kind": "committed standalone runner",
-      "location": "tests/h62/item2/audit-calculus/test_receipts.py:1",
-      "path": "tests/h62/item2/audit-calculus/test_receipts.py",
-      "runner_kind": "unittest",
-      "source_blob": "68da1e61d3c0abb61e12398ef9bb0240da55df58",
-      "source_demonstration_revision": "dfd3be8574e062c8eebb7a7a3d6dcfd12682dcab",
-      "source_only": true,
-      "validation_at_measured_revision": {
-        "command": [
-          "python3",
-          "-B",
-          "tests/h62/item2/audit-calculus/test_receipts.py"
-        ],
-        "reason": "No successful current validation is certified by this historical source-only definition; source role and command are established independently.",
-        "status": "unavailable"
-      }
-    },
-    "committed:tests/h62/item2/audit-calculus/test_reconcile.py": {
-      "command": "python3 -B tests/h62/item2/audit-calculus/test_reconcile.py",
-      "cwd": ".",
-      "kind": "committed standalone runner",
-      "location": "tests/h62/item2/audit-calculus/test_reconcile.py:1",
-      "path": "tests/h62/item2/audit-calculus/test_reconcile.py",
-      "runner_kind": "unittest",
-      "source_blob": "a10452c60df5311a27fef8722bb5e06e3f40f488",
-      "source_demonstration_revision": "dfd3be8574e062c8eebb7a7a3d6dcfd12682dcab",
-      "source_only": true,
-      "validation_at_measured_revision": {
-        "command": [
-          "python3",
-          "-B",
-          "tests/h62/item2/audit-calculus/test_reconcile.py"
         ],
         "reason": "No successful current validation is certified by this historical source-only definition; source role and command are established independently.",
         "status": "unavailable"
@@ -14280,7 +14180,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 59,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 34,
@@ -14363,7 +14263,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 55,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 31,
@@ -14430,7 +14330,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 231,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 17,
@@ -14854,7 +14754,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 183,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 23,
@@ -14972,7 +14872,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 70,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -15035,7 +14935,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 47,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 12,
@@ -15091,7 +14991,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 119,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 16,
@@ -15449,7 +15349,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 287,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 25,
@@ -15720,7 +15620,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 107,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -15811,7 +15711,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 59,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 17,
@@ -15894,7 +15794,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 38,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 13,
@@ -15957,7 +15857,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 40,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -16252,7 +16152,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 483,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 46,
@@ -16909,7 +16809,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 41,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 9,
@@ -17212,7 +17112,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 37,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 20,
@@ -17328,7 +17228,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 28,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 10,
@@ -17391,7 +17291,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 31,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 9,
@@ -17515,7 +17415,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 87,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 17,
@@ -17878,7 +17778,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 32,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 8,
@@ -17988,7 +17888,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 71,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 15,
@@ -18098,7 +17998,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 32,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 5,
@@ -18455,7 +18355,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 104,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 16,
@@ -18694,7 +18594,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 93,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 16,
@@ -18938,7 +18838,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 41,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 12,
@@ -19061,7 +18961,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 46,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 10,
@@ -19152,7 +19052,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 101,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 11,
@@ -19376,7 +19276,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 131,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 10,
@@ -19684,7 +19584,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 41,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 10,
@@ -19881,7 +19781,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 232,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 16,
@@ -20194,7 +20094,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 149,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 32,
@@ -20333,7 +20233,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 261,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 19,
@@ -20640,7 +20540,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 119,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 13,
@@ -20786,7 +20686,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 169,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -21027,7 +20927,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 116,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 35,
@@ -21269,7 +21169,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 230,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 23,
@@ -21451,7 +21351,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 63,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 25,
@@ -21527,7 +21427,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 46,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 7,
@@ -21674,7 +21574,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 136,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 14,
@@ -21765,7 +21665,7 @@
         ],
         "kind": "unittest declaration and explicit main entry",
         "main_line": 61,
-        "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+        "revision": "fa29f6465518674445c71e62a52a189285dad71e",
         "test_contexts": [
           {
             "code_firstlineno": 15,
@@ -22217,6 +22117,66 @@
       "runner_kind": "unittest",
       "source_blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b"
     },
+    "validated:tests/h62/item2/audit-calculus/test_bulk_inputs.py": {
+      "command": "python3 -B tests/h62/item2/audit-calculus/test_bulk_inputs.py",
+      "cwd": ".",
+      "data_use_scope": [],
+      "kind": "validated standalone runner",
+      "location": "tests/h62/item2/audit-calculus/test_bulk_inputs.py:1",
+      "other_reads": "unresolved",
+      "path": "tests/h62/item2/audit-calculus/test_bulk_inputs.py",
+      "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
+      "runner_kind": "unittest",
+      "source_blob": "e966c7b99f53e997430aa99ca965db3b33940447"
+    },
+    "validated:tests/h62/item2/audit-calculus/test_census.py": {
+      "command": "python3 -B tests/h62/item2/audit-calculus/test_census.py",
+      "cwd": ".",
+      "data_use_scope": [],
+      "kind": "validated standalone runner",
+      "location": "tests/h62/item2/audit-calculus/test_census.py:1",
+      "other_reads": "unresolved",
+      "path": "tests/h62/item2/audit-calculus/test_census.py",
+      "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
+      "runner_kind": "unittest",
+      "source_blob": "049292b3e1f72cd6f5ba59bb01ac4933bb5c1dd7"
+    },
+    "validated:tests/h62/item2/audit-calculus/test_handoff_index.py": {
+      "command": "python3 -B tests/h62/item2/audit-calculus/test_handoff_index.py",
+      "cwd": ".",
+      "data_use_scope": [],
+      "kind": "validated standalone runner",
+      "location": "tests/h62/item2/audit-calculus/test_handoff_index.py:1",
+      "other_reads": "unresolved",
+      "path": "tests/h62/item2/audit-calculus/test_handoff_index.py",
+      "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
+      "runner_kind": "unittest",
+      "source_blob": "873df01e20af8815478c9bd3ffd5550f69624ad2"
+    },
+    "validated:tests/h62/item2/audit-calculus/test_receipts.py": {
+      "command": "python3 -B tests/h62/item2/audit-calculus/test_receipts.py",
+      "cwd": ".",
+      "data_use_scope": [],
+      "kind": "validated standalone runner",
+      "location": "tests/h62/item2/audit-calculus/test_receipts.py:1",
+      "other_reads": "unresolved",
+      "path": "tests/h62/item2/audit-calculus/test_receipts.py",
+      "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
+      "runner_kind": "unittest",
+      "source_blob": "68da1e61d3c0abb61e12398ef9bb0240da55df58"
+    },
+    "validated:tests/h62/item2/audit-calculus/test_reconcile.py": {
+      "command": "python3 -B tests/h62/item2/audit-calculus/test_reconcile.py",
+      "cwd": ".",
+      "data_use_scope": [],
+      "kind": "validated standalone runner",
+      "location": "tests/h62/item2/audit-calculus/test_reconcile.py:1",
+      "other_reads": "unresolved",
+      "path": "tests/h62/item2/audit-calculus/test_reconcile.py",
+      "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
+      "runner_kind": "unittest",
+      "source_blob": "a10452c60df5311a27fef8722bb5e06e3f40f488"
+    },
     "vendor/LeanTeX/LeanTeX.lean": {
       "command": "lake build LeanTeX",
       "cwd": ".",
@@ -22303,7 +22263,7 @@
     }
   },
   "goal_decl": null,
-  "measured_revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+  "measured_revision": "fa29f6465518674445c71e62a52a189285dad71e",
   "policy_scans": {
     "private-paths": {
       "eligibility": "Secondary coverage only; test, runnable entry point, Lean root or fixture-specific use is required for keep",
@@ -22347,7 +22307,7 @@
         "checkpoint",
         "full"
       ],
-      "selected_scoped_paths": 5596,
+      "selected_scoped_paths": 5598,
       "selection": "All measured tracked regular blobs except the explicit path exclusion; Git grep -a treats binary bytes as text without unpacking archives.",
       "source_blobs": {
         "scripts/check-private-paths.sh": "c2aabdbdd068a861d13d382e337ee6937d911f03",
@@ -22393,7 +22353,7 @@
               "--evidence",
               "--lean"
             ],
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e"
           },
           "source_blob": "422b13e5bc7bc987e87c86cbd709078eefd0cfb3",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -22464,7 +22424,7 @@
               "--evidence",
               "--lean"
             ],
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e"
           },
           "source_blob": "682be2da2571b069f46bb3f0ae29e1f1fe03caae",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -38207,7 +38167,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 61,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 15,
@@ -38657,7 +38617,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 75,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 37,
@@ -38822,7 +38782,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 48,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 13,
@@ -39902,7 +39862,7 @@
               "--archive",
               "--commit"
             ],
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e"
           },
           "source_blob": "223e96d3fa285f4e838393e9e9afad342bc1d1fc",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -40834,7 +40794,7 @@
             "required_options": [
               "--lean"
             ],
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e"
           },
           "source_blob": "ca23eb7d445d4c99f560c70a6c5cb8b6748985c5",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -42421,7 +42381,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 34,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -42874,7 +42834,7 @@
               "--repo",
               "--source-census"
             ],
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e"
           },
           "source_blob": "7745ef63eb65f01e5dfe9835ac84bf84f1841c9d",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -43047,7 +43007,7 @@
               "--lean",
               "--repo"
             ],
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e"
           },
           "source_blob": "26a9ed6ed79d6252dbb1299b3336d8e9ad8d8fb0",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -43178,7 +43138,7 @@
             "required_options": [
               "--evidence"
             ],
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e"
           },
           "source_blob": "675133d51e0202e01e5cf4532a26996debb4371e",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -43273,7 +43233,7 @@
               "--evidence",
               "--lean"
             ],
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e"
           },
           "source_blob": "35b0e13c4ed30a28724f454e3d110ea33217b0ed",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -43333,19 +43293,55 @@
     },
     {
       "blob": "455b16030ed40dce95c200c1df86ec4f23916c35",
-      "class": null,
+      "class": "keep",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "scripts/h62/item2/audit-calculus/bulk_inputs.py",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "entered measured Python module; no fixture consumption credit at tests/h62/item2/audit-calculus/test_bulk_inputs.py:10",
       "recovery": {
         "blob": "455b16030ed40dce95c200c1df86ec4f23916c35",
         "command": "git show 80bb917ba2f26e45dc12b8d8d15528e34cba2e05:scripts/h62/item2/audit-calculus/bulk_inputs.py",
         "last_touch_commit": "80bb917ba2f26e45dc12b8d8d15528e34cba2e05"
       },
-      "runner_chain": null,
+      "runner_chain": {
+        "edges": [
+          {
+            "kind": "executes",
+            "line": 10,
+            "operation": "entered measured Python module; no fixture consumption credit",
+            "source": "tests/h62/item2/audit-calculus/test_bulk_inputs.py",
+            "target": "scripts/h62/item2/audit-calculus/bulk_inputs.py",
+            "validated_for": "validated:tests/h62/item2/audit-calculus/test_bulk_inputs.py:module:2f2306ae4472007e27f2500cce65d5ec0555ef56c1da28acf5c547eb738529fe"
+          }
+        ],
+        "entry": {
+          "command": "python3 -B tests/h62/item2/audit-calculus/test_bulk_inputs.py",
+          "cwd": ".",
+          "data_use_scope": [],
+          "derived_from": "validated:tests/h62/item2/audit-calculus/test_bulk_inputs.py",
+          "entered_module": "scripts/h62/item2/audit-calculus/bulk_inputs.py",
+          "kind": "validated standalone runner",
+          "location": "tests/h62/item2/audit-calculus/test_bulk_inputs.py:1",
+          "module_entry": {
+            "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+            "module_code_sha256": "7135b3f38e6bc07c59c6f995a53fc1ac87becf52fa52ed6d79a2fc83cde8a428",
+            "module_frame_line": 0,
+            "python": [
+              3,
+              12,
+              14
+            ]
+          },
+          "other_reads": "unresolved",
+          "path": "tests/h62/item2/audit-calculus/test_bulk_inputs.py",
+          "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
+          "runner_kind": "unittest",
+          "source_blob": "e966c7b99f53e997430aa99ca965db3b33940447"
+        },
+        "root": "validated:tests/h62/item2/audit-calculus/test_bulk_inputs.py:module:2f2306ae4472007e27f2500cce65d5ec0555ef56c1da28acf5c547eb738529fe"
+      },
       "search_candidates": [
         {
           "location": "scripts/h62/item2/audit-calculus/classify_frozen_signatures.py:15",
@@ -43385,25 +43381,59 @@
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "1e1ddc8d397522e3e60074bfb4d50cc323b50124",
-      "class": null,
+      "class": "keep",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "scripts/h62/item2/audit-calculus/census.py",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "entered measured Python module; no fixture consumption credit at tests/h62/item2/audit-calculus/test_census.py:9",
       "recovery": {
         "blob": "1e1ddc8d397522e3e60074bfb4d50cc323b50124",
         "command": "git show 9769195024f5cecbff0eff26ea573bc782c3f532:scripts/h62/item2/audit-calculus/census.py",
         "last_touch_commit": "9769195024f5cecbff0eff26ea573bc782c3f532"
       },
-      "runner_chain": null,
+      "runner_chain": {
+        "edges": [
+          {
+            "kind": "executes",
+            "line": 9,
+            "operation": "entered measured Python module; no fixture consumption credit",
+            "source": "tests/h62/item2/audit-calculus/test_census.py",
+            "target": "scripts/h62/item2/audit-calculus/census.py",
+            "validated_for": "validated:tests/h62/item2/audit-calculus/test_census.py:module:b575ca5d974e7313542c23cbc477c5810819e472ad2317ba64dab7fbee4c3aa7"
+          }
+        ],
+        "entry": {
+          "command": "python3 -B tests/h62/item2/audit-calculus/test_census.py",
+          "cwd": ".",
+          "data_use_scope": [],
+          "derived_from": "validated:tests/h62/item2/audit-calculus/test_census.py",
+          "entered_module": "scripts/h62/item2/audit-calculus/census.py",
+          "kind": "validated standalone runner",
+          "location": "tests/h62/item2/audit-calculus/test_census.py:1",
+          "module_entry": {
+            "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+            "module_code_sha256": "a43bc5dc67966270f91e34ec752aa7799a8dedf2d9145af472e7d29526b7575c",
+            "module_frame_line": 0,
+            "python": [
+              3,
+              12,
+              14
+            ]
+          },
+          "other_reads": "unresolved",
+          "path": "tests/h62/item2/audit-calculus/test_census.py",
+          "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
+          "runner_kind": "unittest",
+          "source_blob": "049292b3e1f72cd6f5ba59bb01ac4933bb5c1dd7"
+        },
+        "root": "validated:tests/h62/item2/audit-calculus/test_census.py:module:b575ca5d974e7313542c23cbc477c5810819e472ad2317ba64dab7fbee4c3aa7"
+      },
       "search_candidates": [
         {
           "location": "Solidity/Calculus/DecisionResidueReasons.lean:4",
@@ -43443,9 +43473,7 @@
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "c30794fac6a0ed8a4d1e3226e52018e4ad607a21",
@@ -43532,11 +43560,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:377",
+          "location": "docs/document-index.md:378",
           "token": "scripts/h62/item2/audit-calculus/h28-inherited-handoff/ORIGINAL-FROZEN-PROMPT.md"
         },
         {
-          "location": "docs/document-index.md:377",
+          "location": "docs/document-index.md:378",
           "token": "ORIGINAL-FROZEN-PROMPT.md"
         },
         {
@@ -43573,11 +43601,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:378",
+          "location": "docs/document-index.md:379",
           "token": "scripts/h62/item2/audit-calculus/h28-inherited-handoff/RETIREMENT.md"
         },
         {
-          "location": "docs/document-index.md:378",
+          "location": "docs/document-index.md:379",
           "token": "RETIREMENT.md"
         },
         {
@@ -43683,11 +43711,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:379",
+          "location": "docs/document-index.md:380",
           "token": "scripts/h62/item2/audit-calculus/h28-inherited-handoff/STEERING.md"
         },
         {
-          "location": "docs/document-index.md:379",
+          "location": "docs/document-index.md:380",
           "token": "STEERING.md"
         },
         {
@@ -43740,11 +43768,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:380",
+          "location": "docs/document-index.md:381",
           "token": "scripts/h62/item2/audit-calculus/h28-inherited-handoff/WORK-AND-BACKFILL-QUEUE.md"
         },
         {
-          "location": "docs/document-index.md:380",
+          "location": "docs/document-index.md:381",
           "token": "WORK-AND-BACKFILL-QUEUE.md"
         },
         {
@@ -43782,19 +43810,55 @@
     },
     {
       "blob": "db6b945340c15546194c227b25f8924e334b0ddf",
-      "class": null,
+      "class": "keep",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "scripts/h62/item2/audit-calculus/handoff_index.py",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "entered measured Python module; no fixture consumption credit at tests/h62/item2/audit-calculus/test_handoff_index.py:12",
       "recovery": {
         "blob": "db6b945340c15546194c227b25f8924e334b0ddf",
         "command": "git show c857aa2e0f484a5578a47ab4988fdd94d3115ee4:scripts/h62/item2/audit-calculus/handoff_index.py",
         "last_touch_commit": "c857aa2e0f484a5578a47ab4988fdd94d3115ee4"
       },
-      "runner_chain": null,
+      "runner_chain": {
+        "edges": [
+          {
+            "kind": "executes",
+            "line": 12,
+            "operation": "entered measured Python module; no fixture consumption credit",
+            "source": "tests/h62/item2/audit-calculus/test_handoff_index.py",
+            "target": "scripts/h62/item2/audit-calculus/handoff_index.py",
+            "validated_for": "validated:tests/h62/item2/audit-calculus/test_handoff_index.py:module:31026c2deca55d23606678275f1cdafe7241db05bc7c0f6b9aa5694299909232"
+          }
+        ],
+        "entry": {
+          "command": "python3 -B tests/h62/item2/audit-calculus/test_handoff_index.py",
+          "cwd": ".",
+          "data_use_scope": [],
+          "derived_from": "validated:tests/h62/item2/audit-calculus/test_handoff_index.py",
+          "entered_module": "scripts/h62/item2/audit-calculus/handoff_index.py",
+          "kind": "validated standalone runner",
+          "location": "tests/h62/item2/audit-calculus/test_handoff_index.py:1",
+          "module_entry": {
+            "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+            "module_code_sha256": "d0f2ada9fe4de9a2cd59096d45d19f75750e85b349309b1c0d13f0ae6b3af1ad",
+            "module_frame_line": 0,
+            "python": [
+              3,
+              12,
+              14
+            ]
+          },
+          "other_reads": "unresolved",
+          "path": "tests/h62/item2/audit-calculus/test_handoff_index.py",
+          "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
+          "runner_kind": "unittest",
+          "source_blob": "873df01e20af8815478c9bd3ffd5550f69624ad2"
+        },
+        "root": "validated:tests/h62/item2/audit-calculus/test_handoff_index.py:module:31026c2deca55d23606678275f1cdafe7241db05bc7c0f6b9aa5694299909232"
+      },
       "search_candidates": [
         {
           "location": "docs/feature-work/h62-2-audit-calculus.md:1484",
@@ -43814,9 +43878,7 @@
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "c471b8400bc553a8bd554c3b335bb6074bfc9a33",
@@ -43878,19 +43940,55 @@
     },
     {
       "blob": "133d53e56e924f86609fa98451cac11e25d46632",
-      "class": null,
+      "class": "keep",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "scripts/h62/item2/audit-calculus/receipts.py",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "entered measured Python module; no fixture consumption credit at tests/h62/item2/audit-calculus/test_receipts.py:11",
       "recovery": {
         "blob": "133d53e56e924f86609fa98451cac11e25d46632",
         "command": "git show c361178f68f34c276a02b15691cd726aaa85a51e:scripts/h62/item2/audit-calculus/receipts.py",
         "last_touch_commit": "c361178f68f34c276a02b15691cd726aaa85a51e"
       },
-      "runner_chain": null,
+      "runner_chain": {
+        "edges": [
+          {
+            "kind": "executes",
+            "line": 11,
+            "operation": "entered measured Python module; no fixture consumption credit",
+            "source": "tests/h62/item2/audit-calculus/test_receipts.py",
+            "target": "scripts/h62/item2/audit-calculus/receipts.py",
+            "validated_for": "validated:tests/h62/item2/audit-calculus/test_receipts.py:module:4cabfaad54d62bce944f451ffd34d814f5725c81cec60b6dcf608522b52ba2aa"
+          }
+        ],
+        "entry": {
+          "command": "python3 -B tests/h62/item2/audit-calculus/test_receipts.py",
+          "cwd": ".",
+          "data_use_scope": [],
+          "derived_from": "validated:tests/h62/item2/audit-calculus/test_receipts.py",
+          "entered_module": "scripts/h62/item2/audit-calculus/receipts.py",
+          "kind": "validated standalone runner",
+          "location": "tests/h62/item2/audit-calculus/test_receipts.py:1",
+          "module_entry": {
+            "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+            "module_code_sha256": "425908f61a6cefd46cdac04167b2650fdacb03e2a91fd42798e5e1e1e17bb099",
+            "module_frame_line": 0,
+            "python": [
+              3,
+              12,
+              14
+            ]
+          },
+          "other_reads": "unresolved",
+          "path": "tests/h62/item2/audit-calculus/test_receipts.py",
+          "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
+          "runner_kind": "unittest",
+          "source_blob": "68da1e61d3c0abb61e12398ef9bb0240da55df58"
+        },
+        "root": "validated:tests/h62/item2/audit-calculus/test_receipts.py:module:4cabfaad54d62bce944f451ffd34d814f5725c81cec60b6dcf608522b52ba2aa"
+      },
       "search_candidates": [
         {
           "location": "Bridge/SolidityBridge/HashBridge/Prefix.lean:5",
@@ -43930,25 +44028,59 @@
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "07a6e65fd652db2b8fb6f310c881ed6a6003d1c1",
-      "class": null,
+      "class": "keep",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "scripts/h62/item2/audit-calculus/reconcile.py",
-      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "reason": "entered measured Python module; no fixture consumption credit at tests/h62/item2/audit-calculus/test_reconcile.py:10",
       "recovery": {
         "blob": "07a6e65fd652db2b8fb6f310c881ed6a6003d1c1",
         "command": "git show c361178f68f34c276a02b15691cd726aaa85a51e:scripts/h62/item2/audit-calculus/reconcile.py",
         "last_touch_commit": "c361178f68f34c276a02b15691cd726aaa85a51e"
       },
-      "runner_chain": null,
+      "runner_chain": {
+        "edges": [
+          {
+            "kind": "executes",
+            "line": 10,
+            "operation": "entered measured Python module; no fixture consumption credit",
+            "source": "tests/h62/item2/audit-calculus/test_reconcile.py",
+            "target": "scripts/h62/item2/audit-calculus/reconcile.py",
+            "validated_for": "validated:tests/h62/item2/audit-calculus/test_reconcile.py:module:905c0b512559f35e683163a227dedc84c6be71a5003504ad6aee51bff7514fe3"
+          }
+        ],
+        "entry": {
+          "command": "python3 -B tests/h62/item2/audit-calculus/test_reconcile.py",
+          "cwd": ".",
+          "data_use_scope": [],
+          "derived_from": "validated:tests/h62/item2/audit-calculus/test_reconcile.py",
+          "entered_module": "scripts/h62/item2/audit-calculus/reconcile.py",
+          "kind": "validated standalone runner",
+          "location": "tests/h62/item2/audit-calculus/test_reconcile.py:1",
+          "module_entry": {
+            "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
+            "module_code_sha256": "338b780ab69d443aeb5a7063c6f70dc6f4b423a496c31a8c02a457c25c3912c2",
+            "module_frame_line": 0,
+            "python": [
+              3,
+              12,
+              14
+            ]
+          },
+          "other_reads": "unresolved",
+          "path": "tests/h62/item2/audit-calculus/test_reconcile.py",
+          "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
+          "runner_kind": "unittest",
+          "source_blob": "a10452c60df5311a27fef8722bb5e06e3f40f488"
+        },
+        "root": "validated:tests/h62/item2/audit-calculus/test_reconcile.py:module:905c0b512559f35e683163a227dedc84c6be71a5003504ad6aee51bff7514fe3"
+      },
       "search_candidates": [
         {
           "location": "Solidity/Semantics/CreationTryFrame.lean:189",
@@ -43988,9 +44120,7 @@
           "private-paths"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "7a2921eb598fec62e51556b369de1c6292fa83d6",
@@ -46794,7 +46924,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-language/test_source_roles.py",
             "target": "scripts/h62/item2/audit-language/census.py",
-            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:ea01792226ba072bf4d6477ad983dfb914399c9a8df39bf50ff42f6e9cddd9a4"
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:bd50c9b44d94133da103b38b8909354ad65b9dbe0f671e286e8677dda9ad1071"
           }
         ],
         "entry": {
@@ -46806,7 +46936,7 @@
           "kind": "validated standalone runner",
           "location": "scripts/h62/item2/audit-language/test_source_roles.py:1",
           "module_entry": {
-            "collector_sha256": "42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32",
+            "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
             "module_code_sha256": "3c9dab57f2b08e4b1c1ef7ae59a1642c25c41d47d0b2686eca7329eb5249e64c",
             "module_frame_line": 0,
             "python": [
@@ -46821,7 +46951,7 @@
           "runner_kind": "unittest",
           "source_blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926"
         },
-        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:ea01792226ba072bf4d6477ad983dfb914399c9a8df39bf50ff42f6e9cddd9a4"
+        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:bd50c9b44d94133da103b38b8909354ad65b9dbe0f671e286e8677dda9ad1071"
       },
       "search_candidates": [
         {
@@ -46969,7 +47099,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-language/test_source_roles.py",
             "target": "scripts/h62/item2/audit-language/source_roles.py",
-            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:fa7b2c882bed18c70df65d8d2d3dbfb0dfbdb073d34c1bb6434c785270247c3a"
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:9152703ea4e7a4d9179a33e577545f513a66c2bc01d484317a1df241617a0066"
           },
           {
             "kind": "executes",
@@ -46977,7 +47107,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-language/source_roles.py",
             "target": "scripts/h62/item2/audit-language/classify.py",
-            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:fa7b2c882bed18c70df65d8d2d3dbfb0dfbdb073d34c1bb6434c785270247c3a"
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:9152703ea4e7a4d9179a33e577545f513a66c2bc01d484317a1df241617a0066"
           }
         ],
         "entry": {
@@ -46989,7 +47119,7 @@
           "kind": "validated standalone runner",
           "location": "scripts/h62/item2/audit-language/test_source_roles.py:1",
           "module_entry": {
-            "collector_sha256": "42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32",
+            "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
             "module_code_sha256": "8acba24c7c56cb172436b3f4fe76d154345f55d91c051b45041445bf0a5f2c9a",
             "module_frame_line": 0,
             "python": [
@@ -47004,7 +47134,7 @@
           "runner_kind": "unittest",
           "source_blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926"
         },
-        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:fa7b2c882bed18c70df65d8d2d3dbfb0dfbdb073d34c1bb6434c785270247c3a"
+        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:9152703ea4e7a4d9179a33e577545f513a66c2bc01d484317a1df241617a0066"
       },
       "search_candidates": [
         {
@@ -47294,7 +47424,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-language/test_source_roles.py",
             "target": "scripts/h62/item2/audit-language/test_source_roles.py",
-            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:74ae8f4a054e2442a07625b584eb264b461251e857810bf82a03a874afa44cf5"
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:c904cc2dd0cb7be20549ec7c89ce0890e978e6f5beaac5bdc37eda3858ac37ea"
           },
           {
             "kind": "executes",
@@ -47302,7 +47432,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-language/test_source_roles.py",
             "target": "scripts/h62/item2/audit-language/test_source_roles.py",
-            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:74ae8f4a054e2442a07625b584eb264b461251e857810bf82a03a874afa44cf5"
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:c904cc2dd0cb7be20549ec7c89ce0890e978e6f5beaac5bdc37eda3858ac37ea"
           },
           {
             "kind": "executes",
@@ -47310,7 +47440,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-language/test_source_roles.py",
             "target": "scripts/h62/item2/audit-language/refine_remaining.py",
-            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:74ae8f4a054e2442a07625b584eb264b461251e857810bf82a03a874afa44cf5"
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:c904cc2dd0cb7be20549ec7c89ce0890e978e6f5beaac5bdc37eda3858ac37ea"
           }
         ],
         "entry": {
@@ -47322,7 +47452,7 @@
           "kind": "validated standalone runner",
           "location": "scripts/h62/item2/audit-language/test_source_roles.py:1",
           "module_entry": {
-            "collector_sha256": "42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32",
+            "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
             "module_code_sha256": "519d68966a1881a691cbc26c44ad28ab9ff1051400da5e82d6db5acba2b8bb0b",
             "module_frame_line": 0,
             "python": [
@@ -47337,7 +47467,7 @@
           "runner_kind": "unittest",
           "source_blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926"
         },
-        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:74ae8f4a054e2442a07625b584eb264b461251e857810bf82a03a874afa44cf5"
+        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:c904cc2dd0cb7be20549ec7c89ce0890e978e6f5beaac5bdc37eda3858ac37ea"
       },
       "search_candidates": [
         {
@@ -47530,7 +47660,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-language/test_source_roles.py",
             "target": "scripts/h62/item2/audit-language/source_roles.py",
-            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:2734ce2288976041f8123eb7e68c0ceedd64b31db0f3eacb1f13444b8197685c"
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:6c7ce8548d2930a89ac615d4c2edd74210f5358b10c6f6d1575ee91f6a3c271b"
           },
           {
             "kind": "executes",
@@ -47538,7 +47668,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-language/source_roles.py",
             "target": "scripts/h62/item2/audit-language/source_only.py",
-            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:2734ce2288976041f8123eb7e68c0ceedd64b31db0f3eacb1f13444b8197685c"
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:6c7ce8548d2930a89ac615d4c2edd74210f5358b10c6f6d1575ee91f6a3c271b"
           }
         ],
         "entry": {
@@ -47550,7 +47680,7 @@
           "kind": "validated standalone runner",
           "location": "scripts/h62/item2/audit-language/test_source_roles.py:1",
           "module_entry": {
-            "collector_sha256": "42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32",
+            "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
             "module_code_sha256": "9f12554fc73a2fb7ceeff79ac873f2554a1c307bcd07861ce4b9e61e1179f7ea",
             "module_frame_line": 0,
             "python": [
@@ -47565,7 +47695,7 @@
           "runner_kind": "unittest",
           "source_blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926"
         },
-        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:2734ce2288976041f8123eb7e68c0ceedd64b31db0f3eacb1f13444b8197685c"
+        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:6c7ce8548d2930a89ac615d4c2edd74210f5358b10c6f6d1575ee91f6a3c271b"
       },
       "search_candidates": [
         {
@@ -47610,7 +47740,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "scripts/h62/item2/audit-language/test_source_roles.py",
             "target": "scripts/h62/item2/audit-language/source_roles.py",
-            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:fa7b2c882bed18c70df65d8d2d3dbfb0dfbdb073d34c1bb6434c785270247c3a"
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:9152703ea4e7a4d9179a33e577545f513a66c2bc01d484317a1df241617a0066"
           }
         ],
         "entry": {
@@ -47622,7 +47752,7 @@
           "kind": "validated standalone runner",
           "location": "scripts/h62/item2/audit-language/test_source_roles.py:1",
           "module_entry": {
-            "collector_sha256": "42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32",
+            "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
             "module_code_sha256": "8acba24c7c56cb172436b3f4fe76d154345f55d91c051b45041445bf0a5f2c9a",
             "module_frame_line": 0,
             "python": [
@@ -47637,7 +47767,7 @@
           "runner_kind": "unittest",
           "source_blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926"
         },
-        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:fa7b2c882bed18c70df65d8d2d3dbfb0dfbdb073d34c1bb6434c785270247c3a"
+        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:9152703ea4e7a4d9179a33e577545f513a66c2bc01d484317a1df241617a0066"
       },
       "search_candidates": [
         {
@@ -49003,7 +49133,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 45,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 7,
@@ -49146,7 +49276,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 31,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 7,
@@ -49269,7 +49399,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 94,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 8,
@@ -49470,7 +49600,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 78,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 7,
@@ -52150,7 +52280,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 101,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 17,
@@ -52387,7 +52517,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 49,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 13,
@@ -52476,7 +52606,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 38,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 11,
@@ -52788,7 +52918,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 49,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 13,
@@ -52878,7 +53008,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 89,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 16,
@@ -53186,7 +53316,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 27,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 9,
@@ -53353,7 +53483,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 77,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 18,
@@ -54406,7 +54536,7 @@
             "required_options": [
               "--evidence"
             ],
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e"
           },
           "source_blob": "a50f657e2df51efe2d0049a0c944d47cebce4bb3",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -54562,7 +54692,7 @@
               "--archive",
               "--out"
             ],
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e"
           },
           "source_blob": "b4d93269d25d1effa9e943a6cba3f63c88ffd4a6",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -54716,7 +54846,7 @@
             "required_options": [
               "--evidence"
             ],
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e"
           },
           "source_blob": "a264dd0c7435a8b5f6e2a1c4bb37a34abafbe980",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -54906,11 +55036,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:381",
+          "location": "docs/document-index.md:382",
           "token": "scripts/h62/item2/audit-theories/handoff/ACCEPTANCE-REFRESH-20261108.md"
         },
         {
-          "location": "docs/document-index.md:381",
+          "location": "docs/document-index.md:382",
           "token": "ACCEPTANCE-REFRESH-20261108.md"
         },
         {
@@ -54955,11 +55085,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:382",
+          "location": "docs/document-index.md:383",
           "token": "scripts/h62/item2/audit-theories/handoff/CERTIFICATE-BINDING-FIX-20261107.md"
         },
         {
-          "location": "docs/document-index.md:382",
+          "location": "docs/document-index.md:383",
           "token": "CERTIFICATE-BINDING-FIX-20261107.md"
         },
         {
@@ -55004,11 +55134,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:383",
+          "location": "docs/document-index.md:384",
           "token": "scripts/h62/item2/audit-theories/handoff/CLEAN-TAIL-20261108.md"
         },
         {
-          "location": "docs/document-index.md:383",
+          "location": "docs/document-index.md:384",
           "token": "CLEAN-TAIL-20261108.md"
         },
         {
@@ -55053,11 +55183,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:384",
+          "location": "docs/document-index.md:385",
           "token": "scripts/h62/item2/audit-theories/handoff/CLEAN-TAIL-ROLES-20261108.md"
         },
         {
-          "location": "docs/document-index.md:384",
+          "location": "docs/document-index.md:385",
           "token": "CLEAN-TAIL-ROLES-20261108.md"
         },
         {
@@ -55102,11 +55232,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:385",
+          "location": "docs/document-index.md:386",
           "token": "scripts/h62/item2/audit-theories/handoff/CONFLICT-RESOLUTION-20261108.md"
         },
         {
-          "location": "docs/document-index.md:385",
+          "location": "docs/document-index.md:386",
           "token": "CONFLICT-RESOLUTION-20261108.md"
         },
         {
@@ -55273,11 +55403,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:386",
+          "location": "docs/document-index.md:387",
           "token": "scripts/h62/item2/audit-theories/handoff/FROZEN-REBUILD-20261108.md"
         },
         {
-          "location": "docs/document-index.md:386",
+          "location": "docs/document-index.md:387",
           "token": "FROZEN-REBUILD-20261108.md"
         },
         {
@@ -55322,11 +55452,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:387",
+          "location": "docs/document-index.md:388",
           "token": "scripts/h62/item2/audit-theories/handoff/LEAF-ACCEPTANCE-20261108.md"
         },
         {
-          "location": "docs/document-index.md:387",
+          "location": "docs/document-index.md:388",
           "token": "LEAF-ACCEPTANCE-20261108.md"
         },
         {
@@ -55371,11 +55501,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:388",
+          "location": "docs/document-index.md:389",
           "token": "scripts/h62/item2/audit-theories/handoff/LEAF-PROGRESS-20261108.md"
         },
         {
-          "location": "docs/document-index.md:388",
+          "location": "docs/document-index.md:389",
           "token": "LEAF-PROGRESS-20261108.md"
         },
         {
@@ -55420,11 +55550,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:389",
+          "location": "docs/document-index.md:390",
           "token": "scripts/h62/item2/audit-theories/handoff/LEAF-ROLES-20261108.md"
         },
         {
-          "location": "docs/document-index.md:389",
+          "location": "docs/document-index.md:390",
           "token": "LEAF-ROLES-20261108.md"
         },
         {
@@ -55469,11 +55599,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:390",
+          "location": "docs/document-index.md:391",
           "token": "scripts/h62/item2/audit-theories/handoff/MIRROR-ROLES-20261108.md"
         },
         {
-          "location": "docs/document-index.md:390",
+          "location": "docs/document-index.md:391",
           "token": "MIRROR-ROLES-20261108.md"
         },
         {
@@ -55518,11 +55648,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:391",
+          "location": "docs/document-index.md:392",
           "token": "scripts/h62/item2/audit-theories/handoff/MODE-ACCEPTANCE-20261108.md"
         },
         {
-          "location": "docs/document-index.md:391",
+          "location": "docs/document-index.md:392",
           "token": "MODE-ACCEPTANCE-20261108.md"
         },
         {
@@ -55567,11 +55697,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:392",
+          "location": "docs/document-index.md:393",
           "token": "scripts/h62/item2/audit-theories/handoff/OBSERVATION-DOMAINS-20261108.md"
         },
         {
-          "location": "docs/document-index.md:392",
+          "location": "docs/document-index.md:393",
           "token": "OBSERVATION-DOMAINS-20261108.md"
         },
         {
@@ -55616,11 +55746,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:393",
+          "location": "docs/document-index.md:394",
           "token": "scripts/h62/item2/audit-theories/handoff/OPEN-QUEUE.md"
         },
         {
-          "location": "docs/document-index.md:393",
+          "location": "docs/document-index.md:394",
           "token": "OPEN-QUEUE.md"
         },
         {
@@ -55669,11 +55799,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:394",
+          "location": "docs/document-index.md:395",
           "token": "scripts/h62/item2/audit-theories/handoff/PATH-ROLES-20261108.md"
         },
         {
-          "location": "docs/document-index.md:394",
+          "location": "docs/document-index.md:395",
           "token": "PATH-ROLES-20261108.md"
         },
         {
@@ -55718,11 +55848,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:395",
+          "location": "docs/document-index.md:396",
           "token": "scripts/h62/item2/audit-theories/handoff/REACHABLE-MODE-20261108.md"
         },
         {
-          "location": "docs/document-index.md:395",
+          "location": "docs/document-index.md:396",
           "token": "REACHABLE-MODE-20261108.md"
         },
         {
@@ -55767,11 +55897,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:396",
+          "location": "docs/document-index.md:397",
           "token": "scripts/h62/item2/audit-theories/handoff/REACHABLE-MODE-ROLES-20261108.md"
         },
         {
-          "location": "docs/document-index.md:396",
+          "location": "docs/document-index.md:397",
           "token": "REACHABLE-MODE-ROLES-20261108.md"
         },
         {
@@ -55873,11 +56003,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:397",
+          "location": "docs/document-index.md:398",
           "token": "scripts/h62/item2/audit-theories/handoff/TUPLE-PROGRESS-20261108.md"
         },
         {
-          "location": "docs/document-index.md:397",
+          "location": "docs/document-index.md:398",
           "token": "TUPLE-PROGRESS-20261108.md"
         }
       ],
@@ -55906,11 +56036,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:398",
+          "location": "docs/document-index.md:399",
           "token": "scripts/h62/item2/audit-theories/handoff/TUPLE-ROLES-20261108.md"
         },
         {
-          "location": "docs/document-index.md:398",
+          "location": "docs/document-index.md:399",
           "token": "TUPLE-ROLES-20261108.md"
         }
       ],
@@ -55939,11 +56069,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:399",
+          "location": "docs/document-index.md:400",
           "token": "scripts/h62/item2/audit-theories/handoff/TUPLE-VERIFICATION-20261108.md"
         },
         {
-          "location": "docs/document-index.md:399",
+          "location": "docs/document-index.md:400",
           "token": "TUPLE-VERIFICATION-20261108.md"
         }
       ],
@@ -56005,11 +56135,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:400",
+          "location": "docs/document-index.md:401",
           "token": "scripts/h62/item2/audit-theories/handoff/original-work-and-backfill-queue.md"
         },
         {
-          "location": "docs/document-index.md:400",
+          "location": "docs/document-index.md:401",
           "token": "original-work-and-backfill-queue.md"
         },
         {
@@ -56889,7 +57019,7 @@
               "--lean",
               "--out"
             ],
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e"
           },
           "source_blob": "766c1e39caab15fa028423e025bf4c7e0661fdd9",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -57425,7 +57555,7 @@
             "required_options": [
               "--evidence"
             ],
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e"
           },
           "source_blob": "a725519cebe318902b7caf85768063fb0b8c191a",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -57506,7 +57636,7 @@
             "required_options": [
               "--evidence"
             ],
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e"
           },
           "source_blob": "73b309b26c3d796f34be8f9476421d7f1dfcac62",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -57577,7 +57707,7 @@
               "--evidence",
               "--module"
             ],
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e"
           },
           "source_blob": "90e9500177b9bbd54633f0fef42e3caf165a429d",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -57646,7 +57776,7 @@
             "required_options": [
               "--evidence"
             ],
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e"
           },
           "source_blob": "d377f90debd83512fd4fc3f0a94400fffdf67f12",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -59257,7 +59387,7 @@
               "--output",
               "--toolchain"
             ],
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e"
           },
           "source_blob": "40b7b173d0f683039f55497c1d36b20dcfd70116",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -60070,7 +60200,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 77,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -62454,7 +62584,7 @@
               "--frozen",
               "--output"
             ],
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e"
           },
           "source_blob": "2d795e6b300c40e1fe4924f04ad7a9e4b2ba4df8",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -62686,7 +62816,7 @@
               "--evidence",
               "--toolchain"
             ],
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e"
           },
           "source_blob": "51652ca513e21150f4c49c49505dc64a5bb8c12d",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -62838,7 +62968,7 @@
             "required_options": [
               "--inventory"
             ],
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e"
           },
           "source_blob": "b0d1b50765bf744a5a53cd026695999fb3e6f1c3",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -62931,7 +63061,7 @@
             "required_options": [
               "--evidence"
             ],
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e"
           },
           "source_blob": "f08074788981d2635375dcd531c34621ab29faa8",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -63426,7 +63556,7 @@
               "--inventory",
               "--output"
             ],
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e"
           },
           "source_blob": "5524cbec706ee5732ddcb15feb808a66cfd13421",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -64225,7 +64355,7 @@
               "--inventory",
               "--output"
             ],
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e"
           },
           "source_blob": "35a5868915fc8b3b1818e2e042a5748df899b9f3",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -65319,7 +65449,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 21,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 6,
@@ -65807,7 +65937,7 @@
             "required_options": [
               "--output"
             ],
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e"
           },
           "source_blob": "fc0b06fef2af5c7db8bf451b5b61ae7314ff3343",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -65958,7 +66088,7 @@
             "required_options": [
               "--output"
             ],
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e"
           },
           "source_blob": "5416c212d266a6105db8ac41b4f8d3af26de26ee",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -66218,7 +66348,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 87,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 13,
@@ -68028,7 +68158,7 @@
               "--lean-bin",
               "--pin"
             ],
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e"
           },
           "source_blob": "15143c90ceead4c5d8f57c1cfa95bed521650358",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -68300,7 +68430,7 @@
               "--lean-bin",
               "--pin"
             ],
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72"
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e"
           },
           "source_blob": "5568f8e28a28f5daf777efa0c5c7976f2b413a54",
           "source_demonstration_revision": "9990777843ea8e47fe455c8815bfbac159504abb",
@@ -100614,7 +100744,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 44,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -101890,7 +102020,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 60,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 16,
@@ -102341,7 +102471,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 39,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 11,
@@ -103386,7 +103516,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 19,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 10,
@@ -103491,7 +103621,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 71,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 21,
@@ -105577,6 +105707,36 @@
       ]
     },
     {
+      "blob": "79eea2bd8828f3f70297ef309a6bc77c9a3d7492",
+      "class": null,
+      "generator": null,
+      "mode": "100644",
+      "object_type": "blob",
+      "orphan_analysis": null,
+      "path": "tests/fullscope-20261104/vo1/UnusedFunctionsControls.lean",
+      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "recovery": {
+        "blob": "79eea2bd8828f3f70297ef309a6bc77c9a3d7492",
+        "command": "git show 095600aaf41548260eb2a9b95e63dbb2d1eefb39:tests/fullscope-20261104/vo1/UnusedFunctionsControls.lean",
+        "last_touch_commit": "095600aaf41548260eb2a9b95e63dbb2d1eefb39"
+      },
+      "runner_chain": null,
+      "search_candidates": [
+        {
+          "location": "tests/fullscope-20261104/vo1/unused-functions-registration.md:21",
+          "token": "tests/fullscope-20261104/vo1/UnusedFunctionsControls.lean"
+        }
+      ],
+      "secondary": {
+        "policy_scans": [
+          "private-paths"
+        ]
+      },
+      "unresolved": [
+        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
+      ]
+    },
+    {
       "blob": "1d852736af54cfe5d954829fe9b60333ffe4708e",
       "class": null,
       "generator": null,
@@ -105907,6 +106067,44 @@
         {
           "location": "scripts/h62/item6/migrate-optimizer/measure.py:55",
           "token": "runtime.toml"
+        }
+      ],
+      "secondary": {
+        "policy_scans": [
+          "private-paths"
+        ]
+      },
+      "unresolved": [
+        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use"
+      ]
+    },
+    {
+      "blob": "a4c63230d18e5e553641f91596c97c02396e3a20",
+      "class": null,
+      "generator": null,
+      "mode": "100644",
+      "object_type": "blob",
+      "orphan_analysis": null,
+      "path": "tests/fullscope-20261104/vo1/unused-functions-registration.md",
+      "reason": "No certified consumer or content-based historical role in the current model; further runner/dynamic-path analysis required.",
+      "recovery": {
+        "blob": "a4c63230d18e5e553641f91596c97c02396e3a20",
+        "command": "git show 19a88b89a7a8a67a78fc97f02e1a98ac9f88be07:tests/fullscope-20261104/vo1/unused-functions-registration.md",
+        "last_touch_commit": "19a88b89a7a8a67a78fc97f02e1a98ac9f88be07"
+      },
+      "runner_chain": null,
+      "search_candidates": [
+        {
+          "location": "docs/document-index.md:332",
+          "token": "tests/fullscope-20261104/vo1/unused-functions-registration.md"
+        },
+        {
+          "location": "docs/document-index.md:332",
+          "token": "unused-functions-registration.md"
+        },
+        {
+          "location": "docs/feature-work/fullscope-vo1.md:15",
+          "token": "tests/fullscope-20261104/vo1/unused-functions-registration.md"
         }
       ],
       "secondary": {
@@ -114963,7 +115161,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/test_runner.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:43f70bca8ab896babb8626e753f8f5a24620e0d626da5b504575b05c41d0d810"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:a9839062bf96f78df1ae8eb2de3eff1ee0baac505107aa7f740768d469f21802"
           },
           {
             "kind": "executes",
@@ -114971,7 +115169,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/runner.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:43f70bca8ab896babb8626e753f8f5a24620e0d626da5b504575b05c41d0d810"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:a9839062bf96f78df1ae8eb2de3eff1ee0baac505107aa7f740768d469f21802"
           },
           {
             "kind": "executes",
@@ -114979,7 +115177,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/engine.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:43f70bca8ab896babb8626e753f8f5a24620e0d626da5b504575b05c41d0d810"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:a9839062bf96f78df1ae8eb2de3eff1ee0baac505107aa7f740768d469f21802"
           },
           {
             "kind": "executes",
@@ -114987,7 +115185,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/engine.py",
             "target": "tests/h28-sol/mutation-testing/tools/bounded.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:43f70bca8ab896babb8626e753f8f5a24620e0d626da5b504575b05c41d0d810"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:a9839062bf96f78df1ae8eb2de3eff1ee0baac505107aa7f740768d469f21802"
           }
         ],
         "entry": {
@@ -114999,7 +115197,7 @@
           "kind": "validated standalone runner",
           "location": "tests/h28-sol/mutation-testing/tools/test_runner.py:1",
           "module_entry": {
-            "collector_sha256": "42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32",
+            "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
             "module_code_sha256": "d3db9845891f91c12418fef91b46c1311ea7838b272d6472668a879e86ca1613",
             "module_frame_line": 0,
             "python": [
@@ -115014,7 +115212,7 @@
           "runner_kind": "unittest",
           "source_blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b"
         },
-        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:43f70bca8ab896babb8626e753f8f5a24620e0d626da5b504575b05c41d0d810"
+        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:a9839062bf96f78df1ae8eb2de3eff1ee0baac505107aa7f740768d469f21802"
       },
       "search_candidates": [
         {
@@ -115137,7 +115335,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/test_runner.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:fdb58115485f501b8ea6bf3cca29441082947177cf53bf9c027629e22b22f197"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:0cbf9134b10fde24cf3364ae75b5b406442498bd3bdff73ea1b0ea04e5c4f164"
           },
           {
             "kind": "executes",
@@ -115145,7 +115343,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/runner.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:fdb58115485f501b8ea6bf3cca29441082947177cf53bf9c027629e22b22f197"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:0cbf9134b10fde24cf3364ae75b5b406442498bd3bdff73ea1b0ea04e5c4f164"
           },
           {
             "kind": "executes",
@@ -115153,7 +115351,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/engine.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:fdb58115485f501b8ea6bf3cca29441082947177cf53bf9c027629e22b22f197"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:0cbf9134b10fde24cf3364ae75b5b406442498bd3bdff73ea1b0ea04e5c4f164"
           },
           {
             "kind": "executes",
@@ -115161,7 +115359,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/engine.py",
             "target": "tests/h28-sol/mutation-testing/tools/bulk_inputs.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:fdb58115485f501b8ea6bf3cca29441082947177cf53bf9c027629e22b22f197"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:0cbf9134b10fde24cf3364ae75b5b406442498bd3bdff73ea1b0ea04e5c4f164"
           }
         ],
         "entry": {
@@ -115173,7 +115371,7 @@
           "kind": "validated standalone runner",
           "location": "tests/h28-sol/mutation-testing/tools/test_runner.py:1",
           "module_entry": {
-            "collector_sha256": "42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32",
+            "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
             "module_code_sha256": "a396c3a66e1107de068565d8ec41c562455a583fa0112356138e2e46df2fe365",
             "module_frame_line": 0,
             "python": [
@@ -115188,7 +115386,7 @@
           "runner_kind": "unittest",
           "source_blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b"
         },
-        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:fdb58115485f501b8ea6bf3cca29441082947177cf53bf9c027629e22b22f197"
+        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:0cbf9134b10fde24cf3364ae75b5b406442498bd3bdff73ea1b0ea04e5c4f164"
       },
       "search_candidates": [
         {
@@ -115371,7 +115569,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/test_runner.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:dbec992b7b0f8f7c88cf6d16071781013de5971708fe3d7e23c7331dcfa8f59a"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:653f1438602f4cd55b5991105ec0a7f1280a85be64b2ab940e61223e40aa1d1d"
           },
           {
             "kind": "executes",
@@ -115379,7 +115577,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/runner.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:dbec992b7b0f8f7c88cf6d16071781013de5971708fe3d7e23c7331dcfa8f59a"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:653f1438602f4cd55b5991105ec0a7f1280a85be64b2ab940e61223e40aa1d1d"
           },
           {
             "kind": "executes",
@@ -115387,7 +115585,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/engine.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:dbec992b7b0f8f7c88cf6d16071781013de5971708fe3d7e23c7331dcfa8f59a"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:653f1438602f4cd55b5991105ec0a7f1280a85be64b2ab940e61223e40aa1d1d"
           },
           {
             "kind": "executes",
@@ -115395,7 +115593,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/engine.py",
             "target": "tests/h28-sol/mutation-testing/tools/checked.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:dbec992b7b0f8f7c88cf6d16071781013de5971708fe3d7e23c7331dcfa8f59a"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:653f1438602f4cd55b5991105ec0a7f1280a85be64b2ab940e61223e40aa1d1d"
           }
         ],
         "entry": {
@@ -115407,7 +115605,7 @@
           "kind": "validated standalone runner",
           "location": "tests/h28-sol/mutation-testing/tools/test_runner.py:1",
           "module_entry": {
-            "collector_sha256": "42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32",
+            "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
             "module_code_sha256": "331208f5ac291e382f76585bd634032b670c0904e7a4bd89a3bc49009a5c0523",
             "module_frame_line": 0,
             "python": [
@@ -115422,7 +115620,7 @@
           "runner_kind": "unittest",
           "source_blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b"
         },
-        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:dbec992b7b0f8f7c88cf6d16071781013de5971708fe3d7e23c7331dcfa8f59a"
+        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:653f1438602f4cd55b5991105ec0a7f1280a85be64b2ab940e61223e40aa1d1d"
       },
       "search_candidates": [
         {
@@ -115661,7 +115859,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/test_runner.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:fdb58115485f501b8ea6bf3cca29441082947177cf53bf9c027629e22b22f197"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:0cbf9134b10fde24cf3364ae75b5b406442498bd3bdff73ea1b0ea04e5c4f164"
           },
           {
             "kind": "executes",
@@ -115669,7 +115867,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/runner.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:fdb58115485f501b8ea6bf3cca29441082947177cf53bf9c027629e22b22f197"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:0cbf9134b10fde24cf3364ae75b5b406442498bd3bdff73ea1b0ea04e5c4f164"
           },
           {
             "kind": "executes",
@@ -115677,7 +115875,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/engine.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:fdb58115485f501b8ea6bf3cca29441082947177cf53bf9c027629e22b22f197"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:0cbf9134b10fde24cf3364ae75b5b406442498bd3bdff73ea1b0ea04e5c4f164"
           }
         ],
         "entry": {
@@ -115689,7 +115887,7 @@
           "kind": "validated standalone runner",
           "location": "tests/h28-sol/mutation-testing/tools/test_runner.py:1",
           "module_entry": {
-            "collector_sha256": "42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32",
+            "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
             "module_code_sha256": "a396c3a66e1107de068565d8ec41c562455a583fa0112356138e2e46df2fe365",
             "module_frame_line": 0,
             "python": [
@@ -115704,7 +115902,7 @@
           "runner_kind": "unittest",
           "source_blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b"
         },
-        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:fdb58115485f501b8ea6bf3cca29441082947177cf53bf9c027629e22b22f197"
+        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:0cbf9134b10fde24cf3364ae75b5b406442498bd3bdff73ea1b0ea04e5c4f164"
       },
       "search_candidates": [
         {
@@ -116191,7 +116389,7 @@
             "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/runner.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:dfc25bee74de58d2514e2ea47aeb9a072327917a434c31396fb1d4a2bf973718"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:d876349727a7e4554eb0d8031ae6bdd0be272f1c0561038bbfb7e7bd4696cf6e"
           }
         ],
         "entry": {
@@ -116203,7 +116401,7 @@
           "kind": "validated standalone runner",
           "location": "tests/h28-sol/mutation-testing/tools/test_runner.py:1",
           "module_entry": {
-            "collector_sha256": "42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32",
+            "collector_sha256": "74a8ac05edadf4a4a1cf901134a8c23b24a844284ee8fe2a5f4e6fba274d251c",
             "module_code_sha256": "601bd9fefd2ae435488aa7bff9e1b6328d888eadf076586269d8c17d4af74e4a",
             "module_frame_line": 0,
             "python": [
@@ -116218,7 +116416,7 @@
           "runner_kind": "unittest",
           "source_blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b"
         },
-        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:dfc25bee74de58d2514e2ea47aeb9a072327917a434c31396fb1d4a2bf973718"
+        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:d876349727a7e4554eb0d8031ae6bdd0be272f1c0561038bbfb7e7bd4696cf6e"
       },
       "search_candidates": [
         {
@@ -116652,7 +116850,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 51,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 35,
@@ -117506,7 +117704,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 233,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 11,
@@ -130058,7 +130256,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 92,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 18,
@@ -130147,7 +130345,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 118,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 16,
@@ -134122,7 +134320,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 47,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 25,
@@ -134996,7 +135194,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 41,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -135110,7 +135308,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 42,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -135316,7 +135514,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 33,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 10,
@@ -135377,7 +135575,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 28,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 10,
@@ -135452,7 +135650,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 28,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 9,
@@ -137438,11 +137636,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:336",
+          "location": "docs/document-index.md:337",
           "token": "tests/h62/item1/duplication-scanner/audit-source.md"
         },
         {
-          "location": "docs/document-index.md:336",
+          "location": "docs/document-index.md:337",
           "token": "audit-source.md"
         },
         {
@@ -139593,7 +139791,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 551,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 26,
@@ -139801,7 +139999,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 119,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 21,
@@ -140846,7 +141044,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 195,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 35,
@@ -143080,7 +143278,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 444,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 41,
@@ -146490,11 +146688,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:337",
+          "location": "docs/document-index.md:338",
           "token": "tests/h62/item2/audit-calculus/ARRAY-COPY-CLASSIFICATION.md"
         },
         {
-          "location": "docs/document-index.md:337",
+          "location": "docs/document-index.md:338",
           "token": "ARRAY-COPY-CLASSIFICATION.md"
         }
       ],
@@ -146524,11 +146722,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:338",
+          "location": "docs/document-index.md:339",
           "token": "tests/h62/item2/audit-calculus/BULK-INPUTS.md"
         },
         {
-          "location": "docs/document-index.md:338",
+          "location": "docs/document-index.md:339",
           "token": "BULK-INPUTS.md"
         },
         {
@@ -146582,11 +146780,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:339",
+          "location": "docs/document-index.md:340",
           "token": "tests/h62/item2/audit-calculus/BYTE-CAPTURE-CLASSIFICATION.md"
         },
         {
-          "location": "docs/document-index.md:339",
+          "location": "docs/document-index.md:340",
           "token": "BYTE-CAPTURE-CLASSIFICATION.md"
         }
       ],
@@ -146616,11 +146814,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:340",
+          "location": "docs/document-index.md:341",
           "token": "tests/h62/item2/audit-calculus/BYTE-IMAGE-CLASSIFICATION.md"
         },
         {
-          "location": "docs/document-index.md:340",
+          "location": "docs/document-index.md:341",
           "token": "BYTE-IMAGE-CLASSIFICATION.md"
         }
       ],
@@ -146650,11 +146848,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:341",
+          "location": "docs/document-index.md:342",
           "token": "tests/h62/item2/audit-calculus/CALLBACK-FRAME-CLASSIFICATION.md"
         },
         {
-          "location": "docs/document-index.md:341",
+          "location": "docs/document-index.md:342",
           "token": "CALLBACK-FRAME-CLASSIFICATION.md"
         },
         {
@@ -146894,11 +147092,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:342",
+          "location": "docs/document-index.md:343",
           "token": "tests/h62/item2/audit-calculus/EVM-TRY-OWNER-CONFIRMATION.md"
         },
         {
-          "location": "docs/document-index.md:342",
+          "location": "docs/document-index.md:343",
           "token": "EVM-TRY-OWNER-CONFIRMATION.md"
         }
       ],
@@ -146928,11 +147126,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:343",
+          "location": "docs/document-index.md:344",
           "token": "tests/h62/item2/audit-calculus/EXTERNAL-RETURN-CLASSIFICATION.md"
         },
         {
-          "location": "docs/document-index.md:343",
+          "location": "docs/document-index.md:344",
           "token": "EXTERNAL-RETURN-CLASSIFICATION.md"
         },
         {
@@ -147234,11 +147432,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:344",
+          "location": "docs/document-index.md:345",
           "token": "tests/h62/item2/audit-calculus/PACKET-VERIFICATION.md"
         },
         {
-          "location": "docs/document-index.md:344",
+          "location": "docs/document-index.md:345",
           "token": "PACKET-VERIFICATION.md"
         },
         {
@@ -147272,11 +147470,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:345",
+          "location": "docs/document-index.md:346",
           "token": "tests/h62/item2/audit-calculus/PANIC-CARRIER-CLASSIFICATION.md"
         },
         {
-          "location": "docs/document-index.md:345",
+          "location": "docs/document-index.md:346",
           "token": "PANIC-CARRIER-CLASSIFICATION.md"
         }
       ],
@@ -147306,11 +147504,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:346",
+          "location": "docs/document-index.md:347",
           "token": "tests/h62/item2/audit-calculus/PANIC-PRODUCER-CLASSIFICATION.md"
         },
         {
-          "location": "docs/document-index.md:346",
+          "location": "docs/document-index.md:347",
           "token": "PANIC-PRODUCER-CLASSIFICATION.md"
         }
       ],
@@ -147340,11 +147538,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:347",
+          "location": "docs/document-index.md:348",
           "token": "tests/h62/item2/audit-calculus/PRIMITIVE-PROJECTION-CLASSIFICATION.md"
         },
         {
-          "location": "docs/document-index.md:347",
+          "location": "docs/document-index.md:348",
           "token": "PRIMITIVE-PROJECTION-CLASSIFICATION.md"
         },
         {
@@ -147412,11 +147610,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:348",
+          "location": "docs/document-index.md:349",
           "token": "tests/h62/item2/audit-calculus/SOURCE-DETERMINISM-CLASSIFICATION.md"
         },
         {
-          "location": "docs/document-index.md:348",
+          "location": "docs/document-index.md:349",
           "token": "SOURCE-DETERMINISM-CLASSIFICATION.md"
         }
       ],
@@ -147547,7 +147745,7 @@
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/h62/item2/audit-calculus/test_bulk_inputs.py",
-      "reason": "committed standalone runner entry point: python3 -B tests/h62/item2/audit-calculus/test_bulk_inputs.py",
+      "reason": "validated standalone runner entry point: python3 -B tests/h62/item2/audit-calculus/test_bulk_inputs.py",
       "recovery": {
         "blob": "e966c7b99f53e997430aa99ca965db3b33940447",
         "command": "git show a4e20cbe41917962a2bf6acf4d1ea2d60e9f2fca:tests/h62/item2/audit-calculus/test_bulk_inputs.py",
@@ -147558,24 +147756,16 @@
         "entry": {
           "command": "python3 -B tests/h62/item2/audit-calculus/test_bulk_inputs.py",
           "cwd": ".",
-          "kind": "committed standalone runner",
+          "data_use_scope": [],
+          "kind": "validated standalone runner",
           "location": "tests/h62/item2/audit-calculus/test_bulk_inputs.py:1",
+          "other_reads": "unresolved",
           "path": "tests/h62/item2/audit-calculus/test_bulk_inputs.py",
+          "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
           "runner_kind": "unittest",
-          "source_blob": "e966c7b99f53e997430aa99ca965db3b33940447",
-          "source_demonstration_revision": "dfd3be8574e062c8eebb7a7a3d6dcfd12682dcab",
-          "source_only": true,
-          "validation_at_measured_revision": {
-            "command": [
-              "python3",
-              "-B",
-              "tests/h62/item2/audit-calculus/test_bulk_inputs.py"
-            ],
-            "reason": "No successful current validation is certified by this historical source-only definition; source role and command are established independently.",
-            "status": "unavailable"
-          }
+          "source_blob": "e966c7b99f53e997430aa99ca965db3b33940447"
         },
-        "root": "committed:tests/h62/item2/audit-calculus/test_bulk_inputs.py"
+        "root": "validated:tests/h62/item2/audit-calculus/test_bulk_inputs.py"
       },
       "search_candidates": [
         {
@@ -147598,7 +147788,7 @@
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/h62/item2/audit-calculus/test_census.py",
-      "reason": "committed standalone runner entry point: python3 -B tests/h62/item2/audit-calculus/test_census.py",
+      "reason": "validated standalone runner entry point: python3 -B tests/h62/item2/audit-calculus/test_census.py",
       "recovery": {
         "blob": "049292b3e1f72cd6f5ba59bb01ac4933bb5c1dd7",
         "command": "git show 9769195024f5cecbff0eff26ea573bc782c3f532:tests/h62/item2/audit-calculus/test_census.py",
@@ -147609,24 +147799,16 @@
         "entry": {
           "command": "python3 -B tests/h62/item2/audit-calculus/test_census.py",
           "cwd": ".",
-          "kind": "committed standalone runner",
+          "data_use_scope": [],
+          "kind": "validated standalone runner",
           "location": "tests/h62/item2/audit-calculus/test_census.py:1",
+          "other_reads": "unresolved",
           "path": "tests/h62/item2/audit-calculus/test_census.py",
+          "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
           "runner_kind": "unittest",
-          "source_blob": "049292b3e1f72cd6f5ba59bb01ac4933bb5c1dd7",
-          "source_demonstration_revision": "dfd3be8574e062c8eebb7a7a3d6dcfd12682dcab",
-          "source_only": true,
-          "validation_at_measured_revision": {
-            "command": [
-              "python3",
-              "-B",
-              "tests/h62/item2/audit-calculus/test_census.py"
-            ],
-            "reason": "No successful current validation is certified by this historical source-only definition; source role and command are established independently.",
-            "status": "unavailable"
-          }
+          "source_blob": "049292b3e1f72cd6f5ba59bb01ac4933bb5c1dd7"
         },
-        "root": "committed:tests/h62/item2/audit-calculus/test_census.py"
+        "root": "validated:tests/h62/item2/audit-calculus/test_census.py"
       },
       "search_candidates": [
         {
@@ -147769,7 +147951,7 @@
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/h62/item2/audit-calculus/test_handoff_index.py",
-      "reason": "committed standalone runner entry point: python3 -B tests/h62/item2/audit-calculus/test_handoff_index.py",
+      "reason": "validated standalone runner entry point: python3 -B tests/h62/item2/audit-calculus/test_handoff_index.py",
       "recovery": {
         "blob": "873df01e20af8815478c9bd3ffd5550f69624ad2",
         "command": "git show c857aa2e0f484a5578a47ab4988fdd94d3115ee4:tests/h62/item2/audit-calculus/test_handoff_index.py",
@@ -147780,24 +147962,16 @@
         "entry": {
           "command": "python3 -B tests/h62/item2/audit-calculus/test_handoff_index.py",
           "cwd": ".",
-          "kind": "committed standalone runner",
+          "data_use_scope": [],
+          "kind": "validated standalone runner",
           "location": "tests/h62/item2/audit-calculus/test_handoff_index.py:1",
+          "other_reads": "unresolved",
           "path": "tests/h62/item2/audit-calculus/test_handoff_index.py",
+          "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
           "runner_kind": "unittest",
-          "source_blob": "873df01e20af8815478c9bd3ffd5550f69624ad2",
-          "source_demonstration_revision": "dfd3be8574e062c8eebb7a7a3d6dcfd12682dcab",
-          "source_only": true,
-          "validation_at_measured_revision": {
-            "command": [
-              "python3",
-              "-B",
-              "tests/h62/item2/audit-calculus/test_handoff_index.py"
-            ],
-            "reason": "No successful current validation is certified by this historical source-only definition; source role and command are established independently.",
-            "status": "unavailable"
-          }
+          "source_blob": "873df01e20af8815478c9bd3ffd5550f69624ad2"
         },
-        "root": "committed:tests/h62/item2/audit-calculus/test_handoff_index.py"
+        "root": "validated:tests/h62/item2/audit-calculus/test_handoff_index.py"
       },
       "search_candidates": [],
       "secondary": {
@@ -147907,7 +148081,7 @@
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/h62/item2/audit-calculus/test_receipts.py",
-      "reason": "committed standalone runner entry point: python3 -B tests/h62/item2/audit-calculus/test_receipts.py",
+      "reason": "validated standalone runner entry point: python3 -B tests/h62/item2/audit-calculus/test_receipts.py",
       "recovery": {
         "blob": "68da1e61d3c0abb61e12398ef9bb0240da55df58",
         "command": "git show c361178f68f34c276a02b15691cd726aaa85a51e:tests/h62/item2/audit-calculus/test_receipts.py",
@@ -147918,24 +148092,16 @@
         "entry": {
           "command": "python3 -B tests/h62/item2/audit-calculus/test_receipts.py",
           "cwd": ".",
-          "kind": "committed standalone runner",
+          "data_use_scope": [],
+          "kind": "validated standalone runner",
           "location": "tests/h62/item2/audit-calculus/test_receipts.py:1",
+          "other_reads": "unresolved",
           "path": "tests/h62/item2/audit-calculus/test_receipts.py",
+          "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
           "runner_kind": "unittest",
-          "source_blob": "68da1e61d3c0abb61e12398ef9bb0240da55df58",
-          "source_demonstration_revision": "dfd3be8574e062c8eebb7a7a3d6dcfd12682dcab",
-          "source_only": true,
-          "validation_at_measured_revision": {
-            "command": [
-              "python3",
-              "-B",
-              "tests/h62/item2/audit-calculus/test_receipts.py"
-            ],
-            "reason": "No successful current validation is certified by this historical source-only definition; source role and command are established independently.",
-            "status": "unavailable"
-          }
+          "source_blob": "68da1e61d3c0abb61e12398ef9bb0240da55df58"
         },
-        "root": "committed:tests/h62/item2/audit-calculus/test_receipts.py"
+        "root": "validated:tests/h62/item2/audit-calculus/test_receipts.py"
       },
       "search_candidates": [],
       "secondary": {
@@ -147953,7 +148119,7 @@
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/h62/item2/audit-calculus/test_reconcile.py",
-      "reason": "committed standalone runner entry point: python3 -B tests/h62/item2/audit-calculus/test_reconcile.py",
+      "reason": "validated standalone runner entry point: python3 -B tests/h62/item2/audit-calculus/test_reconcile.py",
       "recovery": {
         "blob": "a10452c60df5311a27fef8722bb5e06e3f40f488",
         "command": "git show c361178f68f34c276a02b15691cd726aaa85a51e:tests/h62/item2/audit-calculus/test_reconcile.py",
@@ -147964,24 +148130,16 @@
         "entry": {
           "command": "python3 -B tests/h62/item2/audit-calculus/test_reconcile.py",
           "cwd": ".",
-          "kind": "committed standalone runner",
+          "data_use_scope": [],
+          "kind": "validated standalone runner",
           "location": "tests/h62/item2/audit-calculus/test_reconcile.py:1",
+          "other_reads": "unresolved",
           "path": "tests/h62/item2/audit-calculus/test_reconcile.py",
+          "purpose": "Fixture roles not reviewed; passing test status and IO alone do not establish data eligibility.",
           "runner_kind": "unittest",
-          "source_blob": "a10452c60df5311a27fef8722bb5e06e3f40f488",
-          "source_demonstration_revision": "dfd3be8574e062c8eebb7a7a3d6dcfd12682dcab",
-          "source_only": true,
-          "validation_at_measured_revision": {
-            "command": [
-              "python3",
-              "-B",
-              "tests/h62/item2/audit-calculus/test_reconcile.py"
-            ],
-            "reason": "No successful current validation is certified by this historical source-only definition; source role and command are established independently.",
-            "status": "unavailable"
-          }
+          "source_blob": "a10452c60df5311a27fef8722bb5e06e3f40f488"
         },
-        "root": "committed:tests/h62/item2/audit-calculus/test_reconcile.py"
+        "root": "validated:tests/h62/item2/audit-calculus/test_reconcile.py"
       },
       "search_candidates": [],
       "secondary": {
@@ -150377,7 +150535,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 59,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 34,
@@ -150512,7 +150670,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 55,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 31,
@@ -152699,7 +152857,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 231,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 17,
@@ -154113,11 +154271,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:349",
+          "location": "docs/document-index.md:350",
           "token": "tests/h62/item2/audit-language/registration-fragment.md"
         },
         {
-          "location": "docs/document-index.md:349",
+          "location": "docs/document-index.md:350",
           "token": "registration-fragment.md"
         },
         {
@@ -164300,7 +164458,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 183,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 23,
@@ -164584,7 +164742,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 70,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -164706,7 +164864,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 47,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 12,
@@ -164788,7 +164946,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 119,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 16,
@@ -168850,7 +169008,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 287,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 25,
@@ -169634,7 +169792,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 107,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -170659,7 +170817,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 59,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 17,
@@ -170827,7 +170985,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 38,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 13,
@@ -170916,7 +171074,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 40,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -174345,7 +174503,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 483,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 46,
@@ -176324,7 +176482,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 41,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 9,
@@ -177658,7 +177816,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 37,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 20,
@@ -178739,7 +178897,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 28,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 10,
@@ -178828,7 +178986,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 31,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 9,
@@ -179146,7 +179304,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 87,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 17,
@@ -182359,7 +182517,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 32,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 8,
@@ -182736,7 +182894,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 71,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 15,
@@ -183609,7 +183767,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 32,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 5,
@@ -214955,7 +215113,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 104,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 16,
@@ -215233,7 +215391,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 93,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 16,
@@ -215542,7 +215700,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 41,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 12,
@@ -215811,7 +215969,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 46,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 10,
@@ -216399,7 +216557,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 101,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 11,
@@ -216781,7 +216939,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 131,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 10,
@@ -217183,7 +217341,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 41,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 10,
@@ -217820,7 +217978,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 232,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 16,
@@ -218283,7 +218441,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 149,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 32,
@@ -218499,7 +218657,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 261,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 19,
@@ -218858,7 +219016,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 119,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 13,
@@ -219030,7 +219188,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 169,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -219426,7 +219584,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 116,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 35,
@@ -219802,7 +219960,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 230,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 23,
@@ -220945,7 +221103,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 63,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 25,
@@ -229492,7 +229650,7 @@
         "edges": [
           {
             "kind": "executes",
-            "line": 4174,
+            "line": 4175,
             "operation": "Lean import",
             "repository_lean": true,
             "source": "Solidity.lean",
@@ -229827,7 +229985,7 @@
         "edges": [
           {
             "kind": "executes",
-            "line": 4175,
+            "line": 4176,
             "operation": "Lean import",
             "repository_lean": true,
             "source": "Solidity.lean",
@@ -230145,7 +230303,7 @@
         "edges": [
           {
             "kind": "executes",
-            "line": 4175,
+            "line": 4176,
             "operation": "Lean import",
             "repository_lean": true,
             "source": "Solidity.lean",
@@ -231744,7 +231902,7 @@
         "edges": [
           {
             "kind": "executes",
-            "line": 4175,
+            "line": 4176,
             "operation": "Lean import",
             "repository_lean": true,
             "source": "Solidity.lean",
@@ -233167,7 +233325,7 @@
         "edges": [
           {
             "kind": "executes",
-            "line": 4175,
+            "line": 4176,
             "operation": "Lean import",
             "repository_lean": true,
             "source": "Solidity.lean",
@@ -235999,7 +236157,7 @@
         "edges": [
           {
             "kind": "executes",
-            "line": 4176,
+            "line": 4177,
             "operation": "Lean import",
             "repository_lean": true,
             "source": "Solidity.lean",
@@ -236140,7 +236298,7 @@
         "edges": [
           {
             "kind": "executes",
-            "line": 4176,
+            "line": 4177,
             "operation": "Lean import",
             "repository_lean": true,
             "source": "Solidity.lean",
@@ -236541,7 +236699,7 @@
         "edges": [
           {
             "kind": "executes",
-            "line": 4174,
+            "line": 4175,
             "operation": "Lean import",
             "repository_lean": true,
             "source": "Solidity.lean",
@@ -236826,7 +236984,7 @@
         "edges": [
           {
             "kind": "executes",
-            "line": 4177,
+            "line": 4178,
             "operation": "Lean import",
             "repository_lean": true,
             "source": "Solidity.lean",
@@ -241661,7 +241819,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 46,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 7,
@@ -243328,7 +243486,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 136,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 14,
@@ -268141,11 +268299,11 @@
       "runner_chain": null,
       "search_candidates": [
         {
-          "location": "docs/document-index.md:367",
+          "location": "docs/document-index.md:368",
           "token": "tests/upstream/repairs/group02.md"
         },
         {
-          "location": "docs/document-index.md:367",
+          "location": "docs/document-index.md:368",
           "token": "group02.md"
         },
         {
@@ -282460,7 +282618,7 @@
             ],
             "kind": "unittest declaration and explicit main entry",
             "main_line": 61,
-            "revision": "a83beba3351fd4dbd3e5dbf0bfc93a96ec75bf72",
+            "revision": "fa29f6465518674445c71e62a52a189285dad71e",
             "test_contexts": [
               {
                 "code_firstlineno": 15,
@@ -288765,11 +288923,11 @@
   },
   "totals": {
     "evidence": 377,
-    "keep": 1106,
+    "keep": 1111,
     "orphan": 0,
-    "paths": 5597,
+    "paths": 5599,
     "regenerable": 0,
-    "unresolved": 4114
+    "unresolved": 4111
   },
   "universe": [
     "tests/",
