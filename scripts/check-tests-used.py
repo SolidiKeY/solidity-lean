@@ -48,6 +48,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import tarfile
 import shlex
 import importlib.util
 from pathlib import Path, PurePosixPath
@@ -74,6 +75,15 @@ def decode(b):
 
 def canonical(value):
     return (json.dumps(value, ensure_ascii=True, indent=2, sort_keys=True) + '\n').encode()
+
+
+
+def unique_json_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result: raise ValueError('duplicate JSON object key: ' + key)
+        result[key] = value
+    return result
 
 
 def excluded(p):
@@ -504,7 +514,7 @@ def validated_routes(graph, catalog):
     historical_revisions = set()
     for entry in catalog['standalone']:
         p = entry.get('path')
-        if (entry.get('input_revision') == repo.ref or entry.get('kind') not in ('unittest', 'node-test', 'runnable-entrypoint')
+        if (entry.get('input_revision') == repo.ref or entry.get('kind') not in ('unittest', 'node-test', 'runnable-entrypoint', 'committed-cli')
                 or p in current_runner_paths or p not in repo.tree or repo.tree[p][2] != entry.get('source_blob')): continue
         revision = entry.get('input_revision')
         if not hex_pin(revision, 40): raise ValueError('historical runner demonstration requires full commit revision')
@@ -527,12 +537,13 @@ def validated_routes(graph, catalog):
         if entry.get('kind') == 'runnable-entrypoint': required.update(('entry_line', 'purpose', 'input_scope', 'other_reads'))
         if entry.get('kind') == 'nonpassing-unittest': required.update(('purpose', 'input_scope'))
         if entry.get('kind') == 'skipped-unittest': required.add('purpose')
+        if entry.get('kind') == 'committed-cli': required.update(('purpose', 'entry_line', 'required_options'))
         allowed = (required, required | {'purpose', 'input_scope', 'other_reads'}) if entry.get('kind') in ('unittest', 'node-test') else (required,)
         if set(entry) not in allowed:
             raise ValueError('invalid standalone definition')
         p = entry['path']
         historical_runner = entry['input_revision'] != repo.ref
-        if historical_runner and (entry['kind'] not in ('unittest', 'node-test', 'runnable-entrypoint')
+        if historical_runner and (entry['kind'] not in ('unittest', 'node-test', 'runnable-entrypoint', 'committed-cli')
                 or p in current_runner_paths or p not in repo.tree or repo.tree[p][2] != entry['source_blob']):
             continue
         if p not in repo.tree or repo.tree[p][2] != entry['source_blob']:
@@ -540,8 +551,26 @@ def validated_routes(graph, catalog):
         command = entry['command']
         if entry['kind'] != 'manual-reproducer' and command not in (['python3', '-B', p], ['node', '--test', p]):
             raise ValueError('unsupported standalone invocation: ' + p)
-        if entry['kind'] not in ('unittest', 'node-test', 'manual-reproducer', 'runnable-entrypoint', 'nonpassing-unittest', 'skipped-unittest'):
+        if entry['kind'] not in ('unittest', 'node-test', 'manual-reproducer', 'runnable-entrypoint', 'nonpassing-unittest', 'skipped-unittest', 'committed-cli'):
             raise ValueError('unsupported standalone kind')
+        if entry['kind'] == 'committed-cli':
+            declaration = declared_configured_cli(repo, p)
+            if (declaration is None or command != ['python3', '-B', p]
+                    or type(entry['entry_line']) is not int or entry['entry_line'] != declaration['main_line']
+                    or entry['required_options'] != declaration['required_options']
+                    or not isinstance(entry['purpose'], str) or not entry['purpose'].strip()):
+                raise ValueError('unsupported committed CLI source role')
+            identity = 'committed-cli:' + p
+            graph.root(p, 'committed CLI runner source', shlex.join(command), p,
+                       declaration['main_line'], root_id=identity)
+            graph.roots[identity].update({'source_only': True, 'source_blob': entry['source_blob'],
+                'role_provenance': declaration, 'purpose': entry['purpose'],
+                'source_demonstration_revision': entry['input_revision'],
+                'command_form': 'entry prefix; required configuration is not supplied',
+                'required_options': entry['required_options'],
+                'validation_at_measured_revision': {'status': 'unavailable', 'command_prefix': command,
+                    'reason': 'Configured checker invocation not validated; required options are absent. Source role only, no helper/fixture or passing-reproducer credit.'}})
+            continue
         if entry['kind'] == 'skipped-unittest':
             declaration = declared_unittest(repo, p)
             if (declaration is None or command != ['python3', '-B', p]
@@ -621,7 +650,7 @@ def validated_routes(graph, catalog):
             graph.roots[identity].update({'runner_kind': entry['kind'], 'source_blob': entry['source_blob'],
                 'source_only': True, 'source_demonstration_revision': entry['input_revision'],
                 'validation_at_measured_revision': {'status': 'unavailable', 'command': command,
-                    'reason': 'Not executed at measured revision; source role and command established independently.'}})
+                    'reason': 'No successful current validation is certified by this historical source-only definition; source role and command are established independently.'}})
             continue
         graph.root(p, 'validated standalone runner', shlex.join(command), p, entry.get('entry_line', 1), root_id='validated:' + p)
         graph.roots['validated:' + p].update({'runner_kind': entry['kind'], 'source_blob': entry['source_blob']})
@@ -919,6 +948,132 @@ def reviewed_receipt_rows(value):
     return []
 
 
+def failed_validation_logs(value):
+    """Two reviewed initial-failure indexes; hashes bind stored log bytes.
+
+    The reports retain failed whitespace checks and name their archived output
+    objects. No committed producer for the initial envelopes was found. The
+    related attribution/validate.py:29-41 and probes/validate.py:28-37 create
+    sequential gzip logs, but that does not identify every indexed command.
+    Never invent per-log commands, exits, timing or current validation credit.
+    """
+    if not isinstance(value, dict): return []
+    core = {'exitCode', 'failedGate', 'failedGateExitCode', 'reason', 'logs'}
+    if set(value) not in (core, core | {'status', 'command'}): return []
+    if set(value) != core and (value['status'] != 'failed-whitespace-check' or value['command'] !=
+            ['python3', 'tests/upstream/baseline-20261028/attribution/validate.py']): return []
+    if (value['failedGate'] != ['git', 'diff', '--cached', '--check']
+            or any(type(value[k]) is not int or value[k] == 0 for k in ('exitCode', 'failedGateExitCode'))
+            or not isinstance(value['reason'], str) or not value['reason'].strip()): return []
+    logs = value['logs']
+    if not isinstance(logs, list) or not logs: return []
+    paths = []
+    for row in logs:
+        if not isinstance(row, dict) or set(row) != {'path', 'sha256'}: return []
+        path = row['path']
+        if (not isinstance(path, str) or not path or '\0' in path or path.startswith(('/', '\\'))
+                or re.match(r'^[A-Za-z]:', path) or any(p in ('', '.', '..') for p in path.split('/'))
+                or not hex_pin(row['sha256'])): return []
+        paths.append(path)
+    if len(set(paths)) != len(paths): return []
+    return [(f'/logs/{index}', {'log': row['path'], 'sha256': row['sha256']}) for index, row in enumerate(logs)]
+
+
+
+def flat_node_transcript(text):
+    """Narrow Node spec output: only flat timed cases and a full EOF summary.
+
+    Reviewed baseline gate and group04 transcripts use this exact form. Nested
+    suites, failure diagnostics, resource wrappers and partial summaries are
+    deliberately outside it. Counters describe historical output, never a
+    current run, identified producer, or successful-reproducer claim.
+    """
+    if '\0' in text: return False
+    lines = text.splitlines()
+    if len(lines) < 10: return False
+    labels = ('tests', 'suites', 'pass', 'fail', 'cancelled', 'skipped', 'todo')
+    counters = []
+    for line, name in zip(lines[-8:-1], labels):
+        match = re.fullmatch('ℹ ' + name + r' (0|[1-9][0-9]*)', line)
+        if not match or len(match[1]) > 20: return False
+        counters.append(int(match[1]))
+    duration = re.fullmatch(r'ℹ duration_ms ([0-9]+(?:\.[0-9]+)?)', lines[-1])
+    if not duration or not math.isfinite(float(duration[1])): return False
+    cases = lines[:-8]
+    for line in cases:
+        match = re.fullmatch(r'[✔✖] [^\x00-\x1f]+ \(([0-9]+(?:\.[0-9]+)?)ms\)', line)
+        if not match or not math.isfinite(float(match[1])): return False
+    tests, suites, passed, failed, cancelled, skipped, todo = counters
+    # This first reviewed subset has no suites, cancellations, skips or todos;
+    # unsupported outcome forms remain unresolved rather than guessed.
+    return (tests == len(cases) and tests >= 2 and suites == cancelled == skipped == todo == 0
+            and passed == sum(line.startswith('✔ ') for line in cases)
+            and failed == sum(line.startswith('✖ ') for line in cases))
+
+
+
+def lake_build_transcript(text):
+    """Reviewed Lake job/diagnostic output with an exact final build footer.
+
+    Progress totals can change and cached jobs need not be displayed. This
+    recognizes historical output content, not successful fresh validation or
+    an identified command. Resource wrappers and partial output are excluded.
+    """
+    if '\0' in text: return False
+    lines = text.splitlines()
+    if len(lines) < 3: return False
+    job = re.compile(r'[✔✖⚠] \[([1-9][0-9]{0,8})/([1-9][0-9]{0,8})\] (?:Built|Replayed) [A-Za-z_][A-Za-z_0-9]*(?:\.[A-Za-z_][A-Za-z_0-9]*)*(?: \(([0-9]+(?:\.[0-9]+)?)s\))?')
+    if not job.fullmatch(lines[0]): return False
+    footer = re.fullmatch(r'Build completed successfully \(([1-9][0-9]{0,8}) jobs\)\.', lines[-1])
+    if not footer: return False
+    jobs = set(); diagnostics = 0
+    for line in lines[:-1]:
+        if 'Build completed successfully' in line or 'All targets up-to-date' in line: return False
+        match = job.fullmatch(line)
+        if match:
+            if not int(match[1]) <= int(match[2]) <= int(footer[1]) or match[3] is not None and not math.isfinite(float(match[3])): return False
+            jobs.add(line)
+        elif re.match(r'^[✔✖⚠] \[', line): return False
+        if re.match(r'^(?:warning|info|error): [^\s:]+\.lean:[0-9]+:[0-9]+: ', line): diagnostics += 1
+    return len(jobs) >= 2 and (diagnostics >= 1 or len(jobs) >= 3)
+
+
+
+def unapplied_pin_comparison(value):
+    """Historical prepare-pin-proposal.mjs:47 output, not pin adoption.
+
+    Retained reports precede the current addition count/optional fields. Their
+    source, generator and candidate identities are recorded claims only; this
+    predicate neither reproduces nor authenticates external historical objects.
+    """
+    if not isinstance(value, dict): return False
+    core = {'command', 'generator_sha256', 'source_head', 'base', 'shared_inventory',
+            'shared_inventory_sha256', 'source_pins', 'source_pins_sha256', 'old_count',
+            'added_count', 'candidate_count', 'old_entries_unchanged', 'before', 'after',
+            'candidate_sha256', 'boundary'}
+    if not core <= set(value) <= core | {'registry_base', 'external_unregistered_count'}: return False
+    command = value['command']; producer = 'tests/h28-sol/non-vacuity/prepare-pin-proposal.mjs'
+    if (not isinstance(command, list) or len(command) != 3
+            or not all(isinstance(a, str) and a and '\0' not in a for a in command)
+            or command[0] != 'node' or not (command[1] == producer or command[1].endswith('/' + producer))): return False
+    if (value['shared_inventory'] != 'scripts/g07-axiom-pins.json'
+            or value['source_pins'] != 'tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean'
+            or value['old_entries_unchanged'] is not True
+            or not isinstance(value['boundary'], str) or not value['boundary'].startswith('UNAPPLIED proposal only.')): return False
+    if not all(hex_pin(value[k]) for k in ('generator_sha256', 'shared_inventory_sha256', 'source_pins_sha256', 'candidate_sha256')): return False
+    if not all(hex_pin(value[k], 40) for k in ('source_head', 'base')): return False
+    if 'registry_base' in value and not hex_pin(value['registry_base'], 40): return False
+    for key in ('old_count', 'added_count', 'candidate_count', 'external_unregistered_count'):
+        if key in value and (type(value[key]) is not int or value[key] < 0): return False
+    if value['old_count'] + value['added_count'] != value['candidate_count']: return False
+    for key in ('before', 'after'):
+        row = value[key]
+        if (not isinstance(row, dict) or set(row) != {'errors', 'notes'}
+                or not all(isinstance(row[k], list) and all(isinstance(a, str) for a in row[k]) for k in row)): return False
+    return (not value['before']['errors'] and not value['after']['errors']
+            and len(value['before']['notes']) - len(value['after']['notes']) == value['added_count'])
+
+
 def evidence_role(data):
     """Content signatures, never extension or directory alone. Keep wins first."""
     if data.startswith(b'\x1f\x8b'):
@@ -934,6 +1089,10 @@ def evidence_role(data):
         return 'Historical sequential command receipts: argv, exit codes and elapsed measurements.'
     if isinstance(value, dict):
         keys = set(value)
+        if unapplied_pin_comparison(value):
+            return 'Historical unapplied axiom-pin proposal comparison (prepare-pin-proposal.mjs:47): recorded identities, preserved-entry counts and comparison diagnostics; no adoption, current validation, external-object verification or reproduction claim.'
+        if failed_validation_logs(value):
+            return 'Historical failed-validation index: recorded nonzero run/gate exits, failed whitespace command and archived output digests; no per-log command/timing or current success claim.'
         if reviewed_receipt_rows(value):
             return 'Historical resource/validation command receipts: reviewed envelope, explicit commands, exit/timing/resource observations and output digests; no current validation credit.'
         reviewed = historical_json_role(value) or reviewed_archive_report(value)
@@ -983,6 +1142,10 @@ def evidence_role(data):
                 and value['totalFixtureFiles'] > 0 and isinstance(value['counts'], dict) and value['counts']
                 and all(isinstance(k, str) and k and type(v) is int and v >= 0 for k, v in value['counts'].items())):
             return 'Historical upstream run summary: pinned archive/runner/model, completion counters and observed status counts.'
+    if lake_build_transcript(text):
+        return 'Historical Lake build transcript: structured job progress, diagnostic context and terminal completion text; no verified fresh build success or command identity claim.'
+    if flat_node_transcript(text):
+        return 'Historical flat Node spec transcript: timed case results and complete, counter-consistent EOF summary; no current validation or producer identity claim.'
     # Require multiple nontrivial log markers; a source containing a string is not a log.
     lines = text.splitlines()
     matches = sum(bool(re.match(r'^(?:[✔✖⚠] \[\d+/\d+\]|(?:info|warning|error): [^ ]+\.lean:\d+:|PASS [a-z][\w-]* \d+s|H28_MODULE_PASS \{)', l)) for l in lines)
@@ -1003,9 +1166,10 @@ def evidence_role(data):
 def historical_outputs(repo):
     """Receipt-named logs, independently bound to their recorded content hash.
 
-    A filename or a mention in prose is insufficient. Only a structured command
-    receipt with exit/timing fields and a matching output digest establishes a
-    historical-output role. This does not make its command a live entry point.
+    A filename or prose mention is insufficient. Structured command receipts
+    or reviewed failed-validation indexes must name the output and match its
+    measured bytes. An index does not identify each log's command or timing;
+    neither kind creates a live entry point.
     """
     roles = {}
     for source in sorted(repo.texts):
@@ -1015,6 +1179,9 @@ def historical_outputs(repo):
         standard = command_receipt_rows(value)
         rows = [(f'/{i}' if isinstance(value, list) else f'/commands/{i}', row) for i, row in enumerate(standard)]
         rows += reviewed_receipt_rows(value)
+        failed_index = failed_validation_logs(value)
+        rows += failed_index
+        failed_pointers = {pointer for pointer, _ in failed_index}
         for pointer, row in rows:
             if not {'log'} <= set(row) or not isinstance(row['log'], str): continue
             digest = row.get('uncompressedLogSha256', row.get('uncompressedSha256', row.get('sha256')))
@@ -1034,8 +1201,174 @@ def historical_outputs(repo):
                 except (OSError, EOFError, zlib.error): continue
             if len(data) > 8_000_000 or hashlib.sha256(data).hexdigest() != digest: continue
             encoding = 'uncompressed' if 'uncompressedLogSha256' in row or 'uncompressedSha256' in row else 'stored-byte'
-            roles[target] = f'Historical command output: {source} {pointer} names this log; recorded {encoding} SHA256 matches measured bytes.'
+            role = 'Historical failed-validation indexed output' if pointer in failed_pointers else 'Historical command output'
+            roles[target] = f'{role}: {source} {pointer} names this log; recorded {encoding} SHA256 matches measured bytes.'
     return roles
+
+
+
+def archive_member_matches(data, name, digest):
+    """Read bounded regular historical tar members in memory; never extract."""
+    if len(data) > 8_000_000: return False
+    try:
+        with gzip.GzipFile(fileobj=io.BytesIO(data)) as stream: raw = stream.read(8_000_001)
+        if len(raw) > 8_000_000: return False
+        with tarfile.open(fileobj=io.BytesIO(raw), mode='r:') as archive:
+            seen = set(); selected = None; count = 0; total = 0
+            for member in archive:
+                count += 1; total += member.size
+                parts = member.name.rstrip('/').split('/')
+                canonical_name = '/'.join(parts)
+                if (count > 100 or total > 8_000_000 or canonical_name in seen
+                        or not (member.isfile() or member.isdir()) or member.name.startswith('/')
+                        or '\\' in member.name or any(p in ('', '.', '..') for p in parts)): return False
+                seen.add(canonical_name)
+                if member.name == name:
+                    if not member.isfile(): return False
+                    selected = archive.extractfile(member).read()
+            return selected is not None and hashlib.sha256(selected).hexdigest() == digest
+    except (OSError, EOFError, ValueError, tarfile.TarError, zlib.error): return False
+
+
+def reviewed_historical_archive(repo, path):
+    """Exact-blob exceptions independently inspected by finder and skeptic.
+
+    The first archive is described in baseline README:98-104/build-archive.json;
+    the second in its adjacent manifest.json:302-306 and verification JSON.
+    Exact selected member digests make these role assertions re-checkable.
+    Source/configuration snapshots coexist with receipts; no non-use, fresh
+    integration, proof or regeneration claim follows. The mixed Terra frozen
+    fixture archive is deliberately NOT included pending consumer resolution.
+    """
+    reviewed = {
+        'tests/upstream/baseline-20261028/build-evidence.tar.gz': (
+            'c01c878e924562b8e0f0b27b76f95f7dcd3cb64e',
+            'tests/upstream/baseline-20261028/cold/logs/cold.json',
+            '3ceaa3ca1cacbe33784d8e42bef6b7fc6743088f449218bdbd6b0da01a4d7b90',
+            'Historical cold-build archive: selected cold.json records timeout exit 124; captured logs, resources and harness/configuration, not a passing build.'),
+        'tests/upstream/diamond-payments-integration-20261030/coordinator-evidence.tar.gz': (
+            '644af637d1feeffa91affc3e9b10c76d6c6f6d55',
+            'context/3-investigation-b8355e59-controller-handoff.json',
+            'd987a14ad2b21a57325c5221260e9a0b55a2e8a6620841e228262dcaf6351678',
+            'Historical coordination/repair archive: selected controller handoff records integration_passed false; documentation comparisons, failed checks and read-only reviews, not a passing integration.')}
+    if path not in reviewed: return None
+    blob, member, digest, role = reviewed[path]
+    if repo.tree.get(path) not in (('100644', 'blob', blob), ('100755', 'blob', blob)): return None
+    if not archive_member_matches(repo.bytes(path), member, digest): return None
+    return role + ' Exact reviewed Git blob and member ' + member + ' SHA256 ' + digest + ' verified.'
+
+
+
+def reviewed_historical_notes(repo, definitions=None):
+    """Per-file reviewed captured records, never a Markdown/directory rule.
+
+    Exact blobs and literal anchors revoke role claims when content changes.
+    Captured prompts/steering are data, not instructions or current permission.
+    This creates no use-graph root or edge; live/uncertain consumers retain
+    precedence. Definitions are classifier input, not current lane receipts.
+    """
+    if definitions is None:
+        path = Path(__file__).with_name('check-tests-used-roles.json')
+        if not path.exists(): return {}
+        definitions = json.loads(path.read_bytes())
+    if (not isinstance(definitions, dict) or set(definitions) != {'schema_version', 'records'}
+            or type(definitions['schema_version']) is not int or definitions['schema_version'] != 1
+            or not isinstance(definitions['records'], list)): raise ValueError('invalid historical note definitions')
+    result = {}; seen = set()
+    for row in definitions['records']:
+        if not isinstance(row, dict) or set(row) != {'path', 'blob', 'anchor', 'role'}: raise ValueError('invalid historical note definition')
+        path = row['path']
+        if (not isinstance(path, str) or not path.startswith(SCOPE) or path in seen
+                or not hex_pin(row['blob'], 40) or not isinstance(row['anchor'], str) or not row['anchor'].strip()
+                or not isinstance(row['role'], str) or not row['role'].startswith('Historical record: ')):
+            raise ValueError('unsupported historical note claim')
+        seen.add(path)
+        if repo.tree.get(path) not in (('100644', 'blob', row['blob']), ('100755', 'blob', row['blob'])): continue
+        if row['anchor'] not in repo.texts.get(path, '').splitlines(): raise ValueError('historical note content anchor mismatch')
+        result[path] = row['role'] + ' Exact reviewed Git blob and literal content anchor verified.'
+    return result
+
+
+def declared_configured_cli(repo, path):
+    """Structural guard for curated CLI roles, never an automatic root finder.
+
+    The catalog must separately pin/review a meaningful checker purpose. This
+    narrow form has a local zero-argument main, direct argparse setup with
+    required long options, and an explicit live main call. Its bare command is
+    an entry prefix, not a working configured invocation. No reads propagate.
+    """
+    if path not in repo.texts or not path.endswith('.py') or repo.tree[path][0] not in ('100644', '100755'): return None
+    try:
+        tree = ast.parse(repo.texts[path]); compile(repo.texts[path], path, 'exec', dont_inherit=True)
+    except (SyntaxError, ValueError, RecursionError): return None
+    modules = {alias.asname or 'argparse' for node in tree.body if isinstance(node, ast.Import)
+               for alias in node.names if alias.name == 'argparse'}
+    functions = [node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == 'main']
+    if not modules or len(functions) != 1: return None
+    function = functions[0]; args = function.args
+    if function.decorator_list: return None
+    if args.posonlyargs or args.args or args.vararg or args.kwonlyargs or args.kwarg: return None
+    protected = modules | {'__name__', 'main'}
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and node.name in protected and node is not function: return None
+        if isinstance(node, ast.Name) and isinstance(node.ctx, (ast.Store, ast.Del)) and node.id in protected: return None
+        if isinstance(node, ast.ImportFrom) and any(a.name == '*' or (a.asname or a.name) in protected for a in node.names): return None
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                name = alias.asname or alias.name.split('.')[0]
+                if name in protected and not (alias.name == 'argparse' and name in modules): return None
+        if isinstance(node, ast.Attribute) and isinstance(node.ctx, (ast.Store, ast.Del)) and isinstance(node.value, ast.Name) and node.value.id in modules: return None
+    def terminal(node):
+        return (isinstance(node, ast.Raise) or isinstance(node, ast.Expr) and isinstance(node.value, ast.Call)
+                and (isinstance(node.value.func, ast.Name) and node.value.func.id in ('exit', 'quit')
+                     or isinstance(node.value.func, ast.Attribute) and node.value.func.attr in ('exit', '_exit')))
+    def main_call(node):
+        return node.value if isinstance(node, ast.Expr) and isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Name) and node.value.func.id == 'main' else None
+    calls = []
+    for index, node in enumerate(tree.body):
+        if any(terminal(n) for n in tree.body[:index]): break
+        call = main_call(node)
+        if call is not None: calls.append(call); continue
+        if not isinstance(node, ast.If) or not isinstance(node.test, ast.Compare): continue
+        test = node.test
+        if len(test.ops) != 1 or not isinstance(test.ops[0], ast.Eq) or len(test.comparators) != 1: continue
+        pair = (test.left, test.comparators[0])
+        if not (any(isinstance(n, ast.Name) and n.id == '__name__' for n in pair)
+                and any(isinstance(n, ast.Constant) and n.value == '__main__' for n in pair)): continue
+        for statement in node.body:
+            if terminal(statement): break
+            call = main_call(statement)
+            if call is not None: calls.append(call)
+    if not calls or calls[0].args or calls[0].keywords or function.lineno >= calls[0].lineno: return None
+    parsers = {}
+    for statement in function.body:
+        if isinstance(statement, ast.Expr) and isinstance(statement.value, ast.Constant) and isinstance(statement.value.value, str): continue
+        if isinstance(statement, ast.Assign) and len(statement.targets) == 1 and isinstance(statement.targets[0], ast.Name):
+            value = statement.value; name = statement.targets[0].id
+            if isinstance(value, ast.Call) and isinstance(value.func, ast.Attribute):
+                owner = value.func.value
+                if isinstance(owner, ast.Name) and owner.id in modules and value.func.attr == 'ArgumentParser':
+                    parsers[name] = set(); continue
+                if isinstance(owner, ast.Name) and owner.id in parsers and value.func.attr == 'parse_args' and not value.args and not value.keywords:
+                    if not parsers[owner.id]: return None
+                    return {'kind': 'curated local argparse entry', 'revision': repo.ref,
+                            'function_line': function.lineno, 'main_line': calls[0].lineno,
+                            'parse_args_line': statement.lineno, 'required_options': sorted(parsers[owner.id])}
+            return None
+        if isinstance(statement, ast.Expr) and isinstance(statement.value, ast.Call):
+            call = statement.value; target = call.func
+            if (isinstance(target, ast.Attribute) and isinstance(target.value, ast.Name)
+                    and target.value.id in parsers and target.attr == 'add_argument'):
+                required = [k.value for k in call.keywords if k.arg == 'required']
+                if required and not (len(required) == 1 and isinstance(required[0], ast.Constant) and type(required[0].value) is bool): return None
+                if required and required[0].value is True:
+                    if len(call.args) != 1 or not isinstance(call.args[0], ast.Constant) or not isinstance(call.args[0].value, str) or not re.fullmatch(r'--[A-Za-z][A-Za-z0-9-]*', call.args[0].value): return None
+                    parsers[target.value.id].add(call.args[0].value)
+                continue
+        # No unreviewed setup call, control branch or parser mutation before
+        # parse_args may silently alter the declared configuration contract.
+        return None
+    return None
 
 
 def reviewed_unittest_wildcard(repo, path, node):
@@ -1225,6 +1558,7 @@ def inventory(repo, catalog=None):
         orphan_reviews[p] = entry
     pins = repo.pins()
     historical = historical_outputs(repo)
+    historical.update(reviewed_historical_notes(repo))
     # Search coverage is explicitly broader than the certified use graph. A
     # textual hit is negative-evidence context, not a consumer certification.
     names = collections.defaultdict(list)
@@ -1276,7 +1610,7 @@ def inventory(repo, catalog=None):
         recovery = pins.get(p)
         reason = None; classification = None; unresolved = []
         chain = chains.get(p)
-        historical_role = historical.get(p) or (evidence_role(repo.bytes(p)) if kind == 'blob' and mode != '120000' else None)
+        historical_role = historical.get(p) or reviewed_historical_archive(repo, p) or (evidence_role(repo.bytes(p)) if kind == 'blob' and mode != '120000' else None)
         if chain:
             classification = 'keep'
             reason = (chain['entry']['kind'] + ' entry point: ' + chain['entry']['command'] if not chain['edges'] else
@@ -1327,7 +1661,7 @@ def inventory(repo, catalog=None):
 
 def verify(actual, expected, require_complete=True):
     if not isinstance(actual, dict): raise ValueError('inventory must be an object')
-    if actual.get('schema_version') != SCHEMA: raise ValueError('schema version mismatch')
+    if type(actual.get('schema_version')) is not int or actual['schema_version'] != SCHEMA: raise ValueError('schema version mismatch')
     if actual.get('measured_revision') != expected['measured_revision']:
         raise ValueError('stale or mismatched measured revision')
     rows = actual.get('records')
@@ -1340,7 +1674,8 @@ def verify(actual, expected, require_complete=True):
         if r.get('class') not in (*CLASSES, None): raise ValueError('invalid class')
     # Rebuilding all rows checks every pin/chain/content claim, not a digest
     # supplied by the same untrusted input. This also rejects extra fields.
-    if actual != expected: raise ValueError('classification provenance, recovery pin, ordering or schema differs from rebuilt model')
+    # JSON distinguishes booleans, integers and floats; Python equality does not.
+    if canonical(actual) != canonical(expected): raise ValueError('classification provenance, recovery pin, ordering or schema differs from rebuilt model')
     if require_complete and expected['analysis_gaps']:
         raise ValueError('unresolved analysis: ' + '; '.join(expected['analysis_gaps']))
     if require_complete and expected['totals']['unresolved']:
@@ -1438,6 +1773,71 @@ def passing_scan_boundary_controls():
         assert rows[target]['class'] == 'evidence' and not rows[target]['runner_chain']
 
 
+def configured_cli_boundary_controls():
+    import copy
+    with tempfile.TemporaryDirectory(prefix='tests-used-cli-controls-') as directory:
+        root = Path(directory)
+        text = 'import argparse\nfrom pathlib import Path\ndef main():\n p=argparse.ArgumentParser()\n p.add_argument("--input", required=True)\n a=p.parse_args()\n assert Path(a.input).read_text()=="fixture\\n"\nif __name__ == "__main__": main()\n'
+        variants = {
+            'valid': text,
+            'dead': text.replace('if __name__ == "__main__":', 'if False:'),
+            'nested': text.replace('if __name__ == "__main__": main()', 'def never(): main()'),
+            'early-exit': text.replace('if __name__', 'import sys\nsys.exit(0)\nif __name__'),
+            'shadow-module': text.replace('from pathlib', 'import json as argparse\nfrom pathlib'),
+            'shadow-main': text.replace('if __name__', 'main=lambda:None\nif __name__'),
+            'parser-mutation': text.replace(' a=p.parse_args()', ' p.parse_args=lambda:None\n a=p.parse_args()'),
+            'different-parser': text.replace(' a=p.parse_args()', ' q=argparse.ArgumentParser()\n a=q.parse_args()'),
+            'no-parser': 'def main(): pass\nif __name__ == "__main__": main()\n',
+            'class-main': text.replace('if __name__', 'class main: pass\nif __name__'),
+            'function-argparse': text.replace('def main():', 'def argparse(): pass\ndef main():'),
+            'class-argparse': text.replace('def main():', 'class argparse: pass\ndef main():'),
+            'class-magic-name': text.replace('if __name__', 'class __name__: pass\nif __name__'),
+            'function-magic-name': text.replace('if __name__', 'def __name__(): pass\nif __name__'),
+            'decorated-main': text.replace('def main():', '@replace_checker\ndef main():'),
+        }
+        for name, source in variants.items():
+            target = root/('scripts/h55/' + name + '.py'); target.parent.mkdir(parents=True, exist_ok=True); target.write_text(source)
+        (root/'tests').mkdir(); (root/'tests/input.txt').write_text('fixture\n')
+        git(root, 'init', '-q'); git(root, 'add', '.')
+        git(root, '-c', 'user.name=Control', '-c', 'user.email=control@example.invalid', 'commit', '-qm', 'CLI controls')
+        repo = Repository(root, 'HEAD'); path = 'scripts/h55/valid.py'; declaration = declared_configured_cli(repo, path)
+        assert declaration and declaration['required_options'] == ['--input']
+        refusal = subprocess.run(['python3', '-B', path], cwd=root, capture_output=True)
+        assert refusal.returncode == 2 and b'--input' in refusal.stderr
+        entry = {'path': path, 'input_revision': repo.ref, 'source_blob': repo.tree[path][2],
+                 'command': ['python3', '-B', path], 'kind': 'committed-cli',
+                 'entry_line': declaration['main_line'], 'required_options': ['--input'],
+                 'purpose': 'Curated input-checker source; configured invocation not validated.'}
+        catalog = {'schema_version': 1, 'standalone': [entry], 'generators': [], 'reads': [], 'orphans': []}
+        model = inventory(repo, catalog); rows = {r['path']: r for r in model['records']}; source = rows[path]['runner_chain']['entry']
+        assert rows[path]['class'] == 'keep' and source['source_only']
+        assert source['command_form'].startswith('entry prefix') and source['required_options'] == ['--input']
+        assert source['validation_at_measured_revision']['status'] == 'unavailable'
+        assert rows['tests/input.txt']['class'] is None
+        graph = Graph(repo); validated_routes(graph, catalog)
+        graph.edge(path, 'tests/input.txt', 7, 'unreviewed configured read')
+        assert 'tests/input.txt' not in graph.chains()
+        for name in variants:
+            if name == 'valid': continue
+            candidate = 'scripts/h55/' + name + '.py'; assert declared_configured_cli(repo, candidate) is None, name
+            bad = copy.deepcopy(catalog); bad['standalone'][0].update(path=candidate, source_blob=repo.tree[candidate][2], command=['python3', '-B', candidate])
+            try: inventory(repo, bad)
+            except ValueError: pass
+            else: raise AssertionError('unsupported CLI role accepted: ' + name)
+        for field, value in (('entry_line', 1), ('required_options', ['--invented']), ('source_blob', '0' * 40),
+                             ('command', ['python3', '-B', path, '--input', 'tests/input.txt'])):
+            bad = copy.deepcopy(catalog); bad['standalone'][0][field] = value
+            try: inventory(repo, bad)
+            except ValueError: pass
+            else: raise AssertionError('unsupported CLI command/provenance accepted')
+        bad = copy.deepcopy(catalog); bad['reads'] = [{'runner': 'committed-cli:' + path, 'input_revision': repo.ref,
+            'frames': [{'path': path, 'blob': repo.tree[path][2], 'line': 7}], 'target': 'tests/input.txt',
+            'target_blob': repo.tree['tests/input.txt'][2], 'operation': 'validated Python read of measured bytes'}]
+        try: inventory(repo, bad)
+        except ValueError as error: assert 'no validated runner' in str(error)
+        else: raise AssertionError('CLI source-only root granted observed-read credit')
+
+
 def skipped_runner_boundary_controls():
     import copy
     with tempfile.TemporaryDirectory(prefix='tests-used-skipped-controls-') as directory:
@@ -1497,6 +1897,7 @@ def self_test():
     if not __debug__: raise ValueError("self-test requires Python assertions; omit -O")
     import copy
     skipped_runner_boundary_controls()
+    configured_cli_boundary_controls()
     assert evidence_role(b'\x1f\x8b' + b'\0' * 40) is None
     transcript = b'....\n----------------------------------------------------------------------\nRan 4 tests in 0.001s\n\nOK\n'
     assert evidence_role(gzip.compress(transcript, mtime=0))
@@ -1546,6 +1947,118 @@ def self_test():
         assert not reviewed_unittest_wildcard(types.SimpleNamespace(tree=changed), wildcard_test, wildcard_node)
     assert not reviewed_unittest_wildcard(types.SimpleNamespace(tree=wildcard_tree), wildcard_test,
                                          ast.parse('from kernel_metadata import *').body[0])
+    failed_log = gzip.compress(b'', mtime=0)
+    failed_index = {'exitCode': 1, 'failedGate': ['git', 'diff', '--cached', '--check'], 'failedGateExitCode': 2,
+                    'reason': 'Initial whitespace failure; exact archived outputs retained.',
+                    'logs': [{'path': 'initial-failed.log.gz', 'sha256': hashlib.sha256(failed_log).hexdigest()}]}
+    assert failed_validation_logs(failed_index) and evidence_role(json.dumps(failed_index).encode())
+    lake_text = '⚠ [2/8] Built Solidity.AST (11s)\nwarning: Solidity/AST.lean:354:4: unused variable `k`\nbody of diagnostic\n✔ [77/77] Built Solidity.Tools.Upstream (4.2s)\nBuild completed successfully (77 jobs).\n'
+    assert lake_build_transcript(lake_text) and evidence_role(lake_text.encode())
+    assert evidence_role(gzip.compress(lake_text.encode()))
+    for bad in (lake_text.rsplit('Build completed', 1)[0], '```\n' + lake_text + '```\n',
+                lake_text + 'trailing source\n', lake_text + lake_text,
+                lake_text.replace('[2/8]', '[9/8]'), lake_text.replace('[2/8]', '[0/8]'),
+                lake_text.replace('[2/8]', '[2/88]'),
+                lake_text.replace('✔ [77/77] Built Solidity.Tools.Upstream (4.2s)', '⚠ [2/8] Built Solidity.AST (11s)'),
+                lake_text.replace('[2/8]', '[999999999999/999999999999]'),
+                lake_text.replace('(11s)', '(NaNs)'), lake_text.replace('(11s)', '(' + '9' * 5000 + 's)'),
+                lake_text.replace('Solidity.AST', 'Solidity.AST\x00'),
+                lake_text.replace('Build completed successfully (77 jobs).', 'Build completed successfully (0 jobs).')):
+        assert not lake_build_transcript(bad), repr(bad)
+    node_text = '✔ first (1.2ms)\n✔ second (0ms)\nℹ tests 2\nℹ suites 0\nℹ pass 2\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 3.4\n'
+    assert flat_node_transcript(node_text) and evidence_role(node_text.encode())
+    assert flat_node_transcript(node_text.replace('✔ second', '✖ second').replace('ℹ pass 2', 'ℹ pass 1').replace('ℹ fail 0', 'ℹ fail 1'))
+    assert evidence_role(gzip.compress(node_text.encode()))
+    for bad in (node_text.rsplit('ℹ duration_ms', 1)[0], node_text + 'source wrapper\n', '```\n' + node_text + '```\n',
+                node_text.replace('ℹ tests 2', 'ℹ tests 3'), node_text.replace('ℹ fail 0', 'ℹ fail 1'),
+                node_text.replace('3.4', 'NaN'), node_text.replace('3.4', 'Infinity'),
+                node_text.replace('ℹ suites 0', 'ℹ suites -1'), node_text.replace('ℹ todo 0', 'ℹ todo 1'),
+                node_text.replace('ℹ tests 2', 'ℹ tests ' + '9' * 5000),
+                node_text.replace('1.2ms', '9' * 5000 + 'ms'),
+                node_text + node_text, 'prefix\n' + node_text, node_text.replace('first', 'first\x00')):
+        assert not flat_node_transcript(bad), repr(bad)
+    attributed_failure = dict(failed_index, status='failed-whitespace-check', command=['python3', 'tests/upstream/baseline-20261028/attribution/validate.py'])
+    assert failed_validation_logs(attributed_failure)
+    for field, bad in (('exitCode', 0), ('exitCode', True), ('failedGateExitCode', False),
+                       ('failedGate', ['echo', 'expected']), ('reason', ' '), ('logs', [])):
+        assert not failed_validation_logs(dict(failed_index, **{field: bad}))
+    for path in ('/external/log.gz', '../log.gz', 'C:/external/log.gz', 'bad\0name', 'a//log.gz'):
+        assert not failed_validation_logs(dict(failed_index, logs=[{'path': path, 'sha256': 'a' * 64}]))
+    assert not failed_validation_logs(dict(failed_index, logs=failed_index['logs'] * 2))
+    assert not failed_validation_logs(dict(attributed_failure, command=['python3', 'obsolete.py']))
+    assert not failed_validation_logs(dict(failed_index, expectedExitCode=1))
+    proposal = {'command': ['node', 'tests/h28-sol/non-vacuity/prepare-pin-proposal.mjs', 'private-output'],
+        'generator_sha256': 'a' * 64, 'source_head': 'b' * 40, 'base': 'c' * 40,
+        'shared_inventory': 'scripts/g07-axiom-pins.json', 'shared_inventory_sha256': 'd' * 64,
+        'source_pins': 'tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean',
+        'source_pins_sha256': 'e' * 64, 'old_count': 3, 'added_count': 2, 'candidate_count': 5,
+        'old_entries_unchanged': True, 'before': {'errors': [], 'notes': ['new pin one', 'new pin two']},
+        'after': {'errors': [], 'notes': []}, 'candidate_sha256': 'f' * 64, 'boundary': 'UNAPPLIED proposal only.'}
+    assert unapplied_pin_comparison(proposal) and evidence_role(json.dumps(proposal).encode())
+    assert unapplied_pin_comparison(dict(proposal, registry_base='1' * 40, external_unregistered_count=7))
+    for field, bad in (('command', ['node', 'prepare-pin-proposal.mjs', 'out']),
+                       ('command', ['node', 'tests/h28-sol/non-vacuity/prepare-pin-proposal.mjs']),
+                       ('source_head', 'partial'), ('generator_sha256', 'missing'), ('registry_base', 'bad'),
+                       ('old_count', True), ('added_count', -1), ('candidate_count', 4),
+                       ('old_entries_unchanged', False), ('shared_inventory', 'other.json'),
+                       ('source_pins', 'other.lean'), ('before', {'errors': [], 'notes': 'expected'}),
+                       ('after', {'expected': 'pass'}), ('after', {'errors': ['failure'], 'notes': []}),
+                       ('before', {'errors': [], 'notes': []}),
+                       ('boundary', 'Applied successfully'), ('extra', 'unsupported')):
+        assert not unapplied_pin_comparison(dict(proposal, **{field: bad})), field
+    missing = dict(proposal); del missing['candidate_sha256']; assert not unapplied_pin_comparison(missing)
+    def control_archive(entries):
+        output = io.BytesIO()
+        with tarfile.open(fileobj=output, mode='w:gz') as archive:
+            for name, data, kind in entries:
+                member = tarfile.TarInfo(name); member.type = kind
+                member.size = len(data) if kind == tarfile.REGTYPE else 0
+                if kind == tarfile.SYMTYPE: member.linkname = 'elsewhere'
+                archive.addfile(member, io.BytesIO(data) if kind == tarfile.REGTYPE else None)
+        return output.getvalue()
+    body = b'{"historical":true}\n'; member_sha = hashlib.sha256(body).hexdigest()
+    archive_bytes = control_archive([('records/result.json', body, tarfile.REGTYPE)])
+    assert archive_member_matches(archive_bytes, 'records/result.json', member_sha)
+    assert not archive_member_matches(archive_bytes, 'records/result.json', '0' * 64)
+    assert not archive_member_matches(archive_bytes, 'missing.json', member_sha)
+    for entries in ([('records/result.json', body, tarfile.REGTYPE)] * 2,
+                    [('records/result.json', b'', tarfile.SYMTYPE)],
+                    [('../escape', body, tarfile.REGTYPE)], [('/absolute', body, tarfile.REGTYPE)],
+                    [('records/result.json', body, tarfile.REGTYPE), ('special', b'', tarfile.FIFOTYPE)],
+                    [('records/result.json', body, tarfile.REGTYPE), ('dir', b'', tarfile.DIRTYPE), ('dir/', b'', tarfile.DIRTYPE)]):
+        assert not archive_member_matches(control_archive(entries), 'records/result.json', member_sha)
+    assert not archive_member_matches(b'not a gzip archive', 'records/result.json', member_sha)
+    assert not archive_member_matches(gzip.compress(b'x' * 8_000_001), 'records/result.json', member_sha)
+    from types import SimpleNamespace
+    note_path = 'tests/captured-prompt.md'; note_blob = 'c' * 40
+    note_repo = SimpleNamespace(tree={note_path: ('100644', 'blob', note_blob)}, texts={note_path: '# Captured old assignment\nDo the old work.\n'})
+    note_row = {'path': note_path, 'blob': note_blob, 'anchor': '# Captured old assignment',
+                'role': 'Historical record: captured assignment, not current instructions.'}
+    note_defs = {'schema_version': 1, 'records': [note_row]}
+    assert note_path in reviewed_historical_notes(note_repo, note_defs)
+    assert not reviewed_historical_notes(note_repo, dict(note_defs, records=[dict(note_row, blob='0' * 40)]))
+    for bad in (dict(note_defs, records=[note_row, note_row]), dict(note_defs, schema_version=True),
+                dict(note_defs, records=[dict(note_row, anchor='# Not in source')]),
+                dict(note_defs, records=[dict(note_row, path='outside.md')]),
+                dict(note_defs, records=[dict(note_row, role='Keep because filename')]),
+                dict(note_defs, records=[dict(note_row, blob='partial')]),
+                dict(note_defs, records=[dict(note_row, extra='unsupported')])):
+        try: reviewed_historical_notes(note_repo, bad)
+        except ValueError: pass
+        else: raise AssertionError('unsupported historical prose claim accepted')
+    typed_expected = {'schema_version': 1, 'measured_revision': 'a' * 40, 'records': [],
+                      'analysis_gaps': [], 'totals': {**{c: 0 for c in CLASSES}, 'unresolved': 0, 'paths': 0}}
+    verify(typed_expected, typed_expected)
+    for bad in (dict(typed_expected, schema_version=True), dict(typed_expected, schema_version=1.0),
+                dict(typed_expected, totals=dict(typed_expected['totals'], unresolved=False)),
+                dict(typed_expected, totals=dict(typed_expected['totals'], paths=0.0))):
+        try: verify(bad, typed_expected)
+        except ValueError: pass
+        else: raise AssertionError('non-integer schema/counter accepted through Python equality')
+    for raw in ('{"schema_version":0,"schema_version":1}', '{"recovery":{"blob":"fake","blob":"real"}}'):
+        try: json.loads(raw, object_pairs_hook=unique_json_object)
+        except ValueError: pass
+        else: raise AssertionError('duplicate JSON object key accepted')
     assert nonnegative_number(10 ** 1000)
     resource_receipt = {'command': ['archived-runner'], 'exit': 7, 'elapsed_seconds': 0.25,
                         'resource_stop': False, 'peak_group_rss_bytes': 1024}
@@ -1638,6 +2151,11 @@ def self_test():
         sources['tests/bound-history.log'] = 'archived failure\n'
         sources['tests/unsafe-history.json'] = json.dumps(dict(resource_envelope, commands=[dict(measured_row, log='/tests/not-an-input.log', uncompressedLogSha256=hashlib.sha256(b'unused\n').hexdigest())]))
         sources['tests/not-an-input.log'] = 'unused\n'
+        sources['tests/failed-index.json'] = json.dumps(dict(failed_index, logs=[
+            {'path': 'initial-failed.log.gz', 'sha256': hashlib.sha256(failed_log).hexdigest()},
+            {'path': 'same-text-other-gzip.log.gz', 'sha256': hashlib.sha256(failed_log).hexdigest()}]))
+        sources['tests/initial-failed.log.gz'] = failed_log
+        sources['tests/same-text-other-gzip.log.gz'] = gzip.compress(b'', mtime=1)
         sources['tests/cumulative-history.json'] = json.dumps(dict(baseline_report, commands=[
             dict(baseline_row, log='compressed-history.gz', uncompressedSha256=hashlib.sha256(b'').hexdigest()),
             dict(baseline_row, log='wrong-history.gz', uncompressedSha256=hashlib.sha256(b'other').hexdigest()),
@@ -1840,6 +2358,10 @@ def self_test():
         assert rows['tests/history-empty.log']['class'] == 'evidence'
         assert rows['tests/bound-history.log']['class'] == 'evidence'
         assert '/commands/0' in rows['tests/bound-history.log']['reason']
+        assert rows['tests/failed-index.json']['class'] == 'evidence'
+        assert rows['tests/initial-failed.log.gz']['class'] == 'evidence'
+        assert '/logs/0' in rows['tests/initial-failed.log.gz']['reason'] and 'stored-byte SHA256' in rows['tests/initial-failed.log.gz']['reason']
+        assert rows['tests/same-text-other-gzip.log.gz']['class'] is None
         assert rows['tests/compressed-history.gz']['class'] == 'evidence'
         assert 'uncompressed SHA256' in rows['tests/compressed-history.gz']['reason']
         assert rows['tests/wrong-history.gz']['class'] is None
@@ -1952,7 +2474,7 @@ def main():
         target = Path(root) / OUTPUT
         if args.write: target.write_bytes(canonical(expected))
         else:
-            actual = json.loads(target.read_bytes())
+            actual = json.loads(target.read_bytes(), object_pairs_hook=unique_json_object)
             verify(actual, expected)
             if target.read_bytes() != canonical(expected): raise ValueError('noncanonical inventory bytes')
         print(json.dumps(expected['totals'], sort_keys=True))

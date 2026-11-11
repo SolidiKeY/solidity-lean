@@ -1,0 +1,149 @@
+{
+  "records": [
+    {
+      "anchor": "You are the Codex Cloud worker for batch \"solidity-h62-2-20261106\", task \"audit-calculus\": H62 2 audit-calculus.",
+      "blob": "b27e719a07433d0b81c984c7149c8b66d8c594ec",
+      "path": "scripts/h62/item2/audit-calculus/h28-inherited-handoff/ORIGINAL-FROZEN-PROMPT.md",
+      "role": "Historical record: Captured original audit-calculus assignment and pinned launch revision; historical instructions are data, not current authorization. Reported assertions, permissions, external artifacts and passes are not independently verified or adopted."
+    },
+    {
+      "anchor": "# H82 retirement handoff",
+      "blob": "68d0ac0c3c2ef463e11ac3df00e170c526031920",
+      "path": "scripts/h62/item2/audit-calculus/h28-inherited-handoff/RETIREMENT.md",
+      "role": "Historical record: Recorded H82 stopped implementation, successor and authenticated handoff requirements. Reported assertions, permissions, external artifacts and passes are not independently verified or adopted."
+    },
+    {
+      "anchor": "# Subsequent coordinator steering from this thread",
+      "blob": "ba2f87aee4fe7a5011c115c3ca734b02394e6e89",
+      "path": "scripts/h62/item2/audit-calculus/h28-inherited-handoff/STEERING.md",
+      "role": "Historical record: Quoted old coordinator steering and retirement instruction; no current permission follows. Reported assertions, permissions, external artifacts and passes are not independently verified or adopted."
+    },
+    {
+      "anchor": "# Original queue and final open obligations",
+      "blob": "cc58b8bece96cff780ee366fdff45397f2ccbc9e",
+      "path": "scripts/h62/item2/audit-calculus/h28-inherited-handoff/WORK-AND-BACKFILL-QUEUE.md",
+      "role": "Historical record: Explicit verbatim original queue and retirement-time unfinished obligations. Reported assertions, permissions, external artifacts and passes are not independently verified or adopted."
+    },
+    {
+      "anchor": "# Coherent original-history accounting refresh",
+      "blob": "f40c20a5fb16985f4dd09ebeab65247b6241ef61",
+      "path": "scripts/h62/item2/audit-theories/handoff/ACCEPTANCE-REFRESH-20261108.md",
+      "role": "Historical record: Reported coherent original-history report refresh, gates and pending coverage. Reported assertions, permissions, external artifacts and passes are not independently verified or adopted."
+    },
+    {
+      "anchor": "# Portable certificate binding review fix",
+      "blob": "7bdbf3f4f39ff917eaf083904b0773ff1bd68a4b",
+      "path": "scripts/h62/item2/audit-theories/handoff/CERTIFICATE-BINDING-FIX-20261107.md",
+      "role": "Historical record: Reported source/receipt binding defect, repair and historical corruption controls. Reported assertions, permissions, external artifacts and passes are not independently verified or adopted."
+    },
+    {
+      "anchor": "# Six original clean-tail statements witnessed",
+      "blob": "ff7713cb1499ec79add04d1b88e2d6a0b2be073b",
+      "path": "scripts/h62/item2/audit-theories/handoff/CLEAN-TAIL-20261108.md",
+      "role": "Historical record: Reported six-statement witness checkpoint and failed/final check history with limits. Reported assertions, permissions, external artifacts and passes are not independently verified or adopted."
+    },
+    {
+      "anchor": "# Occurrence-based clean-tail roles",
+      "blob": "eeb4d9b65099b5a70b9b3716d8bc569041aeb2ab",
+      "path": "scripts/h62/item2/audit-theories/handoff/CLEAN-TAIL-ROLES-20261108.md",
+      "role": "Historical record: Reported frozen premise-occurrence accounting and corruption-control checkpoint. Reported assertions, permissions, external artifacts and passes are not independently verified or adopted."
+    },
+    {
+      "anchor": "# Conflict resolution handoff",
+      "blob": "e824c7f9512b45028b20371048ad0de6fb75d436",
+      "path": "scripts/h62/item2/audit-theories/handoff/CONFLICT-RESOLUTION-20261108.md",
+      "role": "Historical record: Named historical ancestor/merge repair and external evidence availability report; also a portable-attachment consumer candidate. Reported assertions, permissions, external artifacts and passes are not independently verified or adopted."
+    },
+    {
+      "anchor": "# Frozen evidence reconstruction",
+      "blob": "427f3a7f92f11e731cdb140320d731deb45a51fa",
+      "path": "scripts/h62/item2/audit-theories/handoff/FROZEN-REBUILD-20261108.md",
+      "role": "Historical record: Pinned historical reconstruction report and unfinished validation boundaries. Reported assertions, permissions, external artifacts and passes are not independently verified or adopted."
+    },
+    {
+      "anchor": "# Coherent original-history acceptance after leaf witnesses",
+      "blob": "89442b594dba40cdb47379605cb2323d734f6bf2",
+      "path": "scripts/h62/item2/audit-theories/handoff/LEAF-ACCEPTANCE-20261108.md",
+      "role": "Historical record: Reported post-leaf historical refresh, navigation/approval disposition and remaining obligations. Reported assertions, permissions, external artifacts and passes are not independently verified or adopted."
+    },
+    {
+      "anchor": "# All frozen leaf-extension inputs witnessed",
+      "blob": "744123f4cecd37d1bd83cf3077f6202c191af33e",
+      "path": "scripts/h62/item2/audit-theories/handoff/LEAF-PROGRESS-20261108.md",
+      "role": "Historical record: Reported ordinary leaf witness/source-stage progress and model limits. Reported assertions, permissions, external artifacts and passes are not independently verified or adopted."
+    },
+    {
+      "anchor": "# Frozen leaf-premise accounting",
+      "blob": "8ae36e2ea5c5055ac494771c9f7bf0e64c6ec564",
+      "path": "scripts/h62/item2/audit-theories/handoff/LEAF-ROLES-20261108.md",
+      "role": "Historical record: Frozen leaf premise report explicitly distinguishing current-tree equivalence. Reported assertions, permissions, external artifacts and passes are not independently verified or adopted."
+    },
+    {
+      "anchor": "# Memory mirror role checkpoint",
+      "blob": "21c01a46b552a70e480fdf946858d9212a2d8548",
+      "path": "scripts/h62/item2/audit-theories/handoff/MIRROR-ROLES-20261108.md",
+      "role": "Historical record: Reported memory-mirror occurrence classification, controls and separate coverage. Reported assertions, permissions, external artifacts and passes are not independently verified or adopted."
+    },
+    {
+      "anchor": "# Coherent original-history acceptance after Mode witnesses",
+      "blob": "144e76b0799d497e975ca473f7141ac97c2b3547",
+      "path": "scripts/h62/item2/audit-theories/handoff/MODE-ACCEPTANCE-20261108.md",
+      "role": "Historical record: Reported Mode historical acceptance refresh and pending original queue. Reported assertions, permissions, external artifacts and passes are not independently verified or adopted."
+    },
+    {
+      "anchor": "# Populated observation-domain handoff",
+      "blob": "d0a7e60f174e04fc640bbbeb22dcdaf5453ec048",
+      "path": "scripts/h62/item2/audit-theories/handoff/OBSERVATION-DOMAINS-20261108.md",
+      "role": "Historical record: Reported populated-domain witness checkpoint and non-physical-model limits. Reported assertions, permissions, external artifacts and passes are not independently verified or adopted."
+    },
+    {
+      "anchor": "# Retirement status and complete remaining queue",
+      "blob": "e8711aaeba9c06bfe0757b3c46fa47d010612d53",
+      "path": "scripts/h62/item2/audit-theories/handoff/OPEN-QUEUE.md",
+      "role": "Historical record: Retirement/successor record, remaining work and recorded unavailable goal-control account. Reported assertions, permissions, external artifacts and passes are not independently verified or adopted."
+    },
+    {
+      "anchor": "# Complete path-observation role inventory",
+      "blob": "b95ab748779b750df24ca62e8ea4c5465a1df57b",
+      "path": "scripts/h62/item2/audit-theories/handoff/PATH-ROLES-20261108.md",
+      "role": "Historical record: Reported frozen path-observation premise accounting, controls and remaining work. Reported assertions, permissions, external artifacts and passes are not independently verified or adopted."
+    },
+    {
+      "anchor": "# All original Reachable/Mode inputs witnessed",
+      "blob": "d69d8cda8ca15cf9025a7a8abe35e4253c123278",
+      "path": "scripts/h62/item2/audit-theories/handoff/REACHABLE-MODE-20261108.md",
+      "role": "Historical record: Reported Mode witness progress and unresolved gates with explicit scope limits. Reported assertions, permissions, external artifacts and passes are not independently verified or adopted."
+    },
+    {
+      "anchor": "# Reachable-mode premise accounting",
+      "blob": "9596bec9d4cfce1ec046a9868a90263a7e0030ce",
+      "path": "scripts/h62/item2/audit-theories/handoff/REACHABLE-MODE-ROLES-20261108.md",
+      "role": "Historical record: Reported frozen telescope/occurrence-role accounting and refusal controls. Reported assertions, permissions, external artifacts and passes are not independently verified or adopted."
+    },
+    {
+      "anchor": "# Frozen tuple-progress joint inputs",
+      "blob": "5de5226d506e8e6e2cc0339bcf71eae0e5631749",
+      "path": "scripts/h62/item2/audit-theories/handoff/TUPLE-PROGRESS-20261108.md",
+      "role": "Historical record: Reported tuple witness progress, current/frozen distinction and pending integration. Reported assertions, permissions, external artifacts and passes are not independently verified or adopted."
+    },
+    {
+      "anchor": "# All frozen tuple premise roles",
+      "blob": "98c226934a7c25f06360f112286f6eae8d4b8be4",
+      "path": "scripts/h62/item2/audit-theories/handoff/TUPLE-ROLES-20261108.md",
+      "role": "Historical record: Reported tuple occurrence roles and impossibility-versus-witness distinctions. Reported assertions, permissions, external artifacts and passes are not independently verified or adopted."
+    },
+    {
+      "anchor": "# Tuple audit verification and fresh-thread handoff",
+      "blob": "1ec8743a648dce0eac73265903576be2fc0c5f8f",
+      "path": "scripts/h62/item2/audit-theories/handoff/TUPLE-VERIFICATION-20261108.md",
+      "role": "Historical record: Final historical checkpoint accounting, catalog disposition and pending integration. Reported assertions, permissions, external artifacts and passes are not independently verified or adopted."
+    },
+    {
+      "anchor": "## Work queue (four checkpoints)",
+      "blob": "73326fc36de3421854174f16e5cf62a7976ca29e",
+      "path": "scripts/h62/item2/audit-theories/handoff/original-work-and-backfill-queue.md",
+      "role": "Historical record: Verbatim original work/backfill assignment with explicit provenance marker; also a portable-attachment consumer candidate. Reported assertions, permissions, external artifacts and passes are not independently verified or adopted."
+    }
+  ],
+  "schema_version": 1
+}
