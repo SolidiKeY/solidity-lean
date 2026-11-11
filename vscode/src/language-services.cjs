@@ -126,7 +126,13 @@ function receiverMembers(text,point,analysis){
   if(declaration?.nodeType==='EnumDefinition')return declaration.members||[];
   const result=[];
   if(/\[.*\]/.test(type)||/^bytes(?: |$)/.test(type)){
-    result.push({name:'length'});if(type.includes('storage')&&/\[\]|^bytes(?: |$)/.test(type))result.push({name:'push',nodeType:'FunctionDefinition'},{name:'pop',nodeType:'FunctionDefinition'});
+    const location=declaration?.storageLocation;
+    // Declaration ownership is separate from type text; only the outer array can grow.
+    const nonstorage=/\s(?:memory|calldata)(?: ref| pointer)?$/.test(type);
+    const storage=!nonstorage&&(location==='storage'||location==='default'&&declaration?.stateVariable===true||location===undefined&&declaration?.stateVariable===undefined&&/\bstorage\b/.test(type));
+    const arrayType=declaration?.typeName,openOuter=/\[\]$/.test(plainType(type));
+    const dynamicOuter=openOuter&&(arrayType?.nodeType!=='ArrayTypeName'||!Object.hasOwn(arrayType,'length')||arrayType.length===null);
+    result.push({name:'length'});if(storage&&(dynamicOuter||/^bytes(?: |$)/.test(type)))result.push({name:'push',nodeType:'FunctionDefinition'},{name:'pop',nodeType:'FunctionDefinition'});
   }
   if(/^address/.test(type))for(const name of ['balance','code','codehash','call','delegatecall','staticcall'])result.push({name});
   for(const using of analysis?.nodes.filter(n=>n.nodeType==='UsingForDirective')||[]){
