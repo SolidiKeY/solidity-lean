@@ -18,6 +18,12 @@ Passing routes require successful ordinary and instrumented commands. Separate
 nonpassing unittest observations retain failure status and require an entered
 test/setup method identity. Reinterpreting older traces requires an exact
 reviewed full collector SHA. Raw traces and receipts stay outside the code branch.
+
+--observe-module-entry is an explicit, off-by-default positive observation. A
+profile call event observes an entered measured module frame, rather than an
+audit exec attempt or source-loader read. It adds overhead within the same
+timeout. Missing events, removed profiling and unsupported interpreters provide
+no non-use evidence. This telemetry is not proof or adversarial attestation.
 """
 import argparse
 import hashlib
@@ -135,6 +141,8 @@ def install_hook():
     fingerprints = {}
     untrusted_sources = set()
     original_hash = hashlib.sha256
+    compiled_sources = set()
+    observe_entries = os.environ.get('X1_TRACE_MODULE_ENTRY') == '1'
 
     def relative(path):
         try:
@@ -152,6 +160,12 @@ def install_hook():
                 data = source.encode('utf-8') if isinstance(source, str) else source
                 if source is not None and (not isinstance(data, bytes) or original_hash(data).hexdigest() != manifest[target]['sha256']):
                     untrusted_sources.add(target)
+            if observe_entries and target in manifest and isinstance(data, bytes) and original_hash(data).hexdigest() == manifest[target]['sha256']:
+                compiled_sources.add(target)
+            return
+        if observe_entries and event == 'code.__new__':
+            target = relative(args[1])
+            if target in manifest: untrusted_sources.add(target)
             return
         if event == 'exec':
             code = args[0]; target = relative(code.co_filename)
@@ -198,9 +212,43 @@ def install_hook():
             state.busy = False
 
     sys.addaudithook(audit)
+    if observe_entries:
+        if sys.implementation.name != 'cpython' or sys.getprofile() is not None or threading.getprofile() is not None:
+            raise ValueError('module entry observation requires unprofiled CPython')
+        def entered(frame, event, argument):
+            if event != 'call' or frame.f_code.co_name != '<module>' or getattr(state, 'busy', False): return
+            state.busy = True
+            try:
+                # Direct callback invocation is not an interpreter profile call.
+                if sys._getframe(1) is not frame: return
+                target = relative(frame.f_code.co_filename)
+                if target not in compiled_sources or target in untrusted_sources: return
+                fingerprint = code_fingerprint(frame.f_code)
+                if fingerprint not in manifest[target].get('module_code_hashes', ()): return
+                frames = []; caller = frame.f_back
+                while caller:
+                    source = relative(caller.f_code.co_filename)
+                    if source in manifest:
+                        if source in untrusted_sources or code_fingerprint(caller.f_code) not in manifest[source].get('code_hashes', ()): return
+                        frames.append({'path': source, 'line': caller.f_lineno})
+                    elif caller.f_code.co_filename in ('<string>', '<stdin>') or caller.f_code.co_filename.startswith(root + os.sep): return
+                    elif os.path.isabs(caller.f_code.co_filename) and not any(caller.f_code.co_filename.startswith(prefix + os.sep) for prefix in (sys.prefix, sys.base_prefix)): return
+                    caller = caller.f_back
+                if not frames: return
+                record = {'event_id': f'X1EXEC:{threading.get_native_id()}:{next(sequence)}',
+                          'target': target, 'frames': frames, 'module_code_sha256': fingerprint,
+                          'module_frame_line': frame.f_lineno,
+                          'python': list(sys.version_info[:3])}
+                os.write(log, json.dumps(record, separators=(',', ':')).encode() + b'\n')
+            except (OSError, ValueError, TypeError):
+                pass
+            finally:
+                state.busy = False
+        sys.setprofile(entered)
+        threading.setprofile(entered)
 
 
-def run(command, scratch, manifest, output, timeout=30):
+def run(command, scratch, manifest, output, timeout=30, observe_module_entry=False):
     scratch = Path(scratch).resolve()
     output = Path(output).resolve()
     manifest = Path(manifest).resolve()
@@ -224,6 +272,7 @@ def run(command, scratch, manifest, output, timeout=30):
         env = dict(os.environ, PYTHONDONTWRITEBYTECODE='1', LEAN_NUM_THREADS='1',
                    X1_TRACE_ROOT=str(scratch), X1_TRACE_MANIFEST=str(checked_manifest), X1_TRACE_LOG=events,
                    PYTHONPATH=directory + (os.pathsep + os.environ['PYTHONPATH'] if os.environ.get('PYTHONPATH') else ''))
+        env['X1_TRACE_MODULE_ENTRY'] = '1' if observe_module_entry else '0'
         instrumentation_sha = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
         start = time.monotonic()
         with open(str(output) + '.stdout', 'wb') as stream:
@@ -240,6 +289,7 @@ def run(command, scratch, manifest, output, timeout=30):
                 os.killpg(process.pid, signal.SIGKILL)
                 status = process.wait()
         receipt = {'command': command, 'input_revision': revision, 'exit': status,
+                   'observe_module_entry': observe_module_entry,
                    'timeout': timed_out, 'seconds': round(time.monotonic() - start, 3),
                    'events': events, 'stdout': str(output) + '.stdout',
                    'instrumentation_source_sha256': instrumentation_sha,
@@ -248,7 +298,7 @@ def run(command, scratch, manifest, output, timeout=30):
         return receipt
 
 
-def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False):
+def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False, module_entries=False):
     """Match each actual read to its audited open by native thread and fd.
 
     Every mutated path and directory descendant is excluded, even if restored.
@@ -262,6 +312,7 @@ def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False):
     def relative(value):
         return value[len(scratch) + 1:] if value.startswith(scratch + '/') else None
     events = {e['event_id']: e for line in Path(receipt['events']).read_text().splitlines() if (e := json.loads(line))}
+    entries = set(); thread_reads = {}
     pending = {}; descriptors = {}; reads = set(); all_read_paths = set(); dirty = set(); unfinished = {}
     directories = set()
     for name in files:
@@ -325,6 +376,15 @@ def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False):
         if resumed:
             if tid not in unfinished: continue
             line = unfinished.pop(tid) + resumed[1]
+        entry_marker = re.search(r'X1EXEC:[0-9]+:[0-9]+', line)
+        if entry_marker and entry_marker[0] in events:
+            entry = events[entry_marker[0]]
+            # Source and all measured callers must have been read BEFORE entry.
+            needed = {entry['target']} | {f['path'] for f in entry['frames']}
+            expected_prefix = f'X1EXEC:{tid}:'
+            if (entry_marker[0].startswith(expected_prefix) and line.startswith('write(')
+                    and str(Path(receipt['events'])) in line and re.search(r'= [1-9][0-9]*\s*$', line)
+                    and not resumed and needed <= thread_reads.get(tid, set())): entries.add(entry_marker[0])
         marker = re.search(r'X1AUDIT:[0-9]+:[0-9]+', line)
         if marker and marker[0] in events:
             pending.setdefault(tid, []).append(marker[0])
@@ -354,7 +414,8 @@ def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False):
             consumed = (int(match[3]) > 0 or (attempted and actual in files and
                         files[actual]['sha256'] == hashlib.sha256(b'').hexdigest()))
             if consumed:
-                if actual in files: all_read_paths.add(actual)
+                if actual in files:
+                    all_read_paths.add(actual); thread_reads.setdefault(tid, set()).add(actual)
                 event_id = descriptors.get((tid, int(match[1])))
                 if event_id and actual == events[event_id]['target']: reads.add(event_id)
         kernel_copy = re.match(r'(sendfile|copy_file_range)\(', line)
@@ -380,7 +441,8 @@ def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False):
                 consumed = (requested > 0 and transferred <= requested and
                             (transferred > 0 or actual in files and files[actual]['sha256'] == hashlib.sha256(b'').hexdigest()))
                 if consumed:
-                    if actual in files: all_read_paths.add(actual)
+                    if actual in files:
+                        all_read_paths.add(actual); thread_reads.setdefault(tid, set()).add(actual)
                     event_id = descriptors.get((tid, int(source[1])))
                     if event_id and actual == events[event_id]['target']: reads.add(event_id)
         closed = re.match(r'close\((\d+).*\)\s+=\s+0\s*$', line)
@@ -414,9 +476,13 @@ def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False):
             elif name != 'ftruncate':
                 path_argument(args[0])
     routes = {}
-    for event_id in sorted(reads):
+    for event_id in sorted(entries if module_entries else reads):
         event = events[event_id]; target = event['target']
         if target not in files or target in dirty: continue
+        if module_entries:
+            if event.get('python') != list(sys.version_info[:3]): continue
+            hashes = source_code_hashes((scratch_path / target).read_bytes(), '<measured>')
+            if event.get('module_code_sha256') not in hashes['module_code_hashes']: continue
         if any(frame['path'] in dirty or frame['path'] not in all_read_paths for frame in event['frames']): continue
         frames = list(reversed(event['frames']))
         if not frames or frames[0]['path'] != runner: continue
@@ -432,6 +498,10 @@ def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False):
                              **({'code_qualname': f.get('code_qualname'), 'code_firstlineno': f.get('code_firstlineno')} if nonpassing else {})} for f in frames],
                  'target': target, 'target_blob': files[target]['blob'],
                  'operation': ('Observed fixture read during nonpassing unittest' if nonpassing else 'validated Python read of measured bytes')}
+        if module_entries:
+            route.update(operation='entered measured Python module; no fixture consumption credit',
+                         module_code_sha256=event['module_code_sha256'], python=event['python'],
+                         module_frame_line=event['module_frame_line'])
         routes[json.dumps(route, sort_keys=True, separators=(',', ':'))] = route
     return [routes[k] for k in sorted(routes)]
 
@@ -440,6 +510,22 @@ def _observed_routes(receipt, scratch, manifest, runner, nonpassing=False):
 def observed_routes(receipt, scratch, manifest, runner):
     """Passing traces only; failures never receive passing-runner credit."""
     return _observed_routes(receipt, scratch, manifest, runner)
+
+
+def observed_module_entries(receipt, normal, scratch, manifest, runner):
+    """Candidate observations only, requiring independently successful runs.
+
+    This deliberately does not change the public inventory or grant child/data
+    use. Review a separate root chain before adopting any candidate into it.
+    """
+    if (receipt.get('observe_module_entry') is not True or receipt.get('timeout') is not False
+            or normal.get('timeout') is not False or type(receipt.get('exit')) is not int
+            or receipt['exit'] != 0 or type(normal.get('exit')) is not int or normal['exit'] != 0
+            or normal.get('revision') != manifest['measured_revision']
+            or normal.get('command') != receipt.get('command')): return []
+    if receipt.get('instrumentation_source_sha256') != hashlib.sha256(Path(__file__).read_bytes()).hexdigest():
+        raise ValueError('entered-module observation requires exact collector source')
+    return _observed_routes(receipt, scratch, manifest, runner, module_entries=True)
 
 
 def observed_test_failure_routes(receipt, normal, scratch, manifest, runner, instrumentation_source=None):
@@ -560,6 +646,71 @@ def kernel_copy_boundary_controls():
                     path.write_text(''.join(lines[:index]+[malformed+'\n']+lines[index+1:]));assert expected not in {r['target'] for r in observed_routes(receipt,root,manifest,runner)}
                 path.write_text(original)
         print('kernel-copy self-test: '+str(len(scenarios))+' actual syscall scenarios plus resumed/unfinished/flag controls PASS')
+
+
+def module_entry_boundary_controls():
+    """Finite positive/negative controls; sources are committed in this helper."""
+    with tempfile.TemporaryDirectory(prefix='tests-used-entry-controls-') as directory:
+        base = Path(directory); root = base / 'repo'; root.mkdir()
+        helper = 'VALUE = 3\ndef function(): return VALUE\n'
+        setup = 'from pathlib import Path\np=Path(__file__).with_name("helper.py")\n'
+        sources = {'tests/helper.py': helper,
+            'tests/imported.py': 'import helper\nassert helper.function() == 3\n',
+            'tests/read_only.py': setup + 'p.read_bytes()\n',
+            'tests/compiled.py': setup + 'compile(p.read_bytes(), str(p), "exec")\n',
+            'tests/dead.py': 'if False: import helper\n',
+            'tests/blocked.py': setup + 'import sys\ncode=compile(p.read_bytes(),str(p),"exec")\ndef block(event,args):\n if event=="exec" and args[0].co_filename==str(p): raise RuntimeError("blocked")\nsys.addaudithook(block)\ntry: exec(code,{})\nexcept RuntimeError: pass\n',
+            'tests/literal.py': setup + 'exec(compile(' + repr(helper) + ',str(p),"exec"),{})\n',
+            'tests/read_after.py': setup + 'exec(compile(' + repr(helper) + ',str(p),"exec"),{})\np.read_bytes()\n',
+            'tests/wrong_bytes.py': setup + 'data=p.read_bytes()+b"# changed\\n"\nexec(compile(data,str(p),"exec"),{})\n',
+            'tests/replaced.py': setup + 'p.read_bytes()\ncode=compile(' + repr(helper) + ',"other.py","exec").replace(co_filename=str(p))\nexec(code,{})\n',
+            'tests/restored.py': setup + 'data=p.read_bytes()\np.write_bytes(data+b"# temporary\\n")\np.write_bytes(data)\nexec(compile(data,str(p),"exec"),{})\n',
+            'tests/failed.py': 'import helper\nraise RuntimeError("failed")\n',
+            'tests/profiler_removed.py': 'import sys\nsys.setprofile(None)\nimport helper\n'}
+        for path, content in sources.items():
+            target=root/path; target.parent.mkdir(parents=True,exist_ok=True); target.write_text(content)
+        def git(*args): return subprocess.check_output(['git','-C',str(root),'-c','core.hooksPath=/dev/null',*args])
+        git('init','-q');git('add','.')
+        git('-c','user.name=Control','-c','user.email=control@example.invalid','commit','-qm','entry controls')
+        revision=git('rev-parse','HEAD').decode().strip()
+        manifest={'measured_revision':revision,'files':{p:{'blob':git('rev-parse',revision+':'+p).decode().strip(),
+                  'sha256':hashlib.sha256((root/p).read_bytes()).hexdigest()} for p in sources}}
+        manifest_path=base/'manifest.json';manifest_path.write_text(json.dumps(manifest))
+        for scenario in ('imported','read_only','compiled','dead','blocked','literal','read_after','wrong_bytes','replaced','restored','failed','profiler_removed'):
+            runner='tests/'+scenario+'.py';command=['python3','-B',runner]
+            normal_process=subprocess.run(command,cwd=root,capture_output=True,timeout=15,env=dict(os.environ,PYTHONDONTWRITEBYTECODE='1'))
+            normal={'command':command,'revision':revision,'timeout':False,'exit':normal_process.returncode}
+            receipt=run(command,root,manifest_path,base/scenario,15,observe_module_entry=True)
+            entries=observed_module_entries(receipt,normal,root,manifest,runner)
+            targets={r['target'] for r in entries}
+            assert ('tests/helper.py' in targets)==(scenario=='imported'), (scenario, targets,Path(receipt['stdout']).read_text())
+            if scenario=='imported':
+                for bad in (dict(receipt,timeout=True),dict(receipt,observe_module_entry=False),dict(receipt,exit=1)):
+                    assert not observed_module_entries(bad,normal,root,manifest,runner)
+                assert not observed_module_entries(receipt,dict(normal,exit=True),root,manifest,runner)
+                try: observed_module_entries(dict(receipt,instrumentation_source_sha256='0'*64),normal,root,manifest,runner)
+                except ValueError: pass
+                else: raise AssertionError('fabricated entry collector accepted')
+                syscall_path=Path(str(receipt['events']).removesuffix('.events.jsonl')+'.syscalls')
+                original_trace=syscall_path.read_text()
+                lines=original_trace.splitlines(); altered=[]
+                for line in lines:
+                    if '/tests/helper.py>' in line and re.search(r'\b(?:read|pread64)\(',line): continue
+                    if 'X1EXEC:' in line:
+                        tid, body=line.split(None,1)
+                        if any(e['target']=='tests/helper.py' and e['event_id'] in line for e in map(json.loads,Path(receipt['events']).read_text().splitlines())):
+                            start=body.rsplit(' = ',1)[0]
+                            altered += [tid+' '+start+' <unfinished ...>', tid+' read(99<'+str(root/'tests/helper.py')+'>, "x", 1) = 1',tid+' <... write resumed>) = 1']
+                            continue
+                    altered.append(line)
+                assert altered!=lines
+                syscall_path.write_text('\n'.join(altered)+'\n')
+                assert not observed_module_entries(receipt,normal,root,manifest,runner), 'resumed marker admitted late source read'
+                syscall_path.write_text(original_trace)
+                disabled=run(command,root,manifest_path,base/'disabled',15)
+                assert not any('X1EXEC:' in line for line in Path(disabled['events']).read_text().splitlines())
+                assert not observed_module_entries(disabled,normal,root,manifest,runner)
+        print('module entry controls: positive import; loader-only/compile/dead/blocked/literal/read-after/wrong-bytes/code-replace/restored/failure/removed-profile/default-off PASS')
 
 
 def self_test():
@@ -705,12 +856,14 @@ def self_test():
         except ValueError: pass
         else: raise AssertionError('untracked bytecode accepted')
     kernel_copy_boundary_controls()
+    module_entry_boundary_controls()
     print('trace self-test: measured inputs, forged manifest, index flags, bytecode, actual read/fd correlation, historical/synthetic code, link aliases, directory replacement and command binding PASS')
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--self-test', action='store_true')
+    parser.add_argument('--observe-module-entry', action='store_true', help='opt in to positive entered-module candidate observations; same timeout, no proof credit')
     parser.add_argument('--scratch')
     parser.add_argument('--manifest')
     parser.add_argument('--output')
@@ -723,7 +876,7 @@ def main():
     command = args.command[1:] if args.command[:1] == ['--'] else args.command
     if not command: parser.error('supply an explicit command after --')
     try:
-        receipt = run(command, args.scratch, args.manifest, args.output, args.timeout)
+        receipt = run(command, args.scratch, args.manifest, args.output, args.timeout, args.observe_module_entry)
         print(json.dumps(receipt, sort_keys=True))
         return 0 if receipt['exit'] == 0 else 1
     except (OSError, ValueError, subprocess.CalledProcessError) as error:
