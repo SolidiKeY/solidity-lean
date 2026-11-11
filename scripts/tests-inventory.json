@@ -46774,19 +46774,55 @@
     },
     {
       "blob": "6cb2604529e8d5249ce907890d85071ea92112db",
-      "class": null,
+      "class": "keep",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "scripts/h62/item2/audit-language/census.py",
-      "reason": "An observed entry point read this object; fixture-specific versus secondary-scan eligibility needs review. Independent historical/generated properties are retained.",
+      "reason": "entered measured Python module; no fixture consumption credit at scripts/h62/item2/audit-language/test_source_roles.py:5",
       "recovery": {
         "blob": "6cb2604529e8d5249ce907890d85071ea92112db",
         "command": "git show dcf33632c2e88dd2161a0f1b212954ea84647f5f:scripts/h62/item2/audit-language/census.py",
         "last_touch_commit": "dcf33632c2e88dd2161a0f1b212954ea84647f5f"
       },
-      "runner_chain": null,
+      "runner_chain": {
+        "edges": [
+          {
+            "kind": "executes",
+            "line": 5,
+            "operation": "entered measured Python module; no fixture consumption credit",
+            "source": "scripts/h62/item2/audit-language/test_source_roles.py",
+            "target": "scripts/h62/item2/audit-language/census.py",
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:78c294b458155ec0cd3d6f018f58300bb53f6616365e46d8d69b784a112d3dc1"
+          }
+        ],
+        "entry": {
+          "command": "python3 -B scripts/h62/item2/audit-language/test_source_roles.py",
+          "cwd": ".",
+          "data_use_scope": [],
+          "derived_from": "validated:scripts/h62/item2/audit-language/test_source_roles.py",
+          "entered_module": "scripts/h62/item2/audit-language/census.py",
+          "kind": "validated standalone runner",
+          "location": "scripts/h62/item2/audit-language/test_source_roles.py:1",
+          "module_entry": {
+            "collector_sha256": "42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32",
+            "module_code_sha256": "3c9dab57f2b08e4b1c1ef7ae59a1642c25c41d47d0b2686eca7329eb5249e64c",
+            "module_frame_line": 0,
+            "python": [
+              3,
+              12,
+              14
+            ]
+          },
+          "other_reads": "unresolved",
+          "path": "scripts/h62/item2/audit-language/test_source_roles.py",
+          "purpose": "Fresh ordinary/instrumented unittest command; only separately entered measured frames qualify as helper execution. Source-loader targets have no reviewed data-fixture role.",
+          "runner_kind": "unittest",
+          "source_blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926"
+        },
+        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:78c294b458155ec0cd3d6f018f58300bb53f6616365e46d8d69b784a112d3dc1"
+      },
       "search_candidates": [
         {
           "location": "Solidity/Calculus/DecisionResidueReasons.lean:4",
@@ -46829,10 +46865,7 @@
           "validated:scripts/h62/item2/audit-language/test_source_roles.py"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use",
-        "UNRESOLVED_READ_ROLE: observed read eligibility is unreviewed; this is not established non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "367616d8d65dd2bd6abb1e5fac7138050f2acc78",
@@ -46919,19 +46952,63 @@
     },
     {
       "blob": "c83b17a257020515a2491be5b3c489a93428ffd2",
-      "class": null,
+      "class": "keep",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "scripts/h62/item2/audit-language/classify.py",
-      "reason": "An observed entry point read this object; fixture-specific versus secondary-scan eligibility needs review. Independent historical/generated properties are retained.",
+      "reason": "entered measured Python module; no fixture consumption credit at scripts/h62/item2/audit-language/source_roles.py:13",
       "recovery": {
         "blob": "c83b17a257020515a2491be5b3c489a93428ffd2",
         "command": "git show c2ffe26194e661f11b6ef4673090fdc97021ed74:scripts/h62/item2/audit-language/classify.py",
         "last_touch_commit": "c2ffe26194e661f11b6ef4673090fdc97021ed74"
       },
-      "runner_chain": null,
+      "runner_chain": {
+        "edges": [
+          {
+            "kind": "executes",
+            "line": 6,
+            "operation": "entered measured Python module; no fixture consumption credit",
+            "source": "scripts/h62/item2/audit-language/test_source_roles.py",
+            "target": "scripts/h62/item2/audit-language/source_roles.py",
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:4ea5f2b7a695b594a05b8389b87c9a991e75218cc9cff530aeb592df05174ff0"
+          },
+          {
+            "kind": "executes",
+            "line": 13,
+            "operation": "entered measured Python module; no fixture consumption credit",
+            "source": "scripts/h62/item2/audit-language/source_roles.py",
+            "target": "scripts/h62/item2/audit-language/classify.py",
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:4ea5f2b7a695b594a05b8389b87c9a991e75218cc9cff530aeb592df05174ff0"
+          }
+        ],
+        "entry": {
+          "command": "python3 -B scripts/h62/item2/audit-language/test_source_roles.py",
+          "cwd": ".",
+          "data_use_scope": [],
+          "derived_from": "validated:scripts/h62/item2/audit-language/test_source_roles.py",
+          "entered_module": "scripts/h62/item2/audit-language/classify.py",
+          "kind": "validated standalone runner",
+          "location": "scripts/h62/item2/audit-language/test_source_roles.py:1",
+          "module_entry": {
+            "collector_sha256": "42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32",
+            "module_code_sha256": "8acba24c7c56cb172436b3f4fe76d154345f55d91c051b45041445bf0a5f2c9a",
+            "module_frame_line": 0,
+            "python": [
+              3,
+              12,
+              14
+            ]
+          },
+          "other_reads": "unresolved",
+          "path": "scripts/h62/item2/audit-language/test_source_roles.py",
+          "purpose": "Fresh ordinary/instrumented unittest command; only separately entered measured frames qualify as helper execution. Source-loader targets have no reviewed data-fixture role.",
+          "runner_kind": "unittest",
+          "source_blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926"
+        },
+        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:4ea5f2b7a695b594a05b8389b87c9a991e75218cc9cff530aeb592df05174ff0"
+      },
       "search_candidates": [
         {
           "location": "Solidity/Backend/MemoryOps/InterstageGrowth.lean:146",
@@ -46974,10 +47051,7 @@
           "validated:scripts/h62/item2/audit-language/test_source_roles.py"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use",
-        "UNRESOLVED_READ_ROLE: observed read eligibility is unreviewed; this is not established non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "8716249f720024a58cd09779996882f389d2fa71",
@@ -47206,19 +47280,71 @@
     },
     {
       "blob": "257831d3a34991bfe5939d065bbb0891d836a092",
-      "class": null,
+      "class": "keep",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "scripts/h62/item2/audit-language/refine_remaining.py",
-      "reason": "An observed entry point read this object; fixture-specific versus secondary-scan eligibility needs review. Independent historical/generated properties are retained.",
+      "reason": "entered measured Python module; no fixture consumption credit at scripts/h62/item2/audit-language/test_source_roles.py:65",
       "recovery": {
         "blob": "257831d3a34991bfe5939d065bbb0891d836a092",
         "command": "git show b11bc46163fddb93f634e2a92fe6876d53e4cfd2:scripts/h62/item2/audit-language/refine_remaining.py",
         "last_touch_commit": "b11bc46163fddb93f634e2a92fe6876d53e4cfd2"
       },
-      "runner_chain": null,
+      "runner_chain": {
+        "edges": [
+          {
+            "kind": "executes",
+            "line": 89,
+            "operation": "entered measured Python module; no fixture consumption credit",
+            "source": "scripts/h62/item2/audit-language/test_source_roles.py",
+            "target": "scripts/h62/item2/audit-language/test_source_roles.py",
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:a4977c6cc6c484f44f2b0386bce1f721ccc0295f982c55156cd175679946d2e0"
+          },
+          {
+            "kind": "executes",
+            "line": 73,
+            "operation": "entered measured Python module; no fixture consumption credit",
+            "source": "scripts/h62/item2/audit-language/test_source_roles.py",
+            "target": "scripts/h62/item2/audit-language/test_source_roles.py",
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:a4977c6cc6c484f44f2b0386bce1f721ccc0295f982c55156cd175679946d2e0"
+          },
+          {
+            "kind": "executes",
+            "line": 65,
+            "operation": "entered measured Python module; no fixture consumption credit",
+            "source": "scripts/h62/item2/audit-language/test_source_roles.py",
+            "target": "scripts/h62/item2/audit-language/refine_remaining.py",
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:a4977c6cc6c484f44f2b0386bce1f721ccc0295f982c55156cd175679946d2e0"
+          }
+        ],
+        "entry": {
+          "command": "python3 -B scripts/h62/item2/audit-language/test_source_roles.py",
+          "cwd": ".",
+          "data_use_scope": [],
+          "derived_from": "validated:scripts/h62/item2/audit-language/test_source_roles.py",
+          "entered_module": "scripts/h62/item2/audit-language/refine_remaining.py",
+          "kind": "validated standalone runner",
+          "location": "scripts/h62/item2/audit-language/test_source_roles.py:1",
+          "module_entry": {
+            "collector_sha256": "42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32",
+            "module_code_sha256": "519d68966a1881a691cbc26c44ad28ab9ff1051400da5e82d6db5acba2b8bb0b",
+            "module_frame_line": 0,
+            "python": [
+              3,
+              12,
+              14
+            ]
+          },
+          "other_reads": "unresolved",
+          "path": "scripts/h62/item2/audit-language/test_source_roles.py",
+          "purpose": "Fresh ordinary/instrumented unittest command; only separately entered measured frames qualify as helper execution. Source-loader targets have no reviewed data-fixture role.",
+          "runner_kind": "unittest",
+          "source_blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926"
+        },
+        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:a4977c6cc6c484f44f2b0386bce1f721ccc0295f982c55156cd175679946d2e0"
+      },
       "search_candidates": [
         {
           "location": "scripts/h62/item2/audit-language/continuation_acceptance.py:11",
@@ -47241,10 +47367,7 @@
           "validated:scripts/h62/item2/audit-language/test_source_roles.py"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use",
-        "UNRESOLVED_READ_ROLE: observed read eligibility is unreviewed; this is not established non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "4748376ef83284136230125977bd0725e39fe43a",
@@ -47396,19 +47519,63 @@
     },
     {
       "blob": "5fbc100e83b26fb0bd9f4bfe408cfab0e108aef4",
-      "class": null,
+      "class": "keep",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "scripts/h62/item2/audit-language/source_only.py",
-      "reason": "An observed entry point read this object; fixture-specific versus secondary-scan eligibility needs review. Independent historical/generated properties are retained.",
+      "reason": "entered measured Python module; no fixture consumption credit at scripts/h62/item2/audit-language/source_roles.py:14",
       "recovery": {
         "blob": "5fbc100e83b26fb0bd9f4bfe408cfab0e108aef4",
         "command": "git show 316cd4acb888e3c670991872ed558f1041e5f542:scripts/h62/item2/audit-language/source_only.py",
         "last_touch_commit": "316cd4acb888e3c670991872ed558f1041e5f542"
       },
-      "runner_chain": null,
+      "runner_chain": {
+        "edges": [
+          {
+            "kind": "executes",
+            "line": 6,
+            "operation": "entered measured Python module; no fixture consumption credit",
+            "source": "scripts/h62/item2/audit-language/test_source_roles.py",
+            "target": "scripts/h62/item2/audit-language/source_roles.py",
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:fcaf886ace0dbb7152006016818ea3b884599f42d0da7d06945f3232dc53be41"
+          },
+          {
+            "kind": "executes",
+            "line": 14,
+            "operation": "entered measured Python module; no fixture consumption credit",
+            "source": "scripts/h62/item2/audit-language/source_roles.py",
+            "target": "scripts/h62/item2/audit-language/source_only.py",
+            "validated_for": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:fcaf886ace0dbb7152006016818ea3b884599f42d0da7d06945f3232dc53be41"
+          }
+        ],
+        "entry": {
+          "command": "python3 -B scripts/h62/item2/audit-language/test_source_roles.py",
+          "cwd": ".",
+          "data_use_scope": [],
+          "derived_from": "validated:scripts/h62/item2/audit-language/test_source_roles.py",
+          "entered_module": "scripts/h62/item2/audit-language/source_only.py",
+          "kind": "validated standalone runner",
+          "location": "scripts/h62/item2/audit-language/test_source_roles.py:1",
+          "module_entry": {
+            "collector_sha256": "42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32",
+            "module_code_sha256": "9f12554fc73a2fb7ceeff79ac873f2554a1c307bcd07861ce4b9e61e1179f7ea",
+            "module_frame_line": 0,
+            "python": [
+              3,
+              12,
+              14
+            ]
+          },
+          "other_reads": "unresolved",
+          "path": "scripts/h62/item2/audit-language/test_source_roles.py",
+          "purpose": "Fresh ordinary/instrumented unittest command; only separately entered measured frames qualify as helper execution. Source-loader targets have no reviewed data-fixture role.",
+          "runner_kind": "unittest",
+          "source_blob": "8425d6d046fac59ffacc1c2ba2a67c0c7b4aa926"
+        },
+        "root": "validated:scripts/h62/item2/audit-language/test_source_roles.py:module:fcaf886ace0dbb7152006016818ea3b884599f42d0da7d06945f3232dc53be41"
+      },
       "search_candidates": [
         {
           "location": "scripts/h62/item2/audit-language/source_acceptance.py:14",
@@ -47431,10 +47598,7 @@
           "validated:scripts/h62/item2/audit-language/test_source_roles.py"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use",
-        "UNRESOLVED_READ_ROLE: observed read eligibility is unreviewed; this is not established non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "fbc2eb5bc17f91adabf886d22058615d640dd20d",
@@ -114759,19 +114923,79 @@
     },
     {
       "blob": "05a9887298923a0c864eb1e62184eac1ea859bdb",
-      "class": null,
+      "class": "keep",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/h28-sol/mutation-testing/tools/bounded.py",
-      "reason": "An observed entry point read this object; fixture-specific versus secondary-scan eligibility needs review. Independent historical/generated properties are retained.",
+      "reason": "entered measured Python module; no fixture consumption credit at tests/h28-sol/mutation-testing/tools/engine.py:14",
       "recovery": {
         "blob": "05a9887298923a0c864eb1e62184eac1ea859bdb",
         "command": "git show 9863cd532396595cccd57ab021cbb8e398f9c0a2:tests/h28-sol/mutation-testing/tools/bounded.py",
         "last_touch_commit": "9863cd532396595cccd57ab021cbb8e398f9c0a2"
       },
-      "runner_chain": null,
+      "runner_chain": {
+        "edges": [
+          {
+            "kind": "executes",
+            "line": 91,
+            "operation": "entered measured Python module; no fixture consumption credit",
+            "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
+            "target": "tests/h28-sol/mutation-testing/tools/test_runner.py",
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:7a08bdc8640ccddb9c49992129b331f91ecb6a8ec24fc4fc0742394f71ce1dee"
+          },
+          {
+            "kind": "executes",
+            "line": 59,
+            "operation": "entered measured Python module; no fixture consumption credit",
+            "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
+            "target": "tests/h28-sol/mutation-testing/tools/runner.py",
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:7a08bdc8640ccddb9c49992129b331f91ecb6a8ec24fc4fc0742394f71ce1dee"
+          },
+          {
+            "kind": "executes",
+            "line": 76,
+            "operation": "entered measured Python module; no fixture consumption credit",
+            "source": "tests/h28-sol/mutation-testing/tools/runner.py",
+            "target": "tests/h28-sol/mutation-testing/tools/engine.py",
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:7a08bdc8640ccddb9c49992129b331f91ecb6a8ec24fc4fc0742394f71ce1dee"
+          },
+          {
+            "kind": "executes",
+            "line": 14,
+            "operation": "entered measured Python module; no fixture consumption credit",
+            "source": "tests/h28-sol/mutation-testing/tools/engine.py",
+            "target": "tests/h28-sol/mutation-testing/tools/bounded.py",
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:7a08bdc8640ccddb9c49992129b331f91ecb6a8ec24fc4fc0742394f71ce1dee"
+          }
+        ],
+        "entry": {
+          "command": "python3 -B tests/h28-sol/mutation-testing/tools/test_runner.py",
+          "cwd": ".",
+          "data_use_scope": [],
+          "derived_from": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py",
+          "entered_module": "tests/h28-sol/mutation-testing/tools/bounded.py",
+          "kind": "validated standalone runner",
+          "location": "tests/h28-sol/mutation-testing/tools/test_runner.py:1",
+          "module_entry": {
+            "collector_sha256": "42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32",
+            "module_code_sha256": "d3db9845891f91c12418fef91b46c1311ea7838b272d6472668a879e86ca1613",
+            "module_frame_line": 0,
+            "python": [
+              3,
+              12,
+              14
+            ]
+          },
+          "other_reads": "unresolved",
+          "path": "tests/h28-sol/mutation-testing/tools/test_runner.py",
+          "purpose": "Fresh ordinary/instrumented unittest command; only separately entered measured frames qualify as helper execution. Source-loader targets have no reviewed data-fixture role.",
+          "runner_kind": "unittest",
+          "source_blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b"
+        },
+        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:7a08bdc8640ccddb9c49992129b331f91ecb6a8ec24fc4fc0742394f71ce1dee"
+      },
       "search_candidates": [
         {
           "location": ".claude/rules/rule-table.md:61",
@@ -114814,10 +115038,7 @@
           "validated:tests/h28-sol/mutation-testing/tools/test_runner.py"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use",
-        "UNRESOLVED_READ_ROLE: observed read eligibility is unreviewed; this is not established non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "f6f3b09c5a88aff594c187f6fb7f643d44d08985",
@@ -114879,19 +115100,79 @@
     },
     {
       "blob": "2d36256b0def09f09a71b020f2c1fe87d1f2f092",
-      "class": null,
+      "class": "keep",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/h28-sol/mutation-testing/tools/bulk_inputs.py",
-      "reason": "An observed entry point read this object; fixture-specific versus secondary-scan eligibility needs review. Independent historical/generated properties are retained.",
+      "reason": "entered measured Python module; no fixture consumption credit at tests/h28-sol/mutation-testing/tools/engine.py:13",
       "recovery": {
         "blob": "2d36256b0def09f09a71b020f2c1fe87d1f2f092",
         "command": "git show 9863cd532396595cccd57ab021cbb8e398f9c0a2:tests/h28-sol/mutation-testing/tools/bulk_inputs.py",
         "last_touch_commit": "9863cd532396595cccd57ab021cbb8e398f9c0a2"
       },
-      "runner_chain": null,
+      "runner_chain": {
+        "edges": [
+          {
+            "kind": "executes",
+            "line": 91,
+            "operation": "entered measured Python module; no fixture consumption credit",
+            "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
+            "target": "tests/h28-sol/mutation-testing/tools/test_runner.py",
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:93db27c4f0ba41039687e5b8813dc7c83a3a98296e0f10ec20636a2694c07e33"
+          },
+          {
+            "kind": "executes",
+            "line": 59,
+            "operation": "entered measured Python module; no fixture consumption credit",
+            "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
+            "target": "tests/h28-sol/mutation-testing/tools/runner.py",
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:93db27c4f0ba41039687e5b8813dc7c83a3a98296e0f10ec20636a2694c07e33"
+          },
+          {
+            "kind": "executes",
+            "line": 76,
+            "operation": "entered measured Python module; no fixture consumption credit",
+            "source": "tests/h28-sol/mutation-testing/tools/runner.py",
+            "target": "tests/h28-sol/mutation-testing/tools/engine.py",
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:93db27c4f0ba41039687e5b8813dc7c83a3a98296e0f10ec20636a2694c07e33"
+          },
+          {
+            "kind": "executes",
+            "line": 13,
+            "operation": "entered measured Python module; no fixture consumption credit",
+            "source": "tests/h28-sol/mutation-testing/tools/engine.py",
+            "target": "tests/h28-sol/mutation-testing/tools/bulk_inputs.py",
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:93db27c4f0ba41039687e5b8813dc7c83a3a98296e0f10ec20636a2694c07e33"
+          }
+        ],
+        "entry": {
+          "command": "python3 -B tests/h28-sol/mutation-testing/tools/test_runner.py",
+          "cwd": ".",
+          "data_use_scope": [],
+          "derived_from": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py",
+          "entered_module": "tests/h28-sol/mutation-testing/tools/bulk_inputs.py",
+          "kind": "validated standalone runner",
+          "location": "tests/h28-sol/mutation-testing/tools/test_runner.py:1",
+          "module_entry": {
+            "collector_sha256": "42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32",
+            "module_code_sha256": "a396c3a66e1107de068565d8ec41c562455a583fa0112356138e2e46df2fe365",
+            "module_frame_line": 0,
+            "python": [
+              3,
+              12,
+              14
+            ]
+          },
+          "other_reads": "unresolved",
+          "path": "tests/h28-sol/mutation-testing/tools/test_runner.py",
+          "purpose": "Fresh ordinary/instrumented unittest command; only separately entered measured frames qualify as helper execution. Source-loader targets have no reviewed data-fixture role.",
+          "runner_kind": "unittest",
+          "source_blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b"
+        },
+        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:93db27c4f0ba41039687e5b8813dc7c83a3a98296e0f10ec20636a2694c07e33"
+      },
       "search_candidates": [
         {
           "location": "scripts/h62/item2/audit-calculus/classify_frozen_signatures.py:15",
@@ -114934,10 +115215,7 @@
           "validated:tests/h28-sol/mutation-testing/tools/test_runner.py"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use",
-        "UNRESOLVED_READ_ROLE: observed read eligibility is unreviewed; this is not established non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "3ece788147fa26cd577fc6e73d4ed48c80b213b1",
@@ -115059,19 +115337,79 @@
     },
     {
       "blob": "82f46353a66eae3ccd479e76b8fa352488069286",
-      "class": null,
+      "class": "keep",
       "generator": null,
       "mode": "100644",
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/h28-sol/mutation-testing/tools/checked.py",
-      "reason": "An observed entry point read this object; fixture-specific versus secondary-scan eligibility needs review. Independent historical/generated properties are retained.",
+      "reason": "entered measured Python module; no fixture consumption credit at tests/h28-sol/mutation-testing/tools/engine.py:15",
       "recovery": {
         "blob": "82f46353a66eae3ccd479e76b8fa352488069286",
         "command": "git show 9863cd532396595cccd57ab021cbb8e398f9c0a2:tests/h28-sol/mutation-testing/tools/checked.py",
         "last_touch_commit": "9863cd532396595cccd57ab021cbb8e398f9c0a2"
       },
-      "runner_chain": null,
+      "runner_chain": {
+        "edges": [
+          {
+            "kind": "executes",
+            "line": 91,
+            "operation": "entered measured Python module; no fixture consumption credit",
+            "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
+            "target": "tests/h28-sol/mutation-testing/tools/test_runner.py",
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:9211b03fdad80763e4102b3841d4587b44d9bb5c2ace229b392542e8838bb4c9"
+          },
+          {
+            "kind": "executes",
+            "line": 59,
+            "operation": "entered measured Python module; no fixture consumption credit",
+            "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
+            "target": "tests/h28-sol/mutation-testing/tools/runner.py",
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:9211b03fdad80763e4102b3841d4587b44d9bb5c2ace229b392542e8838bb4c9"
+          },
+          {
+            "kind": "executes",
+            "line": 76,
+            "operation": "entered measured Python module; no fixture consumption credit",
+            "source": "tests/h28-sol/mutation-testing/tools/runner.py",
+            "target": "tests/h28-sol/mutation-testing/tools/engine.py",
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:9211b03fdad80763e4102b3841d4587b44d9bb5c2ace229b392542e8838bb4c9"
+          },
+          {
+            "kind": "executes",
+            "line": 15,
+            "operation": "entered measured Python module; no fixture consumption credit",
+            "source": "tests/h28-sol/mutation-testing/tools/engine.py",
+            "target": "tests/h28-sol/mutation-testing/tools/checked.py",
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:9211b03fdad80763e4102b3841d4587b44d9bb5c2ace229b392542e8838bb4c9"
+          }
+        ],
+        "entry": {
+          "command": "python3 -B tests/h28-sol/mutation-testing/tools/test_runner.py",
+          "cwd": ".",
+          "data_use_scope": [],
+          "derived_from": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py",
+          "entered_module": "tests/h28-sol/mutation-testing/tools/checked.py",
+          "kind": "validated standalone runner",
+          "location": "tests/h28-sol/mutation-testing/tools/test_runner.py:1",
+          "module_entry": {
+            "collector_sha256": "42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32",
+            "module_code_sha256": "331208f5ac291e382f76585bd634032b670c0904e7a4bd89a3bc49009a5c0523",
+            "module_frame_line": 0,
+            "python": [
+              3,
+              12,
+              14
+            ]
+          },
+          "other_reads": "unresolved",
+          "path": "tests/h28-sol/mutation-testing/tools/test_runner.py",
+          "purpose": "Fresh ordinary/instrumented unittest command; only separately entered measured frames qualify as helper execution. Source-loader targets have no reviewed data-fixture role.",
+          "runner_kind": "unittest",
+          "source_blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b"
+        },
+        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:9211b03fdad80763e4102b3841d4587b44d9bb5c2ace229b392542e8838bb4c9"
+      },
       "search_candidates": [
         {
           "location": ".claude/rules/derivations.md:76",
@@ -115114,10 +115452,7 @@
           "validated:tests/h28-sol/mutation-testing/tools/test_runner.py"
         ]
       },
-      "unresolved": [
-        "UNRESOLVED_USE: candidate search is not a certified use graph or proof of non-use",
-        "UNRESOLVED_READ_ROLE: observed read eligibility is unreviewed; this is not established non-use"
-      ]
+      "unresolved": []
     },
     {
       "blob": "a07ceffc2a92d020f36ec88ecb4d85770d40b0ae",
@@ -115824,7 +116159,7 @@
       "object_type": "blob",
       "orphan_analysis": null,
       "path": "tests/h28-sol/mutation-testing/tools/runner.py",
-      "reason": "validated Python call stack at tests/h28-sol/mutation-testing/tools/test_runner.py:59",
+      "reason": "entered measured Python module; no fixture consumption credit at tests/h28-sol/mutation-testing/tools/test_runner.py:9",
       "recovery": {
         "blob": "7fad642144fd1d2d2afc519e5deaa87a643ff0db",
         "command": "git show 9863cd532396595cccd57ab021cbb8e398f9c0a2:tests/h28-sol/mutation-testing/tools/runner.py",
@@ -115834,19 +116169,11 @@
         "edges": [
           {
             "kind": "executes",
-            "line": 91,
-            "operation": "validated Python call stack",
-            "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
-            "target": "tests/h28-sol/mutation-testing/tools/test_runner.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:read:f0e1621fe7a5e629d7f080268a699975c9c09982c271ea297c5cf34541bcd7f0"
-          },
-          {
-            "kind": "executes",
-            "line": 59,
-            "operation": "validated Python call stack",
+            "line": 9,
+            "operation": "entered measured Python module; no fixture consumption credit",
             "source": "tests/h28-sol/mutation-testing/tools/test_runner.py",
             "target": "tests/h28-sol/mutation-testing/tools/runner.py",
-            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:read:f0e1621fe7a5e629d7f080268a699975c9c09982c271ea297c5cf34541bcd7f0"
+            "validated_for": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:8bb059e70c27866080fd7081dc532505972b4dac138604b853696b0cd4e9a8d5"
           }
         ],
         "entry": {
@@ -115854,16 +116181,26 @@
           "cwd": ".",
           "data_use_scope": [],
           "derived_from": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py",
+          "entered_module": "tests/h28-sol/mutation-testing/tools/runner.py",
           "kind": "validated standalone runner",
           "location": "tests/h28-sol/mutation-testing/tools/test_runner.py:1",
-          "observed_target": "tests/h28-sol/mutation-testing/tools/bulk_inputs.py",
+          "module_entry": {
+            "collector_sha256": "42027e7c42dac3912c1f8ef468a6d99bddb8075172c545b6a587692b039cff32",
+            "module_code_sha256": "601bd9fefd2ae435488aa7bff9e1b6328d888eadf076586269d8c17d4af74e4a",
+            "module_frame_line": 0,
+            "python": [
+              3,
+              12,
+              14
+            ]
+          },
           "other_reads": "unresolved",
           "path": "tests/h28-sol/mutation-testing/tools/test_runner.py",
           "purpose": "Fresh ordinary/instrumented unittest command; only separately entered measured frames qualify as helper execution. Source-loader targets have no reviewed data-fixture role.",
           "runner_kind": "unittest",
           "source_blob": "e0a6693f200205c74aa0bbf302e6ed299190c35b"
         },
-        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:read:f0e1621fe7a5e629d7f080268a699975c9c09982c271ea297c5cf34541bcd7f0"
+        "root": "validated:tests/h28-sol/mutation-testing/tools/test_runner.py:module:8bb059e70c27866080fd7081dc532505972b4dac138604b853696b0cd4e9a8d5"
       },
       "search_candidates": [
         {
@@ -288413,11 +288750,11 @@
   },
   "totals": {
     "evidence": 377,
-    "keep": 1099,
+    "keep": 1106,
     "orphan": 0,
     "paths": 5596,
     "regenerable": 0,
-    "unresolved": 4120
+    "unresolved": 4113
   },
   "universe": [
     "tests/",
