@@ -1,4 +1,4 @@
-import Solidity.Source.Value
+import Solidity.Source.PowerV2Correct
 import Solidity.Semantics.Ops
 import Solidity.Lowering.V07.UnsignedNarrowing
 import Solidity.Lowering.V07.SignedNarrowing
@@ -15,65 +15,6 @@ actual Source amount and this actual word operand, including effects/errors,
 checkedness, widths and pipeline ordering. No pass or endpoint is asserted.
 -/
 namespace Solidity.Correctness.Lowering.Unchecked.ModularPower
-
-private theorem mul_congr (a b c d m : Int) (left : a % m = b % m)
-    (right : c % m = d % m) : (a * c) % m = (b * d) % m := by
-  rw [Int.mul_emod a c m, Int.mul_emod b d m, left, right]
-
-private theorem pow_congr (a b m : Int) (n : Nat) (base : a % m = b % m) :
-    a ^ n % m = b ^ n % m := by
-  induction n with
-  | zero => rfl
-  | succ n ih =>
-    exact mul_congr (a ^ n) (b ^ n) a b m ih base
-
-private theorem square_power (base : Int) (n : Nat) : (base * base) ^ n = base ^ (n + n) := by
-  induction n with
-  | zero => rfl
-  | succ n ih =>
-    rw [Int.pow_succ, ih, show n + 1 + (n + 1) = (n + n) + 2 by omega,
-      Int.pow_add base (n + n) 2]
-    simp only [Int.pow_succ, Int.pow_zero, Int.one_mul]
-
-private theorem go_mod (m fuel : Nat) (base : Int) (n : Nat) (acc : Int)
-    (bound : n < 2 ^ fuel) :
-    Source.powMod.go m fuel base n acc % (m : Int) = (acc * base ^ n) % (m : Int) := by
-  induction fuel generalizing base n acc with
-  | zero =>
-    have zero : n = 0 := by omega
-    subst n
-    simp only [Source.powMod.go, Int.pow_zero, Int.mul_one]
-  | succ fuel ih =>
-    by_cases zero : n = 0
-    · subst n
-      simp only [Source.powMod.go, if_true, Int.pow_zero, Int.mul_one]
-    · have short : n / 2 < 2 ^ fuel :=
-        (Nat.div_lt_iff_lt_mul (by decide : 0 < 2)).mpr
-          (by simpa only [Nat.pow_succ] using bound)
-      rw [Source.powMod.go, if_neg zero]
-      rw [ih ((base * base) % (m : Int)) (n / 2) _ short]
-      have power_mod := pow_congr ((base * base) % (m : Int)) (base * base)
-        (m : Int) (n / 2) (Int.emod_emod (base * base) (m : Int))
-      by_cases odd : n % 2 = 1
-      · rw [if_pos odd]
-        rw [mul_congr ((acc * base) % (m : Int)) (acc * base)
-          (((base * base) % (m : Int)) ^ (n / 2)) ((base * base) ^ (n / 2))
-          (m : Int) (Int.emod_emod (acc * base) (m : Int)) power_mod]
-        rw [square_power]
-        have division := Nat.mod_add_div n 2
-        have form : n = (n / 2 + n / 2) + 1 := by omega
-        have powered : base ^ n = base ^ (n / 2 + n / 2) * base :=
-          (congrArg (fun e : Nat => base ^ e) form).trans
-            (Int.pow_succ base (n / 2 + n / 2))
-        rw [powered, Int.mul_assoc, Int.mul_comm base (base ^ (n / 2 + n / 2))]
-      · rw [if_neg odd]
-        rw [mul_congr acc acc (((base * base) % (m : Int)) ^ (n / 2))
-          ((base * base) ^ (n / 2)) (m : Int) rfl power_mod]
-        rw [square_power]
-        have division := Nat.mod_add_div n 2
-        have smallmod := Nat.mod_lt n (by decide : 0 < 2)
-        have form : n / 2 + n / 2 = n := by omega
-        rw [form]
 
 private theorem word_bound (word : PrimTy.uint.Denote) (fuel : Nat) (enough : 256 ≤ fuel) :
     word.val.toNat < 2 ^ fuel := by
@@ -121,8 +62,9 @@ there is no extra exponent or successful-execution premise. -/
 theorem word_powMod (base : Int) (word : PrimTy.uint.Denote) (modulus : Nat) :
     Source.powMod base word.val.toNat modulus % (modulus : Int) =
       base ^ word.val.toNat % (modulus : Int) := by
-  simpa only [Source.powMod, Int.one_mul] using
-    go_mod modulus 300 base word.val.toNat 1 (word_bound word 300 (by decide))
+  exact (Source.PowerV2.powMod_agrees_v1 base word.val.toNat modulus
+    (word_bound word 300 (by decide))).symm.trans
+      (Source.PowerV2.powMod_residue base word.val.toNat modulus)
 
 /-- The actual intrinsic powW arithmetic at a word exponent has precisely
 that residue. This is an operator leaf, not an assumed whole execution. -/
